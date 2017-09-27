@@ -57,6 +57,9 @@ import com.openexchange.ajax.helper.DownloadUtility;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.api2.TasksSQLInterface;
+import com.openexchange.chronos.provider.CalendarFolder;
+import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
+import com.openexchange.chronos.provider.composition.IDBasedCalendarAccessFactory;
 import com.openexchange.contact.ContactService;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.composition.FilenameValidationUtils;
@@ -68,8 +71,10 @@ import com.openexchange.groupware.i18n.FolderStrings;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TasksSQLImpl;
 import com.openexchange.i18n.tools.StringHelper;
+import com.openexchange.importexport.exceptions.ImportExportExceptionCodes;
 import com.openexchange.importexport.osgi.ImportExportServices;
 import com.openexchange.java.Strings;
+import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -94,6 +99,7 @@ public class ExportFileNameCreator {
      *
      * @param session The session object
      * @param folder The folder to create the file name with
+     * @param extension The extension of the file name
      * @return String The file name
      */
     public static String createFolderExportFileName(ServerSession session, String folder, String extension) {
@@ -128,6 +134,30 @@ public class ExportFileNameCreator {
             } else {
                 prefix = folderString;
             }
+        } catch (OXException e) {
+            LOG.debug("", e);
+            prefix = getLocalizedFileName(session, ExportDefaultFileNames.DEFAULT_NAME);
+        }
+        return validateFileName(prefix, extension, session);
+    }
+
+    /**
+     * Creates a file name based on the chronos folder
+     *
+     * @param session The session object
+     * @param folder The folder to create the file name with
+     * @param extension The extension of the file name
+     * @return String The file name
+     */
+    public static String createChronosFolderFileName(ServerSession session, String folder, String extension) {
+        String prefix;
+        try {
+            IDBasedCalendarAccessFactory factory = ImportExportServices.getIDBasedCalendarAccessFactory();
+            IDBasedCalendarAccess calendarAccess = factory.createAccess(session);
+
+            CalendarFolder calFolder = calendarAccess.getFolder(folder);
+            //TODO: FolderString to avoid e.g. ldap folder name
+            prefix = getLocalizedFileName(session, calFolder.getName());
         } catch (OXException e) {
             LOG.debug("", e);
             prefix = getLocalizedFileName(session, ExportDefaultFileNames.DEFAULT_NAME);

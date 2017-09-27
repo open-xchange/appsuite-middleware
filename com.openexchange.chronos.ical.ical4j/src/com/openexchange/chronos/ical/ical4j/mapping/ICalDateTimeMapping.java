@@ -49,7 +49,6 @@
 
 package com.openexchange.chronos.ical.ical4j.mapping;
 
-import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
 import com.openexchange.chronos.ical.ICalParameters;
@@ -133,10 +132,8 @@ public abstract class ICalDateTimeMapping<T extends Component, U> extends Abstra
         DateProperty property = getProperty(component);
         if (null != property && null != property.getDate()) {
             if (ParserTools.isDateTime(property)) {
-                TimeZone defaultTimeZone = parameters.get(ICalParameters.DEFAULT_TIMEZONE, TimeZone.class);
-                Date value = ParserTools.toDateConsideringDateType(property, defaultTimeZone);
-                TimeZone timeZone = TimeZoneUtils.selectTimeZone(property, defaultTimeZone);
-                setValue(object, new org.dmfs.rfc5545.DateTime(timeZone, value.getTime()));
+                TimeZone timeZone = TimeZoneUtils.selectTimeZone(property, (TimeZone) null);
+                setValue(object, org.dmfs.rfc5545.DateTime.parse(timeZone, property.getValue()));
             } else {
                 setValue(object, new org.dmfs.rfc5545.DateTime(property.getDate().getTime()).toAllDay());
             }

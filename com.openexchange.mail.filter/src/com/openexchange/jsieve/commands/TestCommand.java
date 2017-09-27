@@ -159,7 +159,7 @@ public class TestCommand extends Command {
          * <code>header [COMPARATOR] [MATCH-TYPE] &lt;header-names: string-list&gt; &lt;key-list: string-list&gt;</code>
          * <p><a href="https://tools.ietf.org/html/rfc5228#section-5.7">RFC-5228: Test header</a></p>
          */
-        HEADER("header", 2, Integer.MAX_VALUE, standardAddressPart(), standardComparators(), standardMatchTypes(), standardJSONMatchTypes(), null, null),
+        HEADER("header", 2, Integer.MAX_VALUE, standardAddressPart(), standardComparators(), standardMatchTypes(), headerJSONMatchTypes(), null, null),
         /**
          * <p>The "allof" test performs a logical AND on the tests supplied to it.</p>
          * <code>allof &lt;tests: test-list&gt;</code>
@@ -181,9 +181,9 @@ public class TestCommand extends Command {
         BODY("body", 1, 1, standardBodyPart(), null, standardMatchTypes(), standardJSONMatchTypes(), "body", null),
         /**
          * <p>The date test matches date/time information derived from headers
-         * containing [RFC2822] date-time values.  The date/time information is
+         * containing [RFC2822] date-time values. The date/time information is
          * extracted from the header, shifted to the specified time zone, and
-         * the value of the given date-part is determined.  The test returns
+         * the value of the given date-part is determined. The test returns
          * true if the resulting string matches any of the strings specified in
          * the key-list, as controlled by the comparator and match keywords.</p>
          * <code>date [&lt;":zone" &lt;time-zone: string&gt;&gt; / ":originalzone"] [COMPARATOR] [MATCH-TYPE] &lt;header-name: string&gt; &lt;date-part: string&gt; &lt;key-list: string-list&gt;
@@ -260,7 +260,7 @@ public class TestCommand extends Command {
          */
         private static Hashtable<String, String> addressParts() {
             final Hashtable<String, String> standard_address_parts = new Hashtable<>(5);
-            for(AddressParts part: AddressParts.values()){
+            for (AddressParts part : AddressParts.values()) {
                 standard_address_parts.put(part.getSieveArgument(), part.getNeededCapabilities());
             }
             return standard_address_parts;
@@ -367,6 +367,23 @@ public class TestCommand extends Command {
         }
 
         /**
+         * The JSON mappings for the header match types
+         * 
+         * @return A {@link List} with mappings
+         */
+        private static List<JSONMatchType> headerJSONMatchTypes() {
+            final List<JSONMatchType> headerMatchTypes = Collections.synchronizedList(new ArrayList<JSONMatchType>(14));
+            headerMatchTypes.addAll(standardJSONMatchTypes());
+
+            //add normal matcher
+            headerMatchTypes.add(new JSONMatchType(MatchType.exists.name(), MatchType.exists.getRequire(), 2));
+            // Add not matcher
+            headerMatchTypes.add(new JSONMatchType(MatchType.exists.getNotName(), MatchType.exists.getRequire(), 2));
+
+            return headerMatchTypes;
+        }
+
+        /**
          * The JSON mappings for dates
          *
          * @return A {@link List} with the mappings
@@ -382,7 +399,6 @@ public class TestCommand extends Command {
             dateMatchTypes.add(new JSONMatchType(MatchType.is.getNotName(), MatchType.is.getRequire(), 2));
             dateMatchTypes.add(new JSONMatchType(MatchType.ge.getNotName(), MatchType.ge.getRequire(), 2));
             dateMatchTypes.add(new JSONMatchType(MatchType.le.getNotName(), MatchType.le.getRequire(), 2));
-
 
             return dateMatchTypes;
         }
@@ -699,7 +715,7 @@ public class TestCommand extends Command {
      * @return
      */
     public final String getMatchType() {
-        if(this.command.getMatchTypes()==null){
+        if (this.command.getMatchTypes() == null) {
             return null;
         }
         final ArrayList<String> arrayList = new ArrayList<String>(this.command.getMatchTypes().keySet());
@@ -798,7 +814,7 @@ public class TestCommand extends Command {
     }
 
     @Override
-    public void addOptionalRequired(String required){
+    public void addOptionalRequired(String required) {
         optRequired.add(required);
     }
 }

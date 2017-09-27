@@ -94,7 +94,7 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a> (minor: changes to new interface)
  * @author <a href="mailto:Jan-Oliver.Huhn@open-xchange.com">Jan-Oliver Huhn</a> batch export
  */
-public class VCardExporter implements Exporter {
+public class VCardExporter extends AbstractExporter {
 
     protected final static int[] _contactFields = {
         DataObject.OBJECT_ID,
@@ -449,16 +449,6 @@ public class VCardExporter implements Exporter {
         System.arraycopy(fields, 0, retval, 0, fields.length);
         retval[fields.length] = fieldToAdd;
         return retval;
-    }
-
-    @Override
-    public String getFolderExportFileName(ServerSession sessionObj, String folder, String extension) {
-        return ExportFileNameCreator.createFolderExportFileName(sessionObj, folder, extension);
-    }
-
-    @Override
-    public String getBatchExportFileName(ServerSession sessionObj, Map<String, List<String>> batchIds, String extension) {
-        return ExportFileNameCreator.createBatchExportFileName(sessionObj, batchIds, extension);
     }
 
     private String appendFileNameParameter(AJAXRequestData requestData, String fileName) {

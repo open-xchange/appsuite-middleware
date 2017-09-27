@@ -140,16 +140,19 @@ public class WebdavPropfindAction extends AbstractAction {
 		}
 	}
 
-    protected PropertiesMarshaller getMarshaller(final WebdavRequest req, boolean forceAllProp, Document requestBody, LoadingHints loadingHints) {
+    protected PropertiesMarshaller getMarshaller(final WebdavRequest req, boolean forceAllProp, Document requestBody, LoadingHints loadingHints) throws WebdavProtocolException {
         if (loadingHints == null) {
             loadingHints = new LoadingHints();
         }
         PropertiesMarshaller marshaller = null;
 		loadingHints.setUrl(req.getUrl());
 
-		if(null != requestBody && null != requestBody.getRootElement().getChild("propname", DAV_NS)) {
-			marshaller = new PropfindPropNamesMarshaller(req.getURLPrefix(),req.getCharset());
-			loadingHints.setProps(LoadingHints.Property.ALL);
+        if (null != requestBody && null != requestBody.getRootElement().getChild("propname", DAV_NS)) {
+            if (null != requestBody.getRootElement().getChild("allprop", DAV_NS)) {
+                throw WebdavProtocolException.Code.GENERAL_ERROR.create(req.getUrl(), HttpServletResponse.SC_BAD_REQUEST);
+            }
+            marshaller = new PropfindPropNamesMarshaller(req.getURLPrefix(), req.getCharset());
+            loadingHints.setProps(LoadingHints.Property.ALL);
 		}
 
 		if(null != requestBody && null != requestBody.getRootElement().getChild("allprop", DAV_NS) || forceAllProp) {

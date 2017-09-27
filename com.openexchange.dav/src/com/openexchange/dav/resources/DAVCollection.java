@@ -179,7 +179,12 @@ public abstract class DAVCollection extends AbstractCollection {
     @Override
     protected boolean isset(Property p) {
         int id = p.getId();
-        return Protocol.GETCONTENTLANGUAGE != id && Protocol.GETCONTENTLENGTH != id && Protocol.GETETAG != id;
+        return Protocol.GETCONTENTLANGUAGE != id && Protocol.GETETAG != id;
+    }
+
+    @Override
+    public Long getLength() throws WebdavProtocolException {
+        return Long.valueOf(0);
     }
 
     @Override

@@ -250,10 +250,10 @@ public class Check {
             throw CalendarExceptionCodes.END_BEFORE_START.create(L(event.getStartDate().getTimestamp()), L(event.getEndDate().getTimestamp()));
         }
         if (event.getStartDate().isAllDay() != event.getEndDate().isAllDay()) {
-            throw new OXException(); //TODO
+            throw CalendarExceptionCodes.INCOMPATIBLE_DATE_TYPES.create(String.valueOf(event.getStartDate()), String.valueOf(event.getEndDate()));
         }
         if (event.getStartDate().isFloating() != event.getEndDate().isFloating()) {
-            throw new OXException(); //TODO
+            throw CalendarExceptionCodes.INCOMPATIBLE_DATE_TYPES.create(String.valueOf(event.getStartDate()), String.valueOf(event.getEndDate()));
         }
     }
 

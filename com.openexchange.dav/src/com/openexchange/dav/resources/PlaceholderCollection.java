@@ -115,6 +115,11 @@ public class PlaceholderCollection<T> extends FolderCollection<T> {
     }
 
     @Override
+    public AbstractResource getChild(String name) throws WebdavProtocolException {
+        throw WebdavProtocolException.generalError(constructPathForChildResource(name), HttpServletResponse.SC_NOT_FOUND);
+    }
+
+    @Override
     public Date getLastModified() throws WebdavProtocolException {
         return null;
     }

@@ -87,7 +87,7 @@ public class DefaultEventConverter extends EventConverter {
     }
 
     @Override
-    protected TimeZone getDefaultTimeZone() throws OXException {
+    public TimeZone getDefaultTimeZone() throws OXException {
         TimeZone timeZone = session.get(CalendarParameters.PARAMETER_TIMEZONE, TimeZone.class);
         if (null == timeZone) {
             timeZone = session.getEntityResolver().getTimeZone(session.getUserId());

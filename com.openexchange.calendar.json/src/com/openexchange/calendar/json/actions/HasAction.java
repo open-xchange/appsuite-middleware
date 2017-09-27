@@ -49,27 +49,21 @@
 
 package com.openexchange.calendar.json.actions;
 
-import static com.openexchange.tools.TimeZoneUtils.getTimeZone;
 import java.util.Date;
 import java.util.Set;
-import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.calendar.json.AppointmentAJAXRequest;
 import com.openexchange.calendar.json.AppointmentActionFactory;
-import com.openexchange.calendar.json.actions.chronos.ChronosAction;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.FreeBusyService;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
-
 
 /**
  * {@link HasAction}
@@ -77,41 +71,7 @@ import com.openexchange.server.ServiceLookup;
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 @OAuthAction(AppointmentActionFactory.OAUTH_READ_SCOPE)
-public final class HasAction extends ChronosAction {
-
-    /**
-     * Initializes a new {@link HasAction}.
-     * @param services
-     */
-    public HasAction(final ServiceLookup services) {
-        super(services);
-    }
-
-    @Override
-    protected AJAXRequestResult perform(final AppointmentAJAXRequest req) throws OXException, JSONException {
-        final TimeZone timeZone;
-        {
-            final String timeZoneId = req.getParameter(AJAXServlet.PARAMETER_TIMEZONE);
-            timeZone = null == timeZoneId ? req.getTimeZone() : getTimeZone(timeZoneId);
-        }
-        final Date start = req.checkTime(AJAXServlet.PARAMETER_START, timeZone);
-        final Date end = req.checkTime(AJAXServlet.PARAMETER_END, timeZone);
-
-        final AppointmentSqlFactoryService factoryService = getService();
-        if (null == factoryService) {
-            throw ServiceExceptionCode.absentService(AppointmentSqlFactoryService.class);
-        }
-
-        final AppointmentSQLInterface appointmentsql = factoryService.createAppointmentSql(req.getSession());
-        final boolean[] bHas = appointmentsql.hasAppointmentsBetween(start, end);
-
-        final JSONArray jsonResponseArray = new JSONArray();
-        for (int a = 0; a < bHas.length; a++) {
-            jsonResponseArray.put(bHas[a]);
-        }
-
-        return new AJAXRequestResult(jsonResponseArray, "json");
-    }
+public final class HasAction extends AppointmentAction {
 
     private static final Set<String> REQUIRED_PARAMETERS = com.openexchange.tools.arrays.Collections.unmodifiableSet(
         AJAXServlet.PARAMETER_START, AJAXServlet.PARAMETER_END
@@ -120,6 +80,15 @@ public final class HasAction extends ChronosAction {
     private static final Set<String> OPTIONAL_PARAMETERS = com.openexchange.tools.arrays.Collections.unmodifiableSet(
         AJAXServlet.PARAMETER_TIMEZONE
     );
+
+    /**
+     * Initializes a new {@link HasAction}.
+     *
+     * @param services A service lookup reference
+     */
+    public HasAction(ServiceLookup services) {
+        super(services);
+    }
 
     @Override
     protected Set<String> getRequiredParameters() {

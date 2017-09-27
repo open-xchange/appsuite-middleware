@@ -58,7 +58,6 @@ import org.dmfs.rfc5545.recur.RecurrenceRule;
 import org.dmfs.rfc5545.recur.RecurrenceRule.Part;
 import org.dmfs.rfc5545.recur.RecurrenceRule.WeekdayNum;
 import org.dmfs.rfc5545.recur.RecurrenceRuleIterator;
-import org.dmfs.rfc5545.recurrenceset.RecurrenceList;
 import org.dmfs.rfc5545.recurrenceset.RecurrenceRuleAdapter;
 import org.dmfs.rfc5545.recurrenceset.RecurrenceSet;
 import org.dmfs.rfc5545.recurrenceset.RecurrenceSetIterator;
@@ -196,7 +195,7 @@ public class RecurrenceUtils {
                 if (null != byDayPart && 0 < byDayPart.size()) {
                     return matchesDayOfWeek(dateTime, byDayPart);
                 }
-                break;
+                return true;
             case MONTHLY:
                 if (null != byMonthDayPart && 0 < byMonthDayPart.size()) {
                     /*

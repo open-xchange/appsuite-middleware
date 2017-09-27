@@ -261,7 +261,7 @@ public class AlarmMapper extends DefaultDbMapper<Alarm, AlarmField> {
                 if (null == value) {
                     return null;
                 }
-                return value.getCount() + ':' + value.getDuration();
+                return value.getCount() + ":" + value.getDuration();
             }
 
             @Override

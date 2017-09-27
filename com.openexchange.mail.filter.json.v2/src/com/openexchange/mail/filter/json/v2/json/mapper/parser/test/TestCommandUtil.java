@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2017-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,67 +47,37 @@
  *
  */
 
-package com.openexchange.chronos.ical.impl;
+package com.openexchange.mail.filter.json.v2.json.mapper.parser.test;
 
-import java.util.HashMap;
-import java.util.Map;
-import org.slf4j.LoggerFactory;
-import com.openexchange.chronos.ical.ICalParameters;
-import net.fortuna.ical4j.model.TimeZoneRegistry;
-import net.fortuna.ical4j.zoneinfo.outlook.OutlookTimeZoneRegistryFactory;
+import java.util.List;
+import org.json.JSONArray;
+import com.openexchange.mail.filter.json.v2.json.mapper.parser.test.simplified.SimplifiedHeaderTest;
 
 /**
- * {@link ICalParametersImpl}
+ * {@link TestCommandUtil}
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
- * @since v7.10.0
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class ICalParametersImpl implements ICalParameters {
+public final class TestCommandUtil {
 
     /**
-     * {@link TimeZoneRegistry}
-     * <p/>
-     * Holds a reference to the underlying timezone registry.
+     * Tests if the specified {@link JSONArray} contains all headers of the specified {@link SimplifiedHeaderTest}
+     * 
+     * @param headerTest The {@link SimplifiedHeaderTest}
+     * @param headers The {@link JSONArray} with the headers
+     * @return <code>true</code> if the specified {@link JSONArray} contains all headers of the specified {@link SimplifiedHeaderTest}
+     *         <code>false</code> otherwise
      */
-    public static final String TIMEZONE_REGISTRY = TimeZoneRegistry.class.getName();
-
-    private final Map<String, Object> parameters;
-
-    /**
-     * Initializes a new, empty {@link ICalParametersImpl}.
-     */
-    public ICalParametersImpl() {
-        super();
-        this.parameters = new HashMap<String, Object>();
-        applyDefaults();
-    }
-
-    private void applyDefaults() {
-        //        TimeZoneRegistry defaultRegistry = TimeZoneRegistryFactory.getInstance().createRegistry();
-        TimeZoneRegistry outlookRegistry = OutlookTimeZoneRegistryFactory.getInstance().createRegistry();
-        set(TIMEZONE_REGISTRY, outlookRegistry);
-    }
-
-    @Override
-    public <T> T get(String name, Class<T> clazz) {
-        if (null != name) {
-            try {
-                return clazz.cast(parameters.get(name));
-            } catch (ClassCastException e) {
-                LoggerFactory.getLogger(ICalParametersImpl.class).warn("Error getting iCal parameter {}", name, e);
+    public static boolean isSimplified(SimplifiedHeaderTest headerTest, JSONArray headers) {
+        List<String> simplifiedHeaders = headerTest.getHeaderNames();
+        if (simplifiedHeaders.size() != headers.length()) {
+            return false;
+        }
+        for (Object header : headers) {
+            if (!simplifiedHeaders.contains(header)) {
+                return false;
             }
         }
-        return null;
+        return true;
     }
-
-    @Override
-    public <T> ICalParameters set(String name, T value) {
-        if (null != name) {
-            parameters.put(name, value);
-        } else {
-            parameters.remove(name);
-        }
-        return this;
-    }
-
 }

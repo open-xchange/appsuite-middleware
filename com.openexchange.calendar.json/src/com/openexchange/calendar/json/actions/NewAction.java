@@ -49,22 +49,16 @@
 
 package com.openexchange.calendar.json.actions;
 
-import static com.openexchange.tools.TimeZoneUtils.getTimeZone;
 import java.util.Date;
 import java.util.Set;
-import java.util.TimeZone;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.parser.AppointmentParser;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.ajax.writer.AppointmentWriter;
-import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.calendar.json.AppointmentAJAXRequest;
 import com.openexchange.calendar.json.AppointmentActionFactory;
-import com.openexchange.calendar.json.actions.chronos.ChronosAction;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
@@ -72,14 +66,10 @@ import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarResult;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarDataObject;
-import com.openexchange.groupware.container.Appointment;
 import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
-import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
-import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link NewAction}
@@ -87,75 +77,18 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 @OAuthAction(AppointmentActionFactory.OAUTH_WRITE_SCOPE)
-public final class NewAction extends ChronosAction {
+public final class NewAction extends AppointmentAction {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(NewAction.class);
+    private static final Set<String> OPTIONAL_PARAMETERS = com.openexchange.tools.arrays.Collections.unmodifiableSet(AJAXServlet.PARAMETER_TIMEZONE);
 
     /**
      * Initializes a new {@link NewAction}.
      *
-     * @param services
+     * @param services A service lookup reference
      */
-    public NewAction(final ServiceLookup services) {
+    public NewAction(ServiceLookup services) {
         super(services);
     }
-
-    @Override
-    protected AJAXRequestResult perform(final AppointmentAJAXRequest req) throws OXException, JSONException {
-        final JSONObject jData = req.getData();
-        if (null == jData) {
-            throw AjaxExceptionCodes.INVALID_JSON_REQUEST_BODY.create();
-        }
-        final TimeZone timeZone;
-        {
-            final String timeZoneId = req.getParameter(AJAXServlet.PARAMETER_TIMEZONE);
-            timeZone = null == timeZoneId ? req.getTimeZone() : getTimeZone(timeZoneId);
-        }
-        final ServerSession session = req.getSession();
-
-        final CalendarDataObject appointmentObj = new CalendarDataObject();
-        appointmentObj.setContext(session.getContext());
-
-        final AppointmentParser appointmentParser = new AppointmentParser(timeZone);
-        appointmentParser.parse(appointmentObj, jData);
-
-        if (!appointmentObj.containsParentFolderID()) {
-            throw AjaxExceptionCodes.MISSING_PARAMETER.create(AJAXServlet.PARAMETER_FOLDERID);
-        }
-
-        convertExternalToInternalUsersIfPossible(appointmentObj, session.getContext(), LOG);
-
-        final AppointmentSqlFactoryService factoryService = getService();
-        if (null == factoryService) {
-            throw ServiceExceptionCode.absentService(AppointmentSqlFactoryService.class);
-        }
-        final AppointmentSQLInterface appointmentSql = factoryService.createAppointmentSql(session);
-        final Appointment[] conflicts = appointmentSql.insertAppointmentObject(appointmentObj);
-
-        final JSONObject jsonResponseObj = new JSONObject();
-
-        Date timestamp = null;
-        if (conflicts == null) {
-            jsonResponseObj.put(DataFields.ID, appointmentObj.getObjectID());
-            timestamp = appointmentObj.getLastModified();
-            countObjectUse(session, appointmentObj);
-        } else {
-            final JSONArray jsonConflictArray = new JSONArray(conflicts.length);
-            final AppointmentWriter appointmentWriter = new AppointmentWriter(timeZone).setSession(req.getSession());
-            for (final Appointment conflict : conflicts) {
-                final JSONObject jsonAppointmentObj = new JSONObject();
-                appointmentWriter.writeAppointment(conflict, jsonAppointmentObj);
-                jsonConflictArray.put(jsonAppointmentObj);
-            }
-
-            jsonResponseObj.put("conflicts", jsonConflictArray);
-        }
-
-        return new AJAXRequestResult(jsonResponseObj, timestamp, "json");
-
-    }
-
-    private static final Set<String> OPTIONAL_PARAMETERS = com.openexchange.tools.arrays.Collections.unmodifiableSet(AJAXServlet.PARAMETER_TIMEZONE);
 
     @Override
     protected Set<String> getOptionalParameters() {
