@@ -53,6 +53,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import java.text.ParseException;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -76,7 +77,6 @@ import com.openexchange.testing.httpclient.models.EventResponse;
 import com.openexchange.testing.httpclient.models.Trigger;
 import com.openexchange.testing.httpclient.models.Trigger.RelatedEnum;
 import com.openexchange.testing.httpclient.modules.ChronosApi;
-import edu.emory.mathcs.backport.java.util.Collections;
 
 /**
  * {@link AbstractAlarmTriggerTest}
@@ -98,7 +98,6 @@ public abstract class AbstractAlarmTriggerTest extends AbstractChronosTest {
         super();
     }
 
-    @SuppressWarnings("unchecked")
     protected EventData createSingleEventWithSingleAlarm(String summary, DateTimeData startDate, String duration, RelatedEnum related) throws ParseException {
         EventData singleEvent = new EventData();
         singleEvent.setPropertyClass("PUBLIC");
@@ -117,7 +116,6 @@ public abstract class AbstractAlarmTriggerTest extends AbstractChronosTest {
         return singleEvent;
     }
 
-    @SuppressWarnings("unchecked")
     private EventData createSeriesEventWithSingleAlarm(String summary, Calendar startDate, String duration, List<Attendee> attendees) {
         EventData seriesEvent = new EventData();
         seriesEvent.setPropertyClass("PUBLIC");
