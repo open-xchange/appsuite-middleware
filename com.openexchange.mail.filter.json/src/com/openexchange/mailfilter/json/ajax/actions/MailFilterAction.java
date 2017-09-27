@@ -59,7 +59,6 @@ import org.json.JSONObject;
 import org.json.JSONValue;
 import com.google.common.collect.ImmutableSet;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.Strings;
 import com.openexchange.jsieve.commands.ActionCommand;
 import com.openexchange.jsieve.commands.JSONMatchType;
 import com.openexchange.jsieve.commands.Rule;
@@ -294,12 +293,15 @@ public class MailFilterAction extends AbstractAction<Rule, MailFilterRequest> {
     private JSONArray getActionArray(final Set<String> capabilities) {
         final JSONArray actionarray = new JSONArray();
         for (final ActionCommand.Commands command : ActionCommand.Commands.values()) {
-            final String required = command.getRequired();
-            if (Strings.isEmpty(required)) {
+            final List<String> required = command.getRequired();
+            if (required.isEmpty()) {
                 actionarray.put(command.getJsonName());
             } else {
-                if (capabilities.contains(required)) {
-                    actionarray.put(command.getJsonName());
+                for (final String req : required) {
+                    if (capabilities.contains(req)) {
+                        actionarray.put(command.getJsonName());
+                        break;
+                    }
                 }
             }
         }

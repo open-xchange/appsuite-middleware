@@ -47,28 +47,16 @@
  *
  */
 
-package com.openexchange.jsieve.commands.test;
-
-import java.util.List;
+package com.openexchange.file.storage;
 
 /**
- * {@link ICommand}
+ * {@link FileStorageCaseInsensitiveAccess} - Marks whether file storage treats file/folder names as case insensitive.
  *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.10.0
  */
-public interface ICommand {
+public interface FileStorageCaseInsensitiveAccess {
 
-    /**
-     * The name of the command
-     *
-     * @return The command name
-     */
-    String getCommandName();
+    // Just a marker interface
 
-    /**
-     * The required sieve server capabilities
-     *
-     * @return The required capabilities
-     */
-    List<String> getRequired();
 }

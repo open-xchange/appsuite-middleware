@@ -50,6 +50,8 @@
 package com.openexchange.jsieve.commands;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
@@ -114,13 +116,13 @@ public class ActionCommand extends ControlOrActionCommand {
          * <code>fileinto &lt;mailbox: string&gt;</code>
          * <p><a href="https://tools.ietf.org/html/rfc5228#section-4.1">RFC-5228: Action fileinto</p>
          */
-        FILEINTO("fileinto", 1, fileintoTags(), "move", "fileinto"),
+        FILEINTO("fileinto", 1, fileintoTags(), "move", Collections.singletonList("fileinto")),
         /**
          * <p>The "reject" action cancels the implicit keep and refuses delivery of a message.</p>
          * <code>reject &lt;reason: string&gt;</code>
          * <p><a href="https://tools.ietf.org/html/rfc5429#section-2.2">RFC-5429: Action reject</a></p>
          */
-        REJECT("reject", 1, new Hashtable<String, Integer>(), "reject", "reject"),
+        REJECT("reject", 1, new Hashtable<String, Integer>(), "reject", Collections.singletonList("reject")),
         /**
          * <p>The "stop" action ends all processing. If the implicit keep has not
          * been cancelled, then it is taken.</p>
@@ -134,20 +136,20 @@ public class ActionCommand extends ControlOrActionCommand {
          * <code>vacation [":days" number] [":subject" string] [":from" string] [":addresses" string-list] [":mime"] [":handle" string] &lt;reason: string&gt;</code>
          * <p><a href="https://tools.ietf.org/html/rfc5230#section-4">RFC-5230: Action vacation</a></p>
          */
-        VACATION("vacation", 1, vacationTags(), "vacation", "vacation"),
+        VACATION("vacation", 1, vacationTags(), "vacation", Collections.singletonList("vacation")),
         /**
          * <p>The "notify" action specifies that a notification should be sent to a user.</p>
          * <code>notify [":from" string] [":importance" &lt;"1" / "2" / "3"&gt;] [":options" string-list] [":message" string] &lt;method: string&gt;</code>
          * <p><a href="https://tools.ietf.org/html/rfc5435#section-3">RFC-5435: Action notify</a></p>
          */
-        ENOTIFY("notify", 1, enotifyTags(), "notify", "enotify"),
+        ENOTIFY("notify", 1, enotifyTags(), "notify", Collections.singletonList("enotify")),
         /**
          * <p>Setflag is used for setting [IMAP] system flags or keywords.
          * Setflag replaces any previously set flags.
          * <code>setflag [&lt;variablename: string&gt;] &lt;list-of-flags: string-list&gt;</code>
          * <p><a href="https://tools.ietf.org/html/rfc5232#section-3.1">RFC-5232: Action setflag</a></p>
          */
-        SETFLAG("setflag", 1, new Hashtable<String, Integer>(), "setflags", "imap4flags"),
+        SETFLAG("setflag", 1, new Hashtable<String, Integer>(), "setflags", Arrays.asList("imap4flags", "imapflags")),
         /**
          * <p>Addflag is used to add flags to a list of [IMAP] flags. It doesn't
          * replace any previously set flags. This means that multiple
@@ -155,7 +157,7 @@ public class ActionCommand extends ControlOrActionCommand {
          * <code>addflag [&lt;variablename: string&gt;] &lt;list-of-flags: string-list&gt;</code>
          * <p><a href="https://tools.ietf.org/html/rfc5232#section-3.2">RFC-5232: Action addflag</a></p>
          */
-        ADDFLAG("addflag", 1, new Hashtable<String, Integer>(), "addflags", "imap4flags"),
+        ADDFLAG("addflag", 1, new Hashtable<String, Integer>(), "addflags", Arrays.asList("imap4flags", "imapflags")),
         /**
          * <p>Addflag is used to add flags to a list of [IMAP] flags. It doesn't
          * replace any previously set flags. This means that multiple
@@ -163,14 +165,14 @@ public class ActionCommand extends ControlOrActionCommand {
          * <code>removeflag [&lt;variablename: string&gt;] &lt;list-of-flags: string-list&gt;</code>
          * <p><a href="https://tools.ietf.org/html/rfc5232#section-3.3">RFC-5232: Action removeflag</a></p>
          */
-        REMOVEFLAG("removeflag", 1, new Hashtable<String, Integer>(), "removeflags", "imap4flags"),
-        PGP_ENCRYPT("pgp_encrypt", 0, pgpEncryptTags(), "pgp", "vnd.dovecot.pgp-encrypt"),
+        REMOVEFLAG("removeflag", 1, new Hashtable<String, Integer>(), "removeflags", Arrays.asList("imap4flags", "imapflags")),
+        PGP_ENCRYPT("pgp_encrypt", 0, pgpEncryptTags(), "pgp", Collections.singletonList("vnd.dovecot.pgp-encrypt")),
         /**
          * <p>The addheader action adds a header field to the existing message header.</p>
          * <code>addheader [":last"] &lt;field-name: string&gt; &lt;value: string&gt;</code>
          * <p><a href="https://tools.ietf.org/html/rfc5293#section-4">RFC-5293: Action addheader</a></p>
          */
-        ADDHEADER("addheader", 2, addHeaderTags(), "addheader", "editheader"),
+        ADDHEADER("addheader", 2, addHeaderTags(), "addheader", Collections.singletonList("editheader")),
         /**
          * <p>By default, the deleteheader action deletes all occurrences of the
          * named header field. The deleteheader action does not affect Sieve's
@@ -178,13 +180,13 @@ public class ActionCommand extends ControlOrActionCommand {
          * <code>deleteheader [":index" &lt;fieldno: number&gt; [":last"]] [COMPARATOR] [MATCH-TYPE] &lt;field-name: string&gt; [&lt;value-patterns: string-list&gt;]</code>
          * <p><a href="https://tools.ietf.org/html/rfc5293#section-5">RFC-5293: Action deleteheader</a></p>
          */
-        DELETEHEADER("deleteheader", 1, deleteHeaderTags(), "deleteheader", "editheader"),
+        DELETEHEADER("deleteheader", 1, deleteHeaderTags(), "deleteheader", Collections.singletonList("editheader")),
         /**
          * <p> The "set" action stores the specified value in the variable identified by name.</p>
          * <code>set [MODIFIER] &lt;name: string&gt; &lt;value: string&gt;</code>
          * <p><a href="https://tools.ietf.org/html/rfc5229#section-4">RFC-5229: Action set</a></p>
          */
-        SET("set", 2, variablesTags(), "set", "variables");
+        SET("set", 2, variablesTags(), "set", Collections.singletonList("variables"));
 
         /**
          * <p>
@@ -334,7 +336,7 @@ public class ActionCommand extends ControlOrActionCommand {
         /**
          * Defines what must be included for this command to run
          */
-        private final String required;
+        private final List<String> required;
 
         /**
          * Stores the name of the parameter for the json object
@@ -350,7 +352,7 @@ public class ActionCommand extends ControlOrActionCommand {
          * @param jsonName The json mappings
          * @param required The 'required'
          */
-        Commands(final String commandName, final int minNumberOfArguments, final Hashtable<String, Integer> tagArgs, final String jsonName, final String required) {
+        Commands(final String commandName, final int minNumberOfArguments, final Hashtable<String, Integer> tagArgs, final String jsonName, final List<String> required) {
             this.commandName = commandName;
             this.minNumberOfArguments = minNumberOfArguments;
             this.tagArgs = tagArgs;
@@ -393,7 +395,7 @@ public class ActionCommand extends ControlOrActionCommand {
          * @return a {@link List} with the required plugins
          */
         @Override
-        public final String getRequired() {
+        public final List<String> getRequired() {
             return required;
         }
 
@@ -556,7 +558,7 @@ public class ActionCommand extends ControlOrActionCommand {
     public HashSet<String> getRequired() {
         HashSet<String> result = new HashSet<String>();
         result.addAll(optRequired);
-        result.add(this.command.getRequired());
+        result.addAll(this.command.getRequired());
         return result;
     }
 

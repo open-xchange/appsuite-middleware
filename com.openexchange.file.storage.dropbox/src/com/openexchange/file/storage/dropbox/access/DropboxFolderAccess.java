@@ -70,6 +70,7 @@ import com.dropbox.core.v2.users.SpaceUsage;
 import com.dropbox.core.v2.users.TeamSpaceAllocation;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
+import com.openexchange.file.storage.FileStorageCaseInsensitiveAccess;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageFolderAccess;
@@ -85,7 +86,7 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class DropboxFolderAccess extends AbstractDropboxAccess implements FileStorageFolderAccess {
+public class DropboxFolderAccess extends AbstractDropboxAccess implements FileStorageFolderAccess, FileStorageCaseInsensitiveAccess {
 
     private static final Logger LOG = LoggerFactory.getLogger(DropboxFolderAccess.class);
 
@@ -256,7 +257,7 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
             FolderMetadata folderMetadata = client.files().createFolder(fullpath);
             return folderMetadata.getPathDisplay();
         } catch (CreateFolderErrorException e) {
-            throw DropboxExceptionHandler.handleCreateFolderErrorException(e, fullpath);
+            throw DropboxExceptionHandler.handleCreateFolderErrorException(e, fullpath, accountDisplayName);
         } catch (DbxException e) {
             throw DropboxExceptionHandler.handle(e, session, dropboxOAuthAccess.getOAuthAccount());
         }
@@ -298,7 +299,7 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
             Metadata metadata = client.files().move(folderId, newParentId);
             return metadata.getPathDisplay();
         } catch (RelocationErrorException e) {
-            throw DropboxExceptionHandler.handleRelocationErrorException(e, folderId, "");
+            throw DropboxExceptionHandler.handleRelocationErrorException(e, folderId, "", accountDisplayName);
         } catch (DbxException e) {
             throw DropboxExceptionHandler.handle(e, session, dropboxOAuthAccess.getOAuthAccount());
         }
@@ -318,7 +319,7 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
             Metadata metadata = client.files().move(folderId, newPath);
             return metadata.getPathDisplay();
         } catch (RelocationErrorException e) {
-            throw DropboxExceptionHandler.handleRelocationErrorException(e, folderId, "");
+            throw DropboxExceptionHandler.handleRelocationErrorException(e, folderId, "", accountDisplayName);
         } catch (DbxException e) {
             throw DropboxExceptionHandler.handle(e, session, dropboxOAuthAccess.getOAuthAccount());
         }
@@ -335,7 +336,7 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
             Metadata metadata = client.files().delete(folderId);
             return metadata.getName();
         } catch (DeleteErrorException e) {
-            throw DropboxExceptionHandler.handleDeleteErrorException(e, folderId, "");
+            throw DropboxExceptionHandler.handleDeleteErrorException(e, folderId, "", accountDisplayName);
         } catch (DbxException e) {
             throw DropboxExceptionHandler.handle(e, session, dropboxOAuthAccess.getOAuthAccount());
         }
