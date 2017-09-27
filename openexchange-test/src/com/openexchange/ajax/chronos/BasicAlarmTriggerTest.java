@@ -60,6 +60,7 @@ import java.time.zone.ZoneRules;
 import java.time.zone.ZoneRulesProvider;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
@@ -83,7 +84,6 @@ import com.openexchange.testing.httpclient.models.EventData;
 import com.openexchange.testing.httpclient.models.EventId;
 import com.openexchange.testing.httpclient.models.Trigger.RelatedEnum;
 import com.openexchange.testing.httpclient.models.UpdatesResult;
-import edu.emory.mathcs.backport.java.util.Collections;
 
 /**
  *
@@ -192,7 +192,6 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
         checkAlarmTime(alarmTrigger, event.getId(), cal.getTimeInMillis());
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     public void testEventSeriesAlarmTriggerTimeRoundtripForSingleUser() throws Exception {
 
@@ -278,7 +277,6 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
         getAndCheckAlarmTrigger(0); // No upcoming triggers
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     public void testEventSeriesAlarmTriggerTimeRoundtripForMultipleUser() throws Exception {
 
