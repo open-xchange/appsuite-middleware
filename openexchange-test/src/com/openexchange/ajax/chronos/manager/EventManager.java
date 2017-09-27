@@ -259,6 +259,19 @@ public class EventManager extends AbstractManager {
      * @throws ApiException if an API error is occurred
      */
     public AlarmTriggerData getAlarmTrigger(long until) throws ApiException {
+        return getAlarmTrigger(until, null);
+    }
+
+    /**
+     * Retrieves not acknowledged alarm triggers.
+     * 
+     * @param until Upper exclusive limit of the queried range as a utc date-time value as specified
+     *            in RFC 5545 chapter 3.3.5. E.g. \"20170708T220000Z\". Only events which should trigger before this date are returned.
+     * @param actions The actions to retrieve (comma separated string)
+     * @return The {@link AlarmTriggerData}
+     * @throws ApiException if an API error is occurred
+     */
+    public AlarmTriggerData getAlarmTrigger(long until, String actions) throws ApiException {
         AlarmTriggerResponse triggerResponse = userApi.getChronosApi().getAlarmTrigger(userApi.getSession(), DateTimeUtil.getZuluDateTime(until).getValue(), null);
         return checkResponse(triggerResponse.getError(), triggerResponse.getErrorDesc(), triggerResponse.getData());
     }
