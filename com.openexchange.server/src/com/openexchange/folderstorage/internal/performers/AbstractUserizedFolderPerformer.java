@@ -66,6 +66,7 @@ import java.util.regex.Pattern;
 import com.google.common.collect.ImmutableSet;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.FileStorageCapability;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
@@ -97,6 +98,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.modules.Module;
 import com.openexchange.java.Autoboxing;
+import com.openexchange.java.Strings;
 import com.openexchange.objectusecount.IncrementArguments;
 import com.openexchange.objectusecount.ObjectUseCountService;
 import com.openexchange.share.CreatedShares;
@@ -122,8 +124,8 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
     protected static final String RECURSION_MARKER = AbstractUserizedFolderPerformer.class.getName() + ".RECURSION_MARKER";
 
     private static final String DUMMY_ID = "dummyId";
-    private static final Pattern IS_NUMBERED_PARENTHESIS = Pattern.compile("\\(\\d+\\)$");
-    private static final Pattern IS_NUMBERED = Pattern.compile("\\d+$");
+    private static final Pattern IS_NUMBERED_PARENTHESIS = Pattern.compile(" \\(\\d+\\)$");
+    private static final Pattern IS_NUMBERED = Pattern.compile(" \\d+$");
 
     private final FolderServiceDecorator decorator;
     private volatile TimeZone timeZone;
@@ -459,16 +461,18 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
      * @param targetFolderId The identifier of the parent folder where the folder should be saved in
      * @param folderToSave The folder to be saved
      * @param contentType The folder's content type
-     * @param allowAutorename <code>true</code> to allow an automatic rename based on the <code>autorename</code> decorator property, <code>false</code>, otherwise
+     * @param options The options to respect for this check
      * @return <code>null</code> if the folder name does not or no longer conflict due to auto-rename, or the conflicting reserved folder name, otherwise
      */
-    protected String checkForReservedName(String treeId, String targetFolderId, Folder folderToSave, ContentType contentType, boolean allowAutorename) throws OXException {
+    protected String checkForReservedName(String treeId, String targetFolderId, Folder folderToSave, ContentType contentType, CheckOptions options) throws OXException {
         if (false == check4Duplicates || null == folderToSave.getName() ||
             InfostoreContentType.getInstance().toString().equals(contentType.toString())) {
             return null;
         }
-        boolean autoRename = allowAutorename ? AJAXRequestDataTools.parseBoolParameter(getDecoratorStringProperty("autorename")) : false;
-        String lowercaseTargetName = folderToSave.getName().toLowerCase(getLocale());
+        boolean autoRename = options.isAllowAutorename() ? AJAXRequestDataTools.parseBoolParameter(getDecoratorStringProperty("autorename")) : false;
+        boolean ignoreCase = options.isIgnoreCase();
+        Locale loc = getLocale();
+        String targetName = ignoreCase ? folderToSave.getName().toLowerCase(loc) : folderToSave.getName();
         /*
          * check reserved names for outlook folders (non-infostore folders)
          */
@@ -476,8 +480,8 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
         Set<String> i18nNames = FolderI18nNamesServiceImpl.getInstance().getI18nNamesFor(Module.SYSTEM.getFolderConstant(),
             Module.CALENDAR.getFolderConstant(), Module.CONTACTS.getFolderConstant(), Module.MAIL.getFolderConstant(), Module.TASK.getFolderConstant());
         for (String i18nName : i18nNames) {
-            String reservedName = i18nName.toLowerCase(getLocale());
-            if (false == autoRename && lowercaseTargetName.equals(reservedName)) {
+            String reservedName = ignoreCase ? i18nName.toLowerCase(loc) : i18nName;
+            if (false == autoRename && targetName.equals(reservedName)) {
                 return i18nName;
             }
             reservedNames.add(reservedName);
@@ -486,7 +490,7 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
          * auto-rename automatically as needed
          */
         if (autoRename) {
-            autoRename(reservedNames, folderToSave, contentType);
+            autoRename(reservedNames, folderToSave, contentType, loc, ignoreCase);
         }
         return null;
     }
@@ -500,16 +504,17 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
      * @param targetFolderId The identifier of the parent folder where the folder should be saved in
      * @param folderToSave The folder to be saved
      * @param contentType The folder's content type
-     * @param allowAutorename <code>true</code> to allow an automatic rename based on the <code>autorename</code> decorator property, <code>false</code>, otherwise
+     * @param options The options to respect for this check
      * @return <code>null</code> if the folder name does not or no longer conflict due to auto-rename, or the conflicting folder, otherwise
      */
-    protected UserizedFolder checkForEqualName(String treeId, String targetFolderId, Folder folderToSave, ContentType contentType, boolean allowAutorename) throws OXException {
+    protected UserizedFolder checkForEqualName(String treeId, String targetFolderId, Folder folderToSave, ContentType contentType, CheckOptions options) throws OXException {
         if (false == check4Duplicates || null == folderToSave.getName()) {
             return null;
         }
-        boolean autoRename = allowAutorename ? AJAXRequestDataTools.parseBoolParameter(getDecoratorStringProperty("autorename")) : false;
+        boolean autoRename = options.isAllowAutorename() ? AJAXRequestDataTools.parseBoolParameter(getDecoratorStringProperty("autorename")) : false;
+        boolean ignoreCase = options.isIgnoreCase();
         Locale loc = getLocale();
-        String lowercaseTargetName = folderToSave.getName().toLowerCase(loc);
+        String targetName = ignoreCase ? folderToSave.getName().toLowerCase(loc) : folderToSave.getName();
         /*
          * check for equally named folder on same level
          */
@@ -523,14 +528,14 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
         UserizedFolder[] existingFolders = listPerformer.doList(treeId, targetFolderId, true, true);
         for (UserizedFolder existingFolder : existingFolders) {
             if (false == existingFolder.getID().equals(folderToSave.getID())) {
-                String conflictingName = existingFolder.getName().toLowerCase(loc);
-                if (false == autoRename && lowercaseTargetName.equals(conflictingName)) {
+                String conflictingName = ignoreCase ? existingFolder.getName().toLowerCase(loc) : existingFolder.getName();
+                if (false == autoRename && targetName.equals(conflictingName)) {
                     return existingFolder;
                 }
                 conflictingNames.add(conflictingName);
                 if (false == InfostoreContentType.getInstance().toString().equals(contentType.toString())) {
-                    String conflictingLocalizedName = existingFolder.getLocalizedName(loc).toLowerCase(loc);
-                    if (false == autoRename && lowercaseTargetName.equals(conflictingLocalizedName)) {
+                    String conflictingLocalizedName = ignoreCase ? existingFolder.getLocalizedName(loc).toLowerCase(loc) : existingFolder.getLocalizedName(loc);
+                    if (false == autoRename && targetName.equals(conflictingLocalizedName)) {
                         return existingFolder;
                     }
                     conflictingNames.add(conflictingLocalizedName);
@@ -541,7 +546,7 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
          * auto-rename automatically as needed
          */
         if (autoRename) {
-            autoRename(conflictingNames, folderToSave, contentType);
+            autoRename(conflictingNames, folderToSave, contentType, loc, ignoreCase);
         }
         return null;
     }
@@ -553,18 +558,20 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
      * @param folderToSave The folder to save
      * @return <code>true</code> if the folder's name was adjusted, <code>false</code>, otherwise
      */
-    private boolean autoRename(Set<String> conflictingNames, Folder folderToSave, ContentType contentType) {
+    private boolean autoRename(Set<String> conflictingNames, Folder folderToSave, ContentType contentType, Locale loc, boolean ignoreCase) {
         if (null == conflictingNames || 0 == conflictingNames.size()) {
             return false;
         }
-        String targetName = folderToSave.getName();
-        if (conflictingNames.contains(targetName.toLowerCase(getLocale()).trim())) {
+        String nameToEnhance = folderToSave.getName();
+        String nameToCheck = (ignoreCase ? nameToEnhance.toLowerCase(loc) : nameToEnhance).trim();
+        if (conflictingNames.contains(nameToCheck)) {
             boolean useParenthesis = PARENTHESIS_CAPABLE.contains(contentType.toString());
             int counter = 0;
             do {
-                targetName = enhance(targetName, ++counter, useParenthesis);
-            } while (conflictingNames.contains(targetName.toLowerCase(getLocale()).trim()));
-            folderToSave.setName(targetName);
+                nameToEnhance = enhance(nameToEnhance, ++counter, useParenthesis);
+                nameToCheck = (ignoreCase ? nameToEnhance.toLowerCase(loc) : nameToEnhance).trim();
+            } while (conflictingNames.contains(nameToCheck));
+            folderToSave.setName(nameToEnhance);
             return true;
         }
         return false;
@@ -977,14 +984,14 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
         if (useParenthesis) {
             Matcher matcher = IS_NUMBERED_PARENTHESIS.matcher(name);
             if (matcher.find()) {
-                return new StringBuilder(name).replace(matcher.start(), matcher.end(), '(' + String.valueOf(counter) + ')').toString();
+                return new StringBuilder(name).replace(matcher.start(), matcher.end(), " (" + String.valueOf(counter) + ')').toString();
             } else {
                 return name + " (" + counter + ')';
             }
         } else {
             Matcher matcher = IS_NUMBERED.matcher(name);
             if (matcher.find()) {
-                return new StringBuilder(name).replace(matcher.start(), matcher.end(), String.valueOf(counter)).toString();
+                return new StringBuilder(name).replace(matcher.start(), matcher.end(), " " + counter).toString();
             } else {
                 return name + ' ' + counter;
             }
@@ -1015,13 +1022,103 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
         if (null == userizedFolders) {
             return new UserizedFolder[0];
         }
-        final List<UserizedFolder> l = new ArrayList<UserizedFolder>(userizedFolders.length);
-        for (final UserizedFolder uf : userizedFolders) {
-            if (null != uf) {
-                l.add(uf);
+        List<UserizedFolder> l = null;
+        for (int i = 0; i < userizedFolders.length; i++) {
+            UserizedFolder uf = userizedFolders[i];
+            if (null == uf) {
+                if (null == l) {
+                    l = new ArrayList<UserizedFolder>(userizedFolders.length);
+                    for (int k = 0; k < i; k++) {
+                        l.add(userizedFolders[k]);
+                    }
+                }
+            } else {
+                if (null != l) {
+                    l.add(uf);
+                }
             }
         }
-        return l.toArray(new UserizedFolder[l.size()]);
+        return null == l ? userizedFolders : l.toArray(new UserizedFolder[l.size()]);
+    }
+
+    private static final String CAPABILITY_CASE_INSENSITIVE = Strings.asciiLowerCase(FileStorageCapability.CASE_INSENSITIVE.name());
+
+    /**
+     * Checks of specified folder supports the {@link FileStorageCapability#CASE_INSENSITIVE CASE_INSENSITIVE} capability.
+     *
+     * @param folder The folder to check
+     * @return <code>true</code> if specified folder supports that capability; otherwise <code>false</code>
+     */
+    protected static boolean supportsCaseInsensitive(Folder folder) {
+        Set<String> supportedCapabilities = null == folder ? null : folder.getSupportedCapabilities();
+        return null != supportedCapabilities && supportedCapabilities.contains(CAPABILITY_CASE_INSENSITIVE);
+    }
+
+    // -----------------------------------------------------------------------------------------------
+
+    /** Options for performing name-based folder checks */
+    public static final class CheckOptions {
+
+        /** Gets a new builder instance */
+        public static Builder builder() {
+            return new Builder();
+        }
+
+        public static class Builder {
+
+            boolean allowAutorename;
+            boolean ignoreCase;
+
+            Builder() {
+                super();
+                allowAutorename = false;
+                ignoreCase = false;
+            }
+
+            public Builder allowAutorename(boolean allowAutorename) {
+                this.allowAutorename = allowAutorename;
+                return this;
+            }
+
+            public Builder ignoreCase(boolean ignoreCase) {
+                this.ignoreCase = ignoreCase;
+                return this;
+            }
+
+            public CheckOptions build() {
+                return new CheckOptions(allowAutorename, ignoreCase);
+            }
+        }
+
+        private final boolean allowAutorename;
+        private final boolean ignoreCase;
+
+        /**
+         * Initializes a new {@link CheckOptions}.
+         */
+        CheckOptions(boolean allowAutorename, boolean ignoreCase) {
+            super();
+            this.allowAutorename = allowAutorename;
+            this.ignoreCase = ignoreCase;
+        }
+
+        /**
+         * Gets the allow auto-rename flag
+         *
+         * @return <code>true</code> to allow an automatic rename based on the <code>autorename</code> decorator property, <code>false</code>, otherwise
+         */
+        public boolean isAllowAutorename() {
+            return allowAutorename;
+        }
+
+        /**
+         * Gets the ignore-case flag
+         *
+         * @return <code>true</code> to signal that underlying storage handles folder names case insensitive, <code>false</code>, otherwise
+         */
+        public boolean isIgnoreCase() {
+            return ignoreCase;
+        }
     }
 
 }
