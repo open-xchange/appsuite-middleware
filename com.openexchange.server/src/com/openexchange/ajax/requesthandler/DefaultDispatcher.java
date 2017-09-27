@@ -529,6 +529,10 @@ public class DefaultDispatcher implements Dispatcher {
             // No further processing
             return contributeDispatcherListeners(result, dispatcherListeners);
         }
+        if (AJAXRequestResult.ResultType.ENQUEUED == result.getType()) {
+            // No further processing
+            return contributeDispatcherListeners(result, dispatcherListeners);
+        }
         result = customizeResult(requestData, result, customizers, session);
         return contributeDispatcherListeners(result, dispatcherListeners);
     }
