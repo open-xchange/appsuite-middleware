@@ -55,6 +55,7 @@ import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 import org.junit.Test;
 import com.openexchange.ajax.chronos.factory.AlarmFactory;
+import com.openexchange.ajax.chronos.manager.ChronosApiException;
 import com.openexchange.ajax.chronos.util.DateTimeUtil;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.AlarmTrigger;
@@ -80,7 +81,7 @@ public class TimezoneAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTe
 
     @SuppressWarnings("unchecked")
     @Test
-    public void testTrigger() throws ApiException, ParseException {
+    public void testTrigger() throws ApiException, ParseException, ChronosApiException {
         Calendar start = DateTimeUtil.getUTCCalendar();
         start.add(Calendar.DAY_OF_MONTH, 1);
         DateTimeData startDate = DateTimeUtil.getDateTime(start);
@@ -99,7 +100,7 @@ public class TimezoneAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTe
             ChronosCalendarResultResponse createEvent = defaultUserApi.getChronosApi().createEvent(defaultUserApi.getSession(), folderId, event, false, false);
             event = handleCreation(createEvent);
 
-            getAndCheckEvent(event, 1);
+            getAndAssertAlarms(event, 1);
 
             // Get alarms within the next two days
             AlarmTriggerData triggers = getAndCheckAlarmTrigger(1); // one trigger
@@ -119,7 +120,7 @@ public class TimezoneAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTe
             ChronosCalendarResultResponse createEvent = defaultUserApi.getChronosApi().createEvent(defaultUserApi.getSession(), folderId, event, true, false);
             event = handleCreation(createEvent);
 
-            getAndCheckEvent(event, 1);
+            getAndAssertAlarms(event, 1);
 
             // Get alarms within the next two days
             AlarmTriggerData triggers = getAndCheckAlarmTrigger(1); // one trigger
@@ -131,7 +132,7 @@ public class TimezoneAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTe
 
     @SuppressWarnings("unchecked")
     @Test
-    public void testTriggerWithPositiveDuration() throws ApiException, ParseException {
+    public void testTriggerWithPositiveDuration() throws ApiException, ParseException, ChronosApiException {
         Calendar start = DateTimeUtil.getUTCCalendar();
         start.add(Calendar.DAY_OF_MONTH, 1);
         DateTimeData startDate = DateTimeUtil.getDateTime(start);
@@ -150,7 +151,7 @@ public class TimezoneAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTe
             ChronosCalendarResultResponse createEvent = defaultUserApi.getChronosApi().createEvent(defaultUserApi.getSession(), folderId, event, false, false);
             event = handleCreation(createEvent);
 
-            getAndCheckEvent(event, 1);
+            getAndAssertAlarms(event, 1);
 
             // Get alarms within the next two days
             AlarmTriggerData triggers = getAndCheckAlarmTrigger(1); // one trigger
@@ -170,7 +171,7 @@ public class TimezoneAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTe
             ChronosCalendarResultResponse createEvent = defaultUserApi.getChronosApi().createEvent(defaultUserApi.getSession(), folderId, event, true, false);
             event = handleCreation(createEvent);
 
-            getAndCheckEvent(event, 1);
+            getAndAssertAlarms(event, 1);
 
             // Get alarms within the next two days
             AlarmTriggerData triggers = getAndCheckAlarmTrigger(1); // one trigger

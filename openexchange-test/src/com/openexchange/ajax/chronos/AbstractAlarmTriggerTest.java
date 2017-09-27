@@ -65,7 +65,6 @@ import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.Alarm;
 import com.openexchange.testing.httpclient.models.AlarmTrigger;
 import com.openexchange.testing.httpclient.models.AlarmTriggerData;
-import com.openexchange.testing.httpclient.models.AlarmTriggerResponse;
 import com.openexchange.testing.httpclient.models.Attendee;
 import com.openexchange.testing.httpclient.models.Attendee.CuTypeEnum;
 import com.openexchange.testing.httpclient.models.CalendarResult;
@@ -85,7 +84,7 @@ import com.openexchange.testing.httpclient.modules.ChronosApi;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.0
  */
-public abstract class AbstractAlarmTriggerTest extends AbstractChronosTest {
+public abstract class AbstractAlarmTriggerTest extends AbstractAlarmTest {
 
     protected String folderId;
     protected String folderId2;
@@ -165,18 +164,6 @@ public abstract class AbstractAlarmTriggerTest extends AbstractChronosTest {
     }
 
     /**
-     * Simple wrapper to return alarm triggers
-     *
-     * @param until The upper limit
-     * @param actions The alarm actions to retrieve or null to retrieve the basic ones
-     * @return The {@link AlarmTriggerResponse}
-     * @throws ApiException
-     */
-    private AlarmTriggerResponse getAlarmTrigger(long until, String actions, ChronosApi chronosApi, String session) throws ApiException {
-        return chronosApi.getAlarmTrigger(session, DateTimeUtil.getZuluDateTime(until).getValue(), actions);
-    }
-
-    /**
      * Shifts a given event by the given amount
      *
      * @param eventId The event id
@@ -203,23 +190,6 @@ public abstract class AbstractAlarmTriggerTest extends AbstractChronosTest {
     }
 
     /**
-     * Checks if a given event exists and if it contains the given amount of alarm objects
-     *
-     * @param event The event to check
-     * @param alarmSize The amount of alarm object
-     * @throws ApiException
-     */
-    protected EventData getAndCheckEvent(EventData event, int alarmSize) throws ApiException {
-        EventResponse eventResponse = defaultUserApi.getChronosApi().getEvent(defaultUserApi.getSession(), event.getId(), folderId, null, null);
-        EventData getEvent = checkResponse(eventResponse.getError(), eventResponse.getErrorDesc(), eventResponse.getData());
-        AssertUtil.assertEventsEqual(event, getEvent);
-        assertNotNull(getEvent.getAlarms());
-        assertEquals(alarmSize, getEvent.getAlarms().size());
-        this.setLastTimestamp(eventResponse.getTimestamp());
-        return getEvent;
-    }
-
-    /**
      * Retrieves alarm triggers with a trigger time lower than the given limit and checks if the response contains the correct amount of alarm trigger objects.
      * Its also possible to filter for specific actions.
      *
@@ -229,9 +199,8 @@ public abstract class AbstractAlarmTriggerTest extends AbstractChronosTest {
      * @return The {@link AlarmTriggerData}
      * @throws ApiException
      */
-    protected AlarmTriggerData getAndCheckAlarmTrigger(long until, String actions, int expected) throws ApiException {
-        AlarmTriggerResponse triggerResponse = getAlarmTrigger(until, actions, defaultUserApi.getChronosApi(), defaultUserApi.getSession());
-        AlarmTriggerData triggers = checkResponse(triggerResponse.getError(), triggerResponse.getErrorDesc(), triggerResponse.getData());
+    AlarmTriggerData getAndCheckAlarmTrigger(long until, String actions, int expected) throws ApiException {
+        AlarmTriggerData triggers = eventManager.getAlarmTrigger(until, actions);
         assertEquals(expected, triggers.size());
         return triggers;
     }
@@ -246,9 +215,8 @@ public abstract class AbstractAlarmTriggerTest extends AbstractChronosTest {
      * @return The {@link AlarmTriggerData}
      * @throws ApiException
      */
-    protected AlarmTriggerData getAndCheckAlarmTrigger(long until, int expected, ChronosApi api, String session) throws ApiException {
-        AlarmTriggerResponse triggerResponse = getAlarmTrigger(until, null, api, session);
-        AlarmTriggerData triggers = checkResponse(triggerResponse.getError(), triggerResponse.getErrorDesc(), triggerResponse.getData());
+    AlarmTriggerData getAndCheckAlarmTrigger(long until, int expected, ChronosApi api, String session) throws ApiException {
+        AlarmTriggerData triggers = eventManager.getAlarmTrigger(until);
         assertEquals(expected, triggers.size());
         return triggers;
     }
@@ -261,7 +229,7 @@ public abstract class AbstractAlarmTriggerTest extends AbstractChronosTest {
      * @return The {@link AlarmTriggerData}
      * @throws ApiException
      */
-    protected AlarmTriggerData getAndCheckAlarmTrigger(int expected) throws ApiException {
+    AlarmTriggerData getAndCheckAlarmTrigger(int expected) throws ApiException {
         return getAndCheckAlarmTrigger(System.currentTimeMillis() + TimeUnit.DAYS.toMillis(2), expected, defaultUserApi.getChronosApi(), defaultUserApi.getSession());
     }
 

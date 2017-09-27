@@ -66,6 +66,8 @@ import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 import org.junit.Test;
 import com.openexchange.ajax.chronos.factory.AlarmFactory;
+import com.openexchange.ajax.chronos.factory.EventFactory;
+import com.openexchange.ajax.chronos.manager.ChronosApiException;
 import com.openexchange.ajax.chronos.util.DateTimeUtil;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.AlarmTrigger;
@@ -98,9 +100,8 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
     public void testCreateSingleAlarmTrigger() throws Exception {
         // Create an event with alarm
         long currentTime = System.currentTimeMillis();
-
-        EventData event = createSingleEvent("testSingleAlarmTrigger", System.currentTimeMillis() + TimeUnit.DAYS.toMillis(1));
-        getAndCheckEvent(event, 1);
+        EventData event = eventManager.createEvent(EventFactory.createSingleEventWithSingleAlarm(defaultUserApi.getCalUser(), testUser.getLogin(), "testSingleAlarmTrigger", AlarmFactory.createDisplayAlarm("-PT15M")));
+        getAndAssertAlarms(event, 1);
 
         // Test alarm/until action with different time-slots
         // 1. Get alarms within the next hour
@@ -124,7 +125,7 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
         // Create an event with alarm
         EventData event = createSingleEvent("testSingleAlarmTriggerTime", cal);
 
-        getAndCheckEvent(event, 1);
+        getAndAssertAlarms(event, 1);
 
         Calendar today = Calendar.getInstance(UTC);
         today.setTime(new Date());
@@ -143,7 +144,7 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
 
         // Create an event with alarm
         EventData event = createSingleEvent("testSingleAlarmTriggerWithUpdate", cal);
-        getAndCheckEvent(event, 1);
+        getAndAssertAlarms(event, 1);
 
         Calendar today = Calendar.getInstance(UTC);
         today.setTime(new Date());
@@ -174,7 +175,7 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
 
         // Create an event with alarm
         EventData event = createSeriesEvent("testSeriesAlarmTriggerTime", cal);
-        getAndCheckEvent(event, 1);
+        getAndAssertAlarms(event, 1);
 
         // Check if next trigger is at correct time
         long currentTime = System.currentTimeMillis();
@@ -205,7 +206,7 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
 
         // Create an event with alarm
         EventData event = createSeriesEvent("testSeriesAlarmTriggerTimeRoundtrip", cal);
-        getAndCheckEvent(event, 1);
+        getAndAssertAlarms(event, 1);
 
         // Check if next trigger is at correct time
         long currentTime = System.currentTimeMillis();
@@ -305,7 +306,7 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
         atts.add(attendee2);
 
         EventData event = createSeriesEvent("testSeriesAlarmTriggerTimeRoundtrip", cal, atts);
-        getAndCheckEvent(event, 1);
+        getAndAssertAlarms(event, 1);
 
         ChronosUpdatesResponse updates = user2.getChronosApi().getUpdates(user2.getSession(), folderId2, 0l, null, null, null, null, null, false, true);
         UpdatesResult updatesResult = checkResponse(updates.getError(), updates.getErrorDesc(), updates.getData());
@@ -495,7 +496,7 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
             DateTimeData startTime = DateTimeUtil.getDateTime(null, cal.getTimeInMillis());
             ChronosCalendarResultResponse createEvent = defaultUserApi.getChronosApi().createEvent(defaultUserApi.getSession(), folderId, createSingleEventWithSingleAlarm("testFloatingEventAlarmTriggerTime", startTime, "-PT3D", RelatedEnum.START), false, false);
             EventData event = handleCreation(createEvent);
-            getAndCheckEvent(event, 1);
+            getAndAssertAlarms(event, 1);
 
             // Check if next trigger is at correct time
             Calendar from = Calendar.getInstance(UTC);
@@ -523,7 +524,7 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
     }
 
     @Test
-    public void testPositiveDurationTrigger() throws ApiException, ParseException {
+    public void testPositiveDurationTrigger() throws ApiException, ParseException, ChronosApiException {
         // Create an event with an alarm with a positive duration
         Calendar cal = DateTimeUtil.getUTCCalendar();
         cal.add(Calendar.DAY_OF_MONTH, 1);
@@ -532,7 +533,7 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
         ChronosCalendarResultResponse createEvent = defaultUserApi.getChronosApi().createEvent(defaultUserApi.getSession(), folderId, event, false, false);
         event = handleCreation(createEvent);
 
-        getAndCheckEvent(event, 1);
+        getAndAssertAlarms(event, 1);
 
         // Get alarms within the next two days
         AlarmTriggerData triggers = getAndCheckAlarmTrigger(1); // one trigger
@@ -541,7 +542,7 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
     }
 
     @Test
-    public void testEndDateTrigger() throws ApiException, ParseException {
+    public void testEndDateTrigger() throws ApiException, ParseException, ChronosApiException {
         // Create an event with an alarm related to the end date
         Calendar cal = DateTimeUtil.getUTCCalendar();
         cal.add(Calendar.DAY_OF_MONTH, 1);
@@ -550,7 +551,7 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
         ChronosCalendarResultResponse createEvent = defaultUserApi.getChronosApi().createEvent(defaultUserApi.getSession(), folderId, event, false, false);
         event = handleCreation(createEvent);
 
-        getAndCheckEvent(event, 1);
+        getAndAssertAlarms(event, 1);
 
         // Get alarms within the next two days
         AlarmTriggerData triggers = getAndCheckAlarmTrigger(1); // one trigger

@@ -95,12 +95,12 @@ public class AcknowledgeAndSnoozeTest extends AbstractAlarmTriggerTest {
     public void testSimpleAcknowledge() throws Exception {
         // Create an event with alarm
         EventData event = createSingleEvent("testSimpleAcknowledge", System.currentTimeMillis() + TimeUnit.DAYS.toMillis(1));
-        getAndCheckEvent(event, 1);
+        getAndAssertAlarms(event, 1);
 
         AlarmTriggerData triggerData = getAndCheckAlarmTrigger(1);
         AlarmTrigger alarmTrigger = triggerData.get(0);
 
-        EventData getEvent = getAndCheckEvent(event, 1);
+        EventData getEvent = getAndAssertAlarms(event, 1);
         assertNull(getEvent.getAlarms().get(0).getAcknowledged());
 
         ChronosCalendarResultResponse acknowledgeAlarm = defaultUserApi.getChronosApi().acknowledgeAlarm(defaultUserApi.getSession(), event.getId(), folderId, Integer.valueOf(alarmTrigger.getAlarmId()));
@@ -110,7 +110,7 @@ public class AcknowledgeAndSnoozeTest extends AbstractAlarmTriggerTest {
         Long acknowledged = updated.getAlarms().get(0).getAcknowledged();
         assertNotNull(acknowledged);
 
-        getEvent = getAndCheckEvent(updated, 1);
+        getEvent = getAndAssertAlarms(updated, 1);
         assertNotNull(getEvent.getAlarms().get(0).getAcknowledged());
         assertEquals(acknowledged, getEvent.getAlarms().get(0).getAcknowledged());
         assertTrue("Acknowdledge time is not later than the creation date.", acknowledged.longValue() >= event.getCreated().longValue());
@@ -120,12 +120,12 @@ public class AcknowledgeAndSnoozeTest extends AbstractAlarmTriggerTest {
     public void testSimpleSnooze() throws Exception {
         // Create an event with alarm
         EventData event = createSingleEvent("testSimpleSnooze", System.currentTimeMillis() + TimeUnit.DAYS.toMillis(1));
-        getAndCheckEvent(event, 1);
+        getAndAssertAlarms(event, 1);
 
         AlarmTriggerData triggerData = getAndCheckAlarmTrigger(1);
         AlarmTrigger alarmTrigger = triggerData.get(0);
 
-        EventData getEvent = getAndCheckEvent(event, 1);
+        EventData getEvent = getAndAssertAlarms(event, 1);
         assertNull(getEvent.getAlarms().get(0).getAcknowledged());
         int alarmId = Integer.valueOf(alarmTrigger.getAlarmId());
 
