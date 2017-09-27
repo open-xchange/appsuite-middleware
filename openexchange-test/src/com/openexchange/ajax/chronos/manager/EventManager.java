@@ -57,9 +57,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import com.openexchange.ajax.chronos.UserApi;
 import com.openexchange.ajax.chronos.factory.EventFactory;
 import com.openexchange.ajax.chronos.util.DateTimeUtil;
@@ -84,7 +82,7 @@ public class EventManager extends AbstractManager {
     private final UserApi userApi;
     private final String defaultFolder;
 
-    private Map<UserApi, List<EventId>> eventIds;
+    private List<EventId> eventIds;
     private long lastTimeStamp;
 
     /**
@@ -94,17 +92,15 @@ public class EventManager extends AbstractManager {
         super();
         this.userApi = userApi;
         this.defaultFolder = defaultFolder;
-        eventIds = new HashMap<>();
+        eventIds = new ArrayList<>();
     }
 
     public void cleanUp() {
-        for (UserApi userApi : eventIds.keySet()) {
-            try {
-                userApi.getChronosApi().deleteEvent(userApi.getSession(), System.currentTimeMillis(), eventIds.get(userApi));
-            } catch (Exception e) {
-                System.err.println("Could not clean up the events for user " + userApi.getCalUser() + ": " + e.getMessage());
-                e.printStackTrace();
-            }
+        try {
+            userApi.getChronosApi().deleteEvent(userApi.getSession(), System.currentTimeMillis(), eventIds);
+        } catch (Exception e) {
+            System.err.println("Could not clean up the events for user " + userApi.getCalUser() + ": " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
@@ -321,14 +317,11 @@ public class EventManager extends AbstractManager {
      * @param userApi The {@link UserApi}
      * @param eventId The {@link EventId}
      */
-    protected void rememberEventId(UserApi userApi, EventId eventId) {
+    private void rememberEventId(UserApi userApi, EventId eventId) {
         if (eventIds == null) {
-            eventIds = new HashMap<>();
+            eventIds = new ArrayList<>();
         }
-        if (!eventIds.containsKey(userApi)) {
-            eventIds.put(userApi, new ArrayList<>(1));
-        }
-        eventIds.get(userApi).add(eventId);
+        eventIds.add(eventId);
     }
 
     /**
@@ -339,10 +332,8 @@ public class EventManager extends AbstractManager {
      */
     protected void forgetEventId(UserApi userApi, EventId eventId) {
         if (eventIds == null) {
-            eventIds = new HashMap<>();
+            eventIds = new ArrayList<>();
         }
-        if (eventIds.containsKey(userApi)) {
-            eventIds.get(userApi).remove(eventId);
-        }
+        eventIds.remove(eventId);
     }
 }
