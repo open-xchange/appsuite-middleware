@@ -118,7 +118,7 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
     public void testSingleEventAlarmTriggerTime() throws Exception {
         // Create an event tomorrow 12 o clock
 
-        Calendar cal = getUTCCalendar();
+        Calendar cal = DateTimeUtil.getUTCCalendar();
         cal.add(Calendar.DAY_OF_MONTH, 1);
 
         // Create an event with alarm
@@ -138,7 +138,7 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
     @Test
     public void testSingleEventAlarmTriggerTimeAfterUpdate() throws Exception {
         // Create an event tomorrow 12 o clock
-        Calendar cal = getUTCCalendar();
+        Calendar cal = DateTimeUtil.getUTCCalendar();
         cal.add(Calendar.DAY_OF_MONTH, 1);
 
         // Create an event with alarm
@@ -169,7 +169,7 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
     @Test
     public void testEventSeriesAlarmTriggerTime() throws Exception {
         // Create an event yesterday 12 o clock
-        Calendar cal = getUTCCalendar();
+        Calendar cal = DateTimeUtil.getUTCCalendar();
         cal.add(Calendar.DAY_OF_MONTH, -1);
 
         // Create an event with alarm
@@ -200,7 +200,7 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
          */
 
         // Create an event yesterday 12 o clock
-        Calendar cal = getUTCCalendar();
+        Calendar cal = DateTimeUtil.getUTCCalendar();
         cal.add(Calendar.DAY_OF_MONTH, -1);
 
         // Create an event with alarm
@@ -286,7 +286,7 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
          */
 
         // Create an event yesterday 12 o clock
-        Calendar cal = getUTCCalendar();
+        Calendar cal = DateTimeUtil.getUTCCalendar();
         cal.add(Calendar.DAY_OF_MONTH, -1);
 
         // Create an event with alarm and two attendees
@@ -525,7 +525,7 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
     @Test
     public void testPositiveDurationTrigger() throws ApiException, ParseException {
         // Create an event with an alarm with a positive duration
-        Calendar cal = getUTCCalendar();
+        Calendar cal = DateTimeUtil.getUTCCalendar();
         cal.add(Calendar.DAY_OF_MONTH, 1);
         DateTimeData startDate = DateTimeUtil.getDateTime(cal);
         EventData event = createSingleEventWithSingleAlarm("testPositiveDurationTrigger", startDate, "PT10M", RelatedEnum.START);
@@ -543,7 +543,7 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
     @Test
     public void testEndDateTrigger() throws ApiException, ParseException {
         // Create an event with an alarm related to the end date
-        Calendar cal = getUTCCalendar();
+        Calendar cal = DateTimeUtil.getUTCCalendar();
         cal.add(Calendar.DAY_OF_MONTH, 1);
         DateTimeData startDate = DateTimeUtil.getDateTime(cal);
         EventData event = createSingleEventWithSingleAlarm("testPositiveDurationTrigger", startDate, "-PT10M", RelatedEnum.END);

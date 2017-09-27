@@ -55,7 +55,6 @@ import java.text.ParseException;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 import com.openexchange.ajax.chronos.factory.AlarmFactory;
 import com.openexchange.ajax.chronos.util.AssertUtil;
@@ -83,6 +82,7 @@ import edu.emory.mathcs.backport.java.util.Collections;
  * {@link AbstractAlarmTriggerTest}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.0
  */
 public abstract class AbstractAlarmTriggerTest extends AbstractChronosTest {
@@ -265,21 +265,6 @@ public abstract class AbstractAlarmTriggerTest extends AbstractChronosTest {
      */
     protected AlarmTriggerData getAndCheckAlarmTrigger(int expected) throws ApiException {
         return getAndCheckAlarmTrigger(System.currentTimeMillis() + TimeUnit.DAYS.toMillis(2), expected, defaultUserApi.getChronosApi(), defaultUserApi.getSession());
-    }
-
-    /**
-     * Returns an {@link Calendar} object with time set to today 12 o clock and timezone set to 'utc'
-     * 
-     * @return The calendar
-     */
-    protected Calendar getUTCCalendar() {
-        Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-        cal.setTime(new Date());
-        cal.set(Calendar.HOUR_OF_DAY, 12);
-        cal.set(Calendar.MINUTE, 0);
-        cal.set(Calendar.SECOND, 0);
-        cal.set(Calendar.MILLISECOND, 0);
-        return cal;
     }
 
     /**

@@ -210,4 +210,19 @@ public final class DateTimeUtil {
         utcCalendar.set(Calendar.MILLISECOND, 0);
         return utcCalendar.getTime();
     }
+
+    /**
+     * Returns an {@link Calendar} object with time set to today 12 o clock and timezone set to 'utc'
+     * 
+     * @return The calendar
+     */
+    public static Calendar getUTCCalendar() {
+        Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+        cal.setTime(new Date());
+        cal.set(Calendar.HOUR_OF_DAY, 12);
+        cal.set(Calendar.MINUTE, 0);
+        cal.set(Calendar.SECOND, 0);
+        cal.set(Calendar.MILLISECOND, 0);
+        return cal;
+    }
 }

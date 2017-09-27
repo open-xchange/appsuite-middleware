@@ -81,7 +81,7 @@ public class TimezoneAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTe
     @SuppressWarnings("unchecked")
     @Test
     public void testTrigger() throws ApiException, ParseException {
-        Calendar start = getUTCCalendar();
+        Calendar start = DateTimeUtil.getUTCCalendar();
         start.add(Calendar.DAY_OF_MONTH, 1);
         DateTimeData startDate = DateTimeUtil.getDateTime(start);
 
@@ -132,7 +132,7 @@ public class TimezoneAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTe
     @SuppressWarnings("unchecked")
     @Test
     public void testTriggerWithPositiveDuration() throws ApiException, ParseException {
-        Calendar start = getUTCCalendar();
+        Calendar start = DateTimeUtil.getUTCCalendar();
         start.add(Calendar.DAY_OF_MONTH, 1);
         DateTimeData startDate = DateTimeUtil.getDateTime(start);
 
