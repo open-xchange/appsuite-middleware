@@ -59,7 +59,6 @@ import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Classification;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
-import com.openexchange.chronos.EventStatus;
 import com.openexchange.chronos.TimeTransparency;
 import com.openexchange.chronos.common.mapping.EventMapper;
 import com.openexchange.chronos.impl.AttendeeHelper;
@@ -178,14 +177,13 @@ public class CreatePerformer extends AbstractUpdatePerformer {
         Consistency.adjustAllDayDates(event);
         //        Consistency.setTimeZone(session, event, calendarUserId);
         /*
-         * classification, status, transparency, color, geo
+         * classification, transparency, color, geo
          */
         if (eventData.containsClassification() && null != eventData.getClassification()) {
             event.setClassification(Check.classificationIsValid(eventData.getClassification(), folder));
         } else {
             event.setClassification(Classification.PUBLIC);
         }
-        event.setStatus(eventData.containsStatus() && null != eventData.getStatus() ? eventData.getStatus() : EventStatus.CONFIRMED);
         event.setTransp(eventData.containsTransp() && null != eventData.getTransp() ? eventData.getTransp() : TimeTransparency.OPAQUE);
         event.setColor(eventData.containsColor() ? eventData.getColor() : null);
         if (eventData.containsGeo()) {
@@ -204,7 +202,7 @@ public class CreatePerformer extends AbstractUpdatePerformer {
         /*
          * copy over further (unchecked) event fields
          */
-        return EventMapper.getInstance().copy(eventData, event, EventField.SUMMARY, EventField.LOCATION, EventField.DESCRIPTION, EventField.CATEGORIES, EventField.FILENAME, EventField.URL, EventField.EXTENDED_PROPERTIES);
+        return EventMapper.getInstance().copy(eventData, event, EventField.SUMMARY, EventField.LOCATION, EventField.DESCRIPTION, EventField.CATEGORIES, EventField.FILENAME, EventField.URL, EventField.STATUS, EventField.EXTENDED_PROPERTIES);
     }
 
 }

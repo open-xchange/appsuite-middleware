@@ -93,31 +93,6 @@ public interface CalendarConfig {
     int getMinimumSearchPatternLength() throws OXException;
 
     /**
-     * Gets a value indicating whether the legacy <i>Appointment</i> stack should be used or not.
-     *
-     * @return <code>true</code> if the legacy stack should be used, <code>false</code>, otherwise
-     */
-    boolean isUseLegacyStack();
-
-    /**
-     * Gets a value indicating whether the storage should solely use the <i>legacy</i> database tables or not.
-     * <p/>
-     * This implicitly depends on {@link #isUseLegacyStack()}.
-     *
-     * @return <code>true</code> if the legacy storage should be used, <code>false</code>, otherwise
-     */
-    boolean isUseLegacyStorage();
-
-    /**
-     * Gets a value indicating whether data should be written to both the <i>legacy</i> and the new database tables or not.
-     * <p/>
-     * This implicitly depends on {@link #isUseLegacyStorage()}.
-     *
-     * @return <code>true</code> if data should also be written into the legacy storage, <code>false</code>, otherwise
-     */
-    boolean isReplayToLegacyStorage();
-
-    /**
      * Gets the configured limit for the maximum calculated occurrences when expanding event series.
      *
      * @return The recurrence calculation limit
