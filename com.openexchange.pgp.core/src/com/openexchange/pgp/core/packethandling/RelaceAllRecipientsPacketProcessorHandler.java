@@ -55,34 +55,46 @@ import java.util.List;
 import org.bouncycastle.bcpg.ContainedPacket;
 import org.bouncycastle.bcpg.Packet;
 import org.bouncycastle.bcpg.PublicKeyEncSessionPacket;
-import org.bouncycastle.openpgp.PGPException;
 import org.bouncycastle.openpgp.PGPPrivateKey;
 import org.bouncycastle.openpgp.PGPPublicKey;
-import org.bouncycastle.openpgp.operator.PGPKeyEncryptionMethodGenerator;
-import org.bouncycastle.openpgp.operator.bc.BcPublicKeyKeyEncryptionMethodGenerator;
 import com.openexchange.pgp.core.PGPSessionDecrypter;
+import com.openexchange.pgp.core.exceptions.PGPCoreExceptionCodes;
 
 /**
- * {@link AddRecipientPacketProcessorHandler} adds new recipients to a PGP Message without the need to re-encrypt the whole Message
+ * {@link RelaceAllRecipientsPacketProcessorHandler} Replaces all recipients with new list of recipients
  *
- * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
+ * @author <a href="mailto:greg.hill@open-xchange.com">Greg Hill</a>
  * @since v7.8.4
  */
-public class AddRecipientPacketProcessorHandler implements PacketProcessorHandler {
+public class RelaceAllRecipientsPacketProcessorHandler implements PacketProcessorHandler {
 
-    private final PGPPublicKey[] identitiesToAdd;
+    private final PGPPublicKey[] newIdentitiesToAdd;
+    private final SecretKeyForPacketService addingIdentityService;
     private final PGPPrivateKey addingIdentity;
     private boolean alreadyProcessed;
 
     /**
-     * Initializes a new {@link AddRecipientPacketProcessorHandler}.
+     * Initializes a new {@link RelaceAllRecipientsPacketProcessorHandler}.
      *
      * @param addingIdentity The key of the identity who want's to add other identities
-     * @param identitiesToAdd The keys of the identity which should be added to the PGP Message being able to decrypt it
+     * @param newIdentitiesToAdd The keys of the identitys which should be added to the PGP Message being able to decrypt it
      */
-    public AddRecipientPacketProcessorHandler(PGPPrivateKey addingIdentity, PGPPublicKey[] identitiesToAdd) {
+    public RelaceAllRecipientsPacketProcessorHandler(SecretKeyForPacketService addingIdentityService, PGPPublicKey[] newIdentitiesToAdd) {
+        this.addingIdentityService = addingIdentityService;
+        this.addingIdentity = null;
+        this.newIdentitiesToAdd = newIdentitiesToAdd;
+    }
+
+    /**
+     * Initializes a new {@link RelaceAllRecipientsPacketProcessorHandler}.
+     *
+     * @param addingIdentity The key of the identity who want's to add other identities
+     * @param newIdentitiesToAdd The keys of the identitys which should be added to the PGP Message being able to decrypt it
+     */
+    public RelaceAllRecipientsPacketProcessorHandler(PGPPrivateKey addingIdentity, PGPPublicKey[] newIdentitiesToAdd) {
         this.addingIdentity = addingIdentity;
-        this.identitiesToAdd = identitiesToAdd;
+        this.addingIdentityService = null;
+        this.newIdentitiesToAdd = newIdentitiesToAdd;
     }
 
     /*
@@ -93,14 +105,22 @@ public class AddRecipientPacketProcessorHandler implements PacketProcessorHandle
     @Override
     public PGPPacket[] handlePacket(PGPPacket packet) throws Exception {
         Packet rawPacket = packet.getBcPacket();
-        if (!alreadyProcessed && rawPacket instanceof PublicKeyEncSessionPacket) {
-            List<PGPPacket> ret = new ArrayList<PGPPacket>(Arrays.asList(new PGPPacket[] { packet /* keep the original packet */}));
+        // If first pass, add all needed new recipients to the sesion header
+        if (rawPacket instanceof PublicKeyEncSessionPacket) {
+            if (alreadyProcessed) return null;  // We only process the first EncSessionPacket, all the rest are removed
+            List<PGPPacket> ret = new ArrayList<PGPPacket>(Arrays.asList(new PGPPacket[] { }));
 
             //Decrypt the session data
-            byte[] symmetricSessionKey = new PGPSessionDecrypter().decryptSymmetricSessionKey((PublicKeyEncSessionPacket) rawPacket, addingIdentity);
+            PublicKeyEncSessionPacket encrPacket = (PublicKeyEncSessionPacket) rawPacket;
+            long keyId = encrPacket.getKeyID();
+            PGPPrivateKey pKey = addingIdentity == null ? addingIdentityService.getSecretKey(keyId) : addingIdentity;
+            if (pKey == null) {
+                throw PGPCoreExceptionCodes.PRIVATE_KEY_NOT_FOUND.create();
+            }
+            byte[] symmetricSessionKey = new PGPSessionDecrypter().decryptSymmetricSessionKey(encrPacket, pKey);
             try {
                 //Creating a new session packet for each new identity
-                for (PGPPublicKey identities : identitiesToAdd) {
+                for (PGPPublicKey identities : newIdentitiesToAdd) {
                     ContainedPacket newPacket = PacketUtil.createSessionPacketForIdentitiy(identities, symmetricSessionKey);
                     ret.add(new PGPPacket(newPacket, null));
                 }
@@ -110,10 +130,6 @@ public class AddRecipientPacketProcessorHandler implements PacketProcessorHandle
                     symmetricSessionKey[i] = 0x0;
                 }
             }
-
-            //also keeping the original recipient
-            ret.add(packet);
-
             //Mark as done;
             //because it could be possible that the PGP Message contains more than one PublicKeyEncSessionPacket and this handler is called multiple times
             alreadyProcessed = true;
