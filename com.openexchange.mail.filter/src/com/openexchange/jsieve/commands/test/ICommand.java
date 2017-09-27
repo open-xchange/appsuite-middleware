@@ -49,6 +49,8 @@
 
 package com.openexchange.jsieve.commands.test;
 
+import java.util.List;
+
 /**
  * {@link ICommand}
  *
@@ -58,15 +60,15 @@ public interface ICommand {
 
     /**
      * The name of the command
-     * 
+     *
      * @return The command name
      */
     String getCommandName();
 
     /**
      * The required sieve server capabilities
-     * 
+     *
      * @return The required capabilities
      */
-    String getRequired();
+    List<String> getRequired();
 }
