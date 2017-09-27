@@ -630,7 +630,10 @@ public class EventResource extends DAVObjectResource<Event> {
                 LOG.info("{}: PUT operation failed due to non-ignorable conflicts.", getUrl());
                 return new PreconditionException(e, DAVProtocol.CAL_NS.getURI(), "allowed-organizer-scheduling-object-change", getUrl(), HttpServletResponse.SC_FORBIDDEN);
             case "ICAL-0003":
-                return new PreconditionException(e, DAVProtocol.CAL_NS.getURI(), "valid-calendar-data", getUrl(), HttpServletResponse.SC_BAD_REQUEST);
+            case "ICAL-0004":
+            case "CAL-4221":
+            case "CAL-4229":
+                return new PreconditionException(e, DAVProtocol.CAL_NS.getURI(), "valid-calendar-data", getUrl(), HttpServletResponse.SC_FORBIDDEN);
             default:
                 return com.openexchange.dav.DAVProtocol.protocolException(getUrl(), e);
         }
