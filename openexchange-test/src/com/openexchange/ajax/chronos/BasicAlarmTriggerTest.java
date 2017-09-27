@@ -492,7 +492,7 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
             long offset = timeZone.getOffset(cal.getTimeInMillis());
 
             // Create an floating event with an alarm 3 days earlier
-            DateTimeData startTime = DateTimeUtil.incrementDateTimeData(null, cal.getTimeInMillis());
+            DateTimeData startTime = DateTimeUtil.getDateTime(null, cal.getTimeInMillis());
             ChronosCalendarResultResponse createEvent = defaultUserApi.getChronosApi().createEvent(defaultUserApi.getSession(), folderId, createSingleEventWithSingleAlarm("testFloatingEventAlarmTriggerTime", startTime, "-PT3D", RelatedEnum.START), false, false);
             EventData event = handleCreation(createEvent);
             getAndCheckEvent(event, 1);
