@@ -49,9 +49,13 @@
 
 package com.openexchange.ajax.chronos;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
@@ -63,7 +67,6 @@ import org.junit.runner.RunWith;
 import org.junit.runners.BlockJUnit4ClassRunner;
 import com.openexchange.ajax.chronos.factory.EventFactory;
 import com.openexchange.ajax.chronos.manager.ChronosApiException;
-import com.openexchange.ajax.chronos.manager.EventManager;
 import com.openexchange.ajax.chronos.util.AssertUtil;
 import com.openexchange.ajax.chronos.util.DateTimeUtil;
 import com.openexchange.configuration.asset.Asset;
@@ -84,27 +87,11 @@ import com.openexchange.testing.httpclient.models.UpdatesResult;
 @RunWith(BlockJUnit4ClassRunner.class)
 public class BasicSingleEventTest extends AbstractChronosTest {
 
-    private String folderId;
-
-    private EventManager eventManager;
-
     /**
      * Initialises a new {@link BasicSingleEventTest}.
      */
     public BasicSingleEventTest() {
         super();
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.chronos.AbstractChronosTest#setUp()
-     */
-    @Override
-    public void setUp() throws Exception {
-        super.setUp();
-        folderId = getDefaultFolder();
-        eventManager = new EventManager(defaultUserApi, folderId);
     }
 
     /**
@@ -245,5 +232,23 @@ public class BasicSingleEventTest extends AbstractChronosTest {
         expectedEventData = eventManager.updateEventWithAttachment(actualEventData, asset);
         actualEventData = eventManager.getEvent(expectedEventData.getId());
         AssertUtil.assertEventsEqual(expectedEventData, actualEventData);
+    }
+
+    /**
+     * Tests the retrieval of an attachment from an event
+     */
+    @Test
+    public void testGetAttaachment() throws Exception {
+        AssetManager assetManager = new AssetManager();
+        Asset asset = assetManager.getRandomAsset(AssetType.jpg);
+
+        Path path = Paths.get(asset.getAbsolutePath());
+        byte[] expectedAttachmentData = Files.readAllBytes(path);
+
+        EventData expectedEventData = eventManager.createEventWithAttachment(EventFactory.createSingleEventWithAttachment(defaultUserApi.getCalUser(), testUser.getLogin(), "testUpdateSingleWithAttachment", asset), asset);
+        assertEquals("The amount of attachments is not correct", 1, expectedEventData.getAttachments().size());
+
+        byte[] actualAttachmentData = eventManager.getAttachment(expectedEventData.getId(), expectedEventData.getAttachments().get(0).getManagedId());
+        assertArrayEquals("The attachment binary data does not match", expectedAttachmentData, actualAttachmentData);
     }
 }

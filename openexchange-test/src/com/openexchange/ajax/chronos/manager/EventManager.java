@@ -96,6 +96,17 @@ public class EventManager extends AbstractManager {
         this.defaultFolder = defaultFolder;
     }
 
+    public void cleanUp() {
+        for (UserApi userApi : eventIds.keySet()) {
+            try {
+                userApi.getChronosApi().deleteEvent(userApi.getSession(), System.currentTimeMillis(), eventIds.get(userApi));
+            } catch (Exception e) {
+                System.err.println("Could not clean up the events for user " + userApi.getCalUser() + ": " + e.getMessage());
+                e.printStackTrace();
+            }
+        }
+    }
+
     /**
      * Creates an event and does not ignore conflicts
      * 
@@ -151,11 +162,12 @@ public class EventManager extends AbstractManager {
     }
 
     /**
+     * Get an event
      * 
-     * @param eventId
-     * @param expectException
-     * @return
-     * @throws ApiException
+     * @param eventId The {@link EventId}
+     * @param expectedException flag to indicate that an exception is expected
+     * @return the {@link EventData}
+     * @throws ApiException if an API error is occurred
      * @throws ChronosApiException if a Chronos API error is occurred
      */
     public EventData getEvent(String eventId, boolean expectException) throws ApiException, ChronosApiException {
@@ -167,6 +179,20 @@ public class EventManager extends AbstractManager {
         assertNull(eventResponse.getError(), eventResponse.getError());
         assertNotNull(eventResponse.getData());
         return eventResponse.getData();
+    }
+
+    /**
+     * Retrieves the attachment of the specified event
+     * 
+     * @param eventId The event identifier
+     * @param attachmentId The attachment's identifier
+     * @return The binary data of the attachment
+     * @throws ApiException if an API error is occurred
+     */
+    public byte[] getAttachment(String eventId, int attachmentId) throws ApiException {
+        byte[] eventAttachment = userApi.getChronosApi().getEventAttachment(userApi.getSession(), eventId, defaultFolder, attachmentId);
+        assertNotNull(eventAttachment);
+        return eventAttachment;
     }
 
     /**

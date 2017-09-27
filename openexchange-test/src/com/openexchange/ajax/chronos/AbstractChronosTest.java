@@ -58,6 +58,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
+import com.openexchange.ajax.chronos.manager.EventManager;
 import com.openexchange.ajax.framework.AbstractAPIClientSession;
 import com.openexchange.exception.OXException;
 import com.openexchange.testing.httpclient.invoker.ApiClient;
@@ -90,6 +91,8 @@ public class AbstractChronosTest extends AbstractAPIClientSession {
 
     protected UserApi defaultUserApi;
     protected ChronosApi chronosApi;
+    protected EventManager eventManager;
+    protected String folderId;
 
     /**
      * Initialises a new {@link AbstractChronosTest}.
@@ -110,6 +113,8 @@ public class AbstractChronosTest extends AbstractAPIClientSession {
         rememberClient(client);
         defaultUserApi = new UserApi(client, testUser);
         chronosApi = defaultUserApi.getChronosApi();
+        folderId = getDefaultFolder();
+        eventManager = new EventManager(defaultUserApi, folderId);
     }
 
     /*
@@ -134,6 +139,9 @@ public class AbstractChronosTest extends AbstractAPIClientSession {
                 api.getFoldersApi().deleteFolders(api.getSession(), folderToDelete.get(api), "0", System.currentTimeMillis(), "event", true, true, false);
             }
         }
+
+        // Clean-up event manager
+        eventManager.cleanUp();
 
         super.tearDown();
 
