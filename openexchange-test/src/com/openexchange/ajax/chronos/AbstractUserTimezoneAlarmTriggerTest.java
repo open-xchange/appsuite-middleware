@@ -71,7 +71,7 @@ public abstract class AbstractUserTimezoneAlarmTriggerTest extends AbstractAlarm
 
     @Parameters(name = "TimeZone={0}")
     public static Iterable<Object[]> params() {
-        List<Object[]> timeZones = new ArrayList<>(2);
+        List<Object[]> timeZones = new ArrayList<>(3);
         timeZones.add(new Object[] { TimeZone.getTimeZone("UTC") });
         timeZones.add(new Object[] { TimeZone.getTimeZone("Europe/Berlin") });
         timeZones.add(new Object[] { TimeZone.getTimeZone("America/New_York") });
