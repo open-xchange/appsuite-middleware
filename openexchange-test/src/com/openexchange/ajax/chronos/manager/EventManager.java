@@ -235,6 +235,7 @@ public class EventManager extends AbstractManager {
     public void deleteEvent(EventId eventId) throws ApiException {
         ChronosCalendarResultResponse deleteResponse = userApi.getChronosApi().deleteEvent(userApi.getSession(), System.currentTimeMillis(), Collections.singletonList(eventId));
         assertNull(deleteResponse.getErrorDesc(), deleteResponse.getError());
+        forgetEventId(userApi, eventId);
     }
 
     /**
@@ -330,4 +331,18 @@ public class EventManager extends AbstractManager {
         eventIds.get(userApi).add(eventId);
     }
 
+    /**
+     * Removes the specified {@link EventId} for the specified user from the cache
+     * 
+     * @param userApi The {@link UserApi}
+     * @param eventId The {@link EventId}
+     */
+    protected void forgetEventId(UserApi userApi, EventId eventId) {
+        if (eventIds == null) {
+            eventIds = new HashMap<>();
+        }
+        if (eventIds.containsKey(userApi)) {
+            eventIds.get(userApi).remove(eventId);
+        }
+    }
 }
