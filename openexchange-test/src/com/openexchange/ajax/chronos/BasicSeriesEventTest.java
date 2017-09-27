@@ -231,6 +231,7 @@ public class BasicSeriesEventTest extends AbstractChronosTest {
         DateTimeData nextWeek = DateTimeUtil.getZuluDateTime(DateTimeUtil.incrementDateTimeData(TimeZone.getTimeZone("UTC"), date, 7).getTime());
 
         EventData initialEvent = createSeriesEvent("testUpdateSeriesOccurence");
+        //eventManager.createEvent(initialEvent);
         ChronosCalendarResultResponse createEvent = defaultUserApi.getChronosApi().createEvent(defaultUserApi.getSession(), folderId, initialEvent, false, false);
         assertNull(createEvent.getError(), createEvent.getError());
         assertNotNull(createEvent.getData());

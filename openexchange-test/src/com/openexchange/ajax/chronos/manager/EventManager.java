@@ -94,6 +94,7 @@ public class EventManager extends AbstractManager {
         super();
         this.userApi = userApi;
         this.defaultFolder = defaultFolder;
+        eventIds = new HashMap<>();
     }
 
     public void cleanUp() {
