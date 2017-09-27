@@ -58,8 +58,8 @@ import java.util.List;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 import com.openexchange.ajax.chronos.factory.AlarmFactory;
+import com.openexchange.ajax.chronos.util.AssertUtil;
 import com.openexchange.ajax.chronos.util.DateTimeUtil;
-import com.openexchange.ajax.chronos.util.EventUtil;
 import com.openexchange.testing.httpclient.invoker.ApiClient;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.Alarm;
@@ -214,7 +214,7 @@ public abstract class AbstractAlarmTriggerTest extends AbstractChronosTest {
     protected EventData getAndCheckEvent(EventData event, int alarmSize) throws ApiException {
         EventResponse eventResponse = defaultUserApi.getChronosApi().getEvent(defaultUserApi.getSession(), event.getId(), folderId, null, null);
         EventData getEvent = checkResponse(eventResponse.getError(), eventResponse.getErrorDesc(), eventResponse.getData());
-        EventUtil.compare(event, getEvent, true);
+        AssertUtil.assertEventsEqual(event, getEvent);
         assertNotNull(getEvent.getAlarms());
         assertEquals(alarmSize, getEvent.getAlarms().size());
         this.setLastTimestamp(eventResponse.getTimestamp());

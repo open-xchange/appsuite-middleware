@@ -57,8 +57,8 @@ import java.util.List;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.BlockJUnit4ClassRunner;
+import com.openexchange.ajax.chronos.util.AssertUtil;
 import com.openexchange.ajax.chronos.util.DateTimeUtil;
-import com.openexchange.ajax.chronos.util.EventUtil;
 import com.openexchange.testing.httpclient.models.Alarm;
 import com.openexchange.testing.httpclient.models.Attendee;
 import com.openexchange.testing.httpclient.models.Attendee.CuTypeEnum;
@@ -146,7 +146,7 @@ public class BasicAlarmTest extends AbstractChronosTest {
         EventResponse eventResponse = defaultUserApi.getChronosApi().getEvent(defaultUserApi.getSession(), event.getId(), folderId, null, null);
         assertNull(eventResponse.getError(), createEvent.getError());
         assertNotNull(eventResponse.getData());
-        EventUtil.compare(event, eventResponse.getData(), true);
+        AssertUtil.assertEventsEqual(event, eventResponse.getData());
         assertNotNull(eventResponse.getData().getAlarms());
         assertEquals(1, eventResponse.getData().getAlarms().size());
     }
@@ -165,7 +165,7 @@ public class BasicAlarmTest extends AbstractChronosTest {
         EventResponse eventResponse = defaultUserApi.getChronosApi().getEvent(defaultUserApi.getSession(), event.getId(), folderId, null, null);
         assertNull(eventResponse.getError(), createEvent.getError());
         assertNotNull(eventResponse.getData());
-        EventUtil.compare(event, eventResponse.getData(), true);
+        AssertUtil.assertEventsEqual(event, eventResponse.getData());
         assertNotNull(eventResponse.getData().getAlarms());
         assertEquals(0, eventResponse.getData().getAlarms().size());
 
@@ -205,7 +205,7 @@ public class BasicAlarmTest extends AbstractChronosTest {
         EventResponse eventResponse = defaultUserApi.getChronosApi().getEvent(defaultUserApi.getSession(), event.getId(), folderId, null, null);
         assertNull(eventResponse.getError(), eventResponse.getErrorDesc());
         assertNotNull(eventResponse.getData());
-        EventUtil.compare(event, eventResponse.getData(), true);
+        AssertUtil.assertEventsEqual(event, eventResponse.getData());
         assertNotNull(eventResponse.getData().getAlarms());
         assertEquals(1, eventResponse.getData().getAlarms().size());
 
@@ -247,7 +247,7 @@ public class BasicAlarmTest extends AbstractChronosTest {
         EventResponse eventResponse = defaultUserApi.getChronosApi().getEvent(defaultUserApi.getSession(), event.getId(), folderId, null, null);
         assertNull(eventResponse.getError(), createEvent.getError());
         assertNotNull(eventResponse.getData());
-        EventUtil.compare(event, eventResponse.getData(), true);
+        AssertUtil.assertEventsEqual(event, eventResponse.getData());
         assertNotNull(eventResponse.getData().getAlarms());
         assertEquals(0, eventResponse.getData().getAlarms().size());
 

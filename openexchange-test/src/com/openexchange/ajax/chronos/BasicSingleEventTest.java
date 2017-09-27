@@ -64,8 +64,8 @@ import org.junit.runners.BlockJUnit4ClassRunner;
 import com.openexchange.ajax.chronos.factory.EventFactory;
 import com.openexchange.ajax.chronos.manager.ChronosApiException;
 import com.openexchange.ajax.chronos.manager.EventManager;
+import com.openexchange.ajax.chronos.util.AssertUtil;
 import com.openexchange.ajax.chronos.util.DateTimeUtil;
-import com.openexchange.ajax.chronos.util.EventUtil;
 import com.openexchange.configuration.asset.Asset;
 import com.openexchange.configuration.asset.AssetManager;
 import com.openexchange.configuration.asset.AssetType;
@@ -114,7 +114,7 @@ public class BasicSingleEventTest extends AbstractChronosTest {
     public void testCreateSingle() throws Exception {
         EventData expectedEventData = eventManager.createEvent(EventFactory.createSingleTwoHourEvent(defaultUserApi.getCalUser(), testUser.getLogin(), "testCreateSingle"));
         EventData actualEventData = eventManager.getEvent(expectedEventData.getId());
-        EventUtil.compare(expectedEventData, actualEventData, true);
+        AssertUtil.assertEventsEqual(expectedEventData, actualEventData);
     }
 
     /**
@@ -150,10 +150,10 @@ public class BasicSingleEventTest extends AbstractChronosTest {
 
         EventData updatedEvent = eventManager.updateEvent(event);
 
-        EventUtil.compare(initialEvent, updatedEvent, false);
+        AssertUtil.assertEventsNotEqual(initialEvent, updatedEvent);
         event.setLastModified(updatedEvent.getLastModified());
         event.setSequence(updatedEvent.getSequence());
-        EventUtil.compare(event, updatedEvent, true);
+        AssertUtil.assertEventsEqual(event, updatedEvent);
     }
 
     /**
@@ -173,22 +173,22 @@ public class BasicSingleEventTest extends AbstractChronosTest {
 
         // Get event directly
         EventData actualEvent = eventManager.getEvent(event.getId());
-        EventUtil.compare(event, actualEvent, true);
+        AssertUtil.assertEventsEqual(event, actualEvent);
 
         // Get all events
         List<EventData> events = eventManager.getAllEvents(today, tomorrow);
         assertEquals(1, events.size());
-        EventUtil.compare(event, events.get(0), true);
+        AssertUtil.assertEventsEqual(event, events.get(0));
 
         // Get updates
         UpdatesResult updatesResult = eventManager.getUpdates(date);
         assertEquals(1, updatesResult.getNewAndModified().size());
-        EventUtil.compare(event, updatesResult.getNewAndModified().get(0), true);
+        AssertUtil.assertEventsEqual(event, updatesResult.getNewAndModified().get(0));
 
         // List events
         events = eventManager.listEvents(Collections.singletonList(eventId));
         assertEquals(1, events.size());
-        EventUtil.compare(event, events.get(0), true);
+        AssertUtil.assertEventsEqual(event, events.get(0));
 
     }
 
@@ -205,7 +205,7 @@ public class BasicSingleEventTest extends AbstractChronosTest {
 
         EventData expectedEventData = eventManager.createEvent(EventFactory.createSingleEvent(defaultUserApi.getCalUser(), testUser.getLogin(), "testCreateSingle", DateTimeUtil.getDateTime(start), DateTimeUtil.getDateTime(end)));
         EventData actualEventData = eventManager.getEvent(expectedEventData.getId());
-        EventUtil.compare(expectedEventData, actualEventData, true);
+        AssertUtil.assertEventsEqual(expectedEventData, actualEventData);
     }
 
     ////////////////////////////////// Attachment Tests ///////////////////////////////////
@@ -222,7 +222,7 @@ public class BasicSingleEventTest extends AbstractChronosTest {
         assertEquals("The amount of attachments is not correct", 1, expectedEventData.getAttachments().size());
 
         EventData actualEventData = eventManager.getEvent(expectedEventData.getId());
-        EventUtil.compare(expectedEventData, actualEventData, true);
+        AssertUtil.assertEventsEqual(expectedEventData, actualEventData);
     }
 
     /**
@@ -237,16 +237,13 @@ public class BasicSingleEventTest extends AbstractChronosTest {
         assertEquals("The amount of attachments is not correct", 1, expectedEventData.getAttachments().size());
 
         EventData actualEventData = eventManager.getEvent(expectedEventData.getId());
-        EventUtil.compare(expectedEventData, actualEventData, true);
+        AssertUtil.assertEventsEqual(expectedEventData, actualEventData);
 
         asset = assetManager.getRandomAsset(AssetType.png);
         expectedEventData.getAttachments().add(EventFactory.createAttachment(asset));
 
-        actualEventData = eventManager.updateEventWithAttachment(expectedEventData, asset);
-
-        EventUtil.compare(expectedEventData, actualEventData, false);
-        expectedEventData.setLastModified(actualEventData.getLastModified());
-        expectedEventData.setSequence(actualEventData.getSequence());
-        EventUtil.compare(expectedEventData, actualEventData, true);
+        expectedEventData = eventManager.updateEventWithAttachment(actualEventData, asset);
+        actualEventData = eventManager.getEvent(expectedEventData.getId());
+        AssertUtil.assertEventsEqual(expectedEventData, actualEventData);
     }
 }

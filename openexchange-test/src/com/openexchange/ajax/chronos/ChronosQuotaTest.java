@@ -49,11 +49,11 @@
 
 package com.openexchange.ajax.chronos;
 
-import static org.junit.Assert.assertThat;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.nullValue;
+import static org.junit.Assert.assertThat;
 import java.rmi.Naming;
 import java.util.HashMap;
 import java.util.List;
@@ -69,13 +69,13 @@ import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.configuration.AJAXConfig.Property;
 import com.openexchange.testing.httpclient.invoker.ApiClient;
 import com.openexchange.testing.httpclient.models.Attendee;
-import com.openexchange.testing.httpclient.models.DateTimeData;
-import com.openexchange.testing.httpclient.models.EventData;
-import com.openexchange.testing.httpclient.models.LoginResponse;
-import com.openexchange.testing.httpclient.models.QuotasResponse;
 import com.openexchange.testing.httpclient.models.Attendee.CuTypeEnum;
 import com.openexchange.testing.httpclient.models.ChronosCalendarResultResponse;
+import com.openexchange.testing.httpclient.models.DateTimeData;
+import com.openexchange.testing.httpclient.models.EventData;
 import com.openexchange.testing.httpclient.models.EventData.TranspEnum;
+import com.openexchange.testing.httpclient.models.LoginResponse;
+import com.openexchange.testing.httpclient.models.QuotasResponse;
 import com.openexchange.testing.httpclient.modules.QuotaApi;
 import edu.emory.mathcs.backport.java.util.Collections;
 

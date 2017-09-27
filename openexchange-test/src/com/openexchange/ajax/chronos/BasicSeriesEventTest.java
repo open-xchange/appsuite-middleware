@@ -60,8 +60,8 @@ import java.util.TimeZone;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.BlockJUnit4ClassRunner;
+import com.openexchange.ajax.chronos.util.AssertUtil;
 import com.openexchange.ajax.chronos.util.DateTimeUtil;
-import com.openexchange.ajax.chronos.util.EventUtil;
 import com.openexchange.testing.httpclient.models.Attendee;
 import com.openexchange.testing.httpclient.models.Attendee.CuTypeEnum;
 import com.openexchange.testing.httpclient.models.ChronosCalendarResultResponse;
@@ -124,7 +124,7 @@ public class BasicSeriesEventTest extends AbstractChronosTest {
         EventResponse eventResponse = defaultUserApi.getChronosApi().getEvent(defaultUserApi.getSession(), event.getId(), folderId, null, null);
         assertNull(eventResponse.getError(), createEvent.getError());
         assertNotNull(eventResponse.getData());
-        EventUtil.compare(event, eventResponse.getData(), true);
+        AssertUtil.assertEventsEqual(event, eventResponse.getData());
     }
 
     @SuppressWarnings("unchecked")
@@ -216,10 +216,10 @@ public class BasicSeriesEventTest extends AbstractChronosTest {
 
         List<EventData> updates = updateResponse.getData().getUpdated();
         assertTrue(updates.size() == 1);
-        EventUtil.compare(initialEvent, updates.get(0), false);
+        AssertUtil.assertEventsNotEqual(initialEvent, updates.get(0));
         event.setLastModified(updates.get(0).getLastModified());
         event.setSequence(updates.get(0).getSequence());
-        EventUtil.compare(event, updates.get(0), true);
+        AssertUtil.assertEventsEqual(event, updates.get(0));
 
     }
 
@@ -301,7 +301,7 @@ public class BasicSeriesEventTest extends AbstractChronosTest {
         EventResponse eventResponse = defaultUserApi.getChronosApi().getEvent(defaultUserApi.getSession(), event.getId(), folderId, null, null);
         assertNull(eventResponse.getError(), eventResponse.getError());
         assertNotNull(eventResponse.getData());
-        EventUtil.compare(event, eventResponse.getData(), true);
+        AssertUtil.assertEventsEqual(event, eventResponse.getData());
 
         // Get all events
         EventsResponse eventsResponse = defaultUserApi.getChronosApi().getAllEvents(defaultUserApi.getSession(), today.getValue(), nextWeek.getValue(), folderId, null, null, null, true, true);
@@ -357,7 +357,7 @@ public class BasicSeriesEventTest extends AbstractChronosTest {
         EventResponse eventResponse = defaultUserApi.getChronosApi().getEvent(defaultUserApi.getSession(), event.getId(), folderId, null, null);
         assertNull(eventResponse.getError(), eventResponse.getError());
         assertNotNull(eventResponse.getData());
-        EventUtil.compare(event, eventResponse.getData(), true);
+        AssertUtil.assertEventsEqual(event, eventResponse.getData());
 
         // Get all events
         EventsResponse eventsResponse = defaultUserApi.getChronosApi().getAllEvents(defaultUserApi.getSession(), today.getValue(), nextWeek.getValue(), folderId, null, null, null, true, true);
