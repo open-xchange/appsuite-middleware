@@ -59,7 +59,6 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import com.openexchange.ajax.chronos.UserApi;
-import com.openexchange.ajax.chronos.factory.EventFactory;
 import com.openexchange.ajax.chronos.util.DateTimeUtil;
 import com.openexchange.configuration.asset.Asset;
 import com.openexchange.testing.httpclient.invoker.ApiException;
@@ -112,7 +111,7 @@ public class EventManager extends AbstractManager {
      * @throws ApiException if an API error is occurred
      */
     public EventData createEvent(EventData eventData) throws ApiException {
-        ChronosCalendarResultResponse createEvent = userApi.getChronosApi().createEvent(userApi.getSession(), defaultFolder, EventFactory.createSingleTwoHourEvent(userApi.getCalUser(), userApi.getUser().getLogin(), "testCreateSingle"), false, false);
+        ChronosCalendarResultResponse createEvent = userApi.getChronosApi().createEvent(userApi.getSession(), defaultFolder, eventData, false, false);
         EventData event = handleCreation(createEvent);
         return event;
     }
