@@ -49,13 +49,19 @@
 
 package com.openexchange.chronos.storage.rdb;
 
+import static com.openexchange.osgi.Tools.requireService;
+import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.service.EntityResolver;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.chronos.storage.CalendarStorageFactory;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.provider.DBTransactionPolicy;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.update.UpdateStatus;
+import com.openexchange.groupware.update.Updater;
+import com.openexchange.server.ServiceLookup;
 
 /**
  * {@link CalendarStorage}
@@ -65,15 +71,20 @@ import com.openexchange.groupware.contexts.Context;
  */
 public class RdbCalendarStorageFactory implements CalendarStorageFactory {
 
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(RdbCalendarStorageFactory.class);
+
+    private final ServiceLookup services;
     private final DBProvider defaultDbProvider;
 
     /**
      * Initializes a new {@link RdbCalendarStorageFactory}.
      *
+     * @param services A service lookup reference
      * @param defaultDbProvider The default database provider to use
      */
-    public RdbCalendarStorageFactory(DBProvider defaultDbProvider) {
+    public RdbCalendarStorageFactory(ServiceLookup services, DBProvider defaultDbProvider) {
         super();
+        this.services = services;
         this.defaultDbProvider = defaultDbProvider;
     }
 
@@ -84,7 +95,28 @@ public class RdbCalendarStorageFactory implements CalendarStorageFactory {
 
     @Override
     public CalendarStorage create(Context context, int accountId, EntityResolver entityResolver, DBProvider dbProvider, DBTransactionPolicy txPolicy) throws OXException {
-        return new RdbCalendarStorage(context, accountId, entityResolver, dbProvider, txPolicy);
+        if (CalendarAccount.DEFAULT_ACCOUNT.getAccountId() == accountId) {
+            /*
+             * choose target storage for default account based update status and configuration overrides
+             */
+            ConfigurationService configService = requireService(ConfigurationService.class, services);
+            if (configService.getBoolProperty("com.openexchange.chronos.useLegacyStorage", false)) {
+                LOG.debug("Using 'legacy' calendar storage for default account '0' (overridden via configuration).");
+                return new com.openexchange.chronos.storage.rdb.legacy.RdbCalendarStorage(context, entityResolver, dbProvider, txPolicy);
+            }
+            UpdateStatus updateStatus = Updater.getInstance().getStatus(context.getContextId());
+            if (false == updateStatus.isExecutedSuccessfully("com.openexchange.chronos.storage.rdb.migration.ChronosStorageMigrationTask")) {
+                LOG.debug("ChronosStorageMigrationTask not executed successfully, falling back to 'legacy' calendar storage for account '0'.");
+                return new com.openexchange.chronos.storage.rdb.legacy.RdbCalendarStorage(context, entityResolver, dbProvider, txPolicy);
+            }
+            if (configService.getBoolProperty("com.openexchange.chronos.replayToLegacyStorage", true)) {
+                LOG.debug("Using 'replaying' calendar storage for default account '0'.");
+                CalendarStorage legacyStorage = new com.openexchange.chronos.storage.rdb.legacy.RdbCalendarStorage(context, entityResolver, dbProvider, txPolicy);
+                CalendarStorage storage = new com.openexchange.chronos.storage.rdb.RdbCalendarStorage(context, accountId, entityResolver, dbProvider, txPolicy);
+                return new com.openexchange.chronos.storage.rdb.replaying.RdbCalendarStorage(storage, legacyStorage);
+            }
+        }
+        return new com.openexchange.chronos.storage.rdb.RdbCalendarStorage(context, accountId, entityResolver, dbProvider, txPolicy);
     }
 
 }
