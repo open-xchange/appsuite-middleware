@@ -100,7 +100,7 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
     public void testCreateSingleAlarmTrigger() throws Exception {
         // Create an event with alarm
         long currentTime = System.currentTimeMillis();
-        EventData event = eventManager.createEvent(EventFactory.createSingleEventWithSingleAlarm(defaultUserApi.getCalUser(), testUser.getLogin(), "testSingleAlarmTrigger", AlarmFactory.createDisplayAlarm("-PT15M")));
+        EventData event = eventManager.createEvent(EventFactory.createSingleEventWithSingleAlarm(defaultUserApi.getCalUser(), testUser.getLogin(), "testSingleAlarmTrigger", DateTimeUtil.getDateTime(System.currentTimeMillis() + TimeUnit.DAYS.toMillis(1)), DateTimeUtil.getDateTime(System.currentTimeMillis() + TimeUnit.DAYS.toMillis(1) + TimeUnit.HOURS.toMillis(2)), AlarmFactory.createDisplayAlarm("-PT15M")));
         getAndAssertAlarms(event, 1);
 
         // Test alarm/until action with different time-slots
