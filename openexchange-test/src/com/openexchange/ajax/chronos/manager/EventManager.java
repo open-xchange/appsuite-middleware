@@ -276,6 +276,18 @@ public class EventManager extends AbstractManager {
     }
 
     /**
+     * Deletes the event with the specified identifier
+     * 
+     * @param eventId The {@link EventId}
+     * @throws ApiException if an API error is occurred
+     */
+    public void deleteEvent(EventId eventId, long timestamp) throws ApiException {
+        ChronosCalendarResultResponse deleteResponse = userApi.getChronosApi().deleteEvent(userApi.getSession(), getLastTimeStamp(), Collections.singletonList(eventId));
+        assertNull(deleteResponse.getErrorDesc(), deleteResponse.getError());
+        forgetEventId(userApi, eventId);
+    }
+
+    /**
      * Updates the specified event and ignores conflicts
      * 
      * @param eventData The data of the event

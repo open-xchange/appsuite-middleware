@@ -215,11 +215,20 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
         // Create an event yesterday 12 o clock
         Calendar cal = DateTimeUtil.getUTCCalendar();
         cal.add(Calendar.DAY_OF_MONTH, -1);
+        
+        DateTimeData startDate = DateTimeUtil.getDateTime(cal);
+        DateTimeData endDate = DateTimeUtil.incrementDateTimeData(startDate, TimeUnit.HOURS.toMillis(1));
 
         // Create an event with alarm
-        EventData event = createSeriesEvent("testSeriesAlarmTriggerTimeRoundtrip", cal);
-        getAndAssertAlarms(event, 1);
+        EventData toCreate = EventFactory.createSeriesEvent(defaultUserApi.getCalUser(), testUser.getLogin(), "testSeriesAlarmTriggerTimeRoundtrip", startDate, endDate, 4);
+        toCreate.setAlarms(Collections.singletonList(AlarmFactory.createDisplayAlarm("-PT15M")));
+        
+//        EventData event = createSeriesEvent("testSeriesAlarmTriggerTimeRoundtrip", cal);
+//        getAndAssertAlarms(event, 1);
 
+        EventData event = eventManager.createEvent(toCreate);
+        getAndAssertAlarms(event, 1);
+        
         // Check if next trigger is at correct time
         long currentTime = System.currentTimeMillis();
         AlarmTriggerData triggers = getAndCheckAlarmTrigger(1); // The created alarm
@@ -242,7 +251,7 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
         /*
          * 2. create an exception for the event recurrence of the next trigger by shifting the start time by one hour
          */
-        CalendarResult updateResult = eventManager.shiftEvent(event.getId(), alarmTrigger.getRecurrenceId(), event, eventTime, TimeUnit.HOURS, 1, getLastTimestamp());
+        CalendarResult updateResult = eventManager.shiftEvent(event.getId(), alarmTrigger.getRecurrenceId(), event, eventTime, TimeUnit.HOURS, 1, eventManager.getLastTimeStamp());
         assertNotNull(updateResult.getCreated());
         assertEquals(1, updateResult.getCreated().size());
         EventData exceptionEvent = updateResult.getCreated().get(0);
@@ -269,8 +278,9 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
         toDelete.setFolderId(folderId);
         toDelete.setId(exceptionEvent.getId());
         List<EventId> singletonList = Collections.singletonList(toDelete);
-        ChronosCalendarResultResponse deleteResponse = defaultUserApi.getChronosApi().deleteEvent(defaultUserApi.getSession(), getLastTimestamp(), singletonList);
-        checkResponse(deleteResponse.getError(), deleteResponse.getErrorDesc(), deleteResponse.getData());
+        eventManager.deleteEvent(toDelete);
+        //ChronosCalendarResultResponse deleteResponse = defaultUserApi.getChronosApi().deleteEvent(defaultUserApi.getSession(), getLastTimestamp(), singletonList);
+        //checkResponse(deleteResponse.getError(), deleteResponse.getErrorDesc(), deleteResponse.getData());
 
         // Check the normal alarm
         triggers = getAndCheckAlarmTrigger(1); // Only the alarm of the series
@@ -283,8 +293,9 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
         toDelete.setFolderId(folderId);
         toDelete.setId(event.getId());
         singletonList = Collections.singletonList(toDelete);
-        deleteResponse = defaultUserApi.getChronosApi().deleteEvent(defaultUserApi.getSession(), deleteResponse.getTimestamp(), singletonList);
-        checkResponse(deleteResponse.getError(), deleteResponse.getErrorDesc(), deleteResponse.getData());
+        eventManager.deleteEvent(toDelete);
+        //deleteResponse = defaultUserApi.getChronosApi().deleteEvent(defaultUserApi.getSession(), deleteResponse.getTimestamp(), singletonList);
+        //checkResponse(deleteResponse.getError(), deleteResponse.getErrorDesc(), deleteResponse.getData());
 
         // Check the normal alarm
         getAndCheckAlarmTrigger(0); // No upcoming triggers
@@ -353,7 +364,7 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
         body.attendee(attendee2);
 
         body.addAlarmsItem(AlarmFactory.createAlarm("-PT20M", RelatedEnum.START));
-        ChronosCalendarResultResponse updateAttendee = user2.getChronosApi().updateAttendee(user2.getSession(), folderId2, eventU2.getId(), getLastTimestamp(), body, null, false, true);
+        ChronosCalendarResultResponse updateAttendee = user2.getChronosApi().updateAttendee(user2.getSession(), folderId2, eventU2.getId(), eventManager.getLastTimeStamp(), body, null, false, true);
         checkResponse(updateAttendee.getError(), updateAttendee.getErrorDesc(), updateAttendee.getData());
         setLastTimestamp(updateAttendee.getTimestamp());
 
@@ -364,7 +375,7 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
         /*
          * 3. create an exception for the event recurrence of the next trigger by shifting the start time by one hour
          */
-        CalendarResult updateResult = eventManager.shiftEvent(event.getId(), alarmTrigger.getRecurrenceId(), event, eventTime, TimeUnit.HOURS, 1, getLastTimestamp());
+        CalendarResult updateResult = eventManager.shiftEvent(event.getId(), alarmTrigger.getRecurrenceId(), event, eventTime, TimeUnit.HOURS, 1, eventManager.getLastTimeStamp());
         assertNotNull(updateResult.getCreated());
         assertEquals(1, updateResult.getCreated().size());
         EventData exceptionEvent = updateResult.getCreated().get(0);
@@ -399,7 +410,7 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
         } else {
             removed = attendees.remove(0);
         }
-        ChronosCalendarResultResponse updateEventResponse = defaultUserApi.getChronosApi().updateEvent(defaultUserApi.getSession(), folderId, exceptionEvent.getId(), exceptionEvent, getLastTimestamp(), null, true, false);
+        ChronosCalendarResultResponse updateEventResponse = defaultUserApi.getChronosApi().updateEvent(defaultUserApi.getSession(), folderId, exceptionEvent.getId(), exceptionEvent, eventManager.getLastTimeStamp(), null, true, false);
         checkResponse(updateEventResponse.getError(), updateEventResponse.getErrorDesc(), updateEventResponse.getData());
         setLastTimestamp(updateEventResponse.getTimestamp());
 
