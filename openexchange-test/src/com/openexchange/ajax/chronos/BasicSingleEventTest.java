@@ -237,7 +237,7 @@ public class BasicSingleEventTest extends AbstractChronosTest {
      * Tests the retrieval of an attachment from an event
      */
     @Test
-    public void testGetAttachment() throws Exception {
+    public void testGetAttaachment() throws Exception {
         Asset asset = assetManager.getRandomAsset(AssetType.jpg);
 
         Path path = Paths.get(asset.getAbsolutePath());
