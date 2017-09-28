@@ -57,6 +57,7 @@ import com.openexchange.ajax.tools.JSONCoercion;
 import com.openexchange.chronos.account.json.CalendarAccountFields;
 import com.openexchange.chronos.account.json.ChronosAccountActionFactory;
 import com.openexchange.chronos.provider.CalendarAccount;
+import com.openexchange.chronos.provider.DefaultCalendarAccount;
 import com.openexchange.chronos.provider.account.CalendarAccountService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
@@ -98,7 +99,9 @@ public class GetAction extends AbstractAccountAction implements CalendarAccountF
         try {
             response.put(ID, account.getAccountId());
             response.put(PROVIDER, account.getProviderId());
-            response.put(TIMESTAMP, account.getLastModified().getTime());
+            if (DefaultCalendarAccount.DEFAULT_ACCOUNT.getAccountId() != account.getAccountId()) {
+                response.put(TIMESTAMP, account.getLastModified().getTime());
+            }
             response.put(CONFIGURATION, JSONCoercion.coerceToJSON(account.getConfiguration()));
         } catch (JSONException e) {
             throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);

@@ -51,13 +51,13 @@ package com.openexchange.chronos.account.json.actions;
 
 import org.json.JSONArray;
 import org.json.JSONException;
-import com.openexchange.ajax.AJAXServlet;
+import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.chronos.account.json.CalendarAccountFields;
 import com.openexchange.chronos.account.json.ChronosAccountActionFactory;
 import com.openexchange.chronos.provider.account.CalendarAccountService;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.Strings;
 import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -71,7 +71,7 @@ import com.openexchange.tools.session.ServerSession;
  * @since v7.10.0
  */
 @OAuthAction(ChronosAccountActionFactory.OAUTH_WRITE_SCOPE)
-public class DeleteAction extends AbstractAccountAction {
+public class DeleteAction extends AbstractAccountAction implements CalendarAccountFields {
 
     /**
      * Initializes a new {@link DeleteAction}.
@@ -84,10 +84,6 @@ public class DeleteAction extends AbstractAccountAction {
 
     @Override
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
-        String timestamp = requestData.getParameter(AJAXServlet.PARAMETER_TIMESTAMP);
-        if (Strings.isEmpty(timestamp)) {
-            throw AjaxExceptionCodes.MISSING_PARAMETER.create(AJAXServlet.PARAMETER_TIMESTAMP);
-        }
         JSONArray data = requestData.getData(JSONArray.class);
         if (null == data) {
             throw AjaxExceptionCodes.MISSING_REQUEST_BODY.create();
@@ -95,7 +91,10 @@ public class DeleteAction extends AbstractAccountAction {
         CalendarAccountService service = getService(CalendarAccountService.class);
         try {
             for (int i = 0; i < data.length(); i++) {
-                service.deleteAccount(session, data.getInt(i), Long.parseLong(timestamp));
+                JSONObject obj = data.getJSONObject(i);
+                String id = obj.getString(ID);
+                String timestamp = obj.getString(TIMESTAMP);
+                service.deleteAccount(session, Integer.parseInt(id), Long.parseLong(timestamp));
             }
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
