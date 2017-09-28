@@ -229,9 +229,12 @@ public class BasicSingleEventTest extends AbstractChronosTest {
         AssertUtil.assertEventsEqual(expectedEventData, actualEventData);
 
         asset = assetManager.getRandomAsset(AssetType.png);
-        expectedEventData.getAttachments().add(EventFactory.createAttachment(asset));
+        actualEventData.getAttachments().get(0).setManagedId(actualEventData.getAttachments().get(0).getManagedId());
+        actualEventData.getAttachments().add(EventFactory.createAttachment(asset));
 
         expectedEventData = eventManager.updateEventWithAttachment(actualEventData, asset);
+        assertEquals("The amount of attachments is not correct", 2, expectedEventData.getAttachments().size());
+
         actualEventData = eventManager.getEvent(expectedEventData.getId());
         AssertUtil.assertEventsEqual(expectedEventData, actualEventData);
     }
