@@ -356,7 +356,7 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
          * construct primary alarm from reminder minutes
          */
         Alarm primaryAlarm = new Alarm(new Trigger("-PT" + reminderData.reminderMinutes + 'M'), AlarmAction.DISPLAY);
-        //        primaryAlarm.setDescription("Alarm");
+        primaryAlarm.setDescription("Reminder");
         primaryAlarm.setUid(new UUID(context.getContextId(), reminderData.id).toString().toUpperCase());
         /*
          * assume alarm is not yet acknowledged if next trigger still matches the primary alarm's regular trigger time
