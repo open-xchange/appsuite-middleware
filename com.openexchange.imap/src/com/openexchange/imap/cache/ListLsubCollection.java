@@ -838,6 +838,10 @@ final class ListLsubCollection implements Serializable {
     private static final String ATTRIBUTE_SENT = "\\sent";
     private static final String ATTRIBUTE_TRASH = "\\trash";
     private static final String ATTRIBUTE_ARCHIVE = "\\archive";
+    /**
+     * New mailbox attribute added by the "LIST-EXTENDED" extension.
+     */
+    private static final String ATTRIBUTE_NON_EXISTENT = "\\nonexistent";
 
     private static final String[] ATTRIBUTES_SPECIAL_USE = { ATTRIBUTE_DRAFTS, ATTRIBUTE_JUNK, ATTRIBUTE_SENT, ATTRIBUTE_TRASH };
 
@@ -2034,6 +2038,11 @@ final class ListLsubCollection implements Serializable {
         }
 
         @Override
+        public boolean existsAndIsNotNonExistent() {
+            return false;
+        }
+
+        @Override
         public ListLsubEntry getParent() {
             return null;
         }
@@ -2145,6 +2154,8 @@ final class ListLsubCollection implements Serializable {
 
         private final String fullName;
 
+        private boolean nonExistent;
+
         private Set<String> attributes;
 
         private char separator;
@@ -2175,6 +2186,7 @@ final class ListLsubCollection implements Serializable {
             super();
             this.fullName = checkFullName(fullName, separator);
             this.attributes = attributes;
+            this.nonExistent = null != attributes && attributes.contains(ATTRIBUTE_NON_EXISTENT);
             this.separator = separator;
             this.changeState = changeState;
             this.hasInferiors = hasInferiors;
@@ -2196,6 +2208,7 @@ final class ListLsubCollection implements Serializable {
             super();
             fullName = newEntry.fullName;
             attributes = newEntry.attributes;
+            nonExistent = newEntry.nonExistent;
             canOpen = newEntry.canOpen;
             changeState = newEntry.changeState;
             hasInferiors = newEntry.hasInferiors;
@@ -2213,6 +2226,7 @@ final class ListLsubCollection implements Serializable {
                 return;
             }
             attributes = newEntry.attributes;
+            nonExistent = newEntry.nonExistent;
             canOpen = newEntry.canOpen;
             changeState = newEntry.changeState;
             hasInferiors = newEntry.hasInferiors;
@@ -2412,6 +2426,12 @@ final class ListLsubCollection implements Serializable {
         @Override
         public boolean exists() {
             return true;
+        }
+
+        @Override
+        public boolean existsAndIsNotNonExistent() {
+            // This instance is known to exist, therefore only check for \NonExistent attribute
+            return !nonExistent;
         }
 
         protected void setSubscribed(final boolean subscribed) {
