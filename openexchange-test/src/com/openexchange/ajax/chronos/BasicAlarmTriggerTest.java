@@ -539,11 +539,12 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
         // Create an event with an alarm with a positive duration
         Calendar cal = DateTimeUtil.getUTCCalendar();
         cal.add(Calendar.DAY_OF_MONTH, 1);
-        DateTimeData startDate = DateTimeUtil.getDateTime(cal);
-        EventData event = createSingleEventWithSingleAlarm("testPositiveDurationTrigger", startDate, "PT10M", RelatedEnum.START);
-        ChronosCalendarResultResponse createEvent = defaultUserApi.getChronosApi().createEvent(defaultUserApi.getSession(), folderId, event, false, false);
-        event = handleCreation(createEvent);
 
+        DateTimeData startDate = DateTimeUtil.getDateTime(cal);
+        DateTimeData endDate = DateTimeUtil.incrementDateTimeData(startDate, TimeUnit.HOURS.toMillis(1));
+
+        EventData toCreate = EventFactory.createSingleEventWithSingleAlarm(defaultUserApi.getCalUser(), testUser.getLogin(), "testPositiveDurationTrigger", startDate, endDate, AlarmFactory.createAlarm("PT10M", RelatedEnum.START));
+        EventData event = eventManager.createEvent(toCreate);
         getAndAssertAlarms(event, 1);
 
         // Get alarms within the next two days
