@@ -133,6 +133,24 @@ public class EventManager extends AbstractManager {
     }
 
     /**
+     * Creates an event and attaches the specified {@link Asset}s
+     * 
+     * @param eventData The {@link EventData}
+     * @param assets The {@link Asset}s to attach
+     * @return The created {@link EventData}
+     * @throws ApiException if an API error is occurred
+     */
+    public EventData createEventWithAttachments(EventData eventData, List<Asset> assets) throws ApiException {
+        List<File> files = new ArrayList<>();
+        for (Asset asset : assets) {
+            files.add(new File(asset.getAbsolutePath()));
+        }
+        ChronosCalendarResultResponse createEvent = userApi.getEnhancedChronosApi().createEventWithAttachments(userApi.getSession(), defaultFolder, eventData.toJson(), files, false, false);
+        EventData event = handleCreation(createEvent);
+        return event;
+    }
+
+    /**
      * Update the specified event and attach the specified {@link Asset}
      * 
      * @param eventData The event

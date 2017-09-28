@@ -60,6 +60,7 @@ import java.util.Map;
 import java.util.TimeZone;
 import com.openexchange.ajax.chronos.manager.EventManager;
 import com.openexchange.ajax.framework.AbstractAPIClientSession;
+import com.openexchange.configuration.asset.AssetManager;
 import com.openexchange.exception.OXException;
 import com.openexchange.testing.httpclient.invoker.ApiClient;
 import com.openexchange.testing.httpclient.invoker.ApiException;
@@ -92,6 +93,7 @@ public class AbstractChronosTest extends AbstractAPIClientSession {
     protected UserApi defaultUserApi;
     protected ChronosApi chronosApi;
     protected EventManager eventManager;
+    protected AssetManager assetManager;
     protected String folderId;
 
     /**
@@ -114,6 +116,7 @@ public class AbstractChronosTest extends AbstractAPIClientSession {
         defaultUserApi = new UserApi(client, testUser);
         chronosApi = defaultUserApi.getChronosApi();
         folderId = getDefaultFolder();
+        assetManager = new AssetManager();
         eventManager = new EventManager(defaultUserApi, folderId);
     }
 

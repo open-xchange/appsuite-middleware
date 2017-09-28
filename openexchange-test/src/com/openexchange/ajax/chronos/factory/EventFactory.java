@@ -51,6 +51,7 @@ package com.openexchange.ajax.chronos.factory;
 
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.List;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 import com.openexchange.ajax.chronos.util.DateTimeUtil;
@@ -106,8 +107,14 @@ public final class EventFactory {
      * @return The {@link EventData}
      */
     public static EventData createSingleEventWithAttachment(int userId, String emailAddress, String summary, Asset asset) {
+        return createSingleEventWithAttachments(userId, emailAddress, summary, Collections.singletonList(asset));
+    }
+
+    public static EventData createSingleEventWithAttachments(int userId, String emailAddress, String summary, List<Asset> assets) {
         EventData eventData = createSingleTwoHourEvent(userId, emailAddress, summary);
-        eventData.addAttachmentsItem(createAttachment(asset));
+        for (Asset asset : assets) {
+            eventData.addAttachmentsItem(createAttachment(asset));
+        }
         return eventData;
     }
 

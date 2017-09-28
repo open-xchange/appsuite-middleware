@@ -56,6 +56,7 @@ import static org.junit.Assert.fail;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
@@ -70,8 +71,8 @@ import com.openexchange.ajax.chronos.manager.ChronosApiException;
 import com.openexchange.ajax.chronos.util.AssertUtil;
 import com.openexchange.ajax.chronos.util.DateTimeUtil;
 import com.openexchange.configuration.asset.Asset;
-import com.openexchange.configuration.asset.AssetManager;
 import com.openexchange.configuration.asset.AssetType;
+import com.openexchange.testing.httpclient.models.ChronosAttachment;
 import com.openexchange.testing.httpclient.models.EventData;
 import com.openexchange.testing.httpclient.models.EventId;
 import com.openexchange.testing.httpclient.models.UpdatesResult;
@@ -202,7 +203,6 @@ public class BasicSingleEventTest extends AbstractChronosTest {
      */
     @Test
     public void testCreateSingleWithAttachment() throws Exception {
-        AssetManager assetManager = new AssetManager();
         Asset asset = assetManager.getRandomAsset(AssetType.jpg);
 
         EventData expectedEventData = eventManager.createEventWithAttachment(EventFactory.createSingleEventWithAttachment(defaultUserApi.getCalUser(), testUser.getLogin(), "testCreateSingleWithAttachment", asset), asset);
@@ -217,7 +217,6 @@ public class BasicSingleEventTest extends AbstractChronosTest {
      */
     @Test
     public void testUpdateSingleWithAttachment() throws Exception {
-        AssetManager assetManager = new AssetManager();
         Asset asset = assetManager.getRandomAsset(AssetType.jpg);
 
         EventData expectedEventData = eventManager.createEventWithAttachment(EventFactory.createSingleEventWithAttachment(defaultUserApi.getCalUser(), testUser.getLogin(), "testUpdateSingleWithAttachment", asset), asset);
@@ -239,7 +238,6 @@ public class BasicSingleEventTest extends AbstractChronosTest {
      */
     @Test
     public void testGetAttaachment() throws Exception {
-        AssetManager assetManager = new AssetManager();
         Asset asset = assetManager.getRandomAsset(AssetType.jpg);
 
         Path path = Paths.get(asset.getAbsolutePath());
@@ -250,5 +248,39 @@ public class BasicSingleEventTest extends AbstractChronosTest {
 
         byte[] actualAttachmentData = eventManager.getAttachment(expectedEventData.getId(), expectedEventData.getAttachments().get(0).getManagedId());
         assertArrayEquals("The attachment binary data does not match", expectedAttachmentData, actualAttachmentData);
+    }
+
+    /**
+     * Tests the creation of an event with two attachments and the deletion of one of them
+     * during an update call
+     */
+    @Test
+    public void testUpdateSingleWithAttachmentsDeleteOne() throws Exception {
+        Asset assetA = assetManager.getRandomAsset(AssetType.jpg);
+        Asset assetB = assetManager.getRandomAsset(AssetType.png);
+        List<Asset> assets = new ArrayList<>(2);
+        assets.add(assetA);
+        assets.add(assetB);
+
+        EventData expectedEventData = eventManager.createEventWithAttachments(EventFactory.createSingleEventWithAttachments(defaultUserApi.getCalUser(), testUser.getLogin(), "testUpdateSingleWithAttachmentsDeleteOne", assets), assets);
+        assertEquals("The amount of attachments is not correct", 2, expectedEventData.getAttachments().size());
+
+        EventData actualEventData = eventManager.getEvent(expectedEventData.getId());
+        AssertUtil.assertEventsEqual(expectedEventData, actualEventData);
+
+        // Set the managed id for the retained attachment
+        ChronosAttachment retainedAttachment = EventFactory.createAttachment(assetA);
+        retainedAttachment.setManagedId(actualEventData.getAttachments().get(0).getManagedId());
+        // Create the delta
+        EventData updateData = new EventData();
+        updateData.setId(actualEventData.getId());
+        updateData.setAttachments(Collections.singletonList(retainedAttachment));
+
+        // Update the event
+        actualEventData = eventManager.updateEvent(updateData);
+        // Get...
+        expectedEventData = eventManager.getEvent(actualEventData.getId());
+        // ...and assert
+        AssertUtil.assertEventsEqual(expectedEventData, actualEventData);
     }
 }

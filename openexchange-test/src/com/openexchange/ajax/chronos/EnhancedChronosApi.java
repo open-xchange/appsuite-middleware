@@ -51,6 +51,7 @@ package com.openexchange.ajax.chronos;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -89,10 +90,9 @@ public class EnhancedChronosApi extends ChronosApi {
     /**
      * Copied from the original {@link #createEventWithAttachments(String, String, String, File, Boolean, Boolean)}. The request is enhanced
      * with the API parameter<code>plainJson</code> to signal the response renderer to return a plain json object instead of the regular
-     * HTML response.
+     * HTML response. It also takes multiple files as parameters
      */
-    @Override
-    public ChronosCalendarResultResponse createEventWithAttachments(String session, String folder, String json0, File file0, Boolean ignoreConflicts, Boolean sendInternalNotifications) throws ApiException {
+    public ChronosCalendarResultResponse createEventWithAttachments(String session, String folder, String json0, List<File> files, Boolean ignoreConflicts, Boolean sendInternalNotifications) throws ApiException {
         Object localVarPostBody = null;
 
         // verify the required parameter 'session' is set
@@ -111,7 +111,7 @@ public class EnhancedChronosApi extends ChronosApi {
         }
 
         // verify the required parameter 'file0' is set
-        if (file0 == null) {
+        if (files == null) {
             throw new ApiException(400, "Missing the required parameter 'file0' when calling createEventWithAttachments");
         }
 
@@ -132,8 +132,11 @@ public class EnhancedChronosApi extends ChronosApi {
         if (json0 != null) {
             localVarFormParams.put("json_0", json0);
         }
-        if (file0 != null) {
-            localVarFormParams.put("file_0", file0);
+        int index = 0;
+        for (File file : files) {
+            if (file != null) {
+                localVarFormParams.put("file_" + index++, file);
+            }
         }
 
         final String[] localVarAccepts = { "application/json" };
@@ -146,6 +149,16 @@ public class EnhancedChronosApi extends ChronosApi {
 
         GenericType<ChronosCalendarResultResponse> localVarReturnType = new GenericType<ChronosCalendarResultResponse>() {};
         return getApiClient().invokeAPI(localVarPath, "POST", localVarQueryParams, localVarPostBody, localVarHeaderParams, localVarFormParams, localVarAccept, localVarContentType, localVarAuthNames, localVarReturnType);
+    }
+
+    /**
+     * Copied from the original {@link #createEventWithAttachments(String, String, String, File, Boolean, Boolean)}. The request is enhanced
+     * with the API parameter<code>plainJson</code> to signal the response renderer to return a plain json object instead of the regular
+     * HTML response.
+     */
+    @Override
+    public ChronosCalendarResultResponse createEventWithAttachments(String session, String folder, String json0, File file0, Boolean ignoreConflicts, Boolean sendInternalNotifications) throws ApiException {
+        return createEventWithAttachments(session, folder, json0, Collections.singletonList(file0), ignoreConflicts, sendInternalNotifications);
     }
 
     /**
