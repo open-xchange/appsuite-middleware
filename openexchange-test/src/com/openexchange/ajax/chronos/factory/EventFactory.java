@@ -91,6 +91,7 @@ public final class EventFactory {
         singleEvent.setTransp(TranspEnum.OPAQUE);
         singleEvent.setAllDay(false);
         singleEvent.setSummary(summary);
+        singleEvent.setDescription(summary);
 
         return singleEvent;
     }
