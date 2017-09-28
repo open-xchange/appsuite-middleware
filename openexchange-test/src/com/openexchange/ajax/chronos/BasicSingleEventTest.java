@@ -51,6 +51,7 @@ package com.openexchange.ajax.chronos;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 import java.nio.file.Files;
@@ -138,7 +139,9 @@ public class BasicSingleEventTest extends AbstractChronosTest {
 
         EventData updatedEvent = eventManager.updateEvent(event);
 
-        AssertUtil.assertEventsNotEqual(initialEvent, updatedEvent);
+        assertNotEquals("The timestamp matches", event.getLastModified(), updatedEvent.getLastModified());
+        assertNotEquals("The sequence matches", event.getSequence(), updatedEvent.getSequence());
+
         event.setLastModified(updatedEvent.getLastModified());
         event.setSequence(updatedEvent.getSequence());
         AssertUtil.assertEventsEqual(event, updatedEvent);
