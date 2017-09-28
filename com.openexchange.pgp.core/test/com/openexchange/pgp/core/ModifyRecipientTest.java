@@ -91,6 +91,8 @@ public class ModifyRecipientTest extends AbstractPGPTest {
     private Identity identity2;
     private Identity identity3;
 
+    private static final int TEST_DATA_LENGTH = 4096;
+
     @Rule
     public ExpectedException thrown = ExpectedException.none();
 
@@ -312,7 +314,7 @@ public class ModifyRecipientTest extends AbstractPGPTest {
      */
     @Test
     public void testReplacingRecipientsShouldBeDecryptable() throws Exception {
-        encryptThenReplaceThenDecrypt(generateTestData(), Arrays.asList(identity, identity2), Arrays.asList(identity, identity3), Arrays.asList(identity, identity3), Arrays.asList(identity2));
+        encryptThenReplaceThenDecrypt(generateTestData(TEST_DATA_LENGTH), Arrays.asList(identity, identity2), Arrays.asList(identity, identity3), Arrays.asList(identity, identity3), Arrays.asList(identity2));
     }
     /**
      * Test that removing a recipient from a PGP message does not affect the possibility for other recipients to decrypt the message
@@ -321,7 +323,7 @@ public class ModifyRecipientTest extends AbstractPGPTest {
      */
     @Test
     public void testRemovingRecipientShouldNotAffectDecryptionForOtherRecipient() throws Exception {
-        encryptThenRemoveThenDecrypt(generateTestData(), Arrays.asList(identity, identity2), Arrays.asList(identity2), Arrays.asList(identity));
+        encryptThenRemoveThenDecrypt(generateTestData(TEST_DATA_LENGTH), Arrays.asList(identity, identity2), Arrays.asList(identity2), Arrays.asList(identity));
     }
 
     /**
@@ -331,7 +333,7 @@ public class ModifyRecipientTest extends AbstractPGPTest {
      */
     @Test
     public void testNotRemovingAnyRecipientsShouldNotAffectDecryption() throws Exception {
-        encryptThenRemoveThenDecrypt(generateTestData(), Arrays.asList(identity, identity2), null, Arrays.asList(identity, identity2));
+        encryptThenRemoveThenDecrypt(generateTestData(TEST_DATA_LENGTH), Arrays.asList(identity, identity2), null, Arrays.asList(identity, identity2));
     }
 
     /**
@@ -343,7 +345,7 @@ public class ModifyRecipientTest extends AbstractPGPTest {
     public void testRemovingRecipientShouldResultInAnErrorWhenDecrypting() throws Exception {
         thrown.expect(OXException.class);
         thrown.expectMessage("The private key for the identity" /* expected error message substring */);
-        encryptThenRemoveThenDecrypt(generateTestData(), Arrays.asList(identity, identity2), Arrays.asList(identity), Arrays.asList(identity));
+        encryptThenRemoveThenDecrypt(generateTestData(TEST_DATA_LENGTH), Arrays.asList(identity, identity2), Arrays.asList(identity), Arrays.asList(identity));
     }
 
     /**
@@ -353,6 +355,6 @@ public class ModifyRecipientTest extends AbstractPGPTest {
      */
     @Test
     public void testAddedRecipientShouldBeAbleToDecrypt() throws Exception {
-        encryptThenAddThenDecrypt(generateTestData(), Arrays.asList(identity), Arrays.asList(identity2), Arrays.asList(identity, identity2));
+        encryptThenAddThenDecrypt(generateTestData(TEST_DATA_LENGTH), Arrays.asList(identity), Arrays.asList(identity2), Arrays.asList(identity, identity2));
     }
 }
