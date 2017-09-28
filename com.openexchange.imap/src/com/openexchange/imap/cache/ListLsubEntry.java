@@ -82,6 +82,13 @@ public interface ListLsubEntry {
     boolean exists();
 
     /**
+     * Indicates whether associated IMAP folder exists and does not hold <code>"\NonExistent"</code> attribute.
+     *
+     * @return <code>true</code> if associated IMAP folder <i>really</i> exists; otherwise <code>false</code>
+     */
+    boolean existsAndIsNotNonExistent();
+
+    /**
      * Gets this LIST/LSUB entry's parent or <code>null</code> if no parent exists.
      *
      * @return The parent or <code>null</code> for no parent
