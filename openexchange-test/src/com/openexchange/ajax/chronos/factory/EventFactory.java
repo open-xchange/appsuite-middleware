@@ -96,6 +96,36 @@ public final class EventFactory {
     }
 
     /**
+     * Creates a simple daily two hour event with the specified amount of occurrences
+     * 
+     * @param userId The user identifier
+     * @param emailAddress The e-mail address of the user
+     * @param summary The summary of the event
+     * @return The series {@link EventData}
+     */
+    public static EventData createSeriesEvent(int userId, String emailAddress, String summary, int occurences) {
+        EventData seriesEvent = createSingleTwoHourEvent(userId, emailAddress, summary);
+        seriesEvent.setRrule("FREQ=DAILY;COUNT=" + occurences);
+        seriesEvent.setAllDay(false);
+        return seriesEvent;
+    }
+
+    /**
+     * Creates a simple daily two hour event with the specified amount of occurrences
+     * 
+     * @param userId The user identifier
+     * @param emailAddress The e-mail address of the user
+     * @param summary The summary of the event
+     * @return The series {@link EventData}
+     */
+    public static EventData createSeriesEvent(int userId, String emailAddress, String summary, DateTimeData startDate, DateTimeData endDate, int occurences) {
+        EventData seriesEvent = createSingleEvent(userId, emailAddress, summary, startDate, endDate);
+        seriesEvent.setRrule("FREQ=DAILY;COUNT=" + occurences);
+        seriesEvent.setAllDay(false);
+        return seriesEvent;
+    }
+
+    /**
      * Creates a single event with the specified start and end time and with the specified attachment.
      * 
      * @param userId The user identifier

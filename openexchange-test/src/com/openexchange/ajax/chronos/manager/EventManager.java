@@ -220,7 +220,7 @@ public class EventManager extends AbstractManager {
         event.setEndDate(DateTimeUtil.getDateTime(endTime));
 
         ChronosCalendarResultResponse updateEvent = userApi.getChronosApi().updateEvent(userApi.getSession(), defaultFolder, eventId, event, timestamp, recurrence, false, false);
-        this.setLastTimestamp(updateEvent.getTimestamp());
+        lastTimeStamp = updateEvent.getTimestamp();
         return checkResponse(updateEvent.getError(), updateEvent.getErrorDesc(), updateEvent.getData());
     }
 
@@ -342,7 +342,7 @@ public class EventManager extends AbstractManager {
         eventId.setId(event.getId());
         eventId.setFolderId(event.getFolder());
         rememberEventId(userApi, eventId);
-        this.setLastTimestamp(createEvent.getTimestamp());
+        lastTimeStamp = createEvent.getTimestamp();
 
         return event;
     }
@@ -359,24 +359,6 @@ public class EventManager extends AbstractManager {
         assertTrue(updates.size() == 1);
 
         return updates.get(0);
-    }
-
-    /**
-     * Sets the last timestamp
-     * 
-     * @param timestamp the last timestamp to set
-     */
-    public void setLastTimestamp(long timestamp) {
-        this.lastTimeStamp = timestamp;
-    }
-
-    /**
-     * Gets the last timestamp
-     * 
-     * @return the last timestamp
-     */
-    public long getLastTimestamp() {
-        return lastTimeStamp;
     }
 
     /**
@@ -403,5 +385,23 @@ public class EventManager extends AbstractManager {
             eventIds = new ArrayList<>();
         }
         eventIds.remove(eventId);
+    }
+
+    /**
+     * Gets the lastTimeStamp
+     *
+     * @return The lastTimeStamp
+     */
+    public long getLastTimeStamp() {
+        return lastTimeStamp;
+    }
+
+    /**
+     * Sets the lastTimeStamp
+     *
+     * @param lastTimeStamp The lastTimeStamp to set
+     */
+    public void setLastTimeStamp(long lastTimeStamp) {
+        this.lastTimeStamp = lastTimeStamp;
     }
 }
