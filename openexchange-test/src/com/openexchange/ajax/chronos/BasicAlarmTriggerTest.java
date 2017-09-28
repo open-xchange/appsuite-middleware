@@ -54,10 +54,6 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import java.text.ParseException;
-import java.time.Instant;
-import java.time.zone.ZoneOffsetTransition;
-import java.time.zone.ZoneRules;
-import java.time.zone.ZoneRulesProvider;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -502,7 +498,7 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
 
             // Set floating date one day after the summer time change
             int currentYear = Calendar.getInstance().get(Calendar.YEAR);
-            Calendar cal = getDaylightSavingDate(timeZone, currentYear + 1);
+            Calendar cal = DateTimeUtil.getDaylightSavingDate(timeZone, currentYear + 1);
             cal.add(Calendar.DAY_OF_MONTH, 3);
 
             long offset = timeZone.getOffset(cal.getTimeInMillis());
@@ -561,11 +557,13 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
         // Create an event with an alarm related to the end date
         Calendar cal = DateTimeUtil.getUTCCalendar();
         cal.add(Calendar.DAY_OF_MONTH, 1);
-        DateTimeData startDate = DateTimeUtil.getDateTime(cal);
-        EventData event = createSingleEventWithSingleAlarm("testPositiveDurationTrigger", startDate, "-PT10M", RelatedEnum.END);
-        ChronosCalendarResultResponse createEvent = defaultUserApi.getChronosApi().createEvent(defaultUserApi.getSession(), folderId, event, false, false);
-        event = handleCreation(createEvent);
 
+        DateTimeData startDate = DateTimeUtil.getDateTime(cal);
+        DateTimeData endDate = DateTimeUtil.incrementDateTimeData(startDate, TimeUnit.HOURS.toMillis(1));
+
+        // Create an event with alarm
+        EventData toCreate = EventFactory.createSingleEventWithSingleAlarm(defaultUserApi.getCalUser(), testUser.getLogin(), "testPositiveDurationTrigger", startDate, endDate, AlarmFactory.createAlarm("-PT10M", RelatedEnum.END));
+        EventData event = eventManager.createEvent(toCreate);
         getAndAssertAlarms(event, 1);
 
         // Get alarms within the next two days
@@ -573,14 +571,4 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
         AlarmTrigger alarmTrigger = triggers.get(0);
         checkAlarmTime(alarmTrigger, event.getId(), cal.getTimeInMillis() + TimeUnit.HOURS.toMillis(1) - TimeUnit.MINUTES.toMillis(10));
     }
-
-    private Calendar getDaylightSavingDate(TimeZone tz, int year) {
-        Calendar cal = Calendar.getInstance(tz);
-        cal.set(year, 1, 1, 0, 0);
-        ZoneRules rules = ZoneRulesProvider.getRules(tz.getID(), true);
-        ZoneOffsetTransition nextTransition = rules.nextTransition(Instant.ofEpochMilli(cal.getTimeInMillis()));
-        cal.setTimeInMillis(nextTransition.getInstant().getEpochSecond() * 1000);
-        return cal;
-    }
-
 }

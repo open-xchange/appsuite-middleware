@@ -51,6 +51,10 @@ package com.openexchange.ajax.chronos.util;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.zone.ZoneOffsetTransition;
+import java.time.zone.ZoneRules;
+import java.time.zone.ZoneRulesProvider;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -223,6 +227,24 @@ public final class DateTimeUtil {
         cal.set(Calendar.MINUTE, 0);
         cal.set(Calendar.SECOND, 0);
         cal.set(Calendar.MILLISECOND, 0);
+        return cal;
+    }
+
+    /**
+     * Gets the daylight saving date from the specified {@link TimeZone} and the specified year
+     * 
+     * @param tz The {@link TimeZone}
+     * @param year The year
+     * @return The {@link Calendar} with the daylight saving date
+     */
+    public static Calendar getDaylightSavingDate(TimeZone tz, int year) {
+        Calendar cal = Calendar.getInstance(tz);
+        cal.set(year, 1, 1, 0, 0);
+
+        ZoneRules rules = ZoneRulesProvider.getRules(tz.getID(), true);
+        ZoneOffsetTransition nextTransition = rules.nextTransition(Instant.ofEpochMilli(cal.getTimeInMillis()));
+
+        cal.setTimeInMillis(nextTransition.getInstant().getEpochSecond() * 1000);
         return cal;
     }
 }
