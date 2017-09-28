@@ -57,6 +57,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import com.openexchange.ajax.chronos.factory.AlarmFactory;
+import com.openexchange.ajax.chronos.manager.EventManager;
 import com.openexchange.ajax.chronos.util.DateTimeUtil;
 import com.openexchange.testing.httpclient.invoker.ApiClient;
 import com.openexchange.testing.httpclient.invoker.ApiException;
@@ -85,6 +86,7 @@ public abstract class AbstractAlarmTriggerTest extends AbstractAlarmTest {
     protected String folderId;
     protected String folderId2;
     protected UserApi user2;
+    protected EventManager eventManager2;
 
     /**
      * Initializes a new {@link AbstractAlarmTriggerTest}.
@@ -152,6 +154,7 @@ public abstract class AbstractAlarmTriggerTest extends AbstractAlarmTest {
         rememberClient(client);
         user2 = new UserApi(client, testUser2);
         folderId2 = getDefaultFolder(user2.getSession(), client);
+        eventManager2 = new EventManager(user2, getDefaultFolder(user2.getSession(), client));
     }
 
     @Override

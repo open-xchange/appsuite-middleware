@@ -66,6 +66,7 @@ import com.openexchange.configuration.asset.Asset;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.AlarmTriggerData;
 import com.openexchange.testing.httpclient.models.AlarmTriggerResponse;
+import com.openexchange.testing.httpclient.models.AttendeeAndAlarm;
 import com.openexchange.testing.httpclient.models.CalendarResult;
 import com.openexchange.testing.httpclient.models.ChronosCalendarResultResponse;
 import com.openexchange.testing.httpclient.models.ChronosUpdatesResponse;
@@ -337,6 +338,19 @@ public class EventManager extends AbstractManager {
     public AlarmTriggerData getAlarmTrigger(long until, String actions) throws ApiException {
         AlarmTriggerResponse triggerResponse = userApi.getChronosApi().getAlarmTrigger(userApi.getSession(), DateTimeUtil.getZuluDateTime(until).getValue(), actions);
         return checkResponse(triggerResponse.getError(), triggerResponse.getErrorDesc(), triggerResponse.getData());
+    }
+
+    /**
+     * Updates the attendee status of the event with the specified identifier.
+     * 
+     * @param eventId The event identifier
+     * @param attendeeAndAlarm The status of the attendee
+     * @throws ApiException if an API error occurs
+     */
+    public void updateAttendee(String eventId, AttendeeAndAlarm attendeeAndAlarm) throws ApiException {
+        ChronosCalendarResultResponse updateAttendee = userApi.getChronosApi().updateAttendee(userApi.getSession(), defaultFolder, eventId, System.currentTimeMillis(), attendeeAndAlarm, null, false, true);
+        checkResponse(updateAttendee.getError(), updateAttendee.getErrorDesc(), updateAttendee.getData());
+        lastTimeStamp = updateAttendee.getTimestamp();
     }
 
     //////////////////////////////////////////////// HELPERS ///////////////////////////////////////////////////
