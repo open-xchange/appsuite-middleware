@@ -223,9 +223,6 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
         EventData toCreate = EventFactory.createSeriesEvent(defaultUserApi.getCalUser(), testUser.getLogin(), "testSeriesAlarmTriggerTimeRoundtrip", startDate, endDate, 4);
         toCreate.setAlarms(Collections.singletonList(AlarmFactory.createDisplayAlarm("-PT15M")));
 
-        //        EventData event = createSeriesEvent("testSeriesAlarmTriggerTimeRoundtrip", cal);
-        //        getAndAssertAlarms(event, 1);
-
         EventData event = eventManager.createEvent(toCreate);
         getAndAssertAlarms(event, 1);
 
@@ -277,10 +274,7 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
         EventId toDelete = new EventId();
         toDelete.setFolderId(exceptionEvent.getFolder());
         toDelete.setId(exceptionEvent.getId());
-        List<EventId> singletonList = Collections.singletonList(toDelete);
         eventManager.deleteEvent(toDelete);
-        //ChronosCalendarResultResponse deleteResponse = defaultUserApi.getChronosApi().deleteEvent(defaultUserApi.getSession(), eventManager.getLastTimeStamp(), singletonList);
-        //checkResponse(deleteResponse.getError(), deleteResponse.getErrorDesc(), deleteResponse.getData());
 
         // Check the normal alarm
         triggers = getAndCheckAlarmTrigger(1); // Only the alarm of the series
@@ -292,10 +286,7 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
         toDelete = new EventId();
         toDelete.setFolderId(exceptionEvent.getFolder());
         toDelete.setId(event.getId());
-        singletonList = Collections.singletonList(toDelete);
         eventManager.deleteEvent(toDelete);
-        //deleteResponse = defaultUserApi.getChronosApi().deleteEvent(defaultUserApi.getSession(), deleteResponse.getTimestamp(), singletonList);
-        //checkResponse(deleteResponse.getError(), deleteResponse.getErrorDesc(), deleteResponse.getData());
 
         // Check the normal alarm
         getAndCheckAlarmTrigger(0); // No upcoming triggers
