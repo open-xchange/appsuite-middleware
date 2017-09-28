@@ -96,6 +96,8 @@ public class GetAttachment extends ChronosAction {
 
         // Prepare the response
         try (IFileHolder fileHolder = attachment.getData()) {
+            // Prevent any transformations for image files...
+            requestData.putParameter("transformationNeeded", String.valueOf(false));
             // Compose & return result
             AJAXRequestResult result = new AJAXRequestResult(fileHolder, "file");
             setETag(UUID.randomUUID().toString(), AJAXRequestResult.YEAR_IN_MILLIS * 50, result);
