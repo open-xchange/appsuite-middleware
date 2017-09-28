@@ -273,6 +273,7 @@ public class EventManager extends AbstractManager {
         ChronosCalendarResultResponse deleteResponse = userApi.getChronosApi().deleteEvent(userApi.getSession(), System.currentTimeMillis(), Collections.singletonList(eventId));
         assertNull(deleteResponse.getErrorDesc(), deleteResponse.getError());
         forgetEventId(userApi, eventId);
+        lastTimeStamp = deleteResponse.getTimestamp();
     }
 
     /**
@@ -282,9 +283,10 @@ public class EventManager extends AbstractManager {
      * @throws ApiException if an API error is occurred
      */
     public void deleteEvent(EventId eventId, long timestamp) throws ApiException {
-        ChronosCalendarResultResponse deleteResponse = userApi.getChronosApi().deleteEvent(userApi.getSession(), getLastTimeStamp(), Collections.singletonList(eventId));
+        ChronosCalendarResultResponse deleteResponse = userApi.getChronosApi().deleteEvent(userApi.getSession(), timestamp, Collections.singletonList(eventId));
         assertNull(deleteResponse.getErrorDesc(), deleteResponse.getError());
         forgetEventId(userApi, eventId);
+        lastTimeStamp = deleteResponse.getTimestamp();
     }
 
     /**

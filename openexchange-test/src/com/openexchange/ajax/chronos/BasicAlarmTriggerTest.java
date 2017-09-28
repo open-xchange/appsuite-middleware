@@ -215,20 +215,20 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
         // Create an event yesterday 12 o clock
         Calendar cal = DateTimeUtil.getUTCCalendar();
         cal.add(Calendar.DAY_OF_MONTH, -1);
-        
+
         DateTimeData startDate = DateTimeUtil.getDateTime(cal);
         DateTimeData endDate = DateTimeUtil.incrementDateTimeData(startDate, TimeUnit.HOURS.toMillis(1));
 
         // Create an event with alarm
         EventData toCreate = EventFactory.createSeriesEvent(defaultUserApi.getCalUser(), testUser.getLogin(), "testSeriesAlarmTriggerTimeRoundtrip", startDate, endDate, 4);
         toCreate.setAlarms(Collections.singletonList(AlarmFactory.createDisplayAlarm("-PT15M")));
-        
-//        EventData event = createSeriesEvent("testSeriesAlarmTriggerTimeRoundtrip", cal);
-//        getAndAssertAlarms(event, 1);
+
+        //        EventData event = createSeriesEvent("testSeriesAlarmTriggerTimeRoundtrip", cal);
+        //        getAndAssertAlarms(event, 1);
 
         EventData event = eventManager.createEvent(toCreate);
         getAndAssertAlarms(event, 1);
-        
+
         // Check if next trigger is at correct time
         long currentTime = System.currentTimeMillis();
         AlarmTriggerData triggers = getAndCheckAlarmTrigger(1); // The created alarm
@@ -275,11 +275,11 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
          * 3. Delete the exception
          */
         EventId toDelete = new EventId();
-        toDelete.setFolderId(folderId);
+        toDelete.setFolderId(exceptionEvent.getFolder());
         toDelete.setId(exceptionEvent.getId());
         List<EventId> singletonList = Collections.singletonList(toDelete);
         eventManager.deleteEvent(toDelete);
-        //ChronosCalendarResultResponse deleteResponse = defaultUserApi.getChronosApi().deleteEvent(defaultUserApi.getSession(), getLastTimestamp(), singletonList);
+        //ChronosCalendarResultResponse deleteResponse = defaultUserApi.getChronosApi().deleteEvent(defaultUserApi.getSession(), eventManager.getLastTimeStamp(), singletonList);
         //checkResponse(deleteResponse.getError(), deleteResponse.getErrorDesc(), deleteResponse.getData());
 
         // Check the normal alarm
@@ -290,7 +290,7 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
          * 4. Delete series too
          */
         toDelete = new EventId();
-        toDelete.setFolderId(folderId);
+        toDelete.setFolderId(exceptionEvent.getFolder());
         toDelete.setId(event.getId());
         singletonList = Collections.singletonList(toDelete);
         eventManager.deleteEvent(toDelete);
