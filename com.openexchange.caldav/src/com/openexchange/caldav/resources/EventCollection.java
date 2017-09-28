@@ -97,6 +97,7 @@ import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.folderstorage.type.SharedType;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.Strings;
+import com.openexchange.login.Interface;
 import com.openexchange.user.UserService;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
@@ -222,6 +223,11 @@ public class EventCollection extends FolderCollection<Event> implements Filterin
             }
         }
         return lastModified;
+    }
+
+    @Override
+    public String getPushTopic() {
+        return null != folder ? "ox:" + Interface.CALDAV.toString().toLowerCase() + ":" + folder.getID() : null;
     }
 
     @Override
