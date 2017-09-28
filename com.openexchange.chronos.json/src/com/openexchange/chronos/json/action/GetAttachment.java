@@ -54,6 +54,7 @@ import java.util.UUID;
 import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.DispatcherNotes;
 import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
 import com.openexchange.chronos.service.EventID;
@@ -66,6 +67,7 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
+@DispatcherNotes(defaultFormat = "file")
 public class GetAttachment extends ChronosAction {
 
     /**
@@ -95,7 +97,6 @@ public class GetAttachment extends ChronosAction {
         // Prepare the response
         try (IFileHolder fileHolder = attachment.getData()) {
             // Compose & return result
-            requestData.setFormat("file");
             AJAXRequestResult result = new AJAXRequestResult(fileHolder, "file");
             setETag(UUID.randomUUID().toString(), AJAXRequestResult.YEAR_IN_MILLIS * 50, result);
             return result;
