@@ -1,0 +1,11 @@
+type: object
+required:
+- id
+- timestamp
+properties:
+  id:
+    type: string
+    description: The identifier of the account.
+  timestamp:
+    type: integer
+    description: The last modified timestamp of the account.

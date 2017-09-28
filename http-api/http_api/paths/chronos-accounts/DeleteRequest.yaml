@@ -8,15 +8,9 @@
       - application/json
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"
-      - in: query
-        name: timestamp
-        type: integer
-        format: int64
-        description: The last modification date
-        required: true
       - in: body
         name: body
-        description: A JSON array of ids from the calendar accounts to delete.
+        description: A JSON array of ids and timestamps from the calendar accounts to delete.
         required: true
         schema:
           type: array
