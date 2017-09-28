@@ -55,9 +55,11 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import com.openexchange.ajax.chronos.UserApi;
 import com.openexchange.ajax.chronos.util.DateTimeUtil;
 import com.openexchange.configuration.asset.Asset;
@@ -77,6 +79,7 @@ import com.openexchange.testing.httpclient.models.UpdatesResult;
  * {@link EventManager}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  */
 public class EventManager extends AbstractManager {
 
@@ -191,6 +194,34 @@ public class EventManager extends AbstractManager {
             throw new ChronosApiException(eventResponse.getCode(), eventResponse.getError());
         }
         return checkResponse(eventResponse.getError(), eventResponse.getError(), eventResponse.getData());
+    }
+
+    /**
+     * Shifts a given event by the given amount
+     *
+     * @param eventId The event id
+     * @param recurrence The recurrence id or null
+     * @param event The event data to change
+     * @param startTime The start time of the event
+     * @param unit The unit of the shift
+     * @param value The shifting amount
+     * @param timestamp The timestamp of the last request
+     * @return The {@link CalendarResult}
+     * @throws ApiException if an API error is occurred
+     */
+    public CalendarResult shiftEvent(String eventId, String recurrence, EventData event, Calendar startTime, TimeUnit unit, int value, long timestamp) throws ApiException {
+        Calendar newStartTime = Calendar.getInstance(startTime.getTimeZone());
+        newStartTime.setTimeInMillis(startTime.getTimeInMillis() + unit.toMillis(value));
+        event.setStartDate(DateTimeUtil.getDateTime(newStartTime));
+
+        Calendar endTime = Calendar.getInstance(startTime.getTimeZone());
+        endTime.setTimeInMillis(startTime.getTimeInMillis());
+        endTime.add(Calendar.HOUR, 1);
+        event.setEndDate(DateTimeUtil.getDateTime(endTime));
+
+        ChronosCalendarResultResponse updateEvent = userApi.getChronosApi().updateEvent(userApi.getSession(), defaultFolder, eventId, event, timestamp, recurrence, false, false);
+        this.setLastTimestamp(updateEvent.getTimestamp());
+        return checkResponse(updateEvent.getError(), updateEvent.getErrorDesc(), updateEvent.getData());
     }
 
     /**

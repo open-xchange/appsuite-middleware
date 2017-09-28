@@ -50,7 +50,6 @@
 package com.openexchange.ajax.chronos;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import java.text.ParseException;
 import java.util.Calendar;
 import java.util.Collections;
@@ -58,7 +57,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import com.openexchange.ajax.chronos.factory.AlarmFactory;
-import com.openexchange.ajax.chronos.util.AssertUtil;
 import com.openexchange.ajax.chronos.util.DateTimeUtil;
 import com.openexchange.testing.httpclient.invoker.ApiClient;
 import com.openexchange.testing.httpclient.invoker.ApiException;
@@ -67,7 +65,6 @@ import com.openexchange.testing.httpclient.models.AlarmTrigger;
 import com.openexchange.testing.httpclient.models.AlarmTriggerData;
 import com.openexchange.testing.httpclient.models.Attendee;
 import com.openexchange.testing.httpclient.models.Attendee.CuTypeEnum;
-import com.openexchange.testing.httpclient.models.CalendarResult;
 import com.openexchange.testing.httpclient.models.ChronosCalendarResultResponse;
 import com.openexchange.testing.httpclient.models.DateTimeData;
 import com.openexchange.testing.httpclient.models.EventData;
@@ -160,32 +157,6 @@ public abstract class AbstractAlarmTriggerTest extends AbstractAlarmTest {
     @Override
     public void tearDown() throws Exception {
         super.tearDown();
-    }
-
-    /**
-     * Shifts a given event by the given amount
-     *
-     * @param eventId The event id
-     * @param recurrence The recurrence id or null
-     * @param event The event data to change
-     * @param startTime The start time of the event
-     * @param unit The unit of the shift
-     * @param value The shifting amount
-     * @param timestamp The timestamp of the last request
-     * @return The {@link CalendarResult}
-     * @throws ApiException
-     */
-    protected CalendarResult shiftEvent(String eventId, String recurrence, EventData event, Calendar startTime, TimeUnit unit, int value, long timestamp) throws ApiException {
-        Calendar newStartTime = Calendar.getInstance(startTime.getTimeZone());
-        newStartTime.setTimeInMillis(startTime.getTimeInMillis() + unit.toMillis(value));
-        event.setStartDate(DateTimeUtil.getDateTime(newStartTime));
-        Calendar endTime = Calendar.getInstance(startTime.getTimeZone());
-        endTime.setTimeInMillis(startTime.getTimeInMillis());
-        endTime.add(Calendar.HOUR, 1);
-        event.setEndDate(DateTimeUtil.getDateTime(endTime));
-        ChronosCalendarResultResponse updateEvent = defaultUserApi.getChronosApi().updateEvent(defaultUserApi.getSession(), folderId, eventId, event, timestamp, recurrence, false, false);
-        this.setLastTimestamp(updateEvent.getTimestamp());
-        return checkResponse(updateEvent.getError(), updateEvent.getErrorDesc(), updateEvent.getData());
     }
 
     /**
