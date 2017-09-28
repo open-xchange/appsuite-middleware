@@ -95,7 +95,8 @@ public class GetAttachment extends ChronosAction {
         // Prepare the response
         try (IFileHolder fileHolder = attachment.getData()) {
             // Compose & return result
-            AJAXRequestResult result = new AJAXRequestResult(fileHolder, "apiResponse");
+            requestData.setFormat("file");
+            AJAXRequestResult result = new AJAXRequestResult(fileHolder, "file");
             setETag(UUID.randomUUID().toString(), AJAXRequestResult.YEAR_IN_MILLIS * 50, result);
             return result;
         } catch (IOException e) {
