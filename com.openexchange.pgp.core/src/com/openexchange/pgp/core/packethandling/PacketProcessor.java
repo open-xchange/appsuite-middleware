@@ -143,6 +143,7 @@ public class PacketProcessor {
                                 }
                             } finally {
                                 Streams.close(inputStream);
+                                rememberInpuStream.stopRemembering();
                                 rememberInpuStream.resetBuffer();
                             }
                         }
