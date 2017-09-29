@@ -59,6 +59,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.BlockJUnit4ClassRunner;
 import com.openexchange.admin.rmi.OXUserInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
@@ -85,6 +87,7 @@ import edu.emory.mathcs.backport.java.util.Collections;
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.0
  */
+@RunWith(BlockJUnit4ClassRunner.class)
 public class ChronosQuotaTest extends AbstractChronosTest {
 
     private static final String MODULE = "calendar";
