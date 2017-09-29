@@ -49,9 +49,8 @@
 
 package com.openexchange.groupware;
 
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
+import com.google.common.collect.ImmutableMap;
 
 public enum EnumComponent implements Component {
 
@@ -287,10 +286,6 @@ public enum EnumComponent implements Component {
         return ABBREV2COMPONENT.get(abbrev);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.groupware.Component#getAbbreviation()
-     */
     @Override
     public String getAbbreviation() {
         return abbreviation;
@@ -299,10 +294,10 @@ public enum EnumComponent implements Component {
     private static final Map<String, EnumComponent> ABBREV2COMPONENT;
 
     static {
-        final Map<String, EnumComponent> tmp = new HashMap<String, EnumComponent>(values().length, 1F);
+        ImmutableMap.Builder<String, EnumComponent> tmp = ImmutableMap.builder();
         for (final EnumComponent component : values()) {
             tmp.put(component.abbreviation, component);
         }
-        ABBREV2COMPONENT = Collections.unmodifiableMap(tmp);
+        ABBREV2COMPONENT = tmp.build();
     }
 }

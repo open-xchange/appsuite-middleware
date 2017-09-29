@@ -68,6 +68,7 @@ import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import javax.mail.internet.MimePart;
+import com.google.common.collect.ImmutableMap;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.mime.HeaderName;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
@@ -301,7 +302,7 @@ public class MimeMessagingPart implements MessagingPart {
         name = "Resent-Bcc";
         m.put(HeaderName.valueOf(name), new AddressHeaderHandler(name));
 
-        HHANDLERS = Collections.unmodifiableMap(m);
+        HHANDLERS = ImmutableMap.copyOf(m);
     }
 
     /*-

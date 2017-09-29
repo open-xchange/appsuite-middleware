@@ -27,12 +27,11 @@ package com.davekoelle;
 import java.text.Collator;
 import java.text.ParseException;
 import java.text.RuleBasedCollator;
-import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import org.slf4j.LoggerFactory;
+import com.google.common.collect.ImmutableMap;
 import com.openexchange.java.Collators;
 
 /**
@@ -66,7 +65,7 @@ public class AlphanumComparator implements Comparator<String> {
     static {
         final Collator collator = Collators.getSecondaryInstance(DEFAULT_LOCALE);
         DEFAULT_COLLATOR = collator;
-        COLLATOR_OVERRIDES = Collections.unmodifiableMap(initCollatorOverrides());
+        COLLATOR_OVERRIDES = initCollatorOverrides();
     }
 
     private Collator collator;
@@ -149,8 +148,8 @@ public class AlphanumComparator implements Comparator<String> {
         return s1Length - s2Length;
     }
 
-    private static Map<Locale, Collator> initCollatorOverrides() {
-        Map<Locale, Collator> overrides = new HashMap<Locale, Collator>();
+    private static ImmutableMap<Locale, Collator> initCollatorOverrides() {
+        ImmutableMap.Builder<Locale, Collator> overrides = ImmutableMap.builder();
         Collator defaultJapaneseCollator = Collator.getInstance(Locale.JAPANESE);
         if (null != defaultJapaneseCollator && RuleBasedCollator.class.isInstance(defaultJapaneseCollator)) {
             StringBuilder customRules = new StringBuilder(((RuleBasedCollator)defaultJapaneseCollator).getRules());
@@ -185,7 +184,7 @@ public class AlphanumComparator implements Comparator<String> {
                 overrides.put(Locale.JAPANESE, customJapaneseCollator);
             }
         }
-        return overrides;
+        return overrides.build();
     }
 
 }
