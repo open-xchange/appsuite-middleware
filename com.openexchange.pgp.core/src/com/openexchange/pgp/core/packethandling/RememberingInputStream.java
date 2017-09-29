@@ -157,11 +157,7 @@ class RememberingInputStream extends InputStream {
      */
     @Override
     public int read(byte[] b, int off, int len) throws IOException {
-        int read = super.read(b, off, len);
-        if (read != -1) {
-            addToBuffer(Arrays.copyOfRange(b, off, read));
-        }
-        return read;
+        return super.read(b, off, len);
     }
 
     /*
@@ -171,11 +167,6 @@ class RememberingInputStream extends InputStream {
      */
     @Override
     public int read(byte[] b) throws IOException {
-        int read = super.read(b);
-        if (read != -1) {
-            addToBuffer(Arrays.copyOf(b, read));
-        }
-        return read;
+        return super.read(b);
     }
-
 }

@@ -55,6 +55,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.SecureRandom;
 import java.security.Security;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Random;
@@ -270,7 +271,10 @@ public class AbstractPGPTest {
      * @return A bunch of test data
      */
     public byte[] generateTestData() {
-        return "test".getBytes();
+        //using some larger test data since this caused failing in the past due error prone stream handling
+        byte[] data = new byte[1024*1000 /* 1 MB */];
+        Arrays.fill(data, (byte)117);
+        return data;
     }
 
     /**
