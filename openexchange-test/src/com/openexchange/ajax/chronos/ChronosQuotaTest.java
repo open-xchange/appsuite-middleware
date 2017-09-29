@@ -49,32 +49,35 @@
 
 package com.openexchange.ajax.chronos;
 
-import static org.junit.Assert.assertThat;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.nullValue;
+import static org.junit.Assert.assertThat;
 import java.rmi.Naming;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.BlockJUnit4ClassRunner;
 import com.openexchange.admin.rmi.OXUserInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.UserProperty;
+import com.openexchange.ajax.chronos.util.DateTimeUtil;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.configuration.AJAXConfig.Property;
 import com.openexchange.testing.httpclient.invoker.ApiClient;
 import com.openexchange.testing.httpclient.models.Attendee;
-import com.openexchange.testing.httpclient.models.DateTimeData;
-import com.openexchange.testing.httpclient.models.EventData;
-import com.openexchange.testing.httpclient.models.LoginResponse;
-import com.openexchange.testing.httpclient.models.QuotasResponse;
 import com.openexchange.testing.httpclient.models.Attendee.CuTypeEnum;
 import com.openexchange.testing.httpclient.models.ChronosCalendarResultResponse;
+import com.openexchange.testing.httpclient.models.DateTimeData;
+import com.openexchange.testing.httpclient.models.EventData;
 import com.openexchange.testing.httpclient.models.EventData.TranspEnum;
+import com.openexchange.testing.httpclient.models.LoginResponse;
+import com.openexchange.testing.httpclient.models.QuotasResponse;
 import com.openexchange.testing.httpclient.modules.QuotaApi;
 import edu.emory.mathcs.backport.java.util.Collections;
 
@@ -84,6 +87,7 @@ import edu.emory.mathcs.backport.java.util.Collections;
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.0
  */
+@RunWith(BlockJUnit4ClassRunner.class)
 public class ChronosQuotaTest extends AbstractChronosTest {
 
     private static final String MODULE = "calendar";
@@ -133,7 +137,7 @@ public class ChronosQuotaTest extends AbstractChronosTest {
 
         // Try creating a new event
         LoginResponse login = defaultUserApi.login(testUser.getLogin(), testUser.getPassword(), client);
-        ChronosCalendarResultResponse resultResponse = defaultUserApi.getApi().createEvent(login.getSession(), getDefaultFolder(login.getSession(), client), createSingleEvent("SingleEventQuotaTest"), Boolean.TRUE, Boolean.FALSE);
+        ChronosCalendarResultResponse resultResponse = defaultUserApi.getChronosApi().createEvent(login.getSession(), getDefaultFolder(login.getSession(), client), createSingleEvent("SingleEventQuotaTest"), Boolean.TRUE, Boolean.FALSE);
 
         // Check that creation failed
         assertThat("No response!", resultResponse, is(not(nullValue())));
@@ -190,7 +194,7 @@ public class ChronosQuotaTest extends AbstractChronosTest {
     }
 
     private EventData createSingleEvent(String summary) {
-        return createSingleEvent(summary, getDateTime(System.currentTimeMillis()), getDateTime(System.currentTimeMillis() + 5000));
+        return createSingleEvent(summary, DateTimeUtil.getDateTime(System.currentTimeMillis()), DateTimeUtil.getDateTime(System.currentTimeMillis() + 5000));
     }
 
 }

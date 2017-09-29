@@ -57,11 +57,11 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import com.openexchange.ajax.chronos.AbstractChronosTest;
+import com.openexchange.ajax.chronos.util.DateTimeUtil;
 import com.openexchange.java.util.Pair;
 import com.openexchange.testing.httpclient.invoker.ApiException;
-import com.openexchange.testing.httpclient.models.EventData;
 import com.openexchange.testing.httpclient.models.Alarm;
+import com.openexchange.testing.httpclient.models.EventData;
 import com.openexchange.testing.httpclient.models.EventId;
 import com.openexchange.testing.httpclient.models.EventsResponse;
 
@@ -88,22 +88,21 @@ public class ChronosCaldavTest extends AbstractChronosCaldavTest {
         Date yesterday = instance.getTime();
         instance.add(Calendar.DAY_OF_MONTH, 14);
         Date twoWeeks = instance.getTime();
-        String rangeStart = AbstractChronosTest.ZULU_FORMATER.get().format(yesterday);
-        String rangeEnd = AbstractChronosTest.ZULU_FORMATER.get().format(twoWeeks);
-        EventsResponse allEventResponse = defaultUserApi.getApi().getAllEvents(defaultUserApi.getSession(), rangeStart, rangeEnd, getDefaultFolder(), null, null, null, true, true);
+        String rangeStart = DateTimeUtil.formatZuluDate(yesterday);
+        String rangeEnd = DateTimeUtil.formatZuluDate(twoWeeks);
+        EventsResponse allEventResponse = defaultUserApi.getChronosApi().getAllEvents(defaultUserApi.getSession(), rangeStart, rangeEnd, getDefaultFolder(), null, null, null, true, true);
         checkResponse(allEventResponse.getError(), allEventResponse.getErrorDesc(), allEventResponse.getData());
 
-
-        for(EventData event: allEventResponse.getData()){
-            if(uid.equals(event.getUid())){
-                if(remember){
+        for (EventData event : allEventResponse.getData()) {
+            if (uid.equals(event.getUid())) {
+                if (remember) {
                     EventId eventId = new EventId();
                     eventId.setFolderId(event.getFolder());
                     eventId.setId(event.getId());
                     eventId.setRecurrenceId(event.getRecurrenceId());
                     rememberEventId(defaultUserApi, eventId);
                 }
-                return defaultUserApi.getApi().getEvent(defaultUserApi.getSession(), event.getId(), event.getFolder(), event.getRecurrenceId(), null).getData();
+                return defaultUserApi.getChronosApi().getEvent(defaultUserApi.getSession(), event.getId(), event.getFolder(), event.getRecurrenceId(), null).getData();
             }
         }
         return null;
@@ -125,15 +124,15 @@ public class ChronosCaldavTest extends AbstractChronosCaldavTest {
         Date yesterday = instance.getTime();
         instance.add(Calendar.DAY_OF_MONTH, 14);
         Date twoWeeks = instance.getTime();
-        String rangeStart = AbstractChronosTest.ZULU_FORMATER.get().format(yesterday);
-        String rangeEnd = AbstractChronosTest.ZULU_FORMATER.get().format(twoWeeks);
-        EventsResponse allEventResponse = defaultUserApi.getApi().getAllEvents(defaultUserApi.getSession(), rangeStart, rangeEnd, getDefaultFolder(), null, null, null, true, true);
+        String rangeStart = DateTimeUtil.formatZuluDate(yesterday);
+        String rangeEnd = DateTimeUtil.formatZuluDate(twoWeeks);
+        EventsResponse allEventResponse = defaultUserApi.getChronosApi().getAllEvents(defaultUserApi.getSession(), rangeStart, rangeEnd, getDefaultFolder(), null, null, null, true, true);
         checkResponse(allEventResponse.getError(), allEventResponse.getErrorDesc(), allEventResponse.getData());
 
         List<EventData> result = new ArrayList<>();
-        for(EventData event: allEventResponse.getData()){
-            if(seriesId.equals(event.getSeriesId()) && !seriesId.equals(event.getId())){
-                result.add(defaultUserApi.getApi().getEvent(defaultUserApi.getSession(), event.getId(), event.getFolder(), event.getRecurrenceId(), null).getData());
+        for (EventData event : allEventResponse.getData()) {
+            if (seriesId.equals(event.getSeriesId()) && !seriesId.equals(event.getId())) {
+                result.add(defaultUserApi.getChronosApi().getEvent(defaultUserApi.getSession(), event.getId(), event.getFolder(), event.getRecurrenceId(), null).getData());
             }
         }
         return result;
@@ -152,7 +151,7 @@ public class ChronosCaldavTest extends AbstractChronosCaldavTest {
      * @throws ApiException
      * @throws Exception
      */
-    protected EventData verifyEvent(String uid, boolean remember, String triggerValue) throws ApiException, Exception{
+    protected EventData verifyEvent(String uid, boolean remember, String triggerValue) throws ApiException, Exception {
         EventData event = getEvent(uid, remember);
         assertNotNull("event not found on server", event);
         assertTrue("no alarm found", event.getAlarms() != null && !event.getAlarms().isEmpty());
@@ -161,7 +160,7 @@ public class ChronosCaldavTest extends AbstractChronosCaldavTest {
         return event;
     }
 
-    protected Pair<String, String> getPair(String uid, String value){
+    protected Pair<String, String> getPair(String uid, String value) {
         return new Pair<String, String>(uid, value);
     }
 
@@ -175,10 +174,10 @@ public class ChronosCaldavTest extends AbstractChronosCaldavTest {
      * @throws ApiException
      * @throws Exception
      */
-    protected EventData verifyEvent(String uid, boolean remember, int alarms) throws ApiException, Exception{
+    protected EventData verifyEvent(String uid, boolean remember, int alarms) throws ApiException, Exception {
         EventData event = getEvent(uid, remember);
         assertNotNull("event not found on server", event);
-        if(alarms>0){
+        if (alarms > 0) {
             assertTrue("no alarm found", event.getAlarms() != null && !event.getAlarms().isEmpty());
             assertEquals("no alarm found", alarms, event.getAlarms().size());
         } else {
@@ -198,12 +197,12 @@ public class ChronosCaldavTest extends AbstractChronosCaldavTest {
      * @throws Exception
      */
     @SafeVarargs
-    final protected EventData verifyEventException(String seriesId, int alarms, Pair<String, String>... triggerValues) throws ApiException, Exception{
+    final protected EventData verifyEventException(String seriesId, int alarms, Pair<String, String>... triggerValues) throws ApiException, Exception {
         List<EventData> exceptions = getExceptions(seriesId);
         assertFalse("No change exceptions found on server", exceptions.isEmpty());
         assertEquals("Unexpected number of change excpetions", 1, exceptions.size());
         EventData changeExcpetion = exceptions.get(0);
-        if(alarms>0){
+        if (alarms > 0) {
             assertTrue("no alarm found", changeExcpetion.getAlarms() != null && !changeExcpetion.getAlarms().isEmpty());
             assertEquals("Wrong size of alarms found", alarms, changeExcpetion.getAlarms().size());
             checkAlarms(changeExcpetion.getAlarms(), triggerValues);
@@ -220,11 +219,10 @@ public class ChronosCaldavTest extends AbstractChronosCaldavTest {
      * @throws ApiException
      * @throws Exception
      */
-    protected void verifyNoEventExceptions(String seriesId) throws ApiException, Exception{
+    protected void verifyNoEventExceptions(String seriesId) throws ApiException, Exception {
         List<EventData> exceptions = getExceptions(seriesId);
         assertTrue("Change exceptions found on server", exceptions.isEmpty());
     }
-
 
     /**
      * Checks whether the alarm contain the given value as either duration or dateTime
@@ -233,12 +231,12 @@ public class ChronosCaldavTest extends AbstractChronosCaldavTest {
      * @param alarmTriggerValue A pair of alarm uid and value (either duration or date time)
      */
     @SafeVarargs
-    final protected void checkAlarms(List<Alarm> alarms, Pair<String, String>... alarmTriggerValue){
+    final protected void checkAlarms(List<Alarm> alarms, Pair<String, String>... alarmTriggerValue) {
 
-        for(Alarm alarm: alarms){
+        for (Alarm alarm : alarms) {
             String uid = alarm.getUid();
-            for(Pair<String, String> alarmUid: alarmTriggerValue){
-                if(uid.equals(alarmUid.getFirst())){
+            for (Pair<String, String> alarmUid : alarmTriggerValue) {
+                if (uid.equals(alarmUid.getFirst())) {
                     String expected = alarmUid.getSecond();
                     assertTrue("Wrong trigger.", expected.equals(alarm.getTrigger().getDuration()) || expected.equals(alarm.getTrigger().getDateTime()));
                 }
@@ -246,6 +244,5 @@ public class ChronosCaldavTest extends AbstractChronosCaldavTest {
         }
 
     }
-
 
 }

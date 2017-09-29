@@ -70,6 +70,7 @@ import java.util.Set;
 import java.util.TimeZone;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmTrigger;
+import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.RecurrenceId;
@@ -102,6 +103,7 @@ import com.openexchange.session.Session;
  * {@link CompositingIDBasedCalendarAccess}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.0
  */
 public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBasedCalendarAccess implements IDBasedCalendarAccess {
@@ -412,6 +414,20 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
         }
         return result;
     }
+
+    @Override
+    public Attachment getAttachment(EventID eventID, int managedId) throws OXException {
+        int accountId = getAccountId(eventID.getFolderID());
+        try {
+            EventID relativeEventID = getRelativeId(eventID);
+            return getGroupwareAccess(accountId).getAttachment(relativeEventID, managedId);
+            //TODO: getUniqueId?
+        } catch (OXException e) {
+            throw withUniqueIDs(e, accountId);
+        }
+    }
+
+    /////////////////////////////////////////// HELPERS //////////////////////////////////////////////////
 
     private List<Event> sort(List<Event> events) throws OXException {
         if (null != events && 0 < events.size()) {

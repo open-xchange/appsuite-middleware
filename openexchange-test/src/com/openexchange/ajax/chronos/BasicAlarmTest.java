@@ -50,305 +50,150 @@
 package com.openexchange.ajax.chronos;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Collections;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.BlockJUnit4ClassRunner;
+import com.openexchange.ajax.chronos.factory.AlarmFactory;
+import com.openexchange.ajax.chronos.factory.EventFactory;
 import com.openexchange.testing.httpclient.models.Alarm;
-import com.openexchange.testing.httpclient.models.Attendee;
-import com.openexchange.testing.httpclient.models.Attendee.CuTypeEnum;
-import com.openexchange.testing.httpclient.models.ChronosAttachment;
-import com.openexchange.testing.httpclient.models.ChronosCalendarResultResponse;
 import com.openexchange.testing.httpclient.models.EventData;
-import com.openexchange.testing.httpclient.models.EventData.TranspEnum;
-import com.openexchange.testing.httpclient.models.EventId;
-import com.openexchange.testing.httpclient.models.EventResponse;
-import com.openexchange.testing.httpclient.models.Trigger;
-import com.openexchange.testing.httpclient.models.Trigger.RelatedEnum;
-import edu.emory.mathcs.backport.java.util.Collections;
 
 /**
  *
  * {@link BasicAlarmTest}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.0
  */
 @RunWith(BlockJUnit4ClassRunner.class)
-public class BasicAlarmTest extends AbstractChronosTest {
+public class BasicAlarmTest extends AbstractAlarmTest {
 
-    private String folderId;
-
-    @SuppressWarnings("unchecked")
-    private EventData createSingleEventWithoutAlarms(String summary) {
-        EventData singleEvent = new EventData();
-        singleEvent.setPropertyClass("PUBLIC");
-        Attendee attendee = new Attendee();
-        attendee.entity(defaultUserApi.getCalUser());
-        attendee.cuType(CuTypeEnum.INDIVIDUAL);
-        attendee.setUri("mailto:" + this.testUser.getLogin());
-        singleEvent.setAttendees(Collections.singletonList(attendee));
-        singleEvent.setStartDate(getDateTime(System.currentTimeMillis()));
-        singleEvent.setEndDate(getDateTime(System.currentTimeMillis()+5000));
-        singleEvent.setTransp(TranspEnum.OPAQUE);
-        singleEvent.setAllDay(false);
-        singleEvent.setSummary(summary);
-        return singleEvent;
+    /**
+     * Initialises a new {@link BasicAlarmTest}.
+     */
+    public BasicAlarmTest() {
+        super();
     }
 
-    @SuppressWarnings("unchecked")
-    private EventData createSingleEventWithSingleAlarm(String summary) {
-        EventData singleEvent = new EventData();
-        singleEvent.setPropertyClass("PUBLIC");
-        Attendee attendee = new Attendee();
-        attendee.entity(defaultUserApi.getCalUser());
-        attendee.cuType(CuTypeEnum.INDIVIDUAL);
-        attendee.setUri("mailto:" + this.testUser.getLogin());
-        singleEvent.setAttendees(Collections.singletonList(attendee));
-        singleEvent.setStartDate(getDateTime(System.currentTimeMillis()));
-        singleEvent.setEndDate(getDateTime(System.currentTimeMillis()+5000));
-        singleEvent.setTransp(TranspEnum.OPAQUE);
-        singleEvent.setAllDay(false);
-
-        Alarm alarm = new Alarm();
-        alarm.setAction("display");
-        Trigger trigger = new Trigger();
-        trigger.setRelated(RelatedEnum.START);
-        trigger.setDuration("-PT15M");
-        alarm.setTrigger(trigger);
-        alarm.setDescription("This is the display message!");
-        singleEvent.setAlarms(Collections.singletonList(alarm));
-        singleEvent.setSummary(summary);
-        return singleEvent;
-    }
-
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ajax.chronos.AbstractChronosTest#setUp()
+     */
     @Override
     public void setUp() throws Exception {
         super.setUp();
         folderId = createAndRememberNewFolder(defaultUserApi, defaultUserApi.getSession(), getDefaultFolder(), defaultUserApi.getCalUser());
     }
 
+    /**
+     * Tests the creation an event with a single alarm
+     */
     @Test
     public void testCreateSingleAlarm() throws Exception {
-        ChronosCalendarResultResponse createEvent = defaultUserApi.getApi().createEvent(defaultUserApi.getSession(), folderId, createSingleEventWithSingleAlarm("testCreateSingleAlarm"), false, false);
-        assertNull(createEvent.getError(), createEvent.getError());
-        assertNotNull(createEvent.getData());
-        EventData event = createEvent.getData().getCreated().get(0);
-        EventId eventId = new EventId();
-        eventId.setId(event.getId());
-        eventId.setFolderId(folderId);
-        rememberEventId(defaultUserApi, eventId);
-        EventResponse eventResponse = defaultUserApi.getApi().getEvent(defaultUserApi.getSession(), event.getId(), folderId, null, null);
-        assertNull(eventResponse.getError(), createEvent.getError());
-        assertNotNull(eventResponse.getData());
-        EventUtil.compare(event, eventResponse.getData(), true);
-        assertNotNull(eventResponse.getData().getAlarms());
-        assertEquals(1, eventResponse.getData().getAlarms().size());
+        EventData expectedEventData = eventManager.createEvent(EventFactory.createSingleEventWithSingleAlarm(defaultUserApi.getCalUser(), testUser.getLogin(), "testCreateSingleAlarm", AlarmFactory.createDisplayAlarm("-PT15M")));
+        getAndAssertAlarms(expectedEventData, 1);
     }
 
-    @SuppressWarnings("unchecked")
+    /**
+     * Tests the creation of an event without an alarm and the later addition of one
+     */
     @Test
     public void testAddSingleAlarm() throws Exception {
-        ChronosCalendarResultResponse createEvent = defaultUserApi.getApi().createEvent(defaultUserApi.getSession(), folderId, createSingleEventWithoutAlarms("testAddSingleAlarm"), false, false);
-        assertNull(createEvent.getError(), createEvent.getError());
-        assertNotNull(createEvent.getData());
-        EventData event = createEvent.getData().getCreated().get(0);
-        EventId eventId = new EventId();
-        eventId.setId(event.getId());
-        eventId.setFolderId(folderId);
-        rememberEventId(defaultUserApi, eventId);
-        EventResponse eventResponse = defaultUserApi.getApi().getEvent(defaultUserApi.getSession(), event.getId(), folderId, null, null);
-        assertNull(eventResponse.getError(), createEvent.getError());
-        assertNotNull(eventResponse.getData());
-        EventUtil.compare(event, eventResponse.getData(), true);
-        assertNotNull(eventResponse.getData().getAlarms());
-        assertEquals(0, eventResponse.getData().getAlarms().size());
+        // Create an event without an alarm
+        EventData expectedEventData = eventManager.createEvent(EventFactory.createSingleTwoHourEvent(defaultUserApi.getCalUser(), testUser.getLogin(), "testAddSingleAlarm"));
+        EventData actualEventData = getAndAssertAlarms(expectedEventData, 0);
 
+        // Create the alarm as a delta for the event
         EventData updateData = new EventData();
-        Alarm alarm = new Alarm();
-        alarm.setAction("display");
-        Trigger trigger = new Trigger();
-        trigger.setRelated(RelatedEnum.START);
-        trigger.setDuration("-PT30M");
-        alarm.setTrigger(trigger);
-        alarm.setDescription("This is the display message!");
-        updateData.setAlarms(Collections.singletonList(alarm));
+        updateData.setAlarms(Collections.singletonList(AlarmFactory.createDisplayAlarm("-PT30M")));
+        updateData.setId(actualEventData.getId());
 
-        ChronosCalendarResultResponse updateEvent = defaultUserApi.getApi().updateEvent(defaultUserApi.getSession(), folderId, event.getId(), updateData, eventResponse.getTimestamp(), null, true, false);
-        assertNull(updateEvent.getError(), updateEvent.getErrorDesc());
-        assertNotNull(updateEvent.getData());
-        assertEquals(1, updateEvent.getData().getUpdated().size());
+        // Update the event and add the alarm
+        expectedEventData = eventManager.updateEvent(updateData);
 
-
-        EventResponse eventResponse2 = defaultUserApi.getApi().getEvent(defaultUserApi.getSession(), event.getId(), folderId, null, null);
-        assertNull(eventResponse2.getError(), eventResponse2.getErrorDesc());
-        assertNotNull(eventResponse2.getData());
-        assertNotNull(eventResponse2.getData().getAlarms());
-        assertEquals(1, eventResponse2.getData().getAlarms().size());
+        // Assert that the alarm was successfully added
+        getAndAssertAlarms(expectedEventData, 1);
     }
 
-    @SuppressWarnings("unchecked")
+    /**
+     * Tests the change of the alarm time
+     */
     @Test
     public void testChangeAlarmTime() throws Exception {
-        ChronosCalendarResultResponse createEvent = defaultUserApi.getApi().createEvent(defaultUserApi.getSession(), folderId, createSingleEventWithSingleAlarm("testChangeAlarmTime"), false, false);
-        assertNull(createEvent.getError(), createEvent.getErrorDesc());
-        assertNotNull(createEvent.getData());
-        EventData event = createEvent.getData().getCreated().get(0);
-        EventId eventId = new EventId();
-        eventId.setId(event.getId());
-        eventId.setFolderId(folderId);
-        rememberEventId(defaultUserApi, eventId);
-        EventResponse eventResponse = defaultUserApi.getApi().getEvent(defaultUserApi.getSession(), event.getId(), folderId, null, null);
-        assertNull(eventResponse.getError(), eventResponse.getErrorDesc());
-        assertNotNull(eventResponse.getData());
-        EventUtil.compare(event, eventResponse.getData(), true);
-        assertNotNull(eventResponse.getData().getAlarms());
-        assertEquals(1, eventResponse.getData().getAlarms().size());
-
+        EventData expectedEventData = eventManager.createEvent(EventFactory.createSingleEventWithSingleAlarm(defaultUserApi.getCalUser(), testUser.getLogin(), "testChangeAlarmTime", AlarmFactory.createDisplayAlarm("-PT15M")));
+        EventData actualEventData = getAndAssertAlarms(expectedEventData, 1);
 
         EventData updateData = new EventData();
-        Alarm alarm = new Alarm();
-        alarm.setAction("display");
-        Trigger trigger = new Trigger();
-        trigger.setRelated(RelatedEnum.START);
-        trigger.setDuration("-PT30M");
-        alarm.setTrigger(trigger);
-        alarm.setDescription("This is the display message!");
-        updateData.setAlarms(Collections.singletonList(alarm));
+        updateData.setAlarms(Collections.singletonList(AlarmFactory.createDisplayAlarm("-PT30M")));
+        updateData.setId(actualEventData.getId());
 
-        ChronosCalendarResultResponse updateEvent = defaultUserApi.getApi().updateEvent(defaultUserApi.getSession(), folderId, event.getId(), updateData, eventResponse.getTimestamp(), null, true, false);
-        assertNull(updateEvent.getError(), updateEvent.getErrorDesc());
-        assertNotNull(updateEvent.getData());
-        assertEquals(1, updateEvent.getData().getUpdated().size());
+        expectedEventData = eventManager.updateEvent(updateData);
 
-
-        EventResponse eventResponse2 = defaultUserApi.getApi().getEvent(defaultUserApi.getSession(), event.getId(), folderId, null, null);
-        assertNull(eventResponse2.getError(), eventResponse2.getErrorDesc());
-        assertNotNull(eventResponse2.getData());
-        assertNotNull(eventResponse2.getData().getAlarms());
-        assertEquals(1, eventResponse2.getData().getAlarms().size());
-        assertEquals("-PT30M", eventResponse2.getData().getAlarms().get(0).getTrigger().getDuration());
-
+        actualEventData = getAndAssertAlarms(expectedEventData, 1);
+        assertEquals("-PT30M", actualEventData.getAlarms().get(0).getTrigger().getDuration());
     }
 
-    @SuppressWarnings("unchecked")
+    /**
+     * Tests the creation of different alarm types (display, mail, audio)
+     * 
+     * @throws Exception
+     */
     @Test
     public void testDifferentAlarmTypes() throws Exception {
-        ChronosCalendarResultResponse createEvent = defaultUserApi.getApi().createEvent(defaultUserApi.getSession(), folderId, createSingleEventWithoutAlarms("testDifferentAlarmTypes"), false, false);
-        assertNull(createEvent.getError(), createEvent.getError());
-        assertNotNull(createEvent.getData());
-        EventData event = createEvent.getData().getCreated().get(0);
-        EventId eventId = new EventId();
-        eventId.setId(event.getId());
-        eventId.setFolderId(folderId);
-        rememberEventId(defaultUserApi, eventId);
-        EventResponse eventResponse = defaultUserApi.getApi().getEvent(defaultUserApi.getSession(), event.getId(), folderId, null, null);
-        assertNull(eventResponse.getError(), createEvent.getError());
-        assertNotNull(eventResponse.getData());
-        EventUtil.compare(event, eventResponse.getData(), true);
-        assertNotNull(eventResponse.getData().getAlarms());
-        assertEquals(0, eventResponse.getData().getAlarms().size());
-
-        long timestamp = eventResponse.getTimestamp();
+        EventData expectedEventData = eventManager.createEvent(EventFactory.createSingleTwoHourEvent(defaultUserApi.getCalUser(), testUser.getLogin(), "testDifferentAlarmTypes"));
+        EventData actualEventData = getAndAssertAlarms(expectedEventData, 0);
 
         // Test display alarm
         {
+            Alarm alarm = AlarmFactory.createDisplayAlarm("-PT30M");
+
             EventData updateData = new EventData();
-            Alarm alarm = new Alarm();
-            alarm.setAction("display");
-            Trigger trigger = new Trigger();
-            trigger.setRelated(RelatedEnum.START);
-            trigger.setDuration("-PT30M");
-            alarm.setTrigger(trigger);
-            alarm.setDescription("This is the display message!");
             updateData.setAlarms(Collections.singletonList(alarm));
+            updateData.setId(actualEventData.getId());
 
-            ChronosCalendarResultResponse updateEvent = defaultUserApi.getApi().updateEvent(defaultUserApi.getSession(), folderId, event.getId(), updateData, timestamp, null, true, false);
-            assertNull(updateEvent.getError(), updateEvent.getErrorDesc());
-            assertNotNull(updateEvent.getData());
-            assertEquals(1, updateEvent.getData().getUpdated().size());
+            expectedEventData = eventManager.updateEvent(updateData);
 
-            EventResponse eventResponse2 = defaultUserApi.getApi().getEvent(defaultUserApi.getSession(), event.getId(), folderId, null, null);
-            assertNull(eventResponse2.getError(), eventResponse2.getErrorDesc());
-            assertNotNull(eventResponse2.getData());
-            assertNotNull(eventResponse2.getData().getAlarms());
-            assertEquals(1, eventResponse2.getData().getAlarms().size());
-            Alarm changedAlarm = eventResponse2.getData().getAlarms().get(0);
+            actualEventData = getAndAssertAlarms(expectedEventData, 1);
+
+            Alarm changedAlarm = actualEventData.getAlarms().get(0);
             alarm.setUid(changedAlarm.getUid());
             assertEquals("The created alarm does not match the expected one.", alarm, changedAlarm);
-            timestamp = updateEvent.getTimestamp();
         }
 
         // Test mail alarm
         {
+            Alarm alarm = AlarmFactory.createMailAlarm("-PT30M", "test@domain.wrong", "This is the mail message!", "This is the mail subject");
+
             EventData updateData = new EventData();
-            Alarm alarm = new Alarm();
-            alarm.setAction("mail");
-            Trigger trigger = new Trigger();
-            trigger.setRelated(RelatedEnum.START);
-            trigger.setDuration("-PT30M");
-            alarm.setTrigger(trigger);
-            alarm.setDescription("This is the mail message!");
-            alarm.setSummary("This is the mail subject");
-            List<Attendee> attendees = new ArrayList<>(1);
-            Attendee attendee = new Attendee();
-            attendee.setUri("mailto:test@domain.wrong");
-            attendee.setEmail("test@domain.wrong");
-            attendees.add(attendee);
-            alarm.setAttendees(attendees);
             updateData.setAlarms(Collections.singletonList(alarm));
+            updateData.setId(actualEventData.getId());
 
-            ChronosCalendarResultResponse updateEvent = defaultUserApi.getApi().updateEvent(defaultUserApi.getSession(), folderId, event.getId(), updateData, timestamp, null, true, false);
-            assertNull(updateEvent.getError(), updateEvent.getErrorDesc());
-            assertNotNull(updateEvent.getData());
-            assertEquals(1, updateEvent.getData().getUpdated().size());
+            expectedEventData = eventManager.updateEvent(updateData);
 
-            EventResponse eventResponse2 = defaultUserApi.getApi().getEvent(defaultUserApi.getSession(), event.getId(), folderId, null, null);
-            assertNull(eventResponse2.getError(), eventResponse2.getErrorDesc());
-            assertNotNull(eventResponse2.getData());
-            assertNotNull(eventResponse2.getData().getAlarms());
-            assertEquals(1, eventResponse2.getData().getAlarms().size());
-            Alarm changedAlarm = eventResponse2.getData().getAlarms().get(0);
+            actualEventData = getAndAssertAlarms(expectedEventData, 1);
+
+            Alarm changedAlarm = actualEventData.getAlarms().get(0);
             alarm.setUid(changedAlarm.getUid());
             assertEquals("The created alarm does not match the expected one.", alarm, changedAlarm);
-            timestamp = updateEvent.getTimestamp();
         }
 
         // Test AUDIO alarm
         {
+            Alarm alarm = AlarmFactory.createAudioAlarm("-PT30M", "ftp://some.fake.ftp.server/file.mp3");
             EventData updateData = new EventData();
-            Alarm alarm = new Alarm();
-            alarm.setAction("audio");
-            Trigger trigger = new Trigger();
-            trigger.setRelated(RelatedEnum.START);
-            trigger.setDuration("-PT30M");
-            alarm.setTrigger(trigger);
-            List<ChronosAttachment> attachments = new ArrayList<>(1);
-            ChronosAttachment attachment = new ChronosAttachment();
-            attachment.setUri("fpt://some.fake.ftp.server/file.mp3");
-            attachment.setFmtType("audio/mpeg");
-            attachments.add(attachment);
-            alarm.setAttachments(attachments);
             updateData.setAlarms(Collections.singletonList(alarm));
+            updateData.setId(actualEventData.getId());
 
-            ChronosCalendarResultResponse updateEvent = defaultUserApi.getApi().updateEvent(defaultUserApi.getSession(), folderId, event.getId(), updateData, timestamp, null, true, false);
-            assertNull(updateEvent.getError(), updateEvent.getErrorDesc());
-            assertNotNull(updateEvent.getData());
-            assertEquals(1, updateEvent.getData().getUpdated().size());
+            expectedEventData = eventManager.updateEvent(updateData);
 
-            EventResponse eventResponse2 = defaultUserApi.getApi().getEvent(defaultUserApi.getSession(), event.getId(), folderId, null, null);
-            assertNull(eventResponse2.getError(), eventResponse2.getErrorDesc());
-            assertNotNull(eventResponse2.getData());
-            assertNotNull(eventResponse2.getData().getAlarms());
-            assertEquals(1, eventResponse2.getData().getAlarms().size());
-            Alarm changedAlarm = eventResponse2.getData().getAlarms().get(0);
+            actualEventData = getAndAssertAlarms(expectedEventData, 1);
+
+            Alarm changedAlarm = actualEventData.getAlarms().get(0);
             alarm.setUid(changedAlarm.getUid());
             assertEquals("The created alarm does not match the expected one.", alarm, changedAlarm);
-            timestamp = updateEvent.getTimestamp();
         }
     }
-
 }

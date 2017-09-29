@@ -64,6 +64,7 @@ import java.util.Map;
 import java.util.Set;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmTrigger;
+import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.FreeBusyTime;
@@ -104,6 +105,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  * {@link InternalCalendarAccess}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.0
  */
 public class InternalCalendarAccess implements GroupwareCalendarAccess, FreeBusyAwareCalendarAccess, SyncAware, PersonalAlarmAware, SearchAware, QuotaAware {
@@ -350,6 +352,11 @@ public class InternalCalendarAccess implements GroupwareCalendarAccess, FreeBusy
     @Override
     public List<AlarmTrigger> getAlarmTrigger(Set<String> actions) throws OXException {
         return getCalendarService().getAlarmTrigger(session, actions);
+    }
+
+    @Override
+    public Attachment getAttachment(EventID eventID, int managedId) throws OXException {
+        return getCalendarService().getAttachment(session, eventID, managedId);
     }
 
     /**

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2017-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,54 +47,43 @@
  *
  */
 
-package com.openexchange.chronos.json.action;
+package com.openexchange.ajax.chronos.factory;
 
-import java.util.Collection;
-import java.util.Map;
-import com.google.common.collect.ImmutableMap;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
-import com.openexchange.exception.OXException;
-import com.openexchange.oauth.provider.resourceserver.annotations.OAuthModule;
-import com.openexchange.server.ServiceLookup;
+import com.openexchange.testing.httpclient.models.Attendee;
+import com.openexchange.testing.httpclient.models.Attendee.CuTypeEnum;
 
 /**
- * {@link ChronosActionFactory}
+ * {@link AttendeeFactory}
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
- * @since v7.10.0
  */
-@OAuthModule
-public class ChronosActionFactory implements AJAXActionServiceFactory {
+public final class AttendeeFactory {
 
-    private final Map<String, AJAXActionService> actions;
+    /**
+     * Creates a new {@link Attendee} object with the specified user identifier, email address and {@link CuTypeEnum}
+     * 
+     * @param userId The user identifier
+     * @param emailAddress the e-mail address
+     * @param cuType the {@link CuTypeEnum}
+     * @return The new {@link Attendee}
+     */
+    public static Attendee createAttendee(int userId, String emailAddress, CuTypeEnum cuType) {
+        Attendee attendee = new Attendee();
+        attendee.entity(userId);
+        attendee.cuType(cuType);
+        attendee.setUri("mailto:" + emailAddress);
 
-    public ChronosActionFactory(ServiceLookup services) {
-        super();
-        ImmutableMap.Builder<String, AJAXActionService> actions = ImmutableMap.builder();
-        actions.put("get", new GetAction(services));
-        actions.put("all", new AllAction(services));
-        actions.put("list", new ListAction(services));
-        actions.put("new", new NewAction(services));
-        actions.put("update", new UpdateAction(services));
-        actions.put("delete", new DeleteAction(services));
-        actions.put("updateAttendee", new UpdateAttendeeAction(services));
-        actions.put("updateAlarms", new UpdateAlarmsAction(services));
-        actions.put("updates", new UpdatesAction(services));
-        actions.put("move", new MoveAction(services));
-        actions.put("getAttachment", new GetAttachment(services));
-        this.actions = actions.build();
+        return attendee;
     }
 
-    @Override
-    public AJAXActionService createActionService(String action) throws OXException {
-        return actions.get(action);
+    /**
+     * Creates an {@link Attendee} of type {@link CuTypeEnum#INDIVIDUAL}
+     * 
+     * @param userId The user identifier
+     * @param emailAddress The e-mail address
+     * @return The new {@link Attendee}
+     */
+    public static Attendee createIndividual(int userId, String emailAddress) {
+        return createAttendee(userId, emailAddress, CuTypeEnum.INDIVIDUAL);
     }
-
-    @Override
-    public Collection<? extends AJAXActionService> getSupportedServices() {
-        return java.util.Collections.unmodifiableCollection(actions.values());
-    }
-
 }

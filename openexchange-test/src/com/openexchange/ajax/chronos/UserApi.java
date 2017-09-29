@@ -61,6 +61,7 @@ import com.openexchange.testing.httpclient.modules.LoginApi;
  * {@link UserApi}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.0
  */
 public class UserApi {
@@ -69,20 +70,39 @@ public class UserApi {
     private Integer calUser;
     private FoldersApi foldersApi;
     private JSlobApi jslob;
-    private ChronosApi api;
+    private ChronosApi chronosApi;
+    private EnhancedChronosApi enhancedChronosApi;
     private final ApiClient client;
+    private final TestUser user;
 
-    public UserApi(ApiClient client, TestUser user ) throws Exception {
+    /**
+     * Initialises a new {@link UserApi}.
+     * 
+     * @param client
+     * @param user
+     * @throws Exception
+     */
+    public UserApi(ApiClient client, TestUser user) throws Exception {
         this.client = client;
-        api = new ChronosApi(client);
+        this.user = user;
+        chronosApi = new ChronosApi(client);
         jslob = new JSlobApi(client);
         foldersApi = new FoldersApi(client);
+        setEnhancedChronosApi(new EnhancedChronosApi(client));
 
         LoginResponse login = login(user.getLogin(), user.getPassword(), client);
         this.calUser = login.getUserId();
         this.session = login.getSession();
     }
 
+    /**
+     * 
+     * @param login
+     * @param password
+     * @param client
+     * @return
+     * @throws Exception
+     */
     protected LoginResponse login(String login, String password, ApiClient client) throws Exception {
         LoginResponse doLogin = new LoginApi(client).doLogin(login, password, null, null, null, null, null, null, null);
         if (doLogin.getError() == null) {
@@ -90,7 +110,6 @@ public class UserApi {
         }
         throw new Exception("Error during login: " + doLogin.getError());
     }
-
 
     /**
      * Gets the session
@@ -101,7 +120,6 @@ public class UserApi {
         return session;
     }
 
-
     /**
      * Sets the session
      *
@@ -110,7 +128,6 @@ public class UserApi {
     public void setSession(String session) {
         this.session = session;
     }
-
 
     /**
      * Gets the calUser
@@ -121,7 +138,6 @@ public class UserApi {
         return calUser;
     }
 
-
     /**
      * Sets the calUser
      *
@@ -130,7 +146,6 @@ public class UserApi {
     public void setCalUser(Integer calUser) {
         this.calUser = calUser;
     }
-
 
     /**
      * Gets the foldersApi
@@ -141,7 +156,6 @@ public class UserApi {
         return foldersApi;
     }
 
-
     /**
      * Sets the foldersApi
      *
@@ -150,7 +164,6 @@ public class UserApi {
     public void setFoldersApi(FoldersApi foldersApi) {
         this.foldersApi = foldersApi;
     }
-
 
     /**
      * Gets the jslob
@@ -161,7 +174,6 @@ public class UserApi {
         return jslob;
     }
 
-
     /**
      * Sets the jslob
      *
@@ -171,16 +183,14 @@ public class UserApi {
         this.jslob = jslob;
     }
 
-
     /**
      * Gets the api
      *
      * @return The api
      */
-    public ChronosApi getApi() {
-        return api;
+    public ChronosApi getChronosApi() {
+        return chronosApi;
     }
-
 
     /**
      * Sets the api
@@ -188,7 +198,7 @@ public class UserApi {
      * @param api The api to set
      */
     public void setApi(ChronosApi api) {
-        this.api = api;
+        this.chronosApi = api;
     }
 
     /**
@@ -200,6 +210,31 @@ public class UserApi {
         return client;
     }
 
+    /**
+     * Gets the user
+     *
+     * @return The user
+     */
+    public TestUser getUser() {
+        return user;
+    }
 
+    /**
+     * Gets the enhancedChronosApi
+     *
+     * @return The enhancedChronosApi
+     */
+    public EnhancedChronosApi getEnhancedChronosApi() {
+        return enhancedChronosApi;
+    }
+
+    /**
+     * Sets the enhancedChronosApi
+     *
+     * @param enhancedChronosApi The enhancedChronosApi to set
+     */
+    public void setEnhancedChronosApi(EnhancedChronosApi enhancedChronosApi) {
+        this.enhancedChronosApi = enhancedChronosApi;
+    }
 
 }

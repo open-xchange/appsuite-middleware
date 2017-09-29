@@ -49,61 +49,73 @@
 
 package com.openexchange.chronos.json.action;
 
-import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_IGNORE_CONFLICTS;
-import static com.openexchange.tools.arrays.Collections.unmodifiableSet;
-import java.util.Date;
-import java.util.Set;
-import com.openexchange.ajax.AJAXServlet;
+import java.io.IOException;
+import java.util.UUID;
+import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.chronos.Event;
-import com.openexchange.chronos.json.converter.CalendarResultConverter;
-import com.openexchange.chronos.json.oauth.ChronosOAuthScope;
+import com.openexchange.ajax.requesthandler.DispatcherNotes;
+import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
-import com.openexchange.chronos.service.CalendarResult;
+import com.openexchange.chronos.service.EventID;
 import com.openexchange.exception.OXException;
-import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
- * {@link NewAction}
+ * {@link GetAttachment}
  *
- * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
- * @since v7.10.0
  */
-@OAuthAction(ChronosOAuthScope.OAUTH_WRITE_SCOPE)
-public class NewAction extends ChronosAction {
-
-    private static final Set<String> OPTIONAL_PARAMETERS = unmodifiableSet("sendInternalNotifications", PARAMETER_IGNORE_CONFLICTS);
+@DispatcherNotes(defaultFormat = "file")
+public class GetAttachment extends ChronosAction {
 
     /**
-     * Initializes a new {@link NewAction}.
-     *
-     * @param services A service lookup reference
+     * Initialises a new {@link GetAttachment}.
+     * 
+     * @param services
      */
-    protected NewAction(ServiceLookup services) {
+    protected GetAttachment(ServiceLookup services) {
         super(services);
     }
 
-    @Override
-    protected Set<String> getOptionalParameters() {
-        return OPTIONAL_PARAMETERS;
-    }
-
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.chronos.json.action.ChronosAction#perform(com.openexchange.chronos.provider.composition.IDBasedCalendarAccess, com.openexchange.ajax.requesthandler.AJAXRequestData)
+     */
     @Override
     protected AJAXRequestResult perform(IDBasedCalendarAccess calendarAccess, AJAXRequestData requestData) throws OXException {
-        String folderId = requestData.requireParameter(AJAXServlet.PARAMETER_FOLDERID);
-        Event event = parseEvent(calendarAccess.getSession(), requestData);
-        try {
-            CalendarResult calendarResult = calendarAccess.createEvent(folderId, event);
-            if (calendarResult.getCreations().size() != 1) {
-                throw AjaxExceptionCodes.UNEXPECTED_ERROR.create("Unable to create new event");
-            }
-            return new AJAXRequestResult(calendarResult, new Date(calendarResult.getTimestamp()), CalendarResultConverter.INPUT_FORMAT);
-        } catch (OXException e) {
-            return handleConflictException(e);
+        // Gather the parameters
+        EventID eventId = parseIdParameter(requestData);
+        String managedId = requestData.getParameter("managedId");
+        int mid = Integer.parseInt(managedId);
+
+        // Get the attachment
+        Attachment attachment = calendarAccess.getAttachment(eventId, mid);
+
+        // Prepare the response
+        try (IFileHolder fileHolder = attachment.getData()) {
+            // Prevent any transformations for image files...
+            requestData.putParameter("transformationNeeded", String.valueOf(false));
+            // Compose & return result
+            AJAXRequestResult result = new AJAXRequestResult(fileHolder, "file");
+            setETag(UUID.randomUUID().toString(), AJAXRequestResult.YEAR_IN_MILLIS * 50, result);
+            return result;
+        } catch (IOException e) {
+            throw AjaxExceptionCodes.IO_ERROR.create(e.getMessage(), e);
         }
+    }
+
+    /**
+     * Set the etag for the file
+     * 
+     * @param eTag The eTag identifier
+     * @param expires The TTL in milliseconds
+     * @param result The result to set the etag on
+     */
+    private void setETag(final String eTag, final long expires, final AJAXRequestResult result) {
+        result.setExpires(expires);
+        result.setHeader("ETag", eTag);
     }
 }

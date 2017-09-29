@@ -127,7 +127,7 @@ public class ChronosJsonActivator extends AJAXModuleActivator {
             registerService(ResultConverter.class, new MultipleCalendarResultConverter());
             registerService(ResultConverter.class, new AlarmTriggerConverter());
 
-            services=this;
+            services = this;
         } catch (Exception e) {
             getLogger(ChronosJsonActivator.class).error("error starting {}", context.getBundle(), e);
             throw e;
@@ -137,11 +137,11 @@ public class ChronosJsonActivator extends AJAXModuleActivator {
     @Override
     protected void stopBundle() throws Exception {
         getLogger(ChronosJsonActivator.class).info("stopping bundle {}", context.getBundle());
-        services=null;
+        services = null;
         super.stopBundle();
     }
 
-    public static ServiceLookup getServiceLookup(){
+    public static ServiceLookup getServiceLookup() {
         return services;
     }
 }

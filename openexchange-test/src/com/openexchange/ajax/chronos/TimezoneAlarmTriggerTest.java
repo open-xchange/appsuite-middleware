@@ -54,18 +54,17 @@ import java.util.Calendar;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 import org.junit.Test;
+import com.openexchange.ajax.chronos.factory.AlarmFactory;
+import com.openexchange.ajax.chronos.factory.EventFactory;
+import com.openexchange.ajax.chronos.manager.ChronosApiException;
+import com.openexchange.ajax.chronos.util.DateTimeUtil;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.AlarmTrigger;
 import com.openexchange.testing.httpclient.models.AlarmTriggerData;
-import com.openexchange.testing.httpclient.models.Attendee;
-import com.openexchange.testing.httpclient.models.ChronosCalendarResultResponse;
 import com.openexchange.testing.httpclient.models.DateTimeData;
 import com.openexchange.testing.httpclient.models.EventData;
-import com.openexchange.testing.httpclient.models.Attendee.CuTypeEnum;
-import com.openexchange.testing.httpclient.models.EventData.TranspEnum;
 import com.openexchange.testing.httpclient.models.EventId;
 import com.openexchange.testing.httpclient.models.Trigger.RelatedEnum;
-import edu.emory.mathcs.backport.java.util.Collections;
 
 /**
  *
@@ -76,28 +75,32 @@ import edu.emory.mathcs.backport.java.util.Collections;
  */
 public class TimezoneAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest {
 
-    @SuppressWarnings("unchecked")
+    /**
+     * Initialises a new {@link TimezoneAlarmTriggerTest}.
+     */
+    public TimezoneAlarmTriggerTest() {
+        super();
+    }
+
     @Test
-    public void testTrigger() throws ApiException, ParseException {
-        Calendar start = getUTCCalendar();
+    public void testTrigger() throws ApiException, ParseException, ChronosApiException {
+        Calendar start = DateTimeUtil.getUTCCalendar();
         start.add(Calendar.DAY_OF_MONTH, 1);
-        DateTimeData startDate = getDateTime(start);
+        DateTimeData startDate = DateTimeUtil.getDateTime(start);
 
         TimeZone endTimeZone = TimeZone.getTimeZone("Europe/Berlin");
         Calendar end = Calendar.getInstance(endTimeZone);
         end.setTimeInMillis(start.getTimeInMillis());
         end.add(Calendar.HOUR, 10);
-        DateTimeData endDate = getDateTime(end);
+        DateTimeData endDate = DateTimeUtil.getDateTime(end);
 
         /*
          * 1. Test alarm related to start
          */
         {
-            EventData event = createSingleEventWithSingleAlarm("testPositiveDurationTrigger", startDate, endDate, "-PT10M", RelatedEnum.START);
-            ChronosCalendarResultResponse createEvent = defaultUserApi.getApi().createEvent(defaultUserApi.getSession(), folderId, event, false, false);
-            event = handleCreation(createEvent);
-
-            getAndCheckEvent(event, 1);
+            EventData toCreate = EventFactory.createSingleEventWithSingleAlarm(defaultUserApi.getCalUser(), testUser.getLogin(), "testPositiveDurationTrigger", startDate, endDate, AlarmFactory.createDisplayAlarm("-PT10M"));
+            EventData event = eventManager.createEvent(toCreate);
+            getAndAssertAlarms(event, 1);
 
             // Get alarms within the next two days
             AlarmTriggerData triggers = getAndCheckAlarmTrigger(1); // one trigger
@@ -107,17 +110,15 @@ public class TimezoneAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTe
             eventId.setFolderId(event.getFolder());
             eventId.setId(event.getId());
             eventId.setRecurrenceId(event.getRecurrenceId());
-            defaultUserApi.getApi().deleteEvent(defaultUserApi.getSession(), getLastTimestamp(), Collections.singletonList(eventId));
+            eventManager.deleteEvent(eventId);
         }
         /*
          * 2. Test alarm related to end
          */
         {
-            EventData event = createSingleEventWithSingleAlarm("testPositiveDurationTrigger", startDate, endDate, "-PT10M", RelatedEnum.END);
-            ChronosCalendarResultResponse createEvent = defaultUserApi.getApi().createEvent(defaultUserApi.getSession(), folderId, event, true, false);
-            event = handleCreation(createEvent);
-
-            getAndCheckEvent(event, 1);
+            EventData toCreate = EventFactory.createSingleEventWithSingleAlarm(defaultUserApi.getCalUser(), testUser.getLogin(), "testPositiveDurationTrigger", startDate, endDate, AlarmFactory.createAlarm("-PT10M", RelatedEnum.END));
+            EventData event = eventManager.createEvent(toCreate);
+            getAndAssertAlarms(event, 1);
 
             // Get alarms within the next two days
             AlarmTriggerData triggers = getAndCheckAlarmTrigger(1); // one trigger
@@ -127,48 +128,43 @@ public class TimezoneAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTe
         }
     }
 
-    @SuppressWarnings("unchecked")
     @Test
-    public void testTriggerWithPositiveDuration() throws ApiException, ParseException {
-        Calendar start = getUTCCalendar();
+    public void testTriggerWithPositiveDuration() throws ApiException, ParseException, ChronosApiException {
+        Calendar start = DateTimeUtil.getUTCCalendar();
         start.add(Calendar.DAY_OF_MONTH, 1);
-        DateTimeData startDate = getDateTime(start);
+        DateTimeData startDate = DateTimeUtil.getDateTime(start);
 
         TimeZone endTimeZone = TimeZone.getTimeZone("Europe/Berlin");
         Calendar end = Calendar.getInstance(endTimeZone);
         end.setTimeInMillis(start.getTimeInMillis());
         end.add(Calendar.HOUR, 10);
-        DateTimeData endDate = getDateTime(end);
+        DateTimeData endDate = DateTimeUtil.getDateTime(end);
 
         /*
          * 1. Test alarm related to start
          */
         {
-            EventData event = createSingleEventWithSingleAlarm("testPositiveDurationTrigger", startDate, endDate, "PT10M", RelatedEnum.START);
-            ChronosCalendarResultResponse createEvent = defaultUserApi.getApi().createEvent(defaultUserApi.getSession(), folderId, event, false, false);
-            event = handleCreation(createEvent);
-
-            getAndCheckEvent(event, 1);
+            EventData toCreate = EventFactory.createSingleEventWithSingleAlarm(defaultUserApi.getCalUser(), testUser.getLogin(), "testPositiveDurationTrigger", startDate, endDate, AlarmFactory.createDisplayAlarm("-PT10M"));
+            EventData event = eventManager.createEvent(toCreate);
+            getAndAssertAlarms(event, 1);
 
             // Get alarms within the next two days
             AlarmTriggerData triggers = getAndCheckAlarmTrigger(1); // one trigger
             AlarmTrigger alarmTrigger = triggers.get(0);
-            checkAlarmTime(alarmTrigger, event.getId(), start.getTimeInMillis() + TimeUnit.MINUTES.toMillis(10));
+            checkAlarmTime(alarmTrigger, event.getId(), start.getTimeInMillis() - TimeUnit.MINUTES.toMillis(10));
             EventId eventId = new EventId();
             eventId.setFolderId(event.getFolder());
             eventId.setId(event.getId());
             eventId.setRecurrenceId(event.getRecurrenceId());
-            defaultUserApi.getApi().deleteEvent(defaultUserApi.getSession(), getLastTimestamp(), Collections.singletonList(eventId));
+            eventManager.deleteEvent(eventId);
         }
         /*
          * 2. Test alarm related to end
          */
         {
-            EventData event = createSingleEventWithSingleAlarm("testPositiveDurationTrigger", startDate, endDate, "PT10M", RelatedEnum.END);
-            ChronosCalendarResultResponse createEvent = defaultUserApi.getApi().createEvent(defaultUserApi.getSession(), folderId, event, true, false);
-            event = handleCreation(createEvent);
-
-            getAndCheckEvent(event, 1);
+            EventData toCreate = EventFactory.createSingleEventWithSingleAlarm(defaultUserApi.getCalUser(), testUser.getLogin(), "testPositiveDurationTrigger", startDate, endDate, AlarmFactory.createAlarm("PT10M", RelatedEnum.END));
+            EventData event = eventManager.createEvent(toCreate);
+            getAndAssertAlarms(event, 1);
 
             // Get alarms within the next two days
             AlarmTriggerData triggers = getAndCheckAlarmTrigger(1); // one trigger
@@ -177,24 +173,4 @@ public class TimezoneAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTe
             checkAlarmTime(alarmTrigger, event.getId(), end.getTimeInMillis() - offset + TimeUnit.MINUTES.toMillis(10));
         }
     }
-
-    @SuppressWarnings("unchecked")
-    protected EventData createSingleEventWithSingleAlarm(String summary, DateTimeData startDate, DateTimeData endDate, String duration, RelatedEnum related) {
-        EventData singleEvent = new EventData();
-        singleEvent.setPropertyClass("PUBLIC");
-        Attendee attendee = new Attendee();
-        attendee.entity(defaultUserApi.getCalUser());
-        attendee.cuType(CuTypeEnum.INDIVIDUAL);
-        attendee.setUri("mailto:" + this.testUser.getLogin());
-        singleEvent.setAttendees(Collections.singletonList(attendee));
-        singleEvent.setStartDate(startDate);
-
-        singleEvent.setEndDate(endDate);
-        singleEvent.setTransp(TranspEnum.OPAQUE);
-        singleEvent.setAllDay(false);
-        singleEvent.setAlarms(Collections.singletonList(createSingleAlarm(duration, related)));
-        singleEvent.setSummary(summary);
-        return singleEvent;
-    }
-
 }

@@ -52,6 +52,7 @@ package com.openexchange.chronos.provider.groupware;
 import java.util.List;
 import java.util.Set;
 import com.openexchange.chronos.AlarmTrigger;
+import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.provider.CalendarAccess;
@@ -66,6 +67,7 @@ import com.openexchange.exception.OXException;
  * {@link GroupwareCalendarAccess}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.0
  */
 public interface GroupwareCalendarAccess extends CalendarAccess {
@@ -161,7 +163,6 @@ public interface GroupwareCalendarAccess extends CalendarAccess {
      */
     CalendarResult createEvent(String folderId, Event event) throws OXException;
 
-
     /**
      * Updates an existing event.
      * <p/>
@@ -227,5 +228,16 @@ public interface GroupwareCalendarAccess extends CalendarAccess {
      * @throws OXException
      */
     List<AlarmTrigger> getAlarmTrigger(Set<String> actions) throws OXException;
+
+    /**
+     * Retrieves the {@link Attachment} with the specified managed identifier from the {@link Event}
+     * with the specified {@link EventID}
+     * 
+     * @param eventID The {@link Event} identifier
+     * @param managedId The managed identifier of the {@link Attachment}
+     * @return The {@link Attachment}
+     * @throws OXException if an error is occurred
+     */
+    Attachment getAttachment(EventID eventID, int managedId) throws OXException;
 
 }

@@ -50,6 +50,7 @@
 package com.openexchange.chronos.exception;
 
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.ACCOUNT_NOT_FOUND_MSG;
+import static com.openexchange.chronos.exception.CalendarExceptionMessages.ATTACHMENT_NOT_FOUND_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.ATTENDEE_NOT_FOUND_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.AUTH_FAILED_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.BAD_AUTH_CONFIGURATION_MSG;
@@ -70,6 +71,7 @@ import static com.openexchange.chronos.exception.CalendarExceptionMessages.MANDA
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.MISSING_CAPABILITY_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.MOVE_OCCURRENCE_NOT_SUPPORTED_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.MOVE_SERIES_NOT_SUPPORTED_MSG;
+import static com.openexchange.chronos.exception.CalendarExceptionMessages.NO_ATTACHMENTS_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.NO_PERMISSION_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.PROVIDER_NOT_AVAILABLE_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.QUERY_TOO_SHORT_MSG;
@@ -318,6 +320,16 @@ public enum CalendarExceptionCodes implements DisplayableOXExceptionCode {
     UNKNOWN_INTERNAL_ATTENDEE("Internal attendee not found [attendee %1$s]", UNKNOWN_INTERNAL_ATTENDEE_MSG, Category.CATEGORY_WARNING, 5073),
 
     AUTH_FAILED("Authentication failed to access the resource at %1$s", AUTH_FAILED_MSG, Category.CATEGORY_ERROR, 4010),
+    /**
+     * <li>The requested attachment was not found.</li>
+     * <li>Attachment not found [attachment %1$d, event %2$s, folder %3$s]</li>
+     */
+    ATTACHMENT_NOT_FOUND("Attachment not found [attachment %1$d, event %2$s, folder %3$s]", ATTACHMENT_NOT_FOUND_MSG, Category.CATEGORY_USER_INPUT, 5074),
+    /**
+     * <li>The event has no attachments.</li>
+     * <li>The event has no attachments [event %1$s, folder %2$s]</li>
+     */
+    NO_ATTACHMENTS("The event has no attachments [event %1$s, folder %2$s]", NO_ATTACHMENTS_MSG, Category.CATEGORY_USER_INPUT, 5075),
 
     ;
 

@@ -49,19 +49,36 @@
 
 package com.openexchange.chronos.json.action;
 
+import java.io.File;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TimeZone;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.ajax.container.FileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.chronos.Attachment;
+import com.openexchange.chronos.Event;
+import com.openexchange.chronos.json.converter.EventConflictResultConverter;
+import com.openexchange.chronos.json.converter.mapper.EventMapper;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccessFactory;
+import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.attach.AttachmentConfig;
+import com.openexchange.groupware.upload.UploadFile;
+import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.tools.TimeZoneUtils;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
@@ -69,6 +86,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  * {@link ChronosAction}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.0
  */
 public abstract class ChronosAction extends AbstractChronosAction {
@@ -112,6 +130,22 @@ public abstract class ChronosAction extends AbstractChronosAction {
     protected abstract AJAXRequestResult perform(IDBasedCalendarAccess calendarAccess, AJAXRequestData requestData) throws OXException;
 
     /**
+     * Handles the specified {@link OXException} and if it is of type
+     * {@link Category#CATEGORY_CONFLICT}, it returns the correct response.
+     * Otherwise the original exception is re-thrown
+     * 
+     * @param e The {@link OXException} to handle
+     * @return The proper conflict response
+     * @throws OXException The original {@link OXException} if not of type {@link Category#CATEGORY_CONFLICT}
+     */
+    AJAXRequestResult handleConflictException(OXException e) throws OXException {
+        if (isConflict(e)) {
+            return new AJAXRequestResult(e.getProblematics(), EventConflictResultConverter.INPUT_FORMAT);
+        }
+        throw e;
+    }
+
+    /**
      * Initializes the calendar access for a request and parses all known parameters supplied by the client, throwing an appropriate
      * exception in case a required parameters is missing.
      *
@@ -134,4 +168,125 @@ public abstract class ChronosAction extends AbstractChronosAction {
         return calendarAccess;
     }
 
+    /**
+     * Parses the {@link Event} from the payload object of the specified {@link AJAXRequestData}.
+     * Any {@link Attachment} uploads will also be handled and properly attached to the {@link Event}.
+     * 
+     * @param session The groupware {@link Session}
+     * @param requestData The {@link AJAXRequestData}
+     * @return The parsed {@link Event}
+     * @throws OXException if a parsing error occurs
+     */
+    protected Event parseEvent(Session session, AJAXRequestData requestData) throws OXException {
+        Map<String, Attachment> attachments = new HashMap<>();
+        JSONObject jsonEvent;
+        long maxUploadSize = AttachmentConfig.getMaxUploadSize();
+        if (requestData.hasUploads(-1, maxUploadSize > 0 ? maxUploadSize : -1L)) {
+            jsonEvent = handleUploads(requestData, attachments);
+        } else {
+            jsonEvent = extractJsonBody(requestData);
+        }
+        try {
+            Event event = EventMapper.getInstance().deserialize(jsonEvent, EventMapper.getInstance().getMappedFields(), getTimeZone(session, requestData));
+            processAttachments(attachments, event);
+            return event;
+        } catch (JSONException e) {
+            throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Processes any attachments the {@link Event} might have. It simply sets
+     * the 'data' field of each attachment.
+     * 
+     * @param attachments The uploaded attachments (data + metadata)
+     * @param event The event that contains the metadata of the attachments
+     */
+    private void processAttachments(Map<String, Attachment> attachments, Event event) {
+        if (!event.containsAttachments()) {
+            return;
+        }
+        for (Attachment attachment : event.getAttachments()) {
+            Attachment att = attachments.get(attachment.getFilename());
+            if (att != null) {
+                attachment.setData(att.getData());
+            }
+        }
+    }
+
+    /**
+     * Handles the file uploads and extracts the {@link JSONObject} payload from the upload request.
+     * 
+     * @param requestData The {@link AJAXRequestData}
+     * @param attachments The {@link Map} with the attachments
+     * @return The {@link JSONObject} payload of the POST request
+     * @throws OXException if an error is occurred
+     */
+    private JSONObject handleUploads(AJAXRequestData requestData, Map<String, Attachment> attachments) throws OXException {
+        UploadEvent uploadEvent = requestData.getUploadEvent();
+        final List<UploadFile> uploadFiles = uploadEvent.getUploadFiles();
+        for (UploadFile uploadFile : uploadFiles) {
+            attachments.put(uploadFile.getFileName(), convertUploadedFile(uploadFile));
+        }
+
+        return extractJsonBody(uploadEvent);
+    }
+
+    /**
+     * Converts the specified {@link UploadFile} to an {@link Attachment}
+     * 
+     * @param uploadFile The {@link UploadFile} to convert
+     * @return The {@link Attachment}
+     */
+    private Attachment convertUploadedFile(UploadFile uploadFile) {
+        Attachment attachment = new Attachment();
+        attachment.setContentId(uploadFile.getContentId());
+        attachment.setFilename(uploadFile.getFileName());
+        attachment.setFormatType(uploadFile.getContentType());
+        attachment.setSize(uploadFile.getSize());
+
+        File tmpFile = uploadFile.getTmpFile();
+        FileHolder fileHolder = new FileHolder(FileHolder.newClosureFor(tmpFile), tmpFile.length(), attachment.getFormatType(), attachment.getFilename());
+        attachment.setData(fileHolder);
+
+        return attachment;
+    }
+
+    /**
+     * Extracts the {@link JSONObject} payload from the specified {@link AJAXRequestData}
+     * 
+     * @param requestData the {@link AJAXRequestData} to extract the {@link JSONObject} payload from
+     * @return The extracted {@link JSONObject} payload
+     * @throws OXException if the payload is missing, or a parsing error occurs
+     */
+    private JSONObject extractJsonBody(AJAXRequestData requestData) throws OXException {
+        Object data = requestData.getData();
+        if (data == null || !(data instanceof JSONObject)) {
+            throw AjaxExceptionCodes.ILLEGAL_REQUEST_BODY.create();
+        }
+        return (JSONObject) data;
+    }
+
+    /**
+     * Extracts the {@link JSONObject} payload from the specified {@link UploadEvent}
+     * 
+     * @param upload the {@link UploadEvent} to extract the {@link JSONObject} payload from
+     * @return The extracted {@link JSONObject} payload
+     * @throws OXException if the payload is missing, or a parsing error occurs
+     */
+    private JSONObject extractJsonBody(UploadEvent upload) throws OXException {
+        try {
+            final String obj = upload.getFormField("json_0");
+            if (Strings.isEmpty(obj)) {
+                throw AjaxExceptionCodes.ILLEGAL_REQUEST_BODY.create();
+            }
+
+            JSONObject json = new JSONObject();
+            json.reset();
+            json.parseJSONString(obj);
+            return json;
+        } catch (final JSONException e) {
+            throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+        }
+    }
 }

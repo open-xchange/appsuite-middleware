@@ -3,6 +3,7 @@ requests:
   - ListRequest.yaml
   - UpdatesRequest.yaml
   - GetRequest.yaml
+  - GetAttachmentRequest.yaml
   - UpdateRequest.yaml
   - NewRequest.yaml
   - DeleteRequest.yaml

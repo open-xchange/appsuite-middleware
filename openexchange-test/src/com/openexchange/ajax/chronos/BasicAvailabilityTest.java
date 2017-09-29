@@ -57,6 +57,7 @@ import java.util.List;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.BlockJUnit4ClassRunner;
+import com.openexchange.ajax.chronos.util.DateTimeUtil;
 import com.openexchange.testing.httpclient.models.AvailabilityData;
 import com.openexchange.testing.httpclient.models.Available;
 import com.openexchange.testing.httpclient.models.GetAvailabilityResponse;
@@ -155,8 +156,8 @@ public class BasicAvailabilityTest extends AbstractChronosTest {
      */
     private Available createAvailable(long from, long until) {
         Available available = new Available();
-        available.setStart(getDateTime(from));
-        available.setEnd(getDateTime(until));
+        available.setStart(DateTimeUtil.getDateTime(from));
+        available.setEnd(DateTimeUtil.getDateTime(until));
         available.setUser(defaultUserApi.getCalUser());
         return available;
     }

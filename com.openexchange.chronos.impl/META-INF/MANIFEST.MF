@@ -5,7 +5,9 @@ Bundle-SymbolicName: com.openexchange.chronos.impl
 Bundle-Version: 7.8.4
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Import-Package: com.openexchange.capabilities,
+Import-Package: com.openexchange.ajax.container,
+ com.openexchange.ajax.fileholder,
+ com.openexchange.capabilities,
  com.openexchange.chronos,
  com.openexchange.chronos.common,
  com.openexchange.chronos.common.mapping,
@@ -25,6 +27,7 @@ Import-Package: com.openexchange.capabilities,
  com.openexchange.database.provider,
  com.openexchange.event,
  com.openexchange.exception,
+ com.openexchange.filemanagement,
  com.openexchange.folder,
  com.openexchange.folderstorage,
  com.openexchange.folderstorage.database.contentType,
