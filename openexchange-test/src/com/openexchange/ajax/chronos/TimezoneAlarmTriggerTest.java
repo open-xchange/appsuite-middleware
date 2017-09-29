@@ -65,7 +65,6 @@ import com.openexchange.testing.httpclient.models.DateTimeData;
 import com.openexchange.testing.httpclient.models.EventData;
 import com.openexchange.testing.httpclient.models.EventId;
 import com.openexchange.testing.httpclient.models.Trigger.RelatedEnum;
-import edu.emory.mathcs.backport.java.util.Collections;
 
 /**
  *
@@ -76,7 +75,13 @@ import edu.emory.mathcs.backport.java.util.Collections;
  */
 public class TimezoneAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest {
 
-    @SuppressWarnings("unchecked")
+    /**
+     * Initialises a new {@link TimezoneAlarmTriggerTest}.
+     */
+    public TimezoneAlarmTriggerTest() {
+        super();
+    }
+
     @Test
     public void testTrigger() throws ApiException, ParseException, ChronosApiException {
         Calendar start = DateTimeUtil.getUTCCalendar();
@@ -105,7 +110,7 @@ public class TimezoneAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTe
             eventId.setFolderId(event.getFolder());
             eventId.setId(event.getId());
             eventId.setRecurrenceId(event.getRecurrenceId());
-            defaultUserApi.getChronosApi().deleteEvent(defaultUserApi.getSession(), eventManager.getLastTimeStamp(), Collections.singletonList(eventId));
+            eventManager.deleteEvent(eventId);
         }
         /*
          * 2. Test alarm related to end
@@ -123,7 +128,6 @@ public class TimezoneAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTe
         }
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     public void testTriggerWithPositiveDuration() throws ApiException, ParseException, ChronosApiException {
         Calendar start = DateTimeUtil.getUTCCalendar();
@@ -147,12 +151,12 @@ public class TimezoneAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTe
             // Get alarms within the next two days
             AlarmTriggerData triggers = getAndCheckAlarmTrigger(1); // one trigger
             AlarmTrigger alarmTrigger = triggers.get(0);
-            checkAlarmTime(alarmTrigger, event.getId(), start.getTimeInMillis() + TimeUnit.MINUTES.toMillis(10));
+            checkAlarmTime(alarmTrigger, event.getId(), start.getTimeInMillis() - TimeUnit.MINUTES.toMillis(10));
             EventId eventId = new EventId();
             eventId.setFolderId(event.getFolder());
             eventId.setId(event.getId());
             eventId.setRecurrenceId(event.getRecurrenceId());
-            defaultUserApi.getChronosApi().deleteEvent(defaultUserApi.getSession(), eventManager.getLastTimeStamp(), Collections.singletonList(eventId));
+            eventManager.deleteEvent(eventId);
         }
         /*
          * 2. Test alarm related to end
