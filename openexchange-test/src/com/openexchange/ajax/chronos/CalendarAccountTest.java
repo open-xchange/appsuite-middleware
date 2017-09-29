@@ -97,7 +97,7 @@ public class CalendarAccountTest extends AbstractChronosTest {
     public void tearDown() throws Exception {
         super.tearDown();
         if (null != calendarAccountIds) {
-            defaultUserApi.getChronosApi().deleteAccount(defaultUserApi.getSession(), System.currentTimeMillis(), calendarAccountIds);
+            defaultUserApi.getChronosApi().deleteAccount(defaultUserApi.getSession(), calendarAccountIds);
         }
     }
 
