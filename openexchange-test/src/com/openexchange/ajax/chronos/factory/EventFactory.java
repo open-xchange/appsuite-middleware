@@ -52,7 +52,6 @@ package com.openexchange.ajax.chronos.factory;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
-import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 import com.openexchange.ajax.chronos.util.DateTimeUtil;
 import com.openexchange.configuration.asset.Asset;
@@ -184,10 +183,10 @@ public final class EventFactory {
      * @return The {@link EventData}
      */
     public static EventData createSingleTwoHourEvent(int userId, String emailAddress, String summary) {
-        Calendar start = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+        Calendar start = Calendar.getInstance();
         start.setTimeInMillis(System.currentTimeMillis());
 
-        Calendar end = Calendar.getInstance(TimeZone.getTimeZone("Europe/Berlin"));
+        Calendar end = Calendar.getInstance();
         end.setTimeInMillis(System.currentTimeMillis() + TimeUnit.HOURS.toMillis(2));
 
         return createSingleEvent(userId, emailAddress, summary, DateTimeUtil.getDateTime(start), DateTimeUtil.getDateTime(end));
