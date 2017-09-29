@@ -273,7 +273,7 @@ public class EventManager extends AbstractManager {
     public void deleteEvent(EventId eventId) throws ApiException {
         ChronosCalendarResultResponse deleteResponse = userApi.getChronosApi().deleteEvent(userApi.getSession(), System.currentTimeMillis(), Collections.singletonList(eventId));
         assertNull(deleteResponse.getErrorDesc(), deleteResponse.getError());
-        forgetEventId(userApi, eventId);
+        forgetEventId(eventId);
         lastTimeStamp = deleteResponse.getTimestamp();
     }
 
@@ -286,7 +286,7 @@ public class EventManager extends AbstractManager {
     public void deleteEvent(EventId eventId, long timestamp) throws ApiException {
         ChronosCalendarResultResponse deleteResponse = userApi.getChronosApi().deleteEvent(userApi.getSession(), timestamp, Collections.singletonList(eventId));
         assertNull(deleteResponse.getErrorDesc(), deleteResponse.getError());
-        forgetEventId(userApi, eventId);
+        forgetEventId(eventId);
         lastTimeStamp = deleteResponse.getTimestamp();
     }
 
@@ -369,7 +369,7 @@ public class EventManager extends AbstractManager {
         EventId eventId = new EventId();
         eventId.setId(event.getId());
         eventId.setFolderId(event.getFolder());
-        rememberEventId(userApi, eventId);
+        rememberEventId(eventId);
         lastTimeStamp = createEvent.getTimestamp();
 
         return event;
@@ -395,7 +395,7 @@ public class EventManager extends AbstractManager {
      * @param userApi The {@link UserApi}
      * @param eventId The {@link EventId}
      */
-    private void rememberEventId(UserApi userApi, EventId eventId) {
+    private void rememberEventId(EventId eventId) {
         if (eventIds == null) {
             eventIds = new ArrayList<>();
         }
@@ -408,7 +408,7 @@ public class EventManager extends AbstractManager {
      * @param userApi The {@link UserApi}
      * @param eventId The {@link EventId}
      */
-    protected void forgetEventId(UserApi userApi, EventId eventId) {
+    protected void forgetEventId(EventId eventId) {
         if (eventIds == null) {
             eventIds = new ArrayList<>();
         }
