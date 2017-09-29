@@ -424,6 +424,7 @@ public class EventPatches {
              * insert corresponding snooze alarm & establish snooze relationship
              */
             Alarm snoozeAlarm = new Alarm(new Trigger(mozSnoozeTime), AlarmAction.DISPLAY);
+            snoozeAlarm.setDescription("Reminder");
             snoozeAlarm.setAcknowledged(Tools.optExtendedPropertyAsDate(importedEvent.getExtendedProperties(), "X-MOZ-LASTACK"));
             importedEvent.getAlarms().add(snoozeAlarm);
             addSnoozeRelationship(snoozeAlarm, importedEvent.getAlarms());
