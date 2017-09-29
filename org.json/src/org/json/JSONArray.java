@@ -78,6 +78,9 @@ public class JSONArray extends AbstractJSONValue implements Iterable<Object> {
 
     private static final long serialVersionUID = -3408431864592339725L;
 
+    /** The (immutable) empty JSON array */
+    public static final JSONArray EMPTY_ARRAY = ImmutableJSONArray.immutableFor(new JSONArray(0));
+
     /** The special JSON NULL object */
     private static final Object NULL = JSONObject.NULL;
 
