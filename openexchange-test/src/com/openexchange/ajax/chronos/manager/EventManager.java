@@ -189,9 +189,23 @@ public class EventManager extends AbstractManager {
      * @throws ChronosApiException if a Chronos API error is occurred
      */
     public EventData getEvent(String eventId, boolean expectException) throws ApiException, ChronosApiException {
-        EventResponse eventResponse = userApi.getChronosApi().getEvent(userApi.getSession(), eventId, defaultFolder, null, null);
+        return getRecurringEvent(eventId, null, expectException);
+    }
+
+    /**
+     * Gets the occurrence of an event
+     * 
+     * @param eventId The {@link EventId}
+     * @param expectedException flag to indicate that an exception is expected
+     * @param reccurenceId The recurrence identifier
+     * @return the {@link EventData}
+     * @throws ApiException if an API error is occurred
+     * @throws ChronosApiException if a Chronos API error is occurred
+     */
+    public EventData getRecurringEvent(String eventId, String reccurenceId, boolean expectException) throws ApiException, ChronosApiException {
+        EventResponse eventResponse = userApi.getChronosApi().getEvent(userApi.getSession(), eventId, defaultFolder, reccurenceId, null);
         if (expectException) {
-            assertNotNull(eventResponse.getError());
+            assertNotNull("An error was expected", eventResponse.getError());
             throw new ChronosApiException(eventResponse.getCode(), eventResponse.getError());
         }
         return checkResponse(eventResponse.getError(), eventResponse.getError(), eventResponse.getData());
@@ -240,7 +254,7 @@ public class EventManager extends AbstractManager {
     }
 
     /**
-     * Retrieves all events with in the specified interval
+     * Retrieves all events with in the specified interval (occurences will not be expanded)
      * 
      * @param from The starting date
      * @param until The ending date
@@ -248,7 +262,20 @@ public class EventManager extends AbstractManager {
      * @throws ApiException if an API error occurs
      */
     public List<EventData> getAllEvents(Date from, Date until) throws ApiException {
-        EventsResponse eventsResponse = userApi.getChronosApi().getAllEvents(userApi.getSession(), DateTimeUtil.getZuluDateTime(from.getTime()).getValue(), DateTimeUtil.getZuluDateTime(until.getTime()).getValue(), defaultFolder, null, null, null, false, true);
+        return getAllEvents(from, until, false);
+    }
+
+    /**
+     * Retrieves all events with in the specified interval
+     * 
+     * @param from The starting date
+     * @param until The ending date
+     * @param expand Flag to expand the occurrences
+     * @return A {@link List} with {@link EventData}
+     * @throws ApiException if an API error occurs
+     */
+    public List<EventData> getAllEvents(Date from, Date until, boolean expand) throws ApiException {
+        EventsResponse eventsResponse = userApi.getChronosApi().getAllEvents(userApi.getSession(), DateTimeUtil.getZuluDateTime(from.getTime()).getValue(), DateTimeUtil.getZuluDateTime(until.getTime()).getValue(), defaultFolder, null, null, null, expand, true);
         return checkResponse(eventsResponse.getErrorDesc(), eventsResponse.getError(), eventsResponse.getData());
     }
 
@@ -303,14 +330,39 @@ public class EventManager extends AbstractManager {
     }
 
     /**
-     * Gets all changed events since the given timestamp.
+     * Updates the specified recurrence event and ignores conflicts
+     * 
+     * @param eventData The data of the event
+     * @param the recurrence identifier
+     * @return The updated event
+     * @throws ApiException if an API error is occurred
+     */
+    public EventData updateOccurenceEvent(EventData eventData, String recurrenceId) throws ApiException {
+        ChronosCalendarResultResponse updateResponse = userApi.getChronosApi().updateEvent(userApi.getSession(), defaultFolder, eventData.getId(), eventData, System.currentTimeMillis(), recurrenceId, true, false);
+        return handleUpdate(updateResponse);
+    }
+
+    /**
+     * Gets all changed events since the given timestamp (recurring events will not be expanded).
      * 
      * @param since The timestamp
      * @return The {@link UpdatesResult}
      * @throws ApiException if an API error is occurred
      */
     public UpdatesResult getUpdates(Date since) throws ApiException {
-        ChronosUpdatesResponse updatesResponse = userApi.getChronosApi().getUpdates(userApi.getSession(), defaultFolder, since.getTime(), null, null, null, null, null, false, true);
+        return getUpdates(since, false);
+    }
+
+    /**
+     * Gets all changed events since the given timestamp.
+     * 
+     * @param since The timestamp
+     * @param expand Flag to expand any recurring events
+     * @return The {@link UpdatesResult}
+     * @throws ApiException if an API error is occurred
+     */
+    public UpdatesResult getUpdates(Date since, boolean expand) throws ApiException {
+        ChronosUpdatesResponse updatesResponse = userApi.getChronosApi().getUpdates(userApi.getSession(), defaultFolder, since.getTime(), null, null, null, null, null, expand, true);
         return checkResponse(updatesResponse.getErrorDesc(), updatesResponse.getError(), updatesResponse.getData());
     }
 

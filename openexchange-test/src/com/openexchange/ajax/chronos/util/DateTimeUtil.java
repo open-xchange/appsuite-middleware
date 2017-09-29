@@ -114,6 +114,17 @@ public final class DateTimeUtil {
     }
 
     /**
+     * Gets the Zulu date from the specified timestamp
+     * 
+     * @param millis The timestamp
+     * @return The Zulu {@link Date}
+     * @throws ParseException if a parsing error occurs
+     */
+    public static Date getZuluDate(long millis) throws ParseException {
+        return DateTimeUtil.parseZuluDateTime(DateTimeUtil.formatZuluDate(new Date(millis)));
+    }
+
+    /**
      * Formats the specified {@link Date} into ZULU format
      * 
      * @param date The date to format
@@ -132,6 +143,17 @@ public final class DateTimeUtil {
      */
     public static Date parseZuluDateTime(String time) throws ParseException {
         return ZULU_FORMATER.get().parse(time);
+    }
+
+    /**
+     * Parses the specified {@link DateTimeData} into a {@link Date} object using the ZULU format
+     * 
+     * @param time The time
+     * @return The {@link Date}
+     * @throws ParseException if a parsing error occurs
+     */
+    public static Date parseZuluDateTime(DateTimeData time) throws ParseException {
+        return ZULU_FORMATER.get().parse(time.getValue());
     }
 
     /**

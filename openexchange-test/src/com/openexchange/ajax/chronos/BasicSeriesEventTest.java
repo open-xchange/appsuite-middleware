@@ -51,28 +51,21 @@ package com.openexchange.ajax.chronos;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.BlockJUnit4ClassRunner;
+import com.openexchange.ajax.chronos.factory.EventFactory;
+import com.openexchange.ajax.chronos.manager.ChronosApiException;
 import com.openexchange.ajax.chronos.util.AssertUtil;
 import com.openexchange.ajax.chronos.util.DateTimeUtil;
-import com.openexchange.testing.httpclient.models.Attendee;
-import com.openexchange.testing.httpclient.models.Attendee.CuTypeEnum;
-import com.openexchange.testing.httpclient.models.ChronosCalendarResultResponse;
-import com.openexchange.testing.httpclient.models.ChronosUpdatesResponse;
 import com.openexchange.testing.httpclient.models.DateTimeData;
 import com.openexchange.testing.httpclient.models.EventData;
-import com.openexchange.testing.httpclient.models.EventData.TranspEnum;
 import com.openexchange.testing.httpclient.models.EventId;
-import com.openexchange.testing.httpclient.models.EventResponse;
-import com.openexchange.testing.httpclient.models.EventsResponse;
-import edu.emory.mathcs.backport.java.util.Collections;
+import com.openexchange.testing.httpclient.models.UpdatesResult;
 import edu.emory.mathcs.backport.java.util.concurrent.TimeUnit;
 
 /**
@@ -80,6 +73,7 @@ import edu.emory.mathcs.backport.java.util.concurrent.TimeUnit;
  * {@link BasicSeriesEventTest}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.0
  */
 @RunWith(BlockJUnit4ClassRunner.class)
@@ -87,189 +81,154 @@ public class BasicSeriesEventTest extends AbstractChronosTest {
 
     private String folderId;
 
-    @SuppressWarnings("unchecked")
-    private EventData createSeriesEvent(String summary) {
-        EventData seriesEvent = new EventData();
-        seriesEvent.setPropertyClass("PUBLIC");
-        Attendee attendee = new Attendee();
-        attendee.entity(defaultUserApi.getCalUser());
-        attendee.cuType(CuTypeEnum.INDIVIDUAL);
-        attendee.setUri("mailto:" + this.testUser.getLogin());
-        seriesEvent.setAttendees(Collections.singletonList(attendee));
-        seriesEvent.setStartDate(DateTimeUtil.getDateTime(System.currentTimeMillis()));
-        seriesEvent.setEndDate(DateTimeUtil.getDateTime(System.currentTimeMillis() + 5000));
-        seriesEvent.setTransp(TranspEnum.OPAQUE);
-        seriesEvent.setAllDay(false);
-        seriesEvent.setRrule("FREQ=DAILY;COUNT=3");
-        seriesEvent.setSummary(summary);
-        return seriesEvent;
-    }
-
     @Override
     public void setUp() throws Exception {
         super.setUp();
         folderId = getDefaultFolder();
     }
 
+    /**
+     * Tests the creation of a series event
+     */
     @Test
     public void testCreateSeries() throws Exception {
-        ChronosCalendarResultResponse createEvent = defaultUserApi.getChronosApi().createEvent(defaultUserApi.getSession(), folderId, createSeriesEvent("testCreateSeries"), false, false);
-        assertNull(createEvent.getError(), createEvent.getError());
-        assertNotNull(createEvent.getData());
-        EventData event = createEvent.getData().getCreated().get(0);
-        EventId eventId = new EventId();
-        eventId.setId(event.getId());
-        eventId.setFolderId(folderId);
-        rememberEventId(defaultUserApi, eventId);
-        EventResponse eventResponse = defaultUserApi.getChronosApi().getEvent(defaultUserApi.getSession(), event.getId(), folderId, null, null);
-        assertNull(eventResponse.getError(), createEvent.getError());
-        assertNotNull(eventResponse.getData());
-        AssertUtil.assertEventsEqual(event, eventResponse.getData());
+        EventData toCreate = EventFactory.createSeriesEvent(defaultUserApi.getCalUser(), testUser.getLogin(), "testCreateSeries", 3);
+        EventData expectedEventData = eventManager.createEvent(toCreate);
+        EventData actualEventData = eventManager.getEvent(expectedEventData.getId());
+        AssertUtil.assertEventsEqual(expectedEventData, actualEventData);
     }
 
-    @SuppressWarnings("unchecked")
+    /**
+     * Tests the complete deletion of a series event
+     */
     @Test
     public void testDeleteCompleteSeries() throws Exception {
+        EventData toCreate = EventFactory.createSeriesEvent(defaultUserApi.getCalUser(), testUser.getLogin(), "testDeleteCompleteSeries", 3);
+        EventData expectedEventData = eventManager.createEvent(toCreate);
 
-        ChronosCalendarResultResponse createEvent = defaultUserApi.getChronosApi().createEvent(defaultUserApi.getSession(), folderId, createSeriesEvent("testDeleteCompleteSeries"), false, false);
-        assertNull(createEvent.getError(), createEvent.getError());
-        assertNotNull(createEvent.getData());
-        EventData event = createEvent.getData().getCreated().get(0);
         EventId eventId = new EventId();
-        eventId.setId(event.getId());
-        eventId.setFolderId(folderId);
+        eventId.setId(expectedEventData.getId());
+        eventId.setFolderId(expectedEventData.getFolder());
+        eventManager.deleteEvent(eventId);
 
-        ChronosCalendarResultResponse deleteResponse = defaultUserApi.getChronosApi().deleteEvent(defaultUserApi.getSession(), System.currentTimeMillis(), Collections.singletonList(eventId));
-        assertNull(deleteResponse.getError());
-
-        EventResponse eventResponse = defaultUserApi.getChronosApi().getEvent(defaultUserApi.getSession(), event.getId(), folderId, null, null);
-        assertNotNull(eventResponse.getError());
-        assertEquals("CAL-4040", eventResponse.getCode());
-
+        try {
+            eventManager.getEvent(expectedEventData.getId(), true);
+            fail("Series exists. Expected 'CAL-4040' error");
+        } catch (ChronosApiException e) {
+            assertEquals("CAL-4040", e.getErrorCode());
+        }
     }
 
-    @SuppressWarnings("unchecked")
+    /**
+     * Tests the deletion of an occurence from a series
+     */
     @Test
     public void testDeleteSeriesOccurence() throws Exception {
-
         Date date = new Date();
         int offset = TimeZone.getDefault().getOffset(date.getTime());
-        DateTimeData today = DateTimeUtil.getZuluDateTime(date.getTime() - offset);
-        DateTimeData nextWeek = DateTimeUtil.getZuluDateTime(DateTimeUtil.incrementDateTimeData(TimeZone.getTimeZone("UTC"), date, 7).getTime());
+        Date today = DateTimeUtil.getZuluDate(date.getTime() - offset);
+        Date nextWeek = DateTimeUtil.parseZuluDateTime(DateTimeUtil.formatZuluDate(DateTimeUtil.incrementDateTimeData(TimeZone.getTimeZone("UTC"), date, 7)));
 
-        ChronosCalendarResultResponse createEvent = defaultUserApi.getChronosApi().createEvent(defaultUserApi.getSession(), folderId, createSeriesEvent("testDeleteSeriesOccurence"), false, false);
-        assertNull(createEvent.getError(), createEvent.getError());
-        assertNotNull(createEvent.getData());
-        EventData event = createEvent.getData().getCreated().get(0);
+        EventData toCreate = EventFactory.createSeriesEvent(defaultUserApi.getCalUser(), testUser.getLogin(), "testDeleteSeriesOccurence", 3);
+        EventData expectedEventData = eventManager.createEvent(toCreate);
+
         EventId eventId = new EventId();
-        eventId.setId(event.getId());
-        eventId.setFolderId(folderId);
-        rememberEventId(defaultUserApi, eventId);
+        eventId.setId(expectedEventData.getId());
+        eventId.setFolderId(expectedEventData.getFolder());
 
-        EventsResponse eventsResponse = defaultUserApi.getChronosApi().getAllEvents(defaultUserApi.getSession(), today.getValue(), nextWeek.getValue(), folderId, null, null, null, true, true);
-        assertNull(eventsResponse.getError(), eventsResponse.getError());
-        assertNotNull(eventsResponse.getData());
-        assertEquals(3, eventsResponse.getData().size());
-        for (int x = 0; x < eventsResponse.getData().size(); x++) {
-            assertEquals(event.getId(), eventsResponse.getData().get(x).getId());
+        List<EventData> allEvents = eventManager.getAllEvents(today, nextWeek, true);
+        assertEquals("Expected 3 occurrences", 3, allEvents.size());
+        for (int x = 0; x < allEvents.size(); x++) {
+            assertEquals(expectedEventData.getId(), allEvents.get(x).getId());
         }
 
         EventId occurence = new EventId();
         occurence.setId(eventId.getId());
-        occurence.setFolderId(folderId);
-        occurence.setRecurrenceId(eventsResponse.getData().get(2).getRecurrenceId());
+        occurence.setFolderId(expectedEventData.getFolder());
+        occurence.setRecurrenceId(allEvents.get(2).getRecurrenceId());
 
-        ChronosCalendarResultResponse deleteResponse = defaultUserApi.getChronosApi().deleteEvent(defaultUserApi.getSession(), System.currentTimeMillis(), Collections.singletonList(occurence));
-        assertNull(deleteResponse.getError());
+        eventManager.deleteEvent(occurence);
 
-        EventResponse eventResponse = defaultUserApi.getChronosApi().getEvent(defaultUserApi.getSession(), occurence.getId(), folderId, occurence.getRecurrenceId(), null);
-        assertNotNull(eventResponse.getError());
-        assertEquals("CAL-4042", eventResponse.getCode());
+        try {
+            eventManager.getRecurringEvent(occurence.getId(), occurence.getRecurrenceId(), true);
+            fail("Series exists. Expected 'CAL-4042' error");
+        } catch (ChronosApiException e) {
+            assertEquals("CAL-4042", e.getErrorCode());
+        }
 
         // Get updates
-        ChronosUpdatesResponse updatesResponse = defaultUserApi.getChronosApi().getUpdates(defaultUserApi.getSession(), folderId, date.getTime(), null, null, null, null, null, true, true);
-        assertNull(updatesResponse.getError(), updatesResponse.getErrorDesc());
-        assertNotNull(updatesResponse.getData());
-        assertEquals(2, updatesResponse.getData().getNewAndModified().size());
-        for (int x = 0; x < updatesResponse.getData().getNewAndModified().size(); x++) {
-            assertEquals(event.getId(), updatesResponse.getData().getNewAndModified().get(x).getId());
+        UpdatesResult updates = eventManager.getUpdates(date, true);
+        assertEquals(2, updates.getNewAndModified().size());
+        for (int x = 0; x < updates.getNewAndModified().size(); x++) {
+            assertEquals(expectedEventData.getId(), updates.getNewAndModified().get(x).getId());
         }
     }
 
+    /**
+     * Tests the update of a the master event of a series
+     */
     @Test
     public void testUpdateSeriesMaster() throws Exception {
-        EventData initialEvent = createSeriesEvent("testUpdateSeriesMaster");
-        ChronosCalendarResultResponse createEvent = defaultUserApi.getChronosApi().createEvent(defaultUserApi.getSession(), folderId, initialEvent, false, false);
-        assertNull(createEvent.getError(), createEvent.getError());
-        assertNotNull(createEvent.getData());
-        EventData event = createEvent.getData().getCreated().get(0);
+        EventData toCreate = EventFactory.createSeriesEvent(defaultUserApi.getCalUser(), testUser.getLogin(), "testUpdateSeriesMaster", 3);
+        EventData expectedEventData = eventManager.createEvent(toCreate);
+
         EventId eventId = new EventId();
-        eventId.setId(event.getId());
-        eventId.setFolderId(folderId);
-        rememberEventId(defaultUserApi, eventId);
+        eventId.setId(expectedEventData.getId());
+        eventId.setFolderId(expectedEventData.getFolder());
 
-        event.setEndDate(DateTimeUtil.incrementDateTimeData(event.getEndDate(), 5000));
+        expectedEventData.setEndDate(DateTimeUtil.incrementDateTimeData(expectedEventData.getEndDate(), 5000));
 
-        ChronosCalendarResultResponse updateResponse = defaultUserApi.getChronosApi().updateEvent(defaultUserApi.getSession(), folderId, eventId.getId(), event, System.currentTimeMillis(), null, true, false);
-        assertNull(updateResponse.getErrorDesc(), updateResponse.getError());
-        assertNotNull(updateResponse.getData());
+        // Update
+        EventData updatedEvent = eventManager.updateEvent(expectedEventData);
 
-        List<EventData> updates = updateResponse.getData().getUpdated();
-        assertTrue(updates.size() == 1);
-        AssertUtil.assertEventsNotEqual(initialEvent, updates.get(0));
-        event.setLastModified(updates.get(0).getLastModified());
-        event.setSequence(updates.get(0).getSequence());
-        AssertUtil.assertEventsEqual(event, updates.get(0));
+        assertNotEquals("The timestamp matches", expectedEventData.getLastModified(), updatedEvent.getLastModified());
+        assertNotEquals("The sequence matches", expectedEventData.getSequence(), updatedEvent.getSequence());
+
+        expectedEventData.setLastModified(updatedEvent.getLastModified());
+        expectedEventData.setSequence(updatedEvent.getSequence());
+        AssertUtil.assertEventsEqual(expectedEventData, updatedEvent);
 
     }
 
+    /**
+     * Tests the update of an occurence with in a series
+     */
     @Test
     public void testUpdateSeriesOccurence() throws Exception {
         Date date = new Date();
         int offset = TimeZone.getDefault().getOffset(date.getTime());
-        DateTimeData today = DateTimeUtil.getZuluDateTime(date.getTime() - offset);
-        DateTimeData nextWeek = DateTimeUtil.getZuluDateTime(DateTimeUtil.incrementDateTimeData(TimeZone.getTimeZone("UTC"), date, 7).getTime());
+        Date today = DateTimeUtil.getZuluDate(date.getTime() - offset);
+        Date nextWeek = DateTimeUtil.parseZuluDateTime(DateTimeUtil.formatZuluDate(DateTimeUtil.incrementDateTimeData(TimeZone.getTimeZone("UTC"), date, 7)));
 
-        EventData initialEvent = createSeriesEvent("testUpdateSeriesOccurence");
-        //eventManager.createEvent(initialEvent);
-        ChronosCalendarResultResponse createEvent = defaultUserApi.getChronosApi().createEvent(defaultUserApi.getSession(), folderId, initialEvent, false, false);
-        assertNull(createEvent.getError(), createEvent.getError());
-        assertNotNull(createEvent.getData());
-        EventData event = createEvent.getData().getCreated().get(0);
+        EventData toCreate = EventFactory.createSeriesEvent(defaultUserApi.getCalUser(), testUser.getLogin(), "testUpdateSeriesOccurence", 3);
+        EventData expectedEventData = eventManager.createEvent(toCreate);
+
         EventId masterId = new EventId();
-        masterId.setId(event.getId());
-        masterId.setFolderId(folderId);
-        rememberEventId(defaultUserApi, masterId);
+        masterId.setId(expectedEventData.getId());
+        masterId.setFolderId(expectedEventData.getFolder());
 
-        EventsResponse eventsResponse = defaultUserApi.getChronosApi().getAllEvents(defaultUserApi.getSession(), today.getValue(), nextWeek.getValue(), folderId, null, null, null, true, true);
-        assertNull(eventsResponse.getError(), eventsResponse.getError());
-        assertNotNull(eventsResponse.getData());
-        assertEquals(3, eventsResponse.getData().size());
-        for (int x = 0; x < eventsResponse.getData().size(); x++) {
-            assertEquals(event.getId(), eventsResponse.getData().get(x).getId());
+        List<EventData> allEvents = eventManager.getAllEvents(today, nextWeek, true);
+        assertEquals("Expected 3 occurrences", 3, allEvents.size());
+        for (int x = 0; x < allEvents.size(); x++) {
+            assertEquals(expectedEventData.getId(), allEvents.get(x).getId());
         }
 
         EventId occurence = new EventId();
         occurence.setId(masterId.getId());
         occurence.setFolderId(folderId);
-        occurence.setRecurrenceId(eventsResponse.getData().get(2).getRecurrenceId());
+        occurence.setRecurrenceId(allEvents.get(2).getRecurrenceId());
 
         EventData updatedData = new EventData();
-        updatedData.setEndDate(DateTimeUtil.incrementDateTimeData(eventsResponse.getData().get(2).getEndDate(), 5000));
+        updatedData.setEndDate(DateTimeUtil.incrementDateTimeData(allEvents.get(2).getEndDate(), 5000));
+        updatedData.setId(occurence.getId());
 
-        ChronosCalendarResultResponse updateResponse = defaultUserApi.getChronosApi().updateEvent(defaultUserApi.getSession(), folderId, occurence.getId(), updatedData, eventsResponse.getTimestamp(), occurence.getRecurrenceId(), true, false);
-        assertNull(updateResponse.getError());
-        assertNotNull(updateResponse.getData());
+        EventData updatedEvent = eventManager.updateOccurenceEvent(updatedData, occurence.getRecurrenceId());
 
-        List<EventData> updates = updateResponse.getData().getUpdated();
-        assertTrue(updates.size() == 1);
+        UpdatesResult updates = eventManager.getUpdates(new Date(updatedEvent.getTimestamp()));
 
         // Get updates
-        ChronosUpdatesResponse updatesResponse = defaultUserApi.getChronosApi().getUpdates(defaultUserApi.getSession(), folderId, eventsResponse.getTimestamp(), null, null, null, null, null, false, true);
-        assertNull(updatesResponse.getError(), updatesResponse.getErrorDesc());
-        assertNotNull(updatesResponse.getData());
-        assertEquals(2, updatesResponse.getData().getNewAndModified().size());
-        for (EventData newOrModifiedEvent : updatesResponse.getData().getNewAndModified()) {
+        assertEquals(2, updates.getNewAndModified().size());
+        for (EventData newOrModifiedEvent : updates.getNewAndModified()) {
             if (newOrModifiedEvent.getId().equals(masterId.getId())) {
                 continue;
             }
@@ -280,6 +239,9 @@ public class BasicSeriesEventTest extends AbstractChronosTest {
 
     }
 
+    /**
+     * Tests getting the series
+     */
     @Test
     public void testGetSeries() throws Exception {
         Date date = new Date();
@@ -288,51 +250,39 @@ public class BasicSeriesEventTest extends AbstractChronosTest {
         DateTimeData nextWeek = DateTimeUtil.getZuluDateTime(DateTimeUtil.incrementDateTimeData(TimeZone.getTimeZone("UTC"), date, 7).getTime());
 
         // Create a series event
-        EventData eventToCreate = createSeriesEvent("testGetSeries");
-        ChronosCalendarResultResponse createEvent = defaultUserApi.getChronosApi().createEvent(defaultUserApi.getSession(), folderId, eventToCreate, false, false);
-        assertNull(createEvent.getError(), createEvent.getError());
-        assertNotNull(createEvent.getData());
-        EventData event = createEvent.getData().getCreated().get(0);
-        EventId eventId = new EventId();
-        eventId.setId(event.getId());
-        eventId.setFolderId(folderId);
-        rememberEventId(defaultUserApi, eventId);
+        EventData toCreate = EventFactory.createSeriesEvent(defaultUserApi.getCalUser(), testUser.getLogin(), "testGetSeries", 3);
+        EventData expectedEventData = eventManager.createEvent(toCreate);
 
         // Get series master
-        EventResponse eventResponse = defaultUserApi.getChronosApi().getEvent(defaultUserApi.getSession(), event.getId(), folderId, null, null);
-        assertNull(eventResponse.getError(), eventResponse.getError());
-        assertNotNull(eventResponse.getData());
-        AssertUtil.assertEventsEqual(event, eventResponse.getData());
+        EventData actualEventData = eventManager.getEvent(expectedEventData.getId());
+        AssertUtil.assertEventsEqual(expectedEventData, actualEventData);
 
         // Get all events
-        EventsResponse eventsResponse = defaultUserApi.getChronosApi().getAllEvents(defaultUserApi.getSession(), today.getValue(), nextWeek.getValue(), folderId, null, null, null, true, true);
-        assertNull(eventsResponse.getError(), eventsResponse.getError());
-        assertNotNull(eventsResponse.getData());
-        assertEquals(3, eventsResponse.getData().size());
-        for (int x = 0; x < eventsResponse.getData().size(); x++) {
-            assertEquals(event.getId(), eventsResponse.getData().get(x).getId());
+        List<EventData> allEvents = eventManager.getAllEvents(DateTimeUtil.parseZuluDateTime(today), DateTimeUtil.parseZuluDateTime(nextWeek), true);
+        assertEquals("Expected 3 occurrences", 3, allEvents.size());
+        for (int x = 0; x < allEvents.size(); x++) {
+            assertEquals(expectedEventData.getId(), allEvents.get(x).getId());
         }
 
-        // Get series occurence
-        eventResponse = defaultUserApi.getChronosApi().getEvent(defaultUserApi.getSession(), event.getId(), folderId, eventsResponse.getData().get(2).getRecurrenceId(), null);
-        assertNull(eventResponse.getError(), eventResponse.getError());
-        assertNotNull(eventResponse.getData());
-        assertEquals(event.getId(), eventResponse.getData().getId());
-        assertNotEquals(event.getRecurrenceId(), eventResponse.getData().getRecurrenceId());
-        DateTimeData expectedRecurrenceId = DateTimeUtil.getZuluDateTime(DateTimeUtil.parseDateTime(event.getStartDate()).getTime() + TimeUnit.DAYS.toMillis(2) - offset);
-        assertEquals(expectedRecurrenceId.getValue(), eventResponse.getData().getRecurrenceId());
+        // Get series occurrence
+        EventData recurringEvent = eventManager.getRecurringEvent(expectedEventData.getId(), allEvents.get(2).getRecurrenceId(), false);
+        assertEquals(expectedEventData.getId(), recurringEvent.getId());
+        assertNotEquals(expectedEventData.getRecurrenceId(), recurringEvent.getRecurrenceId());
+        DateTimeData expectedRecurrenceId = DateTimeUtil.getZuluDateTime(DateTimeUtil.parseDateTime(expectedEventData.getStartDate()).getTime() + TimeUnit.DAYS.toMillis(2) - offset);
+        assertEquals(expectedRecurrenceId.getValue(), recurringEvent.getRecurrenceId());
 
         // Get updates
-        ChronosUpdatesResponse updatesResponse = defaultUserApi.getChronosApi().getUpdates(defaultUserApi.getSession(), folderId, date.getTime(), null, null, null, null, null, true, true);
-        assertNull(updatesResponse.getError(), updatesResponse.getErrorDesc());
-        assertNotNull(updatesResponse.getData());
-        assertEquals(3, updatesResponse.getData().getNewAndModified().size());
-        for (int x = 0; x < updatesResponse.getData().getNewAndModified().size(); x++) {
-            assertEquals(event.getId(), updatesResponse.getData().getNewAndModified().get(x).getId());
+        UpdatesResult updates = eventManager.getUpdates(date, true);
+        assertEquals(3, updates.getNewAndModified().size());
+        for (int x = 0; x < updates.getNewAndModified().size(); x++) {
+            assertEquals(expectedEventData.getId(), updates.getNewAndModified().get(x).getId());
         }
 
     }
 
+    /**
+     * Tests floating series events
+     */
     @Test
     public void testFloatingSeries() throws Exception {
         Date date = new Date();
@@ -341,51 +291,34 @@ public class BasicSeriesEventTest extends AbstractChronosTest {
         DateTimeData nextWeek = DateTimeUtil.getZuluDateTime(DateTimeUtil.incrementDateTimeData(TimeZone.getTimeZone("UTC"), date, 7).getTime());
 
         // Create a series event
-        EventData eventToCreate = createSeriesEvent("testFloatingSeries");
-        eventToCreate.setStartDate(DateTimeUtil.getDateTime(null, System.currentTimeMillis()));
-        eventToCreate.setEndDate(DateTimeUtil.getDateTime(null, System.currentTimeMillis() + 5000));
-
-        ChronosCalendarResultResponse createEvent = defaultUserApi.getChronosApi().createEvent(defaultUserApi.getSession(), folderId, eventToCreate, false, false);
-        assertNull(createEvent.getError(), createEvent.getError());
-        assertNotNull(createEvent.getData());
-        EventData event = createEvent.getData().getCreated().get(0);
-        EventId eventId = new EventId();
-        eventId.setId(event.getId());
-        eventId.setFolderId(folderId);
-        rememberEventId(defaultUserApi, eventId);
+        EventData toCreate = EventFactory.createSeriesEvent(defaultUserApi.getCalUser(), testUser.getLogin(), "testFloatingSeries", 3);
+        toCreate.setStartDate(DateTimeUtil.getDateTime(null, System.currentTimeMillis()));
+        toCreate.setEndDate(DateTimeUtil.getDateTime(null, System.currentTimeMillis() + 5000));
+        EventData expectedEventData = eventManager.createEvent(toCreate);
 
         // Get series master
-        EventResponse eventResponse = defaultUserApi.getChronosApi().getEvent(defaultUserApi.getSession(), event.getId(), folderId, null, null);
-        assertNull(eventResponse.getError(), eventResponse.getError());
-        assertNotNull(eventResponse.getData());
-        AssertUtil.assertEventsEqual(event, eventResponse.getData());
+        EventData actualEventData = eventManager.getEvent(expectedEventData.getId());
+        AssertUtil.assertEventsEqual(expectedEventData, actualEventData);
 
         // Get all events
-        EventsResponse eventsResponse = defaultUserApi.getChronosApi().getAllEvents(defaultUserApi.getSession(), today.getValue(), nextWeek.getValue(), folderId, null, null, null, true, true);
-        assertNull(eventsResponse.getError(), eventsResponse.getError());
-        assertNotNull(eventsResponse.getData());
-        assertEquals(3, eventsResponse.getData().size());
-        for (int x = 0; x < eventsResponse.getData().size(); x++) {
-            assertEquals(event.getId(), eventsResponse.getData().get(x).getId());
+        List<EventData> allEvents = eventManager.getAllEvents(DateTimeUtil.parseZuluDateTime(today), DateTimeUtil.parseZuluDateTime(nextWeek), true);
+        assertEquals("Expected 3 occurrences", 3, allEvents.size());
+        for (int x = 0; x < allEvents.size(); x++) {
+            assertEquals(expectedEventData.getId(), allEvents.get(x).getId());
         }
 
-        // Get series occurence
-        eventResponse = defaultUserApi.getChronosApi().getEvent(defaultUserApi.getSession(), event.getId(), folderId, eventsResponse.getData().get(2).getRecurrenceId(), null);
-        assertNull(eventResponse.getError(), eventResponse.getError());
-        assertNotNull(eventResponse.getData());
-        assertEquals(event.getId(), eventResponse.getData().getId());
-        assertNotEquals(event.getRecurrenceId(), eventResponse.getData().getRecurrenceId());
-        DateTimeData expectedRecurrenceId = DateTimeUtil.getDateTime(null, DateTimeUtil.parseDateTime(event.getStartDate()).getTime() + TimeUnit.DAYS.toMillis(2));
-        assertEquals(expectedRecurrenceId.getValue(), eventResponse.getData().getRecurrenceId());
+        // Get series occurrence
+        EventData recurringEvent = eventManager.getRecurringEvent(expectedEventData.getId(), allEvents.get(2).getRecurrenceId(), false);
+        assertEquals(expectedEventData.getId(), recurringEvent.getId());
+        assertNotEquals(expectedEventData.getRecurrenceId(), recurringEvent.getRecurrenceId());
+        DateTimeData expectedRecurrenceId = DateTimeUtil.getDateTime(null, DateTimeUtil.parseDateTime(expectedEventData.getStartDate()).getTime() + TimeUnit.DAYS.toMillis(2));
+        assertEquals(expectedRecurrenceId.getValue(), recurringEvent.getRecurrenceId());
 
         // Get updates
-        ChronosUpdatesResponse updatesResponse = defaultUserApi.getChronosApi().getUpdates(defaultUserApi.getSession(), folderId, date.getTime(), null, null, null, null, null, true, true);
-        assertNull(updatesResponse.getError(), updatesResponse.getErrorDesc());
-        assertNotNull(updatesResponse.getData());
-        assertEquals(3, updatesResponse.getData().getNewAndModified().size());
-        for (int x = 0; x < updatesResponse.getData().getNewAndModified().size(); x++) {
-            assertEquals(event.getId(), updatesResponse.getData().getNewAndModified().get(x).getId());
+        UpdatesResult updates = eventManager.getUpdates(date, true);
+        assertEquals(3, updates.getNewAndModified().size());
+        for (int x = 0; x < updates.getNewAndModified().size(); x++) {
+            assertEquals(expectedEventData.getId(), updates.getNewAndModified().get(x).getId());
         }
-
     }
 }
