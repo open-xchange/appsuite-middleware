@@ -366,7 +366,7 @@ public class MailFilterAction extends AbstractAction<Rule, MailFilterRequest> {
     }
 
     private Integer getUniqueId(final JSONObject json) throws OXException {
-        if (json.has("id") && !json.isNull("id")) {
+        if (json.hasAndNotNull("id")) {
             try {
                 return Integer.valueOf(json.getInt("id"));
             } catch (final JSONException e) {
