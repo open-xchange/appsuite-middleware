@@ -116,10 +116,11 @@ public abstract class AttachmentsMapping<O> extends ListItemMapping<Attachment, 
         }
         if (from.has(ChronosJsonFields.Attachment.CREATED)) {
             long date = from.getLong(ChronosJsonFields.Attachment.CREATED);
-            date -= timeZone.getOffset(date);
+            if (null != timeZone) {
+                date -= timeZone.getOffset(date);
+            }
             attachment.setCreated(new Date(date));
         }
-
         /**
          * The attachment is either a uri or a managed id.
          */
@@ -149,7 +150,9 @@ public abstract class AttachmentsMapping<O> extends ListItemMapping<Attachment, 
         }
         if (null != attachment.getCreated()) {
             long date = attachment.getCreated().getTime();
-            date += timeZone.getOffset(date);
+            if (null != timeZone) {
+                date += timeZone.getOffset(date);
+            }
             jsonObject.put(ChronosJsonFields.Attachment.CREATED, date);
         }
         if (0 < attachment.getManagedId()) {
