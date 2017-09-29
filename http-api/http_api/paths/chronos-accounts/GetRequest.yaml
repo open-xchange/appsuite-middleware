@@ -8,8 +8,7 @@
       - $ref: "#/parameters/gblQueryParamSession"
       - in: query
         name: accountId
-        type: integer
-        format: int64
+        type: string
         description: Calendar account identifier
         required: true
     responses:
