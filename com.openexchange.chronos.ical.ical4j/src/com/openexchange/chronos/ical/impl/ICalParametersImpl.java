@@ -54,7 +54,7 @@ import java.util.Map;
 import org.slf4j.LoggerFactory;
 import com.openexchange.chronos.ical.ICalParameters;
 import net.fortuna.ical4j.model.TimeZoneRegistry;
-import net.fortuna.ical4j.zoneinfo.outlook.OutlookTimeZoneRegistryFactory;
+import net.fortuna.ical4j.model.TimeZoneRegistryImpl;
 
 /**
  * {@link ICalParametersImpl}
@@ -71,6 +71,9 @@ public class ICalParametersImpl implements ICalParameters {
      */
     public static final String TIMEZONE_REGISTRY = TimeZoneRegistry.class.getName();
 
+    /** The default timezone registry to use */
+    private static final TimeZoneRegistry DEFAULT_TIMEZONE_REGISTRY = new TimeZoneRegistryImpl("zoneinfo-outlook/");
+
     private final Map<String, Object> parameters;
 
     /**
@@ -83,9 +86,11 @@ public class ICalParametersImpl implements ICalParameters {
     }
 
     private void applyDefaults() {
-        //        TimeZoneRegistry defaultRegistry = TimeZoneRegistryFactory.getInstance().createRegistry();
-        TimeZoneRegistry outlookRegistry = OutlookTimeZoneRegistryFactory.getInstance().createRegistry();
-        set(TIMEZONE_REGISTRY, outlookRegistry);
+        set(TIMEZONE_REGISTRY, DEFAULT_TIMEZONE_REGISTRY);
+        //
+        //        //        TimeZoneRegistry defaultRegistry = TimeZoneRegistryFactory.getInstance().createRegistry();
+        //        TimeZoneRegistry outlookRegistry = OutlookTimeZoneRegistryFactory.getInstance().createRegistry();
+        //        set(TIMEZONE_REGISTRY, outlookRegistry);
     }
 
     @Override
