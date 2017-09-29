@@ -49,16 +49,19 @@
 
 package com.openexchange.ajax.chronos;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import java.util.ArrayList;
 import java.util.List;
 import org.json.JSONObject;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.BlockJUnit4ClassRunner;
-import com.openexchange.test.pool.TestUser;
 import com.openexchange.testing.httpclient.models.CalendarAccountId;
-import com.openexchange.testing.httpclient.models.LoginResponse;
-import com.openexchange.testing.httpclient.modules.LoginApi;
+import com.openexchange.testing.httpclient.models.CalendarAccountResponse;
+import com.openexchange.testing.httpclient.models.CalendarAccountsResponse;
+import com.openexchange.testing.httpclient.models.CommonResponse;
 
 /**
  * {@link CalendarAccountTest}
@@ -99,16 +102,14 @@ public class CalendarAccountTest extends AbstractChronosTest {
         if (null != calendarAccountIds) {
             defaultUserApi.getChronosApi().deleteAccount(defaultUserApi.getSession(), calendarAccountIds);
         }
+        calendarAccountIds.clear();
     }
 
-    private void swapClient(TestUser user) throws Exception {
-        loginApi.doLogout(defaultUserApi.getSession());
-        logoutClient(apiClient);
-        this.apiClient = generateClient(user);
-        loginApi = new LoginApi(apiClient);
-        LoginResponse login = defaultUserApi.login(user.getLogin(),user.getPassword(), apiClient);
-        defaultUserApi.setCalUser(login.getUserId());
-        defaultUserApi.setSession(login.getSession());
+    private CalendarAccountId createCalendarAccountId(String id, Long timestamp) {
+        CalendarAccountId calAccId = new CalendarAccountId();
+        calAccId.setId(id);
+        calAccId.setTimestamp(timestamp);
+        return calAccId;
     }
 
     private void rememberCalendarAccountId(CalendarAccountId calendarAccountId) {
@@ -119,107 +120,104 @@ public class CalendarAccountTest extends AbstractChronosTest {
     }
 
     @Test
-    public void testVerifyAccountAction() throws Exception {
-//        CalendarAccountResponse response = defaultUserApi.getChronosApi().createAccount(defaultUserApi.getSession(), TEST_PROVIDER_ID, createCalendarAccountTestConfiguration(false));
-//        assertNull(response.getError(), response.getError());
-//        assertNotNull(response.getData());
-//
-//        String id = response.getData().getId();
-//        rememberCalendarAccountId(id);
-//
-//        swapClient(this.testUser2);
-//
-//        response = defaultUserApi.getApi().getAccount(defaultUserApi.getSession(), Long.valueOf(id));
-//        assertNotNull(response.getError(), response.getError());
-    }
-
-    @Test
     public void testCreateAndLoadCalendarAccount() throws Exception {
-//        CalendarAccountResponse response = defaultUserApi.getChronosApi().createAccount(defaultUserApi.getSession(), TEST_PROVIDER_ID, createCalendarAccountTestConfiguration(false));
-//        assertNull(response.getError(), response.getError());
-//        assertNotNull(response.getData());
-//
-//        String id = response.getData().getId();
-//        rememberCalendarAccountId(id);
-//
-//        response = defaultUserApi.getChronosApi().getAccount(defaultUserApi.getSession(), Long.valueOf(id));
-//        assertNull(response.getError(), response.getError());
-//        assertNotNull(response.getData());
-//        assertEquals("The id of the calendar account is invalid!", id, response.getData().getId());
-//        assertEquals("The providerId of the calendar account is invalid!", TEST_PROVIDER_ID, response.getData().getProvider());
-//
-////      Test for default Account
-//        response = defaultUserApi.getChronosApi().getAccount(defaultUserApi.getSession(), Long.valueOf(DEFAULT_ACCOUNT_ID));
-//        assertNull(response.getError(), response.getError());
-//        assertNotNull(response.getData());
-//        assertEquals("The id of the default calendar account is invalid!", DEFAULT_ACCOUNT_ID, response.getData().getId());
+        CalendarAccountResponse response = defaultUserApi.getChronosApi().createAccount(defaultUserApi.getSession(), TEST_PROVIDER_ID, createCalendarAccountTestConfiguration(false));
+        assertNull(response.getError(), response.getError());
+        assertNotNull(response.getData());
+
+        String id = response.getData().getId();
+
+        response = defaultUserApi.getChronosApi().getAccount(defaultUserApi.getSession(), id);
+        rememberCalendarAccountId(createCalendarAccountId(id, response.getData().getTimestamp()));
+        assertNull(response.getError(), response.getError());
+        assertNotNull(response.getData());
+        assertEquals("The id of the calendar account is invalid!", id, response.getData().getId());
+        assertEquals("The providerId of the calendar account is invalid!", TEST_PROVIDER_ID, response.getData().getProvider());
+
+//      Test for default Account
+        response = defaultUserApi.getChronosApi().getAccount(defaultUserApi.getSession(), DEFAULT_ACCOUNT_ID);
+        assertNull(response.getError(), response.getError());
+        assertNotNull(response.getData());
+        assertEquals("The id of the default calendar account is invalid!", DEFAULT_ACCOUNT_ID, response.getData().getId());
     }
 
     @Test
     public void testLoadAllCalendarAccountsForOneProvider() throws Exception {
-//        CalendarAccountResponse response = defaultUserApi.getChronosApi().createAccount(defaultUserApi.getSession(), TEST_PROVIDER_ID, createCalendarAccountTestConfiguration(false));
-//        assertNull(response.getError(), response.getError());
-//        assertNotNull(response.getData());
-//
-//        rememberCalendarAccountId(response.getData().getId());
-//
-//        response = defaultUserApi.getApi().createAccount(defaultUserApi.getSession(), TEST_PROVIDER_ID, createCalendarAccountTestConfiguration(false));
-//        assertNull(response.getError(), response.getError());
-//        assertNotNull(response.getData());
-//
-//        rememberCalendarAccountId(response.getData().getId());
-//
-//        CalendarAccountsResponse resp = defaultUserApi.getChronosApi().getAllAccounts(defaultUserApi.getSession(), TEST_PROVIDER_ID);
-//        assertNull(resp.getError(), resp.getError());
-//        assertNotNull(response.getData());
-//        assertEquals("Invalid data size! Data should contain two entries!", 2, resp.getData().size());
-//
-//        //Test for default account
-//        resp = defaultUserApi.getApi().getAllAccounts(defaultUserApi.getSession(), DEFAULT_ACCOUNT_PROVIDER_ID);
-//        assertNull(resp.getError(), resp.getError());
-//        assertNotNull(resp.getData());
-//        assertEquals("Invalid data size! Data should only contain default account!", 1, resp.getData().size());
-//        assertEquals("The id of the default calendar account is invalid!" , DEFAULT_ACCOUNT_ID, resp.getData().get(0).getId());
+        CalendarAccountResponse response = defaultUserApi.getChronosApi().createAccount(defaultUserApi.getSession(), TEST_PROVIDER_ID, createCalendarAccountTestConfiguration(false));
+        assertNull(response.getError(), response.getError());
+        assertNotNull(response.getData());
+
+        response = defaultUserApi.getChronosApi().getAccount(defaultUserApi.getSession(), response.getData().getId());
+        rememberCalendarAccountId(createCalendarAccountId(response.getData().getId(), response.getData().getTimestamp()));
+
+        response = defaultUserApi.getChronosApi().createAccount(defaultUserApi.getSession(), TEST_PROVIDER_ID, createCalendarAccountTestConfiguration(false));
+        assertNull(response.getError(), response.getError());
+        assertNotNull(response.getData());
+
+        response = defaultUserApi.getChronosApi().getAccount(defaultUserApi.getSession(), response.getData().getId());
+        rememberCalendarAccountId(createCalendarAccountId(response.getData().getId(), response.getData().getTimestamp()));
+
+        CalendarAccountsResponse resp = defaultUserApi.getChronosApi().getAllAccounts(defaultUserApi.getSession(), TEST_PROVIDER_ID);
+        assertNull(resp.getError(), resp.getError());
+        assertNotNull(response.getData());
+        assertEquals("Invalid data size! Data should contain two entries!", 2, resp.getData().size());
+
+        //Test for default account
+        resp = defaultUserApi.getChronosApi().getAllAccounts(defaultUserApi.getSession(), DEFAULT_ACCOUNT_PROVIDER_ID);
+        assertNull(resp.getError(), resp.getError());
+        assertNotNull(resp.getData());
+        assertEquals("Invalid data size! Data should only contain default account!", 1, resp.getData().size());
+        assertEquals("The id of the default calendar account is invalid!" , DEFAULT_ACCOUNT_ID, resp.getData().get(0).getId());
 
     }
 
     @Test
     public void testUpdateCalendarAccount() throws Exception {
-//        CalendarAccountResponse response = defaultUserApi.getChronosApi().createAccount(defaultUserApi.getSession(), TEST_PROVIDER_ID, createCalendarAccountTestConfiguration(false));
-//
-//        String id = response.getData().getId();
-//        rememberCalendarAccountId(id);
-//
-//        response = defaultUserApi.getChronosApi().updateAccount(defaultUserApi.getSession(), Long.valueOf(id), createCalendarAccountTestConfiguration(true));
-//        assertNull(response.getError(), response.getError());
-//
-//        //Test for default account
-//        response = defaultUserApi.getChronosApi().updateAccount(defaultUserApi.getSession(), Long.valueOf(DEFAULT_ACCOUNT_ID), createCalendarAccountTestConfiguration(true));
-//        assertNotNull(response.getError(), response.getError());
+        CalendarAccountResponse response = defaultUserApi.getChronosApi().createAccount(defaultUserApi.getSession(), TEST_PROVIDER_ID, createCalendarAccountTestConfiguration(false));
+
+        String id = response.getData().getId();
+
+        response = defaultUserApi.getChronosApi().updateAccount(defaultUserApi.getSession(), Long.valueOf(id), createCalendarAccountTestConfiguration(true));
+        assertNull(response.getError(), response.getError());
+
+        response = defaultUserApi.getChronosApi().getAccount(defaultUserApi.getSession(), response.getData().getId());
+        rememberCalendarAccountId(createCalendarAccountId(response.getData().getId(), response.getData().getTimestamp()));
+
+        //Test for default account
+        response = defaultUserApi.getChronosApi().updateAccount(defaultUserApi.getSession(), Long.valueOf(DEFAULT_ACCOUNT_ID), createCalendarAccountTestConfiguration(true));
+        assertNotNull(response.getError(), response.getError());
     }
 
     @Test
     public void testDeleteCalendarAccount() throws Exception {
-//        CalendarAccountResponse response = defaultUserApi.getChronosApi().createAccount(defaultUserApi.getSession(), TEST_PROVIDER_ID, createCalendarAccountTestConfiguration(false));
-//
-//        String id = response.getData().getId();
-//        rememberCalendarAccountId(id);
-//
-//        response = defaultUserApi.getChronosApi().getAccount(defaultUserApi.getSession(), Long.valueOf(id));
-//        assertEquals(id, response.getData().getId());
-//        assertEquals(TEST_PROVIDER_ID, response.getData().getProvider());
-//
-//        List<String> idsToDelete = new ArrayList<>(1);
-//        idsToDelete.add(id);
-//
-//        CommonResponse resp = defaultUserApi.getChronosApi().deleteAccount(defaultUserApi.getSession(), response.getData().getTimestamp(), idsToDelete);
-//        assertNull(resp.getError(), resp.getError());
-//
-//        //Try test to delete default account
-//        idsToDelete.clear();
-//        idsToDelete.add(DEFAULT_ACCOUNT_ID);
-//        resp = defaultUserApi.getChronosApi().deleteAccount(defaultUserApi.getSession(), response.getData().getTimestamp(), idsToDelete);
-//        assertNotNull(resp.getError(), resp.getError());
+        CalendarAccountResponse response = defaultUserApi.getChronosApi().createAccount(defaultUserApi.getSession(), TEST_PROVIDER_ID, createCalendarAccountTestConfiguration(false));
+
+        String id = response.getData().getId();
+
+        response = defaultUserApi.getChronosApi().getAccount(defaultUserApi.getSession(), id);
+        assertEquals(id, response.getData().getId());
+        assertEquals(TEST_PROVIDER_ID, response.getData().getProvider());
+
+        List<CalendarAccountId> idsToDelete = new ArrayList<>(2);
+        idsToDelete.add(createCalendarAccountId(response.getData().getId(), response.getData().getTimestamp()));
+
+        response = defaultUserApi.getChronosApi().createAccount(defaultUserApi.getSession(), TEST_PROVIDER_ID, createCalendarAccountTestConfiguration(false));
+
+        id = response.getData().getId();
+
+        response = defaultUserApi.getChronosApi().getAccount(defaultUserApi.getSession(), id);
+        assertEquals(id, response.getData().getId());
+        assertEquals(TEST_PROVIDER_ID, response.getData().getProvider());
+        idsToDelete.add(createCalendarAccountId(response.getData().getId(), response.getData().getTimestamp()));
+
+        CommonResponse resp = defaultUserApi.getChronosApi().deleteAccount(defaultUserApi.getSession(),  idsToDelete);
+        assertNull(resp.getError(), resp.getError());
+
+        //Try test to delete default account
+        idsToDelete.clear();
+        idsToDelete.add(createCalendarAccountId(DEFAULT_ACCOUNT_ID, null));
+        resp = defaultUserApi.getChronosApi().deleteAccount(defaultUserApi.getSession(), idsToDelete);
+        assertNotNull(resp.getError(), resp.getError());
     }
 
 }
