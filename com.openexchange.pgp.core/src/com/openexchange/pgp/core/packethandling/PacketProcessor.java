@@ -107,6 +107,7 @@ public class PacketProcessor {
      * @param packet The parsed packet to handle
      * @param out The output to write the modified packet to
      * @param handler The handler which want't to modify the parsed package
+     * @param rememberInpuStream The underlying stream containing the whole PGP Message
      * @throws IOException
      */
     protected void handlePacket(PGPPacket packet, BCPGOutputStream out, PacketProcessorHandler handler, RememberingInputStream rememberInpuStream) throws Exception {
