@@ -79,14 +79,28 @@ public interface ICalUtilities {
     /**
      * Exports one or more alarms to <code>VALARM</code> components and writes them to the supplied output stream.
      * <p/>
-     * Note that the generated data will just contain <code>VALARM</code> components (<code>BEGIN:VALARM...END:VALARM</code>), i.e. syntactically the <i>alarmc</i> elements as
-     * per <a href="https://tools.ietf.org/html/rfc5545#section-3.6.6">RFC 5545, section 3.6.6</a>.
+     * Note that the generated data will just contain <code>VALARM</code> components (<code>BEGIN:VALARM...END:VALARM</code>), i.e.
+     * syntactically the <i>alarmc</i> elements as per
+     * <a href="https://tools.ietf.org/html/rfc5545#section-3.6.6">RFC 5545, section 3.6.6</a>.
      *
      * @param outputStream The output stream to write to
      * @param alarms The alarms to export
      * @param parameters Further parameters for the iCalendar export, or <code>null</code> to stick with the defaults
      */
     void exportAlarms(OutputStream outputStream, List<Alarm> alarms, ICalParameters parameters) throws OXException;
+
+    /**
+     * Exports one or more time zones to <code>VTIMEZONE</code> components and writes them to the supplied output stream.
+     * <p/>
+     * Note that the generated data will just contain <code>VTIMEZONE</code> components (<code>BEGIN:VTIMEZONE...END:VTIMEZONE</code>),
+     * i.e. syntactically the <i>timezonec</i> elements as per
+     * <a href="https://tools.ietf.org/html/rfc5545#section-3.6.5">RFC 5545, section 3.6.5</a>.
+     *
+     * @param outputStream The output stream to write to
+     * @param timeZoneIDs The identifiers of the time zones to export
+     * @param parameters Further parameters for the iCalendar export, or <code>null</code> to stick with the defaults
+     */
+    void exportTimeZones(OutputStream outputStream, List<String> timeZoneIDs, ICalParameters parameters) throws OXException;
 
     List<TimeZone> importTimeZones(InputStream inputStream, ICalParameters parameters) throws OXException;
 

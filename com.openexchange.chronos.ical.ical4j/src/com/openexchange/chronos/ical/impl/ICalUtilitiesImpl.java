@@ -58,12 +58,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.TimeZone;
 import com.openexchange.chronos.Alarm;
+import com.openexchange.chronos.ical.ICalExceptionCodes;
 import com.openexchange.chronos.ical.ICalParameters;
 import com.openexchange.chronos.ical.ICalUtilities;
 import com.openexchange.chronos.ical.ical4j.mapping.ICalMapper;
 import com.openexchange.exception.OXException;
+import net.fortuna.ical4j.model.Component;
 import net.fortuna.ical4j.model.ComponentList;
+import net.fortuna.ical4j.model.TimeZoneRegistry;
 import net.fortuna.ical4j.model.component.VAlarm;
+import net.fortuna.ical4j.model.component.VTimeZone;
 
 /**
  * {@link ICalUtilitiesImpl}
@@ -109,6 +113,16 @@ public class ICalUtilitiesImpl implements ICalUtilities {
         return null;
     }
 
+    @Override
+    public void exportTimeZones(OutputStream outputStream, List<String> timeZoneIDs, ICalParameters parameters) throws OXException {
+        if (null == timeZoneIDs || 0 == timeZoneIDs.size()) {
+            return;
+        }
+        parameters = getParametersOrDefault(parameters);
+        ComponentList timeZoneComponents = exportTimeZones(timeZoneIDs, parameters, new ArrayList<OXException>());
+        exportComponents(outputStream, timeZoneComponents, parameters);
+    }
+
     private ComponentList exportAlarms(List<Alarm> alarms, ICalParameters parameters, List<OXException> warnings) throws OXException {
         if (null == alarms) {
             return null;
@@ -124,6 +138,28 @@ public class ICalUtilitiesImpl implements ICalUtilities {
         VAlarm vAlarm = mapper.exportAlarm(alarm, parameters, warnings);
         ICalUtils.removeProperties(vAlarm, parameters.get(ICalParameters.IGNORED_PROPERTIES, String[].class));
         return vAlarm;
+    }
+
+    private ComponentList exportTimeZones(List<String> timeZoneIDs, ICalParameters parameters, List<OXException> warnings) throws OXException {
+        if (null == timeZoneIDs) {
+            return null;
+        }
+        ComponentList components = new ComponentList();
+        for (String timeZoneID : timeZoneIDs) {
+            components.add(exportTimeZone(timeZoneID, parameters, warnings));
+        }
+        return components;
+    }
+
+    private VTimeZone exportTimeZone(String timeZoneID, ICalParameters parameters, List<OXException> warnings) throws OXException {
+        TimeZoneRegistry timeZoneRegistry = parameters.get(ICalParametersImpl.TIMEZONE_REGISTRY, TimeZoneRegistry.class);
+        net.fortuna.ical4j.model.TimeZone timeZone = timeZoneRegistry.getTimeZone(timeZoneID);
+        if (null != timeZone) {
+            return timeZone.getVTimeZone();
+        } else {
+            warnings.add(ICalExceptionCodes.CONVERSION_FAILED.create(Component.VTIMEZONE, "No timezone '" + timeZoneID + "' registered."));
+            return null;
+        }
     }
 
 }
