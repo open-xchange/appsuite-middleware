@@ -102,7 +102,7 @@ public class CalendarAccountTest extends AbstractChronosTest {
         if (null != calendarAccountIds) {
             defaultUserApi.getChronosApi().deleteAccount(defaultUserApi.getSession(), calendarAccountIds);
         }
-        calendarAccountIds.clear();
+        calendarAccountIds = null;
     }
 
     private CalendarAccountId createCalendarAccountId(String id, Long timestamp) {
