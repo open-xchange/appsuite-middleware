@@ -73,6 +73,8 @@ public class CalendarExceptionMessages implements LocalizableStrings {
 
     public static final String NO_PERMISSION_MSG = "The operation could not be completed due to insufficient permissions.";
 
+    public static final String NOT_ORGANIZER_MSG = "This modification can only be performed by the organizer of the event.";
+
     public static final String MISSING_CAPABILITY_MSG = "The operation could not be completed due to missing capabilities.";
 
     public static final String UNSUPPORTED_FOLDER_MSG = "The supplied folder is not supported. Please select a valid folder and try again.";

@@ -913,6 +913,14 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
         }
     }
 
+    /**
+     * Checks that the event can be updated by the current session's user under the perspective of the current folder.
+     *
+     * @param originalEvent The original event being updated
+     * @throws OXException {@link CalendarExceptionCodes#UNSUPPORTED_FOLDER}, {@link CalendarExceptionCodes#NO_READ_PERMISSION},
+     *             {@link CalendarExceptionCodes#NO_WRITE_PERMISSION}, {@link CalendarExceptionCodes#NOT_ORGANIZER},
+     *             {@link CalendarExceptionCodes#RESTRICTED_BY_CLASSIFICATION}
+     */
     private void requireWritePermissions(Event originalEvent) throws OXException {
         if (session.getUserId() == originalEvent.getCreatedBy()) {
             requireCalendarPermission(folder, READ_FOLDER, READ_OWN_OBJECTS, WRITE_OWN_OBJECTS, NO_PERMISSIONS);
@@ -921,10 +929,20 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
         }
         Check.classificationAllowsUpdate(folder, originalEvent);
         if (isAttendeeSchedulingResource(originalEvent, calendarUserId) && session.getConfig().isRestrictAllowedAttendeeChanges()) {
-            throw CalendarExceptionCodes.FORBIDDEN_CHANGE.create(originalEvent.getId(), "");
+            throw CalendarExceptionCodes.NOT_ORGANIZER.create(folder.getID(), originalEvent.getId());
         }
     }
 
+    /**
+     * Checks that one or more attendees of an event can be updated by the current session's user under the perspective of the current
+     * folder.
+     *
+     * @param originalEvent The original event being updated
+     * @param updatedAttendees The attendees being updated
+     * @throws OXException {@link CalendarExceptionCodes#UNSUPPORTED_FOLDER}, {@link CalendarExceptionCodes#NO_READ_PERMISSION},
+     *             {@link CalendarExceptionCodes#NO_WRITE_PERMISSION}, {@link CalendarExceptionCodes#NOT_ORGANIZER},
+     *             {@link CalendarExceptionCodes#RESTRICTED_BY_CLASSIFICATION}
+     */
     private void requireWritePermissions(Event originalEvent, List<Attendee> updatedAttendees) throws OXException {
         if (null != updatedAttendees && (1 < updatedAttendees.size() || session.getUserId() != updatedAttendees.get(0).getEntity())) {
             requireWritePermissions(originalEvent);

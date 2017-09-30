@@ -71,6 +71,7 @@ import static com.openexchange.chronos.exception.CalendarExceptionMessages.MANDA
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.MISSING_CAPABILITY_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.MOVE_OCCURRENCE_NOT_SUPPORTED_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.MOVE_SERIES_NOT_SUPPORTED_MSG;
+import static com.openexchange.chronos.exception.CalendarExceptionMessages.NOT_ORGANIZER_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.NO_ATTACHMENTS_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.NO_PERMISSION_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.PROVIDER_NOT_AVAILABLE_MSG;
@@ -173,6 +174,11 @@ public enum CalendarExceptionCodes implements DisplayableOXExceptionCode {
      * <li>Access to event restricted by classification [folder %1$s, id %2$s, classification %3$s]</li>
      */
     RESTRICTED_BY_CLASSIFICATION("Access to event restricted by classification [folder %1$s, id %2$s, classification %3$s]", NO_PERMISSION_MSG, Category.CATEGORY_PERMISSION_DENIED, 4037),
+    /**
+     * <li>This modification can only be performed by the organizer of the event.</li>
+     * <li>Modification restricted to organizer [folder %1$s, id %2$s]</li>
+     */
+    NOT_ORGANIZER("Modification restricted to organizer [folder %1$s, id %2$s]", NOT_ORGANIZER_MSG, Category.CATEGORY_PERMISSION_DENIED, 4038),
     /**
      * <li>The supplied folder is not supported. Please select a valid folder and try again.</li>
      * <li>Unsupported folder [folder %1$s, content type %2$s]</li>
