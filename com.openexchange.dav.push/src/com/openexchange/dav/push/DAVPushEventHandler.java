@@ -85,6 +85,7 @@ public class DAVPushEventHandler implements EventHandler {
         "com/openexchange/groupware/folder/*",
         "com/openexchange/groupware/contact/*",
         "com/openexchange/groupware/appointment/*",
+        "com/openexchange/groupware/event/*",
         "com/openexchange/groupware/task/*",
     };
 
