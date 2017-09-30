@@ -201,8 +201,8 @@ public class PushSubscribeResource extends DAVResource {
     /**
      * Subscribes a client to one or more push topics using this resource's transport- and client-identifiers.
      *
-     * @param transportId The trasnport identifier to use
-     * @param token The unqiue client token to use
+     * @param transportId The transport identifier to use
+     * @param token The unique client token to use
      * @param topics The topics to subscribe to
      * @param expires The expiration date of the subscription, or <code>null</code> if not defined
      */

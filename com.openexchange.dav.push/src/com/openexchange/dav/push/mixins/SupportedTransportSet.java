@@ -100,12 +100,16 @@ public class SupportedTransportSet extends SingleResourcePropertyMixin {
         StringBuilder stringBuilder = new StringBuilder();
         for (DavPushGateway gateway : pushGateways) {
             if (gateway.servesClient(clientID)) {
-                stringBuilder
-                    .append("<transport>")
-                    .append(  "<transport-uri>" + gateway.getOptions().getTransportURI() + "</transport-uri>")
-                    .append(  "<refresh-interval>" + gateway.getOptions().getRefreshInterval() + "</refresh-interval>")
-                    .append("</transport>")
-                ;
+                //TODO: init via https://tools.ietf.org/html/draft-gajda-dav-push-00#section-5.1
+                // empty transport lets client choose 'his' transport settings
+                stringBuilder.append("<transport/>");
+                //                stringBuilder
+                //                    .append("<transport>")
+                //                    .append(  "<transport-uri>" + gateway.getOptions().getTransportURI() + "</transport-uri>")
+                //                    .append(  "<refresh-interval>" + gateway.getOptions().getRefreshInterval() + "</refresh-interval>")
+                //                    .append(  "<transport-data>" + "{ \"{http://davpush.com/ns/davpush}sender-id\": 1061607552595 }" + "</transport-data>")
+                //                    .append("</transport>")
+                //                ;
             }
         }
         return stringBuilder.toString();
