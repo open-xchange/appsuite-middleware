@@ -59,6 +59,7 @@ import static com.openexchange.chronos.common.CalendarUtils.getFolderView;
 import static com.openexchange.chronos.common.CalendarUtils.getUserIDs;
 import static com.openexchange.chronos.common.CalendarUtils.hasExternalOrganizer;
 import static com.openexchange.chronos.common.CalendarUtils.initCalendar;
+import static com.openexchange.chronos.common.CalendarUtils.isAttendeeSchedulingResource;
 import static com.openexchange.chronos.common.CalendarUtils.isGroupScheduled;
 import static com.openexchange.chronos.common.CalendarUtils.isOrganizer;
 import static com.openexchange.chronos.common.CalendarUtils.isPublicClassification;
@@ -919,6 +920,9 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
             requireCalendarPermission(folder, READ_FOLDER, READ_ALL_OBJECTS, WRITE_ALL_OBJECTS, NO_PERMISSIONS);
         }
         Check.classificationAllowsUpdate(folder, originalEvent);
+        if (isAttendeeSchedulingResource(originalEvent, calendarUserId) && session.getConfig().isRestrictAllowedAttendeeChanges()) {
+            throw CalendarExceptionCodes.FORBIDDEN_CHANGE.create(originalEvent.getId(), "");
+        }
     }
 
     private void requireWritePermissions(Event originalEvent, List<Attendee> updatedAttendees) throws OXException {
