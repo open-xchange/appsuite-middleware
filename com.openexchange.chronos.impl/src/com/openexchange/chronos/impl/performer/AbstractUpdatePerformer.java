@@ -63,6 +63,8 @@ import static com.openexchange.chronos.impl.Utils.getCalendarUserId;
 import static com.openexchange.chronos.impl.Utils.getPersonalFolderIds;
 import static com.openexchange.chronos.impl.Utils.getSearchTerm;
 import static com.openexchange.chronos.impl.Utils.isInFolder;
+import static com.openexchange.chronos.impl.Utils.isResolveOccurrences;
+import static com.openexchange.chronos.impl.Utils.mapEventOccurrences;
 import static com.openexchange.folderstorage.Permission.DELETE_ALL_OBJECTS;
 import static com.openexchange.folderstorage.Permission.DELETE_OWN_OBJECTS;
 import static com.openexchange.folderstorage.Permission.NO_PERMISSIONS;
@@ -146,11 +148,18 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
      */
     protected void trackCreation(Event createdEvent) throws OXException {
         /*
-         * track affected folders and add 'plain' and 'userized' event creations
+         * track affected folders and add 'plain' event creation
          */
         result.addAffectedFolderIds(folder.getID(), getPersonalFolderIds(createdEvent.getAttendees()));
         result.addPlainCreation(createdEvent);
-        result.addUserizedCreation(userize(createdEvent));
+        /*
+         * prepare 'userized' version of created event & expand event series if needed prior adding results
+         */
+        if (isSeriesMaster(createdEvent) && isResolveOccurrences(session)) {
+            result.addUserizedCreations(resolveOccurrences(userize(createdEvent)));
+        } else {
+            result.addUserizedCreation(userize(createdEvent));
+        }
     }
 
     /**
@@ -171,16 +180,55 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
          */
         if (isInFolder(originalEvent, folder)) {
             if (isInFolder(updatedEvent, folder)) {
-                result.addUserizedUpdate(userize(originalEvent), userize(updatedEvent));
+                /*
+                 * "update" from calendar user's point of view
+                 */
+                if (isResolveOccurrences(session) && (isSeriesMaster(originalEvent) || isSeriesMaster(updatedEvent))) {
+                    if (isSeriesMaster(originalEvent) && isSeriesMaster(updatedEvent)) {
+                        for (Entry<Event, Event> entry : mapEventOccurrences(resolveOccurrences(userize(originalEvent)), resolveOccurrences(userize(updatedEvent)))) {
+                            if (null == entry.getKey()) {
+                                result.addUserizedCreation(entry.getValue());
+                            } else if (null == entry.getValue()) {
+                                result.addUserizedDeletion(timestamp.getTime(), new EventID(folder.getID(), entry.getKey().getId(), entry.getKey().getRecurrenceId()));
+                            } else {
+                                result.addUserizedUpdate(entry.getKey(), entry.getValue());
+                            }
+                        }
+                    } else if (isSeriesMaster(originalEvent)) {
+                        for (Event originalOccurrence : resolveOccurrences(userize(originalEvent))) {
+                            result.addUserizedDeletion(timestamp.getTime(), new EventID(folder.getID(), originalOccurrence.getId(), originalOccurrence.getRecurrenceId()));
+                        }
+                        result.addUserizedDeletion(timestamp.getTime(), new EventID(folder.getID(), originalEvent.getId(), originalEvent.getRecurrenceId()));
+                        result.addUserizedCreation(userize(updatedEvent));
+                    } else if (isSeriesMaster(updatedEvent)) {
+                        result.addUserizedDeletion(timestamp.getTime(), new EventID(folder.getID(), originalEvent.getId(), originalEvent.getRecurrenceId()));
+                        result.addUserizedCreations(resolveOccurrences(userize(updatedEvent)));
+                    }
+                } else {
+                    result.addUserizedUpdate(userize(originalEvent), userize(updatedEvent));
+                }
             } else {
-                result.addUserizedDeletion(timestamp.getTime(), new EventID(folder.getID(), originalEvent.getId(), originalEvent.getRecurrenceId()));
+                /*
+                 * "delete" from calendar user's point of view
+                 */
+                if (isSeriesMaster(originalEvent) && isResolveOccurrences(session)) {
+                    for (Event originalOccurrence : resolveOccurrences(userize(originalEvent))) {
+                        result.addUserizedDeletion(timestamp.getTime(), new EventID(folder.getID(), originalOccurrence.getId(), originalOccurrence.getRecurrenceId()));
+                    }
+                } else {
+                    result.addUserizedDeletion(timestamp.getTime(), new EventID(folder.getID(), originalEvent.getId(), originalEvent.getRecurrenceId()));
+                }
             }
         } else if (isInFolder(updatedEvent, folder)) {
             /*
-             * possible for attendee being added to an existing event, so that it shows up in the new attendee's folder
-             * afterwards (after #needsExistenceCheckInTargetFolder() was false)
+             * "create" from calendar user's point of view - possible for attendee being added to an existing event, so that it shows up
+             * in the new attendee's folder afterwards (after #needsExistenceCheckInTargetFolder() was false)
              */
-            result.addUserizedCreation(updatedEvent);
+            if (isSeriesMaster(updatedEvent) && isResolveOccurrences(session)) {
+                result.addUserizedCreations(resolveOccurrences(userize(updatedEvent)));
+            } else {
+                result.addUserizedCreation(userize(updatedEvent));
+            }
         }
     }
 
@@ -190,10 +238,16 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
      *
      * @param deletedEvent The deleted event
      */
-    protected void trackDeletion(Event deletedEvent) {
+    protected void trackDeletion(Event deletedEvent) throws OXException {
         result.addAffectedFolderIds(folder.getID(), getPersonalFolderIds(deletedEvent.getAttendees()));
         result.addPlainDeletion(timestamp.getTime(), getEventID(deletedEvent));
-        result.addUserizedDeletion(timestamp.getTime(), new EventID(folder.getID(), deletedEvent.getId(), deletedEvent.getRecurrenceId()));
+        if (isSeriesMaster(deletedEvent) && isResolveOccurrences(session)) {
+            for (Event deletedOccurrence : resolveOccurrences(userize(deletedEvent))) {
+                result.addUserizedDeletion(timestamp.getTime(), new EventID(folder.getID(), deletedOccurrence.getId(), deletedOccurrence.getRecurrenceId()));
+            }
+        } else {
+            result.addUserizedDeletion(timestamp.getTime(), new EventID(folder.getID(), deletedEvent.getId(), deletedEvent.getRecurrenceId()));
+        }
     }
 
     /**

@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.impl;
 
+import static com.openexchange.chronos.common.CalendarUtils.find;
 import static com.openexchange.chronos.common.CalendarUtils.isClassifiedFor;
 import static com.openexchange.chronos.common.CalendarUtils.isGroupScheduled;
 import static com.openexchange.chronos.common.CalendarUtils.isInRange;
@@ -59,6 +60,7 @@ import static com.openexchange.chronos.impl.AbstractStorageOperation.PARAM_CONNE
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.i2I;
 import java.sql.Connection;
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -69,6 +71,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TimeZone;
@@ -509,6 +512,27 @@ public class Utils {
             }
             throw e;
         }
+    }
+
+    /**
+     * Maps the corresponding event occurrences from two collections based on their common object- and recurrence identifiers.
+     *
+     * @param originalOccurrences The original event occurrences
+     * @param updatedOccurrences The updated event occurrences
+     * @return A list of entries holding each of the matching original and updated event occurrences, with one of them possibly <code>null</code>
+     */
+    public static List<Entry<Event, Event>> mapEventOccurrences(List<Event> originalOccurrences, List<Event> updatedOccurrences) {
+        List<Entry<Event, Event>> mappedEvents = new ArrayList<Entry<Event, Event>>(Math.max(originalOccurrences.size(), updatedOccurrences.size()));
+        for (Event originalOccurrence : originalOccurrences) {
+            Event updatedOccurrence = find(updatedOccurrences, originalOccurrence.getId(), originalOccurrence.getRecurrenceId());
+            mappedEvents.add(new AbstractMap.SimpleEntry<Event, Event>(originalOccurrence, updatedOccurrence));
+        }
+        for (Event updatedOccurrence : updatedOccurrences) {
+            if (null == find(originalOccurrences, updatedOccurrence.getId(), updatedOccurrence.getRecurrenceId())) {
+                mappedEvents.add(new AbstractMap.SimpleEntry<Event, Event>(null, updatedOccurrence));
+            }
+        }
+        return mappedEvents;
     }
 
     /**

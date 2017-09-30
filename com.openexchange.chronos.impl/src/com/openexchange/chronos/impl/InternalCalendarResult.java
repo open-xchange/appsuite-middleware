@@ -139,20 +139,6 @@ public class InternalCalendarResult {
     /**
      * Adds a plain/vanilla deletion to this calendar result.
      *
-     * @param deletion The deletion to add
-     * @return A self reference
-     */
-    public InternalCalendarResult addPlainDeletion(DeleteResult deletion) {
-        if (null == deletions) {
-            deletions = new ArrayList<DeleteResult>();
-        }
-        deletions.add(deletion);
-        return this;
-    }
-
-    /**
-     * Adds a plain/vanilla deletion to this calendar result.
-     *
      * @param timestamp The timestamp
      * @param eventID The identifier of the deleted event
      * @return A self reference
@@ -162,16 +148,16 @@ public class InternalCalendarResult {
     }
 
     /**
-     * Adds a <i>userized</i> deletion to this calendar result.
+     * Adds a plain/vanilla deletion to this calendar result.
      *
      * @param deletion The deletion to add
      * @return A self reference
      */
-    public InternalCalendarResult addUserizedDeletion(DeleteResult deletion) {
-        if (null == userizedDeletions) {
-            userizedDeletions = new ArrayList<DeleteResult>();
+    private InternalCalendarResult addPlainDeletion(DeleteResult deletion) {
+        if (null == deletions) {
+            deletions = new ArrayList<DeleteResult>();
         }
-        userizedDeletions.add(deletion);
+        deletions.add(deletion);
         return this;
     }
 
@@ -187,16 +173,16 @@ public class InternalCalendarResult {
     }
 
     /**
-     * Adds a plain/vanilla creation to this calendar result.
+     * Adds a <i>userized</i> deletion to this calendar result.
      *
-     * @param creation The creation to add
+     * @param deletion The deletion to add
      * @return A self reference
      */
-    public InternalCalendarResult addPlainCreation(CreateResult creation) {
-        if (null == creations) {
-            creations = new ArrayList<CreateResult>();
+    private InternalCalendarResult addUserizedDeletion(DeleteResult deletion) {
+        if (null == userizedDeletions) {
+            userizedDeletions = new ArrayList<DeleteResult>();
         }
-        creations.add(creation);
+        userizedDeletions.add(deletion);
         return this;
     }
 
@@ -211,16 +197,16 @@ public class InternalCalendarResult {
     }
 
     /**
-     * Adds a <i>userized</i> creation to this calendar result.
+     * Adds a plain/vanilla creation to this calendar result.
      *
      * @param creation The creation to add
      * @return A self reference
      */
-    public InternalCalendarResult addUserizedCreation(CreateResult creation) {
-        if (null == userizedCreations) {
-            userizedCreations = new ArrayList<CreateResult>();
+    private InternalCalendarResult addPlainCreation(CreateResult creation) {
+        if (null == creations) {
+            creations = new ArrayList<CreateResult>();
         }
-        userizedCreations.add(creation);
+        creations.add(creation);
         return this;
     }
 
@@ -235,16 +221,29 @@ public class InternalCalendarResult {
     }
 
     /**
-     * Adds a plain/vanilla update to this calendar result.
+     * Adds a <i>userized</i> creations to this calendar result.
      *
-     * @param update The update to add
+     * @param createdEvents The created events
      * @return A self reference
      */
-    public InternalCalendarResult addPlainUpdate(UpdateResult update) {
-        if (null == updates) {
-            updates = new ArrayList<UpdateResult>();
+    public InternalCalendarResult addUserizedCreations(List<Event> createdEvents) {
+        for (Event createdEvent : createdEvents) {
+            addUserizedCreation(new CreateResultImpl(createdEvent));
         }
-        updates.add(update);
+        return this;
+    }
+
+    /**
+     * Adds a <i>userized</i> creation to this calendar result.
+     *
+     * @param creation The creation to add
+     * @return A self reference
+     */
+    private InternalCalendarResult addUserizedCreation(CreateResult creation) {
+        if (null == userizedCreations) {
+            userizedCreations = new ArrayList<CreateResult>();
+        }
+        userizedCreations.add(creation);
         return this;
     }
 
@@ -260,16 +259,16 @@ public class InternalCalendarResult {
     }
 
     /**
-     * Adds a <i>userized</i> update to this calendar result.
+     * Adds a plain/vanilla update to this calendar result.
      *
      * @param update The update to add
      * @return A self reference
      */
-    public InternalCalendarResult addUserizedUpdate(UpdateResult update) {
-        if (null == userizedUpdates) {
-            userizedUpdates = new ArrayList<UpdateResult>();
+    private InternalCalendarResult addPlainUpdate(UpdateResult update) {
+        if (null == updates) {
+            updates = new ArrayList<UpdateResult>();
         }
-        userizedUpdates.add(update);
+        updates.add(update);
         return this;
     }
 
@@ -282,6 +281,20 @@ public class InternalCalendarResult {
      */
     public InternalCalendarResult addUserizedUpdate(Event originalEvent, Event updatedEvent) throws OXException {
         return addUserizedUpdate(new UpdateResultImpl(originalEvent, updatedEvent));
+    }
+
+    /**
+     * Adds a <i>userized</i> update to this calendar result.
+     *
+     * @param update The update to add
+     * @return A self reference
+     */
+    private InternalCalendarResult addUserizedUpdate(UpdateResult update) {
+        if (null == userizedUpdates) {
+            userizedUpdates = new ArrayList<UpdateResult>();
+        }
+        userizedUpdates.add(update);
+        return this;
     }
 
     /**

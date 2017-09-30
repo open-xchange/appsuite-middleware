@@ -152,7 +152,7 @@ public class CalendarConfigImpl implements CalendarConfig {
 
     @Override
     public boolean isRestrictAllowedAttendeeChanges() {
-        return getConfigValue("com.openexchange.chronos.restrictAllowedAttendeeChanges", Boolean.class, Boolean.TRUE).booleanValue();
+        return getConfigValue("com.openexchange.chronos.restrictAllowedAttendeeChanges", Boolean.class, Boolean.FALSE).booleanValue();
     }
 
     private OXFolderAccess getFolderAccess() throws OXException {

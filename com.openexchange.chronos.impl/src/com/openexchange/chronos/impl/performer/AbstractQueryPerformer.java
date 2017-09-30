@@ -351,7 +351,7 @@ public abstract class AbstractQueryPerformer {
         return CalendarUtils.getRecurrenceIds(changeExceptions);
     }
 
-    private List<Event> resolveOccurrences(Event master) throws OXException {
+    protected List<Event> resolveOccurrences(Event master) throws OXException {
         return Utils.asList(resolveOccurrences(master, getFrom(session), getUntil(session)));
     }
 
