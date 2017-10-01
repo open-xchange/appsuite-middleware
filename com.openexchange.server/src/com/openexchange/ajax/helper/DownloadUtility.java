@@ -70,6 +70,8 @@ import com.openexchange.ajax.fileholder.IFileHolder.RandomAccess;
 import com.openexchange.ajax.fileholder.Readable;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.upload.UploadFile;
+import com.openexchange.groupware.upload.impl.UploadImageSizeExceededException;
+import com.openexchange.groupware.upload.impl.UploadException.UploadCode;
 import com.openexchange.html.HtmlService;
 import com.openexchange.html.HtmlServices;
 import com.openexchange.imagetransformation.Utility;
@@ -876,7 +878,7 @@ public final class DownloadUtility {
             long maxSize = Utility.maxSize();
             if (0 < maxSize && maxSize < imageFile.getSize()) {
                 // Too big
-                throw DownloadUtilityExceptionCode.IMAGE_TOO_BIG.create(imageFile.getSize(), maxSize);
+                throw UploadImageSizeExceededException.create(imageFile.getSize(), maxSize, true);
             }
         }
 
@@ -887,7 +889,7 @@ public final class DownloadUtility {
                 int resolution = dimension.height * dimension.width;
                 if (resolution > maxResolution) {
                     // Resolution too high
-                    throw DownloadUtilityExceptionCode.IMAGE_RESOLUTION_TOO_HIGH.create(resolution, maxResolution);
+                    throw UploadCode.IMAGE_RESOLUTION_TOO_HIGH.create(resolution, maxResolution);
                 }
             }
         }

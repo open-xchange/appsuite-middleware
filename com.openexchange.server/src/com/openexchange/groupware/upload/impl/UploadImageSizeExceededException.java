@@ -47,33 +47,50 @@
  *
  */
 
-package com.openexchange.ajax.helper;
+package com.openexchange.groupware.upload.impl;
 
-import com.openexchange.i18n.LocalizableStrings;
+import static com.openexchange.groupware.upload.impl.UploadUtility.getSize;
 
 /**
- * {@link DownloadUtilityExceptionMessage}
+ * {@link UploadImageSizeExceededException} - The upload error with code IMAGE_TOO_BIG providing the possibility to convert bytes to a
+ * human readable string; e.g. <code>88.3 MB</code>.
  *
- * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
- * @since v7.10.0
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class DownloadUtilityExceptionMessage implements LocalizableStrings {
+public final class UploadImageSizeExceededException extends UploadException {
 
     /**
-     * Initializes a new {@link DownloadUtilityExceptionMessage}.
+     * No instance.
      */
-    private DownloadUtilityExceptionMessage() {
-        super();
+    private UploadImageSizeExceededException(final int code, final String displayMessage, final Throwable cause, final Object[] displayArgs) {
+        super(code, displayMessage, cause, displayArgs);
+    }
+
+    private static final long serialVersionUID = -7266524953168225923L;
+
+    /**
+     * Initializes a new {@link UploadException} for exceeded upload file size.
+     *
+     * @param size The actual file size in bytes
+     * @param maxSize The max. allowed file size in bytes
+     * @param humanReadable <code>true</code> to convert bytes to a human readable string; otherwise <code>false</code>
+     */
+    public static UploadException create(long size, long maxSize, boolean humanReadable) {
+        return create(null, size, maxSize, humanReadable);
     }
 
     /**
-     * Image upload denied. Size is too big.
+     * Initializes a new {@link UploadException} for exceeded upload file size.
+     *
+     * @param cause The cause
+     * @param size The actual file size in bytes
+     * @param maxSize The max. allowed file size in bytes
+     * @param humanReadable <code>true</code> to convert bytes to a human readable string; otherwise <code>false</code>
      */
-    public final static String IMAGE_TOO_BIG_MSG = "Image upload denied. Size is too big.";
-
-    /**
-     * Image upload denied. Resolution is too high.
-     */
-    public final static String IMAGE_RESOLUTION_TOO_HIGH_MSG = "Image upload denied. Resolution is too high.";
+    public static UploadException create(Throwable cause, long size, long maxSize, boolean humanReadable) {
+        return UploadException.UploadCode.IMAGE_TOO_BIG.create(cause,
+            humanReadable ? getSize(size, 2, false, true) : Long.valueOf(size),
+            humanReadable ? getSize(maxSize, 2, false, true) : Long.valueOf(maxSize)).setAction(null);
+    }
 
 }
