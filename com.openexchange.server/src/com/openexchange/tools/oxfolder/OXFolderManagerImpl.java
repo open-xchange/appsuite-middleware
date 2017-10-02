@@ -1071,16 +1071,16 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
         }
     }
 
-    private void setProperSystemValues(List<OCLPermission> permissions, List<OCLPermission> original){
-
-        for(OCLPermission perm: permissions){
-            for(OCLPermission originalPerm: original){
-                if (perm.isGroupPermission() == originalPerm.isGroupPermission() && perm.getEntity() == originalPerm.getEntity() && originalPerm.getSystem() == 2 && perm.getSystem() != 1) {
-                    perm.setSystem(2);
+    void setProperSystemValues(List<OCLPermission> permissions, List<OCLPermission> original) {
+        for (OCLPermission perm : permissions) {
+            if (perm.getSystem() != 1) {
+                for (OCLPermission originalPerm : original) {
+                    if (originalPerm.getSystem() == 2 && perm.isGroupPermission() == originalPerm.isGroupPermission() && perm.getEntity() == originalPerm.getEntity()) {
+                        perm.setSystem(2);
+                    }
                 }
             }
         }
-
     }
 
     private int getFolderTypeFromMaster(int folderId) throws OXException {
