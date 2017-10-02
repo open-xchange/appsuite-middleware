@@ -89,7 +89,7 @@ public class EventManager extends AbstractManager {
 
     private List<EventId> eventIds;
     private long lastTimeStamp;
-    
+
     private static final boolean EXPAND_SERIES = false;
 
     /**
@@ -381,6 +381,25 @@ public class EventManager extends AbstractManager {
     public UpdatesResult getUpdates(Date since, boolean expand) throws ApiException {
         ChronosUpdatesResponse updatesResponse = userApi.getChronosApi().getUpdates(userApi.getSession(), defaultFolder, since.getTime(), null, null, null, null, null, expand, true);
         return checkResponse(updatesResponse.getErrorDesc(), updatesResponse.getError(), updatesResponse.getData());
+    }
+
+    /**
+     * Acknowledges the alarm with the specified identifier for the specified event
+     * 
+     * @param eventId The event identifier
+     * @param alarmId The alarm identifier
+     * @return The time of the acknowledgement
+     * @throws ApiException if an API error is occurred
+     */
+    public Long acknowledgeAlarm(String eventId, int alarmId) throws ApiException {
+        ChronosCalendarResultResponse acknowledgeAlarm = userApi.getChronosApi().acknowledgeAlarm(userApi.getSession(), eventId, defaultFolder, alarmId);
+        CalendarResult checkResponse = checkResponse(acknowledgeAlarm.getError(), acknowledgeAlarm.getErrorDesc(), acknowledgeAlarm.getData());
+        assertEquals(1, checkResponse.getUpdated().size());
+        EventData updated = checkResponse.getUpdated().get(0);
+        Long acknowledged = updated.getAlarms().get(0).getAcknowledged();
+        assertNotNull(acknowledged);
+
+        return acknowledged;
     }
 
     /**
