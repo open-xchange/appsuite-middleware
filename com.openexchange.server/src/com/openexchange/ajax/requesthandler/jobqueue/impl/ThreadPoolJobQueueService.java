@@ -117,8 +117,8 @@ public class ThreadPoolJobQueueService implements JobQueueService {
      */
     public ThreadPoolJobQueueService(ConfigurationService configService) {
         super();
-        int defaultMaxRequestAgeMillis = 60000;
-        maxRequestAgeMillis = configService.getIntProperty("com.openexchange.requestwatcher.maxRequestAge", defaultMaxRequestAgeMillis);
+        int defaultMaxRequestAgeMillis = 10000;
+        maxRequestAgeMillis = configService.getIntProperty("com.openexchange.jobqueue.waitMillis", defaultMaxRequestAgeMillis);
 
         RemovalListener<UUID, FutureJobInfo> listener = new RemovalListener<UUID, FutureJobInfo>() {
 
