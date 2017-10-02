@@ -131,7 +131,8 @@ public class AbstractChronosTest extends AbstractAPIClientSession {
         try {
             if (eventIds != null) {
                 for (UserApi api : eventIds.keySet()) {
-                    api.getChronosApi().deleteEvent(api.getSession(), System.currentTimeMillis(), eventIds.get(api));
+                    // FIXME: Switch to EventManager
+                    api.getChronosApi().deleteEvent(api.getSession(), System.currentTimeMillis(), eventIds.get(api), null, null, false);
                 }
             }
         } catch (Exception e) {

@@ -217,7 +217,8 @@ public abstract class AbstractAlarmTriggerTest extends AbstractAlarmTest {
      * @throws ParseException
      */
     protected EventData createSingleEvent(String name, long startTime) throws ApiException, ParseException {
-        ChronosCalendarResultResponse createEvent = defaultUserApi.getChronosApi().createEvent(defaultUserApi.getSession(), folderId, createSingleEventWithSingleAlarm(name, DateTimeUtil.getDateTime(startTime), "-PT15M", null), false, false);
+        // FIXME: Use the EventManager instead
+        ChronosCalendarResultResponse createEvent = defaultUserApi.getChronosApi().createEvent(defaultUserApi.getSession(), folderId, createSingleEventWithSingleAlarm(name, DateTimeUtil.getDateTime(startTime), "-PT15M", null), false, false, null, null, false);
         return handleCreation(createEvent);
     }
 
@@ -232,7 +233,8 @@ public abstract class AbstractAlarmTriggerTest extends AbstractAlarmTest {
      * @throws ParseException
      */
     protected EventData createSingleEvent(String name, Calendar startTime) throws ApiException, ParseException {
-        ChronosCalendarResultResponse createEvent = defaultUserApi.getChronosApi().createEvent(defaultUserApi.getSession(), folderId, createSingleEventWithSingleAlarm(name, DateTimeUtil.getDateTime(startTime), "-PT15M", null), false, false);
+        // FIXME: Use the EventManager instead
+        ChronosCalendarResultResponse createEvent = defaultUserApi.getChronosApi().createEvent(defaultUserApi.getSession(), folderId, createSingleEventWithSingleAlarm(name, DateTimeUtil.getDateTime(startTime), "-PT15M", null), false, false, null, null, false);
         return handleCreation(createEvent);
     }
 
@@ -246,7 +248,8 @@ public abstract class AbstractAlarmTriggerTest extends AbstractAlarmTest {
      * @throws ApiException
      */
     protected EventData createSeriesEvent(String name, Calendar startTime) throws ApiException {
-        ChronosCalendarResultResponse createEvent = defaultUserApi.getChronosApi().createEvent(defaultUserApi.getSession(), folderId, createSeriesEventWithSingleAlarm(name, startTime, "-PT15M", null), false, false);
+        // FIXME: Use the EventManager instead
+        ChronosCalendarResultResponse createEvent = defaultUserApi.getChronosApi().createEvent(defaultUserApi.getSession(), folderId, createSeriesEventWithSingleAlarm(name, startTime, "-PT15M", null), false, false, null, null, false);
         return handleCreation(createEvent);
     }
 
@@ -260,7 +263,8 @@ public abstract class AbstractAlarmTriggerTest extends AbstractAlarmTest {
      * @throws ApiException
      */
     protected EventData createSeriesEvent(String name, Calendar startTime, List<Attendee> attendees) throws ApiException {
-        ChronosCalendarResultResponse createEvent = defaultUserApi.getChronosApi().createEvent(defaultUserApi.getSession(), folderId, createSeriesEventWithSingleAlarm(name, startTime, "-PT15M", attendees), false, false);
+        // FIXME: Use the EventManager instead
+        ChronosCalendarResultResponse createEvent = defaultUserApi.getChronosApi().createEvent(defaultUserApi.getSession(), folderId, createSeriesEventWithSingleAlarm(name, startTime, "-PT15M", attendees), false, false, null, null, false);
         return handleCreation(createEvent);
     }
 

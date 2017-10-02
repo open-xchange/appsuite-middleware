@@ -252,7 +252,8 @@ public class BasicFreeBusyTest extends AbstractChronosTest {
         att.setCuType(CuTypeEnum.INDIVIDUAL);
         att.setPartStat("ACCEPTED");
         body.setAttendee(att);
-        ChronosCalendarResultResponse updateAttendee = secondUserChronosApi.updateAttendee(secondSession, secondUserFolder, newEventId, getLastTimestamp(), body, null, false, true);
+        // FIXME: Use the EventManager instead
+        ChronosCalendarResultResponse updateAttendee = secondUserChronosApi.updateAttendee(secondSession, secondUserFolder, newEventId, getLastTimestamp(), body, null, false, true, null, null, false);
         assertNull(updateAttendee.getErrorDesc(), updateAttendee.getError());
         assertNotNull(updateAttendee.getData());
 
@@ -268,7 +269,8 @@ public class BasicFreeBusyTest extends AbstractChronosTest {
         att.setCuType(CuTypeEnum.INDIVIDUAL);
         att.setPartStat("TENTATIVE");
         body.setAttendee(att);
-        ChronosCalendarResultResponse updateAttendee2 = secondUserChronosApi.updateAttendee(secondSession, secondUserFolder, newEventId, getLastTimestamp(), body, null, false, true);
+        // FIXME: Use the EventManager instead
+        ChronosCalendarResultResponse updateAttendee2 = secondUserChronosApi.updateAttendee(secondSession, secondUserFolder, newEventId, getLastTimestamp(), body, null, false, true, null, null, false);
         assertNull(updateAttendee2.getErrorDesc(), updateAttendee2.getError());
         assertNotNull(updateAttendee2.getData());
 
@@ -284,7 +286,8 @@ public class BasicFreeBusyTest extends AbstractChronosTest {
         att.setCuType(CuTypeEnum.INDIVIDUAL);
         att.setPartStat("DECLINED");
         body.setAttendee(att);
-        ChronosCalendarResultResponse updateAttendee3 = secondUserChronosApi.updateAttendee(secondSession, secondUserFolder, newEventId, getLastTimestamp(), body, null, false, true);
+        // FIXME: Use the EventManager instead
+        ChronosCalendarResultResponse updateAttendee3 = secondUserChronosApi.updateAttendee(secondSession, secondUserFolder, newEventId, getLastTimestamp(), body, null, false, true, null, null, false);
         assertNull(updateAttendee3.getErrorDesc(), updateAttendee3.getError());
         assertNotNull(updateAttendee3.getData());
 
@@ -373,7 +376,8 @@ public class BasicFreeBusyTest extends AbstractChronosTest {
                 attendees.add(att);
             }
         }
-        ChronosCalendarResultResponse createEvent = defaultUserApi.getChronosApi().createEvent(defaultUserApi.getSession(), folderId, createSingleEvent(summary, start, end, attendees), true, false);
+        // FIXME: Use the EventManager instead
+        ChronosCalendarResultResponse createEvent = defaultUserApi.getChronosApi().createEvent(defaultUserApi.getSession(), folderId, createSingleEvent(summary, start, end, attendees), true, false, null, null, false);
         assertNull(createEvent.getErrorDesc(), createEvent.getError());
         assertNotNull(createEvent.getData());
         EventData event = createEvent.getData().getCreated().get(0);
