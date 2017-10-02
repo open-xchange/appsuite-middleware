@@ -244,7 +244,7 @@ public class BasicSingleEventTest extends AbstractChronosTest {
      */
     @Test
     public void testGetAttachment() throws Exception {
-        Asset asset = assetManager.getRandomAsset(AssetType.jpg);
+        Asset asset = assetManager.getRandomAsset(AssetType.pdf);
 
         Path path = Paths.get(asset.getAbsolutePath());
         byte[] expectedAttachmentData = Files.readAllBytes(path);
