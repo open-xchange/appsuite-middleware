@@ -388,10 +388,10 @@ public class EventManager extends AbstractManager {
      * 
      * @param eventId The event identifier
      * @param alarmId The alarm identifier
-     * @return The time of the acknowledgement
+     * @return The updated {@link EventData} with the acknowledged alarm
      * @throws ApiException if an API error is occurred
      */
-    public Long acknowledgeAlarm(String eventId, int alarmId) throws ApiException {
+    public EventData acknowledgeAlarm(String eventId, int alarmId) throws ApiException {
         ChronosCalendarResultResponse acknowledgeAlarm = userApi.getChronosApi().acknowledgeAlarm(userApi.getSession(), eventId, defaultFolder, alarmId);
         CalendarResult checkResponse = checkResponse(acknowledgeAlarm.getError(), acknowledgeAlarm.getErrorDesc(), acknowledgeAlarm.getData());
         assertEquals(1, checkResponse.getUpdated().size());
@@ -399,7 +399,26 @@ public class EventManager extends AbstractManager {
         Long acknowledged = updated.getAlarms().get(0).getAcknowledged();
         assertNotNull(acknowledged);
 
-        return acknowledged;
+        return updated;
+    }
+
+    /**
+     * Snoozes the alarm with the specified identifier for the specified event
+     * 
+     * @param eventId The event identifier
+     * @param alarmId The alarm identifier
+     * @param snoozeTime The snooze time
+     * @return The updated {@link EventData}
+     * @throws ApiException if an API error is occurred
+     */
+    public EventData snoozeAlarm(String eventId, int alarmId, long snoozeTime) throws ApiException {
+        ChronosCalendarResultResponse snoozeResponse = userApi.getChronosApi().snoozeAlarm(userApi.getSession(), eventId, defaultFolder, alarmId, snoozeTime);
+        CalendarResult snoozeResult = checkResponse(snoozeResponse.getError(), snoozeResponse.getErrorDesc(), snoozeResponse.getData());
+        assertEquals(1, snoozeResult.getUpdated().size());
+        EventData updatedEvent = snoozeResult.getUpdated().get(0);
+        assertEquals(2, updatedEvent.getAlarms().size()); // The previous snooze alarm should be replaced by a new one
+
+        return updatedEvent;
     }
 
     /**
