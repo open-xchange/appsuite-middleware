@@ -131,8 +131,6 @@ public class CalendarExceptionMessages implements LocalizableStrings {
 
     public static final String ATTACHMENT_NOT_FOUND_MSG = "The requested attachment was not found.";
 
-    public static final String NO_ATTACHMENTS_MSG = "The event has no attachments.";
-
     /**
      * Initializes a new {@link CalendarExceptionMessages}.
      */

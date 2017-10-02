@@ -72,7 +72,6 @@ import static com.openexchange.chronos.exception.CalendarExceptionMessages.MISSI
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.MOVE_OCCURRENCE_NOT_SUPPORTED_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.MOVE_SERIES_NOT_SUPPORTED_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.NOT_ORGANIZER_MSG;
-import static com.openexchange.chronos.exception.CalendarExceptionMessages.NO_ATTACHMENTS_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.NO_PERMISSION_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.PROVIDER_NOT_AVAILABLE_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.QUERY_TOO_SHORT_MSG;
@@ -331,12 +330,6 @@ public enum CalendarExceptionCodes implements DisplayableOXExceptionCode {
      * <li>Attachment not found [attachment %1$d, event %2$s, folder %3$s]</li>
      */
     ATTACHMENT_NOT_FOUND("Attachment not found [attachment %1$d, event %2$s, folder %3$s]", ATTACHMENT_NOT_FOUND_MSG, Category.CATEGORY_USER_INPUT, 5074),
-    /**
-     * <li>The event has no attachments.</li>
-     * <li>The event has no attachments [event %1$s, folder %2$s]</li>
-     */
-    NO_ATTACHMENTS("The event has no attachments [event %1$s, folder %2$s]", NO_ATTACHMENTS_MSG, Category.CATEGORY_USER_INPUT, 5075),
-
     ;
 
     public static final String PREFIX = "CAL".intern();

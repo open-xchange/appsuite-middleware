@@ -101,7 +101,7 @@ public class GetAttachmentPerformer extends AbstractQueryPerformer {
         // Search for the attachment with the specified managed id
         List<Attachment> attachments = storage.getAttachmentStorage().loadAttachments(eventId);
         if (attachments == null) {
-            throw CalendarExceptionCodes.NO_ATTACHMENTS.create(eventId, folder.getID());
+            throw CalendarExceptionCodes.ATTACHMENT_NOT_FOUND.create(managedId, eventId, folder.getID());
         }
         for (Attachment attachment : attachments) {
             if (attachment.getManagedId() == managedId) {
