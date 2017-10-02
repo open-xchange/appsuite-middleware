@@ -124,7 +124,7 @@ public class ExtendedFolderPermission extends ExtendedPermission {
             }
         }
         if (permission.getSystem() == 2) {
-            jsonObject.put("isInherited", permission.getSystem() == 2);
+            jsonObject.put("isInherited", true);
         }
         return jsonObject;
     }
