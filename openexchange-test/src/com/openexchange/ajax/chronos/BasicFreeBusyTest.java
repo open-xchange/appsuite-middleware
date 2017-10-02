@@ -186,7 +186,7 @@ public class BasicFreeBusyTest extends AbstractChronosTest {
         Body1 b = new Body1();
         b.addAttendeesItem(new Attendee());
         ChronosFreeBusyResponse freeBusy = freeBusyApi.freebusy(defaultUserApi.getSession(), DateTimeUtil.getZuluDateTime(day1 - offset).getValue(), DateTimeUtil.getZuluDateTime(nextWeek).getValue(), createAttendeesBody(defaultUserApi.getCalUser()));
-        assertEquals(freeBusy.getErrorDesc(), null, freeBusy.getError());
+        assertEquals(freeBusy.getError(), null, freeBusy.getErrorDesc());
         assertNotNull(freeBusy.getData());
         List<ChronosFreeBusyResponseData> data = freeBusy.getData();
         //Expect only one event for the given attendee

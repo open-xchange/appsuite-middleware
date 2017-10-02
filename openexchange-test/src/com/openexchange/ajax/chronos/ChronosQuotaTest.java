@@ -106,7 +106,7 @@ public class ChronosQuotaTest extends AbstractChronosTest {
 
     /**
      * Checks if the creation of an Event fails if the there is no quota available.
-     * 
+     *
      * @throws Exception In case of mismatching test results
      */
     @Test

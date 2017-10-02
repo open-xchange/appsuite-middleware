@@ -93,7 +93,7 @@ public class EventManager extends AbstractManager {
     private static final boolean EXPAND_SERIES = false;
 
     /**
-     * Initialises a new {@link EventManager}.
+     * Initializes a new {@link EventManager}.
      */
     public EventManager(UserApi userApi, String defaultFolder) {
         super();
@@ -116,7 +116,7 @@ public class EventManager extends AbstractManager {
 
     /**
      * Creates an event and does not ignore conflicts
-     * 
+     *
      * @param eventData The data of the event
      * @return The created {@link EventData}
      * @throws ApiException if an API error is occurred
@@ -127,7 +127,7 @@ public class EventManager extends AbstractManager {
 
     /**
      * Creates an event
-     * 
+     *
      * @param eventData The data of the event
      * @param ignoreConflicts Flag whether or not to ignore conflicts
      * @return The created {@link EventData}
@@ -141,7 +141,7 @@ public class EventManager extends AbstractManager {
 
     /**
      * Creates an event and attaches the specified {@link Asset}
-     * 
+     *
      * @param eventData The {@link EventData}
      * @param asset The {@link Asset} to attach
      * @return The created {@link EventData}
@@ -155,7 +155,7 @@ public class EventManager extends AbstractManager {
 
     /**
      * Creates an event and attaches the specified {@link Asset}s
-     * 
+     *
      * @param eventData The {@link EventData}
      * @param assets The {@link Asset}s to attach
      * @return The created {@link EventData}
@@ -173,7 +173,7 @@ public class EventManager extends AbstractManager {
 
     /**
      * Update the specified event and attach the specified {@link Asset}
-     * 
+     *
      * @param eventData The event
      * @param asset The {@link Asset} to attach
      * @return The updated {@link EventData}
@@ -186,7 +186,7 @@ public class EventManager extends AbstractManager {
 
     /**
      * Get an event
-     * 
+     *
      * @param eventId The {@link EventId}
      * @return the {@link EventData}
      * @throws ApiException if an API error is occurred
@@ -198,7 +198,7 @@ public class EventManager extends AbstractManager {
 
     /**
      * Get an event
-     * 
+     *
      * @param eventId The {@link EventId}
      * @param expectedException flag to indicate that an exception is expected
      * @return the {@link EventData}
@@ -211,7 +211,7 @@ public class EventManager extends AbstractManager {
 
     /**
      * Gets the occurrence of an event
-     * 
+     *
      * @param eventId The {@link EventId}
      * @param expectedException flag to indicate that an exception is expected
      * @param reccurenceId The recurrence identifier
@@ -258,7 +258,7 @@ public class EventManager extends AbstractManager {
 
     /**
      * Retrieves the attachment of the specified event
-     * 
+     *
      * @param eventId The event identifier
      * @param attachmentId The attachment's identifier
      * @return The binary data of the attachment
@@ -272,7 +272,7 @@ public class EventManager extends AbstractManager {
 
     /**
      * Retrieves all events with in the specified interval (occurences will not be expanded)
-     * 
+     *
      * @param from The starting date
      * @param until The ending date
      * @return A {@link List} with {@link EventData}
@@ -284,7 +284,7 @@ public class EventManager extends AbstractManager {
 
     /**
      * Retrieves all events with in the specified interval
-     * 
+     *
      * @param from The starting date
      * @param until The ending date
      * @param expand Flag to expand the occurrences
@@ -298,7 +298,7 @@ public class EventManager extends AbstractManager {
 
     /**
      * Lists the events with the specified identifiers
-     * 
+     *
      * @param ids The event identifiers
      * @return A {@link List} with {@link EventData}
      * @throws ApiException if an API error occurs
@@ -310,7 +310,7 @@ public class EventManager extends AbstractManager {
 
     /**
      * Deletes the event with the specified identifier
-     * 
+     *
      * @param eventId The {@link EventId}
      * @throws ApiException if an API error is occurred
      */
@@ -323,7 +323,7 @@ public class EventManager extends AbstractManager {
 
     /**
      * Deletes the event with the specified identifier
-     * 
+     *
      * @param eventId The {@link EventId}
      * @throws ApiException if an API error is occurred
      */
@@ -336,7 +336,7 @@ public class EventManager extends AbstractManager {
 
     /**
      * Updates the specified event and ignores conflicts
-     * 
+     *
      * @param eventData The data of the event
      * @return The updated event
      * @throws ApiException if an API error is occurred
@@ -348,7 +348,7 @@ public class EventManager extends AbstractManager {
 
     /**
      * Updates the specified recurrence event and ignores conflicts
-     * 
+     *
      * @param eventData The data of the event
      * @param the recurrence identifier
      * @return The updated event
@@ -361,7 +361,7 @@ public class EventManager extends AbstractManager {
 
     /**
      * Gets all changed events since the given timestamp (recurring events will not be expanded).
-     * 
+     *
      * @param since The timestamp
      * @return The {@link UpdatesResult}
      * @throws ApiException if an API error is occurred
@@ -372,7 +372,7 @@ public class EventManager extends AbstractManager {
 
     /**
      * Gets all changed events since the given timestamp.
-     * 
+     *
      * @param since The timestamp
      * @param expand Flag to expand any recurring events
      * @return The {@link UpdatesResult}
@@ -385,7 +385,7 @@ public class EventManager extends AbstractManager {
 
     /**
      * Acknowledges the alarm with the specified identifier for the specified event
-     * 
+     *
      * @param eventId The event identifier
      * @param alarmId The alarm identifier
      * @return The updated {@link EventData} with the acknowledged alarm
@@ -404,7 +404,7 @@ public class EventManager extends AbstractManager {
 
     /**
      * Snoozes the alarm with the specified identifier for the specified event
-     * 
+     *
      * @param eventId The event identifier
      * @param alarmId The alarm identifier
      * @param snoozeTime The snooze time
@@ -423,7 +423,7 @@ public class EventManager extends AbstractManager {
 
     /**
      * Retrieves not acknowledged alarm triggers.
-     * 
+     *
      * @param until Upper exclusive limit of the queried range as a utc date-time value as specified
      *            in RFC 5545 chapter 3.3.5. E.g. \"20170708T220000Z\". Only events which should trigger before this date are returned.
      * @return The {@link AlarmTriggerData}
@@ -435,7 +435,7 @@ public class EventManager extends AbstractManager {
 
     /**
      * Retrieves not acknowledged alarm triggers.
-     * 
+     *
      * @param until Upper exclusive limit of the queried range as a utc date-time value as specified
      *            in RFC 5545 chapter 3.3.5. E.g. \"20170708T220000Z\". Only events which should trigger before this date are returned.
      * @param actions The actions to retrieve (comma separated string)
@@ -449,7 +449,7 @@ public class EventManager extends AbstractManager {
 
     /**
      * Updates the attendee status of the event with the specified identifier.
-     * 
+     *
      * @param eventId The event identifier
      * @param attendeeAndAlarm The status of the attendee
      * @throws ApiException if an API error occurs
@@ -484,7 +484,7 @@ public class EventManager extends AbstractManager {
 
     /**
      * Handles the result response of an update event
-     * 
+     *
      * @param updateEvent The result
      * @return The updated event
      */
@@ -492,13 +492,13 @@ public class EventManager extends AbstractManager {
         CalendarResult calendarResult = checkResponse(updateEvent.getErrorDesc(), updateEvent.getError(), updateEvent.getData());
         List<EventData> updates = calendarResult.getUpdated();
         assertTrue(updates.size() == 1);
-
+        lastTimeStamp = updates.get(0).getTimestamp();
         return updates.get(0);
     }
 
     /**
      * Keeps track of the specified {@link EventId} for the specified user
-     * 
+     *
      * @param userApi The {@link UserApi}
      * @param eventId The {@link EventId}
      */
@@ -511,7 +511,7 @@ public class EventManager extends AbstractManager {
 
     /**
      * Removes the specified {@link EventId} for the specified user from the cache
-     * 
+     *
      * @param userApi The {@link UserApi}
      * @param eventId The {@link EventId}
      */

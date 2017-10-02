@@ -77,11 +77,6 @@ public class BasicAlarmTest extends AbstractAlarmTest {
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.chronos.AbstractChronosTest#setUp()
-     */
     @Override
     public void setUp() throws Exception {
         super.setUp();
@@ -138,7 +133,7 @@ public class BasicAlarmTest extends AbstractAlarmTest {
 
     /**
      * Tests the creation of different alarm types (display, mail, audio)
-     * 
+     *
      * @throws Exception
      */
     @Test

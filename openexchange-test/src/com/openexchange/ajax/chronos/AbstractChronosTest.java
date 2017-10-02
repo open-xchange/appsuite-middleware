@@ -103,11 +103,6 @@ public class AbstractChronosTest extends AbstractAPIClientSession {
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.framework.AbstractAPIClientSession#setUp()
-     */
     @Override
     public void setUp() throws Exception {
         super.setUp();
@@ -120,11 +115,6 @@ public class AbstractChronosTest extends AbstractAPIClientSession {
         eventManager = new EventManager(defaultUserApi, folderId);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.framework.AbstractAPIClientSession#tearDown()
-     */
     @Override
     public void tearDown() throws Exception {
         Exception exception = null;
@@ -156,7 +146,7 @@ public class AbstractChronosTest extends AbstractAPIClientSession {
 
     /**
      * Keeps track of the specified {@link EventId} for the specified user
-     * 
+     *
      * @param userApi The {@link UserApi}
      * @param eventId The {@link EventId}
      */
@@ -172,7 +162,7 @@ public class AbstractChronosTest extends AbstractAPIClientSession {
 
     /**
      * Keeps track of the specified folder for the specified user
-     * 
+     *
      * @param userApi The {@link UserApi}
      * @param folder The folder
      */
@@ -188,7 +178,7 @@ public class AbstractChronosTest extends AbstractAPIClientSession {
 
     /**
      * Creates a new folder and remembers it.
-     * 
+     *
      * @param api The {@link UserApi}
      * @param session The user's session
      * @param parent The parent folder
@@ -225,7 +215,7 @@ public class AbstractChronosTest extends AbstractAPIClientSession {
 
     /**
      * Retrieves the default calendar folder of the current user
-     * 
+     *
      * @return The default calendar folder of the current user
      * @throws Exception if the default calendar folder cannot be found
      */
@@ -235,7 +225,7 @@ public class AbstractChronosTest extends AbstractAPIClientSession {
 
     /**
      * Retrieves the default calendar folder of the user with the specified session
-     * 
+     *
      * @param session The session of the user
      * @param client The {@link ApiClient}
      * @return The default calendar folder of the user
@@ -247,7 +237,7 @@ public class AbstractChronosTest extends AbstractAPIClientSession {
 
     /**
      * Retrieves the default calendar folder of the user with the specified session
-     * 
+     *
      * @param session The session of the user
      * @param foldersApi The {@link FoldersApi}
      * @return The default calendar folder of the user
@@ -276,7 +266,7 @@ public class AbstractChronosTest extends AbstractAPIClientSession {
 
     /**
      * Sets the last timestamp
-     * 
+     *
      * @param timestamp the last timestamp to set
      */
     protected void setLastTimestamp(long timestamp) {
@@ -285,7 +275,7 @@ public class AbstractChronosTest extends AbstractAPIClientSession {
 
     /**
      * Gets the last timestamp
-     * 
+     *
      * @return the last timestamp
      */
     protected long getLastTimestamp() {
