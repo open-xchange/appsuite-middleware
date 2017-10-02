@@ -50,7 +50,6 @@
 package com.openexchange.chronos.json.action;
 
 import java.io.IOException;
-import java.util.UUID;
 import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -96,22 +95,10 @@ public class GetAttachment extends ChronosAction {
             requestData.putParameter("transformationNeeded", String.valueOf(false));
             // Compose & return result
             AJAXRequestResult result = new AJAXRequestResult(fileHolder, "file");
-            setETag(UUID.randomUUID().toString(), AJAXRequestResult.YEAR_IN_MILLIS * 50, result);
+            result.setHeader("ETag", calendarAccess.getSession().getContextId() + "-" + managedId);
             return result;
         } catch (IOException e) {
             throw AjaxExceptionCodes.IO_ERROR.create(e.getMessage(), e);
         }
-    }
-
-    /**
-     * Set the etag for the file
-     * 
-     * @param eTag The eTag identifier
-     * @param expires The TTL in milliseconds
-     * @param result The result to set the etag on
-     */
-    private void setETag(final String eTag, final long expires, final AJAXRequestResult result) {
-        result.setExpires(expires);
-        result.setHeader("ETag", eTag);
     }
 }
