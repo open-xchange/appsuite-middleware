@@ -66,7 +66,6 @@ import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.Attendee;
 import com.openexchange.testing.httpclient.models.Attendee.CuTypeEnum;
 import com.openexchange.testing.httpclient.models.AttendeeAndAlarm;
-import com.openexchange.testing.httpclient.models.Body1;
 import com.openexchange.testing.httpclient.models.CheckEventConflictResponse;
 import com.openexchange.testing.httpclient.models.CheckEventResponse;
 import com.openexchange.testing.httpclient.models.ChronosCalendarResultResponse;
@@ -80,6 +79,7 @@ import com.openexchange.testing.httpclient.models.EventData;
 import com.openexchange.testing.httpclient.models.EventData.TranspEnum;
 import com.openexchange.testing.httpclient.models.EventId;
 import com.openexchange.testing.httpclient.models.EventsResponse;
+import com.openexchange.testing.httpclient.models.FreeBusyBody;
 import com.openexchange.testing.httpclient.models.FreeBusyTime;
 import com.openexchange.testing.httpclient.modules.ChronosApi;
 import com.openexchange.testing.httpclient.modules.ChronosFreebusyApi;
@@ -184,8 +184,6 @@ public class BasicFreeBusyTest extends AbstractChronosTest {
         createEvent("dayThree", day3, day3 + TimeUnit.HOURS.toMillis(1));
         createEvent("dayFive", day5, day5 + TimeUnit.HOURS.toMillis(1));
 
-        Body1 b = new Body1();
-        b.addAttendeesItem(new Attendee());
         ChronosFreeBusyResponse freeBusy = freeBusyApi.freebusy(defaultUserApi.getSession(), DateTimeUtil.getZuluDateTime(day1 - offset).getValue(), DateTimeUtil.getZuluDateTime(nextWeek).getValue(), createAttendeesBody(defaultUserApi.getCalUser()));
         assertEquals(freeBusy.getError(), null, freeBusy.getErrorDesc());
         assertNotNull(freeBusy.getData());
@@ -390,8 +388,8 @@ public class BasicFreeBusyTest extends AbstractChronosTest {
         return event;
     }
 
-    private Body1 createAttendeesBody(int... attendees) {
-        Body1 b = new Body1();
+    private FreeBusyBody createAttendeesBody(int... attendees) {
+        FreeBusyBody b = new FreeBusyBody();
         for (Integer i : attendees) {
             Attendee attendee = new Attendee();
             attendee.setCuType(CuTypeEnum.INDIVIDUAL);
