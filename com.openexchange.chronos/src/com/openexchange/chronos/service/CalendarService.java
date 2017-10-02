@@ -51,6 +51,7 @@ package com.openexchange.chronos.service;
 
 import java.util.List;
 import java.util.Set;
+import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmTrigger;
 import com.openexchange.chronos.Attachment;
@@ -390,15 +391,15 @@ public interface CalendarService {
     List<AlarmTrigger> getAlarmTrigger(CalendarSession session, Set<String> actions) throws OXException;
 
     /**
-     * Retrieves the {@link Attachment} with the specified managed identifier from the {@link Event}
+     * Retrieves the {@link IFileHolder} with the specified managed identifier from the {@link Event}
      * with the specified {@link EventID}
      * 
      * @param session The {@link CalendarSession}
      * @param eventID The {@link Event} identifier
      * @param managedId The managed identifier of the {@link Attachment}
-     * @return The {@link Attachment}
+     * @return The {@link IFileHolder}
      * @throws OXException if an error is occurred
      */
-    Attachment getAttachment(CalendarSession session, EventID eventID, int managedId) throws OXException;
+    IFileHolder getAttachment(CalendarSession session, EventID eventID, int managedId) throws OXException;
 
 }

@@ -6,6 +6,7 @@ Bundle-Version: 7.8.4
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.google.common.io;version="19.0.0",
+ com.openexchange.ajax.fileholder,
  com.openexchange.chronos,
  com.openexchange.chronos.common,
  com.openexchange.chronos.exception,

@@ -62,9 +62,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmTrigger;
-import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.FreeBusyTime;
@@ -355,7 +355,7 @@ public class InternalCalendarAccess implements GroupwareCalendarAccess, FreeBusy
     }
 
     @Override
-    public Attachment getAttachment(EventID eventID, int managedId) throws OXException {
+    public IFileHolder getAttachment(EventID eventID, int managedId) throws OXException {
         return getCalendarService().getAttachment(session, eventID, managedId);
     }
 

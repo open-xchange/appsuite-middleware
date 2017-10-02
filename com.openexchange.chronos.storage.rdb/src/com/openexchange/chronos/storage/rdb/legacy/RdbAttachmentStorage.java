@@ -63,7 +63,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import com.openexchange.ajax.container.FileHolder;
 import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.storage.AttachmentStorage;
 import com.openexchange.chronos.storage.rdb.RdbStorage;

@@ -55,7 +55,6 @@ import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.DispatcherNotes;
-import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
 import com.openexchange.chronos.service.EventID;
 import com.openexchange.exception.OXException;
@@ -91,11 +90,8 @@ public class GetAttachment extends ChronosAction {
         String managedId = requestData.getParameter("managedId");
         int mid = Integer.parseInt(managedId);
 
-        // Get the attachment
-        Attachment attachment = calendarAccess.getAttachment(eventId, mid);
-
-        // Prepare the response
-        try (IFileHolder fileHolder = attachment.getData()) {
+        // Get the attachment and prepare the response
+        try (IFileHolder fileHolder = calendarAccess.getAttachment(eventId, mid)) {
             // Prevent any transformations for image files...
             requestData.putParameter("transformationNeeded", String.valueOf(false));
             // Compose & return result

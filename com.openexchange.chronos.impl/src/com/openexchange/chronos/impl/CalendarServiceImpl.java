@@ -56,9 +56,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
+import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmTrigger;
-import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.UnmodifiableEvent;
@@ -431,11 +431,11 @@ public class CalendarServiceImpl implements CalendarService {
     }
 
     @Override
-    public Attachment getAttachment(CalendarSession session, EventID eventID, int managedId) throws OXException {
-        return new InternalCalendarStorageOperation<Attachment>(session) {
+    public IFileHolder getAttachment(CalendarSession session, EventID eventID, int managedId) throws OXException {
+        return new InternalCalendarStorageOperation<IFileHolder>(session) {
 
             @Override
-            protected Attachment execute(CalendarSession session, CalendarStorage storage) throws OXException {
+            protected IFileHolder execute(CalendarSession session, CalendarStorage storage) throws OXException {
                 return new GetAttachmentPerformer(session, storage).performGetAttachment(eventID.getObjectID(), getFolder(session, eventID.getFolderID()), managedId);
             }
         }.executeQuery();

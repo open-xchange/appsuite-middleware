@@ -68,9 +68,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TimeZone;
+import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmTrigger;
-import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.RecurrenceId;
@@ -416,7 +416,7 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
     }
 
     @Override
-    public Attachment getAttachment(EventID eventID, int managedId) throws OXException {
+    public IFileHolder getAttachment(EventID eventID, int managedId) throws OXException {
         int accountId = getAccountId(eventID.getFolderID());
         try {
             EventID relativeEventID = getRelativeId(eventID);

@@ -57,6 +57,7 @@ import static com.openexchange.folderstorage.Permission.READ_FOLDER;
 import static com.openexchange.folderstorage.Permission.READ_OWN_OBJECTS;
 import java.util.List;
 import com.openexchange.ajax.container.FileHolder;
+import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
@@ -90,11 +91,11 @@ public class GetAttachmentPerformer extends AbstractQueryPerformer {
      * @param eventId The {@link Event} identifier
      * @param folder The {@link UserizedFolder}
      * @param managedId The managed identifier of the {@link Attachment}
-     * @return The {@link Attachment} metadata and the actual data
+     * @return The {@link IFileHolder} of the attachment
      * @throws OXException if the attachment is not found, or if the user has no permissions,
      *             or any other error is occurred
      */
-    public Attachment performGetAttachment(String eventId, UserizedFolder folder, int managedId) throws OXException {
+    public IFileHolder performGetAttachment(String eventId, UserizedFolder folder, int managedId) throws OXException {
         // Check the permissions first
         checkPermissions(eventId, folder);
 
@@ -105,9 +106,7 @@ public class GetAttachmentPerformer extends AbstractQueryPerformer {
         }
         for (Attachment attachment : attachments) {
             if (attachment.getManagedId() == managedId) {
-                FileHolder fileHolder = new FileHolder(storage.getAttachmentStorage().loadAttachmentData(managedId), attachment.getSize(), attachment.getFormatType(), attachment.getFilename());
-                attachment.setData(fileHolder);
-                return attachment;
+                return new FileHolder(storage.getAttachmentStorage().loadAttachmentData(managedId), attachment.getSize(), attachment.getFormatType(), attachment.getFilename());
             }
         }
         throw CalendarExceptionCodes.ATTACHMENT_NOT_FOUND.create(managedId, eventId, folder.getID());
