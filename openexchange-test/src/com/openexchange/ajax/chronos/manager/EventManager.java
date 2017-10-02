@@ -100,6 +100,9 @@ public class EventManager extends AbstractManager {
         eventIds = new ArrayList<>();
     }
 
+    /**
+     * Removes all events that were created with this event manager during the session
+     */
     public void cleanUp() {
         try {
             userApi.getChronosApi().deleteEvent(userApi.getSession(), System.currentTimeMillis(), eventIds);
@@ -117,7 +120,19 @@ public class EventManager extends AbstractManager {
      * @throws ApiException if an API error is occurred
      */
     public EventData createEvent(EventData eventData) throws ApiException {
-        ChronosCalendarResultResponse createEvent = userApi.getChronosApi().createEvent(userApi.getSession(), defaultFolder, eventData, false, false);
+        return createEvent(eventData, false);
+    }
+
+    /**
+     * Creates an event
+     * 
+     * @param eventData The data of the event
+     * @param ignoreConflicts Flag whether or not to ignore conflicts
+     * @return The created {@link EventData}
+     * @throws ApiException if an API error is occurred
+     */
+    public EventData createEvent(EventData eventData, boolean ignoreConflicts) throws ApiException {
+        ChronosCalendarResultResponse createEvent = userApi.getChronosApi().createEvent(userApi.getSession(), defaultFolder, eventData, ignoreConflicts, false);
         EventData event = handleCreation(createEvent);
         return event;
     }
