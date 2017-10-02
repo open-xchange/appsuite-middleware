@@ -51,27 +51,14 @@ package com.openexchange.ajax.chronos;
 
 import static org.junit.Assert.assertEquals;
 import java.text.ParseException;
-import java.util.Calendar;
-import java.util.Collections;
 import java.util.Date;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
-import com.openexchange.ajax.chronos.factory.AlarmFactory;
 import com.openexchange.ajax.chronos.manager.EventManager;
 import com.openexchange.ajax.chronos.util.DateTimeUtil;
 import com.openexchange.testing.httpclient.invoker.ApiClient;
 import com.openexchange.testing.httpclient.invoker.ApiException;
-import com.openexchange.testing.httpclient.models.Alarm;
 import com.openexchange.testing.httpclient.models.AlarmTrigger;
 import com.openexchange.testing.httpclient.models.AlarmTriggerData;
-import com.openexchange.testing.httpclient.models.Attendee;
-import com.openexchange.testing.httpclient.models.Attendee.CuTypeEnum;
-import com.openexchange.testing.httpclient.models.ChronosCalendarResultResponse;
-import com.openexchange.testing.httpclient.models.DateTimeData;
-import com.openexchange.testing.httpclient.models.EventData;
-import com.openexchange.testing.httpclient.models.EventData.TranspEnum;
-import com.openexchange.testing.httpclient.models.Trigger;
-import com.openexchange.testing.httpclient.models.Trigger.RelatedEnum;
 import com.openexchange.testing.httpclient.modules.ChronosApi;
 
 /**
@@ -93,57 +80,6 @@ public abstract class AbstractAlarmTriggerTest extends AbstractAlarmTest {
      */
     public AbstractAlarmTriggerTest() {
         super();
-    }
-
-    protected EventData createSingleEventWithSingleAlarm(String summary, DateTimeData startDate, String duration, RelatedEnum related) throws ParseException {
-        EventData singleEvent = new EventData();
-        singleEvent.setPropertyClass("PUBLIC");
-        Attendee attendee = new Attendee();
-        attendee.entity(defaultUserApi.getCalUser());
-        attendee.cuType(CuTypeEnum.INDIVIDUAL);
-        attendee.setUri("mailto:" + this.testUser.getLogin());
-        singleEvent.setAttendees(Collections.singletonList(attendee));
-        singleEvent.setStartDate(startDate);
-
-        singleEvent.setEndDate(DateTimeUtil.incrementDateTimeData(startDate, TimeUnit.HOURS.toMillis(1)));
-        singleEvent.setTransp(TranspEnum.OPAQUE);
-        singleEvent.setAllDay(false);
-        singleEvent.setAlarms(Collections.singletonList(AlarmFactory.createAlarm(duration, related)));
-        singleEvent.setSummary(summary);
-        return singleEvent;
-    }
-
-    private EventData createSeriesEventWithSingleAlarm(String summary, Calendar startDate, String duration, List<Attendee> attendees) {
-        EventData seriesEvent = new EventData();
-        seriesEvent.setPropertyClass("PUBLIC");
-        if (attendees == null) {
-            Attendee attendee = new Attendee();
-            attendee.entity(defaultUserApi.getCalUser());
-            attendee.cuType(CuTypeEnum.INDIVIDUAL);
-            attendee.setUri("mailto:" + this.testUser.getLogin());
-            seriesEvent.setAttendees(Collections.singletonList(attendee));
-        } else {
-            seriesEvent.setAttendees(attendees);
-        }
-        seriesEvent.setStartDate(DateTimeUtil.getDateTime(startDate));
-        Calendar endDate = Calendar.getInstance(startDate.getTimeZone());
-        endDate.setTimeInMillis(startDate.getTimeInMillis());
-        endDate.add(Calendar.HOUR, 1);
-        seriesEvent.setEndDate(DateTimeUtil.getDateTime(endDate));
-        seriesEvent.setTransp(TranspEnum.OPAQUE);
-        seriesEvent.setRrule("FREQ=DAILY;COUNT=4");
-        seriesEvent.setAllDay(false);
-
-        Alarm alarm = new Alarm();
-        alarm.setAction("display");
-        Trigger trigger = new Trigger();
-        trigger.setRelated(RelatedEnum.START);
-        trigger.setDuration(duration);
-        alarm.setTrigger(trigger);
-        alarm.setDescription("This is the display message!");
-        seriesEvent.setAlarms(Collections.singletonList(alarm));
-        seriesEvent.setSummary(summary);
-        return seriesEvent;
     }
 
     @Override
@@ -204,68 +140,6 @@ public abstract class AbstractAlarmTriggerTest extends AbstractAlarmTest {
      */
     AlarmTriggerData getAndCheckAlarmTrigger(int expected) throws ApiException {
         return getAndCheckAlarmTrigger(System.currentTimeMillis() + TimeUnit.DAYS.toMillis(2), expected, defaultUserApi.getChronosApi(), defaultUserApi.getSession());
-    }
-
-    /**
-     * Creates a single event with the given start time and name.
-     * Also handles all necessary tests and remembers the event for later deletion.
-     *
-     * @param name The name of the event
-     * @param startTime The startTime of the event
-     * @return The created event
-     * @throws ApiException
-     * @throws ParseException
-     */
-    protected EventData createSingleEvent(String name, long startTime) throws ApiException, ParseException {
-        // FIXME: Use the EventManager instead
-        ChronosCalendarResultResponse createEvent = defaultUserApi.getChronosApi().createEvent(defaultUserApi.getSession(), folderId, createSingleEventWithSingleAlarm(name, DateTimeUtil.getDateTime(startTime), "-PT15M", null), false, false, null, null, false);
-        return handleCreation(createEvent);
-    }
-
-    /**
-     * Creates a single event with the given start time and name.
-     * Also handles all necessary tests and remembers the event for later deletion.
-     *
-     * @param name The name of the event
-     * @param startTime The startTime of the event
-     * @return The created event
-     * @throws ApiException
-     * @throws ParseException
-     */
-    protected EventData createSingleEvent(String name, Calendar startTime) throws ApiException, ParseException {
-        // FIXME: Use the EventManager instead
-        ChronosCalendarResultResponse createEvent = defaultUserApi.getChronosApi().createEvent(defaultUserApi.getSession(), folderId, createSingleEventWithSingleAlarm(name, DateTimeUtil.getDateTime(startTime), "-PT15M", null), false, false, null, null, false);
-        return handleCreation(createEvent);
-    }
-
-    /**
-     * Creates a event series with the given start time and name.
-     * Also handles all necessary tests and remembers the event for later deletion.
-     *
-     * @param name The name of the event
-     * @param startTime The startTime of the event
-     * @return The created event
-     * @throws ApiException
-     */
-    protected EventData createSeriesEvent(String name, Calendar startTime) throws ApiException {
-        // FIXME: Use the EventManager instead
-        ChronosCalendarResultResponse createEvent = defaultUserApi.getChronosApi().createEvent(defaultUserApi.getSession(), folderId, createSeriesEventWithSingleAlarm(name, startTime, "-PT15M", null), false, false, null, null, false);
-        return handleCreation(createEvent);
-    }
-
-    /**
-     * Creates a event series with the given start time and name.
-     * Also handles all necessary tests and remembers the event for later deletion.
-     *
-     * @param name The name of the event
-     * @param startTime The startTime of the event
-     * @return The created event
-     * @throws ApiException
-     */
-    protected EventData createSeriesEvent(String name, Calendar startTime, List<Attendee> attendees) throws ApiException {
-        // FIXME: Use the EventManager instead
-        ChronosCalendarResultResponse createEvent = defaultUserApi.getChronosApi().createEvent(defaultUserApi.getSession(), folderId, createSeriesEventWithSingleAlarm(name, startTime, "-PT15M", attendees), false, false, null, null, false);
-        return handleCreation(createEvent);
     }
 
     /**

@@ -66,8 +66,6 @@ import com.openexchange.ajax.chronos.factory.EventFactory;
 import com.openexchange.ajax.chronos.util.DateTimeUtil;
 import com.openexchange.testing.httpclient.models.AlarmTrigger;
 import com.openexchange.testing.httpclient.models.AlarmTriggerData;
-import com.openexchange.testing.httpclient.models.CalendarResult;
-import com.openexchange.testing.httpclient.models.ChronosCalendarResultResponse;
 import com.openexchange.testing.httpclient.models.DateTimeData;
 import com.openexchange.testing.httpclient.models.EventData;
 
@@ -81,25 +79,21 @@ import com.openexchange.testing.httpclient.models.EventData;
 @RunWith(BlockJUnit4ClassRunner.class)
 public class AcknowledgeAndSnoozeTest extends AbstractAlarmTriggerTest {
 
-    private void checkAlarmTimeRoughly(long expectedTime, long value) {
-        Calendar exp = Calendar.getInstance();
-        exp.setTimeInMillis(expectedTime);
-        exp.set(Calendar.SECOND, 0);
-        exp.set(Calendar.MILLISECOND, 0);
-
-        Calendar valCal = Calendar.getInstance();
-        valCal.setTimeInMillis(value);
-        valCal.set(Calendar.SECOND, 0);
-        valCal.set(Calendar.MILLISECOND, 0);
-
-        assertEquals(exp.getTimeInMillis(), valCal.getTimeInMillis());
+    /**
+     * Initialises a new {@link AcknowledgeAndSnoozeTest}.
+     */
+    public AcknowledgeAndSnoozeTest() {
+        super();
     }
 
+    /**
+     * Tests a simple acknowledgement of an alarm
+     */
     @Test
     public void testSimpleAcknowledge() throws Exception {
         DateTimeData startDate = DateTimeUtil.getDateTime(System.currentTimeMillis() + TimeUnit.DAYS.toMillis(1));
         DateTimeData endDate = DateTimeUtil.incrementDateTimeData(startDate, (System.currentTimeMillis() + TimeUnit.HOURS.toMillis(2)));
-        
+
         // Create an event with alarm
         EventData toCreate = EventFactory.createSingleEvent(defaultUserApi.getCalUser(), testUser.getLogin(), "testSimpleAcknowledge", startDate, endDate);
         toCreate.setAlarms(Collections.singletonList(AlarmFactory.createDisplayAlarm("-PT15M")));
@@ -123,11 +117,14 @@ public class AcknowledgeAndSnoozeTest extends AbstractAlarmTriggerTest {
         assertTrue("Acknowdledge time is not later than the creation date.", acknowledged.longValue() >= expectedEventData.getCreated().longValue());
     }
 
+    /**
+     * Tests the snooze function of the alarm
+     */
     @Test
     public void testSimpleSnooze() throws Exception {
         DateTimeData startDate = DateTimeUtil.getDateTime(System.currentTimeMillis() + TimeUnit.DAYS.toMillis(1));
         DateTimeData endDate = DateTimeUtil.incrementDateTimeData(startDate, (System.currentTimeMillis() + TimeUnit.HOURS.toMillis(2)));
-        
+
         // Create an event with alarm
         EventData toCreate = EventFactory.createSingleEvent(defaultUserApi.getCalUser(), testUser.getLogin(), "testSimpleSnooze", startDate, endDate);
         toCreate.setAlarms(Collections.singletonList(AlarmFactory.createDisplayAlarm("-PT15M")));
@@ -164,6 +161,26 @@ public class AcknowledgeAndSnoozeTest extends AbstractAlarmTriggerTest {
         parsedTime = DateTimeUtil.parseZuluDateTime(alarmTrigger2.getTime());
         checkAlarmTimeRoughly(expectedTime, parsedTime.getTime());
 
+    }
+    
+
+    /**
+     * Checks the alarm time
+     * @param expectedTime The expected time
+     * @param value The actual time
+     */
+    private void checkAlarmTimeRoughly(long expectedTime, long value) {
+        Calendar exp = Calendar.getInstance();
+        exp.setTimeInMillis(expectedTime);
+        exp.set(Calendar.SECOND, 0);
+        exp.set(Calendar.MILLISECOND, 0);
+
+        Calendar valCal = Calendar.getInstance();
+        valCal.setTimeInMillis(value);
+        valCal.set(Calendar.SECOND, 0);
+        valCal.set(Calendar.MILLISECOND, 0);
+
+        assertEquals(exp.getTimeInMillis(), valCal.getTimeInMillis());
     }
 
 }
