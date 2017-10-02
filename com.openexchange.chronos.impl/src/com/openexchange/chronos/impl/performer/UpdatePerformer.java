@@ -170,10 +170,10 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
             updateEvent(originalEvent, updatedEventData, recurrenceId);
         } else {
             if (updateEvent(originalEvent, updatedEventData)) {
-                trackUpdate(originalEvent, loadEventData(originalEvent.getId()));
+                resultTracker.trackUpdate(originalEvent, loadEventData(originalEvent.getId()));
             }
         }
-        return result;
+        return resultTracker.getResult();
     }
 
     private void updateEvent(Event originalEvent, Event updatedEventData, RecurrenceId recurrenceId) throws OXException {
@@ -189,8 +189,8 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
                  */
                 if (updateEvent(originalExceptionEvent, updatedEventData)) {
                     touch(originalEvent.getSeriesId());
-                    trackUpdate(originalExceptionEvent, loadEventData(originalExceptionEvent.getId()));
-                    trackUpdate(originalEvent, loadEventData(originalEvent.getId()));
+                    resultTracker.trackUpdate(originalExceptionEvent, loadEventData(originalExceptionEvent.getId()));
+                    resultTracker.trackUpdate(originalEvent, loadEventData(originalEvent.getId()));
                 }
             } else {
                 /*
@@ -233,8 +233,8 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
                 storage.getAlarmTriggerStorage().insertTriggers(updatedMasterEvent, exceptions);
 
                 touch(originalEvent.getId());
-                trackUpdate(originalEvent, updatedMasterEvent);
-                trackCreation(loadEventData(newExceptionEvent.getId()));
+                resultTracker.trackUpdate(originalEvent, updatedMasterEvent);
+                resultTracker.trackCreation(loadEventData(newExceptionEvent.getId()));
             }
         } else if (isSeriesException(originalEvent)) {
             /*
@@ -243,8 +243,8 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
             if (updateEvent(originalEvent, updatedEventData)) {
                 Event originalMasterEvent = loadEventData(originalEvent.getSeriesId());
                 touch(originalMasterEvent.getId());
-                trackUpdate(originalEvent, loadEventData(originalEvent.getId()));
-                trackUpdate(originalMasterEvent, loadEventData(originalMasterEvent.getId()));
+                resultTracker.trackUpdate(originalEvent, loadEventData(originalEvent.getId()));
+                resultTracker.trackUpdate(originalMasterEvent, loadEventData(originalMasterEvent.getId()));
             }
         } else {
             /*

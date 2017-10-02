@@ -142,9 +142,9 @@ public class CreatePerformer extends AbstractUpdatePerformer {
          * track creation, insert alarm triggers & return result
          */
         Event createdEvent = loadEventData(newEvent.getId());
-        trackCreation(createdEvent);
+        resultTracker.trackCreation(createdEvent);
         storage.getAlarmTriggerStorage().insertTriggers(newEvent, newEvent.getDeleteExceptionDates());
-        return result;
+        return resultTracker.getResult();
     }
 
     private List<Attendee> prepareAttendees(List<Attendee> attendeeData) throws OXException {

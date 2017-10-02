@@ -57,7 +57,6 @@ import static com.openexchange.chronos.common.CalendarUtils.isSeriesException;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.chronos.impl.Check.requireCalendarPermission;
 import static com.openexchange.chronos.impl.Utils.getCalendarUserId;
-import static com.openexchange.chronos.impl.Utils.getPersonalFolderIds;
 import static com.openexchange.folderstorage.Permission.CREATE_OBJECTS_IN_FOLDER;
 import static com.openexchange.folderstorage.Permission.DELETE_ALL_OBJECTS;
 import static com.openexchange.folderstorage.Permission.DELETE_OWN_OBJECTS;
@@ -85,7 +84,6 @@ import com.openexchange.chronos.impl.Check;
 import com.openexchange.chronos.impl.Consistency;
 import com.openexchange.chronos.impl.InternalCalendarResult;
 import com.openexchange.chronos.service.CalendarSession;
-import com.openexchange.chronos.service.EventID;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.UserizedFolder;
@@ -158,15 +156,8 @@ public class MovePerformer extends AbstractUpdatePerformer {
          * track & return results
          */
         Event updatedEvent = loadEventData(originalEvent.getId());
-        result.addAffectedFolderIds(folder.getID(), getPersonalFolderIds(originalEvent.getAttendees()));
-        result.addAffectedFolderIds(targetFolder.getID(), getPersonalFolderIds(updatedEvent.getAttendees()));
-        result.addPlainUpdate(originalEvent, updatedEvent);
-
-        //TODO: resolve occurrences
-
-        result.addUserizedDeletion(timestamp.getTime(), new EventID(folder.getID(), originalEvent.getId(), originalEvent.getRecurrenceId()));
-        result.addUserizedCreation(userize(updatedEvent, getCalendarUserId(targetFolder)));
-        return result;
+        resultTracker.trackUpdate(originalEvent, updatedEvent);
+        return resultTracker.getResult();
     }
 
     private void moveFromPersonalToPublicFolder(Event originalEvent, UserizedFolder targetFolder) throws OXException {

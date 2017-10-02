@@ -142,7 +142,7 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
         } else {
             updateAttendee(originalEvent, originalAttendee, attendee, recurrenceId);
         }
-        return result;
+        return resultTracker.getResult();
     }
 
     /**
@@ -201,8 +201,7 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
         storage.getAttendeeStorage().updateAttendee(originalEvent.getId(), attendeeUpdate);
         touch(originalEvent.getId());
         Event updatedEvent = loadEventData(originalEvent.getId());
-        result.addPlainUpdate(originalEvent, updatedEvent);
-        result.addUserizedUpdate(userize(originalEvent), userize(updatedEvent));
+        resultTracker.trackUpdate(originalEvent, updatedEvent);
         if (isSeriesException(originalEvent)) {
             /*
              * also 'touch' the series master in case of an exception update
@@ -210,8 +209,7 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
             Event originalMasterEvent = loadEventData(originalEvent.getSeriesId());
             touch(originalEvent.getSeriesId());
             Event updatedMasterEvent = loadEventData(originalEvent.getSeriesId());
-            result.addPlainUpdate(originalMasterEvent, updatedMasterEvent);
-            result.addUserizedUpdate(userize(originalMasterEvent), userize(updatedMasterEvent));
+            resultTracker.trackUpdate(originalMasterEvent, updatedMasterEvent);
         }
     }
 
@@ -256,10 +254,8 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
                  */
                 Event createdException = loadEventData(exceptionEvent.getId());
                 Event updatedMasterEvent = loadEventData(originalEvent.getId());
-                result.addPlainCreation(createdException);
-                result.addUserizedCreation(userize(createdException));
-                result.addPlainUpdate(originalEvent, updatedMasterEvent);
-                result.addUserizedUpdate(userize(originalEvent), userize(updatedMasterEvent));
+                resultTracker.trackCreation(createdException);
+                resultTracker.trackUpdate(originalEvent, updatedMasterEvent);
             }
         } else if (isSeriesException(originalEvent)) {
             /*

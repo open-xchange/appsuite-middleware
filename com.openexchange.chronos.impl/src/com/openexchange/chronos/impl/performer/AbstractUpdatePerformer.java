@@ -51,7 +51,6 @@ package com.openexchange.chronos.impl.performer;
 
 import static com.openexchange.chronos.common.CalendarUtils.find;
 import static com.openexchange.chronos.common.CalendarUtils.getAlarmIDs;
-import static com.openexchange.chronos.common.CalendarUtils.getEventID;
 import static com.openexchange.chronos.common.CalendarUtils.getFolderView;
 import static com.openexchange.chronos.common.CalendarUtils.isGroupScheduled;
 import static com.openexchange.chronos.common.CalendarUtils.isLastUserAttendee;
@@ -61,11 +60,7 @@ import static com.openexchange.chronos.impl.Check.classificationAllowsUpdate;
 import static com.openexchange.chronos.impl.Check.requireCalendarPermission;
 import static com.openexchange.chronos.impl.Utils.getCalendarUserId;
 import static com.openexchange.chronos.impl.Utils.getChangeExceptionDates;
-import static com.openexchange.chronos.impl.Utils.getPersonalFolderIds;
 import static com.openexchange.chronos.impl.Utils.getSearchTerm;
-import static com.openexchange.chronos.impl.Utils.isInFolder;
-import static com.openexchange.chronos.impl.Utils.isResolveOccurrences;
-import static com.openexchange.chronos.impl.Utils.mapEventOccurrences;
 import static com.openexchange.folderstorage.Permission.DELETE_ALL_OBJECTS;
 import static com.openexchange.folderstorage.Permission.DELETE_OWN_OBJECTS;
 import static com.openexchange.folderstorage.Permission.NO_PERMISSIONS;
@@ -97,11 +92,9 @@ import com.openexchange.chronos.common.mapping.EventMapper;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.Check;
 import com.openexchange.chronos.impl.Consistency;
-import com.openexchange.chronos.impl.InternalCalendarResult;
 import com.openexchange.chronos.impl.Utils;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.CollectionUpdate;
-import com.openexchange.chronos.service.EventID;
 import com.openexchange.chronos.service.ItemUpdate;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
@@ -124,7 +117,8 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
     protected final int calendarUserId;
     protected final UserizedFolder folder;
     protected final Date timestamp;
-    protected final InternalCalendarResult result;
+
+    protected final ResultTracker resultTracker;
 
     /**
      * Initializes a new {@link AbstractUpdatePerformer}.
@@ -138,117 +132,7 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
         this.folder = folder;
         this.calendarUserId = getCalendarUserId(folder);
         this.timestamp = new Date();
-        this.result = new InternalCalendarResult(session, calendarUserId, folder);
-    }
-
-    /**
-     * Tracks suitable results for a created event in the current internal calendar result, which includes adding a <i>plain</i> creation
-     * for the new event data, as well as an appropriate creation from the acting user's point of view.
-     *
-     * @param createdEvent The created event
-     */
-    protected void trackCreation(Event createdEvent) throws OXException {
-        /*
-         * track affected folders and add 'plain' event creation
-         */
-        result.addAffectedFolderIds(folder.getID(), getPersonalFolderIds(createdEvent.getAttendees()));
-        result.addPlainCreation(createdEvent);
-        /*
-         * prepare 'userized' version of created event & expand event series if needed prior adding results
-         */
-        if (isSeriesMaster(createdEvent) && isResolveOccurrences(session)) {
-            result.addUserizedCreations(resolveOccurrences(userize(createdEvent)));
-        } else {
-            result.addUserizedCreation(userize(createdEvent));
-        }
-    }
-
-    /**
-     * Tracks suitable results for an updated event in the current internal calendar result, which includes adding a <i>plain</i> update
-     * for the modified event data, as well as an update, deletion or creation from the acting user's point of view.
-     *
-     * @param originalEvent The original event
-     * @param updatedEvent The updated event
-     */
-    protected void trackUpdate(Event originalEvent, Event updatedEvent) throws OXException {
-        /*
-         * track affected folders and add a 'plain' event update
-         */
-        result.addAffectedFolderIds(folder.getID(), getPersonalFolderIds(originalEvent.getAttendees()), getPersonalFolderIds(updatedEvent.getAttendees()));
-        result.addPlainUpdate(originalEvent, updatedEvent);
-        /*
-         * check whether original and updated event are visible in actual folder view & add corresponding result
-         */
-        if (isInFolder(originalEvent, folder)) {
-            if (isInFolder(updatedEvent, folder)) {
-                /*
-                 * "update" from calendar user's point of view
-                 */
-                if (isResolveOccurrences(session) && (isSeriesMaster(originalEvent) || isSeriesMaster(updatedEvent))) {
-                    if (isSeriesMaster(originalEvent) && isSeriesMaster(updatedEvent)) {
-                        for (Entry<Event, Event> entry : mapEventOccurrences(resolveOccurrences(userize(originalEvent)), resolveOccurrences(userize(updatedEvent)))) {
-                            if (null == entry.getKey()) {
-                                result.addUserizedCreation(entry.getValue());
-                            } else if (null == entry.getValue()) {
-                                result.addUserizedDeletion(timestamp.getTime(), new EventID(folder.getID(), entry.getKey().getId(), entry.getKey().getRecurrenceId()));
-                            } else {
-                                result.addUserizedUpdate(entry.getKey(), entry.getValue());
-                            }
-                        }
-                    } else if (isSeriesMaster(originalEvent)) {
-                        for (Event originalOccurrence : resolveOccurrences(userize(originalEvent))) {
-                            result.addUserizedDeletion(timestamp.getTime(), new EventID(folder.getID(), originalOccurrence.getId(), originalOccurrence.getRecurrenceId()));
-                        }
-                        result.addUserizedDeletion(timestamp.getTime(), new EventID(folder.getID(), originalEvent.getId(), originalEvent.getRecurrenceId()));
-                        result.addUserizedCreation(userize(updatedEvent));
-                    } else if (isSeriesMaster(updatedEvent)) {
-                        result.addUserizedDeletion(timestamp.getTime(), new EventID(folder.getID(), originalEvent.getId(), originalEvent.getRecurrenceId()));
-                        result.addUserizedCreations(resolveOccurrences(userize(updatedEvent)));
-                    }
-                } else {
-                    result.addUserizedUpdate(userize(originalEvent), userize(updatedEvent));
-                }
-            } else {
-                /*
-                 * "delete" from calendar user's point of view
-                 */
-                if (isSeriesMaster(originalEvent) && isResolveOccurrences(session)) {
-                    for (Event originalOccurrence : resolveOccurrences(userize(originalEvent))) {
-                        result.addUserizedDeletion(timestamp.getTime(), new EventID(folder.getID(), originalOccurrence.getId(), originalOccurrence.getRecurrenceId()));
-                    }
-                } else {
-                    result.addUserizedDeletion(timestamp.getTime(), new EventID(folder.getID(), originalEvent.getId(), originalEvent.getRecurrenceId()));
-                }
-            }
-        } else if (isInFolder(updatedEvent, folder)) {
-            /*
-             * "create" from calendar user's point of view - possible for attendee being added to an existing event, so that it shows up
-             * in the new attendee's folder afterwards (after #needsExistenceCheckInTargetFolder() was false)
-             */
-            if (isSeriesMaster(updatedEvent) && isResolveOccurrences(session)) {
-                result.addUserizedCreations(resolveOccurrences(userize(updatedEvent)));
-            } else {
-                result.addUserizedCreation(userize(updatedEvent));
-            }
-        }
-    }
-
-    /**
-     * Tracks suitable results for a deleted event in the current internal calendar result, which includes adding a <i>plain</i> deletion
-     * for the removed event data, as well as an appropriate deletion from the acting user's point of view.
-     *
-     * @param deletedEvent The deleted event
-     */
-    protected void trackDeletion(Event deletedEvent) throws OXException {
-        result.addAffectedFolderIds(folder.getID(), getPersonalFolderIds(deletedEvent.getAttendees()));
-        result.addPlainDeletion(timestamp.getTime(), getEventID(deletedEvent));
-        if (isSeriesMaster(deletedEvent) && isResolveOccurrences(session)) {
-            for (Event deletedOccurrence : resolveOccurrences(userize(deletedEvent))) {
-                result.addUserizedDeletion(timestamp.getTime(), new EventID(folder.getID(), deletedOccurrence.getId(), deletedOccurrence.getRecurrenceId()));
-            }
-        } else {
-            result.addUserizedDeletion(timestamp.getTime(), new EventID(folder.getID(), deletedEvent.getId(), deletedEvent.getRecurrenceId()));
-        }
+        this.resultTracker = new ResultTracker(storage, session, folder, timestamp.getTime());
     }
 
     /**
@@ -326,7 +210,7 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
         /*
          * track deletion in result
          */
-        trackDeletion(originalEvent);
+        resultTracker.trackDeletion(originalEvent);
     }
 
     /**
@@ -370,7 +254,7 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
          */
         touch(id);
         Event updatedEvent = loadEventData(id);
-        trackUpdate(originalEvent, updatedEvent);
+        resultTracker.trackUpdate(originalEvent, updatedEvent);
 
         // Update alarm trigger
         storage.getAlarmTriggerStorage().deleteTriggers(updatedEvent.getId());
@@ -434,7 +318,6 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
         /*
          * prepare & insert a new plain exception
          */
-        String folderView = getFolderView(originalMasterEvent, calendarUserId);
         Event exceptionEvent = prepareException(originalMasterEvent, recurrenceId);
         storage.getEventStorage().insertEvent(exceptionEvent);
         /*
@@ -466,10 +349,8 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
         Event createdException = loadEventData(exceptionEvent.getId());
         Event updatedMasterEvent = loadEventData(originalMasterEvent.getId());
         removeAlarmTrigger(createdException, updatedMasterEvent);
-        result.addPlainCreation(createdException);
-        result.addPlainUpdate(originalMasterEvent, updatedMasterEvent);
-        result.addUserizedDeletion(timestamp.getTime(), new EventID(folderView, originalMasterEvent.getId(), recurrenceId));
-        result.addUserizedUpdate(userize(originalMasterEvent), userize(updatedMasterEvent));
+        resultTracker.trackCreation(createdException);
+        resultTracker.trackUpdate(originalMasterEvent, updatedMasterEvent);
     }
 
     private void removeAlarmTrigger(Event createdException, Event updatedMasterEvent) throws OXException {

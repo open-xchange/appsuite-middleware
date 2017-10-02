@@ -115,7 +115,7 @@ public class DeletePerformer extends AbstractUpdatePerformer {
         } else {
             deleteRecurrence(originalEvent, recurrenceId);
         }
-        return result;
+        return resultTracker.getResult();
     }
 
     /**
@@ -277,7 +277,7 @@ public class DeletePerformer extends AbstractUpdatePerformer {
             /*
              * track update of master in result
              */
-            trackUpdate(originalMasterEvent, updatedMasterEvent);
+            resultTracker.trackUpdate(originalMasterEvent, updatedMasterEvent);
         } else {
             /*
              * delete series master
@@ -345,7 +345,7 @@ public class DeletePerformer extends AbstractUpdatePerformer {
          */
         Event originalMasterEvent = loadEventData(seriesId);
         touch(seriesId);
-        trackUpdate(originalMasterEvent, loadEventData(originalMasterEvent.getId()));
+        resultTracker.trackUpdate(originalMasterEvent, loadEventData(originalMasterEvent.getId()));
     }
 
 }

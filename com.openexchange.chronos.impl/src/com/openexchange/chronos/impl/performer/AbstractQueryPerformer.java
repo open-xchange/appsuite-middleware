@@ -66,9 +66,7 @@ import static com.openexchange.folderstorage.Permission.READ_OWN_OBJECTS;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Classification;
-import com.openexchange.chronos.DelegatingEvent;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.common.CalendarUtils;
@@ -240,36 +238,7 @@ public abstract class AbstractQueryPerformer {
      * @see Utils#anonymizeIfNeeded
      */
     protected Event userize(Event event, int forUser) throws OXException {
-        if (isSeriesMaster(event)) {
-            event = applyExceptionDates(storage, event, forUser);
-        }
-        final List<Alarm> alarms = storage.getAlarmStorage().loadAlarms(event, forUser);
-        final String folderView = getFolderView(event, forUser);
-        if (null != alarms || false == folderView.equals(event.getFolderId())) {
-            event = new DelegatingEvent(event) {
-
-                @Override
-                public String getFolderId() {
-                    return folderView;
-                }
-
-                @Override
-                public boolean containsFolderId() {
-                    return true;
-                }
-
-                @Override
-                public List<Alarm> getAlarms() {
-                    return alarms;
-                }
-
-                @Override
-                public boolean containsAlarms() {
-                    return true;
-                }
-            };
-        }
-        return anonymizeIfNeeded(session, event);
+        return Utils.userize(session, storage, event, forUser);
     }
 
     /**

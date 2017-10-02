@@ -128,7 +128,7 @@ public class ClearPerformer extends AbstractUpdatePerformer {
         /*
          * return calendar result
          */
-        return result;
+        return resultTracker.getResult();
     }
 
     private int deleteEvents(SearchTerm<?> searchTerm, SearchOptions searchOptions, long clientTimestamp) throws OXException {
@@ -211,7 +211,7 @@ public class ClearPerformer extends AbstractUpdatePerformer {
          * track deletions in result
          */
         for (Event originalEvent : eventsToDelete) {
-            trackDeletion(originalEvent);
+            resultTracker.trackDeletion(originalEvent);
         }
     }
 
@@ -251,7 +251,7 @@ public class ClearPerformer extends AbstractUpdatePerformer {
             Event originalEvent = attendeeToDeleteByEvent.getKey();
             touch(originalEvent.getId());
             Event updatedEvent = loadEventData(originalEvent.getId());
-            trackUpdate(originalEvent, updatedEvent);
+            resultTracker.trackUpdate(originalEvent, updatedEvent);
         }
     }
 

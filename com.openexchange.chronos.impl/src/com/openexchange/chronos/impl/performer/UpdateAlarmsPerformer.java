@@ -118,9 +118,9 @@ public class UpdateAlarmsPerformer extends AbstractUpdatePerformer {
          */
         if (updateAlarms(originalEvent, session.getUserId(), originalAlarms, alarms)) {
             touch(originalEvent.getId());
-            trackUpdate(originalEvent, loadEventData(originalEvent.getId()));
+            resultTracker.trackUpdate(originalEvent, loadEventData(originalEvent.getId()));
         }
-        return result;
+        return resultTracker.getResult();
     }
 
 }
