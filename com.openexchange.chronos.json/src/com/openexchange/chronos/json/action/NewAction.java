@@ -49,7 +49,6 @@
 
 package com.openexchange.chronos.json.action;
 
-import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_IGNORE_CONFLICTS;
 import static com.openexchange.tools.arrays.Collections.unmodifiableSet;
 import java.util.Date;
 import java.util.Set;
@@ -76,7 +75,7 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
 @OAuthAction(ChronosOAuthScope.OAUTH_WRITE_SCOPE)
 public class NewAction extends ChronosAction {
 
-    private static final Set<String> OPTIONAL_PARAMETERS = unmodifiableSet("sendInternalNotifications", PARAMETER_IGNORE_CONFLICTS);
+    private static final Set<String> OPTIONAL_PARAMETERS = unmodifiableSet(PARAM_SEND_INTERNAL_NOTIFICATIONS, PARAM_IGNORE_CONFLICTS, PARAM_RANGE_START, PARAM_RANGE_END, PARAM_EXPAND );
 
     /**
      * Initializes a new {@link NewAction}.

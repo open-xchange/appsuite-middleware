@@ -71,7 +71,6 @@ import com.openexchange.chronos.json.converter.mapper.ListItemMapping;
 import com.openexchange.chronos.json.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.json.oauth.ChronosOAuthScope;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
-import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarResult;
 import com.openexchange.chronos.service.CreateResult;
 import com.openexchange.chronos.service.EventID;
@@ -102,7 +101,7 @@ public class UpdateAttendeeAction extends ChronosAction {
         super(services);
     }
 
-    private static final Set<String> OPTIONAL_PARAMETERS = unmodifiableSet("sendInternalNotifications", CalendarParameters.PARAMETER_IGNORE_CONFLICTS);
+    private static final Set<String> OPTIONAL_PARAMETERS = unmodifiableSet(PARAM_SEND_INTERNAL_NOTIFICATIONS, PARAM_IGNORE_CONFLICTS, PARAM_RANGE_START, PARAM_RANGE_END, PARAM_EXPAND );
 
     private static final String ATTENDEE = "attendee";
     private static final String ALARMS_FIELD = "alarms";

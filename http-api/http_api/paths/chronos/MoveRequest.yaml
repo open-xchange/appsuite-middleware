@@ -24,6 +24,21 @@
         type: string
         description: ID of the target folder.
         required: true
+      - in: query
+        name: rangeStart
+        type: string
+        description: |
+          If expand is set to 'true' this parameter defines a lower inclusive limit as a utc date-time value as specified in rfc 5545 chapter 3.3.5. E.g. "20170708T220000Z". 
+          Only events which start on or after this date are returned.
+        required: false
+      - in: query
+        name: rangeEnd
+        type: string
+        description: | 
+          If expand is set to 'true' this parameter defines a upper exclusive limit as a utc date-time value as specified in rfc 5545 chapter 3.3.5. E.g. "20170708T220000Z". 
+          Only events which end before this date are returned.
+        required: false
+      - $ref: "#/parameters/QueryParamChronosExpand"
     responses:
       200:
         description: |

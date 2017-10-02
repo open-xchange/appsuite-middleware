@@ -356,7 +356,7 @@ QueryParamChronosSort:
   description: Specifies the field for sorting the results.
   required: false
 QueryParamChronosIgnoreConflicts:
-  name: ignore_conflicts
+  name: ignoreConflicts
   in: query
   type: boolean
   default: false

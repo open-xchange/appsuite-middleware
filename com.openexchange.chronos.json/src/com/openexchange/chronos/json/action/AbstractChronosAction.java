@@ -93,6 +93,12 @@ public abstract class AbstractChronosAction implements AJAXActionService {
     protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractChronosAction.class);
     protected final ServiceLookup services;
 
+    protected static final String PARAM_RANGE_START = "rangeStart";
+    protected static final String PARAM_RANGE_END = "rangeEnd";
+    protected static final String PARAM_EXPAND = "expand";
+    protected static final String PARAM_IGNORE_CONFLICTS = "ignoreConflicts";
+    protected static final String PARAM_SEND_INTERNAL_NOTIFICATIONS = "sendInternalNotifications";
+
     /**
      * Initializes a new {@link AbstractChronosAction}.
      */
@@ -176,15 +182,15 @@ public abstract class AbstractChronosAction implements AJAXActionService {
 
     private static Entry<String, ?> parseParameter(String parameter, String value) throws IllegalArgumentException {
         switch (parameter) {
-            case "rangeStart":
+            case PARAM_RANGE_START:
                 DateTime startTime = DateTime.parse(TimeZones.UTC, value);
                 return new AbstractMap.SimpleEntry<String, Date>(PARAMETER_RANGE_START, new Date(startTime.getTimestamp()));
-            case "rangeEnd":
+            case PARAM_RANGE_END:
                 DateTime endTime = DateTime.parse(TimeZones.UTC, value);
                 return new AbstractMap.SimpleEntry<String, Date>(PARAMETER_RANGE_END, new Date(endTime.getTimestamp()));
-            case "expand":
+            case PARAM_EXPAND:
                 return new AbstractMap.SimpleEntry<String, Boolean>(PARAMETER_EXPAND_OCCURRENCES, Boolean.valueOf(value));
-            case PARAMETER_IGNORE_CONFLICTS:
+            case PARAM_IGNORE_CONFLICTS:
                 return new AbstractMap.SimpleEntry<String, Boolean>(PARAMETER_IGNORE_CONFLICTS, Boolean.parseBoolean(value));
             case PARAMETER_ORDER_BY:
                 EventField mappedField = EventMapper.getInstance().getMappedField(value);
@@ -198,7 +204,7 @@ public abstract class AbstractChronosAction implements AJAXActionService {
                 return new AbstractMap.SimpleEntry<String, EventField[]>(PARAMETER_FIELDS, parseFields(value));
             case PARAMETER_INCLUDE_PRIVATE:
                 return new AbstractMap.SimpleEntry<String, Boolean>(PARAMETER_INCLUDE_PRIVATE, Boolean.valueOf(value));
-            case "sendInternalNotifications":
+            case PARAM_SEND_INTERNAL_NOTIFICATIONS:
                 return new AbstractMap.SimpleEntry<String, Boolean>(PARAMETER_NOTIFICATION, Boolean.valueOf(value));
             default:
                 return null;

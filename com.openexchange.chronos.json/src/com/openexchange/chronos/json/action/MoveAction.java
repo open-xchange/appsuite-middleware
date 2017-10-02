@@ -57,7 +57,6 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.chronos.json.converter.CalendarResultConverter;
 import com.openexchange.chronos.json.oauth.ChronosOAuthScope;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
-import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
@@ -73,7 +72,7 @@ import com.openexchange.server.ServiceLookup;
 @OAuthAction(ChronosOAuthScope.OAUTH_WRITE_SCOPE)
 public class MoveAction extends ChronosAction {
 
-    private static final Set<String> OPTIONAL_PARAMETERS = unmodifiableSet("sendInternalNotifications", CalendarParameters.PARAMETER_IGNORE_CONFLICTS);
+    private static final Set<String> OPTIONAL_PARAMETERS = unmodifiableSet(PARAM_SEND_INTERNAL_NOTIFICATIONS, PARAM_IGNORE_CONFLICTS, PARAM_RANGE_START, PARAM_RANGE_END, PARAM_EXPAND );
 
     @Override
     protected Set<String> getOptionalParameters() {

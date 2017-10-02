@@ -49,10 +49,12 @@
 
 package com.openexchange.chronos.json.action;
 
+import static com.openexchange.tools.arrays.Collections.unmodifiableSet;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -85,6 +87,13 @@ public class DeleteAction extends ChronosAction {
     private static final String FOLDER_ID_FIELD = "folderId";
     private static final String ID_FIELD = "id";
     private static final String RECURENCE_ID_FIELD = "recurrenceId";
+
+    private static final Set<String> OPTIONAL_PARAMETERS = unmodifiableSet(PARAM_RANGE_START, PARAM_RANGE_END, PARAM_EXPAND );
+
+    @Override
+    protected Set<String> getOptionalParameters() {
+        return OPTIONAL_PARAMETERS;
+    }
 
     /**
      * Initializes a new {@link DeleteAction}.
