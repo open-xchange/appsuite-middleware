@@ -19,4 +19,7 @@ properties:
     description: The manage id of the attachment.
   uri:
     type: string
-    description: An uniform resource identifier to the attachment file.
+    description: A uniform resource identifier to the attachment file.
+  cid:
+    type: string
+    description: The Content-ID that uniquely identifies an attachment with an upload request.
