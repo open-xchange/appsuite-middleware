@@ -329,7 +329,7 @@ public enum CalendarExceptionCodes implements DisplayableOXExceptionCode {
      * <li>The requested attachment was not found.</li>
      * <li>Attachment not found [attachment %1$d, event %2$s, folder %3$s]</li>
      */
-    ATTACHMENT_NOT_FOUND("Attachment not found [attachment %1$d, event %2$s, folder %3$s]", ATTACHMENT_NOT_FOUND_MSG, Category.CATEGORY_USER_INPUT, 5074),
+    ATTACHMENT_NOT_FOUND("Attachment not found [attachment %1$d, event %2$s, folder %3$s]", ATTACHMENT_NOT_FOUND_MSG, Category.CATEGORY_USER_INPUT, 4047),
     ;
 
     public static final String PREFIX = "CAL".intern();
