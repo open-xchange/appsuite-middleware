@@ -91,8 +91,6 @@ public class GetAttachment extends ChronosAction {
 
         // Get the attachment and prepare the response
         try (IFileHolder fileHolder = calendarAccess.getAttachment(eventId, mid)) {
-            // Prevent any transformations for image files...
-            requestData.putParameter("transformationNeeded", String.valueOf(false));
             // Compose & return result
             AJAXRequestResult result = new AJAXRequestResult(fileHolder, "file");
             result.setHeader("ETag", calendarAccess.getSession().getContextId() + "-" + managedId);
