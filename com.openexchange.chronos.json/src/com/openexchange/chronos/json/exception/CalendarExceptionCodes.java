@@ -77,10 +77,6 @@ public enum CalendarExceptionCodes implements DisplayableOXExceptionCode {
      * Unable to add alarms: %s
      */
     UNABLE_TO_ADD_ALARMS("Unable to add alarms: %s", CalendarExceptionMessages.UNABLE_TO_ADD_ALARMS_MSG, Category.CATEGORY_ERROR, 3),
-    /**
-     * Unable to extract any content ids for the attachments.
-     */
-    UNABLE_TO_EXTRACT_CID("Unable to extract any content ids for the attachments.", CalendarExceptionMessages.UNABLE_TO_EXTRACT_CIDS_MSG, Category.CATEGORY_ERROR, 4),
 
     ;
 

@@ -66,7 +66,6 @@ import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.json.converter.EventConflictResultConverter;
 import com.openexchange.chronos.json.converter.mapper.EventMapper;
-import com.openexchange.chronos.json.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccessFactory;
 import com.openexchange.exception.Category;
@@ -229,7 +228,7 @@ public abstract class ChronosAction extends AbstractChronosAction {
         for (UploadFile uploadFile : uploadFiles) {
             String contentId = uploadFile.getContentId();
             if (Strings.isEmpty(contentId)) {
-                throw CalendarExceptionCodes.UNABLE_TO_EXTRACT_CID.create();
+                throw AjaxExceptionCodes.BAD_REQUEST_CUSTOM.create("Unable to extract the Content-ID for the attachment.");
             }
             attachments.put(contentId, convertUploadedFile(uploadFile));
         }
