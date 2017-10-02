@@ -148,7 +148,7 @@ public class EventManager extends AbstractManager {
      * @throws ApiException if an API error is occurred
      */
     public EventData createEventWithAttachment(EventData eventData, Asset asset) throws ApiException {
-        ChronosCalendarResultResponse createEvent = userApi.getEnhancedChronosApi().createEventWithAttachments(userApi.getSession(), defaultFolder, eventData.toJson(), new File(asset.getAbsolutePath()), false, false);
+        ChronosCalendarResultResponse createEvent = userApi.getEnhancedChronosApi().createEventWithAttachments(userApi.getEnhancedSession(), defaultFolder, eventData.toJson(), new File(asset.getAbsolutePath()), false, false);
         EventData event = handleCreation(createEvent);
         return event;
     }
@@ -166,7 +166,7 @@ public class EventManager extends AbstractManager {
         for (Asset asset : assets) {
             files.add(new File(asset.getAbsolutePath()));
         }
-        ChronosCalendarResultResponse createEvent = userApi.getEnhancedChronosApi().createEventWithAttachments(userApi.getSession(), defaultFolder, eventData.toJson(), files, false, false);
+        ChronosCalendarResultResponse createEvent = userApi.getEnhancedChronosApi().createEventWithAttachments(userApi.getEnhancedSession(), defaultFolder, eventData.toJson(), files, false, false);
         EventData event = handleCreation(createEvent);
         return event;
     }
@@ -180,7 +180,7 @@ public class EventManager extends AbstractManager {
      * @throws ApiException if an API error is occurred
      */
     public EventData updateEventWithAttachment(EventData eventData, Asset asset) throws ApiException {
-        ChronosCalendarResultResponse updateResponse = userApi.getEnhancedChronosApi().updateEventWithAttachments(userApi.getSession(), defaultFolder, eventData.getId(), System.currentTimeMillis(), eventData.toJson(), new File(asset.getAbsolutePath()), null, true, false);
+        ChronosCalendarResultResponse updateResponse = userApi.getEnhancedChronosApi().updateEventWithAttachments(userApi.getEnhancedSession(), defaultFolder, eventData.getId(), System.currentTimeMillis(), eventData.toJson(), new File(asset.getAbsolutePath()), null, true, false);
         return handleUpdate(updateResponse);
     }
 

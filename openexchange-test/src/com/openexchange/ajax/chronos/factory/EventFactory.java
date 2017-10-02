@@ -52,6 +52,7 @@ package com.openexchange.ajax.chronos.factory;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import com.openexchange.ajax.chronos.util.DateTimeUtil;
 import com.openexchange.configuration.asset.Asset;
@@ -170,6 +171,7 @@ public final class EventFactory {
         attachment.setFilename(asset.getFilename());
         attachment.setFmtType(asset.getAssetType().name());
         attachment.setUri("file:");
+        attachment.setCid(UUID.randomUUID().toString());
 
         return attachment;
     }

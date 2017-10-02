@@ -72,8 +72,12 @@ public class UserApi {
     private JSlobApi jslob;
     private ChronosApi chronosApi;
     private EnhancedChronosApi enhancedChronosApi;
+    private EnhancedApiClient enhancedApiClient;
     private final ApiClient client;
     private final TestUser user;
+
+    private String enhancedSession;
+    private int enhancedCalUser;
 
     /**
      * Initialises a new {@link UserApi}.
@@ -82,17 +86,22 @@ public class UserApi {
      * @param user
      * @throws Exception
      */
-    public UserApi(ApiClient client, TestUser user) throws Exception {
+    public UserApi(ApiClient client, EnhancedApiClient enhancedApiClient, TestUser user) throws Exception {
         this.client = client;
+        this.enhancedApiClient = enhancedApiClient;
         this.user = user;
         chronosApi = new ChronosApi(client);
         jslob = new JSlobApi(client);
         foldersApi = new FoldersApi(client);
-        setEnhancedChronosApi(new EnhancedChronosApi(client));
+        setEnhancedChronosApi(new EnhancedChronosApi(enhancedApiClient));
 
         LoginResponse login = login(user.getLogin(), user.getPassword(), client);
         this.calUser = login.getUserId();
         this.session = login.getSession();
+
+        login = login(user.getLogin(), user.getPassword(), enhancedApiClient);
+        this.enhancedCalUser = login.getUserId();
+        this.enhancedSession = login.getSession();
     }
 
     /**
@@ -235,6 +244,60 @@ public class UserApi {
      */
     public void setEnhancedChronosApi(EnhancedChronosApi enhancedChronosApi) {
         this.enhancedChronosApi = enhancedChronosApi;
+    }
+
+    /**
+     * Gets the enhancedApiClient
+     *
+     * @return The enhancedApiClient
+     */
+    public EnhancedApiClient getEnhancedApiClient() {
+        return enhancedApiClient;
+    }
+
+    /**
+     * Sets the enhancedApiClient
+     *
+     * @param enhancedApiClient The enhancedApiClient to set
+     */
+    public void setEnhancedApiClient(EnhancedApiClient enhancedApiClient) {
+        this.enhancedApiClient = enhancedApiClient;
+    }
+
+    /**
+     * Gets the enhancedSession
+     *
+     * @return The enhancedSession
+     */
+    public String getEnhancedSession() {
+        return enhancedSession;
+    }
+
+    /**
+     * Sets the enhancedSession
+     *
+     * @param enhancedSession The enhancedSession to set
+     */
+    public void setEnhancedSession(String enhancedSession) {
+        this.enhancedSession = enhancedSession;
+    }
+
+    /**
+     * Gets the enhancedCalUser
+     *
+     * @return The enhancedCalUser
+     */
+    public int getEnhancedCalUser() {
+        return enhancedCalUser;
+    }
+
+    /**
+     * Sets the enhancedCalUser
+     *
+     * @param enhancedCalUser The enhancedCalUser to set
+     */
+    public void setEnhancedCalUser(int enhancedCalUser) {
+        this.enhancedCalUser = enhancedCalUser;
     }
 
 }

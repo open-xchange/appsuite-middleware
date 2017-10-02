@@ -128,8 +128,9 @@ public class BasicFreeBusyTest extends AbstractChronosTest {
         freeBusyApi = new ChronosFreebusyApi(defaultUserApi.getClient());
 
         // prepare second user
-        user2 = new UserApi(generateClient(testUser2), testUser2);
+        user2 = new UserApi(generateClient(testUser2), generateEnhancedClient(testUser2), testUser2);
         rememberClient(user2.getClient());
+        rememberClient(user2.getEnhancedApiClient());
     }
 
     @Test

@@ -57,6 +57,7 @@ import org.junit.Before;
 import org.junit.runner.RunWith;
 import com.google.code.tempusfugit.concurrency.ConcurrentTestRunner;
 import com.google.code.tempusfugit.concurrency.annotations.Concurrent;
+import com.openexchange.ajax.chronos.EnhancedApiClient;
 import com.openexchange.exception.OXException;
 import com.openexchange.test.pool.TestContext;
 import com.openexchange.test.pool.TestContextPool;
@@ -83,9 +84,9 @@ public abstract class AbstractAPIClientSession {
     protected TestUser testUser2;
     protected LoginApi loginApi;
     protected ApiClient apiClient;
+    private EnhancedApiClient enhancedApiClient;
 
     private Set<ApiClient> apiClients;
-
 
     /**
      * Default constructor.
@@ -95,7 +96,6 @@ public abstract class AbstractAPIClientSession {
     protected AbstractAPIClientSession() {
         super();
     }
-
 
     /**
      * Gets the client identifier to use when performing a login
@@ -122,10 +122,13 @@ public abstract class AbstractAPIClientSession {
         apiClient = generateClient(testUser);
         rememberClient(apiClient);
 
+        enhancedApiClient = generateEnhancedClient(testUser);
+        rememberClient(enhancedApiClient);
+
     }
 
-    protected void rememberClient(ApiClient client){
-        if(apiClients==null){
+    protected void rememberClient(ApiClient client) {
+        if (apiClients == null) {
             apiClients = new HashSet<>(1);
         }
         apiClients.add(client);
@@ -133,7 +136,7 @@ public abstract class AbstractAPIClientSession {
 
     @After
     public void tearDown() throws Exception {
-        for(ApiClient client: apiClients){
+        for (ApiClient client : apiClients) {
             logoutClient(client);
         }
         TestContextPool.backContext(testContext);
@@ -240,5 +243,49 @@ public abstract class AbstractAPIClientSession {
             throw new OXException();
         }
         return newClient;
+    }
+
+    /**
+     * Generates a new {@link EnhancedApiClient} for the {@link TestUser}.
+     * Generated client needs a <b>logout in tearDown()</b>
+     *
+     * @param client The client identifier to use when performing a login
+     * @param user The {@link TestUser} to create a client for
+     * @return The new {@link EnhancedApiClient}
+     * @throws OXException In case no client could be created
+     */
+    protected final EnhancedApiClient generateEnhancedClient(TestUser user) throws OXException {
+        if (null == user) {
+            LOG.error("Can only create a client for an valid user");
+            throw new OXException();
+        }
+        EnhancedApiClient newClient;
+        try {
+            newClient = new EnhancedApiClient();
+            newClient.setBasePath("http://localhost/ajax");
+            newClient.setUserAgent("ox-test-client");
+        } catch (Exception e) {
+            LOG.error("Could not generate new client for user {} in context {} ", user.getUser(), user.getContext());
+            throw new OXException();
+        }
+        return newClient;
+    }
+
+    /**
+     * Gets the enhancedApiClient
+     *
+     * @return The enhancedApiClient
+     */
+    public EnhancedApiClient getEnhancedApiClient() {
+        return enhancedApiClient;
+    }
+
+    /**
+     * Sets the enhancedApiClient
+     *
+     * @param enhancedApiClient The enhancedApiClient to set
+     */
+    public void setEnhancedApiClient(EnhancedApiClient enhancedApiClient) {
+        this.enhancedApiClient = enhancedApiClient;
     }
 }

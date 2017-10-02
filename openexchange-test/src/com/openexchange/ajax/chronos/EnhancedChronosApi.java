@@ -56,7 +56,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.ws.rs.core.GenericType;
-import com.openexchange.testing.httpclient.invoker.ApiClient;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.invoker.Pair;
 import com.openexchange.testing.httpclient.models.ChronosCalendarResultResponse;
@@ -71,6 +70,8 @@ import com.openexchange.testing.httpclient.modules.ChronosApi;
  */
 public class EnhancedChronosApi extends ChronosApi {
 
+    private EnhancedApiClient enhancedApiClient;
+
     /**
      * Initialises a new {@link EnhancedChronosApi}.
      */
@@ -83,8 +84,9 @@ public class EnhancedChronosApi extends ChronosApi {
      * 
      * @param apiClient
      */
-    public EnhancedChronosApi(ApiClient apiClient) {
+    public EnhancedChronosApi(EnhancedApiClient apiClient) {
         super(apiClient);
+        enhancedApiClient = apiClient;
     }
 
     /**
@@ -123,15 +125,16 @@ public class EnhancedChronosApi extends ChronosApi {
         Map<String, String> localVarHeaderParams = new HashMap<String, String>();
         Map<String, Object> localVarFormParams = new HashMap<String, Object>();
 
-        localVarQueryParams.addAll(getApiClient().parameterToPairs("", "session", session));
-        localVarQueryParams.addAll(getApiClient().parameterToPairs("", "folder", folder));
-        localVarQueryParams.addAll(getApiClient().parameterToPairs("", "plainJson", true)); //Set this parameter explicitly to 'true' to return a regular json object instead of text/html
-        localVarQueryParams.addAll(getApiClient().parameterToPairs("", "ignore_conflicts", ignoreConflicts));
-        localVarQueryParams.addAll(getApiClient().parameterToPairs("", "sendInternalNotifications", sendInternalNotifications));
+        localVarQueryParams.addAll(enhancedApiClient.parameterToPairs("", "session", session));
+        localVarQueryParams.addAll(enhancedApiClient.parameterToPairs("", "folder", folder));
+        localVarQueryParams.addAll(enhancedApiClient.parameterToPairs("", "plainJson", true)); //Set this parameter explicitly to 'true' to return a regular json object instead of text/html
+        localVarQueryParams.addAll(enhancedApiClient.parameterToPairs("", "ignore_conflicts", ignoreConflicts));
+        localVarQueryParams.addAll(enhancedApiClient.parameterToPairs("", "sendInternalNotifications", sendInternalNotifications));
 
         if (json0 != null) {
             localVarFormParams.put("json_0", json0);
         }
+
         int index = 0;
         for (File file : files) {
             if (file != null) {
@@ -140,15 +143,15 @@ public class EnhancedChronosApi extends ChronosApi {
         }
 
         final String[] localVarAccepts = { "application/json" };
-        final String localVarAccept = getApiClient().selectHeaderAccept(localVarAccepts);
+        final String localVarAccept = enhancedApiClient.selectHeaderAccept(localVarAccepts);
 
         final String[] localVarContentTypes = { "multipart/form-data" };
-        final String localVarContentType = getApiClient().selectHeaderContentType(localVarContentTypes);
+        final String localVarContentType = enhancedApiClient.selectHeaderContentType(localVarContentTypes);
 
         String[] localVarAuthNames = new String[] {};
 
         GenericType<ChronosCalendarResultResponse> localVarReturnType = new GenericType<ChronosCalendarResultResponse>() {};
-        return getApiClient().invokeAPI(localVarPath, "POST", localVarQueryParams, localVarPostBody, localVarHeaderParams, localVarFormParams, localVarAccept, localVarContentType, localVarAuthNames, localVarReturnType);
+        return enhancedApiClient.invokeAPI(localVarPath, "POST", localVarQueryParams, localVarPostBody, localVarHeaderParams, localVarFormParams, localVarAccept, localVarContentType, localVarAuthNames, localVarReturnType);
     }
 
     /**
@@ -208,14 +211,14 @@ public class EnhancedChronosApi extends ChronosApi {
         Map<String, String> localVarHeaderParams = new HashMap<String, String>();
         Map<String, Object> localVarFormParams = new HashMap<String, Object>();
 
-        localVarQueryParams.addAll(getApiClient().parameterToPairs("", "session", session));
-        localVarQueryParams.addAll(getApiClient().parameterToPairs("", "folder", folder));
-        localVarQueryParams.addAll(getApiClient().parameterToPairs("", "id", id));
-        localVarQueryParams.addAll(getApiClient().parameterToPairs("", "plainJson", true)); //Set this parameter explicitly to 'true' to return a regular json object instead of text/html
-        localVarQueryParams.addAll(getApiClient().parameterToPairs("", "recurrenceId", recurrenceId));
-        localVarQueryParams.addAll(getApiClient().parameterToPairs("", "ignore_conflicts", ignoreConflicts));
-        localVarQueryParams.addAll(getApiClient().parameterToPairs("", "sendInternalNotifications", sendInternalNotifications));
-        localVarQueryParams.addAll(getApiClient().parameterToPairs("", "timestamp", timestamp));
+        localVarQueryParams.addAll(enhancedApiClient.parameterToPairs("", "session", session));
+        localVarQueryParams.addAll(enhancedApiClient.parameterToPairs("", "folder", folder));
+        localVarQueryParams.addAll(enhancedApiClient.parameterToPairs("", "id", id));
+        localVarQueryParams.addAll(enhancedApiClient.parameterToPairs("", "plainJson", true)); //Set this parameter explicitly to 'true' to return a regular json object instead of text/html
+        localVarQueryParams.addAll(enhancedApiClient.parameterToPairs("", "recurrenceId", recurrenceId));
+        localVarQueryParams.addAll(enhancedApiClient.parameterToPairs("", "ignore_conflicts", ignoreConflicts));
+        localVarQueryParams.addAll(enhancedApiClient.parameterToPairs("", "sendInternalNotifications", sendInternalNotifications));
+        localVarQueryParams.addAll(enhancedApiClient.parameterToPairs("", "timestamp", timestamp));
 
         if (json0 != null) {
             localVarFormParams.put("json_0", json0);
@@ -225,14 +228,14 @@ public class EnhancedChronosApi extends ChronosApi {
         }
 
         final String[] localVarAccepts = { "application/json" };
-        final String localVarAccept = getApiClient().selectHeaderAccept(localVarAccepts);
+        final String localVarAccept = enhancedApiClient.selectHeaderAccept(localVarAccepts);
 
         final String[] localVarContentTypes = { "multipart/form-data" };
-        final String localVarContentType = getApiClient().selectHeaderContentType(localVarContentTypes);
+        final String localVarContentType = enhancedApiClient.selectHeaderContentType(localVarContentTypes);
 
         String[] localVarAuthNames = new String[] {};
 
         GenericType<ChronosCalendarResultResponse> localVarReturnType = new GenericType<ChronosCalendarResultResponse>() {};
-        return getApiClient().invokeAPI(localVarPath, "POST", localVarQueryParams, localVarPostBody, localVarHeaderParams, localVarFormParams, localVarAccept, localVarContentType, localVarAuthNames, localVarReturnType);
+        return enhancedApiClient.invokeAPI(localVarPath, "POST", localVarQueryParams, localVarPostBody, localVarHeaderParams, localVarFormParams, localVarAccept, localVarContentType, localVarAuthNames, localVarReturnType);
     }
 }

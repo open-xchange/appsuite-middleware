@@ -88,7 +88,10 @@ public abstract class AbstractAlarmTriggerTest extends AbstractAlarmTest {
         folderId = createAndRememberNewFolder(defaultUserApi, defaultUserApi.getSession(), getDefaultFolder(), defaultUserApi.getCalUser().intValue());
         ApiClient client = generateClient(testUser2);
         rememberClient(client);
-        user2 = new UserApi(client, testUser2);
+        EnhancedApiClient enhancedClient = new EnhancedApiClient();
+        rememberClient(enhancedClient);
+        
+        defaultUserApi = new UserApi(client, enhancedClient, testUser2);
         folderId2 = getDefaultFolder(user2.getSession(), client);
         eventManager2 = new EventManager(user2, getDefaultFolder(user2.getSession(), client));
     }

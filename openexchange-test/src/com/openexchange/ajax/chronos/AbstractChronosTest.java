@@ -108,7 +108,9 @@ public class AbstractChronosTest extends AbstractAPIClientSession {
         super.setUp();
         ApiClient client = getClient();
         rememberClient(client);
-        defaultUserApi = new UserApi(client, testUser);
+        EnhancedApiClient enhancedClient = getEnhancedApiClient();
+        rememberClient(enhancedClient);
+        defaultUserApi = new UserApi(client, enhancedClient, testUser);
         chronosApi = defaultUserApi.getChronosApi();
         folderId = getDefaultFolder();
         assetManager = new AssetManager();
