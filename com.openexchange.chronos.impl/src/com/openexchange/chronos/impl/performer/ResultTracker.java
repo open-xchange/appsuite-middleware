@@ -158,7 +158,7 @@ public class ResultTracker {
                 /*
                  * "update" from calendar user's point of view
                  */
-                if (/* isResolveOccurrences(session) && */(isSeriesMaster(originalEvent) || isSeriesMaster(updatedEvent))) {
+                if (isResolveOccurrences(session) && (isSeriesMaster(originalEvent) || isSeriesMaster(updatedEvent))) {
                     if (isSeriesMaster(originalEvent) && isSeriesMaster(updatedEvent)) {
                         for (Entry<Event, Event> entry : mapEventOccurrences(resolveOccurrences(userize(originalEvent)), resolveOccurrences(userize(updatedEvent)))) {
                             if (null == entry.getKey()) {
