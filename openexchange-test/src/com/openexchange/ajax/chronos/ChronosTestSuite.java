@@ -61,6 +61,7 @@ import com.openexchange.test.concurrent.ParallelSuite;
 @RunWith(ParallelSuite.class)
 @Suite.SuiteClasses({
     // @formatter:off
+    AcknowledgeAndSnoozeTest.class,
     BasicAlarmTest.class,
     BasicAlarmTriggerTest.class,
     BasicAvailabilityTest.class,
