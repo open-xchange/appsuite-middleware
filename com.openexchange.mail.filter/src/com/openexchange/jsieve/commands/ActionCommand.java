@@ -96,21 +96,21 @@ public class ActionCommand extends ControlOrActionCommand {
          * <code>keep</code>
          * <p><a href="https://tools.ietf.org/html/rfc5228#section-4.3">RFC-5228: Action keep</a></p>
          */
-        KEEP("keep", 0, new Hashtable<String, Integer>(), "keep", null),
+        KEEP("keep", 0, new Hashtable<String, Integer>(), "keep", new ArrayList<String>()),
         /**
          * <p>Discard is used to silently throw away the message. It does so by
          * simply cancelling the <a href="https://tools.ietf.org/html/rfc5228#section-2.10.2">implicit keep</a>.</p>
          * <code>discard</code>
          * <p><a href="https://tools.ietf.org/html/rfc5228#section-4.4">RFC-5228: Action discard</a></p>
          */
-        DISCARD("discard", 0, new Hashtable<String, Integer>(), "discard", null),
+        DISCARD("discard", 0, new Hashtable<String, Integer>(), "discard", new ArrayList<String>()),
         /**
          * <p>The "redirect" action is used to send the message to another user at
          * a supplied address, as a mail forwarding feature does.</p>
          * <code>redirect &lt;address: string&gt;</code>
          * <p><a href="https://tools.ietf.org/html/rfc5228#section-4.2">RFC-5228: Action redirect</p>
          */
-        REDIRECT("redirect", 1, redirectTags(), "redirect", null),
+        REDIRECT("redirect", 1, redirectTags(), "redirect", new ArrayList<String>()),
         /**
          * <p>The "fileinto" action delivers the message into the specified mailbox.</p>
          * <code>fileinto &lt;mailbox: string&gt;</code>
@@ -129,7 +129,7 @@ public class ActionCommand extends ControlOrActionCommand {
          * <code>stop</code>
          * <p><a href="https://tools.ietf.org/html/rfc5228#section-3.3">RFC-5228: Control stop</a></p>
          */
-        STOP("stop", 0, new Hashtable<String, Integer>(), "stop", null),
+        STOP("stop", 0, new Hashtable<String, Integer>(), "stop", new ArrayList<String>()),
         /**
          * <p>The "vacation" action implements a vacation autoresponder similar to
          * the vacation command available under many versions of Unix.</p>
@@ -356,7 +356,7 @@ public class ActionCommand extends ControlOrActionCommand {
             this.commandName = commandName;
             this.minNumberOfArguments = minNumberOfArguments;
             this.tagArgs = tagArgs;
-            this.required = null == required || required.isEmpty() ? null : required;
+            this.required = (null == required || required.isEmpty()) ? new ArrayList<String>() : required;
             this.jsonName = jsonName;
         }
 
@@ -558,7 +558,7 @@ public class ActionCommand extends ControlOrActionCommand {
     public HashSet<String> getRequired() {
         HashSet<String> result = new HashSet<String>();
         result.addAll(optRequired);
-        result.addAll(this.command.getRequired());
+        result.addAll(this.command.getRequired() == null ? new HashSet<>() : this.command.getRequired());
         return result;
     }
 
