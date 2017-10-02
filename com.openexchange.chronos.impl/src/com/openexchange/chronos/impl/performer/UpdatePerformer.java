@@ -69,6 +69,7 @@ import static com.openexchange.chronos.common.CalendarUtils.matches;
 import static com.openexchange.chronos.impl.Check.requireCalendarPermission;
 import static com.openexchange.chronos.impl.Check.requireUpToDateTimestamp;
 import static com.openexchange.chronos.impl.Utils.asList;
+import static com.openexchange.chronos.impl.Utils.getChangeExceptionDates;
 import static com.openexchange.folderstorage.Permission.NO_PERMISSIONS;
 import static com.openexchange.folderstorage.Permission.READ_ALL_OBJECTS;
 import static com.openexchange.folderstorage.Permission.READ_FOLDER;
@@ -223,7 +224,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
                  * touch master & track results
                  */
                 Event updatedMasterEvent = loadEventData(originalEvent.getId());
-                Set<RecurrenceId> exceptions = getChangeExceptionDates(updatedMasterEvent.getSeriesId());
+                Set<RecurrenceId> exceptions = getChangeExceptionDates(storage, updatedMasterEvent.getSeriesId());
                 if (updatedMasterEvent.getDeleteExceptionDates() != null) {
                     exceptions.addAll(updatedMasterEvent.getDeleteExceptionDates());
                 }
@@ -369,7 +370,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
             Event alarmTriggerEvent = loadEventData(originalEvent.getId());
             SortedSet<RecurrenceId> exceptions = null;
             if (alarmTriggerEvent.getSeriesId() != null) {
-                exceptions = getChangeExceptionDates(alarmTriggerEvent.getSeriesId());
+                exceptions = getChangeExceptionDates(storage, alarmTriggerEvent.getSeriesId());
                 if (alarmTriggerEvent.getDeleteExceptionDates() != null) {
                     exceptions.addAll(alarmTriggerEvent.getDeleteExceptionDates());
                 }
@@ -400,7 +401,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
             false == eventUpdate.containsAnyChangeOf(new EventField[] { EventField.START_DATE, EventField.END_DATE, EventField.RECURRENCE_RULE })) {
             return false;
         }
-        SortedSet<RecurrenceId> changeExceptionDates = getChangeExceptionDates(originalEvent.getSeriesId());
+        SortedSet<RecurrenceId> changeExceptionDates = getChangeExceptionDates(storage, originalEvent.getSeriesId());
         SortedSet<RecurrenceId> deleteExceptionDates = originalEvent.getDeleteExceptionDates();
         if (isNullOrEmpty(deleteExceptionDates) && isNullOrEmpty(changeExceptionDates)) {
             return false;

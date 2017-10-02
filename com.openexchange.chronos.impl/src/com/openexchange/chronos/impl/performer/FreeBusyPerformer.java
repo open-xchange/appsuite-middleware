@@ -55,6 +55,7 @@ import static com.openexchange.chronos.common.CalendarUtils.isGroupScheduled;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.chronos.impl.Utils.anonymizeIfNeeded;
 import static com.openexchange.chronos.impl.Utils.getFields;
+import static com.openexchange.chronos.impl.Utils.getRecurrenceIterator;
 import static com.openexchange.tools.arrays.Collections.put;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -194,7 +195,7 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
                     folderID = eventInPeriod.getFolderId();
                 }
                 if (isSeriesMaster(eventInPeriod)) {
-                    Iterator<RecurrenceId> iterator = getRecurrenceIterator(eventInPeriod, from, until);
+                    Iterator<RecurrenceId> iterator = getRecurrenceIterator(storage, session, eventInPeriod, from, until);
                     while (iterator.hasNext()) {
                         put(eventsPerAttendee, attendee, getResultingOccurrence(eventInPeriod, iterator.next(), folderID));
                     }
@@ -240,7 +241,7 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
         Map<Attendee, Availability> availabilityPerAttendee = availabilityService.getAttendeeAvailability(session, attendees, from, until);
 
         TimeZone timeZone = Utils.getTimeZone(session);
-        // Expand any recurring available instances 
+        // Expand any recurring available instances
         expandRecurringInstances(from, until, availabilityPerAttendee, timeZone);
         // Adjust the intervals
         adjustIntervals(from, until, availabilityPerAttendee, timeZone);
@@ -286,7 +287,7 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
 
     /**
      * Expands any recurring instances found in the specified available times {@link Map}
-     * 
+     *
      * @param availableTimes The available times for the attendees
      * @param timeZone The {@link TimeZone} of the user
      */
@@ -332,7 +333,7 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
     /**
      * Adjusts the ranges of the {@link FreeBusyTime} slots that are marked as FREE
      * in regard to the mergedFreeBusyTimes
-     * 
+     *
      * @param freeBusyTimes
      * @param eventsFreeBusyTimes
      */
@@ -372,7 +373,7 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
     /**
      * Create an equivalent free busy time slot for each of the available blocks in the
      * specified {@link Availability}
-     * 
+     *
      * @param availability The {@link Availability} block
      * @param timeZone The user's {@link TimeZone}
      * @return A {@link List} with {@link FreeBusyTime} slots
@@ -415,7 +416,7 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
     /**
      * Adjusts (if necessary) the intervals of the specified {@link Availability} blocks according to the specified
      * range
-     * 
+     *
      * @param from The starting point of the interval
      * @param until The ending point of the interval
      * @param availableTimes The {@link Availability} blocks to adjust
@@ -498,7 +499,7 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
     /**
      * Creates and returns a {@link FreeBusyTime} instance with the specified {@link FbType}
      * in the specified interval
-     * 
+     *
      * @param fbType The free/busy type
      * @param startTime The start time of the instance
      * @param endTime The end time of the instance
@@ -511,7 +512,7 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
     /**
      * Creates and returns a {@link FreeBusyTime} instance with the specified {@link BusyType}
      * in the specified interval
-     * 
+     *
      * @param busyType The free/busy type
      * @param startTime The start time of the instance
      * @param endTime The end time of the instance

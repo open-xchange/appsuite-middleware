@@ -142,7 +142,7 @@ public class HasPerformer extends AbstractFreeBusyPerformer {
                 }
                 if (isSeriesMaster(event)) {
                     long duration = event.getEndDate().getTimestamp() - event.getStartDate().getTimestamp();
-                    Iterator<RecurrenceId> iterator = getRecurrenceIterator(event, minimumEndTime, maximumStartTime);
+                    Iterator<RecurrenceId> iterator = Utils.getRecurrenceIterator(storage, session, event, minimumEndTime, maximumStartTime);
                     while (iterator.hasNext() && false == hasEvents) {
                         RecurrenceId recurrenceId = iterator.next();
                         Period occurence = new Period(new Date(recurrenceId.getValue().getTimestamp()), new Date(recurrenceId.getValue().getTimestamp() + duration), event.getStartDate().isAllDay());

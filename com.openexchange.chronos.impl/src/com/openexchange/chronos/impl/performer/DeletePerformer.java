@@ -53,7 +53,7 @@ import static com.openexchange.chronos.common.CalendarUtils.find;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesException;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.chronos.impl.Check.requireUpToDateTimestamp;
-import static com.openexchange.chronos.impl.Utils.getPersonalFolderIds;
+import static com.openexchange.chronos.impl.Utils.getChangeExceptionDates;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -277,9 +277,7 @@ public class DeletePerformer extends AbstractUpdatePerformer {
             /*
              * track update of master in result
              */
-            result.addAffectedFolderIds(folder.getID(), getPersonalFolderIds(originalMasterEvent.getAttendees()));
-            result.addPlainUpdate(originalMasterEvent, updatedMasterEvent);
-            result.addUserizedUpdate(userize(originalMasterEvent), userize(updatedMasterEvent));
+            trackUpdate(originalMasterEvent, updatedMasterEvent);
         } else {
             /*
              * delete series master
@@ -289,7 +287,7 @@ public class DeletePerformer extends AbstractUpdatePerformer {
     }
 
     private void updateAlarmTrigger(Event originalMasterEvent, Event updatedMasterEvent, Set<RecurrenceId> deleteExceptionDates) throws OXException {
-        SortedSet<RecurrenceId> changeExceptionDates = getChangeExceptionDates(updatedMasterEvent.getSeriesId());
+        SortedSet<RecurrenceId> changeExceptionDates = getChangeExceptionDates(storage, updatedMasterEvent.getSeriesId());
         Set<RecurrenceId> exceptions = new TreeSet<>(deleteExceptionDates);
         exceptions.addAll(changeExceptionDates);
         storage.getAlarmTriggerStorage().deleteTriggers(originalMasterEvent.getId());
@@ -347,10 +345,7 @@ public class DeletePerformer extends AbstractUpdatePerformer {
          */
         Event originalMasterEvent = loadEventData(seriesId);
         touch(seriesId);
-        Event updatedMasterEvent = loadEventData(originalMasterEvent.getId());
-        result.addAffectedFolderIds(folder.getID(), getPersonalFolderIds(originalMasterEvent.getAttendees()));
-        result.addPlainUpdate(originalMasterEvent, updatedMasterEvent);
-        result.addUserizedUpdate(userize(originalMasterEvent), userize(updatedMasterEvent));
+        trackUpdate(originalMasterEvent, loadEventData(originalMasterEvent.getId()));
     }
 
 }

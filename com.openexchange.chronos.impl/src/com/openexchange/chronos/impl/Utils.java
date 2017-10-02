@@ -50,6 +50,7 @@
 package com.openexchange.chronos.impl;
 
 import static com.openexchange.chronos.common.CalendarUtils.find;
+import static com.openexchange.chronos.common.CalendarUtils.getExceptionDates;
 import static com.openexchange.chronos.common.CalendarUtils.isClassifiedFor;
 import static com.openexchange.chronos.common.CalendarUtils.isGroupScheduled;
 import static com.openexchange.chronos.common.CalendarUtils.isInRange;
@@ -87,6 +88,7 @@ import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.common.DefaultRecurrenceData;
 import com.openexchange.chronos.common.RecurrenceIdComparator;
 import com.openexchange.chronos.common.mapping.EventMapper;
 import com.openexchange.chronos.compat.Event2Appointment;
@@ -96,6 +98,7 @@ import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.EntityResolver;
+import com.openexchange.chronos.service.RecurrenceData;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.database.DatabaseService;
@@ -798,6 +801,116 @@ public class Utils {
         return affectedUsers;
     }
 
+    /**
+     * Looks up the recurrence identifiers of all change exceptions for a specific event series from the storage.
+     *
+     * @param storage The calendar storage to use
+     * @param seriesId The identifier of the series to get the recurrence identifiers for
+     * @return The recurrence identifiers in a sorted set, or an empty set if there are none
+     */
+    public static SortedSet<RecurrenceId> getChangeExceptionDates(CalendarStorage storage, String seriesId) throws OXException {
+        EventField[] fields = new EventField[] { EventField.RECURRENCE_ID, EventField.ID, EventField.SERIES_ID };
+        List<Event> changeExceptions = storage.getEventStorage().loadExceptions(seriesId, fields);
+        return CalendarUtils.getRecurrenceIds(changeExceptions);
+    }
+
+    /**
+     * Gets a recurrence iterator for the supplied series master event, iterating over the occurrences of the event series.
+     * <p/>
+     * Any exception dates (as per {@link Event#getDeleteExceptionDates()} and overridden instances (looked up dynamically in the
+     * storage) are skipped implicitly, so that those occurrences won't be included in the resulting iterator.
+     * <p/>
+     * Start- and end of the considered range are taken from the corresponding parameters in the supplied session.
+     *
+     * @param storage The calendar storage to use
+     * @param session The calendar session
+     * @param masterEvent The recurring event master
+     * @return The recurrence iterator
+     * @see #getChangeExceptionDates(String)
+     */
+    public static Iterator<Event> resolveOccurrences(CalendarStorage storage, CalendarSession session, Event masterEvent) throws OXException {
+        return resolveOccurrences(storage, session, masterEvent, getFrom(session), getUntil(session));
+    }
+
+    /**
+     * Gets a recurrence iterator for the supplied series master event, iterating over the occurrences of the event series.
+     * <p/>
+     * Any exception dates (as per {@link Event#getDeleteExceptionDates()} and overridden instances (looked up dynamically in the
+     * storage) are skipped implicitly, so that those occurrences won't be included in the resulting iterator.
+     *
+     * @param storage The calendar storage to use
+     * @param session The calendar session
+     * @param masterEvent The recurring event master
+     * @param from The start of the iteration interval, or <code>null</code> to start with the first occurrence
+     * @param until The end of the iteration interval, or <code>null</code> to iterate until the last occurrence
+     * @return The recurrence iterator
+     * @see #getChangeExceptionDates(String)
+     */
+    public static Iterator<Event> resolveOccurrences(CalendarStorage storage, CalendarSession session, Event masterEvent, Date from, Date until) throws OXException {
+        final TreeSet<RecurrenceId> recurrenceIds = new TreeSet<RecurrenceId>(RecurrenceIdComparator.DEFAULT_COMPARATOR);
+        recurrenceIds.addAll(getChangeExceptionDates(storage, masterEvent.getSeriesId()));
+        if (null != masterEvent.getDeleteExceptionDates()) {
+            recurrenceIds.addAll(masterEvent.getDeleteExceptionDates());
+        }
+        Event adjustedSeriesMaster = new DelegatingEvent(masterEvent) {
+
+            @Override
+            public SortedSet<RecurrenceId> getDeleteExceptionDates() {
+                return recurrenceIds;
+            }
+
+            @Override
+            public boolean containsDeleteExceptionDates() {
+                return true;
+            }
+        };
+        return session.getRecurrenceService().iterateEventOccurrences(adjustedSeriesMaster, from, until);
+    }
+
+    /**
+     * Gets a recurrence iterator for the supplied series master event, iterating over the recurrence identifiers of the event.
+     * <p/>
+     * Any exception dates (as per {@link Event#getDeleteExceptionDates()} and overridden instances (looked up dynamically in the
+     * storage) are skipped implicitly, so that those recurrence identifiers won't be included in the resulting iterator.
+     * <p/>
+     * Start- and end of the considered range are taken from the corresponding parameters in the supplied session.
+     *
+     * @param storage The calendar storage to use
+     * @param session The calendar session
+     * @param masterEvent The recurring event master
+     * @return The recurrence iterator
+     * @see #getChangeExceptionDates(String)
+     */
+    public static Iterator<RecurrenceId> getRecurrenceIterator(CalendarStorage storage, CalendarSession session, Event masterEvent) throws OXException {
+        return getRecurrenceIterator(storage, session, masterEvent, getFrom(session), getUntil(session));
+    }
+
+    /**
+     * Gets a recurrence iterator for the supplied series master event, iterating over the recurrence identifiers of the event.
+     * <p/>
+     * Any exception dates (as per {@link Event#getDeleteExceptionDates()} and overridden instances (looked up dynamically in the
+     * storage) are skipped implicitly, so that those recurrence identifiers won't be included in the resulting iterator.
+     *
+     * @param storage The calendar storage to use
+     * @param session The calendar session
+     * @param masterEvent The recurring event master
+     * @param from The start of the iteration interval, or <code>null</code> to start with the first occurrence
+     * @param until The end of the iteration interval, or <code>null</code> to iterate until the last occurrence
+     * @return The recurrence iterator
+     * @see #getChangeExceptionDates(String)
+     */
+    public static Iterator<RecurrenceId> getRecurrenceIterator(CalendarStorage storage, CalendarSession session, Event masterEvent, Date from, Date until) throws OXException {
+        SortedSet<RecurrenceId> recurrenceIds = new TreeSet<RecurrenceId>();
+        if (null != masterEvent.getSeriesId()) {
+            recurrenceIds.addAll(getChangeExceptionDates(storage, masterEvent.getSeriesId()));
+        }
+        if (null != masterEvent.getDeleteExceptionDates()) {
+            recurrenceIds.addAll(masterEvent.getDeleteExceptionDates());
+        }
+        RecurrenceData recurrenceData = new DefaultRecurrenceData(masterEvent.getRecurrenceRule(), masterEvent.getStartDate(), getExceptionDates(recurrenceIds));
+        return session.getRecurrenceService().iterateRecurrenceIds(recurrenceData, from, until);
+    }
+
     private static FolderServiceDecorator initDecorator(CalendarSession session) throws OXException {
         FolderServiceDecorator decorator = new FolderServiceDecorator();
         Connection connection = optConnection(session);
@@ -809,6 +922,12 @@ public class Utils {
         return decorator;
     }
 
+    /**
+     * Optionally gets a database connection set in a specific calendar session.
+     *
+     * @param session The calendar session to get the connection from
+     * @return The connection, or <code>null</code> if not defined
+     */
     public static Connection optConnection(CalendarSession session) {
         return session.get(AbstractStorageOperation.PARAM_CONNECTION, Connection.class, null);
     }

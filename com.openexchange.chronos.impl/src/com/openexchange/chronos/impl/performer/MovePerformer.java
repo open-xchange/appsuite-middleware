@@ -161,6 +161,9 @@ public class MovePerformer extends AbstractUpdatePerformer {
         result.addAffectedFolderIds(folder.getID(), getPersonalFolderIds(originalEvent.getAttendees()));
         result.addAffectedFolderIds(targetFolder.getID(), getPersonalFolderIds(updatedEvent.getAttendees()));
         result.addPlainUpdate(originalEvent, updatedEvent);
+
+        //TODO: resolve occurrences
+
         result.addUserizedDeletion(timestamp.getTime(), new EventID(folder.getID(), originalEvent.getId(), originalEvent.getRecurrenceId()));
         result.addUserizedCreation(userize(updatedEvent, getCalendarUserId(targetFolder)));
         return result;

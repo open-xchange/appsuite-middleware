@@ -60,6 +60,7 @@ import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.chronos.impl.Check.classificationAllowsUpdate;
 import static com.openexchange.chronos.impl.Check.requireCalendarPermission;
 import static com.openexchange.chronos.impl.Utils.getCalendarUserId;
+import static com.openexchange.chronos.impl.Utils.getChangeExceptionDates;
 import static com.openexchange.chronos.impl.Utils.getPersonalFolderIds;
 import static com.openexchange.chronos.impl.Utils.getSearchTerm;
 import static com.openexchange.chronos.impl.Utils.isInFolder;
@@ -351,7 +352,7 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
          */
         int userId = originalAttendee.getEntity();
         if (isSeriesMaster(originalEvent)) {
-            deleteExceptions(originalEvent.getSeriesId(), getChangeExceptionDates(originalEvent.getSeriesId()), userId);
+            deleteExceptions(originalEvent.getSeriesId(), getChangeExceptionDates(storage, originalEvent.getSeriesId()), userId);
         }
         /*
          * delete event data from storage for this attendee
@@ -375,7 +376,7 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
         storage.getAlarmTriggerStorage().deleteTriggers(updatedEvent.getId());
         Set<RecurrenceId> exceptions = null;
         if (isSeriesMaster(originalEvent)) {
-            exceptions = getChangeExceptionDates(originalEvent.getSeriesId());
+            exceptions = getChangeExceptionDates(storage, originalEvent.getSeriesId());
             if (originalEvent.getDeleteExceptionDates() != null) {
                 exceptions.addAll(originalEvent.getDeleteExceptionDates());
             }
@@ -476,7 +477,7 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
         storage.getAlarmTriggerStorage().insertTriggers(createdException, null);
 
 
-        Set<RecurrenceId> exceptions = getChangeExceptionDates(updatedMasterEvent.getSeriesId());
+        Set<RecurrenceId> exceptions = getChangeExceptionDates(storage, updatedMasterEvent.getSeriesId());
         if (updatedMasterEvent.getDeleteExceptionDates() != null) {
             exceptions.addAll(updatedMasterEvent.getDeleteExceptionDates());
         }
@@ -586,7 +587,7 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
         storage.getAlarmTriggerStorage().deleteTriggers(event.getId());
         Set<RecurrenceId> exceptions = null;
         if (isSeriesMaster(event)) {
-            exceptions = getChangeExceptionDates(event.getSeriesId());
+            exceptions = getChangeExceptionDates(storage, event.getSeriesId());
             if (event.getDeleteExceptionDates() != null) {
                 exceptions.addAll(event.getDeleteExceptionDates());
             }
