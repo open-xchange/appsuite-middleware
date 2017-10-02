@@ -66,6 +66,7 @@ import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.json.converter.EventConflictResultConverter;
 import com.openexchange.chronos.json.converter.mapper.EventMapper;
+import com.openexchange.chronos.json.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccessFactory;
 import com.openexchange.exception.Category;
@@ -207,7 +208,7 @@ public abstract class ChronosAction extends AbstractChronosAction {
             return;
         }
         for (Attachment attachment : event.getAttachments()) {
-            Attachment att = attachments.get(attachment.getFilename());
+            Attachment att = attachments.get(attachment.getContentId());
             if (att != null) {
                 attachment.setData(att.getData());
             }
@@ -226,7 +227,11 @@ public abstract class ChronosAction extends AbstractChronosAction {
         UploadEvent uploadEvent = requestData.getUploadEvent();
         final List<UploadFile> uploadFiles = uploadEvent.getUploadFiles();
         for (UploadFile uploadFile : uploadFiles) {
-            attachments.put(uploadFile.getFileName(), convertUploadedFile(uploadFile));
+            String contentId = uploadFile.getContentId();
+            if (Strings.isEmpty(contentId)) {
+                throw CalendarExceptionCodes.UNABLE_TO_EXTRACT_CID.create();
+            }
+            attachments.put(contentId, convertUploadedFile(uploadFile));
         }
 
         return extractJsonBody(uploadEvent);

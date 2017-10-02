@@ -71,5 +71,9 @@ public class CalendarExceptionMessages implements LocalizableStrings {
      * Unable to add alarms: %s
      */
     public static final String UNABLE_TO_ADD_ALARMS_MSG = "Unable to add alarms: %s";
+    /**
+     * Unable to extract any content ids for the attachments.
+     */
+    public static final String UNABLE_TO_EXTRACT_CIDS_MSG = "Unable to extract any content ids for the attachments.";
 
 }

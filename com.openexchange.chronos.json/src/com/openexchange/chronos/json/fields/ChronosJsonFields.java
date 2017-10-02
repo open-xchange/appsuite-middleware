@@ -307,10 +307,15 @@ public class ChronosJsonFields {
         public static final String MANAGED_ID = "managedId";
 
         /**
-         * An uniform resource identifier to the attachment file.
+         * A uniform resource identifier to the attachment file. See {@link com.openexchange.chronos.Attachment#getUri()}
          */
         public static final String URI = "uri";
 
+        /**
+         * The Content-ID that uniquely identifies an attachment with an upload request.
+         * See {@link com.openexchange.chronos.Attachment#getContentId()}
+         */
+        public static final String CID = "cid";
 
     }
 
