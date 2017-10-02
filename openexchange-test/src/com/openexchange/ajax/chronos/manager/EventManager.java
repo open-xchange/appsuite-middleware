@@ -380,6 +380,7 @@ public class EventManager extends AbstractManager {
      */
     public UpdatesResult getUpdates(Date since, boolean expand) throws ApiException {
         ChronosUpdatesResponse updatesResponse = userApi.getChronosApi().getUpdates(userApi.getSession(), defaultFolder, since.getTime(), null, null, null, null, null, expand, true);
+        this.lastTimeStamp = updatesResponse.getTimestamp();
         return checkResponse(updatesResponse.getErrorDesc(), updatesResponse.getError(), updatesResponse.getData());
     }
 
@@ -455,7 +456,7 @@ public class EventManager extends AbstractManager {
      * @throws ApiException if an API error occurs
      */
     public void updateAttendee(String eventId, AttendeeAndAlarm attendeeAndAlarm) throws ApiException {
-        ChronosCalendarResultResponse updateAttendee = userApi.getChronosApi().updateAttendee(userApi.getSession(), defaultFolder, eventId, System.currentTimeMillis(), attendeeAndAlarm, null, false, true, null, null, EXPAND_SERIES);
+        ChronosCalendarResultResponse updateAttendee = userApi.getChronosApi().updateAttendee(userApi.getSession(), defaultFolder, eventId, lastTimeStamp, attendeeAndAlarm, null, false, true, null, null, EXPAND_SERIES);
         checkResponse(updateAttendee.getError(), updateAttendee.getErrorDesc(), updateAttendee.getData());
         lastTimeStamp = updateAttendee.getTimestamp();
     }

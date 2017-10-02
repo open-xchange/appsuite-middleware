@@ -419,6 +419,7 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
          */
         attendees.add(removed);
         eventManager.updateEvent(exceptionEvent);
+        eventManager2.setLastTimeStamp(eventManager.getLastTimeStamp());
 
         // Check again if trigger times are correct
         triggers = getAndCheckAlarmTrigger(2); // The alarm of the series and the alarm for the exception
