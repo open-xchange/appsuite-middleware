@@ -47,81 +47,60 @@
  *
  */
 
-package com.openexchange.groupware.generic;
+package com.openexchange.subscribe.dav.web.de;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.tools.servlet.AjaxExceptionCodes;
-
+import java.net.URI;
+import java.net.URISyntaxException;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.subscribe.dav.AbstractCardDAVSubscribeService;
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link TargetFolderDefinition}
+ * {@link WebDeSubscribeService}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.10.0
  */
-public class TargetFolderDefinition {
+public class WebDeSubscribeService extends AbstractCardDAVSubscribeService {
 
-    protected String folderId;
-
-    protected Context context;
-
-    protected int userId;
-
-    public TargetFolderDefinition() {
-
+    /**
+     * Initializes a new {@link WebDeSubscribeService}.
+     */
+    public WebDeSubscribeService(ServiceLookup services) {
+        super(services);
     }
 
-    public TargetFolderDefinition(final String folderId, final int userId, final Context context) {
-        this.folderId = folderId;
-        this.userId = userId;
-        this.context = context;
-    }
-
-
-    public String getFolderId() {
-        return folderId;
-    }
-
-    public int getFolderIdAsInt() throws OXException {
-        int retval = -1;
+    @Override
+    protected URI getBaseUrl(ServerSession session) {
         try {
-            retval = Integer.parseInt(folderId);
-        } catch (final NumberFormatException e) {
-            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create("folder", folderId);
+            return new URI("https://carddav.web.de/CardDavProxy/carddav");
+        } catch (URISyntaxException e) {
+            throw new IllegalStateException(e);
         }
-        return retval;
     }
 
-    public void setFolderId(final String folderId) {
-        this.folderId = folderId;
+    @Override
+    protected URI getUserPrincipal(ServerSession session) {
+        try {
+            return new URI("https://carddav.web.de/CardDavProxy/carddav/current-user-principal-uri");
+        } catch (URISyntaxException e) {
+            throw new IllegalStateException(e);
+        }
     }
 
-    public void setFolderId(final int folderId) {
-        setFolderId(Integer.toString(folderId));
+    @Override
+    protected int getChunkSize(ServerSession session) {
+        return 25;
     }
 
-    public boolean containsFolderId() {
-        return getFolderId() != null;
+    @Override
+    protected String getDisplayName() {
+        return "WEB.DE";
     }
 
-    public Context getContext() {
-        return context;
-    }
-
-    public void setContext(final Context context) {
-        this.context = context;
-    }
-
-    public int getUserId() {
-        return userId;
-    }
-
-    public void setUserId(final int userId) {
-        this.userId = userId;
-    }
-
-    public boolean containsUserId() {
-        return getUserId() > 0;
+    @Override
+    protected String getId() {
+        return "com.openexchange.subscribe.dav.web.de";
     }
 
 }

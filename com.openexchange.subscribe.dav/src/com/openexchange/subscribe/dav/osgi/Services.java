@@ -47,81 +47,73 @@
  *
  */
 
-package com.openexchange.groupware.generic;
+package com.openexchange.subscribe.dav.osgi;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import java.util.concurrent.atomic.AtomicReference;
 
+import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link TargetFolderDefinition}
+ * {@link Services} - Provides static access to {@link ServiceLookup} reference.
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class TargetFolderDefinition {
+public final class Services {
 
-    protected String folderId;
+    private static final AtomicReference<ServiceLookup> SERVICES = new AtomicReference<ServiceLookup>();
 
-    protected Context context;
-
-    protected int userId;
-
-    public TargetFolderDefinition() {
-
+    /**
+     * Initializes a new {@link Services}.
+     */
+    private Services() {
+        super();
     }
 
-    public TargetFolderDefinition(final String folderId, final int userId, final Context context) {
-        this.folderId = folderId;
-        this.userId = userId;
-        this.context = context;
+    /**
+     * Sets the {@link ServiceLookup} reference.
+     *
+     * @param services The reference
+     */
+    public static void setServices(final ServiceLookup services) {
+        SERVICES.set(services);
     }
 
-
-    public String getFolderId() {
-        return folderId;
+    /**
+     * Gets the {@link ServiceLookup} reference.
+     *
+     * @return The reference
+     */
+    public static ServiceLookup getServices() {
+        return SERVICES.get();
     }
 
-    public int getFolderIdAsInt() throws OXException {
-        int retval = -1;
-        try {
-            retval = Integer.parseInt(folderId);
-        } catch (final NumberFormatException e) {
-            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create("folder", folderId);
+    /**
+     * Gets the service of specified type
+     *
+     * @param clazz The service's class
+     * @return The service or <code>null</code> if absent
+     * @throws IllegalStateException If an error occurs while returning the demanded service
+     */
+    public static <S extends Object> S getService(final Class<? extends S> clazz) {
+        final ServiceLookup serviceLookup = SERVICES.get();
+        if (null == serviceLookup) {
+            throw new IllegalStateException("ServiceLookup is absent. Check bundle activator.");
         }
-        return retval;
+        return serviceLookup.getService(clazz);
     }
 
-    public void setFolderId(final String folderId) {
-        this.folderId = folderId;
-    }
-
-    public void setFolderId(final int folderId) {
-        setFolderId(Integer.toString(folderId));
-    }
-
-    public boolean containsFolderId() {
-        return getFolderId() != null;
-    }
-
-    public Context getContext() {
-        return context;
-    }
-
-    public void setContext(final Context context) {
-        this.context = context;
-    }
-
-    public int getUserId() {
-        return userId;
-    }
-
-    public void setUserId(final int userId) {
-        this.userId = userId;
-    }
-
-    public boolean containsUserId() {
-        return getUserId() > 0;
+    /**
+     * Gets the optional service of specified type
+     *
+     * @param clazz The service's class
+     * @return The service or <code>null</code> if absent
+     */
+    public static <S extends Object> S getOptionalService(final Class<? extends S> clazz) {
+        final ServiceLookup serviceLookup = SERVICES.get();
+        if (null == serviceLookup) {
+            return null;
+        }
+        return serviceLookup.getOptionalService(clazz);
     }
 
 }

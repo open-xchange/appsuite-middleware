@@ -47,81 +47,45 @@
  *
  */
 
-package com.openexchange.groupware.generic;
+package com.openexchange.subscribe.dav.web.de.osgi;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.tools.servlet.AjaxExceptionCodes;
-
+import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.subscribe.SubscribeService;
+import com.openexchange.subscribe.crawler.CrawlerBlacklister;
+import com.openexchange.subscribe.dav.web.de.WebDeSubscribeService;
 
 /**
- * {@link TargetFolderDefinition}
+ * {@link WebDeSubscribeActivator}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.0
  */
-public class TargetFolderDefinition {
+public class WebDeSubscribeActivator extends HousekeepingActivator {
 
-    protected String folderId;
-
-    protected Context context;
-
-    protected int userId;
-
-    public TargetFolderDefinition() {
-
+    /**
+     * Initializes a new {@link WebDeSubscribeActivator}.
+     */
+    public WebDeSubscribeActivator() {
+        super();
     }
 
-    public TargetFolderDefinition(final String folderId, final int userId, final Context context) {
-        this.folderId = folderId;
-        this.userId = userId;
-        this.context = context;
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return EMPTY_CLASSES;
     }
 
+    @Override
+    protected void startBundle() throws Exception {
+        CrawlerBlacklister blacklister = new CrawlerBlacklister() {
 
-    public String getFolderId() {
-        return folderId;
-    }
-
-    public int getFolderIdAsInt() throws OXException {
-        int retval = -1;
-        try {
-            retval = Integer.parseInt(folderId);
-        } catch (final NumberFormatException e) {
-            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create("folder", folderId);
-        }
-        return retval;
-    }
-
-    public void setFolderId(final String folderId) {
-        this.folderId = folderId;
-    }
-
-    public void setFolderId(final int folderId) {
-        setFolderId(Integer.toString(folderId));
-    }
-
-    public boolean containsFolderId() {
-        return getFolderId() != null;
-    }
-
-    public Context getContext() {
-        return context;
-    }
-
-    public void setContext(final Context context) {
-        this.context = context;
-    }
-
-    public int getUserId() {
-        return userId;
-    }
-
-    public void setUserId(final int userId) {
-        this.userId = userId;
-    }
-
-    public boolean containsUserId() {
-        return getUserId() > 0;
+            @Override
+            public String getCrawlerId() {
+                return "com.openexchange.subscribe.crawler.web.de";
+            }
+        };
+        registerService(CrawlerBlacklister.class, blacklister, null);
+        WebDeSubscribeService subscribeService = new WebDeSubscribeService(this);
+        registerService(SubscribeService.class, subscribeService, null);
     }
 
 }

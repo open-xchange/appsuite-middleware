@@ -47,81 +47,48 @@
  *
  */
 
-package com.openexchange.groupware.generic;
+package com.openexchange.subscribe.dav.osgi;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import com.openexchange.contact.vcard.VCardService;
+import com.openexchange.context.ContextService;
+import com.openexchange.groupware.generic.FolderUpdaterRegistry;
+import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.subscribe.SubscriptionExecutionService;
+import com.openexchange.threadpool.ThreadPoolService;
 
 
 /**
- * {@link TargetFolderDefinition}
+ * {@link DAVSubscribeActivator}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.10.0
  */
-public class TargetFolderDefinition {
+public class DAVSubscribeActivator extends HousekeepingActivator {
 
-    protected String folderId;
-
-    protected Context context;
-
-    protected int userId;
-
-    public TargetFolderDefinition() {
-
+    /**
+     * Initializes a new {@link DAVSubscribeActivator}.
+     */
+    public DAVSubscribeActivator() {
+        super();
     }
 
-    public TargetFolderDefinition(final String folderId, final int userId, final Context context) {
-        this.folderId = folderId;
-        this.userId = userId;
-        this.context = context;
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[] { ThreadPoolService.class, ContextService.class, VCardService.class };
     }
 
-
-    public String getFolderId() {
-        return folderId;
+    @Override
+    protected void startBundle() throws Exception {
+        Services.setServices(this);
+        trackService(SubscriptionExecutionService.class);
+        trackService(FolderUpdaterRegistry.class);
+        openTrackers();
     }
 
-    public int getFolderIdAsInt() throws OXException {
-        int retval = -1;
-        try {
-            retval = Integer.parseInt(folderId);
-        } catch (final NumberFormatException e) {
-            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create("folder", folderId);
-        }
-        return retval;
-    }
-
-    public void setFolderId(final String folderId) {
-        this.folderId = folderId;
-    }
-
-    public void setFolderId(final int folderId) {
-        setFolderId(Integer.toString(folderId));
-    }
-
-    public boolean containsFolderId() {
-        return getFolderId() != null;
-    }
-
-    public Context getContext() {
-        return context;
-    }
-
-    public void setContext(final Context context) {
-        this.context = context;
-    }
-
-    public int getUserId() {
-        return userId;
-    }
-
-    public void setUserId(final int userId) {
-        this.userId = userId;
-    }
-
-    public boolean containsUserId() {
-        return getUserId() > 0;
+    @Override
+    protected void stopBundle() throws Exception {
+        Services.setServices(null);
+        super.stopBundle();
     }
 
 }

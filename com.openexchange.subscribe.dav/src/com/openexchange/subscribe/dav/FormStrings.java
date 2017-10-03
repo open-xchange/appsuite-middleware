@@ -47,81 +47,22 @@
  *
  */
 
-package com.openexchange.groupware.generic;
+package com.openexchange.subscribe.dav;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.tools.servlet.AjaxExceptionCodes;
-
+import com.openexchange.i18n.LocalizableStrings;
 
 /**
- * {@link TargetFolderDefinition}
+ * Strings in forms that should be translated.
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class TargetFolderDefinition {
+public class FormStrings implements LocalizableStrings {
 
-    protected String folderId;
+    public static final String FORM_LABEL_LOGIN = "Login";
 
-    protected Context context;
+    public static final String FORM_LABEL_PASSWORD = "Password";
 
-    protected int userId;
-
-    public TargetFolderDefinition() {
-
+    public FormStrings() {
+        super();
     }
-
-    public TargetFolderDefinition(final String folderId, final int userId, final Context context) {
-        this.folderId = folderId;
-        this.userId = userId;
-        this.context = context;
-    }
-
-
-    public String getFolderId() {
-        return folderId;
-    }
-
-    public int getFolderIdAsInt() throws OXException {
-        int retval = -1;
-        try {
-            retval = Integer.parseInt(folderId);
-        } catch (final NumberFormatException e) {
-            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create("folder", folderId);
-        }
-        return retval;
-    }
-
-    public void setFolderId(final String folderId) {
-        this.folderId = folderId;
-    }
-
-    public void setFolderId(final int folderId) {
-        setFolderId(Integer.toString(folderId));
-    }
-
-    public boolean containsFolderId() {
-        return getFolderId() != null;
-    }
-
-    public Context getContext() {
-        return context;
-    }
-
-    public void setContext(final Context context) {
-        this.context = context;
-    }
-
-    public int getUserId() {
-        return userId;
-    }
-
-    public void setUserId(final int userId) {
-        this.userId = userId;
-    }
-
-    public boolean containsUserId() {
-        return getUserId() > 0;
-    }
-
 }

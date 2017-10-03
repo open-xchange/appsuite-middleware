@@ -47,81 +47,39 @@
  *
  */
 
-package com.openexchange.groupware.generic;
+package com.openexchange.subscribe.dav;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.tools.servlet.AjaxExceptionCodes;
-
+import com.openexchange.groupware.container.FolderObject;
 
 /**
- * {@link TargetFolderDefinition}
+ * {@link DAVFolderModule}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.10.0
  */
-public class TargetFolderDefinition {
+public enum DAVFolderModule {
 
-    protected String folderId;
+    /**
+     * The calendar folder module
+     */
+    CALENDAR(FolderObject.CALENDAR),
+    /**
+     * The contacts folder module
+     */
+    CONTACTS(FolderObject.CONTACT);
 
-    protected Context context;
+    private final int module;
 
-    protected int userId;
-
-    public TargetFolderDefinition() {
-
+    private DAVFolderModule(int module) {
+        this.module = module;
     }
 
-    public TargetFolderDefinition(final String folderId, final int userId, final Context context) {
-        this.folderId = folderId;
-        this.userId = userId;
-        this.context = context;
+    /**
+     * Gets the module identifier.
+     *
+     * @return The module identifier
+     */
+    public int getModule() {
+        return module;
     }
-
-
-    public String getFolderId() {
-        return folderId;
-    }
-
-    public int getFolderIdAsInt() throws OXException {
-        int retval = -1;
-        try {
-            retval = Integer.parseInt(folderId);
-        } catch (final NumberFormatException e) {
-            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create("folder", folderId);
-        }
-        return retval;
-    }
-
-    public void setFolderId(final String folderId) {
-        this.folderId = folderId;
-    }
-
-    public void setFolderId(final int folderId) {
-        setFolderId(Integer.toString(folderId));
-    }
-
-    public boolean containsFolderId() {
-        return getFolderId() != null;
-    }
-
-    public Context getContext() {
-        return context;
-    }
-
-    public void setContext(final Context context) {
-        this.context = context;
-    }
-
-    public int getUserId() {
-        return userId;
-    }
-
-    public void setUserId(final int userId) {
-        this.userId = userId;
-    }
-
-    public boolean containsUserId() {
-        return getUserId() > 0;
-    }
-
 }
