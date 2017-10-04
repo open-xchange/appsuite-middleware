@@ -68,6 +68,11 @@ if [ ${1:-0} -eq 2 ]; then
     ox_add_property io.ox/core//pdf/enableRangeRequests true /opt/open-xchange/etc/settings/appsuite.properties
 fi
 
+ox_move_config_file /opt/open-xchange/templates /opt/open-xchange/templates print_dayview_table.tmpl cp_dayview_table_appsuite.tmpl
+ox_move_config_file /opt/open-xchange/templates /opt/open-xchange/templates print_monthview_list.tmpl cp_monthview_list_appsuite.tmpl
+ox_move_config_file /opt/open-xchange/templates /opt/open-xchange/templates print_weekview_table.tmpl cp_weekview_table_appsuite.tmpl
+ox_move_config_file /opt/open-xchange/templates /opt/open-xchange/templates print_workweekview_table.tmpl cp_workweekview_table_appsuite.tmpl
+
 %clean
 %{__rm} -rf %{buildroot}
 
@@ -84,6 +89,8 @@ fi
 %config(noreplace) /opt/open-xchange/etc/meta/appsuite.yaml
 %config(noreplace) /opt/open-xchange/etc/settings/appsuite.properties
 %config(noreplace) /opt/open-xchange/etc/settings/upsell-appsuite.properties
+%dir /opt/open-xchange/templates/
+%config(noreplace) /opt/open-xchange/templates/*
 
 %changelog
 * Fri May 19 2017 Marcus Klein <marcus.klein@open-xchange.com>
