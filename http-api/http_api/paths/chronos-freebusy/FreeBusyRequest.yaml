@@ -4,6 +4,8 @@
     tags:
       - Chronos-freebusy
     summary: Gets free-busy timeslots for the given attendees.
+    consumes:
+      - application/json
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"
       - $ref: "#/parameters/ChronosFromTimeRange"
@@ -14,7 +16,6 @@
         required: true
         schema:
           type: object
-          title: FreeBusyBody
           properties:
             attendees:
               type: array
