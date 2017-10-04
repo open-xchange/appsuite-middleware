@@ -1,0 +1,6 @@
+opt/open-xchange/templates/calendar.printing.properties
+opt/open-xchange/templates/cp_dayview_table.tmpl
+opt/open-xchange/templates/cp_monthview_list.tmpl
+opt/open-xchange/templates/cp_monthview_table.tmpl
+opt/open-xchange/templates/cp_weekview_table.tmpl
+opt/open-xchange/templates/cp_workweekview_table.tmpl

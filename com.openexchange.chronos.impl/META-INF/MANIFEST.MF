@@ -7,7 +7,6 @@ Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.openexchange.ajax.container,
  com.openexchange.ajax.fileholder,
- com.openexchange.capabilities,
  com.openexchange.chronos,
  com.openexchange.chronos.common,
  com.openexchange.chronos.common.mapping,

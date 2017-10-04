@@ -1,0 +1,59 @@
+
+body {
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 14px;
+    line-height: 20px;
+    padding: 20px;
+}
+
+.calendar-detail .date {
+}
+
+.calendar-detail .interval {
+    white-space: nowrap;
+    float: right;
+}
+
+.calendar-detail .day {
+}
+
+.calendar-detail .title {
+    font-size: 18pt;
+    line-height: 22pt;
+    margin: 1em 0 0.25em 0;
+}
+
+.calendar-detail .location {
+    font-size: 11pt;
+    color: #888;
+    margin-bottom: 1em;
+}
+
+.calendar-detail .label2 {
+    font-size: 8pt;
+    color: #888;
+    clear: both;
+    padding: 1em 0 0.25em 0em;
+    margin-bottom: 0.5em;
+    margin-left: 1em;
+    margin-right: 0.5em;
+}
+
+.calendar-detail .label2:first-child {
+    margin-left: 0;
+}
+
+
+.calendar-detail .note {
+    max-width: 550px;
+    margin: 2em 0 2em 0;
+    cursor: text;
+}
+
+.calendar-detail .participants {
+    min-height: 2em;
+}
+
+.calendar-detail .declined {
+    text-decoration: line-through;
+}
