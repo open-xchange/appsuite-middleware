@@ -14,7 +14,7 @@ properties:
       tags: ["Cassandra", "Database"]
     - key: com.openexchange.nosql.cassandra.clusterContactPoints
       description: |
-        Defines the Cassandra seed node(s) as a comma separated list.
+        Defines the Cassandra seed node(s) as a comma separated list (either as hostnames or IP address).
       defaultValue: 
       version: 7.8.4
       reloadable: false
