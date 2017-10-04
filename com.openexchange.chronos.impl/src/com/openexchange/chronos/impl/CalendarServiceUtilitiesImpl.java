@@ -52,6 +52,7 @@ package com.openexchange.chronos.impl;
 import static com.openexchange.chronos.impl.Utils.getFolder;
 import static com.openexchange.java.Autoboxing.B;
 import static com.openexchange.java.Autoboxing.L;
+import com.openexchange.chronos.Event;
 import com.openexchange.chronos.impl.performer.CountEventsPerformer;
 import com.openexchange.chronos.impl.performer.ForeignEventsPerformer;
 import com.openexchange.chronos.impl.performer.ResolveFilenamePerformer;
@@ -141,5 +142,11 @@ public class CalendarServiceUtilitiesImpl implements CalendarServiceUtilities {
                 return new Quota[] { Utils.getQuota(session, storage) };
             }
         }.executeQuery();
+    }
+
+    @Override
+    public Event allocateAlarm(CalendarSession session, String alarmId) throws OXException {
+        // TODO Auto-generated method stub
+        return null;
     }
 }

@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.service;
 
+import com.openexchange.chronos.Event;
 import com.openexchange.exception.OXException;
 import com.openexchange.osgi.annotation.SingletonService;
 import com.openexchange.quota.Quota;
@@ -110,5 +111,14 @@ public interface CalendarServiceUtilities {
      * @return The configured quotas and the actual usages
      */
     Quota[] getQuotas(CalendarSession session) throws OXException;
+
+    /**
+     * Looks up the event that is targeted by a specific alarm of the current session's user.
+     *
+     * @param session The calendar session
+     * @param alarmId The identifier of the alarm to get the associated event for
+     * @return The associated event, or <code>null</code> if there is none
+     */
+    Event allocateAlarm(CalendarSession session, String alarmId) throws OXException;
 
 }
