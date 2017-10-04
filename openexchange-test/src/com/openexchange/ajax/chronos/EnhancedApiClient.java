@@ -126,19 +126,24 @@ public class EnhancedApiClient extends ApiClient {
         String json0 = (String) formParams.get("json_0");
         Map<String, String> tmp = new HashMap<>();
         if (json0 != null) {
+            JSONObject json;
             try {
-                JSONObject json = new JSONObject(json0);
-                JSONArray attachments = json.optJSONArray("attachments");
-                if (attachments == null || attachments.isEmpty()) {
-                    throw new ApiException(400, "Missing the required field 'attachments' when calling createEventWithAttachments");
-                }
+                json = new JSONObject(json0);
+            } catch (JSONException e) {
+                throw new ApiException(400, "The required parameter 'json0' when calling createEventWithAttachments is not of type JSONObject. " + json0);
+            }
+            JSONArray attachments = json.optJSONArray("attachments");
+            if (attachments == null || attachments.isEmpty()) {
+                throw new ApiException(400, "Missing the required field 'attachments' when calling createEventWithAttachments");
+            }
 
+            try {
                 for (int index = 0; index < attachments.length(); index++) {
                     JSONObject attachment = attachments.getJSONObject(index);
-                    tmp.put(attachment.getString("filename"), attachment.getString("cid"));
+                    tmp.put(attachment.getString("filename"), attachment.optString("cid"));
                 }
             } catch (JSONException e) {
-                throw new ApiException(400, "The required parameter 'json0' when calling createEventWithAttachments is not of type JSONObject");
+                throw new ApiException(400, "A JSON error occurred: " + e.getMessage());
             }
         }
         return tmp;
