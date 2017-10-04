@@ -73,6 +73,13 @@ public class BasicAvailabilityTest extends AbstractChronosTest {
 
     private ChronosApi chronosApi;
 
+    @Override
+    public void tearDown() throws Exception {
+        // Clear the availability
+        chronosApi.setAvailability(defaultUserApi.getSession(), new AvailabilityData());
+        super.tearDown();
+    }
+
     /**
      * Tests setting a single available block
      */
