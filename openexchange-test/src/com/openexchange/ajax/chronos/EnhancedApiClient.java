@@ -79,25 +79,8 @@ public class EnhancedApiClient extends ApiClient {
     public Entity<?> serialize(Object obj, Map<String, Object> formParams, String contentType) throws ApiException {
         Entity<?> entity = null;
         if (contentType.startsWith("multipart/form-data")) {
-
-            String json0 = (String) formParams.get("json_0");
-            Map<String, String> tmp = new HashMap<>();
-            if (json0 != null) {
-                try {
-                    JSONObject json = new JSONObject(json0);
-                    JSONArray attachments = json.optJSONArray("attachments");
-                    if (attachments == null || attachments.isEmpty()) {
-                        throw new ApiException(400, "Missing the required field 'attachments' when calling createEventWithAttachments");
-                    }
-                    
-                    for (int index = 0; index < attachments.length(); index++) {
-                        JSONObject attachment = attachments.getJSONObject(index);
-                        tmp.put(attachment.getString("filename"), attachment.getString("cid"));
-                    }
-                } catch (JSONException e) {
-                    throw new ApiException(400, "The required parameter 'json0' when calling createEventWithAttachments is not of type JSONObject");
-                }
-            }
+            // Extract attachments (if any)
+            Map<String, String> attachments = extractAttachments(formParams);
             MultiPart multiPart = new MultiPart();
             for (Entry<String, Object> param : formParams.entrySet()) {
                 FormDataBodyPart bodyPart;
@@ -105,8 +88,9 @@ public class EnhancedApiClient extends ApiClient {
                     File file = (File) param.getValue();
                     FormDataContentDisposition contentDisp = FormDataContentDisposition.name(param.getKey()).fileName(file.getName()).size(file.length()).build();
                     bodyPart = new FormDataBodyPart(contentDisp, file, MediaType.APPLICATION_OCTET_STREAM_TYPE);
-                    // Set the contentId if exists
-                    String contentId = (String) tmp.get(file.getName());
+
+                    // Set the contentId of the attachments (if exists)
+                    String contentId = (String) attachments.get(file.getName());
                     if (contentId != null && !contentId.isEmpty()) {
                         bodyPart.getHeaders().add("Content-ID", contentId);
                     }
@@ -129,5 +113,34 @@ public class EnhancedApiClient extends ApiClient {
             entity = Entity.entity(obj, contentType);
         }
         return entity;
+    }
+
+    /**
+     * Create a {@link Map} with the attachments (if any)
+     * 
+     * @param formParams The form parameters with the attachments
+     * @return A {@link Map} with the attachment name and contentId
+     * @throws ApiException if an API error is occurred
+     */
+    private Map<String, String> extractAttachments(Map<String, Object> formParams) throws ApiException {
+        String json0 = (String) formParams.get("json_0");
+        Map<String, String> tmp = new HashMap<>();
+        if (json0 != null) {
+            try {
+                JSONObject json = new JSONObject(json0);
+                JSONArray attachments = json.optJSONArray("attachments");
+                if (attachments == null || attachments.isEmpty()) {
+                    throw new ApiException(400, "Missing the required field 'attachments' when calling createEventWithAttachments");
+                }
+
+                for (int index = 0; index < attachments.length(); index++) {
+                    JSONObject attachment = attachments.getJSONObject(index);
+                    tmp.put(attachment.getString("filename"), attachment.getString("cid"));
+                }
+            } catch (JSONException e) {
+                throw new ApiException(400, "The required parameter 'json0' when calling createEventWithAttachments is not of type JSONObject");
+            }
+        }
+        return tmp;
     }
 }
