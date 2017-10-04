@@ -177,14 +177,14 @@ public class CalendarAccountTest extends AbstractChronosTest {
 
         String id = response.getData().getId();
 
-        response = defaultUserApi.getChronosApi().updateAccount(defaultUserApi.getSession(), Long.valueOf(id), createCalendarAccountTestConfiguration(true));
+        response = defaultUserApi.getChronosApi().updateAccount(defaultUserApi.getSession(), id, createCalendarAccountTestConfiguration(true));
         assertNull(response.getError(), response.getError());
 
         response = defaultUserApi.getChronosApi().getAccount(defaultUserApi.getSession(), response.getData().getId());
         rememberCalendarAccountId(createCalendarAccountId(response.getData().getId(), response.getData().getTimestamp()));
 
         //Test for default account
-        response = defaultUserApi.getChronosApi().updateAccount(defaultUserApi.getSession(), Long.valueOf(DEFAULT_ACCOUNT_ID), createCalendarAccountTestConfiguration(true));
+        response = defaultUserApi.getChronosApi().updateAccount(defaultUserApi.getSession(), DEFAULT_ACCOUNT_ID, createCalendarAccountTestConfiguration(true));
         assertNotNull(response.getError(), response.getError());
     }
 
