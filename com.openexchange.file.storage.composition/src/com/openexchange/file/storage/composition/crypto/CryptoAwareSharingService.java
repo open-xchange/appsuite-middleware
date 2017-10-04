@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.file.storage.composition;
+package com.openexchange.file.storage.composition.crypto;
 
 import java.util.List;
 import com.openexchange.exception.OXException;

@@ -51,10 +51,10 @@ package com.openexchange.file.storage.composition.osgi;
 
 import org.osgi.service.event.EventAdmin;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.file.storage.composition.CryptoAwareSharingService;
 import com.openexchange.file.storage.composition.FileStreamHandlerRegistry;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.file.storage.composition.IDBasedFolderAccessFactory;
+import com.openexchange.file.storage.composition.crypto.CryptoAwareSharingService;
 import com.openexchange.file.storage.composition.internal.AbstractCompositingIDBasedFileAccess;
 import com.openexchange.file.storage.composition.internal.CompositingIDBasedFolderAccess;
 import com.openexchange.file.storage.composition.internal.FileStreamHandlerRegistryImpl;
