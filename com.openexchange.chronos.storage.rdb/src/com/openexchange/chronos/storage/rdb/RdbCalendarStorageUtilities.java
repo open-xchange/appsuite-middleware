@@ -59,6 +59,7 @@ import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
+import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.common.mapping.AttendeeMapper;
@@ -77,9 +78,9 @@ public class RdbCalendarStorageUtilities implements CalendarStorageUtilities {
 
     /** The event fields that are preserved for reference in <i>tombstone</i> events */
     private static final EventField[] EVENT_TOMBSTONE_FIELDS = {
-        EventField.FOLDER_ID, EventField.ID, EventField.SERIES_ID, EventField.CALENDAR_USER, EventField.UID, EventField.FILENAME, 
-        EventField.TIMESTAMP, EventField.CREATED, EventField.CREATED_BY, EventField.LAST_MODIFIED, EventField.MODIFIED_BY, 
-        EventField.SEQUENCE, EventField.START_DATE, EventField.END_DATE, EventField.RECURRENCE_RULE, EventField.DELETE_EXCEPTION_DATES,  
+        EventField.FOLDER_ID, EventField.ID, EventField.SERIES_ID, EventField.CALENDAR_USER, EventField.UID, EventField.FILENAME,
+        EventField.TIMESTAMP, EventField.CREATED, EventField.CREATED_BY, EventField.LAST_MODIFIED, EventField.MODIFIED_BY,
+        EventField.SEQUENCE, EventField.START_DATE, EventField.END_DATE, EventField.RECURRENCE_RULE, EventField.DELETE_EXCEPTION_DATES,
         EventField.CLASSIFICATION, EventField.TRANSP
     };
 
@@ -118,7 +119,7 @@ public class RdbCalendarStorageUtilities implements CalendarStorageUtilities {
     }
 
     @Override
-    public Event getTombstone(Event event, Date lastModified, int modifiedBy) throws OXException {
+    public Event getTombstone(Event event, Date lastModified, CalendarUser modifiedBy) throws OXException {
         Event tombstone = EventMapper.getInstance().copy(event, new Event(), true, EVENT_TOMBSTONE_FIELDS);
         tombstone.setLastModified(lastModified);
         tombstone.setModifiedBy(modifiedBy);

@@ -145,7 +145,7 @@ public class CalendarAttachmentHandler implements AttachmentAuthorization, Attac
          * if write access is needed, check permissions for parent folder
          */
         UserizedFolder folder = requireService(FolderService.class).getFolder(FolderStorage.REAL_TREE_ID, String.valueOf(folderId), serverSession, null);
-        int requiredWritePermission = event.getCreatedBy() == serverSession.getUserId() ? Permission.WRITE_OWN_OBJECTS : Permission.WRITE_OWN_OBJECTS;
+        int requiredWritePermission = CalendarUtils.matches(event.getCreatedBy(), serverSession.getUserId()) ? Permission.WRITE_OWN_OBJECTS : Permission.WRITE_OWN_OBJECTS;
         if (folder.getOwnPermission().getWritePermission() < requiredWritePermission) {
             throw CalendarExceptionCodes.NO_WRITE_PERMISSION.create(folder.getID());
         }

@@ -103,7 +103,7 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
                 "cid INT4 UNSIGNED NOT NULL," +
                 "account INT4 UNSIGNED NOT NULL," +
                 "id INT4 UNSIGNED NOT NULL," +
-                "user INT4 UNSIGNED NOT NULL," +
+                "user INT4 UNSIGNED DEFAULT NULL," +
                 "folder VARCHAR(255) DEFAULT NULL," +
                 "series INT4 UNSIGNED DEFAULT NULL," +
                 "uid VARCHAR(1024) DEFAULT NULL," +
@@ -150,7 +150,7 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
                 "cid INT4 UNSIGNED NOT NULL," +
                 "account INT4 UNSIGNED NOT NULL," +
                 "id INT4 UNSIGNED NOT NULL," +
-                "user INT4 UNSIGNED NOT NULL," +
+                "user INT4 UNSIGNED DEFAULT NULL," +
                 "folder VARCHAR(255) DEFAULT NULL," +
                 "series INT4 UNSIGNED DEFAULT NULL," +
                 "uid VARCHAR(1024) DEFAULT NULL," +

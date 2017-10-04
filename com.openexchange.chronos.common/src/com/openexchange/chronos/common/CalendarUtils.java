@@ -160,18 +160,17 @@ public class CalendarUtils {
     }
 
     /**
-     * Looks up a specific internal attendee in a collection of attendees, utilizing the
-     * {@link CalendarUtils#matches(Attendee, Attendee)} routine.
+     * Looks up a specific calendar user in a collection of attendees, utilizing the {@link CalendarUtils#matches} routine.
      *
      * @param attendees The attendees to search
-     * @param attendee The attendee to lookup
-     * @return The matching attendee, or <code>null</code> if not found
-     * @see CalendarUtils#matches(Attendee, Attendee)
+     * @param calendarUser The calendar user to lookup
+     * @return The matching calendar user, or <code>null</code> if not found
+     * @see CalendarUtils#matches
      */
-    public static Attendee find(List<Attendee> attendees, Attendee attendee) {
+    public static Attendee find(List<Attendee> attendees, CalendarUser calendarUser) {
         if (null != attendees && 0 < attendees.size()) {
             for (Attendee candidateAttendee : attendees) {
-                if (matches(attendee, candidateAttendee)) {
+                if (matches(calendarUser, candidateAttendee)) {
                     return candidateAttendee;
                 }
             }
@@ -180,16 +179,16 @@ public class CalendarUtils {
     }
 
     /**
-     * Gets a value indicating whether a specific attendee is present in a collection of attendees, utilizing the
-     * {@link CalendarUtils#matches(Attendee, Attendee)} routine.
+     * Gets a value indicating whether a specific calendar user is present in a collection of attendees, utilizing the
+     * {@link CalendarUtils#matches} routine.
      *
      * @param attendees The attendees to search
-     * @param attendee The attendee to lookup
-     * @return <code>true</code> if the attendee is contained in the collection of attendees, <code>false</code>, otherwise
-     * @see CalendarUtils#matches(Attendee, Attendee)
+     * @param calendarUser The calendar user to lookup
+     * @return <code>true</code> if the calendar user is contained in the collection of attendees, <code>false</code>, otherwise
+     * @see CalendarUtils#matches
      */
-    public static boolean contains(List<Attendee> attendees, Attendee attendee) {
-        return null != find(attendees, attendee);
+    public static boolean contains(List<Attendee> attendees, CalendarUser calendarUser) {
+        return null != find(attendees, calendarUser);
     }
 
     /**
@@ -251,6 +250,17 @@ public class CalendarUtils {
             }
         }
         return false;
+    }
+
+    /**
+     * Gets a value indicating whether a calendar user matches a specific internal user entity.
+     *
+     * @param calendarUser The calendar user to check
+     * @param userID The entity identifier of the user to check
+     * @return <code>true</code> if the objects <i>match</i>, i.e. are targeting the same calendar user, <code>false</code>, otherwise
+     */
+    public static boolean matches(CalendarUser calendarUser, int userID) {
+        return null != calendarUser && calendarUser.getEntity() == userID;
     }
 
     /**
@@ -1160,7 +1170,7 @@ public class CalendarUtils {
         if (isPublicClassification(event)) {
             return false;
         }
-        if (event.getCreatedBy() == userID || contains(event.getAttendees(), userID)) {
+        if (matches(event.getCreatedBy(), userID) || matches(event.getCalendarUser(), userID) || contains(event.getAttendees(), userID)) {
             return false;
         }
         return true;
@@ -1179,6 +1189,21 @@ public class CalendarUtils {
      */
     public static boolean isGroupScheduled(Event event) {
         return null != event.getOrganizer() && null != event.getAttendees() && 0 < event.getAttendees().size();
+    }
+
+    /**
+     * Gets a value indicating whether an event is a so-called <i>group-scheduled</i> event, but the only attendee is the organizer itself.
+     * <p/>
+     * While pseudo-group-scheduled events are formally <i>group-scheduled</i> events, they should rather not be treated as such, since no
+     * actual scheduling is required here. The legacy calendar implementation used to assign an organizer and attendee even for personal
+     * events in a single user's calendar only.
+     *
+     * @param event The event to check
+     * @return <code>true</code> if the event is pseudo-group-scheduled, <code>false</code>, otherwise
+     * @see CalendarUtils#isGroupScheduled
+     */
+    public static boolean isPseudoGroupScheduled(Event event) {
+        return isGroupScheduled(event) && 1 == event.getAttendees().size() && matches(event.getOrganizer(), event.getAttendees().get(0));
     }
 
     /**

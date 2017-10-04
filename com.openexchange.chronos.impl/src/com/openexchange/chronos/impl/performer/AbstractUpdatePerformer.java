@@ -56,9 +56,10 @@ import static com.openexchange.chronos.common.CalendarUtils.isGroupScheduled;
 import static com.openexchange.chronos.common.CalendarUtils.isLastUserAttendee;
 import static com.openexchange.chronos.common.CalendarUtils.isOrganizer;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
+import static com.openexchange.chronos.common.CalendarUtils.matches;
 import static com.openexchange.chronos.impl.Check.classificationAllowsUpdate;
 import static com.openexchange.chronos.impl.Check.requireCalendarPermission;
-import static com.openexchange.chronos.impl.Utils.getCalendarUserId;
+import static com.openexchange.chronos.impl.Utils.getCalendarUser;
 import static com.openexchange.chronos.impl.Utils.getChangeExceptionDates;
 import static com.openexchange.chronos.impl.Utils.getSearchTerm;
 import static com.openexchange.folderstorage.Permission.DELETE_ALL_OBJECTS;
@@ -114,6 +115,7 @@ import com.openexchange.search.SingleSearchTerm.SingleOperation;
  */
 public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
 
+    protected final CalendarUser calendarUser;
     protected final int calendarUserId;
     protected final UserizedFolder folder;
     protected final Date timestamp;
@@ -130,7 +132,8 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
     protected AbstractUpdatePerformer(CalendarStorage storage, CalendarSession session, UserizedFolder folder) throws OXException {
         super(session, storage);
         this.folder = folder;
-        this.calendarUserId = getCalendarUserId(folder);
+        this.calendarUser = getCalendarUser(session, folder);
+        this.calendarUserId = calendarUser.getEntity();
         this.timestamp = new Date();
         this.resultTracker = new ResultTracker(storage, session, folder, timestamp.getTime());
     }
@@ -150,7 +153,7 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
         exceptionEvent.setStartDate(CalendarUtils.calculateStart(originalMasterEvent, recurrenceID));
         exceptionEvent.setEndDate(CalendarUtils.calculateEnd(originalMasterEvent, recurrenceID));
         Consistency.setCreated(timestamp, exceptionEvent, originalMasterEvent.getCreatedBy());
-        Consistency.setModified(timestamp, exceptionEvent, session.getUserId());
+        Consistency.setModified(session, timestamp, exceptionEvent, session.getUserId());
         return exceptionEvent;
     }
 
@@ -163,7 +166,7 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
     protected void touch(String id) throws OXException {
         Event eventUpdate = new Event();
         eventUpdate.setId(id);
-        Consistency.setModified(timestamp, eventUpdate, session.getUserId());
+        Consistency.setModified(session, timestamp, eventUpdate, session.getUserId());
         storage.getEventStorage().updateEvent(eventUpdate);
     }
 
@@ -198,7 +201,7 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
          * delete event data from storage
          */
         String id = originalEvent.getId();
-        Event tombstone = storage.getUtilities().getTombstone(originalEvent, timestamp, calendarUserId);
+        Event tombstone = storage.getUtilities().getTombstone(originalEvent, timestamp, calendarUser);
         tombstone.setAttendees(storage.getUtilities().getTombstones(originalEvent.getAttendees()));
         storage.getEventStorage().insertEventTombstone(tombstone);
         storage.getAttendeeStorage().insertAttendeeTombstones(id, tombstone.getAttendees());
@@ -242,7 +245,7 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
          * delete event data from storage for this attendee
          */
         String id = originalEvent.getId();
-        Event tombstone = storage.getUtilities().getTombstone(originalEvent, timestamp, calendarUserId);
+        Event tombstone = storage.getUtilities().getTombstone(originalEvent, timestamp, calendarUser);
         tombstone.setAttendees(Collections.singletonList(storage.getUtilities().getTombstone(originalAttendee)));
         storage.getEventStorage().insertEventTombstone(tombstone);
         storage.getAttendeeStorage().insertAttendeeTombstones(id, originalEvent.getAttendees());
@@ -715,7 +718,7 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
      * @see Check#classificationAllowsUpdate
      */
     protected void requireDeletePermissions(Event originalEvent) throws OXException {
-        if (session.getUserId() == originalEvent.getCreatedBy()) {
+        if (matches(originalEvent.getCreatedBy(), session.getUserId())) {
             requireCalendarPermission(folder, READ_FOLDER, NO_PERMISSIONS, NO_PERMISSIONS, DELETE_OWN_OBJECTS);
         } else {
             requireCalendarPermission(folder, READ_FOLDER, NO_PERMISSIONS, NO_PERMISSIONS, DELETE_ALL_OBJECTS);

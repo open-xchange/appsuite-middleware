@@ -69,6 +69,7 @@ import com.openexchange.chronos.AlarmField;
 import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
+import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.Classification;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
@@ -372,7 +373,18 @@ public class EventMapper extends DefaultMapper<Event, EventField> {
                 object.removeSequence();
             }
         });
-        mappings.put(EventField.CREATED_BY, new DefaultMapping<Integer, Event>() {
+        mappings.put(EventField.CREATED_BY, new DefaultMapping<CalendarUser, Event>() {
+
+            @Override
+            public boolean equals(Event event1, Event event2) {
+                return CalendarUtils.equals(get(event1), get(event2));
+            }
+
+            @Override
+            public void copy(Event from, Event to) throws OXException {
+                CalendarUser value = get(from);
+                set(to, null == value ? null : new CalendarUser(value));
+            }
 
             @Override
             public boolean isSet(Event object) {
@@ -380,13 +392,13 @@ public class EventMapper extends DefaultMapper<Event, EventField> {
             }
 
             @Override
-            public void set(Event object, Integer value) throws OXException {
-                object.setCreatedBy(null == value ? 0 : i(value));
+            public void set(Event object, CalendarUser value) throws OXException {
+                object.setCreatedBy(value);
             }
 
             @Override
-            public Integer get(Event object) {
-                return I(object.getCreatedBy());
+            public CalendarUser get(Event object) {
+                return object.getCreatedBy();
             }
 
             @Override
@@ -416,7 +428,18 @@ public class EventMapper extends DefaultMapper<Event, EventField> {
                 object.removeLastModified();
             }
         });
-        mappings.put(EventField.MODIFIED_BY, new DefaultMapping<Integer, Event>() {
+        mappings.put(EventField.MODIFIED_BY, new DefaultMapping<CalendarUser, Event>() {
+
+            @Override
+            public boolean equals(Event event1, Event event2) {
+                return CalendarUtils.equals(get(event1), get(event2));
+            }
+
+            @Override
+            public void copy(Event from, Event to) throws OXException {
+                CalendarUser value = get(from);
+                set(to, null == value ? null : new CalendarUser(value));
+            }
 
             @Override
             public boolean isSet(Event object) {
@@ -424,13 +447,13 @@ public class EventMapper extends DefaultMapper<Event, EventField> {
             }
 
             @Override
-            public void set(Event object, Integer value) throws OXException {
-                object.setModifiedBy(null == value ? 0 : i(value));
+            public void set(Event object, CalendarUser value) throws OXException {
+                object.setModifiedBy(value);
             }
 
             @Override
-            public Integer get(Event object) {
-                return I(object.getModifiedBy());
+            public CalendarUser get(Event object) {
+                return object.getModifiedBy();
             }
 
             @Override
@@ -438,7 +461,18 @@ public class EventMapper extends DefaultMapper<Event, EventField> {
                 object.removeModifiedBy();
             }
         });
-        mappings.put(EventField.CALENDAR_USER, new DefaultMapping<Integer, Event>() {
+        mappings.put(EventField.CALENDAR_USER, new DefaultMapping<CalendarUser, Event>() {
+
+            @Override
+            public boolean equals(Event event1, Event event2) {
+                return CalendarUtils.equals(get(event1), get(event2));
+            }
+
+            @Override
+            public void copy(Event from, Event to) throws OXException {
+                CalendarUser value = get(from);
+                set(to, null == value ? null : new CalendarUser(value));
+            }
 
             @Override
             public boolean isSet(Event object) {
@@ -446,13 +480,13 @@ public class EventMapper extends DefaultMapper<Event, EventField> {
             }
 
             @Override
-            public void set(Event object, Integer value) throws OXException {
-                object.setCalendarUser(null == value ? 0 : i(value));
+            public void set(Event object, CalendarUser value) throws OXException {
+                object.setCalendarUser(value);
             }
 
             @Override
-            public Integer get(Event object) {
-                return I(object.getCalendarUser());
+            public CalendarUser get(Event object) {
+                return object.getCalendarUser();
             }
 
             @Override
@@ -846,6 +880,12 @@ public class EventMapper extends DefaultMapper<Event, EventField> {
             @Override
             public boolean equals(Event event1, Event event2) {
                 return CalendarUtils.equals(event1.getOrganizer(), event2.getOrganizer());
+            }
+
+            @Override
+            public void copy(Event from, Event to) throws OXException {
+                Organizer value = get(from);
+                set(to, null == value ? null : new Organizer(value));
             }
 
             @Override

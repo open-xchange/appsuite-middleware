@@ -54,6 +54,7 @@ import static com.openexchange.chronos.common.CalendarUtils.getObjectIDs;
 import static com.openexchange.chronos.common.CalendarUtils.isAttendee;
 import static com.openexchange.chronos.common.CalendarUtils.isOrganizer;
 import static com.openexchange.chronos.common.CalendarUtils.isPublicClassification;
+import static com.openexchange.chronos.common.CalendarUtils.matches;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -109,7 +110,7 @@ public class AbstractFreeBusyPerformer extends AbstractQueryPerformer {
         // exclude foreign events classified as 'private' (but keep 'confidential' ones)
         int userId = session.getUserId();
         return isPublicClassification(event) || Classification.CONFIDENTIAL.equals(event.getClassification()) ||
-            event.getCreatedBy() == userId || isOrganizer(event, userId) || isAttendee(event, userId);
+            matches(event.getCalendarUser(), userId) || isOrganizer(event, userId) || isAttendee(event, userId);
     }
 
     /**
@@ -145,7 +146,7 @@ public class AbstractFreeBusyPerformer extends AbstractQueryPerformer {
             UserizedFolder folder = findFolder(getVisibleFolders(), event.getFolderId());
             if (null != folder) {
                 int readPermission = folder.getOwnPermission().getReadPermission();
-                if (Permission.READ_ALL_OBJECTS <= readPermission || Permission.READ_OWN_OBJECTS == readPermission && event.getCreatedBy() == session.getUserId()) {
+                if (Permission.READ_ALL_OBJECTS <= readPermission || Permission.READ_OWN_OBJECTS == readPermission && matches(event.getCreatedBy(), session.getUserId())) {
                     return event.getFolderId();
                 }
             }
@@ -166,7 +167,7 @@ public class AbstractFreeBusyPerformer extends AbstractQueryPerformer {
             UserizedFolder folder = findFolder(getVisibleFolders(), attendee.getFolderId());
             if (null != folder) {
                 int readPermission = folder.getOwnPermission().getReadPermission();
-                if (Permission.READ_ALL_OBJECTS <= readPermission || Permission.READ_OWN_OBJECTS == readPermission && event.getCreatedBy() == session.getUserId()) {
+                if (Permission.READ_ALL_OBJECTS <= readPermission || Permission.READ_OWN_OBJECTS == readPermission && matches(event.getCreatedBy(), session.getUserId())) {
                     chosenFolder = chooseFolder(chosenFolder, folder);
                 }
             }

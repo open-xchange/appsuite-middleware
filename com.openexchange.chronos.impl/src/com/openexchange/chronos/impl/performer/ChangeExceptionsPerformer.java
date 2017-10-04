@@ -63,6 +63,7 @@ import java.util.Iterator;
 import java.util.List;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.Utils;
 import com.openexchange.chronos.service.CalendarSession;
@@ -106,7 +107,7 @@ public class ChangeExceptionsPerformer extends AbstractQueryPerformer {
         if (null == event) {
             throw CalendarExceptionCodes.EVENT_NOT_FOUND.create(seriesID);
         }
-        if (session.getUserId() != event.getCreatedBy()) {
+        if (CalendarUtils.matches(event.getCreatedBy(), session.getUserId())) {
             requireCalendarPermission(folder, READ_FOLDER, READ_ALL_OBJECTS, NO_PERMISSIONS, NO_PERMISSIONS);
         } else {
             requireCalendarPermission(folder, READ_FOLDER, READ_OWN_OBJECTS, NO_PERMISSIONS, NO_PERMISSIONS);

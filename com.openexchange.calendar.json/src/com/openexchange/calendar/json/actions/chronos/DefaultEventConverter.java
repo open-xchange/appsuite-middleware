@@ -100,6 +100,7 @@ public class DefaultEventConverter extends EventConverter {
         return session.getRecurrenceService();
     }
 
+    @Override
     public CalendarSession getCalendarSession() {
         return session;
     }

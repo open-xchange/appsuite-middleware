@@ -64,6 +64,7 @@ import java.util.Locale;
 import java.util.TimeZone;
 import org.dmfs.rfc5545.DateTime;
 import com.openexchange.chronos.Attendee;
+import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Classification;
 import com.openexchange.chronos.DelegatingEvent;
@@ -108,7 +109,9 @@ public class EventConverter {
         event.setFolderId(folderId);
         event.setId(getEventId(contact));
         event.setSeriesId(event.getId());
-        event.setCalendarUser(calendarUserId);
+        CalendarUser calendarUser = new CalendarUser();
+        calendarUser.setEntity(calendarUserId);
+        event.setCalendarUser(calendarUser);
         event.setRecurrenceRule("FREQ=YEARLY");
         event.setTransp(TimeTransparency.TRANSPARENT);
         event.setClassification(Classification.PUBLIC);

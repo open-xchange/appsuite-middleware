@@ -200,12 +200,12 @@ public abstract class DelegatingEvent extends Event {
     }
 
     @Override
-    public int getCreatedBy() {
+    public CalendarUser getCreatedBy() {
         return delegate.getCreatedBy();
     }
 
     @Override
-    public void setCreatedBy(int value) {
+    public void setCreatedBy(CalendarUser value) {
         delegate.setCreatedBy(value);
     }
 
@@ -240,12 +240,12 @@ public abstract class DelegatingEvent extends Event {
     }
 
     @Override
-    public int getModifiedBy() {
+    public CalendarUser getModifiedBy() {
         return delegate.getModifiedBy();
     }
 
     @Override
-    public void setModifiedBy(int value) {
+    public void setModifiedBy(CalendarUser value) {
         delegate.setModifiedBy(value);
     }
 
@@ -260,12 +260,12 @@ public abstract class DelegatingEvent extends Event {
     }
 
     @Override
-    public int getCalendarUser() {
+    public CalendarUser getCalendarUser() {
         return delegate.getCalendarUser();
     }
 
     @Override
-    public void setCalendarUser(int value) {
+    public void setCalendarUser(CalendarUser value) {
         delegate.setCalendarUser(value);
     }
 

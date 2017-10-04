@@ -53,6 +53,7 @@ import static com.openexchange.chronos.common.CalendarUtils.filter;
 import static com.openexchange.chronos.common.CalendarUtils.find;
 import static com.openexchange.chronos.common.CalendarUtils.isGroupScheduled;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
+import static com.openexchange.chronos.common.CalendarUtils.matches;
 import static com.openexchange.chronos.impl.Utils.anonymizeIfNeeded;
 import static com.openexchange.chronos.impl.Utils.getFields;
 import static com.openexchange.chronos.impl.Utils.getRecurrenceIterator;
@@ -189,7 +190,7 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
                     /*
                      * include if attendee matches event owner
                      */
-                    if (attendee.getEntity() != eventInPeriod.getCreatedBy()) {
+                    if (matches(eventInPeriod.getCreatedBy(), attendee.getEntity())) {
                         continue;
                     }
                     folderID = eventInPeriod.getFolderId();

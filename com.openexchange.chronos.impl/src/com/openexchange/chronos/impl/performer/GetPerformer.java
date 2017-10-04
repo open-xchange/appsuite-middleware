@@ -50,6 +50,7 @@
 package com.openexchange.chronos.impl.performer;
 
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
+import static com.openexchange.chronos.common.CalendarUtils.matches;
 import static com.openexchange.chronos.impl.Check.requireCalendarPermission;
 import static com.openexchange.chronos.impl.Utils.anonymizeIfNeeded;
 import static com.openexchange.chronos.impl.Utils.applyExceptionDates;
@@ -106,7 +107,7 @@ public class GetPerformer extends AbstractQueryPerformer {
         if (null == event) {
             throw CalendarExceptionCodes.EVENT_NOT_FOUND.create(eventId);
         }
-        if (session.getUserId() != event.getCreatedBy()) {
+        if (false == matches(event.getCreatedBy(), session.getUserId())) {
             requireCalendarPermission(folder, READ_FOLDER, READ_ALL_OBJECTS, NO_PERMISSIONS, NO_PERMISSIONS);
         } else {
             requireCalendarPermission(folder, READ_FOLDER, READ_OWN_OBJECTS, NO_PERMISSIONS, NO_PERMISSIONS);

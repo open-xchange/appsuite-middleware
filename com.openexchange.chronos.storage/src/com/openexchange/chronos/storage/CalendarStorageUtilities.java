@@ -52,6 +52,7 @@ package com.openexchange.chronos.storage;
 import java.util.Date;
 import java.util.List;
 import com.openexchange.chronos.Attendee;
+import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.exception.OXException;
@@ -87,11 +88,11 @@ public interface CalendarStorageUtilities {
      *
      * @param event The event to create the <i>tombstone</i> for
      * @param lastModified The last modification time to take over
-     * @param modifiedBy The identifier of the modifying user to take over
+     * @param modifiedBy The modifying calendar user to take over, or <code>null</code> to ignore
      * @return The <i>tombstone</i> event
      * @throws OXException In case of an error
      */
-    Event getTombstone(Event event, Date lastModified, int modifiedBy) throws OXException;
+    Event getTombstone(Event event, Date lastModified, CalendarUser modifiedBy) throws OXException;
 
     /**
      * Loads additional event data from the storage, based on the requested fields. This currently includes

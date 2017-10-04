@@ -187,7 +187,7 @@ public class ClearPerformer extends AbstractUpdatePerformer {
         Map<String, List<Attendee>> attendeeTombstonesByEventId = new HashMap<String, List<Attendee>>(eventsToDelete.size());
         for (Event originalEvent : eventsToDelete) {
             eventIds.add(originalEvent.getId());
-            eventTombstones.add(storage.getUtilities().getTombstone(originalEvent, timestamp, calendarUserId));
+            eventTombstones.add(storage.getUtilities().getTombstone(originalEvent, timestamp, calendarUser));
             if (null != originalEvent.getAttendees() && 0 < originalEvent.getAttendees().size()) {
                 attendeeTombstonesByEventId.put(originalEvent.getId(), storage.getUtilities().getTombstones(originalEvent.getAttendees()));
             }
@@ -227,7 +227,7 @@ public class ClearPerformer extends AbstractUpdatePerformer {
             Event event = attendeeToDeleteByEvent.getKey();
             Attendee attendee = attendeeToDeleteByEvent.getValue();
             com.openexchange.tools.arrays.Collections.put(eventIdsByUserId, I(attendee.getEntity()), event.getId());
-            eventTombstones.add(storage.getUtilities().getTombstone(event, timestamp, calendarUserId));
+            eventTombstones.add(storage.getUtilities().getTombstone(event, timestamp, calendarUser));
             attendeeTombstonesByEventId.put(event.getId(), Collections.singletonList(storage.getUtilities().getTombstone(attendee)));
         }
         /*

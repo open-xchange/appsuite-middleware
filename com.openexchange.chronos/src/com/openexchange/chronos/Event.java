@@ -66,15 +66,15 @@ public class Event {
 
     private String id;
     private String folderId;
-    private int calendarUser;
+    private CalendarUser calendarUser;
     private String uid;
     private String filename;
     private long timestamp;
 
     private Date created;
-    private int createdBy;
+    private CalendarUser createdBy;
     private Date lastModified;
-    private int modifiedBy;
+    private CalendarUser modifiedBy;
     private int sequence;
 
     private String summary;
@@ -377,29 +377,29 @@ public class Event {
     }
 
     /**
-     * Gets the identifier of the user who has created the event.
+     * Gets the calendar the user who has created the event.
      *
-     * @return The identifier of the creator
+     * @return The creator
      */
-    public int getCreatedBy() {
+    public CalendarUser getCreatedBy() {
         return createdBy;
     }
 
     /**
-     * Sets the identifier of the user who has created the event.
+     * Sets the calendar user who has created the event.
      *
-     * @param value The identifier of the creator to set
+     * @param value The creator to set
      */
-    public void setCreatedBy(int value) {
+    public void setCreatedBy(CalendarUser value) {
         createdBy = value;
         setFields.add(EventField.CREATED_BY);
     }
 
     /**
-     * Removes the identifier of the user who has created the event.
+     * Removes the calendar user who has created the event.
      */
     public void removeCreatedBy() {
-        createdBy = 0;
+        createdBy = null;
         setFields.remove(EventField.CREATED_BY);
     }
 
@@ -449,29 +449,29 @@ public class Event {
     }
 
     /**
-     * Gets the identifier of the user who has last modified the event.
+     * Gets the calendar user who has last modified the event.
      *
-     * @return The identifier of the last modifying user
+     * @return The last modifying user
      */
-    public int getModifiedBy() {
+    public CalendarUser getModifiedBy() {
         return modifiedBy;
     }
 
     /**
-     * Sets the identifier of the user who has last modified the event.
+     * Sets the calendar user who has last modified the event.
      *
-     * @param value The identifier of the last modifying user to set
+     * @param value The last modifying user to set
      */
-    public void setModifiedBy(int value) {
+    public void setModifiedBy(CalendarUser value) {
         modifiedBy = value;
         setFields.add(EventField.MODIFIED_BY);
     }
 
     /**
-     * Removes the identifier of the user who has last modified the event.
+     * Removes the calendar user who has last modified the event.
      */
     public void removeModifiedBy() {
-        modifiedBy = 0;
+        modifiedBy = null;
         setFields.remove(EventField.MODIFIED_BY);
     }
 
@@ -485,29 +485,29 @@ public class Event {
     }
 
     /**
-     * Gets the identifier of the calendar user of the event.
+     * Gets the calendar user of the event.
      *
-     * @return The identifier of the calendar user
+     * @return The calendar user
      */
-    public int getCalendarUser() {
+    public CalendarUser getCalendarUser() {
         return calendarUser;
     }
 
     /**
-     * Sets the identifier of the calendar user of the event.
+     * Sets the calendar user of the event.
      *
-     * @param value The identifier of the calendar user to set
+     * @param value The calendar user to set
      */
-    public void setCalendarUser(int value) {
+    public void setCalendarUser(CalendarUser value) {
         calendarUser = value;
         setFields.add(EventField.CALENDAR_USER);
     }
 
     /**
-     * Removes the identifier of the calendar user of the event.
+     * Removes the calendar user of the event.
      */
     public void removeCalendarUser() {
-        calendarUser = 0;
+        calendarUser = null;
         setFields.remove(EventField.CALENDAR_USER);
     }
 

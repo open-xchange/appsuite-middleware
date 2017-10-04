@@ -192,6 +192,20 @@ public class EntityProcessor {
              */
             event.setOrganizer(decode(event.getOrganizer().getUri()));
         }
+        /*
+         * apply further entity data
+         */
+        if (null != entityResolver) {
+            if (null != event.getCalendarUser()) {
+                entityResolver.applyEntityData(event.getCalendarUser(), CalendarUserType.INDIVIDUAL);
+            }
+            if (null != event.getCreatedBy()) {
+                entityResolver.applyEntityData(event.getCreatedBy(), CalendarUserType.INDIVIDUAL);
+            }
+            if (null != event.getModifiedBy()) {
+                entityResolver.applyEntityData(event.getModifiedBy(), CalendarUserType.INDIVIDUAL);
+            }
+        }
         return event;
     }
 

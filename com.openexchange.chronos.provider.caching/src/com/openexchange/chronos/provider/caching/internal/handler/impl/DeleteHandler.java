@@ -114,7 +114,7 @@ public class DeleteHandler extends AbstractHandler {
          * delete event data from storage
          */
         String id = originalEvent.getId();
-        calendarStorage.getEventStorage().insertEventTombstone(calendarStorage.getUtilities().getTombstone(originalEvent, new Date(), this.cachedCalendarAccess.getAccount().getUserId()));
+        calendarStorage.getEventStorage().insertEventTombstone(calendarStorage.getUtilities().getTombstone(originalEvent, new Date(), getCalendarUser()));
         calendarStorage.getAttendeeStorage().insertAttendeeTombstones(id, calendarStorage.getUtilities().getTombstones(originalEvent.getAttendees()));
         calendarStorage.getAlarmStorage().deleteAlarms(id);
         calendarStorage.getEventStorage().deleteEvent(id);

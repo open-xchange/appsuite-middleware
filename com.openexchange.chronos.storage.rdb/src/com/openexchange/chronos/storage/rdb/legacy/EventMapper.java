@@ -320,7 +320,13 @@ public class EventMapper extends DefaultDbMapper<Event, EventField> {
 
             @Override
             public void set(Event event, Integer value) {
-                event.setCreatedBy(null == value ? 0 : i(value));
+                if (null == value || 0 == value.intValue()) {
+                    event.setCreatedBy(null);
+                } else {
+                    CalendarUser calendarUser = new CalendarUser();
+                    calendarUser.setEntity(value.intValue());
+                    event.setCreatedBy(calendarUser);
+                }
             }
 
             @Override
@@ -330,7 +336,7 @@ public class EventMapper extends DefaultDbMapper<Event, EventField> {
 
             @Override
             public Integer get(Event event) {
-                return I(event.getCreatedBy());
+                return null != event.getCreatedBy() ? I(event.getCreatedBy().getEntity()) : null;
             }
 
             @Override
@@ -342,7 +348,13 @@ public class EventMapper extends DefaultDbMapper<Event, EventField> {
 
             @Override
             public void set(Event event, Integer value) {
-                event.setModifiedBy(null == value ? 0 : i(value));
+                if (null == value || 0 == value.intValue()) {
+                    event.setModifiedBy(null);
+                } else {
+                    CalendarUser calendarUser = new CalendarUser();
+                    calendarUser.setEntity(value.intValue());
+                    event.setModifiedBy(calendarUser);
+                }
             }
 
             @Override
@@ -352,7 +364,7 @@ public class EventMapper extends DefaultDbMapper<Event, EventField> {
 
             @Override
             public Integer get(Event event) {
-                return I(event.getModifiedBy());
+                return null != event.getModifiedBy() ? I(event.getModifiedBy().getEntity()) : null;
             }
 
             @Override

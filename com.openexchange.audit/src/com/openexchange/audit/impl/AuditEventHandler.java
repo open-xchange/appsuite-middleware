@@ -63,6 +63,7 @@ import com.openexchange.api2.RdbFolderSQLInterface;
 import com.openexchange.audit.configuration.AuditConfiguration;
 import com.openexchange.audit.services.Services;
 import com.openexchange.chronos.Attendee;
+import com.openexchange.chronos.CalendarUser;
 import com.openexchange.contact.ContactService;
 import com.openexchange.event.CommonEvent;
 import com.openexchange.exception.OXException;
@@ -441,8 +442,8 @@ public class AuditEventHandler implements EventHandler {
         logBuilder.append("CONTEXT ID: ").append(commonEvent.getContextId()).append("; ");
         logBuilder.append("EVENT ID: ").append(event.getId()).append("; ");
 
-        appendBy(event.getCreatedBy(), context, "CREATED", logBuilder);
-        appendBy(event.getModifiedBy(), context, "MODIFIED", logBuilder);
+        appendBy(event.getCreatedBy(), "CREATED", logBuilder);
+        appendBy(event.getModifiedBy(), "MODIFIED", logBuilder);
 
         try {
             int folderId = Integer.valueOf(event.getFolderId()).intValue();
@@ -617,7 +618,7 @@ public class AuditEventHandler implements EventHandler {
 
     /**
      * Appends a user with given identifierText to the logBuilder
-     * 
+     *
      * @param userId The identifier of the user
      * @param context The context of the user
      * @param identifierText The text to identify the users role, e.g. 'CREATED'
@@ -636,8 +637,21 @@ public class AuditEventHandler implements EventHandler {
     }
 
     /**
+     * Appends a user with given identifierText to the logBuilder
+     *
+     * @param calendarUser The calendar user
+     * @param identifierText The text to identify the users role, e.g. 'CREATED'
+     * @param logBuilder The {@link StringBuilder}
+     */
+    private void appendBy(CalendarUser calendarUser, String identifierText, StringBuilder logBuilder) {
+        if (null != calendarUser) {
+            logBuilder.append(identifierText).append(" BY: ").append(calendarUser.getCn()).append("; ");
+        }
+    }
+
+    /**
      * Append given attendees to the logBuilder
-     * 
+     *
      * @param logBuilder The {@link StringBuilder}
      * @param attendees The {@link Attendee}s to add
      * @param text The key the attendees should be added to
@@ -660,7 +674,7 @@ public class AuditEventHandler implements EventHandler {
 
     /**
      * Append the given object if it is not <code>null</code> or an empty string
-     * 
+     *
      * @param logBuilder The {@link StringBuilder}
      * @param text The key to add the objecct to
      * @param objectToAppend The object to add

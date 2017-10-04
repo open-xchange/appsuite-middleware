@@ -80,8 +80,6 @@ import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.TimeTransparency;
 import com.openexchange.chronos.common.DefaultRecurrenceId;
 import com.openexchange.chronos.json.fields.ChronosJsonFields;
-import com.openexchange.chronos.json.osgi.ChronosJsonActivator;
-import com.openexchange.chronos.service.CalendarUtilities;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tools.mappings.json.DefaultJsonMapper;
 import com.openexchange.groupware.tools.mappings.json.DefaultJsonMapping;
@@ -314,7 +312,12 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
                 object.removeTimestamp();
             }
         });
-        mappings.put(EventField.CREATED_BY, new IntegerMapping<Event>(ChronosJsonFields.CREATED_BY, ColumnIDs.CREATED_BY) {
+        mappings.put(EventField.CREATED_BY, new CalendarUserMapping<CalendarUser, Event>(ChronosJsonFields.CREATED_BY, ColumnIDs.CREATED_BY) {
+
+            @Override
+            public CalendarUser newInstance() {
+                return new CalendarUser();
+            }
 
             @Override
             public boolean isSet(Event object) {
@@ -322,38 +325,18 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
             }
 
             @Override
-            public void set(Event object, Integer value) throws OXException {
-                object.setCreatedBy(null == value ? 0 : i(value));
+            public void set(Event object, CalendarUser value) throws OXException {
+                object.setCreatedBy(value);
             }
 
             @Override
-            public Integer get(Event object) {
-                return I(object.getCreatedBy());
+            public CalendarUser get(Event object) {
+                return object.getCreatedBy();
             }
 
             @Override
             public void remove(Event object) {
                 object.removeCreatedBy();
-            }
-
-            @Override
-            public Object serialize(Event from, TimeZone timeZone, Session session) throws JSONException, OXException {
-
-                CalendarUser user = new CalendarUser();
-                Integer id = get(from);
-                CalendarUtilities service = ChronosJsonActivator.getServiceLookup().getService(CalendarUtilities.class);
-                service.getEntityResolver(session.getContextId()).applyEntityData(user, id);
-                return serializeCalendarUser(user);
-            }
-
-            @Override
-            public void deserialize(JSONObject from, Event to, TimeZone timeZone) throws JSONException, OXException {
-                JSONObject organizer = (JSONObject) from.get(ChronosJsonFields.CREATED_BY);
-                Organizer deserializeCalendarUser = deserializeCalendarUser(organizer, Organizer.class);
-                if(deserializeCalendarUser.getUri()==null && from.has(getAjaxName())){
-                    super.deserialize(from, to);
-                }
-                set(to, deserializeCalendarUser.getEntity());
             }
         });
         mappings.put(EventField.LAST_MODIFIED, new TimeMapping<Event>(ChronosJsonFields.LAST_MODIFIED, ColumnIDs.LAST_MODIFIED) {
@@ -378,7 +361,12 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
                 object.removeLastModified();
             }
         });
-        mappings.put(EventField.MODIFIED_BY, new IntegerMapping<Event>(ChronosJsonFields.MODIFIED_BY, ColumnIDs.MODIFIED_BY) {
+        mappings.put(EventField.MODIFIED_BY, new CalendarUserMapping<CalendarUser, Event>(ChronosJsonFields.MODIFIED_BY, ColumnIDs.MODIFIED_BY) {
+
+            @Override
+            public CalendarUser newInstance() {
+                return new CalendarUser();
+            }
 
             @Override
             public boolean isSet(Event object) {
@@ -386,13 +374,13 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
             }
 
             @Override
-            public void set(Event object, Integer value) throws OXException {
-                object.setModifiedBy(null == value ? 0 : i(value));
+            public void set(Event object, CalendarUser value) throws OXException {
+                object.setModifiedBy(value);
             }
 
             @Override
-            public Integer get(Event object) {
-                return I(object.getModifiedBy());
+            public CalendarUser get(Event object) {
+                return object.getModifiedBy();
             }
 
             @Override
@@ -400,7 +388,12 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
                 object.removeModifiedBy();
             }
         });
-        mappings.put(EventField.CALENDAR_USER, new IntegerMapping<Event>(ChronosJsonFields.CALENDAR_USER, ColumnIDs.CALENDAR_USER) {
+        mappings.put(EventField.CALENDAR_USER, new CalendarUserMapping<CalendarUser, Event>(ChronosJsonFields.CALENDAR_USER, ColumnIDs.CALENDAR_USER) {
+
+            @Override
+            public CalendarUser newInstance() {
+                return new CalendarUser();
+            }
 
             @Override
             public boolean isSet(Event object) {
@@ -408,13 +401,13 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
             }
 
             @Override
-            public void set(Event object, Integer value) throws OXException {
-                object.setCalendarUser(null == value ? 0 : i(value));
+            public void set(Event object, CalendarUser value) throws OXException {
+                object.setCalendarUser(value);
             }
 
             @Override
-            public Integer get(Event object) {
-                return I(object.getCalendarUser());
+            public CalendarUser get(Event object) {
+                return object.getCalendarUser();
             }
 
             @Override
@@ -781,7 +774,12 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
                 object.removeUrl();
             }
         });
-        mappings.put(EventField.ORGANIZER, new DefaultJsonMapping<Organizer, Event>(ChronosJsonFields.ORGANIZER, ColumnIDs.ORGANIZER) {
+        mappings.put(EventField.ORGANIZER, new CalendarUserMapping<Organizer, Event>(ChronosJsonFields.ORGANIZER, ColumnIDs.ORGANIZER) {
+
+            @Override
+            public Organizer newInstance() {
+                return new Organizer();
+            }
 
             @Override
             public boolean isSet(Event object) {
@@ -801,17 +799,6 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
             @Override
             public void remove(Event object) {
                 object.removeOrganizer();
-            }
-
-            @Override
-            public void deserialize(JSONObject from, Event to) throws JSONException, OXException {
-                JSONObject organizer = (JSONObject) from.get(ChronosJsonFields.ORGANIZER);
-                set(to, deserializeCalendarUser(organizer, Organizer.class));
-            }
-
-            @Override
-            public Object serialize(Event from, TimeZone timeZone, Session session) throws JSONException {
-                return serializeCalendarUser(from.getOrganizer());
             }
         });
         mappings.put(EventField.GEO, new DefaultJsonMapping<double[], Event>(ChronosJsonFields.GEO, null) {

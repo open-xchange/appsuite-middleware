@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.impl.performer;
 
+import static com.openexchange.chronos.common.CalendarUtils.matches;
 import static com.openexchange.chronos.impl.Check.requireCalendarPermission;
 import static com.openexchange.chronos.impl.Utils.getFields;
 import static com.openexchange.folderstorage.Permission.NO_PERMISSIONS;
@@ -65,7 +66,6 @@ import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
-import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.UserizedFolder;
 
 /**
@@ -77,7 +77,7 @@ public class GetAttachmentPerformer extends AbstractQueryPerformer {
 
     /**
      * Initialises a new {@link GetAttachmentPerformer}.
-     * 
+     *
      * @param session The calendar session
      * @param storage The underlying calendar storage
      */
@@ -87,7 +87,7 @@ public class GetAttachmentPerformer extends AbstractQueryPerformer {
 
     /**
      * Performs the get attachment operation.
-     * 
+     *
      * @param eventId The {@link Event} identifier
      * @param folder The {@link UserizedFolder}
      * @param managedId The managed identifier of the {@link Attachment}
@@ -114,7 +114,7 @@ public class GetAttachmentPerformer extends AbstractQueryPerformer {
 
     /**
      * Check event/folder permissions
-     * 
+     *
      * @param eventId The {@link Event} identifier
      * @param folder The {@link UserizedFolder}
      * @throws OXException if the permission check fails
@@ -127,17 +127,11 @@ public class GetAttachmentPerformer extends AbstractQueryPerformer {
             throw CalendarExceptionCodes.EVENT_NOT_FOUND.create(eventId);
         }
         // ...and check for permissions if necessary
-        requireCalendarPermission(folder, READ_FOLDER, readPermission(event.getCreatedBy()), NO_PERMISSIONS, NO_PERMISSIONS);
+        if (false == matches(event.getCreatedBy(), session.getUserId())) {
+            requireCalendarPermission(folder, READ_FOLDER, READ_ALL_OBJECTS, NO_PERMISSIONS, NO_PERMISSIONS);
+        } else {
+            requireCalendarPermission(folder, READ_FOLDER, READ_OWN_OBJECTS, NO_PERMISSIONS, NO_PERMISSIONS);
+        }
     }
 
-    /**
-     * Read object permission
-     * 
-     * @param createdById The identifier of the user that created the event
-     * @return The {@link Permission#READ_ALL_OBJECTS} permission if the event was not created by the specified user,
-     *         or the {@link Permission#READ_OWN_OBJECTS} otherwise
-     */
-    private int readPermission(int createdById) {
-        return session.getUserId() != createdById ? READ_ALL_OBJECTS : READ_OWN_OBJECTS;
-    }
 }

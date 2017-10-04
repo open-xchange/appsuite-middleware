@@ -88,6 +88,7 @@ import com.openexchange.chronos.compat.Appointment2Event;
 import com.openexchange.chronos.compat.Event2Appointment;
 import com.openexchange.chronos.compat.PositionAwareRecurrenceId;
 import com.openexchange.chronos.compat.SeriesPattern;
+import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.EventID;
 import com.openexchange.chronos.service.RecurrenceData;
 import com.openexchange.chronos.service.RecurrenceIterator;
@@ -292,6 +293,8 @@ public abstract class EventConverter {
         return services.getService(RecurrenceService.class);
     }
 
+    protected abstract CalendarSession getCalendarSession();
+
     /**
      * Gets the event identifier for the supplied full appointment identifier, optionally resolving a recurrence position to the
      * corresponding recurrence identifier.
@@ -396,10 +399,18 @@ public abstract class EventConverter {
             event.setId(asString(appointment.getObjectID()));
         }
         if (appointment.containsCreatedBy()) {
-            event.setCreatedBy(appointment.getCreatedBy());
+            if (0 == appointment.getCreatedBy()) {
+                event.setCreatedBy(null);
+            } else {
+                event.setCreatedBy(getCalendarSession().getEntityResolver().applyEntityData(new CalendarUser(), appointment.getCreatedBy()));
+            }
         }
         if (appointment.containsModifiedBy()) {
-            event.setModifiedBy(appointment.getModifiedBy());
+            if (0 == appointment.getModifiedBy()) {
+                event.setModifiedBy(null);
+            } else {
+                event.setModifiedBy(getCalendarSession().getEntityResolver().applyEntityData(new CalendarUser(), appointment.getModifiedBy()));
+            }
         }
         if (appointment.containsCreationDate()) {
             event.setCreated(appointment.getCreationDate());
@@ -542,10 +553,10 @@ public abstract class EventConverter {
             appointment.setObjectID(asInt(event.getId()));
         }
         if (event.containsCreatedBy()) {
-            appointment.setCreatedBy(event.getCreatedBy());
+            appointment.setCreatedBy(null == event.getCreatedBy() ? 0 : event.getCreatedBy().getEntity());
         }
         if (event.containsModifiedBy()) {
-            appointment.setModifiedBy(event.getModifiedBy());
+            appointment.setModifiedBy(null == event.getModifiedBy() ? 0 : event.getModifiedBy().getEntity());
         }
         if (event.containsCreated()) {
             appointment.setCreationDate(event.getCreated());

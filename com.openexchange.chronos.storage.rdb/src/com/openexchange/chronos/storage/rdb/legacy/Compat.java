@@ -156,7 +156,7 @@ public class Compat {
                 /*
                  * event in public folder, assume no specific calendar user
                  */
-                event.setCalendarUser(0);
+                event.setCalendarUser(null);
             }
         }
         /*

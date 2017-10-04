@@ -64,6 +64,7 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import com.openexchange.audit.configuration.AuditConfiguration;
 import com.openexchange.chronos.Attendee;
+import com.openexchange.chronos.CalendarUser;
 import com.openexchange.event.CommonEvent;
 import com.openexchange.file.storage.FileStorageEventConstants;
 import com.openexchange.groupware.Types;
@@ -132,6 +133,8 @@ public class AuditEventHandlerTest {
 
     private UserService userService;
 
+    private CalendarUser calendarUser;
+
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
@@ -150,6 +153,10 @@ public class AuditEventHandlerTest {
         this.commonEvent = PowerMockito.mock(CommonEvent.class);
         this.context = PowerMockito.mock(Context.class);
         this.log = PowerMockito.mock(org.slf4j.Logger.class);
+
+        this.calendarUser = new CalendarUser();
+        this.calendarUser.setEntity(userId);
+        this.calendarUser.setCn("user name");
 
         this.stringBuilder = new StringBuilder();
     }
@@ -334,7 +341,7 @@ public class AuditEventHandlerTest {
                 return "";
             }
         };
-        
+
         Mockito.when(userService.getUser(userId, context).getDisplayName()).thenReturn("TestUser");
 
         com.openexchange.chronos.Event event = PowerMockito.mock(com.openexchange.chronos.Event.class);
@@ -343,8 +350,8 @@ public class AuditEventHandlerTest {
         Mockito.when(commonEvent.getContextId()).thenReturn(this.contextId);
         Mockito.when(commonEvent.getUserId()).thenReturn(this.userId);
         Mockito.when(event.getId()).thenReturn(String.valueOf(this.objectId));
-        Mockito.when(event.getCreatedBy()).thenReturn(this.userId);
-        Mockito.when(event.getModifiedBy()).thenReturn(this.userId);
+        Mockito.when(event.getCreatedBy()).thenReturn(this.calendarUser);
+        Mockito.when(event.getModifiedBy()).thenReturn(this.calendarUser);
         Mockito.when(event.getSummary()).thenReturn(this.objectTitle);
         Mockito.when(event.getStartDate()).thenReturn(this.date);
         Mockito.when(event.getEndDate()).thenReturn(this.date);
@@ -364,17 +371,17 @@ public class AuditEventHandlerTest {
                 return "";
             }
         };
-        
+
         Mockito.when(userService.getUser(userId, context).getDisplayName()).thenReturn("TestUser");
 
         com.openexchange.chronos.Event event = PowerMockito.mock(com.openexchange.chronos.Event.class);
-        Mockito.when(commonEvent.getAction()).thenReturn(CommonEvent.INSERT); 
+        Mockito.when(commonEvent.getAction()).thenReturn(CommonEvent.INSERT);
         Mockito.when(commonEvent.getActionObj()).thenReturn(event);
         Mockito.when(commonEvent.getContextId()).thenReturn(this.contextId);
         Mockito.when(commonEvent.getUserId()).thenReturn(this.userId);
         Mockito.when(event.getId()).thenReturn(String.valueOf(this.objectId));
-        Mockito.when(event.getCreatedBy()).thenReturn(this.userId);
-        Mockito.when(event.getModifiedBy()).thenReturn(this.userId);
+        Mockito.when(event.getCreatedBy()).thenReturn(this.calendarUser);
+        Mockito.when(event.getModifiedBy()).thenReturn(this.calendarUser);
         Mockito.when(event.getSummary()).thenReturn(this.objectTitle);
         Mockito.when(event.getStartDate()).thenReturn(this.date);
         Mockito.when(event.getEndDate()).thenReturn(this.date);
@@ -387,7 +394,7 @@ public class AuditEventHandlerTest {
         Assert.assertTrue(stringBuilder.toString().contains("CONTEXT ID: " + this.contextId));
         Assert.assertTrue(stringBuilder.toString().contains("END DATE: " + this.date));
     }
-    
+
     @Test
     public void testHandleAppointmentCommonEvent_EverythingFine_ContainsNotInformation() throws Exception {
         this.auditEventHandler = new AuditEventHandler(userService) {
@@ -397,7 +404,7 @@ public class AuditEventHandlerTest {
                 return "";
             }
         };
-        
+
         Mockito.when(userService.getUser(userId, context).getDisplayName()).thenReturn("TestUser");
 
         com.openexchange.chronos.Event event = PowerMockito.mock(com.openexchange.chronos.Event.class);
@@ -406,8 +413,8 @@ public class AuditEventHandlerTest {
         Mockito.when(commonEvent.getContextId()).thenReturn(this.contextId);
         Mockito.when(commonEvent.getUserId()).thenReturn(this.userId);
         Mockito.when(event.getId()).thenReturn(String.valueOf(this.objectId));
-        Mockito.when(event.getCreatedBy()).thenReturn(this.userId);
-        Mockito.when(event.getModifiedBy()).thenReturn(this.userId);
+        Mockito.when(event.getCreatedBy()).thenReturn(this.calendarUser);
+        Mockito.when(event.getModifiedBy()).thenReturn(this.calendarUser);
         Mockito.when(event.getSummary()).thenReturn(this.objectTitle);
         Mockito.when(event.getStartDate()).thenReturn(this.date);
         Mockito.when(event.getEndDate()).thenReturn(this.date);

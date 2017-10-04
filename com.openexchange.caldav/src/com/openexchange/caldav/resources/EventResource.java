@@ -294,10 +294,10 @@ public class EventResource extends DAVObjectResource<Event> {
                 int entityID;
                 Date timestamp;
                 if ("created-by".equals(name)) {
-                    entityID = object.getCreatedBy();
+                    entityID = object.getCreatedBy().getEntity();
                     timestamp = object.getCreated();
                 } else {
-                    entityID = object.getModifiedBy();
+                    entityID = object.getModifiedBy().getEntity();
                     timestamp = new Date(object.getTimestamp());
                 }
                 try {

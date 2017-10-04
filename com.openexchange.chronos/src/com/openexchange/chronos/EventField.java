@@ -86,7 +86,7 @@ public enum EventField {
      */
     CREATED,
     /**
-     * The user identifier of the event's creator.
+     * The calendar user that initially created the event.
      */
     CREATED_BY,
     /**
@@ -94,11 +94,11 @@ public enum EventField {
      */
     LAST_MODIFIED,
     /**
-     * The identifier of the user who last modified the event.
+     * The calendar user that performed the last modification of the event.
      */
     MODIFIED_BY,
     /**
-     * The identifier of the calendar user of the event.
+     * The calendar user of the event.
      */
     CALENDAR_USER,
     /**

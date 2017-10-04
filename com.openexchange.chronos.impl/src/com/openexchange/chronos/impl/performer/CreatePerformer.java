@@ -166,9 +166,9 @@ public class CreatePerformer extends AbstractUpdatePerformer {
         /*
          * creation/modification/calendaruser metadata
          */
-        Consistency.setCreated(timestamp, event, calendarUserId);
-        Consistency.setModified(timestamp, event, calendarUserId);
-        Consistency.setCalenderUser(folder, event);
+        Consistency.setCreated(session, timestamp, event, calendarUserId);
+        Consistency.setModified(session, timestamp, event, calendarUserId);
+        Consistency.setCalenderUser(session, folder, event);
         /*
          * date/time related properties
          */

@@ -51,6 +51,7 @@ package com.openexchange.chronos.impl.performer;
 
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesException;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
+import static com.openexchange.chronos.common.CalendarUtils.matches;
 import static com.openexchange.chronos.impl.Check.requireCalendarPermission;
 import static com.openexchange.chronos.impl.Check.requireUpToDateTimestamp;
 import static com.openexchange.folderstorage.Permission.CREATE_OBJECTS_IN_FOLDER;
@@ -122,7 +123,7 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
          * check current session user's permissions
          */
         Check.eventIsInFolder(originalEvent, folder);
-        if (session.getUserId() == originalEvent.getCreatedBy()) {
+        if (matches(originalEvent.getCreatedBy(), session.getUserId())) {
             requireCalendarPermission(folder, READ_FOLDER, READ_OWN_OBJECTS, WRITE_OWN_OBJECTS, NO_PERMISSIONS);
         } else {
             requireCalendarPermission(folder, READ_FOLDER, READ_ALL_OBJECTS, WRITE_ALL_OBJECTS, NO_PERMISSIONS);
@@ -192,7 +193,7 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
             /*
              * store tombstone references in case of a move operation for the attendee
              */
-            storage.getEventStorage().insertEventTombstone(storage.getUtilities().getTombstone(originalEvent, timestamp, calendarUserId));
+            storage.getEventStorage().insertEventTombstone(storage.getUtilities().getTombstone(originalEvent, timestamp, calendarUser));
             storage.getAttendeeStorage().insertAttendeeTombstone(originalEvent.getId(), storage.getUtilities().getTombstone(originalAttendee));
         }
         /*
@@ -331,7 +332,7 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
             throw CalendarExceptionCodes.FORBIDDEN_ATTENDEE_CHANGE.create(originalEvent.getId(), originalAttendee, AttendeeField.FOLDER_ID);
         }
         requireCalendarPermission(targetFolder, CREATE_OBJECTS_IN_FOLDER, NO_PERMISSIONS, NO_PERMISSIONS, NO_PERMISSIONS);
-        if (session.getUserId() == originalEvent.getCreatedBy()) {
+        if (matches(originalEvent.getCreatedBy(), session.getUserId())) {
             requireCalendarPermission(folder, READ_FOLDER, NO_PERMISSIONS, NO_PERMISSIONS, DELETE_OWN_OBJECTS);
         } else {
             requireCalendarPermission(folder, READ_FOLDER, NO_PERMISSIONS, NO_PERMISSIONS, DELETE_ALL_OBJECTS);

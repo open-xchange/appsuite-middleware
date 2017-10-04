@@ -65,6 +65,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.SortedSet;
 import org.dmfs.rfc5545.DateTime;
+import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.Classification;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
@@ -345,7 +346,13 @@ public class EventMapper extends DefaultDbMapper<Event, EventField> {
 
             @Override
             public void set(Event event, Integer value) {
-                event.setCreatedBy(null == value ? 0 : i(value));
+                if (null == value || 0 == value.intValue()) {
+                    event.setCreatedBy(null);
+                } else {
+                    CalendarUser calendarUser = new CalendarUser();
+                    calendarUser.setEntity(value.intValue());
+                    event.setCreatedBy(calendarUser);
+                }
             }
 
             @Override
@@ -355,7 +362,7 @@ public class EventMapper extends DefaultDbMapper<Event, EventField> {
 
             @Override
             public Integer get(Event event) {
-                return I(event.getCreatedBy());
+                return null != event.getCreatedBy() ? I(event.getCreatedBy().getEntity()) : null;
             }
 
             @Override
@@ -390,7 +397,13 @@ public class EventMapper extends DefaultDbMapper<Event, EventField> {
 
             @Override
             public void set(Event event, Integer value) {
-                event.setModifiedBy(null == value ? 0 : i(value));
+                if (null == value || 0 == value.intValue()) {
+                    event.setModifiedBy(null);
+                } else {
+                    CalendarUser calendarUser = new CalendarUser();
+                    calendarUser.setEntity(value.intValue());
+                    event.setModifiedBy(calendarUser);
+                }
             }
 
             @Override
@@ -400,7 +413,7 @@ public class EventMapper extends DefaultDbMapper<Event, EventField> {
 
             @Override
             public Integer get(Event event) {
-                return I(event.getModifiedBy());
+                return null != event.getModifiedBy() ? I(event.getModifiedBy().getEntity()) : null;
             }
 
             @Override
@@ -412,7 +425,13 @@ public class EventMapper extends DefaultDbMapper<Event, EventField> {
 
             @Override
             public void set(Event event, Integer value) {
-                event.setCalendarUser(null == value ? 0 : i(value));
+                if (null == value || 0 == value.intValue()) {
+                    event.setCalendarUser(null);
+                } else {
+                    CalendarUser calendarUser = new CalendarUser();
+                    calendarUser.setEntity(value.intValue());
+                    event.setCalendarUser(calendarUser);
+                }
             }
 
             @Override
@@ -422,7 +441,7 @@ public class EventMapper extends DefaultDbMapper<Event, EventField> {
 
             @Override
             public Integer get(Event event) {
-                return I(event.getCalendarUser());
+                return null != event.getCalendarUser() ? I(event.getCalendarUser().getEntity()) : null;
             }
 
             @Override

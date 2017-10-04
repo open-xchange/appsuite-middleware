@@ -62,8 +62,10 @@ import java.util.Map.Entry;
 import java.util.Set;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Attendee;
+import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.ResourceId;
 import com.openexchange.chronos.provider.caching.CachingCalendarAccess;
 import com.openexchange.chronos.provider.caching.ExternalCalendarResult;
 import com.openexchange.chronos.provider.caching.internal.Services;
@@ -81,6 +83,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.java.Strings;
 import com.openexchange.search.SearchTerm;
 import com.openexchange.search.SingleSearchTerm.SingleOperation;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link AbstractHandler}
@@ -96,6 +99,19 @@ public abstract class AbstractHandler implements CachingHandler {
 
     public AbstractHandler(CachingCalendarAccess cachedCalendarAccess) {
         this.cachedCalendarAccess = cachedCalendarAccess;
+    }
+
+    /**
+     * Gets the calendar user representing the internal user associated with the underlying calendar account.
+     *
+     * @return The calendar user
+     */
+    public CalendarUser getCalendarUser() {
+        ServerSession session = cachedCalendarAccess.getSession();
+        CalendarUser calendarUser = new CalendarUser();
+        calendarUser.setEntity(session.getUserId());
+        calendarUser.setUri(ResourceId.forUser(session.getContextId(), session.getUserId()));
+        return calendarUser;
     }
 
     protected CalendarStorage initStorage(DBProvider dbProvider) throws OXException {
@@ -161,7 +177,7 @@ public abstract class AbstractHandler implements CachingHandler {
         String id = calendarStorage.getEventStorage().nextId();
         Event importedEvent = applyDefaults(folderId, events.get(0), now);
         importedEvent.setId(id);
-        importedEvent.setCalendarUser(this.cachedCalendarAccess.getAccount().getUserId());
+        importedEvent.setCalendarUser(getCalendarUser());
         if (Strings.isNotEmpty(importedEvent.getRecurrenceRule())) {
             importedEvent.setSeriesId(id);
         }
@@ -199,7 +215,7 @@ public abstract class AbstractHandler implements CachingHandler {
     }
 
     private Event applyDefaults(String folderId, Event importedEvent, Date now) {
-        importedEvent.setCalendarUser(this.cachedCalendarAccess.getSession().getUserId());
+        importedEvent.setCalendarUser(getCalendarUser());
         importedEvent.setTimestamp(now.getTime());
         importedEvent.setFolderId(folderId);
         return importedEvent;

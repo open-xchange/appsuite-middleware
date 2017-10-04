@@ -58,4 +58,20 @@ package com.openexchange.chronos;
  */
 public class Organizer extends CalendarUser {
 
+    /**
+     * Initializes a new {@link Organizer}.
+     */
+    public Organizer() {
+        super();
+    }
+
+    /**
+     * Initializes a new {@link Organizer}, copying over all properties from another organizer.
+     *
+     * @param organizer The organizer to copy the properties from
+     */
+    public Organizer(Organizer organizer) {
+        super(organizer);
+    }
+
 }

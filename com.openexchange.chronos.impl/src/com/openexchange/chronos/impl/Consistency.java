@@ -51,8 +51,11 @@ package com.openexchange.chronos.impl;
 
 import java.util.Date;
 import org.dmfs.rfc5545.Duration;
+import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.service.CalendarService;
+import com.openexchange.chronos.service.CalendarSession;
+import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.type.PublicType;
 
@@ -108,19 +111,31 @@ public class Consistency {
         }
     }
 
-    public static void setModified(Date lastModified, Event event, int modifiedBy) {
+    public static void setModified(CalendarSession session, Date lastModified, Event event, int modifiedBy) throws OXException {
+        setModified(lastModified, event, session.getEntityResolver().applyEntityData(new CalendarUser(), modifiedBy));
+    }
+
+    public static void setCreated(CalendarSession session, Date created, Event event, int createdBy) throws OXException {
+        setCreated(created, event, session.getEntityResolver().applyEntityData(new CalendarUser(), createdBy));
+    }
+
+    public static void setModified(Date lastModified, Event event, CalendarUser modifiedBy) {
         event.setLastModified(lastModified);
         event.setModifiedBy(modifiedBy);
         event.setTimestamp(lastModified.getTime());
     }
 
-    public static void setCreated(Date created, Event event, int createdBy) {
+    public static void setCreated(Date created, Event event, CalendarUser createdBy) {
         event.setCreated(created);
         event.setCreatedBy(createdBy);
     }
 
-    public static void setCalenderUser(UserizedFolder folder, Event event) {
-        event.setCalendarUser(PublicType.getInstance().equals(folder.getType()) ? 0 : folder.getCreatedBy());
+    public static void setCalenderUser(CalendarSession session, UserizedFolder folder, Event event) throws OXException {
+        if (PublicType.getInstance().equals(folder.getType())) {
+            event.setCalendarUser(null);
+        } else {
+            event.setCalendarUser(session.getEntityResolver().applyEntityData(new CalendarUser(), folder.getCreatedBy()));
+        }
     }
 
     private Consistency() {

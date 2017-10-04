@@ -270,7 +270,7 @@ public class DeletePerformer extends AbstractUpdatePerformer {
             Event eventUpdate = new Event();
             eventUpdate.setId(originalMasterEvent.getId());
             eventUpdate.setDeleteExceptionDates(deleteExceptionDates);
-            Consistency.setModified(timestamp, eventUpdate, calendarUserId);
+            Consistency.setModified(session, timestamp, eventUpdate, calendarUserId);
             storage.getEventStorage().updateEvent(eventUpdate);
             Event updatedMasterEvent = loadEventData(originalMasterEvent.getId());
             updateAlarmTrigger(originalMasterEvent, updatedMasterEvent, deleteExceptionDates);

@@ -60,6 +60,7 @@ import static com.openexchange.chronos.common.CalendarUtils.isOpaqueTransparency
 import static com.openexchange.chronos.common.CalendarUtils.isOrganizer;
 import static com.openexchange.chronos.common.CalendarUtils.isPublicClassification;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
+import static com.openexchange.chronos.common.CalendarUtils.matches;
 import static com.openexchange.chronos.common.CalendarUtils.truncateTime;
 import static com.openexchange.chronos.impl.Utils.asList;
 import static com.openexchange.chronos.impl.Utils.getFields;
@@ -414,7 +415,7 @@ public class ConflictCheckPerformer extends AbstractFreeBusyPerformer {
                     if (null != matchingAttendee && false == ParticipationStatus.DECLINED.equals(matchingAttendee.getPartStat())) {
                         conflictingAttendees.add(matchingAttendee);
                     }
-                } else if (checkedAttendee.getEntity() == conflictingEvent.getCreatedBy()) {
+                } else if (matches(conflictingEvent.getCalendarUser(), checkedAttendee.getEntity())) {
                     conflictingAttendees.add(session.getEntityResolver().prepareUserAttendee(checkedAttendee.getEntity()));
                 }
             }
@@ -436,7 +437,7 @@ public class ConflictCheckPerformer extends AbstractFreeBusyPerformer {
         /*
          * details available if user is creator or attendee
          */
-        if (conflictingEvent.getCreatedBy() == userID || isAttendee(conflictingEvent, userID) || isOrganizer(conflictingEvent, userID)) {
+        if (matches(conflictingEvent.getCalendarUser(), userID) || matches(conflictingEvent.getCreatedBy(), userID) || isAttendee(conflictingEvent, userID) || isOrganizer(conflictingEvent, userID)) {
             return true;
         }
         /*
@@ -497,10 +498,10 @@ public class ConflictCheckPerformer extends AbstractFreeBusyPerformer {
             /*
              * assume simple, not group-scheduled event
              */
-            if (false == includeUserAttendees) {
+            if (false == includeUserAttendees || null == event.getCalendarUser()) {
                 return Collections.emptyList();
             }
-            return Collections.singletonList(session.getEntityResolver().prepareUserAttendee(event.getCreatedBy()));
+            return Collections.singletonList(session.getEntityResolver().prepareUserAttendee(event.getCalendarUser().getEntity()));
         }
         for (Attendee attendee : attendees) {
             if (isInternal(attendee) && (includeUserAttendees || CalendarUserType.RESOURCE.equals(attendee.getCuType()) || CalendarUserType.ROOM.equals(attendee.getCuType()))) {

@@ -122,7 +122,7 @@ public class UpdateHandler extends AbstractHandler {
          * delete event data from storage
          */
         String id = originalEvent.getId();
-        calendarStorage.getEventStorage().insertEventTombstone(calendarStorage.getUtilities().getTombstone(originalEvent, new Date(), this.cachedCalendarAccess.getAccount().getUserId()));
+        calendarStorage.getEventStorage().insertEventTombstone(calendarStorage.getUtilities().getTombstone(originalEvent, new Date(), getCalendarUser()));
         calendarStorage.getAttendeeStorage().insertAttendeeTombstones(id, calendarStorage.getUtilities().getTombstones(originalEvent.getAttendees()));
         calendarStorage.getAlarmStorage().deleteAlarms(id);
         calendarStorage.getEventStorage().deleteEvent(id);
@@ -189,19 +189,20 @@ public class UpdateHandler extends AbstractHandler {
 
     private void updateAlarms(TruncationAwareCalendarStorage calendarStorage, Event event, CollectionUpdate<Alarm, AlarmField> alarmUpdates) throws OXException {
         if (!alarmUpdates.isEmpty()) {
+            int userId = cachedCalendarAccess.getSession().getUserId();
             AlarmStorage alarmStorage = calendarStorage.getAlarmStorage();
             if (!alarmUpdates.getAddedItems().isEmpty()) {
                 for (Alarm alarm : alarmUpdates.getAddedItems()) {
                     alarm.setId(alarmStorage.nextId());
                 }
-                alarmStorage.insertAlarms(event, event.getCreatedBy(), alarmUpdates.getAddedItems());
+                alarmStorage.insertAlarms(event, userId, alarmUpdates.getAddedItems());
             }
             if (!alarmUpdates.getRemovedItems().isEmpty()) {
                 List<Integer> removedAlarms = new ArrayList<>(alarmUpdates.getRemovedItems().size());
                 for (Alarm alarm : alarmUpdates.getRemovedItems()) {
                     removedAlarms.add(I(alarm.getId()));
                 }
-                alarmStorage.deleteAlarms(event.getId(), event.getCreatedBy(), ArrayUtils.toPrimitive(removedAlarms.toArray(new Integer[removedAlarms.size()])));
+                alarmStorage.deleteAlarms(event.getId(), userId, ArrayUtils.toPrimitive(removedAlarms.toArray(new Integer[removedAlarms.size()])));
             }
             List<? extends ItemUpdate<Alarm, AlarmField>> updatedItems = alarmUpdates.getUpdatedItems();
             if (!updatedItems.isEmpty()) {
@@ -212,7 +213,7 @@ public class UpdateHandler extends AbstractHandler {
                     update.setUid(itemUpdate.getOriginal().getUid());
                     alarms.add(update);
                 }
-                alarmStorage.updateAlarms(event, event.getCreatedBy(), alarms);
+                alarmStorage.updateAlarms(event, userId, alarms);
             }
         }
     }

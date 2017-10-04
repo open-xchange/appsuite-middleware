@@ -83,6 +83,7 @@ import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.CalendarStrings;
+import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Classification;
 import com.openexchange.chronos.DelegatingEvent;
@@ -496,14 +497,13 @@ public class Utils {
      * Gets the actual target calendar user for a specific folder. This is either the current session's user for "private" or "public"
      * folders, or the folder owner for "shared" calendar folders.
      *
+     * @param session The calendar session
      * @param folder The folder to get the calendar user for
      * @return The calendar user
      */
-    public static User getCalendarUser(UserizedFolder folder) throws OXException {
-        if (SharedType.getInstance().equals(folder.getType())) {
-            return Services.getService(UserService.class).getUser(folder.getCreatedBy(), folder.getContext());
-        }
-        return folder.getUser();
+    public static CalendarUser getCalendarUser(CalendarSession session, UserizedFolder folder) throws OXException {
+        int calendarUserId = getCalendarUserId(folder);
+        return session.getEntityResolver().applyEntityData(new CalendarUser(), calendarUserId);
     }
 
     /**

@@ -132,7 +132,7 @@ public class UnmodifiableEvent extends DelegatingEvent {
     }
 
     @Override
-    public void setCreatedBy(int value) {
+    public void setCreatedBy(CalendarUser value) {
         throw new UnsupportedOperationException();
     }
 
@@ -152,7 +152,7 @@ public class UnmodifiableEvent extends DelegatingEvent {
     }
 
     @Override
-    public void setModifiedBy(int value) {
+    public void setModifiedBy(CalendarUser value) {
         throw new UnsupportedOperationException();
     }
 
@@ -162,7 +162,7 @@ public class UnmodifiableEvent extends DelegatingEvent {
     }
 
     @Override
-    public void setCalendarUser(int value) {
+    public void setCalendarUser(CalendarUser value) {
         throw new UnsupportedOperationException();
     }
 

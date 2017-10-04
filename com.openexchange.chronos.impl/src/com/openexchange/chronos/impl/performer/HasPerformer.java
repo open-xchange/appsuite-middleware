@@ -54,6 +54,7 @@ import static com.openexchange.chronos.common.CalendarUtils.initCalendar;
 import static com.openexchange.chronos.common.CalendarUtils.isGroupScheduled;
 import static com.openexchange.chronos.common.CalendarUtils.isInRange;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
+import static com.openexchange.chronos.common.CalendarUtils.matches;
 import static com.openexchange.chronos.common.CalendarUtils.truncateTime;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -137,7 +138,7 @@ public class HasPerformer extends AbstractFreeBusyPerformer {
                     if (null == attendee || ParticipationStatus.DECLINED.equals(attendee.getPartStat())) {
                         continue; // skip if user does not attend
                     }
-                } else if (userID != event.getCreatedBy()) {
+                } else if (false == matches(event.getCalendarUser(), userID)) {
                     continue; // skip if user doesn't match event owner
                 }
                 if (isSeriesMaster(event)) {

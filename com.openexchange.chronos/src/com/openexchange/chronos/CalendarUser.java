@@ -65,6 +65,27 @@ public class CalendarUser {
     protected String email;
 
     /**
+     * Initializes a new {@link CalendarUser}.
+     */
+    public CalendarUser() {
+        super();
+    }
+
+    /**
+     * Initializes a new {@link CalendarUser}, copying over all properties from another calendar user.
+     *
+     * @param calendarUser The calendar user to copy the properties from
+     */
+    public CalendarUser(CalendarUser calendarUser) {
+        super();
+        uri = calendarUser.getUri();
+        cn = calendarUser.getCn();
+        entity = calendarUser.getEntity();
+        sentBy = null != calendarUser.getSentBy() ? new CalendarUser(calendarUser.getSentBy()) : null;
+        email = calendarUser.getEMail();
+    }
+
+    /**
      * Gets the address URI identifying the calendar user.
      *
      * @return The calendar user address URI

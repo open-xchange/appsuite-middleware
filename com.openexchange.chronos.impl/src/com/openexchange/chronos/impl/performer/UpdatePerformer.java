@@ -91,6 +91,7 @@ import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
+import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
@@ -306,7 +307,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
             /*
              * perform update
              */
-            Consistency.setModified(timestamp, eventUpdate.getUpdate(), session.getUserId());
+            Consistency.setModified(session, timestamp, eventUpdate.getUpdate(), session.getUserId());
             storage.getEventStorage().updateEvent(eventUpdate.getUpdate());
             wasUpdated |= true;
         }
@@ -581,7 +582,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
         List<Attendee> attendeesToDelete = attendeeHelper.getAttendeesToDelete();
         if (0 < attendeesToDelete.size()) {
             requireWritePermissions(originalEvent, attendeesToDelete);
-            storage.getEventStorage().insertEventTombstone(storage.getUtilities().getTombstone(originalEvent, timestamp, calendarUserId));
+            storage.getEventStorage().insertEventTombstone(storage.getUtilities().getTombstone(originalEvent, timestamp, calendarUser));
             storage.getAttendeeStorage().insertAttendeeTombstones(originalEvent.getId(), storage.getUtilities().getTombstones(attendeesToDelete));
             storage.getAttendeeStorage().deleteAttendees(originalEvent.getId(), attendeesToDelete);
             storage.getAlarmStorage().deleteAlarms(originalEvent.getId(), getUserIDs(attendeesToDelete));
@@ -841,7 +842,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
             return null;
         }
         EventMapper.getInstance().copy(originalEvent, eventUpdate, EventField.ID);
-        Consistency.setModified(timestamp, eventUpdate, session.getUserId());
+        Consistency.setModified(session, timestamp, eventUpdate, session.getUserId());
         return new DefaultItemUpdate<Event, EventField>(EventMapper.getInstance(), originalEvent, eventUpdate);
     }
 
@@ -871,15 +872,15 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
             if (null == originalEvent.getFolderId() || eventUpdate.containsFolderId()) {
                 eventUpdate.setFolderId(folder.getID());
             }
-            if (0 != originalEvent.getCalendarUser() || eventUpdate.containsCalendarUser()) {
-                eventUpdate.setCalendarUser(0);
+            if (null != originalEvent.getCalendarUser() || eventUpdate.containsCalendarUser()) {
+                eventUpdate.setCalendarUser(null);
             }
         } else {
             if (null != originalEvent.getFolderId() || eventUpdate.containsFolderId()) {
                 eventUpdate.setFolderId(null);
             }
-            if (0 == originalEvent.getCalendarUser()) {
-                eventUpdate.setCalendarUser(folder.getCreatedBy());
+            if (null == originalEvent.getCalendarUser()) {
+                eventUpdate.setCalendarUser(calendarUser);
             } else if (eventUpdate.containsCalendarUser()) {
                 if (eventUpdate.getCalendarUser() != originalEvent.getCalendarUser()) {
                     throw CalendarExceptionCodes.FORBIDDEN_CHANGE.create(originalEvent.getId(), EventField.CALENDAR_USER);
@@ -908,9 +909,9 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
         if (false == folder.getID().equals(originalEvent.getFolderId()) || eventUpdate.containsFolderId()) {
             eventUpdate.setFolderId(folder.getID());
         }
-        int calendarUser = PublicType.getInstance().equals(folder.getType()) ? 0 : folder.getCreatedBy();
-        if (calendarUser != originalEvent.getCalendarUser() || eventUpdate.containsCalendarUser()) {
-            eventUpdate.setCalendarUser(calendarUser);
+        CalendarUser newCalendarUser = PublicType.getInstance().equals(folder.getType()) ? null : calendarUser;
+        if (false == matches(newCalendarUser, originalEvent.getCalendarUser()) || eventUpdate.containsCalendarUser()) {
+            eventUpdate.setCalendarUser(newCalendarUser);
         }
     }
 
@@ -923,7 +924,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
      *             {@link CalendarExceptionCodes#RESTRICTED_BY_CLASSIFICATION}
      */
     private void requireWritePermissions(Event originalEvent) throws OXException {
-        if (session.getUserId() == originalEvent.getCreatedBy()) {
+        if (matches(originalEvent.getCreatedBy(), session.getUserId())) {
             requireCalendarPermission(folder, READ_FOLDER, READ_OWN_OBJECTS, WRITE_OWN_OBJECTS, NO_PERMISSIONS);
         } else {
             requireCalendarPermission(folder, READ_FOLDER, READ_ALL_OBJECTS, WRITE_ALL_OBJECTS, NO_PERMISSIONS);
