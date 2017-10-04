@@ -205,7 +205,7 @@ public class Utils {
      * @see CalendarParameters#PARAMETER_EXPAND_OCCURRENCES
      */
     public static boolean isResolveOccurrences(CalendarParameters parameters) {
-        return parameters.get(CalendarParameters.PARAMETER_EXPAND_OCCURRENCES, Boolean.class, Boolean.TRUE).booleanValue();
+        return parameters.get(CalendarParameters.PARAMETER_EXPAND_OCCURRENCES, Boolean.class, Boolean.FALSE).booleanValue();
     }
 
     /**
