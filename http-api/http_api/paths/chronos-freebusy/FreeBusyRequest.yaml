@@ -16,6 +16,7 @@
         required: true
         schema:
           type: object
+          title: FreeBusyBody
           properties:
             attendees:
               type: array
