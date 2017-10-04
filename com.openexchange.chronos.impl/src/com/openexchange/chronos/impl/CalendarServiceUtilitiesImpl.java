@@ -56,6 +56,7 @@ import com.openexchange.chronos.Event;
 import com.openexchange.chronos.impl.performer.CountEventsPerformer;
 import com.openexchange.chronos.impl.performer.ForeignEventsPerformer;
 import com.openexchange.chronos.impl.performer.ResolveFilenamePerformer;
+import com.openexchange.chronos.impl.performer.ResolveIdPerformer;
 import com.openexchange.chronos.impl.performer.ResolveUidPerformer;
 import com.openexchange.chronos.service.CalendarServiceUtilities;
 import com.openexchange.chronos.service.CalendarSession;
@@ -145,8 +146,14 @@ public class CalendarServiceUtilitiesImpl implements CalendarServiceUtilities {
     }
 
     @Override
-    public Event allocateAlarm(CalendarSession session, String alarmId) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+    public Event resolveByID(CalendarSession session, String id) throws OXException {
+        return new InternalCalendarStorageOperation<Event>(session) {
+
+            @Override
+            protected Event execute(CalendarSession session, CalendarStorage storage) throws OXException {
+                return new ResolveIdPerformer(session, storage).perform(id);
+            }
+        }.executeQuery();
     }
+
 }

@@ -86,6 +86,16 @@ public interface CalendarServiceUtilities {
     String resolveByFilename(CalendarSession session, String filename) throws OXException;
 
     /**
+     * Resolves an event identifier to an event, and returns it in the perspective of the current session's user, i.e. having an
+     * appropriate parent folder identifier assigned.
+     *
+     * @param session The calendar session
+     * @param id The identifier of the event to resolve
+     * @return The resolved event from the user's point of view, or <code>null</code> if not found
+     */
+    Event resolveByID(CalendarSession session, String id) throws OXException;
+
+    /**
      * Gets a value indicating whether a specific folder contains events that were not created by the current session's user.
      *
      * @param session The calendar session
@@ -111,14 +121,5 @@ public interface CalendarServiceUtilities {
      * @return The configured quotas and the actual usages
      */
     Quota[] getQuotas(CalendarSession session) throws OXException;
-
-    /**
-     * Looks up the event that is targeted by a specific alarm of the current session's user.
-     *
-     * @param session The calendar session
-     * @param alarmId The identifier of the alarm to get the associated event for
-     * @return The associated event, or <code>null</code> if there is none
-     */
-    Event allocateAlarm(CalendarSession session, String alarmId) throws OXException;
 
 }
