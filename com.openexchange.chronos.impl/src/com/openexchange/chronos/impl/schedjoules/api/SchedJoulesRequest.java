@@ -58,7 +58,7 @@ import java.util.Map;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class SchedJoulesRequest {
+class SchedJoulesRequest {
 
     private final String path;
     private final Map<String, String> queryParameters;

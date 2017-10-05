@@ -49,7 +49,13 @@
 
 package com.openexchange.chronos.impl.schedjoules.api;
 
-import com.openexchange.chronos.SchedJoulesResponse;
+import java.io.IOException;
+import java.io.InputStream;
+import org.apache.commons.io.IOUtils;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.chronos.exception.CalendarExceptionCodes;
+import com.openexchange.exception.OXException;
 
 /**
  * {@link SchedJoulesPagesAPI}
@@ -58,16 +64,70 @@ import com.openexchange.chronos.SchedJoulesResponse;
  */
 public class SchedJoulesPagesAPI {
 
+    private final SchedJoulesRESTClient client;
+
     /**
      * Initialises a new {@link SchedJoulesPagesAPI}.
      */
-    public SchedJoulesPagesAPI() {
+    public SchedJoulesPagesAPI(SchedJoulesRESTClient client) {
         super();
+        this.client = client;
     }
-    
-    SchedJoulesRESTClient c;
-    
-    public SchedJoulesResponse getPage() {
-        return null;
+
+    /**
+     * Retrieves the user's current location as an entry point.
+     * 
+     * @return The {@link SchedJoulesResponse}
+     * @throws OXException
+     */
+    public JSONObject getRootPage() throws OXException {
+        return getRootPage("en", "us");
+    }
+
+    /**
+     * Retrieves the user's current location as an entry point.
+     * 
+     * @return The page as a {@link JSONObject}
+     * @throws OXException if an error is occurred
+     */
+    public JSONObject getRootPage(String locale, String location) throws OXException {
+        SchedJoulesRequest request = new SchedJoulesRequest(SchedJoulesRESTBindPoint.pages.name());
+        request.setQueryParameter(SchedJoulesCommonParameter.location.name(), location);
+        request.setQueryParameter(SchedJoulesCommonParameter.locale.name(), locale);
+
+        return parseInputStream(client.executeRequest(request));
+    }
+
+    /**
+     * Retrieves the page with the specified identifier
+     * 
+     * @param pageId The page identifier
+     * @return The page as a {@link JSONObject}
+     * @throws OXException if an error is occurred
+     */
+    public JSONObject getPage(int pageId) throws OXException {
+        SchedJoulesRequest request = new SchedJoulesRequest(SchedJoulesRESTBindPoint.pages.name() + "/" + pageId);
+        SchedJoulesResponse response = client.executeRequest(request);
+
+        return parseInputStream(response);
+    }
+
+    /**
+     * Parses the {@link InputStream} from the specified {@link SchedJoulesResponse}
+     * as a {@link JSONObject}
+     * 
+     * @param response The {@link SchedJoulesResponse}
+     * @return The {@link JSONObject} from the response
+     * @throws OXException if a JSON parsing error or an I/O error occurs
+     */
+    private JSONObject parseInputStream(SchedJoulesResponse response) throws OXException {
+        try (InputStream inputStream = response.getStream()) {
+            String body = IOUtils.toString(inputStream, "UTF-8");
+            return new JSONObject(body);
+        } catch (IOException e) {
+            throw CalendarExceptionCodes.UNEXPECTED_ERROR.create(e.getMessage());
+        } catch (JSONException e) {
+            throw CalendarExceptionCodes.UNEXPECTED_ERROR.create(e.getMessage());
+        }
     }
 }

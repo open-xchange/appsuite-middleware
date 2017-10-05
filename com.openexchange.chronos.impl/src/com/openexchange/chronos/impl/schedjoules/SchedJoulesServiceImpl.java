@@ -49,7 +49,8 @@
 
 package com.openexchange.chronos.impl.schedjoules;
 
-import com.openexchange.chronos.SchedJoulesResponse;
+import org.json.JSONObject;
+import com.openexchange.chronos.impl.schedjoules.api.SchedJoulesAPI;
 import com.openexchange.chronos.service.SchedJoulesService;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
@@ -63,23 +64,37 @@ import com.openexchange.server.ServiceLookup;
 public abstract class SchedJoulesServiceImpl implements SchedJoulesService {
 
     private final ServiceLookup services;
+    private final SchedJoulesAPI api;
 
     /**
      * Initialises a new {@link SchedJoulesServiceImpl}.
      * 
      * @param services The {@link ServiceLookup} instance
+     * @throws OXException if the {@link SchedJoulesAPI} cannot be initialised
      */
-    public SchedJoulesServiceImpl(ServiceLookup services) {
+    public SchedJoulesServiceImpl(ServiceLookup services) throws OXException {
         super();
         this.services = services;
+        api = new SchedJoulesAPI();
     }
-    
-    /* (non-Javadoc)
+
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.openexchange.chronos.service.SchedJoulesService#getRoot()
      */
     @Override
-    public SchedJoulesResponse getRoot() throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+    public JSONObject getRoot() throws OXException {
+        return api.pages().getRootPage();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.chronos.service.SchedJoulesService#getPage(int)
+     */
+    @Override
+    public JSONObject getPage(int pageId) throws OXException {
+        return api.pages().getPage(pageId);
     }
 }

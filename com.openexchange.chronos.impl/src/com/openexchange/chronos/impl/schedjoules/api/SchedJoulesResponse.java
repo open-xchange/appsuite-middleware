@@ -47,54 +47,44 @@
  *
  */
 
-package com.openexchange.chronos.service;
+package com.openexchange.chronos.impl.schedjoules.api;
 
-import java.net.URL;
-import org.json.JSONObject;
-import com.openexchange.chronos.Calendar;
-import com.openexchange.exception.OXException;
+import java.io.InputStream;
 
 /**
- * {@link SchedJoulesService}
+ * {@link SchedJoulesResponse}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public interface SchedJoulesService {
+class SchedJoulesResponse {
+
+    private final InputStream stream;
+    private final int statusCode;
 
     /**
-     * Retrieves the SchedJoules page with the specified identifier
-     * 
-     * @param pageId The page identifier
-     * @return The {@link JSONObject}
-     * @throws OXException if an error is occurred
+     * Initialises a new {@link SchedJoulesResponse}.
      */
-    JSONObject getPage(int pageId) throws OXException;
+    public SchedJoulesResponse(int statusCode, InputStream stream) {
+        super();
+        this.statusCode = statusCode;
+        this.stream = stream;
+    }
 
     /**
-     * Retrieves the starting SchedJoules page.
-     * 
-     * @return The {@link JSONObject}
-     * @throws OXException if an error is occurred
+     * Gets the data
+     *
+     * @return The data
      */
-    JSONObject getRoot() throws OXException;
+    public InputStream getStream() {
+        return stream;
+    }
 
     /**
-     * Retrieves the starting SchedJoules page for the specified location
-     * in the specified language
-     * 
-     * @param locale The locale to use
-     * @param language The language to use
-     * @return The {@link JSONObject}
-     * @throws OXException if an error is occurred
+     * Gets the statusCode
+     *
+     * @return The statusCode
      */
-    JSONObject getRoot(String locale, String language);
-
-    /**
-     * Retrieves the {@link Calendar} data from the specified {@link URL}
-     * 
-     * @param url The {@link URL} from which to fetch the {@link Calendar} data
-     * @return the {@link Calendar}
-     * @throws OXException if an error is occurred
-     */
-    Calendar fetchCalendar(URL url) throws OXException;
+    public int getStatusCode() {
+        return statusCode;
+    }
 }

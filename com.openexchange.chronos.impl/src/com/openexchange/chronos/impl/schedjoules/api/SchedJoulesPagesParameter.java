@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2017-2020 OX Software GmbH
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,44 +47,20 @@
  *
  */
 
-package com.openexchange.chronos;
-
-import java.io.InputStream;
+package com.openexchange.chronos.impl.schedjoules.api;
 
 /**
- * {@link SchedJoulesResponse}
+ * {@link SchedJoulesPagesParameter}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class SchedJoulesResponse {
-
-    private final InputStream stream;
-    private final int statusCode;
-
+public enum SchedJoulesPagesParameter {
     /**
-     * Initialises a new {@link SchedJoulesResponse}.
+     * The page identifier
      */
-    public SchedJoulesResponse(int statusCode, InputStream stream) {
-        super();
-        this.statusCode = statusCode;
-        this.stream = stream;
-    }
-
+    page_id,
     /**
-     * Gets the data
-     *
-     * @return The data
+     * The locale parameter. Defaults to 'en'
      */
-    public InputStream getData() {
-        return stream;
-    }
-
-    /**
-     * Gets the statusCode
-     *
-     * @return The statusCode
-     */
-    public int getStatusCode() {
-        return statusCode;
-    }
+    locale
 }

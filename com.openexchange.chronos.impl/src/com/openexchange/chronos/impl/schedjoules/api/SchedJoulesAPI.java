@@ -49,7 +49,7 @@
 
 package com.openexchange.chronos.impl.schedjoules.api;
 
-import com.openexchange.server.ServiceLookup;
+import com.openexchange.exception.OXException;
 
 /**
  * {@link SchedJoulesAPI}
@@ -59,13 +59,17 @@ import com.openexchange.server.ServiceLookup;
 public final class SchedJoulesAPI {
 
     private final SchedJoulesPagesAPI pages;
+    private final SchedJoulesRESTClient client;
 
     /**
      * Initialises a new {@link SchedJoulesAPI}.
+     * 
+     * @throws OXException if the REST client cannot be initialised
      */
-    public SchedJoulesAPI() {
+    public SchedJoulesAPI() throws OXException {
         super();
-        pages = new SchedJoulesPagesAPI();
+        client = new SchedJoulesRESTClient();
+        pages = new SchedJoulesPagesAPI(client);
     }
 
     /**
@@ -73,7 +77,7 @@ public final class SchedJoulesAPI {
      *
      * @return The pages
      */
-    public SchedJoulesPagesAPI getPages() {
+    public SchedJoulesPagesAPI pages() {
         return pages;
     }
 }

@@ -61,7 +61,6 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.impl.client.CloseableHttpClient;
-import com.openexchange.chronos.SchedJoulesResponse;
 import com.openexchange.chronos.impl.osgi.Services;
 import com.openexchange.chronos.impl.schedjoules.SchedJoulesProperty;
 import com.openexchange.config.lean.LeanConfigurationService;

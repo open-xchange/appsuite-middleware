@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2017-2020 OX Software GmbH
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,54 +47,20 @@
  *
  */
 
-package com.openexchange.chronos.service;
-
-import java.net.URL;
-import org.json.JSONObject;
-import com.openexchange.chronos.Calendar;
-import com.openexchange.exception.OXException;
+package com.openexchange.chronos.impl.schedjoules.api;
 
 /**
- * {@link SchedJoulesService}
+ * {@link SchedJoulesCommonParameter}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public interface SchedJoulesService {
-
+public enum SchedJoulesCommonParameter {
     /**
-     * Retrieves the SchedJoules page with the specified identifier
-     * 
-     * @param pageId The page identifier
-     * @return The {@link JSONObject}
-     * @throws OXException if an error is occurred
+     * The location parameter. Defaults to 'us'
      */
-    JSONObject getPage(int pageId) throws OXException;
-
+    location,
     /**
-     * Retrieves the starting SchedJoules page.
-     * 
-     * @return The {@link JSONObject}
-     * @throws OXException if an error is occurred
+     * The locale parameter. Defaults to 'en'
      */
-    JSONObject getRoot() throws OXException;
-
-    /**
-     * Retrieves the starting SchedJoules page for the specified location
-     * in the specified language
-     * 
-     * @param locale The locale to use
-     * @param language The language to use
-     * @return The {@link JSONObject}
-     * @throws OXException if an error is occurred
-     */
-    JSONObject getRoot(String locale, String language);
-
-    /**
-     * Retrieves the {@link Calendar} data from the specified {@link URL}
-     * 
-     * @param url The {@link URL} from which to fetch the {@link Calendar} data
-     * @return the {@link Calendar}
-     * @throws OXException if an error is occurred
-     */
-    Calendar fetchCalendar(URL url) throws OXException;
+    locale
 }
