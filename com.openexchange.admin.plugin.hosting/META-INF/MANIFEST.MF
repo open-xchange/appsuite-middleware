@@ -4,7 +4,8 @@ Bundle-Name: Hosting Plugin for Administration Daemon
 Bundle-SymbolicName: com.openexchange.admin.plugin.hosting
 Bundle-Version: 7.8.3
 Bundle-Activator: com.openexchange.admin.osgi.MainActivator
-Import-Package: com.openexchange.admin.rmi,
+Import-Package: com.google.common.collect,
+ com.openexchange.admin.rmi,
  com.openexchange.admin.rmi.dataobjects,
  com.openexchange.admin.rmi.exceptions,
  com.openexchange.admin.rmi.extensions,

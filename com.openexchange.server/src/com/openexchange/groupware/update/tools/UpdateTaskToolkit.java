@@ -54,14 +54,13 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
-import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicReference;
 import org.slf4j.Logger;
@@ -144,14 +143,10 @@ public final class UpdateTaskToolkit {
             // Get update task by class name
             final UpdateTaskV2 updateTask = getUpdateTask(className);
             // Get all available schemas
-            final Map<String, Set<Integer>> map = getSchemasAndContexts();
+            final Map<String, Integer> map = getSchemasAndContexts(null);
             // ... and iterate them
-            final Iterator<Set<Integer>> iter = map.values().iterator();
-            while (iter.hasNext()) {
-                final Set<Integer> set = iter.next();
-                if (!set.isEmpty()) {
-                    forceUpdateTask0(updateTask, set.iterator().next().intValue());
-                }
+            for (Integer contextId : map.values()) {
+                forceUpdateTask0(updateTask, contextId.intValue());
             }
         }
     }
@@ -165,7 +160,7 @@ public final class UpdateTaskToolkit {
      */
     public static UpdateTaskToolkitJob<Void> runUpdateOnAllSchemas(final boolean throwExceptionOnFailure) throws OXException {
         // Get all available schemas
-        final Map<String, Set<Integer>> map = getSchemasAndContexts();
+        final Map<String, Integer> map = getSchemasAndContexts(null);
         final int total = map.size();
 
         // Status text
@@ -181,37 +176,34 @@ public final class UpdateTaskToolkit {
                     int count = 0;
                     StringBuilder sb = new StringBuilder(32);
                     Map<String, Queue<TaskInfo>> totalFailures = new HashMap<String, Queue<TaskInfo>>(32);
-                    for (Iterator<Set<Integer>> iter = map.values().iterator(); iter.hasNext();) {
-                        Set<Integer> set = iter.next();
-                        if (!set.isEmpty()) {
-                            int contextId = set.iterator().next().intValue();
-                            UpdateProcess updateProcess = new UpdateProcess(contextId, true, throwExceptionOnFailure);
-                            if (throwExceptionOnFailure) {
-                                try {
-                                    updateProcess.runUpdate();
-                                } catch (OXException e) {
-                                    LOG.error("", e);
-                                    statusText.set(e.getPlainLogMessage());
-                                    throw e;
-                                } catch (Exception e) {
-                                    LOG.error("", e);
-                                    statusText.set(e.getMessage());
-                                    throw e;
-                                }
-                            } else {
-                                updateProcess.run();
+                    for (Iterator<Integer> iter = map.values().iterator(); iter.hasNext();) {
+                        int contextId = iter.next().intValue();
+                        UpdateProcess updateProcess = new UpdateProcess(contextId, true, throwExceptionOnFailure);
+                        if (throwExceptionOnFailure) {
+                            try {
+                                updateProcess.runUpdate();
+                            } catch (OXException e) {
+                                LOG.error("", e);
+                                statusText.set(e.getPlainLogMessage());
+                                throw e;
+                            } catch (Exception e) {
+                                LOG.error("", e);
+                                statusText.set(e.getMessage());
+                                throw e;
+                            }
+                        } else {
+                            updateProcess.run();
 
-                                // Check possible failures
-                                Queue<TaskInfo> failures = updateProcess.getFailures();
-                                if (null != failures && !failures.isEmpty()) {
-                                    for (TaskInfo taskInfo : failures) {
-                                        Queue<TaskInfo> schemaFailures = totalFailures.get(taskInfo.getSchema());
-                                        if (null == schemaFailures) {
-                                            schemaFailures = new LinkedList<TaskInfo>();
-                                            totalFailures.put(taskInfo.getSchema(), schemaFailures);
-                                        }
-                                        schemaFailures.offer(taskInfo);
+                            // Check possible failures
+                            Queue<TaskInfo> failures = updateProcess.getFailures();
+                            if (null != failures && !failures.isEmpty()) {
+                                for (TaskInfo taskInfo : failures) {
+                                    Queue<TaskInfo> schemaFailures = totalFailures.get(taskInfo.getSchema());
+                                    if (null == schemaFailures) {
+                                        schemaFailures = new LinkedList<TaskInfo>();
+                                        totalFailures.put(taskInfo.getSchema(), schemaFailures);
                                     }
+                                    schemaFailures.offer(taskInfo);
                                 }
                             }
                         }
@@ -263,31 +255,51 @@ public final class UpdateTaskToolkit {
         return job;
     }
 
-    private static final String SQL_SELECT_SCHEMAS = "SELECT db_schema,cid FROM context_server2db_pool";
-
     /**
-     * Gets schemas and their contexts as a map.
+     * Gets schemas and an identifier of a representative context (residing in that schema) as a map.
      *
-     * @return A map containing schemas and their contexts.
+     * @return A map containing schemas and a representative context identifier
      * @throws OXException If an error occurs
      */
-    private static Map<String, Set<Integer>> getSchemasAndContexts() throws OXException {
+    private static Map<String, Integer> getSchemasAndContexts(String optSchema) throws OXException {
         final Connection con = Database.get(false);
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            stmt = con.prepareStatement(SQL_SELECT_SCHEMAS);
+            if (null != optSchema) {
+                // Check for a certain schema
+                stmt = con.prepareStatement("SELECT cid FROM context_server2db_pool WHERE db_schema = ? LIMIT 1");
+                stmt.setString(1, optSchema);
+                rs = stmt.executeQuery();
+                return rs.next() ? Collections.singletonMap(optSchema, Integer.valueOf(rs.getInt(1))) : Collections.<String, Integer>emptyMap();
+            }
+
+            // Collect all schemas...
+            stmt = con.prepareStatement("SELECT DISTINCT db_schema FROM context_server2db_pool");
             rs = stmt.executeQuery();
-            final Map<String, Set<Integer>> schemasAndContexts = new HashMap<String, Set<Integer>>();
-            while (rs.next()) {
-                final String schemaName = rs.getString(1);
-                final int contextId = rs.getInt(2);
-                Set<Integer> contextIds = schemasAndContexts.get(schemaName);
-                if (null == contextIds) {
-                    contextIds = new HashSet<Integer>();
-                    schemasAndContexts.put(schemaName, contextIds);
+            if (false == rs.next()) {
+                return Collections.emptyMap();
+            }
+            List<String> schemas = new LinkedList<>();
+            do {
+                schemas.add(rs.getString(1));
+            } while (rs.next());
+            DBUtils.closeSQLStuff(rs, stmt);
+            rs = null;
+            stmt = null;
+
+            // ... and grab a representative context identifier
+            Map<String, Integer> schemasAndContexts = new HashMap<String, Integer>(schemas.size());
+            for (String schema : schemas) {
+                stmt = con.prepareStatement("SELECT cid FROM context_server2db_pool WHERE db_schema = ? LIMIT 1");
+                stmt.setString(1, schema);
+                rs = stmt.executeQuery();
+                if (rs.next()) {
+                    schemasAndContexts.put(schema, Integer.valueOf(rs.getInt(1)));
                 }
-                contextIds.add(Integer.valueOf(contextId));
+                DBUtils.closeSQLStuff(rs, stmt);
+                rs = null;
+                stmt = null;
             }
             return schemasAndContexts;
         } catch (final SQLException e) {
@@ -300,12 +312,12 @@ public final class UpdateTaskToolkit {
     }
 
     public static int getContextIdBySchema(final String schemaName) throws OXException {
-        final Map<String, Set<Integer>> map = getSchemasAndContexts();
-        final Set<Integer> set = map.get(schemaName);
-        if (null == set) {
+        final Map<String, Integer> map = getSchemasAndContexts(schemaName);
+        final Integer contextId = map.get(schemaName);
+        if (null == contextId) {
             throw UpdateExceptionCodes.UNKNOWN_SCHEMA.create(schemaName);
         }
-        return set.iterator().next().intValue();
+        return contextId.intValue();
     }
 
     /**

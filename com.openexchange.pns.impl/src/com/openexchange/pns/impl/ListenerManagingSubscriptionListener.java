@@ -58,27 +58,30 @@ import com.openexchange.pns.KnownTopic;
 import com.openexchange.pns.PushSubscription;
 import com.openexchange.pns.PushSubscriptionListener;
 import com.openexchange.pns.PushSubscriptionProvider;
+import com.openexchange.pns.PushSubscriptionRegistry;
 import com.openexchange.push.PushListenerService;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
 
 
 /**
- * {@link ListenerStartingSubscriptionListener}
+ * {@link ListenerManagingSubscriptionListener} - Starts/stops a mail push listener on added/removed permanent subscriptions having an interest for <code>"ox:mail:new"</code> topic.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-public class ListenerStartingSubscriptionListener implements PushSubscriptionListener {
+public class ListenerManagingSubscriptionListener implements PushSubscriptionListener {
 
     private final PushListenerService pushListenerService;
     private final SessiondService sessiond;
+    private final PushSubscriptionRegistry subscriptionRegistry;
 
     /**
-     * Initializes a new {@link ListenerStartingSubscriptionListener}.
+     * Initializes a new {@link ListenerManagingSubscriptionListener}.
      */
-    public ListenerStartingSubscriptionListener(PushListenerService pushListenerService, SessiondService sessiond) {
+    public ListenerManagingSubscriptionListener(PushSubscriptionRegistry subscriptionRegistry, PushListenerService pushListenerService, SessiondService sessiond) {
         super();
+        this.subscriptionRegistry = subscriptionRegistry;
         this.pushListenerService = pushListenerService;
         this.sessiond = sessiond;
     }
@@ -113,13 +116,30 @@ public class ListenerStartingSubscriptionListener implements PushSubscriptionLis
                 return;
             }
 
-            pushListenerService.startListenerFor(session);
+            pushListenerService.registerPermanentListenerFor(session, subscription.getClient());
         }
     }
 
     @Override
     public void removedSubscription(PushSubscription subscription) throws OXException {
-        // Ignore
+        // Check if last subscription for that client was removed
+        boolean stillInterestedInNewMail = subscriptionRegistry.hasInterestedSubscriptions(subscription.getClient(), subscription.getUserId(), subscription.getContextId(), KnownTopic.MAIL_NEW.getName());
+        if (false == stillInterestedInNewMail) {
+            // No subscription left having interest for "ox:mail:new"
+            String sessionId = LogProperties.get(LogProperties.Name.SESSION_SESSION_ID);
+            if (Strings.isEmpty(sessionId)) {
+                // No chance to determine session
+                return;
+            }
+
+            Session session = sessiond.getSession(sessionId);
+            if (null == session) {
+                // No such session
+                return;
+            }
+
+            pushListenerService.unregisterPermanentListenerFor(session, subscription.getClient());
+        }
     }
 
     // ------------------------------------------------------------------------------------------------------------------------

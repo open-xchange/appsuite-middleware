@@ -55,6 +55,7 @@ import static com.openexchange.tools.sql.DBUtils.autocommit;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import static com.openexchange.tools.sql.DBUtils.rollback;
 import static com.openexchange.tools.sql.DBUtils.startTransaction;
+import com.google.common.collect.Lists;
 import java.io.Serializable;
 import java.net.URI;
 import java.sql.Connection;
@@ -460,14 +461,48 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
     @Override
     public void disable(String schema, MaintenanceReason reason) throws StorageException {
         Connection con = null;
+        boolean readOnly = true;
         PreparedStatement stmt = null;
+        ResultSet rs = null;
         try {
-            con = cache.getWriteConnectionForConfigDB();
-            stmt = con.prepareStatement("UPDATE context SET enabled = 0, reason_id = ? WHERE cid IN (SELECT cid FROM context_server2db_pool WHERE db_schema = ?) AND enabled = 1");
-            stmt.setInt(1, reason.getId());
-            stmt.setString(2, schema);
+            con = cache.getReadConnectionForConfigDB();
 
-            int numDisabled = stmt.executeUpdate();
+            stmt = con.prepareStatement("SELECT cid FROM context_server2db_pool WHERE db_schema = ?");
+            stmt.setString(1, schema);
+            rs = stmt.executeQuery();
+            if (false == rs.next()) {
+                // No contexts available for specified schema
+                return;
+            }
+
+            // Put context identifiers into a list
+            List<Integer> contextIds = new ArrayList<>(CONTEXTS_PER_SCHEMA >> 1);
+            do {
+                contextIds.add(Integer.valueOf(rs.getInt(1)));
+            } while (rs.next());
+            Databases.closeSQLStuff(rs, stmt);
+            rs = null;
+            stmt = null;
+
+            // Switch from read-only to read-write connection
+            cache.pushReadConnectionForConfigDB(con);
+            con = null; // Null'ify prior to reassign
+            con = cache.getWriteConnectionForConfigDB();
+            readOnly = false;
+
+            int numDisabled = 0;
+            for (List<Integer> partition : Lists.partition(contextIds, Databases.IN_LIMIT)) {
+                stmt = con.prepareStatement(Databases.getIN("UPDATE context SET enabled = 0, reason_id = ? WHERE enabled = 1 AND cid IN (", partition.size()));
+                stmt.setInt(1, reason.getId().intValue());
+                int pos = 1;
+                for (Integer contextId : partition) {
+                    stmt.setInt(pos++, contextId.intValue());
+                }
+                numDisabled += stmt.executeUpdate();
+                Databases.closeSQLStuff(stmt);
+                stmt = null;
+            }
+
             LOG.info("Disabled {} contexts in schema '{}' with reason {}", numDisabled, schema, reason.getId());
         } catch (final SQLException e) {
             LOG.error("SQL Error", e);
@@ -476,10 +511,14 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             LOG.error("Pool Error", e);
             throw new StorageException(e);
         } finally {
-            Databases.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(rs, stmt);
             if (con != null) {
                 try {
-                    cache.pushWriteConnectionForConfigDB(con);
+                    if (readOnly) {
+                        cache.pushReadConnectionForConfigDB(con);
+                    } else {
+                        cache.pushWriteConnectionForConfigDB(con);
+                    }
                 } catch (PoolException e) {
                     LOG.error("Error pushing configdb connection to pool!", e);
                 }
@@ -534,24 +573,50 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
     @Override
     public void enable(String schema, MaintenanceReason reason) throws StorageException {
         Connection con = null;
+        boolean readOnly = true;
         PreparedStatement stmt = null;
+        ResultSet rs = null;
         try {
-            con = cache.getWriteConnectionForConfigDB();
+            con = cache.getReadConnectionForConfigDB();
 
-            String query;
-            if (reason == null) {
-                query = "UPDATE context SET enabled = 1, reason_id = NULL WHERE cid IN (SELECT cid FROM context_server2db_pool WHERE db_schema = ?) AND enabled = 0";
-            } else {
-                query = "UPDATE context SET enabled = 1, reason_id = NULL WHERE cid IN (SELECT cid FROM context_server2db_pool WHERE db_schema = ?) AND enabled = 0 AND reason_id = ?";
-            }
-
-            stmt = con.prepareStatement(query);
+            stmt = con.prepareStatement("SELECT cid FROM context_server2db_pool WHERE db_schema = ?");
             stmt.setString(1, schema);
-            if (reason != null) {
-                stmt.setInt(2, reason.getId());
+            rs = stmt.executeQuery();
+            if (false == rs.next()) {
+                // No contexts available for specified schema
+                return;
             }
 
-            int numEnabled = stmt.executeUpdate();
+            // Put context identifiers into a list
+            List<Integer> contextIds = new ArrayList<>(CONTEXTS_PER_SCHEMA >> 1);
+            do {
+                contextIds.add(Integer.valueOf(rs.getInt(1)));
+            } while (rs.next());
+            Databases.closeSQLStuff(rs, stmt);
+            rs = null;
+            stmt = null;
+
+            // Switch from read-only to read-write connection
+            cache.pushReadConnectionForConfigDB(con);
+            con = null; // Null'ify prior to reassign
+            con = cache.getWriteConnectionForConfigDB();
+            readOnly = false;
+
+            int numEnabled = 0;
+            for (List<Integer> partition : Lists.partition(contextIds, Databases.IN_LIMIT)) {
+                stmt = con.prepareStatement(Databases.getIN("UPDATE context SET enabled = 1, reason_id = NULL WHERE enabled = 0 " + (reason == null ? "" : "AND reason_id = ? ") + "AND cid IN (", partition.size()));
+                int pos = 1;
+                if (reason != null) {
+                    stmt.setInt(pos++, reason.getId());
+                }
+                for (Integer contextId : partition) {
+                    stmt.setInt(pos++, contextId.intValue());
+                }
+                numEnabled += stmt.executeUpdate();
+                Databases.closeSQLStuff(stmt);
+                stmt = null;
+            }
+
             LOG.info("Enabled {} contexts in schema '{}' with reason {}", numEnabled, schema, reason == null ? "'all'" : reason.getId());
         } catch (final SQLException e) {
             LOG.error("SQL Error", e);
@@ -563,7 +628,11 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             Databases.closeSQLStuff(stmt);
             if (con != null) {
                 try {
-                    cache.pushWriteConnectionForConfigDB(con);
+                    if (readOnly) {
+                        cache.pushReadConnectionForConfigDB(con);
+                    } else {
+                        cache.pushWriteConnectionForConfigDB(con);
+                    }
                 } catch (PoolException e) {
                     LOG.error("Error pushing configdb connection to pool!", e);
                 }
