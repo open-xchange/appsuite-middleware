@@ -66,6 +66,7 @@ import com.openexchange.authentication.ResultCode;
 import com.openexchange.authentication.SessionEnhancement;
 import com.openexchange.authorization.Authorization;
 import com.openexchange.authorization.AuthorizationService;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -75,6 +76,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.java.Strings;
 import com.openexchange.log.LogProperties;
 import com.openexchange.login.Blocking;
 import com.openexchange.login.LoginHandlerService;
@@ -134,10 +136,10 @@ public final class LoginPerformer {
     public LoginResult doLogin(final LoginRequest request, final Map<String, Object> properties) throws OXException {
         return doLogin(request, properties, new NormalLoginMethod(request, properties));
     }
-    
+
     /**
      * Performs the auto login for the specified login request and with the specified properties
-     * 
+     *
      * @param request The login request
      * @param properties The properties
      * @return The login providing login information
@@ -172,15 +174,16 @@ public final class LoginPerformer {
         sanityChecks(request);
         final LoginResultImpl retval = new LoginResultImpl();
         retval.setRequest(request);
+        final Map<String, List<String>> headers = request.getHeaders();
+        if (headers != null) {
+            properties.put("headers", headers);
+        }
+        final Cookie[] cookies = request.getCookies();
+        if (null != cookies) {
+            properties.put("cookies", cookies);
+        }
+
         try {
-            final Map<String, List<String>> headers = request.getHeaders();
-            if (headers != null) {
-                properties.put("headers", headers);
-            }
-            final Cookie[] cookies = request.getCookies();
-            if (null != cookies) {
-                properties.put("cookies", cookies);
-            }
             final Authenticated authed = loginMethod.doAuthentication(retval);
             if (null == authed) {
                 return null;
@@ -238,6 +241,14 @@ public final class LoginPerformer {
         } catch (final OXException e) {
             if (DBPoolingExceptionCodes.PREFIX.equals(e.getPrefix())) {
                 LOG.error(e.getLogMessage(), e);
+            }
+            // Redirect
+            if (ContextExceptionCodes.LOCATED_IN_ANOTHER_SERVER.equals(e)) {
+                ConfigurationService configService = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+                String migrationRedirectURL = configService.getProperty("com.openexchange.server.migrationRedirectURL");
+                if (!Strings.isEmpty(migrationRedirectURL)) {
+                    throw LoginExceptionCodes.REDIRECT.create(migrationRedirectURL);
+                }
             }
             throw e;
         } catch (final RuntimeException e) {

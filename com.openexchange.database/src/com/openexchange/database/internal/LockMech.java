@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the Open-Xchange, Inc. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,70 +47,54 @@
  *
  */
 
-package com.openexchange.admin.storage.mysqlStorage;
-
-import com.openexchange.admin.rmi.dataobjects.SchemaSelectStrategy;
-import com.openexchange.admin.rmi.dataobjects.SchemaSelectStrategy.Strategy;
-import com.openexchange.admin.schemacache.SchemaCacheFinalize;
-import com.openexchange.admin.schemacache.SchemaCacheResult;
+package com.openexchange.database.internal;
 
 /**
- * {@link SchemaResult} - A simple class to reflect how a context's schema has been determined.
+ * {@link LockMech} - Specifies how a locking for a certain database pool (and possibly a given schema) is supposed to be performed.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.0
  */
-public class SchemaResult {
-
-    /** The constant for automatic schema creation/detection */
-    public static final SchemaResult AUTOMATIC = new SchemaResult(Strategy.AUTOMATIC, null);
-
-    /** The constant for pre-defined schema name */
-    public static final SchemaResult SCHEMA_NAME = new SchemaResult(Strategy.SCHEMA, null);
+public enum LockMech {
 
     /**
-     * Gets a result for in-memory schema detection with given roll-back.
-     *
-     * @param cacheResult The cache result
-     * @return The result for in-memory schema detection
+     * Performs row locking through a <code>"SELECT ... FOR UPDATE"</code> statement using pool identifier (and possibly schema name) for fine-grained lock scope.
      */
-    public static SchemaResult inMemoryWith(SchemaCacheResult cacheResult) {
-        return new SchemaResult(Strategy.IN_MEMORY, cacheResult);
-    }
-
-    // -----------------------------------------------------------------------------------------------------------------
-
-    private final SchemaSelectStrategy.Strategy strategy;
-    private final SchemaCacheResult cacheResult;
-
+    ROW_LOCK("row"),
     /**
-     * Initializes a new {@link SchemaResult}.
-     *
-     * @param strategy The utilized strategy
-     * @param cacheResult The cache result
+     * Performs global locking through attempting to increment a counter in a "semaphore" table:<br><code>"UPDATE ctx_per_schema_sem SET id=id+1"</code>
      */
-    private SchemaResult(Strategy strategy, SchemaCacheResult cacheResult) {
-        super();
-        this.strategy = strategy;
-        this.cacheResult = cacheResult;
+    GLOBAL_LOCK("global");
+
+    private final String id;
+
+    private LockMech(String id) {
+        this.id = id;
     }
 
     /**
-     * Gets the utilized strategy
+     * Gets the identifier
      *
-     * @return The utilized strategy
+     * @return The identifier
      */
-    public SchemaSelectStrategy.Strategy getStrategy() {
-        return strategy;
+    public String getId() {
+        return id;
     }
 
     /**
-     * Gets the optional cache roll-back.
+     * Gets the lock mechanism for specified identifier
      *
-     * @return The cacheRollback or <code>null</code>
+     * @param id The identifier
+     * @return The looked-up lock mechanism or {@link #ROW_LOCK} as fall-back
      */
-    public SchemaCacheFinalize getCacheFinalize() {
-        return null == cacheResult ? null : cacheResult.getFinalize();
+    public static LockMech lockMechFor(String id) {
+        if (null != id) {
+            for (LockMech lm : values()) {
+                if (lm.id.equals(id)) {
+                    return lm;
+                }
+            }
+        }
+        return LockMech.ROW_LOCK;
     }
 
 }

@@ -64,10 +64,12 @@ import java.util.List;
 import java.util.Set;
 import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.rmi.dataobjects.Database;
+import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.storage.sqlStorage.CreateTableRegistry;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.database.CreateTableService;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.SchemaStore;
 import com.openexchange.groupware.update.UpdateTask;
@@ -119,18 +121,14 @@ public class OXUtilMySQLStorageCommon {
         return isWhitespace;
     }
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(OXUtilMySQLStorageCommon.class);
-
-    private static AdminCache cache = ClientAdminThread.cache;
-
-    public void createDatabase(final Database db) throws StorageException {
-        final Connection con;
-        String sql_pass = "";
+    private static Connection getSimpleSQLConnectionWithoutTimeout(Database db) throws StorageException {
+        String passwd = "";
         if (db.getPassword() != null) {
-            sql_pass = db.getPassword();
+            passwd = db.getPassword();
         }
+
         try {
-            con = cache.getSimpleSQLConnectionWithoutTimeout(db.getUrl(), db.getLogin(), sql_pass, db.getDriver());
+            return cache.getSimpleSQLConnectionWithoutTimeout(db.getUrl(), db.getLogin(), passwd, db.getDriver());
         } catch (final SQLException e) {
             LOG.error("SQL Error", e);
             throw new StorageException(e.toString(), e);
@@ -138,35 +136,101 @@ public class OXUtilMySQLStorageCommon {
             LOG.error("Driver not found to create database ", e);
             throw new StorageException(e);
         }
+    }
+
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(OXUtilMySQLStorageCommon.class);
+
+    private static AdminCache cache = ClientAdminThread.cache;
+
+    public void createDatabase(final Database db, Connection configdbCon) throws StorageException {
+        Connection con = getSimpleSQLConnectionWithoutTimeout(db);
+        boolean error = true;
         boolean created = false;
+        boolean rollback = false;
         try {
             con.setAutoCommit(false);
+            rollback = true;
+
             if (existsDatabase(con, db.getScheme())) {
                 throw new StorageException("Database \"" + db.getScheme() + "\" already exists");
             }
-            createDatabase(con, db.getScheme());
+
+            createDatabaseSchema(con, db.getScheme());
             // Only delete the schema if it has been created successfully. Otherwise it may happen that we delete a longly existing schema.
             // See bug 18788.
             created = true;
+
             con.setCatalog(db.getScheme());
             pumpData2DatabaseNew(con, CreateTableRegistry.getInstance().getList());
             initUpdateTaskTable(con, db.getId().intValue(), db.getScheme());
+
+            createSchemaCountEntry(db, configdbCon);
+
             con.commit();
+            rollback = false;
+            error = false;
         } catch (final SQLException e) {
-            rollback(con);
-            if (created) {
-                deleteDatabase(con, db);
-            }
-            throw new StorageException(e.toString());
-        } catch (final StorageException e) {
-            rollback(con);
-            if (created) {
-                deleteDatabase(con, db);
-            }
-            throw e;
+            throw new StorageException(e.toString(), e);
         } finally {
+            if (rollback) {
+                rollback(con);
+            }
             autocommit(con);
+            if (error && created) {
+                deleteDatabaseSchema(con, db);
+            }
             cache.closeSimpleConnection(con);
+        }
+    }
+
+    private void createSchemaCountEntry(Database db) throws SQLException, StorageException {
+        Connection configdbCon = null;
+        boolean rollback = false;
+        try {
+            configdbCon = cache.getConnectionForConfigDB();
+            configdbCon.setAutoCommit(false);
+            rollback = true;
+
+            createSchemaCountEntry(db, configdbCon);
+
+            configdbCon.commit();
+            rollback = false;
+        } catch (PoolException e) {
+            LOG.error("Pool Error", e);
+            throw new StorageException(e.toString(), e);
+        } finally {
+            if (rollback) {
+                rollback(configdbCon);
+            }
+            autocommit(configdbCon);
+            cache.closeConfigDBSqlStuff(configdbCon, null);
+        }
+    }
+
+    private void createSchemaCountEntry(Database db, Connection configdbCon) throws SQLException, StorageException {
+        if (null == configdbCon) {
+            createSchemaCountEntry(db);
+            return;
+        }
+
+        PreparedStatement stmt = null;
+        try {
+            stmt = configdbCon.prepareStatement("INSERT INTO contexts_per_dbschema (db_pool_id, schemaname, count, creating_date) VALUES (?, ?, 0, ?)");
+            stmt.setInt(1, db.getId());
+            stmt.setString(2, db.getScheme());
+            stmt.setLong(3, System.currentTimeMillis());
+            stmt.executeUpdate();
+            Databases.closeSQLStuff(stmt);
+            stmt = null;
+
+            stmt = configdbCon.prepareStatement("INSERT INTO dbschema_lock (db_pool_id, schemaname) VALUES (?, ?)");
+            stmt.setInt(1, db.getId());
+            stmt.setString(2, db.getScheme());
+            stmt.executeUpdate();
+            Databases.closeSQLStuff(stmt);
+            stmt = null;
+        } catch (Exception e) {
+            Databases.closeSQLStuff(stmt);
         }
     }
 
@@ -186,7 +250,7 @@ public class OXUtilMySQLStorageCommon {
         }
     }
 
-    private void createDatabase(final Connection con, final String name) throws StorageException {
+    private void createDatabaseSchema(final Connection con, final String name) throws StorageException {
         Statement stmt = null;
         try {
             stmt = con.createStatement();
@@ -201,8 +265,7 @@ public class OXUtilMySQLStorageCommon {
 
     private void pumpData2DatabaseNew(final Connection con, final List<CreateTableService> createTables) throws StorageException {
         final Set<String> existingTables = new HashSet<String>();
-        final List<CreateTableService> toCreate = new ArrayList<CreateTableService>(createTables.size());
-        toCreate.addAll(createTables);
+        final List<CreateTableService> toCreate = new ArrayList<CreateTableService>(createTables);
         for (CreateTableService next; (next = findNext(toCreate, existingTables)) != null;) {
             try {
                 next.perform(con);
@@ -262,36 +325,107 @@ public class OXUtilMySQLStorageCommon {
         }
     }
 
-    public static void deleteDatabase(final Database db) throws StorageException {
-        final Connection con;
+    public static void deleteDatabase(final Database db, final Connection configdbCon) throws StorageException {
+        Connection con = getSimpleSQLConnectionWithoutTimeout(db);
+        boolean rollback = false;
         try {
-            con = cache.getSimpleSQLConnectionWithoutTimeout(db.getUrl(), db.getLogin(), db.getPassword(), db.getDriver());
+            con.setAutoCommit(false);
+            rollback = true;
+
+            deleteDatabase(con, db, configdbCon);
+
+            con.commit();
+            rollback = false;
         } catch (final SQLException e) {
-            LOG.error("SQL Error", e);
             throw new StorageException(e.toString(), e);
-        } catch (final ClassNotFoundException e) {
-            LOG.error("Driver not found to create database ", e);
-            throw new StorageException(e);
-        }
-        try {
-            deleteDatabase(con, db);
         } finally {
+            if (rollback) {
+                rollback(con);
+            }
+            autocommit(con);
             cache.closeSimpleConnection(con);
         }
     }
 
-    private static void deleteDatabase(final Connection con, final Database db) throws StorageException {
+    /**
+     * Deletes specified database (schema) and associated schema-count entry.
+     * <p>
+     * <b>Note</b>: Specified <code>con</code> argument is required to be not <code>null</code>!
+     *
+     * @param con The connection to the database, on which the schema resides that is supposed to be deleted
+     * @param db The database instance providing at least identifier and schema name
+     * @param configdbCon The connection to the ConfigD (optional)
+     * @throws StorageException If deleting database (schema) fails
+     */
+    public static void deleteDatabase(Connection con, Database db, Connection configdbCon) throws StorageException {
+        deleteDatabaseSchema(con, db);
+        deleteSchemaCountEntry(db, configdbCon);
+    }
+
+    private static void deleteDatabaseSchema(Connection con, Database db) throws StorageException {
         Statement stmt = null;
         try {
-            con.setAutoCommit(false);
             stmt = con.createStatement();
             stmt.executeUpdate("DROP DATABASE IF EXISTS `" + db.getScheme() + "`");
-            con.commit();
         } catch (final SQLException e) {
-            rollback(con);
             throw new StorageException(e.getMessage(), e);
         } finally {
             closeSQLStuff(stmt);
         }
     }
+
+    private static void deleteSchemaCountEntry(Database db) throws StorageException {
+        Connection configdbCon = null;
+        boolean rollback = false;
+        try {
+            configdbCon = cache.getConnectionForConfigDB();
+            configdbCon.setAutoCommit(false);
+            rollback = true;
+
+            deleteSchemaCountEntry(db, configdbCon);
+
+            configdbCon.commit();
+            rollback = false;
+        } catch (PoolException e) {
+            LOG.error("Pool Error", e);
+            throw new StorageException(e.toString(), e);
+        } catch (SQLException e) {
+            throw new StorageException(e.toString(), e);
+        } finally {
+            if (rollback) {
+                rollback(configdbCon);
+            }
+            autocommit(configdbCon);
+            cache.closeConfigDBSqlStuff(configdbCon, null);
+        }
+    }
+
+    private static void deleteSchemaCountEntry(Database db, Connection configdbCon) throws StorageException {
+        if (null == configdbCon) {
+            deleteSchemaCountEntry(db);
+            return;
+        }
+
+        PreparedStatement pstmt = null;
+        try {
+            pstmt = configdbCon.prepareStatement("DELETE FROM contexts_per_dbschema WHERE db_pool_id=? AND schemaname=?");
+            pstmt.setInt(1, db.getId().intValue());
+            pstmt.setString(2, db.getScheme());
+            pstmt.executeUpdate();
+            closeSQLStuff(pstmt);
+            pstmt = null;
+
+            pstmt = configdbCon.prepareStatement("DELETE FROM dbschema_lock WHERE db_pool_id=? AND schemaname=?");
+            pstmt.setInt(1, db.getId().intValue());
+            pstmt.setString(2, db.getScheme());
+            pstmt.executeUpdate();
+            closeSQLStuff(pstmt);
+            pstmt = null;
+        } catch (SQLException e) {
+            throw new StorageException(e.toString(), e);
+        } finally {
+            closeSQLStuff(pstmt);
+        }
+    }
+
 }

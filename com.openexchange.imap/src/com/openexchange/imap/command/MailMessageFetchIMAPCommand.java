@@ -49,9 +49,6 @@
 
 package com.openexchange.imap.command;
 
-import gnu.trove.impl.Constants;
-import gnu.trove.map.hash.TIntIntHashMap;
-import gnu.trove.map.hash.TLongIntHashMap;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.ParseException;
@@ -82,6 +79,7 @@ import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.MimeMailException;
+import com.openexchange.mail.mime.PlainTextAddress;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
@@ -98,7 +96,9 @@ import com.sun.mail.imap.protocol.Item;
 import com.sun.mail.imap.protocol.RFC822DATA;
 import com.sun.mail.imap.protocol.RFC822SIZE;
 import com.sun.mail.imap.protocol.UID;
-import com.sun.mail.imap.protocol.X_REAL_UID;
+import gnu.trove.impl.Constants;
+import gnu.trove.map.hash.TIntIntHashMap;
+import gnu.trove.map.hash.TLongIntHashMap;
 
 /**
  * {@link MailMessageFetchIMAPCommand} - performs a prefetch of messages in given folder with only those fields set that need to be present for
@@ -931,9 +931,10 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
             final InternetAddress[] ret = new InternetAddress[length];
             for (int i = 0; i < length; i++) {
                 try {
-                    ret[i] = new QuotedInternetAddress(addresses[i].toString());
-                } catch (final AddressException e) {
-                    ret[i] = addresses[i];
+                    ret[i] = new QuotedInternetAddress(addresses[i].toString(), false);
+                } catch (AddressException e) {
+                    // Use as-is
+                    ret[i] = new PlainTextAddress(e.getRef());
                 }
             }
             return ret;

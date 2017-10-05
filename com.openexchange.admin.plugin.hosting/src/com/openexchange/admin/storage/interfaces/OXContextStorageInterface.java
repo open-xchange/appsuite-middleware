@@ -51,6 +51,7 @@ package com.openexchange.admin.storage.interfaces;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.sql.Connection;
 import java.util.List;
 import java.util.Set;
 import com.openexchange.admin.daemons.ClientAdminThreadExtended;
@@ -160,6 +161,15 @@ public abstract class OXContextStorageInterface {
      * @throws StorageException
      */
     public abstract void changeStorageData(final Context ctx) throws StorageException;
+
+    /**
+     * Gets the login mappings for specified context.
+     *
+     * @param ctx The context for which to load the mappings
+     * @return The available login mappings
+     * @throws StorageException If login mappings cannot be returned
+     */
+    public abstract Set<String> getLoginMappings(Context ctx) throws StorageException;
 
     /**
      * @param ctx
@@ -348,5 +358,24 @@ public abstract class OXContextStorageInterface {
      * @throws StorageException
      */
     public abstract String createSchema(int targetClusterId) throws StorageException;
+
+    /**
+     * Checks the consistencies for the count tables
+     *
+     * @param configCon The connection to the ConfigDb
+     * @param checkDatabaseCounts Whether to check the counts related to context to database/schema associations
+     * @param checkFilestoreCounts Whether to check the counts related to context to filestore associations
+     * @throws StorageException If check fails
+     */
+    public abstract void checkCountsConsistency(Connection configCon, boolean checkDatabaseCounts, boolean checkFilestoreCounts) throws StorageException;
+
+    /**
+     * Checks the consistencies for the count tables
+     *
+     * @param checkDatabaseCounts Whether to check the counts related to context to database/schema associations
+     * @param checkFilestoreCounts Whether to check the counts related to context to filestore associations
+     * @throws StorageException If check fails
+     */
+    public abstract void checkCountsConsistency(boolean checkDatabaseCounts, boolean checkFilestoreCounts) throws StorageException;
 
 }

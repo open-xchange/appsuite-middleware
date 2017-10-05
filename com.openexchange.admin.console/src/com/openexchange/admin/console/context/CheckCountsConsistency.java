@@ -46,71 +46,46 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+package com.openexchange.admin.console.context;
 
-package com.openexchange.admin.storage.mysqlStorage;
+import java.rmi.Naming;
+import com.openexchange.admin.console.AdminParser;
+import com.openexchange.admin.rmi.OXContextInterface;
+import com.openexchange.admin.rmi.dataobjects.Credentials;
 
-import com.openexchange.admin.rmi.dataobjects.SchemaSelectStrategy;
-import com.openexchange.admin.rmi.dataobjects.SchemaSelectStrategy.Strategy;
-import com.openexchange.admin.schemacache.SchemaCacheFinalize;
-import com.openexchange.admin.schemacache.SchemaCacheResult;
+public class CheckCountsConsistency extends ContextAbstraction {
 
-/**
- * {@link SchemaResult} - A simple class to reflect how a context's schema has been determined.
- *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.0
- */
-public class SchemaResult {
+    public CheckCountsConsistency(final String[] args2) {
 
-    /** The constant for automatic schema creation/detection */
-    public static final SchemaResult AUTOMATIC = new SchemaResult(Strategy.AUTOMATIC, null);
+        final AdminParser parser = new AdminParser("checkcountsconsistency");
 
-    /** The constant for pre-defined schema name */
-    public static final SchemaResult SCHEMA_NAME = new SchemaResult(Strategy.SCHEMA, null);
+        setDefaultCommandLineOptionsWithoutContextID(parser);
+        try {
+            parser.ownparse(args2);
 
-    /**
-     * Gets a result for in-memory schema detection with given roll-back.
-     *
-     * @param cacheResult The cache result
-     * @return The result for in-memory schema detection
-     */
-    public static SchemaResult inMemoryWith(SchemaCacheResult cacheResult) {
-        return new SchemaResult(Strategy.IN_MEMORY, cacheResult);
+            final Credentials auth = new Credentials((String) parser.getOptionValue(this.adminUserOption), (String) parser.getOptionValue(this.adminPassOption));
+
+            // get rmi ref
+            final OXContextInterface oxres = (OXContextInterface) Naming.lookup(RMI_HOSTNAME +OXContextInterface.RMI_NAME);
+
+            oxres.checkCountsConsistency(true, true, auth);
+
+            System.out.println("Counts successfully checked");
+            sysexit(0);
+        } catch (final Exception e) {
+            printErrors(null, null, e, parser);
+        }
+
     }
 
-    // -----------------------------------------------------------------------------------------------------------------
-
-    private final SchemaSelectStrategy.Strategy strategy;
-    private final SchemaCacheResult cacheResult;
-
-    /**
-     * Initializes a new {@link SchemaResult}.
-     *
-     * @param strategy The utilized strategy
-     * @param cacheResult The cache result
-     */
-    private SchemaResult(Strategy strategy, SchemaCacheResult cacheResult) {
-        super();
-        this.strategy = strategy;
-        this.cacheResult = cacheResult;
+    public static void main(final String args[]) {
+        new CheckCountsConsistency(args);
     }
 
-    /**
-     * Gets the utilized strategy
-     *
-     * @return The utilized strategy
-     */
-    public SchemaSelectStrategy.Strategy getStrategy() {
-        return strategy;
+    @Override
+    protected String getObjectName() {
+        return "counts consistency";
     }
 
-    /**
-     * Gets the optional cache roll-back.
-     *
-     * @return The cacheRollback or <code>null</code>
-     */
-    public SchemaCacheFinalize getCacheFinalize() {
-        return null == cacheResult ? null : cacheResult.getFinalize();
-    }
 
 }

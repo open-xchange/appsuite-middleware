@@ -51,7 +51,6 @@ package com.openexchange.index.solr.internal;
 
 import java.sql.Connection;
 import java.util.Map;
-
 import com.openexchange.database.Assignment;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.provider.DBProvider;

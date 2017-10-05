@@ -55,14 +55,15 @@ import static com.openexchange.tools.sql.DBUtils.autocommit;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import static com.openexchange.tools.sql.DBUtils.rollback;
 import static com.openexchange.tools.sql.DBUtils.startTransaction;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import com.openexchange.admin.daemons.ClientAdminThread;
@@ -95,8 +96,6 @@ public class OXContextMySQLStorageCommon {
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(OXContextMySQLStorageCommon.class);
 
-    private final OXUtilMySQLStorageCommon oxutilcommon;
-
     private static AdminCache cache = null;
 
     private static PropertyHandler prop = null;
@@ -106,8 +105,57 @@ public class OXContextMySQLStorageCommon {
         prop = cache.getProperties();
     }
 
+    private static interface StartNumberProvider {
+
+        int getStartValue();
+    }
+
+
+    // -----------------------------------------------------------------------------------------------------------------------------
+
+    private final OXUtilMySQLStorageCommon oxutilcommon;
+    private final Map<String, StartNumberProvider> startValues;
+
     public OXContextMySQLStorageCommon() {
+        super();
         oxutilcommon = new OXUtilMySQLStorageCommon();
+
+        Map<String, StartNumberProvider> startValues = new HashMap<String, StartNumberProvider>(4);
+        startValues.put("sequence_folder", new StartNumberProvider() {
+
+            @Override
+            public int getStartValue() {
+                // below id 20 is reserved
+                return 20;
+            }
+        });
+        startValues.put("sequence_uid_number", new StartNumberProvider() {
+
+            @Override
+            public int getStartValue() {
+                int startnum = Integer.parseInt(prop.getUserProp(AdminProperties.User.UID_NUMBER_START, "-1"));
+                if (startnum > 0) {
+                    // we use the uid number feature
+                    // set the start number in the sequence for uid_numbers
+                    return startnum;
+                }
+                return 0;
+            }
+        });
+        startValues.put("sequence_gid_number", new StartNumberProvider() {
+
+            @Override
+            public int getStartValue() {
+                int startnum = Integer.parseInt(prop.getGroupProp(AdminProperties.Group.GID_NUMBER_START, "-1"));
+                if (startnum > 0) {
+                    // we use the gid number feature
+                    // set the start number in the sequence for gid_numbers
+                    return startnum;
+                }
+                return 0;
+            }
+        });
+        this.startValues = startValues;
     }
 
     // TODO: The average size parameter can be removed if we have an new property handler which can
@@ -371,7 +419,7 @@ public class OXContextMySQLStorageCommon {
         if (otherContexts.length == 0) {
             Database db = OXToolStorageInterface.getInstance().loadDatabaseById(poolId);
             db.setScheme(dbSchema);
-            OXUtilMySQLStorageCommon.deleteDatabase(db);
+            OXUtilMySQLStorageCommon.deleteDatabase(db,con);
         }
     }
 
@@ -381,21 +429,38 @@ public class OXContextMySQLStorageCommon {
         try {
             // This creates a lock on context_server2db_pool on the rows with contexts in the same schema. Concurrent create and delete of
             // context can cause removed schemas while creating a context in it. This can not happen anymore with the introduced lock.
-            final int poolId = pool.getWritePool(contextId);
+            int poolId = pool.getWritePool(contextId);
+            String dbSchema = pool.getSchemaName(contextId);
+            int filestoreId = getFilestoreIdFor(con, contextId);
+
             pool.lock(con, poolId);
-            final String dbSchema = pool.getSchemaName(contextId);
+
+            if (0 != filestoreId) {
+                stmt = con.prepareStatement("UPDATE contexts_per_filestore SET count=count-1 WHERE filestore_id=?");
+                stmt.setInt(1, filestoreId);
+                stmt.executeUpdate();
+                Databases.closeSQLStuff(stmt);
+                stmt = null;
+            }
+
+            // Delete association from "context_server2db_pool" table
             pool.deleteAssignment(con, contextId);
+
             deleteEmptySchema(con, poolId, dbSchema);
+
             log.debug("Deleting login2context entries for context {}", I(contextId));
             stmt = con.prepareStatement("DELETE FROM login2context WHERE cid=?");
             stmt.setInt(1, contextId);
             stmt.executeUpdate();
-            stmt.close();
+            Databases.closeSQLStuff(stmt);
+            stmt = null;
+
             log.debug("Deleting context entry for context {}", I(contextId));
             stmt = con.prepareStatement("DELETE FROM context WHERE cid=?");
             stmt.setInt(1, contextId);
             stmt.executeUpdate();
-            stmt.close();
+            Databases.closeSQLStuff(stmt);
+            stmt = null;
         } catch (PoolException e) {
             log.error(e.getMessage(), e);
             throw new StorageException(e.getMessage(), e);
@@ -404,6 +469,23 @@ public class OXContextMySQLStorageCommon {
             throw new StorageException(e.getMessage(), e);
         } finally {
             Databases.closeSQLStuff(stmt);
+        }
+    }
+
+    private int getFilestoreIdFor(Connection con, int contextId) throws SQLException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = con.prepareStatement("SELECT filestore_id FROM context WHERE cid=?");
+            stmt.setInt(1, contextId);
+            rs = stmt.executeQuery();
+            int filestoreId = 0;
+            if (rs.next()) {
+                filestoreId = rs.getInt(1);
+            }
+            return filestoreId;
+        } finally {
+            Databases.closeSQLStuff(rs, stmt);
         }
     }
 
@@ -444,6 +526,7 @@ public class OXContextMySQLStorageCommon {
             db.setRead_id(db.getId());
         }
         fillContextTable(ctx, con);
+        incrementContextsPerFilestoreTable(ctx, con);
 
         try {
             final int serverId = ClientAdminThread.cache.getServerId();
@@ -544,30 +627,8 @@ public class OXContextMySQLStorageCommon {
     }
 
     private int modifyStartValue(final String tableName) {
-        int retval = 0;
-        if ("sequence_folder".equals(tableName)) {
-            // below id 20 is reserved
-            retval = 20;
-        }
-        // check for the uid number feature
-        if ("sequence_uid_number".equals(tableName)) {
-            final int startnum = Integer.parseInt(prop.getUserProp(AdminProperties.User.UID_NUMBER_START, "-1"));
-            if (startnum > 0) {
-                // we use the uid number feature
-                // set the start number in the sequence for uid_numbers
-                retval = startnum;
-            }
-        }
-        // check for the gid number feature
-        if ("sequence_gid_number".equals(tableName)){
-            final int startnum = Integer.parseInt(prop.getGroupProp(AdminProperties.Group.GID_NUMBER_START, "-1"));
-            if (startnum > 0) {
-                // we use the gid number feature
-                // set the start number in the sequence for gid_numbers
-                retval = startnum;
-            }
-        }
-        return retval;
+        StartNumberProvider startNumberProvider = startValues.get(tableName);
+        return null == startNumberProvider ? 0 : startNumberProvider.getStartValue();
     }
 
     /**
@@ -609,6 +670,26 @@ public class OXContextMySQLStorageCommon {
             if (Databases.isKeyConflictInMySQL(e, "context_name_unique")) {
                 throw new InvalidDataException("Context " + name + " already exists!");
             }
+            throw new StorageException(e.getMessage(), e);
+        } finally {
+            Databases.closeSQLStuff(stmt);
+        }
+    }
+
+    /**
+     * <code>INSERT</code>s the data row into the "context" table.
+     *
+     * @param ctx The context newly using a filestore
+     * @param configdbCon A connection to the configdb
+     * @throws StorageException If a general SQL error occurs
+     */
+    private final void incrementContextsPerFilestoreTable(final Context ctx, final Connection configdbCon) throws StorageException {
+        PreparedStatement stmt = null;
+        try {
+            stmt = configdbCon.prepareStatement("UPDATE contexts_per_filestore SET count=count+1 WHERE filestore_id=?");
+            stmt.setInt(1, ctx.getFilestoreId().intValue());
+            stmt.executeUpdate();
+        } catch (final SQLException e) {
             throw new StorageException(e.getMessage(), e);
         } finally {
             Databases.closeSQLStuff(stmt);

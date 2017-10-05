@@ -424,8 +424,16 @@ public class AdminCache {
         return this.pool.getConnectionForConfigDB();
     }
 
+    public Connection getConnectionForConfigDBNoTimeout() throws PoolException {
+        return this.pool.getConnectionForConfigDBNoTimeout();
+    }
+
     public boolean pushConnectionForConfigDB(final Connection con) throws PoolException {
         return this.pool.pushConnectionForConfigDB(con);
+    }
+
+    public boolean pushConnectionForConfigDBNoTimeout(final Connection con) throws PoolException {
+        return this.pool.pushConnectionForConfigDBNoTimeout(con);
     }
 
     public int getServerId() throws PoolException {
@@ -664,19 +672,19 @@ public class AdminCache {
     }
 
     public void closeConfigDBSqlStuff(final Connection con, final PreparedStatement stmt) {
-        try {
-            if (stmt != null) {
+        if (stmt != null) {
+            try {
                 stmt.close();
+            } catch (final SQLException e) {
+                log.error("Error closing statement", e);
             }
-        } catch (final SQLException e) {
-            log.error("Error closing statement", e);
         }
-        try {
-            if (con != null) {
+        if (con != null) {
+            try {
                 pushConnectionForConfigDB(con);
+            } catch (final PoolException exp) {
+                log.error("Pool Error pushing connection to pool!", exp);
             }
-        } catch (final PoolException exp) {
-            log.error("Pool Error pushing connection to pool!", exp);
         }
     }
 
