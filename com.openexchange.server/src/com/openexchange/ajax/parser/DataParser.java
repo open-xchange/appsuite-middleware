@@ -313,6 +313,18 @@ public abstract class DataParser {
         }
     }
 
+    public static long checkLong(final JSONObject json, final String name) throws OXException, OXException {
+        final String tmp = checkString(json, name);
+        if (tmp == null || tmp.length() == 0) {
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create( name);
+        }
+        try {
+            return Long.parseLong(tmp);
+        } catch (final NumberFormatException e) {
+            throw OXJSONExceptionCodes.NUMBER_PARSING.create(e, tmp, name);
+        }
+    }
+
     public static boolean checkBoolean(final JSONObject jsonObj, final String name) throws JSONException, OXException {
         final String tmp = jsonObj.getString(name);
         if (tmp == null || tmp.length() == 0) {

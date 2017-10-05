@@ -52,6 +52,8 @@ package com.openexchange.groupware.reminder.osgi;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.capabilities.CapabilitySet;
+import com.openexchange.chronos.service.CalendarService;
+import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.reminder.ReminderService;
 import com.openexchange.groupware.reminder.ReminderServiceImpl;
@@ -75,7 +77,7 @@ public class ReminderActivator extends AJAXModuleActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] {AppointmentSqlFactoryService.class};
+        return new Class<?>[] {AppointmentSqlFactoryService.class, CalendarService.class, RecurrenceService.class};
     }
 
     @Override

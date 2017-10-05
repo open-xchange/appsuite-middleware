@@ -55,6 +55,7 @@ import java.util.Date;
 import java.util.List;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.Types;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.server.impl.DBPool;
@@ -309,6 +310,9 @@ public class ReminderServiceImpl implements ReminderService{
             List<ReminderObject> result = new ArrayList<ReminderObject>();
             while (reminders.hasNext()) {
                 ReminderObject reminder = reminders.next();
+                if(reminder.getModule() == Types.APPOINTMENT){
+                    continue;
+                }
                 checkPermission(session, reminder, false);
                 result.add(reminder);
             }

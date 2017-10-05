@@ -76,7 +76,13 @@ public class ReminderWriter extends DataWriter {
 	}
 
 	public void writeObject(final ReminderObject reminderObj, final JSONObject jsonObj) throws JSONException {
-		writeParameter(DataFields.ID, reminderObj.getObjectId(), jsonObj);
+	    if(reminderObj.getModule()==1){
+	        // Construct an artificial parameter for event reminder
+	        long id = (long) reminderObj.getObjectId() << 32 | reminderObj.getTargetId() & 0xFFFFFFFFL;
+	        writeParameter(DataFields.ID, id, jsonObj);
+	    } else {
+	        writeParameter(DataFields.ID, reminderObj.getObjectId(), jsonObj);
+	    }
 		writeParameter(DataFields.LAST_MODIFIED, reminderObj.getLastModified(), jsonObj);
 		writeParameter(ReminderFields.TARGET_ID, reminderObj.getTargetId(), jsonObj);
 		writeParameter(ReminderFields.FOLDER, reminderObj.getFolder(), jsonObj);
