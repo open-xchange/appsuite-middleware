@@ -70,7 +70,6 @@ import com.openexchange.pns.subscription.storage.groupware.CreatePnsSubscription
 import com.openexchange.pns.subscription.storage.groupware.PnsCreateTableTask;
 import com.openexchange.pns.subscription.storage.groupware.PnsDeleteListener;
 import com.openexchange.pns.subscription.storage.groupware.PnsSubscriptionsReindexTask;
-import com.openexchange.pns.subscription.storage.inmemory.InMemoryPushSubscriptionRegistry;
 import com.openexchange.pns.subscription.storage.rdb.RdbPushSubscriptionRegistry;
 import com.openexchange.pns.subscription.storage.rdb.cache.RdbPushSubscriptionRegistryCache;
 import com.openexchange.pns.subscription.storage.rdb.cache.RdbPushSubscriptionRegistryInvalidator;
@@ -138,8 +137,7 @@ public class PushSubscriptionRegistryActivator extends HousekeepingActivator {
         }
 
         // Register service
-        PushSubscriptionRegistry volatileRegistry = new InMemoryPushSubscriptionRegistry();
-        registerService(PushSubscriptionRegistry.class, new CompositePushSubscriptionRegistry(persistentRegistry, volatileRegistry, providerTracker, listenerTracker, false));
+        registerService(PushSubscriptionRegistry.class, new CompositePushSubscriptionRegistry(persistentRegistry, providerTracker, listenerTracker));
 
         // Register event handler
         {

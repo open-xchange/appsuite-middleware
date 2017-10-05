@@ -108,7 +108,7 @@ public class ConfigMailFilterAction extends AbstractMailFilterAction{
 
         try {
             final JSONObject result = getTestAndActionObjects(capabilities, blacklists);
-            result.put("options", getOptions(session.getUserId(), session.getContextId()));
+            result.put("options", getOptions(session.getUserId(), session.getContextId(), mailFilterService.getExtendedProperties(credentials)));
             return new AJAXRequestResult(result);
         } catch (JSONException e) {
             throw MailFilterExceptionCode.JSON_ERROR.create(e, e.getMessage());
@@ -139,11 +139,16 @@ public class ConfigMailFilterAction extends AbstractMailFilterAction{
      * @return The options object
      * @throws JSONException
      */
-    private JSONObject getOptions(int userId, int contextId) throws JSONException {
+    private JSONObject getOptions(int userId, int contextId, Map<String, Object> options) throws JSONException {
         JSONObject result = new JSONObject();
         LeanConfigurationService leanConfigurationService = services.getService(LeanConfigurationService.class);
         boolean property = leanConfigurationService.getBooleanProperty(userId, contextId, OptionsProperty.allowNestedTests);
         result.put(OptionsProperty.allowNestedTests.name(), property);
+        if(options != null){
+            for(String key: options.keySet()){
+                result.put(key, options.get(key));
+            }
+        }
         return result;
     }
 

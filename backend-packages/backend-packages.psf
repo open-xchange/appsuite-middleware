@@ -54,6 +54,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,open-xchange-halo"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,open-xchange-cluster-upgrade-from-76x"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,open-xchange-cluster-upgrade-from-780-782"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-cluster-upgrade-from-783"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,open-xchange-hostname-config-cascade"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,open-xchange-hostname-ldap"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,open-xchange-imap"/>

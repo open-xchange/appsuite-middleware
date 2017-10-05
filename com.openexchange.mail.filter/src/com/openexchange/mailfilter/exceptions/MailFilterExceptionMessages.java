@@ -67,4 +67,6 @@ public class MailFilterExceptionMessages implements LocalizableStrings {
 
     public static final String MAILFILTER_NOT_AVAILABLE_MSG = "Managing mail filter rules is not available for your account.";
 
+    public static final String TOO_MANY_REDIRECT_MSG = "The maximum amount of redirect rules is reached. Please delete or deactivate another redirect rule first.";
+
 }
