@@ -53,6 +53,7 @@ import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.L;
 import static com.openexchange.java.Autoboxing.i;
 import static com.openexchange.java.Autoboxing.l;
+import static com.openexchange.tools.sql.DBUtils.autocommit;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import static com.openexchange.tools.sql.DBUtils.rollback;
 import java.sql.Connection;
@@ -360,10 +361,11 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
 
         Connection configdb_write_con = null;
         PreparedStatement prep = null;
-
+        boolean rollback = false;
         try {
             configdb_write_con = cache.getConnectionForConfigDB();
             configdb_write_con.setAutoCommit(false);
+            rollback = true;
 
             final Integer id = fstore.getId();
             final String url = fstore.getUrl();
@@ -400,101 +402,112 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             }
 
             configdb_write_con.commit();
+            rollback = false;
         } catch (final DataTruncation dt) {
             LOG.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);
-            try {
-                if (configdb_write_con != null && !configdb_write_con.getAutoCommit()) {
-                    configdb_write_con.rollback();
-                }
-            } catch (final SQLException expd) {
-                LOG.error("Error processing rollback of configdb connection!", expd);
-            }
             throw AdminCache.parseDataTruncation(dt);
         } catch (final PoolException pe) {
             LOG.error("Pool Error", pe);
             throw new StorageException(pe);
         } catch (final SQLException exp) {
             LOG.error("SQL Error", exp);
-            try {
-                if (configdb_write_con != null && !configdb_write_con.getAutoCommit()) {
-                    configdb_write_con.rollback();
-                }
-            } catch (final SQLException expd) {
-                LOG.error("Error processing rollback of configdb connection!", expd);
-            }
             throw new StorageException(exp);
         } finally {
-            try {
-                if (prep != null) {
-                    prep.close();
-                }
-            } catch (final SQLException e) {
-                LOG.error("Error closing statement", e);
+            if (rollback) {
+                rollback(configdb_write_con);
             }
-            try {
-                if (configdb_write_con != null) {
+
+            closeSQLStuff(prep);
+            autocommit(configdb_write_con);
+            if (configdb_write_con != null) {
+                try {
                     cache.pushConnectionForConfigDB(configdb_write_con);
+                } catch (final PoolException ecp) {
+                    LOG.error("Error pushing configdb connection to pool!", ecp);
                 }
-            } catch (final PoolException ecp) {
-                LOG.error("Error pushing configdb connection to pool!", ecp);
             }
         }
     }
 
     @Override
-    public void createDatabase(final Database db) throws StorageException {
+    public void createDatabase(final Database db, Connection con) throws StorageException {
         final OXUtilMySQLStorageCommon oxutilcommon = new OXUtilMySQLStorageCommon();
-        oxutilcommon.createDatabase(db);
+        oxutilcommon.createDatabase(db, con);
     }
 
     @Override
     public void deleteDatabase(final Database db) throws StorageException {
-        final OXUtilMySQLStorageCommon oxutilcommon = new OXUtilMySQLStorageCommon();
-        oxutilcommon.deleteDatabase(db);
+        Connection con = null;
+        boolean rollback = false;
+        try {
+            con = cache.getConnectionForConfigDB();
+            con.setAutoCommit(false);
+            rollback = true;
+
+            OXUtilMySQLStorageCommon.deleteDatabase(db, con);
+
+            con.commit();
+            rollback = false;
+        } catch (PoolException e) {
+            LOG.error("Pool Error", e);
+            throw new StorageException(e);
+        } catch (SQLException e) {
+            LOG.error("SQL Error", e);
+            throw new StorageException(e);
+        } finally {
+            if (rollback) {
+                rollback(con);
+            }
+
+            autocommit(con);
+            if (con != null) {
+                try {
+                    cache.pushConnectionForConfigDB(con);
+                } catch (final PoolException exp) {
+                    LOG.error("Error pushing configdb connection to pool!", exp);
+                }
+            }
+        }
     }
 
     @Override
     public void deleteMaintenanceReason(final int[] reason_ids) throws StorageException {
         Connection con = null;
         PreparedStatement stmt = null;
-
+        boolean rollback = false;
         try {
             con = cache.getConnectionForConfigDB();
             con.setAutoCommit(false);
-            for (final int element : reason_ids) {
+            rollback = true;
+
+            for (int element : reason_ids) {
                 stmt = con.prepareStatement("DELETE FROM reason_text WHERE id = ?");
                 stmt.setInt(1, element);
                 stmt.executeUpdate();
                 stmt.close();
             }
+
             con.commit();
+            rollback = false;
         } catch (final PoolException pe) {
             LOG.error("Pool Error", pe);
             throw new StorageException(pe);
         } catch (final SQLException ecp) {
             LOG.error("SQL Error", ecp);
-            try {
-                if (con != null && !con.getAutoCommit()) {
-                    con.rollback();
-                }
-            } catch (final SQLException exp) {
-                LOG.error("Error processing rollback of configdb connection!", exp);
-            }
             throw new StorageException(ecp);
         } finally {
-            try {
-                if (stmt != null) {
-                    stmt.close();
-                }
-            } catch (final SQLException e) {
-                LOG.error("Erroe closing statement", e);
+            if (rollback) {
+                rollback(con);
             }
-            try {
-                if (con != null) {
+
+            closeSQLStuff(stmt);
+            autocommit(con);
+            if (con != null) {
+                try {
                     cache.pushConnectionForConfigDB(con);
+                } catch (final PoolException exp) {
+                    LOG.error("Error pushing configdb connection to pool!", exp);
                 }
-            } catch (final PoolException exp) {
-                LOG.error("Error pushing configdb connection to pool!", exp);
             }
         }
     }
@@ -791,6 +804,17 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                 prep.executeUpdate();
                 prep.close();
 
+                // update trigger counter table
+                prep = con.prepareStatement("INSERT INTO contexts_per_dbpool (db_pool_id,count) VALUES(?,0);");
+                prep.setInt(1, db_id);
+                prep.executeUpdate();
+                prep.close();
+
+                // update trigger lock table
+                prep = con.prepareStatement("INSERT INTO dbpool_lock (db_pool_id) VALUES(?);");
+                prep.setInt(1, db_id);
+                prep.executeUpdate();
+                prep.close();
             } else {
                 prep = con.prepareStatement("SELECT db_pool_id FROM db_pool WHERE db_pool_id = ?");
                 prep.setInt(1, db.getMasterId());
@@ -870,6 +894,13 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             stmt.setLong(3, store_size);
             stmt.setInt(4, fstore.getMaxContexts());
             stmt.executeUpdate();
+            stmt.close();
+
+            // update trigger counter table
+            stmt = con.prepareStatement("INSERT INTO contexts_per_filestore (filestore_id,count) VALUES (?,0)");
+            stmt.setInt(1, fstore_id);
+            stmt.executeUpdate();
+
             con.commit();
             rollback = false;
 
@@ -905,7 +936,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
         ResultSet rs = null;
         try {
             con = cache.getConnectionForConfigDB();
-            stmt = con.prepareStatement("SELECT filestore.id, filestore.max_context, COUNT(context.cid) AS num FROM filestore LEFT JOIN context ON filestore.id=context.filestore_id GROUP BY filestore.id ORDER BY num ASC");
+            stmt = con.prepareStatement("SELECT filestore.id, filestore.max_context, contexts_per_filestore.count AS num, filestore.uri, filestore.size FROM filestore LEFT JOIN contexts_per_filestore ON filestore.id=contexts_per_filestore.filestore_id GROUP BY filestore.id ORDER BY num ASC");
             rs = stmt.executeQuery();
 
             if (!rs.next()) {
@@ -918,18 +949,26 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                 final int id;
                 final int maxNumberOfContexts;
                 final int numberOfContexts;
+                final String uri;
+                final long size;
 
-                Candidate(final int id, final int maxNumberOfContexts, final int numberOfContexts) {
+                Candidate(final int id, final int maxNumberOfContexts, final int numberOfContexts, String uri, long size) {
                     super();
                     this.id = id;
                     this.maxNumberOfContexts = maxNumberOfContexts;
                     this.numberOfContexts = numberOfContexts;
+                    this.uri = uri;
+                    this.size = size;
                 }
             }
 
             final List<Candidate> candidates = new LinkedList<Candidate>();
             do {
-                candidates.add(new Candidate(rs.getInt(1), rs.getInt(2), rs.getInt(3)));
+                int maxNumberOfContexts = rs.getInt(2);
+                if (maxNumberOfContexts > 0) {
+                    int numberOfEntities = rs.getInt(3); // In case NULL, then 0 (zero) is returned
+                    candidates.add(new Candidate(rs.getInt(1), maxNumberOfContexts, numberOfEntities, rs.getString(4), toMB(rs.getLong(5))));
+                }
             } while (rs.next());
 
             // Close resources as no more needed
@@ -939,9 +978,23 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
 
             // Find a suitable one from ordered list of candidates
             for (final Candidate candidate : candidates) {
-                if (candidate.maxNumberOfContexts > 0 && candidate.numberOfContexts < candidate.maxNumberOfContexts) {
-                    // Get filestore
-                    final Filestore filestore = getFilestore(candidate.id, false, con);
+                if (candidate.numberOfContexts < candidate.maxNumberOfContexts) {
+                    // Create filestore instance froim candidate
+                    Filestore filestore = new Filestore();
+                    filestore.setId(I(candidate.id));
+                    filestore.setUrl(candidate.uri);
+                    filestore.setSize(L(candidate.size));
+                    filestore.setMaxContexts(I(candidate.maxNumberOfContexts));
+
+                    // Only consider context count for given file storage
+                    int numberOfEntities = candidate.numberOfContexts;
+                    FilestoreUsage usage = new FilestoreUsage(numberOfEntities, 0L);
+
+                    filestore.setUsed(L(toMB(usage.getUsage())));
+                    filestore.setCurrentContexts(I(usage.getCtxCount()));
+                    filestore.setReserved(L(getAverageFilestoreSpace() * usage.getCtxCount()));
+
+                    // Check filestore
                     if (enoughSpaceForContext(filestore)) {
                         return filestore;
                     }
@@ -1058,14 +1111,13 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
 
         Connection con = null;
         PreparedStatement pstmt = null;
-        PreparedStatement cstmt = null;
 
         try {
 
             con = cache.getConnectionForConfigDB();
             final String my_search_pattern = search_pattern.replace('*', '%');
 
-            pstmt = con.prepareStatement("SELECT db_pool_id,url,driver,login,password,hardlimit,max,initial,name,weight,max_units,read_db_pool_id,write_db_pool_id FROM db_pool JOIN db_cluster ON ( db_pool_id = db_cluster.write_db_pool_id OR db_pool_id = db_cluster.read_db_pool_id) WHERE name LIKE ? OR db_pool_id LIKE ? OR url LIKE ?");
+            pstmt = con.prepareStatement("SELECT d.db_pool_id,d.url,d.driver,d.login,d.password,d.hardlimit,d.max,d.initial,d.name,c.weight,c.max_units,c.read_db_pool_id,c.write_db_pool_id,p.count FROM db_pool AS d JOIN db_cluster AS c ON (c.write_db_pool_id=d.db_pool_id OR c.read_db_pool_id=d.db_pool_id) LEFT JOIN contexts_per_dbpool AS p ON d.db_pool_id=p.db_pool_id WHERE d.name LIKE ? OR d.db_pool_id LIKE ? OR d.url LIKE ?");
             pstmt.setString(1, my_search_pattern);
             pstmt.setString(2, my_search_pattern);
             pstmt.setString(3, my_search_pattern);
@@ -1077,9 +1129,9 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                 final Database db = new Database();
 
                 Boolean ismaster = Boolean.TRUE;
-                final int readid = rs.getInt("read_db_pool_id");
-                final int writeid = rs.getInt("write_db_pool_id");
-                final int id = rs.getInt("db_pool_id");
+                final int readid = rs.getInt("c.read_db_pool_id");
+                final int writeid = rs.getInt("c.write_db_pool_id");
+                final int id = rs.getInt("d.db_pool_id");
                 int masterid = 0;
                 int nrcontexts = 0;
                 if (readid == id) {
@@ -1087,29 +1139,24 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                     masterid = writeid;
                 } else {
                     // we are master
-                    cstmt = con.prepareStatement("SELECT COUNT(cid) FROM context_server2db_pool WHERE write_db_pool_id = ?");
-                    cstmt.setInt(1, writeid);
-                    final ResultSet rs1 = cstmt.executeQuery();
-                    if (!rs1.next()) {
-                        throw new StorageException("Unable to count contexts");
+                    nrcontexts = rs.getInt("p.count");
+                    if (rs.wasNull()) {
+                        throw new StorageException("Unable to count contexts. Consider running 'checkcountsconsistency' command-line tool to correct it.");
                     }
-                    nrcontexts = Integer.parseInt(rs1.getString("COUNT(cid)"));
-                    rs1.close();
-                    cstmt.close();
                 }
-                db.setClusterWeight(rs.getInt("weight"));
-                db.setName(rs.getString("name"));
-                db.setDriver(rs.getString("driver"));
-                db.setId(rs.getInt("db_pool_id"));
-                db.setLogin(rs.getString("login"));
+                db.setClusterWeight(rs.getInt("c.weight"));
+                db.setName(rs.getString("d.name"));
+                db.setDriver(rs.getString("d.driver"));
+                db.setId(id);
+                db.setLogin(rs.getString("d.login"));
                 db.setMaster(ismaster.booleanValue());
                 db.setMasterId(masterid);
-                db.setMaxUnits(rs.getInt("max_units"));
-                db.setPassword(rs.getString("password"));
-                db.setPoolHardLimit(rs.getInt("hardlimit"));
-                db.setPoolInitial(rs.getInt("initial"));
-                db.setPoolMax(rs.getInt("max"));
-                db.setUrl(rs.getString("url"));
+                db.setMaxUnits(rs.getInt("c.max_units"));
+                db.setPassword(rs.getString("d.password"));
+                db.setPoolHardLimit(rs.getInt("d.hardlimit"));
+                db.setPoolInitial(rs.getInt("d.initial"));
+                db.setPoolMax(rs.getInt("d.max"));
+                db.setUrl(rs.getString("d.url"));
                 db.setCurrentUnits(nrcontexts);
                 tmp.add(db);
             }
@@ -1124,14 +1171,6 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             LOG.error("SQL Error", ecp);
             throw new StorageException(ecp);
         } finally {
-
-            try {
-                if (cstmt != null) {
-                    cstmt.close();
-                }
-            } catch (final SQLException e) {
-                LOG.error("Error closing statement", e);
-            }
             try {
                 if (pstmt != null) {
                     pstmt.close();
@@ -1234,6 +1273,20 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                 } finally {
                     closeSQLStuff(stmt);
                 }
+                try {
+                    stmt = con.prepareStatement("DELETE FROM contexts_per_dbpool WHERE db_pool_id=?");
+                    stmt.setInt(1, dbId);
+                    stmt.executeUpdate();
+                } finally {
+                    closeSQLStuff(stmt);
+                }
+                try {
+                    stmt = con.prepareStatement("DELETE FROM dbpool_lock WHERE db_pool_id=?");
+                    stmt.setInt(1, dbId);
+                    stmt.executeUpdate();
+                } finally {
+                    closeSQLStuff(stmt);
+                }
             } else {
                 try {
                     stmt = con.prepareStatement("UPDATE db_cluster SET read_db_pool_id=0 WHERE read_db_pool_id=?");
@@ -1279,6 +1332,12 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             stmt = con.prepareStatement("DELETE FROM filestore WHERE id = ?");
             stmt.setInt(1, store_id);
             stmt.executeUpdate();
+            stmt.close();
+
+            stmt = con.prepareStatement("DELETE FROM contexts_per_filestore WHERE filestore_id = ?");
+            stmt.setInt(1, store_id);
+            stmt.executeUpdate();
+
             con.commit();
         } catch (final PoolException pe) {
             LOG.error("Pool Error", pe);
@@ -1709,7 +1768,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             PreparedStatement stmt = null;
             ResultSet result = null;
             try {
-                stmt = con.prepareStatement("SELECT COUNT(cid) FROM context WHERE filestore_id=?");
+                stmt = con.prepareStatement("SELECT count FROM contexts_per_filestore WHERE filestore_id=?");
                 stmt.setInt(1, filestoreId);
                 result = stmt.executeQuery();
                 if (false == result.next()) {
@@ -1768,4 +1827,5 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             }
         }
     }
+
 }

@@ -149,6 +149,9 @@ public class FilestoreDataMover implements Callable<Void> {
      */
     public void copy() throws StorageException, IOException, InterruptedException, ProgrammErrorException {
         final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
+
+        Integer srcFilestoreId = ctx.getFilestoreId();
+
         if (rsyncEnabled) {
             if (new File(this.src).exists()) {
                 final ArrayOutput output = new ShellExecutor().executeprocargs(new String[] { "rsync", "-a", this.src, this.dst + '/' });
@@ -158,9 +161,6 @@ public class FilestoreDataMover implements Callable<Void> {
                 }
                 FileUtils.deleteDirectory(new File(this.src));
             }
-            ctx.setFilestoreId(dstStore.getId());
-            oxcox.changeStorageData(ctx);
-            oxcox.enable(ctx);
         } else {
             FileStorage srcStorage = null;
             FileStorage dstStorage = null;
@@ -216,6 +216,7 @@ public class FilestoreDataMover implements Callable<Void> {
         try {
             ctx.setFilestoreId(dstStore.getId());
             oxcox.changeStorageData(ctx);
+
             final CacheService cacheService = AdminServiceRegistry.getInstance().getService(CacheService.class);
             Cache cache = cacheService.getCache("Filestore");
             cache.clear();
