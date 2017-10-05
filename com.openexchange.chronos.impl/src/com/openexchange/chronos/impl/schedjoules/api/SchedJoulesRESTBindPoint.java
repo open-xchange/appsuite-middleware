@@ -59,4 +59,15 @@ public enum SchedJoulesRESTBindPoint {
      * @see <a href="https://github.com/schedjoules/calendar-store-api/blob/master/details/pages.md">https://github.com/schedjoules/calendar-store-api/blob/master/details/pages.md</a>
      */
     pages,
+
+    ;
+
+    /**
+     * Returns the absolute path of the REST bind point
+     * 
+     * @return the absolute path of the REST bind point
+     */
+    public String getAbsolutePath() {
+        return "/" + name();
+    }
 }

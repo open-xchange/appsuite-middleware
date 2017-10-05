@@ -91,7 +91,7 @@ public class SchedJoulesPagesAPI {
      * @throws OXException if an error is occurred
      */
     public JSONObject getRootPage(String locale, String location) throws OXException {
-        SchedJoulesRequest request = new SchedJoulesRequest(SchedJoulesRESTBindPoint.pages.name());
+        SchedJoulesRequest request = new SchedJoulesRequest(SchedJoulesRESTBindPoint.pages.getAbsolutePath());
         request.setQueryParameter(SchedJoulesCommonParameter.location.name(), location);
         request.setQueryParameter(SchedJoulesCommonParameter.locale.name(), locale);
 
@@ -106,12 +106,12 @@ public class SchedJoulesPagesAPI {
      * @throws OXException if an error is occurred
      */
     public JSONObject getPage(int pageId) throws OXException {
-        SchedJoulesRequest request = new SchedJoulesRequest(SchedJoulesRESTBindPoint.pages.name() + "/" + pageId);
+        SchedJoulesRequest request = new SchedJoulesRequest(SchedJoulesRESTBindPoint.pages.getAbsolutePath() + "/" + pageId);
         SchedJoulesResponse response = client.executeRequest(request);
 
         return parseInputStream(response);
     }
-
+    
     /**
      * Parses the {@link InputStream} from the specified {@link SchedJoulesResponse}
      * as a {@link JSONObject}
