@@ -53,14 +53,30 @@ import static com.openexchange.tools.TimeZoneUtils.getTimeZone;
 import java.sql.SQLException;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
+import java.util.SortedSet;
 import java.util.TimeZone;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.writer.ReminderWriter;
 import com.openexchange.api2.AppointmentSQLInterface;
+import com.openexchange.chronos.Alarm;
+import com.openexchange.chronos.AlarmTrigger;
+import com.openexchange.chronos.Event;
+import com.openexchange.chronos.RecurrenceId;
+import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.common.DefaultRecurrenceData;
+import com.openexchange.chronos.compat.Event2Appointment;
+import com.openexchange.chronos.service.CalendarService;
+import com.openexchange.chronos.service.CalendarSession;
+import com.openexchange.chronos.service.EventID;
+import com.openexchange.chronos.service.RecurrenceData;
+import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
@@ -320,6 +336,57 @@ public abstract class AbstractReminderAction implements AJAXActionService {
         } catch (Exception e) {
             // Ignore
         }
+    }
+
+    protected void convertAlarmTrigger2Reminder(AlarmTrigger trigger, CalendarService calService, CalendarSession calSession, RecurrenceService recurrenceService, ReminderWriter reminderWriter, JSONArray jsonResponseArray) throws OXException, JSONException{
+        final JSONObject jsonReminderObj = new JSONObject(12);
+
+        ReminderObject reminder = new ReminderObject();
+        reminder.setDate(new Date(trigger.getTime()));
+        EventID eventId = null;
+        if(trigger.containsRecurrenceId()){
+            eventId = new EventID(trigger.getFolder(), trigger.getEventId(), trigger.getRecurrenceId());
+        } else {
+            eventId = new EventID(trigger.getFolder(), trigger.getEventId());
+        }
+        Event event = calService.getEvent(calSession, trigger.getFolder(), eventId);
+        List<Alarm> alarms = event.getAlarms();
+        reminder.setLastModified(event.getLastModified());
+        reminder.setFolder(Integer.valueOf(trigger.getFolder()));
+        reminder.setModule(Types.APPOINTMENT);
+        reminder.setUser(trigger.getUserId());
+        reminder.setObjectId(Integer.valueOf(event.getId())); // AlarmTrigger don't have an id
+        reminder.setTargetId(trigger.getAlarm());
+
+        if (CalendarUtils.isSeriesMaster(event)) {
+            SortedSet<RecurrenceId> exceptions = event.getDeleteExceptionDates();
+            List<Event> changeExceptions = calService.getChangeExceptions(calSession, event.getFolderId(), event.getSeriesId());
+            for (Event exception : changeExceptions) {
+                exceptions.add(exception.getRecurrenceId());
+            }
+            long[] exceptionDates = new long[exceptions.size()];
+            int x = 0;
+            for (RecurrenceId id : exceptions) {
+                exceptionDates[x++] = id.getValue().getTimestamp();
+            }
+            RecurrenceData data = new DefaultRecurrenceData(event.getRecurrenceRule(), event.getStartDate(), exceptionDates);
+
+            int pos = Event2Appointment.getRecurrencePosition(recurrenceService, data, event.getRecurrenceId());
+            reminder.setRecurrencePosition(pos);
+            reminder.setRecurrenceAppointment(true);
+        } else {
+            reminder.setRecurrenceAppointment(false);
+        }
+
+        for (Alarm alarm : alarms) {
+            if (alarm.getId() == trigger.getAlarm().intValue()) {
+                reminder.setDescription(alarm.getDescription());
+                break;
+            }
+        }
+
+        reminderWriter.writeObject(reminder, jsonReminderObj);
+        jsonResponseArray.put(jsonReminderObj);
     }
 
 }
