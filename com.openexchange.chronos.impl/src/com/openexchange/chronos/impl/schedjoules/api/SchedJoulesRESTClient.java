@@ -66,8 +66,6 @@ import com.openexchange.chronos.impl.schedjoules.SchedJoulesProperty;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
-import com.openexchange.net.ssl.SSLSocketFactoryProvider;
-import com.openexchange.net.ssl.config.SSLConfigurationService;
 import com.openexchange.rest.client.httpclient.HttpClients;
 import com.openexchange.rest.client.httpclient.HttpClients.ClientConfig;
 
@@ -79,7 +77,7 @@ import com.openexchange.rest.client.httpclient.HttpClients.ClientConfig;
 class SchedJoulesRESTClient {
 
     private static final String BASE_URL = "api.schedjoules.com";
-    private static final String USER_AGENT = "Open-Xchange SchedJoules Client";
+    private static final String USER_AGENT = "Open-Xchange SchedJoules Client (pre-Alpha)";
     private static final String AUTHORIZATION_HEADER = "Token token=\"{{token}}\"";
 
     private final CloseableHttpClient httpClient;
@@ -108,7 +106,7 @@ class SchedJoulesRESTClient {
         if (Strings.isEmpty(apiKey)) {
             throw new OXException(1138, "The apiKey is empty. Please configure the service properly");
         }
-        return AUTHORIZATION_HEADER.replaceFirst("{{token}}", apiKey);
+        return AUTHORIZATION_HEADER.replaceFirst("\\{\\{token\\}\\}", apiKey);
     }
 
     /**
@@ -120,7 +118,7 @@ class SchedJoulesRESTClient {
         ClientConfig clientConfig = ClientConfig.newInstance();
         clientConfig.setUserAgent(USER_AGENT);
 
-        return HttpClients.getHttpClient(clientConfig, Services.getService(SSLSocketFactoryProvider.class), Services.getService(SSLConfigurationService.class));
+        return HttpClients.getHttpClient(clientConfig);
     }
 
     /**
