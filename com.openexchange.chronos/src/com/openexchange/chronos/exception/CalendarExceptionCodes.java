@@ -83,6 +83,9 @@ import static com.openexchange.chronos.exception.CalendarExceptionMessages.UNSUP
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.UNSUPPORTED_FOLDER_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.UNSUPPORTED_OPERATION_FOR_PROVIDER_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.UNSUPPORTED_RRULE_MSG;
+import static com.openexchange.chronos.exception.CalendarExceptionMessages.TOO_MANY_ALARMS_MSG;
+import static com.openexchange.chronos.exception.CalendarExceptionMessages.TOO_MANY_ATTENDEES_MSG;
+import static com.openexchange.chronos.exception.CalendarExceptionMessages.TOO_MANY_EVENTS_MSG;
 import static com.openexchange.exception.OXExceptionStrings.MESSAGE;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.DisplayableOXExceptionCode;
@@ -330,6 +333,12 @@ public enum CalendarExceptionCodes implements DisplayableOXExceptionCode {
      * <li>Attachment not found [attachment %1$d, event %2$s, folder %3$s]</li>
      */
     ATTACHMENT_NOT_FOUND("Attachment not found [attachment %1$d, event %2$s, folder %3$s]", ATTACHMENT_NOT_FOUND_MSG, Category.CATEGORY_USER_INPUT, 4047),
+
+    TOO_MANY_EVENT_RESULTS("Too many events are querried. Please choose a shorter timeframe.", TOO_MANY_EVENTS_MSG, Category.CATEGORY_USER_INPUT, 6001),
+
+    TOO_MANY_ATTENDEES("The event contains too many attendees.", TOO_MANY_ATTENDEES_MSG, Category.CATEGORY_USER_INPUT, 6002),
+
+    TOO_MANY_ALARMS("The event contains too many alarms.", TOO_MANY_ALARMS_MSG, Category.CATEGORY_USER_INPUT, 6003),
     ;
 
     public static final String PREFIX = "CAL".intern();

@@ -66,6 +66,7 @@ import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.common.DefaultUpdatesResult;
+import com.openexchange.chronos.common.SelfProtectionFactory;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.SearchOptions;
@@ -92,8 +93,8 @@ public class UpdatesPerformer extends AbstractQueryPerformer {
      * @param session The calendar session
      * @param storage The underlying calendar storage
      */
-    public UpdatesPerformer(CalendarSession session, CalendarStorage storage) throws OXException {
-        super(session, storage);
+    public UpdatesPerformer(CalendarSession session, CalendarStorage storage, SelfProtectionFactory protectionFactory) throws OXException {
+        super(session, storage, protectionFactory);
     }
 
     /**

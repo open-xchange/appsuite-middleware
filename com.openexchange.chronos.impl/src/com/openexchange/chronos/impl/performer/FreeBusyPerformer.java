@@ -86,6 +86,7 @@ import com.openexchange.chronos.Transp;
 import com.openexchange.chronos.common.AvailabilityUtils;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.DefaultRecurrenceData;
+import com.openexchange.chronos.common.SelfProtectionFactory;
 import com.openexchange.chronos.common.mapping.EventMapper;
 import com.openexchange.chronos.compat.ShownAsTransparency;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
@@ -132,8 +133,8 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
      * @param storage The underlying calendar storage
      * @param session The calendar session
      */
-    public FreeBusyPerformer(CalendarSession session, CalendarStorage storage) throws OXException {
-        super(session, storage);
+    public FreeBusyPerformer(CalendarSession session, CalendarStorage storage, SelfProtectionFactory protectionFactory) throws OXException {
+        super(session, storage, protectionFactory);
     }
 
     /**

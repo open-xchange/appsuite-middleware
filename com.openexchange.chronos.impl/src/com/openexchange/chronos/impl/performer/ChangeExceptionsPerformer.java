@@ -64,6 +64,7 @@ import java.util.List;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.common.SelfProtectionFactory;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.Utils;
 import com.openexchange.chronos.service.CalendarSession;
@@ -89,8 +90,8 @@ public class ChangeExceptionsPerformer extends AbstractQueryPerformer {
      * @param session The calendar session
      * @param storage The underlying calendar storage
      */
-    public ChangeExceptionsPerformer(CalendarSession session, CalendarStorage storage) throws OXException {
-        super(session, storage);
+    public ChangeExceptionsPerformer(CalendarSession session, CalendarStorage storage, SelfProtectionFactory protectionFactory) throws OXException {
+        super(session, storage, protectionFactory);
     }
 
     /**

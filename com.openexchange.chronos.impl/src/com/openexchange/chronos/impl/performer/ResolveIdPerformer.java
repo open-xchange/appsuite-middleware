@@ -62,6 +62,7 @@ import static com.openexchange.folderstorage.Permission.READ_FOLDER;
 import static com.openexchange.folderstorage.Permission.READ_OWN_OBJECTS;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.common.SelfProtectionFactory;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
@@ -81,8 +82,8 @@ public class ResolveIdPerformer extends AbstractQueryPerformer {
      * @param session The calendar session
      * @param storage The underlying calendar storage
      */
-    public ResolveIdPerformer(CalendarSession session, CalendarStorage storage) throws OXException {
-        super(session, storage);
+    public ResolveIdPerformer(CalendarSession session, CalendarStorage storage, SelfProtectionFactory protectionFactory) throws OXException {
+        super(session, storage, protectionFactory);
     }
 
     /**

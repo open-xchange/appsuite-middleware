@@ -60,6 +60,7 @@ import com.openexchange.chronos.Classification;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.TimeTransparency;
+import com.openexchange.chronos.common.SelfProtectionFactory;
 import com.openexchange.chronos.common.mapping.EventMapper;
 import com.openexchange.chronos.impl.AttendeeHelper;
 import com.openexchange.chronos.impl.Check;
@@ -87,8 +88,8 @@ public class CreatePerformer extends AbstractUpdatePerformer {
      * @param session The calendar session
      * @param folder The calendar folder representing the current view on the events
      */
-    public CreatePerformer(CalendarStorage storage, CalendarSession session, UserizedFolder folder) throws OXException {
-        super(storage, session, folder);
+    public CreatePerformer(CalendarStorage storage, CalendarSession session, UserizedFolder folder, SelfProtectionFactory protectionFactory) throws OXException {
+        super(storage, session, folder, protectionFactory);
     }
 
     /**
@@ -98,6 +99,7 @@ public class CreatePerformer extends AbstractUpdatePerformer {
      * @return The result
      */
     public InternalCalendarResult perform(Event event) throws OXException {
+        protection.checkEvent(event);
         /*
          * check current session user's permissions
          */
@@ -123,7 +125,7 @@ public class CreatePerformer extends AbstractUpdatePerformer {
          * check for conflicts & quota restrictions
          */
         Check.quotaNotExceeded(storage, session);
-        Check.noConflicts(storage, session, newEvent, newAttendees);
+        Check.noConflicts(storage, session, newEvent, newAttendees, protectionFactory);
         /*
          * insert event, attendees, attachments & alarms of user
          */

@@ -53,6 +53,7 @@ import static com.openexchange.chronos.common.CalendarUtils.getSearchTerm;
 import static com.openexchange.chronos.impl.Utils.getFolderIdTerm;
 import static com.openexchange.java.Autoboxing.I;
 import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.common.SelfProtectionFactory;
 import com.openexchange.chronos.impl.Utils;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.SearchOptions;
@@ -78,8 +79,8 @@ public class ForeignEventsPerformer extends AbstractQueryPerformer {
      * @param session The calendar session
      * @param storage The underlying calendar storage
      */
-    public ForeignEventsPerformer(CalendarSession session, CalendarStorage storage) throws OXException {
-        super(session, storage);
+    public ForeignEventsPerformer(CalendarSession session, CalendarStorage storage, SelfProtectionFactory protectionFactory) throws OXException {
+        super(session, storage, protectionFactory);
     }
 
     /**

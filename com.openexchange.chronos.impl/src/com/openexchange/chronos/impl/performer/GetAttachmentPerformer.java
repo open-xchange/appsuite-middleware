@@ -62,6 +62,7 @@ import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.common.SelfProtectionFactory;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.storage.CalendarStorage;
@@ -81,8 +82,8 @@ public class GetAttachmentPerformer extends AbstractQueryPerformer {
      * @param session The calendar session
      * @param storage The underlying calendar storage
      */
-    public GetAttachmentPerformer(CalendarSession session, CalendarStorage storage) {
-        super(session, storage);
+    public GetAttachmentPerformer(CalendarSession session, CalendarStorage storage, SelfProtectionFactory protectionFactory) {
+        super(session, storage, protectionFactory);
     }
 
     /**

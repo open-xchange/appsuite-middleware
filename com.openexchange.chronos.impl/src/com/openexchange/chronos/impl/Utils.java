@@ -684,10 +684,10 @@ public class Utils {
      * @param itrerator The iterator to get the list for
      * @return The list
      */
-    public static <T> List<T> asList(Iterator<T> itrerator) {
+    public static <T> List<T> asList(Iterator<T> iterator) {
         List<T> list = new ArrayList<T>();
-        while (itrerator.hasNext()) {
-            list.add(itrerator.next());
+        while (iterator.hasNext()) {
+            list.add(iterator.next());
         }
         return list;
     }

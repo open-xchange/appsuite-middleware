@@ -50,6 +50,7 @@
 package com.openexchange.chronos.impl.performer;
 
 import static com.openexchange.chronos.impl.Utils.getFolderIdTerm;
+import com.openexchange.chronos.common.SelfProtectionFactory;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
@@ -69,8 +70,8 @@ public class CountEventsPerformer extends AbstractQueryPerformer {
      * @param session The calendar session
      * @param storage The underlying calendar storage
      */
-    public CountEventsPerformer(CalendarSession session, CalendarStorage storage) throws OXException {
-        super(session, storage);
+    public CountEventsPerformer(CalendarSession session, CalendarStorage storage, SelfProtectionFactory protectionFactory) throws OXException {
+        super(session, storage, protectionFactory);
     }
 
     /**

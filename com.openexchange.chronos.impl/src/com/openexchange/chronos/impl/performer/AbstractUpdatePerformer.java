@@ -88,6 +88,7 @@ import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.UnmodifiableEvent;
 import com.openexchange.chronos.common.AlarmUtils;
 import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.common.SelfProtectionFactory;
 import com.openexchange.chronos.common.mapping.AlarmMapper;
 import com.openexchange.chronos.common.mapping.EventMapper;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
@@ -129,13 +130,13 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
      * @param session The calendar session
      * @param folder The calendar folder representing the current view on the events
      */
-    protected AbstractUpdatePerformer(CalendarStorage storage, CalendarSession session, UserizedFolder folder) throws OXException {
-        super(session, storage);
+    protected AbstractUpdatePerformer(CalendarStorage storage, CalendarSession session, UserizedFolder folder, SelfProtectionFactory protectionFactory) throws OXException {
+        super(session, storage, protectionFactory);
         this.folder = folder;
         this.calendarUser = getCalendarUser(session, folder);
         this.calendarUserId = calendarUser.getEntity();
         this.timestamp = new Date();
-        this.resultTracker = new ResultTracker(storage, session, folder, timestamp.getTime());
+        this.resultTracker = new ResultTracker(storage, session, folder, timestamp.getTime(), protection);
     }
 
     /**

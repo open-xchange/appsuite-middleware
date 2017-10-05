@@ -61,6 +61,7 @@ import java.util.Map;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Classification;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.common.SelfProtectionFactory;
 import com.openexchange.chronos.impl.Utils;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.storage.CalendarStorage;
@@ -84,8 +85,8 @@ public class AbstractFreeBusyPerformer extends AbstractQueryPerformer {
      * @param storage The underlying calendar storage
      * @param session The calendar session
      */
-    protected AbstractFreeBusyPerformer(CalendarSession session, CalendarStorage storage) throws OXException {
-        super(session, storage);
+    protected AbstractFreeBusyPerformer(CalendarSession session, CalendarStorage storage, SelfProtectionFactory protectionFactory) throws OXException {
+        super(session, storage, protectionFactory);
     }
 
     protected List<Event> readAttendeeData(List<Event> events, Boolean internal) throws OXException {

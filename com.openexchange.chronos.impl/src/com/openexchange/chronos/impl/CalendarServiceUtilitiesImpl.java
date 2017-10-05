@@ -53,6 +53,7 @@ import static com.openexchange.chronos.impl.Utils.getFolder;
 import static com.openexchange.java.Autoboxing.B;
 import static com.openexchange.java.Autoboxing.L;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.common.SelfProtectionFactory;
 import com.openexchange.chronos.impl.performer.CountEventsPerformer;
 import com.openexchange.chronos.impl.performer.ForeignEventsPerformer;
 import com.openexchange.chronos.impl.performer.ResolveFilenamePerformer;
@@ -72,22 +73,27 @@ import com.openexchange.quota.Quota;
  */
 public class CalendarServiceUtilitiesImpl implements CalendarServiceUtilities {
 
-    private static final CalendarServiceUtilities INSTANCE = new CalendarServiceUtilitiesImpl();
+    private static CalendarServiceUtilities instance = null;
+    final SelfProtectionFactory protection;
 
     /**
      * Gets the calendar service utilities instance.
      *
      * @return The calendar service utilities
      */
-    public static CalendarServiceUtilities getInstance() {
-        return INSTANCE;
+    public static CalendarServiceUtilities getInstance(SelfProtectionFactory protection) {
+        if(instance == null){
+            instance = new CalendarServiceUtilitiesImpl(protection);
+        }
+        return instance;
     }
 
     /**
      * Initializes a new {@link CalendarServiceUtilitiesImpl}.
      */
-    private CalendarServiceUtilitiesImpl() {
+    private CalendarServiceUtilitiesImpl(SelfProtectionFactory protection) {
         super();
+        this.protection = protection;
     }
 
     @Override
@@ -96,7 +102,7 @@ public class CalendarServiceUtilitiesImpl implements CalendarServiceUtilities {
 
             @Override
             protected Boolean execute(CalendarSession session, CalendarStorage storage) throws OXException {
-                return B(new ForeignEventsPerformer(session, storage).perform(getFolder(session, folderId)));
+                return B(new ForeignEventsPerformer(session, storage, protection).perform(getFolder(session, folderId)));
             }
         }.executeQuery().booleanValue();
     }
@@ -107,7 +113,7 @@ public class CalendarServiceUtilitiesImpl implements CalendarServiceUtilities {
 
             @Override
             protected Long execute(CalendarSession session, CalendarStorage storage) throws OXException {
-                return L(new CountEventsPerformer(session, storage).perform(getFolder(session, folderId)));
+                return L(new CountEventsPerformer(session, storage, protection).perform(getFolder(session, folderId)));
             }
         }.executeQuery().intValue();
     }
@@ -151,7 +157,7 @@ public class CalendarServiceUtilitiesImpl implements CalendarServiceUtilities {
 
             @Override
             protected Event execute(CalendarSession session, CalendarStorage storage) throws OXException {
-                return new ResolveIdPerformer(session, storage).perform(id);
+                return new ResolveIdPerformer(session, storage, protection).perform(id);
             }
         }.executeQuery();
     }

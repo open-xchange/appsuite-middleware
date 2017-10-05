@@ -503,7 +503,7 @@ public class EventManager extends AbstractManager {
      * @param userApi The {@link UserApi}
      * @param eventId The {@link EventId}
      */
-    private void rememberEventId(EventId eventId) {
+    public void rememberEventId(EventId eventId) {
         if (eventIds == null) {
             eventIds = new ArrayList<>();
         }

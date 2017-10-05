@@ -69,6 +69,7 @@ import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.Period;
 import com.openexchange.chronos.RecurrenceId;
+import com.openexchange.chronos.common.SelfProtectionFactory;
 import com.openexchange.chronos.impl.Utils;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.SearchOptions;
@@ -90,8 +91,8 @@ public class HasPerformer extends AbstractFreeBusyPerformer {
      * @param storage The underlying calendar storage
      * @param session The calendar session
      */
-    public HasPerformer(CalendarSession session, CalendarStorage storage) throws OXException {
-        super(session, storage);
+    public HasPerformer(CalendarSession session, CalendarStorage storage, SelfProtectionFactory protectionFactory) throws OXException {
+        super(session, storage, protectionFactory);
     }
 
     /**

@@ -72,6 +72,7 @@ import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.DefaultRecurrenceData;
+import com.openexchange.chronos.common.SelfProtectionFactory;
 import com.openexchange.chronos.common.mapping.EventMapper;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.performer.ConflictCheckPerformer;
@@ -501,8 +502,8 @@ public class Check {
      * @param attendees The event's list of attendees, or <code>null</code> in case of a not group-scheduled event
      * @throws OXException {@link CalendarExceptionCodes#EVENT_CONFLICTS}, {@link CalendarExceptionCodes#HARD_EVENT_CONFLICTS}
      */
-    public static void noConflicts(CalendarStorage storage, CalendarSession session, Event event, List<Attendee> attendees) throws OXException {
-        noConflicts(new ConflictCheckPerformer(session, storage).perform(event, attendees));
+    public static void noConflicts(CalendarStorage storage, CalendarSession session, Event event, List<Attendee> attendees, SelfProtectionFactory protection) throws OXException {
+        noConflicts(new ConflictCheckPerformer(session, storage, protection).perform(event, attendees));
     }
 
     /**

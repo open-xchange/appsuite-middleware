@@ -65,6 +65,7 @@ import java.util.Iterator;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.RecurrenceId;
+import com.openexchange.chronos.common.SelfProtectionFactory;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.Check;
 import com.openexchange.chronos.service.CalendarSession;
@@ -86,8 +87,8 @@ public class GetPerformer extends AbstractQueryPerformer {
      * @param session The calendar session
      * @param storage The underlying calendar storage
      */
-    public GetPerformer(CalendarSession session, CalendarStorage storage) throws OXException {
-        super(session, storage);
+    public GetPerformer(CalendarSession session, CalendarStorage storage, SelfProtectionFactory protectionFactory) throws OXException {
+        super(session, storage, protectionFactory);
     }
 
     /**

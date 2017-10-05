@@ -101,6 +101,7 @@ import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.Transp;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.DefaultRecurrenceData;
+import com.openexchange.chronos.common.SelfProtectionFactory;
 import com.openexchange.chronos.common.mapping.AttendeeMapper;
 import com.openexchange.chronos.common.mapping.DefaultItemUpdate;
 import com.openexchange.chronos.common.mapping.EventMapper;
@@ -143,8 +144,8 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
      * @param session The calendar session
      * @param folder The calendar folder representing the current view on the events
      */
-    public UpdatePerformer(CalendarStorage storage, CalendarSession session, UserizedFolder folder) throws OXException {
-        super(storage, session, folder);
+    public UpdatePerformer(CalendarStorage storage, CalendarSession session, UserizedFolder folder, SelfProtectionFactory protectionFactory) throws OXException {
+        super(storage, session, folder, protectionFactory);
     }
 
     /**
@@ -157,6 +158,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
      * @return The update result
      */
     public InternalCalendarResult perform(String objectId, RecurrenceId recurrenceId, Event updatedEventData, long clientTimestamp) throws OXException {
+        protection.checkEvent(updatedEventData);
         /*
          * load original event data
          */
@@ -292,7 +294,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
             if (needsConflictCheck(eventUpdate, attendeeHelper)) {
                 Event changedEvent = EventMapper.getInstance().copy(originalEvent, new Event(), (EventField[]) null);
                 changedEvent = EventMapper.getInstance().copy(eventUpdate.getUpdate(), changedEvent, (EventField[]) null);
-                Check.noConflicts(storage, session, changedEvent, newAttendees);
+                Check.noConflicts(storage, session, changedEvent, newAttendees, protectionFactory);
             }
             if (needsSequenceNumberIncrement(eventUpdate, attendeeHelper)) {
                 /*
