@@ -49,7 +49,7 @@
 
 package com.openexchange.chronos;
 
-import org.json.JSONObject;
+import java.io.InputStream;
 
 /**
  * {@link SchedJoulesResponse}
@@ -58,15 +58,16 @@ import org.json.JSONObject;
  */
 public class SchedJoulesResponse {
 
-    private JSONObject data;
+    private final InputStream stream;
     private final int statusCode;
 
     /**
      * Initialises a new {@link SchedJoulesResponse}.
      */
-    public SchedJoulesResponse(int statusCode) {
+    public SchedJoulesResponse(int statusCode, InputStream stream) {
         super();
         this.statusCode = statusCode;
+        this.stream = stream;
     }
 
     /**
@@ -74,17 +75,8 @@ public class SchedJoulesResponse {
      *
      * @return The data
      */
-    public JSONObject getData() {
-        return data;
-    }
-
-    /**
-     * Sets the data
-     *
-     * @param data The data to set
-     */
-    public void setData(JSONObject data) {
-        this.data = data;
+    public InputStream getData() {
+        return stream;
     }
 
     /**

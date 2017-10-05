@@ -21,7 +21,6 @@ Import-Package: com.openexchange.ajax.fileholder,
  com.openexchange.tools.arrays,
  com.openexchange.tools.id,
  javax.mail.internet,
- org.json,
  org.osgi.framework,
  org.osgi.service.event,
  org.slf4j
