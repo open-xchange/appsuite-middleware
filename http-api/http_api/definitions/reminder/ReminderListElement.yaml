@@ -2,4 +2,5 @@ type: object
 properties:
   id:
     type: integer
+    format: int64
     description: The ID of the reminder.
