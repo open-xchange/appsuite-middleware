@@ -1,3 +1,4 @@
+package com.openexchange.chronos.schedjoules;
 /*
  *
  *    OPEN-XCHANGE legal information
@@ -28,7 +29,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2017-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,75 +48,54 @@
  *
  */
 
-package com.openexchange.chronos.impl.schedjoules.api;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+
+import java.net.URL;
+import org.json.JSONObject;
+import com.openexchange.chronos.Calendar;
+import com.openexchange.exception.OXException;
 
 /**
- * {@link SchedJoulesRequest}
+ * {@link SchedJoulesService}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-class SchedJoulesRequest {
-
-    private final String path;
-    private final Map<String, String> queryParameters;
-    private final HttpMethod method;
+public interface SchedJoulesService {
 
     /**
-     * Initialises a new {@link SchedJoulesRequest}.
-     */
-    public SchedJoulesRequest(String path) {
-        this(HttpMethod.GET, path);
-    }
-
-    /**
-     * Initialises a new {@link SchedJoulesRequest}.
-     */
-    public SchedJoulesRequest(HttpMethod method, String path) {
-        super();
-        this.method = method;
-        this.path = path;
-        queryParameters = new HashMap<>();
-    }
-
-    /**
-     * Sets a query parameter. Any previously query parameter with the same name
-     * will be replaced.
+     * Retrieves the SchedJoules page with the specified identifier
      * 
-     * @param name The name of the parameter
-     * @param value The value of the parameter
+     * @param pageId The page identifier
+     * @return The {@link JSONObject}
+     * @throws OXException if an error is occurred
      */
-    public void setQueryParameter(String name, String value) {
-        queryParameters.put(name, value);
-    }
+    JSONObject getPage(int pageId) throws OXException;
 
     /**
-     * Returns an unmodifiable {@link Map} with the query parameters
+     * Retrieves the starting SchedJoules page.
      * 
-     * @return an unmodifiable {@link Map} with the query parameters
+     * @return The {@link JSONObject}
+     * @throws OXException if an error is occurred
      */
-    public Map<String, String> getQueryParameters() {
-        return Collections.unmodifiableMap(queryParameters);
-    }
+    JSONObject getRoot() throws OXException;
 
     /**
-     * Gets the path
-     *
-     * @return The path
+     * Retrieves the starting SchedJoules page for the specified location
+     * in the specified language
+     * 
+     * @param locale The locale to use
+     * @param language The language to use
+     * @return The {@link JSONObject}
+     * @throws OXException if an error is occurred
      */
-    public String getPath() {
-        return path;
-    }
+    JSONObject getRoot(String locale, String language);
 
     /**
-     * Gets the method
-     *
-     * @return The method
+     * Retrieves the {@link Calendar} data from the specified {@link URL}
+     * 
+     * @param url The {@link URL} from which to fetch the {@link Calendar} data
+     * @return the {@link Calendar}
+     * @throws OXException if an error is occurred
      */
-    public HttpMethod getMethod() {
-        return method;
-    }
+    Calendar fetchCalendar(URL url) throws OXException;
 }

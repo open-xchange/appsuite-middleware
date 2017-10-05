@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.chronos.impl.schedjoules.api;
+package com.openexchange.chronos.schedjoules.api;
 
 import java.io.IOException;
 import java.net.URI;
@@ -61,8 +61,8 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.impl.client.CloseableHttpClient;
-import com.openexchange.chronos.impl.osgi.Services;
-import com.openexchange.chronos.impl.schedjoules.SchedJoulesProperty;
+import com.openexchange.chronos.schedjoules.impl.SchedJoulesProperty;
+import com.openexchange.chronos.schedjoules.osgi.Services;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
@@ -189,14 +189,21 @@ class SchedJoulesRESTClient {
             HttpResponse httpResponse = httpClient.execute(httpRequest);
 
             int statusCode = assertStatusCode(httpResponse);
+            SchedJoulesResponse response = new SchedJoulesResponse(statusCode);
 
+            if (statusCode == 304) {
+                // Ok, nothing was modified, return as is
+                return response;
+
+            }
             HttpEntity entity = httpResponse.getEntity();
             if (entity == null) {
                 // Huh? We always expect a body
                 throw new OXException(1138, "No body was returned");
             }
 
-            return new SchedJoulesResponse(statusCode, entity.getContent());
+            response.setStream(entity.getContent());
+            return response;
         } catch (ClientProtocolException e) {
             throw new OXException(1138, "Client protocol error", e);
         } catch (IOException e) {
@@ -205,7 +212,7 @@ class SchedJoulesRESTClient {
     }
 
     /**
-     * Asserts the status code
+     * Asserts the status code for any errorss
      * 
      * @param httpResponse The {@link HttpResponse}'s status code to assert
      * @return The status code

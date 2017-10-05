@@ -46,7 +46,7 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
-package com.openexchange.chronos.impl.schedjoules.api;
+package com.openexchange.chronos.schedjoules.api;
 
 
 /**

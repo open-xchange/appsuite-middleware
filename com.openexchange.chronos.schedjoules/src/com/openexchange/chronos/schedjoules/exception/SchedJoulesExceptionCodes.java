@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.chronos.impl.schedjoules.exception;
+package com.openexchange.chronos.schedjoules.exception;
 
 import static com.openexchange.exception.OXExceptionStrings.MESSAGE;
 import com.openexchange.exception.Category;

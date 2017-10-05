@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2017-2020 OX Software GmbH
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,73 +47,20 @@
  *
  */
 
-package com.openexchange.chronos.impl.schedjoules;
-
-import com.openexchange.config.lean.Property;
+package com.openexchange.chronos.schedjoules.api;
 
 /**
- * {@link SchedJoulesProperty}
+ * {@link SchedJoulesCommonParameter}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public enum SchedJoulesProperty implements Property {
+public enum SchedJoulesCommonParameter {
     /**
-     * The API key that gives access to the complete API of SchedJoules.
+     * The location parameter. Defaults to 'us'
      */
-    apiKey;
-
-    private final String fqn;
-    private final Object defaultValue;
-    private static final String PREFIX = "com.openexchange.chronos.schedjoules.";
-
+    location,
     /**
-     * Initialises a new {@link UserFeedbackMailProperty}.
-     *
-     * @param defaultValue The default value of the property
-     * @param optional Whether the property is optional
+     * The locale parameter. Defaults to 'en'
      */
-    private SchedJoulesProperty() {
-        this("", PREFIX);
-    }
-
-    /**
-     * Initialises a new {@link UserFeedbackMailProperty}.
-     *
-     * @param defaultValue The default value of the property
-     * @param optional Whether the property is optional
-     */
-    private SchedJoulesProperty(Object defaultValue) {
-        this(defaultValue, PREFIX);
-    }
-
-    /**
-     * Initialises a new {@link UserFeedbackMailProperty}.
-     *
-     * @param defaultValue The default value of the property
-     * @param optional Whether the property is optional
-     */
-    private SchedJoulesProperty(Object defaultValue, String fqn) {
-        this.defaultValue = defaultValue;
-        this.fqn = fqn;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.config.lean.Property#getFQPropertyName()
-     */
-    @Override
-    public String getFQPropertyName() {
-        return fqn + name();
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.config.lean.Property#getDefaultValue()
-     */
-    @Override
-    public Object getDefaultValue() {
-        return defaultValue;
-    }
+    locale
 }

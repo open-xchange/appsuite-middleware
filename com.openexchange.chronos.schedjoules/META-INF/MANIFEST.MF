@@ -1,0 +1,24 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: The SchedJoules Bundle
+Bundle-SymbolicName: com.openexchange.chronos.schedjoules
+Bundle-Version: 7.10.0
+Bundle-Vendor: OX Software GmbH
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Import-Package: com.openexchange.chronos,
+ com.openexchange.chronos.exception,
+ com.openexchange.config.lean,
+ com.openexchange.exception,
+ com.openexchange.java,
+ com.openexchange.osgi,
+ com.openexchange.rest.client.httpclient,
+ com.openexchange.server,
+ org.apache.commons.io;version="2.2.0",
+ org.apache.http;version="4.4.5",
+ org.apache.http.client;version="4.5.2",
+ org.apache.http.client.methods;version="4.5.2",
+ org.apache.http.impl.client;version="4.5.2",
+ org.apache.http.message;version="4.4.5",
+ org.json,
+ org.osgi.framework
+Bundle-Activator: com.openexchange.chronos.schedjoules.osgi.SchedJoulesActivator

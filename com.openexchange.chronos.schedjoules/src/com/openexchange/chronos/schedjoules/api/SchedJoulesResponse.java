@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2017-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,27 +47,52 @@
  *
  */
 
-package com.openexchange.chronos.impl.schedjoules.api;
+package com.openexchange.chronos.schedjoules.api;
+
+import java.io.InputStream;
 
 /**
- * {@link SchedJoulesRESTBindPoint}
+ * {@link SchedJoulesResponse}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public enum SchedJoulesRESTBindPoint {
-    /**
-     * @see <a href="https://github.com/schedjoules/calendar-store-api/blob/master/details/pages.md">https://github.com/schedjoules/calendar-store-api/blob/master/details/pages.md</a>
-     */
-    pages,
+class SchedJoulesResponse {
 
-    ;
+    private InputStream stream;
+    private final int statusCode;
 
     /**
-     * Returns the absolute path of the REST bind point
-     * 
-     * @return the absolute path of the REST bind point
+     * Initialises a new {@link SchedJoulesResponse}.
      */
-    public String getAbsolutePath() {
-        return "/" + name();
+    public SchedJoulesResponse(int statusCode) {
+        super();
+        this.statusCode = statusCode;
+    }
+
+    /**
+     * Gets the data
+     *
+     * @return The data
+     */
+    public InputStream getStream() {
+        return stream;
+    }
+
+    /**
+     * Gets the statusCode
+     *
+     * @return The statusCode
+     */
+    public int getStatusCode() {
+        return statusCode;
+    }
+
+    /**
+     * Sets the stream
+     *
+     * @param stream The stream to set
+     */
+    public void setStream(InputStream stream) {
+        this.stream = stream;
     }
 }

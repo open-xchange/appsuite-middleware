@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2017-2020 OX Software GmbH
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,54 +47,27 @@
  *
  */
 
-package com.openexchange.chronos.impl.schedjoules;
-
-import org.json.JSONObject;
-import com.openexchange.chronos.impl.schedjoules.api.SchedJoulesAPI;
-import com.openexchange.chronos.service.SchedJoulesService;
-import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceLookup;
+package com.openexchange.chronos.schedjoules.api;
 
 /**
- * {@link SchedJoulesServiceImpl}
+ * {@link SchedJoulesRESTBindPoint}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-//FIXME: abstract for the time being
-public abstract class SchedJoulesServiceImpl implements SchedJoulesService {
+public enum SchedJoulesRESTBindPoint {
+    /**
+     * @see <a href="https://github.com/schedjoules/calendar-store-api/blob/master/details/pages.md">https://github.com/schedjoules/calendar-store-api/blob/master/details/pages.md</a>
+     */
+    pages,
 
-    private final ServiceLookup services;
-    private final SchedJoulesAPI api;
+    ;
 
     /**
-     * Initialises a new {@link SchedJoulesServiceImpl}.
+     * Returns the absolute path of the REST bind point
      * 
-     * @param services The {@link ServiceLookup} instance
-     * @throws OXException if the {@link SchedJoulesAPI} cannot be initialised
+     * @return the absolute path of the REST bind point
      */
-    public SchedJoulesServiceImpl(ServiceLookup services) throws OXException {
-        super();
-        this.services = services;
-        api = new SchedJoulesAPI();
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.chronos.service.SchedJoulesService#getRoot()
-     */
-    @Override
-    public JSONObject getRoot() throws OXException {
-        return api.pages().getRootPage();
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.chronos.service.SchedJoulesService#getPage(int)
-     */
-    @Override
-    public JSONObject getPage(int pageId) throws OXException {
-        return api.pages().getPage(pageId);
+    public String getAbsolutePath() {
+        return "/" + name();
     }
 }

@@ -47,10 +47,12 @@
  *
  */
 
-package com.openexchange.chronos.impl.schedjoules.api;
+package com.openexchange.chronos.schedjoules.api;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import org.apache.commons.io.IOUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -66,12 +68,19 @@ public class SchedJoulesPagesAPI {
 
     private final SchedJoulesRESTClient client;
 
+    //TODO: Maybe use Hazelcast instead?
+    /**
+     * Caches the resourceId and the ETag for that resource
+     */
+    private ConcurrentMap<String, SchedJoulesItem> etagCache;
+
     /**
      * Initialises a new {@link SchedJoulesPagesAPI}.
      */
     public SchedJoulesPagesAPI(SchedJoulesRESTClient client) {
         super();
         this.client = client;
+        etagCache = new ConcurrentHashMap<>();
     }
 
     /**
@@ -111,7 +120,7 @@ public class SchedJoulesPagesAPI {
 
         return parseInputStream(response);
     }
-    
+
     /**
      * Parses the {@link InputStream} from the specified {@link SchedJoulesResponse}
      * as a {@link JSONObject}
