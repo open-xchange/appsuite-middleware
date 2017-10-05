@@ -49,37 +49,56 @@
 
 package com.openexchange.ajax.contact;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import com.openexchange.test.concurrent.ParallelSuite;
+import static org.junit.Assert.*;
+import java.util.UUID;
+import org.junit.Test;
+import com.openexchange.ajax.user.actions.UpdateRequest;
+import com.openexchange.ajax.user.actions.UpdateResponse;
+import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.container.FolderObject;
 
-@RunWith(ParallelSuite.class)
-@Suite.SuiteClasses({
-    Bug4409Test.class,
-    Bug6335Test.class,
-    Bug12716Test.class,
-    Bug13931Test.class,
-    Bug13960Test.class,
-    Bug15317Test.class,
-    Bug15315Test.class,
-    Bug15937Test.class,
-    Bug16515Test.class,
-    Bug16618Test.class,
-    Bug17513Test.class,
-    Bug13915FileAsViaJSON.class,
-    Bug18608Test_SpecialCharsInEmailTest.class,
-    Bug19827Test.class,
-    Bug25300Test.class,
-    Bug28185Test.class,
-    Bug31993Test.class,
-    Bug34075Test.class,
-    Bug32635Test.class,
-    Bug35059Test.class,
-    Bug36943Test.class,
-    Bug42225Test.class,
-    Bug46654Test.class,
-    Bug55703Test.class,
-})
-public final class ContactBugTestSuite  {
+/**
+ * {@link Bug55703Test}
+ *
+ * "oxadmin" account information can be altered by users
+ *
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @since v7.10.0
+ */
+public class Bug55703Test extends AbstractManagedContactTest {
+
+    /**
+     * Initializes a new {@link Bug55703Test}.
+     *
+     * @param name The test name
+     */
+    public Bug55703Test() {
+        super();
+    }
+
+    @Test
+    public void testUpdateOXAdmin() throws Exception {
+        /*
+         * get current contact for the admin (assume oxadmin always has contact identifier '1')
+         */
+        Contact originalContact = cotm.getAction(FolderObject.SYSTEM_LDAP_FOLDER_ID, 1);
+        /*
+         * try and update the contact through the 'user' module
+         */
+        Contact modifiedContact = new Contact();
+        modifiedContact.setParentFolderID(originalContact.getParentFolderID());
+        modifiedContact.setObjectID(originalContact.getObjectID());
+        modifiedContact.setInternalUserId(originalContact.getInternalUserId());
+        modifiedContact.setNote(UUID.randomUUID().toString());
+        modifiedContact.setLastModified(originalContact.getLastModified());
+        UpdateResponse updateResponse = getClient().execute(new UpdateRequest(modifiedContact, null, false));
+        assertTrue("No errors when updating the admin contact",  updateResponse.hasError());
+        assertEquals("Unexpected error code", "CON-0176", updateResponse.getException().getErrorCode());
+        /*
+         * check that the admin contact was not modified
+         */
+        Contact reloadedContact = cotm.getAction(FolderObject.SYSTEM_LDAP_FOLDER_ID, 1);
+        assertEquals("Note was modified", originalContact.getNote(), reloadedContact.getNote());
+    }
 
 }
