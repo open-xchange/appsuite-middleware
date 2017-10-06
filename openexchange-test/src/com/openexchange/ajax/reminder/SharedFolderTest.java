@@ -104,6 +104,7 @@ public class SharedFolderTest extends AbstractAJAXSession {
         super();
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -219,6 +220,7 @@ public class SharedFolderTest extends AbstractAJAXSession {
         client2.execute(new DeleteRequest(secondAppointment));
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {
@@ -235,6 +237,7 @@ public class SharedFolderTest extends AbstractAJAXSession {
         appointment.setParentFolderID(sharedFolder.getObjectID());
         appointment.setIgnoreConflicts(true);
         cal = TimeTools.createCalendar(tz);
+        cal.add(Calendar.DAY_OF_YEAR, 1);
         appointment.setStartDate(cal.getTime());
         cal.add(Calendar.HOUR, 2);
         appointment.setEndDate(cal.getTime());

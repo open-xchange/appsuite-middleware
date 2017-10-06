@@ -355,8 +355,8 @@ public abstract class AbstractReminderAction implements AJAXActionService {
         reminder.setFolder(Integer.valueOf(trigger.getFolder()));
         reminder.setModule(Types.APPOINTMENT);
         reminder.setUser(trigger.getUserId());
-        reminder.setObjectId(Integer.valueOf(event.getId())); // AlarmTrigger don't have an id
-        reminder.setTargetId(trigger.getAlarm());
+        reminder.setObjectId(trigger.getAlarm()); // Store the alarm id instead of the reminder id
+        reminder.setTargetId(Integer.valueOf(event.getId()));
 
         if (CalendarUtils.isSeriesMaster(event)) {
             SortedSet<RecurrenceId> exceptions = event.getDeleteExceptionDates();

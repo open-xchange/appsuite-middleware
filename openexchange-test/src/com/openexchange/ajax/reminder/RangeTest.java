@@ -73,7 +73,7 @@ public class RangeTest extends AbstractAJAXSession {
 
     /**
      * Default constructor.
-     * 
+     *
      * @param name Test name.
      */
     public RangeTest() {
@@ -87,6 +87,7 @@ public class RangeTest extends AbstractAJAXSession {
         final TimeZone timeZone = client.getValues().getTimeZone();
 
         final Calendar c = TimeTools.createCalendar(timeZone);
+        c.add(Calendar.DAY_OF_YEAR, 1);
 
         final int folderId = client.getValues().getPrivateAppointmentFolder();
 
@@ -103,27 +104,32 @@ public class RangeTest extends AbstractAJAXSession {
 
         final CommonInsertResponse aInsertR = Executor.execute(client, new InsertRequest(appointmentObj, timeZone));
         final int targetId = aInsertR.getId();
-        final ReminderObject[] reminderObj = Executor.execute(client, new RangeRequest(c.getTime())).getReminder(timeZone);
+        Date timestamp = aInsertR.getTimestamp();
+        try {
+            final ReminderObject[] reminderObj = Executor.execute(client, new RangeRequest(new Date(c.getTime().getTime()))).getReminder(timeZone);
 
-        int pos = -1;
-        for (int a = 0; a < reminderObj.length; a++) {
-            if (reminderObj[a].getTargetId() == targetId) {
-                pos = a;
+            int pos = -1;
+            for (int a = 0; a < reminderObj.length; a++) {
+                if (reminderObj[a].getTargetId() == targetId) {
+                    pos = a;
+                }
             }
+
+            assertTrue("reminder not found in response", (pos > -1));
+            assertTrue("object id not found", reminderObj[pos].getObjectId() > 0);
+            assertNotNull("last modified is null", reminderObj[pos].getLastModified());
+            assertEquals("target id is not equals", targetId, reminderObj[pos].getTargetId());
+            assertEquals("folder id is not equals", folderId, reminderObj[pos].getFolder());
+            assertEquals("user id is not equals", userId, reminderObj[pos].getUser());
+
+            c.add(Calendar.MINUTE, -45);
+            final Date expected = c.getTime();
+            assertEquals("alarm is not equals", expected, reminderObj[pos].getDate());
+
+            final GetResponse aGetR = Executor.execute(client, new GetRequest(folderId, targetId));
+            timestamp = aGetR.getTimestamp();
+        } finally {
+            Executor.execute(client, new DeleteRequest(targetId, folderId, timestamp));
         }
-
-        assertTrue("reminder not found in response", (pos > -1));
-        assertTrue("object id not found", reminderObj[pos].getObjectId() > 0);
-        assertNotNull("last modified is null", reminderObj[pos].getLastModified());
-        assertEquals("target id is not equals", targetId, reminderObj[pos].getTargetId());
-        assertEquals("folder id is not equals", folderId, reminderObj[pos].getFolder());
-        assertEquals("user id is not equals", userId, reminderObj[pos].getUser());
-
-        c.add(Calendar.MINUTE, -45);
-        final Date expected = c.getTime();
-        assertEquals("alarm is not equals", expected, reminderObj[pos].getDate());
-
-        final GetResponse aGetR = Executor.execute(client, new GetRequest(folderId, targetId));
-        Executor.execute(client, new DeleteRequest(targetId, folderId, aGetR.getTimestamp()));
     }
 }
