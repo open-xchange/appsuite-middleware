@@ -104,7 +104,7 @@ final class SchedJoulesStreamParsers {
 
             try (InputStream inputStream = Streams.bufferedInputStreamFor(response.getStream())) {
                 return iCalService.importICal(inputStream, parameters);
-            } catch (UnsupportedOperationException | IOException e) {
+            } catch (IOException e) {
                 throw CalendarExceptionCodes.UNEXPECTED_ERROR.create(e.getMessage());
             }
         });
