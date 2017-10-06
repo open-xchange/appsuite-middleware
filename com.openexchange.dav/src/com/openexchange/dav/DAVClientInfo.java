@@ -49,65 +49,64 @@
 
 package com.openexchange.dav;
 
-import com.openexchange.ajax.Client;
+import java.util.Locale;
 import com.openexchange.clientinfo.ClientInfo;
-import com.openexchange.clientinfo.ClientInfoProvider;
-import com.openexchange.java.Strings;
-import com.openexchange.session.Session;
+import com.openexchange.clientinfo.ClientInfoType;
+
 
 /**
- * {@link DAVClientInfoProvider}
+ * {@link DAVClientInfo}
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since v7.10.0
  */
-public class DAVClientInfoProvider implements ClientInfoProvider {
+public class DAVClientInfo implements ClientInfo {
 
-    /**
-     * Initializes a new {@link DAVClientInfoProvider}.
-     */
-    public DAVClientInfoProvider() {
+    private final String platform;
+    private final String platformVersion;
+    private final String app;
+    private final String appVersion;
+
+    public DAVClientInfo(String platform, String platformVersion, String app, String appVersion) {
         super();
+        this.platform = platform;
+        this.platformVersion = platformVersion;
+        this.app = app;
+        this.appVersion = appVersion;
+    }
+
+    public DAVClientInfo(String app) {
+        this(null, null, app, null);
     }
 
     @Override
-    public ClientInfo getClientInfo(Session session) {
-        if (null == session || false == isDAVClient(session.getClient())) {
-            return null;
-        }
-        DAVUserAgent userAgent = getDAVUserAgent(session);
-        return new DAVClientInfo(userAgent.getReadableName());
+    public ClientInfoType getType() {
+        return ClientInfoType.SYNC;
     }
 
     @Override
-    public ClientInfo getClientInfo(String clientId) {
-        if (Strings.isEmpty(clientId) || !isDAVClient(clientId)) {
-            return null;
-        }
-        Client client = Client.getClientByID(clientId);
-        if (Client.CALDAV.equals(client)) {
-            return new DAVClientInfo(DAVUserAgent.GENERIC_CALDAV.getReadableName());
-        }
-        if (Client.CARDDAV.equals(client)) {
-            return new DAVClientInfo(DAVUserAgent.GENERIC_CARDDAV.getReadableName());
-        }
-        return null;
+    public String getPlatform() {
+        return platform;
     }
 
-    private static DAVUserAgent getDAVUserAgent(Session session) {
-        Object userAgentParameter = session.getParameter(Session.PARAM_USER_AGENT);
-        if (null != userAgentParameter && String.class.isInstance(userAgentParameter)) {
-            return DAVUserAgent.parse((String) userAgentParameter);
-        }
-        return DAVUserAgent.UNKNOWN;
+    @Override
+    public String getPlatformVersion() {
+        return platformVersion;
     }
 
-    private static boolean isDAVClient(String clientId) {
-        if (null != clientId) {
-            Client client = Client.getClientByID(clientId);
-            return Client.CALDAV.equals(client) || Client.CARDDAV.equals(client);
-        }
-        return false;
+    @Override
+    public String getApp() {
+        return app;
+    }
+
+    @Override
+    public String getAppVersion() {
+        return appVersion;
+    }
+
+    @Override
+    public String toString(Locale locale) {
+        return app;
     }
 
 }
