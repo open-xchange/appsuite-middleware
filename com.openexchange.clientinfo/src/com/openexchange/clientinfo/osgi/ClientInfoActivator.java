@@ -80,7 +80,7 @@ public class ClientInfoActivator extends HousekeepingActivator {
         track(ClientInfoProvider.class, set);
         openTrackers();
         registerService(ClientInfoService.class, service);
-        registerService(ClientInfoProvider.class, new WebClientInfoProvider());
+        registerService(ClientInfoProvider.class, new WebClientInfoProvider(), 80);
     }
 
 }
