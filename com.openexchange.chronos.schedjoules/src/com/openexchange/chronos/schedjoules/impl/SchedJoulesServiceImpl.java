@@ -50,8 +50,8 @@
 package com.openexchange.chronos.schedjoules.impl;
 
 import java.net.URL;
-import org.json.JSONObject;
 import com.openexchange.chronos.Calendar;
+import com.openexchange.chronos.schedjoules.SchedJoulesResult;
 import com.openexchange.chronos.schedjoules.SchedJoulesService;
 import com.openexchange.chronos.schedjoules.api.SchedJoulesAPI;
 import com.openexchange.exception.OXException;
@@ -86,18 +86,8 @@ public class SchedJoulesServiceImpl implements SchedJoulesService {
      * @see com.openexchange.chronos.service.SchedJoulesService#getRoot()
      */
     @Override
-    public JSONObject getRoot() throws OXException {
-        return api.pages().getRootPage();
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.chronos.service.SchedJoulesService#getPage(int)
-     */
-    @Override
-    public JSONObject getPage(int pageId) throws OXException {
-        return api.pages().getPage(pageId);
+    public SchedJoulesResult getRoot() throws OXException {
+        return new SchedJoulesResult(api.pages().getRootPage());
     }
 
     /*
@@ -106,9 +96,28 @@ public class SchedJoulesServiceImpl implements SchedJoulesService {
      * @see com.openexchange.chronos.service.SchedJoulesService#getRoot(java.lang.String, java.lang.String)
      */
     @Override
-    public JSONObject getRoot(String locale, String language) {
-        // TODO Auto-generated method stub
-        return null;
+    public SchedJoulesResult getRoot(String locale, String location) throws OXException {
+        return new SchedJoulesResult(api.pages().getRootPage(locale, location));
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.chronos.service.SchedJoulesService#getPage(int)
+     */
+    @Override
+    public SchedJoulesResult getPage(int pageId) throws OXException {
+        return new SchedJoulesResult(api.pages().getPage(pageId));
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.chronos.schedjoules.SchedJoulesService#getPage(int, java.lang.String)
+     */
+    @Override
+    public SchedJoulesResult getPage(int pageId, String locale) throws OXException {
+        return new SchedJoulesResult(api.pages().getPage(pageId, locale));
     }
 
     /*
@@ -118,7 +127,6 @@ public class SchedJoulesServiceImpl implements SchedJoulesService {
      */
     @Override
     public Calendar fetchCalendar(URL url) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        return api.pages().getCalendar(url);
     }
 }

@@ -46,76 +46,14 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+package com.openexchange.chronos.schedjoules.api.client;
 
-package com.openexchange.chronos.schedjoules.api;
-
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
- * {@link SchedJoulesRequest}
+ * {@link HttpMethod}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-class SchedJoulesRequest {
-
-    private final String path;
-    private final Map<String, String> queryParameters;
-    private final HttpMethod method;
-
-    /**
-     * Initialises a new {@link SchedJoulesRequest}.
-     */
-    public SchedJoulesRequest(String path) {
-        this(HttpMethod.GET, path);
-    }
-
-    /**
-     * Initialises a new {@link SchedJoulesRequest}.
-     */
-    public SchedJoulesRequest(HttpMethod method, String path) {
-        super();
-        this.method = method;
-        this.path = path;
-        queryParameters = new HashMap<>();
-    }
-
-    /**
-     * Sets a query parameter. Any previously query parameter with the same name
-     * will be replaced.
-     * 
-     * @param name The name of the parameter
-     * @param value The value of the parameter
-     */
-    public void setQueryParameter(String name, String value) {
-        queryParameters.put(name, value);
-    }
-
-    /**
-     * Returns an unmodifiable {@link Map} with the query parameters
-     * 
-     * @return an unmodifiable {@link Map} with the query parameters
-     */
-    public Map<String, String> getQueryParameters() {
-        return Collections.unmodifiableMap(queryParameters);
-    }
-
-    /**
-     * Gets the path
-     *
-     * @return The path
-     */
-    public String getPath() {
-        return path;
-    }
-
-    /**
-     * Gets the method
-     *
-     * @return The method
-     */
-    public HttpMethod getMethod() {
-        return method;
-    }
+public enum HttpMethod {
+    GET;
 }

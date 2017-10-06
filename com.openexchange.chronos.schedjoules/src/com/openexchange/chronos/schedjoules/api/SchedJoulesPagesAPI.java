@@ -51,13 +51,22 @@ package com.openexchange.chronos.schedjoules.api;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import org.apache.commons.io.IOUtils;
+import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.chronos.Calendar;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
+import com.openexchange.chronos.ical.ICalParameters;
+import com.openexchange.chronos.ical.ICalService;
+import com.openexchange.chronos.schedjoules.api.client.SchedJoulesRESTBindPoint;
+import com.openexchange.chronos.schedjoules.api.client.SchedJoulesRESTClient;
+import com.openexchange.chronos.schedjoules.api.client.SchedJoulesRequest;
+import com.openexchange.chronos.schedjoules.api.client.SchedJoulesResponse;
+import com.openexchange.chronos.schedjoules.osgi.Services;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Streams;
 
 /**
  * {@link SchedJoulesPagesAPI}
@@ -66,21 +75,48 @@ import com.openexchange.exception.OXException;
  */
 public class SchedJoulesPagesAPI {
 
+    private static final String DEFAULT_LOCALE = "en";
+    private static final String DEFAULT_LOCATION = "us";
+    private static final String CHARSET = "UTF-8";
+
     private final SchedJoulesRESTClient client;
 
-    //TODO: Maybe use Hazelcast instead?
-    /**
-     * Caches the resourceId and the ETag for that resource
-     */
-    private ConcurrentMap<String, SchedJoulesItem> etagCache;
+    private final Map<StreamParser, SchedJoulesStreamParser<?>> streamParsers;
+
+    private enum StreamParser {
+        JSON,
+        CALENDAR;
+    }
 
     /**
      * Initialises a new {@link SchedJoulesPagesAPI}.
      */
-    public SchedJoulesPagesAPI(SchedJoulesRESTClient client) {
+    SchedJoulesPagesAPI(SchedJoulesRESTClient client) {
         super();
         this.client = client;
-        etagCache = new ConcurrentHashMap<>();
+        streamParsers = new HashMap<>(2);
+
+        // The JSON stream parser
+        streamParsers.put(StreamParser.JSON, (response) -> {
+            try (InputStream inputStream = Streams.bufferedInputStreamFor(response.getStream())) {
+                return new JSONObject(Streams.stream2string(inputStream, CHARSET));
+            } catch (IOException | JSONException e) {
+                throw CalendarExceptionCodes.UNEXPECTED_ERROR.create(e.getMessage());
+            }
+        });
+
+        // The Calendar stream parser
+        streamParsers.put(StreamParser.CALENDAR, (response) -> {
+            ICalService iCalService = Services.getService(ICalService.class);
+            ICalParameters parameters = iCalService.initParameters();
+            parameters.set(ICalParameters.IGNORE_UNSET_PROPERTIES, Boolean.TRUE);
+
+            try (InputStream inputStream = Streams.bufferedInputStreamFor(response.getStream())) {
+                return iCalService.importICal(inputStream, parameters);
+            } catch (UnsupportedOperationException | IOException e) {
+                throw CalendarExceptionCodes.UNEXPECTED_ERROR.create(e.getMessage());
+            }
+        });
     }
 
     /**
@@ -90,12 +126,14 @@ public class SchedJoulesPagesAPI {
      * @throws OXException
      */
     public JSONObject getRootPage() throws OXException {
-        return getRootPage("en", "us");
+        return getRootPage(DEFAULT_LOCALE, DEFAULT_LOCATION);
     }
 
     /**
      * Retrieves the user's current location as an entry point.
      * 
+     * @param locale The user's locale
+     * @param location The users' location
      * @return The page as a {@link JSONObject}
      * @throws OXException if an error is occurred
      */
@@ -104,7 +142,7 @@ public class SchedJoulesPagesAPI {
         request.setQueryParameter(SchedJoulesCommonParameter.location.name(), location);
         request.setQueryParameter(SchedJoulesCommonParameter.locale.name(), locale);
 
-        return parseInputStream(client.executeRequest(request));
+        return (JSONObject) streamParsers.get(StreamParser.JSON).parse(client.executeRequest(request));
     }
 
     /**
@@ -115,28 +153,27 @@ public class SchedJoulesPagesAPI {
      * @throws OXException if an error is occurred
      */
     public JSONObject getPage(int pageId) throws OXException {
-        SchedJoulesRequest request = new SchedJoulesRequest(SchedJoulesRESTBindPoint.pages.getAbsolutePath() + "/" + pageId);
-        SchedJoulesResponse response = client.executeRequest(request);
-
-        return parseInputStream(response);
+        return getPage(pageId, DEFAULT_LOCALE);
     }
 
     /**
-     * Parses the {@link InputStream} from the specified {@link SchedJoulesResponse}
-     * as a {@link JSONObject}
+     * Retrieves the page with the specified identifier
      * 
-     * @param response The {@link SchedJoulesResponse}
-     * @return The {@link JSONObject} from the response
-     * @throws OXException if a JSON parsing error or an I/O error occurs
+     * @param pageId The page identifier
+     * @param locale The user's locale
+     * @param location The users' location
+     * @return The page as a {@link JSONObject}
+     * @throws OXException if an error is occurred
      */
-    private JSONObject parseInputStream(SchedJoulesResponse response) throws OXException {
-        try (InputStream inputStream = response.getStream()) {
-            String body = IOUtils.toString(inputStream, "UTF-8");
-            return new JSONObject(body);
-        } catch (IOException e) {
-            throw CalendarExceptionCodes.UNEXPECTED_ERROR.create(e.getMessage());
-        } catch (JSONException e) {
-            throw CalendarExceptionCodes.UNEXPECTED_ERROR.create(e.getMessage());
-        }
+    public JSONObject getPage(int pageId, String locale) throws OXException {
+        SchedJoulesRequest request = new SchedJoulesRequest(SchedJoulesRESTBindPoint.pages.getAbsolutePath() + "/" + pageId);
+        request.setQueryParameter(SchedJoulesCommonParameter.locale.name(), locale);
+
+        return (JSONObject) streamParsers.get(StreamParser.JSON).parse(client.executeRequest(request));
+    }
+
+    public Calendar getCalendar(URL url) throws OXException {
+        SchedJoulesRequest request = new SchedJoulesRequest(url.toString());
+        return (Calendar) streamParsers.get(StreamParser.CALENDAR).parse(client.executeRequest(request));
     }
 }

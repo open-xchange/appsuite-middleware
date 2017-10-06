@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2017-2020 OX Software GmbH
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -50,49 +50,22 @@
 package com.openexchange.chronos.schedjoules.api;
 
 import java.io.InputStream;
+import com.openexchange.chronos.schedjoules.api.client.SchedJoulesResponse;
+import com.openexchange.exception.OXException;
 
 /**
- * {@link SchedJoulesResponse}
+ * {@link SchedJoulesStreamParser}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-class SchedJoulesResponse {
-
-    private InputStream stream;
-    private final int statusCode;
+interface SchedJoulesStreamParser<R> {
 
     /**
-     * Initialises a new {@link SchedJoulesResponse}.
+     * Parses the {@link InputStream} from the specified {@link SchedJoulesResponse}
+     * 
+     * @param response The {@link SchedJoulesResponse}
+     * @return The parsed {@link R} object
+     * @throws OXException if a parsing error occurs
      */
-    public SchedJoulesResponse(int statusCode) {
-        super();
-        this.statusCode = statusCode;
-    }
-
-    /**
-     * Gets the data
-     *
-     * @return The data
-     */
-    public InputStream getStream() {
-        return stream;
-    }
-
-    /**
-     * Gets the statusCode
-     *
-     * @return The statusCode
-     */
-    public int getStatusCode() {
-        return statusCode;
-    }
-
-    /**
-     * Sets the stream
-     *
-     * @param stream The stream to set
-     */
-    public void setStream(InputStream stream) {
-        this.stream = stream;
-    }
+    R parse(SchedJoulesResponse response) throws OXException;
 }

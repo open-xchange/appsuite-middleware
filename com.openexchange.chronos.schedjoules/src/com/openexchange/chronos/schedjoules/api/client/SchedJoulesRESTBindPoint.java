@@ -46,14 +46,32 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
-package com.openexchange.chronos.schedjoules.api;
 
+package com.openexchange.chronos.schedjoules.api.client;
 
 /**
- * {@link HttpMethod}
+ * {@link SchedJoulesRESTBindPoint}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public enum HttpMethod {
-    GET;
+public enum SchedJoulesRESTBindPoint {
+    /**
+     * @see <a href="https://github.com/schedjoules/calendar-store-api/blob/master/details/pages.md">https://github.com/schedjoules/calendar-store-api/blob/master/details/pages.md</a>
+     */
+    pages,
+
+    /**
+     * @see <a href="https://github.com/schedjoules/calendar-store-api#calendars">https://github.com/schedjoules/calendar-store-api#calendars</a>
+     */
+    calendar,
+    ;
+
+    /**
+     * Returns the absolute path of the REST bind point
+     * 
+     * @return the absolute path of the REST bind point
+     */
+    public String getAbsolutePath() {
+        return "/" + name();
+    }
 }

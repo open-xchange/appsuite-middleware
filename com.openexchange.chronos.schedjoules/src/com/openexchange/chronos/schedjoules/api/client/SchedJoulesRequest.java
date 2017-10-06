@@ -47,69 +47,75 @@
  *
  */
 
-package com.openexchange.chronos.schedjoules.api;
+package com.openexchange.chronos.schedjoules.api.client;
+
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
- * {@link SchedJoulesItem}
+ * {@link SchedJoulesRequest}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class SchedJoulesItem {
+public class SchedJoulesRequest {
 
-    private final int id;
-    private String etag;
-    private long lastModified;
+    private final String path;
+    private final Map<String, String> queryParameters;
+    private final HttpMethod method;
 
     /**
-     * Initialises a new {@link SchedJoulesItem}.
+     * Initialises a new {@link SchedJoulesRequest}.
      */
-    public SchedJoulesItem(int id) {
+    public SchedJoulesRequest(String path) {
+        this(HttpMethod.GET, path);
+    }
+
+    /**
+     * Initialises a new {@link SchedJoulesRequest}.
+     */
+    public SchedJoulesRequest(HttpMethod method, String path) {
         super();
-        this.id = id;
+        this.method = method;
+        this.path = path;
+        queryParameters = new HashMap<>();
     }
 
     /**
-     * Gets the etag
-     *
-     * @return The etag
+     * Sets a query parameter. Any previously query parameter with the same name
+     * will be replaced.
+     * 
+     * @param name The name of the parameter
+     * @param value The value of the parameter
      */
-    public String getEtag() {
-        return etag;
+    public void setQueryParameter(String name, String value) {
+        queryParameters.put(name, value);
     }
 
     /**
-     * Sets the etag
-     *
-     * @param etag The etag to set
+     * Returns an unmodifiable {@link Map} with the query parameters
+     * 
+     * @return an unmodifiable {@link Map} with the query parameters
      */
-    public void setEtag(String etag) {
-        this.etag = etag;
+    public Map<String, String> getQueryParameters() {
+        return Collections.unmodifiableMap(queryParameters);
     }
 
     /**
-     * Gets the lastModified
+     * Gets the path
      *
-     * @return The lastModified
+     * @return The path
      */
-    public long getLastModified() {
-        return lastModified;
+    public String getPath() {
+        return path;
     }
 
     /**
-     * Sets the lastModified
+     * Gets the method
      *
-     * @param lastModified The lastModified to set
+     * @return The method
      */
-    public void setLastModified(long lastModified) {
-        this.lastModified = lastModified;
-    }
-
-    /**
-     * Gets the id
-     *
-     * @return The id
-     */
-    public int getId() {
-        return id;
+    public HttpMethod getMethod() {
+        return method;
     }
 }

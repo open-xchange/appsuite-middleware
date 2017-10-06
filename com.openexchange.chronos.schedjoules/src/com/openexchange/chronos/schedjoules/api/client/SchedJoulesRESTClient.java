@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.chronos.schedjoules.api;
+package com.openexchange.chronos.schedjoules.api.client;
 
 import java.io.IOException;
 import java.net.URI;
@@ -74,11 +74,12 @@ import com.openexchange.rest.client.httpclient.HttpClients.ClientConfig;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-class SchedJoulesRESTClient {
+public class SchedJoulesRESTClient {
 
+    private static final String SCHEME = "https";
     private static final String BASE_URL = "api.schedjoules.com";
-    private static final String USER_AGENT = "Open-Xchange SchedJoules Client (pre-Alpha)";
     private static final String AUTHORIZATION_HEADER = "Token token=\"{{token}}\"";
+    private static final String USER_AGENT = "Open-Xchange SchedJoules Client (pre-Alpha)";
 
     private final CloseableHttpClient httpClient;
     private final String authorizationHeader;
@@ -131,7 +132,7 @@ class SchedJoulesRESTClient {
      */
     private void prepareRequest(HttpRequestBase request, String path, String query) throws OXException {
         try {
-            request.setURI(new URI("https", BASE_URL, path, query, null));
+            request.setURI(new URI(SCHEME, BASE_URL, path, query, null));
             request.addHeader(HttpHeaders.AUTHORIZATION, authorizationHeader);
         } catch (URISyntaxException e) {
             throw new OXException(1138, "The URI path '" + path + "' is not valid", e);
@@ -150,15 +151,18 @@ class SchedJoulesRESTClient {
         String query = prepareQuery(request.getQueryParameters());
 
         // Prepare the request
+        HttpRequestBase httpRequest; 
         HttpMethod httpMethod = request.getMethod();
         switch (httpMethod) {
             case GET:
-                HttpGet httpGet = new HttpGet();
-                prepareRequest(httpGet, request.getPath(), query);
-                return httpGet;
+                httpRequest = new HttpGet();
+                break;
             default:
                 throw new OXException(1138, "Unknown HTTP method '" + httpMethod + "'");
         }
+        
+        prepareRequest(httpRequest, request.getPath(), query);
+        return httpRequest;
     }
 
     /**
@@ -192,13 +196,12 @@ class SchedJoulesRESTClient {
             SchedJoulesResponse response = new SchedJoulesResponse(statusCode);
 
             if (statusCode == 304) {
-                // Ok, nothing was modified, return as is
+                // Ok, nothing was modified, no response body, return as is
                 return response;
 
             }
             HttpEntity entity = httpResponse.getEntity();
             if (entity == null) {
-                // Huh? We always expect a body
                 throw new OXException(1138, "No body was returned");
             }
 

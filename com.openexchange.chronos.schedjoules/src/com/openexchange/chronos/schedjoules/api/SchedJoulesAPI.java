@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.schedjoules.api;
 
+import com.openexchange.chronos.schedjoules.api.client.SchedJoulesRESTClient;
 import com.openexchange.exception.OXException;
 
 /**

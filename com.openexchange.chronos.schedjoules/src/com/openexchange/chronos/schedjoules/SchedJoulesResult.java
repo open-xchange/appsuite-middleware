@@ -1,5 +1,3 @@
-
-package com.openexchange.chronos.schedjoules;
 /*
  *
  *    OPEN-XCHANGE legal information
@@ -30,7 +28,7 @@ package com.openexchange.chronos.schedjoules;
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2017-2020 OX Software GmbH
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,61 +47,34 @@ package com.openexchange.chronos.schedjoules;
  *
  */
 
-import java.net.URL;
+package com.openexchange.chronos.schedjoules;
+
 import org.json.JSONObject;
-import com.openexchange.chronos.Calendar;
-import com.openexchange.exception.OXException;
 
 /**
- * {@link SchedJoulesService}
+ * {@link SchedJoulesResult}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public interface SchedJoulesService {
+public class SchedJoulesResult {
+
+    private final JSONObject data;
 
     /**
-     * Retrieves the starting SchedJoules page.
-     * 
-     * @return The {@link JSONObject}
-     * @throws OXException if an error is occurred
+     * Initialises a new {@link SchedJoulesResult}.
      */
-    SchedJoulesResult getRoot() throws OXException;
+    public SchedJoulesResult(JSONObject data) {
+        super();
+        this.data = data;
+    }
 
     /**
-     * Retrieves the starting SchedJoules page for the specified location
-     * in the specified locale
-     * 
-     * @param locale The locale to use
-     * @param location The location to use
-     * @return The {@link JSONObject}
-     * @throws OXException if an error is occurred
+     * Gets the data
+     *
+     * @return The data
      */
-    SchedJoulesResult getRoot(String locale, String location) throws OXException;
-    
-    /**
-     * Retrieves the SchedJoules page with the specified identifier
-     * 
-     * @param pageId The page identifier
-     * @return The {@link JSONObject}
-     * @throws OXException if an error is occurred
-     */
-    SchedJoulesResult getPage(int pageId) throws OXException;
-    
-    /**
-     * Retrieves the SchedJoules page with the specified identifier
-     * 
-     * @param pageId The page identifier
-     * @return The {@link JSONObject}
-     * @throws OXException if an error is occurred
-     */
-    SchedJoulesResult getPage(int pageId, String locale) throws OXException;
+    public JSONObject getData() {
+        return data;
+    }
 
-    /**
-     * Retrieves the {@link Calendar} data from the specified {@link URL}
-     * 
-     * @param url The {@link URL} from which to fetch the {@link Calendar} data
-     * @return the {@link Calendar}
-     * @throws OXException if an error is occurred
-     */
-    Calendar fetchCalendar(URL url) throws OXException;
 }
