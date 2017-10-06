@@ -56,7 +56,6 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.database.DatabaseFolderStorage;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.tools.oxfolder.property.FolderUserPropertyStorage;
 import com.openexchange.userconf.UserPermissionService;
 
 /**
@@ -80,8 +79,6 @@ public final class DatabaseFolderStorageActivator extends HousekeepingActivator 
 
     @Override
     protected void startBundle() throws Exception {
-        trackService(FolderUserPropertyStorage.class);
-        openTrackers();
         try {
             // Register folder storage
             final Dictionary<String, String> dictionary = new Hashtable<String, String>(2);
