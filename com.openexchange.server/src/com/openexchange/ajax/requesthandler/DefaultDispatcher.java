@@ -256,7 +256,7 @@ public class DefaultDispatcher implements Dispatcher {
                 UserAwareSSLConfigurationService userAwareSSLConfigurationService = ServerServiceRegistry.getInstance().getService(UserAwareSSLConfigurationService.class);
                 if (null != userAwareSSLConfigurationService) {
                     if (userAwareSSLConfigurationService.isAllowedToDefineTrustLevel(session.getUserId(), session.getContextId())) {
-                        throw SSLExceptionCode.UNTRUSTED_CERT_USER_CONFIG.create(e.getDisplayArgs()[0]);
+                        throw SSLExceptionCode.UNTRUSTED_CERT_USER_CONFIG.create(e.getDisplayArgs());
                     }
                 }
             }
