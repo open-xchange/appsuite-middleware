@@ -56,6 +56,7 @@ import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.provider.CalendarFolder;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccessFactory;
@@ -228,7 +229,7 @@ public class CalendarFolderStorage implements FolderStorage {
     @Override
     public void createFolder(Folder folder, StorageParameters storageParameters) throws OXException {
         IDBasedCalendarAccess calendarAccess = getCalendarAccess(storageParameters);
-        GroupwareCalendarFolder folderToCreate = getCalendarFolder(folder, null);
+        GroupwareCalendarFolder folderToCreate = getCalendarFolder(folder);
         String folderID = calendarAccess.createFolder(folder.getParentID(), folderToCreate);
         folder.setID(folderID);
     }
@@ -357,12 +358,13 @@ public class CalendarFolderStorage implements FolderStorage {
         IDBasedCalendarAccess calendarAccess = getCalendarAccess(storageParameters);
         Date timeStamp = storageParameters.getTimeStamp();
         if (null == timeStamp) {
-            throw FolderExceptionErrorMessage.MISSING_PARAMETER.create("timestamp");
+            timeStamp = new Date(CalendarUtils.DISTANT_FUTURE);
+            //            throw FolderExceptionErrorMessage.MISSING_PARAMETER.create("timestamp");
         }
         /*
          * update folder
          */
-        GroupwareCalendarFolder folderToUpdate = getCalendarFolder(folder, null);
+        GroupwareCalendarFolder folderToUpdate = getCalendarFolder(folder);
         String updatedFolderID = calendarAccess.updateFolder(folder.getID(), folderToUpdate, timeStamp.getTime());
         /*
          * take over updated identifiers in passed folder reference

@@ -55,12 +55,17 @@ import static com.openexchange.chronos.provider.internal.Constants.TREE_ID;
 import static com.openexchange.folderstorage.CalendarFolderConverter.getCalendarFolder;
 import static com.openexchange.folderstorage.CalendarFolderConverter.getStorageFolder;
 import static com.openexchange.folderstorage.CalendarFolderConverter.getStorageType;
+import static com.openexchange.folderstorage.CalendarFolderField.COLOR;
+import static com.openexchange.folderstorage.CalendarFolderField.SCHEDULE_TRANSP;
+import static com.openexchange.folderstorage.CalendarFolderField.USED_FOR_SYNC;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.chronos.Alarm;
@@ -90,6 +95,8 @@ import com.openexchange.chronos.service.UpdatesResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
+import com.openexchange.folderstorage.FolderField;
+import com.openexchange.folderstorage.FolderProperty;
 import com.openexchange.folderstorage.FolderResponse;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.FolderServiceDecorator;
@@ -132,7 +139,7 @@ public class InternalCalendarAccess implements GroupwareCalendarAccess, FreeBusy
 
     @Override
     public GroupwareCalendarFolder getDefaultFolder() throws OXException {
-        Folder folder = getFolderService().getDefaultFolder(ServerSessionAdapter.valueOf(session.getSession()).getUser(), TREE_ID, CONTENT_TYPE, PrivateType.getInstance(), session.getSession(), initDecorator());
+        UserizedFolder folder = getFolderService().getDefaultFolder(ServerSessionAdapter.valueOf(session.getSession()).getUser(), TREE_ID, CONTENT_TYPE, PrivateType.getInstance(), session.getSession(), initDecorator());
         return getCalendarFolder(folder, getFolderProperties(session.getContextId(), folder, session.getUserId(), false));
     }
 
@@ -152,7 +159,7 @@ public class InternalCalendarAccess implements GroupwareCalendarAccess, FreeBusy
 
     @Override
     public CalendarFolder getFolder(String folderId) throws OXException {
-        Folder folder = getFolderService().getFolder(TREE_ID, folderId, session.getSession(), initDecorator());
+        UserizedFolder folder = getFolderService().getFolder(TREE_ID, folderId, session.getSession(), initDecorator());
         return getCalendarFolder(folder, getFolderProperties(session.getContextId(), folder, session.getUserId(), true));
     }
 
@@ -366,9 +373,36 @@ public class InternalCalendarAccess implements GroupwareCalendarAccess, FreeBusy
      * @param contextId The identifier of the context
      * @param userId The identifier of the user the folder belongs to
      * @param loadOwner If set to <code>true</code> the folder owners properties will be loaded
+     * @return The folder properties, or <code>null</code> if there are none
+     */
+    private static Map<FolderField, FolderProperty> getFolderProperties(int contextId, Folder folder, int userId, boolean loadOwner) {
+        Map<String, String> properties = getStoredFolderProperties(contextId, folder, userId, loadOwner);
+        if (null == properties || properties.isEmpty()) {
+            return null;
+        }
+        Map<FolderField, FolderProperty> folderProperties = new HashMap<FolderField, FolderProperty>(properties.size());
+        for (Entry<String, String> entry : properties.entrySet()) {
+            if (COLOR.getName().equals(entry.getKey())) {
+                folderProperties.put(COLOR, new FolderProperty(entry.getKey(), entry.getValue()));
+            } else if (USED_FOR_SYNC.getName().equals(entry.getValue())) {
+                folderProperties.put(USED_FOR_SYNC, new FolderProperty(entry.getKey(), Boolean.valueOf(entry.getValue())));
+            } else if (SCHEDULE_TRANSP.getName().equals(entry.getKey())) {
+                folderProperties.put(SCHEDULE_TRANSP, new FolderProperty(entry.getKey(), entry.getValue()));
+            }
+        }
+        return folderProperties;
+    }
+
+    /**
+     * Get user specific properties for the folder
+     *
+     * @param folder The {@link Folder}
+     * @param contextId The identifier of the context
+     * @param userId The identifier of the user the folder belongs to
+     * @param loadOwner If set to <code>true</code> the folder owners properties will be loaded
      * @return {@link Collections#emptyMap()} or a {@link Map} with user-specific properties
      */
-    private static Map<String, String> getFolderProperties(int contextId, Folder folder, int userId, boolean loadOwner) {
+    private static Map<String, String> getStoredFolderProperties(int contextId, Folder folder, int userId, boolean loadOwner) {
         Map<String, String> properties;
         FolderUserPropertyStorage fps = Services.optService(FolderUserPropertyStorage.class);
         if (null != fps) {
