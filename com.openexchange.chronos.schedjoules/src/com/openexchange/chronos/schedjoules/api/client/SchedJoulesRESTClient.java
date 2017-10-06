@@ -52,6 +52,7 @@ package com.openexchange.chronos.schedjoules.api.client;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.Map;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHeaders;
@@ -127,12 +128,26 @@ public class SchedJoulesRESTClient {
      * 
      * @param request The {@link HttpRequestBase} to prepare
      * @param path The mandatory path
+     * @param query The optional query
+     * @throws OXException
+     */
+    private void prepareRequest(HttpRequestBase request, String path, String query) throws OXException {
+        prepareRequest(request, SCHEME, BASE_URL, path, query);
+    }
+
+    /**
+     * Prepares the specified HTTP request
+     * 
+     * @param request The {@link HttpRequestBase} to prepare
+     * @param scheme The mandatory scheme/protocol
+     * @param baseUrl The mandatory base URL
+     * @param path The mandatory path
      * @param query The optional query string
      * @throws OXException if the path is not valid
      */
-    private void prepareRequest(HttpRequestBase request, String path, String query) throws OXException {
+    private void prepareRequest(HttpRequestBase request, String scheme, String baseUrl, String path, String query) throws OXException {
         try {
-            request.setURI(new URI(SCHEME, BASE_URL, path, query, null));
+            request.setURI(new URI(scheme, baseUrl, path, query, null));
             request.addHeader(HttpHeaders.AUTHORIZATION, authorizationHeader);
         } catch (URISyntaxException e) {
             throw new OXException(1138, "The URI path '" + path + "' is not valid", e);
@@ -151,8 +166,20 @@ public class SchedJoulesRESTClient {
         String query = prepareQuery(request.getQueryParameters());
 
         // Prepare the request
-        HttpRequestBase httpRequest; 
-        HttpMethod httpMethod = request.getMethod();
+        HttpRequestBase httpRequest = createRequest(request.getMethod());
+        prepareRequest(httpRequest, request.getPath(), query);
+        return httpRequest;
+    }
+
+    /**
+     * Creates an {@link HttpRequestBase} with the specifeid {@link HttpMethod}
+     * 
+     * @param httpMethod The {@link HttpMethod}
+     * @return The new {@link HttpRequestBase}
+     * @throws OXException if an unknown HTTP method is provided
+     */
+    private HttpRequestBase createRequest(HttpMethod httpMethod) throws OXException {
+        HttpRequestBase httpRequest;
         switch (httpMethod) {
             case GET:
                 httpRequest = new HttpGet();
@@ -160,8 +187,21 @@ public class SchedJoulesRESTClient {
             default:
                 throw new OXException(1138, "Unknown HTTP method '" + httpMethod + "'");
         }
-        
-        prepareRequest(httpRequest, request.getPath(), query);
+        return httpRequest;
+    }
+
+    /**
+     * Creates an {@link HttpUriRequest} from the specified {@link URL} and the specified {@link HttpMethod}
+     * 
+     * @param url The {@link URL} to use
+     * @param httpMethod The {@link HttpMethod}
+     * @return The new {@link HttpUriRequest}
+     * @throws OXException if an unknwon HTTP method is provided
+     * @throws URISyntaxException If an invalid URL is provided
+     */
+    private HttpUriRequest prepareRequest(URL url, HttpMethod httpMethod) throws OXException {
+        HttpRequestBase httpRequest = createRequest(httpMethod);
+        prepareRequest(httpRequest, url.getProtocol(), url.getHost(), url.getPath(), null);
         return httpRequest;
     }
 
@@ -191,8 +231,41 @@ public class SchedJoulesRESTClient {
      * @throws OXException if an error is occurred
      */
     public SchedJoulesResponse executeRequest(SchedJoulesRequest request) throws OXException {
+        return executeRequest(prepareRequest(request));
+    }
+
+    /**
+     * Executes a GET request to the specified {@link URL}
+     * 
+     * @param url The {@link URL}
+     * @return The {@link SchedJoulesResponse}
+     * @throws OXException if an error is occurred
+     */
+    public SchedJoulesResponse executeRequest(URL url) throws OXException {
+        return executeRequest(url, HttpMethod.GET);
+    }
+
+    /**
+     * Executes a request with the specified method to the specified {@link URL}
+     * 
+     * @param url The {@link URL}
+     * @param httpMethod the {@link HttpMethod} to use
+     * @return The {@link SchedJoulesResponse}
+     * @throws OXException if an error is occurred
+     */
+    public SchedJoulesResponse executeRequest(URL url, HttpMethod httpMethod) throws OXException {
+        return executeRequest(prepareRequest(url, httpMethod));
+    }
+
+    /**
+     * Executes the specifeid {@link HttpUriRequest} and returns a {@link SchedJoulesResponse}
+     * 
+     * @param httpRequest the {@link HttpUriRequest} to execute
+     * @return The {@link SchedJoulesResponse}
+     * @throws OXException if an error is occurred
+     */
+    private SchedJoulesResponse executeRequest(HttpUriRequest httpRequest) throws OXException {
         try {
-            HttpUriRequest httpRequest = prepareRequest(request);
             HttpResponse httpResponse = httpClient.execute(httpRequest);
 
             int statusCode = assertStatusCode(httpResponse);
