@@ -60,12 +60,16 @@ import com.openexchange.i18n.LocalizableStrings;
  */
 public class DriveClientInfoStrings implements LocalizableStrings {
 
+    // Drive Client %1$s on %2$s %3$s
     public static final String DRIVE_CLIENT_INFO_WITH_PLATFORM_VERSION = "Drive Client %1$s on %2$s %3$s";
 
+    // Drive Client %1$s on %2$s
     public static final String DRIVE_CLIENT_INFO_WITH_PLATFORM = "Drive Client %1$s on %2$s";
 
+    // Drive Client on %1$s
     public static final String DRIVE_CLIENT_INFO_WITHOUT_VERSION = "Drive Client on %1$s";
 
+    // Drive Client %1$s
     public static final String DRIVE_CLIENT_INFO_WITH_VERSION = "Drive Client %1$s";
 
     private DriveClientInfoStrings() {
