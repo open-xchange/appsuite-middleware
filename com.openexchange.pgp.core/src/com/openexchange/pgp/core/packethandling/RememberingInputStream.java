@@ -51,9 +51,8 @@ package com.openexchange.pgp.core.packethandling;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import org.apache.commons.lang.ArrayUtils;
+import gnu.trove.list.TByteList;
+import gnu.trove.list.array.TByteArrayList;
 
 /**
  * {@link RememberingInputStream} represents an InputStream which remembers the data which has been read
@@ -64,7 +63,7 @@ import org.apache.commons.lang.ArrayUtils;
 class RememberingInputStream extends InputStream {
 
     private final InputStream in;
-    private ArrayList<Byte> buffer = null;
+    private TByteList buffer = null;
     private boolean remember;
 
     /**
@@ -85,9 +84,9 @@ class RememberingInputStream extends InputStream {
     private void addToBuffer(byte... b) {
         if(remember) {
             if (buffer == null) {
-                buffer = new ArrayList<Byte>(b.length);
+                buffer = new TByteArrayList(b.length);
             }
-            buffer.addAll(Arrays.asList(ArrayUtils.toObject(b)));
+            buffer.addAll(b);
         }
     }
 
@@ -100,7 +99,7 @@ class RememberingInputStream extends InputStream {
         if(buffer == null) {
             return new byte[] {};
         }
-        return ArrayUtils.toPrimitive(this.buffer.toArray(new Byte[buffer.size()]));
+        return buffer.toArray();
     }
 
     /**
