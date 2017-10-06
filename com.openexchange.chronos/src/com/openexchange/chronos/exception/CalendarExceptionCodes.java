@@ -333,11 +333,17 @@ public enum CalendarExceptionCodes implements DisplayableOXExceptionCode {
      * <li>Attachment not found [attachment %1$d, event %2$s, folder %3$s]</li>
      */
     ATTACHMENT_NOT_FOUND("Attachment not found [attachment %1$d, event %2$s, folder %3$s]", ATTACHMENT_NOT_FOUND_MSG, Category.CATEGORY_USER_INPUT, 4047),
-
-    TOO_MANY_EVENT_RESULTS("Too many events are querried. Please choose a shorter timeframe.", TOO_MANY_EVENTS_MSG, Category.CATEGORY_USER_INPUT, 6001),
-
+    /**
+     * <li>Too many events are queried. Please choose a shorter timeframe.</li>
+     */
+    TOO_MANY_EVENT_RESULTS("Too many events are queried. Please choose a shorter timeframe.", TOO_MANY_EVENTS_MSG, Category.CATEGORY_USER_INPUT, 6001),
+    /**
+     * <li>The event contains too many attendees.</li>
+     */
     TOO_MANY_ATTENDEES("The event contains too many attendees.", TOO_MANY_ATTENDEES_MSG, Category.CATEGORY_USER_INPUT, 6002),
-
+    /**
+     * <li>The event contains too many alarms.</li>
+     */
     TOO_MANY_ALARMS("The event contains too many alarms.", TOO_MANY_ALARMS_MSG, Category.CATEGORY_USER_INPUT, 6003),
     ;
 

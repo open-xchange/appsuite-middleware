@@ -131,7 +131,7 @@ public class CalendarExceptionMessages implements LocalizableStrings {
 
     public static final String ATTACHMENT_NOT_FOUND_MSG = "The requested attachment was not found.";
 
-    public static final String TOO_MANY_EVENTS_MSG = "Too many events are querried. Please choose a shorter timeframe.";
+    public static final String TOO_MANY_EVENTS_MSG = "Too many events are queried. Please choose a shorter timeframe.";
 
     public static final String TOO_MANY_ATTENDEES_MSG = "The event contains too many attendees.";
 

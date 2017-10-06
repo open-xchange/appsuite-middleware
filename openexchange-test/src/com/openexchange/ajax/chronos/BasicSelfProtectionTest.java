@@ -64,9 +64,11 @@ import com.openexchange.junit.Assert;
 import com.openexchange.testing.httpclient.models.Alarm;
 import com.openexchange.testing.httpclient.models.Attendee;
 import com.openexchange.testing.httpclient.models.ChronosCalendarResultResponse;
+import com.openexchange.testing.httpclient.models.ChronosFreeBusyEventsResponse;
 import com.openexchange.testing.httpclient.models.ChronosUpdatesResponse;
 import com.openexchange.testing.httpclient.models.EventData;
 import com.openexchange.testing.httpclient.models.EventsResponse;
+import com.openexchange.testing.httpclient.modules.ChronosFreebusyApi;
 import edu.emory.mathcs.backport.java.util.concurrent.TimeUnit;
 
 /**
@@ -80,11 +82,13 @@ import edu.emory.mathcs.backport.java.util.concurrent.TimeUnit;
 public class BasicSelfProtectionTest extends AbstractChronosTest {
 
     private String folderId;
+    private ChronosFreebusyApi freeBusyApi;
 
     @Override
     public void setUp() throws Exception {
         super.setUp();
         folderId = getDefaultFolder();
+        freeBusyApi = new ChronosFreebusyApi(defaultUserApi.getClient());
     }
 
     /**
@@ -131,7 +135,10 @@ public class BasicSelfProtectionTest extends AbstractChronosTest {
         Assert.assertNotNull("Response doesn't contain an error", updatesResponse.getError());
         Assert.assertEquals("CAL-6001", updatesResponse.getCode());
 
-
+        // Test freebusy
+        ChronosFreeBusyEventsResponse freeBusyEvents = freeBusyApi.freebusyEvents(defaultUserApi.getSession(), fromStr, untilStr, Integer.toString(defaultUserApi.getCalUser()));
+        Assert.assertNotNull("Response doesn't contain an error", freeBusyEvents.getError());
+        Assert.assertEquals("CAL-6001", freeBusyEvents.getCode());
     }
 
     /**

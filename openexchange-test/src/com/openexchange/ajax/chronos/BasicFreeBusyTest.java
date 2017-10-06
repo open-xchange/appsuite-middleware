@@ -327,10 +327,10 @@ public class BasicFreeBusyTest extends AbstractChronosTest {
         }
 
         event.setId(null);
-        CheckEventResponse freebusyHas = freeBusyApi.checkEvent(defaultUserApi.getSession(), folderId, attendees.toString(), event);
-        assertNull(freebusyHas.getErrorDesc(), freebusyHas.getError());
-        assertNotNull(freebusyHas.getData());
-        CheckEventConflictResponse data = freebusyHas.getData();
+        CheckEventResponse checkEvent = freeBusyApi.checkEvent(defaultUserApi.getSession(), folderId, attendees.toString(), event);
+        assertNull(checkEvent.getErrorDesc(), checkEvent.getError());
+        assertNotNull(checkEvent.getData());
+        CheckEventConflictResponse data = checkEvent.getData();
         assertEquals(1, data.getConflicts().size());
 
         // Check again with one additional event for user 1

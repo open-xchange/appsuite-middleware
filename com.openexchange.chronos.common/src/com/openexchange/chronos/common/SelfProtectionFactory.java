@@ -50,6 +50,9 @@
 package com.openexchange.chronos.common;
 
 import java.util.Collection;
+import java.util.Map;
+import com.openexchange.chronos.Alarm;
+import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.config.lean.DefaultProperty;
@@ -102,16 +105,26 @@ public class SelfProtectionFactory {
 
             prop = DefaultProperty.valueOf(PROPERTY_ALARM_LIMIT, 100);
             alarmLimit = leanConfigurationService.getIntProperty(session.getUserId(), session.getContextId(), prop);
-
         }
 
-        public void checkEventCollection(Collection<Event> collection) throws OXException {
-
+        /**
+         * Checks if a collections of events contains too many events
+         *
+         * @param collection A collections of {@link Event} objects or similar (e.g. EventIds)
+         * @throws OXException if the collection contains too many {@link Event}s
+         */
+        public void checkEventCollection(Collection<?> collection) throws OXException {
             if (collection.size() > eventLimit) {
                 throw CalendarExceptionCodes.TOO_MANY_EVENT_RESULTS.create();
             }
         }
 
+        /**
+         * Checks if an {@link Event} contains too many {@link Attendee} or {@link Alarm} objects
+         *
+         * @param event The event to check
+         * @throws OXException if the event contains too many {@link Attendee}s or {@link Alarm}s
+         */
         public void checkEvent(Event event) throws OXException {
             if (event.getAttendees() != null && event.getAttendees().size() > attendeeLimit) {
                 throw CalendarExceptionCodes.TOO_MANY_ATTENDEES.create();
@@ -119,6 +132,21 @@ public class SelfProtectionFactory {
 
             if (event.getAlarms() != null && event.getAlarms().size() > alarmLimit) {
                 throw CalendarExceptionCodes.TOO_MANY_ALARMS.create();
+            }
+        }
+
+        public void checkMap(Map<?, ? extends Collection<Event>> map) throws OXException {
+            int sum = 0;
+            for (Object key : map.keySet()) {
+                Collection<Event> collection = map.get(key);
+                if (collection == null) {
+                    continue;
+                }
+                sum += collection.size();
+            }
+
+            if (sum > eventLimit) {
+                throw CalendarExceptionCodes.TOO_MANY_EVENT_RESULTS.create();
             }
         }
 

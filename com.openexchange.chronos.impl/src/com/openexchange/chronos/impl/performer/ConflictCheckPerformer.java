@@ -146,7 +146,7 @@ public class ConflictCheckPerformer extends AbstractFreeBusyPerformer {
         /*
          * get conflicts for series or regular event
          */
-        List<EventConflict> conflicts = isSeriesMaster(event) ? getSeriesConflicts(event, attendeesToCheck) : getEventConflicts(event, attendeesToCheck);
+        List<EventConflict> conflicts = isSeriesMaster(event) || (event.getId() == null && event.getRecurrenceRule() != null) ? getSeriesConflicts(event, attendeesToCheck) : getEventConflicts(event, attendeesToCheck);
         if (1 < conflicts.size()) {
             Collections.sort(conflicts, HARD_CONFLICTS_FIRST_COMPARATOR);
             if (maxConflicts < conflicts.size()) {
@@ -321,6 +321,7 @@ public class ConflictCheckPerformer extends AbstractFreeBusyPerformer {
                     }
                 }
             }
+            protection.checkEventCollection(conflicts);
         }
         return conflicts;
     }
@@ -388,6 +389,7 @@ public class ConflictCheckPerformer extends AbstractFreeBusyPerformer {
         if (0 == eventsInPeriod.size()) {
             return Collections.emptyList();
         }
+        protection.checkEventCollection(eventsInPeriod);
         return readAttendeeData(eventsInPeriod, Boolean.TRUE);
     }
 

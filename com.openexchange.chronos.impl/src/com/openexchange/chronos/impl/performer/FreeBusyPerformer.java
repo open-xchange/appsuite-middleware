@@ -200,10 +200,13 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
                     Iterator<RecurrenceId> iterator = getRecurrenceIterator(storage, session, eventInPeriod, from, until);
                     while (iterator.hasNext()) {
                         put(eventsPerAttendee, attendee, getResultingOccurrence(eventInPeriod, iterator.next(), folderID));
+                        protection.checkEventCollection(eventsPerAttendee.get(attendee));
                     }
                 } else {
                     put(eventsPerAttendee, attendee, getResultingEvent(eventInPeriod, folderID));
+                    protection.checkEventCollection(eventsPerAttendee.get(attendee));
                 }
+                protection.checkMap(eventsPerAttendee);
             }
         }
         return eventsPerAttendee;

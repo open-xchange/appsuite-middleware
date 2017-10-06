@@ -66,6 +66,7 @@ import com.openexchange.test.concurrent.ParallelSuite;
     BasicAlarmTriggerTest.class,
     BasicAvailabilityTest.class,
     BasicFreeBusyTest.class,
+    BasicSelfProtectionTest.class,
     BasicSeriesEventTest.class,
     BasicSingleEventTest.class,
     CalendarAccountTest.class,
