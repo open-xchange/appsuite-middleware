@@ -2224,7 +2224,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.admin.storage.interfaces.OXUtilStorageInterface#changeServer(int, java.lang.String)
      */
     @Override
@@ -2273,21 +2273,24 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
     }
 
     @Override
-    public Database[] searchForDatabaseSchema(String search_pattern, boolean onlyEmptySchemas) throws StorageException {
+    public Database[] searchForDatabaseSchema(String searchPattern, boolean onlyEmptySchemas) throws StorageException {
+        String searchPatternToUse = searchPattern.replace('*', '%');
         Connection con = null;
         PreparedStatement pstmt = null;
         ResultSet rs = null;
         try {
             con = cache.getReadConnectionForConfigDB();
 
-            String my_search_pattern = search_pattern.replace('*', '%');
-            pstmt = con.prepareStatement("SELECT d.db_pool_id,d.url,d.driver,d.login,d.password,d.hardlimit,d.max,d.initial,d.name,c.weight,c.max_units,c.read_db_pool_id,c.write_db_pool_id,p.count,s.schemaname,s.count FROM db_pool AS d JOIN db_cluster AS c ON c.write_db_pool_id=d.db_pool_id LEFT JOIN contexts_per_dbpool AS p ON d.db_pool_id=p.db_pool_id LEFT JOIN contexts_per_dbschema AS s ON d.db_pool_id=s.db_pool_id WHERE (c.max_units <> 0) AND (d.name LIKE ? OR s.schemaname LIKE ? OR d.db_pool_id LIKE ? OR d.url LIKE ?)" + (onlyEmptySchemas ? " AND s.count=0" : ""));
-            pstmt.setString(1, my_search_pattern);
-            pstmt.setString(2, my_search_pattern);
-            pstmt.setString(3, my_search_pattern);
-            pstmt.setString(4, my_search_pattern);
+            if ("%".equals(searchPatternToUse)) {
+                pstmt = con.prepareStatement("SELECT d.db_pool_id,d.url,d.driver,d.login,d.password,d.hardlimit,d.max,d.initial,d.name,c.weight,c.max_units,c.read_db_pool_id,c.write_db_pool_id,p.count,s.schemaname,s.count FROM db_pool AS d JOIN db_cluster AS c ON c.write_db_pool_id=d.db_pool_id LEFT JOIN contexts_per_dbpool AS p ON d.db_pool_id=p.db_pool_id LEFT JOIN contexts_per_dbschema AS s ON d.db_pool_id=s.db_pool_id WHERE (c.max_units <> 0)" + (onlyEmptySchemas ? " AND s.count=0" : ""));
+            } else {
+                pstmt = con.prepareStatement("SELECT d.db_pool_id,d.url,d.driver,d.login,d.password,d.hardlimit,d.max,d.initial,d.name,c.weight,c.max_units,c.read_db_pool_id,c.write_db_pool_id,p.count,s.schemaname,s.count FROM db_pool AS d JOIN db_cluster AS c ON c.write_db_pool_id=d.db_pool_id LEFT JOIN contexts_per_dbpool AS p ON d.db_pool_id=p.db_pool_id LEFT JOIN contexts_per_dbschema AS s ON d.db_pool_id=s.db_pool_id WHERE (c.max_units <> 0) AND (d.name LIKE ? OR s.schemaname LIKE ? OR d.db_pool_id LIKE ? OR d.url LIKE ?)" + (onlyEmptySchemas ? " AND s.count=0" : ""));
+                pstmt.setString(1, searchPatternToUse);
+                pstmt.setString(2, searchPatternToUse);
+                pstmt.setString(3, searchPatternToUse);
+                pstmt.setString(4, searchPatternToUse);
+            }
             rs = pstmt.executeQuery();
-
             if (false == rs.next()) {
                 return new Database[0];
             }
@@ -2445,28 +2448,36 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
     }
 
     @Override
-    public Database[] searchForDatabase(final String search_pattern) throws StorageException {
+    public Database[] searchForDatabase(String searchPattern) throws StorageException {
+        String searchPatternToUse = searchPattern.replace('*', '%');
         Connection con = null;
         PreparedStatement pstmt = null;
+        ResultSet rs = null;
         try {
             con = cache.getReadConnectionForConfigDB();
-            final String my_search_pattern = search_pattern.replace('*', '%');
+            if ("%".equals(searchPatternToUse)) {
+                pstmt = con.prepareStatement("SELECT d.db_pool_id,d.url,d.driver,d.login,d.password,d.hardlimit,d.max,d.initial,d.name,c.weight,c.max_units,c.read_db_pool_id,c.write_db_pool_id,p.count FROM db_pool AS d JOIN db_cluster AS c ON (c.write_db_pool_id=d.db_pool_id OR c.read_db_pool_id=d.db_pool_id) LEFT JOIN contexts_per_dbpool AS p ON d.db_pool_id=p.db_pool_id");
+            } else {
+                pstmt = con.prepareStatement("SELECT d.db_pool_id,d.url,d.driver,d.login,d.password,d.hardlimit,d.max,d.initial,d.name,c.weight,c.max_units,c.read_db_pool_id,c.write_db_pool_id,p.count FROM db_pool AS d JOIN db_cluster AS c ON (c.write_db_pool_id=d.db_pool_id OR c.read_db_pool_id=d.db_pool_id) LEFT JOIN contexts_per_dbpool AS p ON d.db_pool_id=p.db_pool_id WHERE (d.name LIKE ? OR d.db_pool_id LIKE ? OR d.url LIKE ?)");
+                pstmt.setString(1, searchPatternToUse);
+                pstmt.setString(2, searchPatternToUse);
+                pstmt.setString(3, searchPatternToUse);
+            }
+            rs = pstmt.executeQuery();
 
-            pstmt = con.prepareStatement("SELECT d.db_pool_id,d.url,d.driver,d.login,d.password,d.hardlimit,d.max,d.initial,d.name,c.weight,c.max_units,c.read_db_pool_id,c.write_db_pool_id,p.count FROM db_pool AS d JOIN db_cluster AS c ON (c.write_db_pool_id=d.db_pool_id OR c.read_db_pool_id=d.db_pool_id) LEFT JOIN contexts_per_dbpool AS p ON d.db_pool_id=p.db_pool_id WHERE (c.max_units <> 0) AND (d.name LIKE ? OR d.db_pool_id LIKE ? OR d.url LIKE ?)");
-            pstmt.setString(1, my_search_pattern);
-            pstmt.setString(2, my_search_pattern);
-            pstmt.setString(3, my_search_pattern);
-            final ResultSet rs = pstmt.executeQuery();
-            final ArrayList<Database> tmp = new ArrayList<>();
+            if (false == rs.next()) {
+                return new Database[0];
+            }
 
-            while (rs.next()) {
-
-                final Database db = new Database();
+            List<Database> tmp = new ArrayList<>();
+            do {
+                Database db = new Database();
 
                 Boolean ismaster = Boolean.TRUE;
-                final int readid = rs.getInt("c.read_db_pool_id");
-                final int writeid = rs.getInt("c.write_db_pool_id");
-                final int id = rs.getInt("d.db_pool_id");
+                int readid = rs.getInt("c.read_db_pool_id");
+                int writeid = rs.getInt("c.write_db_pool_id");
+                int id = rs.getInt("d.db_pool_id");
+                int maxNumberOfContext = rs.getInt("c.max_units");
                 int masterid = 0;
                 int nrcontexts = 0;
                 if (readid == id) {
@@ -2475,7 +2486,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                 } else {
                     // we are master
                     nrcontexts = rs.getInt("p.count");
-                    if (rs.wasNull()) {
+                    if (maxNumberOfContext != 0 && rs.wasNull()) {
                         throw new StorageException("Unable to count contexts. Consider running 'checkcountsconsistency' command-line tool to correct it.");
                     }
                 }
@@ -2486,7 +2497,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                 db.setLogin(rs.getString("d.login"));
                 db.setMaster(ismaster);
                 db.setMasterId(I(masterid));
-                db.setMaxUnits(I(rs.getInt("c.max_units")));
+                db.setMaxUnits(I(maxNumberOfContext));
                 db.setPassword(rs.getString("d.password"));
                 db.setPoolHardLimit(I(rs.getInt("d.hardlimit")));
                 db.setPoolInitial(I(rs.getInt("d.initial")));
@@ -2494,11 +2505,12 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                 db.setUrl(rs.getString("d.url"));
                 db.setCurrentUnits(I(nrcontexts));
                 tmp.add(db);
-            }
-            rs.close();
+            } while (rs.next());
+            closeSQLStuff(rs, pstmt);
+            rs = null;
+            pstmt = null;
 
             return tmp.toArray(new Database[tmp.size()]);
-
         } catch (final PoolException pe) {
             LOG.error("Pool Error", pe);
             throw new StorageException(pe);
@@ -2506,7 +2518,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             LOG.error("SQL Error", ecp);
             throw new StorageException(ecp);
         } finally {
-            closeSQLStuff(pstmt);
+            closeSQLStuff(rs, pstmt);
 
             if (con != null) {
                 try {
