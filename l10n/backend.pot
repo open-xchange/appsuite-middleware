@@ -3738,28 +3738,26 @@ msgid ""
 "context '%3$s'"
 msgstr ""
 
-#. The certificate for domain "%1$s" is untrusted.
+#. The certificate for domain '%2$s' is untrusted.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.net.ssl/src/com/openexchange/net/ssl/exception/SSLExceptionMessages.java:64
-msgid "The certificate for domain \"%1$s\" is untrusted."
+msgid "The certificate for domain '%2$s' is untrusted."
 msgstr ""
 
-#. The certificate for domain "%1$s" is untrusted. You can change your general trust level in the settings.
+#. The certificate for domain '%2$s' is untrusted. You can change your general trust level in the settings.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.net.ssl/src/com/openexchange/net/ssl/exception/SSLExceptionMessages.java:67
 msgid ""
-"The certificate for domain \"%1$s\" is untrusted. You can change your "
-"general trust level in the settings."
+"The certificate for domain '%2$s' is untrusted. You can change your general "
+"trust level in the settings."
 msgstr ""
 
-#. The certificate '%1$s' is not trusted by the user '%2$s' in context '%3$s'
+#. The certificate is not trusted by the user.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.net.ssl/src/com/openexchange/net/ssl/exception/SSLExceptionMessages.java:70
-msgid ""
-"The certificate with fingerprint '%1$s' is not trusted by the user '%2$s' in "
-"context '%3$s'"
+msgid "The certificate with is not trusted by the user."
 msgstr ""
 
-#. The root certificate issued by '%1$s' is not trusted
+#. The root certificate issued by '%2$s' is not trusted
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.net.ssl/src/com/openexchange/net/ssl/exception/SSLExceptionMessages.java:73
-msgid "The root certificate issued by '%1$s' is not trusted"
+msgid "The root certificate issued by '%2$s' is not trusted"
 msgstr ""
 
 #. The certificate is self-signed
