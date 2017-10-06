@@ -558,7 +558,7 @@ public class ActionCommand extends ControlOrActionCommand {
     public HashSet<String> getRequired() {
         HashSet<String> result = new HashSet<String>();
         result.addAll(optRequired);
-        result.addAll(this.command.getRequired() == null ? new HashSet<>() : this.command.getRequired());
+        result.addAll(this.command.getRequired() == null ? new HashSet<String>() : this.command.getRequired());
         return result;
     }
 
