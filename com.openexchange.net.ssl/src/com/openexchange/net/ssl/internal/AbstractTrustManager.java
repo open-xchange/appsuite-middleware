@@ -293,7 +293,7 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
         if (null == sslConfigurationService || false == sslConfigurationService.isAllowedToDefineTrustLevel(user, context)) {
             X509Certificate certificate = chain[0];
             String fingerprint = getFingerprint(certificate);
-            throw new CertificateException(SSLExceptionCode.UNTRUSTED_CERTIFICATE.create(e, Collections.singletonMap(FINGERPRINT_NAME, fingerprint), getHostFromSocket(socket), fingerprint));
+            throw new CertificateException(SSLExceptionCode.UNTRUSTED_CERTIFICATE.create(e, Collections.singletonMap(FINGERPRINT_NAME, fingerprint), fingerprint, getHostFromSocket(socket)));
         }
 
         // Check if the user trusts it
@@ -370,7 +370,7 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
 
                 // If the previous checks did not fail, cache it for future reference and throw as last resort
                 String fingerprint = cacheCertificate(userId, contextId, cert, socketHostname, FailureReason.UNTRUSTED_CERTIFICATE);
-                throw new CertificateException(SSLExceptionCode.UNTRUSTED_CERTIFICATE.create(Collections.singletonMap(FINGERPRINT_NAME, fingerprint), socketHostname, fingerprint));
+                throw new CertificateException(SSLExceptionCode.UNTRUSTED_CERTIFICATE.create(Collections.singletonMap(FINGERPRINT_NAME, fingerprint), fingerprint, socketHostname));
             }
             throw new CertificateException(e);
         }

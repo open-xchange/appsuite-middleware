@@ -542,8 +542,8 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
                         // will not happen here
                     }
                     List<Object> displayArgs = new ArrayList<>(2);
-                    displayArgs.add(url);
                     displayArgs.add(SSLExceptionCode.extractArgument(x, "fingerprint"));
+                    displayArgs.add(url);
                     throw SSLExceptionCode.UNTRUSTED_CERTIFICATE.create(x.getCause(), displayArgs.toArray(new Object[] {}));
                 }
             }
