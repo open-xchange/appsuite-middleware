@@ -467,8 +467,8 @@ public final class POP3StoreConnector {
             } catch (final MessagingException e) {
                 if (MimeMailException.isSSLHandshakeException(e)) {
                     List<Object> displayArgs = new ArrayList<>(2);
-                    displayArgs.add(server);
                     displayArgs.add(SSLExceptionCode.extractArgument(e, "fingerprint"));
+                    displayArgs.add(server);
                     throw SSLExceptionCode.UNTRUSTED_CERTIFICATE.create(e.getCause(), displayArgs.toArray(new Object[] {}));
                 }
 

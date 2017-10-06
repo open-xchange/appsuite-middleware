@@ -332,18 +332,21 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             rollback = false;
 
             // Invalidate cache
-            {
-                CacheService cacheService = AdminServiceRegistry.getInstance().getService(CacheService.class);
-                if (null != cacheService) {
-                    try {
+            try {
+                MailAccountStorageService mass = AdminServiceRegistry.getInstance().getService(MailAccountStorageService.class);
+                if (null != mass) {
+                    mass.invalidateMailAccount(0, userId, contextId);
+                } else {
+                    CacheService cacheService = AdminServiceRegistry.getInstance().getService(CacheService.class);
+                    if (null != cacheService) {
                         Cache cache = cacheService.getCache("MailAccount");
                         cache.remove(cacheService.newCacheKey(ctx.getId().intValue(), Integer.toString(0), Integer.toString(userId)));
                         cache.remove(cacheService.newCacheKey(ctx.getId().intValue(), Integer.toString(userId)));
                         cache.invalidateGroup(ctx.getId().toString());
-                    } catch (final OXException e) {
-                        log.error("", e);
                     }
                 }
+            } catch (final OXException e) {
+                log.error("", e);
             }
 
         } catch (final SQLException e) {
@@ -1310,9 +1313,19 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                         cache.remove(key);
                         cache = cacheService.getCache("Capabilities");
                         cache.removeFromGroup(Integer.valueOf(userId), ctx.getId().toString());
-                        cache = cacheService.getCache("MailAccount");
-                        cache.remove(cacheService.newCacheKey(ctx.getId().intValue(), Integer.toString(0), Integer.toString(userId)));
-                        cache.invalidateGroup(ctx.getId().toString());
+
+                        {
+                            MailAccountStorageService mass = AdminServiceRegistry.getInstance().getService(MailAccountStorageService.class);
+                            if (null != mass) {
+                                mass.invalidateMailAccount(0, userId, contextId);
+                            } else {
+                                cache = cacheService.getCache("MailAccount");
+                                cache.remove(cacheService.newCacheKey(ctx.getId().intValue(), Integer.toString(0), Integer.toString(userId)));
+                                cache.remove(cacheService.newCacheKey(ctx.getId().intValue(), Integer.toString(userId)));
+                                cache.invalidateGroup(ctx.getId().toString());
+                            }
+                        }
+
                         cache = cacheService.getCache("QuotaFileStorages");
                         cache.invalidateGroup(Integer.toString(contextId));
                         if (displayNameUpdate) {

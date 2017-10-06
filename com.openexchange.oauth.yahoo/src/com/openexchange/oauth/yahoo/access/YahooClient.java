@@ -119,8 +119,8 @@ public class YahooClient {
             // Handle Scribe's org.scribe.exceptions.OAuthException (inherits from RuntimeException)
             if (ExceptionUtils.isEitherOf(e, SSLHandshakeException.class)) {
                 List<Object> displayArgs = new ArrayList<>(2);
-                displayArgs.add("social.yahooapis.com");
                 displayArgs.add(SSLExceptionCode.extractArgument(e, "fingerprint"));
+                displayArgs.add("social.yahooapis.com");
                 throw SSLExceptionCode.UNTRUSTED_CERTIFICATE.create(e, displayArgs.toArray(new Object[] {}));
             }
 

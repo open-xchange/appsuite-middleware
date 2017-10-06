@@ -608,16 +608,17 @@ public final class ThresholdFileHolder implements IFileHolder {
     /**
      * Gets the effective input stream from this file holder; either array- or file-backed.
      *
+     * @param sizeKnowing <code>true</code> to return a size-knowing input stream; otherwise <code>false</code>
      * @return The effective input stream
      * @throws OXException If input stream cannot be returned due to an I/O error
      */
-    InputStream getInnerStream() throws OXException {
+    InputStream getInnerStream(boolean sizeKnowing) throws OXException {
         if (count <= 0) {
             return Streams.EMPTY_INPUT_STREAM;
         }
         ByteArrayOutputStream buf = this.buf;
         if (null != buf) {
-            return new SizeKnowingInputStream(Streams.asInputStream(buf), buf.size());
+            return sizeKnowing ? new SizeKnowingInputStream(Streams.asInputStream(buf), buf.size()) : Streams.asInputStream(buf);
         }
         File tempFile = this.tempFile;
         if (null == tempFile) {
@@ -627,7 +628,7 @@ public final class ThresholdFileHolder implements IFileHolder {
         FileInputStream fis = null;
         try {
             fis = new FileInputStream(tempFile);
-            SizeKnowingInputStream retval = new SizeKnowingInputStream(fis, tempFile.length());
+            InputStream retval = sizeKnowing ? new SizeKnowingInputStream(fis, tempFile.length()) : fis;
             fis = null; // Avoid premature closing
             return retval;
         } catch (IOException e) {
@@ -864,7 +865,7 @@ public final class ThresholdFileHolder implements IFileHolder {
          * Initializes a new {@link ClosingInputStream}.
          */
         ThresholdFileHolderInputStream(final ThresholdFileHolder fileHolder) throws OXException {
-            super(fileHolder.getInnerStream(), fileHolder.getLength());
+            super(fileHolder.getInnerStream(false), fileHolder.getLength());
             this.fileHolder = fileHolder;
         }
 
