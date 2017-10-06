@@ -49,24 +49,15 @@
 
 package com.openexchange.chronos.schedjoules.api;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.net.URL;
-import java.util.HashMap;
-import java.util.Map;
-import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.chronos.Calendar;
-import com.openexchange.chronos.exception.CalendarExceptionCodes;
-import com.openexchange.chronos.ical.ICalParameters;
-import com.openexchange.chronos.ical.ICalService;
+import com.openexchange.chronos.schedjoules.api.SchedJoulesStreamParsers.StreamParser;
 import com.openexchange.chronos.schedjoules.api.client.SchedJoulesRESTBindPoint;
 import com.openexchange.chronos.schedjoules.api.client.SchedJoulesRESTClient;
 import com.openexchange.chronos.schedjoules.api.client.SchedJoulesRequest;
 import com.openexchange.chronos.schedjoules.api.client.SchedJoulesResponse;
-import com.openexchange.chronos.schedjoules.osgi.Services;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.Streams;
 
 /**
  * {@link SchedJoulesPagesAPI}
@@ -77,16 +68,8 @@ public class SchedJoulesPagesAPI {
 
     private static final String DEFAULT_LOCALE = "en";
     private static final String DEFAULT_LOCATION = "us";
-    private static final String CHARSET = "UTF-8";
 
     private final SchedJoulesRESTClient client;
-
-    private final Map<StreamParser, SchedJoulesStreamParser<?>> streamParsers;
-
-    private enum StreamParser {
-        JSON,
-        CALENDAR;
-    }
 
     /**
      * Initialises a new {@link SchedJoulesPagesAPI}.
@@ -94,29 +77,6 @@ public class SchedJoulesPagesAPI {
     SchedJoulesPagesAPI(SchedJoulesRESTClient client) {
         super();
         this.client = client;
-        streamParsers = new HashMap<>(2);
-
-        // The JSON stream parser
-        streamParsers.put(StreamParser.JSON, (response) -> {
-            try (InputStream inputStream = Streams.bufferedInputStreamFor(response.getStream())) {
-                return new JSONObject(Streams.stream2string(inputStream, CHARSET));
-            } catch (IOException | JSONException e) {
-                throw CalendarExceptionCodes.UNEXPECTED_ERROR.create(e.getMessage());
-            }
-        });
-
-        // The Calendar stream parser
-        streamParsers.put(StreamParser.CALENDAR, (response) -> {
-            ICalService iCalService = Services.getService(ICalService.class);
-            ICalParameters parameters = iCalService.initParameters();
-            parameters.set(ICalParameters.IGNORE_UNSET_PROPERTIES, Boolean.TRUE);
-
-            try (InputStream inputStream = Streams.bufferedInputStreamFor(response.getStream())) {
-                return iCalService.importICal(inputStream, parameters);
-            } catch (UnsupportedOperationException | IOException e) {
-                throw CalendarExceptionCodes.UNEXPECTED_ERROR.create(e.getMessage());
-            }
-        });
     }
 
     /**
@@ -142,7 +102,7 @@ public class SchedJoulesPagesAPI {
         request.setQueryParameter(SchedJoulesCommonParameter.location.name(), location);
         request.setQueryParameter(SchedJoulesCommonParameter.locale.name(), locale);
 
-        return (JSONObject) streamParsers.get(StreamParser.JSON).parse(client.executeRequest(request));
+        return SchedJoulesStreamParsers.parse(client.executeRequest(request), StreamParser.JSON);
     }
 
     /**
@@ -169,11 +129,18 @@ public class SchedJoulesPagesAPI {
         SchedJoulesRequest request = new SchedJoulesRequest(SchedJoulesRESTBindPoint.pages.getAbsolutePath() + "/" + pageId);
         request.setQueryParameter(SchedJoulesCommonParameter.locale.name(), locale);
 
-        return (JSONObject) streamParsers.get(StreamParser.JSON).parse(client.executeRequest(request));
+        return SchedJoulesStreamParsers.parse(client.executeRequest(request), StreamParser.JSON);
     }
 
+    /**
+     * Retrieves the iCal from the specified {@link URL}
+     * 
+     * @param url The {@link URL} for the iCal
+     * @return The iCal parsed as a {@link Calendar}
+     * @throws OXException if a parsing error is occurred
+     */
     public Calendar getCalendar(URL url) throws OXException {
         SchedJoulesRequest request = new SchedJoulesRequest(url.toString());
-        return (Calendar) streamParsers.get(StreamParser.CALENDAR).parse(client.executeRequest(request));
+        return SchedJoulesStreamParsers.parse(client.executeRequest(request), StreamParser.CALENDAR);
     }
 }
