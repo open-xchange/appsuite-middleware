@@ -71,7 +71,6 @@ import com.openexchange.pns.subscription.storage.groupware.PnsCreateTableTask;
 import com.openexchange.pns.subscription.storage.groupware.PnsDeleteListener;
 import com.openexchange.pns.subscription.storage.groupware.PnsSubscriptionsAddExpiresColumTask;
 import com.openexchange.pns.subscription.storage.groupware.PnsSubscriptionsReindexTask;
-import com.openexchange.pns.subscription.storage.inmemory.InMemoryPushSubscriptionRegistry;
 import com.openexchange.pns.subscription.storage.rdb.RdbPushSubscriptionRegistry;
 import com.openexchange.pns.subscription.storage.rdb.cache.RdbPushSubscriptionRegistryCache;
 import com.openexchange.pns.subscription.storage.rdb.cache.RdbPushSubscriptionRegistryInvalidator;
@@ -133,14 +132,13 @@ public class PushSubscriptionRegistryActivator extends HousekeepingActivator {
         // Register update task, create table job and delete listener
         boolean registerGroupwareStuff = true;
         if (registerGroupwareStuff) {
-            registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new PnsCreateTableTask(this), new PnsSubscriptionsReindexTask(this), new PnsSubscriptionsAddExpiresColumTask(this)));
+            registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new PnsCreateTableTask(), new PnsSubscriptionsReindexTask(this), new PnsSubscriptionsAddExpiresColumTask()));
             registerService(CreateTableService.class, new CreatePnsSubscriptionTable());
             registerService(DeleteListener.class, new PnsDeleteListener(persistentRegistry));
         }
 
         // Register service
-        PushSubscriptionRegistry volatileRegistry = new InMemoryPushSubscriptionRegistry();
-        registerService(PushSubscriptionRegistry.class, new CompositePushSubscriptionRegistry(persistentRegistry, volatileRegistry, providerTracker, listenerTracker, false));
+        registerService(PushSubscriptionRegistry.class, new CompositePushSubscriptionRegistry(persistentRegistry, providerTracker, listenerTracker));
 
         // Register event handler
         {

@@ -52,6 +52,7 @@ package com.openexchange.snippet.mime;
 import static com.openexchange.mail.mime.MimeDefaultSession.getDefaultSession;
 import static com.openexchange.snippet.mime.Services.getService;
 import static com.openexchange.snippet.utils.SnippetUtils.sanitizeContent;
+import com.google.common.collect.ImmutableSet;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -86,8 +87,10 @@ import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import javax.mail.internet.MimePart;
 import javax.mail.internet.MimeUtility;
+import javax.mail.util.ByteArrayDataSource;
 import org.slf4j.Logger;
 import com.openexchange.ajax.container.ThresholdFileHolder;
+import com.openexchange.ajax.container.ThresholdFileHolder.ThresholdFileHolderInputStream;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
@@ -110,6 +113,7 @@ import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.MimeDefaultSession;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.converters.FileBackedMimeMessage;
+import com.openexchange.mail.mime.datasource.FileDataSource;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.utils.MessageUtility;
@@ -162,7 +166,7 @@ public final class MimeSnippetManagement implements SnippetManagement {
 
                     tmp = QuotaMode.getModeByName(configurationService.getProperty(PROP_QUOTA_MODE, QuotaMode.CONTEXT.getName()));
                     MODE = tmp;
-                    LOGGER.info("Using '" + tmp.getName() + "' as the filestore quota mode for snippets.");
+                    LOGGER.info("Using '{}' as the filestore quota mode for snippets.", tmp.getName());
                 }
             }
         }
@@ -538,14 +542,14 @@ public final class MimeSnippetManagement implements SnippetManagement {
         final ContentType contentType = isEmpty(header) ? ContentType.DEFAULT_CONTENT_TYPE : new ContentType(header);
         snippet.setContent(MessageUtility.readMimePart(part, contentType));
         // Read message's headers
-        @SuppressWarnings("unchecked") final Enumeration<Header> others = mimeMessage.getAllHeaders();
+        Enumeration<Header> others = mimeMessage.getAllHeaders();
         while (others.hasMoreElements()) {
             final Header hdr = others.nextElement();
             snippet.put(hdr.getName(), MimeMessageUtility.decodeMultiEncodedHeader(hdr.getValue()));
         }
     }
 
-    private static final Set<String> IGNORABLES = new HashSet<String>(Arrays.asList(Snippet.PROP_MISC));
+    private static final Set<String> IGNORABLES = ImmutableSet.of(Snippet.PROP_MISC);
 
     private static String encode(String value) {
         try {
@@ -558,10 +562,15 @@ public final class MimeSnippetManagement implements SnippetManagement {
     @Override
     public String createSnippet(Snippet snippet) throws OXException {
         AccountQuota quota = getQuota();
-        if (null != quota && quota.hasQuota(QuotaType.AMOUNT)) {
+        if (null != quota) {
             Quota amountQuota = quota.getQuota(QuotaType.AMOUNT);
-            if (amountQuota.isExceeded() || amountQuota.willExceed(1)) {
+            if (null != amountQuota && (amountQuota.isExceeded() || amountQuota.willExceed(1))) {
                 throw QuotaExceptionCodes.QUOTA_EXCEEDED_SNIPPETS.create(amountQuota.getUsage(), amountQuota.getLimit());
+            }
+            // Check if size is already exceeded
+            Quota sizeQuota = quota.getQuota(QuotaType.SIZE);
+            if (null != sizeQuota && sizeQuota.isExceeded()) {
+                throw QuotaExceptionCodes.QUOTA_EXCEEDED_SIGNATURES.create(bytesToReadableString(sizeQuota.getLimit()));
             }
         }
         final DatabaseService databaseService = getDatabaseService();
@@ -821,7 +830,7 @@ public final class MimeSnippetManagement implements SnippetManagement {
                 }
 
                 // Copy remaining to updateMessage; this action includes unnamed properties
-                @SuppressWarnings("unchecked") final Enumeration<Header> nonMatchingHeaders = storageMessage.getNonMatchingHeaders(propNames.toArray(new String[0]));
+                Enumeration<Header> nonMatchingHeaders = storageMessage.getNonMatchingHeaders(propNames.toArray(new String[0]));
                 final Set<String> propertyNames = Property.getPropertyNames();
                 while (nonMatchingHeaders.hasMoreElements()) {
                     final Header hdr = nonMatchingHeaders.nextElement();
@@ -1236,14 +1245,41 @@ public final class MimeSnippetManagement implements SnippetManagement {
         }
     }
 
-    private static MimeBodyPart attachment2MimePart(Attachment attachment) throws MessagingException, IOException {
+    private static MimeBodyPart attachment2MimePart(Attachment attachment) throws MessagingException, IOException, OXException {
         /*
          * Content-Type
          */
         String header = attachment.getContentType();
         final String contentType = isEmpty(header) ? "text/plain; charset=UTF-8" : header;
         final MimeBodyPart bodyPart = new MimeBodyPart();
-        bodyPart.setDataHandler(new DataHandler(new MessageDataSource(attachment.getInputStream(), contentType)));
+        /*
+         * Content
+         */
+        {
+            ThresholdFileHolder fileHolder;
+            InputStream inputStream = attachment.getInputStream();
+            try {
+                if (inputStream instanceof ThresholdFileHolderInputStream) {
+                    ThresholdFileHolderInputStream fileHolderInputStream = (ThresholdFileHolderInputStream) inputStream;
+                    fileHolder = fileHolderInputStream.getFileHolder();
+                } else {
+                    fileHolder = new ThresholdFileHolder();
+                    fileHolder.write(inputStream);
+                }
+            } finally {
+                Streams.close(inputStream);
+            }
+
+            File tempFile = fileHolder.getTempFile();
+            if (null == tempFile) {
+                bodyPart.setDataHandler(new DataHandler(new ByteArrayDataSource(fileHolder.getBuffer().toByteArray(), contentType)));
+            } else {
+                bodyPart.setDataHandler(new DataHandler(new FileDataSource(tempFile, contentType)));
+            }
+        }
+        /*
+         * Rest...
+         */
         bodyPart.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
         bodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MimeMessageUtility.foldContentType(contentType));
         String attachmentId = attachment.getId();

@@ -49,9 +49,8 @@
 
 package com.openexchange.calendar;
 
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
+import com.google.common.collect.ImmutableMap;
 import com.openexchange.ajax.fields.AppointmentFields;
 import com.openexchange.ajax.fields.CalendarFields;
 import com.openexchange.ajax.fields.CommonFields;
@@ -78,7 +77,7 @@ public class AppointmentAttributeFetcher implements SearchAttributeFetcher<Appoi
     private static final Map<String, AttributeGetter> GETTERS;
 
     static {
-        final Map<String, AttributeGetter> m = new HashMap<String, AttributeGetter>(25);
+        ImmutableMap.Builder<String, AttributeGetter> m = ImmutableMap.builder();
 
         m.put(AppointmentFields.FULL_TIME, new AttributeGetter() {
 
@@ -399,7 +398,7 @@ public class AppointmentAttributeFetcher implements SearchAttributeFetcher<Appoi
             }
         });
 
-        GETTERS = Collections.unmodifiableMap(m);
+        GETTERS = m.build();
     }
 
     private static final AppointmentAttributeFetcher instance = new AppointmentAttributeFetcher();

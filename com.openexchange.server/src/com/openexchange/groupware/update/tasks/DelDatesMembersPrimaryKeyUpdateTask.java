@@ -54,7 +54,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
-import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
@@ -79,10 +78,12 @@ public class DelDatesMembersPrimaryKeyUpdateTask extends UpdateTaskAdapter {
 
     @Override
     public void perform(PerformParameters params) throws OXException {
-        int cid = params.getContextId();
-        Connection con = Database.getNoTimeout(cid, true);
+        Connection con = params.getConnection();
+        boolean rollback = false;
         try {
             con.setAutoCommit(false);
+            rollback = true;
+
             final String table = "del_dates_members";
             fillPfid(table, con);
             Column column = new Column("pfid", "INT(11) NOT NULL DEFAULT -2");
@@ -91,16 +92,18 @@ public class DelDatesMembersPrimaryKeyUpdateTask extends UpdateTaskAdapter {
                 Tools.dropPrimaryKey(con, table);
             }
             Tools.createPrimaryKeyIfAbsent(con, table, new String[] { "cid", "object_id", "member_uid", "pfid" });
+
             con.commit();
+            rollback = false;
         } catch (SQLException e) {
-            DBUtils.rollback(con);
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } catch (RuntimeException e) {
-            DBUtils.rollback(con);
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
+            if (rollback) {
+                DBUtils.rollback(con);
+            }
             DBUtils.autocommit(con);
-            Database.backNoTimeout(cid, true, con);
         }
     }
 

@@ -65,7 +65,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
@@ -73,7 +72,6 @@ import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.UUIDs;
-import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.tools.update.Tools;
 import gnu.trove.list.TIntList;
@@ -100,17 +98,12 @@ public final class ChangePrimaryKeyForUserAttribute extends UpdateTaskAdapter {
 
     @Override
     public void perform(final PerformParameters params) throws OXException {
-        // Get required service
-        DatabaseService dbService = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
-
         // Initialize connection
-        int contextId = params.getContextId();
-        Connection con = dbService.getForUpdateTask(contextId);
+        Connection con = params.getConnection();
 
         // Start task processing
         boolean restoreAutocommit = false;
         boolean rollback = false;
-        boolean modified = false;
         try {
             if (Tools.existsPrimaryKey(con, "user_attribute", new String[] {"cid", "id", "name"})) {
                 // PRIMARY KEY already changed
@@ -122,7 +115,6 @@ public final class ChangePrimaryKeyForUserAttribute extends UpdateTaskAdapter {
             rollback = true;
 
             doPerform(con);
-            modified = true;
 
             con.commit();
             rollback = false;
@@ -136,11 +128,6 @@ public final class ChangePrimaryKeyForUserAttribute extends UpdateTaskAdapter {
             }
             if (restoreAutocommit) {
                 autocommit(con);
-            }
-            if (modified) {
-                dbService.backForUpdateTask(contextId, con);
-            } else {
-                dbService.backForUpdateTaskAfterReading(contextId, con);
             }
         }
     }
@@ -205,13 +192,15 @@ public final class ChangePrimaryKeyForUserAttribute extends UpdateTaskAdapter {
                     }
                     rs = stmt.executeQuery();
                     while (rs.next()) {
-                        Duplicate d = new Duplicate(rs.getInt(1), rs.getInt(2), rs.getString(3));
+                        String name = rs.getString(3);
+                        Duplicate d = new Duplicate(rs.getInt(1), rs.getInt(2), name.trim());
                         Values values = mapping.get(d);
                         if (null == values) {
                             values = new Values();
                             mapping.put(d, values);
                         }
-                        values.addValue(new Value(rs.getString(4), UUIDs.toUUID(rs.getBytes(5))));
+                        String value = rs.getString(4);
+                        values.addValue(new Value(value.trim(), UUIDs.toUUID(rs.getBytes(5))));
                     }
                     Databases.closeSQLStuff(rs, stmt);
                     rs = null;
@@ -413,6 +402,17 @@ public final class ChangePrimaryKeyForUserAttribute extends UpdateTaskAdapter {
             }
             return true;
         }
+
+        @Override
+        public String toString() {
+            StringBuilder builder = new StringBuilder();
+            builder.append("{contextId=").append(contextId).append(", userId=").append(userId).append(", ");
+            if (name != null) {
+                builder.append("name=").append(name);
+            }
+            builder.append("}");
+            return builder.toString();
+        }
     }
 
     private static class Values {
@@ -438,6 +438,11 @@ public final class ChangePrimaryKeyForUserAttribute extends UpdateTaskAdapter {
         int size() {
             return values.size();
         }
+
+        @Override
+        public String toString() {
+            return values.toString();
+        }
     }
 
     private static class Value implements Comparable<Value> {
@@ -455,17 +460,19 @@ public final class ChangePrimaryKeyForUserAttribute extends UpdateTaskAdapter {
         public int compareTo(Value o) {
             return this.value.compareTo(o.value);
         }
-    }
 
-    private static class UserAndContext {
-
-        final int contextId;
-        final int userId;
-
-        UserAndContext(int contextId, int userId, String name, String value) {
-            super();
-            this.contextId = contextId;
-            this.userId = userId;
+        @Override
+        public String toString() {
+            StringBuilder builder = new StringBuilder();
+            builder.append("{");
+            if (value != null) {
+                builder.append("value=").append(value).append(", ");
+            }
+            if (uuid != null) {
+                builder.append("uuid=").append(uuid);
+            }
+            builder.append("}");
+            return builder.toString();
         }
     }
 

@@ -789,7 +789,9 @@ msgid "The resource %1$s is no longer reserved for the appointment"
 msgstr ""
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:267
-msgid "The appointment was rescheduled. Original date: %1$s. New date: %2$s"
+msgid ""
+"The appointment was rescheduled. Original date/time: %1$s. New date/time: "
+"%2$s"
 msgstr ""
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:269
@@ -3065,28 +3067,27 @@ msgstr ""
 
 #. A Guard error occurred: %1$s
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.guard.api/src/com/openexchange/guard/api/GuardApiExceptionMessages.java:62
-msgid "A Guard error occurred: %1$s"
+msgid "An error occurred: %1$s"
 msgstr ""
 
 #. A Guard error occurred: %1$s
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.guard.api/src/com/openexchange/guard/api/GuardApiExceptionMessages.java:65
-msgid ""
-"A Guard server error occurred with HTTP status code %1$s. Error message: %2$s"
+msgid "A server error occurred with HTTP status code %1$s. Error message: %2$s"
 msgstr ""
 
 #. Invalid Guard URL: %1$s
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.guard.api/src/com/openexchange/guard/api/GuardApiExceptionMessages.java:68
-msgid "The provided Guard URL: %1$s is invalid"
+msgid "The provided URL: %1$s is invalid"
 msgstr ""
 
 #. The Guard resource does not exist: %1$s
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.guard.api/src/com/openexchange/guard/api/GuardApiExceptionMessages.java:71
-msgid "The provided Guard resource does not exist: %1$s"
+msgid "The provided resource does not exist: %1$s"
 msgstr ""
 
 #. The Guard resource does not exist
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.guard.api/src/com/openexchange/guard/api/GuardApiExceptionMessages.java:74
-msgid "The Guard resource does not exist"
+msgid "The resource does not exist"
 msgstr ""
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.guard.api/src/com/openexchange/guard/api/GuardApiExceptionMessages.java:82
@@ -3649,6 +3650,12 @@ msgstr ""
 msgid "Managing mail filter rules is not available for your account."
 msgstr ""
 
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.mail.filter/src/com/openexchange/mailfilter/exceptions/MailFilterExceptionMessages.java:70
+msgid ""
+"The maximum amount of redirect rules is reached. Please delete or deactivate "
+"another redirect rule first."
+msgstr ""
+
 #. Maximum number of messages already stored for client %1$s
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.message.timeline/src/com/openexchange/message/timeline/MessageTimelineExceptionMessages.java:63
 msgid "Maximum number of messages already stored for client %1$s"
@@ -4051,6 +4058,10 @@ msgstr ""
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.passwordchange.servlet/src/com/openexchange/passwordchange/servlet/PasswordChangeServletExceptionMessage.java:70
 msgid "Password was not changed."
+msgstr ""
+
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.pgp.keys/src/com/openexchange/pgp/keys/exceptions/PGPKeysExceptionMessages.java:62
+msgid "The master key for the given key ring could not be found."
 msgstr ""
 
 #. The topic(s) of interest is/are invalid
@@ -4756,6 +4767,16 @@ msgstr ""
 #.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/ajax/helper/ParamContainerExceptionMessage.java:76
 msgid "Please add a value for %1$s"
+msgstr ""
+
+#. No user-associated job found
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/ajax/requesthandler/jobqueue/JobQueueMessages.java:63
+msgid "No such job %1$s"
+msgstr ""
+
+#. A long-running operation is being executed
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/ajax/requesthandler/jobqueue/JobQueueMessages.java:66
+msgid "A long-running operation is being executed"
 msgstr ""
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/authorization/AuthorizationExceptionMessages.java:60
@@ -7290,6 +7311,10 @@ msgstr ""
 msgid "Column \"%1$s\" not found in table \"%2$s\"."
 msgstr ""
 
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/update/UpdateExceptionMessages.java:84
+msgid "Found multiple schemas for name: \"%1$s\"."
+msgstr ""
+
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/update/internal/SchemaExceptionMessages.java:62
 msgid "Cannot get database connection."
 msgstr ""
@@ -7393,6 +7418,18 @@ msgstr ""
 #. Read timed out. Waited too long for incoming data from client.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/upload/impl/UploadExceptionMessage.java:120
 msgid "Read timed out. Waited too long for incoming data from client."
+msgstr ""
+
+#. Image upload denied. Its size exceeds maximum allowed value of %2$s
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/upload/impl/UploadExceptionMessage.java:123
+msgid "Image upload denied. Its size exceeds maximum allowed value of %2$s."
+msgstr ""
+
+#. Image upload denied. Its resolution exceeds maximum allowed value of %2$s pixels.
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/upload/impl/UploadExceptionMessage.java:126
+msgid ""
+"Image upload denied. Its resolution exceeds maximum allowed value of %2$s "
+"pixels."
 msgstr ""
 
 #. *

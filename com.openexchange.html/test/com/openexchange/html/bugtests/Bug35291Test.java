@@ -49,7 +49,7 @@
 
 package com.openexchange.html.bugtests;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 import com.openexchange.html.AbstractSanitizing;
 
@@ -63,10 +63,6 @@ public class Bug35291Test extends AbstractSanitizing {
      @Test
      public void testObeyEndTagsForStandaloneTags() throws Exception {
         String content = getHtmlService().getConformHTML("<img src=\"https://foo.bar.tld/foo2bar.jpg\">", "UTF-8");
-
-        assertEquals("Unexpected return value", "<!DOCTYPE html>\n" +
-            "<html><head>\n" +
-            "    <meta charset=\"UTF-8\">\n" +
-            "</head><body><img src=\"https://foo.bar.tld/foo2bar.jpg\"></body></html>\n ", content);
+        assertTrue("Slash should not be added", content.indexOf("/>") < 0);
     }
 }

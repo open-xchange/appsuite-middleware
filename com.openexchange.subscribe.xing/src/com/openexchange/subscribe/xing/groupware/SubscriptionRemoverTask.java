@@ -52,7 +52,6 @@ package com.openexchange.subscribe.xing.groupware;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Attributes;
@@ -61,7 +60,6 @@ import com.openexchange.groupware.update.TaskAttributes;
 import com.openexchange.groupware.update.UpdateConcurrency;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskV2;
-import com.openexchange.subscribe.xing.Services;
 
 
 /**
@@ -95,12 +93,10 @@ public abstract class SubscriptionRemoverTask implements UpdateTaskV2 {
 
     @Override
     public void perform(final PerformParameters params) throws OXException {
-        int contextId = params.getContextId();
-        final DatabaseService ds = Services.getService(DatabaseService.class);
-        final Connection con = ds.getForUpdateTask(contextId);
+        Connection con = params.getConnection();
         PreparedStatement stmt = null;
         try {
-            if(!Databases.tablesExist(con, "subscriptions", "genconf_attributes_strings", "genconf_attributes_bools")) {
+            if (false == Databases.tablesExist(con, "subscriptions", "genconf_attributes_strings", "genconf_attributes_bools")) {
                 return;
             }
 
@@ -111,9 +107,6 @@ public abstract class SubscriptionRemoverTask implements UpdateTaskV2 {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(x, x.getMessage());
         } finally {
             Databases.closeSQLStuff(stmt);
-            if (con != null) {
-                ds.backForUpdateTask(contextId, con);
-            }
         }
     }
 

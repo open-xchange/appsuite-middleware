@@ -1,0 +1,49 @@
+'/admin/v1/contexts/{context-id}/users/{user-id}/passwd-changes':
+  get:
+    operationId: passwd-changes
+    tags:
+      - Admin
+    parameters:
+      - description: The context the user is in
+        format: int32
+        in: path
+        name: context-id
+        required: true
+        type: integer
+      - description: The ID representing the user
+        format: int32
+        in: path
+        name: user-id
+        required: true
+        type: integer
+      - description: Limits the output to a specific number of entries.
+        format: int32
+        in: query
+        name: limit
+        required: false
+        type: integer
+      - description: Comma sperated list of fields to sort the output for. Field names that begin with "-" will be sorted descending else the fields get sorted ascending. Valid fields are 'date' and 'client_id'.
+        in: query
+        name: sort
+        required: false
+        type: string
+    produces:
+      - application/json
+    responses:
+      '200':
+        description: An array of password change entries.
+        schema:
+          type: array
+          items:
+            $ref: '#/definitions/PasswordChangeHistoryEntry'
+      '400':
+        description: 'Bad request, response contains error message.'
+      '401':
+        description: Not authorized
+      '404':
+        description: Not found. If path is wrong. Response contains error message.
+      '500':
+        description: 'Internal server error that might have multiple reasons, for instance no configured global database. Response contains error message.'
+    security:
+      - contextAdminAuth: []
+    summary: Lists the history of password changes for a user.

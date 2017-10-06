@@ -52,6 +52,7 @@ package com.openexchange.file.storage.mail;
 import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.FileStorageCaseInsensitiveAccess;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageFolderAccess;
@@ -65,7 +66,7 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.2
  */
-public final class MailDriveFolderAccess extends AbstractMailDriveResourceAccess implements FileStorageFolderAccess {
+public final class MailDriveFolderAccess extends AbstractMailDriveResourceAccess implements FileStorageFolderAccess, FileStorageCaseInsensitiveAccess {
 
     private final int userId;
 

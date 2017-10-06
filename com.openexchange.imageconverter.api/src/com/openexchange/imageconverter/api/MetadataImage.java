@@ -57,7 +57,7 @@ import java.io.InputStream;
  * {@link MetadataImage}
  *
  * @author <a href="mailto:kai.ahrens@open-xchange.com">Kai Ahrens</a>
- * @since v7.8.4
+ * @since v7.10
  */
 public class MetadataImage implements Closeable {
 

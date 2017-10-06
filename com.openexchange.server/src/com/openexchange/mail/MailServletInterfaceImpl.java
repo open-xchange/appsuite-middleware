@@ -91,6 +91,7 @@ import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
 import org.apache.commons.lang.ArrayUtils;
 import org.slf4j.Logger;
+import com.google.common.collect.ImmutableMap;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.contact.ContactService;
@@ -117,6 +118,7 @@ import com.openexchange.groupware.upload.quotachecker.MailUploadQuotaChecker;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.Collators;
+import com.openexchange.java.IOs;
 import com.openexchange.java.Reference;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
@@ -1796,8 +1798,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                     throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
                 }
                 OXException oxe = MailExceptionCode.IO_ERROR.create(e, e.getMessage());
-                String msg = Strings.asciiLowerCase(e.getMessage());
-                if (null != msg && msg.indexOf("connection reset by peer") >= 0) {
+                if (IOs.isConnectionReset(e)) {
                     /*-
                      * A "java.io.IOException: Connection reset by peer" is thrown when the other side has abruptly aborted the connection in midst of a transaction.
                      *
@@ -1932,8 +1933,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                     throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
                 }
                 OXException oxe = MailExceptionCode.IO_ERROR.create(e, e.getMessage());
-                String msg = Strings.asciiLowerCase(e.getMessage());
-                if (null != msg && msg.indexOf("connection reset by peer") >= 0) {
+                if (IOs.isConnectionReset(e)) {
                     /*-
                      * A "java.io.IOException: Connection reset by peer" is thrown when the other side has abruptly aborted the connection in midst of a transaction.
                      *
@@ -4057,7 +4057,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     static {
         Map<String, Object> m = new HashMap<>(1, 1f);
         m.put("operation", "updateMessageColorLabel");
-        MORE_PROPS_UPDATE_LABEL = Collections.unmodifiableMap(m);
+        MORE_PROPS_UPDATE_LABEL = ImmutableMap.copyOf(m);
     }
 
     @Override
@@ -4133,7 +4133,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     static {
         Map<String, Object> m = new HashMap<>(1, 1f);
         m.put("operation", "updateMessageFlags");
-        MORE_PROPS_UPDATE_FLAGS = Collections.unmodifiableMap(m);
+        MORE_PROPS_UPDATE_FLAGS = ImmutableMap.copyOf(m);
     }
 
     @Override

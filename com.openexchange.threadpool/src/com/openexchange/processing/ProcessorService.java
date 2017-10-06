@@ -50,6 +50,7 @@
 package com.openexchange.processing;
 
 import com.openexchange.exception.OXException;
+import com.openexchange.osgi.annotation.SingletonService;
 
 /**
  * {@link ProcessorService} - Appropriate for generating certain processors that are supposed to work-off certain tasks/jobs.
@@ -57,6 +58,7 @@ import com.openexchange.exception.OXException;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
  */
+@SingletonService
 public interface ProcessorService {
 
     /**

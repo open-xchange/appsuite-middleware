@@ -55,7 +55,6 @@ import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
@@ -86,28 +85,26 @@ public class IDCreateTableTask extends UpdateTaskAdapter {
 
     @Override
     public void perform(final PerformParameters params) throws OXException {
-        createTable("sequenceIds", getCreate(), params.getContextId());
+        createTable("sequenceIds", getCreate(), params.getConnectionProvider().getConnection());
         if (LOG.isInfoEnabled()) {
             LOG.info("UpdateTask 'IDCreateTableTask' successfully performed!");
         }
     }
 
-    private static void createTable(final String tablename, final String sqlCreate, final int contextId) throws OXException {
-        final Connection writeCon = Database.get(contextId, true);
+    private static void createTable(String tablename, String sqlCreate, Connection con) throws OXException {
         PreparedStatement stmt = null;
         try {
             try {
-                if (tableExists(tablename, writeCon.getMetaData())) {
+                if (tableExists(tablename, con.getMetaData())) {
                     return;
                 }
-                stmt = writeCon.prepareStatement(sqlCreate);
+                stmt = con.prepareStatement(sqlCreate);
                 stmt.executeUpdate();
             } catch (final SQLException e) {
                 throw createSQLError(e);
             }
         } finally {
             closeSQLStuff(null, stmt);
-            Database.back(contextId, true, writeCon);
         }
     }
 

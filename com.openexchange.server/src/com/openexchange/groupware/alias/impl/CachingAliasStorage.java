@@ -56,6 +56,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.locks.Lock;
+import com.google.common.collect.ImmutableSet;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
@@ -63,6 +64,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.alias.UserAliasStorage;
 import com.openexchange.lock.LockService;
 import com.openexchange.server.services.ServerServiceRegistry;
+import gnu.trove.iterator.TIntObjectIterator;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.TIntObjectMap;
@@ -132,7 +134,7 @@ public class CachingAliasStorage implements UserAliasStorage {
                 return (Set<String>) object;
             }
 
-            HashSet<String> aliases = delegate.getAliases(contextId, userId);
+            ImmutableSet<String> aliases = delegate.getAliases(contextId, userId);
             cache.put(key, aliases, false);
             return aliases;
         } finally {
@@ -174,7 +176,28 @@ public class CachingAliasStorage implements UserAliasStorage {
         }
 
         if (!toLoad.isEmpty()) {
-            map.putAll(delegate.getAliasesMapping(contextId, toLoad.toArray()));
+            TIntObjectMap<ImmutableSet<String>> loaded = delegate.getAliasesMapping(contextId, toLoad.toArray());
+            map.putAll(loaded);
+            
+            LockService lockService = ServerServiceRegistry.getInstance().getService(LockService.class);
+            TIntObjectIterator<ImmutableSet<String>> iterator = loaded.iterator();
+            for (int i = loaded.size(); i-- > 0;) {
+                iterator.advance();
+                
+                int userId = iterator.key();
+                Lock lock = null == lockService ? LockService.EMPTY_LOCK : lockService.getSelfCleaningLockFor(new StringBuilder(32).append("loadaliases-").append(contextId).append('-').append(userId).toString());
+                lock.lock();
+                try {
+                    CacheKey key = newCacheKey(cacheService, userId, contextId);
+                    Object object = cache.get(key);
+                    if (!(object instanceof Set)) {                        
+                        ImmutableSet<String> aliases = iterator.value();
+                        cache.put(key, aliases, false);
+                    }
+                } finally {
+                    lock.unlock();
+                }
+            }
         }
 
         List<Set<String>> list = new ArrayList<>(length);

@@ -63,6 +63,7 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.idn.IDNA;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.google.common.collect.ImmutableSet;
 import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
@@ -148,7 +149,7 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
     /**
      * Cachable formats: <code>"apiResponse"</code>, <code>"json"</code>.
      */
-    protected static final Set<String> CACHABLE_FORMATS = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("apiResponse", "json")));
+    protected static final Set<String> CACHABLE_FORMATS = ImmutableSet.of("apiResponse", "json");
 
     /**
      * Gets the service of specified type

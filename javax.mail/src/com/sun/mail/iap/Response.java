@@ -1,19 +1,19 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2013 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2017 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
  * and Distribution License("CDDL") (collectively, the "License").  You
  * may not use this file except in compliance with the License.  You can
  * obtain a copy of the License at
- * https://glassfish.dev.java.net/public/CDDL+GPL_1_1.html
- * or packager/legal/LICENSE.txt.  See the License for the specific
+ * https://oss.oracle.com/licenses/CDDL+GPL-1.1
+ * or LICENSE.txt.  See the License for the specific
  * language governing permissions and limitations under the License.
  *
  * When distributing the software, include this License Header Notice in each
- * file and include the License file at packager/legal/LICENSE.txt.
+ * file and include the License file at LICENSE.txt.
  *
  * GPL Classpath Exception:
  * Oracle designates this particular file as subject to the "Classpath"
@@ -42,13 +42,16 @@ package com.sun.mail.iap;
 
 import java.io.*;
 import java.util.*;
+import java.nio.charset.StandardCharsets;
+
 import com.sun.mail.util.*;
 
 /**
  * This class represents a response obtained from the input stream
  * of an IMAP server.
  *
- * @author  John Mani
+ * @author John Mani
+ * @author Bill Shannon
  */
 
 public class Response {
@@ -61,6 +64,7 @@ public class Response {
     protected Exception byeException = null;
     /** @since JavaMail 1.5.4 */
     protected Exception ex;
+    protected boolean utf8;
 
     private static final int increment = 100;
 
@@ -97,8 +101,21 @@ public class Response {
     private static String ASTRING_CHAR_DELIM = " (){%*\"\\";
 
     public Response(String s) {
-	buffer = ASCIIUtility.getBytes(s);
+	this(s, true);
+    }
+
+    /**
+     * Constructor for testing.
+     *
+     * @since	JavaMail 1.6.0
+     */
+    public Response(String s, boolean supportsUtf8) {
+	if (supportsUtf8)
+	    buffer = s.getBytes(StandardCharsets.UTF_8);
+	else
+	    buffer = s.getBytes(StandardCharsets.US_ASCII);
 	size = buffer.length;
+	utf8 = supportsUtf8;
 	parse();
     }
 
@@ -115,6 +132,7 @@ public class Response {
 	ByteArray response = p.getInputStream().readResponse(ba);
 	buffer = response.getBytes();
 	size = response.getCount() - 2; // Skip the terminating CRLF
+	utf8 = p.supportsUtf8();
 
 	parse();
     }
@@ -126,10 +144,13 @@ public class Response {
      */
     public Response(Response r) {
 	index = r.index;
+	pindex = r.pindex;
 	size = r.size;
 	buffer = r.buffer;
 	type = r.type;
 	tag = r.tag;
+	ex = r.ex;
+	utf8 = r.utf8;
     }
 
     /**
@@ -146,6 +167,15 @@ public class Response {
 	r.type |= SYNTHETIC;
 	r.ex = ex;
 	return r;
+    }
+
+    /**
+     * Does the server support UTF-8?
+     *
+     * @since	JavaMail 1.6.0
+     */
+    public boolean supportsUtf8() {
+	return utf8;
     }
 
     private void parse() {
@@ -211,6 +241,20 @@ public class Response {
     }
 
     /**
+     * Skip past any spaces.  If the next non-space character is c,
+     * consume it and return true.  Otherwise stop at that point
+     * and return false.
+     */
+    public boolean isNextNonSpace(char c) {
+	skipSpaces();
+	if (index < size && buffer[index] == (byte)c) {
+	    index++;
+	    return true;
+	}
+	return false;
+    }
+
+    /**
      * Skip to the next space, for use in error recovery while parsing.
      */
     public void skipToken() {
@@ -261,13 +305,13 @@ public class Response {
 	if (index >= size) // already at end of response
 	    return null;
 
-	byte b;
+	int b;
 	int start = index;
-	while (index < size && ((b = buffer[index]) > ' ') &&
-	       delim.indexOf((char)b) < 0 && b >= ' ' && b != 0x7f)
+	while (index < size && ((b = (((int)buffer[index])&0xff)) >= ' ') &&
+	       delim.indexOf((char)b) < 0 && b != 0x7f)
 	    index++;
 
-	return ASCIIUtility.toString(buffer, start, index);
+	return toString(buffer, start, index);
     }
 
     /**
@@ -288,7 +332,7 @@ public class Response {
 	while (index < size && buffer[index] != delim)
 	    index++;
 
-	return ASCIIUtility.toString(buffer, start, index);
+	return toString(buffer, start, index);
     }
 
     public String[] readStringList() {
@@ -307,14 +351,11 @@ public class Response {
 	}
 	index++; // skip '('
 
+	// to handle buggy IMAP servers, we tolerate multiple spaces as
+	// well as spaces after the left paren or before the right paren
 	List<String> result = new LinkedList<String>();
-	skipSpaces();
-	if (peekByte() != ')') {
-	    do {
-		result.add(atom ? readAtomString() : readString());
-	    } while (index < size && buffer[index++] != ')');
-	} else
-	    index++;	// skip ')'
+	while (!isNextNonSpace(')'))
+	    result.add(atom ? readAtomString() : readString());
 
 	return result.toArray(new String[result.size()]);
     }
@@ -466,8 +507,8 @@ public class Response {
 	    } else
 		index++; // skip past the terminating quote
 
-	    if (returnString)
-		return ASCIIUtility.toString(buffer, start, copyto);
+	    if (returnString) 
+		return toString(buffer, start, copyto);
 	    else
 		return new ByteArray(buffer, start, copyto-start);
 	} else if (b == '{') { // Literal
@@ -488,7 +529,7 @@ public class Response {
 	    index = start + count; // position index to beyond the literal
 
 	    if (returnString) // return as String
-		return ASCIIUtility.toString(buffer, start, start + count);
+		return toString(buffer, start, start + count);
 	    else
 	    	return new ByteArray(buffer, start, count);
 	} else if (parseAtoms) { // parse as ASTRING-CHARs
@@ -504,6 +545,12 @@ public class Response {
 	    return null;
 	}
 	return null; // Error
+    }
+
+    private String toString(byte[] buffer, int start, int end) {
+	return utf8 ?
+		new String(buffer, start, end - start, StandardCharsets.UTF_8) :
+		ASCIIUtility.toString(buffer, start, end);
     }
 
     public int getType() {
@@ -559,7 +606,7 @@ public class Response {
      */
     public String getRest() {
 	skipSpaces();
-	return ASCIIUtility.toString(buffer, index, size);
+	return toString(buffer, index, size);
     }
 
     /**
@@ -579,8 +626,9 @@ public class Response {
 	index = pindex;
     }
 
+    @Override
     public String toString() {
-	return ASCIIUtility.toString(buffer, 0, size);
+	return toString(buffer, 0, size);
     }
 
 }

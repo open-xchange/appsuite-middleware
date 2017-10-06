@@ -79,6 +79,11 @@ public final class OSGiContextService extends AbstractOSGiDelegateService<Contex
     }
 
     @Override
+    public List<Integer> getDistinctContextsPerSchema() throws OXException {
+        return getService().getDistinctContextsPerSchema();
+    }
+
+    @Override
     public Context getContext(int contextId) throws OXException {
         return getService().getContext(contextId);
     }

@@ -98,4 +98,11 @@ public @interface DispatcherNotes {
      * @return Whether to prefer reading/parsing request body stream by itself
      */
     boolean preferStream() default false;
+
+    /**
+     * Signals whether the performed action is allowed for being enqueued in job queue in case its processing exceeds the threshold
+     *
+     * @return <code>true</code> if enqueue-able; otherwise <code>false</code>
+     */
+    boolean enqueueable() default false;
 }

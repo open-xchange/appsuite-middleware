@@ -86,6 +86,7 @@ import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.MimeMailException;
+import com.openexchange.mail.mime.PlainTextAddress;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
@@ -746,8 +747,8 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
 
         @Override
         public void handleMessage(final Message message, final IDMailMessage msg, final org.slf4j.Logger logger) throws MessagingException, OXException {
-            for (final Enumeration<?> e = message.getAllHeaders(); e.hasMoreElements();) {
-                final Header hdr = (Header) e.nextElement();
+            for (final Enumeration<Header> e = message.getAllHeaders(); e.hasMoreElements();) {
+                final Header hdr = e.nextElement();
                 final String name = hdr.getName();
                 {
                     final HeaderHandler headerHandler = hh.get(name);
@@ -929,10 +930,10 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
             InternetAddress[] ret = new InternetAddress[length];
             for (int i = length; i-- > 0;) {
                 try {
-                    ret[i] = new QuotedInternetAddress(addresses[i].toString());
+                    ret[i] = new QuotedInternetAddress(addresses[i].toString(), false);
                 } catch (AddressException e) {
                     // Use as-is
-                    ret[i] = addresses[i];
+                    ret[i] = new PlainTextAddress(e.getRef());
                 }
             }
             return ret;

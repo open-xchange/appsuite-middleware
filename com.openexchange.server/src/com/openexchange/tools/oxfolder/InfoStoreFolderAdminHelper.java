@@ -53,8 +53,10 @@ import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.tools.oxfolder.OXFolderSQL.getNextSerialForAdmin;
 import static com.openexchange.tools.oxfolder.OXFolderSQL.insertDefaultFolderSQL;
 import static com.openexchange.tools.oxfolder.OXFolderSQL.lookUpFolder;
+import static com.openexchange.tools.oxfolder.OXFolderSQL.updateFolderType;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Collections;
 import java.util.Locale;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
@@ -154,7 +156,7 @@ public final class InfoStoreFolderAdminHelper {
      * @param locale The user's locale for also considering existing localized folder names, or <code>null</code> if not needed
      * @return The identifier of the created folder
      */
-    private static int addDefaultFolder(Connection connection, int contextID, int userID, int parentFolderID, int type, Locale locale) throws OXException {
+    public static int addDefaultFolder(Connection connection, int contextID, int userID, int parentFolderID, int type, Locale locale) throws OXException {
         try {
             String folderName = getDefaultFolderName(connection, contextID, userID, type);
             Context context = new ContextImpl(contextID);
@@ -164,7 +166,7 @@ public final class InfoStoreFolderAdminHelper {
             FolderObject folder = prepareDefaultFolder(userID, parentFolderID, type, folderName);
             int folderID = getNextSerialForAdmin(context, connection);
             insertDefaultFolderSQL(folderID, userID, folder, System.currentTimeMillis(), true, context, connection);
-            LOG.info("Default infostore folder '{}' [type={}, id={}] for user {} in context {} created successfully.",
+            LOG.debug("Default infostore folder '{}' [type={}, id={}] for user {} in context {} created successfully.",
                 folderName, I(type), I(folderID), I(userID), I(contextID));
             return folderID;
         } catch (SQLException e) {

@@ -49,10 +49,10 @@
 
 package com.openexchange.messaging;
 
-import java.util.Collections;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
+import com.google.common.collect.ImmutableMap;
 import com.openexchange.exception.OXException;
 import com.openexchange.messaging.MessagingHeader.KnownHeader;
 
@@ -211,7 +211,7 @@ public enum MessagingField {
         for (final MessagingField field : fields) {
             m.put(field.name, field);
         }
-        FIELDS_MAP = Collections.unmodifiableMap(m);
+        FIELDS_MAP = ImmutableMap.copyOf(m);
     }
 
     private static final MessagingField[] EMPTY_FIELDS = new MessagingField[0];

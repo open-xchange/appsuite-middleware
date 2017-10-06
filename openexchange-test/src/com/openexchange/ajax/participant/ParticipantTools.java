@@ -49,12 +49,13 @@
 
 package com.openexchange.ajax.participant;
 
-import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 import org.json.JSONException;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.framework.AJAXClient;
@@ -66,19 +67,13 @@ import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.search.ContactSearchObject;
+import com.openexchange.test.AbstractAssertTool;
 
 /**
  *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class ParticipantTools {
-
-    /**
-     * Prevent instantiation
-     */
-    private ParticipantTools() {
-        super();
-    }
+public class ParticipantTools extends AbstractAssertTool {
 
     public static List<Participant> getParticipants(final AJAXClient client) throws OXException, IOException, SAXException, JSONException {
         final ContactSearchObject search = new ContactSearchObject();
@@ -156,5 +151,77 @@ public final class ParticipantTools {
             }
         } while (retval.size() < count && retval.size() < participants.size());
         return retval;
+    }
+
+    /**
+     * Converts the specified {@link Participant}'s array to a {@link Set} of strings
+     * 
+     * @param participant The {@link Participant}'s array to convert
+     * @return A {@link Set} with the string representation of the specified {@link Participant}'s array
+     * @throws Exception if an error is occurred
+     */
+    protected static Set<String> participants2String(final Participant[] participant) throws Exception {
+        if (participant == null) {
+            return null;
+        }
+
+        final Set<String> hs = new HashSet<>();
+
+        for (int a = 0; a < participant.length; a++) {
+            hs.add(participant2String(participant[a]));
+        }
+
+        return hs;
+    }
+
+    /**
+     * Converts the specified {@link Participant} object to string
+     * 
+     * @param p The {@link Participant} to convert
+     * @return The string version of the {@link Participant} (Type and identifier)
+     * @throws Exception if an error is occurred
+     */
+    protected static String participant2String(final Participant p) throws Exception {
+        final StringBuffer sb = new StringBuffer();
+        sb.append("T" + p.getType());
+        sb.append("ID" + p.getIdentifier());
+
+        return sb.toString();
+    }
+
+    /**
+     * Converts the specified {@link UserParticipant}'s array to a {@link Set} of strings
+     * 
+     * @param users The {@link UserParticipant}'s array
+     * @return A {@link Set} with the string representation of the specified {@link UserParticipant}'s array
+     * @throws Exception if an error is occurred
+     */
+    protected static Set<String> users2String(final UserParticipant[] users) throws Exception {
+        if (users == null) {
+            return null;
+        }
+
+        final Set<String> hs = new HashSet<>();
+
+        for (int a = 0; a < users.length; a++) {
+            hs.add(user2String(users[a]));
+        }
+
+        return hs;
+    }
+
+    /**
+     * Converts the specified {@link UserParticipant} object to string
+     * 
+     * @param user The {@link UserParticipant} to convert
+     * @return The string version of the {@link UserParticipant}
+     * @throws Exception if an error is occurred
+     */
+    protected static String user2String(final UserParticipant user) throws Exception {
+        final StringBuffer sb = new StringBuffer();
+        sb.append("ID" + user.getIdentifier());
+        sb.append("C" + user.getConfirm());
+
+        return sb.toString();
     }
 }

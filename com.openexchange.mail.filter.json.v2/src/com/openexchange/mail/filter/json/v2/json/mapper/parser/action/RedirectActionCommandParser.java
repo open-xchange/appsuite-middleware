@@ -64,7 +64,6 @@ import com.openexchange.mail.filter.json.v2.json.fields.GeneralField;
 import com.openexchange.mail.filter.json.v2.json.fields.RedirectActionField;
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.CommandParserJSONUtil;
 import com.openexchange.mail.filter.json.v2.mapper.ArgumentUtil;
-import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mailfilter.exceptions.MailFilterExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
@@ -97,7 +96,7 @@ public class RedirectActionCommandParser extends AbstractActionCommandParser {
         String stringParam = CommandParserJSONUtil.getString(jsonObject, RedirectActionField.to.name(), Commands.REDIRECT.getCommandName());
         // Check for valid email address here:
         try {
-            new QuotedInternetAddress(stringParam, true);
+            InternetAddressUtil.validateInternetAddress(stringParam, true);
         } catch (final AddressException e) {
             throw MailFilterExceptionCode.INVALID_REDIRECT_ADDRESS.create(e, stringParam);
         }

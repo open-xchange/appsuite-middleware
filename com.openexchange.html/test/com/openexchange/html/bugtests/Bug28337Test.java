@@ -64,9 +64,20 @@ public class Bug28337Test extends AbstractSanitizing {
      public void testGetConformHtml() throws Exception {
         String content = getHtmlService().getConformHTML("<strong>Very important information</strong><ul><li>Point 1</li><li>Oh forgot the /li</ul>", "UTF-8");
 
-        assertEquals("<!DOCTYPE html>\n" +
-            "<html><head>\n" +
-            "    <meta charset=\"UTF-8\">\n" +
-            "</head><body><strong>Very important information</strong><ul><li>Point 1</li><li>Oh forgot the /li</li></ul></body></html>\n ", content);
+        String expected = "<!doctype html>\n" +
+            "<html>\n" +
+            " <head> \n" +
+            "  <meta charset=\"UTF-8\"> \n" +
+            " </head>\n" +
+            " <body>\n" +
+            "  <strong>Very important information</strong>\n" +
+            "  <ul>\n" +
+            "   <li>Point 1</li>\n" +
+            "   <li>Oh forgot the /li</li>\n" +
+            "  </ul> \n" +
+            " </body>\n" +
+            "</html>";
+
+        assertEquals(expected, content);
     }
 }

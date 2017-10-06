@@ -68,6 +68,7 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.slf4j.spi.MDCAdapter;
 import ch.qos.logback.classic.util.LogbackMDCAdapter;
+import com.google.common.collect.ImmutableSet;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.session.Session;
@@ -805,7 +806,7 @@ public final class LogProperties {
         return new Props();
     }
 
-    private static final Set<String> SANITIZE = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("password", "epassword")));
+    private static final Set<String> SANITIZE = ImmutableSet.of("password", "epassword");
     private static final String REPLACEMENT = "xxx";
 
     /**

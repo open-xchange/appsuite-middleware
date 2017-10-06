@@ -397,7 +397,7 @@ Report was finished: Tue Jun 07 11:31:30 CEST 2016
         "OpenXchange.HTTPClient.OXAddIn" : 2,
         "com.openexchange.mobileapp" : 3
       },
-      "capabilities" : [ "active_sync", "autologin", "boxcom", "caldav", "calendar", "carddav", "client-onboarding", "collect_email_addresses", "conflict_handling", "contacts", "delegate_tasks", "dev", "document_preview", "drive", "edit_group", "edit_public_folders", "edit_resource", "emclient", "filestore", "freebusy", "gab", "google", "groupware", "guard", "guard-drive", "guard-mail", "ical", "infostore", "invite_guests", "messenger", "messenger-group", "mobility", "msliveconnect", "multiple_mail_accounts", "oauth", "olox20", "participants_dialog", "pim", "pop3", "portal", "presenter", "publication", "read_create_shared_folders", "remote_presenter", "rt", "search", "share_links", "share_mail_attachments", "spreadsheet", "subscription", "tasks", "testoauthservice", "text", "twitter", "unified-mailbox", "usm", "vcard", "webdav", "webdav_xml", "webmail" ],
+      "capabilities" : [ "active_sync", "autologin", "boxcom", "caldav", "calendar", "carddav", "client-onboarding", "collect_email_addresses", "conflict_handling", "contacts", "delegate_tasks", "dev", "document_preview", "drive", "edit_group", "edit_public_folders", "edit_resource", "emclient", "filestore", "freebusy", "gab", "google", "groupware", "guard", "guard-drive", "guard-mail", "ical", "infostore", "invite_guests", "messenger", "messenger-group", "mobility", "msliveconnect", "multiple_mail_accounts", "oauth", "olox20", "participants_dialog", "pim", "pop3", "portal", "presenter", "publication", "read_create_shared_folders", "remote_presenter", "rt", "search", "share_links", "share_mail_attachments", "spreadsheet", "subscription", "tasks", "testoauthservice", "text", "twitter", "unified-mailbox", "usm", "vcard", "webdav", "webmail" ],
       "admin" : 0,
       "contexts" : 6,
       "total" : 11,
@@ -413,7 +413,7 @@ Report was finished: Tue Jun 07 11:31:30 CEST 2016
         "open-xchange-appsuite" : 2
       },
       "total" : 7,
-      "capabilities" : [ "active_sync", "autologin", "boxcom", "caldav", "calendar", "carddav", "client-onboarding", "collect_email_addresses", "conflict_handling", "contacts", "delegate_tasks", "dev", "document_preview", "drive", "edit_group", "edit_public_folders", "edit_resource", "emclient", "filestore", "freebusy", "gab", "google", "groupware", "guard", "guard-drive", "guard-mail", "ical", "infostore", "invite_guests", "messenger", "messenger-group", "mobility", "msliveconnect", "multiple_mail_accounts", "oauth", "olox20", "participants_dialog", "pim", "pop3", "portal", "presenter", "publication", "read_create_shared_folders", "remote_presenter", "rt", "search", "share_links", "share_mail_attachments", "spreadsheet", "subscription", "tasks", "testoauthservice", "text", "twitter", "unified-mailbox", "usm", "vcard", "webdav", "webdav_xml" ],
+      "capabilities" : [ "active_sync", "autologin", "boxcom", "caldav", "calendar", "carddav", "client-onboarding", "collect_email_addresses", "conflict_handling", "contacts", "delegate_tasks", "dev", "document_preview", "drive", "edit_group", "edit_public_folders", "edit_resource", "emclient", "filestore", "freebusy", "gab", "google", "groupware", "guard", "guard-drive", "guard-mail", "ical", "infostore", "invite_guests", "messenger", "messenger-group", "mobility", "msliveconnect", "multiple_mail_accounts", "oauth", "olox20", "participants_dialog", "pim", "pop3", "portal", "presenter", "publication", "read_create_shared_folders", "remote_presenter", "rt", "search", "share_links", "share_mail_attachments", "spreadsheet", "subscription", "tasks", "testoauthservice", "text", "twitter", "unified-mailbox", "usm", "vcard", "webdav" ],
       "Context-users-max" : 1,
       "quota" : 1048576,
       "guests" : 0,
@@ -465,6 +465,8 @@ Report was finished: Tue Jun 07 11:31:30 CEST 2016
 **clientlogincount:**
 
 - number of client logins for the last month
+
+**Additional Information:** Both login count values respect only the last client login of a user with a distinct client like olox2 or appsuite. If a user logs in with olox2 and appsuite during the last 30 days, he will be considered in both counts for the clients and also in both timeframes (clientlogincountyear & clientlogincount). If his last login with a client is further away in the past but still in the timeframe of the last year (365 days in the past), he will only be considered in the yearly counter (clientlogincountyear) and not in the last monthly counter (clientlogincount).
 
 **uuid:**
 
@@ -604,7 +606,7 @@ Report was finished: Tue Jun 07 11:46:05 CEST 2016
         "OpenXchange.HTTPClient.OXAddIn" : 2,
         "com.openexchange.mobileapp" : 3
       },
-      "capabilities" : [ "active_sync", "autologin", "boxcom", "caldav", "calendar", "carddav", "client-onboarding", "collect_email_addresses", "conflict_handling", "contacts", "delegate_tasks", "dev", "document_preview", "drive", "edit_group", "edit_public_folders", "edit_resource", "emclient", "filestore", "freebusy", "gab", "google", "groupware", "guard", "guard-drive", "guard-mail", "ical", "infostore", "invite_guests", "messenger", "messenger-group", "mobility", "msliveconnect", "multiple_mail_accounts", "oauth", "olox20", "participants_dialog", "pim", "pop3", "portal", "presenter", "publication", "read_create_shared_folders", "remote_presenter", "rt", "search", "share_links", "share_mail_attachments", "spreadsheet", "subscription", "tasks", "testoauthservice", "text", "twitter", "unified-mailbox", "usm", "vcard", "webdav", "webdav_xml", "webmail" ],
+      "capabilities" : [ "active_sync", "autologin", "boxcom", "caldav", "calendar", "carddav", "client-onboarding", "collect_email_addresses", "conflict_handling", "contacts", "delegate_tasks", "dev", "document_preview", "drive", "edit_group", "edit_public_folders", "edit_resource", "emclient", "filestore", "freebusy", "gab", "google", "groupware", "guard", "guard-drive", "guard-mail", "ical", "infostore", "invite_guests", "messenger", "messenger-group", "mobility", "msliveconnect", "multiple_mail_accounts", "oauth", "olox20", "participants_dialog", "pim", "pop3", "portal", "presenter", "publication", "read_create_shared_folders", "remote_presenter", "rt", "search", "share_links", "share_mail_attachments", "spreadsheet", "subscription", "tasks", "testoauthservice", "text", "twitter", "unified-mailbox", "usm", "vcard", "webdav", "webmail" ],
       "admin" : 0,
       "contexts" : 6,
       "drive-overall" : {
@@ -653,7 +655,7 @@ Report was finished: Tue Jun 07 11:46:05 CEST 2016
       "client-list" : {
         "open-xchange-appsuite" : 2
       },
-      "capabilities" : [ "active_sync", "autologin", "boxcom", "caldav", "calendar", "carddav", "client-onboarding", "collect_email_addresses", "conflict_handling", "contacts", "delegate_tasks", "dev", "document_preview", "drive", "edit_group", "edit_public_folders", "edit_resource", "emclient", "filestore", "freebusy", "gab", "google", "groupware", "guard", "guard-drive", "guard-mail", "ical", "infostore", "invite_guests", "messenger", "messenger-group", "mobility", "msliveconnect", "multiple_mail_accounts", "oauth", "olox20", "participants_dialog", "pim", "pop3", "portal", "presenter", "publication", "read_create_shared_folders", "remote_presenter", "rt", "search", "share_links", "share_mail_attachments", "spreadsheet", "subscription", "tasks", "testoauthservice", "text", "twitter", "unified-mailbox", "usm", "vcard", "webdav", "webdav_xml" ],
+      "capabilities" : [ "active_sync", "autologin", "boxcom", "caldav", "calendar", "carddav", "client-onboarding", "collect_email_addresses", "conflict_handling", "contacts", "delegate_tasks", "dev", "document_preview", "drive", "edit_group", "edit_public_folders", "edit_resource", "emclient", "filestore", "freebusy", "gab", "google", "groupware", "guard", "guard-drive", "guard-mail", "ical", "infostore", "invite_guests", "messenger", "messenger-group", "mobility", "msliveconnect", "multiple_mail_accounts", "oauth", "olox20", "participants_dialog", "pim", "pop3", "portal", "presenter", "publication", "read_create_shared_folders", "remote_presenter", "rt", "search", "share_links", "share_mail_attachments", "spreadsheet", "subscription", "tasks", "testoauthservice", "text", "twitter", "unified-mailbox", "usm", "vcard", "webdav" ],
       "admin" : 7,
       "contexts" : 7,
       "drive-overall" : {

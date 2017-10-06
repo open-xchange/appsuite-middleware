@@ -70,8 +70,8 @@ import com.openexchange.file.storage.composition.IDBasedFolderAccess;
 import com.openexchange.file.storage.json.actions.files.IdVersionPair;
 import com.openexchange.filestore.FileStorageCodes;
 import com.openexchange.groupware.upload.impl.UploadUtility;
+import com.openexchange.java.IOs;
 import com.openexchange.java.Streams;
-import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIterators;
@@ -199,8 +199,7 @@ public class ZipMaker {
                 }
             }
         } catch (IOException e) {
-            String msg = Strings.asciiLowerCase(e.getMessage());
-            if (null != msg && msg.indexOf("connection reset by peer") >= 0) {
+            if (IOs.isConnectionReset(e)) {
                 /*-
                  * A "java.io.IOException: Connection reset by peer" is thrown when the other side has abruptly aborted the connection in midst of a transaction.
                  *

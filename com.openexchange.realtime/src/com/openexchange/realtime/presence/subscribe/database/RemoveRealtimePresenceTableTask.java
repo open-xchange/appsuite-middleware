@@ -51,7 +51,6 @@ package com.openexchange.realtime.presence.subscribe.database;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
@@ -76,7 +75,7 @@ public class RemoveRealtimePresenceTableTask extends UpdateTaskAdapter {
 
     @Override
     public void perform(PerformParameters params) throws OXException {
-        Connection connection = Database.getNoTimeout(params.getContextId(), true);
+        Connection connection = params.getConnection();
         boolean rollback = false;
         try {
             DBUtils.startTransaction(connection);
@@ -95,7 +94,6 @@ public class RemoveRealtimePresenceTableTask extends UpdateTaskAdapter {
                 DBUtils.rollback(connection);
             }
             DBUtils.autocommit(connection);
-            Database.backNoTimeout(params.getContextId(), true, connection);
         }
     }
 

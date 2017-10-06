@@ -58,7 +58,6 @@ import com.openexchange.annotation.NonNull;
  * @since v7.10
  */
 public enum MetadataKey {
-
     // Group EXIF
     EXIF_INTEROP_INDEX(MetadataGroup.EXIF, "Interoperability Index", 0x0001),
     EXIF_INTEROP_VERSION(MetadataGroup.EXIF, "Interoperability Version", 0x0002),
@@ -217,9 +216,9 @@ public enum MetadataKey {
     EXIF_LENS(MetadataGroup.EXIF, "Lens", 0xFDEA),
 
     // Group FILE
-    FILE_NAME(MetadataGroup.FILE, "File Name", 1),
-    FILE_SIZE(MetadataGroup.FILE, "File Size", 2),
-    FILE_MODIFIED_DATE(MetadataGroup.FILE, "File Modified Date", 3),
+    FILE_NAME(MetadataGroup.FILE, "File Name", 0x0001),
+    FILE_SIZE(MetadataGroup.FILE, "File Size", 0x0002),
+    FILE_MODIFIED_DATE(MetadataGroup.FILE, "File Modified Date", 0x0003),
 
     // Group GPS
     GPS_VERSION_ID(MetadataGroup.GPS, "GPS Version ID", 0x0000),
@@ -253,6 +252,10 @@ public enum MetadataKey {
     GPS_AREA_INFORMATION(MetadataGroup.GPS, "GPS Area Information", 0x001C),
     GPS_DATE_STAMP(MetadataGroup.GPS, "GPS Date Stamp", 0x001D),
     GPS_DIFFERENTIAL(MetadataGroup.GPS, "GPS Differential", 0x001E),
+
+    // Group Header
+    HEADER_PIXEL_WIDTH(MetadataGroup.HEADER, "Header Pixel Width", 0x9001),
+    HEADER_PIXEL_HEIGHT(MetadataGroup.HEADER, "Header Pixel Height", 0x9002),
 
     // Group Thumbnail
     THUMBNAIL_OFFSET(MetadataGroup.THUMBNAIL, "Thumbnail Offset", 0x0201),

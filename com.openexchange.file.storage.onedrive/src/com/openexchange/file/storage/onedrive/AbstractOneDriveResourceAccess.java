@@ -56,9 +56,6 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -86,6 +83,7 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.ImmutableSet;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
@@ -147,15 +145,16 @@ public abstract class AbstractOneDriveResourceAccess {
          *
          * @param httpResponse The HTTP response
          * @throws OXException If an Open-Xchange error is yielded from status
+         * @throws ClientProtocolException To singal a client error
          */
-        void handleStatusCode(HttpResponse httpResponse) throws OXException;
+        void handleStatusCode(HttpResponse httpResponse) throws OXException, ClientProtocolException;
     }
 
     /** The default status code policy; accepting greater than/equal to <code>200</code> and lower than <code>300</code> */
     public static final StatusCodePolicy STATUS_CODE_POLICY_DEFAULT = new StatusCodePolicy() {
 
         @Override
-        public void handleStatusCode(HttpResponse httpResponse) throws OXException {
+        public void handleStatusCode(HttpResponse httpResponse) throws OXException, ClientProtocolException {
             StatusLine statusLine = httpResponse.getStatusLine();
             int statusCode = statusLine.getStatusCode();
             if (statusCode < 200 || statusCode >= 300) {
@@ -164,8 +163,15 @@ public abstract class AbstractOneDriveResourceAccess {
                 }
                 String reason;
                 try {
-                    JSONObject jsonObject = new JSONObject(new InputStreamReader(httpResponse.getEntity().getContent(), Charsets.UTF_8));
-                    reason = jsonObject.getJSONObject("error").getString("message");
+                    JSONObject jResponse = new JSONObject(new InputStreamReader(httpResponse.getEntity().getContent(), Charsets.UTF_8));
+                    JSONObject jError = jResponse.getJSONObject("error");
+                    String code = jError.getString("code");
+                    if ("resource_already_exists".equals(code)) {
+                        throw new DuplicateResourceException(jError.getString("message"));
+                    }
+                    reason = jError.getString("message");
+                } catch (DuplicateResourceException e) {
+                    throw e;
                 } catch (Exception e) {
                     reason = statusLine.getReasonPhrase();
                 }
@@ -178,14 +184,21 @@ public abstract class AbstractOneDriveResourceAccess {
     public static final StatusCodePolicy STATUS_CODE_POLICY_IGNORE_NOT_FOUND = new StatusCodePolicy() {
 
         @Override
-        public void handleStatusCode(HttpResponse httpResponse) throws OXException {
+        public void handleStatusCode(HttpResponse httpResponse) throws OXException, ClientProtocolException {
             StatusLine statusLine = httpResponse.getStatusLine();
             int statusCode = statusLine.getStatusCode();
             if ((statusCode < 200 || statusCode >= 300) && statusCode != 404) {
                 String reason;
                 try {
-                    JSONObject jsonObject = new JSONObject(new InputStreamReader(httpResponse.getEntity().getContent(), Charsets.UTF_8));
-                    reason = jsonObject.getJSONObject("error").getString("message");
+                    JSONObject jResponse = new JSONObject(new InputStreamReader(httpResponse.getEntity().getContent(), Charsets.UTF_8));
+                    JSONObject jError = jResponse.getJSONObject("error");
+                    String code = jError.getString("code");
+                    if ("resource_already_exists".equals(code)) {
+                        throw new DuplicateResourceException(jError.getString("message"));
+                    }
+                    reason = jError.getString("message");
+                } catch (DuplicateResourceException e) {
+                    throw e;
                 } catch (Exception e) {
                     reason = statusLine.getReasonPhrase();
                 }
@@ -202,7 +215,7 @@ public abstract class AbstractOneDriveResourceAccess {
     protected static final String URL_API_BASE = "https://apis.live.net/v5.0/";
 
     /** The type constants for a folder */
-    private static final Set<String> TYPES_FOLDER = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(OneDriveConstants.TYPE_FOLDER, OneDriveConstants.TYPE_ALBUM)));
+    private static final Set<String> TYPES_FOLDER = ImmutableSet.of(OneDriveConstants.TYPE_FOLDER, OneDriveConstants.TYPE_ALBUM);
 
     /**
      * Checks if specified JSON item is a folder

@@ -49,7 +49,10 @@
 
 package com.openexchange.importexport.exporters;
 
-import static com.openexchange.importexport.formats.csv.CSVLibrary.*;
+import static com.openexchange.importexport.formats.csv.CSVLibrary.CELL_DELIMITER;
+import static com.openexchange.importexport.formats.csv.CSVLibrary.ROW_DELIMITER;
+import static com.openexchange.importexport.formats.csv.CSVLibrary.getFolderId;
+import static com.openexchange.importexport.formats.csv.CSVLibrary.getFolderObject;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
@@ -195,19 +198,17 @@ public class CSVContactExporter implements Exporter {
     }
 
     @Override
-    public boolean canExportBatch(ServerSession session, Format format, Map<String, List<String>> batchIds, Map<String, Object> optionalParams) {
-        for (Map.Entry<String, List<String>> batchEntry : batchIds.entrySet()) {
-            if (!canExport(session, format, batchEntry.getKey(), optionalParams)) {
+    public boolean canExportBatch(ServerSession session, Format format, Map.Entry<String, List<String>> batchIds, Map<String, Object> optionalParams) {
+            if (!canExport(session, format, batchIds.getKey(), optionalParams)) {
                 return false;
             }
-            for (String objectId : batchEntry.getValue()) {
+            for (String objectId : batchIds.getValue()) {
                 try {
                     Integer.parseInt(objectId);
                 } catch (NumberFormatException e) {
                     return false;
                 }
             }
-        }
         return true;
     }
 
@@ -230,7 +231,8 @@ public class CSVContactExporter implements Exporter {
         if (optionalParams == null) {
             exportDlists = true;
         } else {
-            exportDlists = optionalParams.containsKey(ContactExportAction.PARAMETER_EXPORT_DLISTS) ? Boolean.valueOf(optionalParams.get(ContactExportAction.PARAMETER_EXPORT_DLISTS).toString()).booleanValue() : true;
+            Object oExportDlists = optionalParams.get(ContactExportAction.PARAMETER_EXPORT_DLISTS);
+            exportDlists = null == oExportDlists ? true : Boolean.valueOf(oExportDlists.toString()).booleanValue();
         }
 
         SearchIterator<Contact> conIter;
@@ -283,10 +285,11 @@ public class CSVContactExporter implements Exporter {
 
     @Override
     public SizedInputStream exportBatchData(ServerSession sessObj, Format format, Map<String, List<String>> batchIds, int[] fieldsToBeExported, Map<String, Object> optionalParams) throws OXException {
-        if (!canExportBatch(sessObj, format, batchIds, optionalParams)) {
-            throw ImportExportExceptionCodes.COULD_NOT_VALIDATE_OBJECT.create();
+        for (Map.Entry<String, List<String>> batchEntry : batchIds.entrySet()) {
+            if (!canExportBatch(sessObj, format, batchEntry, optionalParams)) {
+                throw ImportExportExceptionCodes.CANNOT_EXPORT.create(batchEntry.getKey(), format);
+            }
         }
-
         ContactField[] fields;
         if (fieldsToBeExported == null || fieldsToBeExported.length == 0) {
             fields = DEFAULT_FIELDS_ARRAY;
@@ -298,7 +301,8 @@ public class CSVContactExporter implements Exporter {
         if (optionalParams == null) {
             exportDlists = true;
         } else {
-            exportDlists = optionalParams.containsKey(ContactExportAction.PARAMETER_EXPORT_DLISTS) ? Boolean.valueOf(optionalParams.get(ContactExportAction.PARAMETER_EXPORT_DLISTS).toString()).booleanValue() : true;
+            Object oExportDlists = optionalParams.get(ContactExportAction.PARAMETER_EXPORT_DLISTS);
+            exportDlists = null == oExportDlists ? true : Boolean.valueOf(oExportDlists.toString()).booleanValue();
         }
         List<ContactField> fieldList = Arrays.asList(fields.clone());
         if (!fieldList.contains(ContactField.MARK_AS_DISTRIBUTIONLIST)) {
@@ -353,7 +357,7 @@ public class CSVContactExporter implements Exporter {
     }
 
     protected List<String> convertToList(final Contact conObj, final ContactField[] fields) {
-        final List<String> l = new LinkedList<String>();
+        final List<String> l = new LinkedList<>();
         final ContactStringGetter getter = new ContactStringGetter();
         getter.setDelegate(new ContactGetter());
         for (final ContactField field : fields) {
@@ -368,23 +372,29 @@ public class CSVContactExporter implements Exporter {
 
     protected String convertToLine(final List<String> line) {
         StringBuilder bob = new StringBuilder(1024);
+        boolean first = true;
         for (String token : line) {
+            if (first) {
+                first = false;
+            } else {
+                bob.append(CELL_DELIMITER);
+            }
             bob.append('"');
             bob.append(StringUtils.replace(token, "\"", "\"\""));
             bob.append('"');
-            bob.append(CELL_DELIMITER);
         }
-        bob.setCharAt(bob.length() - 1, ROW_DELIMITER);
+        bob.append(ROW_DELIMITER);
         return bob.toString();
     }
 
     @Override
-    public String getFolderExportFileName(ServerSession sessionObj, String folder) {
-        return ExportFileNameCreator.createFolderExportFileName(sessionObj, folder);
+    public String getFolderExportFileName(ServerSession sessionObj, String folder, String extension) {
+        return ExportFileNameCreator.createFolderExportFileName(sessionObj, folder, extension);
     }
 
     @Override
-    public String getBatchExportFileName(ServerSession sessionObj, Map<String, List<String>> batchIds) {
-        return ExportFileNameCreator.createBatchExportFileName(sessionObj, batchIds);
+    public String getBatchExportFileName(ServerSession sessionObj, Map<String, List<String>> batchIds, String extension) {
+        return ExportFileNameCreator.createBatchExportFileName(sessionObj, batchIds, extension);
     }
+
 }

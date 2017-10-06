@@ -56,13 +56,14 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.tools.AdminCacheExtended;
+import com.openexchange.database.Databases;
 import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.ThreadRenamer;
-import com.openexchange.tools.sql.DBUtils;
 
 /**
  * Executes some SQL statements searching for context identifier with a separate thread.
@@ -99,24 +100,31 @@ public class ContextSearcher extends AbstractTask<Collection<Integer>> {
         }
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        List<Integer> cids = new ArrayList<Integer>();
         try {
             stmt = con.prepareStatement(sql);
-            stmt.setString(1, pattern);
+            if (null != pattern) {
+                stmt.setString(1, pattern);
+            }
             rs = stmt.executeQuery();
+            if (false == rs.next()) {
+                return Collections.emptyList();
+            }
+
+            List<Integer> cids = new ArrayList<>();
             while (rs.next()) {
                 cids.add(I(rs.getInt(1)));
             }
+            return cids;
         } catch (SQLException e) {
             throw new StorageException(e);
         } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
             try {
                 cache.pushReadConnectionForConfigDB(con);
             } catch (PoolException e1) {
                 LOG.error("", e1);
             }
         }
-        return cids;
     }
+
 }

@@ -459,6 +459,7 @@ public class DispatcherServlet extends SessionServlet {
         AJAXRequestResult result = null;
         Exception exc = null;
         Dispatcher dispatcher = DISPATCHER.get();
+        boolean enqueued = false;
         try {
             AJAXRequestData requestData = initializeRequestData(httpRequest, httpResp, preferStream);
 
@@ -490,6 +491,10 @@ public class DispatcherServlet extends SessionServlet {
                 /*
                  * ... and send response
                  */
+                ResultType resultType = result.getType();
+                if (ResultType.ENQUEUED == resultType) {
+                    enqueued = true;
+                }
                 sendResponse(requestData, result, httpRequest, httpResp);
             }
         } catch (UploadException e) {
@@ -507,6 +512,10 @@ public class DispatcherServlet extends SessionServlet {
             Locale locale = getLocaleFrom(session, null);
             if (null != locale) {
                 e.setProperty(OXExceptionConstants.PROPERTY_LOCALE, locale.toString());
+            }
+            if (UploadException.UploadCode.IMAGE_TOO_BIG.equals(e) || UploadException.UploadCode.IMAGE_RESOLUTION_TOO_HIGH.equals(e)) {
+                // Do log exceed image size/resolution
+                LOG.warn(e.getSoleMessage());
             }
             handleOXException(e, httpRequest, httpResp);
         } catch (OXException e) {
@@ -528,9 +537,11 @@ public class DispatcherServlet extends SessionServlet {
             }
             super.handleOXException(oxe, httpRequest, httpResp, false, false);
         } finally {
-            Dispatchers.signalDone(result, exc);
-            if (null != state) {
-                dispatcher.end(state);
+            if (false == enqueued) {
+                Dispatchers.signalDone(result, exc);
+                if (null != state) {
+                    dispatcher.end(state);
+                }
             }
         }
     }

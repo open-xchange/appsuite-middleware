@@ -1,19 +1,19 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2015 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2017 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
  * and Distribution License("CDDL") (collectively, the "License").  You
  * may not use this file except in compliance with the License.  You can
  * obtain a copy of the License at
- * https://glassfish.dev.java.net/public/CDDL+GPL_1_1.html
- * or packager/legal/LICENSE.txt.  See the License for the specific
+ * https://oss.oracle.com/licenses/CDDL+GPL-1.1
+ * or LICENSE.txt.  See the License for the specific
  * language governing permissions and limitations under the License.
  *
  * When distributing the software, include this License Header Notice in each
- * file and include the License file at packager/legal/LICENSE.txt.
+ * file and include the License file at LICENSE.txt.
  *
  * GPL Classpath Exception:
  * Oracle designates this particular file as subject to the "Classpath"
@@ -46,10 +46,13 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.Vector;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 import javax.mail.AuthenticationFailedException;
 import javax.mail.Folder;
@@ -194,6 +197,56 @@ public class IMAPStore extends Store
     public static final String ID_COMMAND = "command";
     public static final String ID_ARGUMENTS = "arguments";
     public static final String ID_ENVIRONMENT = "environment";
+
+    private static final AtomicReference<List<ProtocolListener>> PROTOCOL_LISTENERS_REF = new AtomicReference<List<ProtocolListener>>(null);
+
+    /**
+     * Adds specified protocol listener
+     * 
+     * @param protocolListener The protocol listener to add
+     */
+    public static synchronized void addProtocolListener(ProtocolListener protocolListener) {
+        if (null == protocolListener) {
+            return;
+        }
+
+        List<ProtocolListener> listeners = PROTOCOL_LISTENERS_REF.get();
+        if (null == listeners) {
+            listeners = new CopyOnWriteArrayList<>();
+            PROTOCOL_LISTENERS_REF.set(listeners);
+        }
+        listeners.add(protocolListener);
+    }
+
+    /**
+     * Removes specified protocol listener
+     * 
+     * @param protocolListener The protocol listener to remove
+     */
+    public static synchronized void removeProtocolListener(ProtocolListener protocolListener) {
+        if (null == protocolListener) {
+            return;
+        }
+        
+        List<ProtocolListener> listeners = PROTOCOL_LISTENERS_REF.get();
+        if (null == listeners) {
+            return;
+        }
+        
+        listeners.remove(protocolListener);
+        if (listeners.isEmpty()) {
+            PROTOCOL_LISTENERS_REF.set(null);
+        }
+    }
+
+    /**
+     * Gets the currently available protocol listeners.
+     * 
+     * @return The protocol listeners or <code>null</code> if none registered
+     */
+    public static List<ProtocolListener> getProtocolListeners() {
+        return PROTOCOL_LISTENERS_REF.get();
+    }
 
     protected final String name;		// name of this protocol
     protected final int defaultPort;	// default IMAP port
@@ -882,7 +935,7 @@ public class IMAPStore extends Store
      */
     protected IMAPProtocol newIMAPProtocol(String host, int port, String user, String password)
 				throws IOException, ProtocolException {
-    return new IMAPProtocol(name, host, port,
+    return new IMAPProtocol(name, host, port, user,
             session.getProperties(),
             isSSL,
             logger
@@ -1013,6 +1066,11 @@ public class IMAPStore extends Store
 		p.compress();
 	    }
 	}
+
+    	// if server supports UTF-8, enable it for client use
+	// note that this is safe to enable even if mail.mime.allowutf8=false
+	if (p.hasCapability("UTF8=ACCEPT") || p.hasCapability("UTF8=ONLY"))
+	    p.enable("UTF8=ACCEPT");
     }
 
     /**
@@ -1900,66 +1958,11 @@ public class IMAPStore extends Store
      */
     @Override
     public synchronized void close() throws MessagingException {
-	if (!super.isConnected()) {
-        return;
-    }
-
-        IMAPProtocol protocol = null;
-	try {
-	    boolean isEmpty;
-	    synchronized (pool) {
-		// If there's no authenticated connections available
-		// don't create a new one
-		isEmpty = pool.authenticatedConnections.isEmpty();
-	    }
-	    /*
-	     * Have to drop the lock before calling cleanup.
-	     * Yes, there's a potential race here.  The pool could
-	     * become empty after we check, in which case we'll just
-	     * waste time getting a new connection and closing it.
-	     * Or, the pool could be empty now and not empty by the
-	     * time we get into cleanup, but that's ok because cleanup
-	     * will just close the connection.
-	     */
-	    if (isEmpty) {
-		pool.logger.fine("close() - no connections ");
-		cleanup();
-		return;
-	    }
-
-            protocol = getStoreProtocol();
-	    /*
-	     * We have to remove the protocol from the pool so that,
-	     * when our response handler processes the BYE response
-	     * and calls cleanup, which calls emptyConnection, that
-	     * we don't try to log out this connection twice.
-	     */
-	    synchronized (pool) {
-                pool.authenticatedConnections.removeElement(protocol);
-	    }
-
-	    /*
-	     * LOGOUT.
-	     *
-	     * Note that protocol.logout() closes the server socket
-	     * connection, regardless of what happens ..
-	     *
-	     * Also note that protocol.logout() results in a BYE
-	     * response (As per RFC 3501, BYE is a *required* response
-	     * to LOGOUT). In fact, even if protocol.logout() fails
-	     * with an IOException (if the server connection is dead),
-	     * iap.Protocol.command() converts that exception into a
-	     * BYE response. So, I depend on my BYE handler to set the
-	     * flag that causes releaseStoreProtocol to do the
-	     * Store cleanup.
-	     */
-	    logout(protocol);
-	} catch (ProtocolException pex) {
-	    // Hmm .. will this ever happen ?
-	    throw new MessagingException(pex.getMessage(), pex);
-        } finally {
-            releaseStoreProtocol(protocol);
-        }
+    cleanup();
+    // do these again in case cleanup returned early
+    // because we were already closed due to a failure
+    closeAllFolders(false);
+    emptyConnectionPool(false);
     }
 
     /**
@@ -2018,6 +2021,24 @@ public class IMAPStore extends Store
     }
 
 	if (!force || closeFoldersOnStoreFailure) {
+       closeAllFolders(force);
+    }
+
+    emptyConnectionPool(force);
+
+    // to set the state and send the closed connection event
+    try {
+        super.close();
+    } catch (MessagingException mex) {
+        // ignore it
+    }
+    logger.fine("IMAPStore cleanup done");
+    }
+
+    /**
+     * Close all open Folders.  If force is true, close them forcibly.
+     */
+    private void closeAllFolders(boolean force) {
         java.util.List<IMAPFolder> foldersCopy = null;
         boolean done = true;
 
@@ -2067,19 +2088,6 @@ public class IMAPStore extends Store
 	    }
 
 	}
-	}
-
-        synchronized (pool) {
-	    emptyConnectionPool(force);
-	}
-
-	// to set the state and send the closed connection event
-	try {
-	    super.close();
-	} catch (MessagingException mex) {
-	    // ignore it
-	}
-	logger.fine("IMAPStore cleanup done");
     }
 
     /**

@@ -63,6 +63,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONValue;
+import com.google.common.collect.ImmutableSet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
@@ -95,7 +96,7 @@ public abstract class AbstractSubscribeAction extends AbstractSubscribeSourcesAc
     }
 
     /** The set of known parameter names */
-    protected static final Set<String> KNOWN_PARAMS = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("folder", "columns", "session", "action")));
+    protected static final Set<String> KNOWN_PARAMS = ImmutableSet.of("folder", "columns", "session", "action");
 
     protected Subscription getSubscription(final AJAXRequestData requestData, final ServerSession session, final String secret) throws JSONException, OXException {
         final JSONObject object = (JSONObject) requestData.requireData();

@@ -50,10 +50,9 @@
 package com.openexchange.ajax.requesthandler.converters.preview;
 
 import java.io.InputStream;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import com.google.common.collect.ImmutableMap;
 import com.openexchange.java.Streams;
 import com.openexchange.preview.PreviewDocument;
 
@@ -78,10 +77,10 @@ public final class PreviewConst {
     static {
         final Map<String, String> metadata;
         {
-            Map<String, String> m = new HashMap<String, String>(4);
+            ImmutableMap.Builder<String, String> m = ImmutableMap.builder();
             m.put("content-type", "image/jpeg");
             m.put("resourcename", "thumbs.jpg");
-            metadata = Collections.unmodifiableMap(m);
+            metadata = m.build();
         }
 
         PreviewDocument pd = new PreviewDocument() {

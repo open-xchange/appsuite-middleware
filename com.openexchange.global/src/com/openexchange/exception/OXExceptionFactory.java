@@ -49,10 +49,9 @@
 
 package com.openexchange.exception;
 
-import java.util.Collections;
-import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
+import com.google.common.collect.ImmutableSet;
 import com.openexchange.exception.interception.OXExceptionArguments;
 import com.openexchange.exception.interception.OXExceptionInterceptor;
 import com.openexchange.exception.interception.internal.OXExceptionInterceptorRegistration;
@@ -142,7 +141,7 @@ public class OXExceptionFactory {
     /**
      * The set containing category types appropriate for being displayed.
      */
-    public static final Set<Category.EnumType> DISPLAYABLE = Collections.unmodifiableSet(EnumSet.of(
+    public static final Set<Category.EnumType> DISPLAYABLE = ImmutableSet.of(
         Category.EnumType.CAPACITY,
         Category.EnumType.CONFLICT,
         Category.EnumType.CONNECTIVITY,
@@ -151,7 +150,7 @@ public class OXExceptionFactory {
         Category.EnumType.TRUNCATED,
         Category.EnumType.TRY_AGAIN,
         Category.EnumType.USER_INPUT,
-        Category.EnumType.WARNING));
+        Category.EnumType.WARNING);
 
     /**
      * Creates a new {@link OXException} instance pre-filled with specified code's attributes.

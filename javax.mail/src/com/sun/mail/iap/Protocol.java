@@ -1,19 +1,19 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2015 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2017 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
  * and Distribution License("CDDL") (collectively, the "License").  You
  * may not use this file except in compliance with the License.  You can
  * obtain a copy of the License at
- * https://glassfish.dev.java.net/public/CDDL+GPL_1_1.html
- * or packager/legal/LICENSE.txt.  See the License for the specific
+ * https://oss.oracle.com/licenses/CDDL+GPL-1.1
+ * or LICENSE.txt.  See the License for the specific
  * language governing permissions and limitations under the License.
  *
  * When distributing the software, include this License Header Notice in each
- * file and include the License file at packager/legal/LICENSE.txt.
+ * file and include the License file at LICENSE.txt.
  *
  * GPL Classpath Exception:
  * Oracle designates this particular file as subject to the "Classpath"
@@ -45,6 +45,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
 import java.io.*;
+import java.lang.reflect.Field;
 import java.nio.channels.SocketChannel;
 import java.net.*;
 import java.util.logging.Level;
@@ -52,7 +53,11 @@ import java.util.logging.Level;
 import javax.net.ssl.SSLSocket;
 
 import com.sun.mail.imap.GreetingListener;
+import com.sun.mail.imap.IMAPStore;
+import com.sun.mail.imap.ProtocolListener;
+import com.sun.mail.imap.ResponseEvent;
 import com.sun.mail.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * General protocol handling code for IMAP-like protocols. <p>
@@ -67,14 +72,15 @@ import com.sun.mail.util.*;
 public class Protocol {
     private final boolean auditLogEnabled;
     protected String greeting;
-    protected String host;
-    protected int port;
+    protected final String host;
+    protected final int port;
+    protected final String user;
     private Socket socket;
     // in case we turn on TLS, we'll need these later
-    protected boolean quote;
-    protected MailLogger logger;
+    protected final boolean quote;
+    protected final MailLogger logger;
     protected MailLogger traceLogger;
-    protected Properties props;
+    protected final Properties props;
     protected String prefix;
 
     private TraceInputStream traceInput;	// the Tracer
@@ -88,7 +94,7 @@ public class Protocol {
     private String localHostName;
 
     private final List<ResponseHandler> handlers
-	    = new java.util.concurrent.CopyOnWriteArrayList<ResponseHandler>();
+	    = new CopyOnWriteArrayList<>();
 
     private volatile long timestamp;
 
@@ -108,7 +114,7 @@ public class Protocol {
      * @exception	IOException	for I/O errors
      * @exception	ProtocolException	for protocol failures
      */
-    public Protocol(String host, int port, 
+    public Protocol(String host, int port, String user,
 		    Properties props, String prefix,
 		    boolean isSSL, MailLogger logger)
 		    throws IOException, ProtocolException {
@@ -117,6 +123,7 @@ public class Protocol {
 	    this.auditLogEnabled = null == props ? false : PropUtil.getBooleanProperty(props, prefix + ".auditLog.enabled", false);
 	    this.host = host;
 	    this.port = port;
+	    this.user = user;
 	    this.props = props;
 	    this.prefix = prefix;
 	    this.logger = logger;
@@ -182,6 +189,7 @@ public class Protocol {
     this.auditLogEnabled = null == props ? false : PropUtil.getBooleanProperty(props, prefix + ".auditLog.enabled", false);
     this.host = "localhost";
 	this.port = 143;
+	this.user = null;
 	this.props = props;
 	this.quote = false;
 	logger = new MailLogger(this.getClass(), "DEBUG", debug, System.out);
@@ -360,7 +368,9 @@ public class Protocol {
 	Response r = null;
 
 	// write the command
-	long start = auditLogEnabled ? System.currentTimeMillis() : 0L;
+	List<ProtocolListener> protocolListeners = IMAPStore.getProtocolListeners();
+	boolean measure = null != protocolListeners || auditLogEnabled;
+	long start = measure ? System.currentTimeMillis() : 0L;
 	try {
 	    tag = writeCommand(command, args);
 	} catch (LiteralException lex) {
@@ -408,8 +418,33 @@ public class Protocol {
         timestamp = end;
 	commandEnd();
 
-	if (auditLogEnabled) {
-	    com.sun.mail.imap.AuditLog.LOG.info("command='{}' time={} timestamp={} taggedResponse='{}'", (null == args ? command : command + " " + args.toString()), Long.valueOf(end - start), Long.valueOf(end), null == taggedResp ? "<none>" : taggedResp.toString());
+	if (measure) {	    
+	    long executionMillis = end - start;
+	    if (auditLogEnabled) {
+            com.sun.mail.imap.AuditLog.LOG.info("command='{}' time={} timestamp={} taggedResponse='{}'", (null == args ? command : command + " " + args.toString()), Long.valueOf(executionMillis), Long.valueOf(end), null == taggedResp ? "<none>" : taggedResp.toString());
+	    }
+	    if (null != protocolListeners) {
+	        ResponseEvent responseEvent = ResponseEvent.builder()
+	            .setArgs(args)
+	            .setCommand(command)
+	            .setExecutionMillis(executionMillis)
+	            .setHost(host)
+	            .setPort(port)
+	            .setResponses(responses)
+	            .setTag(tag)
+	            .setTerminatedTmestamp(end)
+	            .setStatusResponse(ResponseEvent.StatusResponse.statusResponseFor(responses[responses.length - 1]))
+	            .setUser(user)
+	            .build();
+	        
+            for (ProtocolListener protocolListener : protocolListeners) {
+                try {
+                    protocolListener.onResponse(responseEvent);
+                } catch (ProtocolException e) {
+                    logger.log(java.util.logging.Level.FINE, "Failed protocol listener " + protocolListener.getClass().getName(), e);
+                }
+            }
+        }
 	}
 
 	return responses;
@@ -489,21 +524,6 @@ public class Protocol {
      */
     public synchronized void startCompression(String cmd)
 				throws IOException, ProtocolException {
-	/*
-	 * The Deflator.SYNC_FLUSH support requires JDK 1.7 so use
-	 * reflection to allow compiling on 1.5 but running on 1.7.
-	 */
-	Class<java.util.zip.DeflaterOutputStream> dc = java.util.zip.DeflaterOutputStream.class;
-	java.lang.reflect.Constructor<java.util.zip.DeflaterOutputStream> cons = null;
-	try {
-	    cons = dc.getConstructor(
-			    OutputStream.class, java.util.zip.Deflater.class, boolean.class);
-	} catch (NoSuchMethodException ex) {
-	    logger.fine("Ignoring COMPRESS; " +
-			"missing JDK 1.7 DeflaterOutputStream constructor");
-	    return;	// ignore request, just as if server doesn't support it
-	}
-
 	// XXX - check whether compression is already enabled?
 	simpleCommand(cmd, null);
 
@@ -535,16 +555,10 @@ public class Protocol {
 	} catch (IllegalArgumentException ex) {
 	    logger.log(Level.FINE, "Ignoring bad compression strategy", ex);
 	}
-	//traceOutput = new TraceOutputStream(new DeflaterOutputStream(
-	//		    socket.getOutputStream(), def, true), traceLogger);
-	try {
-	    traceOutput = new TraceOutputStream(cons.newInstance(
-			    socket.getOutputStream(), def, true), traceLogger);
-	} catch (Exception ex) {
-	    throw new ProtocolException("can't create deflater", ex);
-	}
-	traceOutput.setQuote(quote);
-	output = new DataOutputStream(new BufferedOutputStream(traceOutput));
+    traceOutput = new TraceOutputStream(new java.util.zip.DeflaterOutputStream(
+                socket.getOutputStream(), def, true), traceLogger);
+    traceOutput.setQuote(quote);
+    output = new DataOutputStream(new BufferedOutputStream(traceOutput));
     }
 
     /**
@@ -574,7 +588,34 @@ public class Protocol {
      * @since	JavaMail 1.5.2
      */
     public SocketChannel getChannel() {
-	return socket.getChannel();
+	SocketChannel ret = socket.getChannel();
+	if (ret != null)
+	    return ret;
+
+	// XXX - Android is broken and SSL wrapped sockets don't delegate
+	// the getChannel method to the wrapped Socket
+	if (socket instanceof SSLSocket) {
+	    try {
+		Field f = socket.getClass().getDeclaredField("socket");
+		f.setAccessible(true);
+		Socket s = (Socket)f.get(socket);
+		ret = s.getChannel();
+	    } catch (Exception ex) {
+		// ignore anything that might go wrong
+	    }
+	}
+	return ret;
+    }
+
+    /**
+     * Does the server support UTF-8?
+     * This implementation returns false.
+     * Subclasses should override as appropriate.
+     *
+     * @since JavaMail 1.6.0
+     */
+    public boolean supportsUtf8() {
+	return false;
     }
 
     /**
@@ -667,6 +708,7 @@ public class Protocol {
     /**
      * Finalizer.
      */
+    @Override
     protected void finalize() throws Throwable {
 	try {
 	    disconnect();

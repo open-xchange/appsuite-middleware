@@ -50,12 +50,11 @@
 package com.openexchange.folderstorage.messaging;
 
 import java.io.Serializable;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import com.google.common.collect.ImmutableMap;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.AbstractFolder;
 import com.openexchange.folderstorage.ContentType;
@@ -303,7 +302,7 @@ public final class MessagingFolderImpl extends AbstractFolder {
     private static final Map<DefaultFolderType, MessagingFolderType> TYPES;
 
     static {
-        final Map<IgnoreCaseString, Integer> m = new HashMap<IgnoreCaseString, Integer>(16);
+        ImmutableMap.Builder<IgnoreCaseString, Integer> m = ImmutableMap.builder();
 
         m.put(IgnoreCaseString.valueOf("ACL"), Integer.valueOf(1)); // MailCapabilities.BIT_PERMISSIONS
         m.put(IgnoreCaseString.valueOf(MessagingFolder.CAPABILITY_PERMISSIONS), Integer.valueOf(1)); // MailCapabilities.BIT_PERMISSIONS
@@ -332,9 +331,9 @@ public final class MessagingFolderImpl extends AbstractFolder {
 
         m.put(IgnoreCaseString.valueOf("CHILDREN"), Integer.valueOf(2048)); // IMAPCapabilities.BIT_CHILDREN
 
-        KNOWN_CAPS = Collections.unmodifiableMap(m);
+        KNOWN_CAPS = m.build();
 
-        final Map<DefaultFolderType, MessagingFolderType> m2 = new HashMap<DefaultFolderType, MessagingFolderType>(8);
+        ImmutableMap.Builder<DefaultFolderType, MessagingFolderType> m2 = ImmutableMap.builder();
 
         m2.put(DefaultFolderType.CONFIRMED_HAM, MessagingFolderType.NONE);
         m2.put(DefaultFolderType.CONFIRMED_SPAM, MessagingFolderType.NONE);
@@ -346,7 +345,7 @@ public final class MessagingFolderImpl extends AbstractFolder {
         m2.put(DefaultFolderType.TRASH, MessagingFolderType.TRASH);
         m2.put(DefaultFolderType.MESSAGING, MessagingFolderType.MESSAGING);
 
-        TYPES = Collections.unmodifiableMap(m2);
+        TYPES = m2.build();
     }
 
     /**

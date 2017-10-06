@@ -1,5 +1,5 @@
 ---
-Title: Advertisement
+title: Advertisement
 ---
 
 With 7.8.3 the OX middleware is able to manage advertisement configurations. These configurations can be used by various clients to show or hide specific advertisements.

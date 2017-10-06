@@ -56,12 +56,10 @@ import java.nio.CharBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.IllegalCharsetNameException;
 import java.nio.charset.UnsupportedCharsetException;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import com.google.common.collect.ImmutableSet;
 
 /**
  * Class for storing character sets.
@@ -195,7 +193,7 @@ public final class Charsets {
         }
     }
 
-    private static final Set<String> SET_ASCII_NAMES = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("US-ASCII", "ASCII")));
+    private static final Set<String> SET_ASCII_NAMES = ImmutableSet.of("US-ASCII", "ASCII");
 
     /**
      * Checks if specified charset name denotes ASCII charset.

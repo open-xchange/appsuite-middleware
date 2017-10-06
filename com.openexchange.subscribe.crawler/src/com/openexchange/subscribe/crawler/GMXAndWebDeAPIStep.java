@@ -50,13 +50,16 @@
 package com.openexchange.subscribe.crawler;
 
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -70,9 +73,9 @@ import com.gargoylesoftware.htmlunit.HttpMethod;
 import com.gargoylesoftware.htmlunit.Page;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.WebRequestSettings;
-import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.java.Strings;
 import com.openexchange.subscribe.SubscriptionErrorMessage;
 import com.openexchange.subscribe.crawler.internal.AbstractStep;
 import com.openexchange.subscribe.crawler.internal.LoginStep;
@@ -84,13 +87,15 @@ import com.openexchange.subscribe.crawler.internal.LoginStep;
  */
 public class GMXAndWebDeAPIStep extends AbstractStep<Contact[], Object> implements LoginStep {
 
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(GMXAndWebDeAPIStep.class);
+
+    private static final Pattern PATTERN_REDIRECT_URL = Pattern.compile("([^?]*)\\?session=(.*)");
+
     private String url;
 
     private String username, password;
 
     private List<NameValuePair> parameters;
-
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(GMXAndWebDeAPIStep.class);
 
     public GMXAndWebDeAPIStep() {
         super();
@@ -109,97 +114,97 @@ public class GMXAndWebDeAPIStep extends AbstractStep<Contact[], Object> implemen
         this.parameters = parameters;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.subscribe.crawler.internal.AbstractStep#execute(com.gargoylesoftware.htmlunit.WebClient)
-     */
     @Override
     public void execute(final WebClient webClient) throws OXException {
-        List<Contact> contactObjects = new ArrayList<Contact>();
+        List<Contact> contactObjects = Collections.emptyList();
         try {
             String urlString = url;
-            String parameterString = "";
 
             // summing up the parameters into one string
+            StringBuilder parameterString = new StringBuilder();
             if (!parameters.isEmpty()) {
                 //urlString += "?";
                 boolean isFirst = true;
                 for (NameValuePair nvp : parameters) {
-                    if (!isFirst) {
-                        parameterString += "&";
-                    } else {
-                        isFirst = false;
+                    String value = nvp.getValue();
+                    if (Strings.isNotEmpty(value)) {
+                        if (isFirst) {
+                            isFirst = false;
+                        } else {
+                            parameterString.append('&');
+                        }
+                        parameterString.append(URLEncoder.encode(nvp.getName(), "utf-8")).append('=').append(URLEncoder.encode(value, "utf-8"));
                     }
-                    parameterString += URLEncoder.encode(nvp.getName(), "utf-8") + "=" + URLEncoder.encode(nvp.getValue(), "utf-8");
                 }
-            }
-
-            if (debuggingEnabled) {
-                LOG.error("DEBUG: complete URL : {}", urlString);
             }
 
             WebRequestSettings requestSettings = new WebRequestSettings(new URL(urlString), HttpMethod.POST);
 
-            HashMap<String, String> initialMap = new HashMap<String, String>();
+            HashMap<String, String> initialMap = new HashMap<String, String>(2);
             initialMap.put("Content-Type", "application/x-www-form-urlencoded;charset=\"UTF-8\"");
             requestSettings.setAdditionalHeaders(initialMap);
 
             // Adding the parameters to the Body as well
-            requestSettings.setRequestBody(parameterString);
+            requestSettings.setRequestBody(parameterString.toString());
             webClient.setRedirectEnabled(false);
-            HtmlPage page = webClient.getPage(requestSettings);
-
-            if (debuggingEnabled) {
-                LOG.error("DEBUG: Status Code : {}", page.getWebResponse().getStatusCode());
-                LOG.error("DEBUG: URL : {}", page.getWebResponse().getUrl());
-                LOG.error("DEBUG: webResponse : {}", page.getWebResponse().getContentAsString());
-            }
+            webClient.getPage(requestSettings); // Redirect is expected here
         } catch (FailingHttpStatusCodeException e) {
             // catch the 302 that appears after logging in
             if (e.getStatusCode() == 302 || e.getMessage().trim().startsWith("302")) {
-                // LOG.error(e.getResponse().getUrl());
-                Pattern pattern = Pattern.compile("([^?]*)\\?session=(.*)");
-                //Matcher matcher = pattern.matcher(e.getResponse().getUrl().toString());
-                String location = "";
-                List<NameValuePair> responseHeaders = e.getResponse().getResponseHeaders();
-                for (NameValuePair nvp : responseHeaders){
-                    if (nvp.getName().equals("Location") && nvp.getValue() != null) {
-                        location = nvp.getValue();
+                // Get redirect URL from "Location" response header
+                String location = null;
+                {
+                    List<NameValuePair> responseHeaders = e.getResponse().getResponseHeaders();
+                    for (Iterator<NameValuePair> it = responseHeaders.iterator(); null == location && it.hasNext();) {
+                        NameValuePair nvp = it.next();
+                        if (nvp.getName().equals("Location") && Strings.isNotEmpty(nvp.getValue())) {
+                            location = nvp.getValue();
+                        }
+                    }
+                    if (null == location) {
+                        location = "";
                     }
                 }
+
                 if (location.endsWith("error_bad_password")) {
                     throw SubscriptionErrorMessage.INVALID_LOGIN.create();
                 }
-                Matcher matcher = pattern.matcher(location);
+
+                Matcher matcher = PATTERN_REDIRECT_URL.matcher(location);
                 if (matcher.find() && matcher.groupCount() == 2) {
                     String newUrlBase = matcher.group(1);
                     String functionCall = "json/PersonService/getAll";
                     String session = matcher.group(2);
 
-                    String toEncode = username + ":sid=" + session;
-                    Base64 encoder = new Base64();
                     String base64Encoded = "";
-                    try {
-                        base64Encoded = new String(encoder.encode(toEncode.getBytes("UTF-8")));
-                    } catch (UnsupportedEncodingException e2) {
-                        LOG.error(e2.toString());
-                    }
+                    {
+                        String toEncode = username + ":sid=" + session;
+                        Base64 encoder = new Base64();
+                        try {
+                            base64Encoded = new String(encoder.encode(toEncode.getBytes("UTF-8")));
+                        } catch (UnsupportedEncodingException e2) {
+                            LOG.error(e2.toString());
+                        }
 
-                    // remove the whitespaces otherwise there is an error
-                    base64Encoded = base64Encoded.replaceAll("\\s", "");
+                        // Remove the white-spaces otherwise there is an error
+                        base64Encoded = base64Encoded.replaceAll("\\s", "");
+                    }
 
                     String apiURL = newUrlBase + functionCall;
                     try {
                         WebRequestSettings requestSettingsForAPICall = new WebRequestSettings(new URL(apiURL), HttpMethod.POST);
-                        HashMap<String, String> map = new HashMap<String, String>();
+                        HashMap<String, String> map = new HashMap<String, String>(4);
                         map.put("Authorization", "Basic " + base64Encoded);
                         map.put("Content-Type", "application/json;charset=\"UTF-8\"");
                         requestSettingsForAPICall.setAdditionalHeaders(map);
-                        requestSettingsForAPICall.setRequestBody("{\"search\":null}");
+                        // requestSettingsForAPICall.setRequestBody("{\"search\": null}");
+                        requestSettingsForAPICall.setRequestBody("");
                         Page page = webClient.getPage(requestSettingsForAPICall);
-                        String allContactsPage = page.getWebResponse().getContentAsString("UTF-8");
-                        contactObjects = parseJSONIntoContacts(allContactsPage);
+                        JSONObject allContentJSON = new JSONObject(new InputStreamReader(page.getWebResponse().getContentAsStream(), "UTF-8"));
+                        contactObjects = parseJSONIntoContacts(allContentJSON);
                         executedSuccessfully = true;
+                    } catch (JSONException e1) {
+                        LOG.error("", e1);
                     } catch (MalformedURLException e1) {
                         LOG.error("", e1);
                     } catch (FailingHttpStatusCodeException e1) {
@@ -209,10 +214,10 @@ public class GMXAndWebDeAPIStep extends AbstractStep<Contact[], Object> implemen
                     }
 
                 } else {
-                    LOG.error("", e);
+                    LOG.error("Unexpected redirect URL: {}", location, e);
                 }
             } else {
-                LOG.error("", e);
+                LOG.error("Received HTTP error from {}", url, e);
             }
         } catch (final IOException e) {
             LOG.error("", e);
@@ -222,18 +227,17 @@ public class GMXAndWebDeAPIStep extends AbstractStep<Contact[], Object> implemen
     }
 
     /**
-     * @param allContactsPage
+     * @param The JSON response from previous API call
      * @return
      */
-    private List<Contact> parseJSONIntoContacts(String allContactsPage) {
-    	System.out.println(allContactsPage);
-        List<Contact> contacts = new ArrayList<Contact>();
+    private List<Contact> parseJSONIntoContacts(JSONObject allContentJSON) {
         try {
-            JSONObject allContentJSON = new JSONObject(allContactsPage);
             JSONArray allContactsJSON = (JSONArray) allContentJSON.get("response");
-            for (int i = 0; i < allContactsJSON.length(); i++) {
+            int length = allContactsJSON.length();
+            List<Contact> contacts = new ArrayList<Contact>(length);
+            for (int i = 0; i < length; i++) {
                 try {
-                	final JSONObject contactJSON = allContactsJSON.getJSONObject(i);
+                    final JSONObject contactJSON = allContactsJSON.getJSONObject(i);
                     final Contact contact = new Contact();
                     if (contactJSON.has("name")) {
                         contact.setSurName(contactJSON.getString("name"));
@@ -258,17 +262,17 @@ public class GMXAndWebDeAPIStep extends AbstractStep<Contact[], Object> implemen
                     }
 
                     //setting the displayname
-                    if (contactJSON.has("name") && contactJSON.has("firstName")){
-                    	contact.setDisplayName(contact.getGivenName() + " " + contact.getSurName());
-                    } else if (contactJSON.has("name")){
-                    	contact.setDisplayName(contact.getSurName());
-                    } else if (contactJSON.has("firstName")){
-                    	contact.setDisplayName(contact.getGivenName());
+                    if (contactJSON.has("name") && contactJSON.has("firstName")) {
+                        contact.setDisplayName(contact.getGivenName() + " " + contact.getSurName());
+                    } else if (contactJSON.has("name")) {
+                        contact.setDisplayName(contact.getSurName());
+                    } else if (contactJSON.has("firstName")) {
+                        contact.setDisplayName(contact.getGivenName());
                     } else {
-                    	contact.setDisplayName("");
+                        contact.setDisplayName("");
                     }
 
-                    if (contactJSON.hasAndNotNull("birthday")/* && JSONObject.NULL != contactJSON.get("birthday")*/) {
+                    if (contactJSON.hasAndNotNull("birthday")/* && JSONObject.NULL != contactJSON.get("birthday") */) {
                         JSONObject birthdayJSON = contactJSON.getJSONObject("birthday");
                         String day = "";
                         String month = "";
@@ -461,17 +465,17 @@ public class GMXAndWebDeAPIStep extends AbstractStep<Contact[], Object> implemen
 
                     }
 
-
                     contacts.add(contact);
                     // An error in parsing one contact should not bring them all down
                 } catch (final JSONException e) {
                     LOG.error(e.toString());
                 }
             }
+            return contacts;
         } catch (final JSONException e) {
             LOG.error(e.toString());
         }
-        return contacts;
+        return Collections.emptyList();
     }
 
     public String getUrl() {

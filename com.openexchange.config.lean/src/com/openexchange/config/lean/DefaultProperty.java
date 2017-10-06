@@ -58,16 +58,31 @@ package com.openexchange.config.lean;
  */
 public class DefaultProperty implements Property {
 
+    /**
+     * Creates the appropriate property for specified arguments.
+     *
+     * @param fqPropertyName The fully qualifying property name; e.g. <code>"com.openexchange.module.option"</code>
+     * @param def The default value to return in case such a property is not available/existent
+     * @return The appropriate <code>DefaultProperty</code> instance
+     */
+    public static DefaultProperty valueOf(String fqPropertyName, Object def) {
+        return new DefaultProperty(fqPropertyName, def);
+    }
+
+    // ----------------------------------------------------------------------------------------
+
     private final String propertyName;
     private final Object def;
+    private int hash;
 
     /**
      * Initializes a new {@link DefaultProperty}.
      */
-    public DefaultProperty(String propertyName, Object def) {
+    private DefaultProperty(String propertyName, Object def) {
         super();
         this.propertyName = propertyName;
         this.def = def;
+        hash = 0;
     }
 
     @Override
@@ -76,15 +91,49 @@ public class DefaultProperty implements Property {
     }
 
     @Override
-    public <T> T getDefaultValue(Class<T> clazz) {
-        if (null == def) {
-            return null;
-        }
-        if (false == def.getClass().isAssignableFrom(clazz)) {
-            throw new IllegalArgumentException("The object cannot be converted to the specified type '" + clazz.getCanonicalName() + "'");
-        }
+    public Object getDefaultValue() {
+        return def;
+    }
 
-        return clazz.cast(def);
+    @Override
+    public int hashCode() {
+        int result = hash;
+        if (result == 0) {
+            int prime = 31;
+            result = prime * 1 + ((propertyName == null) ? 0 : propertyName.hashCode());
+            result = prime * result + ((def == null) ? 0 : def.hashCode());
+            hash = result;
+        }
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        DefaultProperty other = (DefaultProperty) obj;
+        if (propertyName == null) {
+            if (other.propertyName != null) {
+                return false;
+            }
+        } else if (!propertyName.equals(other.propertyName)) {
+            return false;
+        }
+        if (def == null) {
+            if (other.def != null) {
+                return false;
+            }
+        } else if (!def.equals(other.def)) {
+            return false;
+        }
+        return true;
     }
 
 }

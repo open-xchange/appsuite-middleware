@@ -52,6 +52,7 @@ package com.openexchange.snippet.json.osgi;
 import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.capabilities.CapabilityService;
+import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.html.HtmlService;
 import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
 import com.openexchange.snippet.SnippetService;
@@ -84,6 +85,7 @@ public class SnippetJsonActivator extends AJAXModuleActivator {
         final RankingAwareNearRegistryServiceTracker<SnippetService> snippetServiceRegistry = new RankingAwareNearRegistryServiceTracker<SnippetService>(context, SnippetService.class);
         rememberTracker(snippetServiceRegistry);
         trackService(CapabilityService.class);
+        trackService(ManagedFileManagement.class);
         openTrackers();
 
         registerModule(new SnippetActionFactory(this, snippetServiceRegistry), "snippet");

@@ -174,6 +174,7 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
              * Load storage folder
              */
             final Folder storageFolder = storage.getFolder(treeId, folderId, storageParameters);
+            boolean ignoreCase = supportsCaseInsensitive(storageFolder);
             final String oldParentId = storageFolder.getParentID();
 
             final boolean move;
@@ -186,10 +187,10 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                         folder.setName(storageFolder.getName());
                         checkForReservedName = false;
                     }
-                    if (null != checkForEqualName(treeId, newParentId, folder, storageFolder.getContentType(), true)) {
+                    if (null != checkForEqualName(treeId, newParentId, folder, storageFolder.getContentType(), CheckOptions.builder().allowAutorename(true).ignoreCase(ignoreCase).build())) {
                         throw FolderExceptionErrorMessage.EQUAL_NAME.create(folder.getName(), getFolderNameSave(storage, newParentId), treeId);
                     }
-                    if (checkForReservedName && !folder.getName().equals(storageFolder.getName()) && null != checkForReservedName(treeId, newParentId, folder, storageFolder.getContentType(), true)) {
+                    if (checkForReservedName && !folder.getName().equals(storageFolder.getName()) && null != checkForReservedName(treeId, newParentId, folder, storageFolder.getContentType(), CheckOptions.builder().allowAutorename(true).ignoreCase(ignoreCase).build())) {
                         throw FolderExceptionErrorMessage.RESERVED_NAME.create(folder.getName());
                     }
                 }
@@ -200,10 +201,10 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                 final String newName = folder.getName();
                 rename = (null != newName && !newName.equals(storageFolder.getName()));
                 if (rename && false == move) {
-                    if (null != checkForEqualName(treeId, storageFolder.getParentID(), folder, storageFolder.getContentType(), false)) {
+                    if (null != checkForEqualName(treeId, storageFolder.getParentID(), folder, storageFolder.getContentType(), CheckOptions.builder().allowAutorename(false).ignoreCase(ignoreCase).build())) {
                         throw FolderExceptionErrorMessage.EQUAL_NAME.create(folder.getName(), getFolderNameSave(storage, storageFolder.getParentID()), treeId);
                     }
-                    if (null != checkForReservedName(treeId, storageFolder.getParentID(), folder, storageFolder.getContentType(), false)) {
+                    if (null != checkForReservedName(treeId, storageFolder.getParentID(), folder, storageFolder.getContentType(), CheckOptions.builder().allowAutorename(false).ignoreCase(ignoreCase).build())) {
                         throw FolderExceptionErrorMessage.RESERVED_NAME.create(folder.getName());
                     }
                     if (InfostoreContentType.getInstance().equals(storageFolder.getContentType()) && Strings.isNotEmpty(newName)) {

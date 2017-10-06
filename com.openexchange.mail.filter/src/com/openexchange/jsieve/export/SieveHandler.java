@@ -137,6 +137,8 @@ public class SieveHandler {
 
     private final static String SIEVE_LIST = "LISTSCRIPTS" + CRLF;
 
+    private final static String SIEVE_CAPABILITY = "CAPABILITY" + CRLF;
+
     private final static String SIEVE_GET_SCRIPT = "GETSCRIPT ";
 
     private final static String SIEVE_LOGOUT = "LOGOUT" + CRLF;
@@ -478,8 +480,46 @@ public class SieveHandler {
             if (!selectAuth(saslMech, commandBuilder, configuredAuthTimeout)) {
                 throw new OXSieveHandlerInvalidCredentialsException("Authentication failed");
             }
+
+            /*
+             * Fetch capabilities again
+             */
+            fetchCapabilities();
+
             log.debug("Authentication to sieve successful");
             measureEnd("selectAuth");
+        }
+    }
+
+    /**
+     * @throws OXSieveHandlerException
+     * @throws IOException
+     *
+     */
+    private void fetchCapabilities() throws OXSieveHandlerException, IOException {
+        if (!(AUTH)) {
+            throw new OXSieveHandlerException("Capability not possible. Auth first.", sieve_host, sieve_host_port, null);
+        }
+
+        final String capability = SIEVE_CAPABILITY;
+        bos_sieve.write(capability.getBytes(com.openexchange.java.Charsets.UTF_8));
+        bos_sieve.flush();
+
+        // Forget previous capabilities
+        capa = new Capabilities();
+
+        while (true) {
+            final String temp = bis_sieve.readLine();
+            if (null == temp) {
+                throw new OXSieveHandlerException("Communication to SIEVE server aborted. ", sieve_host, sieve_host_port, null);
+            }
+            if (temp.startsWith(SIEVE_OK)) {
+                return;
+            }
+            if (temp.startsWith(SIEVE_NO)) {
+                throw new OXSieveHandlerException("Unable to retrieve sieve capability", sieve_host, sieve_host_port, parseSIEVEResponse(temp, null));
+            }
+            parseCAPA(temp);
         }
     }
 
@@ -1356,7 +1396,7 @@ public class SieveHandler {
                         return authXOAUTH2(commandBuilder);
                     default:
                         return false;
-                        
+
                 }
             } catch (SocketTimeoutException e) {
                 // Read timeout while doing auth
@@ -1376,6 +1416,7 @@ public class SieveHandler {
         final String implementation = "\"IMPLEMENTATION\"";
         final String sieve = "\"SIEVE\"";
         final String sasl = "\"SASL\"";
+        final String maxredirects = "\"MAXREDIRECTS\"";
 
         String temp = line;
 
@@ -1405,6 +1446,15 @@ public class SieveHandler {
             final StringTokenizer st = new StringTokenizer(temp);
             while (st.hasMoreTokens()) {
                 capa.addSasl(st.nextToken().toUpperCase());
+            }
+        } else if (temp.startsWith(maxredirects)) {
+            temp = temp.substring(maxredirects.length());
+            temp = temp.substring(temp.indexOf("\"") + 1);
+            temp = temp.substring(0, temp.indexOf("\""));
+            try {
+                capa.addExtendedProperty("MAXREDIRECTS", Integer.valueOf(temp));
+            } catch(NumberFormatException ex){
+                log.error("Unable to parse MAXREDIRECTS capability value: "+temp);
             }
         }
     }

@@ -58,7 +58,7 @@ import com.openexchange.importexport.helpers.SizedInputStream;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * Defines a class able to export a certain type of OX folder as a certain format
+ * Defines a class able to export a certain type of PIM objects (contacts, appointments, and tasks) as a certain format.
  *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a>
  * @author <a href="mailto:Jan-Oliver.Huhn@open-xchange.com">Jan-Oliver Huhn</a> - export file name, batch data
@@ -78,11 +78,11 @@ public interface Exporter {
      * @param format Format the exported data is supposed to be in
      * @param folder Folder that should be exported. Note: A folder can only contain data of one type
      * @param optionalParams Parameters that might be needed by a specific implementor of this interface. Note: The format was chosen to be congruent with HTTP-GET
-     * @return true, if the given folders can be exported in the given format; false otherwise     
+     * @return true, if the given folders can be exported in the given format; false otherwise
      * @throws OXException if check fails
      */
     boolean canExport(ServerSession session, Format format, String folder, Map<String, Object> optionalParams) throws OXException;
-    
+
     /**
      * Checks if the given batch data can be exported in the given format
      *
@@ -93,8 +93,8 @@ public interface Exporter {
      * @return true, if the given folders and objects can be exported in the given format; false otherwise
      * @throws OXException if check fails
      */
-    boolean canExportBatch(ServerSession session, Format format, Map<String, List<String>> batchIds, Map<String, Object> optionalParams) throws OXException;
-    
+    boolean canExportBatch(ServerSession session, Format format, Map.Entry<String, List<String>> batchIds, Map<String, Object> optionalParams) throws OXException;
+
     /**
      * Exports the data of a given folder
      *
@@ -107,9 +107,9 @@ public interface Exporter {
      * @throws OXException if export fails
      */
     SizedInputStream exportFolderData(ServerSession session, Format format, String folder, int[] fieldsToBeExported, Map<String, Object> optionalParams) throws OXException;
-    
+
     /**
-     * Exports the data of the given folders and objects 
+     * Exports the data of the given folders and objects
      *
      * @param session The session object to be able to check permissions.
      * @param format Format the returned InputStream should be in.
@@ -120,22 +120,25 @@ public interface Exporter {
      * @throws OXException if export fails
      */
     SizedInputStream exportBatchData(ServerSession session, Format format, Map<String, List<String>> batchIds, int[] fieldsToBeExported, Map<String, Object> optionalParams) throws OXException;
-    
+
     /**
      * Creates a proper export file name based on the folder to export
      *
      * @param session The session object to be able to check permissions.
      * @param folder The folder to name the export file after.
+     * @param extension The file name extension.
      * @return String the name of the export file.
      */
-    String getFolderExportFileName(ServerSession session, String folder);
+    String getFolderExportFileName(ServerSession session, String folder, String extension);
 
     /**
      * Creates a proper export file name based on the batch of ids to export
      *
      * @param session The session object to be able to check permissions.
      * @param batchIds The Identifiers which determine the export file name.
+     * @param extension The file name extension.
      * @return String the name of the export file.
      */
-    String getBatchExportFileName(ServerSession session, Map<String, List<String>> batchIds);
+    String getBatchExportFileName(ServerSession session, Map<String, List<String>> batchIds, String extension);
+
 }

@@ -8,8 +8,7 @@ Homepage: http://www.open-xchange.com
 
 Package: open-xchange-file-distribution
 Architecture: all
-Pre-Depends: open-xchange-core (>= @OXVERSION@)
-Depends: ${misc:Depends}, open-xchange-grizzly (>= @OXVERSION@)
+Depends: ${misc:Depends}, open-xchange-core (>= @OXVERSION@)
 Replaces: open-xchange-core (<< 7.2.1-0)
 Conflicts: open-xchange-core (<< 7.2.1-0)
 Description: Cluster wide file distribution

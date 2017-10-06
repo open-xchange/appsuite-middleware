@@ -51,7 +51,6 @@ package com.openexchange.imageconverter.api;
 
 import java.io.Closeable;
 import com.openexchange.exception.OXException;
-import com.openexchange.imageconverter.api.IImageConverter;
 
 /**
  * {@link IImageClient}
@@ -65,4 +64,6 @@ public interface IImageClient extends IImageConverter, Closeable {
      * @return The status of the remote ImageServer
      */
     public String status() throws OXException;
+
+    public boolean isConnected() throws OXException;
 }
