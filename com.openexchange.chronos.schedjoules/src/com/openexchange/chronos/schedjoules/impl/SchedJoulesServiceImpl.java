@@ -49,7 +49,10 @@
 
 package com.openexchange.chronos.schedjoules.impl;
 
+import java.net.MalformedURLException;
 import java.net.URL;
+import org.json.JSONException;
+import org.json.JSONObject;
 import com.openexchange.chronos.Calendar;
 import com.openexchange.chronos.schedjoules.SchedJoulesResult;
 import com.openexchange.chronos.schedjoules.SchedJoulesService;
@@ -61,7 +64,6 @@ import com.openexchange.exception.OXException;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-//FIXME: abstract for the time being
 public class SchedJoulesServiceImpl implements SchedJoulesService {
 
     private final SchedJoulesAPI api;
@@ -119,10 +121,24 @@ public class SchedJoulesServiceImpl implements SchedJoulesService {
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.chronos.service.SchedJoulesService#fetchCalendar(java.net.URL)
+     * @see com.openexchange.chronos.schedjoules.SchedJoulesService#subscribeCalendar(int)
      */
     @Override
-    public Calendar fetchCalendar(URL url) throws OXException {
-        return api.calendar().getCalendar(url);
+    public void subscribeCalendar(int pageId) throws OXException {
+        JSONObject page = api.pages().getPage(pageId);
+        if (!page.hasAndNotNull("url")) {
+            throw new OXException(1138, "The specified page with id '" + pageId + "' does not denote a calendar");
+        }
+
+        try {
+            String url = page.getString("url");
+            URL u = new URL(url);
+            Calendar calendar = api.calendar().getCalendar(u);
+            //TODO: Hook-up with the SchedJoules provider to subscribe to the calendar
+        } catch (JSONException e) {
+            throw new OXException(1138, "JSON Error", e);
+        } catch (MalformedURLException e) {
+            throw new OXException(1138, "The specified page does not contain a valid URL", e);
+        }
     }
 }

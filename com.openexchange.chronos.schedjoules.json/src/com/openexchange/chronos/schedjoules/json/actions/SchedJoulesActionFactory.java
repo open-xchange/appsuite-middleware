@@ -73,7 +73,8 @@ public class SchedJoulesActionFactory implements AJAXActionServiceFactory {
     public SchedJoulesActionFactory(ServiceLookup services) {
         super();
         ImmutableMap.Builder<String, AJAXActionService> actions = ImmutableMap.builder();
-        // TODO: Add the actions
+        actions.put("browse", new BrowseAction(services));
+        actions.put("subscribe", new SubscribeAction(services));
         this.actions = actions.build();
     }
 

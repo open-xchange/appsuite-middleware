@@ -1,5 +1,3 @@
-
-package com.openexchange.chronos.schedjoules;
 /*
  *
  *    OPEN-XCHANGE legal information
@@ -30,7 +28,7 @@ package com.openexchange.chronos.schedjoules;
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2017-2020 OX Software GmbH
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,59 +47,54 @@ package com.openexchange.chronos.schedjoules;
  *
  */
 
-import java.net.URL;
-import org.json.JSONObject;
-import com.openexchange.chronos.Calendar;
+package com.openexchange.chronos.schedjoules.json.actions;
+
+import com.openexchange.ajax.requesthandler.AJAXActionService;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.chronos.schedjoules.SchedJoulesService;
 import com.openexchange.exception.OXException;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link SchedJoulesService}
+ * {@link SubscribeAction}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public interface SchedJoulesService {
+public class SubscribeAction implements AJAXActionService {
+
+    private ServiceLookup services;
 
     /**
-     * Retrieves the starting SchedJoules page.
-     * 
-     * @return The {@link JSONObject}
-     * @throws OXException if an error is occurred
+     * Initialises a new {@link SubscribeAction}.
      */
-    SchedJoulesResult getRoot() throws OXException;
+    public SubscribeAction(ServiceLookup services) {
+        super();
+        this.services = services;
+    }
 
-    /**
-     * Retrieves the starting SchedJoules page for the specified location
-     * in the specified locale
+    /*
+     * (non-Javadoc)
      * 
-     * @param locale The locale to use
-     * @param location The location to use
-     * @return The {@link JSONObject}
-     * @throws OXException if an error is occurred
+     * @see com.openexchange.ajax.requesthandler.AJAXActionService#perform(com.openexchange.ajax.requesthandler.AJAXRequestData, com.openexchange.tools.session.ServerSession)
      */
-    SchedJoulesResult getRoot(String locale, String location) throws OXException;
+    @Override
+    public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
+        String pid = requestData.getParameter("pageId");
+        if (pid == null) {
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create("pageId");
+        }
 
-    /**
-     * Retrieves the SchedJoules page with the specified identifier
-     * 
-     * @param pageId The page identifier
-     * @return The {@link JSONObject}
-     * @throws OXException if an error is occurred
-     */
-    SchedJoulesResult getPage(int pageId) throws OXException;
+        // TODO: Fetch the locale from the session?
 
-    /**
-     * Retrieves the SchedJoules page with the specified identifier
-     * 
-     * @param pageId The page identifier
-     * @return The {@link JSONObject}
-     * @throws OXException if an error is occurred
-     */
-    SchedJoulesResult getPage(int pageId, String locale) throws OXException;
+        int pageId = Integer.parseInt(pid);
 
-    /**
-     * 
-     * @param pageId
-     * @throws OXException
-     */
-    void subscribeCalendar(int pageId) throws OXException;
+        SchedJoulesService service = services.getService(SchedJoulesService.class);
+        service.subscribeCalendar(pageId);
+
+        return new AJAXRequestResult();
+    }
+
 }
