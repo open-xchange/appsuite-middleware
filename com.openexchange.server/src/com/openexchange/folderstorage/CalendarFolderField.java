@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,75 +47,40 @@
  *
  */
 
-package com.openexchange.chronos.provider;
+package com.openexchange.folderstorage;
 
-import java.util.Date;
-import java.util.List;
 import com.openexchange.chronos.Transp;
 
 /**
- * {@link CalendarFolder}
+ * {@link CalendarFolderField}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public interface CalendarFolder {
+public enum CalendarFolderField {
+    ;
 
     /**
-     * Gets the identifier of the calendar folder.
-     *
-     * @return The folder identifier
+     * {@link String}
+     * <p/>
+     * Specifies the color of the calendar (as a <code>CSS3</code> color value).
      */
-    String getId();
+    public static final FolderField COLOR = new FolderField(3201, "cal.color", null);
 
     /**
-     * Gets the name of the calendar folder.
-     *
-     * @return The folder name
+     * {@link Boolean}
+     * <p/>
+     * Indicates whether a calendar should be considered for synchronization with external clients or not.
      */
-    String getName();
+    public static final FolderField USED_FOR_SYNC = new FolderField(3202, "cal.usedForSync", Boolean.TRUE);
 
     /**
-     * Gets the permissions
+     * {@link String}
+     * <p/>
+     * Determines whether the calendar object resources in a calendar collection will affect the owner's busy time information.
      *
-     * @return
-     */
-    List<CalendarPermission> getPermissions();
-
-    /**
-     * Gets the calendar description.
-     *
-     * @return The calendar description, or <code>null</code> if not defined
-     */
-    String getDescription();
-
-    /**
-     * Gets the calendar color.
-     *
-     * @return The calendar color as a <code>CSS3</code> color value, or <code>null</code> if not defined
-     */
-    String getColor();
-
-    /**
-     * Gets the last modification date of the calendar.
-     *
-     * @return The last modification date, or <code>null</code> if not defined
-     */
-    Date getLastModified();
-
-    /**
-     * Gets a value indicating whether the calendar object resources in the calendar will affect the owner's free/busy time information or not.
-     *
-     * @return {@link Transp#TRANSPARENT} if contained events do not contribute to the user's busy time, {@link Transp#OPAQUE}, otherwise
      * @see <a href="https://tools.ietf.org/html/rfc6638#section-9.1">RFC 6638, section 9.1</a>
      */
-    Transp getScheduleTransparency();
-
-    /**
-     * Gets a value indicating whether the folder should be considered for synchronization with external clients or not.
-     *
-     * @return <code>true</code> if the folder should be considered for synchronization with external clients, <code>false</code>, otherwise
-     */
-    boolean isUsedForSync();
+    public static final FolderField SCHEDULE_TRANSP = new FolderField(3203, "cal.scheduleTransp", Transp.OPAQUE);
 
 }

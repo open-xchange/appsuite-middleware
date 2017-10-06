@@ -187,7 +187,7 @@ public abstract class SingleFolderCalendarAccess implements CalendarAccess {
             folder.setName((String) config.get("name"));
             folder.setColor((String) config.get("color"));
             folder.setDescription((String) config.get("description"));
-            folder.setTransparency(Transp.TRANSPARENT.equals(config.get("transp")) ? TimeTransparency.TRANSPARENT : TimeTransparency.OPAQUE);
+            folder.setScheduleTransparency(Transp.TRANSPARENT.equals(config.get("transp")) ? TimeTransparency.TRANSPARENT : TimeTransparency.OPAQUE);
         }
         return folder;
     }

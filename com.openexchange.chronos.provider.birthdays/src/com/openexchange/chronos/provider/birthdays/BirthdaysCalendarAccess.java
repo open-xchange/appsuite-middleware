@@ -307,11 +307,11 @@ public class BirthdaysCalendarAccess extends SingleFolderCalendarAccess implemen
 
         StringHelper stringHelper = StringHelper.valueOf(session.getUser().getLocale());
         folder.setName(stringHelper.getString(BirthdaysCalendarStrings.CALENDAR_NAME));
-        folder.setTransparency(TimeTransparency.TRANSPARENT);
+        folder.setScheduleTransparency(TimeTransparency.TRANSPARENT);
         Map<String, Object> config = account.getConfiguration();
         if (null != config) {
             folder.setColor((String) config.get("color"));
-            folder.setTransparency(Transp.TRANSPARENT.equals(config.get("transp")) ? TimeTransparency.TRANSPARENT : TimeTransparency.OPAQUE);
+            folder.setScheduleTransparency(Transp.TRANSPARENT.equals(config.get("transp")) ? TimeTransparency.TRANSPARENT : TimeTransparency.OPAQUE);
         }
         return folder;
     }

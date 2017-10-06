@@ -109,8 +109,13 @@ public class IDManglingFolder implements CalendarFolder {
     }
 
     @Override
-    public Transp getTransparency() {
-        return delegate.getTransparency();
+    public Transp getScheduleTransparency() {
+        return delegate.getScheduleTransparency();
+    }
+
+    @Override
+    public boolean isUsedForSync() {
+        return delegate.isUsedForSync();
     }
 
     @Override

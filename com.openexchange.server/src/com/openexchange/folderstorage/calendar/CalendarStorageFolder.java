@@ -47,75 +47,73 @@
  *
  */
 
-package com.openexchange.chronos.provider;
+package com.openexchange.folderstorage.calendar;
 
-import java.util.Date;
-import java.util.List;
-import com.openexchange.chronos.Transp;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import com.openexchange.folderstorage.AbstractFolder;
+import com.openexchange.folderstorage.CalendarFolderField;
+import com.openexchange.folderstorage.ContentType;
+import com.openexchange.folderstorage.FolderField;
+import com.openexchange.folderstorage.FolderProperty;
+import com.openexchange.folderstorage.ParameterizedFolder;
 
 /**
- * {@link CalendarFolder}
+ * {@link CalendarStorageFolder}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public interface CalendarFolder {
+public class CalendarStorageFolder extends AbstractFolder implements ParameterizedFolder {
+
+    private static final long serialVersionUID = 4412370864213762652L;
+
+    private final Map<FolderField, FolderProperty> properties;
 
     /**
-     * Gets the identifier of the calendar folder.
+     * Initializes a new calendar folder as used by the internal folder storage.
      *
-     * @return The folder identifier
+     * @param treeId The identifier of the folder tree to take over
+     * @param accountId The fully-qualified account identifier to take over
+     * @param contentType The content type to take over
      */
-    String getId();
+    public CalendarStorageFolder(String treeId, String accountId, ContentType contentType) {
+        super();
+        this.properties = new HashMap<FolderField, FolderProperty>();
+        setTreeID(treeId);
+        setAccountID(accountId);
+        setSubscribed(true);
+        setContentType(contentType);
+        setDefaultType(contentType.getModule());
 
-    /**
-     * Gets the name of the calendar folder.
-     *
-     * @return The folder name
-     */
-    String getName();
+        properties.put(CalendarFolderField.COLOR, new FolderProperty("color", "cyan"));
+        properties.put(CalendarFolderField.USED_FOR_SYNC, new FolderProperty("synced", Boolean.FALSE));
 
-    /**
-     * Gets the permissions
-     *
-     * @return
-     */
-    List<CalendarPermission> getPermissions();
+    }
 
-    /**
-     * Gets the calendar description.
-     *
-     * @return The calendar description, or <code>null</code> if not defined
-     */
-    String getDescription();
+    @Override
+    public boolean isGlobalID() {
+        return false;
+    }
 
-    /**
-     * Gets the calendar color.
-     *
-     * @return The calendar color as a <code>CSS3</code> color value, or <code>null</code> if not defined
-     */
-    String getColor();
+    @Override
+    public void setProperty(FolderField name, Object value) {
+        if (null == value) {
+            properties.remove(name);
+        } else {
+            properties.put(name, new FolderProperty(name.getName(), value));
+        }
+    }
 
-    /**
-     * Gets the last modification date of the calendar.
-     *
-     * @return The last modification date, or <code>null</code> if not defined
-     */
-    Date getLastModified();
+    @Override
+    public Map<FolderField, FolderProperty> getProperties() {
+        return Collections.unmodifiableMap(properties);
+    }
 
-    /**
-     * Gets a value indicating whether the calendar object resources in the calendar will affect the owner's free/busy time information or not.
-     *
-     * @return {@link Transp#TRANSPARENT} if contained events do not contribute to the user's busy time, {@link Transp#OPAQUE}, otherwise
-     * @see <a href="https://tools.ietf.org/html/rfc6638#section-9.1">RFC 6638, section 9.1</a>
-     */
-    Transp getScheduleTransparency();
-
-    /**
-     * Gets a value indicating whether the folder should be considered for synchronization with external clients or not.
-     *
-     * @return <code>true</code> if the folder should be considered for synchronization with external clients, <code>false</code>, otherwise
-     */
-    boolean isUsedForSync();
+    @Override
+    public String toString() {
+        return "CalendarStorageFolder [account=" + accountId + ", id=" + id + ", name=" + name + "]";
+    }
 
 }

@@ -68,6 +68,7 @@ public class DefaultCalendarFolder implements CalendarFolder {
     private Date lastModified;
     private List<CalendarPermission> permissions;
     private Transp transp;
+    private boolean usedForSync;
 
     /**
      * Initializes a new {@link DefaultCalendarFolder}.
@@ -143,12 +144,21 @@ public class DefaultCalendarFolder implements CalendarFolder {
     }
 
     @Override
-    public Transp getTransparency() {
+    public Transp getScheduleTransparency() {
         return transp;
     }
 
-    public void setTransparency(Transp transp) {
+    public void setScheduleTransparency(Transp transp) {
         this.transp = transp;
+    }
+
+    @Override
+    public boolean isUsedForSync() {
+        return usedForSync;
+    }
+
+    public void setUsedForSync(boolean usedForSync) {
+        this.usedForSync = usedForSync;
     }
 
     @Override
