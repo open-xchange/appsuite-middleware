@@ -72,6 +72,7 @@ public class PacketProcessor {
 
     private static final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(PacketProcessor.class);
     private static final int STREAM_BUFFER_SIZE = 1024 * 500 /*500 kB*/ ;
+    private static final byte[] GARBAGE_SINK = new byte[STREAM_BUFFER_SIZE];
 
     /**
      * Parses the next packet from a given stream
@@ -136,7 +137,7 @@ public class PacketProcessor {
                                 //a corrupt data stream, we remember every byte read from the stream and write it to the output
                                 rememberInpuStream.resetBuffer();
                                 rememberInpuStream.startRemembering();
-                                while(inputStream.read(new byte[STREAM_BUFFER_SIZE], 0, STREAM_BUFFER_SIZE) > 0) {
+                                while(inputStream.read(GARBAGE_SINK, 0, STREAM_BUFFER_SIZE) > 0) {
                                     final byte[] buffer = rememberInpuStream.getBuffer();
                                     out.write(buffer, 0, buffer.length);
                                     rememberInpuStream.resetBuffer();

@@ -81,12 +81,26 @@ class RememberingInputStream extends InputStream {
      *
      * @param b The bytes to remember
      */
-    private void addToBuffer(byte... b) {
-        if(remember) {
+    private void addToBuffer(byte b) {
+        if (remember) {
             if (buffer == null) {
-                buffer = new TByteArrayList(b.length);
+                buffer = new TByteArrayList();
             }
-            buffer.addAll(b);
+            buffer.add(b);
+        }
+    }
+
+    /**
+     * Internal method to write the bytes read to the internal buffer
+     *
+     * @param b The bytes to remember
+     */
+    private void addToBuffer(byte[] b, int off, int len) {
+        if (remember) {
+            if (buffer == null) {
+                buffer = new TByteArrayList(len);
+            }
+            buffer.add(b, off, len);
         }
     }
 
@@ -96,7 +110,7 @@ class RememberingInputStream extends InputStream {
      * @return
      */
     public byte[] getBuffer() {
-        if(buffer == null) {
+        if (buffer == null) {
             return new byte[] {};
         }
         return buffer.toArray();
@@ -106,7 +120,7 @@ class RememberingInputStream extends InputStream {
      * Resets the internal "remember" buffer
      */
     public void resetBuffer() {
-        if(buffer != null) {
+        if (buffer != null) {
             buffer.clear();
             buffer = null;
         }
@@ -156,7 +170,11 @@ class RememberingInputStream extends InputStream {
      */
     @Override
     public int read(byte[] b, int off, int len) throws IOException {
-        return super.read(b, off, len);
+        int read = in.read(b, off, len);
+        if (read > 0) {
+            addToBuffer(b, off, read);
+        }
+        return read;
     }
 
     /*
@@ -166,6 +184,6 @@ class RememberingInputStream extends InputStream {
      */
     @Override
     public int read(byte[] b) throws IOException {
-        return super.read(b);
+        return read(b, 0, b.length);
     }
 }
