@@ -60,6 +60,7 @@ import com.openexchange.exception.OXException;
 public final class SchedJoulesAPI {
 
     private final SchedJoulesPagesAPI pages;
+    private final SchedJoulesCalendarAPI calendar;
     private final SchedJoulesRESTClient client;
 
     /**
@@ -71,14 +72,24 @@ public final class SchedJoulesAPI {
         super();
         client = new SchedJoulesRESTClient();
         pages = new SchedJoulesPagesAPI(client);
+        calendar = new SchedJoulesCalendarAPI(client);
     }
 
     /**
-     * Gets the pages
+     * Gets the pages API
      *
      * @return The pages
      */
     public SchedJoulesPagesAPI pages() {
         return pages;
+    }
+
+    /**
+     * Gets the calendar API
+     *
+     * @return The calendar API
+     */
+    public SchedJoulesCalendarAPI calendar() {
+        return calendar;
     }
 }

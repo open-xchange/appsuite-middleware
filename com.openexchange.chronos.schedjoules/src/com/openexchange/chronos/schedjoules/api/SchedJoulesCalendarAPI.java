@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2017-2020 OX Software GmbH
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,86 +47,41 @@
  *
  */
 
-package com.openexchange.chronos.schedjoules.impl;
+package com.openexchange.chronos.schedjoules.api;
 
 import java.net.URL;
 import com.openexchange.chronos.Calendar;
-import com.openexchange.chronos.schedjoules.SchedJoulesResult;
-import com.openexchange.chronos.schedjoules.SchedJoulesService;
-import com.openexchange.chronos.schedjoules.api.SchedJoulesAPI;
+import com.openexchange.chronos.schedjoules.api.SchedJoulesStreamParsers.StreamParser;
+import com.openexchange.chronos.schedjoules.api.client.SchedJoulesRESTClient;
+import com.openexchange.chronos.schedjoules.api.client.SchedJoulesRequest;
 import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link SchedJoulesServiceImpl}
+ * {@link SchedJoulesCalendarAPI}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-//FIXME: abstract for the time being
-public class SchedJoulesServiceImpl implements SchedJoulesService {
+public class SchedJoulesCalendarAPI {
 
-    private final ServiceLookup services;
-    private final SchedJoulesAPI api;
+    private final SchedJoulesRESTClient client;
 
     /**
-     * Initialises a new {@link SchedJoulesServiceImpl}.
-     * 
-     * @param services The {@link ServiceLookup} instance
-     * @throws OXException if the {@link SchedJoulesAPI} cannot be initialised
+     * Initialises a new {@link SchedJoulesCalendarAPI}.
      */
-    public SchedJoulesServiceImpl(ServiceLookup services) throws OXException {
+    SchedJoulesCalendarAPI(SchedJoulesRESTClient client) {
         super();
-        this.services = services;
-        api = new SchedJoulesAPI();
+        this.client = client;
     }
 
-    /*
-     * (non-Javadoc)
+    /**
+     * Retrieves the iCal from the specified {@link URL}
      * 
-     * @see com.openexchange.chronos.service.SchedJoulesService#getRoot()
+     * @param url The {@link URL} for the iCal
+     * @return The iCal parsed as a {@link Calendar}
+     * @throws OXException if a parsing error is occurred
      */
-    @Override
-    public SchedJoulesResult getRoot() throws OXException {
-        return new SchedJoulesResult(api.pages().getRootPage());
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.chronos.service.SchedJoulesService#getRoot(java.lang.String, java.lang.String)
-     */
-    @Override
-    public SchedJoulesResult getRoot(String locale, String location) throws OXException {
-        return new SchedJoulesResult(api.pages().getRootPage(locale, location));
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.chronos.service.SchedJoulesService#getPage(int)
-     */
-    @Override
-    public SchedJoulesResult getPage(int pageId) throws OXException {
-        return new SchedJoulesResult(api.pages().getPage(pageId));
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.chronos.schedjoules.SchedJoulesService#getPage(int, java.lang.String)
-     */
-    @Override
-    public SchedJoulesResult getPage(int pageId, String locale) throws OXException {
-        return new SchedJoulesResult(api.pages().getPage(pageId, locale));
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.chronos.service.SchedJoulesService#fetchCalendar(java.net.URL)
-     */
-    @Override
-    public Calendar fetchCalendar(URL url) throws OXException {
-        return api.calendar().getCalendar(url);
+    public Calendar getCalendar(URL url) throws OXException {
+        SchedJoulesRequest request = new SchedJoulesRequest(url.toString());
+        return SchedJoulesStreamParsers.parse(client.executeRequest(request), StreamParser.CALENDAR);
     }
 }

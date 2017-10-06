@@ -49,9 +49,7 @@
 
 package com.openexchange.chronos.schedjoules.api;
 
-import java.net.URL;
 import org.json.JSONObject;
-import com.openexchange.chronos.Calendar;
 import com.openexchange.chronos.schedjoules.api.SchedJoulesStreamParsers.StreamParser;
 import com.openexchange.chronos.schedjoules.api.client.SchedJoulesRESTBindPoint;
 import com.openexchange.chronos.schedjoules.api.client.SchedJoulesRESTClient;
@@ -130,17 +128,5 @@ public class SchedJoulesPagesAPI {
         request.setQueryParameter(SchedJoulesCommonParameter.locale.name(), locale);
 
         return SchedJoulesStreamParsers.parse(client.executeRequest(request), StreamParser.JSON);
-    }
-
-    /**
-     * Retrieves the iCal from the specified {@link URL}
-     * 
-     * @param url The {@link URL} for the iCal
-     * @return The iCal parsed as a {@link Calendar}
-     * @throws OXException if a parsing error is occurred
-     */
-    public Calendar getCalendar(URL url) throws OXException {
-        SchedJoulesRequest request = new SchedJoulesRequest(url.toString());
-        return SchedJoulesStreamParsers.parse(client.executeRequest(request), StreamParser.CALENDAR);
     }
 }
