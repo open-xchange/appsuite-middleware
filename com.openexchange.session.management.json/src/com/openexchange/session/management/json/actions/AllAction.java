@@ -53,10 +53,11 @@ import java.util.Collection;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.ajax.Client;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.clientinfo.ClientInfo;
+import com.openexchange.clientinfo.ClientInfoService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceExceptionCode;
@@ -65,7 +66,6 @@ import com.openexchange.session.management.SessionManagementService;
 import com.openexchange.session.management.SessionManagementStrings;
 import com.openexchange.session.management.json.osgi.Services;
 import com.openexchange.tools.session.ServerSession;
-import com.openexchange.uadetector.UserAgentParser;
 
 /**
  * {@link AllAction}
@@ -74,8 +74,6 @@ import com.openexchange.uadetector.UserAgentParser;
  * @since v7.10.0
  */
 public class AllAction implements AJAXActionService {
-
-    //private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(AllAction.class);
 
     public AllAction() {
         super();
@@ -104,7 +102,7 @@ public class AllAction implements AJAXActionService {
                 if (0 < loginTime) {
                     json.put("loginTime", loginTime);
                 }
-                JSONObject deviceInfo = getDeviceInfo(s.getUserAgent(), s.getClient());
+                JSONObject deviceInfo = getDeviceInfo(s.getSessionId(), s.getClient());
                 if (null != deviceInfo) {
                     json.put("deviceInfo", deviceInfo);
                 }
@@ -116,88 +114,38 @@ public class AllAction implements AJAXActionService {
         return new AJAXRequestResult(result, "json");
     }
 
-    private JSONObject getDeviceInfo(String userAgent, String client) {
-        UserAgentParser parser = Services.getService(UserAgentParser.class);
-        if (null == parser) {
+    private JSONObject getDeviceInfo(String sessionId, String client) {
+        ClientInfoService service = Services.getService(ClientInfoService.class);
+        if (null == service) {
             return null;
         }
-
-        JSONObject deviceInfo = new JSONObject();
-        Client c = Client.getClientByID(client);
-        try {
-            switch (c) {
-                case OX6_UI:
-                case APPSUITE_UI:
-                    deviceInfo.put("type", "browser");
-                    break;
-                case USM_EAS:
-                    deviceInfo.put("type", "sync");
-                    break;
-                case DRIVE_WINDOWS:
-                    deviceInfo.put("type", "oxapp");
-                    deviceInfo.put("platform", "Windows");
-                    break;
-                case DRIVE_OSX:
-                    deviceInfo.put("type", "oxapp");
-                    deviceInfo.put("platform", "OSX");
-                    break;
-                case DRIVE_IOS:
-                    deviceInfo.put("type", "oxapp");
-                    deviceInfo.put("platform", "iOS");
-                    break;
-                case DRIVE_ANDROID:
-                    deviceInfo.put("type", "oxapp");
-                    deviceInfo.put("platform", "Android");
-                    break;
-
-                default:
-                    break;
-            }
-        } catch (JSONException e) {
+        ClientInfo info = service.getClientInfo(sessionId);
+        if (null != info) {
+            JSONObject deviceInfo = new JSONObject(5);
+            try {
+                deviceInfo.put("type", info.getType().getName());
+                String app = info.getApp();
+                if (Strings.isNotEmpty(app)) {
+                    deviceInfo.put("browser", app);
+                }
+                String appVersion = info.getAppVersion();
+                if (Strings.isNotEmpty(appVersion)) {
+                    deviceInfo.put("browserVersion", appVersion);
+                }
+                String platform = info.getPlatform();
+                if (Strings.isNotEmpty(platform)) {
+                    deviceInfo.put("platform", platform);
+                }
+                String platformVersion = info.getPlatformVersion();
+                if (Strings.isNotEmpty(platformVersion)) {
+                    deviceInfo.put("platformVersion", platformVersion);
+                }
+                return deviceInfo;
+            } catch (JSONException e) {
             // will not happen
+            }
         }
-//
-//
-//
-//        ReadableUserAgent info = parser.parse(userAgent);
-//
-//            return deviceInfo;
-//        }
         return null;
     }
-
-//    private void fillBrowserInfo(String userAgent, JSONObject deviceInfo) throws JSONException {
-//        UserAgentParser parser = Services.getService(UserAgentParser.class);
-//        if (null == parser) {
-//            return;
-//        }
-//        ReadableUserAgent info = parser.parse(userAgent);
-//        OperatingSystem operatingSystem = info.getOperatingSystem();
-//        String os = null;
-//        String osVersion = null;
-//        if (null != operatingSystem) {
-//            os = operatingSystem.getName();
-//            osVersion = operatingSystem.getVersionNumber().getMajor();
-//        }
-//        String browser = info.getName();
-//        String browserVersion = info.getVersionNumber().getMajor();
-//        if (Strings.isNotEmpty(os) && Strings.isNotEmpty(osVersion) && Strings.isNotEmpty(browser) || Strings.isNotEmpty(browserVersion)) {
-//            try {
-//                if (Strings.isNotEmpty(os)) {
-//                    deviceInfo.put("os", os);
-//                }
-//                if (Strings.isNotEmpty(osVersion)) {
-//                    deviceInfo.put("osVersion", osVersion);
-//                }
-//                if (Strings.isNotEmpty(browser)) {
-//                    deviceInfo.put("browser", browser);
-//                }
-//                if (Strings.isNotEmpty(browserVersion)) {
-//                    deviceInfo.put("browserVersion", browserVersion);
-//                }
-//            } catch (JSONException e) {
-//                // will not happen
-//            }
-//    }
 
 }
