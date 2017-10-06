@@ -82,9 +82,9 @@ public class SubscribeAction implements AJAXActionService {
      */
     @Override
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
-        String pid = requestData.getParameter("pageId");
+        String pid = requestData.getParameter("id");
         if (pid == null) {
-            throw AjaxExceptionCodes.MISSING_PARAMETER.create("pageId");
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create("id");
         }
 
         // TODO: Fetch the locale from the session?
@@ -92,9 +92,9 @@ public class SubscribeAction implements AJAXActionService {
         int pageId = Integer.parseInt(pid);
 
         SchedJoulesService service = services.getService(SchedJoulesService.class);
-        service.subscribeCalendar(pageId);
+        String prodId = service.subscribeCalendar(pageId);
 
-        return new AJAXRequestResult();
+        return new AJAXRequestResult(prodId);
     }
 
 }

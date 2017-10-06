@@ -124,21 +124,35 @@ public class SchedJoulesServiceImpl implements SchedJoulesService {
      * @see com.openexchange.chronos.schedjoules.SchedJoulesService#subscribeCalendar(int)
      */
     @Override
-    public void subscribeCalendar(int pageId) throws OXException {
-        JSONObject page = api.pages().getPage(pageId);
+    public String subscribeCalendar(int id) throws OXException {
+        JSONObject page = api.pages().getPage(id);
         if (!page.hasAndNotNull("url")) {
-            throw new OXException(1138, "The specified page with id '" + pageId + "' does not denote a calendar");
+            throw new OXException(1138, "The specified page with id '" + id + "' does not denote a calendar");
         }
 
         try {
             String url = page.getString("url");
             URL u = new URL(url);
             Calendar calendar = api.calendar().getCalendar(u);
+            checkAccess(calendar);
             //TODO: Hook-up with the SchedJoules provider to subscribe to the calendar
+            return calendar.getProdId();
         } catch (JSONException e) {
             throw new OXException(1138, "JSON Error", e);
         } catch (MalformedURLException e) {
             throw new OXException(1138, "The specified page does not contain a valid URL", e);
+        }
+    }
+
+    /**
+     * Checks if the user has access to the specified calendar.
+     * 
+     * @param calendar The {@link Calendar} to check for access
+     * @throws OXException if access is restricted
+     */
+    private void checkAccess(Calendar calendar) throws OXException {
+        if (calendar.getName().equals("You have no access to this calendar")) {
+            throw new OXException(1138, calendar.getName());
         }
     }
 }

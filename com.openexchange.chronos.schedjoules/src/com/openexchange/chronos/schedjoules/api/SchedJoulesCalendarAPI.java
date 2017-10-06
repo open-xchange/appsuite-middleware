@@ -49,11 +49,12 @@
 
 package com.openexchange.chronos.schedjoules.api;
 
+import java.io.IOException;
 import java.net.URL;
 import com.openexchange.chronos.Calendar;
 import com.openexchange.chronos.schedjoules.api.SchedJoulesStreamParsers.StreamParser;
 import com.openexchange.chronos.schedjoules.api.client.SchedJoulesRESTClient;
-import com.openexchange.chronos.schedjoules.api.client.SchedJoulesRequest;
+import com.openexchange.chronos.schedjoules.api.client.SchedJoulesResponse;
 import com.openexchange.exception.OXException;
 
 /**
@@ -81,7 +82,12 @@ public class SchedJoulesCalendarAPI {
      * @throws OXException if a parsing error is occurred
      */
     public Calendar getCalendar(URL url) throws OXException {
-        SchedJoulesRequest request = new SchedJoulesRequest(url.toString());
-        return SchedJoulesStreamParsers.parse(client.executeRequest(request), StreamParser.CALENDAR);
+        try {
+            SchedJoulesResponse response = new SchedJoulesResponse(200);
+            response.setStream(url.openStream());
+            return SchedJoulesStreamParsers.parse(response, StreamParser.CALENDAR);
+        } catch (IOException e) {
+            throw new OXException(1138, "I/O Error", e);
+        }
     }
 }

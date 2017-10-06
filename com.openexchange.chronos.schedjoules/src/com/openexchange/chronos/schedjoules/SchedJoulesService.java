@@ -49,9 +49,7 @@ package com.openexchange.chronos.schedjoules;
  *
  */
 
-import java.net.URL;
 import org.json.JSONObject;
-import com.openexchange.chronos.Calendar;
 import com.openexchange.exception.OXException;
 
 /**
@@ -99,9 +97,10 @@ public interface SchedJoulesService {
     SchedJoulesResult getPage(int pageId, String locale) throws OXException;
 
     /**
+     * Subscribes to the SchedJoules calendar with the specified identifier
      * 
-     * @param pageId
-     * @throws OXException
+     * @param id The calendar identifier
+     * @throws OXException if an error is occurred
      */
-    void subscribeCalendar(int pageId) throws OXException;
+    String subscribeCalendar(int id) throws OXException;
 }

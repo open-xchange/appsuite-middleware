@@ -172,6 +172,9 @@ public class SchedJoulesRESTClient {
      * @return The query string
      */
     private String prepareQuery(Map<String, String> queryParameters) {
+        if (queryParameters.isEmpty()) {
+            return new String();
+        }
         StringBuilder stringBuilder = new StringBuilder();
         for (String name : queryParameters.keySet()) {
             stringBuilder.append(name).append("=").append(queryParameters.get(name)).append("&");
