@@ -55,7 +55,6 @@ import com.openexchange.chronos.schedjoules.SchedJoulesResult;
 import com.openexchange.chronos.schedjoules.SchedJoulesService;
 import com.openexchange.chronos.schedjoules.api.SchedJoulesAPI;
 import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceLookup;
 
 /**
  * {@link SchedJoulesServiceImpl}
@@ -65,18 +64,15 @@ import com.openexchange.server.ServiceLookup;
 //FIXME: abstract for the time being
 public class SchedJoulesServiceImpl implements SchedJoulesService {
 
-    private final ServiceLookup services;
     private final SchedJoulesAPI api;
 
     /**
      * Initialises a new {@link SchedJoulesServiceImpl}.
      * 
-     * @param services The {@link ServiceLookup} instance
      * @throws OXException if the {@link SchedJoulesAPI} cannot be initialised
      */
-    public SchedJoulesServiceImpl(ServiceLookup services) throws OXException {
+    public SchedJoulesServiceImpl() throws OXException {
         super();
-        this.services = services;
         api = new SchedJoulesAPI();
     }
 
