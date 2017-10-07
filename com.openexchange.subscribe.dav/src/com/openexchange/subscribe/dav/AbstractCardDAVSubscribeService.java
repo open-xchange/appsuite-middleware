@@ -367,10 +367,9 @@ public abstract class AbstractCardDAVSubscribeService extends AbstractDAVSubscri
             Element rootElement = document.getDocumentElement();
             MultiStatus multiStatus = MultiStatus.createFromXml(rootElement);
             for (MultiStatusResponse multiStatusResponse : multiStatus.getResponses()) {
-                String href = multiStatusResponse.getHref();
-                if (href.endsWith("current-user-principal-uri")) {
-                    DavPropertySet propertySet = multiStatusResponse.getProperties(HttpStatus.SC_OK);
-                    DavProperty<Element> property = (DavProperty<Element>) propertySet.get(PROPERTY_ADDRESSBOOK_HOME_SET);
+                DavPropertySet propertySet = multiStatusResponse.getProperties(HttpStatus.SC_OK);
+                DavProperty<Element> property = (DavProperty<Element>) propertySet.get(PROPERTY_ADDRESSBOOK_HOME_SET);
+                if (null != property) {
                     Element addressBookHomeElement = property.getValue();
                     if ("href".equalsIgnoreCase(addressBookHomeElement.getLocalName())) {
                         return addressBookHomeElement.getTextContent();
