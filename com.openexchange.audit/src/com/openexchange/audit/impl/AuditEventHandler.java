@@ -53,7 +53,10 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Queue;
+import java.util.Set;
 import org.apache.commons.lang.Validate;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
@@ -446,9 +449,17 @@ public class AuditEventHandler implements EventHandler {
         appendIfSet(logBuilder, "MODIFIED BY: ", event.getModifiedBy());
 
         try {
-            int folderId = Integer.valueOf(event.getFolderId()).intValue();
-            appendIfSet(logBuilder, "FOLDER: ", getPathToRoot(folderId, commonEvent.getSession()));
-        } catch (NumberFormatException e) {
+            Map<Integer, Set<Integer>> affectedUsersWithFolder = commonEvent.getAffectedUsersWithFolder();
+            Set<Integer> folders = affectedUsersWithFolder.get(Integer.valueOf(commonEvent.getUserId()));
+            if (null != folders && folders.size() == 1) {
+                // Only one folder affected for the user
+                int folderId = folders.iterator().next().intValue();
+                appendIfSet(logBuilder, "FOLDER: ", getPathToRoot(folderId, commonEvent.getSession()));
+            } else {
+                // Don't known which folder to use, so ...
+                logBuilder.append("FOLDER: <unknown>; ");
+            }
+        } catch (NullPointerException | ClassCastException | NoSuchElementException e) {
             logger.debug("Could not resolve folder with id {} to its absolute path.", event.getFolderId(), e);
             logBuilder.append("FOLDER: <unknown>; ");
         }
