@@ -450,7 +450,7 @@ public class AuditEventHandler implements EventHandler {
             appendIfSet(logBuilder, "FOLDER: ", getPathToRoot(folderId, commonEvent.getSession()));
         } catch (NumberFormatException e) {
             logger.debug("Could not resolve folder with id {} to its absolute path.", event.getFolderId(), e);
-            logBuilder.append("FOLDER: <unkown>; ");
+            logBuilder.append("FOLDER: <unknown>; ");
         }
 
         appendIfSet(logBuilder, "TITLE: ", event.getSummary());
@@ -681,7 +681,7 @@ public class AuditEventHandler implements EventHandler {
     private void appendIfSet(StringBuilder logBuilder, String text, Object objectToAppend) {
         String value = String.valueOf(objectToAppend);
         if (Strings.isEmpty(value) || value.equals("null")) {
-            logBuilder.append(text).append("<unkown>; ");
+            logBuilder.append(text).append("<unknown>; ");
         } else {
             logBuilder.append(text).append(value).append("; ");
         }
