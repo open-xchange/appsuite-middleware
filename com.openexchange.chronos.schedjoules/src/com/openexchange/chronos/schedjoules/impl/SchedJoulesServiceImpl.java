@@ -151,7 +151,17 @@ public class SchedJoulesServiceImpl implements SchedJoulesService {
      */
     @Override
     public String subscribeCalendar(int id) throws OXException {
-        JSONObject page = api.pages().getPage(id);
+        return subscribeCalendar(id, null);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.chronos.schedjoules.SchedJoulesService#subscribeCalendar(int, java.lang.String)
+     */
+    @Override
+    public String subscribeCalendar(int id, String locale) throws OXException {
+        JSONObject page = api.pages().getPage(id, locale);
         if (!page.hasAndNotNull("url")) {
             throw SchedJoulesExceptionCodes.NO_CALENDAR.create(id);
         }

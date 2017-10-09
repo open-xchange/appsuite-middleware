@@ -54,6 +54,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.chronos.schedjoules.SchedJoulesService;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 
@@ -81,15 +82,19 @@ public class BrowseAction implements AJAXActionService {
      */
     @Override
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
+        // Get parameters
         String pageId = requestData.getParameter("id");
-        SchedJoulesService service = services.getService(SchedJoulesService.class);
-
         String language = requestData.getParameter("language");
-        session.getUser().getLocale().getLanguage().toLowerCase();
-        
-        String country = session.getUser().getLocale().getCountry().toLowerCase();
-        requestData.getParameter("country");
+        if (Strings.isEmpty(language)) {
+            language = session.getUser().getLocale().getLanguage().toLowerCase();
+        }
+        String country = requestData.getParameter("country");
+        if (Strings.isEmpty(country)) {
+            country = session.getUser().getLocale().getCountry().toLowerCase();
+        }
 
+        // Execute the request
+        SchedJoulesService service = services.getService(SchedJoulesService.class);
         if (pageId == null) {
             return new AJAXRequestResult(service.getRoot(language, country).getData());
         }

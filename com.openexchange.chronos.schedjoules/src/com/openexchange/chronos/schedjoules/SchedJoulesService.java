@@ -49,7 +49,6 @@ package com.openexchange.chronos.schedjoules;
  *
  */
 
-import org.json.JSONObject;
 import com.openexchange.exception.OXException;
 
 /**
@@ -62,7 +61,7 @@ public interface SchedJoulesService {
     /**
      * Retrieves the starting SchedJoules page.
      * 
-     * @return The {@link JSONObject}
+     * @return The {@link SchedJoulesResult}
      * @throws OXException if an error is occurred
      */
     SchedJoulesResult getRoot() throws OXException;
@@ -73,7 +72,7 @@ public interface SchedJoulesService {
      * 
      * @param locale The locale to use
      * @param location The location to use
-     * @return The {@link JSONObject}
+     * @return The {@link SchedJoulesResult}
      * @throws OXException if an error is occurred
      */
     SchedJoulesResult getRoot(String locale, String location) throws OXException;
@@ -82,7 +81,7 @@ public interface SchedJoulesService {
      * Retrieves the SchedJoules page with the specified identifier
      * 
      * @param pageId The page identifier
-     * @return The {@link JSONObject}
+     * @return The {@link SchedJoulesResult}
      * @throws OXException if an error is occurred
      */
     SchedJoulesResult getPage(int pageId) throws OXException;
@@ -91,13 +90,26 @@ public interface SchedJoulesService {
      * Retrieves the SchedJoules page with the specified identifier
      * 
      * @param pageId The page identifier
-     * @return The {@link JSONObject}
+     * @return The {@link SchedJoulesResult}
      * @throws OXException if an error is occurred
      */
     SchedJoulesResult getPage(int pageId, String locale) throws OXException;
-    
+
+    /**
+     * Retrieves a list of supported country names with the default locale 'en'.
+     * 
+     * @return The {@link SchedJoulesResult}
+     * @throws OXException if an error is occurred
+     */
     SchedJoulesResult listCountries() throws OXException;
-    
+
+    /**
+     * Retrieves a list of supported and localised country names
+     * 
+     * @param locale The locale
+     * @return The {@link SchedJoulesResult}
+     * @throws OXException if an error is occurred
+     */
     SchedJoulesResult listCountries(String locale) throws OXException;
 
     /**
@@ -107,4 +119,13 @@ public interface SchedJoulesService {
      * @throws OXException if an error is occurred
      */
     String subscribeCalendar(int id) throws OXException;
+
+    /**
+     * Subscribes to the SchedJoules calendar with the specified identifier and locale
+     * 
+     * @param id The calendar identifier
+     * @param locale The locale
+     * @throws OXException if an error is occurred
+     */
+    String subscribeCalendar(int id, String locale) throws OXException;
 }

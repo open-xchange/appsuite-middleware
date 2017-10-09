@@ -111,14 +111,13 @@ public class SchedJoulesPagesAPI extends AbstractSchedJoulesAPI {
      * Retrieves the page with the specified identifier
      * 
      * @param pageId The page identifier
-     * @param locale The user's locale
-     * @param location The users' location
+     * @param locale The optional user's locale. If absent it defaults to 'en'
      * @return The page as a {@link JSONObject}
      * @throws OXException if an error is occurred
      */
     public JSONObject getPage(int pageId, String locale) throws OXException {
         SchedJoulesRequest request = new SchedJoulesRequest(SchedJoulesRESTBindPoint.pages.getAbsolutePath() + "/" + pageId);
-        request.setQueryParameter(SchedJoulesCommonParameter.locale.name(), locale);
+        request.setQueryParameter(SchedJoulesCommonParameter.locale.name(), locale == null ? DEFAULT_LOCALE : locale);
 
         return executeRequest(request);
     }
