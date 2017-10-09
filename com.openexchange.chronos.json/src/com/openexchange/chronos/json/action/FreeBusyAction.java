@@ -47,13 +47,13 @@
  *
  */
 
-package com.openexchange.chronos.freebusy.json;
+package com.openexchange.chronos.json.action;
 
+import static com.openexchange.tools.arrays.Collections.unmodifiableSet;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map.Entry;
+import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
 import org.dmfs.rfc5545.DateTime;
@@ -65,88 +65,61 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
-import com.openexchange.chronos.json.action.AbstractChronosAction;
+import com.openexchange.chronos.json.converter.FreeBusyConverter;
 import com.openexchange.chronos.json.converter.mapper.EventMapper;
 import com.openexchange.chronos.json.converter.mapper.ListItemMapping;
-import com.openexchange.chronos.provider.composition.IDBasedCalendarAccessFactory;
-import com.openexchange.chronos.provider.composition.IDBasedFreeBusyAccess;
+import com.openexchange.chronos.json.oauth.ChronosOAuthScope;
+import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
+import com.openexchange.chronos.service.CalendarParameters;
+import com.openexchange.chronos.service.FreeBusyResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tools.mappings.json.ListMapping;
 import com.openexchange.java.Strings;
+import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
-import com.openexchange.tools.session.ServerSession;
 
 /**
- *
- * {@link AbstractFreeBusyAction}
+ * {@link FreeBusyAction}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.0
  */
-public abstract class AbstractFreeBusyAction extends AbstractChronosAction {
+@OAuthAction(ChronosOAuthScope.OAUTH_READ_SCOPE)
+public class FreeBusyAction extends ChronosAction {
+
+    private static final Set<String> OPTIONAL_PARAMETERS = unmodifiableSet(CalendarParameters.PARAMETER_FIELDS);
 
     private static final String ATTENDEES = "attendees";
-    protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractFreeBusyAction.class);
 
     /**
-     * Initializes a new {@link AbstractDriveShareAction}.
+     * Initializes a new {@link FreeBusyAction}.
      *
      * @param services A service lookup reference
      */
-    protected AbstractFreeBusyAction(ServiceLookup services) {
+    protected FreeBusyAction(ServiceLookup services) {
         super(services);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.requesthandler.AJAXActionService#perform(com.openexchange.ajax.requesthandler.AJAXRequestData, com.openexchange.tools.session.ServerSession)
-     */
     @Override
-    public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
-        IDBasedFreeBusyAccess freeBusyAccess = initFreeBusyAccess(requestData);
-        AJAXRequestResult result = perform(freeBusyAccess, requestData);
-        return result;
+    protected Set<String> getOptionalParameters() {
+        return OPTIONAL_PARAMETERS;
     }
 
-    /**
-     * Performs a request.
-     *
-     * @param freeBusyAccess The initialized free-busy access to use
-     * @param requestData The underlying request data
-     * @return The request result
-     */
-    protected abstract AJAXRequestResult perform(IDBasedFreeBusyAccess freeBusyAccess, AJAXRequestData requestData) throws OXException;
-
-    /**
-     * Initializes the free-busy access for a request and parses all known parameters supplied by the client, throwing an appropriate
-     * exception in case a required parameters is missing.
-     *
-     * @param requestData The underlying request data
-     * @return The initialized free-busy access
-     */
-    protected IDBasedFreeBusyAccess initFreeBusyAccess(AJAXRequestData requestData) throws OXException {
-        IDBasedFreeBusyAccess calendarAccess = requireService(IDBasedCalendarAccessFactory.class).createFreeBusyAccess(requestData.getSession());
-        Set<String> requiredParameters = getRequiredParameters();
-        Set<String> optionalParameters = getOptionalParameters();
-        Set<String> parameters = new HashSet<String>();
-        parameters.addAll(requiredParameters);
-        parameters.addAll(optionalParameters);
-        for (String parameter : parameters) {
-            Entry<String, ?> entry = parseParameter(requestData, parameter, requiredParameters.contains(parameter));
-            if (null != entry) {
-                calendarAccess.set(entry.getKey(), entry.getValue());
-            }
-        }
-        return calendarAccess;
+    @Override
+    protected AJAXRequestResult perform(IDBasedCalendarAccess calendarAccess, AJAXRequestData requestData) throws OXException {
+        List<Attendee> attendees = parseAttendeesObject(requestData);
+        Date from = parseDate(requestData, "from");
+        Date until = parseDate(requestData, "until");
+        Map<Attendee, FreeBusyResult> result = calendarAccess.queryFreeBusy(attendees, from, until);
+        return new AJAXRequestResult(result, FreeBusyConverter.INPUT_FORMAT);
     }
 
     /**
      * Parses the request parameter 'attendees' from the specified {@link AJAXRequestData}
-     * 
+     *
      * @param request The {@link AJAXRequestData}
      * @return A {@link List} with {@link Attendee} objects
      * @throws OXException if a parsing error occurs
@@ -167,7 +140,7 @@ public abstract class AbstractFreeBusyAction extends AbstractChronosAction {
 
     /**
      * Parses the request body of the specified {@link AJAXRequestData} and extracts the {@link Attendee}s
-     * 
+     *
      * @param request The {@link AJAXRequestData}
      * @return A {@link List} with {@link Attendee} objects
      * @throws OXException if a JSON parsing error is occurred, or if the request body is not a {@link JSONObject},
@@ -186,7 +159,7 @@ public abstract class AbstractFreeBusyAction extends AbstractChronosAction {
         }
 
         try {
-            ListItemMapping<Attendee, Event, JSONObject> mapping = (ListItemMapping<Attendee, Event, JSONObject>) ((ListMapping<Attendee, Event>) EventMapper.getInstance().opt(EventField.ATTENDEES));
+            @SuppressWarnings("unchecked") ListItemMapping<Attendee, Event, JSONObject> mapping = (ListItemMapping<Attendee, Event, JSONObject>) ((ListMapping<Attendee, Event>) EventMapper.getInstance().opt(EventField.ATTENDEES));
             TimeZone timeZone = TimeZone.getTimeZone(requestData.getSession().getUser().getTimeZone());
             JSONArray attendeesArray = requestBody.getJSONArray(ATTENDEES);
             for (int index = 0; index < attendeesArray.length(); index++) {
@@ -205,7 +178,7 @@ public abstract class AbstractFreeBusyAction extends AbstractChronosAction {
 
     /**
      * Parses the specified request parameter from the specified {@link AJAXRequestData} as a {@link Date}
-     * 
+     *
      * @param request The {@link AJAXRequestData}
      * @param param The parameter's name
      * @return The parsed {@link Date}
@@ -215,5 +188,4 @@ public abstract class AbstractFreeBusyAction extends AbstractChronosAction {
         String parameter = request.getParameter(param, String.class, false);
         return new Date(DateTime.parse(TimeZone.getTimeZone("UTC"), parameter).getTimestamp());
     }
-
 }

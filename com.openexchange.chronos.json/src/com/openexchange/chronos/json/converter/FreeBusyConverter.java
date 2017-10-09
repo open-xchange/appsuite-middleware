@@ -58,9 +58,14 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.Converter;
 import com.openexchange.ajax.requesthandler.ResultConverter;
+import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.chronos.Attendee;
+import com.openexchange.chronos.Event;
 import com.openexchange.chronos.FreeBusyTime;
+import com.openexchange.chronos.json.converter.mapper.EventMapper;
+import com.openexchange.chronos.service.FreeBusyResult;
 import com.openexchange.exception.OXException;
+import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -93,30 +98,40 @@ public class FreeBusyConverter implements ResultConverter {
     @Override
     public void convert(AJAXRequestData requestData, AJAXRequestResult result, ServerSession session, Converter converter) throws OXException {
         /*
+         * determine timezone
+         */
+        String timeZoneID = requestData.getParameter("timezone");
+        if (null == timeZoneID) {
+            timeZoneID = session.getUser().getTimeZone();
+        }
+        /*
          * check and convert result object
          */
         Object resultObject = result.getResultObject();
         if (Map.class.isInstance(resultObject)) {
             try {
-                Map<Attendee, List<FreeBusyTime>> map = (Map<Attendee, List<FreeBusyTime>>) resultObject;
+                Map<Attendee, FreeBusyResult> map = (Map<Attendee, FreeBusyResult>) resultObject;
                 JSONArray array = new JSONArray(map.size());
                 for (Attendee att : map.keySet()) {
                     JSONObject json = new JSONObject(2);
                     json.put("attendee", att.getEntity());
-                    json.put("freeBusyTime", parseFreeBusyTime(map.get(att)));
+                    FreeBusyResult freeBusyResult = map.get(att);
+                    json.put("freeBusyTime", parseFreeBusyTime(freeBusyResult, session, timeZoneID));
+                    if(freeBusyResult.getWarnings() != null && freeBusyResult.getWarnings().size()!=0){
+                        JSONArray warningsArray = new JSONArray(freeBusyResult.getWarnings().size());
+                        for(OXException ex : freeBusyResult.getWarnings()){
+                            JSONObject warning = new JSONObject();
+                            ResponseWriter.addException(warning, ex, session.getUser().getLocale(), false);
+                            warningsArray.put(warning);
+                        }
+                        json.put("warnings", warningsArray);
+                    }
                     array.put(json);
                 }
                 resultObject = array;
             } catch (JSONException e) {
                 throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
             }
-        } else if (resultObject instanceof boolean[]) {
-            boolean[] boolArray = (boolean[]) resultObject;
-            JSONArray array = new JSONArray(boolArray.length);
-            for (boolean bool : boolArray) {
-                array.put(bool);
-            }
-            resultObject = array;
         } else {
             throw new UnsupportedOperationException();
         }
@@ -124,19 +139,30 @@ public class FreeBusyConverter implements ResultConverter {
     }
 
     /**
-     * Parse a list of {@link FreeBusyTime}s to a {@link JSONArray}.
+     * Parse a {@link FreeBusyResult}s to a {@link JSONArray}.
      *
-     * @param freeBusyTimes The list of {@link FreeBusyTime}s to parse
+     * @param freeBusyResult The {@link FreeBusyResult}
+     * @param session The user session
+     * @param timeZoneID The id of the time-zone
      * @return The {@link JSONArray}
      * @throws JSONException
+     * @throws OXException
      */
-    private JSONArray parseFreeBusyTime(List<FreeBusyTime> freeBusyTimes) throws JSONException {
+    private JSONArray parseFreeBusyTime(FreeBusyResult freeBusyResult, Session session, String timeZoneID) throws JSONException, OXException {
+        List<FreeBusyTime> freeBusyTimes = freeBusyResult.getFreeBusyTimes();
+        if(freeBusyTimes==null){
+            return new JSONArray();
+        }
         JSONArray result = new JSONArray(freeBusyTimes.size());
         for (FreeBusyTime time : freeBusyTimes) {
             JSONObject json = new JSONObject(3);
             json.put("startTime", time.getStartTime().getTime());
             json.put("endTime", time.getEndTime().getTime());
             json.put("fbType", time.getFbType().getValue());
+            Event event = time.getEvent();
+            if(event!=null){
+              json.put("event", EventMapper.getInstance().serialize(event, EventMapper.getInstance().getAssignedFields(event), timeZoneID, session));
+            }
             result.put(json);
         }
         return result;
