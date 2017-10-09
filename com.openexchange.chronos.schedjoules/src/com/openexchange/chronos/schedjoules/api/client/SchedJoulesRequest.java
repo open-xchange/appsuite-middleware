@@ -66,6 +66,15 @@ public class SchedJoulesRequest {
 
     /**
      * Initialises a new {@link SchedJoulesRequest}.
+     * 
+     * @param restBindPoint The {@link SchedJoulesRESTBindPoint}
+     */
+    public SchedJoulesRequest(SchedJoulesRESTBindPoint restBindPoint) {
+        this(restBindPoint.getAbsolutePath());
+    }
+
+    /**
+     * Initialises a new {@link SchedJoulesRequest}.
      */
     public SchedJoulesRequest(String path) {
         this(HttpMethod.GET, path);

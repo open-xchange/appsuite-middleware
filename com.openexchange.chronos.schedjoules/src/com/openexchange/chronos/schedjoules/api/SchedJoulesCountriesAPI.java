@@ -79,7 +79,7 @@ public class SchedJoulesCountriesAPI {
      * @throws OXException if a parsing error is occurred
      */
     public JSONArray listCountries() throws OXException {
-        SchedJoulesRequest request = new SchedJoulesRequest(SchedJoulesRESTBindPoint.countries.getAbsolutePath());
+        SchedJoulesRequest request = new SchedJoulesRequest(SchedJoulesRESTBindPoint.countries);
         return (JSONArray) SchedJoulesResponseParser.parse(client.executeRequest(request));
     }
 
@@ -91,7 +91,7 @@ public class SchedJoulesCountriesAPI {
      * @throws OXException if a parsing error is occurred
      */
     public JSONArray listCountries(String locale) throws OXException {
-        SchedJoulesRequest request = new SchedJoulesRequest(SchedJoulesRESTBindPoint.countries.getAbsolutePath());
+        SchedJoulesRequest request = new SchedJoulesRequest(SchedJoulesRESTBindPoint.countries);
         request.setQueryParameter("locale", locale);
         return (JSONArray) SchedJoulesResponseParser.parse(client.executeRequest(request));
     }

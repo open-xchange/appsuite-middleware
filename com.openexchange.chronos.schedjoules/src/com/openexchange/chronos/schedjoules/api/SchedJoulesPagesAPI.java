@@ -95,7 +95,7 @@ public class SchedJoulesPagesAPI {
      * @throws OXException if an error is occurred
      */
     public JSONObject getRootPage(String locale, String location) throws OXException {
-        SchedJoulesRequest request = new SchedJoulesRequest(SchedJoulesRESTBindPoint.pages.getAbsolutePath());
+        SchedJoulesRequest request = new SchedJoulesRequest(SchedJoulesRESTBindPoint.pages);
         request.setQueryParameter(SchedJoulesCommonParameter.location.name(), location);
         request.setQueryParameter(SchedJoulesCommonParameter.locale.name(), locale);
 
