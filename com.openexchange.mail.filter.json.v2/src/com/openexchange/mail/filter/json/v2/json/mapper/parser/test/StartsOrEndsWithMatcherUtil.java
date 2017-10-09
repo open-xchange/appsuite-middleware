@@ -103,11 +103,11 @@ public class StartsOrEndsWithMatcherUtil {
         List<String> result = new ArrayList<>(values.size());
         if (endsWith) {
             for (String str : values) {
-                result.add(str + WILDCARD);
+                result.add(WILDCARD + str);
             }
         } else {
             for (String str : values) {
-                result.add(WILDCARD + str);
+                result.add(str + WILDCARD);
             }
         }
 
@@ -130,10 +130,10 @@ public class StartsOrEndsWithMatcherUtil {
        boolean endswith = false;
 
         for(String value: values){
-            if(value.startsWith(WILDCARD) && endswith==false){
-                startswith=true;
-            } else if (value.endsWith(WILDCARD) && startswith==false) {
+            if(value.startsWith(WILDCARD) && startswith==false){
                 endswith=true;
+            } else if (value.endsWith(WILDCARD) && endswith==false) {
+                startswith=true;
             } else {
                 return matchType;
             }
@@ -162,13 +162,14 @@ public class StartsOrEndsWithMatcherUtil {
             case startswith:
                 result = new ArrayList<>(values.size());
                 for (String str : values) {
-                    result.add(str.substring(1));
+                    result.add(str.substring(0,str.length()-1));
+
                 }
                 return result;
             case endswith:
                 result = new ArrayList<>(values.size());
                 for (String str : values) {
-                    result.add(str.substring(0,str.length()-1));
+                    result.add(str.substring(1));
                 }
                 return result;
             default:
