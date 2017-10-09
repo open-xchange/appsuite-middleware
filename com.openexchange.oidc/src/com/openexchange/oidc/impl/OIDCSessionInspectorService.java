@@ -18,19 +18,19 @@ import com.openexchange.session.inspector.SessionInspectorService;
 
 /**
  * {@link OIDCSessionInspectorService} Is triggered on each Request, that comes
- * with a {@link Session} parameter. Is used to check on expired OAuth tokens, if storage of 
+ * with a {@link Session} parameter. Is used to check on expired OAuth tokens, if storage of
  * those is enabled for the current backend.
- * 
- * TODO QS-VS: Den Lösungsansatz diskutieren, Beschaffung des Backends auch einfacher, besser möglich?
+ *
+ * TODO QS-VS: Den Loesungsansatz diskutieren, Beschaffung des Backends auch einfacher, besser moeglich?
  *
  * @author <a href="mailto:vitali.sjablow@open-xchange.com">Vitali Sjablow</a>
  * @since v7.10.0
  */
 public class OIDCSessionInspectorService implements SessionInspectorService{
-    
+
     private final OIDCBackendRegistry oidcBackends;
     private final BundleContext context;
-    
+
     public OIDCSessionInspectorService(OIDCBackendRegistry oidcBackends, BundleContext context) {
         this.oidcBackends = oidcBackends;
         this.context = context;
@@ -39,6 +39,9 @@ public class OIDCSessionInspectorService implements SessionInspectorService{
     @Override
     public Reply onSessionHit(Session session, HttpServletRequest request, HttpServletResponse response) throws OXException {
         OIDCBackend backend = this.loadBackendForSession(session);
+        if (null == backend) {
+            return Reply.NEUTRAL;
+        }
         if (backend.getBackendConfig().isStoreOAuthTokensEnabled() && backend.isTokenExpired(session)) {
             if(!backend.updateOauthTokens(session)) {
                 backend.logoutCurrentUser(session, request, response, null);
@@ -49,7 +52,11 @@ public class OIDCSessionInspectorService implements SessionInspectorService{
 
     private OIDCBackend loadBackendForSession(Session session) throws OXException{
         SortedMap<ServiceReference<OIDCBackend>,OIDCBackend> tracked = oidcBackends.getTracked();
-        String sessionBackendPath = (String) session.getParameter(OIDCTools.BACKEND_PATH);
+        Object object = session.getParameter(OIDCTools.BACKEND_PATH);
+        if (null == object) {
+            return null;
+        }
+        String sessionBackendPath = (String) object;
         for (Entry<ServiceReference<OIDCBackend>, OIDCBackend> entry : tracked.entrySet()) {
             OIDCBackend backend = context.getService(entry.getKey());
             if (sessionBackendPath != null && backend.getPath().equals(sessionBackendPath)) {
