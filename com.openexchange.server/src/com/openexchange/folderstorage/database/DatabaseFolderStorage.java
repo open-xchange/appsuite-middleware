@@ -167,7 +167,6 @@ import com.openexchange.tools.oxfolder.OXFolderLoader.IdAndName;
 import com.openexchange.tools.oxfolder.OXFolderManager;
 import com.openexchange.tools.oxfolder.OXFolderSQL;
 import com.openexchange.tools.oxfolder.UpdatedFolderHandler;
-import com.openexchange.tools.oxfolder.property.FolderUserPropertyStorage;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.tools.sql.DBUtils;
@@ -1012,45 +1011,27 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
 
     @Override
     public Folder prepareFolder(final String treeId, final Folder folder, final StorageParameters storageParameters) throws OXException {
-        Folder retFolder = folder;
         /*
          * Owner
          */
         final int owner = folder.getCreatedBy();
-        if (owner >= 0) {
-            /*
-             * Check shared...
-             */
-            if (owner != storageParameters.getUserId() && PrivateType.getInstance().equals(folder.getType())) {
-                try {
-                    retFolder = getFolder(treeId, folder.getID(), StorageType.WORKING, storageParameters);
-                } catch (final OXException e) {
-                    if (OXFolderExceptionCode.NOT_EXISTS.equals(e) || FolderExceptionErrorMessage.NOT_FOUND.equals(e)) {
-                        retFolder = getFolder(treeId, folder.getID(), StorageType.BACKUP, storageParameters);
-                    }
-                    throw e;
-                }
-            }
+        if (owner < 0) {
+            return folder;
         }
-        // XXX Demo purpose
-        FolderUserPropertyStorage fps = services.getOptionalService(FolderUserPropertyStorage.class);
-        if (null != fps) {
-            Integer folderId = Integer.valueOf(folder.getID());
-            Connection connection = null;
+        /*
+         * Check shared...
+         */
+        if (owner != storageParameters.getUserId() && PrivateType.getInstance().equals(folder.getType())) {
             try {
-                final ConnectionProvider provider = getConnection(Mode.READ, storageParameters);
-                connection = provider.getConnection();
-            } catch (OXException e) {
-                // No connection available, so let FolderUserPropertyStorage handle the connection
-            }
-            Map<String, String> properties = fps.getFolderProperties(storageParameters.getContextId(), folderId.intValue(), storageParameters.getUserId(), connection);
-            if (null != properties && false == properties.isEmpty()) {
-                Map<String, Object> meta = new HashMap<>(properties.size());
-                meta.putAll(properties);
-                retFolder.setMeta(meta);
+                return getFolder(treeId, folder.getID(), StorageType.WORKING, storageParameters);
+            } catch (final OXException e) {
+                if (OXFolderExceptionCode.NOT_EXISTS.equals(e) || FolderExceptionErrorMessage.NOT_FOUND.equals(e)) {
+                    return getFolder(treeId, folder.getID(), StorageType.BACKUP, storageParameters);
+                }
+                throw e;
             }
         }
-        return retFolder;
+        return folder;
     }
 
     @Override

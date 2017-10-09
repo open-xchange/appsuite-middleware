@@ -53,7 +53,10 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Queue;
+import java.util.Set;
 import org.apache.commons.lang.Validate;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
@@ -95,8 +98,11 @@ import ch.qos.logback.core.status.Status;
 import ch.qos.logback.core.util.FileSize;
 
 /**
+ * {@link AuditEventHandler}
+ * 
  * @author <a href="mailto:benjamin.otterbach@open-xchange.com">Benjamin Otterbach</a>
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a> - refactoring
+ * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a> - Switched from appointments to calendar events
  */
 public class AuditEventHandler implements EventHandler {
 
@@ -429,9 +435,6 @@ public class AuditEventHandler implements EventHandler {
         Validate.notNull(commonEvent, "CommonEvent mustn't be null.");
         Validate.notNull(logBuilder, "StringBuilder to write to mustn't be null.");
 
-        // Check if we can access all information
-        boolean isDeletedEvent = commonEvent.getAction() == CommonEvent.DELETE;
-
         // Get calendar events
         final com.openexchange.chronos.Event event = (com.openexchange.chronos.Event) commonEvent.getActionObj();
         final com.openexchange.chronos.Event oldEvent = (com.openexchange.chronos.Event) commonEvent.getOldObj();
@@ -440,32 +443,38 @@ public class AuditEventHandler implements EventHandler {
         logBuilder.append("OBJECT TYPE: EVENT; ");
         appendUserInformation(commonEvent.getUserId(), commonEvent.getContextId(), logBuilder);
         logBuilder.append("CONTEXT ID: ").append(commonEvent.getContextId()).append("; ");
-        logBuilder.append("EVENT ID: ").append(event.getId()).append("; ");
+        logBuilder.append("OBJECT ID: ").append(event.getId()).append("; ");
 
-        appendBy(event.getCreatedBy(), "CREATED", logBuilder);
-        appendBy(event.getModifiedBy(), "MODIFIED", logBuilder);
+        appendIfSet(logBuilder, "CREATED BY: ", event.getCreatedBy());
+        appendIfSet(logBuilder, "MODIFIED BY: ", event.getModifiedBy());
 
         try {
-            int folderId = Integer.valueOf(event.getFolderId()).intValue();
-            appendIfSet(logBuilder, "FOLDER: ", getPathToRoot(folderId, commonEvent.getSession()), true);
-        } catch (NumberFormatException e) {
+            Map<Integer, Set<Integer>> affectedUsersWithFolder = commonEvent.getAffectedUsersWithFolder();
+            Set<Integer> folders = affectedUsersWithFolder.get(Integer.valueOf(commonEvent.getUserId()));
+            if (null != folders && folders.size() == 1) {
+                // Only one folder affected for the user
+                int folderId = folders.iterator().next().intValue();
+                appendIfSet(logBuilder, "FOLDER: ", getPathToRoot(folderId, commonEvent.getSession()));
+            } else {
+                // Don't known which folder to use, so ...
+                logBuilder.append("FOLDER: <unknown>; ");
+            }
+        } catch (NullPointerException | ClassCastException | NoSuchElementException e) {
             logger.debug("Could not resolve folder with id {} to its absolute path.", event.getFolderId(), e);
-            logBuilder.append("FOLDER: <unkown>; ");
+            logBuilder.append("FOLDER: <unknown>; ");
         }
 
-        if (false == isDeletedEvent) {
-            appendIfSet(logBuilder, "TITLE: ", event.getSummary(), false);
-            appendIfSet(logBuilder, "START DATE: ", event.getStartDate(), false);
-            appendIfSet(logBuilder, "END DATE: ", event.getEndDate(), false);
+        appendIfSet(logBuilder, "TITLE: ", event.getSummary());
+        appendIfSet(logBuilder, "START DATE: ", event.getStartDate());
+        appendIfSet(logBuilder, "END DATE: ", event.getEndDate());
 
-            appendAttendees(logBuilder, event.getAttendees(), "ATTENDEES: ");
-        }
+        appendAttendees(logBuilder, event.getAttendees(), "ATTENDEES: ");
 
         if (oldEvent != null) {
             appendAttendees(logBuilder, oldEvent.getAttendees(), "OLD ATTENDEES: ");
         }
         if (commonEvent.getSession() != null) {
-            appendIfSet(logBuilder, "CLIENT: ", commonEvent.getSession().getClient(), false);
+            appendIfSet(logBuilder, "CLIENT: ", commonEvent.getSession().getClient());
         }
     }
 
@@ -647,6 +656,7 @@ public class AuditEventHandler implements EventHandler {
         if (null != calendarUser) {
             logBuilder.append(identifierText).append(" BY: ").append(calendarUser.getCn()).append("; ");
         }
+
     }
 
     /**
@@ -657,8 +667,8 @@ public class AuditEventHandler implements EventHandler {
      * @param text The key the attendees should be added to
      */
     private void appendAttendees(StringBuilder logBuilder, List<Attendee> attendees, String text) {
+        StringBuilder attendeesText = new StringBuilder();
         if (null != attendees) {
-            StringBuilder attendeesText = new StringBuilder();
             for (Iterator<Attendee> iterator = attendees.iterator(); iterator.hasNext();) {
                 Attendee attendee = iterator.next();
                 if (attendee.containsCn()) {
@@ -668,8 +678,8 @@ public class AuditEventHandler implements EventHandler {
                     }
                 }
             }
-            appendIfSet(logBuilder, text, attendeesText, false);
         }
+        appendIfSet(logBuilder, text, attendeesText);
     }
 
     /**
@@ -678,14 +688,11 @@ public class AuditEventHandler implements EventHandler {
      * @param logBuilder The {@link StringBuilder}
      * @param text The key to add the objecct to
      * @param objectToAppend The object to add
-     * @param useUnkown <code>true</code> if in case of empty object 'unknown' should be appended, <code>false</code> otherwise
      */
-    private void appendIfSet(StringBuilder logBuilder, String text, Object objectToAppend, boolean useUnkown) {
+    private void appendIfSet(StringBuilder logBuilder, String text, Object objectToAppend) {
         String value = String.valueOf(objectToAppend);
         if (Strings.isEmpty(value) || value.equals("null")) {
-            if (useUnkown) {
-                logBuilder.append(text).append("<unkown>;");
-            }
+            logBuilder.append(text).append("<unknown>; ");
         } else {
             logBuilder.append(text).append(value).append("; ");
         }

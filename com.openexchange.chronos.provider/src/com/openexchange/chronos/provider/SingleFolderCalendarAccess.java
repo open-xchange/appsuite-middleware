@@ -52,18 +52,19 @@ package com.openexchange.chronos.provider;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.RecurrenceId;
-import com.openexchange.chronos.TimeTransparency;
-import com.openexchange.chronos.Transp;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
+import com.openexchange.chronos.provider.account.CalendarAccountService;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.EventID;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.util.TimeZones;
+import com.openexchange.session.Session;
 
 /**
  * {@link SingleFolderCalendarAccess}
@@ -76,29 +77,34 @@ public abstract class SingleFolderCalendarAccess implements CalendarAccess {
     /** The constant folder identifier for single folder calendar accesses */
     public static final String FOLDER_ID = "0";
 
+    protected final Session session;
     protected final CalendarFolder folder;
     protected final CalendarParameters parameters;
-    protected final CalendarAccount account;
+
+    protected CalendarAccount account;
 
     /**
      * Initializes a new {@link SingleFolderCalendarAccess}.
      *
+     * @param session The user session
      * @param parameters The calendar parameters
      * @param account The calendar account
      */
-    protected SingleFolderCalendarAccess(CalendarAccount account, CalendarParameters parameters) {
-        this(account, parameters, prepareFolder(account));
+    protected SingleFolderCalendarAccess(Session session, CalendarAccount account, CalendarParameters parameters) {
+        this(session, account, parameters, prepareFolder(session, account));
     }
 
     /**
      * Initializes a new {@link SingleFolderCalendarAccess}.
      *
+     * @param session The user session
      * @param parameters The calendar parameters
      * @param account The calendar account
      * @param folder The folder to use
      */
-    protected SingleFolderCalendarAccess(CalendarAccount account, CalendarParameters parameters, CalendarFolder folder) {
+    protected SingleFolderCalendarAccess(Session session, CalendarAccount account, CalendarParameters parameters, CalendarFolder folder) {
         super();
+        this.session = session;
         this.account = account;
         this.parameters = parameters;
         this.folder = folder;
@@ -116,6 +122,18 @@ public abstract class SingleFolderCalendarAccess implements CalendarAccess {
     }
 
     @Override
+    public String updateFolder(String folderId, CalendarFolder folder, long clientTimestamp) throws OXException {
+        checkFolderId(folderId);
+        Map<String, Object> configuration = new HashMap<String, Object>(account.getConfiguration());
+        configuration.put("color", folder.getColor());
+        configuration.put("description", null);
+        configuration.put("scheduleTransp", null != folder.getScheduleTransparency() ? folder.getScheduleTransparency().getValue() : null);
+        configuration.put("usedForSync", Boolean.valueOf(folder.isUsedForSync()));
+        this.account = getAccountService().updateAccount(session, account.getAccountId(), configuration, clientTimestamp);
+        return folderId;
+    }
+
+    @Override
     public Event getEvent(String folderId, String eventId, RecurrenceId recurrenceId) throws OXException {
         checkFolderId(folderId);
         Event event = getEvent(eventId, recurrenceId);
@@ -126,6 +144,8 @@ public abstract class SingleFolderCalendarAccess implements CalendarAccess {
     protected abstract Event getEvent(String eventId, RecurrenceId recurrenceId) throws OXException;
 
     protected abstract List<Event> getEvents() throws OXException;
+
+    protected abstract CalendarAccountService getAccountService() throws OXException;
 
     @Override
     public List<Event> getEvents(List<EventID> eventIDs) throws OXException {
@@ -178,16 +198,18 @@ public abstract class SingleFolderCalendarAccess implements CalendarAccess {
         return folderId;
     }
 
-    private static CalendarFolder prepareFolder(CalendarAccount account) {
+    protected static DefaultCalendarFolder prepareFolder(Session session, CalendarAccount account) {
         DefaultCalendarFolder folder = new DefaultCalendarFolder();
         folder.setId(FOLDER_ID);
         folder.setPermissions(Collections.singletonList(DefaultCalendarPermission.readOnlyPermissionsFor(account.getUserId())));
+        folder.setLastModified(account.getLastModified());
         Map<String, Object> config = account.getConfiguration();
         if (null != config) {
             folder.setName((String) config.get("name"));
             folder.setColor((String) config.get("color"));
-            folder.setDescription((String) config.get("description"));
-            folder.setTransparency(Transp.TRANSPARENT.equals(config.get("transp")) ? TimeTransparency.TRANSPARENT : TimeTransparency.OPAQUE);
+            //            folder.setDescription((String) config.get("description"));
+            folder.setUsedForSync(null != config.get("usedForSync") && ((Boolean) config.get("usedForSync")).booleanValue());
+            //            folder.setScheduleTransparency(Enums.parse(TimeTransparency.class, (String) config.get("scheduleTransp"), TimeTransparency.OPAQUE));
         }
         return folder;
     }

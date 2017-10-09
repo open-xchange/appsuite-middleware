@@ -54,7 +54,7 @@ import java.util.Collections;
 import java.util.List;
 import com.openexchange.chronos.provider.CalendarProvider;
 import com.openexchange.chronos.provider.CalendarProviderRegistry;
-import com.openexchange.exception.OXException;
+import com.openexchange.chronos.provider.FreeBusyProvider;
 import com.openexchange.osgi.ServiceSet;
 
 /**
@@ -66,19 +66,22 @@ import com.openexchange.osgi.ServiceSet;
 public class CalendarProviderRegistryImpl implements CalendarProviderRegistry {
 
     private final ServiceSet<CalendarProvider> calendarProviders;
+    private final ServiceSet<FreeBusyProvider> freeBusyProviders;
 
     /**
      * Initializes a new {@link CalendarProviderRegistryImpl}.
      *
      * @param calendarProviders The calendar providers service set
+     * @param freeBusyProviders The feee/busy providers service set
      */
-    public CalendarProviderRegistryImpl(ServiceSet<CalendarProvider> calendarProviders) {
+    public CalendarProviderRegistryImpl(ServiceSet<CalendarProvider> calendarProviders, ServiceSet<FreeBusyProvider> freeBusyProviders) {
         super();
         this.calendarProviders = calendarProviders;
+        this.freeBusyProviders = freeBusyProviders;
     }
 
     @Override
-    public CalendarProvider getCalendarProvider(String id) throws OXException {
+    public CalendarProvider getCalendarProvider(String id) {
         for (CalendarProvider calendarProvider : calendarProviders) {
             if (id.equals(calendarProvider.getId())) {
                 return calendarProvider;
@@ -88,8 +91,13 @@ public class CalendarProviderRegistryImpl implements CalendarProviderRegistry {
     }
 
     @Override
-    public List<CalendarProvider> getCalendarProviders() throws OXException {
+    public List<CalendarProvider> getCalendarProviders() {
         return Collections.unmodifiableList(new ArrayList<CalendarProvider>(calendarProviders));
+    }
+
+    @Override
+    public List<FreeBusyProvider> getFreeBusyProviders() {
+        return Collections.unmodifiableList(new ArrayList<FreeBusyProvider>(freeBusyProviders));
     }
 
 }

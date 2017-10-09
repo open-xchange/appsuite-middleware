@@ -1,6 +1,0 @@
-requests:
-  - CheckRequest.yaml
-  - FreeBusyRequest.yaml
-  - EventsRequest.yaml
-  - HasRequest.yaml
-

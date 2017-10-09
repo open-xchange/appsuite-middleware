@@ -64,16 +64,15 @@ import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.TimeTransparency;
-import com.openexchange.chronos.Transp;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.DefaultCalendarResult;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.CalendarAccount;
-import com.openexchange.chronos.provider.CalendarFolder;
 import com.openexchange.chronos.provider.CalendarPermission;
 import com.openexchange.chronos.provider.DefaultCalendarFolder;
 import com.openexchange.chronos.provider.DefaultCalendarPermission;
 import com.openexchange.chronos.provider.SingleFolderCalendarAccess;
+import com.openexchange.chronos.provider.account.CalendarAccountService;
 import com.openexchange.chronos.provider.extensions.PersonalAlarmAware;
 import com.openexchange.chronos.provider.extensions.SearchAware;
 import com.openexchange.chronos.service.CalendarParameters;
@@ -124,7 +123,7 @@ public class BirthdaysCalendarAccess extends SingleFolderCalendarAccess implemen
      * @param parameters Additional calendar parameters
      */
     public BirthdaysCalendarAccess(ServiceLookup services, ServerSession session, CalendarAccount account, CalendarParameters parameters) {
-        super(account, parameters, prepareFolder(session, account));
+        super(session, account, parameters, prepareFolder(session, account));
         this.services = services;
         this.session = session;
         this.eventConverter = new EventConverter(services, session.getUser().getLocale(), account.getUserId());
@@ -156,6 +155,11 @@ public class BirthdaysCalendarAccess extends SingleFolderCalendarAccess implemen
             List<Event> seriesMasters = eventConverter.getSeriesMasters(contacts, null, null, getTimeZone());
             alarmHelper.insertDefaultAlarms(seriesMasters);
         }
+    }
+
+    @Override
+    protected CalendarAccountService getAccountService() throws OXException {
+        return services.getService(CalendarAccountService.class);
     }
 
     @Override
@@ -284,13 +288,8 @@ public class BirthdaysCalendarAccess extends SingleFolderCalendarAccess implemen
         return null != timeZone ? timeZone : optTimeZone(session.getUser().getTimeZone(), TimeZones.UTC);
     }
 
-    private static CalendarFolder prepareFolder(ServerSession session, CalendarAccount account) {
-        DefaultCalendarFolder folder = new DefaultCalendarFolder();
-        folder.setId(FOLDER_ID);
-
-
-        folder.setPermissions(Collections.singletonList(DefaultCalendarPermission.readOnlyPermissionsFor(account.getUserId())));
-
+    private static DefaultCalendarFolder prepareFolder(ServerSession session, CalendarAccount account) {
+        DefaultCalendarFolder folder = SingleFolderCalendarAccess.prepareFolder(session, account);
 
         CalendarPermission permission = new DefaultCalendarPermission(
             account.getUserId(),
@@ -304,15 +303,9 @@ public class BirthdaysCalendarAccess extends SingleFolderCalendarAccess implemen
         ;
         folder.setPermissions(Collections.singletonList(permission));
 
-
         StringHelper stringHelper = StringHelper.valueOf(session.getUser().getLocale());
         folder.setName(stringHelper.getString(BirthdaysCalendarStrings.CALENDAR_NAME));
-        folder.setTransparency(TimeTransparency.TRANSPARENT);
-        Map<String, Object> config = account.getConfiguration();
-        if (null != config) {
-            folder.setColor((String) config.get("color"));
-            folder.setTransparency(Transp.TRANSPARENT.equals(config.get("transp")) ? TimeTransparency.TRANSPARENT : TimeTransparency.OPAQUE);
-        }
+        folder.setScheduleTransparency(TimeTransparency.TRANSPARENT);
         return folder;
     }
 

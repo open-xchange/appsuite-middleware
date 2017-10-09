@@ -49,13 +49,15 @@
 
 package com.openexchange.folderstorage;
 
+import static com.openexchange.folderstorage.CalendarFolderField.COLOR;
+import static com.openexchange.folderstorage.CalendarFolderField.SCHEDULE_TRANSP;
+import static com.openexchange.folderstorage.CalendarFolderField.USED_FOR_SYNC;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import com.openexchange.chronos.compat.Appointment2Event;
-import com.openexchange.chronos.compat.Event2Appointment;
+import java.util.Map.Entry;
+import org.slf4j.LoggerFactory;
+import com.openexchange.chronos.TimeTransparency;
 import com.openexchange.chronos.provider.CalendarFolder;
 import com.openexchange.chronos.provider.CalendarPermission;
 import com.openexchange.chronos.provider.DefaultCalendarPermission;
@@ -63,9 +65,11 @@ import com.openexchange.chronos.provider.groupware.DefaultGroupwareCalendarFolde
 import com.openexchange.chronos.provider.groupware.GroupwareCalendarFolder;
 import com.openexchange.chronos.provider.groupware.GroupwareFolderType;
 import com.openexchange.folderstorage.calendar.CalendarFolderStorage;
+import com.openexchange.folderstorage.calendar.CalendarStorageFolder;
 import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.folderstorage.type.SharedType;
+import com.openexchange.java.Enums;
 
 /**
  * {@link CalendarFolderConverter}
@@ -76,7 +80,7 @@ import com.openexchange.folderstorage.type.SharedType;
 public class CalendarFolderConverter {
 
     /**
-     * Converts a calendar folder into a folder-storage compatible folder.
+     * Converts a calendar folder into a folder storage compatible folder.
      *
      * @param treeId The identifier of the folder tree to take over
      * @param accountId The fully-qualified account identifier to take over
@@ -84,11 +88,11 @@ public class CalendarFolderConverter {
      * @param calendarFolder The calendar folder to convert
      * @return The folder-storage compatible folder
      */
-    public static Folder getStorageFolder(String treeId, String accountId, ContentType contentType, CalendarFolder calendarFolder) {
+    public static ParameterizedFolder getStorageFolder(String treeId, String accountId, ContentType contentType, CalendarFolder calendarFolder) {
         if (GroupwareCalendarFolder.class.isInstance(calendarFolder)) {
             return getStorageFolder(treeId, accountId, contentType, (GroupwareCalendarFolder) calendarFolder);
         }
-        Folder folder = newStorageFolder(treeId, accountId, contentType);
+        ParameterizedFolder folder = newStorageFolder(treeId, accountId, contentType);
         folder.setID(calendarFolder.getId());
         folder.setName(calendarFolder.getName());
         folder.setParentID(CalendarFolderStorage.PRIVATE_ID);
@@ -96,18 +100,14 @@ public class CalendarFolderConverter {
         folder.setPermissions(getStoragePermissions(calendarFolder.getPermissions()));
         folder.setSubfolderIDs(new String[0]);
         folder.setSubscribedSubfolders(false);
-        Map<String, Object> meta = new HashMap<String, Object>();
-        String color = calendarFolder.getColor();
-        if (null != color) {
-            meta.put("color", color);
-            meta.put("color_label", Integer.valueOf(Event2Appointment.getColorLabel(color)));
-        }
-        folder.setMeta(meta);
+        folder.setProperty(COLOR, calendarFolder.getColor());
+        folder.setProperty(SCHEDULE_TRANSP, null != calendarFolder.getScheduleTransparency() ? calendarFolder.getScheduleTransparency().getValue() : null);
+        folder.setProperty(USED_FOR_SYNC, calendarFolder.isUsedForSync());
         return folder;
     }
 
     /**
-     * Converts a groupware calendar folder into a folder-storage compatible folder.
+     * Converts a groupware calendar folder into a folder storage compatible folder.
      *
      * @param treeId The identifier of the folder tree to take over
      * @param accountId The fully-qualified account identifier to take over
@@ -115,8 +115,8 @@ public class CalendarFolderConverter {
      * @param calendarFolder The groupware calendar folder to convert
      * @return The folder-storage compatible folder
      */
-    public static Folder getStorageFolder(String treeId, String accountId, ContentType contentType, GroupwareCalendarFolder calendarFolder) {
-        Folder folder = newStorageFolder(treeId, accountId, contentType);
+    public static ParameterizedFolder getStorageFolder(String treeId, String accountId, ContentType contentType, GroupwareCalendarFolder calendarFolder) {
+        ParameterizedFolder folder = newStorageFolder(treeId, accountId, contentType);
         folder.setAccountID(accountId);
         folder.setID(calendarFolder.getId());
         folder.setName(calendarFolder.getName());
@@ -129,14 +129,9 @@ public class CalendarFolderConverter {
         folder.setType(getStorageType(calendarFolder.getType()));
         folder.setDefault(calendarFolder.isDefaultFolder());
         //        folder.setSupportedCapabilities(capabilities);
-        Map<String, Object> meta = new HashMap<String, Object>();
-        String color = calendarFolder.getColor();
-        if (null != color) {
-            meta.put("color", color);
-            meta.put("color_label", Integer.valueOf(Event2Appointment.getColorLabel(color)));
-        }
-        meta.putAll(calendarFolder.getUserProperties()); // XXX For demo purpose
-        folder.setMeta(meta);
+        folder.setProperty(COLOR, calendarFolder.getColor());
+        folder.setProperty(SCHEDULE_TRANSP, null != calendarFolder.getScheduleTransparency() ? calendarFolder.getScheduleTransparency().getValue() : null);
+        folder.setProperty(USED_FOR_SYNC, calendarFolder.isUsedForSync());
         return folder;
     }
 
@@ -199,39 +194,27 @@ public class CalendarFolderConverter {
     }
 
     /**
-     * Gets a groupware calendar folder representing the supplied userized folder.
+     * Gets a groupware calendar folder representing the supplied folder storage folder.
      *
-     * @param folder The userized folder as used by the folder service
-     * @param properties The additional user-specific properties for the folder
+     * @param folder The storage folder as used by the folder service
      * @return The groupware calendar folder
      */
-    public static GroupwareCalendarFolder getCalendarFolder(Folder folder, Map<String, String> properties) {
-        DefaultGroupwareCalendarFolder calendarFolder = new DefaultGroupwareCalendarFolder();
-        calendarFolder.setCreatedBy(folder.getCreatedBy());
-        calendarFolder.setCreationDate(folder.getCreationDate());
-        calendarFolder.setDefaultFolder(folder.isDefault());
-        calendarFolder.setFolderType(getCalendarType(folder.getType()));
-        calendarFolder.setId(folder.getID());
-        calendarFolder.setLastModified(folder.getLastModified());
-        calendarFolder.setModifiedBy(folder.getModifiedBy());
-        calendarFolder.setName(folder.getName());
-        calendarFolder.setParentId(getCalendarParent(folder.getParentID()));
-        calendarFolder.setPermissions(getCalendarPermissions(folder.getPermissions()));
-        Map<String, Object> meta = folder.getMeta();
-        if (null != meta) {
-            Object colorValue = meta.get("color");
-            if (null != colorValue && String.class.isInstance(colorValue)) {
-                calendarFolder.setColor((String) colorValue);
-            }
-            Object colorLabelValue = meta.get("color_label");
-            if (null != colorLabelValue && Integer.class.isInstance(colorLabelValue)) {
-                calendarFolder.setColor(Appointment2Event.getColor(((Integer) colorLabelValue).intValue()));
-            }
+    public static GroupwareCalendarFolder getCalendarFolder(Folder folder) {
+        return newCalendarFolder(folder);
+    }
+
+    /**
+     * Gets a groupware calendar folder representing the supplied folder storage folder.
+     *
+     * @param folder The storage folder as used by the folder service
+     * @param folderProperties The additional user-specific properties for the folder
+     * @return The groupware calendar folder
+     */
+    public static GroupwareCalendarFolder getCalendarFolder(Folder folder, Map<FolderField, FolderProperty> folderProperties) {
+        DefaultGroupwareCalendarFolder calendarFolder = newCalendarFolder(folder);
+        if (null != folderProperties) {
+            applyFolderProperties(calendarFolder, folderProperties);
         }
-        if (null == properties) {
-            properties = Collections.emptyMap();
-        }
-        calendarFolder.setUserProperties(properties); // TODO Add additional meta data?
         return calendarFolder;
     }
 
@@ -296,24 +279,28 @@ public class CalendarFolderConverter {
      * @param treeId The identifier of the folder tree to take over
      * @param accountId The fully-qualified account identifier to take over
      * @param contentType The context type to take over
-     * @return A new folder instance
+     * @return A new calendar storage folder instance
      */
-    private static Folder newStorageFolder(String treeId, String accountId, ContentType contentType) {
-        Folder folder = new AbstractFolder() {
+    private static CalendarStorageFolder newStorageFolder(String treeId, String accountId, ContentType contentType) {
+        return new CalendarStorageFolder(treeId, accountId, contentType);
+    }
 
-            private static final long serialVersionUID = 4412370864216762652L;
-
-            @Override
-            public boolean isGlobalID() {
-                return false;
-            }
-        };
-        folder.setTreeID(treeId);
-        folder.setAccountID(accountId);
-        folder.setSubscribed(true);
-        folder.setContentType(contentType);
-        folder.setDefaultType(contentType.getModule());
-        return folder;
+    private static DefaultGroupwareCalendarFolder newCalendarFolder(Folder folder) {
+        DefaultGroupwareCalendarFolder calendarFolder = new DefaultGroupwareCalendarFolder();
+        calendarFolder.setCreatedBy(folder.getCreatedBy());
+        calendarFolder.setCreationDate(folder.getCreationDate());
+        calendarFolder.setDefaultFolder(folder.isDefault());
+        calendarFolder.setFolderType(getCalendarType(folder.getType()));
+        calendarFolder.setId(folder.getID());
+        calendarFolder.setLastModified(folder.getLastModified());
+        calendarFolder.setModifiedBy(folder.getModifiedBy());
+        calendarFolder.setName(folder.getName());
+        calendarFolder.setParentId(getCalendarParent(folder.getParentID()));
+        calendarFolder.setPermissions(getCalendarPermissions(folder.getPermissions()));
+        if (ParameterizedFolder.class.isInstance(folder)) {
+            applyFolderProperties(calendarFolder, ((ParameterizedFolder) folder).getProperties());
+        }
+        return calendarFolder;
     }
 
     private static String getCalendarParent(String storageParentId) {
@@ -321,6 +308,29 @@ public class CalendarFolderConverter {
         //            return null;
         //        }
         return storageParentId;
+    }
+
+    private static void applyFolderProperties(DefaultGroupwareCalendarFolder calendarFolder, Map<FolderField, FolderProperty> folderProperties) {
+        if (null != folderProperties && 0 < folderProperties.size()) {
+            for (Entry<FolderField, FolderProperty> entry : folderProperties.entrySet()) {
+                applyFolderProperty(calendarFolder, entry.getKey(), entry.getValue());
+            }
+        }
+    }
+
+    private static void applyFolderProperty(DefaultGroupwareCalendarFolder calendarFolder, FolderField field, FolderProperty property) {
+        try {
+            if (COLOR.equals(field)) {
+                calendarFolder.setColor((String) property.getValue());
+            } else if (USED_FOR_SYNC.equals(field)) {
+                calendarFolder.setUsedForSync((Boolean) property.getValue());
+            } else if (SCHEDULE_TRANSP.equals(field)) {
+                calendarFolder.setScheduleTransparency(Enums.parse(TimeTransparency.class, (String) property.getValue(), null));
+            }
+        } catch (RuntimeException e) {
+            LoggerFactory.getLogger(CalendarFolderConverter.class).error(
+                "Error applying folder property {} for field {}: {}", property, field, e.getMessage(), e);
+        }
     }
 
     /**

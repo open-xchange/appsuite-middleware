@@ -62,6 +62,8 @@ import static com.openexchange.chronos.provider.composition.impl.idmangling.IDMa
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.i;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -77,10 +79,12 @@ import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.SelfProtectionFactory;
 import com.openexchange.chronos.common.SelfProtectionFactory.SelfProtection;
+import com.openexchange.chronos.common.FreeBusyUtils;
 import com.openexchange.chronos.provider.CalendarAccess;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.CalendarFolder;
 import com.openexchange.chronos.provider.CalendarProviderRegistry;
+import com.openexchange.chronos.provider.FreeBusyProvider;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
 import com.openexchange.chronos.provider.composition.impl.idmangling.IDManglingCalendarResult;
 import com.openexchange.chronos.provider.composition.impl.idmangling.IDManglingUpdatesResult;
@@ -92,6 +96,7 @@ import com.openexchange.chronos.provider.groupware.GroupwareCalendarFolder;
 import com.openexchange.chronos.provider.groupware.GroupwareFolderType;
 import com.openexchange.chronos.service.CalendarResult;
 import com.openexchange.chronos.service.EventID;
+import com.openexchange.chronos.service.FreeBusyResult;
 import com.openexchange.chronos.service.SearchFilter;
 import com.openexchange.chronos.service.SearchOptions;
 import com.openexchange.chronos.service.SortOrder;
@@ -305,7 +310,9 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
     public CalendarResult createEvent(String folderId, Event event) throws OXException {
         int accountId = getAccountId(folderId);
         try {
+
             GroupwareCalendarAccess calendarAccess = getGroupwareAccess(accountId);
+
             CalendarResult result = calendarAccess.createEvent(getRelativeFolderId(folderId), withRelativeID(event));
             return new IDManglingCalendarResult(result, accountId);
         } catch (OXException e) {
@@ -388,7 +395,7 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
     public String updateFolder(String folderId, CalendarFolder folder, long clientTimestamp) throws OXException {
         int accountId = getAccountId(folderId);
         try {
-            GroupwareCalendarAccess calendarAccess = getGroupwareAccess(accountId);
+            CalendarAccess calendarAccess = getAccess(accountId);
             folderId = calendarAccess.updateFolder(getRelativeFolderId(folderId), withRelativeID(folder), clientTimestamp);
             return getUniqueFolderId(accountId, folderId);
         } catch (OXException e) {
@@ -429,10 +436,34 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
         try {
             EventID relativeEventID = getRelativeId(eventID);
             return getGroupwareAccess(accountId).getAttachment(relativeEventID, managedId);
-            //TODO: getUniqueId?
         } catch (OXException e) {
             throw withUniqueIDs(e, accountId);
         }
+    }
+
+    @Override
+    public Map<Attendee, FreeBusyResult> queryFreeBusy(List<Attendee> attendees, Date from, Date until) throws OXException {
+        List<FreeBusyProvider> freeBusyProviders = getFreeBusyProviders();
+        if (freeBusyProviders.isEmpty()) {
+            return Collections.emptyMap();
+        }
+        Map<Attendee, List<FreeBusyResult>> results = new HashMap<Attendee, List<FreeBusyResult>>();
+        for (FreeBusyProvider freeBusyProvider : getFreeBusyProviders()) {
+            Map<Attendee, Map<Integer, FreeBusyResult>> resultsForProvider = freeBusyProvider.query(session, attendees, from, until, this);
+            if (null != resultsForProvider && 0 < resultsForProvider.size()) {
+                for (Entry<Attendee, Map<Integer, FreeBusyResult>> resultsForAttendee : resultsForProvider.entrySet()) {
+                    for (Entry<Integer, FreeBusyResult> resultsForAccount : resultsForAttendee.getValue().entrySet()) {
+                        FreeBusyResult result = withUniqueID(resultsForAccount.getValue(), i(resultsForAccount.getKey()));
+                        com.openexchange.tools.arrays.Collections.put(results, resultsForAttendee.getKey(), result);
+                    }
+                }
+            }
+        }
+        Map<Attendee, FreeBusyResult> mergedResults = new HashMap<Attendee, FreeBusyResult>(results.size());
+        for (Entry<Attendee, List<FreeBusyResult>> entry : results.entrySet()) {
+            mergedResults.put(entry.getKey(), FreeBusyUtils.merge(entry.getValue()));
+        }
+        return mergedResults;
     }
 
     /////////////////////////////////////////// HELPERS //////////////////////////////////////////////////

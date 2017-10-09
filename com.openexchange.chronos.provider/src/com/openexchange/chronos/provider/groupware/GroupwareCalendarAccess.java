@@ -58,6 +58,7 @@ import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.provider.CalendarAccess;
 import com.openexchange.chronos.provider.CalendarFolder;
+import com.openexchange.chronos.provider.extensions.PermissionAware;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarResult;
 import com.openexchange.chronos.service.EventID;
@@ -71,7 +72,7 @@ import com.openexchange.exception.OXException;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.0
  */
-public interface GroupwareCalendarAccess extends CalendarAccess {
+public interface GroupwareCalendarAccess extends CalendarAccess, PermissionAware {
 
     /**
      * Creates a new folder.
@@ -233,7 +234,7 @@ public interface GroupwareCalendarAccess extends CalendarAccess {
     /**
      * Retrieves the {@link IFileHolder} with the specified managed identifier from the {@link Event}
      * with the specified {@link EventID}
-     * 
+     *
      * @param eventID The {@link Event} identifier
      * @param managedId The managed identifier of the {@link Attachment}
      * @return The {@link IFileHolder}

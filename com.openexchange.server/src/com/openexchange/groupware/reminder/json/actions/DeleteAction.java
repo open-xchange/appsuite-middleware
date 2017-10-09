@@ -105,8 +105,8 @@ public final class DeleteAction extends AbstractReminderAction {
             if (longId > Integer.MAX_VALUE) {
                 try {
                     // reminder is an event reminder
-                    int eventIdInt = (int) (longId >> 32);
-                    int alarmId = (int) longId;
+                    int alarmId = (int) (longId >> 32);
+                    int eventIdInt = (int) longId;
                     CalendarService calendarService = ServerServiceRegistry.getInstance().getService(CalendarService.class);
                     CalendarSession calendarSession = calendarService.init(req.getSession());
                     CalendarServiceUtilities calendarServiceUtilities = ServerServiceRegistry.getInstance().getService(CalendarServiceUtilities.class);

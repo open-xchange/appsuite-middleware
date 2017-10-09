@@ -396,7 +396,7 @@ public class AuditEventHandlerTest {
     }
 
     @Test
-    public void testHandleAppointmentCommonEvent_EverythingFine_ContainsNotInformation() throws Exception {
+    public void testHandleAppointmentCommonEvent_EverythingFine() throws Exception {
         this.auditEventHandler = new AuditEventHandler(userService) {
 
             @Override
@@ -425,7 +425,7 @@ public class AuditEventHandlerTest {
         this.auditEventHandler.handleAppointmentCommonEvent(commonEvent, context, stringBuilder);
 
         Assert.assertTrue(stringBuilder.toString().contains("CONTEXT ID: " + this.contextId));
-        Assert.assertFalse(stringBuilder.toString().contains("END DATE: " + this.date));
+        Assert.assertTrue(stringBuilder.toString().contains("END DATE: " + this.date));
     }
 
     @Test(expected = IllegalArgumentException.class)

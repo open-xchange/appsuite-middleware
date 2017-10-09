@@ -55,7 +55,6 @@ import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.capabilities.CapabilitySet;
 import com.openexchange.chronos.alarm.json.AlarmActionFactory;
 import com.openexchange.chronos.availability.json.AvailabilityActionFactory;
-import com.openexchange.chronos.freebusy.json.ChronosFreeBusyActionFactory;
 import com.openexchange.chronos.json.action.ChronosActionFactory;
 import com.openexchange.chronos.json.converter.AlarmTriggerConverter;
 import com.openexchange.chronos.json.converter.CalendarResultConverter;
@@ -97,7 +96,6 @@ public class ChronosJsonActivator extends AJAXModuleActivator {
              * register json module
              */
             registerModule(new ChronosActionFactory(this), "chronos");
-            registerModule(new ChronosFreeBusyActionFactory(this), "chronos/freebusy");
             registerModule(new AlarmActionFactory(this), "chronos/alarm");
             registerModule(new AvailabilityActionFactory(this), "chronos/availability");
             /*

@@ -50,7 +50,6 @@
 package com.openexchange.chronos.provider.groupware;
 
 import java.util.Date;
-import java.util.Map;
 import com.openexchange.chronos.provider.DefaultCalendarFolder;
 
 /**
@@ -67,7 +66,6 @@ public class DefaultGroupwareCalendarFolder extends DefaultCalendarFolder implem
     private int createdBy;
     private Date creationDate;
     private GroupwareFolderType folderType;
-    private Map<String, String> userProperties;
 
     /**
      * Initializes a new {@link DefaultGroupwareCalendarFolder}.
@@ -128,15 +126,6 @@ public class DefaultGroupwareCalendarFolder extends DefaultCalendarFolder implem
 
     public void setFolderType(GroupwareFolderType folderType) {
         this.folderType = folderType;
-    }
-
-    @Override
-    public Map<String, String> getUserProperties() {
-        return userProperties;
-    }
-    
-    public void setUserProperties(Map<String, String> userProperties) {
-        this.userProperties = userProperties;
     }
 
 }

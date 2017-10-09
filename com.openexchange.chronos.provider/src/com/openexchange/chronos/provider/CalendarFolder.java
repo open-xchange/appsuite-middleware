@@ -92,7 +92,7 @@ public interface CalendarFolder {
     /**
      * Gets the calendar color.
      *
-     * @return The calendar color, or <code>null</code> if not defined
+     * @return The calendar color as a <code>CSS3</code> color value, or <code>null</code> if not defined
      */
     String getColor();
 
@@ -109,6 +109,13 @@ public interface CalendarFolder {
      * @return {@link Transp#TRANSPARENT} if contained events do not contribute to the user's busy time, {@link Transp#OPAQUE}, otherwise
      * @see <a href="https://tools.ietf.org/html/rfc6638#section-9.1">RFC 6638, section 9.1</a>
      */
-    Transp getTransparency();
+    Transp getScheduleTransparency();
+
+    /**
+     * Gets a value indicating whether the folder should be considered for synchronization with external clients or not.
+     *
+     * @return <code>true</code> if the folder should be considered for synchronization with external clients, <code>false</code>, otherwise
+     */
+    boolean isUsedForSync();
 
 }

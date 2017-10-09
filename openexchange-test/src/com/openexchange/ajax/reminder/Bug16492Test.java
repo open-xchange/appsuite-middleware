@@ -50,7 +50,6 @@
 package com.openexchange.ajax.reminder;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import java.io.IOException;
 import java.util.Calendar;
@@ -63,7 +62,6 @@ import org.xml.sax.SAXException;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.GetRequest;
-import com.openexchange.ajax.appointment.action.GetResponse;
 import com.openexchange.ajax.appointment.action.InsertRequest;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
@@ -95,6 +93,7 @@ public class Bug16492Test extends AbstractAJAXSession {
         super();
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -132,15 +131,7 @@ public class Bug16492Test extends AbstractAJAXSession {
         assertNotNull("No reminder was found.", reminder);
     }
 
-    @Test
-    public void testAlarmForReminderInThePast() throws Exception {
-        GetRequest getApp = new GetRequest(pastAppointment);
-        GetResponse getAppResp = client.execute(getApp);
-        Appointment app = getAppResp.getAppointment(timezone);
-
-        assertFalse("Series in the past contains alarm.", app.containsAlarm());
-    }
-
+    @Override
     @After
     public void tearDown() throws Exception {
         try {

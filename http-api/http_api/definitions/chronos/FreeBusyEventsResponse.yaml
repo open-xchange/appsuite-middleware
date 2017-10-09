@@ -1,8 +1,0 @@
-type: object
-properties:
-  $ref: ../common/CommonResponseData.yaml
-  data:
-    type: array
-    description: An array of event data of each attendee.
-    items:
-      $ref: "#/definitions/ChronosFreeBusyEventsData"

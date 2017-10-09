@@ -64,6 +64,7 @@ import com.openexchange.chronos.provider.CalendarAccess;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.CalendarProvider;
 import com.openexchange.chronos.provider.CalendarProviderRegistry;
+import com.openexchange.chronos.provider.FreeBusyProvider;
 import com.openexchange.chronos.provider.account.CalendarAccountService;
 import com.openexchange.chronos.provider.groupware.GroupwareCalendarAccess;
 import com.openexchange.chronos.service.CalendarParameters;
@@ -317,6 +318,15 @@ public abstract class AbstractCompositingIDBasedCalendarAccess implements Transa
             LOG.debug("Error getting display name for calendar provider \"{}\": {}", account.getProviderId(), e.getMessage());
         }
         return account.getProviderId();
+    }
+
+    /**
+     * Gets all registered free/busy providers.
+     *
+     * @return A list of all registered free/busy providers
+     */
+    protected List<FreeBusyProvider> getFreeBusyProviders() {
+        return providerRegistry.getFreeBusyProviders();
     }
 
     @Override

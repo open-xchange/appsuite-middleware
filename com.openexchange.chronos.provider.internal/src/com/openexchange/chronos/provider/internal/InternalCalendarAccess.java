@@ -55,12 +55,17 @@ import static com.openexchange.chronos.provider.internal.Constants.TREE_ID;
 import static com.openexchange.folderstorage.CalendarFolderConverter.getCalendarFolder;
 import static com.openexchange.folderstorage.CalendarFolderConverter.getStorageFolder;
 import static com.openexchange.folderstorage.CalendarFolderConverter.getStorageType;
+import static com.openexchange.folderstorage.CalendarFolderField.COLOR;
+import static com.openexchange.folderstorage.CalendarFolderField.SCHEDULE_TRANSP;
+import static com.openexchange.folderstorage.CalendarFolderField.USED_FOR_SYNC;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.chronos.Alarm;
@@ -69,6 +74,7 @@ import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.FreeBusyTime;
 import com.openexchange.chronos.RecurrenceId;
+import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.CalendarFolder;
 import com.openexchange.chronos.provider.FreeBusyAwareCalendarAccess;
 import com.openexchange.chronos.provider.extensions.PersonalAlarmAware;
@@ -90,9 +96,12 @@ import com.openexchange.chronos.service.UpdatesResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
+import com.openexchange.folderstorage.FolderField;
+import com.openexchange.folderstorage.FolderProperty;
 import com.openexchange.folderstorage.FolderResponse;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.FolderServiceDecorator;
+import com.openexchange.folderstorage.ParameterizedFolder;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.java.util.TimeZones;
@@ -132,8 +141,8 @@ public class InternalCalendarAccess implements GroupwareCalendarAccess, FreeBusy
 
     @Override
     public GroupwareCalendarFolder getDefaultFolder() throws OXException {
-        Folder folder = getFolderService().getDefaultFolder(ServerSessionAdapter.valueOf(session.getSession()).getUser(), TREE_ID, CONTENT_TYPE, PrivateType.getInstance(), session.getSession(), initDecorator());
-        return getCalendarFolder(folder, getFolderProperties(session.getContextId(), folder, session.getUserId(), false));
+        UserizedFolder folder = getFolderService().getDefaultFolder(ServerSessionAdapter.valueOf(session.getSession()).getUser(), TREE_ID, CONTENT_TYPE, PrivateType.getInstance(), session.getSession(), initDecorator());
+        return getCalendarFolder(folder, getFolderProperties(session.getContextId(), folder, session.getUserId(), false, optConnection()));
     }
 
     @Override
@@ -152,8 +161,8 @@ public class InternalCalendarAccess implements GroupwareCalendarAccess, FreeBusy
 
     @Override
     public CalendarFolder getFolder(String folderId) throws OXException {
-        Folder folder = getFolderService().getFolder(TREE_ID, folderId, session.getSession(), initDecorator());
-        return getCalendarFolder(folder, getFolderProperties(session.getContextId(), folder, session.getUserId(), true));
+        UserizedFolder folder = getFolderService().getFolder(TREE_ID, folderId, session.getSession(), initDecorator());
+        return getCalendarFolder(folder, getFolderProperties(session.getContextId(), folder, session.getUserId(), true, optConnection()));
     }
 
     @Override
@@ -163,17 +172,20 @@ public class InternalCalendarAccess implements GroupwareCalendarAccess, FreeBusy
 
     @Override
     public String updateFolder(String folderId, CalendarFolder folder, long clientTimestamp) throws OXException {
-        Folder storageFolder = getStorageFolder(TREE_ID, QUALIFIED_ACCOUNT_ID, CONTENT_TYPE, folder);
+        ParameterizedFolder storageFolder = getStorageFolder(TREE_ID, QUALIFIED_ACCOUNT_ID, CONTENT_TYPE, folder);
         getFolderService().updateFolder(storageFolder, new Date(clientTimestamp), session.getSession(), initDecorator());
+        updateStoredFolderProperties(session.getContextId(), folderId, session.getUserId(), storageFolder.getProperties(), optConnection());
         return storageFolder.getID();
     }
 
     @Override
     public String createFolder(String parentFolderId, CalendarFolder folder) throws OXException {
-        Folder folderToCreate = getStorageFolder(TREE_ID, QUALIFIED_ACCOUNT_ID, CONTENT_TYPE, folder);
+        ParameterizedFolder folderToCreate = getStorageFolder(TREE_ID, QUALIFIED_ACCOUNT_ID, CONTENT_TYPE, folder);
         folderToCreate.setParentID(parentFolderId);
         FolderResponse<String> response = getFolderService().createFolder(folderToCreate, session.getSession(), initDecorator());
-        return response.getResponse();
+        String folderId = response.getResponse();
+        updateStoredFolderProperties(session.getContextId(), folderId, session.getUserId(), folderToCreate.getProperties(), optConnection());
+        return folderId;
     }
 
     @Override
@@ -294,8 +306,7 @@ public class InternalCalendarAccess implements GroupwareCalendarAccess, FreeBusy
      */
     private FolderServiceDecorator initDecorator() throws OXException {
         FolderServiceDecorator decorator = new FolderServiceDecorator();
-        Connection connection = session.get(Connection.class.getName(), Connection.class);
-        //        Object connection = session.getSession().getParameter(Connection.class.getName());
+        Connection connection = optConnection();
         if (null != connection) {
             decorator.put(Connection.class.getName(), connection);
         }
@@ -306,20 +317,25 @@ public class InternalCalendarAccess implements GroupwareCalendarAccess, FreeBusy
         return decorator;
     }
 
+    private Connection optConnection() {
+        return session.get(Connection.class.getName(), Connection.class);
+    }
+
     /**
      * Gets a list of groupware calendar folders representing the userized folders in the supplied folder response.
      *
      * @param folderResponse The response from the folder service
      * @return The groupware calendar folders
      */
-    public static List<GroupwareCalendarFolder> getCalendarFolders(FolderResponse<UserizedFolder[]> folderResponse) {
+    private List<GroupwareCalendarFolder> getCalendarFolders(FolderResponse<UserizedFolder[]> folderResponse) {
         UserizedFolder[] folders = folderResponse.getResponse();
         if (null == folders || 0 == folders.length) {
             return Collections.emptyList();
         }
         List<GroupwareCalendarFolder> calendarFolders = new ArrayList<GroupwareCalendarFolder>(folders.length);
         for (UserizedFolder userizedFolder : folders) {
-            calendarFolders.add(getCalendarFolder(userizedFolder, getFolderProperties(userizedFolder.getContext().getContextId(), userizedFolder, userizedFolder.getUser().getId(), true)));
+            calendarFolders.add(getCalendarFolder(userizedFolder,
+                getFolderProperties(userizedFolder.getContext().getContextId(), userizedFolder, userizedFolder.getUser().getId(), true, optConnection())));
         }
         return calendarFolders;
     }
@@ -366,14 +382,78 @@ public class InternalCalendarAccess implements GroupwareCalendarAccess, FreeBusy
      * @param contextId The identifier of the context
      * @param userId The identifier of the user the folder belongs to
      * @param loadOwner If set to <code>true</code> the folder owners properties will be loaded
+     * @param optConnection The optional database connection to use, or <code>null</code> if not available
+     * @return The folder properties, or <code>null</code> if there are none
+     */
+    private static Map<FolderField, FolderProperty> getFolderProperties(int contextId, Folder folder, int userId, boolean loadOwner, Connection optConnection) {
+        Map<String, String> properties = getStoredFolderProperties(contextId, folder, userId, loadOwner, optConnection);
+        if (null == properties || properties.isEmpty()) {
+            return null;
+        }
+        Map<FolderField, FolderProperty> folderProperties = new HashMap<FolderField, FolderProperty>(properties.size());
+        for (Entry<String, String> entry : properties.entrySet()) {
+            String name = entry.getKey();
+            if (COLOR.getName().equals(name)) {
+                folderProperties.put(COLOR, new FolderProperty(name, entry.getValue()));
+            } else if (USED_FOR_SYNC.getName().equals(name)) {
+                folderProperties.put(USED_FOR_SYNC, new FolderProperty(name, Boolean.valueOf(entry.getValue())));
+            } else if (SCHEDULE_TRANSP.getName().equals(name)) {
+                folderProperties.put(SCHEDULE_TRANSP, new FolderProperty(name, entry.getValue()));
+            }
+        }
+        return folderProperties;
+    }
+
+    private static void updateStoredFolderProperties(int contextId, String folderId, int userId, Map<FolderField, FolderProperty> properties, Connection optConnection) throws OXException {
+
+        // TODO batch operations, compare with existing props
+
+        if (null == properties || properties.isEmpty()) {
+            return;
+        }
+        FolderUserPropertyStorage propertyStorage = Services.getService(FolderUserPropertyStorage.class);
+        if (null == propertyStorage) {
+            throw ServiceExceptionCode.absentService(FolderUserPropertyStorage.class);
+        }
+        int folder;
+        try {
+            folder = Integer.parseInt(folderId);
+        } catch (NumberFormatException e) {
+            throw CalendarExceptionCodes.UNSUPPORTED_FOLDER.create(e, folderId, "");
+        }
+        for (Entry<FolderField, FolderProperty> entry : properties.entrySet()) {
+            String key = entry.getKey().getName();
+            if (key.startsWith("cal.")) {
+                if (null == entry.getValue() || null == entry.getValue().getValue()) {
+                    propertyStorage.deleteFolderProperty(contextId, folder, userId, key);
+                } else {
+                    String value = String.valueOf(entry.getValue().getValue());
+                    propertyStorage.updateFolderProperties(contextId, folder, userId, Collections.singletonMap(key, value));
+                }
+            }
+        }
+    }
+
+    /**
+     * Get user specific properties for the folder
+     *
+     * @param folder The {@link Folder}
+     * @param contextId The identifier of the context
+     * @param userId The identifier of the user the folder belongs to
+     * @param loadOwner If set to <code>true</code> the folder owners properties will be loaded
+     * @param optConnection The optional database connection to use, or <code>null</code> if not available
      * @return {@link Collections#emptyMap()} or a {@link Map} with user-specific properties
      */
-    private static Map<String, String> getFolderProperties(int contextId, Folder folder, int userId, boolean loadOwner) {
+    private static Map<String, String> getStoredFolderProperties(int contextId, Folder folder, int userId, boolean loadOwner, Connection optConnection) {
         Map<String, String> properties;
         FolderUserPropertyStorage fps = Services.optService(FolderUserPropertyStorage.class);
         if (null != fps) {
             try {
-                properties = fps.getFolderProperties(contextId, Integer.valueOf(folder.getID()).intValue(), userId);
+                if (null != optConnection) {
+                    properties = fps.getFolderProperties(contextId, Integer.valueOf(folder.getID()).intValue(), userId, optConnection);
+                } else {
+                    properties = fps.getFolderProperties(contextId, Integer.valueOf(folder.getID()).intValue(), userId);
+                }
                 // Check if we can fall-back to owner properties
                 if (loadOwner && folder.getCreatedBy() != userId) {
                     // Try to load owner properties

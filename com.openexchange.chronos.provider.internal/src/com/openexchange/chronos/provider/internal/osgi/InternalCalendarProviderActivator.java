@@ -51,7 +51,9 @@ package com.openexchange.chronos.provider.internal.osgi;
 
 import static org.slf4j.LoggerFactory.getLogger;
 import com.openexchange.chronos.provider.CalendarProvider;
+import com.openexchange.chronos.provider.FreeBusyProvider;
 import com.openexchange.chronos.provider.internal.InternalCalendarProvider;
+import com.openexchange.chronos.provider.internal.InternalFreeBusyProvider;
 import com.openexchange.chronos.provider.internal.Services;
 import com.openexchange.chronos.provider.internal.share.CalendarFolderHandlerModuleExtension;
 import com.openexchange.chronos.provider.internal.share.CalendarModuleAdjuster;
@@ -92,6 +94,7 @@ public class InternalCalendarProviderActivator extends HousekeepingActivator {
             getLogger(InternalCalendarProviderActivator.class).info("starting bundle {}", context.getBundle());
             Services.setServiceLookup(this);
             registerService(CalendarProvider.class, new InternalCalendarProvider());
+            registerService(FreeBusyProvider.class, new InternalFreeBusyProvider());
             registerService(ModuleAdjuster.class, new CalendarModuleAdjuster());
             registerService(FolderHandlerModuleExtension.class, new CalendarFolderHandlerModuleExtension(this));
         } catch (Exception e) {

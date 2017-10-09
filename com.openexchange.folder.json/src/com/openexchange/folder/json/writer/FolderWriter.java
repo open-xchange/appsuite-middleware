@@ -776,6 +776,7 @@ public final class FolderWriter {
         final TIntList list = new TIntArrayList();
         list.add(ALL_FIELDS);
         list.add(additionalFolderFieldList.getKnownFields());
+        list.addAll(FolderFieldRegistry.getInstance().getFields().keys());
         return list.toArray();
     }
 
