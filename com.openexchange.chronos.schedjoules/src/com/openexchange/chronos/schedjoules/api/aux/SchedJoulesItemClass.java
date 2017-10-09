@@ -47,20 +47,22 @@
  *
  */
 
-package com.openexchange.chronos.schedjoules.api;
+package com.openexchange.chronos.schedjoules.api.aux;
 
 /**
- * {@link SchedJoulesPagesParameter}
- *
+ * {@link SchedJoulesItemClass} - Defines the class of the item returned by the SchedJoules REST API.
+ * 
+ * 
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @see <a href="https://github.com/schedjoules/calendar-store-api#pages">https://github.com/schedjoules/calendar-store-api#pages</a>
  */
-public enum SchedJoulesPagesParameter {
+enum SchedJoulesItemClass {
     /**
-     * The page identifier
+     * A child page of the parent page. A node.
      */
-    page_id,
+    page,
     /**
-     * The locale parameter. Defaults to 'en'
+     * The actual (meta-)data in the calendar file. A leaf node.
      */
-    locale
+    calendar;
 }

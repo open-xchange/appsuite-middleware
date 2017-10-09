@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.chronos.schedjoules.api;
+package com.openexchange.chronos.schedjoules.api.aux;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -66,14 +66,14 @@ import com.openexchange.java.Strings;
 /**
  * {@link SchedJoulesResponseParser} - Defines the types of the available stream parsers and their implementations
  */
-enum SchedJoulesResponseParser {
+public enum SchedJoulesResponseParser {
     /**
      * The JSON parser
      */
     JSON("application/json") {
 
         @Override
-        Object parseResponse(SchedJoulesResponse response) throws OXException {
+        public Object parseResponse(SchedJoulesResponse response) throws OXException {
             try (InputStream inputStream = Streams.bufferedInputStreamFor(response.getStream())) {
                 String string = Streams.stream2string(inputStream, CHARSET);
                 char c = string.charAt(0);
@@ -98,7 +98,7 @@ enum SchedJoulesResponseParser {
     CALENDAR("text/calendar") {
 
         @Override
-        Object parseResponse(SchedJoulesResponse response) throws OXException {
+        public Object parseResponse(SchedJoulesResponse response) throws OXException {
             ICalService iCalService = Services.getService(ICalService.class);
             ICalParameters parameters = iCalService.initParameters();
             parameters.set(ICalParameters.IGNORE_UNSET_PROPERTIES, Boolean.TRUE);
@@ -140,7 +140,7 @@ enum SchedJoulesResponseParser {
      * @return The parsed {@link R} object
      * @throws OXException if a parsing error occurs
      */
-    static Object parse(SchedJoulesResponse response) throws OXException {
+    public static Object parse(SchedJoulesResponse response) throws OXException {
         String contentType = response.getContentType();
         if (Strings.isEmpty(contentType)) {
             throw new IllegalArgumentException("The content type can be neither 'null' nor empty");
@@ -160,5 +160,5 @@ enum SchedJoulesResponseParser {
      * @return The parsed {@link R} object
      * @throws OXException if a parsing error occurs
      */
-    abstract Object parseResponse(SchedJoulesResponse response) throws OXException;
+    public abstract Object parseResponse(SchedJoulesResponse response) throws OXException;
 }

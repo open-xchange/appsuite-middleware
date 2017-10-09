@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.chronos.schedjoules.api;
+package com.openexchange.chronos.schedjoules.api.aux;
 
 /**
  * {@link SchedJoulesCommonParameter}
