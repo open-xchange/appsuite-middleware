@@ -15,7 +15,7 @@ BuildRequires: java7-devel
 BuildRequires: java-devel >= 1.7.0
 %endif
 Version:       @OXVERSION@
-%define        ox_release 35
+%define        ox_release 36
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -53,6 +53,8 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 /opt/open-xchange/osgi/bundle.d/*
 
 %changelog
+* Mon Oct 09 2017 Marcus Klein <marcus.klein@open-xchange.com>
+Build for Patch 2017-10-16 (4392)
 * Mon Aug 14 2017 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2017-08-21 (4316)
 * Fri May 19 2017 Marcus Klein <marcus.klein@open-xchange.com>
