@@ -301,7 +301,7 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
     }
 
     private OIDCTokenResponse getTokenResponse(TokenRequest tokenReq) throws OXException {
-        LOG.trace("OIDCTokenResponse getTokenResponse(TokenRequest tokenReq for client: )", tokenReq.getClientID().getValue());
+        LOG.trace("OIDCTokenResponse getTokenResponse(TokenRequest tokenReq for client: {})", tokenReq.getClientID().getValue());
         HTTPRequest httpRequest = this.backend.getHttpRequest(tokenReq.toHTTPRequest());
         HTTPResponse httpResponse = null;
         try {
