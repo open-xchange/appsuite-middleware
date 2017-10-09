@@ -141,7 +141,11 @@ public enum SchedJoulesExceptionCodes implements DisplayableOXExceptionCode {
      * <li>An unexpected error occurred: %1$s</li>
      */
     UNEXPECTED_ERROR("An unexpected error occurred: %1$s", MESSAGE, CATEGORY_ERROR, 16),
-
+    /**
+     * <li>An error occurred inside the server which prevented it from fulfilling the request.</li>
+     * <li>No content was returned.</li>
+     */
+    NO_CONTENT("No content was returned.", MESSAGE, CATEGORY_ERROR, 17),
     ;
 
     public static final String PREFIX = "SCHEDJOULES";

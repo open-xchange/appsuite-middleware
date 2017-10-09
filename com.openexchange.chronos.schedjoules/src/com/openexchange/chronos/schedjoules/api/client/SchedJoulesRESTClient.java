@@ -298,7 +298,7 @@ public class SchedJoulesRESTClient {
     private SchedJoulesResponse prepareResponse(HttpResponse httpResponse) throws IOException, OXException {
         HttpEntity entity = httpResponse.getEntity();
         if (entity == null) {
-            throw new OXException(1138, "No body was returned");
+            throw SchedJoulesExceptionCodes.NO_CONTENT.create();
         }
         SchedJoulesResponse response = new SchedJoulesResponse(httpResponse.getStatusLine().getStatusCode());
         Header ctHeader = httpResponse.getFirstHeader("content-type");
