@@ -49,6 +49,8 @@
 
 package com.openexchange.server;
 
+import com.openexchange.exception.OXException;
+
 /**
  * {@link ServiceLookup} - A service look-up.
  *
@@ -65,6 +67,23 @@ public interface ServiceLookup {
      * @throws ShutDownRuntimeException If system is currently shutting down
      */
     public <S extends Object> S getService(final Class<? extends S> clazz);
+    
+    /**
+     * Gets the service of specified type. Throws error if service is absent
+     *
+     * @param clazz The service's class
+     * @return The service or <code>null</code> if absent
+     * @throws IllegalStateException If an error occurs while returning the demanded service
+     * @throws ShutDownRuntimeException If system is currently shutting down
+     * @throws OXException In case of missing service
+     */
+    default <S extends Object> S getServiceSafe(final Class<? extends S> clazz) throws OXException {
+        S service = getService(clazz);
+        if(null == service) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(clazz.getName());
+        }
+        return service;
+    }
 
     /**
      * Gets the optional service  of specified type
