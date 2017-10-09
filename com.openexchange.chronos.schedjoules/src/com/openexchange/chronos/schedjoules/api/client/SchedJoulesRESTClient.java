@@ -309,23 +309,23 @@ public class SchedJoulesRESTClient {
         // Assert the 4xx codes
         switch (statusCode) {
             case 401:
-                throw new OXException(1138, "Not Authorized: " + httpResponse.getStatusLine().getReasonPhrase());
+                throw SchedJoulesExceptionCodes.NOT_AUTHORIZED.create(httpResponse.getStatusLine().getReasonPhrase());
             case 404:
-                throw new OXException(1138, "The requested page was not found: " + httpResponse.getStatusLine());
+                throw SchedJoulesExceptionCodes.PAGE_NOT_FOUND.create();
         }
         if (statusCode >= 400 && statusCode <= 499) {
-            throw new OXException(1138, "A client error occurred: " + httpResponse.getStatusLine());
+            throw SchedJoulesExceptionCodes.UNEXPECTED_ERROR.create(httpResponse.getStatusLine());
         }
 
         // Assert the 5xx codes
         switch (statusCode) {
             case 500:
-                throw new OXException(1138, "Internal Server Error: " + httpResponse.getStatusLine().getReasonPhrase());
+                throw SchedJoulesExceptionCodes.REMOTE_INTERNAL_SERVER_ERROR.create(httpResponse.getStatusLine().getReasonPhrase());
             case 503:
-                throw new OXException(1138, "The service is unavailable: " + httpResponse.getStatusLine().getReasonPhrase());
+                throw SchedJoulesExceptionCodes.REMOTE_SERVICE_UNAVAILABLE.create(httpResponse.getStatusLine().getReasonPhrase());
         }
         if (statusCode >= 500 && statusCode <= 599) {
-            throw new OXException(1138, "A server error occurred: " + httpResponse.getStatusLine());
+            throw SchedJoulesExceptionCodes.REMOTE_SERVER_ERROR.create(httpResponse.getStatusLine());
         }
         return statusCode;
     }
