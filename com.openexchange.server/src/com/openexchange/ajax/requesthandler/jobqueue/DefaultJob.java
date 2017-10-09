@@ -95,11 +95,20 @@ public class DefaultJob implements Job {
         private List<AJAXActionCustomizer> customizers;
         private RequestContext requestContext;
         private ServerSession session;
+        private JobKey key;
 
         Builder(boolean trackable, DefaultDispatcher dispatcher) {
             super();
             this.trackable = trackable;
             this.dispatcher = dispatcher;
+        }
+
+        /**
+         * Sets the key
+         */
+        public Builder setKey(JobKey key) {
+            this.key = key;
+            return this;
         }
 
         /**
@@ -164,7 +173,7 @@ public class DefaultJob implements Job {
          * @return The {@code DefaultJob} instance
          */
         public DefaultJob build() {
-            return new DefaultJob(trackable, dispatcher, action, factory, requestData, state, customizers, requestContext, session);
+            return new DefaultJob(trackable, key, dispatcher, action, factory, requestData, state, customizers, requestContext, session);
         }
     }
 
@@ -179,13 +188,15 @@ public class DefaultJob implements Job {
     private final List<AJAXActionCustomizer> customizers;
     private final RequestContext requestContext;
     private final ServerSession session;
+    private final JobKey key;
 
     /**
      * Initializes a new {@link DefaultJob}.
      */
-    DefaultJob(boolean trackable, DefaultDispatcher dispatcher, AJAXActionService action, AJAXActionServiceFactory factory, AJAXRequestData requestData, AJAXState state, List<AJAXActionCustomizer> customizers, RequestContext requestContext, ServerSession session) {
+    DefaultJob(boolean trackable, JobKey key, DefaultDispatcher dispatcher, AJAXActionService action, AJAXActionServiceFactory factory, AJAXRequestData requestData, AJAXState state, List<AJAXActionCustomizer> customizers, RequestContext requestContext, ServerSession session) {
         super();
         this.trackable = trackable;
+        this.key = key;
         this.dispatcher = dispatcher;
         this.action = action;
         this.factory = factory;
@@ -199,6 +210,11 @@ public class DefaultJob implements Job {
     @Override
     public boolean isTrackable() {
         return trackable;
+    }
+
+    @Override
+    public JobKey getOptionalKey() {
+        return key;
     }
 
     @Override

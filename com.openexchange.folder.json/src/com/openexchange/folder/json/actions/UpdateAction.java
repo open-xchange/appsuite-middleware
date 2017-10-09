@@ -53,6 +53,7 @@ import static com.openexchange.folder.json.FolderField.FOLDER_ID;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
@@ -60,6 +61,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.DispatcherNotes;
 import com.openexchange.ajax.requesthandler.EnqueuableAJAXActionService;
+import com.openexchange.ajax.requesthandler.jobqueue.JobKey;
 import com.openexchange.exception.OXException;
 import com.openexchange.folder.json.parser.ParsedFolder;
 import com.openexchange.folder.json.services.ServiceRegistry;
@@ -97,14 +99,34 @@ public final class UpdateAction extends AbstractFolderAction implements Enqueuab
     }
 
     @Override
-    public boolean isEnqueueable(AJAXRequestData request, ServerSession session) throws OXException {
+    public EnqueuableAJAXActionService.Result isEnqueueable(AJAXRequestData request, ServerSession session) throws OXException {
         JSONObject data = (JSONObject) request.requireData();
         JSONObject jFolder = data.optJSONObject("folder");
         if (null == jFolder) {
             jFolder = data;
         }
 
-        return jFolder.hasAndNotNull(FOLDER_ID.getName());
+        String newParent = jFolder.optString(FOLDER_ID.getName(), null);
+        if (null == newParent) {
+            return EnqueuableAJAXActionService.resultFor(false);
+        }
+
+        String id = request.getParameter("id");
+        if (null == id) {
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create("id");
+        }
+
+        try {
+            JSONObject jKeyDesc = new JSONObject(4);
+            jKeyDesc.put("module", "folder");
+            jKeyDesc.put("action", "update");
+            jKeyDesc.put("id", id);
+            jKeyDesc.put("parent", newParent);
+
+            return EnqueuableAJAXActionService.resultFor(true, new JobKey(session.getUserId(), session.getContextId(), jKeyDesc.toString()));
+        } catch (JSONException e) {
+            throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+        }
     }
 
     @Override

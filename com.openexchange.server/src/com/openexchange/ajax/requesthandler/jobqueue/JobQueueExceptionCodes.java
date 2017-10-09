@@ -75,6 +75,10 @@ public enum JobQueueExceptionCodes implements DisplayableOXExceptionCode {
      * A long-running operation is being executed for user %1$s in context %2$s.
      */
     LONG_RUNNING_OPERATION("A long-running operation is being executed for user %1$s in context %2$s.", JobQueueMessages.LONG_RUNNING_OPERATION_MSG, Category.CATEGORY_WARNING, 3),
+    /**
+     * Such an operation (%1$s) is already running for user %2$s in context %3$s.
+     */
+    ALREADY_RUNNING("Such an operation (%1$s) is already running for user %2$s in context %3$s.", JobQueueMessages.ALREADY_RUNNING_MSG, Category.CATEGORY_USER_INPUT, 4)
 
     ;
 
