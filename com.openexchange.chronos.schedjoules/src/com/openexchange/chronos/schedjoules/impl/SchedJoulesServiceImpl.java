@@ -147,6 +147,16 @@ public class SchedJoulesServiceImpl implements SchedJoulesService {
     /*
      * (non-Javadoc)
      * 
+     * @see com.openexchange.chronos.schedjoules.SchedJoulesService#listLanguages()
+     */
+    @Override
+    public SchedJoulesResult listLanguages() throws OXException {
+        return new SchedJoulesResult(api.languages().listLanguages());
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.openexchange.chronos.schedjoules.SchedJoulesService#subscribeCalendar(int)
      */
     @Override

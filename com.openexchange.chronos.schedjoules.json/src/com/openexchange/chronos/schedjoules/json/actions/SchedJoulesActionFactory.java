@@ -68,7 +68,7 @@ public class SchedJoulesActionFactory implements AJAXActionServiceFactory {
     /**
      * Initialises a new {@link SchedJoulesActionFactory}.
      * 
-     * @param services The {@link ServiceLookup} instace
+     * @param services The {@link ServiceLookup} instance
      */
     public SchedJoulesActionFactory(ServiceLookup services) {
         super();
@@ -76,6 +76,7 @@ public class SchedJoulesActionFactory implements AJAXActionServiceFactory {
         actions.put("browse", new BrowseAction(services));
         actions.put("subscribe", new SubscribeAction(services));
         actions.put("countries", new CountriesAction(services));
+        actions.put("languages", new LanguagesAction(services));
         this.actions = actions.build();
     }
 
@@ -98,5 +99,4 @@ public class SchedJoulesActionFactory implements AJAXActionServiceFactory {
     public Collection<?> getSupportedServices() {
         return actions.values();
     }
-
 }

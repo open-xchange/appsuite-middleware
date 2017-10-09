@@ -49,70 +49,35 @@
 
 package com.openexchange.chronos.schedjoules.api;
 
+import org.json.JSONArray;
+import com.openexchange.chronos.schedjoules.api.aux.SchedJoulesResponseParser;
+import com.openexchange.chronos.schedjoules.api.client.SchedJoulesRESTBindPoint;
 import com.openexchange.chronos.schedjoules.api.client.SchedJoulesRESTClient;
+import com.openexchange.chronos.schedjoules.api.client.SchedJoulesRequest;
 import com.openexchange.exception.OXException;
 
 /**
- * {@link SchedJoulesAPI}
+ * {@link SchedJoulesLanguagesAPI}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public final class SchedJoulesAPI {
-
-    private final SchedJoulesPagesAPI pages;
-    private final SchedJoulesCalendarAPI calendar;
-    private final SchedJoulesCountriesAPI countries;
-    private final SchedJoulesLanguagesAPI languages;
-    private final SchedJoulesRESTClient client;
+public class SchedJoulesLanguagesAPI extends AbstractSchedJoulesAPI {
 
     /**
-     * Initialises a new {@link SchedJoulesAPI}.
+     * Initialises a new {@link SchedJoulesLanguagesAPI}.
+     */
+    SchedJoulesLanguagesAPI(SchedJoulesRESTClient client) {
+        super(client);
+    }
+
+    /**
+     * Retrieves a list with all available languages
      * 
-     * @throws OXException if the REST client cannot be initialised
+     * @return A {@link JSONArray} with all available languages
+     * @throws OXException if a parsing error is occurred
      */
-    public SchedJoulesAPI() throws OXException {
-        super();
-        client = new SchedJoulesRESTClient();
-        pages = new SchedJoulesPagesAPI(client);
-        calendar = new SchedJoulesCalendarAPI(client);
-        countries = new SchedJoulesCountriesAPI(client);
-        languages = new SchedJoulesLanguagesAPI(client);
+    public JSONArray listLanguages() throws OXException {
+        SchedJoulesRequest request = new SchedJoulesRequest(SchedJoulesRESTBindPoint.languages);
+        return (JSONArray) SchedJoulesResponseParser.parse(client.executeRequest(request));
     }
-
-    /**
-     * Gets the pages API
-     *
-     * @return The pages
-     */
-    public SchedJoulesPagesAPI pages() {
-        return pages;
-    }
-
-    /**
-     * Gets the calendar API
-     *
-     * @return The calendar API
-     */
-    public SchedJoulesCalendarAPI calendar() {
-        return calendar;
-    }
-
-    /**
-     * Gets the countries
-     *
-     * @return The countries
-     */
-    public SchedJoulesCountriesAPI countries() {
-        return countries;
-    }
-
-    /**
-     * Gets the languages
-     *
-     * @return The languages
-     */
-    public SchedJoulesLanguagesAPI languages() {
-        return languages;
-    }
-
 }

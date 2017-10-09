@@ -113,6 +113,14 @@ public interface SchedJoulesService {
     SchedJoulesResult listCountries(String locale) throws OXException;
 
     /**
+     * Retrieves a list of supported languages
+     * 
+     * @return The {@link SchedJoulesResult}
+     * @throws OXException if an error is occurred
+     */
+    SchedJoulesResult listLanguages() throws OXException;
+
+    /**
      * Subscribes to the SchedJoules calendar with the specified identifier
      * 
      * @param id The calendar identifier

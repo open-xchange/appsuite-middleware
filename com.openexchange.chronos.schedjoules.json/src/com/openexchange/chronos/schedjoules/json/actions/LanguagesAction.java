@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2017-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,72 +47,43 @@
  *
  */
 
-package com.openexchange.chronos.schedjoules.api;
+package com.openexchange.chronos.schedjoules.json.actions;
 
-import com.openexchange.chronos.schedjoules.api.client.SchedJoulesRESTClient;
+import com.openexchange.ajax.requesthandler.AJAXActionService;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.chronos.schedjoules.SchedJoulesService;
 import com.openexchange.exception.OXException;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link SchedJoulesAPI}
+ * {@link LanguagesAction}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public final class SchedJoulesAPI {
+public class LanguagesAction implements AJAXActionService {
 
-    private final SchedJoulesPagesAPI pages;
-    private final SchedJoulesCalendarAPI calendar;
-    private final SchedJoulesCountriesAPI countries;
-    private final SchedJoulesLanguagesAPI languages;
-    private final SchedJoulesRESTClient client;
+    private ServiceLookup services;
 
     /**
-     * Initialises a new {@link SchedJoulesAPI}.
+     * Initialises a new {@link LanguagesAction}.
      * 
-     * @throws OXException if the REST client cannot be initialised
+     * @param services The {@link ServiceLookup} instance
      */
-    public SchedJoulesAPI() throws OXException {
+    public LanguagesAction(ServiceLookup services) {
         super();
-        client = new SchedJoulesRESTClient();
-        pages = new SchedJoulesPagesAPI(client);
-        calendar = new SchedJoulesCalendarAPI(client);
-        countries = new SchedJoulesCountriesAPI(client);
-        languages = new SchedJoulesLanguagesAPI(client);
+        this.services = services;
     }
 
-    /**
-     * Gets the pages API
-     *
-     * @return The pages
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ajax.requesthandler.AJAXActionService#perform(com.openexchange.ajax.requesthandler.AJAXRequestData, com.openexchange.tools.session.ServerSession)
      */
-    public SchedJoulesPagesAPI pages() {
-        return pages;
+    @Override
+    public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
+        SchedJoulesService service = services.getService(SchedJoulesService.class);
+        return new AJAXRequestResult(service.listLanguages().getData());
     }
-
-    /**
-     * Gets the calendar API
-     *
-     * @return The calendar API
-     */
-    public SchedJoulesCalendarAPI calendar() {
-        return calendar;
-    }
-
-    /**
-     * Gets the countries
-     *
-     * @return The countries
-     */
-    public SchedJoulesCountriesAPI countries() {
-        return countries;
-    }
-
-    /**
-     * Gets the languages
-     *
-     * @return The languages
-     */
-    public SchedJoulesLanguagesAPI languages() {
-        return languages;
-    }
-
 }
