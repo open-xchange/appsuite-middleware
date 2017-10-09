@@ -189,7 +189,7 @@ public class SchedJoulesRESTClient {
     }
 
     /**
-     * Creates an {@link HttpRequestBase} with the specifeid {@link HttpMethod}
+     * Creates an {@link HttpRequestBase} with the specified {@link HttpMethod}
      * 
      * @param httpMethod The {@link HttpMethod}
      * @return The new {@link HttpRequestBase}
@@ -213,7 +213,7 @@ public class SchedJoulesRESTClient {
      * @param url The {@link URL} to use
      * @param httpMethod The {@link HttpMethod}
      * @return The new {@link HttpUriRequest}
-     * @throws OXException if an unknwon HTTP method is provided
+     * @throws OXException if an unknown HTTP method is provided
      * @throws URISyntaxException If an invalid URL is provided
      */
     private HttpUriRequest prepareRequest(URL url, HttpMethod httpMethod) throws OXException {
