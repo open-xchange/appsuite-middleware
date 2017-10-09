@@ -66,17 +66,17 @@ public class ParticipantRole extends EnumeratedProperty {
     /**
      * Indicates a participant whose participation is required.
      */
-    public static final ParticipantRole REQ_PARTICIPANT = new ParticipantRole("REQ_PARTICIPANT");
+    public static final ParticipantRole REQ_PARTICIPANT = new ParticipantRole("REQ-PARTICIPANT");
 
     /**
      * Indicates a participant whose participation is optional.
      */
-    public static final ParticipantRole OPT_PARTICIPANT = new ParticipantRole("OPT_PARTICIPANT");
+    public static final ParticipantRole OPT_PARTICIPANT = new ParticipantRole("OPT-PARTICIPANT");
 
     /**
      * Indicates a participant who is copied for information purposes only.
      */
-    public static final ParticipantRole NONE_PARTICIPANT = new ParticipantRole("NONE_PARTICIPANT");
+    public static final ParticipantRole NONE_PARTICIPANT = new ParticipantRole("NON-PARTICIPANT");
 
     /**
      * Initializes a new {@link ParticipantRole}.
