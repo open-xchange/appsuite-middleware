@@ -83,6 +83,9 @@ public class CoreStateManagement implements StateManagement {
     public AuthenticationRequestInfo getAndRemoveAuthenticationInfo(String state) {
         LOG.trace("getAndRemoveAuthenticationInfo(state: {})", state);
         PortableAuthenticationRequest portable = (PortableAuthenticationRequest) hazelcast.getMap(HAZELCAST_AUTHREQUEST_INFO_MAP).remove(state);
+        if (null == portable) {
+            return null;
+        }
         return portable.getDelegate();
     }
 
@@ -97,6 +100,9 @@ public class CoreStateManagement implements StateManagement {
     public LogoutRequestInfo getAndRemoveLogoutRequestInfo(String state) {
         LOG.trace("getAndRemoveLogoutRequestInfo(state: {})", state);
         PortableLogoutRequest portableLogoutRequest = (PortableLogoutRequest) hazelcast.getMap(HAZELCAST_LOGOUT_REQUEST_INFO_MAP).remove(state);
+        if (null == portableLogoutRequest) {
+            return null;
+        }
         return portableLogoutRequest.getDelegate();
     }
 
