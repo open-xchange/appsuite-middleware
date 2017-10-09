@@ -50,7 +50,6 @@
 package com.openexchange.chronos.schedjoules.api;
 
 import org.json.JSONObject;
-import com.openexchange.chronos.schedjoules.api.SchedJoulesStreamParsers.StreamParser;
 import com.openexchange.chronos.schedjoules.api.client.SchedJoulesRESTBindPoint;
 import com.openexchange.chronos.schedjoules.api.client.SchedJoulesRESTClient;
 import com.openexchange.chronos.schedjoules.api.client.SchedJoulesRequest;
@@ -139,6 +138,6 @@ public class SchedJoulesPagesAPI {
      */
     private JSONObject executeRequest(SchedJoulesRequest request) throws OXException {
         SchedJoulesResponse response = client.executeRequest(request);
-        return SchedJoulesStreamParsers.parse(response, StreamParser.findParser(response.getContentType()));
+        return (JSONObject) StreamParser.parse(response);
     }
 }

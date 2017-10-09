@@ -51,7 +51,6 @@ package com.openexchange.chronos.schedjoules.api;
 
 import java.net.URL;
 import com.openexchange.chronos.Calendar;
-import com.openexchange.chronos.schedjoules.api.SchedJoulesStreamParsers.StreamParser;
 import com.openexchange.chronos.schedjoules.api.client.SchedJoulesRESTClient;
 import com.openexchange.chronos.schedjoules.api.client.SchedJoulesResponse;
 import com.openexchange.exception.OXException;
@@ -82,6 +81,6 @@ public class SchedJoulesCalendarAPI {
      */
     public Calendar getCalendar(URL url) throws OXException {
         SchedJoulesResponse response = client.executeRequest(url);
-        return SchedJoulesStreamParsers.parse(response, StreamParser.findParser(response.getContentType()));
+        return (Calendar) StreamParser.parse(response);
     }
 }

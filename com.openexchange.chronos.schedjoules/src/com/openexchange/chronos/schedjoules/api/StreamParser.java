@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2017-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -51,8 +51,6 @@ package com.openexchange.chronos.schedjoules.api;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashMap;
-import java.util.Map;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
@@ -65,79 +63,30 @@ import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 
 /**
- * {@link SchedJoulesStreamParsers}
- *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * {@link StreamParser} - Defines the types of the available stream parsers and their implementations
  */
-final class SchedJoulesStreamParsers {
-
-    private static final String CHARSET = "UTF-8";
-
+enum StreamParser {
     /**
-     * {@link StreamParser} - Defines the types of the available stream parsers
+     * The JSON parser
      */
-    static enum StreamParser {
-        JSON("application/json"),
-        CALENDAR("text/calendar");
+    JSON("application/json") {
 
-        private final String contentType;
-
-        /**
-         * Initialises a new {@link StreamParser}.
-         * 
-         * @param contentType The content type of the stream parser
-         */
-        private StreamParser(String contentType) {
-            this.contentType = contentType;
-        }
-
-        /**
-         * Gets the contentType
-         *
-         * @return The contentType
-         */
-        public String getContentType() {
-            return contentType;
-        }
-
-        /**
-         * Tries to find an appropriate stream parser for the specified content type
-         * 
-         * @param contentType The content type
-         * @return The {@link StreamParser}
-         * @throw IllegalArgumentException if no {@link StreamParser} found
-         */
-        static StreamParser findParser(String contentType) {
-            if (Strings.isEmpty(contentType)) {
-                throw new IllegalArgumentException("The content type can be neither 'null' nor empty");
-            }
-            for (StreamParser streamParser : StreamParser.values()) {
-                if (streamParser.getContentType().equals(contentType)) {
-                    return streamParser;
-                }
-            }
-            throw new IllegalArgumentException("No stream parser found for the specified content type '" + contentType + "'");
-        }
-    }
-
-    /**
-     * A {@link Map} that holds references to all available stream parsers
-     */
-    private static final Map<StreamParser, SchedJoulesStreamParser<?>> streamParsers;
-    static {
-        streamParsers = new HashMap<>(2);
-
-        // The JSON stream parser
-        streamParsers.put(StreamParser.JSON, (response) -> {
+        @Override
+        Object parseResponse(SchedJoulesResponse response) throws OXException {
             try (InputStream inputStream = Streams.bufferedInputStreamFor(response.getStream())) {
                 return new JSONObject(Streams.stream2string(inputStream, CHARSET));
             } catch (IOException | JSONException e) {
                 throw CalendarExceptionCodes.UNEXPECTED_ERROR.create(e.getMessage());
             }
-        });
+        }
+    },
+    /**
+     * The iCal parser
+     */
+    CALENDAR("text/calendar") {
 
-        // The Calendar stream parser
-        streamParsers.put(StreamParser.CALENDAR, (response) -> {
+        @Override
+        Object parseResponse(SchedJoulesResponse response) throws OXException {
             ICalService iCalService = Services.getService(ICalService.class);
             ICalParameters parameters = iCalService.initParameters();
             parameters.set(ICalParameters.IGNORE_UNSET_PROPERTIES, Boolean.TRUE);
@@ -147,42 +96,57 @@ final class SchedJoulesStreamParsers {
             } catch (IOException e) {
                 throw CalendarExceptionCodes.UNEXPECTED_ERROR.create(e.getMessage());
             }
-        });
+        }
+    };
+
+    private static final String CHARSET = "UTF-8";
+
+    private final String contentType;
+
+    /**
+     * Initialises a new {@link StreamParser}.
+     * 
+     * @param contentType The content type of the stream parser
+     */
+    private StreamParser(String contentType) {
+        this.contentType = contentType;
     }
 
     /**
-     * Parses the {@link InputStream} of the specified {@link SchedJoulesResponse}
-     * with the specified {@link StreamParser} type.
+     * Gets the contentType
+     *
+     * @return The contentType
+     */
+    public String getContentType() {
+        return contentType;
+    }
+
+    /**
+     * Parses the {@link InputStream} from the specified {@link SchedJoulesResponse}
      * 
      * @param response The {@link SchedJoulesResponse}
-     * @param streamParser
-     * @return
-     * @throws OXException
+     * @return The parsed {@link R} object
+     * @throws OXException if a parsing error occurs
      */
-    @SuppressWarnings("unchecked")
-    static <R> R parse(SchedJoulesResponse response, StreamParser streamParser) throws OXException {
-        SchedJoulesStreamParser<?> parser = streamParsers.get(streamParser);
-        if (parser == null) {
-            throw new OXException(1138, "Uknown stream parser '" + streamParser + "'");
+    static Object parse(SchedJoulesResponse response) throws OXException {
+        String contentType = response.getContentType();
+        if (Strings.isEmpty(contentType)) {
+            throw new IllegalArgumentException("The content type can be neither 'null' nor empty");
         }
-        return (R) parser.parse(response);
+        for (StreamParser streamParser : StreamParser.values()) {
+            if (streamParser.getContentType().equals(contentType)) {
+                return streamParser.parseResponse(response);
+            }
+        }
+        throw new OXException(1138, "No stream parser found for the specified content type '" + contentType + "'");
     }
-
+    
     /**
+     * Parses the {@link InputStream} from the specified {@link SchedJoulesResponse}
      * 
-     * {@link SchedJoulesStreamParser}
-     * 
-     * @param <R> The returned type
+     * @param response The {@link SchedJoulesResponse}
+     * @return The parsed {@link R} object
+     * @throws OXException if a parsing error occurs
      */
-    private interface SchedJoulesStreamParser<R> {
-
-        /**
-         * Parses the {@link InputStream} from the specified {@link SchedJoulesResponse}
-         * 
-         * @param response The {@link SchedJoulesResponse}
-         * @return The parsed {@link R} object
-         * @throws OXException if a parsing error occurs
-         */
-        R parse(SchedJoulesResponse response) throws OXException;
-    }
+    abstract Object parseResponse(SchedJoulesResponse response) throws OXException;
 }

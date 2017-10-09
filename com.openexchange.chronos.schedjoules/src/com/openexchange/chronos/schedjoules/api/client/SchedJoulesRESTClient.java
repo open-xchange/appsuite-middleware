@@ -275,8 +275,8 @@ public class SchedJoulesRESTClient {
             if (statusCode == 304) {
                 // Ok, nothing was modified, no response body, return as is
                 return response;
-
             }
+            
             HttpEntity entity = httpResponse.getEntity();
             if (entity == null) {
                 throw new OXException(1138, "No body was returned");
