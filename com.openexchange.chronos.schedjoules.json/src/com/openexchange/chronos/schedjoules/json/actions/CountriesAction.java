@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2017-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,35 +47,43 @@
  *
  */
 
-package com.openexchange.chronos.schedjoules.api.client;
+package com.openexchange.chronos.schedjoules.json.actions;
+
+import com.openexchange.ajax.requesthandler.AJAXActionService;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.chronos.schedjoules.SchedJoulesService;
+import com.openexchange.exception.OXException;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link SchedJoulesRESTBindPoint}
+ * {@link CountriesAction}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public enum SchedJoulesRESTBindPoint {
-    /**
-     * @see <a href="https://github.com/schedjoules/calendar-store-api/blob/master/details/pages.md">https://github.com/schedjoules/calendar-store-api/blob/master/details/pages.md</a>
-     */
-    pages,
+public class CountriesAction implements AJAXActionService {
+
+    private ServiceLookup services;
 
     /**
-     * @see <a href="https://github.com/schedjoules/calendar-store-api#calendars">https://github.com/schedjoules/calendar-store-api#calendars</a>
-     */
-    calendar,
-    /**
-     * @see <a href="https://github.com/schedjoules/calendar-store-api/blob/master/details/countries.md">https://github.com/schedjoules/calendar-store-api/blob/master/details/countries.md</a>
-     */
-    countries,
-    ;
-
-    /**
-     * Returns the absolute path of the REST bind point
+     * Initialises a new {@link CountriesAction}.
      * 
-     * @return the absolute path of the REST bind point
+     * @param services The {@link ServiceLookup} instance
      */
-    public String getAbsolutePath() {
-        return "/" + name();
+    public CountriesAction(ServiceLookup services) {
+        super();
+        this.services = services;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ajax.requesthandler.AJAXActionService#perform(com.openexchange.ajax.requesthandler.AJAXRequestData, com.openexchange.tools.session.ServerSession)
+     */
+    @Override
+    public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
+        SchedJoulesService service = services.getService(SchedJoulesService.class);
+        return new AJAXRequestResult(service.listCountries().getData());
     }
 }

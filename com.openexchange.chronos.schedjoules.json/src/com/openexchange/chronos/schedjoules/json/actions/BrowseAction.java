@@ -84,8 +84,11 @@ public class BrowseAction implements AJAXActionService {
         String pageId = requestData.getParameter("id");
         SchedJoulesService service = services.getService(SchedJoulesService.class);
 
-        String language = session.getUser().getLocale().getLanguage().toLowerCase();
+        String language = requestData.getParameter("language");
+        session.getUser().getLocale().getLanguage().toLowerCase();
+        
         String country = session.getUser().getLocale().getCountry().toLowerCase();
+        requestData.getParameter("country");
 
         if (pageId == null) {
             return new AJAXRequestResult(service.getRoot(language, country).getData());

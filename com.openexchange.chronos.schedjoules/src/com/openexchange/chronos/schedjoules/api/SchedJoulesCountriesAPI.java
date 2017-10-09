@@ -47,35 +47,52 @@
  *
  */
 
-package com.openexchange.chronos.schedjoules.api.client;
+package com.openexchange.chronos.schedjoules.api;
+
+import org.json.JSONArray;
+import com.openexchange.chronos.schedjoules.api.client.SchedJoulesRESTBindPoint;
+import com.openexchange.chronos.schedjoules.api.client.SchedJoulesRESTClient;
+import com.openexchange.chronos.schedjoules.api.client.SchedJoulesRequest;
+import com.openexchange.exception.OXException;
 
 /**
- * {@link SchedJoulesRESTBindPoint}
+ * {@link SchedJoulesCountriesAPI}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public enum SchedJoulesRESTBindPoint {
-    /**
-     * @see <a href="https://github.com/schedjoules/calendar-store-api/blob/master/details/pages.md">https://github.com/schedjoules/calendar-store-api/blob/master/details/pages.md</a>
-     */
-    pages,
+public class SchedJoulesCountriesAPI {
+
+    private final SchedJoulesRESTClient client;
 
     /**
-     * @see <a href="https://github.com/schedjoules/calendar-store-api#calendars">https://github.com/schedjoules/calendar-store-api#calendars</a>
+     * Initialises a new {@link SchedJoulesCountriesAPI}.
      */
-    calendar,
-    /**
-     * @see <a href="https://github.com/schedjoules/calendar-store-api/blob/master/details/countries.md">https://github.com/schedjoules/calendar-store-api/blob/master/details/countries.md</a>
-     */
-    countries,
-    ;
+    SchedJoulesCountriesAPI(SchedJoulesRESTClient client) {
+        super();
+        this.client = client;
+    }
 
     /**
-     * Returns the absolute path of the REST bind point
+     * Retrieves a list with all available countries
      * 
-     * @return the absolute path of the REST bind point
+     * @return A {@link JSONArray} with all available countries
+     * @throws OXException if a parsing error is occurred
      */
-    public String getAbsolutePath() {
-        return "/" + name();
+    public JSONArray listCountries() throws OXException {
+        SchedJoulesRequest request = new SchedJoulesRequest(SchedJoulesRESTBindPoint.countries.getAbsolutePath());
+        return (JSONArray) SchedJoulesResponseParser.parse(client.executeRequest(request));
+    }
+
+    /**
+     * Retrieves a list with all available countries
+     * 
+     * @param locale The locale
+     * @return A {@link JSONArray} with all available countries
+     * @throws OXException if a parsing error is occurred
+     */
+    public JSONArray listCountries(String locale) throws OXException {
+        SchedJoulesRequest request = new SchedJoulesRequest(SchedJoulesRESTBindPoint.countries.getAbsolutePath());
+        request.setQueryParameter("locale", locale);
+        return (JSONArray) SchedJoulesResponseParser.parse(client.executeRequest(request));
     }
 }

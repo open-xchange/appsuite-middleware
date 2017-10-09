@@ -49,7 +49,7 @@
 
 package com.openexchange.chronos.schedjoules;
 
-import org.json.JSONObject;
+import org.json.JSONValue;
 
 /**
  * {@link SchedJoulesResult}
@@ -58,12 +58,12 @@ import org.json.JSONObject;
  */
 public class SchedJoulesResult {
 
-    private final JSONObject data;
+    private final JSONValue data;
 
     /**
      * Initialises a new {@link SchedJoulesResult}.
      */
-    public SchedJoulesResult(JSONObject data) {
+    public SchedJoulesResult(JSONValue data) {
         super();
         this.data = data;
     }
@@ -73,7 +73,7 @@ public class SchedJoulesResult {
      *
      * @return The data
      */
-    public JSONObject getData() {
+    public JSONValue getData() {
         return data;
     }
 

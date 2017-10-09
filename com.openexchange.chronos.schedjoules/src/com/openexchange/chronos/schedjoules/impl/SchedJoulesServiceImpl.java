@@ -127,6 +127,26 @@ public class SchedJoulesServiceImpl implements SchedJoulesService {
     /*
      * (non-Javadoc)
      * 
+     * @see com.openexchange.chronos.schedjoules.SchedJoulesService#listCountries()
+     */
+    @Override
+    public SchedJoulesResult listCountries() throws OXException {
+        return new SchedJoulesResult(api.countries().listCountries());
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.chronos.schedjoules.SchedJoulesService#listCountries(java.lang.String)
+     */
+    @Override
+    public SchedJoulesResult listCountries(String locale) throws OXException {
+        return new SchedJoulesResult(api.countries().listCountries(locale));
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.openexchange.chronos.schedjoules.SchedJoulesService#subscribeCalendar(int)
      */
     @Override

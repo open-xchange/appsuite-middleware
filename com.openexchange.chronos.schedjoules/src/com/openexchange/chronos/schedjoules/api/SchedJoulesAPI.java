@@ -61,6 +61,7 @@ public final class SchedJoulesAPI {
 
     private final SchedJoulesPagesAPI pages;
     private final SchedJoulesCalendarAPI calendar;
+    private final SchedJoulesCountriesAPI countries;
     private final SchedJoulesRESTClient client;
 
     /**
@@ -73,6 +74,7 @@ public final class SchedJoulesAPI {
         client = new SchedJoulesRESTClient();
         pages = new SchedJoulesPagesAPI(client);
         calendar = new SchedJoulesCalendarAPI(client);
+        countries = new SchedJoulesCountriesAPI(client);
     }
 
     /**
@@ -91,5 +93,14 @@ public final class SchedJoulesAPI {
      */
     public SchedJoulesCalendarAPI calendar() {
         return calendar;
+    }
+
+    /**
+     * Gets the countries
+     *
+     * @return The countries
+     */
+    public SchedJoulesCountriesAPI countries() {
+        return countries;
     }
 }

@@ -51,6 +51,7 @@ package com.openexchange.chronos.schedjoules.api;
 
 import java.io.IOException;
 import java.io.InputStream;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.chronos.ical.ICalParameters;
@@ -74,7 +75,16 @@ enum SchedJoulesResponseParser {
         @Override
         Object parseResponse(SchedJoulesResponse response) throws OXException {
             try (InputStream inputStream = Streams.bufferedInputStreamFor(response.getStream())) {
-                return new JSONObject(Streams.stream2string(inputStream, CHARSET));
+                String string = Streams.stream2string(inputStream, CHARSET);
+                char c = string.charAt(0);
+                switch (c) {
+                    case '{':
+                        return new JSONObject(string);
+                    case '[':
+                        return new JSONArray(string);
+                    default:
+                        throw SchedJoulesExceptionCodes.JSON_ERROR.create("Unexpected start token detected '" + c + "'");
+                }
             } catch (IOException e) {
                 throw SchedJoulesExceptionCodes.IO_ERROR.create(e.getMessage(), e);
             } catch (JSONException e) {

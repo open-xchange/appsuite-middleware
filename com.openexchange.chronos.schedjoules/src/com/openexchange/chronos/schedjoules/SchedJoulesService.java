@@ -95,6 +95,10 @@ public interface SchedJoulesService {
      * @throws OXException if an error is occurred
      */
     SchedJoulesResult getPage(int pageId, String locale) throws OXException;
+    
+    SchedJoulesResult listCountries() throws OXException;
+    
+    SchedJoulesResult listCountries(String locale) throws OXException;
 
     /**
      * Subscribes to the SchedJoules calendar with the specified identifier
