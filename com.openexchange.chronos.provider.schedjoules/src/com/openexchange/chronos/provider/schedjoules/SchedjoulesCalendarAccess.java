@@ -54,6 +54,7 @@ import com.openexchange.chronos.Event;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.SingleFolderCalendarAccess;
+import com.openexchange.chronos.provider.account.CalendarAccountService;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
@@ -71,19 +72,19 @@ public class SchedjoulesCalendarAccess extends SingleFolderCalendarAccess {
 
     /**
      * Initialises a new {@link SchedjoulesCalendarAccess}.
-     * 
+     *
      * @param account
      * @param parameters
      */
     protected SchedjoulesCalendarAccess(ServiceLookup services, Session session, CalendarAccount account, CalendarParameters parameters) {
-        super(account, parameters);
+        super(session, account, parameters);
         this.services = services;
         this.session = session;
     }
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.chronos.provider.CalendarAccess#close()
      */
     @Override
@@ -94,7 +95,7 @@ public class SchedjoulesCalendarAccess extends SingleFolderCalendarAccess {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.chronos.provider.SingleFolderCalendarAccess#getEvent(java.lang.String, com.openexchange.chronos.RecurrenceId)
      */
     @Override
@@ -105,11 +106,17 @@ public class SchedjoulesCalendarAccess extends SingleFolderCalendarAccess {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.chronos.provider.SingleFolderCalendarAccess#getEvents()
      */
     @Override
     protected List<Event> getEvents() throws OXException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    protected CalendarAccountService getAccountService() throws OXException {
         // TODO Auto-generated method stub
         return null;
     }

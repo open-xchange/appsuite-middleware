@@ -85,6 +85,18 @@ public interface CalendarAccess {
     List<CalendarFolder> getVisibleFolders() throws OXException;
 
     /**
+     * Updates an existing folder.
+     * <p/>
+     * The update may include the calendar color, the desired schedule transparency, or the <i>useForSync</i> flag.
+     *
+     * @param folderId The identifier of the folder to update
+     * @param folder The folder data to update, with the modified properties being set
+     * @param clientTimestamp The last timestamp / sequence number known by the client to catch concurrent updates
+     * @return The (possibly changed) identifier of the updated folder
+     */
+    String updateFolder(String folderId, CalendarFolder folder, long clientTimestamp) throws OXException;
+
+    /**
      * Gets a specific event.
      * <p/>
      * The following calendar parameters are evaluated:

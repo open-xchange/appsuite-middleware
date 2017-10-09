@@ -392,12 +392,13 @@ public class InternalCalendarAccess implements GroupwareCalendarAccess, FreeBusy
         }
         Map<FolderField, FolderProperty> folderProperties = new HashMap<FolderField, FolderProperty>(properties.size());
         for (Entry<String, String> entry : properties.entrySet()) {
-            if (COLOR.getName().equals(entry.getKey())) {
-                folderProperties.put(COLOR, new FolderProperty(entry.getKey(), entry.getValue()));
-            } else if (USED_FOR_SYNC.getName().equals(entry.getValue())) {
-                folderProperties.put(USED_FOR_SYNC, new FolderProperty(entry.getKey(), Boolean.valueOf(entry.getValue())));
-            } else if (SCHEDULE_TRANSP.getName().equals(entry.getKey())) {
-                folderProperties.put(SCHEDULE_TRANSP, new FolderProperty(entry.getKey(), entry.getValue()));
+            String name = entry.getKey();
+            if (COLOR.getName().equals(name)) {
+                folderProperties.put(COLOR, new FolderProperty(name, entry.getValue()));
+            } else if (USED_FOR_SYNC.getName().equals(name)) {
+                folderProperties.put(USED_FOR_SYNC, new FolderProperty(name, Boolean.valueOf(entry.getValue())));
+            } else if (SCHEDULE_TRANSP.getName().equals(name)) {
+                folderProperties.put(SCHEDULE_TRANSP, new FolderProperty(name, entry.getValue()));
             }
         }
         return folderProperties;

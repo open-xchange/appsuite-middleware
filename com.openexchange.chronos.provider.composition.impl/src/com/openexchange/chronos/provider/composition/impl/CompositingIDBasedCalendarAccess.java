@@ -380,7 +380,7 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
     public String updateFolder(String folderId, CalendarFolder folder, long clientTimestamp) throws OXException {
         int accountId = getAccountId(folderId);
         try {
-            GroupwareCalendarAccess calendarAccess = getGroupwareAccess(accountId);
+            CalendarAccess calendarAccess = getAccess(accountId);
             folderId = calendarAccess.updateFolder(getRelativeFolderId(folderId), withRelativeID(folder), clientTimestamp);
             return getUniqueFolderId(accountId, folderId);
         } catch (OXException e) {

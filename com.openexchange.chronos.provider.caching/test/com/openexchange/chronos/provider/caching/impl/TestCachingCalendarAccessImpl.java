@@ -75,7 +75,7 @@ public class TestCachingCalendarAccessImpl extends CachingCalendarAccess {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.chronos.provider.CalendarAccess#close()
      */
     @Override
@@ -86,7 +86,7 @@ public class TestCachingCalendarAccessImpl extends CachingCalendarAccess {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.chronos.provider.CalendarAccess#getFolder(java.lang.String)
      */
     @Override
@@ -97,7 +97,7 @@ public class TestCachingCalendarAccessImpl extends CachingCalendarAccess {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.chronos.provider.CalendarAccess#getVisibleFolders()
      */
     @Override
@@ -108,7 +108,7 @@ public class TestCachingCalendarAccessImpl extends CachingCalendarAccess {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.chronos.provider.CalendarAccess#getChangeExceptions(java.lang.String, java.lang.String)
      */
     @Override
@@ -119,7 +119,7 @@ public class TestCachingCalendarAccessImpl extends CachingCalendarAccess {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.chronos.provider.caching.CachingCalendarAccess#getRefreshInterval()
      */
     @Override
@@ -129,7 +129,7 @@ public class TestCachingCalendarAccessImpl extends CachingCalendarAccess {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.chronos.provider.caching.CachingCalendarAccess#getEvents(java.lang.String)
      */
     @Override
@@ -155,6 +155,12 @@ public class TestCachingCalendarAccessImpl extends CachingCalendarAccess {
     public void handleExceptions(String calendarFolderId, OXException e) {
         // TODO Auto-generated method stub
 
+    }
+
+    @Override
+    public String updateFolder(String folderId, CalendarFolder folder, long clientTimestamp) throws OXException {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }

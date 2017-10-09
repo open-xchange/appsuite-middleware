@@ -47,68 +47,16 @@
  *
  */
 
-package com.openexchange.folderstorage.calendar;
+package com.openexchange.chronos.provider.extensions;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import com.openexchange.folderstorage.AbstractFolder;
-import com.openexchange.folderstorage.ContentType;
-import com.openexchange.folderstorage.FolderField;
-import com.openexchange.folderstorage.FolderProperty;
-import com.openexchange.folderstorage.ParameterizedFolder;
+import com.openexchange.chronos.provider.CalendarAccess;
 
 /**
- * {@link CalendarStorageFolder}
+ * {@link PermissionAware}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class CalendarStorageFolder extends AbstractFolder implements ParameterizedFolder {
-
-    private static final long serialVersionUID = 4412370864213762652L;
-
-    private final Map<FolderField, FolderProperty> properties;
-
-    /**
-     * Initializes a new calendar folder as used by the internal folder storage.
-     *
-     * @param treeId The identifier of the folder tree to take over
-     * @param accountId The fully-qualified account identifier to take over
-     * @param contentType The content type to take over
-     */
-    public CalendarStorageFolder(String treeId, String accountId, ContentType contentType) {
-        super();
-        this.properties = new HashMap<FolderField, FolderProperty>();
-        setTreeID(treeId);
-        setAccountID(accountId);
-        setSubscribed(true);
-        setContentType(contentType);
-        setDefaultType(contentType.getModule());
-    }
-
-    @Override
-    public boolean isGlobalID() {
-        return false;
-    }
-
-    @Override
-    public void setProperty(FolderField name, Object value) {
-        if (null == value) {
-            properties.remove(name);
-        } else {
-            properties.put(name, new FolderProperty(name.getName(), value));
-        }
-    }
-
-    @Override
-    public Map<FolderField, FolderProperty> getProperties() {
-        return Collections.unmodifiableMap(properties);
-    }
-
-    @Override
-    public String toString() {
-        return "CalendarStorageFolder [account=" + accountId + ", id=" + id + ", name=" + name + "]";
-    }
+public interface PermissionAware extends CalendarAccess {
 
 }

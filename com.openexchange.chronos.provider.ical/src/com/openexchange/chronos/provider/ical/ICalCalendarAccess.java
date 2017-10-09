@@ -57,6 +57,7 @@ import org.apache.http.HttpStatus;
 import org.dmfs.rfc5545.Duration;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.CalendarAccount;
+import com.openexchange.chronos.provider.CalendarFolder;
 import com.openexchange.chronos.provider.caching.ExternalCalendarResult;
 import com.openexchange.chronos.provider.caching.SingleFolderCachingCalendarAccess;
 import com.openexchange.chronos.provider.ical.exception.ICalProviderExceptionCodes;
@@ -71,7 +72,7 @@ import com.openexchange.java.Strings;
 import com.openexchange.session.Session;
 
 /**
- * 
+ *
  * {@link ICalCalendarAccess}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
@@ -197,5 +198,11 @@ public class ICalCalendarAccess extends SingleFolderCachingCalendarAccess {
     @Override
     public void handleExceptions(String calendarFolderId, OXException e) {
 
+    }
+
+    @Override
+    public String updateFolder(String folderId, CalendarFolder folder, long clientTimestamp) throws OXException {
+        // TODO Auto-generated method stub
+        return null;
     }
 }
