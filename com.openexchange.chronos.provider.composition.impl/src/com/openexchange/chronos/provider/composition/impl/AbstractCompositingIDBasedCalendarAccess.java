@@ -320,6 +320,11 @@ public abstract class AbstractCompositingIDBasedCalendarAccess implements Transa
         return account.getProviderId();
     }
 
+    /**
+     * Gets all registered free/busy providers.
+     *
+     * @return A list of all registered free/busy providers
+     */
     protected List<FreeBusyProvider> getFreeBusyProviders() {
         return providerRegistry.getFreeBusyProviders();
     }

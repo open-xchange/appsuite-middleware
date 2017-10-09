@@ -62,6 +62,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.slf4j.LoggerFactory;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.FreeBusyTime;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.CalendarAccount;
@@ -69,6 +70,7 @@ import com.openexchange.chronos.provider.CalendarFolder;
 import com.openexchange.chronos.provider.groupware.GroupwareCalendarFolder;
 import com.openexchange.chronos.service.EventConflict;
 import com.openexchange.chronos.service.EventID;
+import com.openexchange.chronos.service.FreeBusyResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.tools.id.IDMangler;
@@ -203,6 +205,41 @@ public class IDMangling {
             eventsWithUniqueIDs.add(withUniqueID(event, accountId));
         }
         return eventsWithUniqueIDs;
+    }
+
+    /**
+     * Gets a free/busy time equipped with unique composite identifiers representing a free/busy time from a specific calendar account.
+     *
+     * @param freeBusyTime The free/busy time from the account
+     * @param accountId The identifier of the account
+     * @return The free/busy time representation with unique identifiers
+     */
+    public static FreeBusyTime withUniqueID(FreeBusyTime freeBusyTime, int accountId) {
+        Event event = freeBusyTime.getEvent();
+        if (null == event) {
+            return freeBusyTime;
+        }
+        return new FreeBusyTime(freeBusyTime.getFbType(), freeBusyTime.getStartTime(), freeBusyTime.getEndTime(), withUniqueID(event, accountId));
+    }
+
+    /**
+     * Gets a free/busy result equipped with unique composite identifiers representing a free/busy result from a specific calendar account.
+     *
+     * @param freeBusyResult The free/busy result from the account
+     * @param accountId The identifier of the account
+     * @return The free/busy result representation with unique identifiers
+     */
+    public static FreeBusyResult withUniqueID(FreeBusyResult freeBusyResult, int accountId) {
+        List<FreeBusyTime> freeBusyTimes = freeBusyResult.getFreeBusyTimes();
+        if (null == freeBusyTimes || freeBusyTimes.isEmpty()) {
+            return freeBusyResult;
+        }
+        List<FreeBusyTime> timesWithUniqueIDs = new ArrayList<FreeBusyTime>(freeBusyTimes.size());
+        for (FreeBusyTime freeBusyTime : freeBusyTimes) {
+            timesWithUniqueIDs.add(withUniqueID(freeBusyTime, accountId));
+        }
+        freeBusyResult.setFreeBusyTimes(timesWithUniqueIDs);
+        return freeBusyResult;
     }
 
     /**

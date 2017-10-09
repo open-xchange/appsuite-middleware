@@ -62,6 +62,7 @@ import static com.openexchange.chronos.provider.composition.impl.idmangling.IDMa
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.i;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -76,6 +77,7 @@ import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.common.FreeBusyUtils;
 import com.openexchange.chronos.provider.CalendarAccess;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.CalendarFolder;
@@ -426,7 +428,6 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
         try {
             EventID relativeEventID = getRelativeId(eventID);
             return getGroupwareAccess(accountId).getAttachment(relativeEventID, managedId);
-            //TODO: getUniqueId?
         } catch (OXException e) {
             throw withUniqueIDs(e, accountId);
         }
@@ -434,16 +435,27 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
 
     @Override
     public Map<Attendee, FreeBusyResult> queryFreeBusy(List<Attendee> attendees, Date from, Date until) throws OXException {
-        Map<Attendee, FreeBusyResult> results = new HashMap<Attendee, FreeBusyResult>();
-        for (FreeBusyProvider freeBusyProvider : getFreeBusyProviders()) {
-
-            Map<Attendee, FreeBusyResult> result = freeBusyProvider.query(session, attendees, from, until, this);
-
-            //TODO: withuniqueid
-
-            results.putAll(result);
+        List<FreeBusyProvider> freeBusyProviders = getFreeBusyProviders();
+        if (freeBusyProviders.isEmpty()) {
+            return Collections.emptyMap();
         }
-        return results;
+        Map<Attendee, List<FreeBusyResult>> results = new HashMap<Attendee, List<FreeBusyResult>>();
+        for (FreeBusyProvider freeBusyProvider : getFreeBusyProviders()) {
+            Map<Attendee, Map<Integer, FreeBusyResult>> resultsForProvider = freeBusyProvider.query(session, attendees, from, until, this);
+            if (null != resultsForProvider && 0 < resultsForProvider.size()) {
+                for (Entry<Attendee, Map<Integer, FreeBusyResult>> resultsForAttendee : resultsForProvider.entrySet()) {
+                    for (Entry<Integer, FreeBusyResult> resultsForAccount : resultsForAttendee.getValue().entrySet()) {
+                        FreeBusyResult result = withUniqueID(resultsForAccount.getValue(), i(resultsForAccount.getKey()));
+                        com.openexchange.tools.arrays.Collections.put(results, resultsForAttendee.getKey(), result);
+                    }
+                }
+            }
+        }
+        Map<Attendee, FreeBusyResult> mergedResults = new HashMap<Attendee, FreeBusyResult>(results.size());
+        for (Entry<Attendee, List<FreeBusyResult>> entry : results.entrySet()) {
+            mergedResults.put(entry.getKey(), FreeBusyUtils.merge(entry.getValue()));
+        }
+        return mergedResults;
     }
 
     /////////////////////////////////////////// HELPERS //////////////////////////////////////////////////

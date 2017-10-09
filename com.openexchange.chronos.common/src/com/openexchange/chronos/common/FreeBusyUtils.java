@@ -58,6 +58,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import com.openexchange.chronos.FreeBusyTime;
+import com.openexchange.chronos.service.FreeBusyResult;
+import com.openexchange.exception.OXException;
 
 /**
  * {@link FreeBusyUtils}
@@ -66,6 +68,35 @@ import com.openexchange.chronos.FreeBusyTime;
  * @since v7.10.0
  */
 public class FreeBusyUtils {
+
+    /**
+     * Merges the free/busy times of multiple free/busy results.
+     *
+     * @param freeBusyResults The free/busy results to merge
+     * @return The merged free/busy result
+     */
+    public static FreeBusyResult merge(List<FreeBusyResult> freeBusyResults) {
+        if (null == freeBusyResults || freeBusyResults.isEmpty()) {
+            return null;
+        }
+        if (1 == freeBusyResults.size()) {
+            return freeBusyResults.get(0);
+        }
+        List<OXException> warnings = new ArrayList<OXException>();
+        List<FreeBusyTime> freeBusyTimes = new ArrayList<FreeBusyTime>();
+        for (FreeBusyResult result : freeBusyResults) {
+            if (null != result.getWarnings()) {
+                warnings.addAll(result.getWarnings());
+            }
+            if (null != result.getFreeBusyTimes()) {
+                freeBusyTimes.addAll(result.getFreeBusyTimes());
+            }
+        }
+        FreeBusyResult freeBusyResult = new FreeBusyResult();
+        freeBusyResult.setFreeBusyTimes(mergeFreeBusy(freeBusyTimes));
+        freeBusyResult.setWarnings(warnings);
+        return freeBusyResult;
+    }
 
     /**
      * Normalizes the given free/busy intervals. This means
