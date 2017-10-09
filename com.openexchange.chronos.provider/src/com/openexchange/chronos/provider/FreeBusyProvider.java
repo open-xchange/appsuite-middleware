@@ -68,18 +68,11 @@ public interface FreeBusyProvider {
 
     /**
      * Queries the free/busy time for a list of attendees.
-     *
-     * @param session The session of the user requesting the free/busy data
-     * @param attendees The queried attendees
-     * @param from The start of the requested time range
-     * @param until The end of the requested time range
-     * @param parameters Additional arbitrary parameters, or <code>null</code> if not used
-     * @return The free/busy times for each of the attendees
-     */
-    //    Map<Attendee, FreeBusyResult> query(Session session, List<Attendee> attendees, Date from, Date until, CalendarParameters parameters) throws OXException;
-
-    /**
-     * Queries the free/busy time for a list of attendees.
+     * <p/>
+     * The following calendar parameters are evaluated:
+     * <ul>
+     * <li>{@link CalendarParameters#PARAMETER_MASK_ID}</li>
+     * </ul>
      *
      * @param session The session of the user requesting the free/busy data
      * @param attendees The queried attendees
