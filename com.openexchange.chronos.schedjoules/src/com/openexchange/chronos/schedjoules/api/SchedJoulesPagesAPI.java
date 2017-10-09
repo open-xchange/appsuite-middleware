@@ -61,19 +61,13 @@ import com.openexchange.exception.OXException;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class SchedJoulesPagesAPI {
-
-    private static final String DEFAULT_LOCALE = "en";
-    private static final String DEFAULT_LOCATION = "us";
-
-    private final SchedJoulesRESTClient client;
+public class SchedJoulesPagesAPI extends AbstractSchedJoulesAPI {
 
     /**
      * Initialises a new {@link SchedJoulesPagesAPI}.
      */
     SchedJoulesPagesAPI(SchedJoulesRESTClient client) {
-        super();
-        this.client = client;
+        super(client);
     }
 
     /**

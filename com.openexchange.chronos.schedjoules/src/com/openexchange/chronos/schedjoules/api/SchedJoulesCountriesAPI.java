@@ -60,16 +60,13 @@ import com.openexchange.exception.OXException;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class SchedJoulesCountriesAPI {
-
-    private final SchedJoulesRESTClient client;
+public class SchedJoulesCountriesAPI extends AbstractSchedJoulesAPI {
 
     /**
      * Initialises a new {@link SchedJoulesCountriesAPI}.
      */
     SchedJoulesCountriesAPI(SchedJoulesRESTClient client) {
-        super();
-        this.client = client;
+        super(client);
     }
 
     /**
@@ -79,8 +76,7 @@ public class SchedJoulesCountriesAPI {
      * @throws OXException if a parsing error is occurred
      */
     public JSONArray listCountries() throws OXException {
-        SchedJoulesRequest request = new SchedJoulesRequest(SchedJoulesRESTBindPoint.countries);
-        return (JSONArray) SchedJoulesResponseParser.parse(client.executeRequest(request));
+        return listCountries(DEFAULT_LOCALE);
     }
 
     /**
@@ -92,7 +88,7 @@ public class SchedJoulesCountriesAPI {
      */
     public JSONArray listCountries(String locale) throws OXException {
         SchedJoulesRequest request = new SchedJoulesRequest(SchedJoulesRESTBindPoint.countries);
-        request.setQueryParameter("locale", locale);
+        request.setQueryParameter(SchedJoulesCommonParameter.locale.name(), locale);
         return (JSONArray) SchedJoulesResponseParser.parse(client.executeRequest(request));
     }
 }

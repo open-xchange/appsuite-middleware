@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2017-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,35 +49,26 @@
 
 package com.openexchange.chronos.schedjoules.api;
 
-import java.net.URL;
-import com.openexchange.chronos.Calendar;
 import com.openexchange.chronos.schedjoules.api.client.SchedJoulesRESTClient;
-import com.openexchange.chronos.schedjoules.api.client.SchedJoulesResponse;
-import com.openexchange.exception.OXException;
 
 /**
- * {@link SchedJoulesCalendarAPI}
+ * {@link AbstractSchedJoulesAPI}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class SchedJoulesCalendarAPI extends AbstractSchedJoulesAPI {
+abstract class AbstractSchedJoulesAPI {
+    
+    static final String DEFAULT_LOCALE = "en";
+    static final String DEFAULT_LOCATION = "us";
 
+    final SchedJoulesRESTClient client;
+    
+    
     /**
-     * Initialises a new {@link SchedJoulesCalendarAPI}.
+     * Initialises a new {@link AbstractSchedJoulesAPI}.
      */
-    SchedJoulesCalendarAPI(SchedJoulesRESTClient client) {
-        super(client);
-    }
-
-    /**
-     * Retrieves the iCal from the specified {@link URL}
-     * 
-     * @param url The {@link URL} for the iCal
-     * @return The iCal parsed as a {@link Calendar}
-     * @throws OXException if a parsing error is occurred
-     */
-    public Calendar getCalendar(URL url) throws OXException {
-        SchedJoulesResponse response = client.executeRequest(url);
-        return (Calendar) SchedJoulesResponseParser.parse(response);
+    public AbstractSchedJoulesAPI(SchedJoulesRESTClient client) {
+        super();
+        this.client = client;
     }
 }
