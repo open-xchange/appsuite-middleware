@@ -63,6 +63,7 @@ public class FreeBusyTime implements Comparable<FreeBusyTime> {
     private FbType fbType;
     private Date startTime;
     private Date endTime;
+    private Event event;
 
     /**
      * Initializes a new {@link FreeBusyTime}.
@@ -79,10 +80,23 @@ public class FreeBusyTime implements Comparable<FreeBusyTime> {
      * @param endTime The end of the period
      */
     public FreeBusyTime(FbType fbType, Date startTime, Date endTime) {
-        super();
+        this(fbType, startTime, endTime, null);
+    }
+
+    /**
+     * Initializes a new {@link FreeBusyTime}.
+     *
+     * @param fbType The free/busy type
+     * @param startTime The start of the period
+     * @param endTime The end of the period
+     * @param event The event behind the free/busy time, or <code>null</code> if not available
+     */
+    public FreeBusyTime(FbType fbType, Date startTime, Date endTime, Event event) {
+        this();
         this.fbType = fbType;
         this.startTime = startTime;
         this.endTime = endTime;
+        this.event = event;
     }
 
     /**
@@ -137,6 +151,24 @@ public class FreeBusyTime implements Comparable<FreeBusyTime> {
      */
     public void setEndTime(Date endTime) {
         this.endTime = endTime;
+    }
+
+    /**
+     * Gets the optional event behind the free/busy time.
+     *
+     * @return The event behind the free/busy time, or <code>null</code> if not available
+     */
+    public Event getEvent() {
+        return event;
+    }
+
+    /**
+     * Sets the optional event behind the free/busy time.
+     *
+     * @param event The event to set
+     */
+    public void setEvent(Event event) {
+        this.event = event;
     }
 
     @Override

@@ -730,7 +730,7 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
                 start = CalendarUtils.getDateInTimeZone(event.getStartDate(), timeZone);
                 end = CalendarUtils.getDateInTimeZone(event.getEndDate(), timeZone);
             }
-            freeBusyTimes.add(new FreeBusyTime(getFbType(event), new Date(start), new Date(end)));
+            freeBusyTimes.add(new FreeBusyTime(getFbType(event), new Date(start), new Date(end), event));
         }
         return freeBusyTimes;
     }
