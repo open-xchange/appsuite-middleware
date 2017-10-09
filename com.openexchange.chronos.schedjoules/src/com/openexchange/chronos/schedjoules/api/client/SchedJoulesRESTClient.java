@@ -276,7 +276,7 @@ public class SchedJoulesRESTClient {
                 // Ok, nothing was modified, no response body, return as is
                 return response;
             }
-            
+
             HttpEntity entity = httpResponse.getEntity();
             if (entity == null) {
                 throw new OXException(1138, "No body was returned");
@@ -297,7 +297,7 @@ public class SchedJoulesRESTClient {
     }
 
     /**
-     * Asserts the status code for any errorss
+     * Asserts the status code for any errors
      * 
      * @param httpResponse The {@link HttpResponse}'s status code to assert
      * @return The status code
@@ -305,16 +305,26 @@ public class SchedJoulesRESTClient {
      */
     private int assertStatusCode(HttpResponse httpResponse) throws OXException {
         int statusCode = httpResponse.getStatusLine().getStatusCode();
-        if (statusCode == 401) {
-            throw new OXException(1138, "Not Authorized: " + httpResponse.getStatusLine().getReasonPhrase());
+        // Assert the 4xx codes
+        switch (statusCode) {
+            case 401:
+                throw new OXException(1138, "Not Authorized: " + httpResponse.getStatusLine().getReasonPhrase());
+            case 404:
+                throw new OXException(1138, "The requested page was not found: " + httpResponse.getStatusLine());
         }
-        
-        if (statusCode == 404) {
-            throw new OXException(1138, "The requested page was not found: " + httpResponse.getStatusLine());
+        if (statusCode >= 400 && statusCode <= 499) {
+            throw new OXException(1138, "A client error occurred: " + httpResponse.getStatusLine());
         }
 
-        if (statusCode >= 500) {
-            throw new OXException(1138, "Interal Server Error: " + httpResponse.getStatusLine().getReasonPhrase());
+        // Assert the 5xx codes
+        switch (statusCode) {
+            case 500:
+                throw new OXException(1138, "Internal Server Error: " + httpResponse.getStatusLine().getReasonPhrase());
+            case 503:
+                throw new OXException(1138, "The service is unavailable: " + httpResponse.getStatusLine().getReasonPhrase());
+        }
+        if (statusCode >= 500 && statusCode <= 599) {
+            throw new OXException(1138, "A server error occurred: " + httpResponse.getStatusLine());
         }
         return statusCode;
     }
