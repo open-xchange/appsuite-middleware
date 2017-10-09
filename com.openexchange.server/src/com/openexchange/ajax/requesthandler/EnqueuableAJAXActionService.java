@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.requesthandler;
 
+import com.openexchange.ajax.requesthandler.jobqueue.JobKey;
 import com.openexchange.exception.OXException;
 import com.openexchange.tools.session.ServerSession;
 
@@ -67,6 +68,85 @@ public interface EnqueuableAJAXActionService extends AJAXActionService {
      * @return <code>true</code> if enqueue-able; otherwise <code>false</code>
      * @throws OXException If check fails
      */
-    boolean isEnqueueable(AJAXRequestData request, ServerSession session) throws OXException;
+    Result isEnqueueable(AJAXRequestData request, ServerSession session) throws OXException;
+
+    // ---------------------------------------------------------------------------------------------------
+
+    /**
+     * Gets the result for specified enqueue-able flag
+     *
+     * @param enqueueable The enqueue-able flag
+     * @return The result
+     */
+    public static Result resultFor(boolean enqueueable) {
+        return enqueueable ? Result.TRUE : Result.FALSE;
+    }
+
+    /**
+     * Gets the result for specified enqueue-able flag
+     *
+     * @param enqueueable The enqueue-able flag
+     * @param optionalKey The key that identifies a certain job; or <code>null</code>
+     * @return The result
+     */
+    public static Result resultFor(boolean enqueueable, JobKey optionalKey) {
+        if (null == optionalKey) {
+            return resultFor(enqueueable);
+        }
+
+        return new Result(enqueueable, optionalKey);
+    }
+
+    /**
+     * The result for checking if an action is enqueue-able.
+     */
+    public static final class Result {
+
+        static final Result TRUE = new Result(true);
+
+        static final Result FALSE = new Result(false);
+
+        private final boolean enqueueable;
+        private final JobKey optionalKey;
+
+        /**
+         * Initializes a new {@link Result}.
+         *
+         * @param enqueueable The enqueue-able flag
+         */
+        Result(boolean enqueueable) {
+            this(enqueueable, null);
+        }
+
+        /**
+         * Initializes a new {@link Result}.
+         *
+         * @param enqueueable The enqueue-able flag
+         * @param optionalKey The key that identifies a certain job; or <code>null</code>
+         */
+        Result(boolean enqueueable, JobKey optionalKey) {
+            super();
+            this.enqueueable = enqueueable;
+            this.optionalKey = optionalKey;
+        }
+
+        /**
+         * Gets the enqueue-able flag
+         *
+         * @return The enqueue-able flag
+         */
+        public boolean isEnqueueable() {
+            return enqueueable;
+        }
+
+        /**
+         * Gets the optional key that identifies a certain job.
+         *
+         * @return The key or <code>null</code>
+         */
+        public JobKey getOptionalKey() {
+            return optionalKey;
+        }
+    }
 
 }
