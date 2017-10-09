@@ -79,6 +79,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.UserAndContext;
 import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.threadpool.TrackableTask;
 import com.openexchange.threadpool.behavior.CallerRunsBehavior;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
@@ -93,16 +94,20 @@ public class ThreadPoolJobQueueService implements JobQueueService {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ThreadPoolJobQueueService.class);
 
-    private static final class JobTask extends AbstractTask<AJAXRequestResult> {
+    private static JobTask jobTaskFor(Job job) {
+        return jobTaskFor(job, null, null);
+    }
+
+    private static JobTask jobTaskFor(Job job, JobKey optionalKey, Cache<String, UUID> jobsByKey) {
+        return job.isTrackable() ? new TrackableJobTask(job, optionalKey, jobsByKey) : new JobTask(job, optionalKey, jobsByKey);
+    }
+
+    private static class JobTask extends AbstractTask<AJAXRequestResult> {
 
         private final Job job;
         private boolean executed;
         private JobKey optionalKey;
         private Cache<String, UUID> jobsByKey;
-
-        JobTask(Job job) {
-            this(job, null, null);
-        }
 
         JobTask(Job job, JobKey optionalKey, Cache<String, UUID> jobsByKey) {
             super();
@@ -140,6 +145,13 @@ public class ThreadPoolJobQueueService implements JobQueueService {
         }
 
     } // End of class JobTask
+
+    private static final class TrackableJobTask extends JobTask implements TrackableTask<AJAXRequestResult> {
+
+        TrackableJobTask(Job job, JobKey optionalKey, Cache<String, UUID> jobsByKey) {
+            super(job, optionalKey, jobsByKey);
+        }
+    }
 
     // ---------------------------------------------------------------------------------------------------------------
 
@@ -216,7 +228,7 @@ public class ThreadPoolJobQueueService implements JobQueueService {
         JobKey key = job.getOptionalKey();
         if (null == key) {
             // No key given
-            Future<AJAXRequestResult> f = threadPool.submit(new JobTask(job), CallerRunsBehavior.getInstance());
+            Future<AJAXRequestResult> f = threadPool.submit(jobTaskFor(job), CallerRunsBehavior.getInstance());
             FutureJobInfo jobInfo = new FutureJobInfo(id, job, f, jobsById);
 
             jobsById.put(id, jobInfo);
@@ -226,7 +238,7 @@ public class ThreadPoolJobQueueService implements JobQueueService {
         Cache<String, UUID> jobsByKey = allKeys.getUnchecked(userAndContext);
         jobsByKey.put(key.getIdentifier(), id);
 
-        Future<AJAXRequestResult> f = threadPool.submit(new JobTask(job, key, jobsByKey), CallerRunsBehavior.getInstance());
+        Future<AJAXRequestResult> f = threadPool.submit(jobTaskFor(job, key, jobsByKey), CallerRunsBehavior.getInstance());
         FutureJobInfo jobInfo = new FutureJobInfo(id, job, f, jobsById);
 
         jobsById.put(id, jobInfo);
@@ -241,7 +253,7 @@ public class ThreadPoolJobQueueService implements JobQueueService {
         }
 
         // Sumbit for execution
-        JobTask jobTask = new JobTask(job);
+        JobTask jobTask = jobTaskFor(job);
         Future<AJAXRequestResult> f = threadPool.submit(jobTask, CallerRunsBehavior.getInstance());
         try {
             AJAXRequestResult result = f.get(timeout, unit);
