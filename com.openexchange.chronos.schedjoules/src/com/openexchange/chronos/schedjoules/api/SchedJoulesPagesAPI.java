@@ -124,7 +124,7 @@ public class SchedJoulesPagesAPI extends AbstractSchedJoulesAPI {
      */
     public JSONObject getPage(int pageId, String locale) throws OXException {
         SchedJoulesRequest request = new SchedJoulesRequest(SchedJoulesRESTBindPoint.pages.getAbsolutePath() + "/" + pageId);
-        request.setQueryParameter(SchedJoulesCommonParameter.locale.name(), locale == null ? DEFAULT_LOCALE : locale);
+        request.setQueryParameter(SchedJoulesCommonParameter.locale.name(), Strings.isEmpty(locale) ? DEFAULT_LOCALE : locale);
 
         return executeRequest(request);
     }
