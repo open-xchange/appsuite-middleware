@@ -241,4 +241,31 @@ public class OIDCBackendRegistry extends ServiceTracker<OIDCBackend, OIDCBackend
             }
         }
     }
+
+    @Override
+    public void removedService(ServiceReference<OIDCBackend> reference, OIDCBackend samlBackend) {
+        backends.remove(samlBackend);
+        Stack<String> servlets = backendServlets.remove(samlBackend);
+        try {
+            if (null != servlets) {
+                HttpService httpService = services.getService(HttpService.class);
+                while (!servlets.isEmpty()) {
+                    httpService.unregister(servlets.pop());
+                }
+            }
+        } catch (Exception e) {
+            LOG.error("Error while removing path for SAML Backend");
+        }
+        Stack<ServiceRegistration<?>> registrations = backendServiceRegistrations.remove(samlBackend);
+        try {
+            if (null != registrations) {
+                while (!registrations.isEmpty()) {
+                    registrations.pop().unregister();
+                }
+            }
+        } catch (Exception e) {
+            LOG.error("Error while removing path for SAML Backend");
+        }
+        context.ungetService(reference);
+    }
 }
