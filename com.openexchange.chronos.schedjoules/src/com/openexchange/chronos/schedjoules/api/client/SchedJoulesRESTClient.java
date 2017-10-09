@@ -268,33 +268,47 @@ public class SchedJoulesRESTClient {
      */
     private SchedJoulesResponse executeRequest(HttpUriRequest httpRequest) throws OXException {
         try {
+            // Execute the request
             HttpResponse httpResponse = httpClient.execute(httpRequest);
 
+            // Get the response code and assert
             int statusCode = assertStatusCode(httpResponse);
-            SchedJoulesResponse response = new SchedJoulesResponse(statusCode);
-
             if (statusCode == 304) {
                 // Ok, nothing was modified, no response body, return as is
-                return response;
+                return new SchedJoulesResponse(statusCode);
             }
 
-            HttpEntity entity = httpResponse.getEntity();
-            if (entity == null) {
-                throw new OXException(1138, "No body was returned");
-            }
-            Header ctHeader = httpResponse.getFirstHeader("content-type");
-            if (ctHeader != null) {
-                String ct = ctHeader.getValue();
-                String contentType = ct.substring(0, ct.indexOf(';'));
-                response.setContentType(contentType);
-            }
-            response.setStream(entity.getContent());
-            return response;
+            // Prepare the response
+            return prepareResponse(httpResponse);
         } catch (ClientProtocolException e) {
             throw SchedJoulesExceptionCodes.CLIENT_PROTOCOL_ERROR.create(e.getMessage(), e);
         } catch (IOException e) {
             throw SchedJoulesExceptionCodes.IO_ERROR.create(e.getMessage(), e);
         }
+    }
+
+    /**
+     * Prepares the {@link SchedJoulesResponse} from the specified {@link HttpResponse}
+     * 
+     * @param httpResponse The {@link HttpResponse} to extract the content from
+     * @return the {@link SchedJoulesResponse}
+     * @throws IOException if an I/O error is occurred
+     * @throws OXException if any other error is occurred
+     */
+    private SchedJoulesResponse prepareResponse(HttpResponse httpResponse) throws IOException, OXException {
+        HttpEntity entity = httpResponse.getEntity();
+        if (entity == null) {
+            throw new OXException(1138, "No body was returned");
+        }
+        SchedJoulesResponse response = new SchedJoulesResponse(httpResponse.getStatusLine().getStatusCode());
+        Header ctHeader = httpResponse.getFirstHeader("content-type");
+        if (ctHeader != null) {
+            String ct = ctHeader.getValue();
+            String contentType = ct.substring(0, ct.indexOf(';'));
+            response.setContentType(contentType);
+        }
+        response.setStream(entity.getContent());
+        return response;
     }
 
     /**
