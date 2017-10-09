@@ -67,6 +67,11 @@ import com.openexchange.exception.OXException;
  */
 public class SchedJoulesServiceImpl implements SchedJoulesService {
 
+    /**
+     * Default 'X-WR-CALNAME' and 'SUMMARY' contents of an iCal that is not accessible
+     */
+    private static final String NO_ACCESS = "You have no access to this calendar";
+
     private final SchedJoulesAPI api;
 
     /**
@@ -135,7 +140,7 @@ public class SchedJoulesServiceImpl implements SchedJoulesService {
             String url = page.getString("url");
             URL u = new URL(url);
             Calendar calendar = api.calendar().getCalendar(u);
-            if (calendar.getName().equals("You have no access to this calendar")) {
+            if (NO_ACCESS.equals(calendar.getName())) {
                 throw SchedJoulesExceptionCodes.NO_ACCESS.create(id);
             }
             //TODO: Hook-up with the SchedJoules provider to subscribe to the calendar
