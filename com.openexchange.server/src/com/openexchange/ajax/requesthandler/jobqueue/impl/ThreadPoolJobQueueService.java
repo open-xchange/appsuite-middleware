@@ -191,8 +191,13 @@ public class ThreadPoolJobQueueService implements JobQueueService {
 
     @Override
     public UUID contains(JobKey key) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        if (null == key) {
+            return null;
+        }
+
+        UserAndContext userAndContext = UserAndContext.newInstance(key.getUserId(), key.getContextId());
+        Cache<String, UUID> jobsByKey = allKeys.getIfPresent(userAndContext);
+        return null == jobsByKey ? null : jobsByKey.getIfPresent(key.getIdentifier());
     }
 
     @Override
