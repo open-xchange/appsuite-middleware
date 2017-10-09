@@ -81,11 +81,15 @@ public class SchedJoulesRESTClient {
 
     private static final String SCHEME = "https";
     private static final String BASE_URL = "api.schedjoules.com";
-    private static final String AUTHORIZATION_HEADER = "Token token=\"{{token}}\"";
     private static final String USER_AGENT = "Open-Xchange SchedJoules Client (pre-Alpha)";
+    private static final int API_VERSION = 1;
+
+    private static final String ACCEPT_HEADER = "application/vnd.schedjoules; version={{version}}";
+    private static final String AUTHORIZATION_HEADER = "Token token=\"{{token}}\"";
 
     private final CloseableHttpClient httpClient;
     private final String authorizationHeader;
+    private final String acceptHeader;
 
     /**
      * Initialises a new {@link SchedJoulesRESTClient}.
@@ -95,11 +99,12 @@ public class SchedJoulesRESTClient {
     public SchedJoulesRESTClient() throws OXException {
         super();
         authorizationHeader = prepareAuthorizationHeader();
+        acceptHeader = prepareAcceptHeader();
         httpClient = initializeHttpClient();
     }
 
     /**
-     * Prepares the authorisation header
+     * Prepares the 'Authorization' header
      * 
      * @return The authorisation header
      * @throws OXException if the api key is not configured
@@ -111,6 +116,15 @@ public class SchedJoulesRESTClient {
             throw SchedJoulesExceptionCodes.NO_API_KEY_CONFIGURED.create();
         }
         return AUTHORIZATION_HEADER.replaceFirst("\\{\\{token\\}\\}", apiKey);
+    }
+
+    /**
+     * Prepares the 'Accept' header
+     * 
+     * @return the 'Accept' header
+     */
+    private String prepareAcceptHeader() {
+        return ACCEPT_HEADER.replaceFirst("\\{\\{version\\}\\}", Integer.toString(API_VERSION));
     }
 
     /**
@@ -151,6 +165,7 @@ public class SchedJoulesRESTClient {
         try {
             request.setURI(new URI(scheme, baseUrl, path, query, null));
             request.addHeader(HttpHeaders.AUTHORIZATION, authorizationHeader);
+            request.addHeader(HttpHeaders.ACCEPT, acceptHeader);
         } catch (URISyntaxException e) {
             throw SchedJoulesExceptionCodes.INVALID_URI_PATH.create(path, e);
         }
