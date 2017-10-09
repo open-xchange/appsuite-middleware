@@ -121,7 +121,7 @@ public class CalendarExceptionMessages implements LocalizableStrings {
 
     public static final String IGNORED_INVALID_DATA_MSG = "The value for \"%2$s\" is invalid and wasn't be applied.";
 
-    public static final String UNKNOWN_INTERNAL_ATTENDEE_MSG = "The attendee '%1$s' is either not an internal user or does not exist.";
+    public static final String UNKNOWN_INTERNAL_ATTENDEE_MSG = "The '%1$s' is either not an internal user or does not exist.";
 
     public static final String AUTH_FAILED_MSG = "Authentication failed.";
 

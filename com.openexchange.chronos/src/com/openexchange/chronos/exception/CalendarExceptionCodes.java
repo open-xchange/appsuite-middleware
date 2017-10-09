@@ -322,7 +322,7 @@ public enum CalendarExceptionCodes implements DisplayableOXExceptionCode {
      * <li>The attendee '%1$s' is either not an internal user or does not exist.</li>
      * <li>Internal attendee not found [attendee %1$s]</li>
      */
-    UNKNOWN_INTERNAL_ATTENDEE("Internal attendee not found [attendee %1$s]", UNKNOWN_INTERNAL_ATTENDEE_MSG, Category.CATEGORY_WARNING, 5073),
+    UNKNOWN_INTERNAL_ATTENDEE("Internal attendee not found [%1$s]", UNKNOWN_INTERNAL_ATTENDEE_MSG, Category.CATEGORY_WARNING, 5073),
 
     AUTH_FAILED("Authentication failed to access the resource at %1$s", AUTH_FAILED_MSG, Category.CATEGORY_ERROR, 4010),
     /**

@@ -251,7 +251,7 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
         Map<Attendee, FreeBusyResult> results = new HashMap<>();
         for (Attendee attendee : attendees) {
             if (!freeBusyPerAttendee.containsKey(attendee)) {
-                List<OXException> warnings = Collections.singletonList(CalendarExceptionCodes.UNKNOWN_INTERNAL_ATTENDEE.create(attendee.getEntity()));
+                List<OXException> warnings = Collections.singletonList(CalendarExceptionCodes.UNKNOWN_INTERNAL_ATTENDEE.create(attendee.toString()));
                 FreeBusyResult result = new FreeBusyResult();
                 result.setWarnings(warnings);
                 results.put(attendee, result);
@@ -266,6 +266,9 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
             // Adjust the ranges of the FreeBusyTime slots that are marked as FREE
             // in regard to the mergedFreeBusyTimes
             List<FreeBusyTime> eventsFreeBusyTimes = freeBusyPerAttendee.get(attendee);
+            if(eventsFreeBusyTimes == null){
+                continue;
+            }
             if (eventsFreeBusyTimes.isEmpty()) {
                 // The empty event free/busy list is unmodifiable, so we create a modifiable empty list
                 eventsFreeBusyTimes = new ArrayList<>(0);

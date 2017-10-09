@@ -165,9 +165,6 @@ public class FreeBusyAction extends ChronosAction {
             for (int index = 0; index < attendeesArray.length(); index++) {
                 JSONObject attendeeJSON = attendeesArray.getJSONObject(index);
                 Attendee attendee = mapping.deserialize(attendeeJSON, timeZone);
-                if (!attendee.containsUri() && !attendee.containsEntity()) {
-                    attendee.setEntity(requestData.getSession().getUserId());
-                }
                 attendees.add(attendee);
             }
             return attendees;
