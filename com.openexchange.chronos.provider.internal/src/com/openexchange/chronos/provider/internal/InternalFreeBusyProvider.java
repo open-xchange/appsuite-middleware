@@ -47,67 +47,53 @@
  *
  */
 
-package com.openexchange.chronos.provider.internal.osgi;
+package com.openexchange.chronos.provider.internal;
 
-import static org.slf4j.LoggerFactory.getLogger;
-import com.openexchange.chronos.provider.CalendarProvider;
+import static com.openexchange.java.Autoboxing.I;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.provider.FreeBusyProvider;
-import com.openexchange.chronos.provider.internal.InternalCalendarProvider;
-import com.openexchange.chronos.provider.internal.InternalFreeBusyProvider;
-import com.openexchange.chronos.provider.internal.Services;
-import com.openexchange.chronos.provider.internal.share.CalendarFolderHandlerModuleExtension;
-import com.openexchange.chronos.provider.internal.share.CalendarModuleAdjuster;
+import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarService;
-import com.openexchange.chronos.service.RecurrenceService;
-import com.openexchange.folderstorage.FolderService;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.share.core.ModuleAdjuster;
-import com.openexchange.share.groupware.spi.FolderHandlerModuleExtension;
-import com.openexchange.tools.oxfolder.property.FolderUserPropertyStorage;
-import com.openexchange.user.UserService;
+import com.openexchange.chronos.service.CalendarSession;
+import com.openexchange.chronos.service.FreeBusyResult;
+import com.openexchange.exception.OXException;
+import com.openexchange.session.Session;
 
 /**
- * {@link InternalCalendarProviderActivator}
+ * {@link InternalFreeBusyProvider}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class InternalCalendarProviderActivator extends HousekeepingActivator {
+public class InternalFreeBusyProvider implements FreeBusyProvider {
 
     /**
-     * Initializes a new {@link InternalCalendarProviderActivator}.
+     * Initializes a new {@link InternalFreeBusyProvider}.
      */
-    public InternalCalendarProviderActivator() {
+    public InternalFreeBusyProvider() {
         super();
     }
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { FolderService.class, CalendarService.class, RecurrenceService.class, UserService.class };
-    }
-
-    @Override
-    protected void startBundle() throws Exception {
-        trackService(FolderUserPropertyStorage.class);
-        openTrackers();
-        try {
-            getLogger(InternalCalendarProviderActivator.class).info("starting bundle {}", context.getBundle());
-            Services.setServiceLookup(this);
-            registerService(CalendarProvider.class, new InternalCalendarProvider());
-            registerService(FreeBusyProvider.class, new InternalFreeBusyProvider());
-            registerService(ModuleAdjuster.class, new CalendarModuleAdjuster());
-            registerService(FolderHandlerModuleExtension.class, new CalendarFolderHandlerModuleExtension(this));
-        } catch (Exception e) {
-            getLogger(InternalCalendarProviderActivator.class).error("error starting {}", context.getBundle(), e);
-            throw e;
+    public Map<Attendee, Map<Integer, FreeBusyResult>> query(Session session, List<Attendee> attendees, Date from, Date until, CalendarParameters parameters) throws OXException {
+        CalendarService calendarService = Services.getService(CalendarService.class);
+        CalendarSession calendarSession = calendarService.init(session, parameters);
+        Map<Attendee, FreeBusyResult> results = calendarSession.getFreeBusyService().calculateFreeBusyTime(calendarSession, attendees, from, until);
+        if (null == results || results.isEmpty()) {
+            return Collections.emptyMap();
         }
+        Map<Attendee, Map<Integer, FreeBusyResult>> resultsPerAccountId = new HashMap<Attendee, Map<Integer, FreeBusyResult>>(results.size());
+        for (Entry<Attendee, FreeBusyResult> entry : results.entrySet()) {
+            resultsPerAccountId.put(entry.getKey(), Collections.singletonMap(I(Constants.ACCOUNT_ID), entry.getValue()));
+        }
+        return resultsPerAccountId;
     }
 
-    @Override
-    protected void stopBundle() throws Exception {
-        getLogger(InternalCalendarProviderActivator.class).info("stopping bundle {}", context.getBundle());
-        Services.setServiceLookup(null);
-        super.stopBundle();
-    }
 
 }
