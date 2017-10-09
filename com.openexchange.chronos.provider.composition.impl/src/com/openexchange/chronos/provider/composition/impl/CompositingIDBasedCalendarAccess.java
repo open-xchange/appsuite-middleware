@@ -62,6 +62,7 @@ import static com.openexchange.chronos.provider.composition.impl.idmangling.IDMa
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.i;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -79,6 +80,7 @@ import com.openexchange.chronos.provider.CalendarAccess;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.CalendarFolder;
 import com.openexchange.chronos.provider.CalendarProviderRegistry;
+import com.openexchange.chronos.provider.FreeBusyProvider;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
 import com.openexchange.chronos.provider.composition.impl.idmangling.IDManglingCalendarResult;
 import com.openexchange.chronos.provider.composition.impl.idmangling.IDManglingUpdatesResult;
@@ -90,6 +92,7 @@ import com.openexchange.chronos.provider.groupware.GroupwareCalendarFolder;
 import com.openexchange.chronos.provider.groupware.GroupwareFolderType;
 import com.openexchange.chronos.service.CalendarResult;
 import com.openexchange.chronos.service.EventID;
+import com.openexchange.chronos.service.FreeBusyResult;
 import com.openexchange.chronos.service.SearchFilter;
 import com.openexchange.chronos.service.SearchOptions;
 import com.openexchange.chronos.service.SortOrder;
@@ -297,7 +300,9 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
     public CalendarResult createEvent(String folderId, Event event) throws OXException {
         int accountId = getAccountId(folderId);
         try {
+
             GroupwareCalendarAccess calendarAccess = getGroupwareAccess(accountId);
+
             CalendarResult result = calendarAccess.createEvent(getRelativeFolderId(folderId), withRelativeID(event));
             return new IDManglingCalendarResult(result, accountId);
         } catch (OXException e) {
@@ -425,6 +430,20 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
         } catch (OXException e) {
             throw withUniqueIDs(e, accountId);
         }
+    }
+
+    @Override
+    public Map<Attendee, FreeBusyResult> queryFreeBusy(List<Attendee> attendees, Date from, Date until) throws OXException {
+        Map<Attendee, FreeBusyResult> results = new HashMap<Attendee, FreeBusyResult>();
+        for (FreeBusyProvider freeBusyProvider : getFreeBusyProviders()) {
+
+            Map<Attendee, FreeBusyResult> result = freeBusyProvider.query(session, attendees, from, until, this);
+
+            //TODO: withuniqueid
+
+            results.putAll(result);
+        }
+        return results;
     }
 
     /////////////////////////////////////////// HELPERS //////////////////////////////////////////////////

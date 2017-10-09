@@ -52,6 +52,7 @@ package com.openexchange.chronos.provider.composition.impl.osgi;
 import static org.slf4j.LoggerFactory.getLogger;
 import com.openexchange.chronos.provider.CalendarProvider;
 import com.openexchange.chronos.provider.CalendarProviderRegistry;
+import com.openexchange.chronos.provider.FreeBusyProvider;
 import com.openexchange.chronos.provider.account.CalendarAccountService;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccessFactory;
 import com.openexchange.chronos.provider.composition.impl.CalendarProviderRegistryImpl;
@@ -94,8 +95,10 @@ public class CompositingCalendarProviderActivator extends HousekeepingActivator 
              * track calendar providers & collect in registry
              */
             ServiceSet<CalendarProvider> calendarProviders = new ServiceSet<CalendarProvider>();
-            CalendarProviderRegistryImpl providerRegistry = new CalendarProviderRegistryImpl(calendarProviders);
+            ServiceSet<FreeBusyProvider> freeBusyProviders = new ServiceSet<FreeBusyProvider>();
+            CalendarProviderRegistryImpl providerRegistry = new CalendarProviderRegistryImpl(calendarProviders, freeBusyProviders);
             track(CalendarProvider.class, calendarProviders);
+            track(FreeBusyProvider.class, freeBusyProviders);
             openTrackers();
             /*
              * register services

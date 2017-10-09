@@ -47,57 +47,35 @@
  *
  */
 
-package com.openexchange.chronos.provider.composition.impl;
+package com.openexchange.chronos.provider;
 
-import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Date;
 import java.util.List;
-import com.openexchange.chronos.provider.CalendarProvider;
-import com.openexchange.chronos.provider.CalendarProviderRegistry;
-import com.openexchange.chronos.provider.FreeBusyProvider;
-import com.openexchange.osgi.ServiceSet;
+import java.util.Map;
+import com.openexchange.chronos.Attendee;
+import com.openexchange.chronos.service.CalendarParameters;
+import com.openexchange.chronos.service.FreeBusyResult;
+import com.openexchange.exception.OXException;
+import com.openexchange.session.Session;
 
 /**
- * {@link CalendarProviderRegistryImpl}
+ * {@link FreeBusyProvider}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class CalendarProviderRegistryImpl implements CalendarProviderRegistry {
-
-    private final ServiceSet<CalendarProvider> calendarProviders;
-    private final ServiceSet<FreeBusyProvider> freeBusyProviders;
+public interface FreeBusyProvider {
 
     /**
-     * Initializes a new {@link CalendarProviderRegistryImpl}.
+     * Queries the free/busy time for a list of attendees.
      *
-     * @param calendarProviders The calendar providers service set
-     * @param freeBusyProviders The feee/busy providers service set
+     * @param session The session of the user requesting the free/busy data
+     * @param attendees The queried attendees
+     * @param from The start of the requested time range
+     * @param until The end of the requested time range
+     * @param parameters Additional arbitrary parameters, or <code>null</code> if not used
+     * @return The free/busy times for each of the attendees
      */
-    public CalendarProviderRegistryImpl(ServiceSet<CalendarProvider> calendarProviders, ServiceSet<FreeBusyProvider> freeBusyProviders) {
-        super();
-        this.calendarProviders = calendarProviders;
-        this.freeBusyProviders = freeBusyProviders;
-    }
-
-    @Override
-    public CalendarProvider getCalendarProvider(String id) {
-        for (CalendarProvider calendarProvider : calendarProviders) {
-            if (id.equals(calendarProvider.getId())) {
-                return calendarProvider;
-            }
-        }
-        return null;
-    }
-
-    @Override
-    public List<CalendarProvider> getCalendarProviders() {
-        return Collections.unmodifiableList(new ArrayList<CalendarProvider>(calendarProviders));
-    }
-
-    @Override
-    public List<FreeBusyProvider> getFreeBusyProviders() {
-        return Collections.unmodifiableList(new ArrayList<FreeBusyProvider>(freeBusyProviders));
-    }
+    Map<Attendee, FreeBusyResult> query(Session session, List<Attendee> attendees, Date from, Date until, CalendarParameters parameters) throws OXException;
 
 }

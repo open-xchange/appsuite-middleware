@@ -49,7 +49,9 @@
 
 package com.openexchange.chronos.provider.composition;
 
+import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.chronos.Alarm;
@@ -66,6 +68,7 @@ import com.openexchange.chronos.provider.groupware.GroupwareFolderType;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarResult;
 import com.openexchange.chronos.service.EventID;
+import com.openexchange.chronos.service.FreeBusyResult;
 import com.openexchange.chronos.service.SearchFilter;
 import com.openexchange.chronos.service.UpdatesResult;
 import com.openexchange.exception.OXException;
@@ -368,7 +371,7 @@ public interface IDBasedCalendarAccess extends TransactionAware, CalendarParamet
      * <li>{@link CalendarParameters#PARAMETER_RANGE_START}</li>
      * <li>{@link CalendarParameters#PARAMETER_RANGE_END}</li>
      * </ul>
-     * 
+     *
      * @param actions The actions to retrieve
      * @return A list of upcoming alarm triggers
      * @throws OXException
@@ -378,11 +381,22 @@ public interface IDBasedCalendarAccess extends TransactionAware, CalendarParamet
     /**
      * Retrieves the {@link IFileHolder} with the specified managed identifier from the {@link Event}
      * with the specified {@link EventID}
-     * 
+     *
      * @param eventID The {@link Event} identifier
      * @param managedId The managed identifier of the {@link Attachment}
      * @return The {@link IFileHolder}
      * @throws OXException if an error is occurred
      */
     IFileHolder getAttachment(EventID eventID, int managedId) throws OXException;
+
+    /**
+     * Queries the free/busy time for a list of attendees.
+     *
+     * @param attendees The queried attendees
+     * @param from The start of the requested time range
+     * @param until The end of the requested time range
+     * @return The free/busy results for each of the queried attendees
+     */
+    Map<Attendee, FreeBusyResult> queryFreeBusy(List<Attendee> attendees, Date from, Date until) throws OXException;
+
 }

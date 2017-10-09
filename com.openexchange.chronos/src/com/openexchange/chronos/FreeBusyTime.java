@@ -64,6 +64,7 @@ public class FreeBusyTime implements Comparable<FreeBusyTime> {
     private Date startTime;
     private Date endTime;
     private Event event;
+    private int accountId;
 
     /**
      * Initializes a new {@link FreeBusyTime}.

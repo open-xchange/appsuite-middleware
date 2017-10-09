@@ -50,7 +50,6 @@
 package com.openexchange.chronos.provider;
 
 import java.util.List;
-import com.openexchange.exception.OXException;
 import com.openexchange.osgi.annotation.SingletonService;
 
 /**
@@ -68,13 +67,20 @@ public interface CalendarProviderRegistry {
      * @param id The identifier of the calendar provider to get
      * @return The calendar provider, or <code>null</code> if not found
      */
-    CalendarProvider getCalendarProvider(String id) throws OXException;
+    CalendarProvider getCalendarProvider(String id);
 
     /**
      * Gets all registered calendar providers.
      *
      * @return A list of all registered calendar providers
      */
-    List<CalendarProvider> getCalendarProviders() throws OXException;
+    List<CalendarProvider> getCalendarProviders();
+
+    /**
+     * Gets all registered free/busy providers.
+     *
+     * @return A list of all registered free/busy providers
+     */
+    List<FreeBusyProvider> getFreeBusyProviders();
 
 }
