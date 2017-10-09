@@ -54,6 +54,7 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.text.ParseException;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.locks.Lock;
@@ -132,7 +133,7 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
     public OIDCBackendConfig getBackendConfig() {
         return new OIDCBackendConfigImpl(Services.getService(LeanConfigurationService.class));
     }
-    
+
     @Override
     public void setLoginConfiguration(LoginConfiguration loginConfiguration) {
         this.loginConfiguration = loginConfiguration;
@@ -323,6 +324,9 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
         Map<String, String> tokenMap = new HashMap<>();
         tokenMap.put(OIDCTools.ACCESS_TOKEN, accessToken.getTokens().getAccessToken().getValue());
         tokenMap.put(OIDCTools.REFRESH_TOKEN, accessToken.getTokens().getRefreshToken().getValue());
+        long expiryDate = new Date().getTime();
+        expiryDate += accessToken.getTokens().getAccessToken().getLifetime() * 1000;
+        tokenMap.put(OIDCTools.ACCESS_TOKEN_EXPIRY, String.valueOf(expiryDate));
         this.updateSession(session, tokenMap);
         return true;
     }
@@ -360,14 +364,14 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
         long expiryDate = Long.parseLong((String) session.getParameter(Session.PARAM_OAUTH_ACCESS_TOKEN_EXPIRY_DATE));
         return System.currentTimeMillis() >= (expiryDate - oauthRefreshTime);
     }
-    
+
     private LoginConfiguration getLoginConfiguration() {
         if (this.loginConfiguration == null) {
             this.loginConfiguration = LoginServlet.getLoginConfiguration();
         }
         return this.loginConfiguration;
     }
-    
+
     @Override
     public void logoutCurrentUser(Session session, HttpServletRequest request, HttpServletResponse response, LoginConfiguration loginConfiguration) throws OXException {
         LOG.debug("Try to Logout user for session {}", session.getSessionID());
