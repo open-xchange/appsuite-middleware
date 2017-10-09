@@ -100,7 +100,7 @@ public class SchedJoulesPagesAPI {
         request.setQueryParameter(SchedJoulesCommonParameter.location.name(), location);
         request.setQueryParameter(SchedJoulesCommonParameter.locale.name(), locale);
 
-        return SchedJoulesStreamParsers.parse(client.executeRequest(request), StreamParser.JSON);
+        return executeRequest(request);
     }
 
     /**
@@ -127,6 +127,18 @@ public class SchedJoulesPagesAPI {
         SchedJoulesRequest request = new SchedJoulesRequest(SchedJoulesRESTBindPoint.pages.getAbsolutePath() + "/" + pageId);
         request.setQueryParameter(SchedJoulesCommonParameter.locale.name(), locale);
 
-        return SchedJoulesStreamParsers.parse(client.executeRequest(request), StreamParser.JSON);
+        return executeRequest(request);
+    }
+
+    /**
+     * Executes the specified request and returns the {@link JSONObject} payload of the response
+     * 
+     * @param request the {@link SchedJoulesRequest}
+     * @return The {@link JSONObject} of the response payload
+     * @throws OXException if an error is occurred
+     */
+    private JSONObject executeRequest(SchedJoulesRequest request) throws OXException {
+        SchedJoulesResponse response = client.executeRequest(request);
+        return SchedJoulesStreamParsers.parse(response, StreamParser.findParser(response.getContentType()));
     }
 }

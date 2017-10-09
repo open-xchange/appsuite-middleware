@@ -60,6 +60,7 @@ public class SchedJoulesResponse {
 
     private InputStream stream;
     private final int statusCode;
+    private String contentType;
 
     /**
      * Initialises a new {@link SchedJoulesResponse}.
@@ -94,5 +95,23 @@ public class SchedJoulesResponse {
      */
     public void setStream(InputStream stream) {
         this.stream = stream;
+    }
+
+    /**
+     * Gets the contentType
+     *
+     * @return The contentType
+     */
+    public String getContentType() {
+        return contentType;
+    }
+
+    /**
+     * Sets the contentType
+     *
+     * @param contentType The contentType to set
+     */
+    public void setContentType(String contentType) {
+        this.contentType = contentType;
     }
 }

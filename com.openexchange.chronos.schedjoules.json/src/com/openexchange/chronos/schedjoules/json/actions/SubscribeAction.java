@@ -87,10 +87,10 @@ public class SubscribeAction implements AJAXActionService {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create("id");
         }
 
-        // TODO: Fetch the locale from the session?
+        //String language = session.getUser().getLocale().getLanguage().toLowerCase();
+        //String country = session.getUser().getLocale().getCountry().toLowerCase();
 
         int pageId = Integer.parseInt(pid);
-
         SchedJoulesService service = services.getService(SchedJoulesService.class);
         String prodId = service.subscribeCalendar(pageId);
 

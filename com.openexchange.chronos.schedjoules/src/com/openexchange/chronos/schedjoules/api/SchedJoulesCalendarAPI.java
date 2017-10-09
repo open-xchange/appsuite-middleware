@@ -53,6 +53,7 @@ import java.net.URL;
 import com.openexchange.chronos.Calendar;
 import com.openexchange.chronos.schedjoules.api.SchedJoulesStreamParsers.StreamParser;
 import com.openexchange.chronos.schedjoules.api.client.SchedJoulesRESTClient;
+import com.openexchange.chronos.schedjoules.api.client.SchedJoulesResponse;
 import com.openexchange.exception.OXException;
 
 /**
@@ -80,6 +81,7 @@ public class SchedJoulesCalendarAPI {
      * @throws OXException if a parsing error is occurred
      */
     public Calendar getCalendar(URL url) throws OXException {
-        return SchedJoulesStreamParsers.parse(client.executeRequest(url), StreamParser.CALENDAR);
+        SchedJoulesResponse response = client.executeRequest(url);
+        return SchedJoulesStreamParsers.parse(response, StreamParser.findParser(response.getContentType()));
     }
 }

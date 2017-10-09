@@ -83,13 +83,15 @@ public class BrowseAction implements AJAXActionService {
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
         String pageId = requestData.getParameter("id");
         SchedJoulesService service = services.getService(SchedJoulesService.class);
+
+        String language = session.getUser().getLocale().getLanguage().toLowerCase();
+        String country = session.getUser().getLocale().getCountry().toLowerCase();
+
         if (pageId == null) {
-            return new AJAXRequestResult(service.getRoot().getData());
+            return new AJAXRequestResult(service.getRoot(language, country).getData());
         }
-        
-        // TODO: Fetch the locale from the session?
 
         int pid = Integer.parseInt(pageId);
-        return new AJAXRequestResult(service.getPage(pid).getData());
+        return new AJAXRequestResult(service.getPage(pid, language).getData());
     }
 }

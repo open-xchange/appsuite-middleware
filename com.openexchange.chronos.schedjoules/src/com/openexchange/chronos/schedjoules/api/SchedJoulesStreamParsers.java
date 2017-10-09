@@ -62,6 +62,7 @@ import com.openexchange.chronos.schedjoules.api.client.SchedJoulesResponse;
 import com.openexchange.chronos.schedjoules.osgi.Services;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
+import com.openexchange.java.Strings;
 
 /**
  * {@link SchedJoulesStreamParsers}
@@ -76,8 +77,47 @@ final class SchedJoulesStreamParsers {
      * {@link StreamParser} - Defines the types of the available stream parsers
      */
     static enum StreamParser {
-        JSON,
-        CALENDAR;
+        JSON("application/json"),
+        CALENDAR("text/calendar");
+
+        private final String contentType;
+
+        /**
+         * Initialises a new {@link StreamParser}.
+         * 
+         * @param contentType The content type of the stream parser
+         */
+        private StreamParser(String contentType) {
+            this.contentType = contentType;
+        }
+
+        /**
+         * Gets the contentType
+         *
+         * @return The contentType
+         */
+        public String getContentType() {
+            return contentType;
+        }
+
+        /**
+         * Tries to find an appropriate stream parser for the specified content type
+         * 
+         * @param contentType The content type
+         * @return The {@link StreamParser}
+         * @throw IllegalArgumentException if no {@link StreamParser} found
+         */
+        static StreamParser findParser(String contentType) {
+            if (Strings.isEmpty(contentType)) {
+                throw new IllegalArgumentException("The content type can be neither 'null' nor empty");
+            }
+            for (StreamParser streamParser : StreamParser.values()) {
+                if (streamParser.getContentType().equals(contentType)) {
+                    return streamParser;
+                }
+            }
+            throw new IllegalArgumentException("No stream parser found for the specified content type '" + contentType + "'");
+        }
     }
 
     /**

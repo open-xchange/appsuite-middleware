@@ -54,6 +54,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Map;
+import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpResponse;
@@ -258,7 +259,7 @@ public class SchedJoulesRESTClient {
     }
 
     /**
-     * Executes the specifeid {@link HttpUriRequest} and returns a {@link SchedJoulesResponse}
+     * Executes the specified {@link HttpUriRequest} and returns a {@link SchedJoulesResponse}
      * 
      * @param httpRequest the {@link HttpUriRequest} to execute
      * @return The {@link SchedJoulesResponse}
@@ -280,7 +281,12 @@ public class SchedJoulesRESTClient {
             if (entity == null) {
                 throw new OXException(1138, "No body was returned");
             }
-
+            Header ctHeader = httpResponse.getFirstHeader("content-type");
+            if (ctHeader != null) {
+                String ct = ctHeader.getValue();
+                String contentType = ct.substring(0, ct.indexOf(';'));
+                response.setContentType(contentType);
+            }
             response.setStream(entity.getContent());
             return response;
         } catch (ClientProtocolException e) {
@@ -301,6 +307,10 @@ public class SchedJoulesRESTClient {
         int statusCode = httpResponse.getStatusLine().getStatusCode();
         if (statusCode == 401) {
             throw new OXException(1138, "Not Authorized: " + httpResponse.getStatusLine().getReasonPhrase());
+        }
+        
+        if (statusCode == 404) {
+            throw new OXException(1138, "The requested page was not found: " + httpResponse.getStatusLine());
         }
 
         if (statusCode >= 500) {
