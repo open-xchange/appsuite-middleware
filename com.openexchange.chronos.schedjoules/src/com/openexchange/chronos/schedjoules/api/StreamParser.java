@@ -53,10 +53,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.ical.ICalParameters;
 import com.openexchange.chronos.ical.ICalService;
 import com.openexchange.chronos.schedjoules.api.client.SchedJoulesResponse;
+import com.openexchange.chronos.schedjoules.exception.SchedJoulesExceptionCodes;
 import com.openexchange.chronos.schedjoules.osgi.Services;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
@@ -75,8 +75,10 @@ enum StreamParser {
         Object parseResponse(SchedJoulesResponse response) throws OXException {
             try (InputStream inputStream = Streams.bufferedInputStreamFor(response.getStream())) {
                 return new JSONObject(Streams.stream2string(inputStream, CHARSET));
-            } catch (IOException | JSONException e) {
-                throw CalendarExceptionCodes.UNEXPECTED_ERROR.create(e.getMessage());
+            } catch (IOException e) {
+                throw SchedJoulesExceptionCodes.IO_ERROR.create(e.getMessage(), e);
+            } catch (JSONException e) {
+                throw SchedJoulesExceptionCodes.JSON_ERROR.create(e.getMessage(), e);
             }
         }
     },
@@ -94,7 +96,7 @@ enum StreamParser {
             try (InputStream inputStream = Streams.bufferedInputStreamFor(response.getStream())) {
                 return iCalService.importICal(inputStream, parameters);
             } catch (IOException e) {
-                throw CalendarExceptionCodes.UNEXPECTED_ERROR.create(e.getMessage());
+                throw SchedJoulesExceptionCodes.IO_ERROR.create(e.getMessage(), e);
             }
         }
     };
@@ -138,9 +140,9 @@ enum StreamParser {
                 return streamParser.parseResponse(response);
             }
         }
-        throw new OXException(1138, "No stream parser found for the specified content type '" + contentType + "'");
+        throw SchedJoulesExceptionCodes.NO_STREAM_PARSER.create(contentType);
     }
-    
+
     /**
      * Parses the {@link InputStream} from the specified {@link SchedJoulesResponse}
      * 

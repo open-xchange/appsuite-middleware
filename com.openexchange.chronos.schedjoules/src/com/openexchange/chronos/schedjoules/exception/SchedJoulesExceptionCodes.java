@@ -61,6 +61,57 @@ import com.openexchange.exception.OXExceptionFactory;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public enum SchedJoulesExceptionCodes implements DisplayableOXExceptionCode {
+    /**
+     * <li>The requested page does not denote to a calendar</li>
+     * <li>The page with the id '%$1s' does not denote to a calendar</li>
+     */
+    NO_CALENDAR("The page with the id '%$1s' does not denote to a calendar", SchedJoulesExceptionMessages.NO_CALENDAR_MSG, CATEGORY_USER_INPUT, 1),
+    /**
+     * <li>You have no access to this calendar.</li>
+     * <li>No access to calendar with id '%1$s'</li>
+     */
+    NO_ACCESS("No access to calendar with id '%1$s'", SchedJoulesExceptionMessages.NO_ACCESS_MSG, CATEGORY_PERMISSION_DENIED, 2),
+    /**
+     * <li>An error occurred inside the server which prevented it from fulfilling the request.</li>
+     * <li>A JSON error occurred: %1$s</li>
+     */
+    JSON_ERROR("A JSON error occurred: %1$s", CATEGORY_ERROR, 3),
+    /**
+     * <li>An error occurred inside the server which prevented it from fulfilling the request.</li>
+     * <li>The page with id '%1$s' does not contain a valid URL.</li>
+     */
+    INVALID_URL("The page with id '%1$s' does not contain a valid URL.", CATEGORY_ERROR, 4),
+    /**
+     * <li>An error occurred inside the server which prevented it from fulfilling the request.</li>
+     * <li>An I/O error occurred: %1$s</li>
+     */
+    IO_ERROR("An I/O error occurred: %1$s", CATEGORY_ERROR, 5),
+    /**
+     * <li>An error occurred inside the server which prevented it from fulfilling the request.</li>
+     * <li>No stream parser found for the specified content type '%1$s'</li>
+     */
+    NO_STREAM_PARSER("No stream parser found for the specified content type '%1$s'", CATEGORY_ERROR, 6),
+    /**
+     * <li>An error occurred inside the server which prevented it from fulfilling the request.</li>
+     * <li>The apiKey is missing from the 'schedjoules.properties'. Please configure the service properly.</li>
+     */
+    NO_API_KEY_CONFIGURED("The apiKey is missing from the 'schedjoules.properties'. Please configure the service properly.", CATEGORY_ERROR, 7),
+    /**
+     * <li>An error occurred inside the server which prevented it from fulfilling the request.</li>
+     * <li>The URI path '%1$s' is not valid.</li>
+     */
+    INVALID_URI_PATH("The URI path '%1$s' is not valid.", CATEGORY_ERROR, 8),
+    /**
+     * <li>An error occurred inside the server which prevented it from fulfilling the request.</li>
+     * <li>An unknown HTTP method '%1$s' was specified.</li>
+     */
+    UNKNOWN_HTTP_METHOD("An unknown HTTP method '%1$s' was specified.", CATEGORY_ERROR, 9),
+    /**
+     * <li>An error occurred inside the server which prevented it from fulfilling the request.</li>
+     * <li>An HTTP client protocol error occurred: %1$s</li>
+     */
+    CLIENT_PROTOCOL_ERROR("An HTTP client protocol error occurred: %1$s", CATEGORY_ERROR, 10)
+
     ;
 
     public static final String PREFIX = "SCHEDJOULES";
@@ -69,6 +120,18 @@ public enum SchedJoulesExceptionCodes implements DisplayableOXExceptionCode {
     private String displayMessage;
     private Category category;
     private int number;
+
+    /**
+     * Initialises a new {@link SchedJoulesExceptionCodes}.
+     * 
+     * @param message The exception message
+     * @param displayMessage The display message
+     * @param category The {@link Category}
+     * @param number The error number
+     */
+    private SchedJoulesExceptionCodes(String message, Category category, int number) {
+        this(message, null, category, number);
+    }
 
     /**
      * Initialises a new {@link SchedJoulesExceptionCodes}.
@@ -144,5 +207,4 @@ public enum SchedJoulesExceptionCodes implements DisplayableOXExceptionCode {
     public OXException create(final Throwable cause, final Object... args) {
         return OXExceptionFactory.getInstance().create(this, cause, args);
     }
-
 }

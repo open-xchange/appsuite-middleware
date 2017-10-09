@@ -63,6 +63,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.impl.client.CloseableHttpClient;
+import com.openexchange.chronos.schedjoules.exception.SchedJoulesExceptionCodes;
 import com.openexchange.chronos.schedjoules.impl.SchedJoulesProperty;
 import com.openexchange.chronos.schedjoules.osgi.Services;
 import com.openexchange.config.lean.LeanConfigurationService;
@@ -107,7 +108,7 @@ public class SchedJoulesRESTClient {
         LeanConfigurationService service = Services.getService(LeanConfigurationService.class);
         String apiKey = service.getProperty(SchedJoulesProperty.apiKey);
         if (Strings.isEmpty(apiKey)) {
-            throw new OXException(1138, "The apiKey is empty. Please configure the service properly");
+            throw SchedJoulesExceptionCodes.NO_API_KEY_CONFIGURED.create();
         }
         return AUTHORIZATION_HEADER.replaceFirst("\\{\\{token\\}\\}", apiKey);
     }
@@ -151,7 +152,7 @@ public class SchedJoulesRESTClient {
             request.setURI(new URI(scheme, baseUrl, path, query, null));
             request.addHeader(HttpHeaders.AUTHORIZATION, authorizationHeader);
         } catch (URISyntaxException e) {
-            throw new OXException(1138, "The URI path '" + path + "' is not valid", e);
+            throw SchedJoulesExceptionCodes.INVALID_URI_PATH.create(path, e);
         }
     }
 
@@ -186,7 +187,7 @@ public class SchedJoulesRESTClient {
                 httpRequest = new HttpGet();
                 break;
             default:
-                throw new OXException(1138, "Unknown HTTP method '" + httpMethod + "'");
+                throw SchedJoulesExceptionCodes.UNKNOWN_HTTP_METHOD.create(httpMethod);
         }
         return httpRequest;
     }
@@ -290,9 +291,9 @@ public class SchedJoulesRESTClient {
             response.setStream(entity.getContent());
             return response;
         } catch (ClientProtocolException e) {
-            throw new OXException(1138, "Client protocol error", e);
+            throw SchedJoulesExceptionCodes.CLIENT_PROTOCOL_ERROR.create(e.getMessage(), e);
         } catch (IOException e) {
-            throw new OXException(1138, "I/O error", e);
+            throw SchedJoulesExceptionCodes.IO_ERROR.create(e.getMessage(), e);
         }
     }
 

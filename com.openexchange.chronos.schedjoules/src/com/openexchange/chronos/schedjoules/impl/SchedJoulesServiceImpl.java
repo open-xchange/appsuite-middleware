@@ -57,6 +57,7 @@ import com.openexchange.chronos.Calendar;
 import com.openexchange.chronos.schedjoules.SchedJoulesResult;
 import com.openexchange.chronos.schedjoules.SchedJoulesService;
 import com.openexchange.chronos.schedjoules.api.SchedJoulesAPI;
+import com.openexchange.chronos.schedjoules.exception.SchedJoulesExceptionCodes;
 import com.openexchange.exception.OXException;
 
 /**
@@ -127,32 +128,22 @@ public class SchedJoulesServiceImpl implements SchedJoulesService {
     public String subscribeCalendar(int id) throws OXException {
         JSONObject page = api.pages().getPage(id);
         if (!page.hasAndNotNull("url")) {
-            throw new OXException(1138, "The specified page with id '" + id + "' does not denote a calendar");
+            throw SchedJoulesExceptionCodes.NO_CALENDAR.create(id);
         }
 
         try {
             String url = page.getString("url");
             URL u = new URL(url);
             Calendar calendar = api.calendar().getCalendar(u);
-            checkAccess(calendar);
+            if (calendar.getName().equals("You have no access to this calendar")) {
+                throw SchedJoulesExceptionCodes.NO_ACCESS.create(id);
+            }
             //TODO: Hook-up with the SchedJoules provider to subscribe to the calendar
             return calendar.getProdId();
         } catch (JSONException e) {
-            throw new OXException(1138, "JSON Error", e);
+            throw SchedJoulesExceptionCodes.JSON_ERROR.create(e.getMessage(), e);
         } catch (MalformedURLException e) {
-            throw new OXException(1138, "The specified page does not contain a valid URL", e);
-        }
-    }
-
-    /**
-     * Checks if the user has access to the specified calendar.
-     * 
-     * @param calendar The {@link Calendar} to check for access
-     * @throws OXException if access is restricted
-     */
-    private void checkAccess(Calendar calendar) throws OXException {
-        if (calendar.getName().equals("You have no access to this calendar")) {
-            throw new OXException(1138, calendar.getName());
+            throw SchedJoulesExceptionCodes.INVALID_URL.create(id, e);
         }
     }
 }
