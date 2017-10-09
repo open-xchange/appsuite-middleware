@@ -138,7 +138,7 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
 
     @Override
     public String getLoginRedirectRequest(HttpServletRequest request, HttpServletResponse response) throws OXException{
-        LOG.trace("getLoginRedirectRequest(HttpServletRequest request: {}, HttpServletResponse response)" + request.getRequestURI());
+        LOG.trace("getLoginRedirectRequest(HttpServletRequest request: {}, HttpServletResponse response)", request.getRequestURI());
         AutologinMode autologinMode = OIDCBackendConfig.AutologinMode.get(this.backend.getBackendConfig().autologinCookieMode());
 
         if (autologinMode != null && autologinMode == AutologinMode.OX_DIRECT) {
@@ -147,7 +147,7 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
                 return autologinRedirect;
             }
         }
-        
+
         State state = new State();
         Nonce nonce = new Nonce();
 
@@ -157,7 +157,7 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
         }
 
         this.addAuthRequestToStateManager(request, state, nonce);
-        LOG.trace("Login redirect request: " + loginRequest);
+        LOG.trace("Login redirect request: {}", loginRequest);
         return loginRequest;
     }
 
@@ -180,7 +180,7 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
     }
 
     private void addAuthRequestToStateManager(HttpServletRequest request, State state, Nonce nonce) {
-        LOG.trace("addAuthRequestToStateManager(HttpServletRequest request: {}, State state: {}, Nonce nonce: {})" + request.getRequestURI(), state.getValue(), nonce.getValue());
+        LOG.trace("addAuthRequestToStateManager(HttpServletRequest request: {}, State state: {}, Nonce nonce: {})", request.getRequestURI(), state.getValue(), nonce.getValue());
         String deepLink = request.getParameter("deep_link");
         String uiClientID = this.getUiClient(request);
         String hostname = OIDCTools.getDomainName(request, services.getOptionalService(HostnameService.class));
@@ -210,7 +210,7 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
 
     @Override
     public void authenticateUser(HttpServletRequest request, HttpServletResponse response) throws OXException{
-        LOG.trace("authenticateUser(HttpServletRequest request: {}, HttpServletResponse response)" + request.getRequestURI());
+        LOG.trace("authenticateUser(HttpServletRequest request: {}, HttpServletResponse response)", request.getRequestURI());
         AuthenticationRequestInfo storedRequestInformation = this.stateManagement.getAndRemoveAuthenticationInfo(request.getParameter("state"));
 
         if (storedRequestInformation == null) {
@@ -230,7 +230,7 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
     }
 
     private String sendLoginRequestToServer(HttpServletRequest request, HttpServletResponse response, OIDCTokenResponse tokenResponse, String domainName) throws OXException {
-        LOG.trace("sendLoginRequestToServer(HttpServletRequest request: {}, HttpServletResponse response, OIDCTokenResponse tokenResponse: {}, String domainName: {})", 
+        LOG.trace("sendLoginRequestToServer(HttpServletRequest request: {}, HttpServletResponse response, OIDCTokenResponse tokenResponse: {}, String domainName: {})",
             request.getRequestURI(), tokenResponse.getOIDCTokens().toJSONObject().toJSONString(), domainName);
         AuthenticationInfo authInfo = this.backend.resolveAuthenticationResponse(request, tokenResponse);
         authInfo.setProperty(OIDCTools.IDTOKEN, tokenResponse.getOIDCTokens().getIDTokenString());
@@ -245,7 +245,7 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
                 authInfo.setProperty(OIDCTools.ACCESS_TOKEN_EXPIRY, String.valueOf(expiryDate));
             }
         }
-        
+
         String sessionToken = sessionReservationService.reserveSessionFor(
             authInfo.getUserId(),
             authInfo.getContextId(),
@@ -262,7 +262,7 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
                 .setParameter(LoginServlet.PARAMETER_ACTION, OIDCTools.OIDC_LOGIN + OIDCTools.getPathString(this.backend.getPath()));
             Tools.disableCaching(response);
             loginRedirect = redirectLocation.build().toString();
-            LOG.trace("Login request to OXServer: " + loginRedirect);
+            LOG.trace("Login request to OXServer: {}",loginRedirect);
             response.sendRedirect(loginRedirect);
         } catch (URISyntaxException e) {
             throw OIDCExceptionCode.UNABLE_TO_PARSE_URI.create(e, "automated construction of login request URI");
@@ -287,7 +287,7 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
     }
 
     private TokenRequest createTokenRequest(HttpServletRequest request) throws OXException {
-        LOG.trace("createTokenRequest(HttpServletRequest request: {})" + request.getRequestURI());
+        LOG.trace("createTokenRequest(HttpServletRequest request: {})", request.getRequestURI());
         AuthorizationCode code = new AuthorizationCode(request.getParameter("code"));
         URI callback = OIDCTools.getURIFromPath(this.backend.getBackendConfig().getRedirectURIAuth());
         AuthorizationGrant codeGrant = new AuthorizationCodeGrant(code, callback);
@@ -301,7 +301,7 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
     }
 
     private OIDCTokenResponse getTokenResponse(TokenRequest tokenReq) throws OXException {
-        LOG.trace("OIDCTokenResponse getTokenResponse(TokenRequest tokenReq for client: )" + tokenReq.getClientID().getValue());
+        LOG.trace("OIDCTokenResponse getTokenResponse(TokenRequest tokenReq for client: )", tokenReq.getClientID().getValue());
         HTTPRequest httpRequest = this.backend.getHttpRequest(tokenReq.toHTTPRequest());
         HTTPResponse httpResponse = null;
         try {
@@ -335,12 +335,12 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
         } else {
             logoutRequest = this.getRedirectForLogoutFromOXServer(session, request, response, null);
         }
-        LOG.trace("Logout request: " + logoutRequest);
+        LOG.trace("Logout request: {}", logoutRequest);
         return logoutRequest;
     }
 
     private Session extractSessionFromRequest(HttpServletRequest request) throws OXException {
-        LOG.trace("extractSessionFromRequest(HttpServletRequest request: {})" + request.getRequestURI());
+        LOG.trace("extractSessionFromRequest(HttpServletRequest request: {})", request.getRequestURI());
         String sessionId = request.getParameter("session");
         if (sessionId == null) {
             throw OIDCExceptionCode.INVALID_LOGOUT_REQUEST.create("No session parameter set.");
@@ -354,7 +354,7 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
     }
 
     private Session getSessionFromId(String sessionId) {
-        LOG.trace("getSessionFromId(String sessionId: {})" + sessionId);
+        LOG.trace("getSessionFromId(String sessionId: {})", sessionId);
         SessiondService sessiondService = Services.getService(SessiondService.class);
         return sessiondService.getSession(sessionId);
     }
@@ -377,12 +377,12 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
         //logout user
         return this.getRedirectForLogoutFromOXServer(getSessionFromId(sessionId), request, response, logoutRequestInfo);
     }
-    
+
     private String getRedirectForLogoutFromOXServer(Session session, HttpServletRequest request, HttpServletResponse response, LogoutRequestInfo logoutRequestInfo) throws OXException {
         LOG.trace("getRedirectForLogoutFromOXServer(Session session: {}, HttpServletRequest request: {}, HttpServletResponse response, LogoutRequestInfo logoutRequestInfo.domainname: {})", session.getSessionID(), request.getRequestURI(), logoutRequestInfo != null ? logoutRequestInfo.getDomainName() : "null");
         String domainName = OIDCTools.getDomainName(request, services.getOptionalService(HostnameService.class));
         String sessionId = session.getSessionID();
-        
+
         if (logoutRequestInfo != null) {
             domainName = logoutRequestInfo.getDomainName();
             sessionId = logoutRequestInfo.getSessionId();
@@ -397,21 +397,21 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
                 .setParameter(LoginServlet.PARAMETER_ACTION, OIDCTools.OIDC_LOGOUT + OIDCTools.getPathString(this.backend.getPath()));
             Tools.disableCaching(response);
             redirectionURI = redirectLocation.build().toString();
-            LOG.trace("Logout URI for logout from OXServer: " + redirectionURI);
+            LOG.trace("Logout URI for logout from OXServer: {}", redirectionURI);
             return redirectionURI;
         } catch (URISyntaxException e) {
             throw OIDCExceptionCode.UNABLE_TO_PARSE_URI.create(e, "automated construction of logout request URI");
-        } 
+        }
     }
-    
+
     private String getAutologinURLFromOIDCCookie(HttpServletRequest request, HttpServletResponse response) throws OXException {
         LOG.trace("getAutologinURLFromOIDCCookie(HttpServletRequest request: {}, HttpServletResponse response)", request.getRequestURI());
         Cookie autologinCookie = OIDCTools.loadAutologinCookie(request, this.loginConfiguration);
-        
+
         if (autologinCookie == null) {
             return null;
         }
-        
+
         return getAutologinByCookieURL(request, response, autologinCookie);
     }
 
@@ -423,7 +423,7 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
                 return this.getRedirectLocationForSession(request, session);
             }
             //No session found, log that
-            LOG.debug("No session found for OIDC Cookie with value: " + oidcAtologinCookie.getValue());
+            LOG.debug("No session found for OIDC Cookie with value: {}", oidcAtologinCookie.getValue());
         }
 
         if (oidcAtologinCookie != null) {
@@ -445,13 +445,13 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
         }
         return session;
     }
-    
+
     private String getRedirectLocationForSession(HttpServletRequest request, Session session) throws OXException {
         LOG.trace("getRedirectLocationForSession(HttpServletRequest request: {}, Session session: {})", request.getRequestURI(), session.getSessionID());
         OIDCTools.validateSession(session, request);
         return OIDCTools.buildFrontendRedirectLocation(session, OIDCTools.getUIWebPath(this.loginConfiguration, this.backend.getBackendConfig()));
     }
-    
+
     @Override
     public void logoutInCaseOfError(String sessionId, HttpServletRequest request, HttpServletResponse response) throws OXException{
         LOG.trace("logoutInCaseOfError(String sessionId: {}, HttpServletRequest request: {}, HttpServletResponse response)", sessionId, request.getRequestURI() );

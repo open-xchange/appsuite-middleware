@@ -62,40 +62,40 @@ import com.openexchange.oidc.hz.PortableLogoutRequest;
  * @since v7.10.0
  */
 public class CoreStateManagement implements StateManagement {
-    
+
     private static final Logger LOG = LoggerFactory.getLogger(CoreStateManagement.class);
     private final HazelcastInstance hazelcast;
     private static final String HAZELCAST_AUTHREQUEST_INFO_MAP = "oidcAuthenticationRequestInfos";
     private static final String HAZELCAST_LOGOUT_REQUEST_INFO_MAP = "oidcLogoutRequestInfos";
-    
+
     public CoreStateManagement(HazelcastInstance hazelcast) {
         super();
         this.hazelcast = hazelcast;
     }
-    
+
     @Override
     public void addAuthenticationRequest(AuthenticationRequestInfo authenticationRequestInfo) {
-        LOG.trace("addAuthenticationRequest(AuthenticationRequestInfo: " + authenticationRequestInfo.getState() + ")");
+        LOG.trace("addAuthenticationRequest(AuthenticationRequestInfo: {})", authenticationRequestInfo.getState());
         hazelcast.getMap(HAZELCAST_AUTHREQUEST_INFO_MAP).put(authenticationRequestInfo.getState(), new PortableAuthenticationRequest(authenticationRequestInfo));
     }
 
     @Override
     public AuthenticationRequestInfo getAndRemoveAuthenticationInfo(String state) {
-        LOG.trace("getAndRemoveAuthenticationInfo(state: " + state + ")");
+        LOG.trace("getAndRemoveAuthenticationInfo(state: {})", state);
         PortableAuthenticationRequest portable = (PortableAuthenticationRequest) hazelcast.getMap(HAZELCAST_AUTHREQUEST_INFO_MAP).remove(state);
         return portable.getDelegate();
     }
 
     @Override
     public void addLogoutRequest(LogoutRequestInfo logoutRequestInfo) {
-        LOG.trace("addLogoutRequest(" + logoutRequestInfo.getState() + ")");
+        LOG.trace("addLogoutRequest({})", logoutRequestInfo.getState());
         hazelcast.getMap(HAZELCAST_LOGOUT_REQUEST_INFO_MAP).put(logoutRequestInfo.getState(), new PortableLogoutRequest(logoutRequestInfo));
 
     }
 
     @Override
     public LogoutRequestInfo getAndRemoveLogoutRequestInfo(String state) {
-        LOG.trace("getAndRemoveLogoutRequestInfo(state: " + state + ")");
+        LOG.trace("getAndRemoveLogoutRequestInfo(state: {})", state);
         PortableLogoutRequest portableLogoutRequest = (PortableLogoutRequest) hazelcast.getMap(HAZELCAST_LOGOUT_REQUEST_INFO_MAP).remove(state);
         return portableLogoutRequest.getDelegate();
     }

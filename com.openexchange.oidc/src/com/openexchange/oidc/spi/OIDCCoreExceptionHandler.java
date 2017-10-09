@@ -64,18 +64,18 @@ import com.openexchange.exception.OXException;
  * @since v7.10.0
  */
 public class OIDCCoreExceptionHandler implements OIDCExceptionHandler {
-    
+
     private static final Logger LOG = LoggerFactory.getLogger(OIDCExceptionHandler.class);
 
     @Override
     public void handleAuthenticationFailed(HttpServletRequest request, HttpServletResponse response, OXException exception) throws IOException {
-        LOG.trace("handleAuthenticationFailed(request: " + request.getRequestURI() + ", HttpServletResponse response, OXException: " + exception.getExceptionCode() +")");
+        LOG.trace("handleAuthenticationFailed(request: {}, HttpServletResponse response, OXException: {})", request.getRequestURI(), exception.getExceptionCode());
         response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
     }
 
     @Override
     public void handleLogoutFailed(HttpServletRequest request, HttpServletResponse response, OXException exception) throws IOException {
-        LOG.trace("handleLogoutFailed(request: " + request.getRequestURI() + ", HttpServletResponse response, OXException: " + exception.getExceptionCode() +")");
+        LOG.trace("handleAuthenticationFailed(request: {}, HttpServletResponse response, OXException: {})", request.getRequestURI(), exception.getExceptionCode());
         response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
     }
 

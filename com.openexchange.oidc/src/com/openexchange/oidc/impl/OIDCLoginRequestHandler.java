@@ -209,7 +209,7 @@ public class OIDCLoginRequestHandler implements LoginRequestHandler {
                 return this.getRedirectLocationForSession(request, session, reservation);
             }
             //No session found, log that
-            LOG.debug("No session found for OIDC Cookie with value: " + oidcAtologinCookie.getValue());
+            LOG.debug("No session found for OIDC Cookie with value: {}", oidcAtologinCookie.getValue());
         }
 
         if (oidcAtologinCookie != null) {
@@ -272,7 +272,7 @@ public class OIDCLoginRequestHandler implements LoginRequestHandler {
     }
 
     private LoginResult loginUser(HttpServletRequest request, final Context context, final User user, final Map<String, String> state, final String oidcAutologinCookieValue) throws OXException {
-        LOG.trace("loginUser(HttpServletRequest request: {}, final Context context: {}, final User user: {}, final Map<String, String> state.size: {}, final String oidcAutologinCookieValue: {})", 
+        LOG.trace("loginUser(HttpServletRequest request: {}, final Context context: {}, final User user: {}, final Map<String, String> state.size: {}, final String oidcAutologinCookieValue: {})",
             request.getRequestURI(), context.getContextId(), user.getId(), state.size(), oidcAutologinCookieValue);
         final LoginRequest loginRequest = backend.getLoginRequest(request, user.getId(), context.getContextId(), loginConfiguration);
 

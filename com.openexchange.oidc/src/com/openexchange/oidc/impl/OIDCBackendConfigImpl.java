@@ -62,11 +62,11 @@ import com.openexchange.oidc.OIDCBackendProperty;
  * @since v7.10.0
  */
 public class OIDCBackendConfigImpl implements OIDCBackendConfig{
-    
+
     private final static Logger LOG = LoggerFactory.getLogger(OIDCBackendConfigImpl.class);
-    
-    private LeanConfigurationService leanConfigurationService; 
-    
+
+    private LeanConfigurationService leanConfigurationService;
+
     public OIDCBackendConfigImpl(LeanConfigurationService leanConfigurationService) {
         this.leanConfigurationService = leanConfigurationService;
     }
@@ -80,7 +80,7 @@ public class OIDCBackendConfigImpl implements OIDCBackendConfig{
     public String getRedirectURIInit() {
         return this.leanConfigurationService.getProperty(OIDCBackendProperty.redirectURIInit);
     }
-    
+
     @Override
     public String getRedirectURIAuth() {
         return this.leanConfigurationService.getProperty(OIDCBackendProperty.redirectURIAuth);
@@ -110,12 +110,12 @@ public class OIDCBackendConfigImpl implements OIDCBackendConfig{
     public String getJWSAlgortihm() {
         return this.leanConfigurationService.getProperty(OIDCBackendProperty.jwsAlgorithm);
     }
-    
+
     @Override
     public String getScope() {
         return this.leanConfigurationService.getProperty(OIDCBackendProperty.scope);
     }
-    
+
     @Override
     public String getIssuer() {
         return this.leanConfigurationService.getProperty(OIDCBackendProperty.issuer);
@@ -125,7 +125,7 @@ public class OIDCBackendConfigImpl implements OIDCBackendConfig{
     public String getResponseType() {
         return this.leanConfigurationService.getProperty(OIDCBackendProperty.responseType);
     }
-    
+
     @Override
     public String getUserInfoEndpoint() {
         return this.leanConfigurationService.getProperty(OIDCBackendProperty.userInfoEndpoint);
@@ -165,9 +165,9 @@ public class OIDCBackendConfigImpl implements OIDCBackendConfig{
     public boolean isAutologinEnabled() {
         boolean result = false;
         AutologinMode autologinMode = OIDCBackendConfig.AutologinMode.get(this.autologinCookieMode());
-        
+
         if (autologinMode == null) {
-            LOG.debug("Unknown value for parameter com.openexchange.oidc.autologinCookieMode. Value is: " + this.autologinCookieMode());
+            LOG.debug("Unknown value for parameter com.openexchange.oidc.autologinCookieMode. Value is: {}", this.autologinCookieMode());
         } else {
             result = (autologinMode == AutologinMode.OX_DIRECT || autologinMode == AutologinMode.SSO_REDIRECT);
         }

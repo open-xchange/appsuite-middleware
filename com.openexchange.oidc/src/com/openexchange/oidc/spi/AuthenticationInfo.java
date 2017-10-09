@@ -53,7 +53,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * {@link AuthenticationInfo} Contains all needed and additional information, that is 
+ * {@link AuthenticationInfo} Contains all needed and additional information, that is
  * needed to authenticate a user.
  *
  * @author <a href="mailto:vitali.sjablow@open-xchange.com">Vitali Sjablow</a>
@@ -152,7 +152,15 @@ public class AuthenticationInfo {
 
     @Override
     public String toString() {
-        return "AuthenticationInfo [contextId=" + contextId + ", userId=" + userId + ", properties=" + properties + "]";
+        StringBuilder sb = new StringBuilder();
+        sb.append("AuthenticationInfo [contextId=");
+        sb.append(contextId);
+        sb.append(", userId=");
+        sb.append(userId);
+        sb.append(", properties=");
+        sb.append(properties);
+        sb.append("]");
+        return sb.toString();
     }
 
 }

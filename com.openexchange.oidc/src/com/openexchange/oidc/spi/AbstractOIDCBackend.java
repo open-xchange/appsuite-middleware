@@ -173,7 +173,7 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
         if (algorithmString != null && !algorithmString.isEmpty()) {
             algorithm = this.getAlgorithmFromString(algorithmString);
         }
-        LOG.trace("getJWSAlgorithm() result: " + algorithm.getName());
+        LOG.trace("getJWSAlgorithm() result: {}", algorithm.getName());
         return algorithm;
     }
 
@@ -192,7 +192,7 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
 
     @Override
     public IDTokenClaimsSet validateIdToken(JWT idToken, String nounce) throws OXException {
-        LOG.trace("IDTokenClaimsSet validateIdToken(JWT idToken: {},String nounce: ", idToken.getParsedString(), nounce);
+        LOG.trace("IDTokenClaimsSet validateIdToken(JWT idToken: {},String nounce: {})", idToken.getParsedString(), nounce);
         IDTokenClaimsSet result = null;
         JWSAlgorithm expectedJWSAlg = this.getJWSAlgorithm();
         try {
@@ -217,8 +217,12 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
 
     @Override
     public LoginRequest getLoginRequest(HttpServletRequest request, int userID, int contextID, LoginConfiguration loginConfiguration) throws OXException {
-        String login = userID + "@" + contextID;
-        LOG.trace("getLoginRequest(...) login: " + login);
+        StringBuilder sb = new StringBuilder();
+        sb.append(userID);
+        sb.append("@");
+        sb.append(contextID);
+        String login = sb.toString();
+        LOG.trace("getLoginRequest(...) login: {}", login);
         String defaultClient = loginConfiguration.getDefaultClient();
         LoginRequestImpl parseLogin = LoginTools.parseLogin(request, login, null, false, defaultClient, loginConfiguration.isCookieForceHTTPS(), false);
         return parseLogin;
@@ -243,7 +247,7 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
 
         URI postLogoutTarget = OIDCTools.getURIFromPath(this.getBackendConfig().getRedirectURIPostSSOLogout());
         LogoutRequest logoutRequest = new LogoutRequest(endSessionEndpoint, idToken, postLogoutTarget, null);
-        LOG.trace("final logout request: " + logoutRequest.toURI().toString());
+        LOG.trace("final logout request: {}", logoutRequest.toURI().toString());
         return logoutRequest.toURI().toString();
     }
 
@@ -341,7 +345,7 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
 
             TokenRequest request = new TokenRequest(tokenEndpoint, clientAuth, refreshTokenGrant);
             HTTPRequest httpRequest = request.toHTTPRequest();
-            LOG.trace("Build TokenRequest to get tokens from OP: " + httpRequest.getURL().toString() + " " +httpRequest.getQuery());
+            LOG.trace("Build TokenRequest to get tokens from OP: {} {}", httpRequest.getURL().toString(), httpRequest.getQuery());
             TokenResponse response = null;
             response = TokenResponse.parse(httpRequest.send());
 

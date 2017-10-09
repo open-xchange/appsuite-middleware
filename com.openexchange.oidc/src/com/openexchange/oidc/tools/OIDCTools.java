@@ -80,24 +80,24 @@ import com.openexchange.tools.servlet.http.Cookies;
 
 /**
  * {@link OIDCTools}
- * 
+ *
  * Provides multiple static methods and attributes, that are used throughout the OpenID feature.
  *
  * @author <a href="mailto:vitali.sjablow@open-xchange.com">Vitali Sjablow</a>
  * @since v7.10.0
  */
 public class OIDCTools {
-    
+
     private static final Logger LOG = LoggerFactory.getLogger(OIDCTools.class);
 
     public static final String SESSION_TOKEN = "sessionToken";
-    
+
     public static final String OIDC_LOGIN = "oidcLogin";
 
     public static final String IDTOKEN = "__session.oidc.idToken";
 
     public static final String TYPE = "type";
-    
+
     public static final String END = "end";
 
     public static final String STATE = "state";
@@ -113,16 +113,16 @@ public class OIDCTools {
     public static final String OIDC_LOGOUT = "oidcLogout";
 
     public static final String ACCESS_TOKEN_EXPIRY = "access_token_expiry";
-    
+
     public static final String BACKEND_PATH = "__session.oidc.backend.path";
-    
+
     public static String getPathString(String path) {
         if (Strings.isEmpty(path)) {
             return "";
         }
         return path;
     }
-    
+
     /**
      * Generates the relative redirect location to enter the web frontend directly with a session.
      *
@@ -138,10 +138,10 @@ public class OIDCTools {
         retval = LoginTools.addFragmentParameter(retval, PARAMETER_SESSION, session.getSessionID());
         return retval;
     }
-    
+
     /**
      * Create an {@link URI} object from the given path.
-     * 
+     *
      * @param path The path
      * @return The {@link URI}
      * @throws OXException If the path can not be parsed
@@ -154,11 +154,11 @@ public class OIDCTools {
             throw OIDCExceptionCode.UNABLE_TO_PARSE_URI.create(e, path);
         }
     }
-    
+
     /**
      * Load the domain name from {@link HostnameService} or get the given
      * {@link HttpServletRequest}s server name if {@link HostnameService} is null
-     * 
+     *
      * @param request The {@link HttpServletRequest}
      * @param hostnameService The {@link HostnameService}, nullable
      * @return The domian name
@@ -176,10 +176,10 @@ public class OIDCTools {
 
         return hostname;
     }
-    
+
     /**
      * Is the given {@link HttpServletRequest} secure by configuration or is the option set?
-     * 
+     *
      * @param request The {@link HttpServletRequest}
      * @return Is the request considered secure or not
      */
@@ -193,10 +193,10 @@ public class OIDCTools {
         }
         return isSecure;
     }
-    
+
     /**
      * Validate the given {@link Session} by checking its IP, cookies and secret informations.
-     * 
+     *
      * @param session The {@link Session} to validate
      * @param request The {@link HttpServletRequest} with additional information
      * @throws OXException If the session is expired
@@ -207,15 +207,15 @@ public class OIDCTools {
         Map<String, Cookie> cookies = Cookies.cookieMapFor(request);
         Cookie secretCookie = cookies.get(LoginServlet.SECRET_PREFIX + session.getHash());
         if (secretCookie == null || !session.getSecret().equals(secretCookie.getValue())) {
-            LOG.debug("No secret cookie found for session: " + session.getSessionID());
+            LOG.debug("No secret cookie found for session: {}", session.getSessionID());
             throw SessionExceptionCodes.SESSION_EXPIRED.create(session.getSessionID());
         }
     }
-    
+
     /**
      * Add the given redirect URI to the given {@link HttpServletResponse}. Either in a JSON object with
      * the attribute name 'redirect', if respondWithRedirect is 'true' or by a direct redirect.
-     * 
+     *
      * @param response The {@link HttpServletResponse} to use
      * @param redirectURI The URI where the response should redirect to
      * @param respondWithRedirect 'true', 'false' or null. Triggers the addition of a JSON body, where an
@@ -235,11 +235,11 @@ public class OIDCTools {
             writer.flush();
         }
     }
-    
+
     /**
      * Load the OIDC auto-login cookie with the given {@link HttpServletRequest} informations.
-     * 
-     * @param request The {@link HttpServletRequest} with needed information 
+     *
+     * @param request The {@link HttpServletRequest} with needed information
      * @param loginConfiguration The {@link LoginConfiguration} to get additional information from
      * @return The auto-login cookie or null
      * @throws OXException If something fails
@@ -250,10 +250,10 @@ public class OIDCTools {
         Map<String, Cookie> cookies = Cookies.cookieMapFor(request);
         return cookies.get(OIDCTools.AUTOLOGIN_COOKIE_PREFIX + hash);
     }
-    
+
     /**
      * Adds a parameter from a given map to a session.
-     * 
+     *
      * @param session The session, where a parameter should be added
      * @param map The map, which contains the values
      * @param entryLoad The key, which find the value in the map
@@ -269,7 +269,7 @@ public class OIDCTools {
 
     /**
      * Load the UI path from the given {@link OIDCBackendConfig} or the {@link LoginConfiguration} instead.
-     * 
+     *
      * @param loginConfiguration The {@link LoginConfiguration} to use as fallback
      * @param backendConfig The {@link OIDCBackendConfig} to load the path from
      * @return The UI web path

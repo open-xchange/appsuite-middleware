@@ -93,7 +93,7 @@ import com.openexchange.server.ServiceLookup;
  * @since v7.10.0
  */
 public class OIDCBackendRegistry extends ServiceTracker<OIDCBackend, OIDCBackend>{
-    
+
     private static final Logger LOG = LoggerFactory.getLogger(OIDCBackendRegistry.class);
     private ServiceLookup services;
     private final ConcurrentList<OIDCBackend> backends;
@@ -109,17 +109,17 @@ public class OIDCBackendRegistry extends ServiceTracker<OIDCBackend, OIDCBackend
         this.backendServiceRegistrations = new ConcurrentHashMap<>();
         this.loginConfiguration = LoginServlet.getLoginConfiguration();
     }
-    
+
     @Override
     public OIDCBackend addingService(ServiceReference<OIDCBackend> reference) {
         final OIDCBackend oidcBackend = this.context.getService(reference);
-        
+
         final Stack<String> servlets = new Stack<>();
         HttpService httpService = this.services.getService(HttpService.class);
         final Stack<ServiceRegistration<?>> serviceRegistrations = new Stack<ServiceRegistration<?>>();
 
         if (backends.addIfAbsent(oidcBackend)) {
-            LOG.info("Adding OIDCBackend: " + oidcBackend.getPath());
+            LOG.info("Adding OIDCBackend: {}", oidcBackend.getPath());
             try {
                 OIDCConfig config = oidcBackend.getOIDCConfig();
                 String path = oidcBackend.getPath();
@@ -132,7 +132,7 @@ public class OIDCBackendRegistry extends ServiceTracker<OIDCBackend, OIDCBackend
                 oidcBackend.setLoginConfiguration(this.loginConfiguration);
                 OIDCWebSSOProvider ssoProvider = new OIDCWebSSOProviderImpl(oidcBackend, new CoreStateManagement(this.services.getService(HazelcastInstance.class)), this.services, this.loginConfiguration);
                 OIDCExceptionHandler exceptionHandler = oidcBackend.getExceptionHandler();
-                
+
                 this.registerServlet(servlets, httpService, this.getPrefix(oidcBackend), new InitService(ssoProvider, exceptionHandler), "init");
                 this.registerServlet(servlets, httpService, this.getPrefix(oidcBackend), new AuthenticationService(ssoProvider, exceptionHandler), "auth");
                 this.registerServlet(servlets, httpService, this.getPrefix(oidcBackend), new LogoutService(ssoProvider, exceptionHandler), "logout");
@@ -165,7 +165,7 @@ public class OIDCBackendRegistry extends ServiceTracker<OIDCBackend, OIDCBackend
         }
         return null;
     }
-    
+
     private String getPrefix(final OIDCBackend oidcBackend) {
         StringBuilder prefixBuilder = new StringBuilder();
         prefixBuilder.append(this.services.getService(DispatcherPrefixService.class).getPrefix());
@@ -188,7 +188,7 @@ public class OIDCBackendRegistry extends ServiceTracker<OIDCBackend, OIDCBackend
             throw OIDCExceptionCode.INVALID_BACKEND_PATH.create(path);
         }
     }
-    
+
     /**
      * Helper method to register a servlet
      * @param servlets the servlets stack of a OIDCBackend
@@ -204,13 +204,13 @@ public class OIDCBackendRegistry extends ServiceTracker<OIDCBackend, OIDCBackend
         httpService.registerServlet(servletName, servlet, null, null);
         servlets.push(servletName);
     }
-    
+
     private void registerRequestHandler(final OIDCBackend backend, final Stack<ServiceRegistration<?>> serviceRegistrations, String oidcAction, LoginRequestHandler requestHandler) {
         Dictionary<String, Object> requestHandlerProps = new Hashtable<String, Object>();
         requestHandlerProps.put(AJAXServlet.PARAMETER_ACTION, oidcAction + OIDCTools.getPathString(backend.getPath()));
         serviceRegistrations.push(context.registerService(LoginRequestHandler.class, requestHandler, requestHandlerProps));
     }
-    
+
     /**
      * Removes all registered OIDC backends from backend container. Unregisters all
      * servlets for each backend and also all Handlers.

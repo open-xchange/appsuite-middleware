@@ -102,7 +102,7 @@ public class InitService extends OIDCServlet {
                 LOG.error(e.getLocalizedMessage(), e);
                 response.sendError(HttpServletResponse.SC_BAD_REQUEST);
             } else if (e.getExceptionCode() == OIDCExceptionCode.UNABLE_TO_PARSE_SESSIONS_IDTOKEN) {
-                LOG.warn("Unable to logout user via oidc roundtrip, because of an invalid IDToken:" + e.getLocalizedMessage());
+                LOG.warn("Unable to logout user via oidc roundtrip, because of an invalid IDToken: {}", e.getLocalizedMessage());
                 this.exceptionLogout(request, response);
             }
         }
