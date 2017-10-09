@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2017-2020 OX Software GmbH
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,28 +47,32 @@
  *
  */
 
-package com.openexchange.chronos.schedjoules.api.aux;
+package com.openexchange.chronos.schedjoules.api.auxiliary;
 
 /**
- * {@link SchedJoulesCategory} - Defines the searchable categories
- * 
- * @see <a href="https://github.com/schedjoules/calendar-store-api/blob/master/details/search.md">https://github.com/schedjoules/calendar-store-api/blob/master/details/search.md</a>
+ * {@link SchedJoulesSearchParameter}
+ *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public enum SchedJoulesCategory {
-    Holidays,
-    Sports,
-    Weather,
-    Finance,
-    Miscellaneous,
-    TV;
-
+public enum SchedJoulesSearchParameter {
     /**
-     * Returns the category identifier
-     * 
-     * @return the category identifier
+     * The calendar name parameter
      */
-    public int getId() {
-        return ordinal() + 1;
-    }
+    q,
+    /**
+     * The locale parameter. Defaults to 'en'
+     */
+    locale,
+    /**
+     * The country identifier parameter
+     */
+    country_id,
+    /**
+     * The category identifier
+     */
+    category_id,
+    /**
+     * The max amount of results. Defaults to '20'
+     */
+    nr_results;
 }

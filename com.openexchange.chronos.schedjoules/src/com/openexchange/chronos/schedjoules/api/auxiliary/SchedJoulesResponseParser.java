@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.chronos.schedjoules.api.aux;
+package com.openexchange.chronos.schedjoules.api.auxiliary;
 
 import java.io.IOException;
 import java.io.InputStream;

@@ -47,18 +47,18 @@
  *
  */
 
-package com.openexchange.chronos.schedjoules.api.aux;
+package com.openexchange.chronos.schedjoules.api.auxiliary;
 
 /**
- * {@link SchedJoulesPagesParameter}
+ * {@link SchedJoulesCommonParameter}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public enum SchedJoulesPagesParameter {
+public enum SchedJoulesCommonParameter {
     /**
-     * The page identifier
+     * The location parameter. Defaults to 'us'
      */
-    page_id,
+    location,
     /**
      * The locale parameter. Defaults to 'en'
      */
