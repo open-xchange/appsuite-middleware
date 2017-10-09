@@ -81,6 +81,6 @@ public class SchedJoulesCalendarAPI {
      */
     public Calendar getCalendar(URL url) throws OXException {
         SchedJoulesResponse response = client.executeRequest(url);
-        return (Calendar) StreamParser.parse(response);
+        return (Calendar) SchedJoulesResponseParser.parse(response);
     }
 }

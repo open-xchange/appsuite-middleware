@@ -138,6 +138,6 @@ public class SchedJoulesPagesAPI {
      */
     private JSONObject executeRequest(SchedJoulesRequest request) throws OXException {
         SchedJoulesResponse response = client.executeRequest(request);
-        return (JSONObject) StreamParser.parse(response);
+        return (JSONObject) SchedJoulesResponseParser.parse(response);
     }
 }

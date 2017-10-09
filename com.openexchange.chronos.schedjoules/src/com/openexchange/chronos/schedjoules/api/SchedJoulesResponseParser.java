@@ -63,9 +63,9 @@ import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 
 /**
- * {@link StreamParser} - Defines the types of the available stream parsers and their implementations
+ * {@link SchedJoulesResponseParser} - Defines the types of the available stream parsers and their implementations
  */
-enum StreamParser {
+enum SchedJoulesResponseParser {
     /**
      * The JSON parser
      */
@@ -106,11 +106,11 @@ enum StreamParser {
     private final String contentType;
 
     /**
-     * Initialises a new {@link StreamParser}.
+     * Initialises a new {@link SchedJoulesResponseParser}.
      * 
      * @param contentType The content type of the stream parser
      */
-    private StreamParser(String contentType) {
+    private SchedJoulesResponseParser(String contentType) {
         this.contentType = contentType;
     }
 
@@ -135,7 +135,7 @@ enum StreamParser {
         if (Strings.isEmpty(contentType)) {
             throw new IllegalArgumentException("The content type can be neither 'null' nor empty");
         }
-        for (StreamParser streamParser : StreamParser.values()) {
+        for (SchedJoulesResponseParser streamParser : SchedJoulesResponseParser.values()) {
             if (streamParser.getContentType().equals(contentType)) {
                 return streamParser.parseResponse(response);
             }
