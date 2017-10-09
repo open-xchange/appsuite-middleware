@@ -77,6 +77,7 @@ public class SchedJoulesActionFactory implements AJAXActionServiceFactory {
         actions.put("subscribe", new SubscribeAction(services));
         actions.put("countries", new CountriesAction(services));
         actions.put("languages", new LanguagesAction(services));
+        actions.put("search", new SearchAction(services));
         this.actions = actions.build();
     }
 

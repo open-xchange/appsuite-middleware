@@ -167,6 +167,16 @@ public class SchedJoulesServiceImpl implements SchedJoulesService {
     /*
      * (non-Javadoc)
      * 
+     * @see com.openexchange.chronos.schedjoules.SchedJoulesService#search(java.lang.String, java.lang.String, int, int, int)
+     */
+    @Override
+    public SchedJoulesResult search(String query, String locale, int countryId, int categoryId, int maxRows) throws OXException {
+        return new SchedJoulesResult(api.pages().search(query, locale, countryId, categoryId, maxRows));
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.openexchange.chronos.schedjoules.SchedJoulesService#subscribeCalendar(int, java.lang.String)
      */
     @Override

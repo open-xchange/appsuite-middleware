@@ -71,7 +71,11 @@ public enum SchedJoulesRESTBindPoint {
     /**
      * @see <a href="https://github.com/schedjoules/calendar-store-api/blob/master/details/languages.md">https://github.com/schedjoules/calendar-store-api/blob/master/details/languages.md</a>
      */
-    languages
+    languages,
+    /**
+     * @see <a href="https://github.com/schedjoules/calendar-store-api/blob/master/details/search.md">https://github.com/schedjoules/calendar-store-api/blob/master/details/search.md</a>
+     */
+    search
 
     ;
 

@@ -119,6 +119,8 @@ public interface SchedJoulesService {
      * @throws OXException if an error is occurred
      */
     SchedJoulesResult listLanguages() throws OXException;
+    
+    SchedJoulesResult search(String query, String locale, int countryId, int categoryId, int maxRows) throws OXException;
 
     /**
      * Subscribes to the SchedJoules calendar with the specified identifier

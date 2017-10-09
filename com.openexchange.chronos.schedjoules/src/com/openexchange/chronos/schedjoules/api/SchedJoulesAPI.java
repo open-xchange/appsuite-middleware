@@ -114,5 +114,4 @@ public final class SchedJoulesAPI {
     public SchedJoulesLanguagesAPI languages() {
         return languages;
     }
-
 }
