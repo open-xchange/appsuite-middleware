@@ -55,7 +55,6 @@ import java.util.Map;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.FreeBusyTime;
-import com.openexchange.chronos.common.SelfProtectionFactory;
 import com.openexchange.chronos.impl.performer.ConflictCheckPerformer;
 import com.openexchange.chronos.impl.performer.FreeBusyPerformer;
 import com.openexchange.chronos.impl.performer.HasPerformer;
@@ -74,14 +73,11 @@ import com.openexchange.exception.OXException;
  */
 public class FreeBusyServiceImpl implements FreeBusyService {
 
-    final SelfProtectionFactory protectionFactory;
-
     /**
      * Initializes a new {@link FreeBusyServiceImpl}.
      */
-    public FreeBusyServiceImpl(SelfProtectionFactory protectionFactory) {
+    public FreeBusyServiceImpl() {
         super();
-        this.protectionFactory = protectionFactory;
     }
 
     @Override
@@ -90,7 +86,7 @@ public class FreeBusyServiceImpl implements FreeBusyService {
 
             @Override
             protected boolean[] execute(CalendarSession session, CalendarStorage storage) throws OXException {
-                return new HasPerformer(session, storage, protectionFactory).perform(session.getUserId(), from, until);
+                return new HasPerformer(session, storage).perform(session.getUserId(), from, until);
             }
         }.executeQuery();
     }
@@ -101,7 +97,7 @@ public class FreeBusyServiceImpl implements FreeBusyService {
 
             @Override
             protected Map<Attendee, List<Event>> execute(CalendarSession session, CalendarStorage storage) throws OXException {
-                return new FreeBusyPerformer(session, storage, protectionFactory).perform(attendees, from, until);
+                return new FreeBusyPerformer(session, storage).perform(attendees, from, until);
             }
         }.executeQuery();
     }
@@ -112,7 +108,7 @@ public class FreeBusyServiceImpl implements FreeBusyService {
 
             @Override
             protected List<EventConflict> execute(CalendarSession session, CalendarStorage storage) throws OXException {
-                return new ConflictCheckPerformer(session, storage, protectionFactory).perform(event, attendees);
+                return new ConflictCheckPerformer(session, storage).perform(event, attendees);
             }
         }.executeQuery();
     }
@@ -123,7 +119,7 @@ public class FreeBusyServiceImpl implements FreeBusyService {
 
             @Override
             protected Map<Attendee, List<FreeBusyTime>> execute(CalendarSession session, CalendarStorage storage) throws OXException {
-                return new FreeBusyPerformer(session, storage, protectionFactory).performMerged(attendees, from, until);
+                return new FreeBusyPerformer(session, storage).performMerged(attendees, from, until);
             }
         }.executeQuery();
     }
@@ -134,7 +130,7 @@ public class FreeBusyServiceImpl implements FreeBusyService {
 
             @Override
             protected Map<Attendee, FreeBusyResult> execute(CalendarSession session, CalendarStorage storage) throws OXException {
-                return new FreeBusyPerformer(session, storage, protectionFactory).performCalculateFreeBusyTime(attendees, from, until);
+                return new FreeBusyPerformer(session, storage).performCalculateFreeBusyTime(attendees, from, until);
             }
         }.executeQuery();
     }

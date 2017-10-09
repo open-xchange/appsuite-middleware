@@ -52,7 +52,6 @@ package com.openexchange.chronos.impl.osgi;
 import org.osgi.service.event.EventAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.openexchange.chronos.common.SelfProtectionFactory;
 import com.openexchange.chronos.impl.CalendarServiceImpl;
 import com.openexchange.chronos.impl.FreeBusyServiceImpl;
 import com.openexchange.chronos.impl.availability.CalendarAvailabilityServiceImpl;
@@ -68,7 +67,6 @@ import com.openexchange.chronos.storage.CalendarAvailabilityStorageFactory;
 import com.openexchange.chronos.storage.CalendarStorageFactory;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigViewFactory;
-import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.contactcollector.ContactCollectorService;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
@@ -104,7 +102,7 @@ public class ChronosActivator extends HousekeepingActivator {
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] { ConfigurationService.class, ConfigViewFactory.class, CalendarStorageFactory.class, CalendarAvailabilityStorageFactory.class,
             FolderService.class, ContextService.class, UserService.class, GroupService.class, ResourceService.class, DatabaseService.class, RecurrenceService.class,
-            ThreadPoolService.class, QuotaService.class, LeanConfigurationService.class };
+            ThreadPoolService.class, QuotaService.class};
     }
     //@formatter:on
 
@@ -126,11 +124,10 @@ public class ChronosActivator extends HousekeepingActivator {
             /*
              * register services
              */
-            SelfProtectionFactory protection = new SelfProtectionFactory(getService(LeanConfigurationService.class));
 
-            CalendarService calendarService = new CalendarServiceImpl(calendarHandlers, protection);
+            CalendarService calendarService = new CalendarServiceImpl(calendarHandlers);
             registerService(CalendarService.class, calendarService);
-            registerService(FreeBusyService.class, new FreeBusyServiceImpl(protection));
+            registerService(FreeBusyService.class, new FreeBusyServiceImpl());
             registerService(CalendarUtilities.class, new DefaultCalendarUtilities(this));
             registerService(CalendarAvailabilityService.class, new CalendarAvailabilityServiceImpl());
             /*

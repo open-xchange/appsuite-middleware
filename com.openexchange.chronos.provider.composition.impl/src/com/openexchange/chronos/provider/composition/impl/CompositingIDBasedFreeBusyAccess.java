@@ -70,7 +70,6 @@ import com.openexchange.chronos.provider.composition.IDBasedFreeBusyAccess;
 import com.openexchange.chronos.provider.composition.impl.idmangling.IDManglingEventConflict;
 import com.openexchange.chronos.service.EventConflict;
 import com.openexchange.chronos.service.FreeBusyResult;
-import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
@@ -94,7 +93,7 @@ public class CompositingIDBasedFreeBusyAccess extends AbstractCompositingIDBased
      */
     public CompositingIDBasedFreeBusyAccess(Session session, CalendarProviderRegistry providerRegistry, ServiceLookup services) throws OXException {
         super(session, providerRegistry, services);
-        protection = new SelfProtectionFactory(services.getService(LeanConfigurationService.class)).createSelfProtection(session);
+        protection = SelfProtectionFactory.createSelfProtection(session);
     }
 
     @Override

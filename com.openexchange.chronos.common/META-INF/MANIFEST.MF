@@ -5,6 +5,7 @@ Bundle-SymbolicName: com.openexchange.chronos.common
 Bundle-Version: 7.8.4
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-Activator: com.openexchange.chronos.common.osgi.ChronosCommonActivator
 Bundle-ClassPath: .,
  lib/vinnie-2.0.0.jar,
  lib/lib-recur-0.10.jar
@@ -16,13 +17,16 @@ Import-Package: com.openexchange.chronos,
  com.openexchange.groupware.tools.mappings,
  com.openexchange.java,
  com.openexchange.java.util,
+ com.openexchange.osgi,
  com.openexchange.search,
  com.openexchange.search.internal.operands,
+ com.openexchange.server,
  com.openexchange.session,
  com.openexchange.tools.arrays,
  javax.mail.internet.idn,
  org.dmfs.rfc5545,
  org.dmfs.rfc5545.calendarmetrics,
+ org.osgi.framework,
  org.slf4j
 Export-Package: com.github.mangstadt.vinnie,
  com.github.mangstadt.vinnie.io,

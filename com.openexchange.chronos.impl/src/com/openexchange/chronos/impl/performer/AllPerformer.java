@@ -64,7 +64,6 @@ import java.util.List;
 import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
-import com.openexchange.chronos.common.SelfProtectionFactory;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.SearchOptions;
 import com.openexchange.chronos.storage.CalendarStorage;
@@ -89,8 +88,8 @@ public class AllPerformer extends AbstractQueryPerformer {
      * @param session The calendar session
      * @param storage The underlying calendar storage
      */
-    public AllPerformer(CalendarSession session, CalendarStorage storage, SelfProtectionFactory protectionFactory) throws OXException {
-        super(session, storage, protectionFactory);
+    public AllPerformer(CalendarSession session, CalendarStorage storage) throws OXException {
+        super(session, storage);
     }
 
     /**

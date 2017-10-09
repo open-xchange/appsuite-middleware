@@ -85,8 +85,8 @@ public class AbstractFreeBusyPerformer extends AbstractQueryPerformer {
      * @param storage The underlying calendar storage
      * @param session The calendar session
      */
-    protected AbstractFreeBusyPerformer(CalendarSession session, CalendarStorage storage, SelfProtectionFactory protectionFactory) throws OXException {
-        super(session, storage, protectionFactory);
+    protected AbstractFreeBusyPerformer(CalendarSession session, CalendarStorage storage) throws OXException {
+        super(session, storage);
     }
 
     protected List<Event> readAttendeeData(List<Event> events, Boolean internal) throws OXException {

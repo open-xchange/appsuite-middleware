@@ -69,7 +69,6 @@ import java.util.Set;
 import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
-import com.openexchange.chronos.common.SelfProtectionFactory;
 import com.openexchange.chronos.common.mapping.EventMapper;
 import com.openexchange.chronos.impl.Check;
 import com.openexchange.chronos.impl.Utils;
@@ -103,8 +102,8 @@ public class SearchPerformer extends AbstractQueryPerformer {
      * @param session The calendar session
      * @param storage The underlying calendar storage
      */
-    public SearchPerformer(CalendarSession session, CalendarStorage storage, SelfProtectionFactory protectionFactory) throws OXException {
-        super(session, storage, protectionFactory);
+    public SearchPerformer(CalendarSession session, CalendarStorage storage) throws OXException {
+        super(session, storage);
         this.minimumSearchPatternLength = session.getConfig().getMinimumSearchPatternLength();
     }
 
@@ -143,6 +142,7 @@ public class SearchPerformer extends AbstractQueryPerformer {
                     events.addAll(postProcess(Collections.singletonList(copiedEvent), folder, false));
                 }
             }
+            getSelfProctection().checkEventCollection(events);
         }
         return sortEvents(events);
     }

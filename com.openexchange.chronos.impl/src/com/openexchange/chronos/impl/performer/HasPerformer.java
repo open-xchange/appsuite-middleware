@@ -91,8 +91,8 @@ public class HasPerformer extends AbstractFreeBusyPerformer {
      * @param storage The underlying calendar storage
      * @param session The calendar session
      */
-    public HasPerformer(CalendarSession session, CalendarStorage storage, SelfProtectionFactory protectionFactory) throws OXException {
-        super(session, storage, protectionFactory);
+    public HasPerformer(CalendarSession session, CalendarStorage storage) throws OXException {
+        super(session, storage);
     }
 
     /**

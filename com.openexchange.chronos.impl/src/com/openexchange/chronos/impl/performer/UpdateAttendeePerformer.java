@@ -73,7 +73,6 @@ import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.RecurrenceId;
-import com.openexchange.chronos.common.SelfProtectionFactory;
 import com.openexchange.chronos.common.mapping.AttendeeMapper;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.Check;
@@ -100,8 +99,8 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
      * @param session The calendar session
      * @param folder The calendar folder representing the current view on the events
      */
-    public UpdateAttendeePerformer(CalendarStorage storage, CalendarSession session, UserizedFolder folder, SelfProtectionFactory protectionFactory) throws OXException {
-        super(storage, session, folder, protectionFactory);
+    public UpdateAttendeePerformer(CalendarStorage storage, CalendarSession session, UserizedFolder folder) throws OXException {
+        super(storage, session, folder);
     }
 
     /**
@@ -137,7 +136,7 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
             throw CalendarExceptionCodes.NO_WRITE_PERMISSION.create(folder.getID());
         }
         if (needsConflictCheck(originalEvent, originalAttendee, attendee)) {
-            Check.noConflicts(storage, session, originalEvent, Collections.singletonList(attendee), protectionFactory);
+            Check.noConflicts(storage, session, originalEvent, Collections.singletonList(attendee));
         }
         if (null == recurrenceId) {
             updateAttendee(originalEvent, originalAttendee, attendee);

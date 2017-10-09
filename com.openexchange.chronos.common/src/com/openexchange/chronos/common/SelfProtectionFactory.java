@@ -54,11 +54,13 @@ import java.util.Map;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.common.osgi.Services;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.config.lean.DefaultProperty;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.config.lean.Property;
 import com.openexchange.exception.OXException;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
 
 /**
@@ -72,21 +74,19 @@ public class SelfProtectionFactory {
     private static final String PROPERTY_EVENT_LIMIT = "com.openexchange.chronos.maxEventResults";
     private static final String PROPERTY_ATTENDEE_LIMIT = "com.openexchange.chronos.maxAttendeesPerEvent";
     private static final String PROPERTY_ALARM_LIMIT = "com.openexchange.chronos.maxAlarmsPerEvent";
-    private final LeanConfigurationService leanService;
 
     /**
      * Initializes a new {@link SelfProtectionFactory}.
      */
-    public SelfProtectionFactory(LeanConfigurationService leanConfigurationService) {
+    private SelfProtectionFactory() {
         super();
-        this.leanService = leanConfigurationService;
     }
 
-    public SelfProtection createSelfProtection(Session session){
-        return new SelfProtection(leanService, session);
+    public static SelfProtection createSelfProtection(Session session) throws OXException{
+        return new SelfProtection(session);
     }
 
-    public class SelfProtection {
+    public static class SelfProtection {
 
         private final int eventLimit;
         private final int attendeeLimit;
@@ -94,9 +94,15 @@ public class SelfProtectionFactory {
 
         /**
          * Initializes a new {@link SelfProtectionFactory.SelfProtection}.
+         * @throws OXException
          */
-        public SelfProtection(LeanConfigurationService leanConfigurationService, Session session) {
+        public SelfProtection(Session session) throws OXException {
             super();
+            LeanConfigurationService leanConfigurationService = Services.getService(LeanConfigurationService.class);
+            if(leanConfigurationService == null){
+                throw ServiceExceptionCode.absentService(LeanConfigurationService.class);
+            }
+
             Property prop = DefaultProperty.valueOf(PROPERTY_EVENT_LIMIT, 1000);
             eventLimit = leanConfigurationService.getIntProperty(session.getUserId(), session.getContextId(), prop);
 
@@ -108,7 +114,7 @@ public class SelfProtectionFactory {
         }
 
         /**
-         * Checks if a collections of events contains too many events
+         * Checks if a {@link Collection} of events contains too many events
          *
          * @param collection A collections of {@link Event} objects or similar (e.g. EventIds)
          * @throws OXException if the collection contains too many {@link Event}s
@@ -120,20 +126,29 @@ public class SelfProtectionFactory {
         }
 
         /**
-         * Checks if an {@link Event} contains too many {@link Attendee} or {@link Alarm} objects
+         * Checks if an {@link Event} contains too many {@link Alarm}s
          *
          * @param event The event to check
          * @throws OXException if the event contains too many {@link Attendee}s or {@link Alarm}s
          */
         public void checkEvent(Event event) throws OXException {
-            if (event.getAttendees() != null && event.getAttendees().size() > attendeeLimit) {
-                throw CalendarExceptionCodes.TOO_MANY_ATTENDEES.create();
-            }
-
             if (event.getAlarms() != null && event.getAlarms().size() > alarmLimit) {
                 throw CalendarExceptionCodes.TOO_MANY_ALARMS.create();
             }
         }
+
+        /**
+         * Checks if a {@link Collection} of {@link Attendee}s contains too many elements.
+         *
+         * @param event The {@link Collection} to check
+         * @throws OXException if the {@link Collection} contains too many {@link Attendee}s
+         */
+        public void checkAttendeeCollection(Collection<Attendee> attendees) throws OXException {
+            if (attendees != null && attendees.size() > attendeeLimit) {
+                throw CalendarExceptionCodes.TOO_MANY_ATTENDEES.create();
+            }
+        }
+
 
         public void checkMap(Map<?, ? extends Collection<Event>> map) throws OXException {
             int sum = 0;

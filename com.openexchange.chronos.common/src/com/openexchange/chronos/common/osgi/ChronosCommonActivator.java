@@ -47,39 +47,45 @@
  *
  */
 
-package com.openexchange.chronos.impl.performer;
+package com.openexchange.chronos.common.osgi;
 
-import static com.openexchange.chronos.impl.Utils.getFolderIdTerm;
-import com.openexchange.chronos.service.CalendarSession;
-import com.openexchange.chronos.storage.CalendarStorage;
-import com.openexchange.exception.OXException;
-import com.openexchange.folderstorage.UserizedFolder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import com.openexchange.config.lean.LeanConfigurationService;
+import com.openexchange.osgi.HousekeepingActivator;
 
 /**
- * {@link CountEventsPerformer}
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * {@link ChronosCommonActivator}
+ *
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.0
  */
-public class CountEventsPerformer extends AbstractQueryPerformer {
+public class ChronosCommonActivator extends HousekeepingActivator {
+
+    private static final Logger LOG = LoggerFactory.getLogger(ChronosCommonActivator.class);
 
     /**
-     * Initializes a new {@link CountEventsPerformer}.
-     *
-     * @param session The calendar session
-     * @param storage The underlying calendar storage
+     * Initializes a new {@link ChronosCommonActivator}.
      */
-    public CountEventsPerformer(CalendarSession session, CalendarStorage storage) throws OXException {
-        super(session, storage);
+    public ChronosCommonActivator() {
+        super();
     }
 
-    /**
-     * Performs the operation.
-     *
-     * @param folder The folder to count the contained events in
-     */
-    public long perform(UserizedFolder folder) throws OXException {
-        return storage.getEventStorage().countEvents(getFolderIdTerm(folder));
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[] { LeanConfigurationService.class };
     }
 
+    @Override
+    protected void startBundle() throws Exception {
+        LOG.info("starting bundle {}", context.getBundle());
+        Services.setServiceLookup(this);
+    }
+
+    @Override
+    protected void stopBundle() throws Exception {
+        LOG.info("stopping bundle {}", context.getBundle());
+        super.stopBundle();
+    }
 }

@@ -70,7 +70,6 @@ import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
-import com.openexchange.chronos.common.SelfProtectionFactory;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.InternalCalendarResult;
 import com.openexchange.chronos.impl.Utils;
@@ -100,8 +99,8 @@ public class ClearPerformer extends AbstractUpdatePerformer {
      * @param session The calendar session
      * @param folder The calendar folder representing the current view on the events
      */
-    public ClearPerformer(CalendarStorage storage, CalendarSession session, UserizedFolder folder, SelfProtectionFactory protectionFactory) throws OXException {
-        super(storage, session, folder, protectionFactory);
+    public ClearPerformer(CalendarStorage storage, CalendarSession session, UserizedFolder folder) throws OXException {
+        super(storage, session, folder);
     }
 
     /**

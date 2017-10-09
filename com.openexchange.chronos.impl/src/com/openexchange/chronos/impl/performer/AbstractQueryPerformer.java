@@ -94,21 +94,24 @@ public abstract class AbstractQueryPerformer {
 
     protected final CalendarSession session;
     protected final CalendarStorage storage;
-    protected final SelfProtection protection;
-    protected final SelfProtectionFactory protectionFactory;
-
+    private SelfProtection selfProtection;
     /**
      * Initializes a new {@link AbstractQueryPerformer}.
      *
      * @param storage The underlying calendar storage
      * @param session The calendar session
      */
-    protected AbstractQueryPerformer(CalendarSession session, CalendarStorage storage, SelfProtectionFactory protectionFactory) {
+    protected AbstractQueryPerformer(CalendarSession session, CalendarStorage storage) {
         super();
         this.session = session;
         this.storage = storage;
-        this.protection = protectionFactory.createSelfProtection(session.getSession());
-        this.protectionFactory = protectionFactory;
+    }
+
+    protected SelfProtection getSelfProctection() throws OXException{
+        if(selfProtection==null){
+            selfProtection = SelfProtectionFactory.createSelfProtection(session.getSession());
+        }
+        return selfProtection;
     }
 
     protected List<Event> readEventsInFolder(UserizedFolder folder, String[] objectIDs, boolean tombstones, Long updatedSince) throws OXException {
@@ -187,7 +190,7 @@ public abstract class AbstractQueryPerformer {
             } else {
                 processedEvents.add(event);
             }
-            protection.checkEventCollection(processedEvents);
+            getSelfProctection().checkEventCollection(processedEvents);
         }
         return sortEvents(processedEvents);
     }
@@ -224,7 +227,7 @@ public abstract class AbstractQueryPerformer {
             } else {
                 processedEvents.add(event);
             }
-            protection.checkEventCollection(processedEvents);
+            getSelfProctection().checkEventCollection(processedEvents);
         }
         return sortEvents(processedEvents);
     }
@@ -265,7 +268,7 @@ public abstract class AbstractQueryPerformer {
         List<Event> list = new ArrayList<Event>();
         while (itrerator.hasNext()) {
             list.add(itrerator.next());
-            protection.checkEventCollection(list);
+            getSelfProctection().checkEventCollection(list);
         }
         return list;
     }

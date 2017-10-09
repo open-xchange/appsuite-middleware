@@ -75,6 +75,8 @@ import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.common.SelfProtectionFactory;
+import com.openexchange.chronos.common.SelfProtectionFactory.SelfProtection;
 import com.openexchange.chronos.provider.CalendarAccess;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.CalendarFolder;
@@ -122,6 +124,10 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
     @Override
     public Session getSession() {
         return session;
+    }
+
+    private SelfProtection getSelfProtection() throws OXException {
+        return SelfProtectionFactory.createSelfProtection(getSession());
     }
 
     @Override
@@ -209,6 +215,7 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
             try {
                 List<Event> eventsInAccount = getAccess(accountId, SearchAware.class).searchEvents(relativeFolderIds, filters, queries);
                 events.addAll(withUniqueIDs(eventsInAccount, accountId));
+                getSelfProtection().checkEventCollection(events);
             } catch (OXException e) {
                 throw withUniqueIDs(e, accountId);
             }
@@ -224,6 +231,7 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
                 try {
                     List<Event> eventsInAccount = getAccess(account, SearchAware.class).searchEvents(null, filters, queries);
                     events.addAll(withUniqueIDs(eventsInAccount, account.getAccountId()));
+                    getSelfProtection().checkEventCollection(events);
                 } catch (OXException e) {
                     throw withUniqueIDs(e, account.getAccountId());
                 }

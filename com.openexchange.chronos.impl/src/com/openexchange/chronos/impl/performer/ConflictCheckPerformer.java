@@ -86,7 +86,6 @@ import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.Transp;
 import com.openexchange.chronos.common.CalendarUtils;
-import com.openexchange.chronos.common.SelfProtectionFactory;
 import com.openexchange.chronos.impl.EventConflictImpl;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarSession;
@@ -120,8 +119,8 @@ public class ConflictCheckPerformer extends AbstractFreeBusyPerformer {
      * @param session The calendar session
      * @param storage The calendar storage
      */
-    public ConflictCheckPerformer(CalendarSession session, CalendarStorage storage, SelfProtectionFactory protectionFactory) throws OXException {
-        super(session, storage, protectionFactory);
+    public ConflictCheckPerformer(CalendarSession session, CalendarStorage storage) throws OXException {
+        super(session, storage);
         this.today = truncateTime(new Date(), getTimeZone(session));
         maxConflicts = session.getConfig().getMaxConflicts();
         maxAttendeesPerConflict = session.getConfig().getMaxAttendeesPerConflict();
@@ -321,7 +320,7 @@ public class ConflictCheckPerformer extends AbstractFreeBusyPerformer {
                     }
                 }
             }
-            protection.checkEventCollection(conflicts);
+            getSelfProctection().checkEventCollection(conflicts);
         }
         return conflicts;
     }
@@ -389,7 +388,7 @@ public class ConflictCheckPerformer extends AbstractFreeBusyPerformer {
         if (0 == eventsInPeriod.size()) {
             return Collections.emptyList();
         }
-        protection.checkEventCollection(eventsInPeriod);
+        getSelfProctection().checkEventCollection(eventsInPeriod);
         return readAttendeeData(eventsInPeriod, Boolean.TRUE);
     }
 
