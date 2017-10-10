@@ -119,7 +119,19 @@ public interface SchedJoulesService {
      * @throws OXException if an error is occurred
      */
     SchedJoulesResult listLanguages() throws OXException;
-    
+
+    /**
+     * Performs a search with the specified parameters. If the country and/or category identifiers are
+     * specified, then a search is only performed within those countries/categories respectively.
+     * 
+     * @param query The query (free text search query parameter)
+     * @param locale The locale. Defaults to 'en' if empty
+     * @param countryId The country identifier. Ignored if less than or equal to '0'.
+     * @param categoryId The category identifier. Ignored if less than or equal to '0'.
+     * @param maxRows The maximum amount of results. Defaults to 20.
+     * @return The {@link SchedJoulesResult}
+     * @throws OXException if an error is occurred
+     */
     SchedJoulesResult search(String query, String locale, int countryId, int categoryId, int maxRows) throws OXException;
 
     /**

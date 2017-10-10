@@ -54,7 +54,6 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.chronos.schedjoules.SchedJoulesService;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
@@ -64,16 +63,13 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class SubscribeAction implements AJAXActionService {
-
-    private ServiceLookup services;
+public class SubscribeAction extends AbstractSchedJoulesAction implements AJAXActionService {
 
     /**
      * Initialises a new {@link SubscribeAction}.
      */
     public SubscribeAction(ServiceLookup services) {
-        super();
-        this.services = services;
+        super(services);
     }
 
     /*
@@ -87,12 +83,9 @@ public class SubscribeAction implements AJAXActionService {
         if (pid == null) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create("id");
         }
-        String language = requestData.getParameter("language");
-        if (Strings.isEmpty(language)) {
-            language = session.getUser().getLocale().getLanguage().toLowerCase();
-        }
-
         int pageId = Integer.parseInt(pid);
+        String language = getLanguage(requestData, session);
+
         SchedJoulesService service = services.getService(SchedJoulesService.class);
         String prodId = service.subscribeCalendar(pageId, language);
 

@@ -49,40 +49,60 @@
 
 package com.openexchange.chronos.schedjoules.json.actions;
 
-import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.chronos.schedjoules.SchedJoulesService;
-import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link CountriesAction}
+ * {@link AbstractSchedJoulesAction}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class CountriesAction extends AbstractSchedJoulesAction implements AJAXActionService {
+abstract class AbstractSchedJoulesAction {
+
+    protected final ServiceLookup services;
 
     /**
-     * Initialises a new {@link CountriesAction}.
+     * Initialises a new {@link AbstractSchedJoulesAction}.
      * 
      * @param services The {@link ServiceLookup} instance
      */
-    public CountriesAction(ServiceLookup services) {
-        super(services);
+    AbstractSchedJoulesAction(ServiceLookup services) {
+        this.services = services;
     }
 
-    /*
-     * (non-Javadoc)
+    /**
+     * Gets the 'language' URL parameter from the request and returns it. If no
+     * parameter is present, then the default language from the user's session
+     * is returned.
      * 
-     * @see com.openexchange.ajax.requesthandler.AJAXActionService#perform(com.openexchange.ajax.requesthandler.AJAXRequestData, com.openexchange.tools.session.ServerSession)
+     * @param requestData The {@link AJAXRequestData}
+     * @param session The groupware session
+     * @return The value of the 'language' URL parameter if present, or the user's language from the session
      */
-    @Override
-    public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
-        String locale = getLanguage(requestData, session);
+    String getLanguage(AJAXRequestData requestData, ServerSession session) {
+        String language = requestData.getParameter("language");
+        if (Strings.isEmpty(language)) {
+            language = session.getUser().getLocale().getLanguage().toLowerCase();
+        }
+        return language;
+    }
 
-        SchedJoulesService service = services.getService(SchedJoulesService.class);
-        return new AJAXRequestResult(service.listCountries(locale).getData());
+    /**
+     * Gets the 'country' URL parameter from the request and returns it. If no
+     * parameter is present, then the default country from the user's session
+     * is returned.
+     * 
+     * @param requestData The {@link AJAXRequestData}
+     * @param session The groupware session
+     * @return The value of the 'country' URL parameter if present, or the user's country from the session
+     */
+    String getCountry(AJAXRequestData requestData, ServerSession session) {
+        String country = requestData.getParameter("country");
+        if (Strings.isEmpty(country)) {
+            country = session.getUser().getLocale().getCountry().toLowerCase();
+        }
+        return country;
     }
 }

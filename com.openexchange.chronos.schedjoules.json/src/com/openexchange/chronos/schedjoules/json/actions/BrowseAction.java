@@ -54,7 +54,6 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.chronos.schedjoules.SchedJoulesService;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 
@@ -63,16 +62,13 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class BrowseAction implements AJAXActionService {
-
-    private ServiceLookup services;
+public class BrowseAction extends AbstractSchedJoulesAction implements AJAXActionService {
 
     /**
      * Initialises a new {@link BrowseAction}.
      */
     public BrowseAction(ServiceLookup services) {
-        super();
-        this.services = services;
+        super(services);
     }
 
     /*
@@ -84,14 +80,8 @@ public class BrowseAction implements AJAXActionService {
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
         // Get parameters
         String pageId = requestData.getParameter("id");
-        String language = requestData.getParameter("language");
-        if (Strings.isEmpty(language)) {
-            language = session.getUser().getLocale().getLanguage().toLowerCase();
-        }
-        String country = requestData.getParameter("country");
-        if (Strings.isEmpty(country)) {
-            country = session.getUser().getLocale().getCountry().toLowerCase();
-        }
+        String language = getLanguage(requestData, session);
+        String country = getCountry(requestData, session);
 
         // Execute the request
         SchedJoulesService service = services.getService(SchedJoulesService.class);

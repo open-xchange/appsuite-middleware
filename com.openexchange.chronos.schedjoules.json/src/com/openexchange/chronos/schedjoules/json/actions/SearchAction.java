@@ -64,9 +64,7 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class SearchAction implements AJAXActionService {
-
-    private ServiceLookup services;
+public class SearchAction extends AbstractSchedJoulesAction implements AJAXActionService {
 
     /**
      * Initialises a new {@link SearchAction}.
@@ -74,8 +72,7 @@ public class SearchAction implements AJAXActionService {
      * @param services The {@link ServiceLookup} instance
      */
     public SearchAction(ServiceLookup services) {
-        super();
-        this.services = services;
+        super(services);
     }
 
     /*
@@ -103,10 +100,7 @@ public class SearchAction implements AJAXActionService {
         }
 
         // Get the optional 'language' parameter
-        String locale = requestData.getParameter("language");
-        if (Strings.isEmpty(locale)) {
-            locale = session.getUser().getLocale().getLanguage().toLowerCase();
-        }
+        String locale = getLanguage(requestData, session);
 
         // Get the optional 'countryId' parameter
         String cid = requestData.getParameter("countryId");
