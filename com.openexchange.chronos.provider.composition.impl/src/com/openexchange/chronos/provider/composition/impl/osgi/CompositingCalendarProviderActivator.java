@@ -58,6 +58,7 @@ import com.openexchange.chronos.provider.composition.IDBasedCalendarAccessFactor
 import com.openexchange.chronos.provider.composition.impl.CalendarProviderRegistryImpl;
 import com.openexchange.chronos.provider.composition.impl.CompositingIDBasedCalendarAccessFactory;
 import com.openexchange.chronos.provider.composition.impl.quota.CalendarQuotaProvider;
+import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.ServiceSet;
 import com.openexchange.quota.QuotaProvider;
@@ -79,7 +80,7 @@ public class CompositingCalendarProviderActivator extends HousekeepingActivator 
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { CalendarAccountService.class };
+        return new Class<?>[] { CalendarAccountService.class, LeanConfigurationService.class };
     }
 
     @Override

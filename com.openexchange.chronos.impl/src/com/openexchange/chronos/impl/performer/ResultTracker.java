@@ -51,15 +51,17 @@ package com.openexchange.chronos.impl.performer;
 
 import static com.openexchange.chronos.common.CalendarUtils.getEventID;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
-import static com.openexchange.chronos.impl.Utils.asList;
 import static com.openexchange.chronos.impl.Utils.getCalendarUserId;
 import static com.openexchange.chronos.impl.Utils.getPersonalFolderIds;
 import static com.openexchange.chronos.impl.Utils.isInFolder;
 import static com.openexchange.chronos.impl.Utils.isResolveOccurrences;
 import static com.openexchange.chronos.impl.Utils.mapEventOccurrences;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.common.SelfProtectionFactory.SelfProtection;
 import com.openexchange.chronos.impl.InternalCalendarResult;
 import com.openexchange.chronos.impl.Utils;
 import com.openexchange.chronos.service.CalendarSession;
@@ -81,6 +83,7 @@ public class ResultTracker {
     private final UserizedFolder folder;
     private final long timestamp;
     private final InternalCalendarResult result;
+    private final SelfProtection protection;
 
     /**
      * Initializes a new {@link ResultTracker}.
@@ -90,13 +93,14 @@ public class ResultTracker {
      * @param folder The calendar folder representing the current view on the events
      * @param timestamp The timestamp to apply for the result
      */
-    public ResultTracker(CalendarStorage storage, CalendarSession session, UserizedFolder folder, long timestamp) throws OXException {
+    public ResultTracker(CalendarStorage storage, CalendarSession session, UserizedFolder folder, long timestamp, SelfProtection protection) throws OXException {
         super();
         this.storage = storage;
         this.session = session;
         this.folder = folder;
         this.timestamp = timestamp;
         this.result = new InternalCalendarResult(session, getCalendarUserId(folder), folder);
+        this.protection = protection;
     }
 
     /**
@@ -226,7 +230,14 @@ public class ResultTracker {
     }
 
     private List<Event> resolveOccurrences(Event master) throws OXException {
-        return asList(Utils.resolveOccurrences(storage, session, master));
+        Iterator<Event> iterator = Utils.resolveOccurrences(storage, session, master);
+
+        List<Event> list = new ArrayList<Event>();
+        while (iterator.hasNext()) {
+            list.add(iterator.next());
+            protection.checkEventCollection(list);
+        }
+        return list;
     }
 
     private Event userize(Event event) throws OXException {

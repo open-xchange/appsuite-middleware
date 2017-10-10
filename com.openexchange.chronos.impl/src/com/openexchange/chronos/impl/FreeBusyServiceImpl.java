@@ -124,11 +124,6 @@ public class FreeBusyServiceImpl implements FreeBusyService {
         }.executeQuery();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.chronos.service.FreeBusyService#calculateFreeBusyTime(com.openexchange.chronos.service.CalendarSession, java.util.List, java.util.Date, java.util.Date)
-     */
     @Override
     public Map<Attendee, FreeBusyResult> calculateFreeBusyTime(CalendarSession session, final List<Attendee> attendees, final Date from, final Date until) throws OXException {
         return new InternalCalendarStorageOperation<Map<Attendee, FreeBusyResult>>(session) {

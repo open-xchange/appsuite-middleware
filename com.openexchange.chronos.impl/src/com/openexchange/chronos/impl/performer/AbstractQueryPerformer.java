@@ -65,11 +65,14 @@ import static com.openexchange.folderstorage.Permission.READ_FOLDER;
 import static com.openexchange.folderstorage.Permission.READ_OWN_OBJECTS;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import com.openexchange.chronos.Classification;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.common.SelfProtectionFactory;
+import com.openexchange.chronos.common.SelfProtectionFactory.SelfProtection;
 import com.openexchange.chronos.impl.Utils;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.SearchOptions;
@@ -91,7 +94,7 @@ public abstract class AbstractQueryPerformer {
 
     protected final CalendarSession session;
     protected final CalendarStorage storage;
-
+    private SelfProtection selfProtection;
     /**
      * Initializes a new {@link AbstractQueryPerformer}.
      *
@@ -102,6 +105,13 @@ public abstract class AbstractQueryPerformer {
         super();
         this.session = session;
         this.storage = storage;
+    }
+
+    protected SelfProtection getSelfProctection() throws OXException{
+        if(selfProtection==null){
+            selfProtection = SelfProtectionFactory.createSelfProtection(session.getSession());
+        }
+        return selfProtection;
     }
 
     protected List<Event> readEventsInFolder(UserizedFolder folder, String[] objectIDs, boolean tombstones, Long updatedSince) throws OXException {
@@ -180,6 +190,7 @@ public abstract class AbstractQueryPerformer {
             } else {
                 processedEvents.add(event);
             }
+            getSelfProctection().checkEventCollection(processedEvents);
         }
         return sortEvents(processedEvents);
     }
@@ -216,6 +227,7 @@ public abstract class AbstractQueryPerformer {
             } else {
                 processedEvents.add(event);
             }
+            getSelfProctection().checkEventCollection(processedEvents);
         }
         return sortEvents(processedEvents);
     }
@@ -252,7 +264,13 @@ public abstract class AbstractQueryPerformer {
     }
 
     protected List<Event> resolveOccurrences(Event master) throws OXException {
-        return Utils.asList(Utils.resolveOccurrences(storage, session, master));
+        Iterator<Event> itrerator = Utils.resolveOccurrences(storage, session, master);
+        List<Event> list = new ArrayList<Event>();
+        while (itrerator.hasNext()) {
+            list.add(itrerator.next());
+            getSelfProctection().checkEventCollection(list);
+        }
+        return list;
     }
 
 }

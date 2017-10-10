@@ -87,12 +87,12 @@ import com.openexchange.chronos.common.AvailabilityUtils;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.DefaultRecurrenceData;
 import com.openexchange.chronos.common.mapping.EventMapper;
+import com.openexchange.chronos.impl.osgi.Services;
 import com.openexchange.chronos.compat.ShownAsTransparency;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.Check;
 import com.openexchange.chronos.impl.Comparators;
 import com.openexchange.chronos.impl.Utils;
-import com.openexchange.chronos.impl.osgi.Services;
 import com.openexchange.chronos.recurrence.service.RecurrenceUtils;
 import com.openexchange.chronos.service.AvailableField;
 import com.openexchange.chronos.service.CalendarAvailabilityService;
@@ -199,10 +199,13 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
                     Iterator<RecurrenceId> iterator = getRecurrenceIterator(storage, session, eventInPeriod, from, until);
                     while (iterator.hasNext()) {
                         put(eventsPerAttendee, attendee, getResultingOccurrence(eventInPeriod, iterator.next(), folderID));
+                        getSelfProctection().checkEventCollection(eventsPerAttendee.get(attendee));
                     }
                 } else {
                     put(eventsPerAttendee, attendee, getResultingEvent(eventInPeriod, folderID));
+                    getSelfProctection().checkEventCollection(eventsPerAttendee.get(attendee));
                 }
+                getSelfProctection().checkMap(eventsPerAttendee);
             }
         }
         return eventsPerAttendee;

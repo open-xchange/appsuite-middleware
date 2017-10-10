@@ -125,6 +125,7 @@ public class ChronosActivator extends HousekeepingActivator {
             /*
              * register services
              */
+
             CalendarService calendarService = new CalendarServiceImpl(calendarHandlers);
             registerService(CalendarService.class, calendarService);
             registerService(FreeBusyService.class, new FreeBusyServiceImpl());

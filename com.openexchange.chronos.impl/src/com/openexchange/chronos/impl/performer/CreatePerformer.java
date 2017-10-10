@@ -98,6 +98,7 @@ public class CreatePerformer extends AbstractUpdatePerformer {
      * @return The result
      */
     public InternalCalendarResult perform(Event event) throws OXException {
+        getSelfProctection().checkEvent(event);
         /*
          * check current session user's permissions
          */
@@ -107,6 +108,7 @@ public class CreatePerformer extends AbstractUpdatePerformer {
          */
         Event newEvent = prepareEvent(event);
         List<Attendee> newAttendees = prepareAttendees(event.getAttendees());
+        getSelfProctection().checkAttendeeCollection(newAttendees);
         if (null == newAttendees || 0 == newAttendees.size()) {
             /*
              * not group-scheduled event (only on a single user's calendar), apply parent folder identifier

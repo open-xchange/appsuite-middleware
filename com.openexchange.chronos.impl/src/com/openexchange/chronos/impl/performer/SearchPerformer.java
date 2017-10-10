@@ -142,6 +142,7 @@ public class SearchPerformer extends AbstractQueryPerformer {
                     events.addAll(postProcess(Collections.singletonList(copiedEvent), folder, false));
                 }
             }
+            getSelfProctection().checkEventCollection(events);
         }
         return sortEvents(events);
     }

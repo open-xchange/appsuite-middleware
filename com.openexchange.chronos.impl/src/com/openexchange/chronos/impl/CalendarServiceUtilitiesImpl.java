@@ -72,7 +72,7 @@ import com.openexchange.quota.Quota;
  */
 public class CalendarServiceUtilitiesImpl implements CalendarServiceUtilities {
 
-    private static final CalendarServiceUtilities INSTANCE = new CalendarServiceUtilitiesImpl();
+    private static CalendarServiceUtilities instance = null;
 
     /**
      * Gets the calendar service utilities instance.
@@ -80,7 +80,10 @@ public class CalendarServiceUtilitiesImpl implements CalendarServiceUtilities {
      * @return The calendar service utilities
      */
     public static CalendarServiceUtilities getInstance() {
-        return INSTANCE;
+        if(instance == null){
+            instance = new CalendarServiceUtilitiesImpl();
+        }
+        return instance;
     }
 
     /**

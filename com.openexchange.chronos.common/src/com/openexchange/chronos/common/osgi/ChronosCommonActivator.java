@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the Open-Xchange, Inc. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2017-2020 OX Software GmbH
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,58 +47,45 @@
  *
  */
 
-package com.openexchange.ajax.chronos.factory;
+package com.openexchange.chronos.common.osgi;
 
-import com.openexchange.testing.httpclient.models.Attendee;
-import com.openexchange.testing.httpclient.models.Attendee.CuTypeEnum;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import com.openexchange.config.lean.LeanConfigurationService;
+import com.openexchange.osgi.HousekeepingActivator;
 
 /**
- * {@link AttendeeFactory}
  *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * {@link ChronosCommonActivator}
+ *
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.10.0
  */
-public final class AttendeeFactory {
+public class ChronosCommonActivator extends HousekeepingActivator {
+
+    private static final Logger LOG = LoggerFactory.getLogger(ChronosCommonActivator.class);
 
     /**
-     * Creates a new {@link Attendee} object with the specified user identifier, email address and {@link CuTypeEnum}
-     *
-     * @param userId The user identifier
-     * @param emailAddress the e-mail address
-     * @param cuType the {@link CuTypeEnum}
-     * @return The new {@link Attendee}
+     * Initializes a new {@link ChronosCommonActivator}.
      */
-    public static Attendee createAttendee(int userId, String emailAddress, CuTypeEnum cuType) {
-        Attendee attendee = new Attendee();
-        attendee.entity(userId);
-        attendee.cuType(cuType);
-        attendee.setUri("mailto:" + emailAddress);
-
-        return attendee;
+    public ChronosCommonActivator() {
+        super();
     }
 
-    /**
-     * Creates an {@link Attendee} of type {@link CuTypeEnum#INDIVIDUAL}
-     *
-     * @param userId The user identifier
-     * @param emailAddress The e-mail address
-     * @return The new {@link Attendee}
-     */
-    public static Attendee createIndividual(int userId, String emailAddress) {
-        return createAttendee(userId, emailAddress, CuTypeEnum.INDIVIDUAL);
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[] { LeanConfigurationService.class };
     }
 
-    /**
-     * Creates an external {@link Attendee} of type {@link CuTypeEnum#INDIVIDUAL}
-     *
-     * @param emailAddress The e-mail address
-     * @return The new {@link Attendee}
-     */
-    public static Attendee createIndividual(String emailAddress) {
-        Attendee attendee = new Attendee();
-        attendee.cuType(CuTypeEnum.INDIVIDUAL);
-        attendee.setUri("mailto:" + emailAddress);
-        return attendee;
+    @Override
+    protected void startBundle() throws Exception {
+        LOG.info("starting bundle {}", context.getBundle());
+        Services.setServiceLookup(this);
     }
 
-
+    @Override
+    protected void stopBundle() throws Exception {
+        LOG.info("stopping bundle {}", context.getBundle());
+        super.stopBundle();
+    }
 }
