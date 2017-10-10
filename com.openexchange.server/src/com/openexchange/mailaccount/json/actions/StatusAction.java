@@ -281,6 +281,9 @@ public final class StatusAction extends AbstractValidateMailAccountAction implem
                 newWarning.setCategory(Category.CATEGORY_WARNING);
                 warnings.clear();
                 warnings.add(newWarning);
+            } else if (indicatesSSLProblem(warning)) {
+                warnings.add(warning);
+                return KnownStatus.INVALID_SSL_CERTIFICATE;
             }
         }
         return null;
