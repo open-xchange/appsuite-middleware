@@ -62,6 +62,7 @@ import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Classification;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.impl.Utils;
+import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
@@ -107,6 +108,12 @@ public class AbstractFreeBusyPerformer extends AbstractQueryPerformer {
      * @return <code>true</code> if the event should be considered, <code>false</code>, otherwise
      */
     protected boolean considerForFreeBusy(Event event) {
+
+        String maskId = session.get(CalendarParameters.PARAMETER_MASK_ID, String.class);
+        if(maskId != null && (maskId.equals(event.getId()) || maskId.equals(event.getSeriesId()))){
+            return false;
+        }
+
         // exclude foreign events classified as 'private' (but keep 'confidential' ones)
         int userId = session.getUserId();
         return isPublicClassification(event) || Classification.CONFIDENTIAL.equals(event.getClassification()) ||

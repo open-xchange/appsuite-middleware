@@ -90,7 +90,7 @@ import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 @OAuthAction(ChronosOAuthScope.OAUTH_READ_SCOPE)
 public class FreeBusyAction extends ChronosAction {
 
-    private static final Set<String> OPTIONAL_PARAMETERS = unmodifiableSet(CalendarParameters.PARAMETER_FIELDS);
+    private static final Set<String> OPTIONAL_PARAMETERS = unmodifiableSet(CalendarParameters.PARAMETER_FIELDS, CalendarParameters.PARAMETER_MASK_ID);
 
     private static final String ATTENDEES = "attendees";
 
