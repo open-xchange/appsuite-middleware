@@ -8,7 +8,7 @@ BuildRequires: open-xchange-core
 BuildRequires: open-xchange-admin
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 31
+%define        ox_release 32
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -58,6 +58,8 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 /opt/open-xchange/solr/*
 
 %changelog
+* Tue Oct 10 2017 Steffen Templin <steffen.templin@open-xchange.com>
+Build for Patch 2017-10-16 (4391)
 * Mon Aug 14 2017 Steffen Templin <steffen.templin@open-xchange.com>
 2017-08-21 (4315)
 * Wed Aug 02 2017 Steffen Templin <steffen.templin@open-xchange.com>
