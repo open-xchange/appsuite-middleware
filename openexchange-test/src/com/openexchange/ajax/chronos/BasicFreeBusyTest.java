@@ -258,6 +258,43 @@ public class BasicFreeBusyTest extends AbstractChronosTest {
         assertEquals("BUSY", freeBusyTimes.get(0).getFbType());
     }
 
+    @Test
+    public void testMaskId() throws Exception {
+        Date now = new Date();
+        int offset = TimeZone.getDefault().getOffset(now.getTime());
+        long day1 = 1000 * (now.getTime() / 1000);
+        long day3 = day1 + TimeUnit.DAYS.toMillis(2);
+        long day5 = day3 + TimeUnit.DAYS.toMillis(2);
+        long nextWeek = day1 + TimeUnit.DAYS.toMillis(7);
+        createEvent("dayOne", day1, day1 + TimeUnit.HOURS.toMillis(1));
+        EventData createEvent = createEvent("dayThree", day3, day3 + TimeUnit.HOURS.toMillis(1));
+        createEvent("dayFive", day5, day5 + TimeUnit.HOURS.toMillis(1));
+
+        ChronosFreeBusyResponse freeBusy = chronosApi.freebusy(defaultUserApi.getSession(), DateTimeUtil.getZuluDateTime(day1 - offset).getValue(), DateTimeUtil.getZuluDateTime(nextWeek).getValue(), createAttendeesBody(defaultUserApi.getCalUser()), createEvent.getId());
+
+        assertEquals(freeBusy.getError(), null, freeBusy.getErrorDesc());
+        assertNotNull(freeBusy.getData());
+        List<ChronosFreeBusyResponseData> data = freeBusy.getData();
+        //Expect only one event for the given attendee
+        assertEquals(1, data.size());
+        List<FreeBusyTime> freeBusyTimes = data.get(0).getFreeBusyTime();
+
+        // Adapt to timezone
+        day1 -= offset;
+        day3 -= offset;
+        day5 -= offset;
+
+        // Expect only 2 free busy times.
+        assertEquals(2, freeBusyTimes.size());
+        assertEquals(day1, freeBusyTimes.get(0).getStartTime().longValue());
+        assertEquals(day1 + TimeUnit.HOURS.toMillis(1), freeBusyTimes.get(0).getEndTime().longValue());
+        assertEquals("BUSY", freeBusyTimes.get(0).getFbType());
+
+        assertEquals(day5, freeBusyTimes.get(1).getStartTime().longValue());
+        assertEquals(day5 + TimeUnit.HOURS.toMillis(1), freeBusyTimes.get(1).getEndTime().longValue());
+        assertEquals("BUSY", freeBusyTimes.get(1).getFbType());
+    }
+
     private EventData createEvent(String summary, long start, long end, IdWrappingTestUser... users) throws ApiException {
         List<Attendee> attendees = null;
         if (users != null && users.length > 0) {
