@@ -47,71 +47,69 @@
  *
  */
 
-package com.openexchange.chronos.json.converter;
+package com.openexchange.chronos.json.fields;
 
-import java.util.List;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.ajax.requesthandler.Converter;
-import com.openexchange.ajax.requesthandler.ResultConverter;
-import com.openexchange.chronos.AlarmTrigger;
-import com.openexchange.chronos.json.converter.mapper.AlarmTriggerMapper;
-import com.openexchange.exception.OXException;
-import com.openexchange.tools.servlet.OXJSONExceptionCodes;
-import com.openexchange.tools.session.ServerSession;
+import com.openexchange.chronos.json.action.DeleteAction.ErrorAwareCalendarResult;
+import com.openexchange.chronos.service.CalendarResult;
+import com.openexchange.chronos.service.UpdatesResult;
 
 /**
- * {@link AlarmTriggerConverter}
+ * {@link ChronosCalendarResultJsonFields} contains fields of the calendar results
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.0
  */
-public class AlarmTriggerConverter implements ResultConverter {
+public class ChronosCalendarResultJsonFields {
 
-    public static final String INPUT_FORMAT = "alarm_trigger";
 
-    @Override
-    public String getInputFormat() {
-        return INPUT_FORMAT;
+    public static final class Result {
+        /**
+         * The created events. See {@link CalendarResult#getCreations()}.
+         */
+        public static final String CREATED = "created";
+
+        /**
+         * The deleted events. See {@link CalendarResult#getDeletions()}.
+         */
+        public static final String DELETED = "deleted";
+
+        /**
+         * The updated events. See {@link CalendarResult#getUpdates()}.
+         */
+        public static final String UPDATED = "updated";
+
+        /**
+         * The failed events. See {@link ErrorAwareCalendarResult}.
+         */
+        public static final String FAILED = "failed";
     }
 
-    @Override
-    public String getOutputFormat() {
-        return "json";
+    public static final class Updates {
+        /**
+         * The new and modified events. See {@link UpdatesResult#getNewAndModifiedEvents()}.
+         */
+        public static final String NEW = "newAndModified";
+
+        /**
+         * The deleted events. See {@link UpdatesResult#getDeletedEvents())}.
+         */
+        public static final String DELETED = "deleted";
     }
 
-    @Override
-    public Quality getQuality() {
-        return Quality.GOOD;
-    }
-
-    @Override
-    public void convert(AJAXRequestData requestData, AJAXRequestResult result, ServerSession session, Converter converter) throws OXException {
-        Object resultObject = result.getResultObject();
-
-        if (resultObject instanceof List) {
-            @SuppressWarnings("unchecked") List<AlarmTrigger> triggers = (List<AlarmTrigger>) resultObject;
-
-            try {
-                JSONArray json = new JSONArray(triggers.size());
-                for (AlarmTrigger trigger : triggers) {
-                    json.put(toJSON(trigger, session));
-                }
-                result.setResultObject(json, getOutputFormat());
-            } catch (JSONException e) {
-                throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
-            }
-        } else {
-            throw new UnsupportedOperationException();
-        }
-    }
-
-    private JSONObject toJSON(AlarmTrigger trigger, ServerSession session) throws JSONException, OXException {
-        return AlarmTriggerMapper.getInstance().serialize(trigger, AlarmTriggerMapper.getInstance().getAssignedFields(trigger), "UTC", session);
-
+    public static final class Error {
+        /**
+         * The id of the event. See {@link ErrorAwareCalendarResult#getId()}.
+         */
+        public static final String ID = "id";
+        /**
+         * The folder id. See {@link ErrorAwareCalendarResult#getFolderID()}.
+         */
+        public static final String FOLDER_ID = "folderId";
+        /**
+         * The error. See {@link ErrorAwareCalendarResult#getError()}.
+         */
+        public static final String ERROR = "error";
     }
 
 }
+

@@ -47,71 +47,49 @@
  *
  */
 
-package com.openexchange.chronos.json.converter;
+package com.openexchange.chronos.json.fields;
 
-import java.util.List;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.ajax.requesthandler.Converter;
-import com.openexchange.ajax.requesthandler.ResultConverter;
-import com.openexchange.chronos.AlarmTrigger;
-import com.openexchange.chronos.json.converter.mapper.AlarmTriggerMapper;
-import com.openexchange.exception.OXException;
-import com.openexchange.tools.servlet.OXJSONExceptionCodes;
-import com.openexchange.tools.session.ServerSession;
+import com.openexchange.chronos.service.FreeBusyResult;
 
 /**
- * {@link AlarmTriggerConverter}
+ * {@link ChronosFreeBusyJsonFields} contains all fields which are used by the freeBusy action
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.0
  */
-public class AlarmTriggerConverter implements ResultConverter {
+public class ChronosFreeBusyJsonFields {
 
-    public static final String INPUT_FORMAT = "alarm_trigger";
+    /**
+     * The attendee of the {@link FreeBusyResult}
+     */
+    public static final String ATTENDEE = "attendee";
+    /**
+     * The free busy times of the attendee. See {@link FreeBusyResult#getFreeBusyTimes()}.
+     */
+    public static final String FREE_BUSY_TIME = "freeBusyTime";
 
-    @Override
-    public String getInputFormat() {
-        return INPUT_FORMAT;
+    /**
+     * The warnings of the attendee. See {@link FreeBusyResult#getWarnings()}.
+     */
+    public static final String WARNINGS = "warnings";
+
+    public static final class FreeBusyTime {
+        /**
+         * The start time of the free-busy time-slot. See {@link com.openexchange.chronos.FreeBusyTime#getStartTime()}.
+         */
+        public static final String START_TIME = "startTime";
+        /**
+         * The end time of the free-busy time-slot. See {@link com.openexchange.chronos.FreeBusyTime#getEndTime()}.
+         */
+        public static final String END_TIME = "endTime";
+        /**
+         * The type of the free-busy time-slot. See {@link com.openexchange.chronos.FreeBusyTime#getFbType()}.
+         */
+        public static final String FB_TYPE = "fbType";
+        /**
+         * The event the free-busy time-slot corresponds to. See {@link com.openexchange.chronos.FreeBusyTime#getEvent()}.
+         */
+        public static final String EVENT = "event";
     }
-
-    @Override
-    public String getOutputFormat() {
-        return "json";
-    }
-
-    @Override
-    public Quality getQuality() {
-        return Quality.GOOD;
-    }
-
-    @Override
-    public void convert(AJAXRequestData requestData, AJAXRequestResult result, ServerSession session, Converter converter) throws OXException {
-        Object resultObject = result.getResultObject();
-
-        if (resultObject instanceof List) {
-            @SuppressWarnings("unchecked") List<AlarmTrigger> triggers = (List<AlarmTrigger>) resultObject;
-
-            try {
-                JSONArray json = new JSONArray(triggers.size());
-                for (AlarmTrigger trigger : triggers) {
-                    json.put(toJSON(trigger, session));
-                }
-                result.setResultObject(json, getOutputFormat());
-            } catch (JSONException e) {
-                throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
-            }
-        } else {
-            throw new UnsupportedOperationException();
-        }
-    }
-
-    private JSONObject toJSON(AlarmTrigger trigger, ServerSession session) throws JSONException, OXException {
-        return AlarmTriggerMapper.getInstance().serialize(trigger, AlarmTriggerMapper.getInstance().getAssignedFields(trigger), "UTC", session);
-
-    }
-
 }
+

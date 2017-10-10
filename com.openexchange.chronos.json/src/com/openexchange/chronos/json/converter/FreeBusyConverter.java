@@ -66,6 +66,8 @@ import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.FreeBusyTime;
 import com.openexchange.chronos.json.converter.mapper.AttendeesMapping;
 import com.openexchange.chronos.json.converter.mapper.EventMapper;
+import com.openexchange.chronos.json.fields.ChronosFreeBusyJsonFields;
+import com.openexchange.chronos.json.fields.ChronosGeneralJsonFields;
 import com.openexchange.chronos.service.FreeBusyResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
@@ -101,9 +103,9 @@ public class FreeBusyConverter implements ResultConverter {
     @Override
     public void convert(AJAXRequestData requestData, AJAXRequestResult result, ServerSession session, Converter converter) throws OXException {
         /*
-         * determine timezone
+         * Determine timezone
          */
-        String timeZoneID = requestData.getParameter("timezone");
+        String timeZoneID = requestData.getParameter(ChronosGeneralJsonFields.TIMEZONE);
         if (null == timeZoneID) {
             timeZoneID = session.getUser().getTimeZone();
         }
@@ -117,9 +119,9 @@ public class FreeBusyConverter implements ResultConverter {
                 JSONArray array = new JSONArray(map.size());
                 for (Attendee att : map.keySet()) {
                     JSONObject json = new JSONObject(2);
-                    json.put("attendee", ((AttendeesMapping<?>)EventMapper.getInstance().get(EventField.ATTENDEES)).serialize(att, TimeZone.getTimeZone(timeZoneID)));
+                    json.put(ChronosFreeBusyJsonFields.ATTENDEE, ((AttendeesMapping<?>)EventMapper.getInstance().get(EventField.ATTENDEES)).serialize(att, TimeZone.getTimeZone(timeZoneID)));
                     FreeBusyResult freeBusyResult = map.get(att);
-                    json.put("freeBusyTime", parseFreeBusyTime(freeBusyResult, session, timeZoneID));
+                    json.put(ChronosFreeBusyJsonFields.FREE_BUSY_TIME, parseFreeBusyTime(freeBusyResult, session, timeZoneID));
                     if(freeBusyResult.getWarnings() != null && freeBusyResult.getWarnings().size()!=0){
                         JSONArray warningsArray = new JSONArray(freeBusyResult.getWarnings().size());
                         for(OXException ex : freeBusyResult.getWarnings()){
@@ -127,7 +129,7 @@ public class FreeBusyConverter implements ResultConverter {
                             ResponseWriter.addException(warning, ex, session.getUser().getLocale(), false);
                             warningsArray.put(warning);
                         }
-                        json.put("warnings", warningsArray);
+                        json.put(ChronosFreeBusyJsonFields.WARNINGS, warningsArray);
                     }
                     array.put(json);
                 }
@@ -138,7 +140,7 @@ public class FreeBusyConverter implements ResultConverter {
         } else {
             throw new UnsupportedOperationException();
         }
-        result.setResultObject(resultObject, "json");
+        result.setResultObject(resultObject, getOutputFormat());
     }
 
     /**
@@ -159,12 +161,12 @@ public class FreeBusyConverter implements ResultConverter {
         JSONArray result = new JSONArray(freeBusyTimes.size());
         for (FreeBusyTime time : freeBusyTimes) {
             JSONObject json = new JSONObject(3);
-            json.put("startTime", time.getStartTime().getTime());
-            json.put("endTime", time.getEndTime().getTime());
-            json.put("fbType", time.getFbType().getValue());
+            json.put(ChronosFreeBusyJsonFields.FreeBusyTime.START_TIME, time.getStartTime().getTime());
+            json.put(ChronosFreeBusyJsonFields.FreeBusyTime.END_TIME, time.getEndTime().getTime());
+            json.put(ChronosFreeBusyJsonFields.FreeBusyTime.FB_TYPE, time.getFbType().getValue());
             Event event = time.getEvent();
             if(event!=null){
-              json.put("event", EventMapper.getInstance().serialize(event, EventMapper.getInstance().getAssignedFields(event), timeZoneID, session));
+              json.put(ChronosFreeBusyJsonFields.FreeBusyTime.EVENT, EventMapper.getInstance().serialize(event, EventMapper.getInstance().getAssignedFields(event), timeZoneID, session));
             }
             result.put(json);
         }

@@ -59,6 +59,8 @@ import com.openexchange.ajax.requesthandler.Converter;
 import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.json.converter.mapper.EventMapper;
+import com.openexchange.chronos.json.fields.ChronosEventConflictJsonFields;
+import com.openexchange.chronos.json.fields.ChronosGeneralJsonFields;
 import com.openexchange.chronos.service.EventConflict;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXException.ProblematicAttribute;
@@ -95,9 +97,9 @@ public class EventConflictResultConverter implements ResultConverter {
     @Override
     public void convert(AJAXRequestData requestData, AJAXRequestResult result, ServerSession session, Converter converter) throws OXException {
         /*
-         * determine timezone
+         * Determine timezone
          */
-        String timeZoneID = requestData.getParameter("timezone");
+        String timeZoneID = requestData.getParameter(ChronosGeneralJsonFields.TIMEZONE);
         if (null == timeZoneID) {
             timeZoneID = session.getUser().getTimeZone();
         }
@@ -114,7 +116,7 @@ public class EventConflictResultConverter implements ResultConverter {
         } else {
             throw new UnsupportedOperationException();
         }
-        result.setResultObject(resultObject, "json");
+        result.setResultObject(resultObject, getOutputFormat());
     }
 
     private JSONObject convertProblematics(ProblematicAttribute[] problematics, String timeZoneID, Session session) throws OXException {
@@ -125,13 +127,13 @@ public class EventConflictResultConverter implements ResultConverter {
                 if(problematic instanceof EventConflict){
                     EventConflict conflict = (EventConflict) problematic;
                     JSONObject jsonConflict = new JSONObject(2);
-                    jsonConflict.put("hard_conflict", conflict.isHardConflict());
-                    jsonConflict.put("conflicting_attendees", parseAttendees(conflict.getConflictingAttendees()));
-                    jsonConflict.put("event", EventMapper.getInstance().serialize(conflict.getConflictingEvent(), EventMapper.getInstance().getAssignedFields(conflict.getConflictingEvent()), timeZoneID, session));
+                    jsonConflict.put(ChronosEventConflictJsonFields.EventConflict.HARD_CONFLICT, conflict.isHardConflict());
+                    jsonConflict.put(ChronosEventConflictJsonFields.EventConflict.CONFLICTING_ATTENDEES, parseAttendees(conflict.getConflictingAttendees()));
+                    jsonConflict.put(ChronosEventConflictJsonFields.EventConflict.EVENT, EventMapper.getInstance().serialize(conflict.getConflictingEvent(), EventMapper.getInstance().getAssignedFields(conflict.getConflictingEvent()), timeZoneID, session));
                     conflicts.put(jsonConflict);
                 }
             }
-            result.put("conflicts", conflicts);
+            result.put(ChronosEventConflictJsonFields.CONFLICTS, conflicts);
         } catch (JSONException e) {
             throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
         }

@@ -47,71 +47,37 @@
  *
  */
 
-package com.openexchange.chronos.json.converter;
-
-import java.util.List;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.ajax.requesthandler.Converter;
-import com.openexchange.ajax.requesthandler.ResultConverter;
-import com.openexchange.chronos.AlarmTrigger;
-import com.openexchange.chronos.json.converter.mapper.AlarmTriggerMapper;
-import com.openexchange.exception.OXException;
-import com.openexchange.tools.servlet.OXJSONExceptionCodes;
-import com.openexchange.tools.session.ServerSession;
+package com.openexchange.chronos.json.fields;
 
 /**
- * {@link AlarmTriggerConverter}
+ * {@link ChronosEventConflictJsonFields} contains fields for event conflicts
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.0
  */
-public class AlarmTriggerConverter implements ResultConverter {
+public class ChronosEventConflictJsonFields {
 
-    public static final String INPUT_FORMAT = "alarm_trigger";
+    /**
+     * An array of conflicts. See {@link EventConflict}
+     */
+    public static final String CONFLICTS = "conflicts";
 
-    @Override
-    public String getInputFormat() {
-        return INPUT_FORMAT;
-    }
+    public static final class EventConflict {
 
-    @Override
-    public String getOutputFormat() {
-        return "json";
-    }
+        /**
+         * Defines whether the conflict is a hard conflict. See {@link EventConflict#isHardConflict()}
+         */
+        public static final String HARD_CONFLICT = "hard_conflict";
 
-    @Override
-    public Quality getQuality() {
-        return Quality.GOOD;
-    }
+        /**
+         * The conflicting attendees. See {@link EventConflict#getConflictingAttendees()}
+         */
+        public static final String CONFLICTING_ATTENDEES = "conflicting_attendees";
 
-    @Override
-    public void convert(AJAXRequestData requestData, AJAXRequestResult result, ServerSession session, Converter converter) throws OXException {
-        Object resultObject = result.getResultObject();
-
-        if (resultObject instanceof List) {
-            @SuppressWarnings("unchecked") List<AlarmTrigger> triggers = (List<AlarmTrigger>) resultObject;
-
-            try {
-                JSONArray json = new JSONArray(triggers.size());
-                for (AlarmTrigger trigger : triggers) {
-                    json.put(toJSON(trigger, session));
-                }
-                result.setResultObject(json, getOutputFormat());
-            } catch (JSONException e) {
-                throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
-            }
-        } else {
-            throw new UnsupportedOperationException();
-        }
-    }
-
-    private JSONObject toJSON(AlarmTrigger trigger, ServerSession session) throws JSONException, OXException {
-        return AlarmTriggerMapper.getInstance().serialize(trigger, AlarmTriggerMapper.getInstance().getAssignedFields(trigger), "UTC", session);
+        /**
+         * The conflicting event. See {@link EventConflict#getConflictingEvent()}
+         */
+        public static final String EVENT = "event";
 
     }
-
 }

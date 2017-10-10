@@ -59,6 +59,8 @@ import com.openexchange.ajax.requesthandler.Converter;
 import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.json.converter.mapper.EventMapper;
+import com.openexchange.chronos.json.fields.ChronosCalendarResultJsonFields;
+import com.openexchange.chronos.json.fields.ChronosGeneralJsonFields;
 import com.openexchange.chronos.service.CalendarResult;
 import com.openexchange.chronos.service.CreateResult;
 import com.openexchange.chronos.service.DeleteResult;
@@ -98,9 +100,9 @@ public class CalendarResultConverter implements ResultConverter {
     @Override
     public void convert(AJAXRequestData requestData, AJAXRequestResult result, ServerSession session, Converter converter) throws OXException {
         /*
-         * determine timezone
+         * Determine timezone
          */
-        String timeZoneID = requestData.getParameter("timezone");
+        String timeZoneID = requestData.getParameter(ChronosGeneralJsonFields.TIMEZONE);
         if (null == timeZoneID) {
             timeZoneID = session.getUser().getTimeZone();
         }
@@ -115,15 +117,15 @@ public class CalendarResultConverter implements ResultConverter {
         } else {
             throw new UnsupportedOperationException();
         }
-        result.setResultObject(resultObject, "json");
+        result.setResultObject(resultObject, getOutputFormat());
     }
 
     private JSONObject convertCalendarResult(CalendarResult calendarResult, String timeZoneID, Session session) throws OXException {
         JSONObject result = new JSONObject(1);
         try {
-            result.put("created", convertCreateEvents(calendarResult.getCreations(), timeZoneID, session));
-            result.put("updated", convertUpdateEvents(calendarResult.getUpdates(), timeZoneID, session));
-            result.put("deleted", convertDeleteEvents(calendarResult.getDeletions(), timeZoneID, session));
+            result.put(ChronosCalendarResultJsonFields.Result.CREATED, convertCreateEvents(calendarResult.getCreations(), timeZoneID, session));
+            result.put(ChronosCalendarResultJsonFields.Result.UPDATED, convertUpdateEvents(calendarResult.getUpdates(), timeZoneID, session));
+            result.put(ChronosCalendarResultJsonFields.Result.DELETED, convertDeleteEvents(calendarResult.getDeletions(), timeZoneID, session));
         } catch (JSONException e) {
             throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
         }
@@ -133,8 +135,8 @@ public class CalendarResultConverter implements ResultConverter {
     private JSONObject convertCalendarResult(UpdatesResult calendarResult, String timeZoneID, Session session) throws OXException {
         JSONObject result = new JSONObject(1);
         try {
-            result.put("newAndModified", convertEvents(calendarResult.getNewAndModifiedEvents(), timeZoneID, session));
-            result.put("deleted", convertEvents(calendarResult.getDeletedEvents(), timeZoneID, session));
+            result.put(ChronosCalendarResultJsonFields.Updates.NEW, convertEvents(calendarResult.getNewAndModifiedEvents(), timeZoneID, session));
+            result.put(ChronosCalendarResultJsonFields.Updates.DELETED, convertEvents(calendarResult.getDeletedEvents(), timeZoneID, session));
         } catch (JSONException e) {
             throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
         }
