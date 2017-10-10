@@ -53,6 +53,7 @@ import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.chronos.schedjoules.SchedJoulesService;
+import com.openexchange.chronos.schedjoules.json.actions.parameter.SchedJoulesSearchParameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
@@ -81,15 +82,15 @@ public class SearchAction extends AbstractSchedJoulesAction implements AJAXActio
     @Override
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
         // Get the mandatory 'query' parameter
-        String query = requestData.nonEmptyParameter("query");
+        String query = requestData.nonEmptyParameter(SchedJoulesSearchParameter.QUERY);
         // Get optional 'maxRows' parameter
-        int maxRows = requestData.getIntParameter("maxRows");
+        int maxRows = requestData.getIntParameter(SchedJoulesSearchParameter.MAX_ROWS);
         // Get the optional 'language' parameter
         String locale = getLanguage(requestData, session);
         // Get the optional 'countryId' parameter
-        int countryId = requestData.getIntParameter("countryId");
+        int countryId = requestData.getIntParameter(SchedJoulesSearchParameter.COUNTRY_ID);
         // Get the optional 'categoryId' parameter
-        int categoryId = requestData.getIntParameter("categoryId");
+        int categoryId = requestData.getIntParameter(SchedJoulesSearchParameter.CATEGORY_ID);
 
         // Execute
         SchedJoulesService service = services.getService(SchedJoulesService.class);

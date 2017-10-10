@@ -50,6 +50,8 @@
 package com.openexchange.chronos.schedjoules.json.actions;
 
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.chronos.schedjoules.json.actions.parameter.SchedJoulesBrowseParameter;
+import com.openexchange.chronos.schedjoules.json.actions.parameter.SchedJoulesCommonParameter;
 import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
@@ -82,7 +84,7 @@ abstract class AbstractSchedJoulesAction {
      * @return The value of the 'language' URL parameter if present, or the user's language from the session
      */
     String getLanguage(AJAXRequestData requestData, ServerSession session) {
-        String language = requestData.getParameter("language");
+        String language = requestData.getParameter(SchedJoulesCommonParameter.LANGUAGE);
         if (Strings.isEmpty(language)) {
             language = session.getUser().getLocale().getLanguage().toLowerCase();
         }
@@ -99,7 +101,7 @@ abstract class AbstractSchedJoulesAction {
      * @return The value of the 'country' URL parameter if present, or the user's country from the session
      */
     String getCountry(AJAXRequestData requestData, ServerSession session) {
-        String country = requestData.getParameter("country");
+        String country = requestData.getParameter(SchedJoulesBrowseParameter.COUNTRY);
         if (Strings.isEmpty(country)) {
             country = session.getUser().getLocale().getCountry().toLowerCase();
         }

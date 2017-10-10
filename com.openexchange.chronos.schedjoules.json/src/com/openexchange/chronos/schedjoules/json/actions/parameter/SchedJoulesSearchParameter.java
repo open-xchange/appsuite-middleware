@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2017-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,48 +47,35 @@
  *
  */
 
-package com.openexchange.chronos.schedjoules.json.actions;
-
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.chronos.schedjoules.SchedJoulesService;
-import com.openexchange.chronos.schedjoules.json.actions.parameter.SchedJoulesSubscribeParameter;
-import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.session.ServerSession;
+package com.openexchange.chronos.schedjoules.json.actions.parameter;
 
 /**
- * {@link SubscribeAction}
+ * {@link SchedJoulesSearchParameter}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class SubscribeAction extends AbstractSchedJoulesAction implements AJAXActionService {
+public class SchedJoulesSearchParameter extends SchedJoulesCommonParameter {
 
     /**
-     * Initialises a new {@link SubscribeAction}.
+     * The full text query
      */
-    public SubscribeAction(ServiceLookup services) {
-        super(services);
-    }
+    public static final String QUERY = "query";
 
-    /*
-     * (non-Javadoc)
+    /**
+     * The maximum amount of rows to return
+     */
+    public static final String MAX_ROWS = "maxRows";
+
+    /**
+     * The country identifier (retrieved by a 'countries' call)
+     * to use in order to limit the search.
+     */
+    public static final String COUNTRY_ID = "countryId";
+
+    /**
+     * The category identifier to use in order to limit the search.
      * 
-     * @see com.openexchange.ajax.requesthandler.AJAXActionService#perform(com.openexchange.ajax.requesthandler.AJAXRequestData, com.openexchange.tools.session.ServerSession)
+     * @see <a href="https://github.com/schedjoules/calendar-store-api/blob/master/details/search.md">https://github.com/schedjoules/calendar-store-api/blob/master/details/search.md</a>
      */
-    @Override
-    public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
-        // Check if the mandatory 'id' is present...
-        requestData.checkParameter(SchedJoulesSubscribeParameter.ID);
-        // ... and get it
-        int pageId = requestData.getIntParameter(SchedJoulesSubscribeParameter.ID);
-
-        String language = getLanguage(requestData, session);
-
-        SchedJoulesService service = services.getService(SchedJoulesService.class);
-        String prodId = service.subscribeCalendar(pageId, language);
-
-        return new AJAXRequestResult(prodId);
-    }
+    public static final String CATEGORY_ID = "categoryId";
 }
