@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,29 +47,49 @@
  *
  */
 
-package com.openexchange.database.internal.wrapping;
+package com.openexchange.ajax.requesthandler;
 
-import java.sql.SQLException;
-import java.sql.Statement;
+import com.openexchange.ajax.requesthandler.EnqueuableAJAXActionService.Result;
+import com.openexchange.ajax.requesthandler.jobqueue.JobKey;
 
 /**
- * {@link JDBC41StatementWrapper}
+ * {@link EnqueuableAJAXActionServices}
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.3
  */
-public class JDBC41StatementWrapper extends JDBC4StatementWrapper {
+public class EnqueuableAJAXActionServices {
 
-    public JDBC41StatementWrapper(Statement delegate, JDBC4ConnectionReturner con) {
-        super(delegate, con);
+    /**
+     * Initializes a new {@link EnqueuableAJAXActionServices}.
+     */
+    private EnqueuableAJAXActionServices() {
+        super();
     }
 
-    @Override
-    public void closeOnCompletion() throws SQLException {
-        delegate.closeOnCompletion();
+    /**
+     * Gets the result for specified enqueue-able flag
+     *
+     * @param enqueueable The enqueue-able flag
+     * @return The result
+     */
+    public static Result resultFor(boolean enqueueable) {
+        return enqueueable ? Result.TRUE : Result.FALSE;
     }
 
-    @Override
-    public boolean isCloseOnCompletion() throws SQLException {
-        return delegate.isCloseOnCompletion();
+    /**
+     * Gets the result for specified enqueue-able flag
+     *
+     * @param enqueueable The enqueue-able flag
+     * @param optionalKey The key that identifies a certain job; or <code>null</code>
+     * @return The result
+     */
+    public static Result resultFor(boolean enqueueable, JobKey optionalKey) {
+        if (null == optionalKey) {
+            return resultFor(enqueueable);
+        }
+
+        return new Result(enqueueable, optionalKey);
     }
+
 }

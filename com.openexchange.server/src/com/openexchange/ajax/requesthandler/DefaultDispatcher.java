@@ -348,7 +348,7 @@ public class DefaultDispatcher implements Dispatcher {
             ret = actionMetadata == null ? Boolean.FALSE : Boolean.valueOf(actionMetadata.enqueueable());
             enqueueableCache.put(key, ret);
         }
-        return EnqueuableAJAXActionService.resultFor(ret.booleanValue());
+        return EnqueuableAJAXActionServices.resultFor(ret.booleanValue());
     }
 
     private RequestContext buildRequestContext(AJAXRequestData requestData) throws OXException {
