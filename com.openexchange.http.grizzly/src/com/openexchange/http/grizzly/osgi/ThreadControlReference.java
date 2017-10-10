@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.http.grizzly.util;
+package com.openexchange.http.grizzly.osgi;
 
 import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.startup.ThreadControlService;
