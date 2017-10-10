@@ -55,7 +55,6 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.chronos.schedjoules.SchedJoulesService;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -79,11 +78,11 @@ public class SubscribeAction extends AbstractSchedJoulesAction implements AJAXAc
      */
     @Override
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
-        String pid = requestData.getParameter("id");
-        if (pid == null) {
-            throw AjaxExceptionCodes.MISSING_PARAMETER.create("id");
-        }
-        int pageId = Integer.parseInt(pid);
+        // Check if the mandatory 'id' is present...
+        requestData.checkParameter("id");
+        // ... and get it
+        int pageId = requestData.getIntParameter("id");
+
         String language = getLanguage(requestData, session);
 
         SchedJoulesService service = services.getService(SchedJoulesService.class);
@@ -91,5 +90,4 @@ public class SubscribeAction extends AbstractSchedJoulesAction implements AJAXAc
 
         return new AJAXRequestResult(prodId);
     }
-
 }

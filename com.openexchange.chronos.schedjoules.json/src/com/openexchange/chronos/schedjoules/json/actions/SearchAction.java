@@ -54,9 +54,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.chronos.schedjoules.SchedJoulesService;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -83,11 +81,7 @@ public class SearchAction extends AbstractSchedJoulesAction implements AJAXActio
     @Override
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
         // Get the mandatory 'query' parameter
-        String q = requestData.getParameter("query");
-        if (Strings.isEmpty(q)) {
-            throw AjaxExceptionCodes.MISSING_PARAMETER.create("query");
-        }
-
+        String query = requestData.nonEmptyParameter("query");
         // Get optional 'maxRows' parameter
         int maxRows = requestData.getIntParameter("maxRows");
         // Get the optional 'language' parameter
@@ -99,6 +93,6 @@ public class SearchAction extends AbstractSchedJoulesAction implements AJAXActio
 
         // Execute
         SchedJoulesService service = services.getService(SchedJoulesService.class);
-        return new AJAXRequestResult(service.search(q, locale, countryId, categoryId, maxRows).getData());
+        return new AJAXRequestResult(service.search(query, locale, countryId, categoryId, maxRows).getData());
     }
 }
