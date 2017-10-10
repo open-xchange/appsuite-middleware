@@ -7,7 +7,8 @@ BuildRequires: ant
 %else
 BuildRequires: ant-nodeps
 %endif
-BuildRequires: open-xchange-admin
+BuildRequires: open-xchange-admin >= @OXVERSION@
+BuildRequires: open-xchange-soap-cxf >= @OXVERSION@
 %if 0%{?suse_version}
 BuildRequires: java-1_8_0-openjdk-devel
 %else

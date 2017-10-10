@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,54 +47,60 @@
  *
  */
 
-package com.openexchange.ajax.requesthandler.jobqueue;
+package com.openexchange.subscribe.dav.tonline.de;
 
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.exception.OXException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.subscribe.dav.AbstractCardDAVSubscribeService;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link Job} - A dispatcher job to perform.
+ * {@link TOnlineDeSubscribeService}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.10.0
  */
-public interface Job {
+public class TOnlineDeSubscribeService extends AbstractCardDAVSubscribeService {
 
     /**
-     * Checks whether this job is trackable by watcher.
-     *
-     * @return <code>true</code> if trackable; otherwise <code>false</code>
+     * Initializes a new {@link TOnlineDeSubscribeService}.
      */
-    boolean isTrackable();
+    public TOnlineDeSubscribeService(ServiceLookup services) {
+        super(services);
+    }
 
-    /**
-     * Gets the optional job key.
-     *
-     * @return The key or <code>null</code>
-     */
-    JobKey getOptionalKey();
+    @Override
+    protected URI getBaseUrl(ServerSession session) {
+        try {
+            return new URI("https://spica.t-online.de/spica-contacts/carddav");
+        } catch (URISyntaxException e) {
+            throw new IllegalStateException(e);
+        }
+    }
 
-    /**
-     * Gets the associated user session
-     *
-     * @return The session
-     */
-    ServerSession getSession();
+    @Override
+    protected URI getUserPrincipal(ServerSession session) {
+        try {
+            return new URI("https://spica.t-online.de/spica-contacts/carddav/principals/");
+        } catch (URISyntaxException e) {
+            throw new IllegalStateException(e);
+        }
+    }
 
-    /**
-     * Gets the request data
-     *
-     * @return The request data
-     */
-    AJAXRequestData getRequestData();
+    @Override
+    protected int getChunkSize(ServerSession session) {
+        return 25;
+    }
 
-    /**
-     * Performs this job.
-     *
-     * @return The result yielded from given request
-     * @throws OXException If an error occurs
-     */
-    AJAXRequestResult perform() throws OXException;
+    @Override
+    protected String getDisplayName() {
+        return "T-Online.de";
+    }
+
+    @Override
+    protected String getId() {
+        return "com.openexchange.subscribe.dav.tonline.de";
+    }
+
 }

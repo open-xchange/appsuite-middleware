@@ -65,6 +65,9 @@ public final class JobQueueMessages implements LocalizableStrings {
     // A long-running operation is being executed
     public static final String LONG_RUNNING_OPERATION_MSG = "A long-running operation is being executed";
 
+    // Such a long-running operation is already in progress
+    public static final String ALREADY_RUNNING_MSG = "Such a long-running operation is already in progress";
+
     /**
      * Prevent instantiation.
      */

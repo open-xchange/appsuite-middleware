@@ -49,52 +49,98 @@
 
 package com.openexchange.ajax.requesthandler.jobqueue;
 
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.exception.OXException;
-import com.openexchange.tools.session.ServerSession;
-
 /**
- * {@link Job} - A dispatcher job to perform.
+ * {@link JobKey} - A key that identifies a certain job.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.10.0
  */
-public interface Job {
+public class JobKey {
+
+    private final int userId;
+    private final int contextId;
+    private final String identifier;
+    private final int hash;
 
     /**
-     * Checks whether this job is trackable by watcher.
+     * Initializes a new {@link JobKey}.
      *
-     * @return <code>true</code> if trackable; otherwise <code>false</code>
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @param identifier The key description
      */
-    boolean isTrackable();
+    public JobKey(int userId, int contextId, String identifier) {
+        super();
+        this.userId = userId;
+        this.contextId = contextId;
+        this.identifier = identifier;
+
+        int prime = 31;
+        int result = 1;
+        result = prime * result + contextId;
+        result = prime * result + userId;
+        result = prime * result + ((identifier == null) ? 0 : identifier.hashCode());
+        hash = result;
+    }
 
     /**
-     * Gets the optional job key.
+     * Gets the context identifier
      *
-     * @return The key or <code>null</code>
+     * @return The context identifier
      */
-    JobKey getOptionalKey();
+    public int getContextId() {
+        return contextId;
+    }
 
     /**
-     * Gets the associated user session
+     * Gets the user identifier
      *
-     * @return The session
+     * @return The user identifier
      */
-    ServerSession getSession();
+    public int getUserId() {
+        return userId;
+    }
 
     /**
-     * Gets the request data
+     * Gets the key identifier
      *
-     * @return The request data
+     * @return The key identifier
      */
-    AJAXRequestData getRequestData();
+    public String getIdentifier() {
+        return identifier;
+    }
 
-    /**
-     * Performs this job.
-     *
-     * @return The result yielded from given request
-     * @throws OXException If an error occurs
-     */
-    AJAXRequestResult perform() throws OXException;
+    @Override
+    public int hashCode() {
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        JobKey other = (JobKey) obj;
+        if (contextId != other.contextId) {
+            return false;
+        }
+        if (userId != other.userId) {
+            return false;
+        }
+        if (identifier == null) {
+            if (other.identifier != null) {
+                return false;
+            }
+        } else if (!identifier.equals(other.identifier)) {
+            return false;
+        }
+        return true;
+    }
+
 }

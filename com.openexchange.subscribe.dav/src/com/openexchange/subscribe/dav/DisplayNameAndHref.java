@@ -81,9 +81,9 @@ public class DisplayNameAndHref {
     }
 
     /**
-     * Gets the href value
+     * Gets the hyper reference (<code>href</code>)
      *
-     * @return The href value
+     * @return The hyper reference (<code>href</code>)
      */
     public String getHref() {
         return href;

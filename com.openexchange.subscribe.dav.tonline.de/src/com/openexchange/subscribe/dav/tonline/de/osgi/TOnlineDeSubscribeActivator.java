@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,54 +47,45 @@
  *
  */
 
-package com.openexchange.ajax.requesthandler.jobqueue;
+package com.openexchange.subscribe.dav.tonline.de.osgi;
 
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.exception.OXException;
-import com.openexchange.tools.session.ServerSession;
+import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.subscribe.SubscribeService;
+import com.openexchange.subscribe.crawler.CrawlerBlacklister;
+import com.openexchange.subscribe.dav.tonline.de.TOnlineDeSubscribeService;
 
 /**
- * {@link Job} - A dispatcher job to perform.
+ * {@link TOnlineDeSubscribeActivator}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.10.0
  */
-public interface Job {
+public class TOnlineDeSubscribeActivator extends HousekeepingActivator {
 
     /**
-     * Checks whether this job is trackable by watcher.
-     *
-     * @return <code>true</code> if trackable; otherwise <code>false</code>
+     * Initializes a new {@link TOnlineDeSubscribeActivator}.
      */
-    boolean isTrackable();
+    public TOnlineDeSubscribeActivator() {
+        super();
+    }
 
-    /**
-     * Gets the optional job key.
-     *
-     * @return The key or <code>null</code>
-     */
-    JobKey getOptionalKey();
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return EMPTY_CLASSES;
+    }
 
-    /**
-     * Gets the associated user session
-     *
-     * @return The session
-     */
-    ServerSession getSession();
+    @Override
+    protected void startBundle() throws Exception {
+        CrawlerBlacklister blacklister = new CrawlerBlacklister() {
 
-    /**
-     * Gets the request data
-     *
-     * @return The request data
-     */
-    AJAXRequestData getRequestData();
+            @Override
+            public String getCrawlerId() {
+                return "com.openexchange.subscribe.crawler.t-online.de";
+            }
+        };
+        registerService(CrawlerBlacklister.class, blacklister, null);
+        TOnlineDeSubscribeService subscribeService = new TOnlineDeSubscribeService(this);
+        registerService(SubscribeService.class, subscribeService, null);
+    }
 
-    /**
-     * Performs this job.
-     *
-     * @return The result yielded from given request
-     * @throws OXException If an error occurs
-     */
-    AJAXRequestResult perform() throws OXException;
 }

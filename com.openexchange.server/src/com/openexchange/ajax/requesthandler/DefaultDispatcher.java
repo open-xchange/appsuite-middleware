@@ -70,8 +70,11 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult.ResultType;
+import com.openexchange.ajax.requesthandler.EnqueuableAJAXActionService.Result;
 import com.openexchange.ajax.requesthandler.jobqueue.DefaultJob;
 import com.openexchange.ajax.requesthandler.jobqueue.EnqueuedException;
+import com.openexchange.ajax.requesthandler.jobqueue.JobKey;
+import com.openexchange.ajax.requesthandler.jobqueue.JobQueueExceptionCodes;
 import com.openexchange.ajax.requesthandler.jobqueue.JobQueueService;
 import com.openexchange.continuation.Continuation;
 import com.openexchange.continuation.ContinuationException;
@@ -83,6 +86,7 @@ import com.openexchange.framework.request.DefaultRequestContext;
 import com.openexchange.framework.request.RequestContext;
 import com.openexchange.framework.request.RequestContextHolder;
 import com.openexchange.groupware.notify.hostname.HostData;
+import com.openexchange.java.util.UUIDs;
 import com.openexchange.log.LogProperties;
 import com.openexchange.net.ssl.config.UserAwareSSLConfigurationService;
 import com.openexchange.net.ssl.exception.SSLExceptionCode;
@@ -211,32 +215,46 @@ public class DefaultDispatcher implements Dispatcher {
                 }
             }
 
-            if (parseBoolParameter(PARAMETER_ALLOW_ENQUEUE, modifiedRequestData) && enqueueable(modifiedRequestData.getModule(), modifiedRequestData.getAction(), action, modifiedRequestData, session)) {
-                // Enqueue as dispatcher job and watch it
-                JobQueueService jobQueue = ServerServiceRegistry.getInstance().getService(JobQueueService.class);
-                if (null != jobQueue) {
-                    // Build job
-                    DefaultJob.Builder job = DefaultJob.builder(true, this)
-                        .setAction(action)
-                        .setCustomizers(customizers)
-                        .setFactory(factory)
-                        .setRequestContext(requestContext)
-                        .setRequestData(modifiedRequestData)
-                        .setSession(session)
-                        .setState(state);
+            if (parseBoolParameter(PARAMETER_ALLOW_ENQUEUE, modifiedRequestData)) {
+                // Check if action service is enqueue-able
+                Result enqueueableResult = enqueueable(modifiedRequestData.getModule(), modifiedRequestData.getAction(), action, modifiedRequestData, session);
+                if (enqueueableResult.isEnqueueable()) {
+                    // Enqueue as dispatcher job and watch it
+                    JobQueueService jobQueue = ServerServiceRegistry.getInstance().getService(JobQueueService.class);
+                    if (null != jobQueue) {
+                        // Check for already running job of that kind
+                        JobKey optionalKey = enqueueableResult.getOptionalKey();
+                        if (optionalKey != null) {
+                            UUID contained = jobQueue.contains(optionalKey);
+                            if (null != contained) {
+                                throw JobQueueExceptionCodes.ALREADY_RUNNING.create(UUIDs.getUnformattedString(contained), session.getUserId(), session.getContextId());
+                            }
+                        }
 
-                    // Enqueue (if not computed in time)
-                    try {
-                        long maxRequestAgeMillis = jobQueue.getMaxRequestAgeMillis();
-                        return jobQueue.enqueueAndWait(job.build(), maxRequestAgeMillis, TimeUnit.MILLISECONDS).get(true);
-                    } catch (InterruptedException e) {
-                        // Keep interrupted state
-                        Thread.currentThread().interrupt();
-                        throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, "Interrupted");
-                    } catch (EnqueuedException e) {
-                        // Result not computed in time
-                        LOG.debug("Action \"{}\" of module \"{}\" could not be executed in time for user {} in context {}.", requestData.getAction(), requestData.getModule(), I(session.getUserId()), I(session.getContextId()), e);
-                        return new AJAXRequestResult(e.getJobInfo(), "enqueued");
+                        // Build job
+                        DefaultJob.Builder job = DefaultJob.builder(true, this)
+                            .setAction(action)
+                            .setCustomizers(customizers)
+                            .setFactory(factory)
+                            .setRequestContext(requestContext)
+                            .setRequestData(modifiedRequestData)
+                            .setSession(session)
+                            .setState(state)
+                            .setKey(optionalKey);
+
+                        // Enqueue (if not computed in time)
+                        try {
+                            long maxRequestAgeMillis = jobQueue.getMaxRequestAgeMillis();
+                            return jobQueue.enqueueAndWait(job.build(), maxRequestAgeMillis, TimeUnit.MILLISECONDS).get(true);
+                        } catch (InterruptedException e) {
+                            // Keep interrupted state
+                            Thread.currentThread().interrupt();
+                            throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, "Interrupted");
+                        } catch (EnqueuedException e) {
+                            // Result not computed in time
+                            LOG.debug("Action \"{}\" of module \"{}\" could not be executed in time for user {} in context {}.", requestData.getAction(), requestData.getModule(), I(session.getUserId()), I(session.getContextId()), e);
+                            return new AJAXRequestResult(e.getJobInfo(), "enqueued");
+                        }
                     }
                 }
             }
@@ -316,7 +334,7 @@ public class DefaultDispatcher implements Dispatcher {
      * @return <code>true</code> if enqueue-able; otherwise <code>false</code>
      * @throws OXException If check fails
      */
-    private boolean enqueueable(String module, String action, AJAXActionService actionService, AJAXRequestData requestData, ServerSession session) throws OXException {
+    private EnqueuableAJAXActionService.Result enqueueable(String module, String action, AJAXActionService actionService, AJAXRequestData requestData, ServerSession session) throws OXException {
         // Check by action service instance
         if (actionService instanceof EnqueuableAJAXActionService) {
             return ((EnqueuableAJAXActionService) actionService).isEnqueueable(requestData, session);
@@ -330,7 +348,7 @@ public class DefaultDispatcher implements Dispatcher {
             ret = actionMetadata == null ? Boolean.FALSE : Boolean.valueOf(actionMetadata.enqueueable());
             enqueueableCache.put(key, ret);
         }
-        return ret.booleanValue();
+        return EnqueuableAJAXActionService.resultFor(ret.booleanValue());
     }
 
     private RequestContext buildRequestContext(AJAXRequestData requestData) throws OXException {

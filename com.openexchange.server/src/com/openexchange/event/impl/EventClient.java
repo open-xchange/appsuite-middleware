@@ -246,11 +246,16 @@ public class EventClient {
     /**
      * This adds necessary information to the updated appointment if not present.
      * Mostly a workaround for Bug #53169
-     * 
+     *
      * @param oldAppointment
      * @param newAppointment
      */
     private void appendInformation(Appointment oldAppointment, Appointment newAppointment) {
+        if (null == oldAppointment) {
+            // Nothing can be done...
+            return;
+        }
+
         if (!newAppointment.containsRecurrenceID() && oldAppointment.containsRecurrenceID()) {
             newAppointment.setRecurrenceID(oldAppointment.getRecurrenceID());
         }

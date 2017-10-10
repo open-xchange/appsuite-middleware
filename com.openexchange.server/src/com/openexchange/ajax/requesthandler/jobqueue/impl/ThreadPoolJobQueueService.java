@@ -68,6 +68,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.jobqueue.EnqueuedException;
 import com.openexchange.ajax.requesthandler.jobqueue.Job;
 import com.openexchange.ajax.requesthandler.jobqueue.JobInfo;
+import com.openexchange.ajax.requesthandler.jobqueue.JobKey;
 import com.openexchange.ajax.requesthandler.jobqueue.JobQueueExceptionCodes;
 import com.openexchange.ajax.requesthandler.jobqueue.JobQueueService;
 import com.openexchange.config.ConfigurationService;
@@ -78,6 +79,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.UserAndContext;
 import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.threadpool.TrackableTask;
 import com.openexchange.threadpool.behavior.CallerRunsBehavior;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
@@ -92,24 +94,69 @@ public class ThreadPoolJobQueueService implements JobQueueService {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ThreadPoolJobQueueService.class);
 
-    private static final class JobTask extends AbstractTask<AJAXRequestResult> {
+    private static JobTask jobTaskFor(Job job) {
+        return jobTaskFor(job, null, null);
+    }
+
+    private static JobTask jobTaskFor(Job job, JobKey optionalKey, Cache<String, UUID> jobsByKey) {
+        return job.isTrackable() ? new TrackableJobTask(job, optionalKey, jobsByKey) : new JobTask(job, optionalKey, jobsByKey);
+    }
+
+    private static class JobTask extends AbstractTask<AJAXRequestResult> {
 
         private final Job job;
+        private boolean executed;
+        private JobKey optionalKey;
+        private Cache<String, UUID> jobsByKey;
 
-        JobTask(Job job) {
+        JobTask(Job job, JobKey optionalKey, Cache<String, UUID> jobsByKey) {
             super();
             this.job = job;
+            executed = false;
+            apply(optionalKey, jobsByKey);
         }
 
         @Override
         public AJAXRequestResult call() throws OXException {
             return job.perform();
         }
+
+        @Override
+        public void afterExecute(Throwable throwable) {
+            synchronized (job) {
+                if (null != optionalKey) {
+                    jobsByKey.invalidate(optionalKey.getIdentifier());
+                }
+                executed = true;
+            }
+            super.afterExecute(throwable);
+        }
+
+        public boolean apply(JobKey optionalKey, Cache<String, UUID> jobsByKey) {
+            synchronized (job) {
+                if (false == executed) {
+                    this.optionalKey = optionalKey;
+                    this.jobsByKey = jobsByKey;
+                    return true;
+                }
+
+                return false;
+            }
+        }
+
     } // End of class JobTask
+
+    private static final class TrackableJobTask extends JobTask implements TrackableTask<AJAXRequestResult> {
+
+        TrackableJobTask(Job job, JobKey optionalKey, Cache<String, UUID> jobsByKey) {
+            super(job, optionalKey, jobsByKey);
+        }
+    }
 
     // ---------------------------------------------------------------------------------------------------------------
 
     private final LoadingCache<UserAndContext, Cache<UUID, FutureJobInfo>> allJobs;
+    private final LoadingCache<UserAndContext, Cache<String, UUID>> allKeys;
     private final int maxRequestAgeMillis;
 
     /**
@@ -137,11 +184,32 @@ public class ThreadPoolJobQueueService implements JobQueueService {
         };
 
         allJobs = CacheBuilder.newBuilder().initialCapacity(65536).expireAfterAccess(2, TimeUnit.HOURS).<UserAndContext, Cache<UUID, FutureJobInfo>> build(loader);
+
+        CacheLoader<UserAndContext, Cache<String, UUID>> keysLoader = new CacheLoader<UserAndContext, Cache<String, UUID>>() {
+
+            @Override
+            public Cache<String, UUID> load(UserAndContext key) {
+                return CacheBuilder.newBuilder().initialCapacity(128).expireAfterAccess(30, TimeUnit.MINUTES).build();
+            }
+        };
+
+        allKeys = CacheBuilder.newBuilder().initialCapacity(65536).expireAfterAccess(2, TimeUnit.HOURS).<UserAndContext, Cache<String, UUID>> build(keysLoader);
     }
 
     @Override
     public long getMaxRequestAgeMillis() throws OXException {
         return maxRequestAgeMillis;
+    }
+
+    @Override
+    public UUID contains(JobKey key) throws OXException {
+        if (null == key) {
+            return null;
+        }
+
+        UserAndContext userAndContext = UserAndContext.newInstance(key.getUserId(), key.getContextId());
+        Cache<String, UUID> jobsByKey = allKeys.getIfPresent(userAndContext);
+        return null == jobsByKey ? null : jobsByKey.getIfPresent(key.getIdentifier());
     }
 
     @Override
@@ -151,13 +219,29 @@ public class ThreadPoolJobQueueService implements JobQueueService {
             throw ServiceExceptionCode.absentService(ThreadPoolService.class);
         }
 
+        // Generate unique ID for the job
         UUID id = UUID.randomUUID();
-        Cache<UUID, FutureJobInfo> jobs = allJobs.getUnchecked(UserAndContext.newInstance(job.getSession()));
+        UserAndContext userAndContext = UserAndContext.newInstance(job.getSession());
+        Cache<UUID, FutureJobInfo> jobsById = allJobs.getUnchecked(userAndContext);
 
-        Future<AJAXRequestResult> f = threadPool.submit(new JobTask(job), CallerRunsBehavior.getInstance());
-        FutureJobInfo jobInfo = new FutureJobInfo(id, job, f, jobs);
+        // Check for optional job key
+        JobKey key = job.getOptionalKey();
+        if (null == key) {
+            // No key given
+            Future<AJAXRequestResult> f = threadPool.submit(jobTaskFor(job), CallerRunsBehavior.getInstance());
+            FutureJobInfo jobInfo = new FutureJobInfo(id, job, f, jobsById);
 
-        jobs.put(id, jobInfo);
+            jobsById.put(id, jobInfo);
+            return jobInfo;
+        }
+
+        Cache<String, UUID> jobsByKey = allKeys.getUnchecked(userAndContext);
+        jobsByKey.put(key.getIdentifier(), id);
+
+        Future<AJAXRequestResult> f = threadPool.submit(jobTaskFor(job, key, jobsByKey), CallerRunsBehavior.getInstance());
+        FutureJobInfo jobInfo = new FutureJobInfo(id, job, f, jobsById);
+
+        jobsById.put(id, jobInfo);
         return jobInfo;
     }
 
@@ -169,7 +253,8 @@ public class ThreadPoolJobQueueService implements JobQueueService {
         }
 
         // Sumbit for execution
-        Future<AJAXRequestResult> f = threadPool.submit(new JobTask(job), CallerRunsBehavior.getInstance());
+        JobTask jobTask = jobTaskFor(job);
+        Future<AJAXRequestResult> f = threadPool.submit(jobTask, CallerRunsBehavior.getInstance());
         try {
             AJAXRequestResult result = f.get(timeout, unit);
             return new ExecutedJobInfo(result, job);
@@ -182,8 +267,26 @@ public class ThreadPoolJobQueueService implements JobQueueService {
         } catch (TimeoutException e) {
             // Not computed in time; enqueue job info
             LOG.debug("Action \"{}\" of module \"{}\" could not be executed in time for user {} in context {}.", job.getRequestData().getAction(), job.getRequestData().getModule(), I(job.getSession().getUserId()), I(job.getSession().getContextId()), e);
+
+            // Generate unique ID for the job
             UUID id = UUID.randomUUID();
-            Cache<UUID, FutureJobInfo> jobs = allJobs.getUnchecked(UserAndContext.newInstance(job.getSession()));
+            UserAndContext userAndContext = UserAndContext.newInstance(job.getSession());
+            Cache<UUID, FutureJobInfo> jobs = allJobs.getUnchecked(userAndContext);
+
+            // Check for optional job key
+            JobKey key = job.getOptionalKey();
+            if (null == key) {
+                FutureJobInfo jobInfo = new FutureJobInfo(id, job, f, jobs);
+                jobs.put(id, jobInfo);
+                throw new EnqueuedException(jobInfo, e);
+            }
+
+            Cache<String, UUID> jobsByKey = allKeys.getUnchecked(userAndContext);
+            jobsByKey.put(key.getIdentifier(), id);
+            if (false == jobTask.apply(key, jobsByKey)) {
+                jobsByKey.invalidate(key.getIdentifier());
+            }
+
             FutureJobInfo jobInfo = new FutureJobInfo(id, job, f, jobs);
             jobs.put(id, jobInfo);
             throw new EnqueuedException(jobInfo, e);
