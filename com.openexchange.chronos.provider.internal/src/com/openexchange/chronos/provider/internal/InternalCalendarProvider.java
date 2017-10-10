@@ -50,6 +50,8 @@
 package com.openexchange.chronos.provider.internal;
 
 import java.util.Locale;
+import org.json.JSONObject;
+import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.CalendarAccess;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.CalendarProvider;
@@ -93,8 +95,25 @@ public class InternalCalendarProvider implements CalendarProvider {
     }
 
     @Override
-    public void initialize(Session session, CalendarAccount account) throws OXException {
-        // nothing to do
+    public JSONObject configureAccount(Session session, JSONObject userConfig, CalendarParameters parameters) throws OXException {
+        /*
+         * no account creation allowed
+         */
+        throw CalendarExceptionCodes.UNSUPPORTED_OPERATION_FOR_PROVIDER.create(Constants.PROVIDER_ID);
+    }
+
+    @Override
+    public JSONObject reconfigureAccount(Session session, JSONObject internalConfig, JSONObject userConfig, CalendarParameters parameters) throws OXException {
+        /*
+         * no account initialization allowed
+         */
+        throw CalendarExceptionCodes.UNSUPPORTED_OPERATION_FOR_PROVIDER.create(Constants.PROVIDER_ID);
+    }
+
+    @Override
+    public void initializeAccount(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
+        // no
+
     }
 
 }

@@ -50,6 +50,7 @@
 package com.openexchange.chronos.provider.schedjoules;
 
 import java.util.Locale;
+import org.json.JSONObject;
 import com.openexchange.chronos.provider.CalendarAccess;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.CalendarProvider;
@@ -72,7 +73,7 @@ public class SchedjoulesCalendarProvider implements CalendarProvider {
 
     /**
      * Initialises a new {@link SchedjoulesCalendarProvider}.
-     * 
+     *
      * @param services The {@link ServiceLookup} reference
      */
     public SchedjoulesCalendarProvider(ServiceLookup services) {
@@ -82,7 +83,7 @@ public class SchedjoulesCalendarProvider implements CalendarProvider {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.chronos.provider.CalendarProvider#getId()
      */
     @Override
@@ -92,7 +93,7 @@ public class SchedjoulesCalendarProvider implements CalendarProvider {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.chronos.provider.CalendarProvider#getDisplayName(java.util.Locale)
      */
     @Override
@@ -102,21 +103,29 @@ public class SchedjoulesCalendarProvider implements CalendarProvider {
 
     /*
      * (non-Javadoc)
-     * 
-     * @see com.openexchange.chronos.provider.CalendarProvider#initialize(com.openexchange.chronos.provider.Session, com.openexchange.chronos.provider.CalendarAccount)
-     */
-    @Override
-    public void initialize(Session session, CalendarAccount account) throws OXException {
-        //TODO: Initialise...
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.chronos.provider.CalendarProvider#connect(com.openexchange.chronos.provider.Session, com.openexchange.chronos.provider.CalendarAccount, com.openexchange.chronos.provider.CalendarParameters)
      */
     @Override
     public CalendarAccess connect(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
         return new SchedjoulesCalendarAccess(services, session, account, parameters);
     }
+
+    @Override
+    public JSONObject configureAccount(Session session, JSONObject userConfig, CalendarParameters parameters) throws OXException {
+        //TODO
+        return new JSONObject();
+    }
+
+    @Override
+    public JSONObject reconfigureAccount(Session session, JSONObject internalConfig, JSONObject userConfig, CalendarParameters parameters) throws OXException {
+        //TODO
+        return null;
+    }
+
+    @Override
+    public void initializeAccount(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
+        // TODO
+    }
+
 }

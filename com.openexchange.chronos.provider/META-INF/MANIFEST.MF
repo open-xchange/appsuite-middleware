@@ -32,6 +32,7 @@ Import-Package: com.fasterxml.jackson.annotation,
  javax.crypto.spec,
  org.apache.commons.codec.binary,
  org.dmfs.rfc5545,
+ org.json,
  org.osgi.framework,
  org.osgi.service.event,
  org.slf4j

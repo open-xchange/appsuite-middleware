@@ -50,14 +50,11 @@
 package com.openexchange.chronos.provider.birthdays;
 
 import static com.openexchange.chronos.common.CalendarUtils.getAlarmIDs;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import org.slf4j.LoggerFactory;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmField;
 import com.openexchange.chronos.DelegatingEvent;
@@ -66,8 +63,6 @@ import com.openexchange.chronos.ExtendedProperty;
 import com.openexchange.chronos.common.AlarmUtils;
 import com.openexchange.chronos.common.UpdateResultImpl;
 import com.openexchange.chronos.common.mapping.AlarmMapper;
-import com.openexchange.chronos.ical.ICalParameters;
-import com.openexchange.chronos.ical.ICalService;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.service.CollectionUpdate;
 import com.openexchange.chronos.service.ItemUpdate;
@@ -76,8 +71,6 @@ import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.chronos.storage.operation.OSGiCalendarStorageOperation;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.java.Charsets;
-import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
 
@@ -204,22 +197,24 @@ public class AlarmHelper {
      */
     public List<Alarm> getDefaultAlarms() {
 
-        Object object = account.getConfiguration().get("defaultAlarms");
+        return null;
 
-        {
-            String defaultAlarmsValue = (String) account.getConfiguration().get("defaultAlarms");
-            if (Strings.isEmpty(defaultAlarmsValue)) {
-                return null;
-            }
-            ICalService iCalService = services.getService(ICalService.class);
-            ICalParameters parameters = iCalService.initParameters();
-            try (InputStream inputStream = Streams.newByteArrayInputStream(defaultAlarmsValue.getBytes(Charsets.UTF_8))) {
-                return iCalService.getUtilities().importAlarms(inputStream, parameters);
-            } catch (IOException | OXException e) {
-                LoggerFactory.getLogger(AlarmHelper.class).warn("Error parsing default alarms from \"{}\"", defaultAlarmsValue, e);
-                return null;
-            }
-        }
+        //        Object object = account.getConfiguration().get("defaultAlarms");
+        //
+        //        {
+        //            String defaultAlarmsValue = (String) account.getConfiguration().get("defaultAlarms");
+        //            if (Strings.isEmpty(defaultAlarmsValue)) {
+        //                return null;
+        //            }
+        //            ICalService iCalService = services.getService(ICalService.class);
+        //            ICalParameters parameters = iCalService.initParameters();
+        //            try (InputStream inputStream = Streams.newByteArrayInputStream(defaultAlarmsValue.getBytes(Charsets.UTF_8))) {
+        //                return iCalService.getUtilities().importAlarms(inputStream, parameters);
+        //            } catch (IOException | OXException e) {
+        //                LoggerFactory.getLogger(AlarmHelper.class).warn("Error parsing default alarms from \"{}\"", defaultAlarmsValue, e);
+        //                return null;
+        //            }
+        //        }
         //        // TODO: from config
         //        Alarm defaultAlarm = new Alarm(new Trigger(AlarmUtils.getDuration(false, 0, 0, 9, 0, 0)), AlarmAction.DISPLAY);
         //        defaultAlarm.setDescription("Reminder");

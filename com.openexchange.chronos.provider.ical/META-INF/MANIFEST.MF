@@ -38,6 +38,7 @@ Import-Package: com.openexchange.auth.info,
  org.apache.http.message,
  org.apache.http.util,
  org.dmfs.rfc5545,
+ org.json,
  org.osgi.framework,
  org.osgi.service.event,
  org.slf4j

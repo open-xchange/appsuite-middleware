@@ -49,24 +49,19 @@
 
 package com.openexchange.chronos.account.json.actions;
 
-import java.util.Map;
-import org.json.JSONException;
+import static com.openexchange.chronos.account.json.CalendarAccountFields.CONFIGURATION;
+import static com.openexchange.java.Autoboxing.i;
+import static com.openexchange.java.Autoboxing.l;
 import org.json.JSONObject;
+import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.ajax.tools.JSONCoercion;
-import com.openexchange.auth.info.AuthInfo;
-import com.openexchange.chronos.account.json.CalendarAccountFields;
 import com.openexchange.chronos.account.json.ChronosAccountActionFactory;
 import com.openexchange.chronos.provider.CalendarAccount;
-import com.openexchange.chronos.provider.account.CalendarAccountService;
-import com.openexchange.chronos.provider.auth.CalendarAuthParser;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.Strings;
 import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
-import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -77,7 +72,7 @@ import com.openexchange.tools.session.ServerSession;
  * @since v7.10.0
  */
 @OAuthAction(ChronosAccountActionFactory.OAUTH_WRITE_SCOPE)
-public class UpdateAction extends AbstractAccountAction implements CalendarAccountFields {
+public class UpdateAction extends AbstractAccountAction {
 
     /**
      * Initializes a new {@link UpdateAction}.
@@ -90,35 +85,14 @@ public class UpdateAction extends AbstractAccountAction implements CalendarAccou
 
     @Override
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
-        String accountId = requestData.getParameter(PARAMETER_ACCOUNT_ID);
-        if (Strings.isEmpty(accountId)) {
-            throw AjaxExceptionCodes.MISSING_PARAMETER.create(PARAMETER_ACCOUNT_ID);
-        }
-
+        int accountId = i(requestData.getParameter(AJAXServlet.PARAMETER_ID, Integer.class));
+        long clientTimestamp = l(requestData.getParameter(AJAXServlet.PARAMETER_TIMESTAMP, Long.class));
         JSONObject data = requestData.getData(JSONObject.class);
         if (null == data) {
             throw AjaxExceptionCodes.MISSING_REQUEST_BODY.create();
         }
-
-        Map<String, Object> configuration = data.asMap();
-        CalendarAuthParser authParser = CalendarAuthParser.getInstance();
-        AuthInfo authInfo = authParser.getAuthInfoFromUnstructured(session, configuration);
-        authParser.updateConfiguration(authInfo, configuration);
-
-        CalendarAccountService service = getService(CalendarAccountService.class);
-        CalendarAccount account = service.getAccount(session, Integer.parseInt(accountId));
-        // Updates
-        account = service.updateAccount(session, Integer.parseInt(accountId), configuration, account.getLastModified().getTime());
-
-        JSONObject response = new JSONObject();
-        try {
-            response.put(ID, account.getAccountId());
-            response.put(PROVIDER, account.getProviderId());
-            response.put(TIMESTAMP, account.getLastModified().getTime());
-            response.put(CONFIGURATION, JSONCoercion.coerceToJSON(account.getConfiguration()));
-        } catch (JSONException e) {
-            throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
-        }
-        return new AJAXRequestResult(response);
+        JSONObject userConfig = data.optJSONObject(CONFIGURATION);
+        CalendarAccount account = getAccountService().updateAccount(session, accountId, userConfig, clientTimestamp, null);
+        return new AJAXRequestResult(serializeAccount(account), account.getLastModified(), "json");
     }
 }

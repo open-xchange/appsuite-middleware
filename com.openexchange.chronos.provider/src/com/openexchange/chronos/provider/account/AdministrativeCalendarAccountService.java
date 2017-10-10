@@ -47,59 +47,45 @@
  *
  */
 
-package com.openexchange.chronos.calendar.account.service.osgi;
+package com.openexchange.chronos.provider.account;
 
-import java.util.concurrent.atomic.AtomicReference;
-import com.openexchange.server.ServiceLookup;
+import java.util.List;
+import org.json.JSONObject;
+import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.provider.CalendarAccount;
+import com.openexchange.exception.OXException;
+import com.openexchange.osgi.annotation.SingletonService;
 
 /**
- * 
- * {@link Services}
+ * {@link AdministrativeCalendarAccountService}
  *
- * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public final class Services {
+@SingletonService
+public interface AdministrativeCalendarAccountService {
 
     /**
-     * Initializes a new {@link Services}.
-     */
-    private Services() {
-        super();
-    }
-
-    private static final AtomicReference<ServiceLookup> REF = new AtomicReference<ServiceLookup>();
-
-    /**
-     * Sets the service lookup.
+     * Gets a list of all accounts of certain users in a context for a specific calendar provider.
      *
-     * @param serviceLookup The service lookup or <code>null</code>
+     * @param contextId The context identifier
+     * @param userIds The identifiers of the users to get the accounts from
+     * @param providerId The identifier of the provider to get the accounts from
+     * @return The accounts, or an empty list if there are none
      */
-    public static void setServiceLookup(ServiceLookup serviceLookup) {
-        REF.set(serviceLookup);
-    }
+    List<CalendarAccount> getAccounts(int contextId, int[] userIds, String providerId) throws OXException;
 
     /**
-     * Gets the service lookup.
+     * Updates the <i>internal</i> configuration data of a specific calendar account.
      *
-     * @return The service lookup or <code>null</code>
+     * @param contextId The context identifier
+     * @param userId The identifier of the user owning the account
+     * @param id The identifier of the account to update
+     * @param internalConfig The provider-specific <i>internal</i> configuration data for the calendar account, or <code>null</code> to skip
+     * @param userConfig The provider-specific <i>user</i> configuration data for the calendar account, or <code>null</code> to skip
+     * @param timestamp The last-known timestamp of the account to catch concurrent modifications, or {@link CalendarUtils#DISTANT_FUTURE} to circumvent the check
+     * @return The updated calendar account
      */
-    public static ServiceLookup getServiceLookup() {
-        return REF.get();
-    }
+    CalendarAccount updateAccount(int contextId, int userId, int id, JSONObject internalConfig, JSONObject userConfig, long timestamp) throws OXException;
 
-    /**
-     * Gets the service of specified type
-     *
-     * @param clazz The service's class
-     * @return The service
-     * @throws IllegalStateException If an error occurs while returning the demanded service
-     */
-    public static <S extends Object> S getService(final Class<? extends S> clazz) {
-        final com.openexchange.server.ServiceLookup serviceLookup = REF.get();
-        if (null == serviceLookup) {
-            throw new IllegalStateException("Missing ServiceLookup instance.");
-        }
-        return serviceLookup.getService(clazz);
-    }
 }

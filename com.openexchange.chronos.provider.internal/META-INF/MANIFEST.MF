@@ -47,6 +47,7 @@ Import-Package: com.openexchange.ajax.fileholder,
  org.dmfs.rfc5545,
  org.dmfs.rfc5545.recur,
  org.dmfs.rfc5545.recurrenceset,
+ org.json,
  org.osgi.framework,
  org.osgi.service.event,
  org.slf4j

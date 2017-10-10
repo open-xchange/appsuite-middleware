@@ -52,8 +52,9 @@ package com.openexchange.chronos.provider.caching;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
+import org.json.JSONObject;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.TimeTransparency;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.CalendarFolder;
@@ -61,6 +62,7 @@ import com.openexchange.chronos.provider.DefaultCalendarFolder;
 import com.openexchange.chronos.provider.DefaultCalendarPermission;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Enums;
 import com.openexchange.session.Session;
 
 /**
@@ -100,13 +102,13 @@ public abstract class SingleFolderCachingCalendarAccess extends CachingCalendarA
         return Collections.singletonList(folder);
     }
 
-    protected Map<String, Object> getFolderConfiguration() {
+    protected JSONObject getFolderConfiguration() {
         return getFolderConfiguration(folder.getId());
     }
 
     /**
      * Returns a list of {@link Event}s by querying the underlying calendar and some meta information encapsulated within an {@link ExternalCalendarResult}
-     * 
+     *
      * @return {@link ExternalCalendarResult} containing the external events associated with the calendar account
      * @throws OXException
      */
@@ -153,11 +155,14 @@ public abstract class SingleFolderCachingCalendarAccess extends CachingCalendarA
         DefaultCalendarFolder folder = new DefaultCalendarFolder();
         folder.setId(FOLDER_ID);
         folder.setPermissions(Collections.singletonList(DefaultCalendarPermission.readOnlyPermissionsFor(account.getUserId())));
-        Map<String, Object> config = account.getConfiguration();
-        if (null != config) {
-            folder.setName((String) config.get("name"));
-            folder.setColor((String) config.get("color"));
-            folder.setDescription((String) config.get("description"));
+        folder.setLastModified(account.getLastModified());
+        JSONObject userConfig = account.getUserConfiguration();
+        if (null != userConfig) {
+            folder.setName(userConfig.optString("name", FOLDER_ID));
+            folder.setColor(userConfig.optString("color", null));
+            folder.setDescription(userConfig.optString("description", null));
+            folder.setUsedForSync(userConfig.optBoolean("usedForSync", false));
+            folder.setScheduleTransparency(Enums.parse(TimeTransparency.class, userConfig.optString("scheduleTransp", null), TimeTransparency.OPAQUE));
         }
         return folder;
     }

@@ -52,7 +52,7 @@ package com.openexchange.chronos.storage.rdb;
 import java.io.Serializable;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
+import org.json.JSONObject;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
@@ -83,37 +83,37 @@ public class CachingCalendarAccountStorage implements CalendarAccountStorage {
     }
 
     @Override
-    public int createAccount(String providerId, int userId, Map<String, Object> configuration) throws OXException {
-        return delegate.createAccount(providerId, userId, configuration);
+    public int createAccount(String providerId, int userId, JSONObject internalConfig, JSONObject userConfig) throws OXException {
+        return delegate.createAccount(providerId, userId, internalConfig, userConfig);
     }
 
     @Override
-    public void updateAccount(int id, Map<String, Object> configuration, long timestamp) throws OXException {
-        delegate.updateAccount(id, configuration, timestamp);
-        invalidateCalendarAccounts(new int[] { id });
+    public void updateAccount(int userId, int id, JSONObject internalConfig, JSONObject userConfig, long timestamp) throws OXException {
+        delegate.updateAccount(userId, id, internalConfig, userConfig, timestamp);
+        invalidateCalendarAccounts(new int[] { id }, userId);
     }
 
     @Override
-    public void deleteAccount(int id) throws OXException {
-        delegate.deleteAccount(id);
-        invalidateCalendarAccounts(new int[] { id });
+    public void deleteAccount(int userId, int id) throws OXException {
+        delegate.deleteAccount(userId, id);
+        invalidateCalendarAccounts(new int[] { id }, userId);
     }
 
     @Override
-    public CalendarAccount getAccount(int id) throws OXException {
+    public CalendarAccount getAccount(int userId, int id) throws OXException {
         final CacheService cacheService = getCacheService();
         if (null == cacheService) {
-            return delegate.getAccount(id);
+            return delegate.getAccount(userId, id);
         }
         final Cache cache = cacheService.getCache(REGION_NAME);
-        final Object obj = cache.get(newCacheKey(cacheService, id));
+        final Object obj = cache.get(newCacheKey(cacheService, id, userId));
         if (obj instanceof CalendarAccount) {
             return (CalendarAccount) obj;
         }
-        
-        final CalendarAccount calendarAccount = delegate.getAccount(id);
+
+        final CalendarAccount calendarAccount = delegate.getAccount(userId, id);
         if (null != calendarAccount) {
-            cache.put(newCacheKey(cacheService, id), calendarAccount, false);
+            cache.put(newCacheKey(cacheService, id, userId), calendarAccount, false);
         }
 
         return calendarAccount;
@@ -128,35 +128,35 @@ public class CachingCalendarAccountStorage implements CalendarAccountStorage {
         final Cache cache = cacheService.getCache(REGION_NAME);
         List<CalendarAccount> calendarAccountList = delegate.getAccounts(userId);
         for (CalendarAccount calendarAccount : calendarAccountList) {
-            if (null == cache.get(newCacheKey(cacheService, calendarAccount.getAccountId()))) {
-                cache.put(newCacheKey(cacheService, calendarAccount.getAccountId()), calendarAccount, false);
+            if (null == cache.get(newCacheKey(cacheService, calendarAccount.getAccountId(), userId))) {
+                cache.put(newCacheKey(cacheService, calendarAccount.getAccountId(), userId), calendarAccount, false);
             }
         }
         return calendarAccountList;
     }
 
     @Override
-    public List<CalendarAccount> getAccounts(int userId, String providerId) throws OXException {
+    public List<CalendarAccount> getAccounts(String providerId, int[] userIds) throws OXException {
         final CacheService cacheService = getCacheService();
         if (null == cacheService) {
-            return delegate.getAccounts(userId, providerId);
+            return delegate.getAccounts(providerId, userIds);
         }
         final Cache cache = cacheService.getCache(REGION_NAME);
-        List<CalendarAccount> calendarAccountList = delegate.getAccounts(userId, providerId);
+        List<CalendarAccount> calendarAccountList = delegate.getAccounts(providerId, userIds);
         for (CalendarAccount calendarAccount : calendarAccountList) {
-            if (null == cache.get(newCacheKey(cacheService, calendarAccount.getAccountId()))) {
-                cache.put(newCacheKey(cacheService, calendarAccount.getAccountId()), calendarAccount, false);
+            if (null == cache.get(newCacheKey(cacheService, calendarAccount.getAccountId(), calendarAccount.getUserId()))) {
+                cache.put(newCacheKey(cacheService, calendarAccount.getAccountId(), calendarAccount.getUserId()), calendarAccount, false);
             }
         }
         return calendarAccountList;
     }
 
-    private void invalidateCalendarAccounts(int[] accIds) throws OXException {
+    private void invalidateCalendarAccounts(int[] accIds, int userId) throws OXException {
         CacheService cacheService = getCacheService();
         if (null == cacheService) {
             // Cache not initialized.
             return;
-        }        
+        }
         /*
          * gather cache keys to invalidate
          */
@@ -164,14 +164,14 @@ public class CachingCalendarAccountStorage implements CalendarAccountStorage {
         List<Serializable> keys = new LinkedList<Serializable>();
         for (int accId : accIds) {
             Integer key = accId;
-            keys.add(newCacheKey(cacheService, key));
+            keys.add(newCacheKey(cacheService, key, userId));
         }
 
         cache.remove(keys);
     }
 
-    private CacheKey newCacheKey(final CacheService cacheService, int accId) {
-        return cacheService.newCacheKey(contextId, accId);
+    private CacheKey newCacheKey(final CacheService cacheService, int accId, int userId) {
+        return cacheService.newCacheKey(contextId, String.valueOf(accId), String.valueOf(userId));
     }
 
     private CacheService getCacheService() {

@@ -49,16 +49,23 @@
 
 package com.openexchange.chronos.provider.birthdays;
 
+import java.util.List;
 import java.util.Locale;
+import java.util.Set;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.CalendarAccess;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.CalendarProvider;
+import com.openexchange.chronos.provider.account.AdministrativeCalendarAccountService;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.exception.OXException;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
+import com.openexchange.tools.arrays.Collections;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
@@ -95,14 +102,80 @@ public class BirthdaysCalendarProvider implements CalendarProvider {
     }
 
     @Override
+    public JSONObject configureAccount(Session session, JSONObject userConfig, CalendarParameters parameters) throws OXException {
+        /*
+         * check if user already has an account
+         */
+        List<CalendarAccount> existingAccounts = services.getService(AdministrativeCalendarAccountService.class).getAccounts(session.getContextId(), new int[] { session.getUserId() }, PROVIDER_ID);
+        if (0 < existingAccounts.size()) {
+            throw CalendarExceptionCodes.UNSUPPORTED_OPERATION_FOR_PROVIDER.create(PROVIDER_ID);
+        }
+        /*
+         * initialize & check user config
+         */
+        initializeUserConfig(userConfig);
+        /*
+         * store 'firstRun' flag to perform initial storage preparation upon next usage
+         */
+
+        return new JSONObject();
+    }
+
+    @Override
+    public JSONObject reconfigureAccount(Session session, JSONObject internalConfig, JSONObject userConfig, CalendarParameters parameters) throws OXException {
+        /*
+         * initialize & check user config
+         */
+        initializeUserConfig(userConfig);
+        /*
+         * no further internal config needed
+         */
+        return null;
+    }
+
+    @Override
+    public void initializeAccount(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
+        getAccess(session, account, parameters).initialize();
+    }
+
+    @Override
     public CalendarAccess connect(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
         return getAccess(session, account, parameters);
     }
 
-    @Override
-    public void initialize(Session session, CalendarAccount account) throws OXException {
-        getAccess(session, account, null).initialize();
+    private void initializeUserConfig(JSONObject userConfig) throws OXException {
+        if (null == userConfig) {
+            throw CalendarExceptionCodes.INVALID_CONFIGURATION.create("null");
+        }
+        try {
+            /*
+             * check configured folder types
+             */
+            Set<String> allowedTypes = Collections.unmodifiableSet("private", "shared", "public");
+            JSONArray typesJSONArray = userConfig.optJSONArray("folderTypes");
+            if (null == typesJSONArray || typesJSONArray.isEmpty()) {
+                userConfig.put("folderTypes", new JSONArray(allowedTypes));
+            } else {
+                for (int i = 0; i < typesJSONArray.length(); i++) {
+                    if (false == allowedTypes.contains(typesJSONArray.getString(i))) {
+                        throw CalendarExceptionCodes.INVALID_CONFIGURATION.create(String.valueOf(userConfig));
+                    }
+                }
+            }
+            /*
+             * check default alarm
+             */
+            JSONObject defaultAlarmJSONObject = userConfig.optJSONObject("defaultAlarmDate");
+            if (null != defaultAlarmJSONObject) {
+
+                //TODO: check alarm completeness, only allow alarm with relative trigger
+
+            }
+        } catch (JSONException e) {
+            throw CalendarExceptionCodes.INVALID_CONFIGURATION.create(e, String.valueOf(userConfig));
+        }
     }
+
 
     private BirthdaysCalendarAccess getAccess(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
         ServerSession serverSession = ServerSessionAdapter.valueOf(session);

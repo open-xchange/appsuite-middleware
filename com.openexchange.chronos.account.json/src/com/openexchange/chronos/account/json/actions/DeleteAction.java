@@ -94,7 +94,7 @@ public class DeleteAction extends AbstractAccountAction implements CalendarAccou
                 JSONObject obj = data.getJSONObject(i);
                 String id = obj.getString(ID);
                 String timestamp = obj.getString(TIMESTAMP);
-                service.deleteAccount(session, Integer.parseInt(id), Long.parseLong(timestamp));
+                service.deleteAccount(session, Integer.parseInt(id), Long.parseLong(timestamp), null);
             }
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());

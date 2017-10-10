@@ -49,24 +49,17 @@
 
 package com.openexchange.chronos.account.json.actions;
 
-import java.util.ArrayList;
+import static com.openexchange.chronos.account.json.CalendarAccountFields.PROVIDER;
 import java.util.List;
 import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.ajax.tools.JSONCoercion;
-import com.openexchange.chronos.account.json.CalendarAccountFields;
 import com.openexchange.chronos.account.json.ChronosAccountActionFactory;
 import com.openexchange.chronos.provider.CalendarAccount;
-import com.openexchange.chronos.provider.DefaultCalendarAccount;
-import com.openexchange.chronos.provider.account.CalendarAccountService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -77,7 +70,7 @@ import com.openexchange.tools.session.ServerSession;
  * @since v7.10.0
  */
 @OAuthAction(ChronosAccountActionFactory.OAUTH_READ_SCOPE)
-public class AllAction extends AbstractAccountAction implements CalendarAccountFields{
+public class AllAction extends AbstractAccountAction {
 
     /**
      * Initializes a new {@link AllAction}.
@@ -90,30 +83,13 @@ public class AllAction extends AbstractAccountAction implements CalendarAccountF
 
     @Override
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
-        String providerId = requestData.getParameter(PARAMETER_PROVIDER_ID);
-        CalendarAccountService service = getService(CalendarAccountService.class);
-        List<CalendarAccount> accounts = new ArrayList<>();
-        if (!Strings.isEmpty(providerId)) {
-            accounts.addAll(service.getAccounts(session, providerId));
-        } else {
-            accounts.addAll(service.getAccounts(session));
-        }
+        String provider = requestData.getParameter(PROVIDER);
+        List<CalendarAccount> accounts = Strings.isEmpty(provider) ? getAccountService().getAccounts(session) : getAccountService().getAccounts(session, provider);
         JSONArray response = new JSONArray(accounts.size());
-        try {
-            for (CalendarAccount account : accounts) {
-                JSONObject obj = new JSONObject();
-                obj.put(ID, account.getAccountId());
-                obj.put(PROVIDER, account.getProviderId());
-                if (DefaultCalendarAccount.DEFAULT_ACCOUNT.getAccountId() != account.getAccountId()) {
-                    obj.put(TIMESTAMP, account.getLastModified().getTime());
-                }
-                obj.put(CONFIGURATION, JSONCoercion.coerceToJSON(account.getConfiguration()));
-                response.add(0, obj);
-            }
-        } catch (JSONException e) {
-            throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
+        for (CalendarAccount account : accounts) {
+            response.put(serializeAccount(account));
         }
-        return new AJAXRequestResult(response);
+        return new AJAXRequestResult(response, "json");
     }
 
 }

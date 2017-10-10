@@ -49,8 +49,22 @@
 
 package com.openexchange.chronos.account.json.actions;
 
+import static com.openexchange.chronos.account.json.CalendarAccountFields.CONFIGURATION;
+import static com.openexchange.chronos.account.json.CalendarAccountFields.ID;
+import static com.openexchange.chronos.account.json.CalendarAccountFields.PROVIDER;
+import static com.openexchange.chronos.account.json.CalendarAccountFields.TIMESTAMP;
+import static com.openexchange.java.Autoboxing.L;
+import java.util.Locale;
+import org.json.JSONException;
+import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
+import com.openexchange.chronos.provider.CalendarAccount;
+import com.openexchange.chronos.provider.CalendarProvider;
+import com.openexchange.chronos.provider.account.CalendarAccountService;
+import com.openexchange.exception.OXException;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
  * {@link AbstractAccountAction}
@@ -87,6 +101,38 @@ abstract class AbstractAccountAction implements AJAXActionService {
             throw new IllegalStateException("Missing ServiceLookup instance. Bundle \"com.openexchange.chronos.account.json\" not started?");
         }
         return services.getService(clazz);
+    }
+
+    protected CalendarAccountService getAccountService() throws OXException {
+        CalendarAccountService accountService = getService(CalendarAccountService.class);
+        if (null == accountService) {
+            throw ServiceExceptionCode.absentService(CalendarAccountService.class);
+        }
+        return accountService;
+    }
+
+    protected JSONObject serializeAccount(CalendarAccount account) throws OXException {
+        try {
+            return new JSONObject()
+                .put(ID, account.getAccountId())
+                .put(PROVIDER, account.getProviderId())
+                .putOpt(TIMESTAMP, null != account.getLastModified() ? L(account.getLastModified().getTime()) : null)
+                .putOpt(CONFIGURATION, account.getUserConfiguration())
+            ;
+        } catch (JSONException e) {
+            throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    protected JSONObject serializeProvider(CalendarProvider provider, Locale locale) throws OXException {
+        try {
+            return new JSONObject()
+                .put(ID, provider.getId())
+                .put("name", provider.getDisplayName(locale))
+            ;
+        } catch (JSONException e) {
+            throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+        }
     }
 
 }

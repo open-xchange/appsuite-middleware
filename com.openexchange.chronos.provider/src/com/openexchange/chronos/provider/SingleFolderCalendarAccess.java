@@ -52,17 +52,19 @@ package com.openexchange.chronos.provider;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import org.json.JSONException;
+import org.json.JSONObject;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.RecurrenceId;
+import com.openexchange.chronos.TimeTransparency;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.account.CalendarAccountService;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.EventID;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Enums;
 import com.openexchange.java.util.TimeZones;
 import com.openexchange.session.Session;
 
@@ -124,12 +126,16 @@ public abstract class SingleFolderCalendarAccess implements CalendarAccess {
     @Override
     public String updateFolder(String folderId, CalendarFolder folder, long clientTimestamp) throws OXException {
         checkFolderId(folderId);
-        Map<String, Object> configuration = new HashMap<String, Object>(account.getConfiguration());
-        configuration.put("color", folder.getColor());
-        configuration.put("description", null);
-        configuration.put("scheduleTransp", null != folder.getScheduleTransparency() ? folder.getScheduleTransparency().getValue() : null);
-        configuration.put("usedForSync", Boolean.valueOf(folder.isUsedForSync()));
-        this.account = getAccountService().updateAccount(session, account.getAccountId(), configuration, clientTimestamp);
+        try {
+            JSONObject userConfig = account.getUserConfiguration();
+            userConfig.put("color", folder.getColor());
+            //        userConfig.put("description", null);
+            userConfig.put("scheduleTransp", null != folder.getScheduleTransparency() ? folder.getScheduleTransparency().getValue() : null);
+            userConfig.put("usedForSync", Boolean.valueOf(folder.isUsedForSync()));
+            this.account = getAccountService().updateAccount(session, account.getAccountId(), userConfig, clientTimestamp, parameters);
+        } catch (JSONException e) {
+            throw CalendarExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
         return folderId;
     }
 
@@ -203,13 +209,13 @@ public abstract class SingleFolderCalendarAccess implements CalendarAccess {
         folder.setId(FOLDER_ID);
         folder.setPermissions(Collections.singletonList(DefaultCalendarPermission.readOnlyPermissionsFor(account.getUserId())));
         folder.setLastModified(account.getLastModified());
-        Map<String, Object> config = account.getConfiguration();
-        if (null != config) {
-            folder.setName((String) config.get("name"));
-            folder.setColor((String) config.get("color"));
-            //            folder.setDescription((String) config.get("description"));
-            folder.setUsedForSync(null != config.get("usedForSync") && ((Boolean) config.get("usedForSync")).booleanValue());
-            //            folder.setScheduleTransparency(Enums.parse(TimeTransparency.class, (String) config.get("scheduleTransp"), TimeTransparency.OPAQUE));
+        JSONObject userConfig = account.getUserConfiguration();
+        if (null != userConfig) {
+            folder.setName(userConfig.optString("name", FOLDER_ID));
+            folder.setColor(userConfig.optString("color", null));
+            folder.setDescription(userConfig.optString("description", null));
+            folder.setUsedForSync(userConfig.optBoolean("usedForSync", false));
+            folder.setScheduleTransparency(Enums.parse(TimeTransparency.class, userConfig.optString("scheduleTransp", null), TimeTransparency.OPAQUE));
         }
         return folder;
     }

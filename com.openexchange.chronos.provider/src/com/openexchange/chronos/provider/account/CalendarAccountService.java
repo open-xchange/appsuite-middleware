@@ -50,8 +50,10 @@
 package com.openexchange.chronos.provider.account;
 
 import java.util.List;
-import java.util.Map;
+import org.json.JSONObject;
 import com.openexchange.chronos.provider.CalendarAccount;
+import com.openexchange.chronos.provider.CalendarProvider;
+import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.exception.OXException;
 import com.openexchange.osgi.annotation.SingletonService;
 import com.openexchange.session.Session;
@@ -66,42 +68,49 @@ import com.openexchange.session.Session;
 public interface CalendarAccountService {
 
     /**
-     * Creates a new calendar account and checks for permissions.
-     * 
-     * @param session The current user session
-     * @param providerId The identifier of the corresponding calendar provider
-     * @param userId The identifier of the user the account is added for
-     * @param configuration The provider-specific configuration data for the calendar account
-     * @return The loaded calendar account, or <code>null</code> if not found
-     * @throws OXException if a database error occurs
+     * Gets a list of registered calendar providers.
+     *
+     * @return The calendar providers
      */
-    CalendarAccount createAccount(Session session, String providerId, Map<String, Object> configuration) throws OXException;
+    List<CalendarProvider> getProviders() throws OXException;
+
+    /**
+     * Creates a new calendar account for the current session' user.
+     *
+     * @param session The current session
+     * @param providerId The identifier of the corresponding calendar provider
+     * @param userConfig The account's external / user configuration data
+     * @param parameters Additional calendar parameters, or <code>null</code> if not set
+     * @return The created calendar account
+     */
+    CalendarAccount createAccount(Session session, String providerId, JSONObject userConfig, CalendarParameters parameters) throws OXException;
 
     /**
      * Updates an existing calendar account and checks for permissions.
-     * 
-     * @param session The current user session 
+     *
+     * @param session The current session
      * @param id The identifier of the account to update
-     * @param configuration The provider-specific configuration data for the calendar account
-     * @param timestamp The timestamp that specifies the last modification of the account
-     * @return CalendarAccount The updated calendar account 
-     * @throws OXException if permission check fails
+     * @param userConfig The account's external / user configuration data
+     * @param clientTimestamp The last timestamp known by the client to catch concurrent updates
+     * @param parameters Additional calendar parameters, or <code>null</code> if not set
+     * @return The updated calendar account
      */
-    CalendarAccount updateAccount(Session session, int id, Map<String, Object> configuration, long timestamp) throws OXException;
+    CalendarAccount updateAccount(Session session, int id, JSONObject userConfig, long clientTimestamp, CalendarParameters parameters) throws OXException;
 
     /**
      * Deletes an existing calendar account and checks for permissions.
-     * 
-     * @param session The current user session 
+     *
+     * @param session The current user session
      * @param id The identifier of the account to delete
      * @param timestamp The timestamp that specifies the last modification of the account
+     * @param parameters Additional calendar parameters, or <code>null</code> if not set
      * @throws OXException if permission check fails
      */
-    void deleteAccount(Session session, int id, long timestamp) throws OXException;
+    void deleteAccount(Session session, int id, long timestamp, CalendarParameters parameters) throws OXException;
 
     /**
      * Gets an existing calendar account and checks for permissions.
-     * 
+     *
      * @param session The current user session
      * @param id The identifier of the account to load
      * @return The loaded calendar account, or <code>null</code> if not found
@@ -111,7 +120,7 @@ public interface CalendarAccountService {
 
     /**
      * Gets a list of all calendar accounts stored for a specific user and checks for permissions.
-     * 
+     *
      * @param session The current user session
      * @return The accounts, or an empty list if none were found
      * @throws OXException if permission check fails
@@ -120,7 +129,7 @@ public interface CalendarAccountService {
 
     /**
      * Gets a list of all calendar accounts stored for s specific user and provider, also checks for permissions
-     * 
+     *
      * @param session The current user session
      * @param providerId The providerId to search with
      * @return The accounts, or an empty list if none were found

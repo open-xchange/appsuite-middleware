@@ -51,10 +51,10 @@ package com.openexchange.chronos.provider.ical;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import org.apache.http.HttpStatus;
 import org.dmfs.rfc5545.Duration;
+import org.json.JSONObject;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.CalendarFolder;
@@ -106,9 +106,9 @@ public class ICalCalendarAccess extends SingleFolderCachingCalendarAccess {
 
     @Override
     public long getRefreshInterval() {
-        Number refreshInterval = (Number) getFolderConfiguration().get(REFRESH_INTERVAL);
-        if (refreshInterval != null && refreshInterval.longValue() > 0) {
-            return refreshInterval.longValue();
+        long refreshInterval = getFolderConfiguration().optLong(REFRESH_INTERVAL, 0);
+        if (refreshInterval > 0) {
+            return refreshInterval;
         }
         return Services.getService(LeanConfigurationService.class).getLongProperty(getSession().getUserId(), getSession().getContextId(), ICalCalendarProviderProperties.refreshInterval);
     }
@@ -162,30 +162,31 @@ public class ICalCalendarAccess extends SingleFolderCachingCalendarAccess {
     }
 
     private void updateFolderConfiguration(GetResult importResult) {
-        Map<String, Object> folderConfig = getFolderConfiguration();
+        JSONObject folderConfig = getFolderConfiguration();
         setRefreshInterval(importResult, folderConfig);
         setETag(importResult, folderConfig);
     }
 
-    private void setETag(GetResult importResult, Map<String, Object> folderConfig) {
+    private void setETag(GetResult importResult, JSONObject folderConfig) {
         String etag = importResult.getETag();
         if (Strings.isNotEmpty(etag)) {
-            folderConfig.put(ICalFeedConfig.ETAG, etag);
+            folderConfig.putSafe(ICalFeedConfig.ETAG, etag);
         } else { // maybe deleted from ics in the meantime
             folderConfig.remove(ICalFeedConfig.ETAG);
         }
     }
 
-    private void setRefreshInterval(GetResult importResult, Map<String, Object> folderConfig) {
-        Number persistedInterval = (Number) folderConfig.get(REFRESH_INTERVAL);
+    private void setRefreshInterval(GetResult importResult, JSONObject folderConfig) {
+
+        long persistedInterval = folderConfig.optLong(REFRESH_INTERVAL, 0);
         String refreshInterval = importResult.getRefreshInterval();
         if (Strings.isNotEmpty(refreshInterval)) {
             Duration duration = org.dmfs.rfc5545.Duration.parse(refreshInterval);
             long refreshIntervalFromFeed = TimeUnit.MILLISECONDS.toMinutes(duration.toMillis());
-            if (persistedInterval == null || persistedInterval.longValue() != refreshIntervalFromFeed) {
-                folderConfig.put(REFRESH_INTERVAL, refreshIntervalFromFeed);
+            if (0 == persistedInterval || persistedInterval != refreshIntervalFromFeed) {
+                folderConfig.putSafe(REFRESH_INTERVAL, refreshIntervalFromFeed);
             }
-        } else if (persistedInterval != null) { // maybe deleted from ics in the meantime
+        } else if (persistedInterval != 0) { // maybe deleted from ics in the meantime
             folderConfig.remove(REFRESH_INTERVAL);
         }
     }

@@ -11,4 +11,5 @@ Import-Package: com.openexchange.chronos,
  com.openexchange.chronos.service,
  com.openexchange.exception,
  com.openexchange.server,
- com.openexchange.session
+ com.openexchange.session,
+ org.json

@@ -54,7 +54,6 @@ import static com.openexchange.tools.arrays.Arrays.contains;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -138,15 +137,15 @@ public class BirthdaysCalendarAccess extends SingleFolderCalendarAccess implemen
          */
         List<Map<String, Object>> defaultAlarms = new ArrayList<Map<String, Object>>();
 
-        Map<String, Object> defaultAlarm = new HashMap<String, Object>();
-        defaultAlarm.put("action", "DISPLAY");
-        defaultAlarm.put("description", "Reminder");
-        Map<String, Object> trigger = new HashMap<String, Object>();
-        trigger.put("duration", "PT9H");
-        defaultAlarm.put("trigger", trigger);
-
-        Map<String, Object> configuration = account.getConfiguration();
-        configuration.put("defaultAlarm", defaultAlarms);
+        //        Map<String, Object> defaultAlarm = new HashMap<String, Object>();
+        //        defaultAlarm.put("action", "DISPLAY");
+        //        defaultAlarm.put("description", "Reminder");
+        //        Map<String, Object> trigger = new HashMap<String, Object>();
+        //        trigger.put("duration", "PT9H");
+        //        defaultAlarm.put("trigger", trigger);
+        //
+        //        Map<String, Object> configuration = account.getConfiguration();
+        //        configuration.put("defaultAlarm", defaultAlarms);
 
         AlarmHelper alarmHelper = getAlarmHelper();
         alarmHelper.deleteAllAlarms();

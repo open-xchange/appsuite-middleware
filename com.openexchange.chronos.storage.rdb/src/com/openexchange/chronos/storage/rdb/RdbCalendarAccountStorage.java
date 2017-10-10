@@ -55,14 +55,12 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import org.json.JSONException;
+import org.json.JSONInputStream;
 import org.json.JSONObject;
-import org.json.JSONValue;
-import com.openexchange.ajax.tools.JSONCoercion;
+import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.DefaultCalendarAccount;
@@ -100,14 +98,14 @@ public class RdbCalendarAccountStorage extends RdbStorage implements CalendarAcc
     }
 
     @Override
-    public int createAccount(String providerId, int userId, Map<String, Object> data) throws OXException {
+    public int createAccount(String providerId, int userId, JSONObject internalConfig, JSONObject userConfig) throws OXException {
         int updated = 0;
         Connection connection = null;
         try {
             connection = dbProvider.getWriteConnection(context);
             txPolicy.setAutoCommit(connection, false);
             int id = nextAccountId(connection, context);
-            updated = insertAccount(connection, context.getContextId(), id, providerId, userId, System.currentTimeMillis(), data);
+            updated = insertAccount(connection, context.getContextId(), id, providerId, userId, System.currentTimeMillis(), internalConfig, userConfig);
             txPolicy.commit(connection);
             return id;
         } catch (SQLException e) {
@@ -118,11 +116,11 @@ public class RdbCalendarAccountStorage extends RdbStorage implements CalendarAcc
     }
 
     @Override
-    public CalendarAccount getAccount(int id) throws OXException {
+    public CalendarAccount getAccount(int userId, int id) throws OXException {
         Connection connection = null;
         try {
             connection = dbProvider.getReadConnection(context);
-            return selectAccount(connection, context.getContextId(), id);
+            return selectAccount(connection, context.getContextId(), id, userId);
         } catch (SQLException e) {
             throw asOXException(e);
         } finally {
@@ -131,14 +129,16 @@ public class RdbCalendarAccountStorage extends RdbStorage implements CalendarAcc
     }
 
     @Override
-    public void updateAccount(int id, Map<String, Object> data, long timestamp) throws OXException {
+    public void updateAccount(int userId, int id, JSONObject internalConfig, JSONObject userConfig, long timestamp) throws OXException {
         int updated = 0;
         Connection connection = null;
         try {
             connection = dbProvider.getWriteConnection(context);
             txPolicy.setAutoCommit(connection, false);
-            checkConcurrentModification(connection, context.getContextId(), id, timestamp);
-            updated = updateAccount(connection, context.getContextId(), id, System.currentTimeMillis(), data);
+            if (CalendarUtils.DISTANT_FUTURE != timestamp) {
+                checkConcurrentModification(connection, context.getContextId(), id, userId, timestamp);
+            }
+            updated = updateConfig(connection, context.getContextId(), id, userId, System.currentTimeMillis(), internalConfig, userConfig);
             txPolicy.commit(connection);
         } catch (SQLException e) {
             throw asOXException(e);
@@ -147,8 +147,8 @@ public class RdbCalendarAccountStorage extends RdbStorage implements CalendarAcc
         }
     }
 
-    private static void checkConcurrentModification(Connection connection, int cid, int id, long timestamp) throws SQLException, OXException {
-        long lastModified = getLastModified(connection, cid, id);
+    private static void checkConcurrentModification(Connection connection, int cid, int id, int userId, long timestamp) throws SQLException, OXException {
+        long lastModified = getLastModified(connection, cid, id, userId);
         if (lastModified > timestamp) {
             throw CalendarExceptionCodes.CONCURRENT_MODIFICATION.create(id, timestamp, lastModified);
         } else if (lastModified < 0) {
@@ -156,27 +156,25 @@ public class RdbCalendarAccountStorage extends RdbStorage implements CalendarAcc
         }
     }
 
-    private static long getLastModified(Connection connection, int cid, int id) throws SQLException {
-        String sql = "SELECT modified FROM calendar_account WHERE cid=? AND id=?;";
+    private static long getLastModified(Connection connection, int cid, int id, int userId) throws SQLException {
+        String sql = "SELECT modified FROM calendar_account WHERE cid=? AND id=? AND user=?;";
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             stmt.setInt(1, cid);
             stmt.setInt(2, id);
+            stmt.setInt(3, userId);
             try (ResultSet resultSet = logExecuteQuery(stmt)) {
-                if (resultSet.next()) {
-                    return resultSet.getLong(1);
-                }
+                return resultSet.next() ? resultSet.getLong(1) : -1L;
             }
         }
-        return -1L;
     }
 
     @Override
-    public void deleteAccount(int id) throws OXException {
+    public void deleteAccount(int id, int userId) throws OXException {
         int updated = 0;
         Connection connection = null;
         try {
             connection = dbProvider.getWriteConnection(context);
-            updated = deleteAccount(connection, context.getContextId(), id);
+            updated = deleteAccount(connection, context.getContextId(), id, userId);
         } catch (SQLException e) {
             throw asOXException(e);
         } finally {
@@ -198,11 +196,11 @@ public class RdbCalendarAccountStorage extends RdbStorage implements CalendarAcc
     }
 
     @Override
-    public List<CalendarAccount> getAccounts(int userId, String providerId) throws OXException {
+    public List<CalendarAccount> getAccounts(String providerId, int[] userIds) throws OXException {
         Connection connection = null;
         try {
             connection = dbProvider.getReadConnection(context);
-            return selectAccounts(connection, context.getContextId(), userId, providerId);
+            return selectAccounts(connection, context.getContextId(), providerId, userIds);
         } catch (SQLException e) {
             throw asOXException(e);
         } finally {
@@ -210,127 +208,118 @@ public class RdbCalendarAccountStorage extends RdbStorage implements CalendarAcc
         }
     }
 
-    private static int insertAccount(Connection connection, int cid, int id, String provider, int user, long modified, Map<String, Object> data) throws SQLException, OXException {
-        String sql = "INSERT INTO calendar_account (cid,id,provider,user,modified,data) VALUES (?,?,?,?,?,?);";
+    private static int insertAccount(Connection connection, int cid, int id, String provider, int user, long modified, JSONObject internalConfig, JSONObject userConfig) throws SQLException, OXException {
+        String sql = "INSERT INTO calendar_account (cid,id,provider,user,modified,internalConfig,userConfig) VALUES (?,?,?,?,?,?,?);";
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-            InputStream inputStream = null;
+            InputStream internalConfigStream = null;
+            InputStream userConfigStream = null;
             try {
-                inputStream = serializeMap(data);
+                internalConfigStream = serialize(internalConfig);
+                userConfigStream = serialize(userConfig);
                 stmt.setInt(1, cid);
                 stmt.setInt(2, id);
                 stmt.setString(3, provider);
                 stmt.setInt(4, user);
                 stmt.setLong(5, modified);
-                stmt.setBinaryStream(6, inputStream);
+                stmt.setBinaryStream(6, internalConfigStream);
+                stmt.setBinaryStream(7, userConfigStream);
                 return logExecuteUpdate(stmt);
             } finally {
-                Streams.close(inputStream);
+                Streams.close(internalConfigStream, userConfigStream);
             }
         }
     }
 
-    private static int updateAccount(Connection connection, int cid, int id, long modified, Map<String, Object> data) throws SQLException, OXException {
-        String sql = "UPDATE calendar_account SET modified=?,data=? WHERE cid=? AND id=?;";
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-            InputStream inputStream = null;
+    private static int updateConfig(Connection connection, int cid, int id, int user, long modified, JSONObject internalConfig, JSONObject userConfig) throws SQLException, OXException {
+        StringBuilder stringBuilder = new StringBuilder("UPDATE calendar_account SET modified=?");
+        if (null != internalConfig) {
+            stringBuilder.append(",internalConfig=?");
+        }
+        if (null != userConfig) {
+            stringBuilder.append(",userConfig=?");
+        }
+        stringBuilder.append(" WHERE cid=? AND id=? AND user=?;");
+        try (PreparedStatement stmt = connection.prepareStatement(stringBuilder.toString())) {
+            int parameterIndex = 1;
+            InputStream internalConfigStream = null;
+            InputStream userConfigStream = null;
             try {
-                inputStream = serializeMap(data);
-                stmt.setLong(1, modified);
-                stmt.setBinaryStream(2, inputStream);
-                stmt.setInt(3, cid);
-                stmt.setInt(4, id);
+                internalConfigStream = null != internalConfig ? serialize(internalConfig) : null;
+                userConfigStream = null != userConfig ? serialize(userConfig) : null;
+                stmt.setLong(parameterIndex++, modified);
+                if (null != internalConfigStream) {
+                    stmt.setBinaryStream(parameterIndex++, internalConfigStream);
+                }
+                if (null != userConfigStream) {
+                    stmt.setBinaryStream(parameterIndex++, userConfigStream);
+                }
+                stmt.setInt(parameterIndex++, cid);
+                stmt.setInt(parameterIndex++, id);
+                stmt.setInt(parameterIndex++, user);
                 return logExecuteUpdate(stmt);
             } finally {
-                Streams.close(inputStream);
+                Streams.close(internalConfigStream, userConfigStream);
             }
         }
     }
 
-    private static int deleteAccount(Connection connection, int cid, int id) throws SQLException, OXException {
-        String sql = "DELETE FROM calendar_account WHERE cid=? AND id=?;";
+    private static int deleteAccount(Connection connection, int cid, int id, int user) throws SQLException, OXException {
+        String sql = "DELETE FROM calendar_account WHERE cid=? AND id=? AND user=?;";
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             stmt.setInt(1, cid);
             stmt.setInt(2, id);
+            stmt.setInt(3, user);
             return logExecuteUpdate(stmt);
         }
     }
 
     private static List<CalendarAccount> selectAccounts(Connection connection, int cid, int user) throws SQLException, OXException {
         List<CalendarAccount> accounts = new ArrayList<CalendarAccount>();
-        String sql = "SELECT id,provider,modified,data FROM calendar_account WHERE cid=? AND user=?;";
+        String sql = "SELECT id,user,provider,modified,internalConfig,userConfig FROM calendar_account WHERE cid=? AND user=?;";
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             stmt.setInt(1, cid);
             stmt.setInt(2, user);
             try (ResultSet resultSet = logExecuteQuery(stmt)) {
                 while (resultSet.next()) {
-                    int id = resultSet.getInt(1);
-                    String providerId = resultSet.getString(2);
-                    long lastModified = resultSet.getLong(3);
-                    Map<String, Object> data;
-                    InputStream inputStream = null;
-                    try {
-                        inputStream = resultSet.getBinaryStream(4);
-                        data = deserializeMap(inputStream);
-                    } finally {
-                        Streams.close(inputStream);
-                    }
-                    accounts.add(new DefaultCalendarAccount(providerId, id, user, data, new Date(lastModified)));
+                    accounts.add(readAccount(resultSet));
                 }
             }
         }
         return accounts;
     }
 
-    private static List<CalendarAccount> selectAccounts(Connection connection, int cid, int user, String providerId) throws SQLException, OXException {
+    private static List<CalendarAccount> selectAccounts(Connection connection, int cid, String provider, int[] userIds) throws SQLException, OXException {
+        String sql = new StringBuilder()
+            .append("SELECT id,user,provider,modified,internalConfig,userConfig FROM calendar_account WHERE cid=? AND provider=? AND user")
+            .append(getPlaceholders(userIds.length)).append(';')
+        .toString();
         List<CalendarAccount> accounts = new ArrayList<CalendarAccount>();
-        String sql = "SELECT id,provider,modified,data FROM calendar_account WHERE cid=? AND user=? AND provider=?;";
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-            stmt.setInt(1, cid);
-            stmt.setInt(2, user);
-            stmt.setString(3, providerId);
+            int parameterIndex = 1;
+            stmt.setInt(parameterIndex++, cid);
+            stmt.setString(parameterIndex++, provider);
+            for (int userId : userIds) {
+                stmt.setInt(parameterIndex++, userId);
+            }
             try (ResultSet resultSet = logExecuteQuery(stmt)) {
                 while (resultSet.next()) {
-                    int id = resultSet.getInt(1);
-                    String provider = resultSet.getString(2);
-                    long lastModified = resultSet.getLong(3);
-                    Map<String, Object> data;
-                    InputStream inputStream = null;
-                    try {
-                        inputStream = resultSet.getBinaryStream(4);
-                        data = deserializeMap(inputStream);
-                    } finally {
-                        Streams.close(inputStream);
-                    }
-                    accounts.add(new DefaultCalendarAccount(provider, id, user, data, new Date(lastModified)));
+                    accounts.add(readAccount(resultSet));
                 }
             }
         }
         return accounts;
     }
 
-    private static CalendarAccount selectAccount(Connection connection, int cid, int id) throws SQLException, OXException {
-        String sql = "SELECT provider,user,modified,data FROM calendar_account WHERE cid=? AND id=?;";
+    private static CalendarAccount selectAccount(Connection connection, int cid, int id, int user) throws SQLException, OXException {
+        String sql = "SELECT id,user,provider,modified,internalConfig,userConfig FROM calendar_account WHERE cid=? AND id=? AND user=?;";
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             stmt.setInt(1, cid);
             stmt.setInt(2, id);
+            stmt.setInt(3, user);
             try (ResultSet resultSet = logExecuteQuery(stmt)) {
-                if (resultSet.next()) {
-                    String providerId = resultSet.getString(1);
-                    int userId = resultSet.getInt(2);
-                    long lastModified = resultSet.getLong(3);
-                    Map<String, Object> data;
-                    InputStream inputStream = null;
-                    try {
-                        inputStream = resultSet.getBinaryStream(4);
-                        data = deserializeMap(inputStream);
-                    } finally {
-                        Streams.close(inputStream);
-                    }
-                    return new DefaultCalendarAccount(providerId, id, userId, data, new Date(lastModified));
-                }
+                return resultSet.next() ? readAccount(resultSet) : null;
             }
         }
-        return null;
     }
 
     private static int nextAccountId(Connection connection, Context context) throws SQLException {
@@ -340,45 +329,57 @@ public class RdbCalendarAccountStorage extends RdbStorage implements CalendarAcc
         return IDGenerator.getId(context, ID_GENERATOR_TYPE, connection);
     }
 
+    private static CalendarAccount readAccount(ResultSet resultSet) throws SQLException {
+        int id = resultSet.getInt("id");
+        int user = resultSet.getInt("user");
+        String provider = resultSet.getString("provider");
+        long lastModified = resultSet.getLong("modified");
+        JSONObject internalConfig;
+        InputStream inputStream = null;
+        try {
+            inputStream = resultSet.getBinaryStream("internalConfig");
+            internalConfig = deserialize(inputStream);
+        } finally {
+            Streams.close(inputStream);
+        }
+        JSONObject userConfig;
+        try {
+            inputStream = resultSet.getBinaryStream("userConfig");
+            userConfig = deserialize(inputStream);
+        } finally {
+            Streams.close(inputStream);
+        }
+        return new DefaultCalendarAccount(provider, id, user, internalConfig, userConfig, new Date(lastModified));
+    }
+
     /**
-     * Deserializes a an arbitrary map (as used in an account's configuration field) from the supplied input stream.
+     * Deserializes a JSON object (as used in an account's configuration) from the supplied input stream.
      *
      * @param inputStream The input stream to deserialize
-     * @return The deserialized map
+     * @return The deserialized JSON object
      */
-    private static Map<String, Object> deserializeMap(InputStream inputStream) throws OXException {
+    private static JSONObject deserialize(InputStream inputStream) throws SQLException {
         if (null == inputStream) {
-            return Collections.emptyMap();
+            return null;
         }
         try {
-            return new JSONObject(new AsciiReader(inputStream)).asMap();
+            return new JSONObject(new AsciiReader(inputStream));
         } catch (JSONException e) {
-            throw CalendarExceptionCodes.DB_ERROR.create(e, e.getMessage());
+            throw new SQLException(e);
         }
     }
 
     /**
-     * Serializes an arbitrary meta map (as used in an account's configuration field) to an input stream.
+     * Serializes a JSON object (as used in an account's configuration) to an input stream.
      *
-     * @param data The map to serialize, or <code>null</code>
-     * @return The serialized map data, or <code>null</code> if the map is empty
+     * @param data The JSON object serialize, or <code>null</code>
+     * @return The serialized JSON object, or <code>null</code> if the passed object was <code>null</code>
      */
-    private static InputStream serializeMap(Map<String, Object> data) throws OXException {
-        if (null == data || data.isEmpty()) {
+    private static InputStream serialize(JSONObject data) {
+        if (null == data) {
             return null;
         }
-        Object coerced = null;
-        try {
-            coerced = JSONCoercion.coerceToJSON(data);
-        } catch (JSONException e) {
-            throw CalendarExceptionCodes.DB_ERROR.create(e, e.getMessage());
-        }
-        if (null == coerced || JSONObject.NULL.equals(coerced)) {
-            return null;
-        }
-        String json = ((JSONValue) coerced).toString();
-        return Streams.newByteArrayInputStream(json.getBytes(Charsets.US_ASCII));
-        //TODO: return new JSONInputStream((JSONValue) coerced, "US-ASCII");
+        return new JSONInputStream(data, Charsets.US_ASCII.name());
     }
 
 }

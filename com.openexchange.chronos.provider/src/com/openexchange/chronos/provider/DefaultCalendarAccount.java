@@ -50,12 +50,7 @@
 package com.openexchange.chronos.provider;
 
 import java.util.Date;
-import java.util.Map;
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.openexchange.auth.info.AuthInfo;
-import com.openexchange.chronos.provider.auth.CalendarAuthParser;
-import com.openexchange.exception.OXException;
+import org.json.JSONObject;
 
 /**
  * {@link DefaultCalendarAccount}
@@ -65,15 +60,14 @@ import com.openexchange.exception.OXException;
  */
 public class DefaultCalendarAccount implements CalendarAccount {
 
-    /** auto-generated serialVersionUID */
-    private static final long serialVersionUID = 1289630763948196626L;
+    private static final long serialVersionUID = 8822850387106167336L;
 
     private final String providerId;
     private final int accountId;
     private final int userId;
     private final Date lastModified;
-    private final Map<String, Object> configuration;
-    private final ObjectMapper mapper = new ObjectMapper().setSerializationInclusion(Include.NON_NULL);
+    private final JSONObject internalConfig;
+    private final JSONObject userConfig;
 
     /**
      * Initializes a new {@link DefaultCalendarAccount}.
@@ -81,15 +75,17 @@ public class DefaultCalendarAccount implements CalendarAccount {
      * @param providerId The provider identifier
      * @param accountId The account identifier
      * @param userId The user identifier
-     * @param configuration The account's configuration data
+     * @param internalConfig The account's internal / protected configuration data
+     * @param userConfig The account's external / user configuration data
      * @param lastModified The last modification date
      */
-    public DefaultCalendarAccount(String providerId, int accountId, int userId, Map<String, Object> configuration, Date lastModified) {
+    public DefaultCalendarAccount(String providerId, int accountId, int userId, JSONObject internalConfig, JSONObject userConfig, Date lastModified) {
         super();
         this.providerId = providerId;
         this.accountId = accountId;
         this.userId = userId;
-        this.configuration = configuration;
+        this.internalConfig = internalConfig;
+        this.userConfig = userConfig;
         this.lastModified = lastModified;
     }
 
@@ -109,17 +105,23 @@ public class DefaultCalendarAccount implements CalendarAccount {
     }
 
     @Override
-    public Map<String, Object> getConfiguration() {
-        return configuration;
-    }
-
-    @Override
     public Date getLastModified() {
         return lastModified;
     }
 
     @Override
-    public AuthInfo getAuthInfo() throws OXException {
-        return CalendarAuthParser.getInstance().getAuthInfo(configuration);
+    public JSONObject getInternalConfiguration() {
+        return internalConfig;
     }
+
+    @Override
+    public JSONObject getUserConfiguration() {
+        return userConfig;
+    }
+
+    @Override
+    public String toString() {
+        return "DefaultCalendarAccount [providerId=" + providerId + ", accountId=" + accountId + ", userId=" + userId + ", lastModified=" + lastModified + ", internalConfig=" + internalConfig + ", userConfig=" + userConfig + "]";
+    }
+
 }

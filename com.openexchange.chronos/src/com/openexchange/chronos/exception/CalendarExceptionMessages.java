@@ -113,6 +113,8 @@ public class CalendarExceptionMessages implements LocalizableStrings {
 
     public static final String INVALID_CALENDAR_USER_MSG = "The calendar user \"%1$s\" is invalid.";
 
+    public static final String INVALID_CONFIGURATION_MSG = "The supplied configuration is invalid. Please correct the configuration and try again.";
+    
     public static final String QUERY_TOO_SHORT_MSG = "In order to accomplish the search, %1$d or more characters are required.";
 
     public static final String INCORRECT_STRING_MSG = "The character \"%1$s\" in field \"%2$s\" can't be saved. Please remove the problematic character and try again.";

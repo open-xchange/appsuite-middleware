@@ -50,6 +50,7 @@
 package com.openexchange.chronos.provider;
 
 import java.util.Locale;
+import org.json.JSONObject;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
@@ -78,14 +79,44 @@ public interface CalendarProvider {
     String getDisplayName(Locale locale);
 
     /**
-     * (Re-)initializes a specific calendar account.
+     * Initializes the configuration prior creating a new calendar account.
      * <p/>
-     * Initialization is performed when a new account is added or an existing account is reconfigured or forcibly reseted.
+     * Any permission- or data validation checks are performed during this initialization phase. In case of erroneous or incomplete
+     * configuration data, an appropriate exception will be thrown. Upon success, any <i>internal</i> configuration data is returned for
+     * persisting along with the newly created calendar account.
      *
      * @param session The user's session
-     * @param account The calendar account to connect to
+     * @param userConfig The <i>user</i> configuration as supplied by the client
+     * @param parameters Additional calendar parameters, or <code>null</code> if not set
+     * @return A JSON object holding the <i>internal</i> configuration to store along with the new account
      */
-    void initialize(Session session, CalendarAccount account) throws OXException;
+    JSONObject configureAccount(Session session, JSONObject userConfig, CalendarParameters parameters) throws OXException;
+
+    /**
+     * Re-initializes the configuration prior updating an existing calendar account.
+     * <p/>
+     * Any permission- or data validation checks are performed during this initialization phase. In case of erroneous or incomplete
+     * configuration data, an appropriate exception will be thrown. Upon success, any updated <i>internal</i> configuration data is
+     * returned for persisting along with the updated calendar account.
+     *
+     * @param session The user's session
+     * @param internalConfig The <i>internal</i> configuration as retrieved from the currently stored account
+     * @param userConfig The updated <i>user</i> configuration as supplied by the client
+     * @param parameters Additional calendar parameters, or <code>null</code> if not set
+     * @return A JSON object holding the updated <i>internal</i> configuration to store along with update, or <code>null</code> if unchanged
+     */
+    JSONObject reconfigureAccount(Session session, JSONObject internalConfig, JSONObject userConfig, CalendarParameters parameters) throws OXException;
+
+    /**
+     * Performs additional initialization for a specific calendar account.
+     * <p/>
+     * Initialization is performed after a new account has been added, or an existing account has been reconfigured or is forcibly reseted. <br/>
+     *
+     * @param session The user's session
+     * @param account The calendar account to initialize
+     * @param parameters Additional calendar parameters, or <code>null</code> if not set
+     */
+    void initializeAccount(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException;
 
     /**
      * Initializes the connection to a specific calendar account.

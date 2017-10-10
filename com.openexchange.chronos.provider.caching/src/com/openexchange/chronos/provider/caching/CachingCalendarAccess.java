@@ -51,22 +51,23 @@ package com.openexchange.chronos.provider.caching;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
-import org.apache.commons.lang3.SerializationUtils;
 import org.joda.time.Hours;
 import org.joda.time.Weeks;
+import org.json.JSONObject;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.provider.CalendarAccess;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.CalendarFolder;
+import com.openexchange.chronos.provider.account.AdministrativeCalendarAccountService;
 import com.openexchange.chronos.provider.caching.internal.Services;
 import com.openexchange.chronos.provider.caching.internal.handler.CachingExecutor;
 import com.openexchange.chronos.provider.caching.internal.handler.FolderProcessingType;
@@ -76,8 +77,6 @@ import com.openexchange.chronos.provider.caching.internal.handler.utils.ResultCo
 import com.openexchange.chronos.provider.extensions.WarningsAware;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.EventID;
-import com.openexchange.chronos.storage.CalendarAccountStorage;
-import com.openexchange.chronos.storage.CalendarAccountStorageFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
@@ -115,11 +114,11 @@ public abstract class CachingCalendarAccess implements WarningsAware {
     private final CalendarParameters parameters;
     private List<OXException> warnings = new ArrayList<>();
 
-    private Map<String, Object> originConfiguration;
+    private JSONObject originConfiguration;
 
     /**
      * Initializes a new {@link CachingCalendarAccess}.
-     * 
+     *
      * @param session The user session
      * @param account The user calendar account
      * @param parameters The calendar parameters (for the given request)
@@ -129,28 +128,28 @@ public abstract class CachingCalendarAccess implements WarningsAware {
         this.parameters = parameters;
         this.session = ServerSessionAdapter.valueOf(session);
         this.account = account;
-        this.originConfiguration = SerializationUtils.clone((HashMap<String, Object>) this.getAccount().getConfiguration());
+        this.originConfiguration = new JSONObject(this.getAccount().getInternalConfiguration());
     }
 
     /**
      * Defines the refresh interval in minutes that has to be expired to contact the external event provider for the up-to-date calendar.<br>
      * <br>
      * If the value is <=0 the default of one day will be used.
-     * 
+     *
      * @return The interval that defines the expire of the caching in {@link TimeUnit#MINUTES}
      */
     protected abstract long getRefreshInterval();
 
     /**
      * Defines how long should be wait for the next request to the external calendar provider in case an error occurred.
-     * 
+     *
      * @return The time in {@link TimeUnit#MINUTES} that should be wait for contacting the external calendar provider for updates.
      */
     public abstract long getExternalRequestTimeout();
 
     /**
      * Returns an {@link ExternalCalendarResult} containing the external {@link Event}s by querying the underlying calendar for the given folder id and additional information.
-     * 
+     *
      * @param folderId The identifier of the folder to get the events from
      * @return {@link ExternalCalendarResult}
      */
@@ -158,7 +157,7 @@ public abstract class CachingCalendarAccess implements WarningsAware {
 
     /**
      * Allows the underlying calendar provider to handle {@link OXException}s that might occur while retrieving data from the external source.
-     * 
+     *
      * @param folderId The identifier of the folder the error occurred for
      * @param e The {@link OXException} occurred
      */
@@ -207,7 +206,7 @@ public abstract class CachingCalendarAccess implements WarningsAware {
     /**
      * Cleans up the execution list to only have the really desired instructions left. This means each {@link FolderProcessingType#DELETE}, {@link FolderProcessingType#READ_DB}, {@link FolderProcessingType#INITIAL_INSERT} instruction and
      * {@link FolderProcessingType#UPDATE} for requested folders will be left over.
-     * 
+     *
      * @param executionList Instructions retrieved from merging current state and external folders
      * @param folderIds The folders that should be updated
      */
@@ -278,21 +277,21 @@ public abstract class CachingCalendarAccess implements WarningsAware {
 
     /**
      * Returns the last persisted update state for each currently known folder (under consideration of the provided refresh interval).
-     * 
+     *
      * @return {@link ProcessingType} that indicates the following steps of processing
      * @throws OXException
      */
     protected final List<FolderUpdateState> getLatestUpdateStates() throws OXException {
-        Map<String, Map<String, Object>> lastUpdates = (Map<String, Map<String, Object>>) getAccount().getConfiguration().get(CACHING);
-
+        JSONObject lastUpdates = getAccount().getInternalConfiguration().optJSONObject(CACHING);
         if (lastUpdates == null) {
             return Collections.emptyList();
         }
         List<FolderUpdateState> currentStates = new ArrayList<>();
 
-        for (Entry<String, Map<String, Object>> folderUpdateState : lastUpdates.entrySet()) {
+        //TODO: json
+        for (Entry<String, Object> folderUpdateState : lastUpdates.asMap().entrySet()) {
             String folderId = folderUpdateState.getKey();
-            Map<String, Object> folderConfig = folderUpdateState.getValue();
+            Map<String, Object> folderConfig = (Map<String, Object>) folderUpdateState.getValue();
             Number lastFolderUpdate = (Number) folderConfig.get(LAST_UPDATE);
             long refreshInterval = getCascadedRefreshInterval(folderConfig);
 
@@ -329,12 +328,12 @@ public abstract class CachingCalendarAccess implements WarningsAware {
      * Saves the current configuration for the account if it has been changed while processing
      */
     protected void saveConfig() {
-        if (this.originConfiguration.equals(this.getAccount().getConfiguration())) {
+        if (Objects.equals(originConfiguration, getAccount().getInternalConfiguration())) {
             return;
         }
         try {
-            CalendarAccountStorage accountStorage = Services.getService(CalendarAccountStorageFactory.class).create(this.getSession().getContext());
-            accountStorage.updateAccount(this.account.getAccountId(), this.getAccount().getConfiguration(), this.getAccount().getLastModified().getTime());
+            AdministrativeCalendarAccountService accountService = Services.getService(AdministrativeCalendarAccountService.class);
+            accountService.updateAccount(getSession().getContextId(), getSession().getUserId(), getAccount().getAccountId(), getAccount().getInternalConfiguration(), null, getAccount().getLastModified().getTime());
         } catch (OXException e) {
             LOG.error("Unable to save configuration: {}", e.getMessage(), e);
         }
@@ -345,17 +344,18 @@ public abstract class CachingCalendarAccess implements WarningsAware {
         return warnings;
     }
 
-    public Map<String, Object> getFolderConfiguration(String folderId) {
-        Map<String, Object> configuration = getAccount().getConfiguration();
-        Map<String, Map<String, Object>> caching = (Map<String, Map<String, Object>>) configuration.get(CACHING);
+    public JSONObject getFolderConfiguration(String folderId) {
+
+        JSONObject internalConfig = getAccount().getInternalConfiguration();
+        JSONObject caching = internalConfig.optJSONObject(CACHING);
         if (caching == null) {
-            caching = new HashMap<>();
-            configuration.put(CACHING, caching);
+            caching = new JSONObject();
+            internalConfig.putSafe(CACHING, caching);
         }
-        Map<String, Object> folderConfig = caching.get(folderId);
+        JSONObject folderConfig = caching.optJSONObject(folderId);
         if (folderConfig == null) {
-            folderConfig = new HashMap<>();
-            caching.put(folderId, folderConfig);
+            folderConfig = new JSONObject();
+            caching.putSafe(folderId, folderConfig);
         }
         return folderConfig;
     }

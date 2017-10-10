@@ -49,12 +49,12 @@
 
 package com.openexchange.chronos.provider.ical;
 
-import java.util.Map;
+import org.json.JSONObject;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.caching.CachingCalendarAccess;
 
 /**
- * 
+ *
  * {@link ICalFeedConfig}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
@@ -102,12 +102,11 @@ public class ICalFeedConfig {
         private final String etag;
         private final long lastUpdated;
 
-        Builder(CalendarAccount account, Map<String, Object> folderConfig) {
-            Map<String, Object> configuration = account.getConfiguration();
-            feedUrl = (String) configuration.get("uri");
-            etag = (String) folderConfig.get(ETAG);
-            Number lLastUpdated = (Number) folderConfig.get(CachingCalendarAccess.LAST_UPDATE);
-            lastUpdated = lLastUpdated == null ? -1 : lLastUpdated.longValue();
+        Builder(CalendarAccount account, JSONObject folderConfig) {
+            JSONObject configuration = account.getInternalConfiguration();
+            feedUrl = configuration.optString("uri", null);
+            etag = folderConfig.optString(ETAG, null);
+            lastUpdated = folderConfig.optLong(CachingCalendarAccess.LAST_UPDATE, -1L);
         }
 
         public ICalFeedConfig build() {

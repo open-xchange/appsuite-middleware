@@ -216,7 +216,7 @@ public class ContactEventHandler implements EventHandler {
         List<CalendarAccount> birthdaysCalendarAccounts = new ArrayList<CalendarAccount>();
         CalendarAccountStorage accountStorage = services.getService(CalendarAccountStorageFactory.class).create(context);
         for (Integer userId : affectedUserIds) {
-            birthdaysCalendarAccounts.addAll(accountStorage.getAccounts(userId, BirthdaysCalendarProvider.PROVIDER_ID));
+            birthdaysCalendarAccounts.addAll(accountStorage.getAccounts(BirthdaysCalendarProvider.PROVIDER_ID, new int[] { userId }));
         }
         return birthdaysCalendarAccounts;
     }

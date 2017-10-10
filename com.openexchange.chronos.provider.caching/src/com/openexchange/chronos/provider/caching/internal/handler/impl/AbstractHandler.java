@@ -60,6 +60,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import org.json.JSONObject;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.CalendarUser;
@@ -120,8 +121,8 @@ public abstract class AbstractHandler implements CachingHandler {
 
     @Override
     public void updateLastUpdated(String folderId, long timestamp) {
-        Map<String, Object> folderConfig = this.cachedCalendarAccess.getFolderConfiguration(folderId);
-        folderConfig.put(CachingCalendarAccess.LAST_UPDATE, timestamp);
+        JSONObject folderConfig = this.cachedCalendarAccess.getFolderConfiguration(folderId);
+        folderConfig.putSafe(CachingCalendarAccess.LAST_UPDATE, Long.valueOf(timestamp));
     }
 
     protected List<Event> getExistingEventsInFolder(String folderId) throws OXException {

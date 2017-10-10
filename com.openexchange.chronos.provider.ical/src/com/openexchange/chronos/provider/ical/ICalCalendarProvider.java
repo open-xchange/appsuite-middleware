@@ -50,6 +50,7 @@
 package com.openexchange.chronos.provider.ical;
 
 import java.util.Locale;
+import org.json.JSONObject;
 import com.openexchange.chronos.provider.CalendarAccess;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.CalendarProvider;
@@ -58,7 +59,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
 
 /**
- * 
+ *
  * {@link ICalCalendarProvider}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
@@ -82,8 +83,24 @@ public class ICalCalendarProvider implements CalendarProvider {
     }
 
     @Override
-    public void initialize(Session session, CalendarAccount account) throws OXException {
-        // TODO verify if password the main password has been changed and accessing the external source isn't possible
+    public JSONObject configureAccount(Session session, JSONObject userConfig, CalendarParameters parameters) throws OXException {
+
+        //TODO: verify access to feed, credentials...
+
+        return new JSONObject();
+    }
+
+    @Override
+    public JSONObject reconfigureAccount(Session session, JSONObject internalConfig, JSONObject userConfig, CalendarParameters parameters) throws OXException {
+
+        //TODO: verify access to feed, credentials...
+
+        return null;
+    }
+
+    @Override
+    public void initializeAccount(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
+        // TODO
     }
 
 }

@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,63 +47,45 @@
  *
  */
 
-package com.openexchange.chronos.provider;
+package com.openexchange.chronos.account.json.actions;
 
-import java.io.Serializable;
-import java.util.Date;
-import org.json.JSONObject;
+import java.util.List;
+import org.json.JSONArray;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.chronos.account.json.ChronosAccountActionFactory;
+import com.openexchange.chronos.provider.CalendarProvider;
+import com.openexchange.exception.OXException;
+import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link CalendarAccount}
+ * {@link ProvidersAction}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public interface CalendarAccount extends Serializable {
-
-    /** The default <i>internal</i> calendar provider account */
-    static final CalendarAccount DEFAULT_ACCOUNT = new DefaultCalendarAccount("chronos", 0, 0, null, null, null);
+@OAuthAction(ChronosAccountActionFactory.OAUTH_READ_SCOPE)
+public class ProvidersAction extends AbstractAccountAction {
 
     /**
-     * Gets the account's identifier.
+     * Initializes a new {@link ProvidersAction}.
      *
-     * @return The identifier of the account
+     * @param services A service lookup reference
      */
-    int getAccountId();
+    public ProvidersAction(ServiceLookup services) {
+        super(services);
+    }
 
-    /**
-     * Gets the identifier of the calendar provider this account is associated with.
-     *
-     * @return The identifier of the calendar provider
-     */
-    String getProviderId();
-
-    /**
-     * Gets the identifier of the user this account is registered for.
-     *
-     * @return The identifier of the user
-     */
-    int getUserId();
-
-    /**
-     * Gets the last modification timestamp of the calendar account.
-     *
-     * @return The last modification timestamp
-     */
-    Date getLastModified();
-
-    /**
-     * Gets the account's internal / protected configuration data.
-     *
-     * @return The internal configuration, or <code>null</code> if not set
-     */
-    JSONObject getInternalConfiguration();
-
-    /**
-     * Gets the account's external / user configuration data.
-     *
-     * @return The user configuration, or <code>null</code> if not set
-     */
-    JSONObject getUserConfiguration();
+    @Override
+    public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
+        List<CalendarProvider> providers = getAccountService().getProviders();
+        JSONArray response = new JSONArray(providers.size());
+        for (CalendarProvider provider : providers) {
+            response.put(serializeProvider(provider, session.getUser().getLocale()));
+        }
+        return new AJAXRequestResult(response, "json");
+    }
 
 }

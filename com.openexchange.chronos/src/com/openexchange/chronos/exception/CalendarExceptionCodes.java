@@ -64,6 +64,7 @@ import static com.openexchange.chronos.exception.CalendarExceptionMessages.IGNOR
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.INCOMPATIBLE_DATE_TYPES_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.INCORRECT_STRING_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.INVALID_CALENDAR_USER_MSG;
+import static com.openexchange.chronos.exception.CalendarExceptionMessages.INVALID_CONFIGURATION_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.INVALID_GEO_LOCATION_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.INVALID_RRULE_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.INVALID_TIMEZONE_MSG;
@@ -75,6 +76,9 @@ import static com.openexchange.chronos.exception.CalendarExceptionMessages.NOT_O
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.NO_PERMISSION_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.PROVIDER_NOT_AVAILABLE_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.QUERY_TOO_SHORT_MSG;
+import static com.openexchange.chronos.exception.CalendarExceptionMessages.TOO_MANY_ALARMS_MSG;
+import static com.openexchange.chronos.exception.CalendarExceptionMessages.TOO_MANY_ATTENDEES_MSG;
+import static com.openexchange.chronos.exception.CalendarExceptionMessages.TOO_MANY_EVENTS_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.UID_CONFLICT_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.UNKNOWN_INTERNAL_ATTENDEE_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.UNSUPPORTED_CLASSIFICATION_FOR_MOVE_MSG;
@@ -83,9 +87,6 @@ import static com.openexchange.chronos.exception.CalendarExceptionMessages.UNSUP
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.UNSUPPORTED_FOLDER_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.UNSUPPORTED_OPERATION_FOR_PROVIDER_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.UNSUPPORTED_RRULE_MSG;
-import static com.openexchange.chronos.exception.CalendarExceptionMessages.TOO_MANY_ALARMS_MSG;
-import static com.openexchange.chronos.exception.CalendarExceptionMessages.TOO_MANY_ATTENDEES_MSG;
-import static com.openexchange.chronos.exception.CalendarExceptionMessages.TOO_MANY_EVENTS_MSG;
 import static com.openexchange.exception.OXExceptionStrings.MESSAGE;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.DisplayableOXExceptionCode;
@@ -281,6 +282,11 @@ public enum CalendarExceptionCodes implements DisplayableOXExceptionCode {
      * <li>Invalid geo location [geo %1$s]</li>
      */
     INVALID_GEO_LOCATION("Invalid geo location [geo %1$s]", INVALID_GEO_LOCATION_MSG, Category.CATEGORY_USER_INPUT, 4003),
+    /**
+     * <li>The supplied configuration is invalid. Please correct the configuration and try again.</li>
+     * <li>Invalid configuration [configuration %1$s]</li>
+     */
+    INVALID_CONFIGURATION("Invalid configuration [configuration %1$s]", INVALID_CONFIGURATION_MSG, Category.CATEGORY_USER_INPUT, 4004),
     /**
      * <li>An error occurred inside the server which prevented it from fulfilling the request.</li>
      * <li>Unexpected error [%1$s]</li>

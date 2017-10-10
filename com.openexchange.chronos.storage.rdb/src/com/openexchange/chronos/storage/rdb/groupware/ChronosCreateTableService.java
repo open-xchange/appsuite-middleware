@@ -74,12 +74,13 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
             "CREATE TABLE calendar_account (" +
                 "cid INT4 UNSIGNED NOT NULL," +
                 "id INT4 UNSIGNED NOT NULL," +
-                "provider VARCHAR(64) NOT NULL," +
                 "user INT4 UNSIGNED NOT NULL," +
+                "provider VARCHAR(64) NOT NULL," +
                 "modified BIGINT(20) NOT NULL," +
-                "data BLOB," +
-                "PRIMARY KEY (cid,id)," +
-                "KEY user (cid,user)" +
+                "internalConfig BLOB," +
+                "userConfig BLOB," +
+                "PRIMARY KEY (cid,id,user)," +
+                "KEY user (cid,user,provider)" +
             ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;"
         );
         tablesByName.put("calendar_event_sequence",

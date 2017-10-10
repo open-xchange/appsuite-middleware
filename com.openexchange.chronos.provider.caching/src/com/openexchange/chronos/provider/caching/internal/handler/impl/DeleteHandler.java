@@ -57,8 +57,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.SortedSet;
+import org.json.JSONObject;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.RecurrenceId;
@@ -197,9 +197,11 @@ public class DeleteHandler extends AbstractHandler {
 
     @Override
     public void updateLastUpdated(String folderId, long timestamp) {
-        Map<String, Object> configuration = this.cachedCalendarAccess.getAccount().getConfiguration();
-        Map<String, Long> lastUpdates = (Map<String, Long>) configuration.get(CachingCalendarAccess.CACHING);
-        lastUpdates.remove(folderId);
+        JSONObject configuration = this.cachedCalendarAccess.getAccount().getInternalConfiguration();
+        JSONObject lastUpdates = configuration.optJSONObject(CachingCalendarAccess.CACHING);
+        if (null != lastUpdates) {
+            lastUpdates.remove(folderId);
+        }
     }
 
 }

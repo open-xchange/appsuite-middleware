@@ -58,6 +58,7 @@ import com.openexchange.chronos.account.json.actions.AllAction;
 import com.openexchange.chronos.account.json.actions.DeleteAction;
 import com.openexchange.chronos.account.json.actions.GetAction;
 import com.openexchange.chronos.account.json.actions.NewAction;
+import com.openexchange.chronos.account.json.actions.ProvidersAction;
 import com.openexchange.chronos.account.json.actions.UpdateAction;
 import com.openexchange.exception.OXException;
 import com.openexchange.oauth.provider.resourceserver.annotations.OAuthModule;
@@ -85,13 +86,14 @@ public class ChronosAccountActionFactory implements AJAXActionServiceFactory {
      */
     public ChronosAccountActionFactory(ServiceLookup services) {
         super();
-        ImmutableMap.Builder<String, AJAXActionService> actions = ImmutableMap.builder();
-        actions.put("new", new NewAction(services));
-        actions.put("all", new AllAction(services));
-        actions.put("get", new GetAction(services));
-        actions.put("update", new UpdateAction(services));
-        actions.put("delete", new DeleteAction(services));
-        this.actions = actions.build();
+        actions = ImmutableMap.<String, AJAXActionService> builder()
+            .put("new", new NewAction(services))
+            .put("all", new AllAction(services))
+            .put("get", new GetAction(services))
+            .put("update", new UpdateAction(services))
+            .put("delete", new DeleteAction(services))
+            .put("providers", new ProvidersAction(services))
+        .build();
     }
 
     @Override

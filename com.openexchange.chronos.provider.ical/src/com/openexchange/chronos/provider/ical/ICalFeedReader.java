@@ -89,7 +89,7 @@ import com.openexchange.rest.client.httpclient.HttpClients.ClientConfig;
 import com.openexchange.session.Session;
 
 /**
- * 
+ *
  * {@link ICalFeedReader}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
@@ -142,7 +142,7 @@ public class ICalFeedReader {
     }
 
     private void handleAuth(HttpRequestBase method) throws OXException {
-        AuthInfo authInfo = this.account.getAuthInfo();
+        AuthInfo authInfo = null;// TODO this.account.getAuthInfo();
         AuthType authType = authInfo.getAuthType();
         switch (authType) {
             case LOGIN: {
