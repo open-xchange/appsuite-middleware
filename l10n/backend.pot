@@ -8203,6 +8203,11 @@ msgstr ""
 msgid "Account is currently being set-up."
 msgstr ""
 
+#. The message advertising that the affected account is facing an SSL problem
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/KnownStatusMessage.java:86
+msgid "There was an SSL problem."
+msgstr ""
+
 #. Cannot find mail account for user "%2$s".
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:62
 msgid "Cannot find mail account for user \"%2$s\"."
