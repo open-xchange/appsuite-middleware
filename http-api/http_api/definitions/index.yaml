@@ -191,6 +191,15 @@ Available:
   $ref: ./chronos-availability/Available.yaml
 GetAvailabilityResponse:
   $ref: ./chronos-availability/GetAvailabilityResponse.yaml
+# Module: chronos-schedjoules
+CountryData:
+  $ref: ./chronos-schedjoules/CountryData.yaml
+CountriesResponse:
+  $ref: ./chronos-schedjoules/CountriesResponse.yaml
+LanguageData:
+  $ref: ./chronos-schedjoules/LanguageData.yaml
+LanguagesResponse:
+  $ref: ./chronos-schedjoules/LanguagesResponse.yaml
 # Module: mail
 MailCountResponse:
   $ref: ./mail/MailCountResponse.yaml

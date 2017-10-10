@@ -1,0 +1,11 @@
+type: object
+properties:
+  language_id:
+    type: integer
+    description: The language's unique identifier
+  name:
+    type: string
+    description: The language's name
+  iso_639_1:
+    type: string
+    description: The language's ISO 639-1 code

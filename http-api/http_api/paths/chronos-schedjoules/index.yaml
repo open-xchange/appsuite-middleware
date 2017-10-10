@@ -1,0 +1,6 @@
+requests:
+ - BrowseRequest.yaml
+ - SubscribeRequest.yaml
+ - CountriesRequest.yaml
+ - LanguagesRequest.yaml
+ - SearchRequest.yaml

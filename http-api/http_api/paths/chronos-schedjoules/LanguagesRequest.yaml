@@ -1,0 +1,15 @@
+/chronos/schedjoules?action=languages:
+  get:
+    operationId: languages
+    tags:
+      - Chronos
+    summary: Retrieves a list of all supported languages by SchedJoules
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+    responses:
+      200:
+        description: |
+          An object containing all supported languages. In case of errors the
+          responsible fields in the response are filled (see [Error handling](#error-handling)).
+        schema:
+          $ref: "#/definitions/LanguagesResponse"

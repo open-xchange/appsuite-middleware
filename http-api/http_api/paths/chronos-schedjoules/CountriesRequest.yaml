@@ -1,0 +1,16 @@
+/chronos/schedjoules?action=countries:
+  get:
+    operationId: countries
+    tags:
+      - Chronos
+    summary: Retreives a list of all countries that are supported by SchedJoules.
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - $ref: "#/parameters/QueryParamChronosSchedJoulesLanguage"
+    responses:
+      200:
+        description: |
+          An object containing all supported countries. In case of errors the
+          responsible fields in the response are filled (see [Error handling](#error-handling)).
+        schema:
+          $ref: "#/definitions/CountriesResponse"

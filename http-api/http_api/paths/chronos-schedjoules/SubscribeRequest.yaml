@@ -1,0 +1,23 @@
+/chronos/schedjoules?action=subscribe:
+  get:
+    operationId: subscribe
+    tags:
+      - Chronos
+    summary: Subscribes to a specific SchedJoules calendar.
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - in: query
+        name: id
+        type: integer
+        description: |
+          The identifier of the SchedJoules calendar to subscribe to. The identifier must correspond to a 
+          SchedJoules 'calendar' item class as described in https://github.com/schedjoules/calendar-store-api#pages,
+          otherwise an error will be raised.
+        required: true
+      - $ref: "#/parameters/QueryParamChronosSchedJoulesLanguage"
+    responses:
+      200:
+        description: |
+          The identifier/propId of the subscribed SchedJoule calendar.
+        schema:
+          type: string
