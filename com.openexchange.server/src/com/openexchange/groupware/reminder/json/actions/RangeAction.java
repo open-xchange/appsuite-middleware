@@ -66,7 +66,6 @@ import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXException.Generic;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.reminder.ReminderObject;
 import com.openexchange.groupware.reminder.ReminderService;
@@ -117,26 +116,6 @@ public final class RangeAction extends AbstractReminderAction {
             final List<ReminderObject> reminders = reminderService.getArisingReminder(session, session.getContext(), user, end);
             final JSONArray jsonResponseArray = new JSONArray();
             for (ReminderObject reminder : reminders) {
-                if (reminder.isRecurrenceAppointment()) {
-                    try {
-                        if (!getLatestRecurringReminder(session, tz, end, reminder)) {
-                            final ReminderObject nextReminder = getNextRecurringReminder(session, tz, reminder);
-                            if (nextReminder != null) {
-                                reminderService.updateReminder(req.getSession(), nextReminder);
-                            } else {
-                                reminderService.deleteReminder(req.getSession(), reminder);
-                            }
-                            continue;
-                        }
-                    } catch (final OXException e) {
-                        if (e.isGeneric(Generic.NOT_FOUND)) {
-                            LOG.warn("Cannot load target object of this reminder.", e);
-                            deleteReminderSafe(req.getSession(), reminder, user.getId(), reminderService);
-                        } else {
-                            LOG.error("Can not calculate recurrence of appointment {}{}{}", reminder.getTargetId(), ':', session.getContextId(), e);
-                        }
-                    }
-                }
                 try {
                     if (hasModulePermission(reminder, session) && stillAccepted(reminder, session)) {
                         final JSONObject jsonReminderObj = new JSONObject(12);

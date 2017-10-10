@@ -51,7 +51,6 @@ package com.openexchange.groupware.reminder.json.actions;
 
 import java.util.Date;
 import java.util.List;
-import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -135,22 +134,10 @@ public final class DeleteAction extends AbstractReminderAction {
             } else {
 
                 final int id = (int) longId;
-                final TimeZone tz = req.getTimeZone();
                 try {
                     final ReminderService reminderService = ServerServiceRegistry.getInstance().getService(ReminderService.class, true);
                     final ReminderObject reminder = reminderService.loadReminder(req.getSession(), id);
-
-                    if (reminder.isRecurrenceAppointment()) {
-                        final ReminderObject nextReminder = getNextRecurringReminder(req.getSession(), tz, reminder);
-                        if (nextReminder != null) {
-                            reminderService.updateReminder(req.getSession(), nextReminder);
-                            response.put(nextReminder.getObjectId());
-                        } else {
-                            reminderService.deleteReminder(req.getSession(), reminder);
-                        }
-                    } else {
-                        reminderService.deleteReminder(req.getSession(), reminder);
-                    }
+                    reminderService.deleteReminder(req.getSession(), reminder);
                 } catch (final OXException oxe) {
                     LOG.debug("", oxe);
                     if (ReminderExceptionCode.NOT_FOUND.equals(oxe)) {
@@ -198,22 +185,10 @@ public final class DeleteAction extends AbstractReminderAction {
                     }
                 } else {
                     final int id = (int) longId;
-                    final TimeZone tz = req.getTimeZone();
                     try {
                         final ReminderService reminderService = ServerServiceRegistry.getInstance().getService(ReminderService.class, true);
                         final ReminderObject reminder = reminderService.loadReminder(req.getSession(), id);
-
-                        if (reminder.isRecurrenceAppointment()) {
-                            final ReminderObject nextReminder = getNextRecurringReminder(req.getSession(), tz, reminder);
-                            if (nextReminder != null) {
-                                reminderService.updateReminder(req.getSession(), nextReminder);
-                                response.put(nextReminder.getObjectId());
-                            } else {
-                                reminderService.deleteReminder(req.getSession(), reminder);
-                            }
-                        } else {
-                            reminderService.deleteReminder(req.getSession(), reminder);
-                        }
+                        reminderService.deleteReminder(req.getSession(), reminder);
                     } catch (final OXException oxe) {
                         LOG.debug("", oxe);
                         if (ReminderExceptionCode.NOT_FOUND.equals(oxe)) {
