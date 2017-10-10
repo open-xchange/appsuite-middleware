@@ -86,5 +86,4 @@ public class SchedJoulesJsonActivator extends AJAXModuleActivator {
     protected void startBundle() throws Exception {
         registerModule(new SchedJoulesActionFactory(this), "chronos/schedjoules");
     }
-
 }

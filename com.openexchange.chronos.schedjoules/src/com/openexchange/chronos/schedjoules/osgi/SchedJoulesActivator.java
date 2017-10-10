@@ -87,8 +87,7 @@ public class SchedJoulesActivator extends HousekeepingActivator {
     @Override
     protected void startBundle() throws Exception {
         Services.setServiceLookup(this);
-        SchedJoulesService service = new SchedJoulesServiceImpl();
-        registerService(SchedJoulesService.class, service);
+        registerService(SchedJoulesService.class, new SchedJoulesServiceImpl());
     }
 
     /*
@@ -102,5 +101,4 @@ public class SchedJoulesActivator extends HousekeepingActivator {
         Services.setServiceLookup(null);
         super.stopBundle();
     }
-
 }
