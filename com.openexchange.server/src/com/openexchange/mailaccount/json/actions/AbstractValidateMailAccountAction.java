@@ -116,7 +116,7 @@ public abstract class AbstractValidateMailAccountAction extends AbstractMailAcco
         }
     }
 
-    private static boolean indicatesCommunicationProblem(Throwable cause) {
+    protected static boolean indicatesCommunicationProblem(Throwable cause) {
         if (MessagingException.class.isInstance(cause)) {
             Exception ne = ((MessagingException) cause).getNextException();
             return indicatesCommunicationProblem(ne);
