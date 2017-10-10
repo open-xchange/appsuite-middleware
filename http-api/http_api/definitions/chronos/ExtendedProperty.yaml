@@ -11,7 +11,7 @@ properties:
     description: An array of additional parameters.
     items:
       type: object
-      title: parameter
+      title: Parameter
       properties:
         name: 
           type: string

@@ -164,18 +164,10 @@ ChronosExtendedProperty:
   $ref: ./chronos/ExtendedProperty.yaml
 DateTimeData:
   $ref: ./chronos/DateTimeData.yaml
-CheckEventResponse:
-  $ref: ./chronos/CheckEventResponse.yaml
 ChronosFreeBusyResponse:
   $ref: ./chronos/FreeBusyResponse.yaml
 ChronosFreeBusyResponseData:
   $ref: ./chronos/FreeBusyResponseData.yaml
-ChronosFreeBusyEventsResponse:
-  $ref: ./chronos/FreeBusyEventsResponse.yaml
-ChronosFreeBusyEventsData:
-  $ref: ./chronos/FreeBusyEventsData.yaml
-ChronosFreeBusyHasResponse:
-  $ref: ./chronos/FreeBusyHasResponse.yaml
 ChronosConflictDataRaw:
   $ref: ./chronos/ConflictDataRaw.yaml
 # Module: chronos/alarm

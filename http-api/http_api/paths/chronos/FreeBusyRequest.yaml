@@ -2,7 +2,7 @@
   put:
     operationId: freebusy
     tags:
-      - Chronos-freebusy
+      - Chronos
     summary: Gets free-busy timeslots for the given attendees.
     consumes:
       - application/json
@@ -10,6 +10,13 @@
       - $ref: "#/parameters/gblQueryParamSession"
       - $ref: "#/parameters/ChronosFromTimeRange"
       - $ref: "#/parameters/ChronosUntilTimeRange"
+      - in: query
+        name: maskId
+        type: string
+        description: |
+         The identifier of an existing event or event series to ignore when calculating free/busy information. 
+         This is useful when a client wants to find a new timeslot for an existing event.
+        required: false
       - in: body
         name: body
         description: A JSON object containing the attendees' data.

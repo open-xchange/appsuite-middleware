@@ -395,9 +395,3 @@ ChronosUntilTimeRange:
   type: string
   description: Upper exclusive limit of the queried range as a utc date-time value as specified in rfc 5545 chapter 3.3.5. E.g. "20170708T220000Z". Only events which end before this date are returned.
   required: true
-ChronosFreeBusyAttendees:
-  name: attendees
-  in: query
-  type: string
-  description: A comma-separated list of entityIds of attendees.
-  required: true

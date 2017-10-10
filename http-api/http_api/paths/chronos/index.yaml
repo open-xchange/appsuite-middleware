@@ -9,3 +9,4 @@ requests:
   - DeleteRequest.yaml
   - UpdateAttendeeRequest.yaml
   - MoveRequest.yaml
+  - FreeBusyRequest.yaml
