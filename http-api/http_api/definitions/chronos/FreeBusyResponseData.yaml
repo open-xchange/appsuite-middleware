@@ -1,8 +1,7 @@
 type: object
 properties:
   attendee:
-    type: integer
-    description: The entityId of the attendee.
+    $ref: "#/definitions/Attendee"
   freeBusyTime:
     type: array
     description: The free-busy times of the attendee.
