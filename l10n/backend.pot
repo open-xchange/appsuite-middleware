@@ -5222,6 +5222,10 @@ msgid ""
 "try again."
 msgstr ""
 
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:143
+msgid "The pattern \"%1$s\" has been ignored during search."
+msgstr ""
+
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contexts/impl/ContextExceptionMessage.java:62
 msgid "The account %1$d was not found."
 msgstr ""
