@@ -52,7 +52,6 @@ package com.openexchange.ajax.chronos;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -61,17 +60,11 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.BlockJUnit4ClassRunner;
 import com.openexchange.ajax.chronos.util.DateTimeUtil;
-import com.openexchange.testing.httpclient.invoker.ApiClient;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.Attendee;
 import com.openexchange.testing.httpclient.models.Attendee.CuTypeEnum;
 import com.openexchange.testing.httpclient.models.AttendeeAndAlarm;
-import com.openexchange.testing.httpclient.models.CheckEventConflictResponse;
-import com.openexchange.testing.httpclient.models.CheckEventResponse;
 import com.openexchange.testing.httpclient.models.ChronosCalendarResultResponse;
-import com.openexchange.testing.httpclient.models.ChronosFreeBusyEventsData;
-import com.openexchange.testing.httpclient.models.ChronosFreeBusyEventsResponse;
-import com.openexchange.testing.httpclient.models.ChronosFreeBusyHasResponse;
 import com.openexchange.testing.httpclient.models.ChronosFreeBusyResponse;
 import com.openexchange.testing.httpclient.models.ChronosFreeBusyResponseData;
 import com.openexchange.testing.httpclient.models.ChronosUpdatesResponse;
@@ -82,7 +75,6 @@ import com.openexchange.testing.httpclient.models.EventsResponse;
 import com.openexchange.testing.httpclient.models.FreeBusyBody;
 import com.openexchange.testing.httpclient.models.FreeBusyTime;
 import com.openexchange.testing.httpclient.modules.ChronosApi;
-import com.openexchange.testing.httpclient.modules.ChronosFreebusyApi;
 import edu.emory.mathcs.backport.java.util.Collections;
 import edu.emory.mathcs.backport.java.util.concurrent.TimeUnit;
 
@@ -97,7 +89,6 @@ import edu.emory.mathcs.backport.java.util.concurrent.TimeUnit;
 public class BasicFreeBusyTest extends AbstractChronosTest {
 
     private String folderId;
-    private ChronosFreebusyApi freeBusyApi;
     private UserApi user2;
 
     @SuppressWarnings("unchecked")
@@ -125,7 +116,6 @@ public class BasicFreeBusyTest extends AbstractChronosTest {
     public void setUp() throws Exception {
         super.setUp();
         folderId = createAndRememberNewFolder(defaultUserApi, defaultUserApi.getSession(), getDefaultFolder(), defaultUserApi.getCalUser());
-        freeBusyApi = new ChronosFreebusyApi(defaultUserApi.getClient());
 
         // prepare second user
         user2 = new UserApi(generateClient(testUser2), generateEnhancedClient(testUser2), testUser2);
@@ -133,44 +123,6 @@ public class BasicFreeBusyTest extends AbstractChronosTest {
         rememberClient(user2.getEnhancedApiClient());
     }
 
-    @Test
-    public void testHasEvents() throws Exception {
-
-        long day1 = 1000 * (System.currentTimeMillis() / 1000);
-        long day3 = day1 + TimeUnit.DAYS.toMillis(2);
-        long day5 = day3 + TimeUnit.DAYS.toMillis(2);
-        long nextWeek = day1 + TimeUnit.DAYS.toMillis(7);
-        createEvent("dayOne", day1, day1 + TimeUnit.HOURS.toMillis(1));
-        createEvent("dayThree", day3, day3 + TimeUnit.HOURS.toMillis(1));
-        createEvent("dayFive", day5, day5 + TimeUnit.HOURS.toMillis(1));
-
-        ChronosFreeBusyHasResponse freebusyHas = freeBusyApi.freebusyHas(defaultUserApi.getSession(), DateTimeUtil.getZuluDateTime(day1).getValue(), DateTimeUtil.getZuluDateTime(nextWeek).getValue());
-        assertEquals(freebusyHas.getErrorDesc(), null, freebusyHas.getError());
-        assertNotNull(freebusyHas.getData());
-        List<Boolean> data = freebusyHas.getData();
-        assertEquals(7, data.size());
-        assertTrue(data.get(0));
-        assertTrue(data.get(2));
-        assertTrue(data.get(4));
-    }
-
-    @Test
-    public void testFreeBusyEvents() throws Exception {
-        Date now = new Date();
-        int offset = TimeZone.getDefault().getOffset(now.getTime());
-        long day1 = 1000 * (now.getTime() / 1000);
-        long nextWeek = day1 + TimeUnit.DAYS.toMillis(7);
-        EventData event = createEvent("dayOne", day1, day1 + TimeUnit.HOURS.toMillis(1));
-
-        ChronosFreeBusyEventsResponse freeBusyEvents = freeBusyApi.freebusyEvents(defaultUserApi.getSession(), DateTimeUtil.getZuluDateTime(day1 - offset).getValue(), DateTimeUtil.getZuluDateTime(nextWeek).getValue(), Integer.toString(defaultUserApi.getCalUser()));
-        assertEquals(freeBusyEvents.getErrorDesc(), null, freeBusyEvents.getError());
-        assertNotNull(freeBusyEvents.getData());
-        List<ChronosFreeBusyEventsData> data = freeBusyEvents.getData();
-        assertEquals(1, data.size());
-        List<EventData> events = data.get(0).getEvents();
-        assertEquals(1, events.size());
-        assertEquals(event.getId(), events.get(0).getId());
-    }
 
     @Test
     public void testFreeBusyTime() throws Exception {
@@ -184,7 +136,8 @@ public class BasicFreeBusyTest extends AbstractChronosTest {
         createEvent("dayThree", day3, day3 + TimeUnit.HOURS.toMillis(1));
         createEvent("dayFive", day5, day5 + TimeUnit.HOURS.toMillis(1));
 
-        ChronosFreeBusyResponse freeBusy = freeBusyApi.freebusy(defaultUserApi.getSession(), DateTimeUtil.getZuluDateTime(day1 - offset).getValue(), DateTimeUtil.getZuluDateTime(nextWeek).getValue(), createAttendeesBody(defaultUserApi.getCalUser()));
+        ChronosFreeBusyResponse freeBusy = chronosApi.freebusy(defaultUserApi.getSession(), DateTimeUtil.getZuluDateTime(day1 - offset).getValue(), DateTimeUtil.getZuluDateTime(nextWeek).getValue(), createAttendeesBody(defaultUserApi.getCalUser()), null);
+
         assertEquals(freeBusy.getError(), null, freeBusy.getErrorDesc());
         assertNotNull(freeBusy.getData());
         List<ChronosFreeBusyResponseData> data = freeBusy.getData();
@@ -290,8 +243,8 @@ public class BasicFreeBusyTest extends AbstractChronosTest {
         assertNull(updateAttendee3.getErrorDesc(), updateAttendee3.getError());
         assertNotNull(updateAttendee3.getData());
 
-        ChronosFreebusyApi secondUserFreeBusyApi = new ChronosFreebusyApi(user2.getClient());
-        ChronosFreeBusyResponse freeBusy = secondUserFreeBusyApi.freebusy(secondSession, DateTimeUtil.getZuluDateTime(first - TimeUnit.HOURS.toMillis(5) - offset).getValue(), DateTimeUtil.getZuluDateTime(nextWeek).getValue(), createAttendeesBody(users[1].getUserId()));
+        ChronosApi secondChronosApi = new ChronosApi(user2.getClient());
+        ChronosFreeBusyResponse freeBusy = secondChronosApi.freebusy(secondSession, DateTimeUtil.getZuluDateTime(first - TimeUnit.HOURS.toMillis(5) - offset).getValue(), DateTimeUtil.getZuluDateTime(nextWeek).getValue(), createAttendeesBody(users[1].getUserId()), null);
         assertEquals(freeBusy.getErrorDesc(), null, freeBusy.getError());
         assertNotNull(freeBusy.getData());
         List<ChronosFreeBusyResponseData> data = freeBusy.getData();
@@ -303,63 +256,6 @@ public class BasicFreeBusyTest extends AbstractChronosTest {
         assertEquals(first - offset, freeBusyTimes.get(0).getStartTime().longValue());
         assertEquals(first - offset + TimeUnit.MINUTES.toMillis(90), freeBusyTimes.get(0).getEndTime().longValue());
         assertEquals("BUSY", freeBusyTimes.get(0).getFbType());
-    }
-
-    @Test
-    public void testCheckEvent() throws Exception {
-
-        long day1 = 1000 * (System.currentTimeMillis() / 1000);
-        IdWrappingTestUser[] users = new IdWrappingTestUser[2];
-        users[0] = new IdWrappingTestUser(testUser);
-        users[0].setUserId(defaultUserApi.getCalUser());
-        users[1] = new IdWrappingTestUser(testUser2);
-
-        ApiClient client = generateClient(testUser2);
-        users[1].setUserId(user2.getCalUser());
-        logoutClient(client);
-
-        // Check with one event for both attendees
-        EventData event = createEvent("conflicting event", day1, day1 + TimeUnit.HOURS.toMillis(1), users);
-
-        StringBuilder attendees = new StringBuilder();
-        for (IdWrappingTestUser user : users) {
-            attendees.append(user.getUserId()).append(",");
-        }
-
-        event.setId(null);
-        CheckEventResponse freebusyHas = freeBusyApi.checkEvent(defaultUserApi.getSession(), folderId, attendees.toString(), event);
-        assertNull(freebusyHas.getErrorDesc(), freebusyHas.getError());
-        assertNotNull(freebusyHas.getData());
-        CheckEventConflictResponse data = freebusyHas.getData();
-        assertEquals(1, data.getConflicts().size());
-
-        // Check again with one additional event for user 1
-        {
-            IdWrappingTestUser[] users2 = new IdWrappingTestUser[1];
-            users2[0] = new IdWrappingTestUser(testUser);
-            users2[0].setUserId(defaultUserApi.getCalUser());
-            EventData event2 = createEvent("conflicting event2", day1, day1 + TimeUnit.HOURS.toMillis(1), users2);
-
-            StringBuilder attendees2 = new StringBuilder();
-            for (IdWrappingTestUser user : users2) {
-                attendees2.append(user.getUserId()).append(",");
-            }
-
-            // Now the check should return 2 conflicts
-            event2.setId(null);
-            CheckEventResponse freebusyHas2 = freeBusyApi.checkEvent(defaultUserApi.getSession(), folderId, attendees2.toString(), event2);
-            assertEquals(null, freebusyHas2.getError());
-            assertNotNull(freebusyHas2.getData());
-            CheckEventConflictResponse data2 = freebusyHas2.getData();
-            assertEquals(2, data2.getConflicts().size());
-
-            // Check again for attendee 2. There should still be only one conflict.
-            freebusyHas2 = freeBusyApi.checkEvent(defaultUserApi.getSession(), folderId, Integer.toString(users[1].getUserId()), event2);
-            assertEquals(null, freebusyHas2.getError());
-            assertNotNull(freebusyHas2.getData());
-            data2 = freebusyHas2.getData();
-            assertEquals(1, data2.getConflicts().size());
-        }
     }
 
     private EventData createEvent(String summary, long start, long end, IdWrappingTestUser... users) throws ApiException {
