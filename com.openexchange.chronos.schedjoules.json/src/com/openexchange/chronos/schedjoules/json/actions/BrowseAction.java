@@ -89,7 +89,7 @@ public class BrowseAction extends AbstractSchedJoulesAction implements AJAXActio
             return new AJAXRequestResult(service.getRoot(language, country).getData());
         }
 
-        int pid = Integer.parseInt(pageId);
+        int pid = requestData.getIntParameter(pageId);
         return new AJAXRequestResult(service.getPage(pid, language).getData());
     }
 }
