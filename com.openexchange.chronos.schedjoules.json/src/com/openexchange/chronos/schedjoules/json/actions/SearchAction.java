@@ -89,26 +89,13 @@ public class SearchAction extends AbstractSchedJoulesAction implements AJAXActio
         }
 
         // Get optional 'maxRows' parameter
-        String mr = requestData.getParameter("maxRows");
-        int maxRows = -1;
-        if (!Strings.isEmpty(mr)) {
-            try {
-                maxRows = Integer.parseInt(mr);
-            } catch (NumberFormatException e) {
-                throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create("maxRows", mr);
-            }
-        }
-
+        int maxRows = requestData.getIntParameter("maxRows");
         // Get the optional 'language' parameter
         String locale = getLanguage(requestData, session);
-
         // Get the optional 'countryId' parameter
-        String cid = requestData.getParameter("countryId");
-        int countryId = Strings.isEmpty(cid) ? -1 : Integer.parseInt(cid);
-
+        int countryId = requestData.getIntParameter("countryId");
         // Get the optional 'categoryId' parameter
-        cid = requestData.getParameter("categoryId");
-        int categoryId = Strings.isEmpty(cid) ? -1 : Integer.parseInt(cid);
+        int categoryId = requestData.getIntParameter("categoryId");
 
         // Execute
         SchedJoulesService service = services.getService(SchedJoulesService.class);
