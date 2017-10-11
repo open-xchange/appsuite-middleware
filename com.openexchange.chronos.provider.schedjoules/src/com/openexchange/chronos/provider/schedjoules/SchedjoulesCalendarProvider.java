@@ -124,7 +124,17 @@ public class SchedjoulesCalendarProvider implements CalendarProvider {
     }
 
     @Override
-    public void initializeAccount(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
+    public void onAccountCreated(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
+        // TODO
+    }
+
+    @Override
+    public void onAccountUpdated(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
+        // TODO
+    }
+
+    @Override
+    public void onAccountDeleted(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
         // TODO
     }
 

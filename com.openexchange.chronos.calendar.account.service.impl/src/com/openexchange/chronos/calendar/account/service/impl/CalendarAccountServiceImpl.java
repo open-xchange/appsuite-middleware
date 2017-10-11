@@ -52,6 +52,7 @@ package com.openexchange.chronos.calendar.account.service.impl;
 import java.util.ArrayList;
 import java.util.List;
 import org.json.JSONObject;
+import org.slf4j.LoggerFactory;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.CalendarProvider;
@@ -110,7 +111,7 @@ public class CalendarAccountServiceImpl implements CalendarAccountService, Admin
          * reload account & let provider perform any additional initialization
          */
         CalendarAccount calendarAccount = accountStorage.getAccount(session.getUserId(), accountId);
-        calendarProvider.initializeAccount(session, calendarAccount, parameters);
+        calendarProvider.onAccountCreated(session, calendarAccount, parameters);
         return calendarAccount;
     }
 
@@ -137,14 +138,28 @@ public class CalendarAccountServiceImpl implements CalendarAccountService, Admin
          * reload account & let provider perform any additional initialization
          */
         CalendarAccount calendarAccount = accountStorage.getAccount(session.getUserId(), id);
-        calendarProvider.initializeAccount(session, calendarAccount, parameters);
+        calendarProvider.onAccountUpdated(session, calendarAccount, parameters);
         return calendarAccount;
     }
 
     @Override
     public void deleteAccount(Session session, int id, long timestamp, CalendarParameters parameters) throws OXException {
-        verifyAccountAction(session, loadCalendarAccount(id, session), timestamp, false);
-        getAccountStorage(session).deleteAccount(id, session.getUserId());
+        /*
+         * get stored calendar account & delete it 
+         */
+        CalendarAccountStorage accountStorage = getAccountStorage(session);
+        CalendarAccount storedAccount = verifyAccountAction(session, accountStorage.getAccount(session.getUserId(), id), timestamp, false);
+        accountStorage.deleteAccount(session.getUserId(), id);
+        /*
+         * finally let provider perform any additional initialization
+         */
+        CalendarProvider calendarProvider = getProviderRegistry().getCalendarProvider(storedAccount.getProviderId());
+        if (null == calendarProvider) {
+            LoggerFactory.getLogger(CalendarAccountServiceImpl.class).warn("Provider '{}' not available, skipping additional cleanup tasks for deleted account {}.", 
+                storedAccount.getProviderId(), storedAccount, CalendarExceptionCodes.PROVIDER_NOT_AVAILABLE.create(storedAccount.getProviderId()));
+        } else {
+            calendarProvider.onAccountDeleted(session, storedAccount, parameters);
+        }
     }
 
     @Override

@@ -111,9 +111,18 @@ public class InternalCalendarProvider implements CalendarProvider {
     }
 
     @Override
-    public void initializeAccount(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
+    public void onAccountCreated(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
         // no
+    }
 
+    @Override
+    public void onAccountUpdated(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
+        // no
+    }
+
+    @Override
+    public void onAccountDeleted(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
+        // no
     }
 
 }

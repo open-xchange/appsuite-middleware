@@ -108,15 +108,31 @@ public interface CalendarProvider {
     JSONObject reconfigureAccount(Session session, JSONObject internalConfig, JSONObject userConfig, CalendarParameters parameters) throws OXException;
 
     /**
-     * Performs additional initialization for a specific calendar account.
-     * <p/>
-     * Initialization is performed after a new account has been added, or an existing account has been reconfigured or is forcibly reseted. <br/>
+     * Callback routine that is invoked after a new account for the calendar provider has been created.
      *
      * @param session The user's session
-     * @param account The calendar account to initialize
+     * @param account The calendar account that was created
      * @param parameters Additional calendar parameters, or <code>null</code> if not set
      */
-    void initializeAccount(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException;
+    void onAccountCreated(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException;
+
+    /**
+     * Callback routine that is invoked after an existing account for the calendar provider has been updated.
+     *
+     * @param session The user's session
+     * @param account The calendar account that was updated
+     * @param parameters Additional calendar parameters, or <code>null</code> if not set
+     */
+    void onAccountUpdated(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException;
+
+    /**
+     * Callback routine that is invoked after an existing account for the calendar provider has been deleted.
+     *
+     * @param session The user's session
+     * @param account The calendar account that was deleted
+     * @param parameters Additional calendar parameters, or <code>null</code> if not set
+     */
+    void onAccountDeleted(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException;
 
     /**
      * Initializes the connection to a specific calendar account.

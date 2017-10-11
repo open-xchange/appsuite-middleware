@@ -104,8 +104,11 @@ public class BirthdaysCalendarProvider implements CalendarProvider {
     @Override
     public JSONObject configureAccount(Session session, JSONObject userConfig, CalendarParameters parameters) throws OXException {
         /*
-         * check if user already has an account
+         * check capabilities and if user already has an account
          */
+        if (false == ServerSessionAdapter.valueOf(session).getUserPermissionBits().hasContact()) {
+            throw CalendarExceptionCodes.MISSING_CAPABILITY.create(com.openexchange.groupware.userconfiguration.Permission.CONTACTS.getCapabilityName());
+        }
         List<CalendarAccount> existingAccounts = services.getService(AdministrativeCalendarAccountService.class).getAccounts(session.getContextId(), new int[] { session.getUserId() }, PROVIDER_ID);
         if (0 < existingAccounts.size()) {
             throw CalendarExceptionCodes.UNSUPPORTED_OPERATION_FOR_PROVIDER.create(PROVIDER_ID);
@@ -115,9 +118,8 @@ public class BirthdaysCalendarProvider implements CalendarProvider {
          */
         initializeUserConfig(userConfig);
         /*
-         * store 'firstRun' flag to perform initial storage preparation upon next usage
+         * no further internal config needed
          */
-
         return new JSONObject();
     }
 
@@ -134,8 +136,18 @@ public class BirthdaysCalendarProvider implements CalendarProvider {
     }
 
     @Override
-    public void initializeAccount(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
+    public void onAccountCreated(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
         getAccess(session, account, parameters).initialize();
+    }
+
+    @Override
+    public void onAccountUpdated(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
+        getAccess(session, account, parameters).initialize();
+    }
+
+    @Override
+    public void onAccountDeleted(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
+
     }
 
     @Override
@@ -179,8 +191,8 @@ public class BirthdaysCalendarProvider implements CalendarProvider {
 
     private BirthdaysCalendarAccess getAccess(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
         ServerSession serverSession = ServerSessionAdapter.valueOf(session);
-        if (false == serverSession.getUserConfiguration().hasContact()) {
-            throw CalendarExceptionCodes.INSUFFICIENT_ACCOUNT_PERMISSIONS.create();
+        if (false == serverSession.getUserPermissionBits().hasContact()) {
+            throw CalendarExceptionCodes.MISSING_CAPABILITY.create(com.openexchange.groupware.userconfiguration.Permission.CONTACTS.getCapabilityName());
         }
         return new BirthdaysCalendarAccess(services, serverSession, account, parameters);
     }

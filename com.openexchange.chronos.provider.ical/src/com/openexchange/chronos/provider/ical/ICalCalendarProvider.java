@@ -99,8 +99,21 @@ public class ICalCalendarProvider implements CalendarProvider {
     }
 
     @Override
-    public void initializeAccount(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
-        // TODO
+    public void onAccountCreated(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void onAccountUpdated(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void onAccountDeleted(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
+        // TODO Auto-generated method stub
+
     }
 
 }
