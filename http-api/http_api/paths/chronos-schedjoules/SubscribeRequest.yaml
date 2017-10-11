@@ -18,6 +18,7 @@
     responses:
       200:
         description: |
-          The identifier/propId of the subscribed SchedJoule calendar.
+          A JSON object containing the identifier/propId of the subscribed SchedJoule calendar. In case of errors 
+          the responsible fields in the response are filled (see [Error handling](#error-handling)).
         schema:
-          type: string
+          $ref: "#/definitions/SubscribeResponse"
