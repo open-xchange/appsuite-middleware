@@ -87,12 +87,12 @@ import com.openexchange.chronos.common.AvailabilityUtils;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.DefaultRecurrenceData;
 import com.openexchange.chronos.common.mapping.EventMapper;
-import com.openexchange.chronos.impl.osgi.Services;
 import com.openexchange.chronos.compat.ShownAsTransparency;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.Check;
 import com.openexchange.chronos.impl.Comparators;
 import com.openexchange.chronos.impl.Utils;
+import com.openexchange.chronos.impl.osgi.Services;
 import com.openexchange.chronos.recurrence.service.RecurrenceUtils;
 import com.openexchange.chronos.service.AvailableField;
 import com.openexchange.chronos.service.CalendarAvailabilityService;
@@ -254,7 +254,7 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
         Map<Attendee, FreeBusyResult> results = new HashMap<>();
         for (Attendee attendee : attendees) {
             if (!freeBusyPerAttendee.containsKey(attendee)) {
-                List<OXException> warnings = Collections.singletonList(CalendarExceptionCodes.UNKNOWN_INTERNAL_ATTENDEE.create(attendee.toString()));
+                List<OXException> warnings = Collections.singletonList(CalendarExceptionCodes.ATTENDEE_NOT_FOUND.create(String.valueOf(attendee.toString())));
                 FreeBusyResult result = new FreeBusyResult();
                 result.setWarnings(warnings);
                 results.put(attendee, result);

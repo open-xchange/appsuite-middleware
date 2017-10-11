@@ -80,7 +80,6 @@ import static com.openexchange.chronos.exception.CalendarExceptionMessages.TOO_M
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.TOO_MANY_ATTENDEES_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.TOO_MANY_EVENTS_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.UID_CONFLICT_MSG;
-import static com.openexchange.chronos.exception.CalendarExceptionMessages.UNKNOWN_INTERNAL_ATTENDEE_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.UNSUPPORTED_CLASSIFICATION_FOR_MOVE_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.UNSUPPORTED_CLASSIFICATION_FOR_OCCURRENCE_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.UNSUPPORTED_CLASSIFICATION_MSG;
@@ -133,10 +132,10 @@ public enum CalendarExceptionCodes implements DisplayableOXExceptionCode {
      */
     FOLDER_NOT_FOUND("Folder not found [folder %1$s]", FOLDER_NOT_FOUND_MSG, Category.CATEGORY_USER_INPUT, 4045),
     /**
-     * <li>Unable to create account. There have been issues with the provided authentication.</li>
-     * <li>Account cannot be created. Too many auth mechanisms provided by client: %1$s</li>
+     * <li>The requested attachment was not found.</li>
+     * <li>Attachment not found [attachment %1$d, event %2$s, folder %3$s]</li>
      */
-    BAD_AUTH_CONFIGURATION("Account cannot be created. Too many auth mechanisms provided by client: %1$s", BAD_AUTH_CONFIGURATION_MSG, Category.CATEGORY_USER_INPUT, 4046),
+    ATTACHMENT_NOT_FOUND("Attachment not found [attachment %1$d, event %2$s, folder %3$s]", ATTACHMENT_NOT_FOUND_MSG, Category.CATEGORY_USER_INPUT, 4047),
     /**
      * <li>The operation could not be completed due to insufficient permissions.</li>
      * <li>Insufficient read permissions in folder [folder %1$s]</li>
@@ -318,39 +317,33 @@ public enum CalendarExceptionCodes implements DisplayableOXExceptionCode {
      */
     INCORRECT_STRING("Incorrect string [string %1$s, field %2$s, column %3$s]", INCORRECT_STRING_MSG, Category.CATEGORY_USER_INPUT, 5071),
     /**
+     * <li>Too many events are queried. Please choose a shorter timeframe.</li>
+     */
+    TOO_MANY_EVENT_RESULTS("Too many events are queried. Please choose a shorter timeframe.", TOO_MANY_EVENTS_MSG, Category.CATEGORY_USER_INPUT, 5072),
+    /**
+     * <li>The event contains too many attendees.</li>
+     */
+    TOO_MANY_ATTENDEES("The event contains too many attendees.", TOO_MANY_ATTENDEES_MSG, Category.CATEGORY_USER_INPUT, 5073),
+    /**
+     * <li>The event contains too many alarms.</li>
+     */
+    TOO_MANY_ALARMS("The event contains too many alarms.", TOO_MANY_ALARMS_MSG, Category.CATEGORY_USER_INPUT, 5074),
+    /**
      * <li>The value for \"%2$s\" is invalid and wasn't be applied.</li>
      * <li>Ignored invalid data [id %1$s, field %2$s, severity %3$s, message %4$s]</li>
      */
     IGNORED_INVALID_DATA("Ignored invalid data [id %1$s, field %2$s, severity %3$s, message %4$s]", IGNORED_INVALID_DATA_MSG, Category.CATEGORY_WARNING, 1990),
-    /**
-     * <li>The operation could not be completed due to insufficient permissions.</li>
-     * <li>Insufficient permissions</li>
-     */
-    INSUFFICIENT_ACCOUNT_PERMISSIONS("Insufficient permissions", NO_PERMISSION_MSG, Category.CATEGORY_PERMISSION_DENIED, 5072),
-    /**
-     * <li>The attendee '%1$s' is either not an internal user or does not exist.</li>
-     * <li>Internal attendee not found [attendee %1$s]</li>
-     */
-    UNKNOWN_INTERNAL_ATTENDEE("Internal attendee not found [%1$s]", UNKNOWN_INTERNAL_ATTENDEE_MSG, Category.CATEGORY_WARNING, 5073),
 
+    //TODO: check if needed/useful, check code
+    /**
+     * <li>Unable to create account. There have been issues with the provided authentication.</li>
+     * <li>Account cannot be created. Too many auth mechanisms provided by client: %1$s</li>
+     */
+    BAD_AUTH_CONFIGURATION("Account cannot be created. Too many auth mechanisms provided by client: %1$s", BAD_AUTH_CONFIGURATION_MSG, Category.CATEGORY_USER_INPUT, 4046),
+
+    //TODO: check if needed/useful, check code
     AUTH_FAILED("Authentication failed to access the resource at %1$s", AUTH_FAILED_MSG, Category.CATEGORY_ERROR, 4010),
-    /**
-     * <li>The requested attachment was not found.</li>
-     * <li>Attachment not found [attachment %1$d, event %2$s, folder %3$s]</li>
-     */
-    ATTACHMENT_NOT_FOUND("Attachment not found [attachment %1$d, event %2$s, folder %3$s]", ATTACHMENT_NOT_FOUND_MSG, Category.CATEGORY_USER_INPUT, 4047),
-    /**
-     * <li>Too many events are queried. Please choose a shorter timeframe.</li>
-     */
-    TOO_MANY_EVENT_RESULTS("Too many events are queried. Please choose a shorter timeframe.", TOO_MANY_EVENTS_MSG, Category.CATEGORY_USER_INPUT, 5071),
-    /**
-     * <li>The event contains too many attendees.</li>
-     */
-    TOO_MANY_ATTENDEES("The event contains too many attendees.", TOO_MANY_ATTENDEES_MSG, Category.CATEGORY_USER_INPUT, 5072),
-    /**
-     * <li>The event contains too many alarms.</li>
-     */
-    TOO_MANY_ALARMS("The event contains too many alarms.", TOO_MANY_ALARMS_MSG, Category.CATEGORY_USER_INPUT, 5073),
+
     ;
 
     public static final String PREFIX = "CAL".intern();
