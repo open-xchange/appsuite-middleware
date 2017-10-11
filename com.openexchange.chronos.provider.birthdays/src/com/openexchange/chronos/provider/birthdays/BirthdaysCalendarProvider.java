@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.provider.birthdays;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
@@ -62,10 +63,10 @@ import com.openexchange.chronos.provider.CalendarProvider;
 import com.openexchange.chronos.provider.account.AdministrativeCalendarAccountService;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
-import com.openexchange.tools.arrays.Collections;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
@@ -106,7 +107,8 @@ public class BirthdaysCalendarProvider implements CalendarProvider {
         /*
          * check capabilities and if user already has an account
          */
-        if (false == ServerSessionAdapter.valueOf(session).getUserPermissionBits().hasContact()) {
+        ServerSession serverSession = ServerSessionAdapter.valueOf(session);
+        if (false == serverSession.getUserPermissionBits().hasContact()) {
             throw CalendarExceptionCodes.MISSING_CAPABILITY.create(com.openexchange.groupware.userconfiguration.Permission.CONTACTS.getCapabilityName());
         }
         List<CalendarAccount> existingAccounts = services.getService(AdministrativeCalendarAccountService.class).getAccounts(session.getContextId(), new int[] { session.getUserId() }, PROVIDER_ID);
@@ -116,7 +118,7 @@ public class BirthdaysCalendarProvider implements CalendarProvider {
         /*
          * initialize & check user config
          */
-        initializeUserConfig(userConfig);
+        initializeUserConfig(serverSession, userConfig);
         /*
          * no further internal config needed
          */
@@ -128,7 +130,8 @@ public class BirthdaysCalendarProvider implements CalendarProvider {
         /*
          * initialize & check user config
          */
-        initializeUserConfig(userConfig);
+        ServerSession serverSession = ServerSessionAdapter.valueOf(session);
+        initializeUserConfig(serverSession, userConfig);
         /*
          * no further internal config needed
          */
@@ -155,7 +158,7 @@ public class BirthdaysCalendarProvider implements CalendarProvider {
         return getAccess(session, account, parameters);
     }
 
-    private void initializeUserConfig(JSONObject userConfig) throws OXException {
+    private void initializeUserConfig(ServerSession session, JSONObject userConfig) throws OXException {
         if (null == userConfig) {
             throw CalendarExceptionCodes.INVALID_CONFIGURATION.create("null");
         }
@@ -163,7 +166,7 @@ public class BirthdaysCalendarProvider implements CalendarProvider {
             /*
              * check configured folder types
              */
-            Set<String> allowedTypes = Collections.unmodifiableSet("private", "shared", "public");
+            Set<String> allowedTypes = getAllowedFolderTypes(session.getUserPermissionBits());
             JSONArray typesJSONArray = userConfig.optJSONArray("folderTypes");
             if (null == typesJSONArray || typesJSONArray.isEmpty()) {
                 userConfig.put("folderTypes", new JSONArray(allowedTypes));
@@ -188,6 +191,19 @@ public class BirthdaysCalendarProvider implements CalendarProvider {
         }
     }
 
+    private static Set<String> getAllowedFolderTypes(UserPermissionBits permissionBits) {
+        Set<String> allowedFolderTypes = new HashSet<String>();
+        if (permissionBits.hasContact()) {
+            allowedFolderTypes.add("private");
+            if (permissionBits.hasFullSharedFolderAccess()) {
+                allowedFolderTypes.add("shared");
+            }
+            if (permissionBits.hasFullPublicFolderAccess()) {
+                allowedFolderTypes.add("public");
+            }
+        }
+        return allowedFolderTypes;
+    }
 
     private BirthdaysCalendarAccess getAccess(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
         ServerSession serverSession = ServerSessionAdapter.valueOf(session);
