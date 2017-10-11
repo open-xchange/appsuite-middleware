@@ -9,9 +9,15 @@
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"
       - in: query
-        name: accountId
+        name: id
         type: string
         description: Calendar account identifier
+        required: true
+      - in: query
+        name: timestamp
+        type: integer
+        format: int64
+        description: Timestamp of the last update of the account
         required: true
       - in: body
         name: body

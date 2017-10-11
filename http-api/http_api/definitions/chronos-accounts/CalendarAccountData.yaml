@@ -6,6 +6,9 @@ properties:
   provider:
     type: string
     description: The provider for the calendar account.
+  configuration:
+    type: object
+    description: Provider-specific configuration data of the calendar account.
   timestamp:
     type: integer
     format: int64

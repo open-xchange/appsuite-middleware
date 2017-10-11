@@ -7,7 +7,7 @@
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"
       - in: query
-        name: accountId
+        name: id
         type: string
         description: Calendar account identifier
         required: true
