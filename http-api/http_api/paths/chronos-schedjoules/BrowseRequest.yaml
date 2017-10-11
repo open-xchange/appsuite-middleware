@@ -26,4 +26,4 @@
           A JSON object containing the result of the browse operation. The structure of the returned JSON object can be found
           here (https://github.com/schedjoules/calendar-store-api/blob/master/details/pages.md)
         schema:
-          type: object
+          $ref: "#/definitions/PageData"

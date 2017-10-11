@@ -200,6 +200,12 @@ LanguageData:
   $ref: ./chronos-schedjoules/LanguageData.yaml
 LanguagesResponse:
   $ref: ./chronos-schedjoules/LanguagesResponse.yaml
+ItemData:
+  $ref: ./chronos-schedjoules/ItemData.yaml
+ItemsData:
+  $ref: ./chronos-schedjoules/ItemsData.yaml
+PageData:
+  $ref: ./chronos-schedjoules/PageData.yaml
 # Module: mail
 MailCountResponse:
   $ref: ./mail/MailCountResponse.yaml

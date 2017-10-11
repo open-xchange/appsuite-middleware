@@ -1,0 +1,23 @@
+type: object
+properties:
+  item_id:
+    type: integer
+    description: The item's unique identifier
+  name:
+    type: string
+    description: The item's name (localisable)
+  url:
+    type: string
+    description: The item's url. If the item's class (see below) denotes an iCal item, then this is the subscription URL
+  category_id:
+    type: integer
+    description: The item's category identifier
+  category:
+    type: string
+    description: The item's category name
+  country:
+    type: string
+    description: The country for which the item is valid for
+  icon:
+    type: string
+    description: The URL of the item's icon
