@@ -65,6 +65,7 @@ import com.openexchange.admin.rmi.dataobjects.Database;
 import com.openexchange.admin.rmi.dataobjects.MaintenanceReason;
 import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.admin.storage.sqlStorage.OXAdminPoolInterface;
 import com.openexchange.admin.storage.utils.PoolAndSchema;
 import com.openexchange.admin.tools.AdminCacheExtended;
 import com.openexchange.database.Databases;
@@ -266,14 +267,15 @@ public class ContextLoadUtility {
 
         // Query used quota per schema
         try {
+            OXAdminPoolInterface pool = cache.getPool();
             for (Map.Entry<PoolAndSchema, List<Context>> schema2contextsEntry : schema2contexts.entrySet()) {
-                List<Context> allInSchema = schema2contextsEntry.getValue();
-                int representativeContextId = allInSchema.get(0).getId().intValue();
-                Connection oxdb_read = cache.getConnectionForContext(representativeContextId);
+                PoolAndSchema poolAndSchema = schema2contextsEntry.getKey();
+                Connection oxdb_read = pool.getConnection(poolAndSchema.getPoolId(), poolAndSchema.getSchema());
                 try {
+                    List<Context> allInSchema = schema2contextsEntry.getValue();
                     fillContextsSchema(allInSchema, withContextAttributes, id2context, oxdb_read);
                 } finally {
-                    cache.pushConnectionForContextAfterReading(representativeContextId, oxdb_read);
+                    pool.pushConnection(poolAndSchema.getPoolId(), oxdb_read);
                 }
             }
         } catch (PoolException e) {
