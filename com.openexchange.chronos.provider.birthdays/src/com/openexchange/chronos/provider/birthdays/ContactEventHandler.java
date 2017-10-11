@@ -49,7 +49,9 @@
 
 package com.openexchange.chronos.provider.birthdays;
 
-import java.util.ArrayList;
+import static com.openexchange.chronos.provider.birthdays.BirthdaysCalendarProvider.PROVIDER_ID;
+import static com.openexchange.java.Autoboxing.I2i;
+import static com.openexchange.osgi.Tools.requireService;
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
@@ -58,8 +60,7 @@ import java.util.Set;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 import com.openexchange.chronos.provider.CalendarAccount;
-import com.openexchange.chronos.storage.CalendarAccountStorage;
-import com.openexchange.chronos.storage.CalendarAccountStorageFactory;
+import com.openexchange.chronos.provider.account.AdministrativeCalendarAccountService;
 import com.openexchange.context.ContextService;
 import com.openexchange.event.CommonEvent;
 import com.openexchange.exception.OXException;
@@ -213,12 +214,8 @@ public class ContactEventHandler implements EventHandler {
     }
 
     private List<CalendarAccount> getBirthdaysCalendarAccounts(Context context, Collection<Integer> affectedUserIds) throws OXException {
-        List<CalendarAccount> birthdaysCalendarAccounts = new ArrayList<CalendarAccount>();
-        CalendarAccountStorage accountStorage = services.getService(CalendarAccountStorageFactory.class).create(context);
-        for (Integer userId : affectedUserIds) {
-            birthdaysCalendarAccounts.addAll(accountStorage.getAccounts(BirthdaysCalendarProvider.PROVIDER_ID, new int[] { userId }));
-        }
-        return birthdaysCalendarAccounts;
+        AdministrativeCalendarAccountService accountService = requireService(AdministrativeCalendarAccountService.class, services);
+        return accountService.getAccounts(context.getContextId(), I2i(affectedUserIds), PROVIDER_ID);
     }
 
 }

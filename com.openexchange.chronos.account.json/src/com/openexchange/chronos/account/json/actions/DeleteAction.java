@@ -49,18 +49,17 @@
 
 package com.openexchange.chronos.account.json.actions;
 
-import org.json.JSONArray;
-import org.json.JSONException;
+import static com.openexchange.java.Autoboxing.i;
+import static com.openexchange.java.Autoboxing.l;
 import org.json.JSONObject;
+import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.chronos.account.json.CalendarAccountFields;
 import com.openexchange.chronos.account.json.ChronosAccountActionFactory;
-import com.openexchange.chronos.provider.account.CalendarAccountService;
 import com.openexchange.exception.OXException;
 import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -84,22 +83,10 @@ public class DeleteAction extends AbstractAccountAction implements CalendarAccou
 
     @Override
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
-        JSONArray data = requestData.getData(JSONArray.class);
-        if (null == data) {
-            throw AjaxExceptionCodes.MISSING_REQUEST_BODY.create();
-        }
-        CalendarAccountService service = getService(CalendarAccountService.class);
-        try {
-            for (int i = 0; i < data.length(); i++) {
-                JSONObject obj = data.getJSONObject(i);
-                String id = obj.getString(ID);
-                String timestamp = obj.getString(TIMESTAMP);
-                service.deleteAccount(session, Integer.parseInt(id), Long.parseLong(timestamp), null);
-            }
-        } catch (JSONException e) {
-            throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
-        }
-        return new AJAXRequestResult();
+        int accountId = i(requestData.getParameter(AJAXServlet.PARAMETER_ID, Integer.class));
+        long clientTimestamp = l(requestData.getParameter(AJAXServlet.PARAMETER_TIMESTAMP, Long.class));
+        getAccountService().deleteAccount(session, accountId, clientTimestamp, null);
+        return new AJAXRequestResult(new JSONObject(), "json");
     }
 
 }

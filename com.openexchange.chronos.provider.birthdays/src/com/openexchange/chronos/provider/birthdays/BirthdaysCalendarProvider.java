@@ -137,17 +137,17 @@ public class BirthdaysCalendarProvider implements CalendarProvider {
 
     @Override
     public void onAccountCreated(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
-        getAccess(session, account, parameters).initialize();
+        getAccess(session, account, parameters).onAccountCreated();
     }
 
     @Override
     public void onAccountUpdated(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
-        getAccess(session, account, parameters).initialize();
+        getAccess(session, account, parameters).onAccountUpdated();
     }
 
     @Override
     public void onAccountDeleted(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
-
+        getAccess(session, account, parameters).onAccountDeleted();
     }
 
     @Override

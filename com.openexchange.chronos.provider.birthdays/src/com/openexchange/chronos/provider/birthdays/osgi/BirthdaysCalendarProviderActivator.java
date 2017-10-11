@@ -67,6 +67,7 @@ import com.openexchange.chronos.storage.CalendarStorageFactory;
 import com.openexchange.contact.ContactService;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.folderstorage.FolderService;
 import com.openexchange.osgi.HousekeepingActivator;
 
 /**
@@ -86,8 +87,10 @@ public class BirthdaysCalendarProviderActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ContactService.class, RecurrenceService.class, CalendarUtilities.class, ICalService.class,
-            CalendarStorageFactory.class, DatabaseService.class, ContextService.class, CalendarAccountStorageFactory.class, CalendarAccountService.class, AdministrativeCalendarAccountService.class };
+        return new Class<?>[] { ContactService.class, RecurrenceService.class, CalendarUtilities.class, FolderService.class,
+            CalendarStorageFactory.class, DatabaseService.class, ContextService.class, CalendarAccountService.class, 
+            AdministrativeCalendarAccountService.class 
+        };
     }
 
     @Override

@@ -145,7 +145,7 @@ public class CalendarAccountServiceImpl implements CalendarAccountService, Admin
     @Override
     public void deleteAccount(Session session, int id, long timestamp, CalendarParameters parameters) throws OXException {
         /*
-         * get stored calendar account & delete it 
+         * get stored calendar account & delete it
          */
         CalendarAccountStorage accountStorage = getAccountStorage(session);
         CalendarAccount storedAccount = verifyAccountAction(session, accountStorage.getAccount(session.getUserId(), id), timestamp, false);
@@ -155,7 +155,7 @@ public class CalendarAccountServiceImpl implements CalendarAccountService, Admin
          */
         CalendarProvider calendarProvider = getProviderRegistry().getCalendarProvider(storedAccount.getProviderId());
         if (null == calendarProvider) {
-            LoggerFactory.getLogger(CalendarAccountServiceImpl.class).warn("Provider '{}' not available, skipping additional cleanup tasks for deleted account {}.", 
+            LoggerFactory.getLogger(CalendarAccountServiceImpl.class).warn("Provider '{}' not available, skipping additional cleanup tasks for deleted account {}.",
                 storedAccount.getProviderId(), storedAccount, CalendarExceptionCodes.PROVIDER_NOT_AVAILABLE.create(storedAccount.getProviderId()));
         } else {
             calendarProvider.onAccountDeleted(session, storedAccount, parameters);
@@ -212,7 +212,7 @@ public class CalendarAccountServiceImpl implements CalendarAccountService, Admin
 
     private CalendarAccount verifyAccountAction(Session session, CalendarAccount account, Long timestamp, boolean hasDefaultAccountRights) throws OXException {
         if (null == account || session.getUserId() != account.getUserId()) {
-            throw CalendarExceptionCodes.ACCOUNT_NOT_FOUND.create(Integer.valueOf(account.getAccountId()));
+            throw CalendarExceptionCodes.ACCOUNT_NOT_FOUND.create(Integer.valueOf(null != account ? account.getAccountId() : -1));
         } else if (CalendarAccount.DEFAULT_ACCOUNT.getAccountId() == account.getAccountId() && !hasDefaultAccountRights) {
             throw CalendarExceptionCodes.UNSUPPORTED_OPERATION_FOR_PROVIDER.create(account.getProviderId());
         } else if (null != account.getLastModified() && null != timestamp && account.getLastModified().getTime() > timestamp) {

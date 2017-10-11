@@ -56,8 +56,8 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.TimeZone;
+import org.json.JSONArray;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
@@ -83,6 +83,16 @@ import com.openexchange.chronos.service.UpdateResult;
 import com.openexchange.contact.ContactFieldOperand;
 import com.openexchange.contact.ContactService;
 import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.FolderResponse;
+import com.openexchange.folderstorage.FolderService;
+import com.openexchange.folderstorage.FolderStorage;
+import com.openexchange.folderstorage.Permission;
+import com.openexchange.folderstorage.Type;
+import com.openexchange.folderstorage.UserizedFolder;
+import com.openexchange.folderstorage.database.contentType.ContactContentType;
+import com.openexchange.folderstorage.type.PrivateType;
+import com.openexchange.folderstorage.type.PublicType;
+import com.openexchange.folderstorage.type.SharedType;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.i18n.tools.StringHelper;
@@ -92,6 +102,7 @@ import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
 import com.openexchange.search.SearchTerm;
 import com.openexchange.search.SingleSearchTerm;
 import com.openexchange.search.SingleSearchTerm.SingleOperation;
+import com.openexchange.search.internal.operands.ConstantOperand;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIterators;
@@ -114,7 +125,7 @@ public class BirthdaysCalendarAccess extends SingleFolderCalendarAccess implemen
     private final EventConverter eventConverter;
 
     /**
-     * Initializes a new {@link BirthdaysCalendarAccess2}.
+     * Initializes a new {@link BirthdaysCalendarAccess}.
      *
      * @param services A service lookup reference
      * @param session The session
@@ -129,31 +140,30 @@ public class BirthdaysCalendarAccess extends SingleFolderCalendarAccess implemen
     }
 
     /**
-     * (Re-)initializes the birthdays calendar access.
+     * Callback routine that is invoked after a new account for the calendar provider has been created.
      */
-    public void initialize() throws OXException {
-        /*
-         * clean up any existing alarm remnants & insert new default alarms if configured
-         */
-        List<Map<String, Object>> defaultAlarms = new ArrayList<Map<String, Object>>();
-
-        //        Map<String, Object> defaultAlarm = new HashMap<String, Object>();
-        //        defaultAlarm.put("action", "DISPLAY");
-        //        defaultAlarm.put("description", "Reminder");
-        //        Map<String, Object> trigger = new HashMap<String, Object>();
-        //        trigger.put("duration", "PT9H");
-        //        defaultAlarm.put("trigger", trigger);
-        //
-        //        Map<String, Object> configuration = account.getConfiguration();
-        //        configuration.put("defaultAlarm", defaultAlarms);
-
+    public void onAccountCreated() throws OXException {
         AlarmHelper alarmHelper = getAlarmHelper();
-        alarmHelper.deleteAllAlarms();
         if (alarmHelper.hasDefaultAlarms()) {
             List<Contact> contacts = getBirthdayContacts();
             List<Event> seriesMasters = eventConverter.getSeriesMasters(contacts, null, null, getTimeZone());
             alarmHelper.insertDefaultAlarms(seriesMasters);
         }
+    }
+
+    /**
+     * Callback routine that is invoked after an existing account for the calendar provider has been updated.
+     */
+    public void onAccountUpdated() throws OXException {
+        onAccountDeleted();
+        onAccountCreated();
+    }
+
+    /**
+     * Callback routine that is invoked after an existing account for the calendar provider has been deleted.
+     */
+    public void onAccountDeleted() throws OXException {
+        getAlarmHelper().deleteAllAlarms();
     }
 
     @Override
@@ -256,12 +266,45 @@ public class BirthdaysCalendarAccess extends SingleFolderCalendarAccess implemen
         }
     }
 
+    /**
+     * Searches for contacts having a known birthday located in one of the configured contact folders.
+     *
+     * @param searchTerm An additional search term to use, or <code>null</code> to return all contacts
+     * @return The found contacts, or an empty list if there are none.
+     */
     private List<Contact> searchBirthdayContacts(SearchTerm<?> searchTerm) throws OXException {
+        /*
+         * prepare base search term
+         */
         if (null == searchTerm) {
             searchTerm = HAS_BIRTHDAY_TERM;
         } else {
             searchTerm = new CompositeSearchTerm(CompositeOperation.AND).addSearchTerm(HAS_BIRTHDAY_TERM).addSearchTerm(searchTerm);
         }
+        /*
+         * add parent folder restrictions
+         */
+        List<String> folderIds = getContactFolderIds();
+        if (null != folderIds && 0 < folderIds.size()) {
+            if (1 == folderIds.size()) {
+                searchTerm = new CompositeSearchTerm(CompositeOperation.AND)
+                    .addSearchTerm(new SingleSearchTerm(SingleOperation.EQUALS)
+                        .addOperand(new ContactFieldOperand(ContactField.FOLDER_ID))
+                        .addOperand(new ConstantOperand<String>(folderIds.get(0))))
+                    .addSearchTerm(searchTerm);
+            } else {
+                CompositeSearchTerm orTerm = new CompositeSearchTerm(CompositeOperation.OR);
+                for (String folderId : folderIds) {
+                    orTerm.addSearchTerm(new SingleSearchTerm(SingleOperation.EQUALS)
+                        .addOperand(new ContactFieldOperand(ContactField.FOLDER_ID))
+                        .addOperand(new ConstantOperand<String>(folderId)));
+                }
+                searchTerm = new CompositeSearchTerm(CompositeOperation.AND).addSearchTerm(orTerm).addSearchTerm(searchTerm);
+            }
+        }
+        /*
+         * perform search
+         */
         SearchIterator<Contact> searchIterator = null;
         try {
             return SearchIterators.asList(searchIterator = services.getService(ContactService.class).searchContacts(session, searchTerm));
@@ -306,6 +349,43 @@ public class BirthdaysCalendarAccess extends SingleFolderCalendarAccess implemen
         folder.setName(stringHelper.getString(BirthdaysCalendarStrings.CALENDAR_NAME));
         folder.setScheduleTransparency(TimeTransparency.TRANSPARENT);
         return folder;
+    }
+
+    private List<String> getContactFolderIds() throws OXException {
+        List<String> folderIds = new ArrayList<String>();
+        JSONArray typesJSONArray = account.getUserConfiguration().optJSONArray("folderTypes");
+        for (int i = 0; i < typesJSONArray.length(); i++) {
+            folderIds.addAll(getContactFolderIds(typesJSONArray.optString(i)));
+        }
+        return folderIds;
+    }
+
+    private List<String> getContactFolderIds(String type) throws OXException {
+        switch (type) {
+            case "public":
+                return getContactFolderIds(PublicType.getInstance());
+            case "shared":
+                return getContactFolderIds(SharedType.getInstance());
+            case "private":
+                return getContactFolderIds(PrivateType.getInstance());
+            default:
+                throw new IllegalArgumentException(type);
+        }
+    }
+
+    private List<String> getContactFolderIds(Type type) throws OXException {
+        List<String> folderIds = new ArrayList<String>();
+        FolderResponse<UserizedFolder[]> visibleFolders = services.getService(FolderService.class)
+            .getVisibleFolders(FolderStorage.REAL_TREE_ID, ContactContentType.getInstance(), type, false, session, null);
+        UserizedFolder[] folders = visibleFolders.getResponse();
+        if (null != folders && 0 < folders.length) {
+            for (UserizedFolder folder : folders) {
+                if (folder.getOwnPermission().getReadPermission() >= Permission.READ_OWN_OBJECTS) {
+                    folderIds.add(folder.getID());
+                }
+            }
+        }
+        return folderIds;
     }
 
 }
