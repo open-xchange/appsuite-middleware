@@ -55,6 +55,7 @@ import com.openexchange.calendar.printing.CPServlet;
 import com.openexchange.calendar.printing.preferences.CalendarPrintingEnabled;
 import com.openexchange.calendar.printing.templating.CalendarTemplateHelperFactory;
 import com.openexchange.capabilities.CapabilityService;
+import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.group.GroupService;
@@ -103,11 +104,11 @@ public class CalendarPrintingActivator extends AbstractSessionServletActivator {
         if (templates == null) {
             return;
         }
-        registerSessionServlet(getService(DispatcherPrefixService.class).getPrefix()+"printCalendar", new CPServlet(this));
+        registerSessionServlet(getService(DispatcherPrefixService.class).getPrefix() + "printCalendar", new CPServlet(this));
     }
 
     @Override
     protected Class<?>[] getAdditionalNeededServices() {
-        return new Class<?>[] { TemplateService.class, DispatcherPrefixService.class, HtmlService.class, UserService.class, ResourceService.class };
+        return new Class<?>[] { TemplateService.class, DispatcherPrefixService.class, HtmlService.class, UserService.class, ResourceService.class, CalendarService.class };
     }
 }
