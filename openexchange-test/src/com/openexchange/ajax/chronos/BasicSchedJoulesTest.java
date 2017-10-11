@@ -66,6 +66,8 @@ import com.openexchange.testing.httpclient.models.LanguageData;
 import com.openexchange.testing.httpclient.models.LanguagesResponse;
 import com.openexchange.testing.httpclient.models.PageData;
 import com.openexchange.testing.httpclient.models.PageSectionsData;
+import com.openexchange.testing.httpclient.models.SearchData;
+import com.openexchange.testing.httpclient.models.SearchResponse;
 import com.openexchange.testing.httpclient.models.SubscribeResponse;
 
 /**
@@ -168,9 +170,8 @@ public class BasicSchedJoulesTest extends AbstractChronosTest {
     public void testSubscribe() throws Exception {
         Integer pageId = null;
         boolean isCalendar = false;
-
-        // Browse a random root page
         String randomLanguage = getRandomLanguage();
+
         do {
             BrowseResponse response = chronosApi.browse(defaultUserApi.getSession(), pageId, randomLanguage, getRandomCountry());
             assertNull("Errors detected", response.getError());
@@ -198,13 +199,28 @@ public class BasicSchedJoulesTest extends AbstractChronosTest {
                     break;
                 }
             }
-        } while (isCalendar);
+        } while (!isCalendar);
 
         SubscribeResponse response = chronosApi.subscribe(defaultUserApi.getSession(), pageId, randomLanguage);
         assertNull("Errors detected", response.getError());
         assertTrue("Exception was thrown on server side", response.getErrorStack().isEmpty());
 
         assertNotNull("Unable to subscribe to calendar with id '" + pageId + "', no ical data returned", response.getData());
+    }
+
+    /**
+     * Tests the search
+     */
+    @Test
+    public void testSearch() throws Exception {
+        String query = "Star Wars";
+        SearchResponse response = chronosApi.search(defaultUserApi.getSession(), query, getRandomLanguage(), 5);
+        assertNull("Errors detected", response.getError());
+        assertTrue("Exception was thrown on server side", response.getErrorStack().isEmpty());
+
+        SearchData searchData = response.getData();
+        assertEquals("The name does not match the query", query, searchData.getName());
+        assertNotNull("There were no page sections returned", searchData.getPageSections());
     }
 
     ///////////////////////////////// HELPERS ///////////////////////////////////
