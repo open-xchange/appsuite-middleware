@@ -133,7 +133,7 @@ public class DriveActivator extends HousekeepingActivator {
         /*
          * register Drive client info
          */
-        registerService(ClientInfoProvider.class, new DriveClientInfoProvider(), 100);
+        registerService(ClientInfoProvider.class, new DriveClientInfoProvider(), 10);
         /*
          * register services
          */

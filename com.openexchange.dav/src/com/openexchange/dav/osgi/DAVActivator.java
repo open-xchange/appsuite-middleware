@@ -113,7 +113,7 @@ public class DAVActivator extends HousekeepingActivator {
         /*
          * DAV client info
          */
-        registerService(ClientInfoProvider.class, new DAVClientInfoProvider(), 90);
+        registerService(ClientInfoProvider.class, new DAVClientInfoProvider(), 0);
         openTrackers();
     }
 

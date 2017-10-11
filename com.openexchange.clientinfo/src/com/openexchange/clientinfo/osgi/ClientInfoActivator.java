@@ -78,9 +78,9 @@ public class ClientInfoActivator extends HousekeepingActivator {
         ServiceSet<ClientInfoProvider> set = new ServiceSet<>();
         ClientInfoService service = new ClientInfoServiceImpl(set);
         track(ClientInfoProvider.class, set);
-        openTrackers();
         registerService(ClientInfoService.class, service);
-        registerService(ClientInfoProvider.class, new WebClientInfoProvider(), 80);
+        registerService(ClientInfoProvider.class, new WebClientInfoProvider(), 20);
+        openTrackers();
     }
 
 }
