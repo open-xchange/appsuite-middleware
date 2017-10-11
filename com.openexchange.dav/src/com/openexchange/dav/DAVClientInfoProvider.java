@@ -72,16 +72,19 @@ public class DAVClientInfoProvider implements ClientInfoProvider {
 
     @Override
     public ClientInfo getClientInfo(Session session) {
-        if (null == session || false == isDAVClient(session.getClient())) {
+        if (null == session) {
             return null;
         }
         DAVUserAgent userAgent = getDAVUserAgent(session);
+        if (DAVUserAgent.UNKNOWN.equals(userAgent)) {
+            return null;
+        }
         return new DAVClientInfo(userAgent.getReadableName());
     }
 
     @Override
     public ClientInfo getClientInfo(String clientId) {
-        if (Strings.isEmpty(clientId) || !isDAVClient(clientId)) {
+        if (Strings.isEmpty(clientId)) {
             return null;
         }
         Client client = Client.getClientByID(clientId);
@@ -100,14 +103,6 @@ public class DAVClientInfoProvider implements ClientInfoProvider {
             return DAVUserAgent.parse((String) userAgentParameter);
         }
         return DAVUserAgent.UNKNOWN;
-    }
-
-    private static boolean isDAVClient(String clientId) {
-        if (null != clientId) {
-            Client client = Client.getClientByID(clientId);
-            return Client.CALDAV.equals(client) || Client.CARDDAV.equals(client);
-        }
-        return false;
     }
 
 }
