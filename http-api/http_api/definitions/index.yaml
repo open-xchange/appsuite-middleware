@@ -609,3 +609,12 @@ RemoveSessionBody:
 # Module: Export
 InfoItemExport:
   $ref: ./export/InfoItemExport.yaml
+# Module Job Queue
+AllJobsResponse:
+  $ref: ./jobqueue/AllJobsResponse.yaml
+InfoJobResponse:
+  $ref: ./jobqueue/InfoJobResponse.yaml
+GetJobResponse:
+  $ref: ./jobqueue/GetJobResponse.yaml
+CancelJobResponse:
+  $ref: ./jobqueue/CancelJobResponse.yaml

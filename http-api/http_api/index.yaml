@@ -157,6 +157,8 @@ tags:
     description: The RSS Feed module
   - name: Sessionmanagement
     description: The session management module
+  - name: Jobqueue
+    description: The job queue module
 # References to the definitions, "global" parameters and paths
 definitions:
   $ref: ./definitions/index.yaml

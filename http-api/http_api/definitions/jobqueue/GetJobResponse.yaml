@@ -1,0 +1,5 @@
+type: object
+properties:
+  job:
+    type: string
+    description: The job identifier
