@@ -5,6 +5,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
@@ -25,6 +26,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.java.Charsets;
+import com.openexchange.java.Strings;
 import com.openexchange.rest.client.httpclient.HttpClients;
 import com.openexchange.session.Session;
 import com.openexchange.spamhandler.spamexperts.exceptions.SpamExpertsExceptionCode;
@@ -162,11 +164,10 @@ public final class SpamExpertsServletRequest {
 
 			// create complete new session identifier
 			String sessionid = createPanelSessionID(uiVersion);
-			LOG.debug("new spamexperts panel session created for user {} in context {}", getCurrentUserUsername(), getCurrentUserContextID());
-
             if (sessionid == null) {
                 throw SpamExpertsExceptionCode.SPAMEXPERTS_COMMUNICATION_ERROR.create("save and cache session", "invalid data for sessionid");
             }
+            LOG.debug("new spamexperts panel session created for user {} in context {}", getCurrentUserUsername(), getCurrentUserContextID());
 
 			String panelWebUiUrl = config.getUriProperty(session, "com.openexchange.custom.spamexperts.panel.web_ui_url", "http://demo1.spambrand.com/?authticket=").toString();
 
@@ -232,8 +233,17 @@ public final class SpamExpertsServletRequest {
                 throw SpamExpertsExceptionCode.SPAMEXPERTS_COMMUNICATION_ERROR.create("create panel authticket", statusLine);
             }
 
-            String resp = EntityUtils.toString(httpResponse.getEntity());
+            HttpEntity entity = httpResponse.getEntity();
+            if (null == entity) {
+                return null;
+            }
+
+            String resp = EntityUtils.toString(entity);
             LOG.debug("Got response for user {} in context {} from  panel API: \n{}", getCurrentUserUsername(), getCurrentUserContextID(), resp);
+
+            if (Strings.isEmpty(resp)) {
+                return null;
+            }
 
             if (resp.indexOf("ERROR") != -1) {
                 // ERROR DETECTED
