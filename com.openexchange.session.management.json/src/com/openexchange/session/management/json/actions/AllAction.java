@@ -86,6 +86,10 @@ public class AllAction implements AJAXActionService {
             throw ServiceExceptionCode.absentService(SessionManagementService.class);
         }
         Collection<ManagedSession> sessions = service.getSessionsForUser(session);
+        JSONArray browsers = new JSONArray();
+        JSONArray oxapps = new JSONArray();
+        JSONArray syncapps = new JSONArray();
+        JSONArray others = new JSONArray();
         JSONArray result = new JSONArray(sessions.size());
         try {
             for (ManagedSession s : sessions) {
@@ -105,8 +109,36 @@ public class AllAction implements AJAXActionService {
                 JSONObject deviceInfo = getDeviceInfo(s.getSessionId(), s.getClient());
                 if (null != deviceInfo) {
                     json.put("deviceInfo", deviceInfo);
+                    String type = deviceInfo.getString("type");
+                    switch (type) {
+                        case "browser":
+                            browsers.add(0, json);
+                            break;
+                        case "oxapp":
+                            oxapps.add(0, json);
+                            break;
+                        case "sync":
+                            syncapps.add(0, json);
+                            break;
+                        default:
+                            others.add(0, json);
+                            break;
+                    }
+                } else {
+                    others.add(0, json);
                 }
-                result.add(0, json);
+            }
+            for (int i = 0; i < browsers.length(); i++) {
+                result.add(result.length() + i, browsers.get(i));
+            }
+            for (int i = 0; i < oxapps.length(); i++) {
+                result.add(result.length() + i, oxapps.get(i));
+            }
+            for (int i = 0; i < syncapps.length(); i++) {
+                result.add(result.length() + i, syncapps.get(i));
+            }
+            for (int i = 0; i < others.length(); i++) {
+                result.add(result.length() + i, others.get(i));
             }
         } catch (JSONException e) {
             // should not happen
@@ -126,11 +158,11 @@ public class AllAction implements AJAXActionService {
                 deviceInfo.put("type", info.getType().getName());
                 String app = info.getApp();
                 if (Strings.isNotEmpty(app)) {
-                    deviceInfo.put("browser", app);
+                    deviceInfo.put("client", app);
                 }
                 String appVersion = info.getAppVersion();
                 if (Strings.isNotEmpty(appVersion)) {
-                    deviceInfo.put("browserVersion", appVersion);
+                    deviceInfo.put("clientVersion", appVersion);
                 }
                 String platform = info.getPlatform();
                 if (Strings.isNotEmpty(platform)) {
@@ -142,7 +174,7 @@ public class AllAction implements AJAXActionService {
                 }
                 return deviceInfo;
             } catch (JSONException e) {
-            // will not happen
+                // will not happen
             }
         }
         return null;
