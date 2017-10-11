@@ -5,4 +5,4 @@ properties:
     type: array
     description: Contains the JSON representations for jobs currently held in job queue for a user
     items:
-      $ref: "#/definitions/InfoJobResponse"
+      $ref: "#/definitions/InfoJobData"

@@ -610,6 +610,8 @@ RemoveSessionBody:
 InfoItemExport:
   $ref: ./export/InfoItemExport.yaml
 # Module Job Queue
+InfoJobData:
+  $ref: ./jobqueue/InfoJobData.yaml
 AllJobsResponse:
   $ref: ./jobqueue/AllJobsResponse.yaml
 InfoJobResponse:
