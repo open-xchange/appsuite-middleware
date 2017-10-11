@@ -49,10 +49,8 @@
 
 package com.openexchange.calendar.printing.days;
 
-import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.calendar.printing.CPCalendar;
 import com.openexchange.calendar.printing.CPParameters;
-import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.user.UserService;
 
 public class PartitionerParameter {
@@ -61,17 +59,11 @@ public class PartitionerParameter {
 
     private final CPCalendar cal;
 
-    private final AppointmentSQLInterface appointmentSql;
-
-    private final CalendarCollectionService calendarTools;
-
     private final UserService userService;
 
-    public PartitionerParameter(CPParameters params, CPCalendar cal, AppointmentSQLInterface appointmentSql, CalendarCollectionService calendarTools, UserService userService) {
+    public PartitionerParameter(CPParameters params, CPCalendar cal, UserService userService) {
         this.params = params;
         this.cal = cal;
-        this.appointmentSql = appointmentSql;
-        this.calendarTools = calendarTools;
         this.userService = userService;
     }
 }

@@ -52,15 +52,16 @@ package com.openexchange.calendar.printing;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-
 import org.apache.commons.lang.StringEscapeUtils;
 import com.openexchange.calendar.printing.days.CalendarTools;
+import com.openexchange.chronos.Attendee;
+import com.openexchange.chronos.CalendarUserType;
+import com.openexchange.chronos.Event;
 import com.openexchange.exception.OXException;
 import com.openexchange.group.GroupService;
-import com.openexchange.groupware.calendar.Constants;
-import com.openexchange.groupware.container.Appointment;
-import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.user.UserService;
 
 /**
@@ -68,51 +69,37 @@ import com.openexchange.user.UserService;
  *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public class CPAppointment {
+public class CPEvent {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CPAppointment.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CPEvent.class);
+
+    // From com.openexchange.groupware.calendar.Constants
+    private static final long MILLI_MINUTE = 1000L * 60;
 
     private String title, description, location;
 
     private Date startDate, endDate;
 
-    private Appointment original;
+    private Event original;
 
     private final CPCalendar cal;
 
     private final Context context;
 
-    private int colorLabel;
-
-    public CPAppointment() {
-        super();
-        this.cal = null;
-        this.context = null;
-    }
-
-    public CPAppointment(final Appointment mother) {
+    public CPEvent(final Event mother) {
         this(mother, null, null);
     }
 
-    public CPAppointment(final Appointment mother, final CPCalendar cal, final Context context) {
+    public CPEvent(final Event mother, final CPCalendar cal, final Context context) {
         super();
         this.cal = cal;
         this.context = context;
-        setTitle(mother.getTitle());
-        setDescription(mother.getNote());
+        setTitle(mother.getSummary());
+        setDescription(mother.getDescription());
         setLocation(mother.getLocation());
-        setStartDate(mother.getStartDate());
-        setEndDate(mother.getEndDate());
+        setStartDate(new Date(mother.getStartDate().getTimestamp()));
+        setEndDate(new Date(mother.getEndDate().getTimestamp()));
         setOriginal(mother);
-        setColorLabel(mother.getLabel());
-    }
-
-    private void setColorLabel(int label) {
-        this.colorLabel = label;
-    }
-    
-    public String getColorLabel() {
-        return StringEscapeUtils.escapeHtml(Integer.toString(colorLabel));
     }
 
     public String getTitle() {
@@ -126,11 +113,11 @@ public class CPAppointment {
     }
 
     public String getDescription() {
-        return StringEscapeUtils.escapeHtml( description );
+        return StringEscapeUtils.escapeHtml(description);
     }
 
     public String getLocation() {
-        return StringEscapeUtils.escapeHtml( location );
+        return StringEscapeUtils.escapeHtml(location);
     }
 
     public Date getStartDate() {
@@ -142,7 +129,7 @@ public class CPAppointment {
     }
 
     public long getStartMinutes() {
-        return (startDate.getTime() - CalendarTools.getDayStart(cal, startDate).getTime()) / Constants.MILLI_MINUTE;
+        return (startDate.getTime() - CalendarTools.getDayStart(cal, startDate).getTime()) / MILLI_MINUTE;
     }
 
     public Date getEndDate() {
@@ -150,7 +137,7 @@ public class CPAppointment {
     }
 
     public long getDurationInMinutes() {
-        return (endDate.getTime() - startDate.getTime()) / Constants.MILLI_MINUTE;
+        return (endDate.getTime() - startDate.getTime()) / MILLI_MINUTE;
     }
 
     public void setTitle(final String title) {
@@ -173,52 +160,48 @@ public class CPAppointment {
         this.endDate = end;
     }
 
-    public List<String> getParticipants() {
+    // TODO Can be removed??
+    public List<String> getParticipants(ServiceLookup services) {
         final List<String> retval = new ArrayList<String>();
-        for (final Participant participant : original.getParticipants()) {
-            switch (participant.getType()) {
-            case Participant.USER:
+        for (final Attendee attendee : original.getAttendees()) {
+            CalendarUserType userType = attendee.getCuType();
+            if (CalendarUserType.INDIVIDUAL.equals(userType)) {
                 try {
-                    final UserService userService = CPServiceRegistry.getInstance().getService(UserService.class, true);
-                    retval.add(userService.getUser(participant.getIdentifier(), context).getDisplayName());
+                    final UserService userService =services.getService(UserService.class);
+                    if(null == userService ) {
+                        throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(UserService.class.getName());
+                    }
+                    retval.add(userService.getUser(attendee.getEntity(), context).getDisplayName());
                 } catch (final OXException e) {
                     LOG.error("", e);
                 }
-                break;
-            case Participant.GROUP:
+            } else if (CalendarUserType.GROUP.equals(userType)) {
                 try {
-                    final GroupService service = CPServiceRegistry.getInstance().getService(GroupService.class, true);
-                    retval.add(service.getGroup(context, participant.getIdentifier()).getDisplayName());
+                    final GroupService service = services.getService(GroupService.class);
+                    if(null == service) {
+                        throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(GroupService.class.getName());
+                    }
+                    retval.add(service.getGroup(context, attendee.getEntity()).getDisplayName());
                 } catch (final OXException e) {
                     LOG.error("", e);
                 }
-                break;
-            case Participant.EXTERNAL_USER:
-                if (null != participant.getDisplayName()) {
-                    retval.add(participant.getDisplayName());
-                } else {
-                    retval.add(participant.getEmailAddress());
-                }
-                break;
-            default:
-                break;
             }
+            // Don't log resources, rooms or unknown types
         }
         return retval;
     }
 
-    public void setOriginal(final Appointment original) {
+    public void setOriginal(final Event original) {
         this.original = original;
     }
 
-    public Appointment getOriginal() {
+    public Event getOriginal() {
         return original;
     }
 
     @Override
     public String toString() {
-        return getStartDate() + " - " + getEndDate() +": " + getTitle();
+        return getStartDate() + " - " + getEndDate() + ": " + getTitle();
     }
-
 
 }

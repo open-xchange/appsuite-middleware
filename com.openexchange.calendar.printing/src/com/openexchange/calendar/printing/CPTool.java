@@ -49,7 +49,6 @@
 
 package com.openexchange.calendar.printing;
 
-import java.sql.SQLException;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
@@ -57,14 +56,13 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import com.openexchange.api2.AppointmentSQLInterface;
+import org.dmfs.rfc5545.DateTime;
 import com.openexchange.calendar.printing.blocks.WeekAndDayCalculator;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.calendar.CalendarCollectionService;
-import com.openexchange.groupware.calendar.RecurringResultInterface;
-import com.openexchange.groupware.calendar.RecurringResultsInterface;
-import com.openexchange.groupware.container.Appointment;
-import com.openexchange.groupware.container.UserParticipant;
+import com.openexchange.chronos.Attendee;
+import com.openexchange.chronos.Event;
+import com.openexchange.chronos.ParticipationStatus;
+import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.groupware.contexts.Context;
 
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
@@ -75,10 +73,9 @@ public class CPTool extends WeekAndDayCalculator {
      * Based on the selected template, this method determines new start and end dates to present exactly the block that the template needs.
      */
     public void calculateNewStartAndEnd(final CPParameters params) {
-        if (!isBlockTemplate(params))
-         {
+        if (!isBlockTemplate(params)) {
             return;
-        // TODO this calls for a strategy pattern later on when there is more than one
+            // TODO this calls for a strategy pattern later on when there is more than one
         }
 
         final Calendar cal = getCalendar();
@@ -110,106 +107,133 @@ public class CPTool extends WeekAndDayCalculator {
     }
 
     /**
-     * Sort a list of appointments by start date.
+     * Sort a list of events by start date.
+     * @param events To sort
      */
-    public void sort(final List<CPAppointment> appointments) {
-        Collections.sort(appointments, new StartDateComparator());
+    public void sort(final List<CPEvent> events) {
+        Collections.sort(events, new StartDateComparator());
     }
 
-    /**
-     * Expands all appointments in a list using their recurrence information for a certain given timeframe
-     */
-    public List<CPAppointment> expandAppointements(final List<Appointment> compressedAppointments, final Date start, final Date end, final AppointmentSQLInterface appointmentSql, final CalendarCollectionService calendarTools, int userId) throws OXException, SQLException {
-        final List<CPAppointment> expandedAppointments = new LinkedList<CPAppointment>();
-        for (final Appointment appointment : compressedAppointments) {
-            final Appointment temp = appointmentSql.getObjectById(appointment.getObjectID(), appointment.getParentFolderID());
-            final List<Appointment> split = splitIntoSingleDays(temp);
-            for (final Appointment temp2 : split) {
-                expandedAppointments.addAll(expandRecurrence(temp2, start, end, calendarTools, userId));
-            }
-        }
-        return expandedAppointments;
-    }
+    public List<Event> splitIntoSingleDays(final Event event) {
+        final List<Event> events = new LinkedList<Event>();
 
-    public List<Appointment> splitIntoSingleDays(final Appointment appointment) {
-        final List<Appointment> appointments = new LinkedList<Appointment>();
-
-        if (!isOnDifferentDays(appointment.getStartDate(), appointment.getEndDate())) {
-            appointments.add(appointment);
-            return appointments;
+        Date start = CalendarUtils.asDate(event.getStartDate());
+        Date end = CalendarUtils.asDate(event.getEndDate());
+        if (!isOnDifferentDays(start, end)) {
+            events.add(event);
+            return events;
         }
 
-        final int duration = getMissingDaysInbetween(appointment.getStartDate(), appointment.getEndDate()).size() + 1;
+        final int duration = getMissingDaysInbetween(start, end).size() + 1;
 
         final Calendar newStartCal = Calendar.getInstance();
-        newStartCal.setTime(appointment.getStartDate());
+        newStartCal.setTime(start);
         newStartCal.set(Calendar.HOUR_OF_DAY, 0);
         newStartCal.set(Calendar.MINUTE, 0);
         newStartCal.set(Calendar.SECOND, 0);
         newStartCal.set(Calendar.MILLISECOND, 0);
 
         final Calendar newEndCal = Calendar.getInstance();
-        newEndCal.setTime(appointment.getStartDate());
+        newEndCal.setTime(start);
         newEndCal.set(Calendar.HOUR_OF_DAY, 23);
         newEndCal.set(Calendar.MINUTE, 59);
         newEndCal.set(Calendar.SECOND, 59);
         newEndCal.set(Calendar.MILLISECOND, 999);
 
-        final Appointment first = appointment.clone();
-        first.setEndDate(newEndCal.getTime());
-        appointments.add(first);
+        final Event first = clone(event);
+        first.setEndDate(new DateTime(newEndCal.getTime().getTime()));
+        events.add(first);
 
         for (int i = 1; i < duration; i++) {
-            final Appointment middle = appointment.clone();
+            final Event middle = clone(event);
             newStartCal.add(Calendar.DAY_OF_YEAR, 1);
             newEndCal.add(Calendar.DAY_OF_YEAR, 1);
-            middle.setStartDate(newStartCal.getTime());
-            middle.setEndDate(newEndCal.getTime());
-            appointments.add(middle);
+            DateTime dateTime = new DateTime(newEndCal.getTime().getTime());
+            middle.setStartDate(dateTime);
+            middle.setEndDate(dateTime);
+            events.add(middle);
         }
 
-        final Appointment last = appointment.clone();
+        final Event last = clone(event);
         newStartCal.add(Calendar.DAY_OF_YEAR, 1);
-        last.setStartDate(newStartCal.getTime());
-        appointments.add(last);
+        last.setStartDate(new DateTime(newStartCal.getTime().getTime()));
+        events.add(last);
 
-        return appointments;
+        return events;
     }
 
     /**
-     * Takes an appointment and interprets its recurrence information to find all occurrences between start and end date.
+     * Check if the specific user declined the event
+     * 
+     * @param event The {@link Event}
+     * @param userId The user to check
+     * @return <code>true</code> if the user declined the event, <code>false</code> otherwise
      */
-    public List<CPAppointment> expandRecurrence(final Appointment appointment, final Date start, final Date end, final CalendarCollectionService calendarTools, int userId) throws OXException {
-        if (hasDeclined(appointment, userId)) {
-            return Collections.<CPAppointment>emptyList();
-        }
-        final RecurringResultsInterface recurrences = calendarTools.calculateRecurring(appointment, start.getTime(), end.getTime(), 0);
-        final List<CPAppointment> all = new LinkedList<CPAppointment>();
-        if (recurrences == null) {
-            all.add(new CPAppointment(appointment));
-            return all;
-        }
-
-        for (int i = 0, length = recurrences.size(); i < length; i++) {
-            final CPAppointment temp = new CPAppointment();
-            temp.setTitle(appointment.getTitle());
-            final RecurringResultInterface recurringResult = recurrences.getRecurringResult(i);
-            temp.setStartDate(new Date(recurringResult.getStart()));
-            temp.setEndDate(new Date(recurringResult.getEnd()));
-            temp.setOriginal(appointment);
-            
-            all.add(temp);
-        }
-        return all;
-    }
-
-    public static boolean hasDeclined(Appointment appointment, int userId) {
-        UserParticipant[] users = appointment.getUsers();
-        for (UserParticipant userParticipant : users) {
-            if (userParticipant.getIdentifier() == userId && userParticipant.getConfirm() == Appointment.DECLINE) {
+    public static boolean hasDeclined(Event event, int userId) {
+        for (Attendee attendee : event.getAttendees()) {
+            if (attendee.getEntity() == userId && ParticipationStatus.DECLINED.getValue().equals(attendee.getPartStat().getValue())) {
                 return true;
             }
         }
         return false;
+    }
+
+    /**
+     * Converts {@link Event}s into {@link CPEvent}s
+     * 
+     * @param events To convert
+     * @return The {@link Event}s as {@link CPEvent}s
+     */
+    public List<CPEvent> toCPAppointment(List<Event> events, CPCalendar cal, Context context) {
+        List<CPEvent> retval = new LinkedList<>();
+        for(Event event: events) {
+            retval.add(new CPEvent(event, cal, context));
+        }
+        return retval;
+    }
+    
+    /**
+     * Clones an event
+     * 
+     * @param event To clone
+     * @return The cloned event
+     */
+    private Event clone(Event event) {
+        Event clone = new Event();
+        
+        clone.setAlarms(event.getAlarms());
+        clone.setAttachments(event.getAttachments());
+        clone.setAttendees(event.getAttendees());
+        clone.setCalendarUser(event.getCalendarUser());
+        clone.setCategories(event.getCategories());
+        clone.setClassification(event.getClassification());
+        clone.setColor(event.getColor());
+        clone.setCreated(event.getCreated());
+        clone.setCreatedBy(event.getCreatedBy());
+        clone.setDeleteExceptionDates(event.getDeleteExceptionDates());
+        clone.setDescription(event.getDescription());
+        clone.setEndDate(event.getEndDate());
+        clone.setExtendedProperties(event.getExtendedProperties());
+        clone.setFilename(event.getFilename());
+        clone.setFolderId(event.getFolderId());
+        clone.setGeo(event.getGeo());
+        clone.setId(event.getId());
+        clone.setLastModified(event.getLastModified());
+        clone.setLocation(event.getLocation());
+        clone.setModifiedBy(event.getModifiedBy());
+        clone.setOrganizer(event.getOrganizer());
+        clone.setRecurrenceId(event.getRecurrenceId());
+        clone.setRecurrenceRule(event.getRecurrenceRule());
+        clone.setSequence(event.getSequence());
+        clone.setSeriesId(event.getSeriesId());
+        clone.setStartDate(event.getStartDate());
+        clone.setStatus(event.getStatus());
+        clone.setSummary(event.getSummary());
+        clone.setTimestamp(event.getTimestamp());
+        clone.setTransp(event.getTransp());
+        clone.setUid(event.getUid());
+        clone.setUrl(event.getUrl());
+        
+        return clone;
     }
 }

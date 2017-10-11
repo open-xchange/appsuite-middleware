@@ -52,9 +52,8 @@ package com.openexchange.calendar.printing.templating;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.container.Appointment;
-import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.resource.Resource;
@@ -64,11 +63,11 @@ import com.openexchange.user.UserService;
 
 
 /**
- * {@link EnhancedAppointment}
+ * {@link EnhancedEvent}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class EnhancedAppointment {
+public class EnhancedEvent {
 
     private final List<SimpleParticipant> accepted = new ArrayList<SimpleParticipant>();
     private final List<SimpleParticipant> declined = new ArrayList<SimpleParticipant>();
@@ -78,16 +77,16 @@ public class EnhancedAppointment {
 
     private final ServiceLookup services;
 
-    private final Map<String, Object> appointment;
+    private final Map<String, Object> event;
     private final Context ctx;
 
-    public EnhancedAppointment(Map<String, Object> appointment, ServiceLookup services, Context ctx) throws OXException {
+    public EnhancedEvent(Map<String, Object> event, ServiceLookup services, Context ctx) throws OXException {
         super();
         this.services = services;
-        this.appointment = appointment;
+        this.event = event;
         this.ctx = ctx;
 
-        List<Object> users = (List<Object>) appointment.get("users");
+        List<Object> users = (List<Object>) event.get("users");
         if (users != null) {
             for(Object o: users) {
                 Map<String, Object> user = (Map<String, Object>) o;
@@ -96,23 +95,22 @@ public class EnhancedAppointment {
             }
         }
 
-        List<Object> confirmations = (List<Object>) appointment.get("confirmations");
+        List<Object> confirmations = (List<Object>) event.get("confirmations");
 
         if (confirmations != null) {
             for (Object o: confirmations) {
                 Map<String, Object> confirmation = (Map<String, Object>) o;
                 Integer status = (Integer) confirmation.get("confirmation");
                 getList(status).add(resolveConfirmation(confirmation));
-
             }
         }
 
-        List<Object> participants = (List<Object>) appointment.get("participants");
+        List<Object> participants = (List<Object>) event.get("participants");
 
         if (participants != null) {
             for(Object o: participants) {
                 Map<String, Object> participant = (Map<String, Object>) o;
-                if (Integer.valueOf(Participant.RESOURCE).equals(participant.get("type"))) {
+                if (CalendarUserType.RESOURCE.getValue().equals(participant.get("type"))) {
                     resources.add(resolveResource(participant));
                 }
             }
@@ -169,13 +167,19 @@ public class EnhancedAppointment {
             return undecided;
         }
         switch (status) {
-        case Appointment.ACCEPT:
+            /*
+             * Legacy from CalendarObject
+             * public static final int ACCEPT = 1;
+             * public static final int DECLINE = 2;
+             * public static final int TENTATIVE = 3;
+             */
+        case 1:
             list = accepted;
             break;
-        case Appointment.TENTATIVE:
+        case 2:
             list = tentative;
             break;
-        case Appointment.DECLINE:
+        case 3:
             list = declined;
             break;
         }

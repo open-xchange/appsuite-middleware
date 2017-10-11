@@ -51,21 +51,21 @@ package com.openexchange.calendar.printing.days;
 
 import static com.openexchange.java.Autoboxing.I;
 import java.util.Comparator;
-import com.openexchange.calendar.printing.CPAppointment;
+import com.openexchange.calendar.printing.CPEvent;
 
 /**
  * {@link AppointmentStartComparator}
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class AppointmentStartComparator implements Comparator<CPAppointment> {
+public class AppointmentStartComparator implements Comparator<CPEvent> {
 
     public AppointmentStartComparator() {
         super();
     }
 
     @Override
-    public int compare(CPAppointment appointment1, CPAppointment appointment2) {
+    public int compare(CPEvent appointment1, CPEvent appointment2) {
         int retval = appointment1.getStartDate().compareTo(appointment2.getStartDate());
         if (0 != retval) {
             return retval;

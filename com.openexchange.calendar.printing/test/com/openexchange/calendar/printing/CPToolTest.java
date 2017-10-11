@@ -51,10 +51,12 @@ package com.openexchange.calendar.printing;
 
 import static org.junit.Assert.assertEquals;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
+import org.dmfs.rfc5545.DateTime;
 import org.junit.Before;
 import org.junit.Test;
-import com.openexchange.groupware.container.Appointment;
+import com.openexchange.chronos.Event;
 
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
@@ -104,163 +106,163 @@ public class CPToolTest extends AbstractDateTest {
     }
 
      @Test
-     public void testShouldSplitAHundredDayAppointment() {
+     public void testShouldSplitAHundredDayEvent() {
         final int amount = 5, offset = 10;
 
-        Appointment app = new Appointment();
-        app.setTitle("Appointment spanning " +amount+" days");
+        Event event = new Event();
+        event.setSummary("Event spanning " +amount+" days");
         Calendar cal = getCalendar();
         cal.set(Calendar.YEAR, 2007);
 
         cal.set(Calendar.DAY_OF_YEAR, offset);
-        app.setStartDate(cal.getTime());
+        event.setStartDate(new DateTime(cal.getTime().getTime()));
 
         cal.set(Calendar.DAY_OF_YEAR, amount+offset-1);
-        app.setEndDate(cal.getTime());
+        event.setEndDate(new DateTime(cal.getTime().getTime()));
 
-        List<Appointment> apps = tool.splitIntoSingleDays(app);
-        assertEquals("Should make a lot of single day appointments", amount, apps.size());
+        List<Event> events = tool.splitIntoSingleDays(event);
+        assertEquals("Should make a lot of single day Events", amount, events.size());
 
         for (int i = 0; i < amount; i++) {
-            Appointment temp = apps.get(i);
-            cal.setTime(temp.getStartDate());
+            Event temp = events.get(i);
+            cal.setTime(new Date(temp.getStartDate().getTimestamp()));
             int startDay = cal.get(Calendar.DAY_OF_YEAR);
-            cal.setTime(temp.getEndDate());
+            cal.setTime(new Date(temp.getEndDate().getTimestamp()));
             int endDay = cal.get(Calendar.DAY_OF_YEAR);
             assertEquals("Should contain exactly the right day in the sequence", i+offset, endDay);
-            assertEquals("Every single appointment should only span one day, but appointment #"+i+" misbehaves. ", startDay, endDay);
+            assertEquals("Every single Event should only span one day, but Event #"+i+" misbehaves. ", startDay, endDay);
         }
     }
 
      @Test
      public void testShouldWorkWithoutSeriesAlso() {
-        Appointment app = new Appointment();
-        app.setTitle("Single day appointment");
+        Event app = new Event();
+        app.setDescription("Single day Event");
 
         Calendar cal = getCalendar();
         cal.set(Calendar.YEAR, 2007);
         cal.set(Calendar.HOUR_OF_DAY, 15);
         cal.set(Calendar.DAY_OF_YEAR, 1);
-        app.setStartDate(cal.getTime());
+        app.setStartDate(new DateTime(cal.getTime().getTime()));
         cal.set(Calendar.HOUR_OF_DAY, 16);
-        app.setEndDate(cal.getTime());
+        app.setEndDate(new DateTime(cal.getTime().getTime()));
 
-        List<Appointment> apps = tool.splitIntoSingleDays(app);
-        assertEquals("Should only produce one appointment", 1, apps.size());
-        Appointment actual = apps.get(0);
+        List<Event> apps = tool.splitIntoSingleDays(app);
+        assertEquals("Should only produce one Event", 1, apps.size());
+        Event actual = apps.get(0);
         assertEquals("Should not change start date", app.getStartDate(), actual.getStartDate());
         assertEquals("Should not change end date", app.getEndDate(), actual.getEndDate());
     }
 
      @Test
-     public void testShouldSplitAnAppointmentSpanningNewYear() {
-        Appointment app = new Appointment();
-        app.setTitle("Single day appointment");
+     public void testShouldSplitAnEventSpanningNewYear() {
+        Event app = new Event();
+        app.setDescription("Single day Event");
 
         Calendar cal = getCalendar();
         cal.set(Calendar.YEAR, 2008);
         cal.set(Calendar.DAY_OF_YEAR, 1);
-        app.setEndDate(cal.getTime());
+        app.setEndDate(new DateTime(cal.getTime().getTime()));
         cal.add(Calendar.DAY_OF_YEAR, -1);
-        app.setStartDate(cal.getTime());
+        app.setStartDate(new DateTime(cal.getTime().getTime()));
 
-        List<Appointment> apps = tool.splitIntoSingleDays(app);
-        assertEquals("Should only produce one appointment", 2, apps.size());
+        List<Event> apps = tool.splitIntoSingleDays(app);
+        assertEquals("Should only produce one Event", 2, apps.size());
     }
 
      @Test
      public void testShouldSplitEvenWhenDayOfYearForStartDateIsBiggerThanForEndDate() {
-        Appointment app = new Appointment();
-        app.setTitle("Appointment starting late in one year and ending early in the following");
+        Event app = new Event();
+        app.setDescription("Event starting late in one year and ending early in the following");
 
         Calendar cal = getCalendar();
         cal.set(Calendar.YEAR, 2007);
         cal.set(Calendar.DAY_OF_YEAR, 300);
-        app.setStartDate(cal.getTime());
+        app.setStartDate(new DateTime(cal.getTime().getTime()));
         cal.add(Calendar.DAY_OF_YEAR, 100);
-        app.setEndDate(cal.getTime());
+        app.setEndDate(new DateTime(cal.getTime().getTime()));
 
-        List<Appointment> apps = tool.splitIntoSingleDays(app);
-        assertEquals("Should only produce one appointment", 101, apps.size());
+        List<Event> apps = tool.splitIntoSingleDays(app);
+        assertEquals("Should only produce one Event", 101, apps.size());
 
     }
 
      @Test
-     public void testShouldSplitReallyLongAppointment() {
-        Appointment app = new Appointment();
-        app.setTitle("Long appointment");
+     public void testShouldSplitReallyLongEvent() {
+        Event app = new Event();
+        app.setDescription("Long Event");
 
         Calendar cal = getCalendar();
         cal.set(Calendar.YEAR, 2008);
         cal.set(Calendar.DAY_OF_YEAR, 1);
-        app.setStartDate(cal.getTime());
+        app.setStartDate(new DateTime(cal.getTime().getTime()));
         cal.add(Calendar.DAY_OF_YEAR, 400);
-        app.setEndDate(cal.getTime());
+        app.setEndDate(new DateTime(cal.getTime().getTime()));
 
-        List<Appointment> apps = tool.splitIntoSingleDays(app);
-        assertEquals("Should only produce one appointment", 401, apps.size());
+        List<Event> apps = tool.splitIntoSingleDays(app);
+        assertEquals("Should only produce one Event", 401, apps.size());
 
     }
 
      @Test
-     public void testShouldRetainDayTimeForFirstAndLastAppointmentInExpandedSeries() {
-        Appointment app = new Appointment();
-        app.setTitle("Single day appointment");
+     public void testShouldRetainDayTimeForFirstAndLastEventInExpandedSeries() {
+        Event app = new Event();
+        app.setDescription("Single day Event");
 
         Calendar cal = getCalendar();
         cal.set(Calendar.YEAR, 2007);
         cal.set(Calendar.HOUR_OF_DAY, 15);
         cal.set(Calendar.DAY_OF_YEAR, 1);
-        app.setStartDate(cal.getTime());
+        app.setStartDate(new DateTime(cal.getTime().getTime()));
         cal.add(Calendar.HOUR_OF_DAY, 1);
         cal.add(Calendar.DAY_OF_YEAR, 1);
-        app.setEndDate(cal.getTime());
+        app.setEndDate(new DateTime(cal.getTime().getTime()));
 
-        List<Appointment> apps = tool.splitIntoSingleDays(app);
-        assertEquals("Should only produce two appointments", 2, apps.size());
-        Appointment actual = apps.get(0);
+        List<Event> apps = tool.splitIntoSingleDays(app);
+        assertEquals("Should only produce two Events", 2, apps.size());
+        Event actual = apps.get(0);
         assertEquals("Should not change start date on first", app.getStartDate(), actual.getStartDate());
         actual = apps.get(1);
         assertEquals("Should not change end date on last", app.getEndDate(), actual.getEndDate());
     }
 
      @Test
-     public void testShouldSplit23HourTwoDayAppointmentProperly() {
-        Appointment app = new Appointment();
-        app.setTitle("Two-day long appointment");
+     public void testShouldSplit23HourTwoDayEventProperly() {
+        Event app = new Event();
+        app.setDescription("Two-day long Event");
 
         Calendar cal = getCalendar();
         cal.set(Calendar.YEAR, 2007);
         cal.set(Calendar.DAY_OF_YEAR, 1);
         cal.set(Calendar.HOUR_OF_DAY, 2);
-        app.setStartDate(cal.getTime());
+        app.setStartDate(new DateTime(cal.getTime().getTime()));
         cal.set(Calendar.DAY_OF_YEAR, 2);
         cal.set(Calendar.HOUR_OF_DAY, 1);
-        app.setEndDate(cal.getTime());
+        app.setEndDate(new DateTime(cal.getTime().getTime()));
 
-        List<Appointment> apps = tool.splitIntoSingleDays(app);
-        assertEquals("Should produce two appointments", 2, apps.size());
+        List<Event> apps = tool.splitIntoSingleDays(app);
+        assertEquals("Should produce two Events", 2, apps.size());
     }
 
      @Test
-     public void testShouldSplit47HourThreeDayAppointmentProperly() {
-        Appointment app = new Appointment();
-        app.setTitle("Two-day long appointment");
+     public void testShouldSplit47HourThreeDayEventProperly() {
+        Event event = new Event();
+        event.setDescription("Two-day long Event");
 
         Calendar cal = getCalendar();
         cal.set(Calendar.YEAR, 2007);
         cal.set(Calendar.DAY_OF_YEAR, 1);
         cal.set(Calendar.HOUR_OF_DAY, 2);
-        app.setStartDate(cal.getTime());
+        event.setStartDate(new DateTime(cal.getTime().getTime()));
         cal.set(Calendar.DAY_OF_YEAR, 3);
         cal.set(Calendar.HOUR_OF_DAY, 1);
-        app.setEndDate(cal.getTime());
+        event.setEndDate(new DateTime(cal.getTime().getTime()));
 
-        List<Appointment> apps = tool.splitIntoSingleDays(app);
-        for(Appointment temp: apps) {
+        List<Event> apps = tool.splitIntoSingleDays(event);
+        for(Event temp: apps) {
             System.out.println(temp.getStartDate() + " / " + temp.getEndDate());
         }
-        assertEquals("Should produce three appointments", 3, apps.size());
+        assertEquals("Should produce three Events", 3, apps.size());
     }
 
     private void checkBlockTemplate(boolean expected, String templateName) {

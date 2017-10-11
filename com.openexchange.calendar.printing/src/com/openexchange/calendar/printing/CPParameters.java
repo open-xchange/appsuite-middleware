@@ -311,21 +311,6 @@ public class CPParameters {
         return -1;
     }
 
-    private int extractMandatoryIntParam(HttpServletRequest req, String parameter) {
-        String val = req.getParameter(parameter);
-        if (val == null) {
-            missingMandatoryFields.add(parameter);
-        } else {
-            try {
-                return Integer.valueOf(val).intValue();
-            } catch (NumberFormatException e) {
-                unparseableFields.add(parameter);
-                missingMandatoryFields.add(parameter);
-            }
-        }
-        return -1;
-    }
-
     private TimeZone extractOptionalTimezoneParam(HttpServletRequest req, String parameter) {
         String val = req.getParameter(parameter);
         if (val == null) {

@@ -49,22 +49,25 @@
 
 package com.openexchange.calendar.printing;
 
-import com.openexchange.osgi.ServiceRegistry;
-
 /**
- * A registry for services needed by the calendar printing module.
- *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * Some calendar constants.
+ * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class CPServiceRegistry extends ServiceRegistry {
+public final class Constants {
 
-    private static final CPServiceRegistry SINGLETON = new CPServiceRegistry();
+    public static final long MILLI_SECOND = 1000L;
+    public static final long MILLI_MINUTE = 60 * MILLI_SECOND;
+    public static final long MILLI_HOUR = 60 * MILLI_MINUTE;
+    public static final long MILLI_DAY = 24 * MILLI_HOUR;
+    public static final long MILLI_WEEK = 7 * MILLI_DAY;
+    public static final long MILLI_MONTH = 31 * MILLI_DAY;
+    public static final long MILLI_YEAR = 365 * MILLI_DAY;
 
-    private CPServiceRegistry() {
+    /**
+     * Prevent instantiation.
+     */
+    private Constants() {
         super();
     }
 
-    public static CPServiceRegistry getInstance() {
-        return SINGLETON;
-    }
 }

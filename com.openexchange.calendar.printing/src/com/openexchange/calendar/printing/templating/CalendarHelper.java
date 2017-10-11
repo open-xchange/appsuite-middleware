@@ -65,7 +65,7 @@ import com.openexchange.server.ServiceLookup;
 public class CalendarHelper {
 
     private final CalendarFormatter formatters;
-    private final EnhancedAppointment enhanced;
+    private final EnhancedEvent enhanced;
     private final CalendarLabels labels;
 
     /**
@@ -76,7 +76,7 @@ public class CalendarHelper {
     public CalendarHelper(Map<String, Object> appointment, Locale locale, TimeZone timezone, Context ctx, ServiceLookup services) throws OXException {
         super();
         this.formatters = new CalendarFormatter(appointment, locale, timezone);
-        this.enhanced = new EnhancedAppointment(appointment, services, ctx);
+        this.enhanced = new EnhancedEvent(appointment, services, ctx);
         this.labels = new CalendarLabels(appointment, locale, services);
     }
 
@@ -86,7 +86,7 @@ public class CalendarHelper {
     }
 
     
-    public EnhancedAppointment getEnhanced() {
+    public EnhancedEvent getEnhanced() {
         return enhanced;
     }
 
@@ -94,7 +94,4 @@ public class CalendarHelper {
     public CalendarLabels getLabels() {
         return labels;
     }
-    
-    
-    
 }
