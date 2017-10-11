@@ -24,5 +24,4 @@ properties:
   page_sections:
     type: array
     items:
-      $ref: "#/definitions/ItemsData"
-
+      $ref: "#/definitions/PageSectionsData"

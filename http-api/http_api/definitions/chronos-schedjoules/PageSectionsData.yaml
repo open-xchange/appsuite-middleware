@@ -1,0 +1,7 @@
+type: object
+properties:
+  items:
+    $ref: "#/definitions/ItemsData"
+  name:
+    type: string
+    description: The section's name
