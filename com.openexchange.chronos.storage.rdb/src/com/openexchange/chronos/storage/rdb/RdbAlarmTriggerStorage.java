@@ -538,61 +538,61 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
     }
 
     private int insertTrigger(Map<String, Map<Integer, List<Alarm>>> alarmMap, List<Event> events, Map<String, Set<RecurrenceId>> exceptionsMap, Connection writeCon) throws OXException, SQLException {
-        PreparedStatement stmt = getInsertStatementForBatch(writeCon);
-        for (Event event : events) {
+        try (PreparedStatement stmt = getInsertStatementForBatch(writeCon)) {
+            for (Event event : events) {
 
-            Map<Integer, List<Alarm>> alarmsPerAttendee = alarmMap.get(event.getId());
-            if (alarmsPerAttendee == null) {
-                continue;
-            }
-            Set<RecurrenceId> exceptionSet = null;
-            RecurrenceId recurrenceId = null;
-            if (event.containsRecurrenceRule() && event.getRecurrenceRule() != null && event.getRecurrenceId() == null && event.getId().equals(event.getSeriesId())) {
+                Map<Integer, List<Alarm>> alarmsPerAttendee = alarmMap.get(event.getId());
+                if (alarmsPerAttendee == null) {
+                    continue;
+                }
+                Set<RecurrenceId> exceptionSet = null;
+                RecurrenceId recurrenceId = null;
+                if (event.containsRecurrenceRule() && event.getRecurrenceRule() != null && event.getRecurrenceId() == null && event.getId().equals(event.getSeriesId())) {
 
-                long[] exceptions = null;
-                exceptionSet = exceptionsMap.get(event.getId());
-                if (exceptionSet != null) {
-                    exceptions = new long[exceptionSet.size()];
-                    int x = 0;
-                    for (RecurrenceId recId : exceptionSet) {
-                        exceptions[x++] = recId.getValue().getTimestamp();
+                    long[] exceptions = null;
+                    exceptionSet = exceptionsMap.get(event.getId());
+                    if (exceptionSet != null) {
+                        exceptions = new long[exceptionSet.size()];
+                        int x = 0;
+                        for (RecurrenceId recId : exceptionSet) {
+                            exceptions[x++] = recId.getValue().getTimestamp();
+                        }
                     }
-                }
-                RecurrenceData data = new DefaultRecurrenceData(event.getRecurrenceRule(), event.getStartDate(), exceptions);
-                RecurrenceIterator<RecurrenceId> iterateRecurrenceIds = recurrenceService.iterateRecurrenceIds(data, new Date(), null);
-                if(!iterateRecurrenceIds.hasNext()){
-                    // Nothing to do for this event
-                    continue;
-                }
-                recurrenceId = new DefaultRecurrenceId(iterateRecurrenceIds.next().getValue());
-
-            }
-
-            for (Integer userId : alarmsPerAttendee.keySet()) {
-
-                List<Alarm> alarms = alarmsPerAttendee.get(userId);
-                if (alarms == null || alarms.isEmpty()) {
-                    // Skip user in case no alarms available
-                    continue;
-                }
-                for (Alarm alarm : alarms) {
-
-                    AlarmTrigger trigger = prepareTrigger(userId, alarm, event, exceptionSet, recurrenceId);
-                    if(trigger==null){
-                        // Skip past and invalid triggers
+                    RecurrenceData data = new DefaultRecurrenceData(event.getRecurrenceRule(), event.getStartDate(), exceptions);
+                    RecurrenceIterator<RecurrenceId> iterateRecurrenceIds = recurrenceService.iterateRecurrenceIds(data, new Date(), null);
+                    if (!iterateRecurrenceIds.hasNext()) {
+                        // Nothing to do for this event
                         continue;
                     }
-                    addBatch(trigger, stmt);
+                    recurrenceId = new DefaultRecurrenceId(iterateRecurrenceIds.next().getValue());
+
+                }
+
+                for (Integer userId : alarmsPerAttendee.keySet()) {
+
+                    List<Alarm> alarms = alarmsPerAttendee.get(userId);
+                    if (alarms == null || alarms.isEmpty()) {
+                        // Skip user in case no alarms available
+                        continue;
+                    }
+                    for (Alarm alarm : alarms) {
+
+                        AlarmTrigger trigger = prepareTrigger(userId, alarm, event, exceptionSet, recurrenceId);
+                        if (trigger == null) {
+                            // Skip past and invalid triggers
+                            continue;
+                        }
+                        addBatch(trigger, stmt);
+                    }
                 }
             }
+            int[] executeBatch = stmt.executeBatch();
+            int result = 0;
+            for (int i : executeBatch) {
+                result += i;
+            }
+            return result;
         }
-        int[] executeBatch = stmt.executeBatch();
-        int result = 0;
-        for(int i: executeBatch){
-            result+=i;
-        }
-        return result;
-
     }
 
     /**
