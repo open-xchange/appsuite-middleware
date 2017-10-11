@@ -85,11 +85,13 @@ public class ClientInfoServiceImpl implements ClientInfoService {
 
     @Override
     public ClientInfo getClientInfo(Session session) {
-        ClientInfo info = null;
         for (ClientInfoProvider provider : providers) {
-            info = provider.getClientInfo(session);
+            ClientInfo info = provider.getClientInfo(session);
+            if (null != info) {
+                return info;
+            }
         }
-        return info;
+        return null;
     }
 
     @Override
