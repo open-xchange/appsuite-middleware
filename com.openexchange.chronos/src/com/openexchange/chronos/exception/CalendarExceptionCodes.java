@@ -86,6 +86,7 @@ import static com.openexchange.chronos.exception.CalendarExceptionMessages.UNSUP
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.UNSUPPORTED_FOLDER_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.UNSUPPORTED_OPERATION_FOR_PROVIDER_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.UNSUPPORTED_RRULE_MSG;
+import static com.openexchange.chronos.exception.CalendarExceptionMessages.IO_ERROR_MSG;
 import static com.openexchange.exception.OXExceptionStrings.MESSAGE;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.DisplayableOXExceptionCode;
@@ -301,6 +302,12 @@ public enum CalendarExceptionCodes implements DisplayableOXExceptionCode {
      * <li>Unexpected database error, try again [%1$s]</li>
      */
     DB_ERROR_TRY_AGAIN("Unexpected database error, try again [%1$s]", OXExceptionStrings.SQL_ERROR_MSG, Category.CATEGORY_TRY_AGAIN, 5002),
+
+    /**
+     * An I/O error occurred: %1$s
+     */
+    IO_ERROR("An I/O error occurred: %1$s", IO_ERROR_MSG, Category.CATEGORY_ERROR, 5003),
+
     /**
      * <li>The calendar provider \"%1$s\" is not available.</li>
      * <li>Missing calendar provider [provider: %1$s]</li>
