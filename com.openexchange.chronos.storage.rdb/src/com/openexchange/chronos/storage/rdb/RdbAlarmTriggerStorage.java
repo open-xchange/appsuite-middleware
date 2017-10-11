@@ -406,7 +406,7 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
             stmt.setInt(parameterIndex++, context.getContextId());
             stmt.setInt(parameterIndex++, accountId);
             for (String id : ids) {
-                stmt.setInt(parameterIndex++, asInt(id));
+                stmt.setString(parameterIndex++, id);
             }
             return logExecuteUpdate(stmt);
         }
@@ -426,7 +426,7 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
             stmt.setInt(parameterIndex++, accountId);
             stmt.setInt(parameterIndex++, userId);
             for (String id : ids) {
-                stmt.setInt(parameterIndex++, asInt(id));
+                stmt.setString(parameterIndex++, id);
             }
             return logExecuteUpdate(stmt);
         }
