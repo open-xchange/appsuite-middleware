@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.http.grizzly.util;
+package com.openexchange.net;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -58,7 +58,6 @@ import org.slf4j.Logger;
 import com.google.common.collect.ImmutableList;
 import com.google.common.net.InetAddresses;
 import com.openexchange.java.Strings;
-import com.openexchange.net.IPRange;
 
 /**
  * {@link IPTools} - Detects the first IP that isn't one of our known proxies and represents our new remoteIP.
@@ -165,7 +164,7 @@ public class IPTools {
      * @throws PatternSyntaxException - if the regular expression's syntax of separator is invalid
      */
     public static List<String> splitAndTrim(String input, String separator) {
-        return Strings.splitAndTrim(input, separator);
+        return com.openexchange.java.Strings.splitAndTrim(input, separator);
     }
 
     /**

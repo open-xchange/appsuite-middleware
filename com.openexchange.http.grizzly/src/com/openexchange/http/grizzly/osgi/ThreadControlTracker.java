@@ -52,6 +52,7 @@ package com.openexchange.http.grizzly.osgi;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.http.grizzly.util.ThreadControlReference;
 import com.openexchange.startup.ThreadControlService;
 
 

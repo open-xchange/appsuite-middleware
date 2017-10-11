@@ -72,6 +72,7 @@ import com.openexchange.http.grizzly.service.http.OSGiCleanMapper;
 import com.openexchange.http.grizzly.service.http.OSGiHandler;
 import com.openexchange.http.grizzly.service.http.OSGiMainHandler;
 import com.openexchange.http.grizzly.service.http.OSGiServletHandler;
+import com.openexchange.http.grizzly.util.ThreadControlReference;
 import com.openexchange.java.Strings;
 import com.openexchange.startup.SignalHttpApiAvailabilityService;
 import com.openexchange.startup.SignalStartedService;
