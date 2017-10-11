@@ -204,8 +204,8 @@ ItemData:
   $ref: ./chronos-schedjoules/ItemData.yaml
 ItemsData:
   $ref: ./chronos-schedjoules/ItemsData.yaml
-PageData:
-  $ref: ./chronos-schedjoules/PageData.yaml
+BrowseResponse:
+  $ref: ./chronos-schedjoules/BrowseResponse.yaml
 # Module: mail
 MailCountResponse:
   $ref: ./mail/MailCountResponse.yaml
