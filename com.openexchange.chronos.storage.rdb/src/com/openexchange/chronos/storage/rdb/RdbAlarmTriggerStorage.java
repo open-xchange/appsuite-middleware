@@ -377,6 +377,22 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
         }
     }
 
+    @Override
+    public void deleteTriggers(int userId) throws OXException {
+        int updated = 0;
+        Connection connection = null;
+        try {
+            connection = dbProvider.getWriteConnection(context);
+            txPolicy.setAutoCommit(connection, false);
+            updated = deleteTriggers(connection, userId);
+            txPolicy.commit(connection);
+        } catch (SQLException e) {
+            throw asOXException(e);
+        } finally {
+            release(connection, updated);
+        }
+    }
+
     private int deleteTriggers(Connection connection, List<String> ids) throws SQLException {
         if (null == ids || 0 == ids.size()) {
             return 0;
@@ -412,6 +428,17 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
             for (String id : ids) {
                 stmt.setInt(parameterIndex++, asInt(id));
             }
+            return logExecuteUpdate(stmt);
+        }
+    }
+
+    private int deleteTriggers(Connection connection, int userId) throws SQLException {
+        String sql = "DELETE FROM calendar_alarm_trigger WHERE cid=? AND account=? AND user=?;";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            int parameterIndex = 1;
+            stmt.setInt(parameterIndex++, context.getContextId());
+            stmt.setInt(parameterIndex++, accountId);
+            stmt.setInt(parameterIndex++, userId);
             return logExecuteUpdate(stmt);
         }
     }

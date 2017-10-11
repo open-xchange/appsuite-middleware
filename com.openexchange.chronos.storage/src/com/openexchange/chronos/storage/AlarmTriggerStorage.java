@@ -85,7 +85,7 @@ public interface AlarmTriggerStorage {
      * @param exceptions A map of exceptions per event.
      * @throws OXException
      */
-    public void insertTriggers(Map<String, Map<Integer, List<Alarm>>> alarms, List<Event> events, Map<String, Set<RecurrenceId>> exceptions) throws OXException;
+    void insertTriggers(Map<String, Map<Integer, List<Alarm>>> alarms, List<Event> events, Map<String, Set<RecurrenceId>> exceptions) throws OXException;
 
     /**
      * Removes all existing triggers for the given event
@@ -110,6 +110,13 @@ public interface AlarmTriggerStorage {
      * @param userId The identifier of the user to delete the triggers for
      */
     void deleteTriggers(List<String> eventIds, int userId) throws OXException;
+
+    /**
+     * Deletes all existing triggers for any alarm stored for a specific user.
+     *
+     * @param userId The identifier of the user to delete the triggers for
+     */
+    void deleteTriggers(int userId) throws OXException;
 
     /**
      * Retrieves all not acknowledged alarm triggers for the given user with a trigger time earlier than the given limit.
