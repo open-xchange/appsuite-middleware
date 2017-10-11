@@ -206,6 +206,8 @@ ItemsData:
   $ref: ./chronos-schedjoules/ItemsData.yaml
 BrowseResponse:
   $ref: ./chronos-schedjoules/BrowseResponse.yaml
+PageData:
+  $ref: ./chronos-schedjoules/PageData.yaml
 # Module: mail
 MailCountResponse:
   $ref: ./mail/MailCountResponse.yaml
