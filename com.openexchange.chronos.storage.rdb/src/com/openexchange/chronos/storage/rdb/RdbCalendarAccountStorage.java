@@ -169,7 +169,7 @@ public class RdbCalendarAccountStorage extends RdbStorage implements CalendarAcc
     }
 
     @Override
-    public void deleteAccount(int id, int userId) throws OXException {
+    public void deleteAccount(int userId, int id) throws OXException {
         int updated = 0;
         Connection connection = null;
         try {
