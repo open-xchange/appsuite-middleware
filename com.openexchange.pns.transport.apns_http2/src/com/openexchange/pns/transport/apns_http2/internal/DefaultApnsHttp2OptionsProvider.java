@@ -47,70 +47,46 @@
  *
  */
 
-package com.openexchange.pns;
+package com.openexchange.pns.transport.apns_http2.internal;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Map;
+import com.openexchange.pns.transport.apns_http2.ApnsHttp2Options;
+import com.openexchange.pns.transport.apns_http2.ApnsHttp2OptionsPerClient;
+import com.openexchange.pns.transport.apns_http2.ApnsHttp2OptionsProvider;
 
 
 /**
- * {@link KnownTransport} - The enumeration for known transports for the push notification service.
+ * {@link DefaultApnsHttp2OptionsProvider}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.3
+ * @since v7.10.0
  */
-public enum KnownTransport {
+public class DefaultApnsHttp2OptionsProvider implements ApnsHttp2OptionsProvider {
+
+    private final Map<String, ApnsHttp2Options> options;
 
     /**
-     * The transport by a Web Socket connection.
+     * Initializes a new {@link DefaultApnsHttp2OptionsProvider}.
      */
-    WEB_SOCKET("websocket"),
-    /**
-     * The transport by Apple Push Notification Service (APNS).
-     */
-    APNS("apn"),
-    /**
-     * The transport by Google Cloud Messaging service (GCM).
-     */
-    GCM("gcm"),
-    /**
-     * The transport by Windows Push Notification Services (WNS).
-     */
-    WNS("wns"),
-    /**
-     * The transport by Apple Push Notification Service (APNS) using HTTP/2.
-     */
-    APNS_HTTP2("apns_http2"),
-
-    ;
-
-    private final String transportId;
-
-    private KnownTransport(String transportId) {
-        this.transportId = transportId;
+    public DefaultApnsHttp2OptionsProvider(Map<String, ApnsHttp2Options> options) {
+        super();
+        this.options = options;
     }
 
-    /**
-     * Gets the transport identifier.
-     *
-     * @return The transport identifier
-     */
-    public String getTransportId() {
-        return transportId;
+    @Override
+    public ApnsHttp2Options getOptions(String client) {
+        return options.get(client);
     }
 
-    /**
-     * Gets the known transport for specified identifier.
-     *
-     * @param transportId The transport identifier
-     * @return The associated known transport or <code>null</code>
-     */
-    public static KnownTransport knownTransportFor(String transportId) {
-        if (null != transportId) {
-            for (KnownTransport knownTransport : values()) {
-                if (transportId.equals(knownTransport.transportId)) {
-                    return knownTransport;
-                }
-            }
+    @Override
+    public Collection<ApnsHttp2OptionsPerClient> getAvailableOptions() {
+        Collection<ApnsHttp2OptionsPerClient> col = new ArrayList<>(options.size());
+        for (Map.Entry<String, ApnsHttp2Options> entry : options.entrySet()) {
+            col.add(new ApnsHttp2OptionsPerClient(entry.getKey(), entry.getValue()));
         }
-        return null;
+        return col;
     }
 
 }

@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,70 +47,30 @@
  *
  */
 
-package com.openexchange.pns;
+package com.openexchange.pns.transport.apns_http2;
 
+import java.util.Collection;
 
 /**
- * {@link KnownTransport} - The enumeration for known transports for the push notification service.
+ * {@link ApnsHttp2OptionsProvider} - Provides the options to communicate with the Apple Push Notification System via HTTP/2.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.3
+ * @since v7.10.0
  */
-public enum KnownTransport {
+public interface ApnsHttp2OptionsProvider {
 
     /**
-     * The transport by a Web Socket connection.
-     */
-    WEB_SOCKET("websocket"),
-    /**
-     * The transport by Apple Push Notification Service (APNS).
-     */
-    APNS("apn"),
-    /**
-     * The transport by Google Cloud Messaging service (GCM).
-     */
-    GCM("gcm"),
-    /**
-     * The transport by Windows Push Notification Services (WNS).
-     */
-    WNS("wns"),
-    /**
-     * The transport by Apple Push Notification Service (APNS) using HTTP/2.
-     */
-    APNS_HTTP2("apns_http2"),
-
-    ;
-
-    private final String transportId;
-
-    private KnownTransport(String transportId) {
-        this.transportId = transportId;
-    }
-
-    /**
-     * Gets the transport identifier.
+     * Gets the APNS HTTP/2 options containing the push certificate for specified client.
      *
-     * @return The transport identifier
+     * @return The APNS options or <code>null</code>
      */
-    public String getTransportId() {
-        return transportId;
-    }
+    ApnsHttp2Options getOptions(String client);
 
     /**
-     * Gets the known transport for specified identifier.
+     * Gets available options from this provider
      *
-     * @param transportId The transport identifier
-     * @return The associated known transport or <code>null</code>
+     * @return The available options
      */
-    public static KnownTransport knownTransportFor(String transportId) {
-        if (null != transportId) {
-            for (KnownTransport knownTransport : values()) {
-                if (transportId.equals(knownTransport.transportId)) {
-                    return knownTransport;
-                }
-            }
-        }
-        return null;
-    }
+    Collection<ApnsHttp2OptionsPerClient> getAvailableOptions();
 
 }

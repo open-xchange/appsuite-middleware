@@ -47,70 +47,48 @@
  *
  */
 
-package com.openexchange.pns;
+package com.openexchange.pns.transport.apns_http2;
 
 
 /**
- * {@link KnownTransport} - The enumeration for known transports for the push notification service.
+ * {@link ApnsHttp2OptionsPerClient} - A pair of client identifier and associated APNS HTTP/2 options.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.3
+ * @since v7.10.0
  */
-public enum KnownTransport {
+public class ApnsHttp2OptionsPerClient {
+
+    private final String client;
+    private final ApnsHttp2Options options;
 
     /**
-     * The transport by a Web Socket connection.
+     * Initializes a new {@link ApnsHttp2OptionsPerClient}.
+     *
+     * @param client The client
+     * @param options The associated APNS HTTP/2 options
      */
-    WEB_SOCKET("websocket"),
-    /**
-     * The transport by Apple Push Notification Service (APNS).
-     */
-    APNS("apn"),
-    /**
-     * The transport by Google Cloud Messaging service (GCM).
-     */
-    GCM("gcm"),
-    /**
-     * The transport by Windows Push Notification Services (WNS).
-     */
-    WNS("wns"),
-    /**
-     * The transport by Apple Push Notification Service (APNS) using HTTP/2.
-     */
-    APNS_HTTP2("apns_http2"),
-
-    ;
-
-    private final String transportId;
-
-    private KnownTransport(String transportId) {
-        this.transportId = transportId;
+    public ApnsHttp2OptionsPerClient(String client, ApnsHttp2Options options) {
+        super();
+        this.client = client;
+        this.options = options;
     }
 
     /**
-     * Gets the transport identifier.
+     * Gets the client
      *
-     * @return The transport identifier
+     * @return The client
      */
-    public String getTransportId() {
-        return transportId;
+    public String getClient() {
+        return client;
     }
 
     /**
-     * Gets the known transport for specified identifier.
+     * Gets the APNS HTTP/2 options
      *
-     * @param transportId The transport identifier
-     * @return The associated known transport or <code>null</code>
+     * @return The APNS HTTP/2 options
      */
-    public static KnownTransport knownTransportFor(String transportId) {
-        if (null != transportId) {
-            for (KnownTransport knownTransport : values()) {
-                if (transportId.equals(knownTransport.transportId)) {
-                    return knownTransport;
-                }
-            }
-        }
-        return null;
+    public ApnsHttp2Options getOptions() {
+        return options;
     }
 
 }
