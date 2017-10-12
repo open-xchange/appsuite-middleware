@@ -320,7 +320,9 @@ public final class LoginPerformer {
             if (ContextExceptionCodes.LOCATED_IN_ANOTHER_SERVER.equals(e)) {
                 ConfigurationService configService = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
                 String migrationRedirectURL = configService.getProperty("com.openexchange.server.migrationRedirectURL");
-                if (!Strings.isEmpty(migrationRedirectURL)) {
+                if (Strings.isEmpty(migrationRedirectURL)) {
+                    LOG.error("Cannot redirect. The property 'com.openexchange.server.migrationRedirectURL' is not set in 'server.properties'.");
+                } else {
                     OXException redirectExc = LoginExceptionCodes.REDIRECT.create(migrationRedirectURL);
                     // Call onRedirectedAuthentication
                     for (LoginListener listener : listeners) {
