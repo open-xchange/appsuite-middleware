@@ -146,9 +146,28 @@ public class EventManager extends AbstractManager {
      * @param asset The {@link Asset} to attach
      * @return The created {@link EventData}
      * @throws ApiException if an API error is occurred
+     * @throws ChronosApiException if a Chronos API error is occurred
      */
-    public EventData createEventWithAttachment(EventData eventData, Asset asset) throws ApiException {
+    public EventData createEventWithAttachment(EventData eventData, Asset asset) throws ApiException, ChronosApiException {
+        return createEventWithAttachment(eventData, asset, false);
+    }
+
+    /**
+     * Creates an event and attaches the specified {@link Asset}
+     *
+     * @param eventData The {@link EventData}
+     * @param asset The {@link Asset} to attach
+     * @param expectedException flag to indicate that an exception is expected
+     * @return The created {@link EventData}
+     * @throws ApiException if an API error is occurred
+     * @throws ChronosApiException if a Chronos API error is occurred
+     */
+    public EventData createEventWithAttachment(EventData eventData, Asset asset, boolean expectException) throws ApiException, ChronosApiException {
         ChronosCalendarResultResponse createEvent = userApi.getEnhancedChronosApi().createEventWithAttachments(userApi.getEnhancedSession(), defaultFolder, eventData.toJson(), new File(asset.getAbsolutePath()), false, false);
+        if (expectException) {
+            assertNotNull("An error was expected", createEvent.getError());
+            throw new ChronosApiException(createEvent.getCode(), createEvent.getError());
+        }
         EventData event = handleCreation(createEvent);
         return event;
     }
@@ -213,8 +232,8 @@ public class EventManager extends AbstractManager {
      * Gets the occurrence of an event
      *
      * @param eventId The {@link EventId}
-     * @param expectedException flag to indicate that an exception is expected
      * @param reccurenceId The recurrence identifier
+     * @param expectedException flag to indicate that an exception is expected
      * @return the {@link EventData}
      * @throws ApiException if an API error is occurred
      * @throws ChronosApiException if a Chronos API error is occurred

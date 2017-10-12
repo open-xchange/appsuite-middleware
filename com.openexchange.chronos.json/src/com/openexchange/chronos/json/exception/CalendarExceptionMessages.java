@@ -71,4 +71,12 @@ public class CalendarExceptionMessages implements LocalizableStrings {
      * Unable to add alarms: %s
      */
     public static final String UNABLE_TO_ADD_ALARMS_MSG = "Unable to add alarms: %s";
+    /**
+     * The content-id '%1$s' refers to a non-existing attachment in the body part.
+     */
+    public static final String MISSING_BODY_PART_ATTACHMENT_REFERENCE_MSG = "The content-id '%1$s' refers to a non-existing attachment in the body part.";
+    /**
+     * The metadata of the attachment '%1$s' does not have a content-id.
+     */
+    public static final String MISSING_METADATA_ATTACHMENT_REFERENCE_MSG = "The metadata of the attachment '%1$s' does not have a content-id.";
 }
