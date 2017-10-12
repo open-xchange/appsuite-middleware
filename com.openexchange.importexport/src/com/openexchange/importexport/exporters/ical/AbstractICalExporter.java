@@ -47,59 +47,81 @@
  *
  */
 
-package com.openexchange.importexport.exporters;
+package com.openexchange.importexport.exporters.ical;
 
-import java.util.List;
-import java.util.Map;
+import java.io.IOException;
+import java.io.OutputStream;
+import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.importexport.helpers.ExportFileNameCreator;
+import com.openexchange.exception.OXException;
+import com.openexchange.importexport.exceptions.ImportExportExceptionCodes;
+import com.openexchange.importexport.formats.Format;
+import com.openexchange.importexport.helpers.SizedInputStream;
+import com.openexchange.java.Streams;
 import com.openexchange.tools.session.ServerSession;
 
-
 /**
- * {@link AbstractExporter}
+ * {@link AbstractICalExporter}
  *
  * @author <a href="mailto:Jan-Oliver.Huhn@open-xchange.com">Jan-Oliver Huhn</a>
  * @since v7.10.0
  */
-public abstract class AbstractExporter implements Exporter {
+public abstract class AbstractICalExporter implements ICalExport {
 
-    @Override
-    public String getFolderExportFileName(ServerSession session, String folder, String extension) {
-        return ExportFileNameCreator.createFolderExportFileName(session, folder, extension);
+    public AbstractICalExporter() {
+        super();
     }
 
-    @Override
-    public String getBatchExportFileName(ServerSession session, Map<String, List<String>> batchIds, String extension) {
-        return ExportFileNameCreator.createBatchExportFileName(session, batchIds, extension);
+    public AbstractICalExporter(String folderId) {
+        super();
+        this.folderId = folderId;
     }
+
+    private String folderId;
 
     /**
-     * Reads the saveToDisk parameter
+     * Exports the data
      *
-     * @param optionalParams The optional parameters of the request
-     * @return boolean The value of the saveToDisk parameter
+     * @param session The session object
+     * @param out The output stream to write to
+     * @return ThresholdFileHolder The file holder to export
+     * @throws OXException if folder export fails
      */
-    public boolean isSaveToDisk(final Map<String, Object> optionalParams) {
-        if (null == optionalParams) {
-            return false;
+    abstract protected ThresholdFileHolder exportData(ServerSession session, OutputStream out) throws OXException;
+
+    @Override
+    public SizedInputStream exportData(ServerSession session, AJAXRequestData requestData, boolean isSaveToDisk, String filename) throws OXException {
+        if (null != requestData) {
+            // Try to stream
+            try {
+                OutputStream out = requestData.optOutputStream();
+                if (null != out) {
+                    requestData.setResponseHeader("Content-Type", isSaveToDisk ? "application/octet-stream" : Format.ICAL.getMimeType() + "; charset=UTF-8");
+                    requestData.setResponseHeader("Content-Disposition", "attachment"+filename);
+                    requestData.removeCachingHeader();
+                    exportData(session, out);
+                    return null;
+                }
+            } catch (IOException e) {
+                throw ImportExportExceptionCodes.ICAL_CONVERSION_FAILED.create(e);
+            }
         }
-        final Object object = optionalParams.get("__saveToDisk");
-        if (null == object) {
-            return false;
+
+        ThresholdFileHolder sink = new ThresholdFileHolder();
+        boolean error = true;
+        try {
+            sink = exportData(session, null);
+            error = false;
+            return new SizedInputStream(sink.getClosingStream(), sink.getLength(), Format.ICAL);
+        } finally {
+            if (error) {
+                Streams.close(sink);
+            }
         }
-        return (object instanceof Boolean ? ((Boolean) object).booleanValue() : Boolean.parseBoolean(object.toString().trim()));
     }
 
-    /**
-     * Creates an encoded file name
-     *
-     * @param requestData The AJAX request data
-     * @param fileName The file name to export
-     * @return String The fully parsed file name
-     */
-    public String appendFileNameParameter(AJAXRequestData requestData, String fileName) {
-        return ExportFileNameCreator.appendFileNameParameter(requestData, fileName);
+    public String getFolderId() {
+        return folderId;
     }
 
 }

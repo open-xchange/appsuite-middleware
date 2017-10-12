@@ -47,59 +47,59 @@
  *
  */
 
-package com.openexchange.importexport.exporters;
+package com.openexchange.importexport.exporters.ical;
 
+import java.io.OutputStream;
 import java.util.List;
 import java.util.Map;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.importexport.helpers.ExportFileNameCreator;
+import com.openexchange.ajax.container.ThresholdFileHolder;
+import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.tools.session.ServerSession;
 
-
 /**
- * {@link AbstractExporter}
+ * {@link AbstractICalBatchExporter}
  *
  * @author <a href="mailto:Jan-Oliver.Huhn@open-xchange.com">Jan-Oliver Huhn</a>
  * @since v7.10.0
  */
-public abstract class AbstractExporter implements Exporter {
+public abstract class AbstractICalBatchExporter extends AbstractICalExporter {
 
-    @Override
-    public String getFolderExportFileName(ServerSession session, String folder, String extension) {
-        return ExportFileNameCreator.createFolderExportFileName(session, folder, extension);
+    public AbstractICalBatchExporter(String folderId) {
+        super(folderId);
     }
 
-    @Override
-    public String getBatchExportFileName(ServerSession session, Map<String, List<String>> batchIds, String extension) {
-        return ExportFileNameCreator.createBatchExportFileName(session, batchIds, extension);
+    public AbstractICalBatchExporter(Map<String, List<String>> batchIds) {
+        this.batchIds = batchIds;
     }
+
+    private Map<String, List<String>> batchIds;
 
     /**
-     * Reads the saveToDisk parameter
-     *
-     * @param optionalParams The optional parameters of the request
-     * @return boolean The value of the saveToDisk parameter
+     * @param session
+     * @param out
+     * @return
+     * @throws OXException
      */
-    public boolean isSaveToDisk(final Map<String, Object> optionalParams) {
-        if (null == optionalParams) {
-            return false;
+    abstract protected ThresholdFileHolder exportBatchData(ServerSession session, OutputStream out) throws OXException ;
+
+    @Override
+    protected ThresholdFileHolder exportData(ServerSession session, OutputStream out) throws OXException {
+        if (!isBatchExport()) {
+            return exportData(session, out);
         }
-        final Object object = optionalParams.get("__saveToDisk");
-        if (null == object) {
-            return false;
-        }
-        return (object instanceof Boolean ? ((Boolean) object).booleanValue() : Boolean.parseBoolean(object.toString().trim()));
+        return exportBatchData(session, out);
     }
 
-    /**
-     * Creates an encoded file name
-     *
-     * @param requestData The AJAX request data
-     * @param fileName The file name to export
-     * @return String The fully parsed file name
-     */
-    public String appendFileNameParameter(AJAXRequestData requestData, String fileName) {
-        return ExportFileNameCreator.appendFileNameParameter(requestData, fileName);
+    private boolean isBatchExport() {
+        if (Strings.isEmpty(getFolderId())) {
+            return false;
+        }
+        return true;
+    }
+
+    public Map<String, List<String>> getBatchIds() {
+        return batchIds;
     }
 
 }

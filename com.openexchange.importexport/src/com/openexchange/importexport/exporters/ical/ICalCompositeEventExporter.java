@@ -47,77 +47,65 @@
  *
  */
 
-package com.openexchange.importexport.osgi;
+package com.openexchange.importexport.exporters.ical;
 
-
-import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
+import java.io.OutputStream;
+import java.util.List;
+import com.openexchange.ajax.container.ThresholdFileHolder;
+import com.openexchange.chronos.Event;
+import com.openexchange.chronos.ical.CalendarExport;
+import com.openexchange.chronos.ical.ICalParameters;
 import com.openexchange.chronos.ical.ICalService;
-import com.openexchange.chronos.provider.composition.IDBasedCalendarAccessFactory;
-import com.openexchange.chronos.service.CalendarService;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.cascade.ConfigViewFactory;
-import com.openexchange.contact.ContactService;
-import com.openexchange.contact.similarity.ContactSimilarityService;
-import com.openexchange.contact.vcard.VCardService;
-import com.openexchange.contact.vcard.storage.VCardStorageFactory;
-import com.openexchange.data.conversion.ical.ICalEmitter;
-import com.openexchange.data.conversion.ical.ICalParser;
-import com.openexchange.folderstorage.FolderService;
-import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
-import com.openexchange.groupware.calendar.CalendarCollectionService;
-import com.openexchange.groupware.generic.FolderUpdaterRegistry;
-import com.openexchange.importexport.actions.ExportActionFactory;
-import com.openexchange.importexport.actions.ImportActionFactory;
+import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
+import com.openexchange.exception.OXException;
+import com.openexchange.importexport.osgi.ImportExportServices;
+import com.openexchange.java.Streams;
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link ImportExportActivator}
+ * {@link ICalCompositeEventExporter}
  *
- * @author tobiasp
+ * @author <a href="mailto:Jan-Oliver.Huhn@open-xchange.com">Jan-Oliver Huhn</a>
+ * @since v7.10.0
  */
-public class ImportExportActivator extends AJAXModuleActivator{
+public class ICalCompositeEventExporter extends AbstractICalExporter {
 
-    public ImportExportActivator() {
-        super();
+    public ICalCompositeEventExporter(String folderId) {
+        super(folderId);
     }
-
-	@Override
-	protected Class<?>[] getNeededServices() {
-		return new Class[]{
-		    ContactService.class,
-			FolderUpdaterRegistry.class,
-			ICalParser.class,
-			AppointmentSqlFactoryService.class,
-			CalendarCollectionService.class,
-			ConfigurationService.class,
-			ICalEmitter.class,
-			ConfigViewFactory.class,
-			VCardService.class,
-			FolderService.class,
-			IDBasedCalendarAccessFactory.class,
-			ICalService.class,
-			CalendarService.class
-		};
-	}
 
     @Override
-    protected Class<?>[] getOptionalServices() {
-        return new Class[] { ContactSimilarityService.class };
+    protected ThresholdFileHolder exportData(ServerSession session, OutputStream out) throws OXException {
+        return exportFolderData(session, out);
     }
 
-	@Override
-	protected void startBundle() throws Exception {
-		ImportExportServices.LOOKUP.set(this);
-		registerModule(new ImportActionFactory(this), "import");
-		registerModule(new ExportActionFactory(this), "export");
+    private ThresholdFileHolder exportFolderData(ServerSession session, OutputStream out) throws OXException {
+        IDBasedCalendarAccess calendarAccess = ImportExportServices.getIDBasedCalendarAccessFactory().createAccess(session);
+        return exportChronosEvents(calendarAccess.getEventsInFolder(getFolderId()), out);
+    }
 
-		track(VCardStorageFactory.class);
-		openTrackers();
-	}
-
-	@Override
-	protected void stopBundle() throws Exception {
-	    ImportExportServices.LOOKUP.set(null);
-	    super.stopBundle();
-	}
+    private ThresholdFileHolder exportChronosEvents(List<Event> eventList, OutputStream optOut) throws OXException {
+        ICalService iCalService = ImportExportServices.getICalService();
+        ICalParameters iCalParameters = iCalService.initParameters();
+        CalendarExport calendarExport = iCalService.exportICal(iCalParameters);
+        for (Event event : eventList) {
+            calendarExport.add(event);
+        }
+        if (null != optOut) {
+            calendarExport.writeVCalendar(optOut);
+            return null;
+        }
+        ThresholdFileHolder sink = new ThresholdFileHolder();
+        boolean error = true;
+        try {
+            calendarExport.writeVCalendar(sink.asOutputStream());
+            error = false;
+            return sink;
+        } finally {
+            if (error) {
+                Streams.close(sink);
+            }
+        }
+    }
 
 }

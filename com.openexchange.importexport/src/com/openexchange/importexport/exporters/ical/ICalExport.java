@@ -47,59 +47,31 @@
  *
  */
 
-package com.openexchange.importexport.exporters;
+package com.openexchange.importexport.exporters.ical;
 
-import java.util.List;
-import java.util.Map;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.importexport.helpers.ExportFileNameCreator;
+import com.openexchange.exception.OXException;
+import com.openexchange.importexport.helpers.SizedInputStream;
 import com.openexchange.tools.session.ServerSession;
 
-
 /**
- * {@link AbstractExporter}
+ * {@link ICalExport}
  *
  * @author <a href="mailto:Jan-Oliver.Huhn@open-xchange.com">Jan-Oliver Huhn</a>
  * @since v7.10.0
  */
-public abstract class AbstractExporter implements Exporter {
-
-    @Override
-    public String getFolderExportFileName(ServerSession session, String folder, String extension) {
-        return ExportFileNameCreator.createFolderExportFileName(session, folder, extension);
-    }
-
-    @Override
-    public String getBatchExportFileName(ServerSession session, Map<String, List<String>> batchIds, String extension) {
-        return ExportFileNameCreator.createBatchExportFileName(session, batchIds, extension);
-    }
+public interface ICalExport {
 
     /**
-     * Reads the saveToDisk parameter
+     * Handles the export request
      *
-     * @param optionalParams The optional parameters of the request
-     * @return boolean The value of the saveToDisk parameter
-     */
-    public boolean isSaveToDisk(final Map<String, Object> optionalParams) {
-        if (null == optionalParams) {
-            return false;
-        }
-        final Object object = optionalParams.get("__saveToDisk");
-        if (null == object) {
-            return false;
-        }
-        return (object instanceof Boolean ? ((Boolean) object).booleanValue() : Boolean.parseBoolean(object.toString().trim()));
-    }
-
-    /**
-     * Creates an encoded file name
-     *
+     * @param session The session object
      * @param requestData The AJAX request data
-     * @param fileName The file name to export
-     * @return String The fully parsed file name
+     * @param isSaveToDisk The value of the optional parameter isSaveToDisk
+     * @param filename The file name
+     * @return InputStream in requested format.
+     * @throws OXException if export fails
      */
-    public String appendFileNameParameter(AJAXRequestData requestData, String fileName) {
-        return ExportFileNameCreator.appendFileNameParameter(requestData, fileName);
-    }
+    SizedInputStream exportData(ServerSession session, AJAXRequestData requestData, boolean isSaveToDisk, String filename) throws OXException;
 
 }
