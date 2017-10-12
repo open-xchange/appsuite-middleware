@@ -69,6 +69,9 @@ import com.openexchange.authentication.SessionEnhancement;
 import com.openexchange.authorization.Authorization;
 import com.openexchange.authorization.AuthorizationService;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Interests;
+import com.openexchange.config.Reloadable;
+import com.openexchange.config.Reloadables;
 import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -95,6 +98,7 @@ import com.openexchange.login.listener.LoginListener;
 import com.openexchange.login.listener.internal.LoginListenerRegistryImpl;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.server.reloadable.GenericReloadable;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
@@ -122,6 +126,25 @@ public final class LoginPerformer {
      */
     public static LoginPerformer getInstance() {
         return SINGLETON;
+    }
+
+    private static final String PROPERTY_NAME = "com.openexchange.server.migrationRedirectURL";
+    static {
+        GenericReloadable.getInstance().addReloadable(new Reloadable() {
+
+            @Override
+            public void reloadConfiguration(final ConfigurationService configService) {
+                String migrationRedirectURL = configService.getProperty(PROPERTY_NAME);
+                if (Strings.isEmpty(migrationRedirectURL)) {
+                    LOG.warn("The property '" + PROPERTY_NAME + "' in 'server.properties' is empty. No redirect will happen unless it is properly configured.");
+                }
+            }
+
+            @Override
+            public Interests getInterests() {
+                return Reloadables.interestsForProperties(PROPERTY_NAME);
+            }
+        });
     }
 
     // -----------------------------------------------------------------------------------------------------------------
