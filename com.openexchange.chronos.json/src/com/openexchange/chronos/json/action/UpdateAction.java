@@ -94,10 +94,7 @@ public class UpdateAction extends ChronosAction {
         long clientTimestamp = parseClientTimestamp(requestData);
         Event event = parseEvent(calendarAccess.getSession(), requestData);
         try {
-
-            CalendarResult calendarResult = calendarAccess.updateAlarms(parseIdParameter(requestData), event.getAlarms(), clientTimestamp);
-
-            //            CalendarResult calendarResult = calendarAccess.updateEvent(parseIdParameter(requestData), event, clientTimestamp);
+            CalendarResult calendarResult = calendarAccess.updateEvent(parseIdParameter(requestData), event, clientTimestamp);
             return new AJAXRequestResult(calendarResult, new Date(calendarResult.getTimestamp()), CalendarResultConverter.INPUT_FORMAT);
         } catch (OXException e) {
             return handleConflictException(e);

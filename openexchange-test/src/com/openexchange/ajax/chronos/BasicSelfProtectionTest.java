@@ -60,6 +60,7 @@ import com.openexchange.ajax.chronos.factory.AttendeeFactory;
 import com.openexchange.ajax.chronos.factory.EventFactory;
 import com.openexchange.ajax.chronos.util.AssertUtil;
 import com.openexchange.ajax.chronos.util.DateTimeUtil;
+import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.junit.Assert;
 import com.openexchange.testing.httpclient.models.Alarm;
 import com.openexchange.testing.httpclient.models.Attendee;
@@ -93,6 +94,7 @@ public class BasicSelfProtectionTest extends AbstractChronosTest {
     @Test
     public void testTooManyEvents() throws Exception {
         // Create event with more than 1000 occurrences
+        String excpectedErrorCode = CalendarExceptionCodes.TOO_MANY_EVENT_RESULTS.create().getErrorCode();
         long now = System.currentTimeMillis();
         Date from = new Date(now - TimeUnit.DAYS.toMillis(1));
         Date until = new Date(now + TimeUnit.DAYS.toMillis(1012));
@@ -103,7 +105,7 @@ public class BasicSelfProtectionTest extends AbstractChronosTest {
         // Try create with expand 'true'
         ChronosCalendarResultResponse createEvent = defaultUserApi.getChronosApi().createEvent(defaultUserApi.getSession(), folderId, toCreate, true, false, fromStr, untilStr, true);
         Assert.assertNotNull("Response doesn't contain an error", createEvent.getError());
-        Assert.assertEquals("CAL-5071", createEvent.getCode());
+        Assert.assertEquals(excpectedErrorCode, createEvent.getCode());
 
         // Create normally
         EventData expectedEventData = eventManager.createEvent(toCreate);
@@ -114,14 +116,14 @@ public class BasicSelfProtectionTest extends AbstractChronosTest {
         // Query all event occurrences
         EventsResponse eventsResponse = defaultUserApi.getChronosApi().getAllEvents(defaultUserApi.getSession(), fromStr, untilStr, folderId, null, null, null, true, true);
         Assert.assertNotNull("Response doesn't contain an error", eventsResponse.getError());
-        Assert.assertEquals("CAL-5071", eventsResponse.getCode());
+        Assert.assertEquals(excpectedErrorCode, eventsResponse.getCode());
 
         // Update event with expand 'true'
         EventData eventData = actualEventData;
         eventData.setDescription("Changed description");
         ChronosCalendarResultResponse updateResponse = defaultUserApi.getChronosApi().updateEvent(defaultUserApi.getSession(), folderId, eventData.getId(), eventData, eventManager.getLastTimeStamp(), null, true, false, fromStr, untilStr, true);
         Assert.assertNotNull("Response doesn't contain an error", updateResponse.getError());
-        Assert.assertEquals("CAL-5071", updateResponse.getCode());
+        Assert.assertEquals(excpectedErrorCode, updateResponse.getCode());
 
         // Do a successful update
         eventManager.updateEvent(eventData);
@@ -129,7 +131,7 @@ public class BasicSelfProtectionTest extends AbstractChronosTest {
         // Query updates with expand 'true'
         ChronosUpdatesResponse updatesResponse = defaultUserApi.getChronosApi().getUpdates(defaultUserApi.getSession(), folderId, timestamp, fromStr, untilStr, null, null, null, true, true);
         Assert.assertNotNull("Response doesn't contain an error", updatesResponse.getError());
-        Assert.assertEquals("CAL-5071", updatesResponse.getCode());
+        Assert.assertEquals(excpectedErrorCode, updatesResponse.getCode());
     }
 
     /**
@@ -137,6 +139,9 @@ public class BasicSelfProtectionTest extends AbstractChronosTest {
      */
     @Test
     public void testTooManyAttendees() throws Exception {
+
+        String excpectedErrorCode = CalendarExceptionCodes.TOO_MANY_ATTENDEES.create().getErrorCode();
+
         // Create single event with over 1000 attendees
         EventData toCreate = EventFactory.createSingleTwoHourEvent(defaultUserApi.getCalUser(), testUser.getLogin(), "testTooManyAttendees");
 
@@ -152,7 +157,7 @@ public class BasicSelfProtectionTest extends AbstractChronosTest {
         // Try create with expand 'true'
         ChronosCalendarResultResponse createEvent = defaultUserApi.getChronosApi().createEvent(defaultUserApi.getSession(), folderId, toCreate, true, false, null, null, false);
         Assert.assertNotNull("Response doesn't contain an error", createEvent.getError());
-        Assert.assertEquals("CAL-5072", createEvent.getCode());
+        Assert.assertEquals(excpectedErrorCode, createEvent.getCode());
 
 
         // Create normal and try to update
@@ -168,7 +173,7 @@ public class BasicSelfProtectionTest extends AbstractChronosTest {
 
         ChronosCalendarResultResponse updateResponse = defaultUserApi.getChronosApi().updateEvent(defaultUserApi.getSession(), folderId, actualEventData.getId(), actualEventData, eventManager.getLastTimeStamp(), null, true, false, null, null, false);
         Assert.assertNotNull("Response doesn't contain an error", updateResponse.getError());
-        Assert.assertEquals("CAL-5072", updateResponse.getCode());
+        Assert.assertEquals(excpectedErrorCode, updateResponse.getCode());
     }
 
     /**
@@ -176,6 +181,9 @@ public class BasicSelfProtectionTest extends AbstractChronosTest {
      */
     @Test
     public void testTooManyAlarms() throws Exception {
+
+        String excpectedErrorCode = CalendarExceptionCodes.TOO_MANY_ALARMS.create().getErrorCode();
+
         // Create single event with over 100 alarms
         EventData toCreate = EventFactory.createSingleTwoHourEvent(defaultUserApi.getCalUser(), testUser.getLogin(), "testTooManyAttendees");
 
@@ -189,7 +197,7 @@ public class BasicSelfProtectionTest extends AbstractChronosTest {
         // Try create with expand 'true'
         ChronosCalendarResultResponse createEvent = defaultUserApi.getChronosApi().createEvent(defaultUserApi.getSession(), folderId, toCreate, true, false, null, null, false);
         Assert.assertNotNull("Response doesn't contain an error", createEvent.getError());
-        Assert.assertEquals("CAL-5073", createEvent.getCode());
+        Assert.assertEquals(excpectedErrorCode, createEvent.getCode());
 
 
         // Create normal and try to update
@@ -204,6 +212,6 @@ public class BasicSelfProtectionTest extends AbstractChronosTest {
 
         ChronosCalendarResultResponse updateResponse = defaultUserApi.getChronosApi().updateEvent(defaultUserApi.getSession(), folderId, actualEventData.getId(), actualEventData, eventManager.getLastTimeStamp(), null, true, false, null, null, false);
         Assert.assertNotNull("Response doesn't contain an error", updateResponse.getError());
-        Assert.assertEquals("CAL-5073", updateResponse.getCode());
+        Assert.assertEquals(excpectedErrorCode, updateResponse.getCode());
     }
 }
