@@ -66,7 +66,9 @@ import com.openexchange.test.concurrent.ParallelSuite;
     BasicAlarmTriggerTest.class,
     BasicAvailabilityTest.class,
     BasicFreeBusyTest.class,
-    BasicSchedJoulesTest.class,
+    // FIXME: The SchedJoules tests were deactivated due to the nature of their implementation
+    //        i.e. external/third party service provider. Will be re-activated for CI tests. 
+    //BasicSchedJoulesTest.class,
     BasicSelfProtectionTest.class,
     BasicSeriesEventTest.class,
     BasicSingleEventTest.class,
