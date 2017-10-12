@@ -61,6 +61,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import org.joda.time.Weeks;
+import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -120,7 +121,7 @@ public class CachingCalendarAccessTest {
     @Mock
     private Connection connection;
 
-    private Map<String, Object> cachingConfig = new HashMap<String, Object>();
+    private final Map<String, Object> cachingConfig = new HashMap<String, Object>();
 
     @Before
     public void setUp() throws Exception {
@@ -136,7 +137,7 @@ public class CachingCalendarAccessTest {
 
         cachingCalendarAccess = new TestCachingCalendarAccessImpl(session, account, parameters);
 
-        Mockito.when(account.getConfiguration()).thenReturn(cachingConfig);
+        Mockito.when(account.getInternalConfiguration()).thenReturn(new JSONObject(cachingConfig));
     }
 
     @Test

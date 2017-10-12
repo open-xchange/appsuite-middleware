@@ -52,7 +52,6 @@ package com.openexchange.chronos.provider.google.converter;
 import java.util.HashMap;
 import java.util.Map;
 import org.dmfs.rfc5545.DateTime;
-import com.google.api.services.calendar.model.EventDateTime;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.common.mapping.EventMapper;
@@ -69,7 +68,7 @@ public class GoogleEventConverter {
 
     private static final GoogleEventConverter INSTANCE = new GoogleEventConverter();
 
-    private static final EventMapper MAPPER = EventMapper.getInstance();
+    static final EventMapper MAPPER = EventMapper.getInstance();
 
     private Map<EventField, GoogleMapping> mappings = null;
 
@@ -86,24 +85,21 @@ public class GoogleEventConverter {
         mappings = createMappings();
     }
 
-    public com.google.api.services.calendar.model.Event convertToGoogleEvent(Event from) throws OXException {
-        com.google.api.services.calendar.model.Event to = new com.google.api.services.calendar.model.Event();
-        for(GoogleMapping mapping: mappings.values()){
-            mapping.deserialize(from, to);
-        }
-        return to;
-    }
-
-    public Event convertToEvent(com.google.api.services.calendar.model.Event from) throws OXException {
+    public Event convertToEvent(com.google.api.services.calendar.model.Event from, EventField... fields) throws OXException {
         Event to = new Event();
-        for(GoogleMapping mapping: mappings.values()){
-            mapping.serialize(to, from);
+        if(fields == null || fields.length == 0){
+            fields = EventField.values();
+        }
+        for(EventField field: fields){
+            GoogleMapping mapping = mappings.get(field);
+            if(mapping!=null){
+                mapping.serialize(to, from);
+            }
         }
         return to;
     }
 
     private Map<EventField, GoogleMapping> createMappings(){
-        final EventMapper mapper = MAPPER;
         Map<EventField, GoogleMapping> result = new HashMap<>();
 
         result.put(EventField.ID, new GoogleMapping() {
@@ -114,10 +110,6 @@ public class GoogleEventConverter {
                 ((Mapping<String, Event>)MAPPER.get(EventField.ID)).set(to, from.getId());
             }
 
-            @Override
-            public void deserialize(Event from, com.google.api.services.calendar.model.Event to) throws OXException {
-                to.setId((String) MAPPER.get(EventField.ID).get(from));
-            }
         });
         result.put(EventField.START_DATE, new GoogleMapping() {
 
@@ -127,12 +119,6 @@ public class GoogleEventConverter {
                 ((Mapping<DateTime, Event>)MAPPER.get(EventField.START_DATE)).set(to, new DateTime(from.getStart().getDateTime().getValue()));
             }
 
-            @Override
-            public void deserialize(Event from, com.google.api.services.calendar.model.Event to) throws OXException {
-                EventDateTime eventDateTime = new EventDateTime();
-                eventDateTime.setDateTime(new com.google.api.client.util.DateTime(from.getStartDate().getTimestamp()));
-                to.setStart(eventDateTime);
-            }
         });
         result.put(EventField.END_DATE, new GoogleMapping() {
 
@@ -142,12 +128,6 @@ public class GoogleEventConverter {
                 ((Mapping<DateTime, Event>)MAPPER.get(EventField.END_DATE)).set(to, new DateTime(from.getStart().getDateTime().getValue()));
             }
 
-            @Override
-            public void deserialize(Event from, com.google.api.services.calendar.model.Event to) throws OXException {
-                EventDateTime eventDateTime = new EventDateTime();
-                eventDateTime.setDateTime(new com.google.api.client.util.DateTime(from.getStartDate().getTimestamp()));
-                to.setEnd(eventDateTime);
-            }
         });
 
         return result;
@@ -156,8 +136,6 @@ public class GoogleEventConverter {
     private interface GoogleMapping {
 
         public void serialize(Event to, com.google.api.services.calendar.model.Event from) throws OXException;
-
-        public void deserialize(Event from, com.google.api.services.calendar.model.Event to) throws OXException;
 
     }
 

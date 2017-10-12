@@ -51,22 +51,31 @@ package com.openexchange.chronos.provider.google.access;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.json.JSONException;
+import org.json.JSONObject;
+import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.Calendar;
+import com.google.api.services.calendar.model.CalendarList;
+import com.google.api.services.calendar.model.CalendarListEntry;
 import com.google.api.services.calendar.model.Events;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
+import com.openexchange.chronos.provider.CalendarAccess;
 import com.openexchange.chronos.provider.CalendarAccount;
-import com.openexchange.chronos.provider.SingleFolderCalendarAccess;
-import com.openexchange.chronos.provider.account.CalendarAccountService;
+import com.openexchange.chronos.provider.CalendarFolder;
+import com.openexchange.chronos.provider.DefaultCalendarFolder;
 import com.openexchange.chronos.provider.google.converter.GoogleEventConverter;
-import com.openexchange.chronos.provider.google.osgi.Services;
 import com.openexchange.chronos.service.CalendarParameters;
+import com.openexchange.chronos.service.EventID;
 import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
-import com.openexchange.chronos.provider.google.GoogleCalendarConfigField;
 
 /**
  * {@link GoogleCalendarAccess}
@@ -74,9 +83,14 @@ import com.openexchange.chronos.provider.google.GoogleCalendarConfigField;
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.0
  */
-public class GoogleCalendarAccess extends SingleFolderCalendarAccess {
+public class GoogleCalendarAccess implements CalendarAccess {
 
     private final GoogleOAuthAccess oauthAccess;
+    private final Session session;
+    private final CalendarParameters parameters;
+    private final CalendarAccount account;
+
+    private Map<String, CalendarFolder> folders;
 
     /**
      * Initializes a new {@link GoogleCalendarAccess}.
@@ -87,9 +101,69 @@ public class GoogleCalendarAccess extends SingleFolderCalendarAccess {
      * @throws OXException
      */
     public GoogleCalendarAccess(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
-        super(session, account, parameters);
+        this.session = session;
+        this.parameters = parameters;
+        this.account = account;
         oauthAccess = new GoogleOAuthAccess(account, session);
         oauthAccess.initialize();
+        initCalendarFolder();
+    }
+
+    /**
+    * Initializes the calendar folder and returns an updated internal configuration.
+    *
+    * @return the internal configuration
+    * @throws OXException
+    */
+    @SuppressWarnings("unchecked")
+    public JSONObject initCalendarFolder() throws OXException {
+        try {
+            Calendar googleCal = (Calendar) oauthAccess.getClient().getClient();
+            CalendarList calendars = googleCal.calendarList().list().execute();
+            int id=0;
+            JSONObject internalConfiguration = account.getInternalConfiguration();
+            Map<String, JSONObject> folderArray = null;
+            if(internalConfiguration != null){
+                folderArray = (Map<String, JSONObject>) internalConfiguration.get("folders");
+            }
+            Map<String, JSONObject> folderToAdd = new HashMap<>();
+            for(CalendarListEntry entry: calendars.getItems()){
+                if(folderArray!=null && folderArray.containsKey(entry.getId())){
+                    if(folderArray.get(entry.getId()).getBoolean("enabled")){
+                        folders.put(String.valueOf(id++),new DefaultCalendarFolder(entry.getId(), entry.getSummary()));
+                    }
+                } else {
+                    if(entry.getId().equals("primary")){
+                        folders.put(String.valueOf(id++),new DefaultCalendarFolder(entry.getId(), entry.getSummary()));
+                        JSONObject config = new JSONObject();
+                        config.put("enabled", true);
+                        folderToAdd.put(entry.getId(), config);
+                    } else {
+                        JSONObject config = new JSONObject();
+                        config.put("enabled", false);
+                        folderToAdd.put(entry.getId(), config);
+                    }
+                }
+            }
+            if(!folderToAdd.isEmpty()){
+                Map<String, JSONObject> newConfig = new HashMap<>(folderToAdd.size());
+                if(folderArray != null){
+                    newConfig.putAll(folderArray);
+                }
+                newConfig.putAll(folderToAdd);
+                if(internalConfiguration == null){
+                    internalConfiguration = new JSONObject(1);
+                }
+                internalConfiguration.put("folders", newConfig);
+                return internalConfiguration;
+            }
+            return internalConfiguration;
+        } catch (IOException e) {
+            throw CalendarExceptionCodes.IO_ERROR.create(e, e.getMessage());
+        } catch (JSONException e) {
+            throw CalendarExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+
     }
 
     @Override
@@ -98,40 +172,83 @@ public class GoogleCalendarAccess extends SingleFolderCalendarAccess {
     }
 
     @Override
-    protected Event getEvent(String eventId, RecurrenceId recurrenceId) throws OXException {
-        try {
-            Calendar googleCal = (Calendar) oauthAccess.getClient().getClient();
-            String calendar = account.getUserConfiguration().getString(GoogleCalendarConfigField.calendar_id.name());
-            com.google.api.services.calendar.model.Event event = googleCal.events().get(calendar, eventId).execute();
-            return GoogleEventConverter.getInstance().convertToEvent(event);
-        } catch (IOException e) {
-            throw CalendarExceptionCodes.IO_ERROR.create(e, e.getMessage());
-        } catch (JSONException e) {
-            throw CalendarExceptionCodes.INVALID_CONFIGURATION.create(account.getUserConfiguration());
-        }
+    public CalendarFolder getFolder(String folderId) throws OXException {
+        return folders.get(folderId);
     }
 
     @Override
-    protected List<Event> getEvents() throws OXException {
+    public List<CalendarFolder> getVisibleFolders() throws OXException {
+        return Collections.unmodifiableList(new ArrayList<>(folders.values()));
+    }
+
+    @Override
+    public String updateFolder(String folderId, CalendarFolder folder, long clientTimestamp) throws OXException {
+        // TODO update folder or throw exception if not possible
+        return folderId;
+    }
+
+    @Override
+    public Event getEvent(String folderId, String eventId, RecurrenceId recurrenceId) throws OXException {
         try {
             Calendar googleCal = (Calendar) oauthAccess.getClient().getClient();
-            String calendar = account.getUserConfiguration().getString(GoogleCalendarConfigField.calendar_id.name());
-            Events events = googleCal.events().list(calendar).execute();
+            com.google.api.services.calendar.model.Event event = googleCal.events().get(folderId, eventId).execute();
+            return convertEvent(event);
+        } catch (IOException e) {
+            throw CalendarExceptionCodes.IO_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    private Event convertEvent(com.google.api.services.calendar.model.Event event) throws OXException{
+        if(parameters.contains(CalendarParameters.PARAMETER_FIELDS)){
+            EventField[] eventFields = parameters.get(CalendarParameters.PARAMETER_FIELDS, EventField[].class);
+            return GoogleEventConverter.getInstance().convertToEvent(event, eventFields);
+        }
+        return GoogleEventConverter.getInstance().convertToEvent(event);
+    }
+
+    @Override
+    public List<Event> getEvents(List<EventID> eventIDs) throws OXException {
+        List<Event> result = new ArrayList<>(eventIDs.size());
+        for(EventID id: eventIDs){
+            result.add(getEvent(id.getFolderID(), id.getObjectID(), id.getRecurrenceID()));
+        }
+        return result;
+    }
+
+    @Override
+    public List<Event> getChangeExceptions(String folderId, String seriesId) throws OXException {
+        // TODO can be deleted?
+        return null;
+    }
+
+    @Override
+    public List<Event> getEventsInFolder(String folderId) throws OXException {
+        try {
+            Calendar googleCal = (Calendar) oauthAccess.getClient().getClient();
+            com.google.api.services.calendar.Calendar.Events.List list = googleCal.events().list(folderId);
+
+            Date startDate = parameters.get(CalendarParameters.PARAMETER_RANGE_START, Date.class);
+            Date endDate = parameters.get(CalendarParameters.PARAMETER_RANGE_END, Date.class);
+            DateTime startDateTime = new DateTime(startDate);
+            list = list.setTimeMin(startDateTime);
+            DateTime endDateTime = new DateTime(endDate);
+            list = list.setTimeMin(endDateTime);
+
+            if(parameters.contains(CalendarParameters.PARAMETER_EXPAND_OCCURRENCES) && parameters.get(CalendarParameters.PARAMETER_EXPAND_OCCURRENCES, Boolean.class)){
+                list.setSingleEvents(true);
+            }
+
+            Events events = list.execute();
             List<Event> result = new ArrayList<>(events.size());
             for(com.google.api.services.calendar.model.Event event : events.getItems()){
-                result.add(GoogleEventConverter.getInstance().convertToEvent(event));
+                result.add(convertEvent(event));
             }
+
+            // Sort by order
             return result;
         } catch (IOException e) {
             throw CalendarExceptionCodes.IO_ERROR.create(e, e.getMessage());
-        } catch (JSONException e) {
-            throw CalendarExceptionCodes.INVALID_CONFIGURATION.create(account.getUserConfiguration());
         }
-    }
-
-    @Override
-    protected CalendarAccountService getAccountService() throws OXException {
-        return Services.getService(CalendarAccountService.class);
     }
 
 }

@@ -77,7 +77,7 @@ public class GoogleOAuthAccess extends AbstractOAuthAccess {
     /**
      * Initializes a new {@link GoogleOAuthAccess}.
      */
-    public GoogleOAuthAccess(CalendarAccount account, Session session) throws OXException {
+    public GoogleOAuthAccess(CalendarAccount account, Session session) {
         super(session);
         this.acc = account;
     }
@@ -110,7 +110,7 @@ public class GoogleOAuthAccess extends AbstractOAuthAccess {
     @Override
     public boolean ping() throws OXException {
         try {
-            Calendar cal = this.<Calendar> getClient().client;
+//            Calendar cal = this.<Calendar> getClient().client;
             return true;
 //        } catch (final HttpResponseException e) {
 //            if (401 == e.getStatusCode() || 403 == e.getStatusCode()) {
