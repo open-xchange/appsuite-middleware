@@ -103,8 +103,7 @@ public class ICalFeedConfig {
         private final long lastUpdated;
 
         Builder(CalendarAccount account, JSONObject folderConfig) {
-            JSONObject configuration = account.getInternalConfiguration();
-            feedUrl = configuration.optString("uri", null);
+            feedUrl = account.getUserConfiguration().optString("uri", null);
             etag = folderConfig.optString(ETAG, null);
             lastUpdated = folderConfig.optLong(CachingCalendarAccess.LAST_UPDATE, -1L);
         }

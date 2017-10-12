@@ -71,10 +71,11 @@ import com.openexchange.chronos.ical.ICalParameters;
 import com.openexchange.chronos.ical.ICalService;
 import com.openexchange.chronos.ical.ImportedCalendar;
 import com.openexchange.chronos.provider.CalendarAccount;
-import com.openexchange.chronos.provider.auth.PasswordUtil;
 import com.openexchange.chronos.provider.ical.exception.ICalProviderExceptionCodes;
 import com.openexchange.chronos.provider.ical.internal.ICalCalendarProviderProperties;
 import com.openexchange.chronos.provider.ical.internal.Services;
+import com.openexchange.chronos.provider.ical.internal.auth.CalendarAuthParser;
+import com.openexchange.chronos.provider.ical.internal.auth.PasswordUtil;
 import com.openexchange.chronos.provider.ical.result.GetResult;
 import com.openexchange.chronos.provider.ical.result.HeadResult;
 import com.openexchange.config.ConfigTools;
@@ -142,7 +143,7 @@ public class ICalFeedReader {
     }
 
     private void handleAuth(HttpRequestBase method) throws OXException {
-        AuthInfo authInfo = null;// TODO this.account.getAuthInfo();
+        AuthInfo authInfo = CalendarAuthParser.getInstance().getAuthInfo(this.account.getUserConfiguration());
         AuthType authType = authInfo.getAuthType();
         switch (authType) {
             case LOGIN: {

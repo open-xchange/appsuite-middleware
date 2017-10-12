@@ -61,6 +61,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import org.joda.time.Weeks;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -120,7 +122,9 @@ public class CachingCalendarAccessTest {
     @Mock
     private Connection connection;
 
-    private Map<String, Object> cachingConfig = new HashMap<String, Object>();
+    private JSONObject cachingConfig = new JSONObject();
+
+    private Map<String, Object> cachingConfigMap = new HashMap<>();
 
     @Before
     public void setUp() throws Exception {
@@ -136,7 +140,7 @@ public class CachingCalendarAccessTest {
 
         cachingCalendarAccess = new TestCachingCalendarAccessImpl(session, account, parameters);
 
-        Mockito.when(account.getConfiguration()).thenReturn(cachingConfig);
+        Mockito.when(account.getInternalConfiguration()).thenReturn(cachingConfig);
     }
 
     @Test
@@ -249,9 +253,9 @@ public class CachingCalendarAccessTest {
     }
 
     @Test
-    public void testGetLatestUpdateStates_noCacheConfiguration_returnInitialInsert() throws OXException {
+    public void testGetLatestUpdateStates_noCacheConfiguration_returnInitialInsert() throws OXException, JSONException {
         Map<String, Map<String, Object>> folderCachingConfig = new HashMap<>();
-        cachingConfig.put(CachingCalendarAccess.CACHING, folderCachingConfig);
+        cachingConfig.append(CachingCalendarAccess.CACHING, folderCachingConfig);
 
         List<FolderUpdateState> latestUpdateStates = cachingCalendarAccess.getLatestUpdateStates();
 
@@ -259,12 +263,12 @@ public class CachingCalendarAccessTest {
     }
 
     @Test
-    public void testGetLatestUpdateStates_oneFolderCachedButRequestedInReadTime_returnUpdateState() throws OXException {
+    public void testGetLatestUpdateStates_oneFolderCachedButRequestedInReadTime_returnUpdateState() throws OXException, JSONException {
         Map<String, Map<String, Object>> folderCachingConfig = new HashMap<>();
         Map<String, Object> latestUpdate = new HashMap<>();
         latestUpdate.put(CachingCalendarAccess.LAST_UPDATE, System.currentTimeMillis());
         folderCachingConfig.put("0", latestUpdate);
-        cachingConfig.put(CachingCalendarAccess.CACHING, folderCachingConfig);
+        cachingConfig.append(CachingCalendarAccess.CACHING, folderCachingConfig);
 
         List<FolderUpdateState> latestUpdateStates = cachingCalendarAccess.getLatestUpdateStates();
 
@@ -273,12 +277,12 @@ public class CachingCalendarAccessTest {
     }
 
     @Test
-    public void testGetLatestUpdateStates_oneFolderCachedAndRefreshPeriodExceeded_returnUpdateState() throws OXException {
+    public void testGetLatestUpdateStates_oneFolderCachedAndRefreshPeriodExceeded_returnUpdateState() throws OXException, JSONException {
         Map<String, Map<String, Object>> folderCachingConfig = new HashMap<>();
         Map<String, Object> latestUpdate = new HashMap<>();
         latestUpdate.put(CachingCalendarAccess.LAST_UPDATE, System.currentTimeMillis() - TimeUnit.MINUTES.toMillis(Weeks.TWO.toStandardMinutes().getMinutes()));
         folderCachingConfig.put("0", latestUpdate);
-        cachingConfig.put(CachingCalendarAccess.CACHING, folderCachingConfig);
+        cachingConfig.append(CachingCalendarAccess.CACHING, folderCachingConfig);
 
         List<FolderUpdateState> latestUpdateStates = cachingCalendarAccess.getLatestUpdateStates();
 
@@ -287,7 +291,7 @@ public class CachingCalendarAccessTest {
     }
 
     @Test
-    public void testGetLatestUpdateStates_multipleFolderCached_returnUpdateState() throws OXException {
+    public void testGetLatestUpdateStates_multipleFolderCached_returnUpdateState() throws OXException, JSONException {
         Map<String, Map<String, Object>> folderCachingConfig = new HashMap<>();
         Map<String, Object> latestUpdate = new HashMap<>();
         latestUpdate.put(CachingCalendarAccess.LAST_UPDATE, System.currentTimeMillis() - TimeUnit.MINUTES.toMillis(Weeks.TWO.toStandardMinutes().getMinutes()));
@@ -297,7 +301,7 @@ public class CachingCalendarAccessTest {
         latestUpdate2.put(CachingCalendarAccess.LAST_UPDATE, System.currentTimeMillis());
         folderCachingConfig.put("2", latestUpdate2);
 
-        cachingConfig.put(CachingCalendarAccess.CACHING, folderCachingConfig);
+        cachingConfig.append(CachingCalendarAccess.CACHING, folderCachingConfig);
 
         List<FolderUpdateState> latestUpdateStates = cachingCalendarAccess.getLatestUpdateStates();
 
@@ -313,11 +317,11 @@ public class CachingCalendarAccessTest {
     }
 
     @Test
-    public void testGetLatestUpdateStates_folderKnownWithoutLastUpdateTimestamp_shouldNotHappenButReturnInitialUpdate() throws OXException {
+    public void testGetLatestUpdateStates_folderKnownWithoutLastUpdateTimestamp_shouldNotHappenButReturnInitialUpdate() throws OXException, JSONException {
         Map<String, Map<String, Object>> folderCachingConfig = new HashMap<>();
         Map<String, Object> latestUpdate = new HashMap<>();
         folderCachingConfig.put("0", latestUpdate);
-        cachingConfig.put(CachingCalendarAccess.CACHING, folderCachingConfig);
+        cachingConfig.append(CachingCalendarAccess.CACHING, folderCachingConfig);
 
         List<FolderUpdateState> latestUpdateStates = cachingCalendarAccess.getLatestUpdateStates();
 
@@ -334,7 +338,7 @@ public class CachingCalendarAccessTest {
 
     @Test
     public void testGetLatestUpdateStates_folderConfigEmptyAndProviderIntervalTooSmall_useDefaultOneWeek() {
-        long cascadedRefreshInterval = cachingCalendarAccess.getCascadedRefreshInterval(cachingConfig);
+        long cascadedRefreshInterval = cachingCalendarAccess.getCascadedRefreshInterval(cachingConfigMap);
 
         assertEquals(Weeks.ONE.toStandardMinutes().getMinutes(), cascadedRefreshInterval);
     }
@@ -364,7 +368,7 @@ public class CachingCalendarAccessTest {
                 return refreshInterval;
             }
         };
-        long cascadedRefreshInterval = cachingCalendarAccess.getCascadedRefreshInterval(cachingConfig);
+        long cascadedRefreshInterval = cachingCalendarAccess.getCascadedRefreshInterval(cachingConfigMap);
 
         assertEquals(refreshInterval, cascadedRefreshInterval);
     }

@@ -50,6 +50,7 @@
 package com.openexchange.chronos.provider.caching.osgi;
 
 import static org.slf4j.LoggerFactory.getLogger;
+import com.openexchange.chronos.provider.account.AdministrativeCalendarAccountService;
 import com.openexchange.chronos.provider.caching.internal.Services;
 import com.openexchange.chronos.service.CalendarUtilities;
 import com.openexchange.chronos.storage.CalendarAccountStorageFactory;
@@ -76,7 +77,7 @@ public class CachingCalendarAccessActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { CalendarAccountStorageFactory.class, CalendarStorageFactory.class, DatabaseService.class, ContextService.class, CalendarUtilities.class };
+        return new Class<?>[] { CalendarAccountStorageFactory.class, CalendarStorageFactory.class, DatabaseService.class, ContextService.class, CalendarUtilities.class, AdministrativeCalendarAccountService.class };
     }
 
     @Override

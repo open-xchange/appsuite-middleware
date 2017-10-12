@@ -344,8 +344,7 @@ public abstract class CachingCalendarAccess implements WarningsAware {
         return warnings;
     }
 
-    public JSONObject getFolderConfiguration(String folderId) {
-
+    public JSONObject getFolderCachingConfiguration(String folderId) {
         JSONObject internalConfig = getAccount().getInternalConfiguration();
         JSONObject caching = internalConfig.optJSONObject(CACHING);
         if (caching == null) {
