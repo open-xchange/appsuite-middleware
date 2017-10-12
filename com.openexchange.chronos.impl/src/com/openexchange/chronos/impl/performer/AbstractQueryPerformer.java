@@ -74,9 +74,11 @@ import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.SelfProtectionFactory;
 import com.openexchange.chronos.common.SelfProtectionFactory.SelfProtection;
 import com.openexchange.chronos.impl.Utils;
+import com.openexchange.chronos.impl.osgi.Services;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.SearchOptions;
 import com.openexchange.chronos.storage.CalendarStorage;
+import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.quota.Quota;
@@ -109,7 +111,8 @@ public abstract class AbstractQueryPerformer {
 
     protected SelfProtection getSelfProctection() throws OXException{
         if(selfProtection==null){
-            selfProtection = SelfProtectionFactory.createSelfProtection(session.getSession());
+            LeanConfigurationService leanConfigurationService = Services.getService(LeanConfigurationService.class);
+            selfProtection = SelfProtectionFactory.createSelfProtection(session.getSession(), leanConfigurationService);
         }
         return selfProtection;
     }

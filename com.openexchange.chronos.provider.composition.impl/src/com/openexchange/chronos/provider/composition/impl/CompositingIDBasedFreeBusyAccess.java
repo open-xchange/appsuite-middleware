@@ -70,6 +70,7 @@ import com.openexchange.chronos.provider.composition.IDBasedFreeBusyAccess;
 import com.openexchange.chronos.provider.composition.impl.idmangling.IDManglingEventConflict;
 import com.openexchange.chronos.service.EventConflict;
 import com.openexchange.chronos.service.FreeBusyResult;
+import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
@@ -82,7 +83,7 @@ import com.openexchange.session.Session;
  */
 public class CompositingIDBasedFreeBusyAccess extends AbstractCompositingIDBasedCalendarAccess implements IDBasedFreeBusyAccess {
 
-    private final SelfProtection protection;
+    private SelfProtection protection;
 
     /**
      * Initializes a new {@link CompositingIDBasedFreeBusyAccess}.
@@ -93,7 +94,14 @@ public class CompositingIDBasedFreeBusyAccess extends AbstractCompositingIDBased
      */
     public CompositingIDBasedFreeBusyAccess(Session session, CalendarProviderRegistry providerRegistry, ServiceLookup services) throws OXException {
         super(session, providerRegistry, services);
-        protection = SelfProtectionFactory.createSelfProtection(session);
+    }
+
+    private SelfProtection getSelfProtection() throws OXException {
+        if (protection == null) {
+            LeanConfigurationService leanConfigurationService = services.getService(LeanConfigurationService.class);
+            protection = SelfProtectionFactory.createSelfProtection(this.session, leanConfigurationService);
+        }
+        return protection;
     }
 
     @Override
@@ -138,15 +146,15 @@ public class CompositingIDBasedFreeBusyAccess extends AbstractCompositingIDBased
                     result = eventsPerAttendee;
                     for (Attendee att : result.keySet()) {
                         result.put(att, withUniqueIDs(result.get(att), account.getAccountId()));
-                        protection.checkEventCollection(result.get(att));
+                        getSelfProtection().checkEventCollection(result.get(att));
                     }
                 } else {
                     for (Attendee att : eventsPerAttendee.keySet()) {
                         result.get(att).addAll(withUniqueIDs(eventsPerAttendee.get(att), account.getAccountId()));
-                        protection.checkEventCollection(result.get(att));
+                        getSelfProtection().checkEventCollection(result.get(att));
                     }
                 }
-                protection.checkMap(eventsPerAttendee);
+                getSelfProtection().checkMap(eventsPerAttendee);
             }
         }
 
@@ -235,7 +243,7 @@ public class CompositingIDBasedFreeBusyAccess extends AbstractCompositingIDBased
                     result.add(new IDManglingEventConflict(conflict, account.getAccountId()));
                 }
             }
-            protection.checkEventCollection(result);
+            getSelfProtection().checkEventCollection(result);
         }
 
         //TODO sort results?

@@ -101,6 +101,7 @@ import com.openexchange.chronos.service.SearchFilter;
 import com.openexchange.chronos.service.SearchOptions;
 import com.openexchange.chronos.service.SortOrder;
 import com.openexchange.chronos.service.UpdatesResult;
+import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.util.TimeZones;
 import com.openexchange.server.ServiceLookup;
@@ -114,6 +115,8 @@ import com.openexchange.session.Session;
  * @since v7.10.0
  */
 public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBasedCalendarAccess implements IDBasedCalendarAccess {
+
+    private SelfProtection protection = null;
 
     /**
      * Initializes a new {@link CompositingIDBasedCalendarAccess}.
@@ -132,7 +135,11 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
     }
 
     private SelfProtection getSelfProtection() throws OXException {
-        return SelfProtectionFactory.createSelfProtection(getSession());
+        if (protection == null) {
+            LeanConfigurationService leanConfigurationService = services.getService(LeanConfigurationService.class);
+            protection = SelfProtectionFactory.createSelfProtection(getSession(), leanConfigurationService);
+        }
+        return protection;
     }
 
     @Override

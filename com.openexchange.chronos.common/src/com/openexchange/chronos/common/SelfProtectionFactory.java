@@ -51,16 +51,15 @@ package com.openexchange.chronos.common;
 
 import java.util.Collection;
 import java.util.Map;
+import org.slf4j.LoggerFactory;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
-import com.openexchange.chronos.common.osgi.Services;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.config.lean.DefaultProperty;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.config.lean.Property;
 import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
 
 /**
@@ -70,6 +69,8 @@ import com.openexchange.session.Session;
  * @since v7.10.0
  */
 public class SelfProtectionFactory {
+
+    static final org.slf4j.Logger LOG = LoggerFactory.getLogger(SelfProtectionFactory.class);
 
     private static final String PROPERTY_EVENT_LIMIT = "com.openexchange.chronos.maxEventResults";
     private static final String PROPERTY_ATTENDEE_LIMIT = "com.openexchange.chronos.maxAttendeesPerEvent";
@@ -82,8 +83,8 @@ public class SelfProtectionFactory {
         super();
     }
 
-    public static SelfProtection createSelfProtection(Session session) throws OXException{
-        return new SelfProtection(session);
+    public static SelfProtection createSelfProtection(Session session, LeanConfigurationService leanConfigurationService) throws OXException{
+        return new SelfProtection(session, leanConfigurationService);
     }
 
     public static class SelfProtection {
@@ -96,11 +97,15 @@ public class SelfProtectionFactory {
          * Initializes a new {@link SelfProtectionFactory.SelfProtection}.
          * @throws OXException
          */
-        public SelfProtection(Session session) throws OXException {
+        public SelfProtection(Session session, LeanConfigurationService leanConfigurationService) throws OXException {
             super();
-            LeanConfigurationService leanConfigurationService = Services.getService(LeanConfigurationService.class);
             if(leanConfigurationService == null){
-                throw ServiceExceptionCode.absentService(LeanConfigurationService.class);
+                // Log warning and use defaults
+                LOG.warn("Missing LeanConfigurationService. Going to use default values for self protection.");
+                eventLimit = 1000;
+                attendeeLimit = 1000;
+                alarmLimit = 100;
+                return;
             }
 
             Property prop = DefaultProperty.valueOf(PROPERTY_EVENT_LIMIT, 1000);
