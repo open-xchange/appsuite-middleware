@@ -63,6 +63,7 @@ import com.openexchange.chronos.Event;
 import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.server.ServiceLookup;
 
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
@@ -184,10 +185,10 @@ public class CPTool extends WeekAndDayCalculator {
      * @param events To convert
      * @return The {@link Event}s as {@link CPEvent}s
      */
-    public List<CPEvent> toCPAppointment(List<Event> events, CPCalendar cal, Context context) {
+    public List<CPEvent> toCPAppointment(ServiceLookup services, List<Event> events, CPCalendar cal, Context context) {
         List<CPEvent> retval = new LinkedList<>();
         for(Event event: events) {
-            retval.add(new CPEvent(event, cal, context));
+            retval.add(new CPEvent(services, event, cal, context));
         }
         return retval;
     }

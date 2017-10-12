@@ -73,9 +73,6 @@ public class CPEvent {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CPEvent.class);
 
-    // From com.openexchange.groupware.calendar.Constants
-    private static final long MILLI_MINUTE = 1000L * 60;
-
     private String title, description, location;
 
     private Date startDate, endDate;
@@ -85,21 +82,31 @@ public class CPEvent {
     private final CPCalendar cal;
 
     private final Context context;
+    
+    private String colorLabel;
 
-    public CPEvent(final Event mother) {
-        this(mother, null, null);
-    }
+    private final ServiceLookup services;
 
-    public CPEvent(final Event mother, final CPCalendar cal, final Context context) {
+    public CPEvent(ServiceLookup services, final Event mother, final CPCalendar cal, final Context context) {
         super();
         this.cal = cal;
         this.context = context;
+        this.services = services;
         setTitle(mother.getSummary());
         setDescription(mother.getDescription());
         setLocation(mother.getLocation());
         setStartDate(new Date(mother.getStartDate().getTimestamp()));
         setEndDate(new Date(mother.getEndDate().getTimestamp()));
+        setColorLabel(mother.getColor());
         setOriginal(mother);
+    }
+    
+    private void setColorLabel(String label) {
+        this.colorLabel = label;
+    }
+
+    public String getColorLabel() {
+        return StringEscapeUtils.escapeHtml(colorLabel);
     }
 
     public String getTitle() {
@@ -129,7 +136,7 @@ public class CPEvent {
     }
 
     public long getStartMinutes() {
-        return (startDate.getTime() - CalendarTools.getDayStart(cal, startDate).getTime()) / MILLI_MINUTE;
+        return (startDate.getTime() - CalendarTools.getDayStart(cal, startDate).getTime()) / Constants.MILLI_MINUTE;
     }
 
     public Date getEndDate() {
@@ -137,7 +144,7 @@ public class CPEvent {
     }
 
     public long getDurationInMinutes() {
-        return (endDate.getTime() - startDate.getTime()) / MILLI_MINUTE;
+        return (endDate.getTime() - startDate.getTime()) / Constants.MILLI_MINUTE;
     }
 
     public void setTitle(final String title) {
@@ -160,8 +167,7 @@ public class CPEvent {
         this.endDate = end;
     }
 
-    // TODO Can be removed??
-    public List<String> getParticipants(ServiceLookup services) {
+    public List<String> getParticipants() {
         final List<String> retval = new ArrayList<String>();
         for (final Attendee attendee : original.getAttendees()) {
             CalendarUserType userType = attendee.getCuType();
