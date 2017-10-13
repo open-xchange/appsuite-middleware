@@ -67,7 +67,7 @@ import com.openexchange.session.Session;
 public class SchedjoulesCalendarProvider implements CalendarProvider {
 
     private static final String PROVIDER_ID = "schedjoules";
-    private static final String DISPLAY_NAME = "Schedjoules";
+    private static final String DISPLAY_NAME = "SchedJoules";
 
     private final ServiceLookup services;
 
@@ -111,31 +111,59 @@ public class SchedjoulesCalendarProvider implements CalendarProvider {
         return new SchedjoulesCalendarAccess(services, session, account, parameters);
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.chronos.provider.CalendarProvider#configureAccount(com.openexchange.session.Session, org.json.JSONObject, com.openexchange.chronos.service.CalendarParameters)
+     */
     @Override
     public JSONObject configureAccount(Session session, JSONObject userConfig, CalendarParameters parameters) throws OXException {
-        //TODO
-        return new JSONObject();
-    }
-
-    @Override
-    public JSONObject reconfigureAccount(Session session, JSONObject internalConfig, JSONObject userConfig, CalendarParameters parameters) throws OXException {
-        //TODO
+        // TODO Auto-generated method stub
         return null;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.chronos.provider.CalendarProvider#reconfigureAccount(com.openexchange.session.Session, org.json.JSONObject, org.json.JSONObject, com.openexchange.chronos.service.CalendarParameters)
+     */
+    @Override
+    public JSONObject reconfigureAccount(Session session, JSONObject internalConfig, JSONObject userConfig, CalendarParameters parameters) throws OXException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.chronos.provider.CalendarProvider#onAccountCreated(com.openexchange.session.Session, com.openexchange.chronos.provider.CalendarAccount, com.openexchange.chronos.service.CalendarParameters)
+     */
     @Override
     public void onAccountCreated(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
-        // TODO
+        // TODO Auto-generated method stub
+
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.chronos.provider.CalendarProvider#onAccountUpdated(com.openexchange.session.Session, com.openexchange.chronos.provider.CalendarAccount, com.openexchange.chronos.service.CalendarParameters)
+     */
     @Override
     public void onAccountUpdated(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
-        // TODO
+        // TODO Auto-generated method stub
+
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.chronos.provider.CalendarProvider#onAccountDeleted(com.openexchange.session.Session, com.openexchange.chronos.provider.CalendarAccount, com.openexchange.chronos.service.CalendarParameters)
+     */
     @Override
     public void onAccountDeleted(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
-        // TODO
+        // TODO Auto-generated method stub
+
     }
 
 }

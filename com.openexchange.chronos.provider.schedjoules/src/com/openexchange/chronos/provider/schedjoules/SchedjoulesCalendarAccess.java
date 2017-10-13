@@ -51,10 +51,10 @@ package com.openexchange.chronos.provider.schedjoules;
 
 import java.util.List;
 import com.openexchange.chronos.Event;
-import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.provider.CalendarAccount;
-import com.openexchange.chronos.provider.SingleFolderCalendarAccess;
-import com.openexchange.chronos.provider.account.CalendarAccountService;
+import com.openexchange.chronos.provider.CalendarFolder;
+import com.openexchange.chronos.provider.caching.CachingCalendarAccess;
+import com.openexchange.chronos.provider.caching.ExternalCalendarResult;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
@@ -65,9 +65,8 @@ import com.openexchange.session.Session;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class SchedjoulesCalendarAccess extends SingleFolderCalendarAccess {
+public class SchedjoulesCalendarAccess extends CachingCalendarAccess {
 
-    private final Session session;
     private final ServiceLookup services;
 
     /**
@@ -75,11 +74,11 @@ public class SchedjoulesCalendarAccess extends SingleFolderCalendarAccess {
      *
      * @param account
      * @param parameters
+     * @throws OXException
      */
-    protected SchedjoulesCalendarAccess(ServiceLookup services, Session session, CalendarAccount account, CalendarParameters parameters) {
+    protected SchedjoulesCalendarAccess(ServiceLookup services, Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
         super(session, account, parameters);
         this.services = services;
-        this.session = session;
     }
 
     /*
@@ -95,30 +94,90 @@ public class SchedjoulesCalendarAccess extends SingleFolderCalendarAccess {
 
     /*
      * (non-Javadoc)
-     *
-     * @see com.openexchange.chronos.provider.SingleFolderCalendarAccess#getEvent(java.lang.String, com.openexchange.chronos.RecurrenceId)
+     * 
+     * @see com.openexchange.chronos.provider.CalendarAccess#getFolder(java.lang.String)
      */
     @Override
-    protected Event getEvent(String eventId, RecurrenceId recurrenceId) throws OXException {
+    public CalendarFolder getFolder(String folderId) throws OXException {
         // TODO Auto-generated method stub
         return null;
     }
 
     /*
      * (non-Javadoc)
-     *
-     * @see com.openexchange.chronos.provider.SingleFolderCalendarAccess#getEvents()
+     * 
+     * @see com.openexchange.chronos.provider.CalendarAccess#getVisibleFolders()
      */
     @Override
-    protected List<Event> getEvents() throws OXException {
+    public List<CalendarFolder> getVisibleFolders() throws OXException {
         // TODO Auto-generated method stub
         return null;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.chronos.provider.CalendarAccess#updateFolder(java.lang.String, com.openexchange.chronos.provider.CalendarFolder, long)
+     */
     @Override
-    protected CalendarAccountService getAccountService() throws OXException {
+    public String updateFolder(String folderId, CalendarFolder folder, long clientTimestamp) throws OXException {
         // TODO Auto-generated method stub
         return null;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.chronos.provider.CalendarAccess#getChangeExceptions(java.lang.String, java.lang.String)
+     */
+    @Override
+    public List<Event> getChangeExceptions(String folderId, String seriesId) throws OXException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.chronos.provider.caching.CachingCalendarAccess#getRefreshInterval()
+     */
+    @Override
+    protected long getRefreshInterval() {
+        // TODO Auto-generated method stub
+        return 0;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.chronos.provider.caching.CachingCalendarAccess#getExternalRequestTimeout()
+     */
+    @Override
+    public long getExternalRequestTimeout() {
+        // TODO Auto-generated method stub
+        return 0;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.chronos.provider.caching.CachingCalendarAccess#getEvents(java.lang.String)
+     */
+    @Override
+    public ExternalCalendarResult getEvents(String folderId) throws OXException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.chronos.provider.caching.CachingCalendarAccess#handleExceptions(java.lang.String, com.openexchange.exception.OXException)
+     */
+    @Override
+    public void handleExceptions(String calendarFolderId, OXException e) {
+        // TODO Auto-generated method stub
+
     }
 
 }

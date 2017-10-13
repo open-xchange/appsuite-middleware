@@ -8,6 +8,7 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.openexchange.chronos,
  com.openexchange.chronos.provider,
  com.openexchange.chronos.provider.account,
+ com.openexchange.chronos.provider.caching,
  com.openexchange.chronos.service,
  com.openexchange.exception,
  com.openexchange.server,
