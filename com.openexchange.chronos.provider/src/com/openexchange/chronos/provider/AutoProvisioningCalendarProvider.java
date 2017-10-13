@@ -49,45 +49,31 @@
 
 package com.openexchange.chronos.provider;
 
-import java.util.List;
-import com.openexchange.osgi.annotation.SingletonService;
+import org.json.JSONObject;
+import com.openexchange.chronos.service.CalendarParameters;
+import com.openexchange.exception.OXException;
+import com.openexchange.session.Session;
 
 /**
- * {@link CalendarProviderRegistry}
+ * {@link AutoProvisioningCalendarProvider}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-@SingletonService
-public interface CalendarProviderRegistry {
+public interface AutoProvisioningCalendarProvider extends CalendarProvider {
 
     /**
-     * Gets a specific calendar provider.
+     * Initializes the configuration prior creating a new calendar account. This method is invoked in case no existing calendar account
+     * of the provider is found for the current session's user, allowing to auto-provision a corresponding account that is persisted
+     * afterwards for later usage.
+     * <p/>
+     * Upon success, any <i>internal</i> configuration data is returned for persisting along with the newly created calendar account.
      *
-     * @param id The identifier of the calendar provider to get
-     * @return The calendar provider, or <code>null</code> if not found
+     * @param session The user's session
+     * @param userConfig The (empty) <i>user</i> configuration to populate with defaults
+     * @param parameters Additional calendar parameters, or <code>null</code> if not set
+     * @return A JSON object holding the <i>internal</i> configuration to store along with the new account, or <code>null</code>
      */
-    CalendarProvider getCalendarProvider(String id);
-
-    /**
-     * Gets all registered calendar providers.
-     *
-     * @return A list of all registered calendar providers
-     */
-    List<CalendarProvider> getCalendarProviders();
-
-    /**
-     * Gets all registered <i>auto-provisioning</i> calendar providers.
-     *
-     * @return A list of all registered auto-provisioning calendar providers
-     */
-    List<AutoProvisioningCalendarProvider> getAutoProvisioningCalendarProviders();
-
-    /**
-     * Gets all registered free/busy providers.
-     *
-     * @return A list of all registered free/busy providers
-     */
-    List<FreeBusyProvider> getFreeBusyProviders();
+    JSONObject autoConfigureAccount(Session session, JSONObject userConfig, CalendarParameters parameters) throws OXException;
 
 }
