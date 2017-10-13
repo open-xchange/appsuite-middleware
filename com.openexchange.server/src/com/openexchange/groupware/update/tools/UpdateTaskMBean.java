@@ -219,7 +219,8 @@ public final class UpdateTaskMBean implements DynamicMBean {
                             } else {
                                 sb.append("\\R");
                             }
-                            sb.append(' ').append(taskInfo.getTaskName()).append(" (schema=").append(taskInfo.getSchema()).append(')');
+                            sb.append(' ').append(taskInfo.getTaskName()).append(" (class=").append(taskInfo.getClass().getName()).append(')');
+                            sb.append(" (schema=").append(taskInfo.getSchema()).append(')');
                         }
                         return sb.toString();
                     }

@@ -67,6 +67,7 @@ import com.openexchange.authentication.SessionEnhancement;
 import com.openexchange.authorization.Authorization;
 import com.openexchange.authorization.AuthorizationService;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Reloadable;
 import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -87,6 +88,7 @@ import com.openexchange.login.internal.format.DefaultLoginFormatter;
 import com.openexchange.login.internal.format.LoginFormatter;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.server.reloadable.GenericReloadable;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
@@ -120,6 +122,27 @@ public final class LoginPerformer {
      */
     public static LoginPerformer getInstance() {
         return SINGLETON;
+    }
+
+    private static final String PROPERTY_NAME = "com.openexchange.server.migrationRedirectURL";
+    static {
+        GenericReloadable.getInstance().addReloadable(new Reloadable() {
+
+            @Override
+            public void reloadConfiguration(final ConfigurationService configService) {
+                String migrationRedirectURL = configService.getProperty(PROPERTY_NAME);
+                if (Strings.isEmpty(migrationRedirectURL)) {
+                    LOG.warn("The property '" + PROPERTY_NAME + "' in 'server.properties' is empty. No redirect will happen unless it is properly configured.");
+                }
+            }
+
+            @Override
+            public Map<String, String[]> getConfigFileNames() {
+                Map<String, String[]> map = new HashMap<String, String[]>(1);
+                map.put("server.properties", new String[] { PROPERTY_NAME });
+                return map;
+            }
+        });
     }
 
     /**
@@ -246,7 +269,9 @@ public final class LoginPerformer {
             if (ContextExceptionCodes.LOCATED_IN_ANOTHER_SERVER.equals(e)) {
                 ConfigurationService configService = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
                 String migrationRedirectURL = configService.getProperty("com.openexchange.server.migrationRedirectURL");
-                if (!Strings.isEmpty(migrationRedirectURL)) {
+                if (Strings.isEmpty(migrationRedirectURL)) {
+                    LOG.error("Cannot redirect. The property 'com.openexchange.server.migrationRedirectURL' is not set in 'server.properties'.");
+                } else {
                     throw LoginExceptionCodes.REDIRECT.create(migrationRedirectURL);
                 }
             }
