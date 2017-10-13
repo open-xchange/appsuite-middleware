@@ -85,8 +85,8 @@ public final class SpamExpertsServlet extends DataServlet {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SpamExpertsServlet.class);
 
-    private final SpamExpertsConfig config;
-    private final CloseableHttpClient httpClient;
+    private final transient SpamExpertsConfig config;
+    private final transient CloseableHttpClient httpClient;
 
     /**
      * Initializes a new {@link SpamExpertsServlet}.
