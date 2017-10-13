@@ -75,9 +75,13 @@ public abstract class OSGiCalendarStorageOperation<T> extends CalendarStorageOpe
 
     /**
      * Initializes a new {@link OSGiCalendarStorageOperation}.
+     * <p/>
+     * The passed service lookup reference should yield the {@link ContextService}, the {@link DatabaseService} and the
+     * {@link CalendarStorageFactory}, and optionally the {@link CalendarUtilities} service.
      *
      * @param services A service lookup reference providing access for the needed services
      * @param contextId The context identifier
+     * @param accountId The account identifier
      */
     protected OSGiCalendarStorageOperation(ServiceLookup services, int contextId, int accountId) throws OXException {
         super(services.getService(DatabaseService.class), contextId);
@@ -90,9 +94,13 @@ public abstract class OSGiCalendarStorageOperation<T> extends CalendarStorageOpe
         Context context = services.getService(ContextService.class).getContext(contextId);
         CalendarStorageFactory storageFactory = services.getService(CalendarStorageFactory.class);
         return storageFactory.create(context, accountId, optEntityResolver(), dbProvider, txPolicy);
-
     }
 
+    /**
+     * Optionally gets an entity resolver for the context.
+     *
+     * @return The entity resolver, or <code>null</code> if not available
+     */
     protected EntityResolver optEntityResolver() throws OXException {
         CalendarUtilities calendarUtilities = services.getOptionalService(CalendarUtilities.class);
         return null != calendarUtilities ? calendarUtilities.getEntityResolver(contextId) : null;
