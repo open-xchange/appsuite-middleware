@@ -77,9 +77,9 @@ import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.common.FreeBusyUtils;
 import com.openexchange.chronos.common.SelfProtectionFactory;
 import com.openexchange.chronos.common.SelfProtectionFactory.SelfProtection;
-import com.openexchange.chronos.common.FreeBusyUtils;
 import com.openexchange.chronos.provider.CalendarAccess;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.CalendarFolder;
@@ -245,7 +245,10 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
                     events.addAll(withUniqueIDs(eventsInAccount, account.getAccountId()));
                     getSelfProtection().checkEventCollection(events);
                 } catch (OXException e) {
-                    throw withUniqueIDs(e, account.getAccountId());
+                    //TODO: persist exception in account data
+                    e = withUniqueIDs(e, account.getAccountId());
+                    LOG.warn("Error performing search in calendar account {}: {}", I(account.getAccountId()), e.getMessage(), e);
+                    continue;
                 }
             }
         }
@@ -296,7 +299,10 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
                     folders.addAll(withUniqueID(access.getVisibleFolders(), account.getAccountId()));
                 }
             } catch (OXException e) {
-                throw withUniqueIDs(e, account.getAccountId());
+                //TODO: persist exception in account data
+                e = withUniqueIDs(e, account.getAccountId());
+                LOG.warn("Error getting visible folders from calendar account {}: {}", I(account.getAccountId()), e.getMessage(), e);
+                continue;
             }
         }
         return folders;
@@ -317,9 +323,7 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
     public CalendarResult createEvent(String folderId, Event event) throws OXException {
         int accountId = getAccountId(folderId);
         try {
-
             GroupwareCalendarAccess calendarAccess = getGroupwareAccess(accountId);
-
             CalendarResult result = calendarAccess.createEvent(getRelativeFolderId(folderId), withRelativeID(event));
             return new IDManglingCalendarResult(result, accountId);
         } catch (OXException e) {
