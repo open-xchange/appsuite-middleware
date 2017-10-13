@@ -54,6 +54,12 @@ import java.net.URL;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.chronos.Calendar;
+import com.openexchange.chronos.exception.CalendarExceptionCodes;
+import com.openexchange.chronos.provider.CalendarAccess;
+import com.openexchange.chronos.provider.CalendarAccount;
+import com.openexchange.chronos.provider.CalendarProvider;
+import com.openexchange.chronos.provider.CalendarProviderRegistry;
+import com.openexchange.chronos.provider.account.CalendarAccountService;
 import com.openexchange.chronos.schedjoules.SchedJoulesResult;
 import com.openexchange.chronos.schedjoules.SchedJoulesService;
 import com.openexchange.chronos.schedjoules.api.SchedJoulesAPI;
@@ -194,13 +200,43 @@ public class SchedJoulesServiceImpl implements SchedJoulesService {
 
         try {
             String url = page.getString("url");
+
             URL u = new URL(url);
             Calendar calendar = api.calendar().getCalendar(u);
             if (NO_ACCESS.equals(calendar.getName())) {
                 throw SchedJoulesExceptionCodes.NO_ACCESS.create(id);
             }
 
-            //TODO: Hook-up with the SchedJoules provider to subscribe to the calendar
+            // Prepare the folder configuration
+            JSONObject singleCalendarConfiguration = new JSONObject();
+            singleCalendarConfiguration.put("url", url);
+            singleCalendarConfiguration.put("name", calendar.getName());
+            singleCalendarConfiguration.put("refreshInterval", "PT7D"); //TODO: either default or user defined
+
+            // Resolve the user's SchedJoules calendar account
+            CalendarAccountService calendarAccountService = services.getService(CalendarAccountService.class);
+            CalendarAccount calendarAccount = calendarAccountService.getAccount(session, accountId);
+            if (calendarAccount == null) {
+                throw CalendarExceptionCodes.ACCOUNT_NOT_FOUND.create(accountId);
+            }
+
+            // Get the SchedJoules calendar provider
+            CalendarProviderRegistry registry = services.getService(CalendarProviderRegistry.class);
+            CalendarProvider calendarProvider = registry.getCalendarProvider(calendarAccount.getProviderId());
+            if (calendarProvider == null) {
+                throw CalendarExceptionCodes.PROVIDER_NOT_AVAILABLE.create(calendarAccount.getProviderId());
+            }
+            
+            // TODO: Hook-up with the SchedJoules provider to subscribe to the calendar
+
+            // FIXME: Should the reconfigure method change the physical data on the database, or should there be a consecutive update call? 
+            calendarProvider.reconfigureAccount(session, calendarAccount.getInternalConfiguration(), singleCalendarConfiguration, null);
+            
+            CalendarAccess calendarAccess = calendarProvider.connect(session, calendarAccount, null);
+            
+            // TODO: How should the subscribe work? Is it enough to simply supply the access with the url via the account user configuration?  
+            
+            
             return calendar.getProdId();
         } catch (JSONException e) {
             throw SchedJoulesExceptionCodes.JSON_ERROR.create(e.getMessage(), e);
