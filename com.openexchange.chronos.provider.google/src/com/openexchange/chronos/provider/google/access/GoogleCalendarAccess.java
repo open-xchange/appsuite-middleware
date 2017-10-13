@@ -86,11 +86,10 @@ import com.openexchange.session.Session;
 public class GoogleCalendarAccess implements CalendarAccess {
 
     private final GoogleOAuthAccess oauthAccess;
-    private final Session session;
     private final CalendarParameters parameters;
     private final CalendarAccount account;
 
-    private Map<String, CalendarFolder> folders;
+    private final Map<String, CalendarFolder> folders = new HashMap<>(1);
 
     /**
      * Initializes a new {@link GoogleCalendarAccess}.
@@ -101,7 +100,6 @@ public class GoogleCalendarAccess implements CalendarAccess {
      * @throws OXException
      */
     public GoogleCalendarAccess(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
-        this.session = session;
         this.parameters = parameters;
         this.account = account;
         oauthAccess = new GoogleOAuthAccess(account, session);
@@ -120,33 +118,43 @@ public class GoogleCalendarAccess implements CalendarAccess {
         try {
             Calendar googleCal = (Calendar) oauthAccess.getClient().getClient();
             CalendarList calendars = googleCal.calendarList().list().execute();
-            int id=0;
             JSONObject internalConfiguration = account.getInternalConfiguration();
-            Map<String, JSONObject> folderArray = null;
+            Map<String, Object> folderArray = null;
             if(internalConfiguration != null){
-                folderArray = (Map<String, JSONObject>) internalConfiguration.get("folders");
+                folderArray = internalConfiguration.getJSONObject("folders").asMap();
             }
             Map<String, JSONObject> folderToAdd = new HashMap<>();
+            JSONObject userConfiguration = account.getUserConfiguration();
+            JSONObject updatedFolders = null;
+            if (userConfiguration != null && userConfiguration.hasAndNotNull("folders")) {
+                updatedFolders = userConfiguration.getJSONObject("folders");
+            }
             for(CalendarListEntry entry: calendars.getItems()){
                 if(folderArray!=null && folderArray.containsKey(entry.getId())){
-                    if(folderArray.get(entry.getId()).getBoolean("enabled")){
-                        folders.put(String.valueOf(id++),new DefaultCalendarFolder(entry.getId(), entry.getSummary()));
+                    if ((boolean) ((Map<String, Object>) folderArray.get(entry.getId())).get("enabled")) {
+                        folders.put(String.valueOf(entry.getId()), new DefaultCalendarFolder(entry.getId(), entry.getSummary()));
+                        continue;
                     }
+                }
+
+                if (entry.getId().equals("primary")) {
+                    folders.put(String.valueOf(entry.getId()), new DefaultCalendarFolder(entry.getId(), entry.getSummary()));
+                    JSONObject config = new JSONObject();
+                    config.put("enabled", true);
+                    folderToAdd.put(entry.getId(), config);
+                } else if (updatedFolders != null && updatedFolders.hasAndNotNull(entry.getId()) && updatedFolders.getJSONObject(entry.getId()).getBoolean("enabled")) {
+                    folders.put(entry.getId(), new DefaultCalendarFolder(entry.getId(), entry.getSummary()));
+                    JSONObject config = new JSONObject();
+                    config.put("enabled", true);
+                    folderToAdd.put(entry.getId(), config);
                 } else {
-                    if(entry.getId().equals("primary")){
-                        folders.put(String.valueOf(id++),new DefaultCalendarFolder(entry.getId(), entry.getSummary()));
-                        JSONObject config = new JSONObject();
-                        config.put("enabled", true);
-                        folderToAdd.put(entry.getId(), config);
-                    } else {
-                        JSONObject config = new JSONObject();
-                        config.put("enabled", false);
-                        folderToAdd.put(entry.getId(), config);
-                    }
+                    JSONObject config = new JSONObject();
+                    config.put("enabled", false);
+                    folderToAdd.put(entry.getId(), config);
                 }
             }
             if(!folderToAdd.isEmpty()){
-                Map<String, JSONObject> newConfig = new HashMap<>(folderToAdd.size());
+                Map<String, Object> newConfig = new HashMap<>(folderToAdd.size());
                 if(folderArray != null){
                     newConfig.putAll(folderArray);
                 }
@@ -232,7 +240,7 @@ public class GoogleCalendarAccess implements CalendarAccess {
             DateTime startDateTime = new DateTime(startDate);
             list = list.setTimeMin(startDateTime);
             DateTime endDateTime = new DateTime(endDate);
-            list = list.setTimeMin(endDateTime);
+            list = list.setTimeMax(endDateTime);
 
             if(parameters.contains(CalendarParameters.PARAMETER_EXPAND_OCCURRENCES) && parameters.get(CalendarParameters.PARAMETER_EXPAND_OCCURRENCES, Boolean.class)){
                 list.setSingleEvents(true);

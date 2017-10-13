@@ -62,7 +62,6 @@ import static com.openexchange.chronos.common.CalendarUtils.isPublicClassificati
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.chronos.common.CalendarUtils.matches;
 import static com.openexchange.chronos.common.CalendarUtils.truncateTime;
-import static com.openexchange.chronos.impl.Utils.asList;
 import static com.openexchange.chronos.impl.Utils.getFields;
 import static com.openexchange.chronos.impl.Utils.getRecurrenceIterator;
 import static com.openexchange.chronos.impl.Utils.getTimeZone;
@@ -242,7 +241,17 @@ public class ConflictCheckPerformer extends AbstractFreeBusyPerformer {
         /*
          * resolve occurrences for event series & derive checked period
          */
-        List<RecurrenceId> eventRecurrenceIds = asList(getRecurrenceIterator(storage, session, masterEvent, today, null));
+        Iterator<RecurrenceId> recurrenceIterator = getRecurrenceIterator(storage, session, masterEvent, today, null);
+        List<RecurrenceId> eventRecurrenceIds = new ArrayList<RecurrenceId>();
+        while (recurrenceIterator.hasNext()) {
+            eventRecurrenceIds.add(recurrenceIterator.next());
+            try {
+                getSelfProctection().checkEventCollection(eventRecurrenceIds);
+            } catch (OXException e) {
+                break;
+            }
+        }
+
         if (0 == eventRecurrenceIds.size()) {
             return Collections.emptyList();
         }
