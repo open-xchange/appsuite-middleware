@@ -60,4 +60,9 @@ public class SchedJoulesSubscribeParameter extends SchedJoulesCommonParameter {
      * The identifier of the iCal to subscribe to
      */
     public static final String ID = "id";
+
+    /**
+     * The user's SchedJoules calendar account
+     */
+    public static final String ACCOUNT_ID = "accountId";
 }

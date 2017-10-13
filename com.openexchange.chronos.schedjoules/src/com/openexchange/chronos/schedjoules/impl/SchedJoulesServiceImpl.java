@@ -59,6 +59,8 @@ import com.openexchange.chronos.schedjoules.SchedJoulesService;
 import com.openexchange.chronos.schedjoules.api.SchedJoulesAPI;
 import com.openexchange.chronos.schedjoules.exception.SchedJoulesExceptionCodes;
 import com.openexchange.exception.OXException;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.session.Session;
 
 /**
  * {@link SchedJoulesServiceImpl}
@@ -74,13 +76,17 @@ public class SchedJoulesServiceImpl implements SchedJoulesService {
 
     private final SchedJoulesAPI api;
 
+    private final ServiceLookup services;
+
     /**
      * Initialises a new {@link SchedJoulesServiceImpl}.
      * 
+     * @services The {@link ServiceLookup} instance
      * @throws OXException if the {@link SchedJoulesAPI} cannot be initialised
      */
-    public SchedJoulesServiceImpl() throws OXException {
+    public SchedJoulesServiceImpl(ServiceLookup services) throws OXException {
         super();
+        this.services = services;
         api = new SchedJoulesAPI();
     }
 
@@ -157,11 +163,11 @@ public class SchedJoulesServiceImpl implements SchedJoulesService {
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.chronos.schedjoules.SchedJoulesService#subscribeCalendar(int)
+     * @see com.openexchange.chronos.schedjoules.SchedJoulesService#subscribeCalendar(com.openexchange.session.Session, int, int)
      */
     @Override
-    public String subscribeCalendar(int id) throws OXException {
-        return subscribeCalendar(id, null);
+    public String subscribeCalendar(Session session, int id, int accountId) throws OXException {
+        return subscribeCalendar(session, id, accountId, null);
     }
 
     /*
@@ -177,10 +183,10 @@ public class SchedJoulesServiceImpl implements SchedJoulesService {
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.chronos.schedjoules.SchedJoulesService#subscribeCalendar(int, java.lang.String)
+     * @see com.openexchange.chronos.schedjoules.SchedJoulesService#subscribeCalendar(com.openexchange.session.Session, int, int, java.lang.String)
      */
     @Override
-    public String subscribeCalendar(int id, String locale) throws OXException {
+    public String subscribeCalendar(Session session, int id, int accountId, String locale) throws OXException {
         JSONObject page = api.pages().getPage(id, locale);
         if (!page.hasAndNotNull("url")) {
             throw SchedJoulesExceptionCodes.NO_CALENDAR.create(id);
@@ -193,6 +199,7 @@ public class SchedJoulesServiceImpl implements SchedJoulesService {
             if (NO_ACCESS.equals(calendar.getName())) {
                 throw SchedJoulesExceptionCodes.NO_ACCESS.create(id);
             }
+
             //TODO: Hook-up with the SchedJoules provider to subscribe to the calendar
             return calendar.getProdId();
         } catch (JSONException e) {

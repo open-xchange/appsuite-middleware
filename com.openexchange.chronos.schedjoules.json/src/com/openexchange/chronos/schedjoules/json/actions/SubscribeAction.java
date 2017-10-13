@@ -79,15 +79,18 @@ public class SubscribeAction extends AbstractSchedJoulesAction implements AJAXAc
      */
     @Override
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
-        // Check if the mandatory 'id' is present...
+        // Check if the mandatory 'id' is present and get it
         requestData.checkParameter(SchedJoulesSubscribeParameter.ID);
-        // ... and get it
         int pageId = requestData.getIntParameter(SchedJoulesSubscribeParameter.ID);
+
+        // Check if the mandatory 'id' is present and get it
+        requestData.checkParameter(SchedJoulesSubscribeParameter.ACCOUNT_ID);
+        int accountId = requestData.getIntParameter(SchedJoulesSubscribeParameter.ACCOUNT_ID);
 
         String language = getLanguage(requestData, session);
 
         SchedJoulesService service = services.getService(SchedJoulesService.class);
-        String prodId = service.subscribeCalendar(pageId, language);
+        String prodId = service.subscribeCalendar(session, pageId, accountId, language);
 
         return new AJAXRequestResult(prodId);
     }
