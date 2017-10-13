@@ -57,9 +57,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
+import com.openexchange.chronos.provider.AutoProvisioningCalendarProvider;
 import com.openexchange.chronos.provider.CalendarAccess;
 import com.openexchange.chronos.provider.CalendarAccount;
-import com.openexchange.chronos.provider.CalendarProvider;
 import com.openexchange.chronos.provider.account.AdministrativeCalendarAccountService;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.exception.OXException;
@@ -76,7 +76,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class BirthdaysCalendarProvider implements CalendarProvider {
+public class BirthdaysCalendarProvider implements AutoProvisioningCalendarProvider {
 
     static final String PROVIDER_ID = "birthdays";
 
@@ -100,6 +100,11 @@ public class BirthdaysCalendarProvider implements CalendarProvider {
     @Override
     public String getDisplayName(Locale locale) {
         return StringHelper.valueOf(locale).getString(BirthdaysCalendarStrings.PROVIDER_NAME);
+    }
+
+    @Override
+    public JSONObject autoConfigureAccount(Session session, JSONObject userConfig, CalendarParameters parameters) throws OXException {
+        return configureAccount(session, userConfig, parameters);
     }
 
     @Override

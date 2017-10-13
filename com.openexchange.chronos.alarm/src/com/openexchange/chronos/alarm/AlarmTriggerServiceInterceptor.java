@@ -49,16 +49,16 @@
 
 package com.openexchange.chronos.alarm;
 
+import static com.openexchange.osgi.Tools.requireService;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.CalendarAccount;
+import com.openexchange.chronos.provider.account.AdministrativeCalendarAccountService;
 import com.openexchange.chronos.service.CalendarUtilities;
 import com.openexchange.chronos.service.EntityResolver;
-import com.openexchange.chronos.storage.CalendarAccountStorage;
-import com.openexchange.chronos.storage.CalendarAccountStorageFactory;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.chronos.storage.CalendarStorageFactory;
 import com.openexchange.database.Databases;
@@ -69,7 +69,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.user.AbstractUserServiceInterceptor;
 
@@ -88,7 +87,7 @@ public class AlarmTriggerServiceInterceptor extends AbstractUserServiceIntercept
 
     /**
      * Initializes a new {@link AlarmTriggerServiceInterceptor}.
-     * 
+     *
      * @param services The {@link ServiceLookup}
      */
     public AlarmTriggerServiceInterceptor(ServiceLookup services) {
@@ -98,22 +97,11 @@ public class AlarmTriggerServiceInterceptor extends AbstractUserServiceIntercept
 
     @Override
     public void afterUpdate(Context context, User user, Contact contactData, Map<String, Object> properties) throws OXException {
-        CalendarAccountStorageFactory accountStorageFactory = services.getService(CalendarAccountStorageFactory.class);
-        if (null == accountStorageFactory) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(CalendarAccountStorageFactory.class.getName());
-        }
-        CalendarAccountStorage accountStorage = accountStorageFactory.create(context);
-        List<CalendarAccount> accounts = accountStorage.getAccounts(user.getId());
+        AdministrativeCalendarAccountService accountService = requireService(AdministrativeCalendarAccountService.class, services);
+        List<CalendarAccount> accounts = accountService.getAccounts(context.getContextId(), user.getId());
 
-        CalendarStorageFactory factory = services.getService(CalendarStorageFactory.class);
-        if (null == factory) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(CalendarStorageFactory.class.getName());
-        }
-
-        DBProvider dbProvider = services.getService(DBProvider.class);
-        if (null == dbProvider) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(DBProvider.class.getName());
-        }
+        CalendarStorageFactory factory = requireService(CalendarStorageFactory.class, services);
+        DBProvider dbProvider = requireService(DBProvider.class, services);
 
         Connection writeConnection = dbProvider.getWriteConnection(context);
         boolean committed = false;
