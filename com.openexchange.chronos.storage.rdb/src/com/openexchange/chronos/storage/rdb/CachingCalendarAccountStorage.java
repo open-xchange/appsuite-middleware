@@ -49,16 +49,20 @@
 
 package com.openexchange.chronos.storage.rdb;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.io.Serializable;
-import java.util.LinkedList;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
+import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.CalendarAccount;
+import com.openexchange.chronos.provider.DefaultCalendarAccount;
 import com.openexchange.chronos.storage.CalendarAccountStorage;
-import com.openexchange.chronos.storage.rdb.osgi.Services;
 import com.openexchange.exception.OXException;
 
 
@@ -70,112 +74,146 @@ import com.openexchange.exception.OXException;
  */
 public class CachingCalendarAccountStorage implements CalendarAccountStorage {
 
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CachingCalendarAccountStorage.class);
     private static final String REGION_NAME = "CalendarAccount";
 
     private final RdbCalendarAccountStorage delegate;
-
     private final int contextId;
+    private final CacheService cacheService;
+    private final Cache cache;
 
-    public CachingCalendarAccountStorage(RdbCalendarAccountStorage delegate, int contextId) {
+    /**
+     * Initializes a new {@link CachingCalendarAccountStorage}.
+     *
+     * @param contextId The context identifier
+     * @param delegate The underlying persistent account storage
+     * @param cacheSerivce A reference to the cache service
+     */
+    public CachingCalendarAccountStorage(RdbCalendarAccountStorage delegate, int contextId, CacheService cacheService) throws OXException {
         super();
         this.delegate = delegate;
         this.contextId = contextId;
+        this.cacheService = cacheService;
+        this.cache = cacheService.getCache(REGION_NAME);
     }
 
     @Override
-    public int createAccount(String providerId, int userId, JSONObject internalConfig, JSONObject userConfig) throws OXException {
-        return delegate.createAccount(providerId, userId, internalConfig, userConfig);
+    public int nextId() throws OXException {
+        return delegate.nextId();
     }
 
     @Override
-    public void updateAccount(int userId, int id, JSONObject internalConfig, JSONObject userConfig, long timestamp) throws OXException {
-        delegate.updateAccount(userId, id, internalConfig, userConfig, timestamp);
-        invalidateCalendarAccounts(new int[] { id }, userId);
+    public void insertAccount(CalendarAccount account) throws OXException {
+        delegate.insertAccount(account);
+        invalidateAccount(account.getUserId(), -1);
     }
 
     @Override
-    public void deleteAccount(int userId, int id) throws OXException {
-        delegate.deleteAccount(userId, id);
-        invalidateCalendarAccounts(new int[] { id }, userId);
+    public void updateAccount(CalendarAccount account) throws OXException {
+        delegate.updateAccount(account);
+        invalidateAccount(account.getUserId(), account.getAccountId());
     }
 
     @Override
-    public CalendarAccount getAccount(int userId, int id) throws OXException {
-        final CacheService cacheService = getCacheService();
-        if (null == cacheService) {
-            return delegate.getAccount(userId, id);
-        }
-        final Cache cache = cacheService.getCache(REGION_NAME);
-        final Object obj = cache.get(newCacheKey(cacheService, id, userId));
-        if (obj instanceof CalendarAccount) {
-            return (CalendarAccount) obj;
-        }
-
-        final CalendarAccount calendarAccount = delegate.getAccount(userId, id);
-        if (null != calendarAccount) {
-            cache.put(newCacheKey(cacheService, id, userId), calendarAccount, false);
-        }
-
-        return calendarAccount;
+    public void deleteAccount(int userId, int accountId) throws OXException {
+        delegate.deleteAccount(userId, accountId);
+        invalidateAccount(userId, accountId);
     }
 
     @Override
-    public List<CalendarAccount> getAccounts(int userId) throws OXException {
-        final CacheService cacheService = getCacheService();
-        if (null == cacheService) {
-            return delegate.getAccounts(userId);
-        }
-        final Cache cache = cacheService.getCache(REGION_NAME);
-        List<CalendarAccount> calendarAccountList = delegate.getAccounts(userId);
-        for (CalendarAccount calendarAccount : calendarAccountList) {
-            if (null == cache.get(newCacheKey(cacheService, calendarAccount.getAccountId(), userId))) {
-                cache.put(newCacheKey(cacheService, calendarAccount.getAccountId(), userId), calendarAccount, false);
+    public CalendarAccount loadAccount(int userId, int accountId) throws OXException {
+        CacheKey key = getAccountKey(userId, accountId);
+        CalendarAccount account = optClonedAccount(cache.get(key));
+        if (null == account) {
+            account = delegate.loadAccount(userId, accountId);
+            if (null != account) {
+                cache.put(key, clone(account), false);
             }
         }
-        return calendarAccountList;
+        return account;
     }
 
     @Override
-    public List<CalendarAccount> getAccounts(String providerId, int[] userIds) throws OXException {
-        final CacheService cacheService = getCacheService();
-        if (null == cacheService) {
-            return delegate.getAccounts(providerId, userIds);
-        }
-        final Cache cache = cacheService.getCache(REGION_NAME);
-        List<CalendarAccount> calendarAccountList = delegate.getAccounts(providerId, userIds);
-        for (CalendarAccount calendarAccount : calendarAccountList) {
-            if (null == cache.get(newCacheKey(cacheService, calendarAccount.getAccountId(), calendarAccount.getUserId()))) {
-                cache.put(newCacheKey(cacheService, calendarAccount.getAccountId(), calendarAccount.getUserId()), calendarAccount, false);
+    public List<CalendarAccount> loadAccounts(int userId) throws OXException {
+        /*
+         * try and get accounts via cached account id list fro user
+         */
+        CacheKey accountIdsKey = getAccountIdsKey(userId);
+        int[] accountIds = optClonedAccountIds(cache.get(accountIdsKey));
+        if (null != accountIds) {
+            List<CalendarAccount> accounts = new ArrayList<CalendarAccount>(accountIds.length);
+            for (int accountId : accountIds) {
+                CalendarAccount account = loadAccount(userId, accountId);
+                if (null == account) {
+                    /*
+                     * stale reference in cached user's account list, invalidate & try again
+                     */
+                    LOG.warn("Detected stale reference {} in account list for user {} in context {}, invalidating cache.", I(accountId), I(userId), I(contextId));
+                    cache.remove(accountIdsKey);
+                    return loadAccounts(userId);
+                }
+                accounts.add(account);
             }
-        }
-        return calendarAccountList;
-    }
-
-    private void invalidateCalendarAccounts(int[] accIds, int userId) throws OXException {
-        CacheService cacheService = getCacheService();
-        if (null == cacheService) {
-            // Cache not initialized.
-            return;
+            return accounts;
         }
         /*
-         * gather cache keys to invalidate
+         * get account list from storage & put into cache
          */
-        Cache cache = cacheService.getCache(REGION_NAME);
-        List<Serializable> keys = new LinkedList<Serializable>();
-        for (int accId : accIds) {
-            Integer key = accId;
-            keys.add(newCacheKey(cacheService, key, userId));
+        List<CalendarAccount> accounts = delegate.loadAccounts(userId);
+        accountIds = new int[accounts.size()];
+        for (int i = 0; i < accounts.size(); i++) {
+            CalendarAccount account = accounts.get(i);
+            accountIds[i] = account.getAccountId();
+            cache.put(getAccountKey(userId, account.getAccountId()), clone(account), false);
         }
-
-        cache.remove(keys);
+        cache.put(accountIdsKey, accountIds, false);
+        return accounts;
     }
 
-    private CacheKey newCacheKey(final CacheService cacheService, int accId, int userId) {
-        return cacheService.newCacheKey(contextId, String.valueOf(accId), String.valueOf(userId));
+    @Override
+    public List<CalendarAccount> loadAccounts(int[] userIds, String providerId) throws OXException {
+        //TODO: from cache / put result in cache?
+        return delegate.loadAccounts(userIds, providerId);
     }
 
-    private CacheService getCacheService() {
-        return Services.getOptionalService(CacheService.class);
+    @Override
+    public void invalidateAccount(int userId, int accountId) throws OXException {
+        if (-1 == accountId) {
+            cache.remove(getAccountIdsKey(userId));
+        } else {
+            cache.remove(Arrays.asList(new Serializable[] { getAccountIdsKey(userId), getAccountKey(userId, accountId) }));
+        }
+    }
+
+    private CacheKey getAccountKey(int userId, int accountId) {
+        String[] keys = new String[] { String.valueOf(userId), String.valueOf(accountId) };
+        return cacheService.newCacheKey(contextId, keys);
+    }
+
+    private CacheKey getAccountIdsKey(int userId) {
+        return cacheService.newCacheKey(contextId, userId);
+    }
+
+    private static CalendarAccount optClonedAccount(Object cachedAccount) throws OXException {
+        return null != cachedAccount && CalendarAccount.class.isInstance(cachedAccount) ? clone((CalendarAccount) cachedAccount) : null;
+    }
+
+    private static int[] optClonedAccountIds(Object cachedAccountIds) throws OXException {
+        return null != cachedAccountIds && int[].class.isInstance(cachedAccountIds) ? clone((int[]) cachedAccountIds) : null;
+    }
+
+    private static CalendarAccount clone(CalendarAccount account) throws OXException {
+        try {
+            JSONObject internalConfig = null == account.getInternalConfiguration() ? null : new JSONObject(account.getInternalConfiguration().toString());
+            JSONObject userConfig = null == account.getUserConfiguration() ? null : new JSONObject(account.getUserConfiguration().toString());
+            return new DefaultCalendarAccount(account.getProviderId(), account.getAccountId(), account.getUserId(), internalConfig, userConfig, account.getLastModified());
+        } catch (JSONException e) {
+            throw CalendarExceptionCodes.DB_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    private static int[] clone(int[] accountIds) throws OXException {
+        return accountIds.clone();
     }
 
 }

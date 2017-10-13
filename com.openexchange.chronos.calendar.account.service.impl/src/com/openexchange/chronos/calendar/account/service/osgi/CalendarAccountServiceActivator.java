@@ -55,8 +55,9 @@ import com.openexchange.chronos.calendar.account.service.impl.CalendarAccountSer
 import com.openexchange.chronos.provider.CalendarProviderRegistry;
 import com.openexchange.chronos.provider.account.AdministrativeCalendarAccountService;
 import com.openexchange.chronos.provider.account.CalendarAccountService;
-import com.openexchange.chronos.storage.CalendarAccountStorageFactory;
+import com.openexchange.chronos.storage.CalendarStorageFactory;
 import com.openexchange.context.ContextService;
+import com.openexchange.database.DatabaseService;
 import com.openexchange.osgi.HousekeepingActivator;
 
 /**
@@ -76,7 +77,7 @@ public class CalendarAccountServiceActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getOptionalServices() {
-        return new Class<?>[] { CalendarAccountStorageFactory.class, CalendarProviderRegistry.class };
+        return new Class<?>[] { CalendarProviderRegistry.class, DatabaseService.class, ContextService.class, CalendarStorageFactory.class };
     }
 
     @Override

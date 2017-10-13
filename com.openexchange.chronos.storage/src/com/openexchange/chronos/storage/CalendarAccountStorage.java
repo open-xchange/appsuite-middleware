@@ -50,8 +50,8 @@
 package com.openexchange.chronos.storage;
 
 import java.util.List;
-import org.json.JSONObject;
 import com.openexchange.chronos.provider.CalendarAccount;
+import com.openexchange.database.provider.DBTransactionPolicy;
 import com.openexchange.exception.OXException;
 
 /**
@@ -63,58 +63,70 @@ import com.openexchange.exception.OXException;
 public interface CalendarAccountStorage {
 
     /**
-     * Creates a new calendar account.
+     * Generates the next unique identifier for inserting new account data.
+     * <p/>
+     * <b>Note:</b> This method should only be called within an active transaction, i.e. if the storage has been initialized using
+     * {@link DBTransactionPolicy#NO_TRANSACTIONS} in favor of an externally controlled transaction.
      *
-     * @param providerId The identifier of the corresponding calendar provider
-     * @param userId The identifier of the user the account is added for
-     * @param configuration The provider-specific configuration data for the calendar account
-     * @return The identifier of the newly inserted calendar account
+     * @return The next unique event identifier
      */
-    int createAccount(String providerId, int userId, JSONObject internalConfig, JSONObject userConfig) throws OXException;
+    int nextId() throws OXException;
 
     /**
-     * Updates the <i>internal</i> configuration data for an existing calendar account.
+     * Inserts a new calendar account.
      *
-     * @param userId The identifier of the user to update the account for
-     * @param id The identifier of the account to update
-     * @param internalConfig The provider-specific <i>internal</i> configuration data for the calendar account, or <code>null</code> to skip
-     * @param userConfig The provider-specific <i>user</i> configuration data for the calendar account, or <code>null</code> to skip
-     * @param timestamp The last-known timestamp of the account to catch concurrent modifications, or {@link CalendarUtils#DISTANT_FUTURE} to circumvent the check
+     * @param account The account data to insert
      */
-    void updateAccount(int userId, int id, JSONObject internalConfig, JSONObject userConfig, long timestamp) throws OXException;
+    void insertAccount(CalendarAccount account) throws OXException;
+
+    /**
+     * Updates an existing calendar account.
+     *
+     * @param account The account data to update
+     */
+    void updateAccount(CalendarAccount account) throws OXException;
 
     /**
      * Deletes an existing calendar account.
      *
      * @param userId The identifier of the user to delete the account for
-     * @param id The identifier of the account to delete
+     * @param accountId The identifier of the account to delete
      */
-    void deleteAccount(int userId, int id) throws OXException;
+    void deleteAccount(int userId, int accountId) throws OXException;
 
     /**
-     * Gets an existing calendar account.
+     * Loads an existing calendar account.
      *
      * @param userId The identifier of the user to get the account for
-     * @param id The identifier of the account to load
+     * @param accountId The identifier of the account to load
      * @return The loaded calendar account, or <code>null</code> if not found
      */
-    CalendarAccount getAccount(int userId, int id) throws OXException;
+    CalendarAccount loadAccount(int userId, int accountId) throws OXException;
 
     /**
-     * Gets a list of all calendar accounts stored for a specific user.
+     * Loads a list of all calendar accounts stored for a specific user.
      *
      * @param userId The identifier of the user to get the accounts for
      * @return The accounts, or an empty list if none were found
      */
-    List<CalendarAccount> getAccounts(int userId) throws OXException;
+    List<CalendarAccount> loadAccounts(int userId) throws OXException;
 
     /**
      * Gets a list of all stored accounts of certain users for a specific calendar provider.
      *
-     * @param providerId The identifier of the provider to get the accounts from
      * @param userIds The identifiers of the users to get the accounts from
+     * @param providerId The identifier of the provider to get the accounts from
+     *
      * @return The accounts, or an empty list if there are none
      */
-    List<CalendarAccount> getAccounts(String providerId, int[] userIds) throws OXException;
+    List<CalendarAccount> loadAccounts(int[] userIds, String providerId) throws OXException;
+
+    /**
+     * Invalidates any cached references of a specific calendar account.
+     *
+     * @param userId The identifier of the user to invalidate the account for
+     * @param accountId The identifier of the account to invalidate, or <code>-1</code> to only invalidate the user's list of known accounts
+     */
+    void invalidateAccount(int userId, int accountId) throws OXException;
 
 }

@@ -60,6 +60,7 @@ import com.openexchange.chronos.storage.AlarmStorage;
 import com.openexchange.chronos.storage.AlarmTriggerStorage;
 import com.openexchange.chronos.storage.AttachmentStorage;
 import com.openexchange.chronos.storage.AttendeeStorage;
+import com.openexchange.chronos.storage.CalendarAccountStorage;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.chronos.storage.CalendarStorageUtilities;
 import com.openexchange.chronos.storage.EventStorage;
@@ -83,6 +84,7 @@ public class RdbCalendarStorage implements CalendarStorage {
     private final RdbAlarmStorage alarmStorage;
     private final RdbAlarmTriggerStorage alarmTriggerStorage;
     private final com.openexchange.chronos.storage.rdb.legacy.RdbAttachmentStorage attachmentStorage;
+    private final CalendarAccountStorage accountStorage;
     private final RdbCalendarStorageUtilities storageUtilities;
 
     /**
@@ -93,7 +95,6 @@ public class RdbCalendarStorage implements CalendarStorage {
      * @param entityResolver The entity resolver to use, or <code>null</code> if not available
      * @param dbProvider The database provider to use
      * @param txPolicy The transaction policy
-     * @throws OXException
      */
     public RdbCalendarStorage(Context context, int accountId, EntityResolver entityResolver, DBProvider dbProvider, DBTransactionPolicy txPolicy) throws OXException {
         super();
@@ -106,6 +107,7 @@ public class RdbCalendarStorage implements CalendarStorage {
         alarmStorage = new RdbAlarmStorage(context, accountId, entityResolver, dbProvider, txPolicy);
         alarmTriggerStorage = new RdbAlarmTriggerStorage(context, accountId, dbProvider, txPolicy, alarmStorage, entityResolver);
         attachmentStorage = 0 == accountId ? new com.openexchange.chronos.storage.rdb.legacy.RdbAttachmentStorage(context, dbProvider, txPolicy) : null;
+        accountStorage = RdbCalendarAccountStorage.init(context, dbProvider, txPolicy);
         storageUtilities = new RdbCalendarStorageUtilities(this);
     }
 
@@ -130,6 +132,16 @@ public class RdbCalendarStorage implements CalendarStorage {
     @Override
     public AttendeeStorage getAttendeeStorage() {
         return attendeeStorage;
+    }
+
+    @Override
+    public AlarmTriggerStorage getAlarmTriggerStorage() {
+        return alarmTriggerStorage;
+    }
+
+    @Override
+    public CalendarAccountStorage getAccountStorage() {
+        return accountStorage;
     }
 
     @Override
@@ -167,7 +179,7 @@ public class RdbCalendarStorage implements CalendarStorage {
      * @param contextId The identifier of the context to get the entity resolver for
      * @return The entity resolver, or <code>null</code> if not available
      */
-    private EntityResolver optEntityResolver(int contextId) {
+    private static EntityResolver optEntityResolver(int contextId) {
         CalendarUtilities calendarUtilities = Services.getOptionalService(CalendarUtilities.class);
         if (null != calendarUtilities) {
             try {
@@ -178,11 +190,6 @@ public class RdbCalendarStorage implements CalendarStorage {
             }
         }
         return null;
-    }
-
-    @Override
-    public AlarmTriggerStorage getAlarmTriggerStorage() {
-        return alarmTriggerStorage;
     }
 
 }

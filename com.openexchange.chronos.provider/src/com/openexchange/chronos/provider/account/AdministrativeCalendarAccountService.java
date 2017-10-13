@@ -66,7 +66,20 @@ import com.openexchange.osgi.annotation.SingletonService;
 public interface AdministrativeCalendarAccountService {
 
     /**
+     * Gets a list of all stored calendar accounts of a certain user.
+     * <p/>
+     * Not yet existing accounts from registered auto-provisioning providers won't be created implicitly.
+     *
+     * @param contextId The context identifier
+     * @param userId The identifier of the users to get the accounts from
+     * @return The accounts, or an empty list if there are none
+     */
+    List<CalendarAccount> getAccounts(int contextId, int userId) throws OXException;
+
+    /**
      * Gets a list of all accounts of certain users in a context for a specific calendar provider.
+     * <p/>
+     * Not yet existing accounts from registered auto-provisioning providers won't be created implicitly.
      *
      * @param contextId The context identifier
      * @param userIds The identifiers of the users to get the accounts from

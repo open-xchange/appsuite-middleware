@@ -57,6 +57,7 @@ import com.openexchange.chronos.storage.AlarmStorage;
 import com.openexchange.chronos.storage.AlarmTriggerStorage;
 import com.openexchange.chronos.storage.AttachmentStorage;
 import com.openexchange.chronos.storage.AttendeeStorage;
+import com.openexchange.chronos.storage.CalendarAccountStorage;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.chronos.storage.CalendarStorageUtilities;
 import com.openexchange.chronos.storage.EventStorage;
@@ -106,6 +107,11 @@ public class RdbCalendarStorage implements CalendarStorage {
     @Override
     public AttendeeStorage getAttendeeStorage() {
         return new RdbAttendeeStorage(delegate.getAttendeeStorage(), legacyDelegate.getAttendeeStorage());
+    }
+
+    @Override
+    public CalendarAccountStorage getAccountStorage() {
+        return delegate.getAccountStorage();
     }
 
     @Override

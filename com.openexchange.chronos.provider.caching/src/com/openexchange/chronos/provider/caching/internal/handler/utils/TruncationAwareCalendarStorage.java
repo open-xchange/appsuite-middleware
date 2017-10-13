@@ -59,6 +59,7 @@ import com.openexchange.chronos.storage.AlarmStorage;
 import com.openexchange.chronos.storage.AlarmTriggerStorage;
 import com.openexchange.chronos.storage.AttachmentStorage;
 import com.openexchange.chronos.storage.AttendeeStorage;
+import com.openexchange.chronos.storage.CalendarAccountStorage;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.chronos.storage.CalendarStorageUtilities;
 import com.openexchange.chronos.storage.EventStorage;
@@ -230,5 +231,10 @@ public class TruncationAwareCalendarStorage implements CalendarStorage {
     @Override
     public Map<String, List<OXException>> getAndFlushWarnings() {
         return calendarStorage.getAndFlushWarnings();
+    }
+
+    @Override
+    public CalendarAccountStorage getAccountStorage() {
+        return calendarStorage.getAccountStorage();
     }
 }
