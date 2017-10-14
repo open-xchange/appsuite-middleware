@@ -74,13 +74,4 @@ public interface IDBasedCalendarAccessFactory {
      */
     IDBasedCalendarAccess createAccess(Session session) throws OXException;
 
-
-    /**
-     * Initializes a new ID-based free-busy access for the supplied session.
-     *
-     * @param session The session to create the access for
-     * @return The free-busy access
-     */
-    IDBasedFreeBusyAccess createFreeBusyAccess(Session session) throws OXException;
-
 }

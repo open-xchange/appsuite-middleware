@@ -72,11 +72,9 @@ import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmTrigger;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
-import com.openexchange.chronos.FreeBusyTime;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.CalendarFolder;
-import com.openexchange.chronos.provider.FreeBusyAwareCalendarAccess;
 import com.openexchange.chronos.provider.extensions.PersonalAlarmAware;
 import com.openexchange.chronos.provider.extensions.QuotaAware;
 import com.openexchange.chronos.provider.extensions.SearchAware;
@@ -87,10 +85,7 @@ import com.openexchange.chronos.provider.groupware.GroupwareFolderType;
 import com.openexchange.chronos.service.CalendarResult;
 import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.chronos.service.CalendarSession;
-import com.openexchange.chronos.service.EventConflict;
 import com.openexchange.chronos.service.EventID;
-import com.openexchange.chronos.service.FreeBusyResult;
-import com.openexchange.chronos.service.FreeBusyService;
 import com.openexchange.chronos.service.SearchFilter;
 import com.openexchange.chronos.service.UpdatesResult;
 import com.openexchange.exception.OXException;
@@ -117,7 +112,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.0
  */
-public class InternalCalendarAccess implements GroupwareCalendarAccess, FreeBusyAwareCalendarAccess, SyncAware, PersonalAlarmAware, SearchAware, QuotaAware {
+public class InternalCalendarAccess implements GroupwareCalendarAccess, SyncAware, PersonalAlarmAware, SearchAware, QuotaAware {
 
     /** The logger */
     static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(InternalCalendarAccess.class);
@@ -291,15 +286,6 @@ public class InternalCalendarAccess implements GroupwareCalendarAccess, FreeBusy
     }
 
     /**
-     * Gets the free busy service.
-     *
-     * @return The {@link FreeBusyService}
-     */
-    private FreeBusyService getFreeBusyService() throws OXException {
-        return session.getFreeBusyService();
-    }
-
-    /**
      * Creates and initializes a folder service decorator ready to use with calls to the underlying folder service.
      *
      * @return A new folder service decorator
@@ -338,31 +324,6 @@ public class InternalCalendarAccess implements GroupwareCalendarAccess, FreeBusy
                 getFolderProperties(userizedFolder.getContext().getContextId(), userizedFolder, userizedFolder.getUser().getId(), true, optConnection())));
         }
         return calendarFolders;
-    }
-
-    @Override
-    public boolean[] hasEventsBetween(Date from, Date until) throws OXException {
-        return getFreeBusyService().hasEventsBetween(session, from, until);
-    }
-
-    @Override
-    public Map<Attendee, List<Event>> getFreeBusy(List<Attendee> attendees, Date from, Date until) throws OXException {
-        return getFreeBusyService().getFreeBusy(session, attendees, from, until);
-    }
-
-    @Override
-    public Map<Attendee, List<FreeBusyTime>> getMergedFreeBusy(List<Attendee> attendees, Date from, Date until) throws OXException {
-        return getFreeBusyService().getMergedFreeBusy(session, attendees, from, until);
-    }
-
-    @Override
-    public Map<Attendee, FreeBusyResult> calculateFreeBusyTime(List<Attendee> attendees, Date from, Date until) throws OXException {
-        return getFreeBusyService().calculateFreeBusyTime(session, attendees, from, until);
-    }
-
-    @Override
-    public List<EventConflict> checkForConflicts(Event event, List<Attendee> attendees) throws OXException {
-        return getFreeBusyService().checkForConflicts(session, event, attendees);
     }
 
     @Override

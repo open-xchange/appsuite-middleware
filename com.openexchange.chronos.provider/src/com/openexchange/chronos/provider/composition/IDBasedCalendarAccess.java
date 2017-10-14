@@ -391,6 +391,11 @@ public interface IDBasedCalendarAccess extends TransactionAware, CalendarParamet
 
     /**
      * Queries the free/busy time for a list of attendees.
+     * <p/>
+     * The following calendar parameters are evaluated:
+     * <ul>
+     * <li>{@link CalendarParameters#PARAMETER_MASK_ID}</li>
+     * </ul>
      *
      * @param attendees The queried attendees
      * @param from The start of the requested time range
