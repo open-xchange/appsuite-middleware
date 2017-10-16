@@ -55,23 +55,12 @@ import static com.openexchange.chronos.common.CalendarUtils.matches;
 import static com.openexchange.chronos.impl.Utils.getCalendarUserId;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.L;
-import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
-import java.util.SortedSet;
-import java.util.TimeZone;
-import javax.mail.internet.AddressException;
-import com.openexchange.chronos.Alarm;
-import com.openexchange.chronos.AlarmAction;
-import com.openexchange.chronos.AlarmField;
 import com.openexchange.chronos.Attendee;
-import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.Classification;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
-import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.CalendarUtils;
-import com.openexchange.chronos.common.DefaultRecurrenceData;
 import com.openexchange.chronos.common.mapping.EventMapper;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.performer.ConflictCheckPerformer;
@@ -79,8 +68,6 @@ import com.openexchange.chronos.impl.performer.ResolveUidPerformer;
 import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.EventConflict;
-import com.openexchange.chronos.service.RecurrenceData;
-import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.Permission;
@@ -89,7 +76,6 @@ import com.openexchange.folderstorage.database.contentType.CalendarContentType;
 import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.groupware.tools.mappings.Mapping;
 import com.openexchange.java.Strings;
-import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.quota.Quota;
 import com.openexchange.quota.QuotaExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
@@ -100,7 +86,7 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class Check {
+public class Check extends com.openexchange.chronos.common.Check {
 
     /**
      * Checks that the session's user has permissions for the <i>calendar</i> module.
@@ -259,73 +245,6 @@ public class Check {
     }
 
     /**
-     * Checks that a list of alarms are valid, i.e. they all contain all mandatory properties.
-     *
-     * @param alarms The alarms to check
-     * @return The passed alarms, after they were checked for validity
-     * @throws OXException {@link CalendarExceptionCodes#INVALID_RRULE}
-     */
-    public static List<Alarm> alarmsAreValid(List<Alarm> alarms) throws OXException {
-        if (null != alarms && 0 < alarms.size()) {
-            for (Alarm alarm : alarms) {
-                alarmIsValid(alarm);
-            }
-        }
-        return alarms;
-    }
-
-    /**
-     * Checks that the supplied alarm is valid, i.e. it contains all mandatory properties.
-     *
-     * @param alarm The alarm to check
-     * @return The passed alarm, after it was checked for validity
-     * @throws OXException {@link CalendarExceptionCodes#INVALID_RRULE}
-     */
-    public static Alarm alarmIsValid(Alarm alarm) throws OXException {
-        /*
-         * action and trigger are both required for any type of alarm
-         */
-        if (null == alarm.getAction()) {
-            throw CalendarExceptionCodes.MANDATORY_FIELD.create(AlarmField.ACTION.toString());
-        }
-        if (null == alarm.getTrigger() || null == alarm.getTrigger().getDateTime() && null == alarm.getTrigger().getDuration()) {
-            throw CalendarExceptionCodes.MANDATORY_FIELD.create(AlarmField.TRIGGER.toString());
-        }
-        /*
-         * check further properties based on alarm type
-         */
-        if (AlarmAction.DISPLAY.equals(alarm.getAction())) {
-            if (!alarm.containsDescription()) {
-                throw CalendarExceptionCodes.MANDATORY_FIELD.create(AlarmField.DESCRIPTION.toString());
-            }
-            return alarm;
-        } else if (AlarmAction.EMAIL.equals(alarm.getAction())) {
-            if ((!alarm.containsDescription()) || alarm.getDescription().isEmpty()) {
-                throw CalendarExceptionCodes.MANDATORY_FIELD.create(AlarmField.DESCRIPTION.toString());
-            }
-            if ((!alarm.containsSummary()) || alarm.getSummary().isEmpty()) {
-                throw CalendarExceptionCodes.MANDATORY_FIELD.create(AlarmField.SUMMARY.toString());
-            }
-
-            if ((!alarm.containsAttendees()) || alarm.getAttendees().isEmpty()) {
-                throw CalendarExceptionCodes.MANDATORY_FIELD.create(AlarmField.ATTENDEES.toString());
-            }
-
-            for (Attendee attendee : alarm.getAttendees()) {
-                if (attendee.getEMail() == null || attendee.getEMail().isEmpty()) {
-                    throw CalendarExceptionCodes.MANDATORY_FIELD.create(AlarmField.ATTENDEES.toString());
-                }
-                try {
-                    new QuotedInternetAddress(attendee.getEMail());
-                } catch (AddressException e) {
-                    throw CalendarExceptionCodes.MANDATORY_FIELD.create(AlarmField.ATTENDEES.toString());
-                }
-            }
-        }
-        return alarm;
-    }
-
-    /**
      * Checks that the classification is supported based on the given folder's type, if it is not <code>null</code> and different from
      * {@link Classification#PUBLIC}.
      *
@@ -378,82 +297,6 @@ public class Check {
                 throw CalendarExceptionCodes.RESTRICTED_BY_CLASSIFICATION.create(folder.getID(), originalEvent.getId(), String.valueOf(originalEvent.getClassification()));
             }
         }
-    }
-
-    /**
-     * Checks an event's geo location for validity.
-     *
-     * @param event The event to check
-     * @return The passed event's geo location, after it was checked for validity
-     * @throws OXException {@link CalendarExceptionCodes#INVALID_GEO_LOCATION}
-     */
-    public static double[] geoLocationIsValid(Event event) throws OXException {
-        double[] geo = event.getGeo();
-        if (null != geo) {
-            if (2 != geo.length) {
-                throw CalendarExceptionCodes.INVALID_GEO_LOCATION.create(geo);
-            }
-            double latitude = geo[0];
-            double longitude = geo[1];
-            if (90 < latitude || -90 > latitude || 180 < longitude || -180 > longitude) {
-                throw CalendarExceptionCodes.INVALID_GEO_LOCATION.create(geo);
-            }
-        }
-        return geo;
-    }
-
-    /**
-     * Checks an event's recurrence rule for validity.
-     *
-     * @param recurrenceService A reference to the recurrence service
-     * @param event The event to check
-     * @return The passed event's recurrence rule, after it was checked for validity
-     * @throws OXException {@link CalendarExceptionCodes#INVALID_RRULE}
-     */
-    public static String recurrenceRuleIsValid(RecurrenceService recurrenceService, Event event) throws OXException {
-        String recurrenceRule = event.getRecurrenceRule();
-        if (event.containsRecurrenceRule() && null != recurrenceRule) {
-            recurrenceService.validate(new DefaultRecurrenceData(recurrenceRule, event.getStartDate(), null));
-        }
-        return recurrenceRule;
-    }
-
-    /**
-     * Ensures that all recurrence identifiers are valid for a specific recurring event series, i.e. the targeted occurrences
-     * are actually part of the series.
-     *
-     * @param recurrenceService A reference to the recurrence service
-     * @param seriesMaster The series master event providing the recurrence information
-     * @param recurrenceID The recurrence identifier
-     * @return The passed list of recurrence identifiers, after their existence was checked
-     * @throws OXException {@link CalendarExceptionCodes#INVALID_RECURRENCE_ID}
-     */
-    public static SortedSet<RecurrenceId> recurrenceIdsExist(RecurrenceService recurrenceService, Event seriesMaster, SortedSet<RecurrenceId> recurrenceIDs) throws OXException {
-        if (null != recurrenceIDs) {
-            for (RecurrenceId recurrenceID : recurrenceIDs) {
-                recurrenceIdExists(recurrenceService, seriesMaster, recurrenceID);
-            }
-        }
-        return recurrenceIDs;
-    }
-
-    /**
-     * Ensures that a specific recurrence identifier is valid for a specific recurring event series, i.e. the targeted occurrence
-     * is actually part of the series.
-     *
-     * @param recurrenceService A reference to the recurrence service
-     * @param seriesMaster The series master event providing the recurrence information
-     * @param recurrenceID The recurrence identifier
-     * @return The passed recurrence identifier, after it was checked for validity
-     * @throws OXException {@link CalendarExceptionCodes#INVALID_RECURRENCE_ID}
-     */
-    public static RecurrenceId recurrenceIdExists(RecurrenceService recurrenceService, Event seriesMaster, RecurrenceId recurrenceID) throws OXException {
-        RecurrenceData recurrenceData = new DefaultRecurrenceData(seriesMaster.getRecurrenceRule(), seriesMaster.getStartDate(), null);
-        Iterator<RecurrenceId> iterator = recurrenceService.iterateRecurrenceIds(recurrenceData, new Date(recurrenceID.getValue().getTimestamp()), null);
-        if (false == iterator.hasNext()) {
-            throw CalendarExceptionCodes.INVALID_RECURRENCE_ID.create(String.valueOf(recurrenceID), seriesMaster.getRecurrenceRule());
-        }
-        return recurrenceID;
     }
 
     /**
@@ -535,50 +378,6 @@ public class Check {
             }
             throw conflictException;
         }
-    }
-
-    /**
-     * Checks that the supplied timezone identifier is valid, i.e. a corresponding timezone exists.
-     *
-     * @param timeZoneID The timezone identifier to check, or <code>null</code> to skip the check
-     * @return The identifier of the matching timezone
-     * @throws OXException {@link CalendarExceptionCodes#INVALID_TIMEZONE}
-     */
-    public static String timeZoneExists(String timeZoneID) throws OXException {
-        TimeZone timeZone = CalendarUtils.optTimeZone(timeZoneID, null);
-        if (null == timeZone) {
-            throw CalendarExceptionCodes.INVALID_TIMEZONE.create(timeZoneID);
-        }
-        return timeZone.getID();
-    }
-
-    /**
-     * Checks that the supplied calendar user's URI denotes a valid e-mail address.
-     * <p/>
-     * This method should only be invoked for <i>external</i> calendar users.
-     *
-     * @param calendarUser The (external) calendar user to check
-     * @return The calendar user, after its URI has been checked for validity
-     * @throws OXException {@link CalendarExceptionCodes#INVALID_CALENDAR_USER}
-     */
-    public static <T extends CalendarUser> T requireValidEMail(T calendarUser) throws OXException {
-        String address = CalendarUtils.extractEMailAddress(calendarUser.getUri());
-        if (null == address) {
-            throw CalendarExceptionCodes.INVALID_CALENDAR_USER.create(calendarUser.getUri(), I(calendarUser.getEntity()), "");
-        }
-        try {
-            new QuotedInternetAddress(address);
-        } catch (AddressException e) {
-            throw CalendarExceptionCodes.INVALID_CALENDAR_USER.create(e, calendarUser.getUri(), I(calendarUser.getEntity()), "");
-        }
-        return calendarUser;
-    }
-
-    /**
-     * Initializes a new {@link Check}.
-     */
-    private Check() {
-        super();
     }
 
 }
