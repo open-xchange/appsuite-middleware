@@ -291,7 +291,7 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
                 "comment VARCHAR(512) DEFAULT NULL," +
                 "extendedProperties BLOB DEFAULT NULL," +
                 "PRIMARY KEY (cid,user,id)," +
-                "KEY uid (cid,user,uid(767))" +
+                "KEY uid (cid,user,uid(191))" +
             ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;"
         );
         tablesByName.put("calendar_available_sequence",
