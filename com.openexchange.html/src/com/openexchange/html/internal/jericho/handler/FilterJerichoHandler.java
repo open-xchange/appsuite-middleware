@@ -1053,7 +1053,43 @@ public final class FilterJerichoHandler implements JerichoHandler {
 
     @Override
     public void handleDocDeclaration(final String docDecl) {
-        htmlBuilder.append(docDecl);
+        htmlBuilder.append(sanitizeDocDeclaration(docDecl));
+    }
+
+    private String sanitizeDocDeclaration(String docDecl) {
+        String str = docDecl.trim();
+        if (!str.startsWith("<!")) {
+            str = "<!" + str;
+        }
+        if (!str.endsWith(">")) {
+            str = str + ">";
+        }
+
+        StringBuilder sb = null;
+        int end = str.length() - 1;
+        for (int i = 2; i < end; i++) {
+            char ch = str.charAt(i);
+            switch (ch) {
+                case '<':
+                    if (null == sb) {
+                        sb = new StringBuilder(docDecl.length());
+                        sb.append(str, 0, i);
+                    }
+                    break;
+                case '>':
+                    if (null == sb) {
+                        sb = new StringBuilder(docDecl.length());
+                        sb.append(str, 0, i);
+                    }
+                    break;
+                default:
+                    if (null != sb) {
+                        sb.append(ch);
+                    }
+                    break;
+            }
+        }
+        return null == sb ? str : sb.append(">").toString();
     }
 
     @Override
