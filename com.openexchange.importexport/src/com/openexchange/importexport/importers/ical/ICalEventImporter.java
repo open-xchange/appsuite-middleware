@@ -47,35 +47,47 @@
  *
  */
 
-package com.openexchange.importexport.exporters.ical;
+package com.openexchange.importexport.importers.ical;
 
-import java.io.OutputStream;
-import com.openexchange.ajax.container.ThresholdFileHolder;
-import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
+import com.openexchange.chronos.Event;
+import com.openexchange.chronos.service.CalendarResult;
+import com.openexchange.chronos.service.CalendarService;
+import com.openexchange.chronos.service.CalendarSession;
+import com.openexchange.chronos.service.EventID;
 import com.openexchange.exception.OXException;
 import com.openexchange.importexport.osgi.ImportExportServices;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link ICalCompositeEventExporter}
+ * {@link ICalEventImporter}
  *
  * @author <a href="mailto:Jan-Oliver.Huhn@open-xchange.com">Jan-Oliver Huhn</a>
  * @since v7.10.0
  */
-public class ICalCompositeEventExporter extends AbstractICalExporter {
+public class ICalEventImporter extends AbstractICalEventImporter{
 
-    public ICalCompositeEventExporter(String folderId) {
-        super(folderId);
+    public ICalEventImporter(ServerSession session) {
+        super(session);
     }
 
     @Override
-    protected ThresholdFileHolder exportData(ServerSession session, OutputStream out) throws OXException {
-        return exportFolderData(session, out);
+    public CalendarResult createEvent(String folderId, Event event) throws OXException {
+        CalendarService calendarService = ImportExportServices.getCalendarService();
+        CalendarSession calendarSession = calendarService.init(session);
+        return calendarService.createEvent(calendarSession, folderId, event);
     }
 
-    private ThresholdFileHolder exportFolderData(ServerSession session, OutputStream out) throws OXException {
-        IDBasedCalendarAccess calendarAccess = ImportExportServices.getIDBasedCalendarAccessFactory().createAccess(session);
-        return exportChronosEvents(calendarAccess.getEventsInFolder(getFolderId()), out);
+    @Override
+    public void writeResult() {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void updateEvent(EventID eventId, Event event) throws OXException{
+        CalendarService calendarService = ImportExportServices.getCalendarService();
+        CalendarSession calendarSession = calendarService.init(session);
+        calendarService.updateEvent(calendarSession, eventId, event, System.currentTimeMillis());
     }
 
 }

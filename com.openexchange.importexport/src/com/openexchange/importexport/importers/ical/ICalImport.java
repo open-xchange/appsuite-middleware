@@ -47,35 +47,24 @@
  *
  */
 
-package com.openexchange.importexport.exporters.ical;
+package com.openexchange.importexport.importers.ical;
 
-import java.io.OutputStream;
-import com.openexchange.ajax.container.ThresholdFileHolder;
-import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
+import java.io.InputStream;
+import java.util.List;
+import java.util.Map;
+import com.openexchange.data.conversion.ical.TruncationInfo;
 import com.openexchange.exception.OXException;
-import com.openexchange.importexport.osgi.ImportExportServices;
-import com.openexchange.tools.session.ServerSession;
+import com.openexchange.folderstorage.UserizedFolder;
+import com.openexchange.groupware.importexport.ImportResult;
 
 /**
- * {@link ICalCompositeEventExporter}
+ * {@link ICalImport}
  *
  * @author <a href="mailto:Jan-Oliver.Huhn@open-xchange.com">Jan-Oliver Huhn</a>
  * @since v7.10.0
  */
-public class ICalCompositeEventExporter extends AbstractICalExporter {
+public interface ICalImport {
 
-    public ICalCompositeEventExporter(String folderId) {
-        super(folderId);
-    }
-
-    @Override
-    protected ThresholdFileHolder exportData(ServerSession session, OutputStream out) throws OXException {
-        return exportFolderData(session, out);
-    }
-
-    private ThresholdFileHolder exportFolderData(ServerSession session, OutputStream out) throws OXException {
-        IDBasedCalendarAccess calendarAccess = ImportExportServices.getIDBasedCalendarAccessFactory().createAccess(session);
-        return exportChronosEvents(calendarAccess.getEventsInFolder(getFolderId()), out);
-    }
+    TruncationInfo importData(UserizedFolder userizedFolder, InputStream is, List<ImportResult> list, Map<String, String[]> optionalParams, Map<String, String> uidReplacements) throws OXException ;
 
 }

@@ -47,35 +47,40 @@
  *
  */
 
-package com.openexchange.importexport.exporters.ical;
+package com.openexchange.importexport.importers.ical;
 
-import java.io.OutputStream;
-import com.openexchange.ajax.container.ThresholdFileHolder;
-import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
-import com.openexchange.exception.OXException;
-import com.openexchange.importexport.osgi.ImportExportServices;
+import java.util.Map;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link ICalCompositeEventExporter}
+ * {@link AbstractICalImporter}
  *
  * @author <a href="mailto:Jan-Oliver.Huhn@open-xchange.com">Jan-Oliver Huhn</a>
  * @since v7.10.0
  */
-public class ICalCompositeEventExporter extends AbstractICalExporter {
+public abstract class AbstractICalImporter implements ICalImport {
 
-    public ICalCompositeEventExporter(String folderId) {
-        super(folderId);
+    ServerSession session;
+
+    public AbstractICalImporter(ServerSession session) {
+        super();
+        this.session = session;
     }
 
-    @Override
-    protected ThresholdFileHolder exportData(ServerSession session, OutputStream out) throws OXException {
-        return exportFolderData(session, out);
-    }
-
-    private ThresholdFileHolder exportFolderData(ServerSession session, OutputStream out) throws OXException {
-        IDBasedCalendarAccess calendarAccess = ImportExportServices.getIDBasedCalendarAccessFactory().createAccess(session);
-        return exportChronosEvents(calendarAccess.getEventsInFolder(getFolderId()), out);
+    /**
+     * Gets a value whether the supplied parameters indicate that UIDs should be ignored during import or not.
+     *
+     * @param optionalParams The optional parameters as passed from the import request, may be <code>null</code>
+     * @return <code>true</code> if UIDs should be ignored, <code>false</code>, otherwise
+     */
+    public static boolean isIgnoreUIDs(Map<String, String[]> optionalParams) {
+        if (null != optionalParams) {
+            String[] value = optionalParams.get("ignoreUIDs");
+            if (null != value && 0 < value.length) {
+                return Boolean.valueOf(value[0]).booleanValue();
+            }
+        }
+        return false;
     }
 
 }

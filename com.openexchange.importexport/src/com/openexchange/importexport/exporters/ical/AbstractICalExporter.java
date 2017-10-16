@@ -51,12 +51,18 @@ package com.openexchange.importexport.exporters.ical;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.List;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.chronos.Event;
+import com.openexchange.chronos.ical.CalendarExport;
+import com.openexchange.chronos.ical.ICalParameters;
+import com.openexchange.chronos.ical.ICalService;
 import com.openexchange.exception.OXException;
 import com.openexchange.importexport.exceptions.ImportExportExceptionCodes;
 import com.openexchange.importexport.formats.Format;
 import com.openexchange.importexport.helpers.SizedInputStream;
+import com.openexchange.importexport.osgi.ImportExportServices;
 import com.openexchange.java.Streams;
 import com.openexchange.tools.session.ServerSession;
 
@@ -120,8 +126,33 @@ public abstract class AbstractICalExporter implements ICalExport {
         }
     }
 
+    protected ThresholdFileHolder exportChronosEvents(List<Event> eventList, OutputStream optOut) throws OXException {
+        ICalService iCalService = ImportExportServices.getICalService();
+        ICalParameters iCalParameters = iCalService.initParameters();
+        CalendarExport calendarExport = iCalService.exportICal(iCalParameters);
+        for (Event event : eventList) {
+            calendarExport.add(event);
+        }
+        if (null != optOut) {
+            calendarExport.writeVCalendar(optOut);
+            return null;
+        }
+        ThresholdFileHolder sink = new ThresholdFileHolder();
+        boolean error = true;
+        try {
+            calendarExport.writeVCalendar(sink.asOutputStream());
+            error = false;
+            return sink;
+        } finally {
+            if (error) {
+                Streams.close(sink);
+            }
+        }
+    }
+
     public String getFolderId() {
         return folderId;
     }
+
 
 }

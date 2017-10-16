@@ -85,7 +85,6 @@ public class ICalExporter extends AbstractExporter {
         if(!format.equals(Format.ICAL)){
             return false;
         }
-
         FolderService service = ImportExportServices.getFolderService();
         UserizedFolder userizedFolder = service.getFolder(FolderStorage.REAL_TREE_ID, folder, session, null);
 
@@ -93,11 +92,11 @@ public class ICalExporter extends AbstractExporter {
             if (!session.getUserPermissionBits().hasTask()) {
                 return false;
             }
-        } else if (com.openexchange.folderstorage.database.contentType.CalendarContentType.getInstance().equals(userizedFolder.getContentType())) {
+        } else if (null == userizedFolder.getAccountID()) {
             if (!session.getUserConfiguration().hasCalendar()) {
                 return false;
             }
-        } else if (com.openexchange.folderstorage.calendar.contentType.CalendarContentType.getInstance().equals(userizedFolder.getContentType())) {
+        } else if (null != userizedFolder.getAccountID()) {
             if (!session.getUserConfiguration().hasCalendar()) {
                 return false;
             }
@@ -134,22 +133,20 @@ public class ICalExporter extends AbstractExporter {
         UserizedFolder userizedFolder = service.getFolder(FolderStorage.REAL_TREE_ID, folder, session, null);
         AJAXRequestData requestData = (AJAXRequestData) (optionalParams == null ? null : optionalParams.get("__requestData"));
 
-        ICalExport exporter = null;
+        ICalExport exporter;
         if (TaskContentType.getInstance().equals(userizedFolder.getContentType())) {
             //export task
             exporter = new ICalTaskExporter(folder, fieldsToBeExported);
-            return exporter.exportData(session, requestData, isSaveToDisk(optionalParams), appendFileNameParameter(requestData, getFolderExportFileName(session, folder, Format.ICAL.getExtension())));
         } else if (null == userizedFolder.getAccountID()) {
             //export legacy call
             exporter = new ICalEventExporter(folder);
-            return exporter.exportData(session, requestData, isSaveToDisk(optionalParams), appendFileNameParameter(requestData, getFolderExportFileName(session, folder, Format.ICAL.getExtension())));
         } else if (null != userizedFolder.getAccountID()) {
             //export new stack
             exporter = new ICalCompositeEventExporter(folder);
-            return exporter.exportData(session, requestData, isSaveToDisk(optionalParams), appendFileNameParameter(requestData, getFolderExportFileName(session, folder, Format.ICAL.getExtension())));
         } else {
             throw ImportExportExceptionCodes.CANNOT_EXPORT.create(folder, format);
         }
+        return exporter.exportData(session, requestData, isSaveToDisk(optionalParams), appendFileNameParameter(requestData, getFolderExportFileName(session, folder, Format.ICAL.getExtension())));
     }
 
     @Override
@@ -160,18 +157,16 @@ public class ICalExporter extends AbstractExporter {
             }
         }
         int folderModule = checkBatchModule(session, batchIds, format);
-
         AJAXRequestData requestData = (AJAXRequestData) (optionalParams == null ? null : optionalParams.get("__requestData"));
-        ICalExport exporter = null;
+        ICalExport exporter;
         if (folderModule == FolderObject.CALENDAR) {
             exporter = new ICalEventExporter(batchIds);
-            return exporter.exportData(session, requestData, isSaveToDisk(optionalParams), appendFileNameParameter(requestData, getBatchExportFileName(session, batchIds, Format.ICAL.getExtension())));
         } else if (folderModule == FolderObject.TASK) {
             exporter = new ICalTaskExporter(batchIds, fieldsToBeExported);
-            return exporter.exportData(session, requestData, isSaveToDisk(optionalParams), appendFileNameParameter(requestData, getBatchExportFileName(session, batchIds, Format.ICAL.getExtension())));
         } else {
             throw ImportExportExceptionCodes.ICAL_CONVERSION_FAILED.create();
         }
+        return exporter.exportData(session, requestData, isSaveToDisk(optionalParams), appendFileNameParameter(requestData, getBatchExportFileName(session, batchIds, Format.ICAL.getExtension())));
     }
 
     private int checkBatchModule(ServerSession session, Map<String, List<String>> batchIds, Format format) throws OXException {
