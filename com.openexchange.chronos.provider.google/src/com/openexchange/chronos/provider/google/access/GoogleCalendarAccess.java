@@ -71,7 +71,9 @@ import com.openexchange.chronos.provider.CalendarAccess;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.CalendarFolder;
 import com.openexchange.chronos.provider.DefaultCalendarFolder;
+import com.openexchange.chronos.provider.account.AdministrativeCalendarAccountService;
 import com.openexchange.chronos.provider.google.converter.GoogleEventConverter;
+import com.openexchange.chronos.provider.google.osgi.Services;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.EventID;
 import com.openexchange.exception.OXException;
@@ -87,9 +89,10 @@ public class GoogleCalendarAccess implements CalendarAccess {
 
     private final GoogleOAuthAccess oauthAccess;
     private final CalendarParameters parameters;
-    private final CalendarAccount account;
+    private CalendarAccount account;
 
     private final Map<String, CalendarFolder> folders = new HashMap<>(1);
+    private final Session session;
 
     /**
      * Initializes a new {@link GoogleCalendarAccess}.
@@ -99,79 +102,83 @@ public class GoogleCalendarAccess implements CalendarAccess {
      * @param parameters The calendar parameters
      * @throws OXException
      */
-    public GoogleCalendarAccess(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
+    public GoogleCalendarAccess(Session session, CalendarAccount account, CalendarParameters parameters, boolean checkConfig) throws OXException {
         this.parameters = parameters;
         this.account = account;
+        this.session = session;
         oauthAccess = new GoogleOAuthAccess(account, session);
         oauthAccess.initialize();
-        initCalendarFolder();
+        if(checkConfig){
+            initCalendarFolder();
+        }
     }
 
     /**
-    * Initializes the calendar folder and returns an updated internal configuration.
+    * Initializes the calendar folder and returns an updated internal configuration or null.
     *
     * @return the internal configuration
     * @throws OXException
     */
-    @SuppressWarnings("unchecked")
     public JSONObject initCalendarFolder() throws OXException {
         try {
             Calendar googleCal = (Calendar) oauthAccess.getClient().getClient();
             CalendarList calendars = googleCal.calendarList().list().execute();
             JSONObject internalConfiguration = account.getInternalConfiguration();
-            Map<String, Object> folderArray = null;
-            if(internalConfiguration != null){
-                folderArray = internalConfiguration.getJSONObject("folders").asMap();
-            }
-            Map<String, JSONObject> folderToAdd = new HashMap<>();
             JSONObject userConfiguration = account.getUserConfiguration();
-            JSONObject updatedFolders = null;
-            if (userConfiguration != null && userConfiguration.hasAndNotNull("folders")) {
-                updatedFolders = userConfiguration.getJSONObject("folders");
-            }
+            boolean changed = false;
+            JSONObject newConfig = new JSONObject();
             for(CalendarListEntry entry: calendars.getItems()){
-                if(folderArray!=null && folderArray.containsKey(entry.getId())){
-                    if ((boolean) ((Map<String, Object>) folderArray.get(entry.getId())).get("enabled")) {
-                        folders.put(String.valueOf(entry.getId()), new DefaultCalendarFolder(entry.getId(), entry.getSummary()));
-                        continue;
-                    }
-                }
 
-                if (entry.getId().equals("primary")) {
-                    folders.put(String.valueOf(entry.getId()), new DefaultCalendarFolder(entry.getId(), entry.getSummary()));
-                    JSONObject config = new JSONObject();
-                    config.put("enabled", true);
-                    folderToAdd.put(entry.getId(), config);
-                } else if (updatedFolders != null && updatedFolders.hasAndNotNull(entry.getId()) && updatedFolders.getJSONObject(entry.getId()).getBoolean("enabled")) {
-                    folders.put(entry.getId(), new DefaultCalendarFolder(entry.getId(), entry.getSummary()));
-                    JSONObject config = new JSONObject();
-                    config.put("enabled", true);
-                    folderToAdd.put(entry.getId(), config);
+                // enabled==true if user config is 'true' or if internal config is 'true' and user config is empty
+                Boolean internalCheck = checkConfig(internalConfiguration, entry.getId());
+                Boolean userCheck = checkConfig(userConfiguration, entry.getId());
+                if( (userCheck != null && userCheck)){
+                    addEntry(entry, true, newConfig);
+                    if(internalCheck == null || !internalCheck){
+                        // new config
+                       changed = true;
+                    }
+                } else if (userCheck==null && internalCheck != null && internalCheck) {
+                    addEntry(entry, true, newConfig);
                 } else {
-                    JSONObject config = new JSONObject();
-                    config.put("enabled", false);
-                    folderToAdd.put(entry.getId(), config);
+                    addEntry(entry, false, newConfig);
                 }
             }
-            if(!folderToAdd.isEmpty()){
-                Map<String, Object> newConfig = new HashMap<>(folderToAdd.size());
-                if(folderArray != null){
-                    newConfig.putAll(folderArray);
-                }
-                newConfig.putAll(folderToAdd);
-                if(internalConfiguration == null){
-                    internalConfiguration = new JSONObject(1);
-                }
+
+            if(changed || getConfig(internalConfiguration).size() != newConfig.asMap().size()){
                 internalConfiguration.put("folders", newConfig);
-                return internalConfiguration;
+                userConfiguration.put("folders", newConfig);
+
+                AdministrativeCalendarAccountService service = Services.getService(AdministrativeCalendarAccountService.class);
+                account = service.updateAccount(session.getContextId(), session.getUserId(), account.getAccountId(), internalConfiguration, userConfiguration, account.getLastModified().getTime());
             }
+
             return internalConfiguration;
         } catch (IOException e) {
             throw CalendarExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (JSONException e) {
             throw CalendarExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
+    }
 
+    private Map<String, Object> getConfig(JSONObject json) throws JSONException{
+        if(json.has("folders")){
+            return json.getJSONObject("folders").asMap();
+        }
+        return null;
+    }
+
+    @SuppressWarnings("unchecked")
+    private Boolean checkConfig(JSONObject config, String key) throws JSONException{
+        Map<String, Object> map = getConfig(config);
+        return map == null ? null : !map.containsKey(key) ? null : Boolean.valueOf((boolean) ((Map<String, Object>) map.get(key)).get("enabled"));
+    }
+
+    private void addEntry(CalendarListEntry entry, boolean enabled, JSONObject newConfig) throws JSONException{
+        folders.put(String.valueOf(entry.getId()), new DefaultCalendarFolder(entry.getId(), entry.getSummary()));
+        JSONObject config = new JSONObject();
+        config.put("enabled", enabled);
+        newConfig.put(entry.getId(), config);
     }
 
     @Override

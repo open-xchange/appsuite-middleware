@@ -86,16 +86,18 @@ public class GoogleCalendarProvider implements CalendarProvider{
 
     @Override
     public CalendarAccess connect(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
-        return new GoogleCalendarAccess(session, account, parameters);
+        return new GoogleCalendarAccess(session, account, parameters, true);
 
     }
 
     @Override
     public JSONObject configureAccount(Session session, JSONObject userConfig, CalendarParameters parameters) throws OXException {
         DefaultCalendarAccount account = new DefaultCalendarAccount(getId(), -1, session.getUserId(), null, userConfig, new Date());
-        CalendarAccess access = connect(session, account, parameters);
-        GoogleCalendarAccess googleCalendarAccess = (GoogleCalendarAccess) access;
-        JSONObject internalConfig = googleCalendarAccess.initCalendarFolder();
+        GoogleCalendarAccess access = new GoogleCalendarAccess(session, account, parameters, false);
+        JSONObject internalConfig = access.initCalendarFolder();
+        if(internalConfig == null){
+            internalConfig = new JSONObject();
+        }
         try {
             userConfig.put("folders", internalConfig.get("folders"));
         } catch (JSONException e) {
@@ -107,9 +109,11 @@ public class GoogleCalendarProvider implements CalendarProvider{
     @Override
     public JSONObject reconfigureAccount(Session session, JSONObject internalConfig, JSONObject userConfig, CalendarParameters parameters) throws OXException {
         DefaultCalendarAccount account = new DefaultCalendarAccount(getId(), -1, session.getUserId(), internalConfig, userConfig, new Date());
-        CalendarAccess access = connect(session, account, parameters);
-        GoogleCalendarAccess googleCalendarAccess = (GoogleCalendarAccess) access;
-        JSONObject resultConfig = googleCalendarAccess.initCalendarFolder();
+        GoogleCalendarAccess access = new GoogleCalendarAccess(session, account, parameters, false);
+        JSONObject resultConfig = access.initCalendarFolder();
+        if(resultConfig == null){
+            resultConfig = internalConfig;
+        }
         try {
             userConfig.put("folders", resultConfig.get("folders"));
         } catch (JSONException e) {

@@ -54,6 +54,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import org.dmfs.rfc5545.DateTime;
 import com.google.api.services.calendar.model.Event.Creator;
 import com.google.api.services.calendar.model.Event.Reminders;
@@ -67,11 +69,13 @@ import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.EventStatus;
 import com.openexchange.chronos.ExtendedProperties;
 import com.openexchange.chronos.ExtendedProperty;
 import com.openexchange.chronos.Organizer;
 import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.RecurrenceId;
+import com.openexchange.chronos.TimeTransparency;
 import com.openexchange.chronos.Trigger;
 import com.openexchange.chronos.Trigger.Related;
 import com.openexchange.chronos.common.DefaultRecurrenceId;
@@ -124,7 +128,8 @@ public class GoogleEventConverter {
             @Override
             public void serialize(Event to, com.google.api.services.calendar.model.Event from) throws OXException {
                 if (from.getRecurringEventId() != null) {
-                    to.setId(from.getRecurringEventId());
+                    String id = from.getId().substring(0, from.getId().lastIndexOf("_"));
+                    to.setId(id);
                     return;
                 }
                 to.setId(from.getId());
@@ -135,7 +140,9 @@ public class GoogleEventConverter {
 
             @Override
             public void serialize(Event to, com.google.api.services.calendar.model.Event from) throws OXException {
-                to.setStartDate(convert(from.getStart()));
+                if(from.getStart() != null){
+                    to.setStartDate(convert(from.getStart()));
+                }
             }
 
         });
@@ -143,7 +150,9 @@ public class GoogleEventConverter {
 
             @Override
             public void serialize(Event to, com.google.api.services.calendar.model.Event from) throws OXException {
-                to.setEndDate(convert(from.getEnd()));
+                if(from.getEnd() != null){
+                    to.setEndDate(convert(from.getEnd()));
+                }
             }
 
         });
@@ -291,7 +300,9 @@ public class GoogleEventConverter {
 
             @Override
             public void serialize(Event to, com.google.api.services.calendar.model.Event from) throws OXException {
-                to.setCreated(new Date(from.getCreated().getValue()));
+                if(from.getCreated()!=null){
+                    to.setCreated(new Date(from.getCreated().getValue()));
+                }
             }
         });
 
@@ -400,16 +411,6 @@ public class GoogleEventConverter {
             }
         });
 
-        result.put(EventField.LAST_MODIFIED, new GoogleMapping() {
-
-            @Override
-            public void serialize(Event to, com.google.api.services.calendar.model.Event from) throws OXException {
-                if (from.getUpdated() != null) {
-                    to.setLastModified(new Date(from.getUpdated().getValue()));
-                }
-            }
-        });
-
         result.put(EventField.MODIFIED_BY, new GoogleMapping() {
 
             @Override
@@ -431,10 +432,122 @@ public class GoogleEventConverter {
             }
         });
 
+        result.put(EventField.RECURRENCE_RULE, new GoogleMapping() {
+
+            @Override
+            public void serialize(Event to, com.google.api.services.calendar.model.Event from) throws OXException {
+                if (from.getRecurrence() != null) {
+                    for(String recurrence: from.getRecurrence()){
+                        if(recurrence.startsWith("RRULE:")){
+                            to.setRecurrenceRule(recurrence.substring("RRULE:".length()));
+                            continue;
+                        }
+                        if(recurrence.startsWith("EXDATE:")){
+                            SortedSet<RecurrenceId> deleteExceptionDates = to.getDeleteExceptionDates();
+                            if(deleteExceptionDates == null){
+                                deleteExceptionDates = new TreeSet<>();
+                                to.setDeleteExceptionDates(deleteExceptionDates);
+                            }
+                            deleteExceptionDates.add(new DefaultRecurrenceId(recurrence.substring("EXDATE:".length())));
+                            continue;
+                        }
+                    }
+                }
+            }
+        });
+
+        result.put(EventField.SEQUENCE, new GoogleMapping() {
+
+            @Override
+            public void serialize(Event to, com.google.api.services.calendar.model.Event from) throws OXException {
+                if (from.getSequence() != null) {
+                   to.setSequence(from.getSequence());
+                }
+            }
+        });
+
+        result.put(EventField.SERIES_ID, new GoogleMapping() {
+
+            @Override
+            public void serialize(Event to, com.google.api.services.calendar.model.Event from) throws OXException {
+                if (from.getRecurringEventId() != null) {
+                   to.setSeriesId(from.getRecurringEventId());
+                }
+            }
+        });
+
+        result.put(EventField.STATUS, new GoogleMapping() {
+
+            @Override
+            public void serialize(Event to, com.google.api.services.calendar.model.Event from) throws OXException {
+                if (from.getStatus() != null) {
+                    to.setStatus(EventStatus.valueOf(from.getStatus().toUpperCase()));
+                }
+            }
+        });
+
+        result.put(EventField.SUMMARY, new GoogleMapping() {
+
+            @Override
+            public void serialize(Event to, com.google.api.services.calendar.model.Event from) throws OXException {
+                if (from.getSummary() != null) {
+                    to.setSummary(from.getSummary());
+                }
+            }
+        });
+
+        result.put(EventField.TIMESTAMP, new GoogleMapping() {
+
+            @Override
+            public void serialize(Event to, com.google.api.services.calendar.model.Event from) throws OXException {
+                if (from.getCreated() != null) {
+                    to.setTimestamp(from.getCreated().getValue());
+                }
+            }
+        });
+
+        result.put(EventField.TRANSP, new GoogleMapping() {
+
+            @Override
+            public void serialize(Event to, com.google.api.services.calendar.model.Event from) throws OXException {
+                if (from.getTransparency() != null) {
+                    to.setTransp(TimeTransparency.valueOf(from.getTransparency().toUpperCase()));
+                }
+            }
+        });
+
+
+        result.put(EventField.UID, new GoogleMapping() {
+
+            @Override
+            public void serialize(Event to, com.google.api.services.calendar.model.Event from) throws OXException {
+                if (from.getICalUID() != null) {
+                    to.setUid(from.getICalUID());
+                }
+            }
+        });
+
+        result.put(EventField.URL, new GoogleMapping() {
+
+            @Override
+            public void serialize(Event to, com.google.api.services.calendar.model.Event from) throws OXException {
+                if (from.getHtmlLink() != null) {
+                    to.setUrl(from.getHtmlLink());
+                }
+            }
+        });
+
         return result;
     }
 
     private abstract class GoogleMapping {
+
+        /**
+         * Initializes a new {@link GoogleMapping}.
+         */
+        public GoogleMapping() {
+            super();
+        }
 
         public abstract void serialize(Event to, com.google.api.services.calendar.model.Event from) throws OXException;
 
