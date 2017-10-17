@@ -56,13 +56,16 @@ import static com.openexchange.chronos.impl.Utils.getPersonalFolderIds;
 import static com.openexchange.chronos.impl.Utils.isInFolder;
 import static com.openexchange.chronos.impl.Utils.isResolveOccurrences;
 import static com.openexchange.chronos.impl.Utils.mapEventOccurrences;
+import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.common.SelfProtectionFactory.SelfProtection;
+import com.openexchange.chronos.impl.AbstractStorageOperation;
 import com.openexchange.chronos.impl.InternalCalendarResult;
+import com.openexchange.chronos.impl.InternalCalendarStorageOperation;
 import com.openexchange.chronos.impl.Utils;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.EventID;
@@ -164,7 +167,7 @@ public class ResultTracker {
                  */
                 if (isResolveOccurrences(session) && (isSeriesMaster(originalEvent) || isSeriesMaster(updatedEvent))) {
                     if (isSeriesMaster(originalEvent) && isSeriesMaster(updatedEvent)) {
-                        for (Entry<Event, Event> entry : mapEventOccurrences(resolveOccurrences(userize(originalEvent)), resolveOccurrences(userize(updatedEvent)))) {
+                        for (Entry<Event, Event> entry : mapEventOccurrences(resolveOriginalUserizedOccurrences(originalEvent), resolveOccurrences(userize(updatedEvent)))) {
                             if (null == entry.getKey()) {
                                 result.addUserizedCreation(entry.getValue());
                             } else if (null == entry.getValue()) {
@@ -174,7 +177,7 @@ public class ResultTracker {
                             }
                         }
                     } else if (isSeriesMaster(originalEvent)) {
-                        for (Event originalOccurrence : resolveOccurrences(userize(originalEvent))) {
+                        for (Event originalOccurrence : resolveOriginalUserizedOccurrences(originalEvent)) {
                             result.addUserizedDeletion(timestamp, new EventID(folder.getID(), originalOccurrence.getId(), originalOccurrence.getRecurrenceId()));
                         }
                         result.addUserizedDeletion(timestamp, new EventID(folder.getID(), originalEvent.getId(), originalEvent.getRecurrenceId()));
@@ -191,7 +194,7 @@ public class ResultTracker {
                  * "delete" from calendar user's point of view
                  */
                 if (isSeriesMaster(originalEvent) && isResolveOccurrences(session)) {
-                    for (Event originalOccurrence : resolveOccurrences(userize(originalEvent))) {
+                    for (Event originalOccurrence : resolveOriginalUserizedOccurrences(originalEvent)) {
                         result.addUserizedDeletion(timestamp, new EventID(folder.getID(), originalOccurrence.getId(), originalOccurrence.getRecurrenceId()));
                     }
                 } else {
@@ -238,6 +241,23 @@ public class ResultTracker {
             protection.checkEventCollection(list);
         }
         return list;
+    }
+
+    private List<Event> resolveOriginalUserizedOccurrences(Event masterEvent) throws OXException {
+        Connection oldConnection = session.get(AbstractStorageOperation.PARAM_CONNECTION, Connection.class);
+        session.set(AbstractStorageOperation.PARAM_CONNECTION, null);
+        try {
+            return new InternalCalendarStorageOperation<List<Event>>(session) {
+
+                @Override
+                protected List<Event> execute(CalendarSession session, CalendarStorage storage) throws OXException {
+                    Event userizedMasterEvent = Utils.userize(session, storage, masterEvent, getCalendarUserId(folder));
+                    return Utils.asList(Utils.resolveOccurrences(storage, session, userizedMasterEvent));
+                }
+            }.executeQuery();
+        } finally {
+            session.set(AbstractStorageOperation.PARAM_CONNECTION, oldConnection);
+        }
     }
 
     private Event userize(Event event) throws OXException {
