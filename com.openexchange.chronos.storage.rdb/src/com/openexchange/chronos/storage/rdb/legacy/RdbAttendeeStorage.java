@@ -263,6 +263,11 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
         }
     }
 
+    @Override
+    public void deleteAllAttendees() throws OXException {
+        throw new UnsupportedOperationException();
+    }
+
     private Map<String, List<Attendee>> loadAttendees(String[] eventIds, Boolean internal, boolean tombstones) throws OXException {
         Map<String, List<Attendee>> attendeesById = new HashMap<String, List<Attendee>>(eventIds.length);
         Connection connection = null;

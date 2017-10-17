@@ -194,6 +194,11 @@ public class RdbEventStorage implements EventStorage {
     }
 
     @Override
+    public void deleteAllEvents() throws OXException {
+        delegate.deleteAllEvents();
+    }
+
+    @Override
     public void insertEventTombstone(Event event) throws OXException {
         delegate.insertEventTombstone(event);
         legacyDelegate.insertEventTombstone(event);

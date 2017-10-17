@@ -111,6 +111,13 @@ public interface AttendeeStorage {
     void deleteAttendees(String eventId, List<Attendee> attendees) throws OXException;
 
     /**
+     * Deletes all existing attendees for an account.
+     * 
+     * @throws OXException
+     */
+    void deleteAllAttendees() throws OXException;
+
+    /**
      * Inserts attendees for a specific event.
      *
      * @param eventId The identifier of the event to insert the attendees for
@@ -171,5 +178,4 @@ public interface AttendeeStorage {
      * @return The attendees, mapped to the identifiers of the corresponding events
      */
     Map<String, List<Attendee>> loadAttendeeTombstones(String[] eventIds) throws OXException;
-
 }

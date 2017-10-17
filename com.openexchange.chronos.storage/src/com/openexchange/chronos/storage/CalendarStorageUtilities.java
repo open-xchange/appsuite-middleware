@@ -137,4 +137,11 @@ public interface CalendarStorageUtilities {
      */
     List<Event> loadAdditionalEventTombstoneData(List<Event> events, EventField[] fields) throws OXException;
 
+    /**
+     * Removes all persisted data (events, alarms, attendees, ...) associated with the given account
+     * 
+     * @throws OXException In case of an error
+     */
+    void deleteAllData() throws OXException;
+
 }

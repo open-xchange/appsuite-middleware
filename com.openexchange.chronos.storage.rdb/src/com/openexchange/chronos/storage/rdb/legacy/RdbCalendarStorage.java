@@ -207,6 +207,11 @@ public class RdbCalendarStorage implements CalendarStorage {
             public void deleteTriggers(int userId) throws OXException {
                 // Do nothing
             }
+
+            @Override
+            public void deleteAllTriggers() throws OXException {
+                // Do nothing
+            }
         };
     }
 

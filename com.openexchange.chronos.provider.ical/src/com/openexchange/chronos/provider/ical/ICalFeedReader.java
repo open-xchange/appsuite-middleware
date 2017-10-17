@@ -51,42 +51,19 @@ package com.openexchange.chronos.provider.ical;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.Charset;
-import java.util.Date;
-import org.apache.commons.codec.binary.Base64;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHeaders;
-import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpHead;
-import org.apache.http.client.methods.HttpRequestBase;
-import org.apache.http.client.utils.DateUtils;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.util.EntityUtils;
-import com.openexchange.auth.info.AuthInfo;
-import com.openexchange.auth.info.AuthType;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.ical.ICalParameters;
 import com.openexchange.chronos.ical.ICalService;
 import com.openexchange.chronos.ical.ImportedCalendar;
-import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.ical.exception.ICalProviderExceptionCodes;
-import com.openexchange.chronos.provider.ical.internal.ICalCalendarProviderProperties;
 import com.openexchange.chronos.provider.ical.internal.Services;
-import com.openexchange.chronos.provider.ical.internal.auth.CalendarAuthParser;
-import com.openexchange.chronos.provider.ical.internal.auth.PasswordUtil;
 import com.openexchange.chronos.provider.ical.result.GetResult;
-import com.openexchange.chronos.provider.ical.result.HeadResult;
-import com.openexchange.config.ConfigTools;
-import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
-import com.openexchange.java.Strings;
-import com.openexchange.net.ssl.SSLSocketFactoryProvider;
-import com.openexchange.net.ssl.config.SSLConfigurationService;
-import com.openexchange.rest.client.httpclient.HttpClients;
-import com.openexchange.rest.client.httpclient.HttpClients.ClientConfig;
 import com.openexchange.session.Session;
 
 /**
@@ -96,43 +73,12 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.10.0
  */
-public class ICalFeedReader {
+public class ICalFeedReader extends ICalFeedConnector {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ICalFeedReader.class);
 
-    private final CloseableHttpClient httpClient;
-    private final Session session;
-    private final ICalFeedConfig iCalFeedConfig;
-    private final CalendarAccount account;
-
-    public ICalFeedReader(Session session, CalendarAccount account, ICalFeedConfig iCalFeedConfig) {
-        this.account = account;
-        this.iCalFeedConfig = iCalFeedConfig;
-        this.session = session;
-
-        ClientConfig config = ClientConfig.newInstance();
-        config.setUserAgent("Open-Xchange Calendar Feed Client");
-
-        init(config);
-        this.httpClient = HttpClients.getHttpClient(config, Services.getService(SSLSocketFactoryProvider.class), Services.getService(SSLConfigurationService.class));
-    }
-
-    private void init(ClientConfig config) {
-        LeanConfigurationService leanConfigurationService = Services.getService(LeanConfigurationService.class);
-        String maxFileSize = leanConfigurationService.getProperty(session.getUserId(), session.getContextId(), ICalCalendarProviderProperties.maxFileSize);
-        this.iCalFeedConfig.setAllowedMaxSize(ConfigTools.parseBytes(maxFileSize));
-
-        int maxConnections = leanConfigurationService.getIntProperty(session.getUserId(), session.getContextId(), ICalCalendarProviderProperties.maxConnections);
-        config.setMaxTotalConnections(maxConnections);
-
-        int maxConnectionsPerRoute = leanConfigurationService.getIntProperty(session.getUserId(), session.getContextId(), ICalCalendarProviderProperties.maxConnectionsPerRoute);
-        config.setMaxConnectionsPerRoute(maxConnectionsPerRoute);
-
-        int connectionTimeout = leanConfigurationService.getIntProperty(session.getUserId(), session.getContextId(), ICalCalendarProviderProperties.connectionTimeout);
-        config.setConnectionTimeout(connectionTimeout);
-
-        int socketReadTimeout = leanConfigurationService.getIntProperty(session.getUserId(), session.getContextId(), ICalCalendarProviderProperties.socketReadTimeout);
-        config.setSocketReadTimeout(socketReadTimeout);
+    public ICalFeedReader(Session session, ICalFeedConfig iCalFeedConfig) {
+        super(session, iCalFeedConfig);
     }
 
     private HttpGet prepareGet(String uri) throws OXException {
@@ -140,44 +86,6 @@ public class ICalFeedReader {
         getMethod.addHeader(HttpHeaders.ACCEPT, "text/calendar");
         handleAuth(getMethod);
         return getMethod;
-    }
-
-    private void handleAuth(HttpRequestBase method) throws OXException {
-        AuthInfo authInfo = CalendarAuthParser.getInstance().getAuthInfo(this.account.getUserConfiguration());
-        AuthType authType = authInfo.getAuthType();
-        switch (authType) {
-            case LOGIN: {
-                StringBuilder auth = new StringBuilder();
-                String login = authInfo.getLogin();
-                if (Strings.isNotEmpty(login)) {
-                    auth.append(login).append(":");
-                }
-                String password = authInfo.getPassword();
-                if (Strings.isNotEmpty(password)) {
-                    String decrypt = new String(PasswordUtil.decrypt(password, session.getPassword()));
-                    auth.append(decrypt);
-                }
-
-                byte[] encodedAuth = Base64.encodeBase64(auth.toString().getBytes(Charset.forName("ISO-8859-1")));
-                String authHeader = "Basic " + new String(encodedAuth);
-
-                method.addHeader(HttpHeaders.AUTHORIZATION, authHeader);
-            }
-                break;
-            case OAUTH:
-                //TODO
-            case OAUTHBEARER:
-                //TODO
-            case TOKEN: {
-                String token = authInfo.getToken();
-                String authHeader = "Token token=" + token;
-                method.addHeader(HttpHeaders.AUTHORIZATION, authHeader);
-            }
-                break;
-            case NONE:
-            default:
-                break;
-        }
     }
 
     private ImportedCalendar importCalendar(HttpEntity httpEntity) throws OXException {
@@ -209,23 +117,13 @@ public class ICalFeedReader {
 
             if (result.getStatusCode() >= 200 && result.getStatusCode() < 300) {
                 HttpEntity httpEntity = response.getEntity();
-
                 if (null == httpEntity) {
                     return null;
                 }
-                long contentLength = httpEntity.getContentLength();
-                if (contentLength > iCalFeedConfig.getAllowedMaxSize()) {
-                    throw ICalProviderExceptionCodes.FEED_SIZE_EXCEEDED.create(uri, contentLength, iCalFeedConfig.getAllowedMaxSize());
-                }
-
                 result.setCalendar(importCalendar(httpEntity));
                 return result;
             }
-            if (401 == result.getStatusCode()) {
-                throw CalendarExceptionCodes.AUTH_FAILED.create(uri);
-            }
-
-            return result; //TODO maybe we should throw an exception?!
+            throw ICalProviderExceptionCodes.UNEXPECTED_FEED_ERROR.create(uri);
         } catch (IOException e) {
             //            throw OAuthExceptionCodes.OAUTH_ERROR.create(e, e.getMessage());
             throw OXException.general("", e);
@@ -234,82 +132,4 @@ public class ICalFeedReader {
             Streams.close(response);
         }
     }
-
-    /**
-     * Resets given HTTP request
-     *
-     * @param request The HTTP request
-     */
-    private static void reset(HttpRequestBase request) {
-        if (null != request) {
-            try {
-                request.reset();
-            } catch (final Exception e) {
-                // Ignore
-            }
-        }
-    }
-
-    /**
-     * Ensures that the entity content is fully consumed and the content stream, if exists, is closed silently.
-     *
-     * @param response The HTTP response to consume and close
-     */
-    private static void consume(HttpResponse response) {
-        if (null != response) {
-            HttpEntity entity = response.getEntity();
-            if (null != entity) {
-                try {
-                    EntityUtils.consume(entity);
-                } catch (Exception e) {
-                    // Ignore
-                }
-            }
-        }
-    }
-
-    /**
-     * Closes the supplied HTTP request & response resources silently.
-     *
-     * @param request The HTTP request to reset
-     * @param response The HTTP response to consume and close
-     */
-    private static void close(HttpRequestBase request, HttpResponse response) {
-        consume(response);
-        reset(request);
-    }
-
-    protected HeadResult head(String uri) throws OXException {
-        HttpHead headMethod = null;
-        CloseableHttpResponse response = null;
-        try {
-            headMethod = prepareHead(uri);
-            response = httpClient.execute(headMethod);
-            return new HeadResult(response.getStatusLine(), response.getAllHeaders());
-        } catch (IOException e) {
-            LOG.error("Error while executing the head request targeting {}: {}.", uri, e.getMessage(), e);
-            throw CalendarExceptionCodes.UNEXPECTED_ERROR.create(e.getMessage());
-        } finally {
-            close(headMethod, response);
-            Streams.close(response);
-        }
-    }
-
-    private HttpHead prepareHead(String uri) throws OXException {
-        HttpHead headMethod = new HttpHead(uri);
-        headMethod.addHeader(HttpHeaders.ACCEPT, "text/calendar");
-
-        if (Strings.isNotEmpty(iCalFeedConfig.getEtag())) {
-            headMethod.addHeader(HttpHeaders.IF_NONE_MATCH, iCalFeedConfig.getEtag());
-        }
-
-        String ifModifiedSince = DateUtils.formatDate(new Date(iCalFeedConfig.getLastUpdated()));
-        if (Strings.isNotEmpty(ifModifiedSince)) {
-            headMethod.setHeader(HttpHeaders.IF_MODIFIED_SINCE, ifModifiedSince);
-        }
-        handleAuth(headMethod);
-
-        return headMethod;
-    }
-
 }

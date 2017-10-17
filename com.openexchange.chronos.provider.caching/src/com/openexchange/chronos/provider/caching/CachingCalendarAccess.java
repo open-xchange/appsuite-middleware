@@ -59,8 +59,6 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
-import org.joda.time.Hours;
-import org.joda.time.Weeks;
 import org.json.JSONObject;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.RecurrenceId;
@@ -271,6 +269,11 @@ public abstract class CachingCalendarAccess implements WarningsAware {
         return account;
     }
 
+    /**
+     * Returns the origin request parameters
+     * 
+     * @return {@link CalendarParameters} containing the parameters
+     */
     public CalendarParameters getParameters() {
         return parameters;
     }
@@ -318,10 +321,10 @@ public abstract class CachingCalendarAccess implements WarningsAware {
             }
         }
         long providerRefreshInterval = getRefreshInterval();
-        if (providerRefreshInterval > Hours.ONE.toStandardMinutes().getMinutes()) {
+        if (providerRefreshInterval > TimeUnit.DAYS.toMinutes(1L)) {
             return providerRefreshInterval;
         }
-        return Weeks.ONE.toStandardMinutes().getMinutes();
+        return TimeUnit.DAYS.toMinutes(1L);
     }
 
     /**

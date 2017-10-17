@@ -50,7 +50,6 @@
 package com.openexchange.chronos.provider.ical;
 
 import org.json.JSONObject;
-import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.caching.CachingCalendarAccess;
 
 /**
@@ -64,29 +63,29 @@ public class ICalFeedConfig {
 
     public static final String ETAG = "etag";
 
-    private final String feedUrl;
-    private long allowedMaxSize;
+    private final JSONObject userConfiguration;
+//    private long allowedMaxSize;
     private final String etag;
     private final long lastUpdated;
 
-    private ICalFeedConfig(String feedUrl, String etag, long lastUpdated) {
+    private ICalFeedConfig(JSONObject userConfiguration, String etag, long lastUpdated) {
         super();
-        this.feedUrl = feedUrl;
+        this.userConfiguration = userConfiguration;
         this.etag = etag;
         this.lastUpdated = lastUpdated;
     }
 
     public String getFeedUrl() {
-        return feedUrl;
+        return getUserConfiguration().optString("uri", null);
     }
 
-    public long getAllowedMaxSize() {
-        return allowedMaxSize;
-    }
-
-    public void setAllowedMaxSize(long allowedMaxSize) {
-        this.allowedMaxSize = allowedMaxSize;
-    }
+//    public long getAllowedMaxSize() {
+//        return allowedMaxSize;
+//    }
+//
+//    public void setAllowedMaxSize(long allowedMaxSize) {
+//        this.allowedMaxSize = allowedMaxSize;
+//    }
 
     public String getEtag() {
         return etag;
@@ -96,20 +95,24 @@ public class ICalFeedConfig {
         return lastUpdated;
     }
 
+    public JSONObject getUserConfiguration() {
+        return userConfiguration;
+    }
+
     public static class Builder {
 
-        private final String feedUrl;
         private final String etag;
         private final long lastUpdated;
+        private final JSONObject userConfiguration;
 
-        Builder(CalendarAccount account, JSONObject folderConfig) {
-            feedUrl = account.getUserConfiguration().optString("uri", null);
-            etag = folderConfig.optString(ETAG, null);
-            lastUpdated = folderConfig.optLong(CachingCalendarAccess.LAST_UPDATE, -1L);
+        Builder(JSONObject userConfiguration, JSONObject folderConfig) {
+            this.userConfiguration = userConfiguration;
+            this.etag = folderConfig.optString(ETAG, null);
+            this.lastUpdated = folderConfig.optLong(CachingCalendarAccess.LAST_UPDATE, -1L);
         }
 
         public ICalFeedConfig build() {
-            return new ICalFeedConfig(feedUrl, etag, lastUpdated);
+            return new ICalFeedConfig(userConfiguration, etag, lastUpdated);
         }
     }
 }

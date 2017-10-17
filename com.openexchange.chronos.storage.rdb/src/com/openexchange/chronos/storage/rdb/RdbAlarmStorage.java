@@ -339,6 +339,22 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
             release(connection, updated);
         }
     }
+    
+    @Override
+    public void deleteAllAlarms() throws OXException {
+        int updated = 0;
+        Connection connection = null;
+        try {
+            connection = dbProvider.getWriteConnection(context);
+            txPolicy.setAutoCommit(connection, false);
+            updated = deleteAlarms(connection, context.getContextId(), accountId);
+            txPolicy.commit(connection);
+        } catch (SQLException e) {
+            throw asOXException(e);
+        } finally {
+            release(connection, updated);
+        }
+    }
 
     private int insertAlarm(Connection connection, int cid, int account, String eventId, int userId, Alarm alarm) throws SQLException, OXException {
         AlarmField[] mappedFields = MAPPER.getMappedFields();
@@ -525,6 +541,14 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
             stmt.setInt(1, cid);
             stmt.setInt(2, account);
             stmt.setInt(3, user);
+            return logExecuteUpdate(stmt);
+        }
+    }
+
+    private static int deleteAlarms(Connection connection, int cid, int account) throws SQLException {
+        try (PreparedStatement stmt = connection.prepareStatement("DELETE FROM calendar_alarm WHERE cid=? AND account=?;")) {
+            stmt.setInt(1, cid);
+            stmt.setInt(2, account);
             return logExecuteUpdate(stmt);
         }
     }

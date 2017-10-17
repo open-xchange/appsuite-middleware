@@ -53,7 +53,7 @@ import java.util.Locale;
 import org.json.JSONObject;
 import com.openexchange.chronos.provider.CalendarAccess;
 import com.openexchange.chronos.provider.CalendarAccount;
-import com.openexchange.chronos.provider.CalendarProvider;
+import com.openexchange.chronos.provider.caching.CachingCalendarProvider;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
@@ -65,7 +65,7 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.10.0
  */
-public class ICalCalendarProvider implements CalendarProvider {
+public class ICalCalendarProvider extends CachingCalendarProvider {
 
     @Override
     public String getId() {
@@ -84,36 +84,22 @@ public class ICalCalendarProvider implements CalendarProvider {
 
     @Override
     public JSONObject configureAccount(Session session, JSONObject userConfig, CalendarParameters parameters) throws OXException {
+        ICalFeedConfig iCalFeedConfig = new ICalFeedConfig.Builder(userConfig, new JSONObject()).build();
+        ICalFeedConnector iCalFeedConnector = new ICalFeedConnector(session, iCalFeedConfig);
 
-        //TODO: verify access to feed, credentials...
-
+        iCalFeedConnector.head(iCalFeedConfig.getFeedUrl()); // check connections and authorization
         return new JSONObject();
     }
 
     @Override
     public JSONObject reconfigureAccount(Session session, JSONObject internalConfig, JSONObject userConfig, CalendarParameters parameters) throws OXException {
+        configureAccount(session, userConfig, parameters);
 
-        //TODO: verify access to feed, credentials...
-
-        return null;
+        return super.reconfigureAccount(session, internalConfig, userConfig, parameters);
     }
 
     @Override
     public void onAccountCreated(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
-        // TODO Auto-generated method stub
-
+        // nothing to do
     }
-
-    @Override
-    public void onAccountUpdated(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void onAccountDeleted(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
-        // TODO Auto-generated method stub
-
-    }
-
 }

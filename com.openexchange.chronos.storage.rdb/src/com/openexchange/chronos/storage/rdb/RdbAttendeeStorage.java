@@ -190,6 +190,32 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
             release(connection, updated);
         }
     }
+    
+    @Override
+    public void deleteAllAttendees() throws OXException {
+        int updated = 0;
+        Connection connection = null;
+        try {
+            connection = dbProvider.getWriteConnection(context);
+            txPolicy.setAutoCommit(connection, false);
+            updated += deleteAttendees(connection);
+            txPolicy.commit(connection);
+        } catch (SQLException e) {
+            throw asOXException(e);
+        } finally {
+            release(connection, updated);
+        }
+    }
+    
+    private int deleteAttendees(Connection connection) throws SQLException {
+        int updated = 0;
+        try (PreparedStatement stmt = connection.prepareStatement("DELETE FROM calendar_attendee WHERE cid=? AND account=?;")) {
+            stmt.setInt(1, context.getContextId());
+            stmt.setInt(2, accountId);
+            updated += logExecuteUpdate(stmt);
+        }
+        return updated;
+    }
 
     @Override
     public void updateAttendee(String eventId, Attendee attendee) throws OXException {
