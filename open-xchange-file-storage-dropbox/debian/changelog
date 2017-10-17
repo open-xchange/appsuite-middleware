@@ -1,3 +1,9 @@
+open-xchange-file-storage-dropbox (7.8.3-36) stable; urgency=medium
+
+  * Build for Patch 2017-10-16 (4393)
+
+ -- Thorben Betten <thorben.betten@open-xchange.com>  Mon, 09 Oct 2017 15:10:55 +0200
+
 open-xchange-file-storage-dropbox (7.8.3-35) stable; urgency=medium
 
   * Build for patch 2017-10-02 (4376)

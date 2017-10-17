@@ -47,37 +47,34 @@
  *
  */
 
-package com.openexchange.advertisement;
+package com.openexchange.tools.filename;
 
-import com.openexchange.config.Reloadable;
-import com.openexchange.osgi.annotation.SingletonService;
+import static org.junit.Assert.*;
+import org.junit.Test;
 
 /**
- * {@link AdvertisementPackageService}
+ * {@link BugFileNameToolsTest}
  *
- * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
- * @since v7.8.3
+ * Lost support for umlauts in file names with certain browsers on macOS
+ *
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @since v7.10.0
  */
-@SingletonService
-public interface AdvertisementPackageService extends Reloadable {
+public class Bug55271Test {
 
-    public static final String DEFAULT_SCHEME_ID = "Global";
+    @Test
+    public void testDecomposedString() {
+        String[] strings = new String[] {
+            "\uff18\u6708\uff12\uff12\u65e5\u6295\u51fd.zip"
+        };
+        for (String string : strings) {
+            checkSanitizing(string);
+        }
+    }
 
-    public static final String DEFAULT_RESELLER = "default";
-
-    /**
-     * Gets the suitable advertisement configuration manager for specified context.
-     *
-     * @param contextId The context identifier
-     * @return The suitable advertisement configuration manager
-     */
-    AdvertisementConfigService getScheme(int contextId);
-
-    /**
-     * Gets the default advertisement configuration manager
-     *
-     * @return The default advertisement configuration manager
-     */
-    AdvertisementConfigService getDefaultScheme();
+    private static void checkSanitizing(String string) {
+        String sanitizedString = FileNameTools.sanitizeFilename(string);
+        assertFalse("Sanitized characters in " + sanitizedString, sanitizedString.contains("_"));
+    }
 
 }

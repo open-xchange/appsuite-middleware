@@ -56,18 +56,23 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
+import java.net.UnknownHostException;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
 import javax.imageio.stream.ImageInputStream;
+import com.google.common.collect.ImmutableSet;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.contact.vcard.VCardParameters;
@@ -81,6 +86,7 @@ import com.openexchange.imagetransformation.ScaleType;
 import com.openexchange.imagetransformation.TransformedImage;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.tools.ImageTypeDetector;
 import com.openexchange.tools.encoding.Base64;
@@ -97,6 +103,25 @@ public class PhotoMapping extends AbstractMapping {
 
     private static final String X_ABCROP_RECTANGLE = "X-ABCROP-RECTANGLE";
     private static final byte[] PHOTO_PLACEHOLDER = "X-OX-IMAGE1".getBytes(Charsets.US_ASCII);
+
+    private static final String LOCAL_HOST_NAME;
+    private static final String LOCAL_HOST_ADDRESS;
+
+    static {
+        // Host name initialization
+        String localHostName;
+        String localHostAddress;
+        try {
+            InetAddress localHost = InetAddress.getLocalHost();
+            localHostName = localHost.getCanonicalHostName();
+            localHostAddress = localHost.getHostAddress();
+        } catch (final UnknownHostException e) {
+            localHostName = "localhost";
+            localHostAddress = "127.0.0.1";
+        }
+        LOCAL_HOST_NAME = localHostName;
+        LOCAL_HOST_ADDRESS = localHostAddress;
+    }
 
     /**
      * Initializes a new {@link PhotoMapping}.
@@ -190,7 +215,7 @@ public class PhotoMapping extends AbstractMapping {
             InputStream inputStream = null;
             try {
                 try {
-                    fileHolder = loadImageFromURL(urlString, parameters, warnings);
+                    fileHolder = loadImageFromURL(urlString, warnings);
                     if (null != fileHolder) {
                         if (null != parameters && 0 < parameters.getMaxContactImageSize() && parameters.getMaxContactImageSize() < fileHolder.getLength()) {
                             addConversionWarning(warnings, "PHOTO", "Referenced image exceeds maximum contact image size");
@@ -203,9 +228,9 @@ public class PhotoMapping extends AbstractMapping {
                     Streams.close(fileHolder);
                 }
             } catch (IOException e) {
-                addConversionWarning(warnings, e, "PHOTO", e.getMessage());
+                addConversionWarning(warnings, e, "PHOTO", "image URL \"" + urlString + "\" appears not to be valid, skipping import.");
             } catch (OXException e) {
-                addConversionWarning(warnings, e, "PHOTO", e.getMessage());
+                addConversionWarning(warnings, e, "PHOTO", "image URL \"" + urlString + "\" appears not to be valid, skipping import.");
             }
         }
         if (null != imageData && null != parameters && 0 < parameters.getMaxContactImageSize() && parameters.getMaxContactImageSize() < imageData.length) {
@@ -365,26 +390,77 @@ public class PhotoMapping extends AbstractMapping {
         return null != parameters && null != parameters.getSession() ? parameters.getSession().getSessionID() : null;
     }
 
+    private static final Set<String> ALLOWED_PROTOCOLS = ImmutableSet.of("http", "https", "ftp", "ftps");
+    private static final Set<String> DENIED_HOSTS = ImmutableSet.of("localhost", "127.0.0.1", LOCAL_HOST_ADDRESS, LOCAL_HOST_NAME);
+
     /**
      * Open a new {@link URLConnection URL connection} to specified parameter's value which indicates to be an URI/URL. The image's data and
      * its MIME type is then read from opened connection and put into given {@link Contact contact container}.
      *
-     * @param contact The contact container to fill
      * @param urlString The image URL
-     * @return A file holder containing the downloaded image, or <code>null</code> if no valid image could be loaded
+     * @param origUrlString The original image URL
+     * @param warnings The listing to add possible warnings to
+     * @return A file holder containing the loaded image, or <code>null</code> if no valid image could be loaded
      */
-    private static ThresholdFileHolder loadImageFromURL(String urlString, VCardParameters parameters, List<OXException> warnings) throws IOException, OXException {
-        URL url = null;
+    private static ThresholdFileHolder loadImageFromURL(String urlString, List<OXException> warnings) throws IOException, OXException {
+        int maxNumAttempts = 5;
+        int numAttempts = 0;
+        LoadedImage result;
+        do {
+            if (numAttempts++ >= maxNumAttempts) {
+                addConversionWarning(warnings, "PHOTO", "image URL \"" + urlString + "\" appears not to be valid, skipping import.");
+                return null;
+            }
+            result = doLoadImageFromURL(urlString, urlString, warnings);
+        } while (result.redirectUrl != null);
+        return result.fileHolder;
+    }
+
+    private static final LoadedImage NULL_RESULT = new LoadedImage();
+
+    private static LoadedImage doLoadImageFromURL(String urlString, String origUrlString, List<OXException> warnings) throws IOException, OXException {
+        if (Strings.isEmpty(urlString)) {
+            return NULL_RESULT;
+        }
+
+        URL url;
         try {
             url = new URL(urlString);
         } catch (MalformedURLException e) {
-            addConversionWarning(warnings, e, "PHOTO", e.getMessage());
-            return null;
+            addConversionWarning(warnings, e, "PHOTO", "image URL \"" + origUrlString + "\" appears not to be valid, skipping import.");
+            return NULL_RESULT;
+        }
+        /*
+         * check URL validity
+         */
+        {
+            String protocol = url.getProtocol();
+            if (null == protocol || false == ALLOWED_PROTOCOLS.contains(Strings.asciiLowerCase(protocol))) {
+                addConversionWarning(warnings, "PHOTO", "image URL \"" + origUrlString + "\" appears not to be valid, skipping import.");
+                return NULL_RESULT;
+            }
+
+            String host = Strings.asciiLowerCase(url.getHost());
+            if (null == host || DENIED_HOSTS.contains(host)) {
+                addConversionWarning(warnings, "PHOTO", "image URL \"" + origUrlString + "\" appears not to be valid, skipping import.");
+                return NULL_RESULT;
+            }
+
+            try {
+                InetAddress inetAddress = InetAddress.getByName(url.getHost());
+                if (inetAddress.isAnyLocalAddress() || inetAddress.isSiteLocalAddress() || inetAddress.isLoopbackAddress() || inetAddress.isLinkLocalAddress()) {
+                    addConversionWarning(warnings, "PHOTO", "image URL \"" + origUrlString + "\" appears not to be valid, skipping import.");
+                    return NULL_RESULT;
+                }
+            } catch (UnknownHostException e) {
+                addConversionWarning(warnings, e, "PHOTO", "image URL \"" + origUrlString + "\" appears not to be valid, skipping import.");
+                return NULL_RESULT;
+            }
         }
         /*
          * download to file holder
          */
-        ThresholdFileHolder fileHolder = new ThresholdFileHolder();
+        ThresholdFileHolder fileHolder = null;
         String mimeType = null;
         InputStream inputStream = null;
         try {
@@ -392,12 +468,29 @@ public class PhotoMapping extends AbstractMapping {
             urlConnnection.setConnectTimeout(2500);
             urlConnnection.setReadTimeout(2500);
             urlConnnection.connect();
+
+            // Follow & check redirects recursively
+            if (urlConnnection instanceof HttpURLConnection) {
+                HttpURLConnection httpURLConnection = (HttpURLConnection) urlConnnection;
+                int responseCode = httpURLConnection.getResponseCode();
+                if (responseCode == HttpURLConnection.HTTP_MOVED_PERM || responseCode == HttpURLConnection.HTTP_MOVED_TEMP) {
+                    String redirectUrl = urlConnnection.getHeaderField("Location");
+                    httpURLConnection.disconnect();
+                    return new LoadedImage(redirectUrl);
+                }
+                if (responseCode >= 400) {
+                    addConversionWarning(warnings, "PHOTO", "image URL \"" + origUrlString + "\" appears not to be valid, skipping import.");
+                    return NULL_RESULT;
+                }
+            }
+
             mimeType = urlConnnection.getContentType();
             inputStream = urlConnnection.getInputStream();
+            fileHolder = new ThresholdFileHolder();
             fileHolder.write(inputStream);
         } catch (SocketTimeoutException e) {
             addConversionWarning(warnings, e, "PHOTO", e.getMessage());
-            return null;
+            return NULL_RESULT;
         } finally {
             Streams.close(inputStream);
         }
@@ -405,9 +498,9 @@ public class PhotoMapping extends AbstractMapping {
          * check image validity
          */
         if (false == isValidImage(fileHolder)) {
-            addConversionWarning(warnings, "PHOTO", "image downloaded from" + urlString + " appears not to be valid, skipping import.");
+            addConversionWarning(warnings, "PHOTO", "image downloaded from \"" + origUrlString + "\" appears not to be valid, skipping import.");
             Streams.close(fileHolder);
-            return null;
+            return NULL_RESULT;
         }
         /*
          * additional fallbacks to determine the mime type
@@ -419,7 +512,7 @@ public class PhotoMapping extends AbstractMapping {
             }
         }
         fileHolder.setContentType(mimeType);
-        return fileHolder;
+        return new LoadedImage(fileHolder);
     }
 
     private static boolean isValidImage(ThresholdFileHolder fileHolder) throws IOException, OXException {
@@ -433,15 +526,15 @@ public class PhotoMapping extends AbstractMapping {
             } finally {
                 Streams.close(imageInputStream, inputStream);
             }
-        } else {
-            File file = fileHolder.getTempFile();
-            ImageInputStream imageInputStream = null;
-            try {
-                imageInputStream = ImageIO.createImageInputStream(file);
-                return isValidImage(imageInputStream);
-            } finally {
-                Streams.close(imageInputStream);
-            }
+        }
+
+        File file = fileHolder.getTempFile();
+        ImageInputStream imageInputStream = null;
+        try {
+            imageInputStream = ImageIO.createImageInputStream(file);
+            return isValidImage(imageInputStream);
+        } finally {
+            Streams.close(imageInputStream);
         }
     }
 
@@ -451,6 +544,32 @@ public class PhotoMapping extends AbstractMapping {
         }
         Iterator<ImageReader> readers = ImageIO.getImageReaders(imageInputStream);
         return null != readers && readers.hasNext();
+    }
+
+    // ---------------------------------------------------------------------------------------------------------------------------------------------
+
+    private static final class LoadedImage {
+
+        final ThresholdFileHolder fileHolder;
+        final String redirectUrl;
+
+        LoadedImage() {
+            super();
+            this.fileHolder = null;
+            this.redirectUrl = null;
+        }
+
+        LoadedImage(ThresholdFileHolder fileHolder) {
+            super();
+            this.fileHolder = fileHolder;
+            this.redirectUrl = null;
+        }
+
+        LoadedImage(String redirectUrl) {
+            super();
+            this.fileHolder = null;
+            this.redirectUrl = redirectUrl;
+        }
     }
 
 }
