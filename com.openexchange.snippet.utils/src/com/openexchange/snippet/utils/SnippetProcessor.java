@@ -56,6 +56,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -187,6 +188,8 @@ public class SnippetProcessor {
             return;
         }
 
+        boolean isSignature = "signature".equalsIgnoreCase(snippet.getType());
+
         MaxImageProps maxImageProps = getMaxImageProps();
         long maxImageSize = maxImageProps.maxImageSize;
         int maxImageLimit = maxImageProps.maxImageLimit;
@@ -226,7 +229,7 @@ public class SnippetProcessor {
                 }
 
                 // Get content identifier for URL resource
-                String contentId = loadImage(url, count, maxImageSize, attachments);
+                String contentId = loadImage(url, count, maxImageSize, attachments, isSignature);
 
                 if (null == contentId) {
                     // No valid image data accessible through URL. Drop <img> tag
@@ -257,13 +260,13 @@ public class SnippetProcessor {
     private static final int READ_TIMEOUT = 10000;
     private static final int CONNECT_TIMEOUT = 3000;
 
-    private String loadImage(URL url, int count, long maxImageSize, List<Attachment> attachments) throws OXException {
+    private String loadImage(URL url, int count, long maxImageSize, List<Attachment> attachments, boolean isSignature) throws OXException {
         ThresholdFileHolder fileHolder = null;
         InputStream in = null;
         try {
             URLConnection con = url.openConnection();
             if (con instanceof HttpURLConnection) {
-                return loadHttpImage((HttpURLConnection) con, count, maxImageSize, attachments);
+                return loadHttpImage((HttpURLConnection) con, count, maxImageSize, attachments, isSignature);
             }
 
             // Generic URLConnection handling
@@ -272,7 +275,7 @@ public class SnippetProcessor {
 
             int contentLength = con.getContentLength();
             if (contentLength > 0 && contentLength > maxImageSize) {
-                throw SnippetExceptionCodes.MAXIMUM_IMAGE_SIZE.create(FileUtils.byteCountToDisplaySize(Long.valueOf(maxImageSize)), maxImageSize);
+                throw SnippetExceptionCodes.MAXIMUM_IMAGE_SIZE.create(FileUtils.byteCountToDisplaySize(maxImageSize), Long.valueOf(maxImageSize));
             }
 
             String contentType = con.getHeaderField("content-type");
@@ -293,7 +296,7 @@ public class SnippetProcessor {
             }
 
             String id = UUIDs.getUnformattedString(UUID.randomUUID());
-            String contentId = processLocalImage(fileHolder, id, true, attachments);
+            String contentId = processLocalImage(fileHolder, id, true, attachments, isSignature);
             fileHolder = null; // Null'ify to avoid preliminary closing
             return contentId;
         } catch (IOException e) {
@@ -303,7 +306,7 @@ public class SnippetProcessor {
         }
     }
 
-    private String loadHttpImage(HttpURLConnection httpCon, int count, long maxImageSize, List<Attachment> attachments) throws OXException {
+    private String loadHttpImage(HttpURLConnection httpCon, int count, long maxImageSize, List<Attachment> attachments, boolean isSignature) throws OXException {
         ThresholdFileHolder fileHolder = null;
         InputStream in = null;
         try {
@@ -321,7 +324,7 @@ public class SnippetProcessor {
 
             int contentLength = httpCon.getContentLength();
             if (contentLength > 0 && contentLength > maxImageSize) {
-                throw SnippetExceptionCodes.MAXIMUM_IMAGE_SIZE.create(FileUtils.byteCountToDisplaySize(Long.valueOf(maxImageSize)), maxImageSize);
+                throw SnippetExceptionCodes.MAXIMUM_IMAGE_SIZE.create(FileUtils.byteCountToDisplaySize(maxImageSize), Long.valueOf(maxImageSize));
             }
 
             String contentType = httpCon.getHeaderField("content-type");
@@ -342,7 +345,7 @@ public class SnippetProcessor {
             }
 
             String id = UUIDs.getUnformattedString(UUID.randomUUID());
-            String contentId = processLocalImage(fileHolder, id, true, attachments);
+            String contentId = processLocalImage(fileHolder, id, true, attachments, isSignature);
             fileHolder = null; // Null'ify to avoid preliminary closing
             return contentId;
         } catch (IOException e) {
@@ -384,10 +387,11 @@ public class SnippetProcessor {
      * Process the images in the snippet, extracts them and convert them to attachments.
      *
      * @param snippet The snippet to process
+     * @return The identifiers of extracted managed files
      * @throws OXException If processing images fails
      */
-    public void processImages(DefaultSnippet snippet) throws OXException {
-        processImages0(snippet, new LinkedList<Attachment>(), true);
+    public List<String> processImages(DefaultSnippet snippet) throws OXException {
+        return processImages0(snippet, new LinkedList<Attachment>(), true);
     }
 
     /**
@@ -395,16 +399,17 @@ public class SnippetProcessor {
      *
      * @param snippet The snippet to process
      * @param attachments The list to add attachments to
+     * @return The identifiers of extracted managed files
      * @throws OXException If processing images fails
      */
-    public void processImages(DefaultSnippet snippet, List<Attachment> attachments) throws OXException {
-        processImages0(snippet, attachments, false);
+    public List<String> processImages(DefaultSnippet snippet, List<Attachment> attachments) throws OXException {
+        return processImages0(snippet, attachments, false);
     }
 
-    private void processImages0(DefaultSnippet snippet, List<Attachment> attachments, boolean addAttachments) throws OXException {
+    private List<String> processImages0(DefaultSnippet snippet, List<Attachment> attachments, boolean addAttachments) throws OXException {
         String content = snippet.getContent();
         if (isEmpty(content)) {
-            return;
+            return Collections.emptyList();
         }
 
         boolean isSignature = "signature".equalsIgnoreCase(snippet.getType());
@@ -415,9 +420,11 @@ public class SnippetProcessor {
 
         ImageMatcher m = ImageMatcher.matcher(content);
         StringBuffer sb = new StringBuffer(content.length());
+        List<String> managedFiles = Collections.emptyList();
         if (m.find()) {
             ManagedFileManagement mfm = Services.getService(ManagedFileManagement.class);
             Set<String> trackedIds = new HashSet<String>(2);
+            managedFiles = new LinkedList<>();
             int count = 0;
             do {
                 String imageTag = m.group();
@@ -437,13 +444,14 @@ public class SnippetProcessor {
                         m.appendLiteralReplacement(sb, MimeMessageUtility.blankSrc(imageTag));
                         continue;
                     }
+                    managedFiles.add(id);
 
                     if (++count > maxImageLimit) {
                         throw SnippetExceptionCodes.MAXIMUM_IMAGES_COUNT.create(Integer.valueOf(maxImageLimit));
                     }
 
                     if (mf.getSize() > maxImageSize) {
-                        throw SnippetExceptionCodes.MAXIMUM_IMAGE_SIZE.create(FileUtils.byteCountToDisplaySize(Long.valueOf(maxImageSize)), maxImageSize);
+                        throw SnippetExceptionCodes.MAXIMUM_IMAGE_SIZE.create(FileUtils.byteCountToDisplaySize(maxImageSize), Long.valueOf(maxImageSize));
                     }
 
                     // Replace "src" attribute
@@ -470,6 +478,8 @@ public class SnippetProcessor {
                 snippet.addAttachment(attachment);
             }
         }
+
+        return managedFiles;
     }
 
     /**
@@ -480,11 +490,14 @@ public class SnippetProcessor {
      * @param appendBodyPart Whether to actually append the part to the snippet
      * @param attachments The attachment list
      * @return The content id
+     * @throws OXException If managed file' content cannot be read
      */
-    private final String processLocalImage(ManagedFile mf, String id, boolean appendBodyPart, List<Attachment> attachments, boolean isSignature) {
-        /*
-         * Determine filename
-         */
+    private final String processLocalImage(ManagedFile mf, String id, boolean appendBodyPart, List<Attachment> attachments, boolean isSignature) throws OXException {
+        if (false == appendBodyPart) {
+            return id;
+        }
+
+        // Determine filename
         String fileName = mf.getFileName();
         if (null == fileName) {
             /*
@@ -508,30 +521,21 @@ public class SnippetProcessor {
                 fileName = mf.getFileName();
             }
         }
-        /*
-         * ... and cid
-         */
-        if (appendBodyPart) {
-            DefaultAttachment att = new DefaultAttachment();
-            {
-                ContentDisposition cd = new ContentDisposition();
-                cd.setInline();
-                if (!isSignature) {
-                    cd.setFilenameParameter(fileName);
-                }
-                att.setContentDisposition(cd.toString());
-            }
-            att.setContentType(mf.getContentType());
-            att.setContentId(new StringBuilder(32).append('<').append(id).append('>').toString());
-            att.setId(mf.getID());
-            att.setSize(mf.getSize());
-            att.setStreamProvider(new ManagedFileInputStreamProvider(mf));
-            if (!isSignature) {
-                att.setFilename(fileName);
-            }
-            attachments.add(att);
+
+        // Transfer content to a ThresholdFileHolder instance
+        ThresholdFileHolder fileHolder = null;
+        try {
+            fileHolder = new ThresholdFileHolder();
+            fileHolder.write(mf.getInputStream());
+            fileHolder.setName(fileName);
+            fileHolder.setContentType(mf.getContentType());
+            fileHolder.setDisposition("inline");
+            String identifier = processLocalImage(fileHolder, id, appendBodyPart, attachments, isSignature);
+            fileHolder = null; // Null'ify to avoid preliminary closing
+            return identifier;
+        } finally {
+            Streams.close(fileHolder);
         }
-        return id;
     }
 
     /**
@@ -543,42 +547,41 @@ public class SnippetProcessor {
      * @param attachments The attachment list
      * @return The content id
      */
-    private final String processLocalImage(ThresholdFileHolder fileHolder, String id, boolean appendBodyPart, List<Attachment> attachments) {
-        /*
-         * Determine filename
-         */
-        String fileName = fileHolder.getName();
-        if (null == fileName) {
-            /*
-             * Generate dummy file name
-             */
-            List<String> exts = MimeType2ExtMap.getFileExtensions(fileHolder.getContentType());
-            StringBuilder sb = new StringBuilder("image.");
-            if (exts == null) {
-                sb.append("dat");
-            } else {
-                sb.append(exts.get(0));
-            }
-            fileName = sb.toString();
-        } else {
-            /*
-             * Encode image's file name for being mail-safe
-             */
-            try {
-                fileName = MimeUtility.encodeText(fileName, MailProperties.getInstance().getDefaultMimeCharset(), "Q");
-            } catch (UnsupportedEncodingException e) {
-                fileName = fileHolder.getName();
-            }
-        }
-        /*
-         * ... and cid
-         */
+    private final String processLocalImage(ThresholdFileHolder fileHolder, String id, boolean appendBodyPart, List<Attachment> attachments, boolean isSignature) {
         if (appendBodyPart) {
+            // Determine filename
+            String fileName = fileHolder.getName();
+            if (null == fileName) {
+                /*
+                 * Generate dummy file name
+                 */
+                List<String> exts = MimeType2ExtMap.getFileExtensions(fileHolder.getContentType());
+                StringBuilder sb = new StringBuilder("image.");
+                if (exts == null) {
+                    sb.append("dat");
+                } else {
+                    sb.append(exts.get(0));
+                }
+                fileName = sb.toString();
+            } else {
+                /*
+                 * Encode image's file name for being mail-safe
+                 */
+                try {
+                    fileName = MimeUtility.encodeText(fileName, MailProperties.getInstance().getDefaultMimeCharset(), "Q");
+                } catch (UnsupportedEncodingException e) {
+                    fileName = fileHolder.getName();
+                }
+            }
+
+            // Create appropriate attachment for inline image
             DefaultAttachment att = new DefaultAttachment();
             {
                 ContentDisposition cd = new ContentDisposition();
                 cd.setInline();
-                cd.setFilenameParameter(fileName);
+                if (!isSignature) {
+                    cd.setFilenameParameter(fileName);
+                }
                 att.setContentDisposition(cd.toString());
             }
             att.setContentType(fileHolder.getContentType());
@@ -586,7 +589,9 @@ public class SnippetProcessor {
             att.setId(id);
             att.setSize(fileHolder.getLength());
             att.setStreamProvider(new ThresholdFileHolderInputStreamProvider(fileHolder));
-            att.setFilename(fileName);
+            if (!isSignature) {
+                att.setFilename(fileName);
+            }
             attachments.add(att);
         }
         return id;

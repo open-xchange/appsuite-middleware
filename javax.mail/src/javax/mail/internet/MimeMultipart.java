@@ -559,13 +559,24 @@ public class MimeMultipart extends Multipart {
 
 	// if there's a preamble, write it out
 	if (preamble != null) {
-	    byte[] pb = ASCIIUtility.getBytes(preamble);
+	    String p = preamble;
+	    if (!p.endsWith("\r\n")) {
+            char c = p.charAt(p.length() - 1);
+            if (c == '\n') {
+                p = p.substring(0, p.length()-1) + "\r\n";
+            } else if (c == '\r') {
+                p = p.substring(0, p.length()-1) + "\r\n";
+            } else {
+                p = p + "\r\n";
+            }
+        }
+        byte[] pb = ASCIIUtility.getBytes(p);
 	    los.write(pb);
 	    // make sure it ends with a newline
-	    if (pb.length > 0 &&
-		    !(pb[pb.length-1] == '\r' || pb[pb.length-1] == '\n')) {
+	    //if (pb.length > 0 &&
+		//    !(pb[pb.length-1] == '\r' || pb[pb.length-1] == '\n')) {
 		los.writeln();
-	    }
+	    //}
 	    // XXX - could force a blank line before start boundary
 	}
 

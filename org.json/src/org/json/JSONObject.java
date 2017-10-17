@@ -90,6 +90,9 @@ public class JSONObject extends AbstractJSONValue {
 
     private static final long serialVersionUID = 3666538885751033341L;
 
+    /** The (immutable) empty JSON object */
+    public static final JSONObject EMPTY_OBJECT = ImmutableJSONObject.immutableFor(new JSONObject(0));
+
     /**
      * The logger reference.
      */

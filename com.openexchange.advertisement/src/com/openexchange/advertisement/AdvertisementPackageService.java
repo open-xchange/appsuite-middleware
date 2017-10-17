@@ -50,6 +50,7 @@
 package com.openexchange.advertisement;
 
 import com.openexchange.config.Reloadable;
+import com.openexchange.osgi.annotation.SingletonService;
 
 /**
  * {@link AdvertisementPackageService}
@@ -57,13 +58,26 @@ import com.openexchange.config.Reloadable;
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.3
  */
+@SingletonService
 public interface AdvertisementPackageService extends Reloadable {
 
     public static final String DEFAULT_SCHEME_ID = "Global";
+
     public static final String DEFAULT_RESELLER = "default";
 
-    public AdvertisementConfigService getScheme(int contextId);
+    /**
+     * Gets the suitable advertisement configuration manager for specified context.
+     *
+     * @param contextId The context identifier
+     * @return The suitable advertisement configuration manager
+     */
+    AdvertisementConfigService getScheme(int contextId);
 
-    public AdvertisementConfigService getDefaultScheme();
+    /**
+     * Gets the default advertisement configuration manager
+     *
+     * @return The default advertisement configuration manager
+     */
+    AdvertisementConfigService getDefaultScheme();
 
 }

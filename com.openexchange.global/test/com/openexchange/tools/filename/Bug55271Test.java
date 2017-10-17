@@ -47,73 +47,34 @@
  *
  */
 
-package com.openexchange.mail.filter.json.v2.mapper.parser.test.simplified;
+package com.openexchange.tools.filename;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import com.openexchange.exception.OXException;
-import com.openexchange.mail.filter.json.v2.json.mapper.parser.exceptions.CommandParserExceptionCodes;
+import static org.junit.Assert.*;
+import org.junit.Test;
 
 /**
- * {@link SimplifiedHeaderTest}
+ * {@link BugFileNameToolsTest}
  *
- * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
- * @since v7.8.4
+ * Lost support for umlauts in file names with certain browsers on macOS
+ *
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @since v7.10.0
  */
-public enum SimplifiedHeaderTest {
-    Subject("subject", "Subject"),
-    From("from", "From"),
-    To("to", "To"),
-    Cc("cc", "Cc"),
-    AnyRecipient("anyrecipient", "to", "cc"),
-    MailingList("mailinglist", "List-Id", "X-BeenThere", "X-Mailinglist", "X-Mailing-List");
+public class Bug55271Test {
 
-    private static final Map<String, SimplifiedHeaderTest> map;
-    static {
-        Map<String, SimplifiedHeaderTest> m = new HashMap<>(8);
-        for (SimplifiedHeaderTest sht : SimplifiedHeaderTest.values()) {
-            m.put(sht.getCommandName(), sht);
+    @Test
+    public void testDecomposedString() {
+        String[] strings = new String[] {
+            "\uff18\u6708\uff12\uff12\u65e5\u6295\u51fd.zip"
+        };
+        for (String string : strings) {
+            checkSanitizing(string);
         }
-        map = Collections.unmodifiableMap(m);
     }
 
-    private String commandName;
-    private List<String> headerNames;
-
-    SimplifiedHeaderTest(String commandName, String... headerNames) {
-        this.commandName = commandName;
-        this.headerNames = Arrays.asList(headerNames);
+    private static void checkSanitizing(String string) {
+        String sanitizedString = FileNameTools.sanitizeFilename(string);
+        assertFalse("Sanitized characters in " + sanitizedString, sanitizedString.contains("_"));
     }
 
-    public String getCommandName() {
-        return commandName;
-    }
-
-    /**
-     * Retrieves the {@link SimplifiedHeaderTest} by name
-     *
-     * @param name The name
-     * @return The {@link SimplifiedHeaderTest}
-     * @throws OXException if no {@link SimplifiedHeaderTest} with this name exists
-     */
-    public static SimplifiedHeaderTest getTestByName(String name) throws OXException {
-        SimplifiedHeaderTest simplifiedHeaderTest = map.get(name);
-        if (simplifiedHeaderTest == null) {
-            throw CommandParserExceptionCodes.UNKOWN_SIMPLIFIED_RULE.create(name);
-        }
-        return simplifiedHeaderTest;
-    }
-
-    /**
-     * Retrieves the header names of this {@link SimplifiedHeaderTest}
-     *
-     * @return A list of header names
-     */
-    public List<String> getHeaderNames() {
-        return this.headerNames;
-    }
 }
