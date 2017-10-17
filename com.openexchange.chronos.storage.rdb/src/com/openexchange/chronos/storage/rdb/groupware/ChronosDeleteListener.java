@@ -108,7 +108,6 @@ public final class ChronosDeleteListener implements DeleteListener {
              * delete all availability data of the user
              */
             deleteAvailabilities(writeCon, cid, user);
-            deleteFreeSlots(writeCon, cid, user);
         } catch (SQLException e) {
             throw CalendarExceptionCodes.DB_ERROR.create(e, e.getMessage());
         }
@@ -135,7 +134,6 @@ public final class ChronosDeleteListener implements DeleteListener {
              * delete all availability data in the context
              */
             deleteAvailabilities(writeCon, cid);
-            deleteFreeSlots(writeCon, cid);
         } catch (SQLException e) {
             throw CalendarExceptionCodes.DB_ERROR.create(e, e.getMessage());
         }
@@ -150,19 +148,11 @@ public final class ChronosDeleteListener implements DeleteListener {
     }
 
     private static int deleteAvailabilities(Connection connection, int cid) throws SQLException {
-        return deleteForContext(connection, "calendar_availability", cid);
+        return deleteForContext(connection, "calendar_available", cid);
     }
 
     private static int deleteAvailabilities(Connection connection, int cid, int user) throws SQLException {
-        return deleteForUser(connection, "calendar_availability", cid, user);
-    }
-
-    private static int deleteFreeSlots(Connection connection, int cid) throws SQLException {
-        return deleteForContext(connection, "calendar_free_slot", cid);
-    }
-
-    private static int deleteFreeSlots(Connection connection, int cid, int user) throws SQLException {
-        return deleteForUser(connection, "calendar_free_slot", cid, user);
+        return deleteForUser(connection, "calendar_available", cid, user);
     }
 
     private static int deleteForContext(Connection connection, String tableName, int cid) throws SQLException {
