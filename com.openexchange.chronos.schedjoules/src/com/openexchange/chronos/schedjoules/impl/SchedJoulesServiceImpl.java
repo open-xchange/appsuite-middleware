@@ -50,14 +50,11 @@
 package com.openexchange.chronos.schedjoules.impl;
 
 import java.util.Iterator;
-import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.CalendarAccount;
-import com.openexchange.chronos.provider.CalendarProvider;
-import com.openexchange.chronos.provider.CalendarProviderRegistry;
 import com.openexchange.chronos.provider.account.CalendarAccountService;
 import com.openexchange.chronos.schedjoules.SchedJoulesResult;
 import com.openexchange.chronos.schedjoules.SchedJoulesService;
@@ -66,7 +63,6 @@ import com.openexchange.chronos.schedjoules.exception.SchedJoulesExceptionCodes;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
-import com.openexchange.tools.id.IDMangler;
 
 /**
  * {@link SchedJoulesServiceImpl}
@@ -213,16 +209,18 @@ public class SchedJoulesServiceImpl implements SchedJoulesService {
                 userConfiguration.put("folders", folders);
             }
             // Prepare the folder configuration
+            String calendarName = page.getString("name");
+
             JSONObject singleCalendarConfiguration = new JSONObject();
             singleCalendarConfiguration.put("url", page.getString("url"));
-            singleCalendarConfiguration.put("name", page.getString("name"));
+            singleCalendarConfiguration.put("name", calendarName);
             singleCalendarConfiguration.put("refreshInterval", "PT7D"); //TODO: either default or user defined
 
             folders.put(singleCalendarConfiguration);
 
             calendarAccountService.updateAccount(session, accountId, userConfiguration, System.currentTimeMillis() + 100, null); //FIXME: Get the client timestamp
 
-            return IDMangler.mangle("cal", String.valueOf(accountId), page.getString("name"));
+            return IDMangling.mangleFolderId(accountId, calendarName);
         } catch (JSONException e) {
             throw SchedJoulesExceptionCodes.JSON_ERROR.create(e.getMessage(), e);
         }
@@ -254,8 +252,7 @@ public class SchedJoulesServiceImpl implements SchedJoulesService {
             return;
         }
 
-        List<String> unmangled = IDMangler.unmangle(folderId);
-        String name = unmangled.get(2); //FIXME: Perform checks
+        String name = IDMangling.getRelativeFolderId(folderId);
         try {
             Iterator<Object> iterator = folders.iterator();
             boolean removed = false;
