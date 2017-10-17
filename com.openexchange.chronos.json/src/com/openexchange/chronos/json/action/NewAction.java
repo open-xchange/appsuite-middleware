@@ -63,7 +63,6 @@ import com.openexchange.chronos.service.CalendarResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
  * {@link NewAction}
@@ -97,9 +96,6 @@ public class NewAction extends ChronosAction {
         Event event = parseEvent(calendarAccess.getSession(), requestData);
         try {
             CalendarResult calendarResult = calendarAccess.createEvent(folderId, event);
-            if (calendarResult.getCreations().size() != 1) {
-                throw AjaxExceptionCodes.UNEXPECTED_ERROR.create("Unable to create new event");
-            }
             return new AJAXRequestResult(calendarResult, new Date(calendarResult.getTimestamp()), CalendarResultConverter.INPUT_FORMAT);
         } catch (OXException e) {
             return handleConflictException(e);
