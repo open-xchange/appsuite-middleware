@@ -49,12 +49,20 @@
 
 package com.openexchange.chronos.provider.schedjoules;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.List;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.chronos.Calendar;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.CalendarFolder;
 import com.openexchange.chronos.provider.caching.CachingCalendarAccess;
 import com.openexchange.chronos.provider.caching.ExternalCalendarResult;
+import com.openexchange.chronos.schedjoules.api.SchedJoulesAPI;
+import com.openexchange.chronos.schedjoules.exception.SchedJoulesExceptionCodes;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
@@ -66,6 +74,11 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class SchedjoulesCalendarAccess extends CachingCalendarAccess {
+
+    /**
+     * Default 'X-WR-CALNAME' and 'SUMMARY' contents of an iCal that is not accessible
+     */
+    private static final String NO_ACCESS = "You have no access to this calendar";
 
     private final ServiceLookup services;
 
@@ -165,8 +178,32 @@ public class SchedjoulesCalendarAccess extends CachingCalendarAccess {
      */
     @Override
     public ExternalCalendarResult getEvents(String folderId) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        try {
+            JSONObject userConfig = getAccount().getUserConfiguration();
+            JSONArray foldersArray = userConfig.getJSONArray("folders");
+            String updateUrl = null;
+            for (int index = 0; index < foldersArray.length(); index++) {
+                JSONObject folder = foldersArray.getJSONObject(index);
+                if (folderId.equals(folder.getString("name"))) {
+                    updateUrl = folder.getString("url");
+                    break;
+                }
+            }
+            URL u = new URL(updateUrl);
+            SchedJoulesAPI api = new SchedJoulesAPI();
+            Calendar calendar = api.calendar().getCalendar(u);
+            if (NO_ACCESS.equals(calendar.getName())) {
+                throw SchedJoulesExceptionCodes.NO_ACCESS.create(folderId);
+            }
+            
+            ExternalCalendarResult res = new ExternalCalendarResult();
+            res.addEvents(calendar.getEvents());
+            return res;
+        } catch (JSONException e) {
+            throw SchedJoulesExceptionCodes.JSON_ERROR.create(e.getMessage(), e);
+        } catch (MalformedURLException e) {
+            throw SchedJoulesExceptionCodes.INVALID_URL.create(folderId, e);
+        }
     }
 
     /*

@@ -26,4 +26,6 @@ Import-Package: com.openexchange.chronos,
  org.json,
  org.osgi.framework
 Bundle-Activator: com.openexchange.chronos.schedjoules.osgi.SchedJoulesActivator
-Export-Package: com.openexchange.chronos.schedjoules
+Export-Package: com.openexchange.chronos.schedjoules,
+ com.openexchange.chronos.schedjoules.api,
+ com.openexchange.chronos.schedjoules.exception

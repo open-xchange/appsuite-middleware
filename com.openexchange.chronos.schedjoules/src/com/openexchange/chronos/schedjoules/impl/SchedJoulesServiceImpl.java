@@ -49,11 +49,9 @@
 
 package com.openexchange.chronos.schedjoules.impl;
 
-import java.net.MalformedURLException;
-import java.net.URL;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.chronos.Calendar;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.CalendarAccess;
 import com.openexchange.chronos.provider.CalendarAccount;
@@ -193,26 +191,7 @@ public class SchedJoulesServiceImpl implements SchedJoulesService {
      */
     @Override
     public String subscribeCalendar(Session session, int id, int accountId, String locale) throws OXException {
-        JSONObject page = api.pages().getPage(id, locale);
-        if (!page.hasAndNotNull("url")) {
-            throw SchedJoulesExceptionCodes.NO_CALENDAR.create(id);
-        }
-
         try {
-            String url = page.getString("url");
-
-            URL u = new URL(url);
-            Calendar calendar = api.calendar().getCalendar(u);
-            if (NO_ACCESS.equals(calendar.getName())) {
-                throw SchedJoulesExceptionCodes.NO_ACCESS.create(id);
-            }
-
-            // Prepare the folder configuration
-            JSONObject singleCalendarConfiguration = new JSONObject();
-            singleCalendarConfiguration.put("url", url);
-            singleCalendarConfiguration.put("name", calendar.getName());
-            singleCalendarConfiguration.put("refreshInterval", "PT7D"); //TODO: either default or user defined
-
             // Resolve the user's SchedJoules calendar account
             CalendarAccountService calendarAccountService = services.getService(CalendarAccountService.class);
             CalendarAccount calendarAccount = calendarAccountService.getAccount(session, accountId);
@@ -226,22 +205,45 @@ public class SchedJoulesServiceImpl implements SchedJoulesService {
             if (calendarProvider == null) {
                 throw CalendarExceptionCodes.PROVIDER_NOT_AVAILABLE.create(calendarAccount.getProviderId());
             }
-            
+
             // TODO: Hook-up with the SchedJoules provider to subscribe to the calendar
 
+            JSONObject page = api.pages().getPage(id, locale);
+            if (!page.hasAndNotNull("url")) {
+                throw SchedJoulesExceptionCodes.NO_CALENDAR.create(id);
+            }
+            String url = page.getString("url");
+
+            // Re-configure
+            JSONObject userConfiguration = calendarAccount.getUserConfiguration();
+            if (userConfiguration == null) {
+                userConfiguration = new JSONObject();
+            }
+
+            JSONArray folders = userConfiguration.getJSONArray("folders");
+            if (folders == null) {
+                folders = new JSONArray();
+                userConfiguration.put("folders", folders);
+            }
+            // Prepare the folder configuration
+            JSONObject singleCalendarConfiguration = new JSONObject();
+            singleCalendarConfiguration.put("url", url);
+            singleCalendarConfiguration.put("name", page.getString("name"));
+            singleCalendarConfiguration.put("refreshInterval", "PT7D"); //TODO: either default or user defined
+
+            folders.put(singleCalendarConfiguration);
+
             // FIXME: Should the reconfigure method change the physical data on the database, or should there be a consecutive update call? 
-            calendarProvider.reconfigureAccount(session, calendarAccount.getInternalConfiguration(), singleCalendarConfiguration, null);
-            
+            calendarProvider.reconfigureAccount(session, calendarAccount.getInternalConfiguration(), userConfiguration, null);
+
             CalendarAccess calendarAccess = calendarProvider.connect(session, calendarAccount, null);
-            
+            calendarAccess.getEventsInFolder(page.getString("name"));
+
             // TODO: How should the subscribe work? Is it enough to simply supply the access with the url via the account user configuration?  
-            
-            
-            return calendar.getProdId();
+
+            return null;
         } catch (JSONException e) {
             throw SchedJoulesExceptionCodes.JSON_ERROR.create(e.getMessage(), e);
-        } catch (MalformedURLException e) {
-            throw SchedJoulesExceptionCodes.INVALID_URL.create(id, e);
         }
     }
 }
