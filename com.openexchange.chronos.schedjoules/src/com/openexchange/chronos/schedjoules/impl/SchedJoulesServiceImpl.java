@@ -195,13 +195,6 @@ public class SchedJoulesServiceImpl implements SchedJoulesService {
             throw CalendarExceptionCodes.ACCOUNT_NOT_FOUND.create(accountId);
         }
 
-        // Get the SchedJoules calendar provider
-        CalendarProviderRegistry registry = services.getService(CalendarProviderRegistry.class);
-        CalendarProvider calendarProvider = registry.getCalendarProvider(calendarAccount.getProviderId());
-        if (calendarProvider == null) {
-            throw CalendarExceptionCodes.PROVIDER_NOT_AVAILABLE.create(calendarAccount.getProviderId());
-        }
-
         JSONObject page = api.pages().getPage(id, locale);
         if (!page.hasAndNotNull("url")) {
             throw SchedJoulesExceptionCodes.NO_CALENDAR.create(id);
@@ -247,13 +240,6 @@ public class SchedJoulesServiceImpl implements SchedJoulesService {
         CalendarAccount calendarAccount = calendarAccountService.getAccount(session, accountId);
         if (calendarAccount == null) {
             throw CalendarExceptionCodes.ACCOUNT_NOT_FOUND.create(accountId);
-        }
-
-        // Get the SchedJoules calendar provider
-        CalendarProviderRegistry registry = services.getService(CalendarProviderRegistry.class);
-        CalendarProvider calendarProvider = registry.getCalendarProvider(calendarAccount.getProviderId());
-        if (calendarProvider == null) {
-            throw CalendarExceptionCodes.PROVIDER_NOT_AVAILABLE.create(calendarAccount.getProviderId());
         }
 
         JSONObject userConfiguration = calendarAccount.getUserConfiguration();
