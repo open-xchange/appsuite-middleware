@@ -58,6 +58,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
+import com.openexchange.ajax.chronos.manager.CalendarAccountManager;
 import com.openexchange.ajax.chronos.manager.EventManager;
 import com.openexchange.ajax.framework.AbstractAPIClientSession;
 import com.openexchange.configuration.asset.AssetManager;
@@ -94,10 +95,11 @@ public class AbstractChronosTest extends AbstractAPIClientSession {
     protected ChronosApi chronosApi;
     protected EventManager eventManager;
     protected AssetManager assetManager;
+    protected CalendarAccountManager calendarAccountManager;
     protected String folderId;
 
     /**
-     * Initialises a new {@link AbstractChronosTest}.
+     * Initializes a new {@link AbstractChronosTest}.
      */
     public AbstractChronosTest() {
         super();
@@ -115,6 +117,7 @@ public class AbstractChronosTest extends AbstractAPIClientSession {
         folderId = getDefaultFolder();
         assetManager = new AssetManager();
         eventManager = new EventManager(defaultUserApi, folderId);
+        calendarAccountManager = new CalendarAccountManager(defaultUserApi);
     }
 
     @Override
@@ -138,6 +141,8 @@ public class AbstractChronosTest extends AbstractAPIClientSession {
 
         // Clean-up event manager
         eventManager.cleanUp();
+
+        calendarAccountManager.cleanUp();
 
         super.tearDown();
 
