@@ -52,7 +52,6 @@ package com.openexchange.importexport.importers.ical;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.service.CalendarResult;
 import com.openexchange.chronos.service.CalendarService;
-import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.EventID;
 import com.openexchange.exception.OXException;
 import com.openexchange.importexport.osgi.ImportExportServices;
@@ -73,15 +72,13 @@ public class ICalEventImporter extends AbstractICalEventImporter{
     @Override
     protected CalendarResult createEvent(String folderId, Event event) throws OXException {
         CalendarService calendarService = ImportExportServices.getCalendarService();
-        CalendarSession calendarSession = calendarService.init(session);
-        return calendarService.createEvent(calendarSession, folderId, event);
+        return calendarService.createEvent(calendarService.init(session), folderId, event);
     }
 
     @Override
     protected CalendarResult updateEvent(EventID eventId, Event event) throws OXException{
         CalendarService calendarService = ImportExportServices.getCalendarService();
-        CalendarSession calendarSession = calendarService.init(session);
-        return calendarService.updateEvent(calendarSession, eventId, event, System.currentTimeMillis());
+        return calendarService.updateEvent(calendarService.init(session), eventId, event, System.currentTimeMillis());
     }
 
 }

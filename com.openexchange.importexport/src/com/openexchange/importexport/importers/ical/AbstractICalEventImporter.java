@@ -100,7 +100,7 @@ public abstract class AbstractICalEventImporter extends AbstractICalImporter{
      *
      * @param eventId The {@link EventID} of the event which gets an update
      * @param event The new event data to use for the update
-     * @return CalendarResult The result of the event creation
+     * @return CalendarResult The result of the event update
      * @throws OXException if event creation fails
      */
     abstract protected CalendarResult updateEvent(EventID eventId, Event event) throws OXException ;
