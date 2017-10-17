@@ -142,9 +142,11 @@ public class ChronosJsonActivator extends AJAXModuleActivator {
             registerService(DataHandler.class, new Json2ObjectDataHandler<Alarm, AlarmField>(
                 AlarmMapper.getInstance()), singletonDictionary("identifier", DataHandlers.JSON2ALARM));
             registerService(DataHandler.class, new Object2JsonDataHandler<Alarm, AlarmField>(
-                AlarmMapper.getInstance(), Alarm.class), singletonDictionary("identifier", DataHandlers.ALARM2JSON));
+                AlarmMapper.getInstance(), Alarm.class, Alarm[].class), singletonDictionary("identifier", DataHandlers.ALARM2JSON));
             registerService(DataHandler.class, new Json2ObjectDataHandler<Available, AvailableField>(
                 AvailableMapper.getInstance()), singletonDictionary("identifier", DataHandlers.JSON2AVAILABLE));
+            registerService(DataHandler.class, new Object2JsonDataHandler<Available, AvailableField>(
+                AvailableMapper.getInstance(), Available.class, Available[].class), singletonDictionary("identifier", DataHandlers.AVAILABLE2JSON));
         } catch (Exception e) {
             getLogger(ChronosJsonActivator.class).error("error starting {}", context.getBundle(), e);
             throw e;

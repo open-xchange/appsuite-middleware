@@ -121,9 +121,6 @@ public class Json2ObjectDataHandler<O, E extends Enum<E>> implements DataHandler
     }
 
     private List<O> deserialize(JSONArray jsonArray, String timeZoneID) throws OXException {
-        if (null == jsonArray) {
-            return null;
-        }
         try {
             List<O> objects = new ArrayList<O>(jsonArray.length());
             for (int i = 0; i < jsonArray.length(); i++) {

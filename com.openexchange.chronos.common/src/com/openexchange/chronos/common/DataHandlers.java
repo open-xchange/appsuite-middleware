@@ -62,24 +62,19 @@ import com.openexchange.chronos.Event;
 public enum DataHandlers {
     ;
 
-    /**
-     * The identifier of the data handler to convert from an event's JSON representation to {@link Event}s.
-     */
+    /** The identifier of the data handler to convert from an event's JSON representation to {@link Event}s. */
     public static final String JSON2EVENT = "com.openexchange.chronos.json2event";
 
-    /**
-     * The identifier of the data handler to convert from an alarm's JSON representation to {@link Alarm}s.
-     */
+    /** The identifier of the data handler to convert from an alarm's JSON representation to {@link Alarm}s. */
     public static final String JSON2ALARM = "com.openexchange.chronos.json2alarm";
 
-    /**
-     * The identifier of the data handler to convert from an {@link Alarm} to its JSON representation.
-     */
+    /** The identifier of the data handler to convert from an {@link Alarm} to its JSON representation. */
     public static final String ALARM2JSON = "com.openexchange.chronos.alarm2json";
 
-    /**
-     * The identifier of the data handler to convert from an available's JSON representation to {@link Available}s.
-     */
-    public static final String JSON2AVAILABLE = "com.openexchange.chronos.json.available";
+    /** The identifier of the data handler to convert from an available's JSON representation to {@link Available}s. */
+    public static final String JSON2AVAILABLE = "com.openexchange.chronos.json2available";
+
+    /** The identifier of the data handler to convert from an {@link Available} to its JSON representation. */
+    public static final String AVAILABLE2JSON = "com.openexchange.chronos.available2json";
 
 }

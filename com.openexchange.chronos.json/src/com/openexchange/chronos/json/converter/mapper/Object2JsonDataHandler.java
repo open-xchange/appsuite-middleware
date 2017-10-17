@@ -75,17 +75,20 @@ public class Object2JsonDataHandler<O, E extends Enum<E>> implements DataHandler
 
     private final JsonMapper<O, E> mapper;
     private final Class<O> clazz;
+    private final Class<O[]> arrayClass;
 
     /**
      * Initializes a new {@link Object2JsonDataHandler}.
      *
      * @param mapper The underlying JSON mapper
      * @param clazz The object class
+     * @param arrayClass The array of objects class
      */
-    public Object2JsonDataHandler(JsonMapper<O, E> mapper, Class<O> clazz) {
+    public Object2JsonDataHandler(JsonMapper<O, E> mapper, Class<O> clazz, Class<O[]> arrayClass) {
         super();
         this.mapper = mapper;
         this.clazz = clazz;
+        this.arrayClass = arrayClass;
     }
 
     @Override
@@ -95,7 +98,7 @@ public class Object2JsonDataHandler<O, E extends Enum<E>> implements DataHandler
 
     @Override
     public Class<?>[] getTypes() {
-        return new Class<?>[] { clazz, Collection.class };
+        return new Class<?>[] { clazz, arrayClass, Collection.class };
     }
 
     @Override
@@ -106,6 +109,8 @@ public class Object2JsonDataHandler<O, E extends Enum<E>> implements DataHandler
             result.setData(null);
         } else if (clazz.isInstance(sourceData)) {
             result.setData(serialize(clazz.cast(sourceData), optTimeZoneID(dataArguments, session)));
+        } else if (arrayClass.isInstance(sourceData)) {
+            result.setData(serialize(arrayClass.cast(sourceData), optTimeZoneID(dataArguments, session)));
         } else if (Collection.class.isInstance(sourceData)) {
             result.setData(serialize((Collection<?>) sourceData, optTimeZoneID(dataArguments, session)));
         } else {
@@ -122,10 +127,15 @@ public class Object2JsonDataHandler<O, E extends Enum<E>> implements DataHandler
         }
     }
 
-    private JSONArray serialize(Collection<?> objects, String timeZoneID) throws OXException {
-        if (null == objects) {
-            return null;
+    private JSONArray serialize(O[] objects, String timeZoneID) throws OXException {
+        JSONArray jsonArray = new JSONArray(objects.length);
+        for (O object : objects) {
+            jsonArray.put(serialize(object, timeZoneID));
         }
+        return jsonArray;
+    }
+
+    private JSONArray serialize(Collection<?> objects, String timeZoneID) throws OXException {
         JSONArray jsonArray = new JSONArray(objects.size());
         for (Object object : objects) {
             try {
