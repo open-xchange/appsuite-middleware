@@ -72,6 +72,7 @@ import com.openexchange.chronos.json.converter.MultipleCalendarResultConverter;
 import com.openexchange.chronos.json.converter.mapper.AlarmMapper;
 import com.openexchange.chronos.json.converter.mapper.EventMapper;
 import com.openexchange.chronos.json.converter.mapper.Json2ObjectDataHandler;
+import com.openexchange.chronos.json.converter.mapper.Object2JsonDataHandler;
 import com.openexchange.chronos.json.oauth.ChronosOAuthScope;
 import com.openexchange.chronos.json.oauth.OAuthScopeDescription;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccessFactory;
@@ -137,9 +138,11 @@ public class ChronosJsonActivator extends AJAXModuleActivator {
              * register data handlers
              */
             registerService(DataHandler.class, new Json2ObjectDataHandler<Event, EventField>(
-                EventMapper.getInstance()), singletonDictionary("identifier", DataHandlers.JSON2ALARM));
+                EventMapper.getInstance()), singletonDictionary("identifier", DataHandlers.JSON2EVENT));
             registerService(DataHandler.class, new Json2ObjectDataHandler<Alarm, AlarmField>(
                 AlarmMapper.getInstance()), singletonDictionary("identifier", DataHandlers.JSON2ALARM));
+            registerService(DataHandler.class, new Object2JsonDataHandler<Alarm, AlarmField>(
+                AlarmMapper.getInstance(), Alarm.class), singletonDictionary("identifier", DataHandlers.ALARM2JSON));
             registerService(DataHandler.class, new Json2ObjectDataHandler<Available, AvailableField>(
                 AvailableMapper.getInstance()), singletonDictionary("identifier", DataHandlers.JSON2AVAILABLE));
         } catch (Exception e) {

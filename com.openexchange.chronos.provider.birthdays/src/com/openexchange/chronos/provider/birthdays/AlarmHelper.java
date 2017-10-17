@@ -59,12 +59,10 @@ import java.util.Map;
 import java.util.UUID;
 import org.json.JSONObject;
 import com.openexchange.chronos.Alarm;
-import com.openexchange.chronos.AlarmAction;
 import com.openexchange.chronos.AlarmField;
 import com.openexchange.chronos.DelegatingEvent;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.ExtendedProperty;
-import com.openexchange.chronos.Trigger;
 import com.openexchange.chronos.common.AlarmUtils;
 import com.openexchange.chronos.common.UpdateResultImpl;
 import com.openexchange.chronos.common.mapping.AlarmMapper;
@@ -74,6 +72,11 @@ import com.openexchange.chronos.service.ItemUpdate;
 import com.openexchange.chronos.service.UpdateResult;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.chronos.storage.operation.OSGiCalendarStorageOperation;
+import com.openexchange.conversion.ConversionResult;
+import com.openexchange.conversion.ConversionService;
+import com.openexchange.conversion.DataArguments;
+import com.openexchange.conversion.DataHandler;
+import com.openexchange.conversion.SimpleData;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.java.Strings;
@@ -209,38 +212,16 @@ public class AlarmHelper {
         if (null == defaultAlarmObject) {
             return null;
         }
+        DataHandler dataHandler = services.getService(ConversionService.class).getDataHandler("com.openexchange.chronos.json.alarm");
         try {
-            Alarm alarm = new Alarm();
-            alarm.setAction(new AlarmAction(defaultAlarmObject.getString("action")));
-            alarm.setDescription(defaultAlarmObject.optString("description", null));
-            JSONObject triggerObject = defaultAlarmObject.getJSONObject("trigger");
-            alarm.setTrigger(new Trigger(triggerObject.getString("duration")));
-            return Collections.singletonList(alarm);
+            ConversionResult result = dataHandler.processData(new SimpleData<JSONObject>(defaultAlarmObject), new DataArguments(), null);
+            if (null != result && null != result.getData()) {
+                return Collections.singletonList((Alarm) result.getData());
+            }
         } catch (Exception e) {
             LOG.warn("Error parsing default alarm \"{}\": {}", defaultAlarmObject, e.getMessage(), e);
-            return null;
         }
-
-        //        Object object = account.getConfiguration().get("defaultAlarms");
-        //
-        //        {
-        //            String defaultAlarmsValue = (String) account.getConfiguration().get("defaultAlarms");
-        //            if (Strings.isEmpty(defaultAlarmsValue)) {
-        //                return null;
-        //            }
-        //            ICalService iCalService = services.getService(ICalService.class);
-        //            ICalParameters parameters = iCalService.initParameters();
-        //            try (InputStream inputStream = Streams.newByteArrayInputStream(defaultAlarmsValue.getBytes(Charsets.UTF_8))) {
-        //                return iCalService.getUtilities().importAlarms(inputStream, parameters);
-        //            } catch (IOException | OXException e) {
-        //                LoggerFactory.getLogger(AlarmHelper.class).warn("Error parsing default alarms from \"{}\"", defaultAlarmsValue, e);
-        //                return null;
-        //            }
-        //        }
-        //        // TODO: from config
-        //        Alarm defaultAlarm = new Alarm(new Trigger(AlarmUtils.getDuration(false, 0, 0, 9, 0, 0)), AlarmAction.DISPLAY);
-        //        defaultAlarm.setDescription("Reminder");
-        //        return Collections.singletonList(defaultAlarm);
+        return null;
     }
 
     /**

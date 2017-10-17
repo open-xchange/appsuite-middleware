@@ -50,18 +50,25 @@
 package com.openexchange.chronos.provider.birthdays;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.chronos.Alarm;
+import com.openexchange.chronos.common.Check;
+import com.openexchange.chronos.common.DataHandlers;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.AutoProvisioningCalendarProvider;
 import com.openexchange.chronos.provider.CalendarAccess;
 import com.openexchange.chronos.provider.CalendarAccount;
-import com.openexchange.chronos.provider.account.AdministrativeCalendarAccountService;
+import com.openexchange.chronos.provider.SingleAccountCalendarProvider;
 import com.openexchange.chronos.service.CalendarParameters;
+import com.openexchange.conversion.ConversionResult;
+import com.openexchange.conversion.ConversionService;
+import com.openexchange.conversion.DataArguments;
+import com.openexchange.conversion.DataHandler;
+import com.openexchange.conversion.SimpleData;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.i18n.tools.StringHelper;
@@ -76,7 +83,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class BirthdaysCalendarProvider implements AutoProvisioningCalendarProvider {
+public class BirthdaysCalendarProvider implements AutoProvisioningCalendarProvider, SingleAccountCalendarProvider {
 
     static final String PROVIDER_ID = "birthdays";
 
@@ -104,21 +111,12 @@ public class BirthdaysCalendarProvider implements AutoProvisioningCalendarProvid
 
     @Override
     public JSONObject autoConfigureAccount(Session session, JSONObject userConfig, CalendarParameters parameters) throws OXException {
-        return configureAccount(session, userConfig, parameters);
-    }
-
-    @Override
-    public JSONObject configureAccount(Session session, JSONObject userConfig, CalendarParameters parameters) throws OXException {
         /*
          * check capabilities and if user already has an account
          */
         ServerSession serverSession = ServerSessionAdapter.valueOf(session);
         if (false == serverSession.getUserPermissionBits().hasContact()) {
             throw CalendarExceptionCodes.MISSING_CAPABILITY.create(com.openexchange.groupware.userconfiguration.Permission.CONTACTS.getCapabilityName());
-        }
-        List<CalendarAccount> existingAccounts = services.getService(AdministrativeCalendarAccountService.class).getAccounts(session.getContextId(), new int[] { session.getUserId() }, PROVIDER_ID);
-        if (0 < existingAccounts.size()) {
-            throw CalendarExceptionCodes.UNSUPPORTED_OPERATION_FOR_PROVIDER.create(PROVIDER_ID);
         }
         /*
          * initialize & check user config
@@ -128,6 +126,14 @@ public class BirthdaysCalendarProvider implements AutoProvisioningCalendarProvid
          * no further internal config needed
          */
         return new JSONObject();
+    }
+
+    @Override
+    public JSONObject configureAccount(Session session, JSONObject userConfig, CalendarParameters parameters) throws OXException {
+        /*
+         * no manual account creation allowed as accounts are provisioned automatically
+         */
+        throw CalendarExceptionCodes.UNSUPPORTED_OPERATION_FOR_PROVIDER.create(PROVIDER_ID);
     }
 
     @Override
@@ -187,9 +193,11 @@ public class BirthdaysCalendarProvider implements AutoProvisioningCalendarProvid
              */
             JSONObject defaultAlarmJSONObject = userConfig.optJSONObject("defaultAlarmDate");
             if (null != defaultAlarmJSONObject) {
-
-                //TODO: check alarm completeness, only allow alarm with relative trigger
-
+                DataHandler dataHandler = services.getService(ConversionService.class).getDataHandler(DataHandlers.JSON2ALARM);
+                ConversionResult result = dataHandler.processData(new SimpleData<JSONObject>(defaultAlarmJSONObject), new DataArguments(), session);
+                if (null != result && null != result.getData() && Alarm.class.isInstance(result.getData())) {
+                    Check.alarmIsValid((Alarm) result.getData());
+                }
             }
         } catch (JSONException e) {
             throw CalendarExceptionCodes.INVALID_CONFIGURATION.create(e, String.valueOf(userConfig));

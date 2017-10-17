@@ -100,7 +100,7 @@ public class Json2ObjectDataHandler<O, E extends Enum<E>> implements DataHandler
     public ConversionResult processData(Data<? extends Object> data, DataArguments dataArguments, Session session) throws OXException {
         ConversionResult result = new ConversionResult();
         Object sourceData = data.getData();
-        if (null == sourceData) {
+        if (null == sourceData || JSONObject.NULL.equals(sourceData)) {
             result.setData(null);
         } else if (JSONObject.class.isInstance(sourceData)) {
             result.setData(deserialize((JSONObject) sourceData, optTimeZoneID(dataArguments, session)));
