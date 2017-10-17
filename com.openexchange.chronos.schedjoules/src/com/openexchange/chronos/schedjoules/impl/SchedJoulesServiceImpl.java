@@ -49,6 +49,11 @@
 
 package com.openexchange.chronos.schedjoules.impl;
 
+import java.util.Map.Entry;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -62,6 +67,7 @@ import com.openexchange.chronos.schedjoules.SchedJoulesResult;
 import com.openexchange.chronos.schedjoules.SchedJoulesService;
 import com.openexchange.chronos.schedjoules.api.SchedJoulesAPI;
 import com.openexchange.chronos.schedjoules.exception.SchedJoulesExceptionCodes;
+import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
@@ -71,7 +77,7 @@ import com.openexchange.session.Session;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class SchedJoulesServiceImpl implements SchedJoulesService {
+public class SchedJoulesServiceImpl implements SchedJoulesService, CalendarParameters {
 
     /**
      * Default 'X-WR-CALNAME' and 'SUMMARY' contents of an iCal that is not accessible
@@ -81,6 +87,8 @@ public class SchedJoulesServiceImpl implements SchedJoulesService {
     private final SchedJoulesAPI api;
 
     private final ServiceLookup services;
+    
+    private final Map<String, Object> parameters;
 
     /**
      * Initialises a new {@link SchedJoulesServiceImpl}.
@@ -92,6 +100,7 @@ public class SchedJoulesServiceImpl implements SchedJoulesService {
         super();
         this.services = services;
         api = new SchedJoulesAPI();
+        this.parameters = new HashMap<String, Object>(); // FIXME: Should be per user
     }
 
     /*
@@ -212,7 +221,6 @@ public class SchedJoulesServiceImpl implements SchedJoulesService {
             if (!page.hasAndNotNull("url")) {
                 throw SchedJoulesExceptionCodes.NO_CALENDAR.create(id);
             }
-            String url = page.getString("url");
 
             // Re-configure
             JSONObject userConfiguration = calendarAccount.getUserConfiguration();
@@ -220,24 +228,24 @@ public class SchedJoulesServiceImpl implements SchedJoulesService {
                 userConfiguration = new JSONObject();
             }
 
-            JSONArray folders = userConfiguration.getJSONArray("folders");
+            JSONArray folders = userConfiguration.optJSONArray("folders");
             if (folders == null) {
                 folders = new JSONArray();
                 userConfiguration.put("folders", folders);
             }
             // Prepare the folder configuration
             JSONObject singleCalendarConfiguration = new JSONObject();
-            singleCalendarConfiguration.put("url", url);
+            singleCalendarConfiguration.put("url", page.getString("url"));
             singleCalendarConfiguration.put("name", page.getString("name"));
             singleCalendarConfiguration.put("refreshInterval", "PT7D"); //TODO: either default or user defined
 
             folders.put(singleCalendarConfiguration);
 
             // FIXME: Should the reconfigure method change the physical data on the database, or should there be a consecutive update call? 
-            calendarProvider.reconfigureAccount(session, calendarAccount.getInternalConfiguration(), userConfiguration, null);
+            calendarAccountService.updateAccount(session, accountId, userConfiguration, System.currentTimeMillis() + 100, null);
 
-            CalendarAccess calendarAccess = calendarProvider.connect(session, calendarAccount, null);
-            calendarAccess.getEventsInFolder(page.getString("name"));
+            //CalendarAccess calendarAccess = calendarProvider.connect(session, calendarAccount, this);
+            //calendarAccess.getEventsInFolder(page.getString("name"));
 
             // TODO: How should the subscribe work? Is it enough to simply supply the access with the url via the account user configuration?  
 
@@ -245,5 +253,47 @@ public class SchedJoulesServiceImpl implements SchedJoulesService {
         } catch (JSONException e) {
             throw SchedJoulesExceptionCodes.JSON_ERROR.create(e.getMessage(), e);
         }
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.chronos.service.CalendarParameters#set(java.lang.String, java.lang.Object)
+     */
+    @Override
+    public <T> CalendarParameters set(String parameter, T value) {
+        parameters.put(parameter, value);
+        return this;
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.chronos.service.CalendarParameters#get(java.lang.String, java.lang.Class)
+     */
+    @Override
+    public <T> T get(String parameter, Class<T> clazz) {
+        return get(parameter, clazz, null);
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.chronos.service.CalendarParameters#get(java.lang.String, java.lang.Class, java.lang.Object)
+     */
+    @Override
+    public <T> T get(String parameter, Class<T> clazz, T defaultValue) {
+        Object value = parameters.get(parameter);
+        return null == value ? defaultValue : clazz.cast(value);
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.chronos.service.CalendarParameters#contains(java.lang.String)
+     */
+    @Override
+    public boolean contains(String parameter) {
+        return parameters.containsKey(parameter);
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.chronos.service.CalendarParameters#entrySet()
+     */
+    @Override
+    public Set<Entry<String, Object>> entrySet() {
+        return Collections.unmodifiableSet(parameters.entrySet());
     }
 }

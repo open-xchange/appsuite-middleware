@@ -51,20 +51,26 @@ package com.openexchange.chronos.provider.schedjoules;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.chronos.Calendar;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.TimeTransparency;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.CalendarFolder;
+import com.openexchange.chronos.provider.DefaultCalendarFolder;
+import com.openexchange.chronos.provider.DefaultCalendarPermission;
 import com.openexchange.chronos.provider.caching.CachingCalendarAccess;
 import com.openexchange.chronos.provider.caching.ExternalCalendarResult;
 import com.openexchange.chronos.schedjoules.api.SchedJoulesAPI;
 import com.openexchange.chronos.schedjoules.exception.SchedJoulesExceptionCodes;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Enums;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 
@@ -112,8 +118,7 @@ public class SchedjoulesCalendarAccess extends CachingCalendarAccess {
      */
     @Override
     public CalendarFolder getFolder(String folderId) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        return prepareFolder(folderId);
     }
 
     /*
@@ -123,8 +128,19 @@ public class SchedjoulesCalendarAccess extends CachingCalendarAccess {
      */
     @Override
     public List<CalendarFolder> getVisibleFolders() throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        JSONArray foldersArray = getAccount().getUserConfiguration().optJSONArray("folders");
+        if (foldersArray == null || foldersArray.isEmpty()) {
+            return new ArrayList<>();
+        }
+        List<CalendarFolder> folders = new ArrayList<>(foldersArray.length());
+        for (int index = 0; index < foldersArray.length(); index++) {
+            try {
+                folders.add(prepareFolder(foldersArray.getJSONObject(index).getString("name")));
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+        return folders;
     }
 
     /*
@@ -145,8 +161,7 @@ public class SchedjoulesCalendarAccess extends CachingCalendarAccess {
      */
     @Override
     public List<Event> getChangeExceptions(String folderId, String seriesId) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        return new ArrayList<>();
     }
 
     /*
@@ -195,7 +210,7 @@ public class SchedjoulesCalendarAccess extends CachingCalendarAccess {
             if (NO_ACCESS.equals(calendar.getName())) {
                 throw SchedJoulesExceptionCodes.NO_ACCESS.create(folderId);
             }
-            
+
             ExternalCalendarResult res = new ExternalCalendarResult();
             res.addEvents(calendar.getEvents());
             return res;
@@ -215,6 +230,22 @@ public class SchedjoulesCalendarAccess extends CachingCalendarAccess {
     public void handleExceptions(String calendarFolderId, OXException e) {
         // TODO Auto-generated method stub
 
+    }
+
+    private CalendarFolder prepareFolder(String folderName) {
+        DefaultCalendarFolder folder = new DefaultCalendarFolder();
+        folder.setId(folderName);
+        folder.setPermissions(Collections.singletonList(DefaultCalendarPermission.readOnlyPermissionsFor(getAccount().getUserId())));
+        folder.setLastModified(getAccount().getLastModified());
+        JSONObject userConfig = getAccount().getUserConfiguration();
+        if (null != userConfig) {
+            folder.setName(userConfig.optString("name", folderName));
+            folder.setColor(userConfig.optString("color", null));
+            folder.setDescription(userConfig.optString("description", null));
+            folder.setUsedForSync(userConfig.optBoolean("usedForSync", false));
+            folder.setScheduleTransparency(Enums.parse(TimeTransparency.class, userConfig.optString("scheduleTransp", null), TimeTransparency.OPAQUE));
+        }
+        return folder;
     }
 
 }
