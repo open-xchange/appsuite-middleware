@@ -59,7 +59,7 @@ public class SchedJoulesUnsubscribeParameter extends SchedJoulesCommonParameter 
     /**
      * The identifier of the calendar id to unsubscribe from
      */
-    public static final String CALENDAR_ID = "calendarId";
+    public static final String FOLDER = "calendarId";
 
     /**
      * The user's SchedJoules calendar account

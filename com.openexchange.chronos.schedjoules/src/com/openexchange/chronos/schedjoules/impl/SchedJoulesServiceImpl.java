@@ -250,7 +250,7 @@ public class SchedJoulesServiceImpl implements SchedJoulesService, CalendarParam
      * @see com.openexchange.chronos.schedjoules.SchedJoulesService#unsubscribeCalendar(com.openexchange.session.Session, java.lang.String, int)
      */
     @Override
-    public void unsubscribeCalendar(Session session, String calendarId, int accountId) throws OXException {
+    public void unsubscribeCalendar(Session session, String folderId, int accountId) throws OXException {
         // Resolve the user's SchedJoules calendar account
         CalendarAccountService calendarAccountService = services.getService(CalendarAccountService.class);
         CalendarAccount calendarAccount = calendarAccountService.getAccount(session, accountId);
@@ -277,7 +277,7 @@ public class SchedJoulesServiceImpl implements SchedJoulesService, CalendarParam
             return;
         }
 
-        List<String> unmangled = IDMangler.unmangle(calendarId);
+        List<String> unmangled = IDMangler.unmangle(folderId);
         String name = unmangled.get(2);
         try {
             Iterator<Object> iterator = folders.iterator();

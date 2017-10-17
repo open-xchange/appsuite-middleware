@@ -153,6 +153,7 @@ public interface SchedJoulesService {
      * @param id The calendar identifier
      * @param accountId The identifier of the user's SchedJoules {@link CalendarAccount}
      * @param locale The locale
+     * @return The folder identifier of the subscribed calendar
      * @throws OXException if an error is occurred
      */
     String subscribeCalendar(Session session, int id, int accountId, String locale) throws OXException;
@@ -161,9 +162,9 @@ public interface SchedJoulesService {
      * Un-subscribes from the specified SchedJoules calendar
      * 
      * @param session The groupware {@link Session}
-     * @param calendarId The calendar identifier
+     * @param folderId The folder identifier
      * @param accountId The identifier of the user's SchedJoules {@link CalendarAccount}
      * @throws OXException if an error is occurred
      */
-    void unsubscribeCalendar(Session session, String calendarId, int accountId) throws OXException;
+    void unsubscribeCalendar(Session session, String folderId, int accountId) throws OXException;
 }

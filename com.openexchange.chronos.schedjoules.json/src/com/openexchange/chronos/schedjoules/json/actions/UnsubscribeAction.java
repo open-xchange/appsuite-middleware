@@ -83,11 +83,11 @@ public class UnsubscribeAction extends AbstractSchedJoulesAction implements AJAX
         requestData.checkParameter(SchedJoulesUnsubscribeParameter.ACCOUNT_ID);
         int accountId = requestData.getIntParameter(SchedJoulesUnsubscribeParameter.ACCOUNT_ID);
 
-        // Check if the mandatory 'calendarId' is present and get it
-        String calendarId = requestData.checkParameter(SchedJoulesUnsubscribeParameter.CALENDAR_ID);
+        // Check if the mandatory 'folder' is present and get it
+        String folder = requestData.checkParameter(SchedJoulesUnsubscribeParameter.FOLDER);
 
         SchedJoulesService service = services.getService(SchedJoulesService.class);
-        service.unsubscribeCalendar(session, calendarId, accountId);
+        service.unsubscribeCalendar(session, folder, accountId);
 
         return new AJAXRequestResult();
     }
