@@ -228,7 +228,7 @@ public class RdbCalendarAccountStorage extends RdbStorage implements CalendarAcc
     }
 
     private static int insertAccount(Connection connection, int cid, CalendarAccount account) throws SQLException, OXException {
-        String sql = "INSERT INTO calendar_account (cid,id,provider,user,modified,internalConfig,userConfig) VALUES (?,?,?,?,?,?,?);";
+        String sql = "INSERT INTO calendar_account (cid,id,provider,user,enabled,modified,internalConfig,userConfig) VALUES (?,?,?,?,?,?,?,?);";
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             InputStream internalConfigStream = null;
             InputStream userConfigStream = null;
@@ -239,9 +239,10 @@ public class RdbCalendarAccountStorage extends RdbStorage implements CalendarAcc
                 stmt.setInt(2, account.getAccountId());
                 stmt.setString(3, account.getProviderId());
                 stmt.setInt(4, account.getUserId());
-                stmt.setLong(5, account.getLastModified().getTime());
-                stmt.setBinaryStream(6, internalConfigStream);
-                stmt.setBinaryStream(7, userConfigStream);
+                stmt.setBoolean(5, account.isEnabled());
+                stmt.setLong(6, account.getLastModified().getTime());
+                stmt.setBinaryStream(7, internalConfigStream);
+                stmt.setBinaryStream(8, userConfigStream);
                 return logExecuteUpdate(stmt);
             } finally {
                 Streams.close(internalConfigStream, userConfigStream);
@@ -250,7 +251,7 @@ public class RdbCalendarAccountStorage extends RdbStorage implements CalendarAcc
     }
 
     private static int updateAccount(Connection connection, int cid, CalendarAccount account) throws SQLException, OXException {
-        StringBuilder stringBuilder = new StringBuilder("UPDATE calendar_account SET modified=?");
+        StringBuilder stringBuilder = new StringBuilder("UPDATE calendar_account SET enabled=?,modified=?");
         JSONObject internalConfig = account.getInternalConfiguration();
         JSONObject userConfig = account.getUserConfiguration();
         if (null != internalConfig) {
@@ -268,6 +269,7 @@ public class RdbCalendarAccountStorage extends RdbStorage implements CalendarAcc
                 internalConfigStream = null != internalConfig ? serialize(internalConfig) : null;
                 userConfigStream = null != userConfig ? serialize(userConfig) : null;
                 stmt.setLong(parameterIndex++, account.getLastModified().getTime());
+                stmt.setBoolean(parameterIndex++, account.isEnabled());
                 if (null != internalConfigStream) {
                     stmt.setBinaryStream(parameterIndex++, internalConfigStream);
                 }
@@ -296,7 +298,7 @@ public class RdbCalendarAccountStorage extends RdbStorage implements CalendarAcc
 
     private static List<CalendarAccount> selectAccounts(Connection connection, int cid, int user) throws SQLException, OXException {
         List<CalendarAccount> accounts = new ArrayList<CalendarAccount>();
-        String sql = "SELECT id,user,provider,modified,internalConfig,userConfig FROM calendar_account WHERE cid=? AND user=?;";
+        String sql = "SELECT id,user,provider,enabled,modified,internalConfig,userConfig FROM calendar_account WHERE cid=? AND user=?;";
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             stmt.setInt(1, cid);
             stmt.setInt(2, user);
@@ -311,7 +313,7 @@ public class RdbCalendarAccountStorage extends RdbStorage implements CalendarAcc
 
     private static List<CalendarAccount> selectAccounts(Connection connection, int cid, String provider, int[] userIds) throws SQLException, OXException {
         String sql = new StringBuilder()
-            .append("SELECT id,user,provider,modified,internalConfig,userConfig FROM calendar_account WHERE cid=? AND provider=? AND user")
+            .append("SELECT id,user,provider,enabled,modified,internalConfig,userConfig FROM calendar_account WHERE cid=? AND provider=? AND user")
             .append(getPlaceholders(userIds.length)).append(';')
         .toString();
         List<CalendarAccount> accounts = new ArrayList<CalendarAccount>();
@@ -332,7 +334,7 @@ public class RdbCalendarAccountStorage extends RdbStorage implements CalendarAcc
     }
 
     private static CalendarAccount selectAccount(Connection connection, int cid, int id, int user) throws SQLException, OXException {
-        String sql = "SELECT id,user,provider,modified,internalConfig,userConfig FROM calendar_account WHERE cid=? AND id=? AND user=?;";
+        String sql = "SELECT id,user,provider,enabled,modified,internalConfig,userConfig FROM calendar_account WHERE cid=? AND id=? AND user=?;";
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             stmt.setInt(1, cid);
             stmt.setInt(2, id);
@@ -354,6 +356,7 @@ public class RdbCalendarAccountStorage extends RdbStorage implements CalendarAcc
         int id = resultSet.getInt("id");
         int user = resultSet.getInt("user");
         String provider = resultSet.getString("provider");
+        boolean enabled = resultSet.getBoolean("enabled");
         long lastModified = resultSet.getLong("modified");
         JSONObject internalConfig;
         InputStream inputStream = null;
@@ -370,7 +373,7 @@ public class RdbCalendarAccountStorage extends RdbStorage implements CalendarAcc
         } finally {
             Streams.close(inputStream);
         }
-        return new DefaultCalendarAccount(provider, id, user, internalConfig, userConfig, new Date(lastModified));
+        return new DefaultCalendarAccount(provider, id, user, enabled, internalConfig, userConfig, new Date(lastModified));
     }
 
     /**

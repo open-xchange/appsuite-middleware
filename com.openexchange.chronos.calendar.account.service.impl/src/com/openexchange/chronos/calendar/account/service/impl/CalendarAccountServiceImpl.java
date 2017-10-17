@@ -291,7 +291,7 @@ public class CalendarAccountServiceImpl implements CalendarAccountService, Admin
                     throw CalendarExceptionCodes.CONCURRENT_MODIFICATION.create(String.valueOf(accountId), clientTimestamp, account.getLastModified().getTime());
                 }
                 CalendarAccount updatedAccount = new DefaultCalendarAccount(
-                    account.getProviderId(), account.getAccountId(), account.getUserId(), internalConfig, userConfig, new Date());
+                    account.getProviderId(), account.getAccountId(), account.getUserId(), account.isEnabled(), internalConfig, userConfig, new Date());
                 storage.getAccountStorage().updateAccount(updatedAccount);
                 return updatedAccount;
             }
@@ -366,7 +366,7 @@ public class CalendarAccountServiceImpl implements CalendarAccountService, Admin
         } else {
             accountId = storage.nextId();
         }
-        DefaultCalendarAccount account = new DefaultCalendarAccount(providerId, accountId, userId, internalConfig, userConfig, new Date());
+        DefaultCalendarAccount account = new DefaultCalendarAccount(providerId, accountId, userId, true, internalConfig, userConfig, new Date());
         storage.insertAccount(account);
         return account;
     }
