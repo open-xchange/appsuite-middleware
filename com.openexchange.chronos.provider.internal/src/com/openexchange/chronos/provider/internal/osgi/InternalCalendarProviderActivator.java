@@ -59,7 +59,9 @@ import com.openexchange.chronos.provider.internal.share.CalendarFolderHandlerMod
 import com.openexchange.chronos.provider.internal.share.CalendarModuleAdjuster;
 import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.chronos.service.RecurrenceService;
+import com.openexchange.conversion.ConversionService;
 import com.openexchange.folderstorage.FolderService;
+import com.openexchange.jslob.JSlobService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.share.core.ModuleAdjuster;
 import com.openexchange.share.groupware.spi.FolderHandlerModuleExtension;
@@ -83,7 +85,12 @@ public class InternalCalendarProviderActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { FolderService.class, CalendarService.class, RecurrenceService.class, UserService.class };
+        return new Class<?>[] { FolderService.class, CalendarService.class, RecurrenceService.class, UserService.class, ConversionService.class };
+    }
+
+    @Override
+    protected Class<?>[] getOptionalServices() {
+        return new Class<?>[] { JSlobService.class };
     }
 
     @Override
@@ -93,7 +100,7 @@ public class InternalCalendarProviderActivator extends HousekeepingActivator {
         try {
             getLogger(InternalCalendarProviderActivator.class).info("starting bundle {}", context.getBundle());
             Services.setServiceLookup(this);
-            registerService(CalendarProvider.class, new InternalCalendarProvider());
+            registerService(CalendarProvider.class, new InternalCalendarProvider(this));
             registerService(FreeBusyProvider.class, new InternalFreeBusyProvider());
             registerService(ModuleAdjuster.class, new CalendarModuleAdjuster());
             registerService(FolderHandlerModuleExtension.class, new CalendarFolderHandlerModuleExtension(this));

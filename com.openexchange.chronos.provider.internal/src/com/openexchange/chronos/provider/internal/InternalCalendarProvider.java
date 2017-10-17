@@ -52,15 +52,19 @@ package com.openexchange.chronos.provider.internal;
 import java.util.Locale;
 import org.json.JSONObject;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
+import com.openexchange.chronos.provider.AutoProvisioningCalendarProvider;
 import com.openexchange.chronos.provider.CalendarAccess;
 import com.openexchange.chronos.provider.CalendarAccount;
-import com.openexchange.chronos.provider.CalendarProvider;
+import com.openexchange.chronos.provider.SingleAccountCalendarProvider;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.exception.OXException;
 import com.openexchange.i18n.tools.StringHelper;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
+import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  * {@link InternalCalendarProvider}
@@ -68,13 +72,18 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class InternalCalendarProvider implements CalendarProvider {
+public class InternalCalendarProvider implements AutoProvisioningCalendarProvider, SingleAccountCalendarProvider {
+
+    private final ServiceLookup services;
 
     /**
      * Initializes a new {@link InternalCalendarProvider}.
+     *
+     * @param services A service lookup reference
      */
-    public InternalCalendarProvider() {
+    public InternalCalendarProvider(ServiceLookup services) {
         super();
+        this.services = services;
     }
 
     @Override
@@ -97,7 +106,7 @@ public class InternalCalendarProvider implements CalendarProvider {
     @Override
     public JSONObject configureAccount(Session session, JSONObject userConfig, CalendarParameters parameters) throws OXException {
         /*
-         * no account creation allowed
+         * no manual account creation allowed as accounts are provisioned automatically
          */
         throw CalendarExceptionCodes.UNSUPPORTED_OPERATION_FOR_PROVIDER.create(Constants.PROVIDER_ID);
     }
@@ -105,9 +114,11 @@ public class InternalCalendarProvider implements CalendarProvider {
     @Override
     public JSONObject reconfigureAccount(Session session, JSONObject internalConfig, JSONObject userConfig, CalendarParameters parameters) throws OXException {
         /*
-         * no account initialization allowed
+         * initialize & check user config
          */
-        throw CalendarExceptionCodes.UNSUPPORTED_OPERATION_FOR_PROVIDER.create(Constants.PROVIDER_ID);
+        ServerSession serverSession = ServerSessionAdapter.valueOf(session);
+        new UserConfigHelper(services).checkUserConfig(serverSession, userConfig);
+        return internalConfig;
     }
 
     @Override
@@ -123,6 +134,16 @@ public class InternalCalendarProvider implements CalendarProvider {
     @Override
     public void onAccountDeleted(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
         // no
+    }
+
+    @Override
+    public JSONObject autoConfigureAccount(Session session, JSONObject userConfig, CalendarParameters parameters) throws OXException {
+        /*
+         * init user config based on migrated legacy settings
+         */
+        ServerSession serverSession = ServerSessionAdapter.valueOf(session);
+        new UserConfigHelper(Services.getServiceLookup()).applyLegacyConfig(serverSession, userConfig);
+        return new JSONObject();
     }
 
 }

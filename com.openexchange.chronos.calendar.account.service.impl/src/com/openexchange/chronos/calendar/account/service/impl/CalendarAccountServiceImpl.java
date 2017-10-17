@@ -62,6 +62,7 @@ import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.CalendarProvider;
 import com.openexchange.chronos.provider.CalendarProviderRegistry;
 import com.openexchange.chronos.provider.DefaultCalendarAccount;
+import com.openexchange.chronos.provider.SingleAccountCalendarProvider;
 import com.openexchange.chronos.provider.account.AdministrativeCalendarAccountService;
 import com.openexchange.chronos.provider.account.CalendarAccountService;
 import com.openexchange.chronos.service.CalendarParameters;
@@ -159,6 +160,10 @@ public class CalendarAccountServiceImpl implements CalendarAccountService, Admin
         if (null != storedAccount.getLastModified() && storedAccount.getLastModified().getTime() > timestamp) {
             throw CalendarExceptionCodes.CONCURRENT_MODIFICATION.create(String.valueOf(id), timestamp, storedAccount.getLastModified().getTime());
         }
+        CalendarProvider calendarProvider = getProviderRegistry().getCalendarProvider(storedAccount.getProviderId());
+        if (null != calendarProvider && AutoProvisioningCalendarProvider.class.isInstance(calendarProvider)) {
+            throw CalendarExceptionCodes.UNSUPPORTED_OPERATION_FOR_PROVIDER.create(calendarProvider.getId());
+        }
         /*
          * delete calendar account in storage within transaction
          */
@@ -178,7 +183,6 @@ public class CalendarAccountServiceImpl implements CalendarAccountService, Admin
         /*
          * finally let provider perform any additional initialization
          */
-        CalendarProvider calendarProvider = getProviderRegistry().getCalendarProvider(storedAccount.getProviderId());
         if (null == calendarProvider) {
             LoggerFactory.getLogger(CalendarAccountServiceImpl.class).warn("Provider '{}' not available, skipping additional cleanup tasks for deleted account {}.",
                 storedAccount.getProviderId(), storedAccount, CalendarExceptionCodes.PROVIDER_NOT_AVAILABLE.create(storedAccount.getProviderId()));
@@ -189,11 +193,6 @@ public class CalendarAccountServiceImpl implements CalendarAccountService, Admin
 
     @Override
     public CalendarAccount getAccount(Session session, int id) throws OXException {
-        //TODO: auto provision default account?
-        if (CalendarAccount.DEFAULT_ACCOUNT.getAccountId() == id) {
-            return CalendarAccount.DEFAULT_ACCOUNT;
-        }
-        //
         CalendarAccount storedAccount = new OSGiCalendarStorageOperation<CalendarAccount>(services, session.getContextId(), -1) {
 
             @Override
@@ -201,6 +200,12 @@ public class CalendarAccountServiceImpl implements CalendarAccountService, Admin
                 return storage.getAccountStorage().loadAccount(session.getUserId(), id);
             }
         }.executeQuery();
+        if (null == storedAccount && CalendarAccount.DEFAULT_ACCOUNT.getAccountId() == id) {
+            /*
+             * get default account from list to implicitly trigger pending auto-provisioning tasks of the default account
+             */
+            storedAccount = find(getAccounts(session), CalendarAccount.DEFAULT_ACCOUNT.getProviderId());
+        }
         if (null == storedAccount) {
             throw CalendarExceptionCodes.ACCOUNT_NOT_FOUND.create(id);
         }
@@ -261,9 +266,6 @@ public class CalendarAccountServiceImpl implements CalendarAccountService, Admin
                 return storage.getAccountStorage().loadAccounts(userId);
             }
         }.executeQuery();
-
-        //TODO - auto-provision default account dynamically, too
-        accounts.add(CalendarAccount.DEFAULT_ACCOUNT);
         return accounts;
     }
 
@@ -394,7 +396,7 @@ public class CalendarAccountServiceImpl implements CalendarAccountService, Admin
     }
 
     private static boolean allowsMultipleAccounts(CalendarProvider provider) {
-        return false;
+        return false == SingleAccountCalendarProvider.class.isInstance(provider);
     }
 
     private void invalidateStorage(int contextId, int userId) throws OXException {
