@@ -64,6 +64,7 @@ import com.openexchange.chronos.DelegatingEvent;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.ExtendedProperty;
 import com.openexchange.chronos.common.AlarmUtils;
+import com.openexchange.chronos.common.DataHandlers;
 import com.openexchange.chronos.common.UpdateResultImpl;
 import com.openexchange.chronos.common.mapping.AlarmMapper;
 import com.openexchange.chronos.provider.CalendarAccount;
@@ -212,7 +213,7 @@ public class AlarmHelper {
         if (null == defaultAlarmObject) {
             return null;
         }
-        DataHandler dataHandler = services.getService(ConversionService.class).getDataHandler("com.openexchange.chronos.json.alarm");
+        DataHandler dataHandler = services.getService(ConversionService.class).getDataHandler(DataHandlers.JSON2ALARM);
         try {
             ConversionResult result = dataHandler.processData(new SimpleData<JSONObject>(defaultAlarmObject), new DataArguments(), null);
             if (null != result && null != result.getData()) {
