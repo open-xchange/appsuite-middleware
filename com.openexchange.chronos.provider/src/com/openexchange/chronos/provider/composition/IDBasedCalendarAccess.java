@@ -92,6 +92,13 @@ public interface IDBasedCalendarAccess extends TransactionAware, CalendarParamet
     Session getSession();
 
     /**
+     * Gets a list of warnings that occurred during processing.
+     *
+     * @return A list if warnings, or an empty list if there were none
+     */
+    List<OXException> getWarnings();
+
+    /**
      * Gets the user's default calendar folder.
      *
      * @return The default calendar folder

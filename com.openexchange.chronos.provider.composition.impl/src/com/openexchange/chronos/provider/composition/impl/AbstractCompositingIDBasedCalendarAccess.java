@@ -50,6 +50,7 @@
 package com.openexchange.chronos.provider.composition.impl;
 
 import static com.openexchange.java.Autoboxing.I;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -66,6 +67,7 @@ import com.openexchange.chronos.provider.CalendarProvider;
 import com.openexchange.chronos.provider.CalendarProviderRegistry;
 import com.openexchange.chronos.provider.FreeBusyProvider;
 import com.openexchange.chronos.provider.account.CalendarAccountService;
+import com.openexchange.chronos.provider.extensions.WarningsAware;
 import com.openexchange.chronos.provider.groupware.GroupwareCalendarAccess;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.exception.OXException;
@@ -87,6 +89,7 @@ public abstract class AbstractCompositingIDBasedCalendarAccess implements Transa
 
     protected final ServiceLookup services;
     protected final ServerSession session;
+    protected final List<OXException> warnings;
 
     private final CalendarProviderRegistry providerRegistry;
     private final Map<String, Object> parameters;
@@ -106,6 +109,7 @@ public abstract class AbstractCompositingIDBasedCalendarAccess implements Transa
         this.session = ServerSessionAdapter.valueOf(session);
         this.parameters = new HashMap<String, Object>();
         this.connectedAccesses = new ConcurrentHashMap<Integer, CalendarAccess>();
+        this.warnings = new ArrayList<OXException>();
     }
 
     @Override
@@ -117,6 +121,7 @@ public abstract class AbstractCompositingIDBasedCalendarAccess implements Transa
             }
         }
         connectedAccesses.clear();
+        warnings.clear();
     }
 
     @Override
@@ -129,6 +134,12 @@ public abstract class AbstractCompositingIDBasedCalendarAccess implements Transa
             Entry<Integer, CalendarAccess> entry = iterator.next();
             CalendarAccess access = entry.getValue();
             LOG.debug("Closing calendar access {} for account {}.", access, entry.getKey());
+            if (WarningsAware.class.isInstance(access)) {
+                List<OXException> warnings = ((WarningsAware) access).getWarnings();
+                if (null != warnings) {
+                    this.warnings.addAll(warnings);
+                }
+            }
             access.close();
             iterator.remove();
         }

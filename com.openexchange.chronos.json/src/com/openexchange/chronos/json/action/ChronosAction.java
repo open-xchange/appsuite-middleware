@@ -103,8 +103,24 @@ public abstract class ChronosAction extends AbstractChronosAction {
 
     @Override
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
+        AJAXRequestResult result;
         IDBasedCalendarAccess calendarAccess = initCalendarAccess(requestData);
-        AJAXRequestResult result = perform(calendarAccess, requestData);
+        boolean committed = false;
+        try {
+            calendarAccess.startTransaction();
+            result = perform(calendarAccess, requestData);
+            calendarAccess.commit();
+            committed = true;
+        } finally {
+            if (false == committed) {
+                calendarAccess.rollback();
+            }
+            calendarAccess.finish();
+        }
+        List<OXException> warnings = calendarAccess.getWarnings();
+        if (null != warnings && 0 < warnings.size()) {
+            result.addWarnings(warnings);
+        }
         return result;
     }
 
@@ -134,7 +150,7 @@ public abstract class ChronosAction extends AbstractChronosAction {
      * Handles the specified {@link OXException} and if it is of type
      * {@link Category#CATEGORY_CONFLICT}, it returns the correct response.
      * Otherwise the original exception is re-thrown
-     * 
+     *
      * @param e The {@link OXException} to handle
      * @return The proper conflict response
      * @throws OXException The original {@link OXException} if not of type {@link Category#CATEGORY_CONFLICT}
@@ -172,7 +188,7 @@ public abstract class ChronosAction extends AbstractChronosAction {
     /**
      * Parses the {@link Event} from the payload object of the specified {@link AJAXRequestData}.
      * Any {@link Attachment} uploads will also be handled and properly attached to the {@link Event}.
-     * 
+     *
      * @param session The groupware {@link Session}
      * @param requestData The {@link AJAXRequestData}
      * @return The parsed {@link Event}
@@ -199,7 +215,7 @@ public abstract class ChronosAction extends AbstractChronosAction {
     /**
      * Processes any attachments the {@link Event} might have. It simply sets
      * the 'data' field of each attachment.
-     * 
+     *
      * @param uploads The uploaded attachments' data
      * @param event The event that contains the metadata of the attachments
      * @throws OXException if there are missing references between attachment metadata and attachment body parts
@@ -228,7 +244,7 @@ public abstract class ChronosAction extends AbstractChronosAction {
 
     /**
      * Handles the file uploads and extracts the {@link JSONObject} payload from the upload request.
-     * 
+     *
      * @param requestData The {@link AJAXRequestData}
      * @param uploads The {@link Map} with the uploads
      * @return The {@link JSONObject} payload of the POST request
@@ -250,7 +266,7 @@ public abstract class ChronosAction extends AbstractChronosAction {
 
     /**
      * Extracts the {@link JSONObject} payload from the specified {@link AJAXRequestData}
-     * 
+     *
      * @param requestData the {@link AJAXRequestData} to extract the {@link JSONObject} payload from
      * @return The extracted {@link JSONObject} payload
      * @throws OXException if the payload is missing, or a parsing error occurs
@@ -265,7 +281,7 @@ public abstract class ChronosAction extends AbstractChronosAction {
 
     /**
      * Extracts the {@link JSONObject} payload from the specified {@link UploadEvent}
-     * 
+     *
      * @param upload the {@link UploadEvent} to extract the {@link JSONObject} payload from
      * @return The extracted {@link JSONObject} payload
      * @throws OXException if the payload is missing, or a parsing error occurs

@@ -134,6 +134,11 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
         return session;
     }
 
+    @Override
+    public List<OXException> getWarnings() {
+        return warnings;
+    }
+
     private SelfProtection getSelfProtection() throws OXException {
         if (protection == null) {
             LeanConfigurationService leanConfigurationService = services.getService(LeanConfigurationService.class);
