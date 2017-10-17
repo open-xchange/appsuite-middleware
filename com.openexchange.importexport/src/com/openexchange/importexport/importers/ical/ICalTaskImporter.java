@@ -98,7 +98,7 @@ public class ICalTaskImporter extends AbstractICalImporter {
     }
 
     @Override
-    public TruncationInfo importData(UserizedFolder userizedFolder, InputStream is, List<ImportResult> list, Map<String, String[]> optionalParams, Map<String, String> uidReplacements) throws OXException {
+    public TruncationInfo importData(UserizedFolder userizedFolder, InputStream is, List<ImportResult> list, Map<String, String[]> optionalParams) throws OXException {
         final List<ConversionError> errors = new ArrayList<>();
         final List<ConversionWarning> warnings = new ArrayList<>();
         final TasksSQLInterface taskInterface = retrieveTaskInterface(Integer.parseInt(userizedFolder.getID()), session);
@@ -211,9 +211,7 @@ public class ICalTaskImporter extends AbstractICalImporter {
             throw ImportExportExceptionCodes.TASKS_DISABLED
                     .create().setGeneric(Generic.NO_PERMISSION);
         }
-
         return new TasksSQLImpl(session);
     }
-
 
 }

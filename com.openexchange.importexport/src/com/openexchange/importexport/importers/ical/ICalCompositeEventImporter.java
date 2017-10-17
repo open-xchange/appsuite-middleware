@@ -76,15 +76,9 @@ public class ICalCompositeEventImporter extends AbstractICalEventImporter {
     }
 
     @Override
-    public void writeResult() {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void updateEvent(EventID eventId, Event event) throws OXException {
+    public CalendarResult updateEvent(EventID eventId, Event event) throws OXException {
         IDBasedCalendarAccess calendarAccess = ImportExportServices.getIDBasedCalendarAccessFactory().createAccess(session);
-        calendarAccess.updateEvent(eventId, event, System.currentTimeMillis());
+        return calendarAccess.updateEvent(eventId, event, System.currentTimeMillis());
     }
 
 }

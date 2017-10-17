@@ -62,11 +62,15 @@ import com.openexchange.chronos.ical.ImportedCalendar;
 import com.openexchange.chronos.service.CalendarResult;
 import com.openexchange.chronos.service.EventID;
 import com.openexchange.data.conversion.ical.TruncationInfo;
+import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXException.ProblematicAttribute;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.groupware.importexport.ImportResult;
+import com.openexchange.importexport.exceptions.ImportExportExceptionCodes;
 import com.openexchange.importexport.osgi.ImportExportServices;
 import com.openexchange.java.Strings;
+import com.openexchange.tools.exceptions.SimpleTruncatedAttribute;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -81,28 +85,46 @@ public abstract class AbstractICalEventImporter extends AbstractICalImporter{
         super(session);
     }
 
-    abstract public CalendarResult createEvent(String folderId, Event event) throws OXException ;
+    /**
+     * Creates an event
+     *
+     * @param folderId The folder to import to
+     * @param event The event to be created
+     * @return CalendarResult The result of the event creation
+     * @throws OXException if event creation fails
+     */
+    abstract protected CalendarResult createEvent(String folderId, Event event) throws OXException ;
 
-    abstract public void updateEvent(EventID eventId, Event event) throws OXException ;
-
-    abstract public void writeResult();
+    /**
+     * Updates an event
+     *
+     * @param eventId The {@link EventID} of the event which gets an update
+     * @param event The new event data to use for the update
+     * @return CalendarResult The result of the event creation
+     * @throws OXException if event creation fails
+     */
+    abstract protected CalendarResult updateEvent(EventID eventId, Event event) throws OXException ;
 
     @Override
-    public TruncationInfo importData(UserizedFolder userizedFolder, InputStream is, List<ImportResult> list, Map<String, String[]> optionalParams, Map<String, String> uidReplacements) throws OXException {
+    public TruncationInfo importData(UserizedFolder userizedFolder, InputStream is, List<ImportResult> list, Map<String, String[]> optionalParams) throws OXException {
         ICalService iCalService= ImportExportServices.getICalService();
         ICalParameters iCalParameters = iCalService.initParameters();
+        iCalParameters.set(ICalParameters.SANITIZE_INPUT, Boolean.TRUE);
         ImportedCalendar importedCalendar = iCalService.importICal(is, iCalParameters);
-        return importEvents(userizedFolder, importedCalendar.getEvents(), optionalParams, uidReplacements);
+        return importEvents(userizedFolder, importedCalendar.getEvents(), optionalParams, list);
     }
 
-    private TruncationInfo importEvents(UserizedFolder userizedFolder, List<Event> events, Map<String, String[]> optionalParams, Map<String, String> uidReplacements) {
+    private TruncationInfo importEvents(UserizedFolder userizedFolder, List<Event> events, Map<String, String[]> optionalParams, List<ImportResult> list) {
         boolean ignoreUIDs = isIgnoreUIDs(optionalParams);
+        Map<String, String> uidReplacements = ignoreUIDs ? new HashMap<>() : null;
         events = sortEvents(events);
         final Map<Integer, Integer> pos2Master = determineMasterEvents(events);
         final Map<Integer, String> master2id = new HashMap<>();
         int index = 0;
-        try {
-            for (Event event : events) {
+        CalendarResult result;
+        for (Event event : events) {
+            final ImportResult importResult = new ImportResult();
+            try {
                 Event eventToImport = handleUIDReplacement(event, ignoreUIDs, uidReplacements);
                 final boolean isMaster = event.containsUid() && !pos2Master.containsKey(index);
                 final boolean isChange = event.containsUid() && pos2Master.containsKey(index);
@@ -112,30 +134,39 @@ public abstract class AbstractICalEventImporter extends AbstractICalImporter{
                     if (masterID == null) {
                         continue;
                     } else {
-                        updateEvent(new EventID(userizedFolder.getID(), masterID), eventToImport);
+                        result = updateEvent(new EventID(userizedFolder.getID(), masterID), eventToImport);
                     }
                 } else {
-                    CalendarResult result = createEvent(userizedFolder.getID(), eventToImport);
+                    result = createEvent(userizedFolder.getID(), eventToImport);
                     if(isMaster && !Strings.isEmpty(result.getCreations().get(0).getCreatedEvent().getId())) {
                         master2id.put(index, result.getCreations().get(0).getCreatedEvent().getId());
                     }
                 }
-                //TODO
-//              writeImportResult(list, importResult, eventToImport, userizedFolder.getID(), index);
-                index++;
+                writeResult(importResult, result, userizedFolder.getID());
+            } catch (OXException e) {
+                OXException ne = makeMoreInformative(e);
+                importResult.setException(ne);
             }
-        } catch (OXException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            importResult.setEntryNumber(index);
+            list.add(importResult);
+            index++;
         }
         return new TruncationInfo(index, events.size());
     }
 
-    public List<Event> sortEvents(List<Event> events) {
+    private void writeResult(ImportResult importResult, CalendarResult result, String folderId) {
+        if (null!= result) {
+            importResult.setObjectId(result.getCreations().get(0).getCreatedEvent().getId());
+            importResult.setDate(result.getCreations().get(0).getCreatedEvent().getLastModified());
+            importResult.setFolder(folderId);
+        }
+    }
+
+    private List<Event> sortEvents(List<Event> events) {
         return CalendarUtils.sortSeriesMasterFirst(events);
     }
 
-    public Event handleUIDReplacement(Event event, boolean ignoreUIDs, Map<String, String> uidReplacements) {
+    private Event handleUIDReplacement(Event event, boolean ignoreUIDs, Map<String, String> uidReplacements) {
         if (ignoreUIDs && event.containsUid()) {
             // perform fixed UID replacement to keep recurring appointment relations
             String originalUID = event.getUid();
@@ -179,6 +210,28 @@ public abstract class AbstractICalEventImporter extends AbstractICalImporter{
             }
         }
         return map;
+    }
+
+    private OXException makeMoreInformative(OXException e) {
+        if( e.getCategory() == Category.CATEGORY_TRUNCATED){
+            ProblematicAttribute[] problematics = e.getProblematics();
+            StringBuilder bob = new StringBuilder();
+            for(ProblematicAttribute att: problematics){
+                if((att instanceof SimpleTruncatedAttribute) && ((SimpleTruncatedAttribute) att).getValue() != null){
+                    SimpleTruncatedAttribute temp = (SimpleTruncatedAttribute) att;
+                    bob.append(temp.getValue());
+                    bob.append(" (>");
+                    bob.append(temp.getMaxSize());
+                    bob.append(")\n");
+                }
+            }
+            OXException exception = ImportExportExceptionCodes.TRUNCATION.create(bob.toString());
+            for (ProblematicAttribute problematic : problematics) {
+                exception.addProblematic(problematic);
+            }
+            return exception;
+        }
+        return e;
     }
 
 }

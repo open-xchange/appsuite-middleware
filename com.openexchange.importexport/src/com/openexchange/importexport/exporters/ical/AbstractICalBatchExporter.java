@@ -76,10 +76,12 @@ public abstract class AbstractICalBatchExporter extends AbstractICalExporter {
     private Map<String, List<String>> batchIds;
 
     /**
-     * @param session
-     * @param out
-     * @return
-     * @throws OXException
+     * Exports the requested batch of data
+     *
+     * @param session The user session
+     * @param out The output stream
+     * @return ThresholdFileHolder The file holder
+     * @throws OXException if export fails
      */
     abstract protected ThresholdFileHolder exportBatchData(ServerSession session, OutputStream out) throws OXException ;
 

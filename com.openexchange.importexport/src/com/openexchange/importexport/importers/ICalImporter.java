@@ -51,7 +51,6 @@ package com.openexchange.importexport.importers;
 
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.api2.AppointmentSQLInterface;
@@ -137,10 +136,6 @@ public class ICalImporter extends AbstractImporter {
 
         FolderService service = ImportExportServices.getFolderService();
         UserizedFolder userizedFolder = service.getFolder(FolderStorage.REAL_TREE_ID, folders.get(0), session, null);
-
-        boolean ignoreUIDs = isIgnoreUIDs(optionalParams);
-        Map<String, String> uidReplacements = ignoreUIDs ? new HashMap<>() : null;
-
         ICalImport importer;
         if (TaskContentType.getInstance().equals(userizedFolder.getContentType())) {
             importer = new ICalTaskImporter(session);
@@ -151,24 +146,8 @@ public class ICalImporter extends AbstractImporter {
         } else {
             throw ImportExportExceptionCodes.RESOURCE_HARD_CONFLICT.create();
         }
-        truncationInfo = importer.importData(userizedFolder, is, list, optionalParams, uidReplacements);
+        truncationInfo = importer.importData(userizedFolder, is, list, optionalParams);
 		return new DefaultImportResults(list, truncationInfo);
 	}
-
-    /**
-     * Gets a value whether the supplied parameters indicate that UIDs should be ignored during import or not.
-     *
-     * @param optionalParams The optional parameters as passed from the import request, may be <code>null</code>
-     * @return <code>true</code> if UIDs should be ignored, <code>false</code>, otherwise
-     */
-    private static boolean isIgnoreUIDs(Map<String, String[]> optionalParams) {
-        if (null != optionalParams) {
-            String[] value = optionalParams.get("ignoreUIDs");
-            if (null != value && 0 < value.length) {
-                return Boolean.valueOf(value[0]).booleanValue();
-            }
-        }
-        return false;
-    }
 
 }

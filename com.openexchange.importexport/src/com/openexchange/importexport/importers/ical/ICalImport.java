@@ -65,6 +65,16 @@ import com.openexchange.groupware.importexport.ImportResult;
  */
 public interface ICalImport {
 
-    TruncationInfo importData(UserizedFolder userizedFolder, InputStream is, List<ImportResult> list, Map<String, String[]> optionalParams, Map<String, String> uidReplacements) throws OXException ;
+    /**
+     * Imports an ical file containing events or tasks
+     *
+     * @param userizedFolder The folder to import to
+     * @param is The inputstream containing the file
+     * @param list A list of import results
+     * @param optionalParams The optional parameters
+     * @return  TruncationInfo The result of the import
+     * @throws OXException if the import fails
+     */
+    TruncationInfo importData(UserizedFolder userizedFolder, InputStream is, List<ImportResult> list, Map<String, String[]> optionalParams) throws OXException ;
 
 }

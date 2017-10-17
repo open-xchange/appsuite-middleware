@@ -71,23 +71,17 @@ public class ICalEventImporter extends AbstractICalEventImporter{
     }
 
     @Override
-    public CalendarResult createEvent(String folderId, Event event) throws OXException {
+    protected CalendarResult createEvent(String folderId, Event event) throws OXException {
         CalendarService calendarService = ImportExportServices.getCalendarService();
         CalendarSession calendarSession = calendarService.init(session);
         return calendarService.createEvent(calendarSession, folderId, event);
     }
 
     @Override
-    public void writeResult() {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void updateEvent(EventID eventId, Event event) throws OXException{
+    protected CalendarResult updateEvent(EventID eventId, Event event) throws OXException{
         CalendarService calendarService = ImportExportServices.getCalendarService();
         CalendarSession calendarSession = calendarService.init(session);
-        calendarService.updateEvent(calendarSession, eventId, event, System.currentTimeMillis());
+        return calendarService.updateEvent(calendarSession, eventId, event, System.currentTimeMillis());
     }
 
 }
