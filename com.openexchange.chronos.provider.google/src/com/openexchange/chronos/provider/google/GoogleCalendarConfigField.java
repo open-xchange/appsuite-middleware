@@ -56,9 +56,21 @@ package com.openexchange.chronos.provider.google;
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.0
  */
-public enum GoogleCalendarConfigField {
+public class GoogleCalendarConfigField {
 
-    calendar_id,
-    oauthId
+    public static final String OAUTH_ID = "oauthId";
+    public static final String FOLDERS = "folders";
+    public static final String SYNC_TIME = "sync";
+
+    public static class Folders {
+
+        public static final String ENABLED = "enabled";
+        public static final String COLOR = "color";
+        public static final String DEFAULT_REMINDER = "default_reminders";
+        public static final String DESCRIPTION = "description";
+        public static final String PRIMARY = "primary";
+
+
+    }
 
 }

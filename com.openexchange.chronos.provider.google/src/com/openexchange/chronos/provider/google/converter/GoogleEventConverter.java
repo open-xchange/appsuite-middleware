@@ -120,6 +120,10 @@ public class GoogleEventConverter {
         return to;
     }
 
+    public GoogleMapping getMapping(EventField field){
+        return mappings.get(field);
+    }
+
     private Map<EventField, GoogleMapping> createMappings(){
         Map<EventField, GoogleMapping> result = new HashMap<>();
 
@@ -157,7 +161,7 @@ public class GoogleEventConverter {
 
         });
 
-        result.put(EventField.ALARMS, new GoogleMapping() {
+        result.put(EventField.ALARMS, new GoogleItemMapping<EventReminder, Alarm>() {
 
             @Override
             public void serialize(Event to, com.google.api.services.calendar.model.Event from) throws OXException {
@@ -168,14 +172,14 @@ public class GoogleEventConverter {
                         return;
                     }
                     for (EventReminder rem : reminders.getOverrides()) {
-                        alarms.add(convertEventReminder(rem));
+                        alarms.add(convert(rem));
                     }
                     to.setAlarms(alarms);
                 }
             }
 
-            private Alarm convertEventReminder(EventReminder rem) {
-
+            @Override
+            public Alarm convert(EventReminder rem) {
                 Trigger trigger = new Trigger();
                 trigger.setRelated(Related.START);
                 trigger.setDuration("-PT" + rem.getMinutes() + "M");
@@ -540,7 +544,20 @@ public class GoogleEventConverter {
         return result;
     }
 
-    private abstract class GoogleMapping {
+    public abstract class GoogleItemMapping<T,S> extends GoogleMapping {
+
+        /**
+         * Initializes a new {@link GoogleItemMapping}.
+         */
+        public GoogleItemMapping() {
+            super();
+        }
+
+        public abstract S convert(T item);
+
+    }
+
+    abstract class GoogleMapping {
 
         /**
          * Initializes a new {@link GoogleMapping}.

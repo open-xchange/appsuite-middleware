@@ -109,26 +109,13 @@ public class GoogleOAuthAccess extends AbstractOAuthAccess {
 
     @Override
     public boolean ping() throws OXException {
-        try {
-//            Calendar cal = this.<Calendar> getClient().client;
-            return true;
-//        } catch (final HttpResponseException e) {
-//            if (401 == e.getStatusCode() || 403 == e.getStatusCode()) {
-//                return false;
-//            }
-////            throw FileStorageExceptionCodes.PROTOCOL_ERROR.create(e, "HTTP", Integer.valueOf(e.getStatusCode()) + " " + e.getStatusMessage());
-//        } catch (final IOException e) {
-////            throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
-        } catch (final RuntimeException e) {
-//            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-        }
         return false;
     }
 
     @Override
     public int getAccountId() throws OXException {
         try {
-            return acc.getUserConfiguration().getInt(GoogleCalendarConfigField.oauthId.name());
+            return acc.getUserConfiguration().getInt(GoogleCalendarConfigField.OAUTH_ID);
         } catch (IllegalArgumentException e) {
 //            throw FileStorageExceptionCodes.MISSING_CONFIG.create(GoogleDriveConstants.ID, fsAccount.getId());
         } catch (JSONException e) {

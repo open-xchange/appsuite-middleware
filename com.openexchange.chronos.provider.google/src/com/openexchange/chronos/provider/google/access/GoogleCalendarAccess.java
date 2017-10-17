@@ -56,12 +56,15 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.model.CalendarList;
 import com.google.api.services.calendar.model.CalendarListEntry;
+import com.google.api.services.calendar.model.EventReminder;
 import com.google.api.services.calendar.model.Events;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
@@ -72,7 +75,10 @@ import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.CalendarFolder;
 import com.openexchange.chronos.provider.DefaultCalendarFolder;
 import com.openexchange.chronos.provider.account.AdministrativeCalendarAccountService;
+import com.openexchange.chronos.provider.google.GoogleCalendarConfigField;
 import com.openexchange.chronos.provider.google.converter.GoogleEventConverter;
+import com.openexchange.chronos.provider.google.converter.GoogleEventConverter.GoogleItemMapping;
+import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.provider.google.osgi.Services;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.EventID;
@@ -109,7 +115,7 @@ public class GoogleCalendarAccess implements CalendarAccess {
         oauthAccess = new GoogleOAuthAccess(account, session);
         oauthAccess.initialize();
         if(checkConfig){
-            initCalendarFolder();
+            initCalendarFolder(false, true);
         }
     }
 
@@ -119,11 +125,21 @@ public class GoogleCalendarAccess implements CalendarAccess {
     * @return the internal configuration
     * @throws OXException
     */
-    public JSONObject initCalendarFolder() throws OXException {
+    public JSONObject initCalendarFolder(boolean subscribePrimary, boolean updateConfig) throws OXException {
         try {
             Calendar googleCal = (Calendar) oauthAccess.getClient().getClient();
             CalendarList calendars = googleCal.calendarList().list().execute();
             JSONObject internalConfiguration = account.getInternalConfiguration();
+
+            // check if sync is necessary
+            if(internalConfiguration.has(GoogleCalendarConfigField.SYNC_TIME)){
+                long lastSync = internalConfiguration.getLong(GoogleCalendarConfigField.SYNC_TIME);
+                if(System.currentTimeMillis() <= lastSync + TimeUnit.MINUTES.toMillis(10)){
+                    // Sync not needed
+                    return internalConfiguration;
+                }
+            }
+
             JSONObject userConfiguration = account.getUserConfiguration();
             boolean changed = false;
             JSONObject newConfig = new JSONObject();
@@ -132,6 +148,7 @@ public class GoogleCalendarAccess implements CalendarAccess {
                 // enabled==true if user config is 'true' or if internal config is 'true' and user config is empty
                 Boolean internalCheck = checkConfig(internalConfiguration, entry.getId());
                 Boolean userCheck = checkConfig(userConfiguration, entry.getId());
+
                 if( (userCheck != null && userCheck)){
                     addEntry(entry, true, newConfig);
                     if(internalCheck == null || !internalCheck){
@@ -140,17 +157,23 @@ public class GoogleCalendarAccess implements CalendarAccess {
                     }
                 } else if (userCheck==null && internalCheck != null && internalCheck) {
                     addEntry(entry, true, newConfig);
+                } else if(subscribePrimary && entry.isPrimary()){
+                    addEntry(entry, false, newConfig);
+                    changed = true;
                 } else {
                     addEntry(entry, false, newConfig);
                 }
             }
 
-            if(changed || getConfig(internalConfiguration).size() != newConfig.asMap().size()){
-                internalConfiguration.put("folders", newConfig);
-                userConfiguration.put("folders", newConfig);
+            Map<String, Object> config = getConfig(internalConfiguration);
+            if(changed || config == null || config.size() != newConfig.asMap().size()){
+                internalConfiguration.put(GoogleCalendarConfigField.FOLDERS, newConfig);
+                userConfiguration.put(GoogleCalendarConfigField.FOLDERS, newConfig);
 
-                AdministrativeCalendarAccountService service = Services.getService(AdministrativeCalendarAccountService.class);
-                account = service.updateAccount(session.getContextId(), session.getUserId(), account.getAccountId(), internalConfiguration, userConfiguration, account.getLastModified().getTime());
+                if(updateConfig){
+                    AdministrativeCalendarAccountService service = Services.getService(AdministrativeCalendarAccountService.class);
+                    account = service.updateAccount(session.getContextId(), session.getUserId(), account.getAccountId(), internalConfiguration, userConfiguration, account.getLastModified().getTime());
+                }
             }
 
             return internalConfiguration;
@@ -162,8 +185,8 @@ public class GoogleCalendarAccess implements CalendarAccess {
     }
 
     private Map<String, Object> getConfig(JSONObject json) throws JSONException{
-        if(json.has("folders")){
-            return json.getJSONObject("folders").asMap();
+        if(json.has(GoogleCalendarConfigField.FOLDERS)){
+            return json.getJSONObject(GoogleCalendarConfigField.FOLDERS).asMap();
         }
         return null;
     }
@@ -171,13 +194,34 @@ public class GoogleCalendarAccess implements CalendarAccess {
     @SuppressWarnings("unchecked")
     private Boolean checkConfig(JSONObject config, String key) throws JSONException{
         Map<String, Object> map = getConfig(config);
-        return map == null ? null : !map.containsKey(key) ? null : Boolean.valueOf((boolean) ((Map<String, Object>) map.get(key)).get("enabled"));
+        return map == null ? null : !map.containsKey(key) ? null : Boolean.valueOf((boolean) ((Map<String, Object>) map.get(key)).get(GoogleCalendarConfigField.Folders.ENABLED));
     }
 
     private void addEntry(CalendarListEntry entry, boolean enabled, JSONObject newConfig) throws JSONException{
         folders.put(String.valueOf(entry.getId()), new DefaultCalendarFolder(entry.getId(), entry.getSummary()));
         JSONObject config = new JSONObject();
-        config.put("enabled", enabled);
+        config.put(GoogleCalendarConfigField.Folders.ENABLED, enabled);
+        if(entry.getBackgroundColor() != null){
+            config.put(GoogleCalendarConfigField.Folders.COLOR, entry.getBackgroundColor());
+        }
+        if(entry.getDefaultReminders() != null){
+            JSONArray array = new JSONArray();
+            for(EventReminder reminder: entry.getDefaultReminders()){
+                JSONObject json = new JSONObject(2);
+                @SuppressWarnings("unchecked") GoogleItemMapping<EventReminder, Alarm> mapping = (GoogleItemMapping<EventReminder, Alarm>) GoogleEventConverter.getInstance().getMapping(EventField.ALARMS);
+                Alarm alarm = mapping.convert(reminder);
+                json.put("action", alarm.getAction().getValue());
+                json.put("duration", alarm.getTrigger().getDuration());
+                array.put(json);
+            }
+            config.put(GoogleCalendarConfigField.Folders.DEFAULT_REMINDER, array);
+        }
+        if(entry.getDescription() != null){
+            config.put(GoogleCalendarConfigField.Folders.DESCRIPTION, entry.getBackgroundColor());
+        }
+        if(entry.isPrimary()){
+            config.put(GoogleCalendarConfigField.Folders.PRIMARY, true);
+        }
         newConfig.put(entry.getId(), config);
     }
 
