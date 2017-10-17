@@ -49,13 +49,8 @@
 
 package com.openexchange.chronos.schedjoules.impl;
 
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -68,7 +63,6 @@ import com.openexchange.chronos.schedjoules.SchedJoulesResult;
 import com.openexchange.chronos.schedjoules.SchedJoulesService;
 import com.openexchange.chronos.schedjoules.api.SchedJoulesAPI;
 import com.openexchange.chronos.schedjoules.exception.SchedJoulesExceptionCodes;
-import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
@@ -79,13 +73,11 @@ import com.openexchange.tools.id.IDMangler;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class SchedJoulesServiceImpl implements SchedJoulesService, CalendarParameters {
+public class SchedJoulesServiceImpl implements SchedJoulesService {
 
     private final SchedJoulesAPI api;
 
     private final ServiceLookup services;
-
-    private final Map<String, Object> parameters;
 
     /**
      * Initialises a new {@link SchedJoulesServiceImpl}.
@@ -97,7 +89,6 @@ public class SchedJoulesServiceImpl implements SchedJoulesService, CalendarParam
         super();
         this.services = services;
         api = new SchedJoulesAPI();
-        this.parameters = new HashMap<String, Object>(); // FIXME: Should be per user
     }
 
     /*
@@ -282,7 +273,7 @@ public class SchedJoulesServiceImpl implements SchedJoulesService, CalendarParam
         try {
             Iterator<Object> iterator = folders.iterator();
             boolean removed = false;
-            while(iterator.hasNext()) {
+            while (iterator.hasNext()) {
                 JSONObject folder = (JSONObject) iterator.next();
                 if (name.equals(folder.getString("name"))) {
                     iterator.remove();
@@ -296,57 +287,5 @@ public class SchedJoulesServiceImpl implements SchedJoulesService, CalendarParam
         } catch (JSONException e) {
             throw SchedJoulesExceptionCodes.JSON_ERROR.create(e.getMessage(), e);
         }
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.chronos.service.CalendarParameters#set(java.lang.String, java.lang.Object)
-     */
-    @Override
-    public <T> CalendarParameters set(String parameter, T value) {
-        parameters.put(parameter, value);
-        return this;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.chronos.service.CalendarParameters#get(java.lang.String, java.lang.Class)
-     */
-    @Override
-    public <T> T get(String parameter, Class<T> clazz) {
-        return get(parameter, clazz, null);
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.chronos.service.CalendarParameters#get(java.lang.String, java.lang.Class, java.lang.Object)
-     */
-    @Override
-    public <T> T get(String parameter, Class<T> clazz, T defaultValue) {
-        Object value = parameters.get(parameter);
-        return null == value ? defaultValue : clazz.cast(value);
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.chronos.service.CalendarParameters#contains(java.lang.String)
-     */
-    @Override
-    public boolean contains(String parameter) {
-        return parameters.containsKey(parameter);
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.chronos.service.CalendarParameters#entrySet()
-     */
-    @Override
-    public Set<Entry<String, Object>> entrySet() {
-        return Collections.unmodifiableSet(parameters.entrySet());
     }
 }
