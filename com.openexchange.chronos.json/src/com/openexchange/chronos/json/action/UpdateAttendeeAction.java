@@ -138,7 +138,7 @@ public class UpdateAttendeeAction extends ChronosAction {
             CalendarResult updateAttendeeResult;
             try {
                 updateAttendeeResult = calendarAccess.updateAttendee(eventID, attendee, clientTimestamp);
-                clientTimestamp = updateAttendeeResult.getTimestamp();
+                clientTimestamp = updateAttendeeResult.getTimestamp() == 0l ? clientTimestamp : updateAttendeeResult.getTimestamp();
             } catch (OXException e) {
                 return handleConflictException(e);
             }
@@ -152,8 +152,10 @@ public class UpdateAttendeeAction extends ChronosAction {
                 Event toUpdate = null;
                 if (creations.size() == 1) {
                     toUpdate = creations.get(0).getCreatedEvent();
-                } else {
+                } else if(updates.size() == 1){
                     toUpdate = updates.get(0).getUpdate();
+                } else {
+                    toUpdate = calendarAccess.getEvent(eventID);
                 }
                 toUpdate = EventMapper.getInstance().copy(toUpdate, null, (EventField[]) null);
                 Entry<String, ?> parseParameter = parseParameter(requestData, "timezone", false);
