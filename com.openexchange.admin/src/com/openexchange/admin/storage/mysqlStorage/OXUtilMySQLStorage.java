@@ -96,6 +96,7 @@ import com.openexchange.admin.rmi.dataobjects.MaintenanceReason;
 import com.openexchange.admin.rmi.dataobjects.Server;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
+import com.openexchange.admin.rmi.exceptions.OXContextException;
 import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.services.AdminServiceRegistry;
@@ -152,13 +153,26 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
 
     private final int USE_UNIT;
 
+    private final int CONTEXTS_PER_SCHEMA;
+
     /**
      * Initializes a new {@link OXUtilMySQLStorage}.
      */
     public OXUtilMySQLStorage() {
         super();
         this.cache = ClientAdminThreadExtended.cache;
-        ;
+
+        int CONTEXTS_PER_SCHEMA = 1;
+        try {
+            CONTEXTS_PER_SCHEMA = Integer.parseInt(cache.getProperties().getProp("CONTEXTS_PER_SCHEMA", "1"));
+            if (CONTEXTS_PER_SCHEMA <= 0) {
+                throw new OXContextException("CONTEXTS_PER_SCHEMA MUST BE > 0");
+            }
+        } catch (final OXContextException e) {
+            LOG.error("Error init", e);
+        }
+        this.CONTEXTS_PER_SCHEMA = CONTEXTS_PER_SCHEMA;
+
         prop = cache.getProperties();
         int use_unit_tmp = UNIT_CONTEXT;
         final String unit = prop.getProp("CREATE_CONTEXT_USE_UNIT", "context");
@@ -2237,6 +2251,8 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             connection = cache.getWriteConnectionForConfigDB();
             connection.setAutoCommit(false);
             rollback = true;
+            
+            isSchemaDisabled(connection, schemaName);
 
             int parameterIndex = 1;
             statement = connection.prepareStatement("UPDATE context_server2db_pool SET server_id=? WHERE db_schema=?");
@@ -4453,5 +4469,59 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
         String schemaName = db.getName() + '_' + schemaUnique;
         db.setScheme(schemaName);
         OXUtilStorageInterface.getInstance().createDatabase(db, configCon);
+    }
+
+    /**
+     * Checks if the specified schema and all its contexts are disabled.
+     * 
+     * @param schemaName The schema to check
+     * @throws StorageException if at least one of the contexts that reside within the specified schema
+     *             is not disabled, or any other error occurs.
+     */
+    private void isSchemaDisabled(Connection connection, String schemaName) throws StorageException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = connection.prepareStatement("SELECT cid FROM context_server2db_pool WHERE db_schema = ?");
+            stmt.setString(1, schemaName);
+            rs = stmt.executeQuery();
+            if (rs.next() == false) {
+                // No contexts found
+                return;
+            }
+
+            // Put context identifiers into a list
+            List<Integer> contextIds = new ArrayList<>(CONTEXTS_PER_SCHEMA >> 1);
+            do {
+                contextIds.add(Integer.valueOf(rs.getInt(1)));
+            } while (rs.next());
+            Databases.closeSQLStuff(rs, stmt);
+
+            // Check if all contexts that reside with in the specified schema are disabled.
+            for (List<Integer> partition : Lists.partition(contextIds, Databases.IN_LIMIT)) {
+                stmt = connection.prepareStatement(Databases.getIN("SELECT cid WHERE enabled = 1 AND cid IN (", partition.size()));
+                int index = 1;
+                for (Integer contextId : partition) {
+                    stmt.setInt(index++, contextId.intValue());
+                }
+                rs = stmt.executeQuery();
+                if (rs.next()) {
+                    List<Integer> notDisabledCids = new ArrayList<>();
+                    do {
+                        notDisabledCids.add(Integer.valueOf(rs.getInt(1)));
+                    } while (rs.next());
+                    throw new StorageException("The schema '" + schemaName + "' is not disabled. The following contexts are still enabled: " + notDisabledCids);
+                }
+                Databases.closeSQLStuff(stmt, rs);
+                stmt = null;
+                rs = null;
+            }
+
+        } catch (SQLException e) {
+            LOG.error("SQL error: {}", e.getMessage(), e);
+            throw new StorageException(e);
+        } finally {
+            Databases.closeSQLStuff(rs, stmt);
+        }
     }
 }
