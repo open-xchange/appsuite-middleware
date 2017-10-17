@@ -75,6 +75,7 @@ public class SchedJoulesActionFactory implements AJAXActionServiceFactory {
         ImmutableMap.Builder<String, AJAXActionService> actions = ImmutableMap.builder();
         actions.put("browse", new BrowseAction(services));
         actions.put("subscribe", new SubscribeAction(services));
+        actions.put("unsubscribe", new UnsubscribeAction(services));
         actions.put("countries", new CountriesAction(services));
         actions.put("languages", new LanguagesAction(services));
         actions.put("search", new SearchAction(services));

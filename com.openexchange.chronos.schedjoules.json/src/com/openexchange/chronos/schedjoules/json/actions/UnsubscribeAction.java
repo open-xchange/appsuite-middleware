@@ -53,22 +53,22 @@ import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.chronos.schedjoules.SchedJoulesService;
-import com.openexchange.chronos.schedjoules.json.actions.parameter.SchedJoulesSubscribeParameter;
+import com.openexchange.chronos.schedjoules.json.actions.parameter.SchedJoulesUnsubscribeParameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link SubscribeAction}
+ * {@link UnsubscribeAction}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class SubscribeAction extends AbstractSchedJoulesAction implements AJAXActionService {
+public class UnsubscribeAction extends AbstractSchedJoulesAction implements AJAXActionService {
 
     /**
-     * Initialises a new {@link SubscribeAction}.
+     * Initialises a new {@link UnsubscribeAction}.
      */
-    public SubscribeAction(ServiceLookup services) {
+    public UnsubscribeAction(ServiceLookup services) {
         super(services);
     }
 
@@ -79,19 +79,16 @@ public class SubscribeAction extends AbstractSchedJoulesAction implements AJAXAc
      */
     @Override
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
-        // Check if the mandatory 'id' is present and get it
-        requestData.checkParameter(SchedJoulesSubscribeParameter.ID);
-        int pageId = requestData.getIntParameter(SchedJoulesSubscribeParameter.ID);
-
         // Check if the mandatory 'accountId' is present and get it
-        requestData.checkParameter(SchedJoulesSubscribeParameter.ACCOUNT_ID);
-        int accountId = requestData.getIntParameter(SchedJoulesSubscribeParameter.ACCOUNT_ID);
+        requestData.checkParameter(SchedJoulesUnsubscribeParameter.ACCOUNT_ID);
+        int accountId = requestData.getIntParameter(SchedJoulesUnsubscribeParameter.ACCOUNT_ID);
 
-        String language = getLanguage(requestData, session);
+        // Check if the mandatory 'calendarId' is present and get it
+        String calendarId = requestData.checkParameter(SchedJoulesUnsubscribeParameter.CALENDAR_ID);
 
         SchedJoulesService service = services.getService(SchedJoulesService.class);
-        String prodId = service.subscribeCalendar(session, pageId, accountId, language);
+        service.unsubscribeCalendar(session, calendarId, accountId);
 
-        return new AJAXRequestResult(prodId);
+        return new AJAXRequestResult();
     }
 }

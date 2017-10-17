@@ -49,16 +49,17 @@
 
 package com.openexchange.chronos.schedjoules.impl;
 
-import java.util.Map.Entry;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
-import com.openexchange.chronos.provider.CalendarAccess;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.CalendarProvider;
 import com.openexchange.chronos.provider.CalendarProviderRegistry;
@@ -71,6 +72,7 @@ import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
+import com.openexchange.tools.id.IDMangler;
 
 /**
  * {@link SchedJoulesServiceImpl}
@@ -79,15 +81,10 @@ import com.openexchange.session.Session;
  */
 public class SchedJoulesServiceImpl implements SchedJoulesService, CalendarParameters {
 
-    /**
-     * Default 'X-WR-CALNAME' and 'SUMMARY' contents of an iCal that is not accessible
-     */
-    private static final String NO_ACCESS = "You have no access to this calendar";
-
     private final SchedJoulesAPI api;
 
     private final ServiceLookup services;
-    
+
     private final Map<String, Object> parameters;
 
     /**
@@ -200,28 +197,26 @@ public class SchedJoulesServiceImpl implements SchedJoulesService, CalendarParam
      */
     @Override
     public String subscribeCalendar(Session session, int id, int accountId, String locale) throws OXException {
+        // Resolve the user's SchedJoules calendar account
+        CalendarAccountService calendarAccountService = services.getService(CalendarAccountService.class);
+        CalendarAccount calendarAccount = calendarAccountService.getAccount(session, accountId);
+        if (calendarAccount == null) {
+            throw CalendarExceptionCodes.ACCOUNT_NOT_FOUND.create(accountId);
+        }
+
+        // Get the SchedJoules calendar provider
+        CalendarProviderRegistry registry = services.getService(CalendarProviderRegistry.class);
+        CalendarProvider calendarProvider = registry.getCalendarProvider(calendarAccount.getProviderId());
+        if (calendarProvider == null) {
+            throw CalendarExceptionCodes.PROVIDER_NOT_AVAILABLE.create(calendarAccount.getProviderId());
+        }
+
+        JSONObject page = api.pages().getPage(id, locale);
+        if (!page.hasAndNotNull("url")) {
+            throw SchedJoulesExceptionCodes.NO_CALENDAR.create(id);
+        }
+
         try {
-            // Resolve the user's SchedJoules calendar account
-            CalendarAccountService calendarAccountService = services.getService(CalendarAccountService.class);
-            CalendarAccount calendarAccount = calendarAccountService.getAccount(session, accountId);
-            if (calendarAccount == null) {
-                throw CalendarExceptionCodes.ACCOUNT_NOT_FOUND.create(accountId);
-            }
-
-            // Get the SchedJoules calendar provider
-            CalendarProviderRegistry registry = services.getService(CalendarProviderRegistry.class);
-            CalendarProvider calendarProvider = registry.getCalendarProvider(calendarAccount.getProviderId());
-            if (calendarProvider == null) {
-                throw CalendarExceptionCodes.PROVIDER_NOT_AVAILABLE.create(calendarAccount.getProviderId());
-            }
-
-            // TODO: Hook-up with the SchedJoules provider to subscribe to the calendar
-
-            JSONObject page = api.pages().getPage(id, locale);
-            if (!page.hasAndNotNull("url")) {
-                throw SchedJoulesExceptionCodes.NO_CALENDAR.create(id);
-            }
-
             // Re-configure
             JSONObject userConfiguration = calendarAccount.getUserConfiguration();
             if (userConfiguration == null) {
@@ -241,21 +236,71 @@ public class SchedJoulesServiceImpl implements SchedJoulesService, CalendarParam
 
             folders.put(singleCalendarConfiguration);
 
-            // FIXME: Should the reconfigure method change the physical data on the database, or should there be a consecutive update call? 
             calendarAccountService.updateAccount(session, accountId, userConfiguration, System.currentTimeMillis() + 100, null);
 
-            //CalendarAccess calendarAccess = calendarProvider.connect(session, calendarAccount, this);
-            //calendarAccess.getEventsInFolder(page.getString("name"));
-
-            // TODO: How should the subscribe work? Is it enough to simply supply the access with the url via the account user configuration?  
-
-            return null;
+            return IDMangler.mangle("cal", String.valueOf(accountId), page.getString("name"));
         } catch (JSONException e) {
             throw SchedJoulesExceptionCodes.JSON_ERROR.create(e.getMessage(), e);
         }
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.chronos.schedjoules.SchedJoulesService#unsubscribeCalendar(com.openexchange.session.Session, java.lang.String, int)
+     */
+    @Override
+    public void unsubscribeCalendar(Session session, String calendarId, int accountId) throws OXException {
+        // Resolve the user's SchedJoules calendar account
+        CalendarAccountService calendarAccountService = services.getService(CalendarAccountService.class);
+        CalendarAccount calendarAccount = calendarAccountService.getAccount(session, accountId);
+        if (calendarAccount == null) {
+            throw CalendarExceptionCodes.ACCOUNT_NOT_FOUND.create(accountId);
+        }
+
+        // Get the SchedJoules calendar provider
+        CalendarProviderRegistry registry = services.getService(CalendarProviderRegistry.class);
+        CalendarProvider calendarProvider = registry.getCalendarProvider(calendarAccount.getProviderId());
+        if (calendarProvider == null) {
+            throw CalendarExceptionCodes.PROVIDER_NOT_AVAILABLE.create(calendarAccount.getProviderId());
+        }
+
+        JSONObject userConfiguration = calendarAccount.getUserConfiguration();
+        if (userConfiguration == null) {
+            // Already unsubscribed
+            return;
+        }
+
+        JSONArray folders = userConfiguration.optJSONArray("folders");
+        if (folders == null || folders.isEmpty()) {
+            // Already unsubscribed
+            return;
+        }
+
+        List<String> unmangled = IDMangler.unmangle(calendarId);
+        String name = unmangled.get(2);
+        try {
+            Iterator<Object> iterator = folders.iterator();
+            boolean removed = false;
+            while(iterator.hasNext()) {
+                JSONObject folder = (JSONObject) iterator.next();
+                if (name.equals(folder.getString("name"))) {
+                    iterator.remove();
+                    removed = true;
+                    break;
+                }
+            }
+            if (removed) {
+                calendarAccountService.updateAccount(session, accountId, userConfiguration, System.currentTimeMillis() + 100, null);
+            }
+        } catch (JSONException e) {
+            throw SchedJoulesExceptionCodes.JSON_ERROR.create(e.getMessage(), e);
+        }
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.openexchange.chronos.service.CalendarParameters#set(java.lang.String, java.lang.Object)
      */
     @Override
@@ -264,7 +309,9 @@ public class SchedJoulesServiceImpl implements SchedJoulesService, CalendarParam
         return this;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.openexchange.chronos.service.CalendarParameters#get(java.lang.String, java.lang.Class)
      */
     @Override
@@ -272,7 +319,9 @@ public class SchedJoulesServiceImpl implements SchedJoulesService, CalendarParam
         return get(parameter, clazz, null);
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.openexchange.chronos.service.CalendarParameters#get(java.lang.String, java.lang.Class, java.lang.Object)
      */
     @Override
@@ -281,7 +330,9 @@ public class SchedJoulesServiceImpl implements SchedJoulesService, CalendarParam
         return null == value ? defaultValue : clazz.cast(value);
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.openexchange.chronos.service.CalendarParameters#contains(java.lang.String)
      */
     @Override
@@ -289,7 +340,9 @@ public class SchedJoulesServiceImpl implements SchedJoulesService, CalendarParam
         return parameters.containsKey(parameter);
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.openexchange.chronos.service.CalendarParameters#entrySet()
      */
     @Override
