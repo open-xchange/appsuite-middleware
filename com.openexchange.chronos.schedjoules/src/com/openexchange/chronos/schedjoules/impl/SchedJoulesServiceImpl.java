@@ -227,7 +227,7 @@ public class SchedJoulesServiceImpl implements SchedJoulesService {
 
             folders.put(singleCalendarConfiguration);
 
-            calendarAccountService.updateAccount(session, accountId, userConfiguration, System.currentTimeMillis() + 100, null);
+            calendarAccountService.updateAccount(session, accountId, userConfiguration, System.currentTimeMillis() + 100, null); //FIXME: Get the client timestamp
 
             return IDMangler.mangle("cal", String.valueOf(accountId), page.getString("name"));
         } catch (JSONException e) {
@@ -269,7 +269,7 @@ public class SchedJoulesServiceImpl implements SchedJoulesService {
         }
 
         List<String> unmangled = IDMangler.unmangle(folderId);
-        String name = unmangled.get(2);
+        String name = unmangled.get(2); //FIXME: Perform checks
         try {
             Iterator<Object> iterator = folders.iterator();
             boolean removed = false;
@@ -282,7 +282,7 @@ public class SchedJoulesServiceImpl implements SchedJoulesService {
                 }
             }
             if (removed) {
-                calendarAccountService.updateAccount(session, accountId, userConfiguration, System.currentTimeMillis() + 100, null);
+                calendarAccountService.updateAccount(session, accountId, userConfiguration, System.currentTimeMillis() + 100, null); //FIXME: Get the client timestamp
             }
         } catch (JSONException e) {
             throw SchedJoulesExceptionCodes.JSON_ERROR.create(e.getMessage(), e);

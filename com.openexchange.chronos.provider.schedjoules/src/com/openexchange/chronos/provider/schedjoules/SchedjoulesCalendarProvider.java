@@ -108,7 +108,7 @@ public class SchedjoulesCalendarProvider implements CalendarProvider {
      */
     @Override
     public CalendarAccess connect(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
-        return new SchedjoulesCalendarAccess(services, session, account, parameters);
+        return new SchedjoulesCalendarAccess(session, account, parameters);
     }
 
     /*

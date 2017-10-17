@@ -71,7 +71,6 @@ import com.openexchange.chronos.schedjoules.exception.SchedJoulesExceptionCodes;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Enums;
-import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 
 /**
@@ -86,7 +85,20 @@ public class SchedjoulesCalendarAccess extends CachingCalendarAccess {
      */
     private static final String NO_ACCESS = "You have no access to this calendar";
 
-    private final ServiceLookup services;
+    /**
+     * The user configuration's key for all available/visible folders
+     */
+    private static final String FOLDERS = "folders";
+
+    /**
+     * The user configuration's key for the name of the calendar
+     */
+    private static final String NAME = "name";
+
+    /**
+     * The user configuration's key for the feed's URL
+     */
+    private static final String URL = "url";
 
     /**
      * Initialises a new {@link SchedjoulesCalendarAccess}.
@@ -95,9 +107,8 @@ public class SchedjoulesCalendarAccess extends CachingCalendarAccess {
      * @param parameters
      * @throws OXException
      */
-    protected SchedjoulesCalendarAccess(ServiceLookup services, Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
+    protected SchedjoulesCalendarAccess(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
         super(session, account, parameters);
-        this.services = services;
     }
 
     /*
@@ -107,8 +118,7 @@ public class SchedjoulesCalendarAccess extends CachingCalendarAccess {
      */
     @Override
     public void close() {
-        // TODO Auto-generated method stub
-
+        // no-op
     }
 
     /*
@@ -128,16 +138,16 @@ public class SchedjoulesCalendarAccess extends CachingCalendarAccess {
      */
     @Override
     public List<CalendarFolder> getVisibleFolders() throws OXException {
-        JSONArray foldersArray = getAccount().getUserConfiguration().optJSONArray("folders");
+        JSONArray foldersArray = getAccount().getUserConfiguration().optJSONArray(FOLDERS);
         if (foldersArray == null || foldersArray.isEmpty()) {
-            return new ArrayList<>();
+            return Collections.emptyList();
         }
         List<CalendarFolder> folders = new ArrayList<>(foldersArray.length());
         for (int index = 0; index < foldersArray.length(); index++) {
             try {
-                folders.add(prepareFolder(foldersArray.getJSONObject(index).getString("name")));
+                folders.add(prepareFolder(foldersArray.getJSONObject(index).getString(NAME)));
             } catch (JSONException e) {
-                e.printStackTrace();
+                throw SchedJoulesExceptionCodes.JSON_ERROR.create(e.getMessage(), e);
             }
         }
         return folders;
@@ -161,7 +171,7 @@ public class SchedjoulesCalendarAccess extends CachingCalendarAccess {
      */
     @Override
     public List<Event> getChangeExceptions(String folderId, String seriesId) throws OXException {
-        return new ArrayList<>();
+        return Collections.emptyList();
     }
 
     /*
@@ -195,12 +205,12 @@ public class SchedjoulesCalendarAccess extends CachingCalendarAccess {
     public ExternalCalendarResult getEvents(String folderId) throws OXException {
         try {
             JSONObject userConfig = getAccount().getUserConfiguration();
-            JSONArray foldersArray = userConfig.getJSONArray("folders");
+            JSONArray foldersArray = userConfig.getJSONArray(FOLDERS);
             String updateUrl = null;
             for (int index = 0; index < foldersArray.length(); index++) {
                 JSONObject folder = foldersArray.getJSONObject(index);
-                if (folderId.equals(folder.getString("name"))) {
-                    updateUrl = folder.getString("url");
+                if (folderId.equals(folder.getString(NAME))) {
+                    updateUrl = folder.getString(URL);
                     break;
                 }
             }
