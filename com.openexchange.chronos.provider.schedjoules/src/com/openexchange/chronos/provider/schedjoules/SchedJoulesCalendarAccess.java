@@ -65,8 +65,8 @@ import com.openexchange.chronos.provider.DefaultCalendarFolder;
 import com.openexchange.chronos.provider.DefaultCalendarPermission;
 import com.openexchange.chronos.provider.caching.CachingCalendarAccess;
 import com.openexchange.chronos.provider.caching.ExternalCalendarResult;
+import com.openexchange.chronos.provider.schedjoules.exception.SchedJoulesProviderExceptionCodes;
 import com.openexchange.chronos.schedjoules.api.SchedJoulesAPI;
-import com.openexchange.chronos.schedjoules.exception.SchedJoulesExceptionCodes;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Enums;
@@ -196,34 +196,31 @@ public class SchedJoulesCalendarAccess extends CachingCalendarAccess {
         try {
             JSONObject userConfig = getAccount().getInternalConfiguration();
             if (userConfig == null || userConfig.isEmpty()) {
-                // TODO: Introduce a better exception
-                throw SchedJoulesExceptionCodes.JSON_ERROR.create("No user configuration found for account '" + getAccount().getAccountId() + "'");
+                throw SchedJoulesProviderExceptionCodes.NO_USER_CONFIGURATION.create(getAccount().getAccountId(), getSession().getUserId(), getSession().getContextId());
             }
             JSONObject foldersObject = userConfig.optJSONObject(FOLDERS);
             if (foldersObject == null || foldersObject.isEmpty()) {
-                // TODO: Introduce a better exception
-                throw SchedJoulesExceptionCodes.JSON_ERROR.create("No 'folder' metadata found for account '" + getAccount().getAccountId() + "'");
+                throw SchedJoulesProviderExceptionCodes.NO_FOLDERS_METADATA.create(getAccount().getAccountId(), getSession().getUserId(), getSession().getContextId());
             }
             JSONObject folder = foldersObject.optJSONObject(folderId);
             if (folder == null || folder.isEmpty()) {
-                // TODO: Introduce a better exception
-                throw SchedJoulesExceptionCodes.JSON_ERROR.create("The folder '" + folderId + "' does not have any metdata stored");
+                throw SchedJoulesProviderExceptionCodes.NO_FOLDER_METADATA.create(folderId, getAccount().getAccountId(), getSession().getUserId(), getSession().getContextId());
             }
 
             URL url = new URL(folder.getString(URL));
             SchedJoulesAPI api = SchedJoulesAPI.getInstance();
             Calendar calendar = api.calendar().getCalendar(url);
             if (NO_ACCESS.equals(calendar.getName())) {
-                throw SchedJoulesExceptionCodes.NO_ACCESS.create(folderId);
+                throw SchedJoulesProviderExceptionCodes.NO_ACCESS.create(folderId);
             }
 
             ExternalCalendarResult res = new ExternalCalendarResult();
             res.addEvents(calendar.getEvents());
             return res;
         } catch (JSONException e) {
-            throw SchedJoulesExceptionCodes.JSON_ERROR.create(e.getMessage(), e);
+            throw SchedJoulesProviderExceptionCodes.JSON_ERROR.create(e.getMessage(), e);
         } catch (MalformedURLException e) {
-            throw SchedJoulesExceptionCodes.INVALID_URL.create(folderId, e);
+            throw SchedJoulesProviderExceptionCodes.INVALID_URL.create(folderId, e);
         }
     }
 
