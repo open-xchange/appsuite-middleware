@@ -116,6 +116,7 @@ abstract class AbstractAccountAction implements AJAXActionService {
             return new JSONObject()
                 .put(ID, account.getAccountId())
                 .put(PROVIDER, account.getProviderId())
+                .put("enabled", account.isEnabled())
                 .putOpt(TIMESTAMP, null != account.getLastModified() ? L(account.getLastModified().getTime()) : null)
                 .putOpt(CONFIGURATION, account.getUserConfiguration())
             ;
