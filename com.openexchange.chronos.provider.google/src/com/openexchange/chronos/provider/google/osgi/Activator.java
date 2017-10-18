@@ -4,6 +4,7 @@ import com.openexchange.chronos.provider.CalendarProvider;
 import com.openexchange.chronos.provider.account.AdministrativeCalendarAccountService;
 import com.openexchange.chronos.provider.account.CalendarAccountService;
 import com.openexchange.chronos.provider.google.GoogleCalendarProvider;
+import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.osgi.HousekeepingActivator;
 
@@ -11,7 +12,7 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] { OAuthService.class, CalendarAccountService.class, AdministrativeCalendarAccountService.class };
+        return new Class[] { OAuthService.class, CalendarAccountService.class, AdministrativeCalendarAccountService.class, LeanConfigurationService.class };
     }
 
     @Override

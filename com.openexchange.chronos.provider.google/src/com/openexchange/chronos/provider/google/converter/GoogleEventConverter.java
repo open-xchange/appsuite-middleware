@@ -78,6 +78,7 @@ import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.TimeTransparency;
 import com.openexchange.chronos.Trigger;
 import com.openexchange.chronos.Trigger.Related;
+import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.DefaultRecurrenceId;
 import com.openexchange.exception.OXException;
 
@@ -131,12 +132,7 @@ public class GoogleEventConverter {
 
             @Override
             public void serialize(Event to, com.google.api.services.calendar.model.Event from) throws OXException {
-                if (from.getRecurringEventId() != null) {
-                    String id = from.getId().substring(0, from.getId().lastIndexOf("_"));
-                    to.setId(id);
-                    return;
-                }
-                to.setId(from.getId());
+                // nothing to do here
             }
 
         });
@@ -171,10 +167,12 @@ public class GoogleEventConverter {
                     if (reminders.getUseDefault()) {
                         return;
                     }
-                    for (EventReminder rem : reminders.getOverrides()) {
-                        alarms.add(convert(rem));
+                    if(reminders.getOverrides() != null){
+                        for (EventReminder rem : reminders.getOverrides()) {
+                            alarms.add(convert(rem));
+                        }
+                        to.setAlarms(alarms);
                     }
-                    to.setAlarms(alarms);
                 }
             }
 
@@ -474,9 +472,7 @@ public class GoogleEventConverter {
 
             @Override
             public void serialize(Event to, com.google.api.services.calendar.model.Event from) throws OXException {
-                if (from.getRecurringEventId() != null) {
-                   to.setSeriesId(from.getRecurringEventId());
-                }
+                // Nothing to do here
             }
         });
 
@@ -571,10 +567,14 @@ public class GoogleEventConverter {
         public CalendarUser convert(EventAttendee from, CalendarUser to) {
             to.setEMail(from.getEmail());
             to.setCn(from.getDisplayName());
+            to.setUri(CalendarUtils.getURI(from.getEmail()));
             return to;
         }
 
         public DateTime convert(EventDateTime from) {
+            if(from.getDateTime() == null){
+                return new DateTime(from.getDate().getValue());
+            }
             return new DateTime(from.getDateTime().getValue());
         }
 

@@ -47,28 +47,28 @@
  *
  */
 
-package com.openexchange.chronos.provider.google;
+package com.openexchange.chronos.provider.caching;
 
+import java.util.Map;
+import com.openexchange.chronos.Event;
+import com.openexchange.chronos.service.EventUpdates;
+import com.openexchange.exception.OXException;
 
 /**
- * {@link GoogleCalendarConfigField}
+ * {@link DiffAwareExternalCalendarResult}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.0
  */
-public class GoogleCalendarConfigField {
+public interface DiffAwareExternalCalendarResult {
 
-    public static final String OAUTH_ID = "oauthId";
-    public static final String FOLDERS = "folders";
-    public static final String SYNC_TOKEN = "syncToken";
+    /**
+     * Calculates the difference between the cached events and the real events.
+     *
+     * @param existingEvents A map of uid-event-pairs of the cached events
+     * @return The difference
+     * @throws OXException
+     */
+    public EventUpdates calculateDiff(Map<String, Event> existingEvents) throws OXException;
 
-    public static class Folders {
-
-        public static final String ENABLED = "enabled";
-        public static final String COLOR = "color";
-        public static final String DEFAULT_REMINDER = "default_reminders";
-        public static final String DESCRIPTION = "description";
-        public static final String PRIMARY = "primary";
-
-    }
 }

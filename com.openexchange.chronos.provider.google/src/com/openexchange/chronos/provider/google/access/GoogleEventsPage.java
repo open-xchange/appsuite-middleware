@@ -47,28 +47,37 @@
  *
  */
 
-package com.openexchange.chronos.provider.google;
+package com.openexchange.chronos.provider.google.access;
 
+import java.util.List;
+import com.openexchange.chronos.Event;
 
 /**
- * {@link GoogleCalendarConfigField}
+ * {@link GoogleEventsPage}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.0
  */
-public class GoogleCalendarConfigField {
+public class GoogleEventsPage {
 
-    public static final String OAUTH_ID = "oauthId";
-    public static final String FOLDERS = "folders";
-    public static final String SYNC_TOKEN = "syncToken";
+    private final List<Event> events;
+    private final String token;
 
-    public static class Folders {
-
-        public static final String ENABLED = "enabled";
-        public static final String COLOR = "color";
-        public static final String DEFAULT_REMINDER = "default_reminders";
-        public static final String DESCRIPTION = "description";
-        public static final String PRIMARY = "primary";
-
+    /**
+     * Initializes a new {@link GoogleEventsPage}.
+     */
+    public GoogleEventsPage(List<Event> events, String token) {
+        super();
+        this.events = events;
+        this.token = token;
     }
+
+    public List<Event> getEvents(){
+        return events;
+    }
+
+    public String getToken(){
+        return token;
+    }
+
 }

@@ -49,7 +49,9 @@
 
 package com.openexchange.chronos.provider.caching.internal.handler;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import com.openexchange.chronos.Event;
@@ -57,6 +59,7 @@ import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.caching.CachingCalendarAccess;
+import com.openexchange.chronos.provider.caching.DiffAwareExternalCalendarResult;
 import com.openexchange.chronos.provider.caching.ExternalCalendarResult;
 import com.openexchange.chronos.provider.caching.internal.handler.utils.EmptyUidUpdates;
 import com.openexchange.chronos.provider.caching.internal.handler.utils.ResultCollector;
@@ -99,15 +102,25 @@ public class CachingExecutor {
                 ExternalCalendarResult externalCalendarResult = cachingHandler.getExternalEvents(calendarFolderId);
                 if (!externalCalendarResult.isUpToDate()) {
                     List<Event> existingEvents = cachingHandler.getExistingEvents(calendarFolderId);
-                    List<Event> externalEvents = externalCalendarResult.getEvents();
-
                     EventUpdates diff = null;
-                    boolean containsUID = containsUid(externalEvents);
-                    if (containsUID) {
-                        diff = generateEventDiff(existingEvents, externalEvents);
+                    Map<String, Event> cachedEvents = new HashMap<>(existingEvents.size());
+                    for(Event eve: existingEvents){
+                        cachedEvents.put(eve.getUid(), eve);
+                    }
+
+                    if (externalCalendarResult instanceof DiffAwareExternalCalendarResult) {
+                        diff = ((DiffAwareExternalCalendarResult) externalCalendarResult).calculateDiff(cachedEvents);
                     } else {
-                        //FIXME generate reproducible UID for upcoming refreshes
-                        diff = new EmptyUidUpdates(existingEvents, externalEvents);
+
+                        List<Event> externalEvents = externalCalendarResult.getEvents();
+
+                        boolean containsUID = containsUid(externalEvents);
+                        if (containsUID) {
+                            diff = generateEventDiff(existingEvents, externalEvents);
+                        } else {
+                            //FIXME generate reproducible UID for upcoming refreshes
+                            diff = new EmptyUidUpdates(existingEvents, externalEvents);
+                        }
                     }
 
                     if (!diff.isEmpty()) {
@@ -137,7 +150,7 @@ public class CachingExecutor {
 
     /**
      * Returns if all provided {@link Event}s do contain a UID
-     * 
+     *
      * @param events A list of {@link Event}s to check for the UID
      * @return <code>true</code> if all {@link Event}s do have a UID; <code>false</code> if at least one {@link Event} is missing the UID field
      */

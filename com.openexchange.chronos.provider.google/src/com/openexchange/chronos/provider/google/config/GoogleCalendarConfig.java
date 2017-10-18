@@ -47,28 +47,43 @@
  *
  */
 
-package com.openexchange.chronos.provider.google;
+package com.openexchange.chronos.provider.google.config;
 
+import com.openexchange.chronos.provider.google.osgi.Services;
+import com.openexchange.config.lean.DefaultProperty;
+import com.openexchange.config.lean.LeanConfigurationService;
+import com.openexchange.config.lean.Property;
+import com.openexchange.session.Session;
 
 /**
- * {@link GoogleCalendarConfigField}
+ * {@link GoogleCalendarConfig}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.0
  */
-public class GoogleCalendarConfigField {
+public class GoogleCalendarConfig {
 
-    public static final String OAUTH_ID = "oauthId";
-    public static final String FOLDERS = "folders";
-    public static final String SYNC_TOKEN = "syncToken";
+    private static final Property REFRESH_INTERVAL_PROP = DefaultProperty.valueOf("com.openexchange.chronos.provider.google.refreshInterval", new Long(10));
 
-    public static class Folders {
+    private static final Property REQUEST_TIMEOUT_PROP = DefaultProperty.valueOf("com.openexchange.chronos.provider.google.requestTimeout", new Long(30));
 
-        public static final String ENABLED = "enabled";
-        public static final String COLOR = "color";
-        public static final String DEFAULT_REMINDER = "default_reminders";
-        public static final String DESCRIPTION = "description";
-        public static final String PRIMARY = "primary";
+    public static long getResfrehInterval(Session session){
+
+        LeanConfigurationService service = Services.getService(LeanConfigurationService.class);
+        if(service == null){
+            return (int) REFRESH_INTERVAL_PROP.getDefaultValue();
+        }
+        return service.getLongProperty(session.getUserId(), session.getContextId(), REFRESH_INTERVAL_PROP);
+
+    }
+
+    public static long getRequestTimeout(Session session){
+
+        LeanConfigurationService service = Services.getService(LeanConfigurationService.class);
+        if(service == null){
+            return (int) REQUEST_TIMEOUT_PROP.getDefaultValue();
+        }
+        return service.getLongProperty(session.getUserId(), session.getContextId(), REQUEST_TIMEOUT_PROP);
 
     }
 }
