@@ -595,15 +595,45 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
     }
 
     private long countEvents(Connection connection, boolean deleted, SearchTerm<?> searchTerm) throws SQLException, OXException {
+        StringBuilder stringBuilder = new StringBuilder();
         SearchAdapter adapter = new SearchAdapter(context.getContextId(), null, "e.", "a.").append(searchTerm);
-        StringBuilder stringBuilder = new StringBuilder()
-            .append("SELECT COUNT(DISTINCT id) FROM ").append(deleted ? "calendar_event_tombstone" : "calendar_event").append(" AS e")
-        ;
-        if (adapter.usesAttendees()) {
-            stringBuilder.append(" LEFT JOIN ").append(deleted ? "calendar_attendee_tombstone" : "calendar_attendee").append(" AS a")
-                .append(" ON e.cid=a.cid AND e.account=a.account AND e.id=a.event");
+        if (false == adapter.usesEvents()) {
+            if (false == adapter.usesAttendees()) {
+                /*
+                 * neither restrictions by event, nor by attendee table, so count all events in account
+                 */
+                stringBuilder
+                    .append("SELECT COUNT(*) FROM ").append(deleted ? "calendar_event_tombstone" : "calendar_event")
+                    .append(" WHERE cid=? AND account=?;")
+                ;
+            } else {
+                /*
+                 * no restrictions by event, so count via attendee table solely
+                 */
+                stringBuilder
+                    .append("SELECT COUNT(DISTINCT a.event) FROM ").append(deleted ? "calendar_attendee_tombstone" : "calendar_attendee").append(" AS a")
+                    .append(" WHERE a.cid=? AND a.account=? AND ").append(adapter.getClause()).append(';')
+                ;
+            }
+        } else if (false == adapter.usesAttendees()) {
+            /*
+             * no restrictions by attendee, so count via event table solely
+             */
+            stringBuilder
+                .append("SELECT COUNT(*) FROM ").append(deleted ? "calendar_event_tombstone" : "calendar_event").append(" AS e")
+                .append(" WHERE e.cid=? AND e.account=? AND ").append(adapter.getClause()).append(';')
+            ;
+        } else {
+            /*
+             * restrictions by both event and attendee, so count joined result
+             */
+            stringBuilder
+                .append("SELECT COUNT(DISTINCT e.id) FROM ").append(deleted ? "calendar_event_tombstone" : "calendar_event").append(" AS e")
+                .append(" LEFT JOIN ").append(deleted ? "calendar_attendee_tombstone" : "calendar_attendee").append(" AS a")
+                .append(" ON e.cid=a.cid AND e.account=a.account AND e.id=a.event")
+                .append(" WHERE e.cid=? AND e.account=? AND ").append(adapter.getClause()).append(';')
+            ;
         }
-        stringBuilder.append(" WHERE e.cid=? AND e.account=? AND ").append(adapter.getClause()).append(';');
         try (PreparedStatement stmt = connection.prepareStatement(stringBuilder.toString())) {
             int parameterIndex = 1;
             stmt.setInt(parameterIndex++, context.getContextId());
