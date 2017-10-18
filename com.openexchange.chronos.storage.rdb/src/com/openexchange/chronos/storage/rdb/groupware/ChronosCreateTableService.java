@@ -143,6 +143,7 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
                 "KEY rangeUntil (cid,account,rangeUntil)," +
                 "KEY timestamp (cid,account,timestamp)," +
                 "KEY user (cid,account,user)," +
+                "KEY folder (cid,account,folder(191))," +
                 "KEY uid (cid,account,uid(191))," +
                 "KEY filename (cid,account,filename(191))" +
             ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;"
@@ -190,6 +191,7 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
                 "KEY rangeUntil (cid,account,rangeUntil)," +
                 "KEY timestamp (cid,account,timestamp)," +
                 "KEY user (cid,account,user)," +
+                "KEY folder (cid,account,folder(191))," +
                 "KEY uid (cid,account,uid(191))," +
                 "KEY filename (cid,account,filename(191))" +
             ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;"
@@ -210,7 +212,7 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
                 "member VARCHAR(1024) DEFAULT NULL," +
                 "PRIMARY KEY (cid,account,event,entity)," +
                 "KEY uri (cid,account,event,uri(191))," +
-                "KEY folder (cid,account,event,folder(191))" +
+                "KEY folder (cid,account,entity,folder(191))" +
             ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;"
         );
         tablesByName.put("calendar_attendee_tombstone",
@@ -229,7 +231,7 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
                 "member VARCHAR(1024) DEFAULT NULL," +
                 "PRIMARY KEY (cid,account,event,entity)," +
                 "KEY uri (cid,account,event,uri(191))," +
-                "KEY folder (cid,account,event,folder(191))" +
+                "KEY folder (cid,account,entity,folder(191))" +
             ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;"
         );
         tablesByName.put("calendar_alarm",
