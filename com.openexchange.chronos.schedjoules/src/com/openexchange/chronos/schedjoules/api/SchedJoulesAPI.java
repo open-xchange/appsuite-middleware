@@ -59,6 +59,21 @@ import com.openexchange.exception.OXException;
  */
 public final class SchedJoulesAPI {
 
+    private static SchedJoulesAPI INSTANCE;
+
+    /**
+     * Returns the instance of the {@link SchedJoulesAPI}
+     * 
+     * @return the instance of the {@link SchedJoulesAPI}
+     * @throws OXException if the instance cannot be returned
+     */
+    public static SchedJoulesAPI getInstance() throws OXException {
+        if (INSTANCE == null) {
+            INSTANCE = new SchedJoulesAPI();
+        }
+        return INSTANCE;
+    }
+
     private final SchedJoulesPagesAPI pages;
     private final SchedJoulesCalendarAPI calendar;
     private final SchedJoulesCountriesAPI countries;
@@ -70,7 +85,7 @@ public final class SchedJoulesAPI {
      * 
      * @throws OXException if the REST client cannot be initialised
      */
-    public SchedJoulesAPI() throws OXException {
+    private SchedJoulesAPI() throws OXException {
         super();
         client = new SchedJoulesRESTClient();
         pages = new SchedJoulesPagesAPI(client);

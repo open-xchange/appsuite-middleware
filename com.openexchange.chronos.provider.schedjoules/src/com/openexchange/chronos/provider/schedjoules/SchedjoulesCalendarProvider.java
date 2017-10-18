@@ -50,12 +50,17 @@
 package com.openexchange.chronos.provider.schedjoules;
 
 import java.util.Locale;
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.chronos.provider.CalendarAccess;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.CalendarProvider;
+import com.openexchange.chronos.schedjoules.api.SchedJoulesAPI;
+import com.openexchange.chronos.schedjoules.exception.SchedJoulesExceptionCodes;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 
@@ -118,8 +123,44 @@ public class SchedjoulesCalendarProvider implements CalendarProvider {
      */
     @Override
     public JSONObject configureAccount(Session session, JSONObject userConfig, CalendarParameters parameters) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        if (userConfig == null) {
+            return new JSONObject();
+        }
+        JSONArray folders = userConfig.optJSONArray("folders");
+        if (folders == null) {
+            return new JSONObject();
+        }
+
+        try {
+            JSONObject internalConfig = new JSONObject();
+            JSONArray subscriptions = new JSONArray();
+            for (int index = 0; index < folders.length(); index++) {
+                JSONObject folder = folders.getJSONObject(index);
+                int itemId = folder.getInt("itemId");
+                String locale = folder.optString("locale");
+                JSONObject page = SchedJoulesAPI.getInstance().pages().getPage(itemId, locale);
+                if (!page.hasAndNotNull("url")) {
+                    throw SchedJoulesExceptionCodes.NO_CALENDAR.create(itemId);
+                }
+
+                String calendarName = page.getString("name");
+                String url = page.getString("url");
+
+                folder.put("name", calendarName);
+
+                JSONObject subscription = new JSONObject();
+                subscription.put("refreshInterval", "PT7D");
+                subscription.put("url", url);
+                subscription.put("itemId", itemId);
+                subscription.put("name", calendarName);
+
+                subscriptions.put(subscription);
+            }
+            internalConfig.put("folders", subscriptions);
+            return internalConfig;
+        } catch (JSONException e) {
+            throw SchedJoulesExceptionCodes.JSON_ERROR.create(e.getMessage(), e);
+        }
     }
 
     /*

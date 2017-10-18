@@ -217,7 +217,7 @@ public class SchedjoulesCalendarAccess extends CachingCalendarAccess {
     @Override
     public ExternalCalendarResult getEvents(String folderId) throws OXException {
         try {
-            JSONObject userConfig = getAccount().getUserConfiguration();
+            JSONObject userConfig = getAccount().getInternalConfiguration();
             JSONArray foldersArray = userConfig.getJSONArray(FOLDERS);
             String updateUrl = null;
             for (int index = 0; index < foldersArray.length(); index++) {
@@ -228,7 +228,7 @@ public class SchedjoulesCalendarAccess extends CachingCalendarAccess {
                 }
             }
             URL u = new URL(updateUrl);
-            SchedJoulesAPI api = new SchedJoulesAPI();
+            SchedJoulesAPI api = SchedJoulesAPI.getInstance();
             Calendar calendar = api.calendar().getCalendar(u);
             if (NO_ACCESS.equals(calendar.getName())) {
                 throw SchedJoulesExceptionCodes.NO_ACCESS.create(folderId);

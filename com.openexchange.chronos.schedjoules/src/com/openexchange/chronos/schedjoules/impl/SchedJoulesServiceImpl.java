@@ -84,7 +84,7 @@ public class SchedJoulesServiceImpl implements SchedJoulesService {
     public SchedJoulesServiceImpl(ServiceLookup services) throws OXException {
         super();
         this.services = services;
-        api = new SchedJoulesAPI();
+        api = SchedJoulesAPI.getInstance();
     }
 
     /*
