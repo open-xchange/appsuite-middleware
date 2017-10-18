@@ -59,8 +59,8 @@ import org.json.JSONObject;
 import com.openexchange.chronos.provider.CalendarAccess;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.CalendarProvider;
+import com.openexchange.chronos.provider.schedjoules.exception.SchedJoulesProviderExceptionCodes;
 import com.openexchange.chronos.schedjoules.api.SchedJoulesAPI;
-import com.openexchange.chronos.schedjoules.exception.SchedJoulesExceptionCodes;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
@@ -140,7 +140,7 @@ public class SchedJoulesCalendarProvider implements CalendarProvider {
             internalConfig.put("folders", internalConfigItems);
             return internalConfig;
         } catch (JSONException e) {
-            throw SchedJoulesExceptionCodes.JSON_ERROR.create(e.getMessage(), e);
+            throw SchedJoulesProviderExceptionCodes.JSON_ERROR.create(e.getMessage(), e);
         }
     }
 
@@ -171,7 +171,7 @@ public class SchedJoulesCalendarProvider implements CalendarProvider {
                 internalConfig.put("folders", internalConfigFolders);
                 return internalConfig;
             } catch (JSONException e) {
-                throw SchedJoulesExceptionCodes.JSON_ERROR.create(e.getMessage(), e);
+                throw SchedJoulesProviderExceptionCodes.JSON_ERROR.create(e.getMessage(), e);
             }
         }
 
@@ -220,7 +220,7 @@ public class SchedJoulesCalendarProvider implements CalendarProvider {
 
             return changed ? internalConfig : null;
         } catch (JSONException e) {
-            throw SchedJoulesExceptionCodes.JSON_ERROR.create(e.getMessage(), e);
+            throw SchedJoulesProviderExceptionCodes.JSON_ERROR.create(e.getMessage(), e);
         }
     }
 
@@ -290,7 +290,7 @@ public class SchedJoulesCalendarProvider implements CalendarProvider {
 
         JSONObject page = SchedJoulesAPI.getInstance().pages().getPage(itemId, locale);
         if (!page.hasAndNotNull("url")) {
-            throw SchedJoulesExceptionCodes.NO_CALENDAR.create(itemId);
+            throw SchedJoulesProviderExceptionCodes.NO_CALENDAR.create(itemId);
         }
 
         //String calendarName = page.getString("name");
