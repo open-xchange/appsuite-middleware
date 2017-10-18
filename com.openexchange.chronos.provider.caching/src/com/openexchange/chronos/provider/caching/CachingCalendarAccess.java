@@ -271,7 +271,7 @@ public abstract class CachingCalendarAccess implements WarningsAware {
 
     /**
      * Returns the origin request parameters
-     * 
+     *
      * @return {@link CalendarParameters} containing the parameters
      */
     public CalendarParameters getParameters() {
@@ -336,7 +336,7 @@ public abstract class CachingCalendarAccess implements WarningsAware {
         }
         try {
             AdministrativeCalendarAccountService accountService = Services.getService(AdministrativeCalendarAccountService.class);
-            accountService.updateAccount(getSession().getContextId(), getSession().getUserId(), getAccount().getAccountId(), getAccount().getInternalConfiguration(), null, getAccount().getLastModified().getTime());
+            accountService.updateAccount(getSession().getContextId(), getSession().getUserId(), getAccount().getAccountId(), null, getAccount().getInternalConfiguration(), null, getAccount().getLastModified().getTime());
         } catch (OXException e) {
             LOG.error("Unable to save configuration: {}", e.getMessage(), e);
         }

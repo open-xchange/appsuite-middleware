@@ -92,7 +92,8 @@ public class UpdateAction extends AbstractAccountAction {
             throw AjaxExceptionCodes.MISSING_REQUEST_BODY.create();
         }
         JSONObject userConfig = data.optJSONObject(CONFIGURATION);
-        CalendarAccount account = getAccountService().updateAccount(session, accountId, userConfig, clientTimestamp, null);
+        Boolean enabled = data.hasAndNotNull("enabled") ? Boolean.valueOf(data.optBoolean("enabled")) : null;
+        CalendarAccount account = getAccountService().updateAccount(session, accountId, enabled, userConfig, clientTimestamp, null);
         return new AJAXRequestResult(serializeAccount(account), account.getLastModified(), "json");
     }
 }

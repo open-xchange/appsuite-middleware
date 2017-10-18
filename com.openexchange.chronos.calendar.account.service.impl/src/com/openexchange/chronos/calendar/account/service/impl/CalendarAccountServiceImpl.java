@@ -118,7 +118,7 @@ public class CalendarAccountServiceImpl implements CalendarAccountService, Admin
     }
 
     @Override
-    public CalendarAccount updateAccount(Session session, int id, JSONObject userConfig, long clientTimestamp, CalendarParameters parameters) throws OXException {
+    public CalendarAccount updateAccount(Session session, int id, Boolean enabled, JSONObject userConfig, long clientTimestamp, CalendarParameters parameters) throws OXException {
         /*
          * get & check stored calendar account
          */
@@ -134,7 +134,7 @@ public class CalendarAccountServiceImpl implements CalendarAccountService, Admin
         /*
          * update calendar account in storage within transaction
          */
-        CalendarAccount account = updateAccount(session.getContextId(), session.getUserId(), id, internalConfig, userConfig, clientTimestamp);
+        CalendarAccount account = updateAccount(session.getContextId(), session.getUserId(), id, enabled, internalConfig, userConfig, clientTimestamp);
         /*
          * let provider perform any additional initialization
          */
@@ -281,7 +281,7 @@ public class CalendarAccountServiceImpl implements CalendarAccountService, Admin
     }
 
     @Override
-    public CalendarAccount updateAccount(int contextId, int userId, int accountId, JSONObject internalConfig, JSONObject userConfig, long clientTimestamp) throws OXException {
+    public CalendarAccount updateAccount(int contextId, int userId, int accountId, Boolean enabled, JSONObject internalConfig, JSONObject userConfig, long clientTimestamp) throws OXException {
         CalendarAccount account = new OSGiCalendarStorageOperation<CalendarAccount>(services, contextId, -1) {
 
             @Override
@@ -290,8 +290,11 @@ public class CalendarAccountServiceImpl implements CalendarAccountService, Admin
                 if (null != account.getLastModified() && account.getLastModified().getTime() > clientTimestamp) {
                     throw CalendarExceptionCodes.CONCURRENT_MODIFICATION.create(String.valueOf(accountId), clientTimestamp, account.getLastModified().getTime());
                 }
-                CalendarAccount updatedAccount = new DefaultCalendarAccount(
-                    account.getProviderId(), account.getAccountId(), account.getUserId(), account.isEnabled(), internalConfig, userConfig, new Date());
+                if (Boolean.FALSE.equals(enabled) && CalendarAccount.DEFAULT_ACCOUNT.getProviderId().equals(account.getProviderId())) {
+                    throw CalendarExceptionCodes.UNSUPPORTED_OPERATION_FOR_PROVIDER.create(account.getProviderId());
+                }
+                CalendarAccount updatedAccount = new DefaultCalendarAccount(account.getProviderId(), account.getAccountId(), account.getUserId(),
+                    null != enabled ? enabled.booleanValue() : account.isEnabled(), internalConfig, userConfig, new Date());
                 storage.getAccountStorage().updateAccount(updatedAccount);
                 return updatedAccount;
             }

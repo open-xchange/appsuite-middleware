@@ -77,7 +77,7 @@ public class SchedJoulesServiceImpl implements SchedJoulesService {
 
     /**
      * Initialises a new {@link SchedJoulesServiceImpl}.
-     * 
+     *
      * @services The {@link ServiceLookup} instance
      * @throws OXException if the {@link SchedJoulesAPI} cannot be initialised
      */
@@ -89,7 +89,7 @@ public class SchedJoulesServiceImpl implements SchedJoulesService {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.chronos.service.SchedJoulesService#getRoot()
      */
     @Override
@@ -99,7 +99,7 @@ public class SchedJoulesServiceImpl implements SchedJoulesService {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.chronos.service.SchedJoulesService#getRoot(java.lang.String, java.lang.String)
      */
     @Override
@@ -109,7 +109,7 @@ public class SchedJoulesServiceImpl implements SchedJoulesService {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.chronos.service.SchedJoulesService#getPage(int)
      */
     @Override
@@ -119,7 +119,7 @@ public class SchedJoulesServiceImpl implements SchedJoulesService {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.chronos.schedjoules.SchedJoulesService#getPage(int, java.lang.String)
      */
     @Override
@@ -129,7 +129,7 @@ public class SchedJoulesServiceImpl implements SchedJoulesService {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.chronos.schedjoules.SchedJoulesService#listCountries()
      */
     @Override
@@ -139,7 +139,7 @@ public class SchedJoulesServiceImpl implements SchedJoulesService {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.chronos.schedjoules.SchedJoulesService#listCountries(java.lang.String)
      */
     @Override
@@ -149,7 +149,7 @@ public class SchedJoulesServiceImpl implements SchedJoulesService {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.chronos.schedjoules.SchedJoulesService#listLanguages()
      */
     @Override
@@ -159,7 +159,7 @@ public class SchedJoulesServiceImpl implements SchedJoulesService {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.chronos.schedjoules.SchedJoulesService#subscribeCalendar(com.openexchange.session.Session, int, int)
      */
     @Override
@@ -169,7 +169,7 @@ public class SchedJoulesServiceImpl implements SchedJoulesService {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.chronos.schedjoules.SchedJoulesService#search(java.lang.String, java.lang.String, int, int, int)
      */
     @Override
@@ -179,7 +179,7 @@ public class SchedJoulesServiceImpl implements SchedJoulesService {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.chronos.schedjoules.SchedJoulesService#subscribeCalendar(com.openexchange.session.Session, int, int, java.lang.String)
      */
     @Override
@@ -218,7 +218,7 @@ public class SchedJoulesServiceImpl implements SchedJoulesService {
 
             folders.put(singleCalendarConfiguration);
 
-            calendarAccountService.updateAccount(session, accountId, userConfiguration, System.currentTimeMillis() + 100, null); //FIXME: Get the client timestamp
+            calendarAccountService.updateAccount(session, accountId, null, userConfiguration, System.currentTimeMillis() + 100, null); //FIXME: Get the client timestamp
 
             return IDMangling.mangleFolderId(accountId, calendarName);
         } catch (JSONException e) {
@@ -228,7 +228,7 @@ public class SchedJoulesServiceImpl implements SchedJoulesService {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.chronos.schedjoules.SchedJoulesService#unsubscribeCalendar(com.openexchange.session.Session, java.lang.String, int)
      */
     @Override
@@ -265,7 +265,7 @@ public class SchedJoulesServiceImpl implements SchedJoulesService {
                 }
             }
             if (removed) {
-                calendarAccountService.updateAccount(session, accountId, userConfiguration, System.currentTimeMillis() + 100, null); //FIXME: Get the client timestamp
+                calendarAccountService.updateAccount(session, accountId, null, userConfiguration, System.currentTimeMillis() + 100, null); //FIXME: Get the client timestamp
             }
         } catch (JSONException e) {
             throw SchedJoulesExceptionCodes.JSON_ERROR.create(e.getMessage(), e);
