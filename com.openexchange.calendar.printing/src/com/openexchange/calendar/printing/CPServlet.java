@@ -194,7 +194,7 @@ public class CPServlet extends PermissionServlet {
             final Partitioner partitioner = new Partitioner(params, cal, session.getContext());
             final List<Day> perDayList = partitioner.partition(services, events, session.getUserId());
 
-            final List<CPEvent> expandedAppointments = tool.toCPAppointment(services, events, cal, session.getContext());
+            final List<CPEvent> expandedAppointments = tool.toCPEvent(services, events, cal, session.getContext());
 
             tool.sort(expandedAppointments);
 
