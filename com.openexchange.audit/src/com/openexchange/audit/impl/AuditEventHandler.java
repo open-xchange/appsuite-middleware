@@ -66,7 +66,6 @@ import com.openexchange.api2.RdbFolderSQLInterface;
 import com.openexchange.audit.configuration.AuditConfiguration;
 import com.openexchange.audit.services.Services;
 import com.openexchange.chronos.Attendee;
-import com.openexchange.chronos.CalendarUser;
 import com.openexchange.contact.ContactService;
 import com.openexchange.event.CommonEvent;
 import com.openexchange.exception.OXException;
