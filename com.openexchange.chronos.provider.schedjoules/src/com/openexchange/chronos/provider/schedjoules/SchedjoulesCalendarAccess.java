@@ -53,10 +53,14 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.chronos.Calendar;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.TimeTransparency;
@@ -80,6 +84,8 @@ import com.openexchange.session.Session;
  */
 public class SchedjoulesCalendarAccess extends CachingCalendarAccess {
 
+    private static final Logger LOG = LoggerFactory.getLogger(SchedjoulesCalendarAccess.class);
+
     /**
      * Default 'X-WR-CALNAME' and 'SUMMARY' contents of an iCal that is not accessible
      */
@@ -101,6 +107,11 @@ public class SchedjoulesCalendarAccess extends CachingCalendarAccess {
     private static final String URL = "url";
 
     /**
+     * Local cache for subscribed folders
+     */
+    private final Map<String, CalendarFolder> folders;
+
+    /**
      * Initialises a new {@link SchedjoulesCalendarAccess}.
      *
      * @param account
@@ -109,6 +120,8 @@ public class SchedjoulesCalendarAccess extends CachingCalendarAccess {
      */
     protected SchedjoulesCalendarAccess(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
         super(session, account, parameters);
+        folders = new HashMap<>();
+        prepareFolders();
     }
 
     /*
@@ -240,6 +253,24 @@ public class SchedjoulesCalendarAccess extends CachingCalendarAccess {
     public void handleExceptions(String calendarFolderId, OXException e) {
         // TODO Auto-generated method stub
 
+    }
+
+    private void prepareFolders() {
+        JSONObject userConfig = getAccount().getUserConfiguration();
+        JSONArray foldersArray = userConfig.optJSONArray(FOLDERS);
+        if (foldersArray == null || foldersArray.isEmpty()) {
+            return;
+        }
+
+        for (int index = 0; index < foldersArray.length(); index++) {
+            try {
+                JSONObject folder = foldersArray.getJSONObject(index);
+                String folderName = folder.getString(NAME);
+                folders.put(folderName, prepareFolder(folderName));
+            } catch (JSONException e) {
+                LOG.warn("There was an error preparing the subscribed folder '{}' for account '{}' of user '{}' in context '{}': {}", e.getMessage(), e);
+            }
+        }
     }
 
     private CalendarFolder prepareFolder(String folderName) {
