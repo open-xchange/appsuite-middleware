@@ -91,6 +91,7 @@ import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
 import org.apache.commons.lang.ArrayUtils;
 import org.slf4j.Logger;
+import com.google.common.collect.ImmutableMap;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.contact.ContactService;
@@ -4056,7 +4057,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     static {
         Map<String, Object> m = new HashMap<>(1, 1f);
         m.put("operation", "updateMessageColorLabel");
-        MORE_PROPS_UPDATE_LABEL = Collections.unmodifiableMap(m);
+        MORE_PROPS_UPDATE_LABEL = ImmutableMap.copyOf(m);
     }
 
     @Override
@@ -4132,7 +4133,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     static {
         Map<String, Object> m = new HashMap<>(1, 1f);
         m.put("operation", "updateMessageFlags");
-        MORE_PROPS_UPDATE_FLAGS = Collections.unmodifiableMap(m);
+        MORE_PROPS_UPDATE_FLAGS = ImmutableMap.copyOf(m);
     }
 
     @Override

@@ -96,6 +96,7 @@ import com.openexchange.admin.rmi.dataobjects.MaintenanceReason;
 import com.openexchange.admin.rmi.dataobjects.Server;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
+import com.openexchange.admin.rmi.exceptions.OXContextException;
 import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.services.AdminServiceRegistry;
@@ -152,13 +153,26 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
 
     private final int USE_UNIT;
 
+    private final int CONTEXTS_PER_SCHEMA;
+
     /**
      * Initializes a new {@link OXUtilMySQLStorage}.
      */
     public OXUtilMySQLStorage() {
         super();
         this.cache = ClientAdminThreadExtended.cache;
-        ;
+
+        int CONTEXTS_PER_SCHEMA = 1;
+        try {
+            CONTEXTS_PER_SCHEMA = Integer.parseInt(cache.getProperties().getProp("CONTEXTS_PER_SCHEMA", "1"));
+            if (CONTEXTS_PER_SCHEMA <= 0) {
+                throw new OXContextException("CONTEXTS_PER_SCHEMA MUST BE > 0");
+            }
+        } catch (final OXContextException e) {
+            LOG.error("Error init", e);
+        }
+        this.CONTEXTS_PER_SCHEMA = CONTEXTS_PER_SCHEMA;
+
         prop = cache.getProperties();
         int use_unit_tmp = UNIT_CONTEXT;
         final String unit = prop.getProp("CREATE_CONTEXT_USE_UNIT", "context");
@@ -2224,7 +2238,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.admin.storage.interfaces.OXUtilStorageInterface#changeServer(int, java.lang.String)
      */
     @Override
@@ -2237,6 +2251,8 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             connection = cache.getWriteConnectionForConfigDB();
             connection.setAutoCommit(false);
             rollback = true;
+            
+            isSchemaDisabled(connection, schemaName);
 
             int parameterIndex = 1;
             statement = connection.prepareStatement("UPDATE context_server2db_pool SET server_id=? WHERE db_schema=?");
@@ -2273,21 +2289,24 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
     }
 
     @Override
-    public Database[] searchForDatabaseSchema(String search_pattern, boolean onlyEmptySchemas) throws StorageException {
+    public Database[] searchForDatabaseSchema(String searchPattern, boolean onlyEmptySchemas) throws StorageException {
+        String searchPatternToUse = searchPattern.replace('*', '%');
         Connection con = null;
         PreparedStatement pstmt = null;
         ResultSet rs = null;
         try {
             con = cache.getReadConnectionForConfigDB();
 
-            String my_search_pattern = search_pattern.replace('*', '%');
-            pstmt = con.prepareStatement("SELECT d.db_pool_id,d.url,d.driver,d.login,d.password,d.hardlimit,d.max,d.initial,d.name,c.weight,c.max_units,c.read_db_pool_id,c.write_db_pool_id,p.count,s.schemaname,s.count FROM db_pool AS d JOIN db_cluster AS c ON c.write_db_pool_id=d.db_pool_id LEFT JOIN contexts_per_dbpool AS p ON d.db_pool_id=p.db_pool_id LEFT JOIN contexts_per_dbschema AS s ON d.db_pool_id=s.db_pool_id WHERE (c.max_units <> 0) AND (d.name LIKE ? OR s.schemaname LIKE ? OR d.db_pool_id LIKE ? OR d.url LIKE ?)" + (onlyEmptySchemas ? " AND s.count=0" : ""));
-            pstmt.setString(1, my_search_pattern);
-            pstmt.setString(2, my_search_pattern);
-            pstmt.setString(3, my_search_pattern);
-            pstmt.setString(4, my_search_pattern);
+            if ("%".equals(searchPatternToUse)) {
+                pstmt = con.prepareStatement("SELECT d.db_pool_id,d.url,d.driver,d.login,d.password,d.hardlimit,d.max,d.initial,d.name,c.weight,c.max_units,c.read_db_pool_id,c.write_db_pool_id,p.count,s.schemaname,s.count FROM db_pool AS d JOIN db_cluster AS c ON c.write_db_pool_id=d.db_pool_id LEFT JOIN contexts_per_dbpool AS p ON d.db_pool_id=p.db_pool_id LEFT JOIN contexts_per_dbschema AS s ON d.db_pool_id=s.db_pool_id WHERE (c.max_units <> 0)" + (onlyEmptySchemas ? " AND s.count=0" : ""));
+            } else {
+                pstmt = con.prepareStatement("SELECT d.db_pool_id,d.url,d.driver,d.login,d.password,d.hardlimit,d.max,d.initial,d.name,c.weight,c.max_units,c.read_db_pool_id,c.write_db_pool_id,p.count,s.schemaname,s.count FROM db_pool AS d JOIN db_cluster AS c ON c.write_db_pool_id=d.db_pool_id LEFT JOIN contexts_per_dbpool AS p ON d.db_pool_id=p.db_pool_id LEFT JOIN contexts_per_dbschema AS s ON d.db_pool_id=s.db_pool_id WHERE (c.max_units <> 0) AND (d.name LIKE ? OR s.schemaname LIKE ? OR d.db_pool_id LIKE ? OR d.url LIKE ?)" + (onlyEmptySchemas ? " AND s.count=0" : ""));
+                pstmt.setString(1, searchPatternToUse);
+                pstmt.setString(2, searchPatternToUse);
+                pstmt.setString(3, searchPatternToUse);
+                pstmt.setString(4, searchPatternToUse);
+            }
             rs = pstmt.executeQuery();
-
             if (false == rs.next()) {
                 return new Database[0];
             }
@@ -2445,28 +2464,36 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
     }
 
     @Override
-    public Database[] searchForDatabase(final String search_pattern) throws StorageException {
+    public Database[] searchForDatabase(String searchPattern) throws StorageException {
+        String searchPatternToUse = searchPattern.replace('*', '%');
         Connection con = null;
         PreparedStatement pstmt = null;
+        ResultSet rs = null;
         try {
             con = cache.getReadConnectionForConfigDB();
-            final String my_search_pattern = search_pattern.replace('*', '%');
+            if ("%".equals(searchPatternToUse)) {
+                pstmt = con.prepareStatement("SELECT d.db_pool_id,d.url,d.driver,d.login,d.password,d.hardlimit,d.max,d.initial,d.name,c.weight,c.max_units,c.read_db_pool_id,c.write_db_pool_id,p.count FROM db_pool AS d JOIN db_cluster AS c ON (c.write_db_pool_id=d.db_pool_id OR c.read_db_pool_id=d.db_pool_id) LEFT JOIN contexts_per_dbpool AS p ON d.db_pool_id=p.db_pool_id");
+            } else {
+                pstmt = con.prepareStatement("SELECT d.db_pool_id,d.url,d.driver,d.login,d.password,d.hardlimit,d.max,d.initial,d.name,c.weight,c.max_units,c.read_db_pool_id,c.write_db_pool_id,p.count FROM db_pool AS d JOIN db_cluster AS c ON (c.write_db_pool_id=d.db_pool_id OR c.read_db_pool_id=d.db_pool_id) LEFT JOIN contexts_per_dbpool AS p ON d.db_pool_id=p.db_pool_id WHERE (d.name LIKE ? OR d.db_pool_id LIKE ? OR d.url LIKE ?)");
+                pstmt.setString(1, searchPatternToUse);
+                pstmt.setString(2, searchPatternToUse);
+                pstmt.setString(3, searchPatternToUse);
+            }
+            rs = pstmt.executeQuery();
 
-            pstmt = con.prepareStatement("SELECT d.db_pool_id,d.url,d.driver,d.login,d.password,d.hardlimit,d.max,d.initial,d.name,c.weight,c.max_units,c.read_db_pool_id,c.write_db_pool_id,p.count FROM db_pool AS d JOIN db_cluster AS c ON (c.write_db_pool_id=d.db_pool_id OR c.read_db_pool_id=d.db_pool_id) LEFT JOIN contexts_per_dbpool AS p ON d.db_pool_id=p.db_pool_id WHERE (c.max_units <> 0) AND (d.name LIKE ? OR d.db_pool_id LIKE ? OR d.url LIKE ?)");
-            pstmt.setString(1, my_search_pattern);
-            pstmt.setString(2, my_search_pattern);
-            pstmt.setString(3, my_search_pattern);
-            final ResultSet rs = pstmt.executeQuery();
-            final ArrayList<Database> tmp = new ArrayList<>();
+            if (false == rs.next()) {
+                return new Database[0];
+            }
 
-            while (rs.next()) {
-
-                final Database db = new Database();
+            List<Database> tmp = new ArrayList<>();
+            do {
+                Database db = new Database();
 
                 Boolean ismaster = Boolean.TRUE;
-                final int readid = rs.getInt("c.read_db_pool_id");
-                final int writeid = rs.getInt("c.write_db_pool_id");
-                final int id = rs.getInt("d.db_pool_id");
+                int readid = rs.getInt("c.read_db_pool_id");
+                int writeid = rs.getInt("c.write_db_pool_id");
+                int id = rs.getInt("d.db_pool_id");
+                int maxNumberOfContext = rs.getInt("c.max_units");
                 int masterid = 0;
                 int nrcontexts = 0;
                 if (readid == id) {
@@ -2475,7 +2502,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                 } else {
                     // we are master
                     nrcontexts = rs.getInt("p.count");
-                    if (rs.wasNull()) {
+                    if (maxNumberOfContext != 0 && rs.wasNull()) {
                         throw new StorageException("Unable to count contexts. Consider running 'checkcountsconsistency' command-line tool to correct it.");
                     }
                 }
@@ -2486,7 +2513,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                 db.setLogin(rs.getString("d.login"));
                 db.setMaster(ismaster);
                 db.setMasterId(I(masterid));
-                db.setMaxUnits(I(rs.getInt("c.max_units")));
+                db.setMaxUnits(I(maxNumberOfContext));
                 db.setPassword(rs.getString("d.password"));
                 db.setPoolHardLimit(I(rs.getInt("d.hardlimit")));
                 db.setPoolInitial(I(rs.getInt("d.initial")));
@@ -2494,11 +2521,12 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                 db.setUrl(rs.getString("d.url"));
                 db.setCurrentUnits(I(nrcontexts));
                 tmp.add(db);
-            }
-            rs.close();
+            } while (rs.next());
+            closeSQLStuff(rs, pstmt);
+            rs = null;
+            pstmt = null;
 
             return tmp.toArray(new Database[tmp.size()]);
-
         } catch (final PoolException pe) {
             LOG.error("Pool Error", pe);
             throw new StorageException(pe);
@@ -2506,7 +2534,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             LOG.error("SQL Error", ecp);
             throw new StorageException(ecp);
         } finally {
-            closeSQLStuff(pstmt);
+            closeSQLStuff(rs, pstmt);
 
             if (con != null) {
                 try {
@@ -4441,5 +4469,59 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
         String schemaName = db.getName() + '_' + schemaUnique;
         db.setScheme(schemaName);
         OXUtilStorageInterface.getInstance().createDatabase(db, configCon);
+    }
+
+    /**
+     * Checks if the specified schema and all its contexts are disabled.
+     * 
+     * @param schemaName The schema to check
+     * @throws StorageException if at least one of the contexts that reside within the specified schema
+     *             is not disabled, or any other error occurs.
+     */
+    private void isSchemaDisabled(Connection connection, String schemaName) throws StorageException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = connection.prepareStatement("SELECT cid FROM context_server2db_pool WHERE db_schema = ?");
+            stmt.setString(1, schemaName);
+            rs = stmt.executeQuery();
+            if (rs.next() == false) {
+                // No contexts found
+                return;
+            }
+
+            // Put context identifiers into a list
+            List<Integer> contextIds = new ArrayList<>(CONTEXTS_PER_SCHEMA >> 1);
+            do {
+                contextIds.add(Integer.valueOf(rs.getInt(1)));
+            } while (rs.next());
+            Databases.closeSQLStuff(rs, stmt);
+
+            // Check if all contexts that reside with in the specified schema are disabled.
+            for (List<Integer> partition : Lists.partition(contextIds, Databases.IN_LIMIT)) {
+                stmt = connection.prepareStatement(Databases.getIN("SELECT cid WHERE enabled = 1 AND cid IN (", partition.size()));
+                int index = 1;
+                for (Integer contextId : partition) {
+                    stmt.setInt(index++, contextId.intValue());
+                }
+                rs = stmt.executeQuery();
+                if (rs.next()) {
+                    List<Integer> notDisabledCids = new ArrayList<>();
+                    do {
+                        notDisabledCids.add(Integer.valueOf(rs.getInt(1)));
+                    } while (rs.next());
+                    throw new StorageException("The schema '" + schemaName + "' is not disabled. The following contexts are still enabled: " + notDisabledCids);
+                }
+                Databases.closeSQLStuff(stmt, rs);
+                stmt = null;
+                rs = null;
+            }
+
+        } catch (SQLException e) {
+            LOG.error("SQL error: {}", e.getMessage(), e);
+            throw new StorageException(e);
+        } finally {
+            Databases.closeSQLStuff(rs, stmt);
+        }
     }
 }

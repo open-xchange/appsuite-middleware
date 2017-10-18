@@ -51,10 +51,10 @@ package com.openexchange.config.lean.internal;
 
 import static com.openexchange.java.Autoboxing.I;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.google.common.collect.ImmutableMap;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
@@ -92,13 +92,13 @@ public class LeanConfigurationServiceImpl implements LeanConfigurationService {
         this.services = services;
 
         // Load parsers
-        Map<Class<?>, PropertyValueParser<?>> vps = new HashMap<>();
+        ImmutableMap.Builder<Class<?>, PropertyValueParser<?>> vps = ImmutableMap.builder();
         vps.put(Integer.class, new IntegerPropertyValueParser());
         vps.put(Long.class, new LongPropertyValueParser());
         vps.put(Float.class, new FloatPropertyValueParser());
         vps.put(Boolean.class, new BooleanPropertyValueParser());
         vps.put(String.class, new StringPropertyValueParser());
-        valueParsers = Collections.unmodifiableMap(vps);
+        valueParsers = vps.build();
     }
 
     /*

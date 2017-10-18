@@ -129,6 +129,7 @@ public class JobInfoResponseRenderer implements ResponseRenderer {
 
     private static boolean writeResponse(JobInfo jobInfo, PrintWriter writer, HttpServletRequest req, HttpServletResponse resp, ServerSession session) throws IOException {
         try {
+            resp.setStatus(HttpServletResponse.SC_ACCEPTED);
             resp.setContentType("text/javascript");
 
             JSONObject jData = new JSONObject(2);

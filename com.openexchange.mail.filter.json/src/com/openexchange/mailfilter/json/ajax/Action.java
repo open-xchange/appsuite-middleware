@@ -49,9 +49,9 @@
 
 package com.openexchange.mailfilter.json.ajax;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import com.google.common.collect.ImmutableMap;
 
 /**
  * Enumeration of all possible AJAX servlet actions.
@@ -114,11 +114,10 @@ public enum Action {
     }
 
     static {
-        final Map<String, Action> tmp = new HashMap<String, Action>(values()
-            .length, 1);
-        for (final Action action : values()) {
+        Map<String, Action> tmp = new HashMap<String, Action>(values().length, 1);
+        for (Action action : values()) {
             tmp.put(action.getAjaxName(), action);
         }
-        name2Action = Collections.unmodifiableMap(tmp);
+        name2Action = ImmutableMap.copyOf(tmp);
     }
 }

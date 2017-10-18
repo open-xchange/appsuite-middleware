@@ -83,8 +83,13 @@ public class IOs {
             return false;
         }
 
-        String lcm = com.openexchange.java.Strings.toLowerCase(e.getMessage());
-        return ("connection reset by peer".equals(lcm) || "broken pipe".equals(lcm) || "connection closed".equals(lcm));
+        String lcm = com.openexchange.java.Strings.asciiLowerCase(e.getMessage());
+        if ("connection reset by peer".equals(lcm) || "broken pipe".equals(lcm)) {
+            return true;
+        }
+
+        Throwable cause = e.getCause();
+        return cause instanceof IOException ? isConnectionReset((IOException) cause) : false;
     }
 
 }

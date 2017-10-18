@@ -58,6 +58,7 @@ import org.json.JSONValue;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.api.AuthInfo;
@@ -160,8 +161,7 @@ public final class StatusAction extends AbstractValidateMailAccountAction implem
             return KnownStatus.DISABLED;
         }
 
-        Boolean valid = actionValidateBoolean(mailAccount, session, false, warnings, false);
-        return valid.booleanValue() ? KnownStatus.OK : KnownStatus.INVALID_CREDENTIALS;
+        return checkStatus(mailAccount, session, false, warnings, false);
     }
 
     /**
@@ -175,10 +175,10 @@ public final class StatusAction extends AbstractValidateMailAccountAction implem
      * @return <code>true</code> for successful validation; otherwise <code>false</code>
      * @throws OXException If an severe error occurs
      */
-    public static Boolean actionValidateBoolean(MailAccount account, ServerSession session, boolean ignoreInvalidTransport, List<OXException> warnings, boolean errorOnDenied) throws OXException {
+    public static KnownStatus checkStatus(MailAccount account, ServerSession session, boolean ignoreInvalidTransport, List<OXException> warnings, boolean errorOnDenied) throws OXException {
         // Check for primary account
         if (MailAccount.DEFAULT_ID == account.getId()) {
-            return Boolean.TRUE;
+            return KnownStatus.OK;
         }
 
         boolean ignoreTransport = ignoreInvalidTransport;
@@ -199,7 +199,7 @@ public final class StatusAction extends AbstractValidateMailAccountAction implem
 
         if (!isEmpty(account.getTransportServer())) {
             if (TransportAuth.NONE == account.getTransportAuth()) {
-                return ValidateAction.actionValidateBoolean(accountDescription, session, ignoreTransport, warnings, errorOnDenied);
+                return checkStatus(accountDescription, session, ignoreTransport, warnings, errorOnDenied);
             }
 
             accountDescription.setTransportServer(account.getTransportServer());
@@ -223,7 +223,69 @@ public final class StatusAction extends AbstractValidateMailAccountAction implem
             }
         }
 
-        return ValidateAction.actionValidateBoolean(accountDescription, session, ignoreTransport, warnings, errorOnDenied);
+        return checkStatus(accountDescription, session, ignoreTransport, warnings, errorOnDenied);
     }
 
+    /**
+     * Validates specified account description.
+     *
+     * @param accountDescription The account description
+     * @param session The associated session
+     * @param ignoreInvalidTransport
+     * @param warnings The warnings list
+     * @param errorOnDenied <code>true</code> to throw an error in case account description is denied (either by host or port); otherwise <code>false</code>
+     * @return <code>true</code> for successful validation; otherwise <code>false</code>
+     * @throws OXException If an severe error occurs
+     */
+    public static KnownStatus checkStatus(MailAccountDescription accountDescription, ServerSession session, boolean ignoreInvalidTransport, List<OXException> warnings, boolean errorOnDenied) throws OXException {
+        // Check for primary account
+        if (MailAccount.DEFAULT_ID == accountDescription.getId()) {
+            return KnownStatus.OK;
+        }
+        // Validate mail server
+        boolean validated = checkMailServerURL(accountDescription, session, warnings, errorOnDenied);
+        // Failed?
+        if (!validated) {
+            KnownStatus status = testForCommunicationProblem(warnings, false, accountDescription);
+            return null == status ? KnownStatus.INVALID_CREDENTIALS : status;
+        }
+        if (ignoreInvalidTransport) {
+            // No need to check transport settings then
+            return KnownStatus.OK;
+        }
+        // Now check transport server URL, if a transport server is present
+        if (!isEmpty(accountDescription.getTransportServer())) {
+            validated = checkTransportServerURL(accountDescription, session, warnings, errorOnDenied);
+            if (!validated) {
+                KnownStatus status = testForCommunicationProblem(warnings, true, accountDescription);
+                return null == status ? KnownStatus.INVALID_CREDENTIALS : status;
+            }
+        }
+        return validated ? KnownStatus.OK : KnownStatus.INVALID_CREDENTIALS;
+    }
+
+    protected static KnownStatus testForCommunicationProblem(List<OXException> warnings, boolean transport, MailAccountDescription accountDescription) {
+        if (null != warnings && !warnings.isEmpty()) {
+            OXException warning = warnings.get(0);
+            if (indicatesCommunicationProblem(warning.getCause())) {
+                OXException newWarning;
+                if (transport) {
+                    String login = accountDescription.getTransportLogin();
+                    if (!seemsValid(login)) {
+                        login = accountDescription.getLogin();
+                    }
+                    newWarning = MailAccountExceptionCodes.VALIDATE_FAILED_TRANSPORT.create(accountDescription.getTransportServer(), login);
+                } else {
+                    newWarning = MailAccountExceptionCodes.VALIDATE_FAILED_MAIL.create(accountDescription.getMailServer(), accountDescription.getLogin());
+                }
+                newWarning.setCategory(Category.CATEGORY_WARNING);
+                warnings.clear();
+                warnings.add(newWarning);
+            } else if (indicatesSSLProblem(warning)) {
+                warnings.add(warning);
+                return KnownStatus.INVALID_SSL_CERTIFICATE;
+            }
+        }
+        return null;
+    }
 }

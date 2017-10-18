@@ -82,12 +82,7 @@ final class TimeoutFetchAndSchema implements FetchAndSchema {
 
     @Override
     public Connection get(Pools pools, AssignmentImpl assign, boolean write, boolean usedAsRead) throws PoolingException, OXException {
-        final int poolId;
-        if (write) {
-            poolId = assign.getWritePoolId();
-        } else {
-            poolId = assign.getReadPoolId();
-        }
+        int poolId = write ? assign.getWritePoolId() : assign.getReadPoolId();
         ConnectionPool pool = pools.getPool(poolId);
         Connection retval = null;
         do {

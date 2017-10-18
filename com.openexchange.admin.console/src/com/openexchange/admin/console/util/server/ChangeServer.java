@@ -118,14 +118,14 @@ public class ChangeServer extends ServerAbstraction {
                 printError("Please specify the server identifier\n", parser);
                 sysexit(1);
                 return;
-            } else {
-                try {
-                    serverId = Integer.valueOf(sid);
-                } catch (NumberFormatException e) {
-                    printError("Invalid server id: " + sid, parser);
-                    sysexit(1);
-                    return;
-                }
+            }
+            
+            try {
+                serverId = Integer.valueOf(sid);
+            } catch (NumberFormatException e) {
+                printError("Invalid server id: " + sid, parser);
+                sysexit(1);
+                return;
             }
             final OXUtilInterface oxutil = (OXUtilInterface) Naming.lookup(RMI_HOSTNAME + OXUtilInterface.RMI_NAME);
 
@@ -133,7 +133,7 @@ public class ChangeServer extends ServerAbstraction {
             srv.setId(serverId);
 
             oxutil.changeServer(srv, schemaName, auth);
-            System.out.println("Successfully changed to server '" + serverId + "' for schema '" + schemaName + "'. Please restart all OX nodes in the cluster for the change to take effect.");
+            System.out.println("Successfully changed to server '" + serverId + "' for schema '" + schemaName + "'.");
             sysexit(0);
         } catch (final Exception e) {
             printErrors(null, null, e, parser);

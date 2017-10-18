@@ -15,7 +15,7 @@ BuildRequires: java-1.8.0-openjdk-devel
 BuildRequires: open-xchange-admin
 BuildRequires: open-xchange-core >= @OXVERSION@, open-xchange-client-onboarding >= @OXVERSION@, open-xchange-drive >= @OXVERSION@
 Version:       @OXVERSION@
-%define        ox_release 3
+%define        ox_release 0
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -63,6 +63,8 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 /opt/open-xchange/sbin/*
 
 %changelog
+* Thu Oct 12 2017 Kevin Ruthmann <kevin.ruthmann@open-xchange.com>
+prepare for 7.10.0 release
 * Fri May 19 2017 Kevin Ruthmann <kevin.ruthmann@open-xchange.com>
 First candidate for 7.8.4 release
 * Thu May 04 2017 Kevin Ruthmann <kevin.ruthmann@open-xchange.com>

@@ -119,4 +119,10 @@ public class UploadExceptionMessage implements LocalizableStrings {
     // Read timed out. Waited too long for incoming data from client.
     public static final String UNEXPECTED_TIMEOUT_MSG = "Read timed out. Waited too long for incoming data from client.";
 
+    // Image upload denied. Its size exceeds maximum allowed value of %2$s
+    public final static String IMAGE_TOO_BIG_MSG = "Image upload denied. Its size exceeds maximum allowed value of %2$s.";
+
+    // Image upload denied. Its resolution exceeds maximum allowed value of %2$s pixels.
+    public final static String IMAGE_RESOLUTION_TOO_HIGH_MSG = "Image upload denied. Its resolution exceeds maximum allowed value of %2$s pixels.";
+
 }

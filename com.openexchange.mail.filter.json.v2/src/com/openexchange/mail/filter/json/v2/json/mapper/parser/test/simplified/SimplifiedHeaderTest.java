@@ -50,10 +50,10 @@
 package com.openexchange.mail.filter.json.v2.json.mapper.parser.test.simplified;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import com.google.common.collect.ImmutableMap;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.exceptions.CommandParserExceptionCodes;
 
@@ -78,7 +78,7 @@ public enum SimplifiedHeaderTest {
         for (SimplifiedHeaderTest sht : SimplifiedHeaderTest.values()) {
             m.put(sht.getCommandName(), sht);
         }
-        map = Collections.unmodifiableMap(m);
+        map = ImmutableMap.copyOf(m);
     }
 
     private String commandName;

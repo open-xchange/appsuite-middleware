@@ -57,6 +57,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.hazelcast.core.Cluster;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IExecutorService;
@@ -75,8 +77,18 @@ public abstract class AbstractImapIdleClusterLock implements ImapIdleClusterLock
 
     private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractImapIdleClusterLock.class);
 
+    /** The time-to-live in cache; cluster lock timeout minus 5 minutes */
+    private static final long CACHE_EXPIRATION = ImapIdleClusterLock.TIMEOUT_MILLIS - 300000L;
+
     /** The service look-up */
     protected final ServiceLookup services;
+
+    /**
+     * A volatile cache for remote look-ups of transient sessions
+     * <p>
+     * This should prevent from hammering Hazelcast service with many subsequent logins
+     */
+    private final Cache<String, Boolean> remoteLookUps;
 
     /**
      * Initializes a new {@link AbstractImapIdleClusterLock}.
@@ -84,6 +96,7 @@ public abstract class AbstractImapIdleClusterLock implements ImapIdleClusterLock
     protected AbstractImapIdleClusterLock(ServiceLookup services) {
         super();
         this.services = services;
+        remoteLookUps = CacheBuilder.newBuilder().initialCapacity(512).expireAfterWrite(CACHE_EXPIRATION, TimeUnit.MILLISECONDS).build();
     }
 
     /**
@@ -139,71 +152,101 @@ public abstract class AbstractImapIdleClusterLock implements ImapIdleClusterLock
             return true;
         }
 
-        // Check regular SessiondService (but might yield negative result in case of a "transient" session
+        // Check regular session service (but might yield negative result in case of a "transient" session)
         String sessionId = value.substring(pos + 1);
         {
             SessiondService sessiondService = services.getService(SessiondService.class);
             if (null != sessiondService) {
                 if (tranzient && (sessiondService instanceof SessiondServiceExtended)) {
-                    // Can only "live" node-local
-                    return ((SessiondServiceExtended) sessiondService).getSession(sessionId, false) != null;
+                    // Can only "live" node-local; either on this node or a remote one. Thus checking session storage makes no sense.
+                    if (((SessiondServiceExtended) sessiondService).getSession(sessionId, false) != null) {
+                        // On this node
+                        return true;
+                    }
+
+                    // Need to check remote ones
+                    Boolean existsRemotely = remoteLookUps.getIfPresent(sessionId);
+                    if (null != existsRemotely) {
+                        return existsRemotely.booleanValue();
+                    }
+
+                    if (null == hzInstance) {
+                        // Cannot check remotely. Assume it does exist
+                        return true;
+                    }
+
+                    // Perform the remote look-up
+                    existsRemotely = Boolean.valueOf(checkRemoteMembersIfSessionExists(sessionId, hzInstance));
+
+                    // Only cache positive look-up result as value will be replaced in consequence of failed validity check
+                    if (existsRemotely.booleanValue()) {
+                        remoteLookUps.put(sessionId, existsRemotely);
+                    }
+                    return existsRemotely.booleanValue();
                 }
 
+                // A non-transient session (which should be available in session storage)
                 if (sessiondService.getSession(sessionId) != null) {
                     return true;
                 }
             }
         }
 
-        if (null != hzInstance) {
-            // Check in cluster
-            Cluster cluster = hzInstance.getCluster();
+        // As last resort: check each member for session existence
+        if (null == hzInstance) {
+            return false;
+        }
+        return checkRemoteMembersIfSessionExists(sessionId, hzInstance);
+    }
 
-            // Get local member
-            Member localMember = cluster.getLocalMember();
+    private boolean checkRemoteMembersIfSessionExists(String sessionId, HazelcastInstance hzInstance) {
+        // Check in cluster
+        Cluster cluster = hzInstance.getCluster();
 
-            // Determine other cluster members
-            Set<Member> otherMembers = getOtherMembers(cluster.getMembers(), localMember);
+        // Get local member
+        Member localMember = cluster.getLocalMember();
 
-            if (!otherMembers.isEmpty()) {
-                IExecutorService executor = hzInstance.getExecutorService("default");
-                Map<Member, Future<Boolean>> futureMap = executor.submitToMembers(new PortableSessionExistenceCheck(sessionId), otherMembers);
-                for (Map.Entry<Member, Future<Boolean>> entry : futureMap.entrySet()) {
-                    Future<Boolean> future = entry.getValue();
-                    // Check Future's return value
-                    int retryCount = 3;
-                    while (retryCount-- > 0) {
-                        try {
-                            boolean exists = future.get().booleanValue();
-                            retryCount = 0;
-                            if (exists) {
-                                return true;
+        // Determine other cluster members
+        Set<Member> otherMembers = getOtherMembers(cluster.getMembers(), localMember);
+
+        if (!otherMembers.isEmpty()) {
+            IExecutorService executor = hzInstance.getExecutorService("default");
+            Map<Member, Future<Boolean>> futureMap = executor.submitToMembers(new PortableSessionExistenceCheck(sessionId), otherMembers);
+            for (Map.Entry<Member, Future<Boolean>> entry : futureMap.entrySet()) {
+                Future<Boolean> future = entry.getValue();
+                // Check Future's return value
+                int retryCount = 3;
+                while (retryCount-- > 0) {
+                    try {
+                        boolean exists = future.get().booleanValue();
+                        retryCount = 0;
+                        if (exists) {
+                            return true;
+                        }
+                    } catch (InterruptedException e) {
+                        // Interrupted - Keep interrupted state
+                        Thread.currentThread().interrupt();
+                    } catch (CancellationException e) {
+                        // Canceled
+                        retryCount = 0;
+                    } catch (ExecutionException e) {
+                        Throwable cause = e.getCause();
+
+                        // Check for Hazelcast timeout
+                        if (!(cause instanceof com.hazelcast.core.OperationTimeoutException)) {
+                            if (cause instanceof RuntimeException) {
+                                throw ((RuntimeException) cause);
                             }
-                        } catch (InterruptedException e) {
-                            // Interrupted - Keep interrupted state
-                            Thread.currentThread().interrupt();
-                        } catch (CancellationException e) {
-                            // Canceled
-                            retryCount = 0;
-                        } catch (ExecutionException e) {
-                            Throwable cause = e.getCause();
-
-                            // Check for Hazelcast timeout
-                            if (!(cause instanceof com.hazelcast.core.OperationTimeoutException)) {
-                                if (cause instanceof RuntimeException) {
-                                    throw ((RuntimeException) cause);
-                                }
-                                if (cause instanceof Error) {
-                                    throw (Error) cause;
-                                }
-                                throw new IllegalStateException("Not unchecked", cause);
+                            if (cause instanceof Error) {
+                                throw (Error) cause;
                             }
+                            throw new IllegalStateException("Not unchecked", cause);
+                        }
 
-                            // Timeout while awaiting remote result
-                            if (retryCount <= 0) {
-                                // No further retry
-                                cancelFutureSafe(future);
-                            }
+                        // Timeout while awaiting remote result
+                        if (retryCount <= 0) {
+                            // No further retry
+                            cancelFutureSafe(future);
                         }
                     }
                 }
