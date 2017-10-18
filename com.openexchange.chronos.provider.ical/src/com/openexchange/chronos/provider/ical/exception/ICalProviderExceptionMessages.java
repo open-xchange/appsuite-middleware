@@ -70,6 +70,8 @@ public class ICalProviderExceptionMessages implements LocalizableStrings {
 
     public static final String FEED_SIZE_EXCEEDED_MSG = "Unfortunately your requested feed cannot be used due to size limitations.";
 
+    public static final String UNEXPECTED_FEED_ERROR_MSG = "Unfortunately the given feed URL cannot be executed as expected.";
+
     /**
      * Initializes a new {@link ICalProviderExceptionMessages}.
      */

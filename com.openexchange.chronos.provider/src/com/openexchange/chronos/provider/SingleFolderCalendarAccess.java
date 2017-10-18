@@ -132,7 +132,7 @@ public abstract class SingleFolderCalendarAccess implements CalendarAccess {
             //        userConfig.put("description", null);
             userConfig.put("scheduleTransp", null != folder.getScheduleTransparency() ? folder.getScheduleTransparency().getValue() : null);
             userConfig.put("usedForSync", Boolean.valueOf(folder.isUsedForSync()));
-            this.account = getAccountService().updateAccount(session, account.getAccountId(), userConfig, clientTimestamp, parameters);
+            this.account = getAccountService().updateAccount(session, account.getAccountId(), null, userConfig, clientTimestamp, parameters);
         } catch (JSONException e) {
             throw CalendarExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }

@@ -1084,6 +1084,21 @@ msgstr ""
 msgid "Unable to add alarms: %s"
 msgstr ""
 
+#. *
+#. * The content-id '%1$s' refers to a non-existing attachment in the body part.
+#.
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.json/src/com/openexchange/chronos/json/exception/CalendarExceptionMessages.java:77
+msgid ""
+"The content-id '%1$s' refers to a non-existing attachment in the body part."
+msgstr ""
+
+#. *
+#. * The metadata of the attachment '%1$s' does not have a content-id.
+#.
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.json/src/com/openexchange/chronos/json/exception/CalendarExceptionMessages.java:81
+msgid "The metadata of the attachment '%1$s' does not have a content-id."
+msgstr ""
+
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.json/src/com/openexchange/chronos/json/oauth/OAuthScopeDescription.java:63
 msgid "Read all your events."
 msgstr ""
@@ -1152,6 +1167,10 @@ msgstr ""
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:71
 msgid ""
 "Unfortunately your requested feed cannot be used due to size limitations."
+msgstr ""
+
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:73
+msgid "Unfortunately the given feed URL cannot be executed as expected."
 msgstr ""
 
 #. *

@@ -392,6 +392,32 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
             release(connection, updated);
         }
     }
+    
+    @Override
+    public void deleteAllTriggers() throws OXException {
+        int updated = 0;
+        Connection connection = null;
+        try {
+            connection = dbProvider.getWriteConnection(context);
+            txPolicy.setAutoCommit(connection, false);
+            updated = deleteTriggers(connection);
+            txPolicy.commit(connection);
+        } catch (SQLException e) {
+            throw asOXException(e);
+        } finally {
+            release(connection, updated);
+        }
+    }
+
+    private int deleteTriggers(Connection connection) throws SQLException {
+        String sql = "DELETE FROM calendar_alarm_trigger WHERE cid=? AND account=?;";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            int parameterIndex = 1;
+            stmt.setInt(parameterIndex++, context.getContextId());
+            stmt.setInt(parameterIndex++, accountId);
+            return logExecuteUpdate(stmt);
+        }
+    }
 
     private int deleteTriggers(Connection connection, List<String> ids) throws SQLException {
         if (null == ids || 0 == ids.size()) {

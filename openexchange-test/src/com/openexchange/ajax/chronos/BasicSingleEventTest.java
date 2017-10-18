@@ -275,8 +275,7 @@ public class BasicSingleEventTest extends AbstractChronosTest {
         AssertUtil.assertEventsEqual(expectedEventData, actualEventData);
 
         // Set the managed id for the retained attachment
-        ChronosAttachment retainedAttachment = EventFactory.createAttachment(assetA);
-        retainedAttachment.setManagedId(actualEventData.getAttachments().get(0).getManagedId());
+        ChronosAttachment retainedAttachment = actualEventData.getAttachments().get(0);
         // Create the delta
         EventData updateData = new EventData();
         updateData.setId(actualEventData.getId());

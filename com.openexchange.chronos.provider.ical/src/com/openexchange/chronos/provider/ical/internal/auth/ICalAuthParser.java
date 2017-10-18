@@ -47,12 +47,14 @@
  *
  */
 
-package com.openexchange.chronos.provider.auth;
+package com.openexchange.chronos.provider.ical.internal.auth;
 
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import org.json.JSONException;
+import org.json.JSONObject;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -67,14 +69,14 @@ import com.openexchange.session.Session;
 
 /**
  * 
- * {@link CalendarAuthParser}
+ * {@link ICalAuthParser}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.10.0
  */
-public class CalendarAuthParser {
+public class ICalAuthParser {
 
-    private static final CalendarAuthParser INSTANCE = new CalendarAuthParser();
+    private static final ICalAuthParser INSTANCE = new ICalAuthParser();
 
     private final ObjectMapper mapper = new ObjectMapper().setSerializationInclusion(Include.NON_NULL);
 
@@ -83,115 +85,12 @@ public class CalendarAuthParser {
      *
      * @return The instance
      */
-    public static CalendarAuthParser getInstance() {
+    public static ICalAuthParser getInstance() {
         return INSTANCE;
     }
 
-    private CalendarAuthParser() {
+    private ICalAuthParser() {
         super();
-    }
-
-    /**
-     * Parses the attributes from the configuration and adapts them to be valid for further processing
-     *
-     * @param configuration
-     * @param session
-     * @return Set of {@link CalendarAccountAttribute}s contained within the configuration map
-     * @throws OXException
-     */
-    private Set<CalendarAccountAttribute> parse(final Map<String, Object> configuration, Session session) throws OXException {
-        final Set<CalendarAccountAttribute> attributes = new HashSet<CalendarAccountAttribute>();
-
-        String login = CalendarAccountAttribute.LOGIN_LITERAL.getName();
-        if (configuration.containsKey(login)) {
-            attributes.add(CalendarAccountAttribute.LOGIN_LITERAL);
-        }
-
-        String id = CalendarAccountAttribute.ID_LITERAL.getName();
-        if (configuration.containsKey(id)) {
-            attributes.add(CalendarAccountAttribute.ID_LITERAL);
-        }
-
-        String password = CalendarAccountAttribute.PASSWORD_LITERAL.getName();
-        if (configuration.containsKey(password)) {
-            String encrypt = PasswordUtil.encrypt(parseString(configuration, password), session.getPassword());
-            configuration.put(password, encrypt);
-            attributes.add(CalendarAccountAttribute.PASSWORD_LITERAL);
-        }
-
-        String oauthToken = CalendarAccountAttribute.OAUTH_ACCOUNT_ID_LITERAL.getName();
-        if (configuration.containsKey(oauthToken)) {
-            configuration.remove(password);
-            attributes.add(CalendarAccountAttribute.OAUTH_ACCOUNT_ID_LITERAL);
-        }
-
-        String token = CalendarAccountAttribute.TOKEN_LITERAL.getName();
-        if (configuration.containsKey(token)) {
-            attributes.add(CalendarAccountAttribute.TOKEN_LITERAL);
-        }
-        return attributes;
-    }
-
-    private Set<CalendarAccountAttribute> validate(Set<CalendarAccountAttribute> attributes) throws OXException {
-        Set<CalendarAccountAttribute> copy = new HashSet<>(attributes);
-        copy.remove(CalendarAccountAttribute.LOGIN_LITERAL);
-        copy.remove(CalendarAccountAttribute.ID_LITERAL);
-
-        if (copy.size() > 1) {
-            throw CalendarExceptionCodes.BAD_AUTH_CONFIGURATION.create(copy.toString());
-        }
-        return copy;
-    }
-
-    private static String parseString(final Map<String, Object> configuration, final String name) {
-        String retval = null;
-        if (configuration.containsKey(name)) {
-            final String test = (String) configuration.get(name);
-            if (0 != test.length()) {
-                retval = test;
-            }
-        }
-        return retval;
-    }
-
-    /**
-     * Returns the {@link AuthInfo} based on the configuration provided by the client (unstructured).
-     * 
-     * @param session - The user session used to encrypt the given password
-     * @param configuration - The configuration provided by the client
-     * @return {@link AuthInfo} that is valid for the given URI
-     * @throws OXException
-     */
-    public AuthInfo getAuthInfoFromUnstructured(Session session, Map<String, Object> configuration) throws OXException {
-        Set<CalendarAccountAttribute> availableAttributes = parse(configuration, session);
-        Set<CalendarAccountAttribute> authAttributes = validate(availableAttributes);
-
-        AuthInfo authInfo = generateAuthInfo(configuration, authAttributes);
-        return authInfo;
-    }
-
-    private AuthInfo generateAuthInfo(Map<String, Object> configuration, Set<CalendarAccountAttribute> authAttributes) {
-        AuthInfo authInfo = null;
-        Builder builder = AuthInfo.builder();
-        if (authAttributes.contains(CalendarAccountAttribute.OAUTH_ACCOUNT_ID_LITERAL)) {
-            authInfo = builder.setAuthType(AuthType.OAUTH).setOauthAccountId(Integer.parseInt((String) configuration.get(CalendarAccountAttribute.OAUTH_ACCOUNT_ID_LITERAL.getName()))).build();
-        } else if (authAttributes.contains(CalendarAccountAttribute.TOKEN_LITERAL)) {
-            authInfo = builder.setAuthType(AuthType.TOKEN).setToken((String) configuration.get(CalendarAccountAttribute.TOKEN_LITERAL.getName())).build();
-        } else if (authAttributes.contains(CalendarAccountAttribute.LOGIN_LITERAL) || authAttributes.contains(CalendarAccountAttribute.PASSWORD_LITERAL)) {
-            builder.setAuthType(AuthType.LOGIN);
-            String login = (String) configuration.get(CalendarAccountAttribute.LOGIN_LITERAL.getName());
-            if (Strings.isNotEmpty(login)) {
-                builder.setLogin(login);
-            }
-            String password = (String) configuration.get(CalendarAccountAttribute.PASSWORD_LITERAL.getName());
-            if (Strings.isNotEmpty(password)) {
-                builder.setPassword(password);
-            }
-            authInfo = builder.build();
-        } else {
-            authInfo = builder.setAuthType(AuthType.NONE).build();
-        }
-        return authInfo;
     }
 
     /**
@@ -217,14 +116,14 @@ public class CalendarAuthParser {
     }
 
     /**
-     * Returns the {@link AuthInfo} based on structured (earlier processed/read from database) data
+     * Returns the {@link AuthInfo} based on {@link JSONObject} configuration
      * 
-     * @param configuration The structured {@link AuthInfo} in a map
+     * @param configuration The {@link JSONObject}
      * @return {@link AuthInfo} if "auth" is available in configuration; otherwise <code>com.openexchange.auth.info.AuthInfo.NONE</code>
      * @throws OXException
      */
-    public AuthInfo getAuthInfo(Map<String, Object> configuration) throws OXException {
-        Object auth = configuration.get("auth");
+    public AuthInfo getAuthInfo(JSONObject configuration) throws OXException {
+        Object auth = configuration.optString("auth", null);
         if (auth == null) {
             return AuthInfo.NONE;
         }
@@ -233,5 +132,105 @@ public class CalendarAuthParser {
         } catch (IOException e) {
             throw CalendarExceptionCodes.UNEXPECTED_ERROR.create(e.getMessage());
         }
+    }
+
+    public AuthInfo getAuthInfoFromUnstructured(Session session, JSONObject userConfiguration) throws OXException {
+        try {
+            Set<CalendarAccountAttribute> availableAttributes = parse(userConfiguration, session);
+            Set<CalendarAccountAttribute> authAttributes = validate(availableAttributes);
+            AuthInfo authInfo = generateAuthInfo(userConfiguration, authAttributes);
+            return authInfo;
+        } catch (JSONException e) {
+            //TODO
+        }
+        return AuthInfo.NONE;
+    }
+
+    /**
+     * Parses the attributes from the configuration and adapts them to be valid for further processing
+     *
+     * @param configuration
+     * @param session
+     * @return Set of {@link CalendarAccountAttribute}s contained within the configuration map
+     * @throws OXException
+     * @throws JSONException
+     */
+    private Set<CalendarAccountAttribute> parse(final JSONObject configuration, Session session) throws OXException, JSONException {
+        final Set<CalendarAccountAttribute> attributes = new HashSet<CalendarAccountAttribute>();
+
+        String login = CalendarAccountAttribute.LOGIN_LITERAL.getName();
+        if (configuration.has(login)) {
+            attributes.add(CalendarAccountAttribute.LOGIN_LITERAL);
+        }
+
+        String id = CalendarAccountAttribute.ID_LITERAL.getName();
+        if (configuration.has(id)) {
+            attributes.add(CalendarAccountAttribute.ID_LITERAL);
+        }
+
+        String password = CalendarAccountAttribute.PASSWORD_LITERAL.getName();
+        if (configuration.has(password)) {
+            String encrypt = PasswordUtil.encrypt(parseString(configuration, password), session.getPassword());
+            configuration.put(password, encrypt);
+            attributes.add(CalendarAccountAttribute.PASSWORD_LITERAL);
+        }
+
+        String oauthToken = CalendarAccountAttribute.OAUTH_ACCOUNT_ID_LITERAL.getName();
+        if (configuration.has(oauthToken)) {
+            configuration.remove(password);
+            attributes.add(CalendarAccountAttribute.OAUTH_ACCOUNT_ID_LITERAL);
+        }
+
+        String token = CalendarAccountAttribute.TOKEN_LITERAL.getName();
+        if (configuration.has(token)) {
+            attributes.add(CalendarAccountAttribute.TOKEN_LITERAL);
+        }
+        return attributes;
+    }
+
+    private static String parseString(final JSONObject configuration, final String name) throws JSONException {
+        String retval = null;
+        if (configuration.has(name)) {
+            final String test = configuration.getString(name);
+            if (0 != test.length()) {
+                retval = test;
+            }
+        }
+        return retval;
+    }
+
+    private Set<CalendarAccountAttribute> validate(Set<CalendarAccountAttribute> attributes) throws OXException {
+        Set<CalendarAccountAttribute> copy = new HashSet<>(attributes);
+        copy.remove(CalendarAccountAttribute.LOGIN_LITERAL);
+        copy.remove(CalendarAccountAttribute.ID_LITERAL);
+
+        if (copy.size() > 1) {
+            throw CalendarExceptionCodes.BAD_AUTH_CONFIGURATION.create(copy.toString());
+        }
+        return copy;
+    }
+
+    private AuthInfo generateAuthInfo(JSONObject configuration, Set<CalendarAccountAttribute> authAttributes) throws JSONException {
+        AuthInfo authInfo = null;
+        Builder builder = AuthInfo.builder();
+        if (authAttributes.contains(CalendarAccountAttribute.OAUTH_ACCOUNT_ID_LITERAL)) {
+            authInfo = builder.setAuthType(AuthType.OAUTH).setOauthAccountId(configuration.getInt(CalendarAccountAttribute.OAUTH_ACCOUNT_ID_LITERAL.getName())).build();
+        } else if (authAttributes.contains(CalendarAccountAttribute.TOKEN_LITERAL)) {
+            authInfo = builder.setAuthType(AuthType.TOKEN).setToken((String) configuration.get(CalendarAccountAttribute.TOKEN_LITERAL.getName())).build();
+        } else if (authAttributes.contains(CalendarAccountAttribute.LOGIN_LITERAL) || authAttributes.contains(CalendarAccountAttribute.PASSWORD_LITERAL)) {
+            builder.setAuthType(AuthType.BASIC);
+            String login = (String) configuration.get(CalendarAccountAttribute.LOGIN_LITERAL.getName());
+            if (Strings.isNotEmpty(login)) {
+                builder.setLogin(login);
+            }
+            String password = (String) configuration.get(CalendarAccountAttribute.PASSWORD_LITERAL.getName());
+            if (Strings.isNotEmpty(password)) {
+                builder.setPassword(password);
+            }
+            authInfo = builder.build();
+        } else {
+            authInfo = builder.setAuthType(AuthType.NONE).build();
+        }
+        return authInfo;
     }
 }

@@ -55,11 +55,11 @@ package com.openexchange.chronos.schedjoules.api.client;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public enum SchedJoulesRESTBindPoint {
+    
     /**
      * @see <a href="https://github.com/schedjoules/calendar-store-api/blob/master/details/pages.md">https://github.com/schedjoules/calendar-store-api/blob/master/details/pages.md</a>
      */
     pages,
-
     /**
      * @see <a href="https://github.com/schedjoules/calendar-store-api#calendars">https://github.com/schedjoules/calendar-store-api#calendars</a>
      */

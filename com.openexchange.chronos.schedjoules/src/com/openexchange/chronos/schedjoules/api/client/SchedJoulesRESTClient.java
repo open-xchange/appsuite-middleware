@@ -107,7 +107,7 @@ public class SchedJoulesRESTClient {
      * Prepares the 'Authorization' header
      * 
      * @return The authorisation header
-     * @throws OXException if the api key is not configured
+     * @throws OXException if the API key is not configured
      */
     private String prepareAuthorizationHeader() throws OXException {
         LeanConfigurationService service = Services.getService(LeanConfigurationService.class);

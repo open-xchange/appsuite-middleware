@@ -55,6 +55,7 @@ import com.openexchange.chronos.provider.CalendarProvider;
 import com.openexchange.chronos.provider.ical.ICalCalendarProvider;
 import com.openexchange.chronos.provider.ical.internal.Services;
 import com.openexchange.config.lean.LeanConfigurationService;
+import com.openexchange.crypto.CryptoService;
 import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.net.ssl.config.SSLConfigurationService;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -77,7 +78,7 @@ public class ICalCalendarProviderActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ICalService.class, LeanConfigurationService.class, SSLSocketFactoryProvider.class, SSLConfigurationService.class };
+        return new Class<?>[] { ICalService.class, LeanConfigurationService.class, SSLSocketFactoryProvider.class, SSLConfigurationService.class, CryptoService.class };
     }
 
     @Override

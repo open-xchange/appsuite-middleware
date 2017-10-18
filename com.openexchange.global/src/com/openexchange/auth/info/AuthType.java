@@ -70,7 +70,7 @@ public enum AuthType {
     /**
      * The login authentication type.
      */
-    LOGIN("login"),
+    BASIC("login"),
     /**
      * Token authentication
      */

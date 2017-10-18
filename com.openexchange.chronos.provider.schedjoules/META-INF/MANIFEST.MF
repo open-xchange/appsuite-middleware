@@ -8,8 +8,15 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.openexchange.chronos,
  com.openexchange.chronos.provider,
  com.openexchange.chronos.provider.account,
+ com.openexchange.chronos.provider.caching,
+ com.openexchange.chronos.schedjoules.api,
+ com.openexchange.chronos.schedjoules.exception,
  com.openexchange.chronos.service,
  com.openexchange.exception,
+ com.openexchange.java,
+ com.openexchange.osgi,
  com.openexchange.server,
  com.openexchange.session,
- org.json
+ org.json,
+ org.osgi.framework
+Bundle-Activator: com.openexchange.chronos.provider.schedjoules.osgi.SchedJoulesProviderActivator

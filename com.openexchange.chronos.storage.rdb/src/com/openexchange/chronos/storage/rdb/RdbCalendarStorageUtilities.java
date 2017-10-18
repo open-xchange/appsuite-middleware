@@ -178,4 +178,12 @@ public class RdbCalendarStorageUtilities implements CalendarStorageUtilities {
         }
         return events;
     }
+
+    @Override
+    public void deleteAllData() throws OXException {
+        storage.getEventStorage().deleteAllEvents();
+        storage.getAlarmStorage().deleteAllAlarms();
+        storage.getAlarmTriggerStorage().deleteAllTriggers();
+        storage.getAttendeeStorage().deleteAllAttendees();
+    }
 }

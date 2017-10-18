@@ -53,8 +53,15 @@ import static org.slf4j.LoggerFactory.getLogger;
 import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.capabilities.CapabilitySet;
+import com.openexchange.chronos.Alarm;
+import com.openexchange.chronos.AlarmField;
+import com.openexchange.chronos.Available;
+import com.openexchange.chronos.Event;
+import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.alarm.json.AlarmActionFactory;
 import com.openexchange.chronos.availability.json.AvailabilityActionFactory;
+import com.openexchange.chronos.availability.json.mapper.AvailableMapper;
+import com.openexchange.chronos.common.DataHandlers;
 import com.openexchange.chronos.json.action.ChronosActionFactory;
 import com.openexchange.chronos.json.converter.AlarmTriggerConverter;
 import com.openexchange.chronos.json.converter.CalendarResultConverter;
@@ -62,16 +69,21 @@ import com.openexchange.chronos.json.converter.EventConflictResultConverter;
 import com.openexchange.chronos.json.converter.EventResultConverter;
 import com.openexchange.chronos.json.converter.FreeBusyConverter;
 import com.openexchange.chronos.json.converter.MultipleCalendarResultConverter;
+import com.openexchange.chronos.json.converter.mapper.AlarmMapper;
+import com.openexchange.chronos.json.converter.mapper.EventMapper;
+import com.openexchange.chronos.json.converter.mapper.Json2ObjectDataHandler;
+import com.openexchange.chronos.json.converter.mapper.Object2JsonDataHandler;
 import com.openexchange.chronos.json.oauth.ChronosOAuthScope;
 import com.openexchange.chronos.json.oauth.OAuthScopeDescription;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccessFactory;
+import com.openexchange.chronos.service.AvailableField;
 import com.openexchange.chronos.service.CalendarAvailabilityService;
 import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.chronos.service.CalendarUtilities;
+import com.openexchange.conversion.DataHandler;
 import com.openexchange.groupware.userconfiguration.Permission;
 import com.openexchange.oauth.provider.resourceserver.scope.AbstractScopeProvider;
 import com.openexchange.oauth.provider.resourceserver.scope.OAuthScopeProvider;
-import com.openexchange.server.ServiceLookup;
 
 /**
  * {@link ChronosJsonActivator}
@@ -80,8 +92,6 @@ import com.openexchange.server.ServiceLookup;
  * @since v7.10.0
  */
 public class ChronosJsonActivator extends AJAXModuleActivator {
-
-    private static ServiceLookup services = null;
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -124,8 +134,19 @@ public class ChronosJsonActivator extends AJAXModuleActivator {
             registerService(ResultConverter.class, new CalendarResultConverter());
             registerService(ResultConverter.class, new MultipleCalendarResultConverter());
             registerService(ResultConverter.class, new AlarmTriggerConverter());
-
-            services = this;
+            /*
+             * register data handlers
+             */
+            registerService(DataHandler.class, new Json2ObjectDataHandler<Event, EventField>(
+                EventMapper.getInstance()), singletonDictionary("identifier", DataHandlers.JSON2EVENT));
+            registerService(DataHandler.class, new Json2ObjectDataHandler<Alarm, AlarmField>(
+                AlarmMapper.getInstance()), singletonDictionary("identifier", DataHandlers.JSON2ALARM));
+            registerService(DataHandler.class, new Object2JsonDataHandler<Alarm, AlarmField>(
+                AlarmMapper.getInstance(), Alarm.class, Alarm[].class), singletonDictionary("identifier", DataHandlers.ALARM2JSON));
+            registerService(DataHandler.class, new Json2ObjectDataHandler<Available, AvailableField>(
+                AvailableMapper.getInstance()), singletonDictionary("identifier", DataHandlers.JSON2AVAILABLE));
+            registerService(DataHandler.class, new Object2JsonDataHandler<Available, AvailableField>(
+                AvailableMapper.getInstance(), Available.class, Available[].class), singletonDictionary("identifier", DataHandlers.AVAILABLE2JSON));
         } catch (Exception e) {
             getLogger(ChronosJsonActivator.class).error("error starting {}", context.getBundle(), e);
             throw e;
@@ -135,11 +156,7 @@ public class ChronosJsonActivator extends AJAXModuleActivator {
     @Override
     protected void stopBundle() throws Exception {
         getLogger(ChronosJsonActivator.class).info("stopping bundle {}", context.getBundle());
-        services = null;
         super.stopBundle();
     }
 
-    public static ServiceLookup getServiceLookup() {
-        return services;
-    }
 }

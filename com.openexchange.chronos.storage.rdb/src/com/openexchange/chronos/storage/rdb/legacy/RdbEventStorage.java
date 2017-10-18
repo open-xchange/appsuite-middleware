@@ -366,6 +366,11 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
         }
     }
 
+    @Override
+    public void deleteAllEvents() throws OXException {
+        throw new UnsupportedOperationException();
+    }
+    
     private static int deleteEvents(Connection connection, int contextID, List<String> objectIDs) throws SQLException {
         if (null == objectIDs || 0 == objectIDs.size()) {
             return 0;

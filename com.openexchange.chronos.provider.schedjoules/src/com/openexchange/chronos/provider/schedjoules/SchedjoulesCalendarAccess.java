@@ -49,15 +49,28 @@
 
 package com.openexchange.chronos.provider.schedjoules;
 
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.chronos.Calendar;
 import com.openexchange.chronos.Event;
-import com.openexchange.chronos.RecurrenceId;
+import com.openexchange.chronos.TimeTransparency;
 import com.openexchange.chronos.provider.CalendarAccount;
-import com.openexchange.chronos.provider.SingleFolderCalendarAccess;
-import com.openexchange.chronos.provider.account.CalendarAccountService;
+import com.openexchange.chronos.provider.CalendarFolder;
+import com.openexchange.chronos.provider.DefaultCalendarFolder;
+import com.openexchange.chronos.provider.DefaultCalendarPermission;
+import com.openexchange.chronos.provider.caching.CachingCalendarAccess;
+import com.openexchange.chronos.provider.caching.ExternalCalendarResult;
+import com.openexchange.chronos.schedjoules.api.SchedJoulesAPI;
+import com.openexchange.chronos.schedjoules.exception.SchedJoulesExceptionCodes;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceLookup;
+import com.openexchange.java.Enums;
 import com.openexchange.session.Session;
 
 /**
@@ -65,21 +78,37 @@ import com.openexchange.session.Session;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class SchedjoulesCalendarAccess extends SingleFolderCalendarAccess {
+public class SchedjoulesCalendarAccess extends CachingCalendarAccess {
 
-    private final Session session;
-    private final ServiceLookup services;
+    /**
+     * Default 'X-WR-CALNAME' and 'SUMMARY' contents of an iCal that is not accessible
+     */
+    private static final String NO_ACCESS = "You have no access to this calendar";
+
+    /**
+     * The user configuration's key for all available/visible folders
+     */
+    private static final String FOLDERS = "folders";
+
+    /**
+     * The user configuration's key for the name of the calendar
+     */
+    private static final String NAME = "name";
+
+    /**
+     * The user configuration's key for the feed's URL
+     */
+    private static final String URL = "url";
 
     /**
      * Initialises a new {@link SchedjoulesCalendarAccess}.
      *
      * @param account
      * @param parameters
+     * @throws OXException
      */
-    protected SchedjoulesCalendarAccess(ServiceLookup services, Session session, CalendarAccount account, CalendarParameters parameters) {
+    protected SchedjoulesCalendarAccess(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
         super(session, account, parameters);
-        this.services = services;
-        this.session = session;
     }
 
     /*
@@ -89,36 +118,144 @@ public class SchedjoulesCalendarAccess extends SingleFolderCalendarAccess {
      */
     @Override
     public void close() {
-        // TODO Auto-generated method stub
-
+        // no-op
     }
 
     /*
      * (non-Javadoc)
-     *
-     * @see com.openexchange.chronos.provider.SingleFolderCalendarAccess#getEvent(java.lang.String, com.openexchange.chronos.RecurrenceId)
+     * 
+     * @see com.openexchange.chronos.provider.CalendarAccess#getFolder(java.lang.String)
      */
     @Override
-    protected Event getEvent(String eventId, RecurrenceId recurrenceId) throws OXException {
+    public CalendarFolder getFolder(String folderId) throws OXException {
+        return prepareFolder(folderId);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.chronos.provider.CalendarAccess#getVisibleFolders()
+     */
+    @Override
+    public List<CalendarFolder> getVisibleFolders() throws OXException {
+        JSONArray foldersArray = getAccount().getUserConfiguration().optJSONArray(FOLDERS);
+        if (foldersArray == null || foldersArray.isEmpty()) {
+            return Collections.emptyList();
+        }
+        List<CalendarFolder> folders = new ArrayList<>(foldersArray.length());
+        for (int index = 0; index < foldersArray.length(); index++) {
+            try {
+                folders.add(prepareFolder(foldersArray.getJSONObject(index).getString(NAME)));
+            } catch (JSONException e) {
+                throw SchedJoulesExceptionCodes.JSON_ERROR.create(e.getMessage(), e);
+            }
+        }
+        return folders;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.chronos.provider.CalendarAccess#updateFolder(java.lang.String, com.openexchange.chronos.provider.CalendarFolder, long)
+     */
+    @Override
+    public String updateFolder(String folderId, CalendarFolder folder, long clientTimestamp) throws OXException {
         // TODO Auto-generated method stub
         return null;
     }
 
     /*
      * (non-Javadoc)
-     *
-     * @see com.openexchange.chronos.provider.SingleFolderCalendarAccess#getEvents()
+     * 
+     * @see com.openexchange.chronos.provider.CalendarAccess#getChangeExceptions(java.lang.String, java.lang.String)
      */
     @Override
-    protected List<Event> getEvents() throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+    public List<Event> getChangeExceptions(String folderId, String seriesId) throws OXException {
+        return Collections.emptyList();
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.chronos.provider.caching.CachingCalendarAccess#getRefreshInterval()
+     */
     @Override
-    protected CalendarAccountService getAccountService() throws OXException {
+    protected long getRefreshInterval() {
         // TODO Auto-generated method stub
-        return null;
+        return 0;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.chronos.provider.caching.CachingCalendarAccess#getExternalRequestTimeout()
+     */
+    @Override
+    public long getExternalRequestTimeout() {
+        // TODO Auto-generated method stub
+        return 0;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.chronos.provider.caching.CachingCalendarAccess#getEvents(java.lang.String)
+     */
+    @Override
+    public ExternalCalendarResult getEvents(String folderId) throws OXException {
+        try {
+            JSONObject userConfig = getAccount().getUserConfiguration();
+            JSONArray foldersArray = userConfig.getJSONArray(FOLDERS);
+            String updateUrl = null;
+            for (int index = 0; index < foldersArray.length(); index++) {
+                JSONObject folder = foldersArray.getJSONObject(index);
+                if (folderId.equals(folder.getString(NAME))) {
+                    updateUrl = folder.getString(URL);
+                    break;
+                }
+            }
+            URL u = new URL(updateUrl);
+            SchedJoulesAPI api = new SchedJoulesAPI();
+            Calendar calendar = api.calendar().getCalendar(u);
+            if (NO_ACCESS.equals(calendar.getName())) {
+                throw SchedJoulesExceptionCodes.NO_ACCESS.create(folderId);
+            }
+
+            ExternalCalendarResult res = new ExternalCalendarResult();
+            res.addEvents(calendar.getEvents());
+            return res;
+        } catch (JSONException e) {
+            throw SchedJoulesExceptionCodes.JSON_ERROR.create(e.getMessage(), e);
+        } catch (MalformedURLException e) {
+            throw SchedJoulesExceptionCodes.INVALID_URL.create(folderId, e);
+        }
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.chronos.provider.caching.CachingCalendarAccess#handleExceptions(java.lang.String, com.openexchange.exception.OXException)
+     */
+    @Override
+    public void handleExceptions(String calendarFolderId, OXException e) {
+        // TODO Auto-generated method stub
+
+    }
+
+    private CalendarFolder prepareFolder(String folderName) {
+        DefaultCalendarFolder folder = new DefaultCalendarFolder();
+        folder.setId(folderName);
+        folder.setPermissions(Collections.singletonList(DefaultCalendarPermission.readOnlyPermissionsFor(getAccount().getUserId())));
+        folder.setLastModified(getAccount().getLastModified());
+        JSONObject userConfig = getAccount().getUserConfiguration();
+        if (null != userConfig) {
+            folder.setName(userConfig.optString("name", folderName));
+            folder.setColor(userConfig.optString("color", null));
+            folder.setDescription(userConfig.optString("description", null));
+            folder.setUsedForSync(userConfig.optBoolean("usedForSync", false));
+            folder.setScheduleTransparency(Enums.parse(TimeTransparency.class, userConfig.optString("scheduleTransp", null), TimeTransparency.OPAQUE));
+        }
+        return folder;
     }
 
 }

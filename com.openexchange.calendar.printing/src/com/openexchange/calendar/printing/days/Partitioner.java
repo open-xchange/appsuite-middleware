@@ -64,6 +64,7 @@ import com.openexchange.calendar.printing.Constants;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.server.ServiceLookup;
 
 /**
  * Takes the list of appointments and calculates on which days an appointment has to appear.
@@ -87,12 +88,12 @@ public class Partitioner {
         this.context = context;
     }
 
-    public List<Day> partition(final List<Event> idList, int userId) {
+    public List<Day> partition(ServiceLookup services, final List<Event> idList, int userId) {
         final SortedMap<Date, Day> dayMap = new TreeMap<Date, Day>();
         preFill(dayMap);
 
         for (final Event event : idList) {
-            calculateToDays(dayMap, event, userId);
+            calculateToDays(services, dayMap, event, userId);
         }
 
         final List<Day> retval = new ArrayList<Day>(dayMap.size());
@@ -141,7 +142,7 @@ public class Partitioner {
         displayEnd = cal.getTime();
     }
 
-    private void calculateToDays(final SortedMap<Date, Day> dayMap, final Event event, int userId) {
+    private void calculateToDays(ServiceLookup services, final SortedMap<Date, Day> dayMap, final Event event, int userId) {
         if (CPTool.hasDeclined(event, userId)) {
             return;
         }
@@ -158,7 +159,7 @@ public class Partitioner {
         Day day = dayMap.get(dest);
         Date endOfDay = CalendarTools.getDayEnd(cal, dest);
         do {
-            final CPEvent cpAppointment = new CPEvent(event, cal, context);
+            final CPEvent cpAppointment = new CPEvent(services, event, cal, context);
             if (dest.after(CalendarUtils.asDate(event.getStartDate()))) {
                 cpAppointment.setStartDate(dest);
             }

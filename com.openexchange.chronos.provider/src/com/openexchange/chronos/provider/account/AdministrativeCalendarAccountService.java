@@ -66,7 +66,20 @@ import com.openexchange.osgi.annotation.SingletonService;
 public interface AdministrativeCalendarAccountService {
 
     /**
+     * Gets a list of all stored calendar accounts of a certain user.
+     * <p/>
+     * Not yet existing accounts from registered auto-provisioning providers won't be created implicitly.
+     *
+     * @param contextId The context identifier
+     * @param userId The identifier of the users to get the accounts from
+     * @return The accounts, or an empty list if there are none
+     */
+    List<CalendarAccount> getAccounts(int contextId, int userId) throws OXException;
+
+    /**
      * Gets a list of all accounts of certain users in a context for a specific calendar provider.
+     * <p/>
+     * Not yet existing accounts from registered auto-provisioning providers won't be created implicitly.
      *
      * @param contextId The context identifier
      * @param userIds The identifiers of the users to get the accounts from
@@ -76,16 +89,17 @@ public interface AdministrativeCalendarAccountService {
     List<CalendarAccount> getAccounts(int contextId, int[] userIds, String providerId) throws OXException;
 
     /**
-     * Updates the <i>internal</i> configuration data of a specific calendar account.
+     * Updates the configuration data of a specific calendar account.
      *
      * @param contextId The context identifier
      * @param userId The identifier of the user owning the account
      * @param id The identifier of the account to update
+     * @param enabled {@link Boolean#TRUE} to enable the account, {@link Boolean#FALSE} to disable the account, or <code>null</code> to skip
      * @param internalConfig The provider-specific <i>internal</i> configuration data for the calendar account, or <code>null</code> to skip
      * @param userConfig The provider-specific <i>user</i> configuration data for the calendar account, or <code>null</code> to skip
      * @param timestamp The last-known timestamp of the account to catch concurrent modifications, or {@link CalendarUtils#DISTANT_FUTURE} to circumvent the check
      * @return The updated calendar account
      */
-    CalendarAccount updateAccount(int contextId, int userId, int id, JSONObject internalConfig, JSONObject userConfig, long timestamp) throws OXException;
+    CalendarAccount updateAccount(int contextId, int userId, int id, Boolean enabled, JSONObject internalConfig, JSONObject userConfig, long timestamp) throws OXException;
 
 }

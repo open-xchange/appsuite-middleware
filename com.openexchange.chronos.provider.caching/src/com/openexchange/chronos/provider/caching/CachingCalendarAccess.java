@@ -59,8 +59,6 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
-import org.joda.time.Hours;
-import org.joda.time.Weeks;
 import org.json.JSONObject;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.RecurrenceId;
@@ -271,6 +269,11 @@ public abstract class CachingCalendarAccess implements WarningsAware {
         return account;
     }
 
+    /**
+     * Returns the origin request parameters
+     *
+     * @return {@link CalendarParameters} containing the parameters
+     */
     public CalendarParameters getParameters() {
         return parameters;
     }
@@ -318,10 +321,10 @@ public abstract class CachingCalendarAccess implements WarningsAware {
             }
         }
         long providerRefreshInterval = getRefreshInterval();
-        if (providerRefreshInterval > Hours.ONE.toStandardMinutes().getMinutes()) {
+        if (providerRefreshInterval > TimeUnit.DAYS.toMinutes(1L)) {
             return providerRefreshInterval;
         }
-        return Weeks.ONE.toStandardMinutes().getMinutes();
+        return TimeUnit.DAYS.toMinutes(1L);
     }
 
     /**
@@ -333,7 +336,7 @@ public abstract class CachingCalendarAccess implements WarningsAware {
         }
         try {
             AdministrativeCalendarAccountService accountService = Services.getService(AdministrativeCalendarAccountService.class);
-            accountService.updateAccount(getSession().getContextId(), getSession().getUserId(), getAccount().getAccountId(), getAccount().getInternalConfiguration(), null, getAccount().getLastModified().getTime());
+            accountService.updateAccount(getSession().getContextId(), getSession().getUserId(), getAccount().getAccountId(), null, getAccount().getInternalConfiguration(), null, getAccount().getLastModified().getTime());
         } catch (OXException e) {
             LOG.error("Unable to save configuration: {}", e.getMessage(), e);
         }
@@ -344,8 +347,7 @@ public abstract class CachingCalendarAccess implements WarningsAware {
         return warnings;
     }
 
-    public JSONObject getFolderConfiguration(String folderId) {
-
+    public JSONObject getFolderCachingConfiguration(String folderId) {
         JSONObject internalConfig = getAccount().getInternalConfiguration();
         JSONObject caching = internalConfig.optJSONObject(CACHING);
         if (caching == null) {

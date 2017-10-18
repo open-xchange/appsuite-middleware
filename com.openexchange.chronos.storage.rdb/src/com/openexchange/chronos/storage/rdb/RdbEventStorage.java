@@ -301,6 +301,30 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
     }
 
     @Override
+    public void deleteAllEvents() throws OXException {
+        int updated = 0;
+        Connection connection = null;
+        try {
+            connection = dbProvider.getWriteConnection(context);
+            txPolicy.setAutoCommit(connection, false);
+            updated = deleteEvents(connection);
+            txPolicy.commit(connection);
+        } catch (SQLException e) {
+            throw asOXException(e, MAPPER, (Event) null, connection, "calendar_event");
+        } finally {
+            release(connection, updated);
+        }
+    }
+
+    private int deleteEvents(Connection connection) throws SQLException {
+        try (PreparedStatement stmt = connection.prepareStatement("DELETE FROM calendar_event WHERE cid=? AND account=?;")) {
+            stmt.setInt(1, context.getContextId());
+            stmt.setInt(2, accountId);
+            return logExecuteUpdate(stmt);
+        }
+    }
+
+    @Override
     public List<Event> searchEventTombstones(SearchTerm<?> searchTerm, SearchOptions searchOptions, EventField[] fields) throws OXException {
         Connection connection = null;
         try {

@@ -77,7 +77,15 @@ public enum CalendarExceptionCodes implements DisplayableOXExceptionCode {
      * Unable to add alarms: %s
      */
     UNABLE_TO_ADD_ALARMS("Unable to add alarms: %s", CalendarExceptionMessages.UNABLE_TO_ADD_ALARMS_MSG, Category.CATEGORY_ERROR, 3),
-
+    /**
+     * The content-id '%1$s' refers to a non-existing attachment in the body part.
+     */
+    MISSING_BODY_PART_ATTACHMENT_REFERENCE("The content-id '%1$s' refers to a non-existing attachment in the body part.", CalendarExceptionMessages.MISSING_BODY_PART_ATTACHMENT_REFERENCE_MSG, Category.CATEGORY_ERROR, 4),
+    /**
+     * <li>The metadata of the attachment '%1$s' does not have a content-id.</li>
+     * <li>The attachment's metadata does not have a content-id.</li>
+     */
+    MISSING_METADATA_ATTACHMENT_REFERENCE("The attachment's metadata does not have a content-id.", CalendarExceptionMessages.MISSING_METADATA_ATTACHMENT_REFERENCE_MSG, Category.CATEGORY_ERROR, 4),
     ;
 
     public static final String PREFIX = "CAL_JSON".intern();

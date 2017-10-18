@@ -159,4 +159,9 @@ public class RdbAlarmStorage implements AlarmStorage {
         legacyDelegate.deleteAlarms(userId);
     }
 
+    @Override
+    public void deleteAllAlarms() throws OXException {
+        delegate.deleteAllAlarms();
+    }
+
 }

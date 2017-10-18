@@ -5,10 +5,7 @@ Bundle-SymbolicName: com.openexchange.chronos.provider
 Bundle-Version: 7.8.4
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Import-Package: com.fasterxml.jackson.annotation,
- com.fasterxml.jackson.core,
- com.fasterxml.jackson.databind,
- com.google.common.io,
+Import-Package: com.google.common.io,
  com.openexchange.ajax.fileholder,
  com.openexchange.auth.info,
  com.openexchange.chronos,
@@ -24,13 +21,9 @@ Import-Package: com.fasterxml.jackson.annotation,
  com.openexchange.osgi.annotation,
  com.openexchange.osgi.util,
  com.openexchange.quota,
- com.openexchange.server,
  com.openexchange.session,
  com.openexchange.tools.id,
  com.openexchange.tx,
- javax.crypto,
- javax.crypto.spec,
- org.apache.commons.codec.binary,
  org.dmfs.rfc5545,
  org.json,
  org.osgi.framework,
@@ -38,8 +31,6 @@ Import-Package: com.fasterxml.jackson.annotation,
  org.slf4j
 Export-Package: com.openexchange.chronos.provider,
  com.openexchange.chronos.provider.account,
- com.openexchange.chronos.provider.auth,
  com.openexchange.chronos.provider.composition,
  com.openexchange.chronos.provider.extensions,
  com.openexchange.chronos.provider.groupware
-Bundle-Activator: com.openexchange.chronos.provider.osgi.ProviderActivator

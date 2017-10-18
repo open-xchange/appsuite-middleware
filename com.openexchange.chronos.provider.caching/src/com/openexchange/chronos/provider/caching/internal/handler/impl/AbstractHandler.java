@@ -121,7 +121,7 @@ public abstract class AbstractHandler implements CachingHandler {
 
     @Override
     public void updateLastUpdated(String folderId, long timestamp) {
-        JSONObject folderConfig = this.cachedCalendarAccess.getFolderConfiguration(folderId);
+        JSONObject folderConfig = this.cachedCalendarAccess.getFolderCachingConfiguration(folderId);
         folderConfig.putSafe(CachingCalendarAccess.LAST_UPDATE, Long.valueOf(timestamp));
     }
 

@@ -86,19 +86,20 @@ public interface CalendarAccountService {
     CalendarAccount createAccount(Session session, String providerId, JSONObject userConfig, CalendarParameters parameters) throws OXException;
 
     /**
-     * Updates an existing calendar account and checks for permissions.
+     * Updates an existing calendar account.
      *
      * @param session The current session
      * @param id The identifier of the account to update
      * @param userConfig The account's external / user configuration data
+     * @param enabled {@link Boolean#TRUE} to enable the account, {@link Boolean#FALSE} to disable the account, or <code>null</code> to skip
      * @param clientTimestamp The last timestamp known by the client to catch concurrent updates
      * @param parameters Additional calendar parameters, or <code>null</code> if not set
      * @return The updated calendar account
      */
-    CalendarAccount updateAccount(Session session, int id, JSONObject userConfig, long clientTimestamp, CalendarParameters parameters) throws OXException;
+    CalendarAccount updateAccount(Session session, int id, Boolean enabled, JSONObject userConfig, long clientTimestamp, CalendarParameters parameters) throws OXException;
 
     /**
-     * Deletes an existing calendar account and checks for permissions.
+     * Deletes an existing calendar account.
      *
      * @param session The current user session
      * @param id The identifier of the account to delete
@@ -109,7 +110,7 @@ public interface CalendarAccountService {
     void deleteAccount(Session session, int id, long timestamp, CalendarParameters parameters) throws OXException;
 
     /**
-     * Gets an existing calendar account and checks for permissions.
+     * Gets an existing calendar account.
      *
      * @param session The current user session
      * @param id The identifier of the account to load
@@ -119,7 +120,7 @@ public interface CalendarAccountService {
     CalendarAccount getAccount(Session session, int id) throws OXException;
 
     /**
-     * Gets a list of all calendar accounts stored for a specific user and checks for permissions.
+     * Gets a list of all calendar accounts stored for a specific user.
      *
      * @param session The current user session
      * @return The accounts, or an empty list if none were found
@@ -128,7 +129,7 @@ public interface CalendarAccountService {
     List<CalendarAccount> getAccounts(Session session) throws OXException;
 
     /**
-     * Gets a list of all calendar accounts stored for s specific user and provider, also checks for permissions
+     * Gets a list of all calendar accounts stored for s specific user and provider.
      *
      * @param session The current user session
      * @param providerId The providerId to search with

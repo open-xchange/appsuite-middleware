@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,42 +47,34 @@
  *
  */
 
-package com.openexchange.chronos.provider.osgi;
+package com.openexchange.importexport.importers.ical;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import com.openexchange.chronos.provider.internal.Services;
-import com.openexchange.crypto.CryptoService;
-import com.openexchange.osgi.HousekeepingActivator;
+import java.io.InputStream;
+import java.util.List;
+import java.util.Map;
+import com.openexchange.data.conversion.ical.TruncationInfo;
+import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.UserizedFolder;
+import com.openexchange.groupware.importexport.ImportResult;
 
 /**
- * 
- * {@link ProviderActivator}
+ * {@link ICalImport}
  *
- * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
+ * @author <a href="mailto:Jan-Oliver.Huhn@open-xchange.com">Jan-Oliver Huhn</a>
  * @since v7.10.0
  */
-public class ProviderActivator extends HousekeepingActivator {
+public interface ICalImport {
 
-    private static final Logger LOG = LoggerFactory.getLogger(ProviderActivator.class);
-
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { CryptoService.class };
-    }
-
-    @Override
-    protected void startBundle() throws Exception {
-        LOG.info("starting bundle: \"com.openexchange.chronos.provider\"");
-        Services.setServiceLookup(this);
-    }
-
-    @Override
-    protected void stopBundle() throws Exception {
-        LOG.info("stopping bundle: \"com.openexchange.chronos.provider\"");
-
-        Services.setServiceLookup(null);
-        super.stopBundle();
-    }
+    /**
+     * Imports an ical file containing events or tasks
+     *
+     * @param userizedFolder The folder to import to
+     * @param is The inputstream containing the file
+     * @param list A list of import results
+     * @param optionalParams The optional parameters
+     * @return  TruncationInfo The result of the import
+     * @throws OXException if the import fails
+     */
+    TruncationInfo importData(UserizedFolder userizedFolder, InputStream is, List<ImportResult> list, Map<String, String[]> optionalParams) throws OXException ;
 
 }

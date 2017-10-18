@@ -65,6 +65,7 @@ import com.openexchange.chronos.storage.AlarmStorage;
 import com.openexchange.chronos.storage.AlarmTriggerStorage;
 import com.openexchange.chronos.storage.AttachmentStorage;
 import com.openexchange.chronos.storage.AttendeeStorage;
+import com.openexchange.chronos.storage.CalendarAccountStorage;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.chronos.storage.CalendarStorageUtilities;
 import com.openexchange.chronos.storage.EventStorage;
@@ -87,6 +88,7 @@ public class RdbCalendarStorage implements CalendarStorage {
     private final RdbAttendeeStorage attendeeStorage;
     private final RdbAlarmStorage alarmStorage;
     private final RdbAttachmentStorage attachmentStorage;
+    private final CalendarAccountStorage accountStorage;
     private final CalendarStorageUtilities storageUtilities;
 
     /**
@@ -103,8 +105,8 @@ public class RdbCalendarStorage implements CalendarStorage {
         attendeeStorage = new RdbAttendeeStorage(context, entityResolver, dbProvider, txPolicy);
         alarmStorage = new RdbAlarmStorage(context, entityResolver, dbProvider, txPolicy);
         attachmentStorage = new RdbAttachmentStorage(context, dbProvider, txPolicy);
-
-        this.storageUtilities = new RdbCalendarStorageUtilities(this);
+        accountStorage = com.openexchange.chronos.storage.rdb.RdbCalendarAccountStorage.init(context, dbProvider, txPolicy);
+        storageUtilities = new RdbCalendarStorageUtilities(this);
     }
 
     @Override
@@ -125,6 +127,11 @@ public class RdbCalendarStorage implements CalendarStorage {
     @Override
     public AttendeeStorage getAttendeeStorage() {
         return attendeeStorage;
+    }
+
+    @Override
+    public CalendarAccountStorage getAccountStorage() {
+        return accountStorage;
     }
 
     @Override
@@ -198,6 +205,11 @@ public class RdbCalendarStorage implements CalendarStorage {
 
             @Override
             public void deleteTriggers(int userId) throws OXException {
+                // Do nothing
+            }
+
+            @Override
+            public void deleteAllTriggers() throws OXException {
                 // Do nothing
             }
         };

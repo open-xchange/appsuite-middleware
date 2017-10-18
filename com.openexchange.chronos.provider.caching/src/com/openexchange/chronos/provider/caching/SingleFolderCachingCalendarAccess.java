@@ -103,7 +103,7 @@ public abstract class SingleFolderCachingCalendarAccess extends CachingCalendarA
     }
 
     protected JSONObject getFolderConfiguration() {
-        return getFolderConfiguration(folder.getId());
+        return getFolderCachingConfiguration(folder.getId());
     }
 
     /**

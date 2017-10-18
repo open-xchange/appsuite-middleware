@@ -79,7 +79,6 @@ import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.importexport.actions.exporter.ContactExportAction;
 import com.openexchange.importexport.exceptions.ImportExportExceptionCodes;
 import com.openexchange.importexport.formats.Format;
-import com.openexchange.importexport.helpers.ExportFileNameCreator;
 import com.openexchange.importexport.helpers.SizedInputStream;
 import com.openexchange.importexport.osgi.ImportExportServices;
 import com.openexchange.java.Streams;
@@ -427,17 +426,6 @@ public class VCardExporter extends AbstractExporter {
         }
     }
 
-    private boolean isSaveToDisk(final Map<String, Object> optionalParams) {
-        if (null == optionalParams) {
-            return false;
-        }
-        final Object object = optionalParams.get("__saveToDisk");
-        if (null == object) {
-            return false;
-        }
-        return (object instanceof Boolean ? ((Boolean) object).booleanValue() : Boolean.parseBoolean(object.toString().trim()));
-    }
-
     private ContactField[] ensureContained(ContactField[] fields, ContactField fieldToAdd) {
         for (ContactField field : fields) {
             if (field == fieldToAdd) {
@@ -449,10 +437,6 @@ public class VCardExporter extends AbstractExporter {
         System.arraycopy(fields, 0, retval, 0, fields.length);
         retval[fields.length] = fieldToAdd;
         return retval;
-    }
-
-    private String appendFileNameParameter(AJAXRequestData requestData, String fileName) {
-        return ExportFileNameCreator.appendFileNameParameter(requestData, fileName);
     }
 
 }

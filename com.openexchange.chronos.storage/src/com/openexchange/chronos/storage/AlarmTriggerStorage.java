@@ -119,6 +119,13 @@ public interface AlarmTriggerStorage {
     void deleteTriggers(int userId) throws OXException;
 
     /**
+     * Deletes all existing alarm triggers for an account.
+     * 
+     * @throws OXException
+     */
+    void deleteAllTriggers() throws OXException;
+
+    /**
      * Retrieves all not acknowledged alarm triggers for the given user with a trigger time earlier than the given limit.
      *
      * @param userId The user id
@@ -136,5 +143,4 @@ public interface AlarmTriggerStorage {
      * @throws OXException
      */
     Integer recalculateFloatingAlarmTriggers(int userId) throws OXException;
-
 }

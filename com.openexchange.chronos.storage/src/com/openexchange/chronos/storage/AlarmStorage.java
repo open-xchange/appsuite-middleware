@@ -122,6 +122,11 @@ public interface AlarmStorage {
     void deleteAlarms(int userId) throws OXException;
 
     /**
+     * Deletes all alarms for an account.
+     */
+    void deleteAllAlarms() throws OXException;
+
+    /**
      * Deletes all alarms of a user stored for a specific event.
      *
      * @param eventId The identifier of the event to remove the alarms for

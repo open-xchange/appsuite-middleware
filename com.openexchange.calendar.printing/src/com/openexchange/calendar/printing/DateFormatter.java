@@ -56,7 +56,6 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Locale;
 import java.util.TimeZone;
-import com.openexchange.i18n.LocalizableStrings;
 import com.openexchange.i18n.tools.StringHelper;
 
 public class DateFormatter {

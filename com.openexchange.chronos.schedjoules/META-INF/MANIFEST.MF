@@ -8,12 +8,17 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.openexchange.chronos,
  com.openexchange.chronos.exception,
  com.openexchange.chronos.ical,
+ com.openexchange.chronos.provider,
+ com.openexchange.chronos.provider.account,
+ com.openexchange.chronos.service,
  com.openexchange.config.lean,
  com.openexchange.exception,
  com.openexchange.java,
  com.openexchange.osgi,
  com.openexchange.rest.client.httpclient,
  com.openexchange.server,
+ com.openexchange.session,
+ com.openexchange.tools.id,
  org.apache.commons.io;version="2.2.0",
  org.apache.http;version="4.4.5",
  org.apache.http.client;version="4.5.2",
@@ -23,4 +28,6 @@ Import-Package: com.openexchange.chronos,
  org.json,
  org.osgi.framework
 Bundle-Activator: com.openexchange.chronos.schedjoules.osgi.SchedJoulesActivator
-Export-Package: com.openexchange.chronos.schedjoules
+Export-Package: com.openexchange.chronos.schedjoules,
+ com.openexchange.chronos.schedjoules.api,
+ com.openexchange.chronos.schedjoules.exception

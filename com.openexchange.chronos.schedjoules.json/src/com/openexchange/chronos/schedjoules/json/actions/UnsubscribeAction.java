@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,38 +47,48 @@
  *
  */
 
-package com.openexchange.chronos.storage.rdb;
+package com.openexchange.chronos.schedjoules.json.actions;
 
-import com.openexchange.chronos.storage.CalendarAccountStorage;
-import com.openexchange.chronos.storage.CalendarAccountStorageFactory;
-import com.openexchange.chronos.storage.CalendarStorage;
-import com.openexchange.database.provider.DBProvider;
-import com.openexchange.database.provider.DBTransactionPolicy;
+import com.openexchange.ajax.requesthandler.AJAXActionService;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.chronos.schedjoules.SchedJoulesService;
+import com.openexchange.chronos.schedjoules.json.actions.parameter.SchedJoulesUnsubscribeParameter;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link CalendarStorage}
+ * {@link UnsubscribeAction}
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
- * @since v7.10.0
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class RdbCalendarAccountStorageFactory implements CalendarAccountStorageFactory {
-
-    private final DBProvider defaultDbProvider;
+public class UnsubscribeAction extends AbstractSchedJoulesAction implements AJAXActionService {
 
     /**
-     * Initializes a new {@link RdbCalendarAccountStorageFactory}.
-     *
-     * @param defaultDbProvider The default database provider to use
+     * Initialises a new {@link UnsubscribeAction}.
      */
-    public RdbCalendarAccountStorageFactory(DBProvider defaultDbProvider) {
-        super();
-        this.defaultDbProvider = defaultDbProvider;
+    public UnsubscribeAction(ServiceLookup services) {
+        super(services);
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ajax.requesthandler.AJAXActionService#perform(com.openexchange.ajax.requesthandler.AJAXRequestData, com.openexchange.tools.session.ServerSession)
+     */
     @Override
-    public CalendarAccountStorage create(Context context) throws OXException {
-        return new CachingCalendarAccountStorage(new RdbCalendarAccountStorage(context, defaultDbProvider, DBTransactionPolicy.NORMAL_TRANSACTIONS), context.getContextId()); 
+    public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
+        // Check if the mandatory 'accountId' is present and get it
+        requestData.checkParameter(SchedJoulesUnsubscribeParameter.ACCOUNT_ID);
+        int accountId = requestData.getIntParameter(SchedJoulesUnsubscribeParameter.ACCOUNT_ID);
+
+        // Check if the mandatory 'folder' is present and get it
+        String folder = requestData.checkParameter(SchedJoulesUnsubscribeParameter.FOLDER);
+
+        SchedJoulesService service = services.getService(SchedJoulesService.class);
+        service.unsubscribeCalendar(session, folder, accountId);
+
+        return new AJAXRequestResult();
     }
 }

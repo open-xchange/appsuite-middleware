@@ -322,6 +322,11 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
     public void deleteAlarms(int userId) throws OXException {
         throw new UnsupportedOperationException();
     }
+    
+    @Override
+    public void deleteAllAlarms() throws OXException {
+        throw new UnsupportedOperationException();
+    }
 
     /**
      * Optionally gets the alarms representing the stored reminder data. Invalid / malformed alarm data is ignored implicitly.
@@ -815,5 +820,4 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
         }
 
     }
-
 }

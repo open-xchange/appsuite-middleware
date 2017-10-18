@@ -240,7 +240,11 @@ public class ScheduleInboxCollection extends DAVCollection implements FilteringR
         CalendarAvailabilityService availabilityService = getFactory().getService(CalendarAvailabilityService.class);
         Availability calendarAvailability = availabilityService.getAvailability(calendarSession);
         if (null == calendarAvailability || null == calendarAvailability.getAvailable() || calendarAvailability.getAvailable().isEmpty()) {
-            return null;
+            WebdavProperty property = new WebdavProperty(namespace, "calendar-availability");
+            property.setXML(true);
+            property.setValue("");
+            return property;
+            //            return null;
         }
         InputStream inputStream = null;
         try {

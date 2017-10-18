@@ -66,6 +66,7 @@ import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.json.converter.EventConflictResultConverter;
 import com.openexchange.chronos.json.converter.mapper.EventMapper;
+import com.openexchange.chronos.json.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccessFactory;
 import com.openexchange.exception.Category;
@@ -102,8 +103,24 @@ public abstract class ChronosAction extends AbstractChronosAction {
 
     @Override
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
+        AJAXRequestResult result;
         IDBasedCalendarAccess calendarAccess = initCalendarAccess(requestData);
-        AJAXRequestResult result = perform(calendarAccess, requestData);
+        boolean committed = false;
+        try {
+            calendarAccess.startTransaction();
+            result = perform(calendarAccess, requestData);
+            calendarAccess.commit();
+            committed = true;
+        } finally {
+            if (false == committed) {
+                calendarAccess.rollback();
+            }
+            calendarAccess.finish();
+        }
+        List<OXException> warnings = calendarAccess.getWarnings();
+        if (null != warnings && 0 < warnings.size()) {
+            result.addWarnings(warnings);
+        }
         return result;
     }
 
@@ -133,7 +150,7 @@ public abstract class ChronosAction extends AbstractChronosAction {
      * Handles the specified {@link OXException} and if it is of type
      * {@link Category#CATEGORY_CONFLICT}, it returns the correct response.
      * Otherwise the original exception is re-thrown
-     * 
+     *
      * @param e The {@link OXException} to handle
      * @return The proper conflict response
      * @throws OXException The original {@link OXException} if not of type {@link Category#CATEGORY_CONFLICT}
@@ -171,24 +188,24 @@ public abstract class ChronosAction extends AbstractChronosAction {
     /**
      * Parses the {@link Event} from the payload object of the specified {@link AJAXRequestData}.
      * Any {@link Attachment} uploads will also be handled and properly attached to the {@link Event}.
-     * 
+     *
      * @param session The groupware {@link Session}
      * @param requestData The {@link AJAXRequestData}
      * @return The parsed {@link Event}
      * @throws OXException if a parsing error occurs
      */
     protected Event parseEvent(Session session, AJAXRequestData requestData) throws OXException {
-        Map<String, Attachment> attachments = new HashMap<>();
+        Map<String, UploadFile> uploads = new HashMap<>();
         JSONObject jsonEvent;
         long maxUploadSize = AttachmentConfig.getMaxUploadSize();
         if (requestData.hasUploads(-1, maxUploadSize > 0 ? maxUploadSize : -1L)) {
-            jsonEvent = handleUploads(requestData, attachments);
+            jsonEvent = handleUploads(requestData, uploads);
         } else {
             jsonEvent = extractJsonBody(requestData);
         }
         try {
             Event event = EventMapper.getInstance().deserialize(jsonEvent, EventMapper.getInstance().getMappedFields(), getTimeZone(session, requestData));
-            processAttachments(attachments, event);
+            processAttachments(uploads, event);
             return event;
         } catch (JSONException e) {
             throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e.getMessage(), e);
@@ -198,31 +215,42 @@ public abstract class ChronosAction extends AbstractChronosAction {
     /**
      * Processes any attachments the {@link Event} might have. It simply sets
      * the 'data' field of each attachment.
-     * 
-     * @param attachments The uploaded attachments (data + metadata)
+     *
+     * @param uploads The uploaded attachments' data
      * @param event The event that contains the metadata of the attachments
+     * @throws OXException if there are missing references between attachment metadata and attachment body parts
      */
-    private void processAttachments(Map<String, Attachment> attachments, Event event) {
+    private void processAttachments(Map<String, UploadFile> uploads, Event event) throws OXException {
         if (!event.containsAttachments()) {
             return;
         }
         for (Attachment attachment : event.getAttachments()) {
-            Attachment att = attachments.get(attachment.getContentId());
-            if (att != null) {
-                attachment.setData(att.getData());
+            // We skip already uploaded files that have a managedId reference
+            if (attachment.getManagedId() > 0) {
+                continue;
             }
+            if (attachment.getContentId() == null) {
+                throw CalendarExceptionCodes.MISSING_METADATA_ATTACHMENT_REFERENCE.create(attachment.getFilename());
+            }
+            UploadFile uploadFile = uploads.get(attachment.getContentId());
+            if (uploadFile == null) {
+                throw CalendarExceptionCodes.MISSING_BODY_PART_ATTACHMENT_REFERENCE.create(attachment.getContentId());
+            }
+            File tmpFile = uploadFile.getTmpFile();
+            FileHolder fileHolder = new FileHolder(FileHolder.newClosureFor(tmpFile), tmpFile.length(), attachment.getFormatType(), attachment.getFilename());
+            attachment.setData(fileHolder);
         }
     }
 
     /**
      * Handles the file uploads and extracts the {@link JSONObject} payload from the upload request.
-     * 
+     *
      * @param requestData The {@link AJAXRequestData}
-     * @param attachments The {@link Map} with the attachments
+     * @param uploads The {@link Map} with the uploads
      * @return The {@link JSONObject} payload of the POST request
      * @throws OXException if an error is occurred
      */
-    private JSONObject handleUploads(AJAXRequestData requestData, Map<String, Attachment> attachments) throws OXException {
+    private JSONObject handleUploads(AJAXRequestData requestData, Map<String, UploadFile> uploads) throws OXException {
         UploadEvent uploadEvent = requestData.getUploadEvent();
         final List<UploadFile> uploadFiles = uploadEvent.getUploadFiles();
         for (UploadFile uploadFile : uploadFiles) {
@@ -230,35 +258,15 @@ public abstract class ChronosAction extends AbstractChronosAction {
             if (Strings.isEmpty(contentId)) {
                 throw AjaxExceptionCodes.BAD_REQUEST_CUSTOM.create("Unable to extract the Content-ID for the attachment.");
             }
-            attachments.put(contentId, convertUploadedFile(uploadFile));
+            uploads.put(contentId, uploadFile);
         }
 
         return extractJsonBody(uploadEvent);
     }
 
     /**
-     * Converts the specified {@link UploadFile} to an {@link Attachment}
-     * 
-     * @param uploadFile The {@link UploadFile} to convert
-     * @return The {@link Attachment}
-     */
-    private Attachment convertUploadedFile(UploadFile uploadFile) {
-        Attachment attachment = new Attachment();
-        attachment.setContentId(uploadFile.getContentId());
-        attachment.setFilename(uploadFile.getFileName());
-        attachment.setFormatType(uploadFile.getContentType());
-        attachment.setSize(uploadFile.getSize());
-
-        File tmpFile = uploadFile.getTmpFile();
-        FileHolder fileHolder = new FileHolder(FileHolder.newClosureFor(tmpFile), tmpFile.length(), attachment.getFormatType(), attachment.getFilename());
-        attachment.setData(fileHolder);
-
-        return attachment;
-    }
-
-    /**
      * Extracts the {@link JSONObject} payload from the specified {@link AJAXRequestData}
-     * 
+     *
      * @param requestData the {@link AJAXRequestData} to extract the {@link JSONObject} payload from
      * @return The extracted {@link JSONObject} payload
      * @throws OXException if the payload is missing, or a parsing error occurs
@@ -273,7 +281,7 @@ public abstract class ChronosAction extends AbstractChronosAction {
 
     /**
      * Extracts the {@link JSONObject} payload from the specified {@link UploadEvent}
-     * 
+     *
      * @param upload the {@link UploadEvent} to extract the {@link JSONObject} payload from
      * @return The extracted {@link JSONObject} payload
      * @throws OXException if the payload is missing, or a parsing error occurs

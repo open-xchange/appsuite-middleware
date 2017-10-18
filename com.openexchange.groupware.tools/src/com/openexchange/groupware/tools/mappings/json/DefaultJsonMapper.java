@@ -49,8 +49,6 @@
 
 package com.openexchange.groupware.tools.mappings.json;
 
-import gnu.trove.map.TIntObjectMap;
-import gnu.trove.map.hash.TIntObjectHashMap;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.EnumSet;
@@ -69,6 +67,8 @@ import org.json.JSONObject;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tools.mappings.DefaultMapper;
 import com.openexchange.session.Session;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 
 /**
  * {@link DefaultJsonMapper} - Abstract {@link JsonMapper} implementation.
@@ -89,6 +89,11 @@ public abstract class DefaultJsonMapper<O, E extends Enum<E>> extends DefaultMap
 	 */
 	protected final TIntObjectMap<E> columnMap;
 
+    /**
+     * The mapped fields
+     */
+    protected final E[] mappedFields;
+
 	/**
 	 * Initializes a new {@link DefaultJsonMapper}.
 	 */
@@ -101,6 +106,7 @@ public abstract class DefaultJsonMapper<O, E extends Enum<E>> extends DefaultMap
                 this.columnMap.put(entry.getValue().getColumnID(), entry.getKey());
             }
         }
+        this.mappedFields = mappings.keySet().toArray(newArray(mappings.keySet().size()));
 	}
 
 	@Override
@@ -287,6 +293,16 @@ public abstract class DefaultJsonMapper<O, E extends Enum<E>> extends DefaultMap
     public EnumMap<E, ? extends JsonMapping<? extends Object, O>> getMappings() {
 		return this.mappings;
 	}
+
+    /**
+     * Gets all mapped fields in an array.
+     *
+     * @return The mapped fields
+     */
+    @Override
+    public E[] getMappedFields() {
+        return mappedFields;
+    }
 
 	/**
 	 * Creates the mappings for all possible values of the underlying enum.

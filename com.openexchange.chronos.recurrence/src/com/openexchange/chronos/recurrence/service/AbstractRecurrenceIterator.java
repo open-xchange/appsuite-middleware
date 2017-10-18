@@ -72,6 +72,8 @@ import com.openexchange.exception.OXException;
  */
 public abstract class AbstractRecurrenceIterator<T> implements RecurrenceIterator<T> {
 
+    public static final int MAX = 1001;
+
     protected final Calendar start;
     protected final Integer startPosition;
     protected final Calendar end;
@@ -178,6 +180,12 @@ public abstract class AbstractRecurrenceIterator<T> implements RecurrenceIterato
     protected abstract T nextInstance();
 
     private void innerNext() {
+        if (count >= MAX) {
+            ChronosLogger.debug("Reached internal limit. Stop calculation.");
+            next = null;
+            return;
+        }
+
         if (limit != null && count >= limit) {
             ChronosLogger.debug("Reached given limit. Stop calculation.");
             next = null;

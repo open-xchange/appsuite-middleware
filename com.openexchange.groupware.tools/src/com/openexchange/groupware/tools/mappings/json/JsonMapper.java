@@ -297,4 +297,11 @@ public interface JsonMapper<O, E extends Enum<E>> extends Mapper<O, E> {
 	 */
 	JSONArray serialize(List<O> objects, E[] fields, TimeZone timeZone, Session session) throws JSONException, OXException;
 
+    /**
+     * Gets all mapped fields in an array.
+     *
+     * @return The mapped fields
+     */
+    E[] getMappedFields();
+
 }

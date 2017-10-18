@@ -49,7 +49,9 @@ package com.openexchange.chronos.schedjoules;
  *
  */
 
+import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.exception.OXException;
+import com.openexchange.session.Session;
 
 /**
  * {@link SchedJoulesService}
@@ -137,17 +139,32 @@ public interface SchedJoulesService {
     /**
      * Subscribes to the SchedJoules calendar with the specified identifier
      * 
+     * @param session The groupware {@link Session}
      * @param id The calendar identifier
+     * @param accountId The identifier of the user's SchedJoules {@link CalendarAccount}
      * @throws OXException if an error is occurred
      */
-    String subscribeCalendar(int id) throws OXException;
+    String subscribeCalendar(Session session, int id, int accountId) throws OXException;
 
     /**
      * Subscribes to the SchedJoules calendar with the specified identifier and locale
      * 
+     * @param session The groupware {@link Session}
      * @param id The calendar identifier
+     * @param accountId The identifier of the user's SchedJoules {@link CalendarAccount}
      * @param locale The locale
+     * @return The folder identifier of the subscribed calendar
      * @throws OXException if an error is occurred
      */
-    String subscribeCalendar(int id, String locale) throws OXException;
+    String subscribeCalendar(Session session, int id, int accountId, String locale) throws OXException;
+
+    /**
+     * Un-subscribes from the specified SchedJoules calendar
+     * 
+     * @param session The groupware {@link Session}
+     * @param folderId The folder identifier
+     * @param accountId The identifier of the user's SchedJoules {@link CalendarAccount}
+     * @throws OXException if an error is occurred
+     */
+    void unsubscribeCalendar(Session session, String folderId, int accountId) throws OXException;
 }

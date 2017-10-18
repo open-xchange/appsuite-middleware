@@ -54,6 +54,7 @@ import static com.openexchange.chronos.provider.ical.exception.ICalProviderExcep
 import static com.openexchange.chronos.provider.ical.exception.ICalProviderExceptionMessages.FEED_URI_NOT_ALLOWED_MSG;
 import static com.openexchange.chronos.provider.ical.exception.ICalProviderExceptionMessages.MISSING_FEED_URI_MSG;
 import static com.openexchange.chronos.provider.ical.exception.ICalProviderExceptionMessages.NO_FEED_MSG;
+import static com.openexchange.chronos.provider.ical.exception.ICalProviderExceptionMessages.UNEXPECTED_FEED_ERROR_MSG;
 import static com.openexchange.exception.OXExceptionStrings.MESSAGE;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.DisplayableOXExceptionCode;
@@ -94,10 +95,16 @@ public enum ICalProviderExceptionCodes implements DisplayableOXExceptionCode {
     NO_FEED("The provided URI %1$s does not contain an ICal feed.", NO_FEED_MSG, Category.CATEGORY_USER_INPUT, 4043),
 
     /**
-     * <li></li>
+     * <li>Unfortunately your requested feed cannot be used due to size limitations.</li>
      * <li>The requested feed with URI %1$s does exceed the configured maximum size. Allowed %2$s but was %3$s.</li>
      */
     FEED_SIZE_EXCEEDED("The requested feed with URI %1$s does exceed the configured maximum size. Allowed %2$s but was %3$s.", FEED_SIZE_EXCEEDED_MSG, Category.CATEGORY_USER_INPUT, 4001),
+
+    /**
+     * <li>Unfortunately the given feed URL cannot be executed as expected.</li>
+     * <li>An error occurred while retrieving the desired feed URI: %1$s</li>
+     */
+    UNEXPECTED_FEED_ERROR("An error occurred while retrieving the desired feed URI: %1$s", UNEXPECTED_FEED_ERROR_MSG, Category.CATEGORY_USER_INPUT, 4001),
 
     ;
 

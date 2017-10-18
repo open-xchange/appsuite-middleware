@@ -92,6 +92,13 @@ public interface IDBasedCalendarAccess extends TransactionAware, CalendarParamet
     Session getSession();
 
     /**
+     * Gets a list of warnings that occurred during processing.
+     *
+     * @return A list if warnings, or an empty list if there were none
+     */
+    List<OXException> getWarnings();
+
+    /**
      * Gets the user's default calendar folder.
      *
      * @return The default calendar folder
@@ -391,6 +398,11 @@ public interface IDBasedCalendarAccess extends TransactionAware, CalendarParamet
 
     /**
      * Queries the free/busy time for a list of attendees.
+     * <p/>
+     * The following calendar parameters are evaluated:
+     * <ul>
+     * <li>{@link CalendarParameters#PARAMETER_MASK_ID}</li>
+     * </ul>
      *
      * @param attendees The queried attendees
      * @param from The start of the requested time range

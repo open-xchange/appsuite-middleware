@@ -77,6 +77,13 @@ public interface CalendarProviderRegistry {
     List<CalendarProvider> getCalendarProviders();
 
     /**
+     * Gets all registered <i>auto-provisioning</i> calendar providers.
+     *
+     * @return A list of all registered auto-provisioning calendar providers
+     */
+    List<AutoProvisioningCalendarProvider> getAutoProvisioningCalendarProviders();
+
+    /**
      * Gets all registered free/busy providers.
      *
      * @return A list of all registered free/busy providers

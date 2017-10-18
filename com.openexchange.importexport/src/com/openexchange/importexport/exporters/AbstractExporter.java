@@ -51,6 +51,7 @@ package com.openexchange.importexport.exporters;
 
 import java.util.List;
 import java.util.Map;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.importexport.helpers.ExportFileNameCreator;
 import com.openexchange.tools.session.ServerSession;
 
@@ -71,6 +72,34 @@ public abstract class AbstractExporter implements Exporter {
     @Override
     public String getBatchExportFileName(ServerSession session, Map<String, List<String>> batchIds, String extension) {
         return ExportFileNameCreator.createBatchExportFileName(session, batchIds, extension);
+    }
+
+    /**
+     * Reads the saveToDisk parameter
+     *
+     * @param optionalParams The optional parameters of the request
+     * @return boolean The value of the saveToDisk parameter
+     */
+    public boolean isSaveToDisk(final Map<String, Object> optionalParams) {
+        if (null == optionalParams) {
+            return false;
+        }
+        final Object object = optionalParams.get("__saveToDisk");
+        if (null == object) {
+            return false;
+        }
+        return (object instanceof Boolean ? ((Boolean) object).booleanValue() : Boolean.parseBoolean(object.toString().trim()));
+    }
+
+    /**
+     * Creates an encoded file name
+     *
+     * @param requestData The AJAX request data
+     * @param fileName The file name to export
+     * @return String The fully parsed file name
+     */
+    public String appendFileNameParameter(AJAXRequestData requestData, String fileName) {
+        return ExportFileNameCreator.appendFileNameParameter(requestData, fileName);
     }
 
 }
