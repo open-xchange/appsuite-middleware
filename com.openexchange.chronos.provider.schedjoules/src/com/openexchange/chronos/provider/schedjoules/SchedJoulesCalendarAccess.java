@@ -53,14 +53,9 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import com.openexchange.chronos.Calendar;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.TimeTransparency;
@@ -84,8 +79,6 @@ import com.openexchange.session.Session;
  */
 public class SchedJoulesCalendarAccess extends CachingCalendarAccess {
 
-    private static final Logger LOG = LoggerFactory.getLogger(SchedJoulesCalendarAccess.class);
-
     /**
      * Default 'X-WR-CALNAME' and 'SUMMARY' contents of an iCal that is not accessible
      */
@@ -97,19 +90,9 @@ public class SchedJoulesCalendarAccess extends CachingCalendarAccess {
     private static final String FOLDERS = "folders";
 
     /**
-     * The user configuration's key for the name of the calendar
-     */
-    private static final String NAME = "name";
-
-    /**
      * The user configuration's key for the feed's URL
      */
     private static final String URL = "url";
-
-    /**
-     * Local cache for subscribed folders
-     */
-    private final Map<String, CalendarFolder> folders;
 
     /**
      * Initialises a new {@link SchedJoulesCalendarAccess}.
@@ -120,8 +103,6 @@ public class SchedJoulesCalendarAccess extends CachingCalendarAccess {
      */
     protected SchedJoulesCalendarAccess(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
         super(session, account, parameters);
-        folders = new HashMap<>();
-        prepareFolders();
     }
 
     /*
@@ -151,17 +132,13 @@ public class SchedJoulesCalendarAccess extends CachingCalendarAccess {
      */
     @Override
     public List<CalendarFolder> getVisibleFolders() throws OXException {
-        JSONArray foldersArray = getAccount().getUserConfiguration().optJSONArray(FOLDERS);
-        if (foldersArray == null || foldersArray.isEmpty()) {
+        JSONObject foldersObject = getAccount().getUserConfiguration().optJSONObject(FOLDERS);
+        if (foldersObject == null || foldersObject.isEmpty()) {
             return Collections.emptyList();
         }
-        List<CalendarFolder> folders = new ArrayList<>(foldersArray.length());
-        for (int index = 0; index < foldersArray.length(); index++) {
-            try {
-                folders.add(prepareFolder(foldersArray.getJSONObject(index).getString(NAME)));
-            } catch (JSONException e) {
-                throw SchedJoulesExceptionCodes.JSON_ERROR.create(e.getMessage(), e);
-            }
+        List<CalendarFolder> folders = new ArrayList<>(foldersObject.length());
+        for (String key : foldersObject.keySet()) {
+            folders.add(prepareFolder(key));
         }
         return folders;
     }
@@ -218,18 +195,24 @@ public class SchedJoulesCalendarAccess extends CachingCalendarAccess {
     public ExternalCalendarResult getEvents(String folderId) throws OXException {
         try {
             JSONObject userConfig = getAccount().getInternalConfiguration();
-            JSONArray foldersArray = userConfig.getJSONArray(FOLDERS);
-            String updateUrl = null;
-            for (int index = 0; index < foldersArray.length(); index++) {
-                JSONObject folder = foldersArray.getJSONObject(index);
-                if (folderId.equals(folder.getString(NAME))) {
-                    updateUrl = folder.getString(URL);
-                    break;
-                }
+            if (userConfig == null || userConfig.isEmpty()) {
+                // TODO: Introduce a better exception
+                throw SchedJoulesExceptionCodes.JSON_ERROR.create("No user configuration found for account '" + getAccount().getAccountId() + "'");
             }
-            URL u = new URL(updateUrl);
+            JSONObject foldersObject = userConfig.optJSONObject(FOLDERS);
+            if (foldersObject == null || foldersObject.isEmpty()) {
+                // TODO: Introduce a better exception
+                throw SchedJoulesExceptionCodes.JSON_ERROR.create("No 'folder' metadata found for account '" + getAccount().getAccountId() + "'");
+            }
+            JSONObject folder = foldersObject.optJSONObject(folderId);
+            if (folder == null || folder.isEmpty()) {
+                // TODO: Introduce a better exception
+                throw SchedJoulesExceptionCodes.JSON_ERROR.create("The folder '" + folderId + "' does not have any metdata stored");
+            }
+
+            URL url = new URL(folder.getString(URL));
             SchedJoulesAPI api = SchedJoulesAPI.getInstance();
-            Calendar calendar = api.calendar().getCalendar(u);
+            Calendar calendar = api.calendar().getCalendar(url);
             if (NO_ACCESS.equals(calendar.getName())) {
                 throw SchedJoulesExceptionCodes.NO_ACCESS.create(folderId);
             }
@@ -255,24 +238,14 @@ public class SchedJoulesCalendarAccess extends CachingCalendarAccess {
 
     }
 
-    private void prepareFolders() {
-        JSONObject userConfig = getAccount().getUserConfiguration();
-        JSONArray foldersArray = userConfig.optJSONArray(FOLDERS);
-        if (foldersArray == null || foldersArray.isEmpty()) {
-            return;
-        }
+    ///////////////////////////////////// HELPERS /////////////////////////////////
 
-        for (int index = 0; index < foldersArray.length(); index++) {
-            try {
-                JSONObject folder = foldersArray.getJSONObject(index);
-                String folderName = folder.getString(NAME);
-                folders.put(folderName, prepareFolder(folderName));
-            } catch (JSONException e) {
-                LOG.warn("There was an error preparing the subscribed folder '{}' for account '{}' of user '{}' in context '{}': {}", e.getMessage(), e);
-            }
-        }
-    }
-
+    /**
+     * Prepares the specified folder
+     * 
+     * @param folderName The folder name
+     * @return the prepared {@link CalendarFolder}
+     */
     private CalendarFolder prepareFolder(String folderName) {
         DefaultCalendarFolder folder = new DefaultCalendarFolder();
         folder.setId(folderName);

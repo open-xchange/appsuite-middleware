@@ -54,7 +54,6 @@ import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.chronos.provider.CalendarAccess;
@@ -129,14 +128,14 @@ public class SchedJoulesCalendarProvider implements CalendarProvider {
         if (userConfig == null) {
             return new JSONObject();
         }
-        JSONArray folders = userConfig.optJSONArray("folders");
+        JSONObject folders = userConfig.optJSONObject("folders");
         if (folders == null) {
             return new JSONObject();
         }
 
         try {
             JSONObject internalConfig = new JSONObject();
-            JSONArray internalConfigItems = new JSONArray();
+            JSONObject internalConfigItems = new JSONObject();
             addFolders(folders, internalConfigItems);
             internalConfig.put("folders", internalConfigItems);
             return internalConfig;
@@ -158,16 +157,16 @@ public class SchedJoulesCalendarProvider implements CalendarProvider {
         }
 
         // User configuration has no 'folders' attribute, thus we have to remove all subscriptions
-        JSONArray userConfigFolders = userConfig.optJSONArray("folders");
+        JSONObject userConfigFolders = userConfig.optJSONObject("folders");
         if (userConfigFolders == null || userConfigFolders.isEmpty()) {
             return (internalConfig.remove("folders") == null) ? null : internalConfig;
         }
 
-        JSONArray internalConfigFolders = internalConfig.optJSONArray("folders");
+        JSONObject internalConfigFolders = internalConfig.optJSONObject("folders");
         // Add all user configuration folders
         if (internalConfigFolders == null) {
             try {
-                internalConfigFolders = new JSONArray();
+                internalConfigFolders = new JSONObject();
                 addFolders(userConfigFolders, internalConfigFolders);
                 internalConfig.put("folders", internalConfigFolders);
                 return internalConfig;
@@ -179,43 +178,45 @@ public class SchedJoulesCalendarProvider implements CalendarProvider {
         // Check for differences and merge
         try {
             // Build a set that contains all internal subscribed items and their position in the array 
-            Map<Integer, Integer> internalItemIds = new HashMap<>();
-            for (int index = 0; index < internalConfigFolders.length(); index++) {
-                JSONObject folder = internalConfigFolders.getJSONObject(index);
-                internalItemIds.put(folder.getInt("itemId"), index);
+            Map<Integer, String> internalItemIds = new HashMap<>();
+            for (String name : internalConfigFolders.keySet()) {
+                JSONObject folder = internalConfigFolders.getJSONObject(name);
+                internalItemIds.put(folder.getInt("itemId"), name);
             }
 
             // Build a set that contains all user configured subscribed items
             // and add any new items
             Set<Integer> userConfigItemIds = new HashSet<>();
             boolean changed = false;
-            JSONArray additions = new JSONArray();
-            for (int index = 0; index < userConfigFolders.length(); index++) {
-                JSONObject folder = userConfigFolders.getJSONObject(index);
+            JSONObject additions = new JSONObject();
+            for (String name : userConfigFolders.keySet()) {
+                JSONObject folder = userConfigFolders.getJSONObject(name);
                 int itemId = folder.getInt("itemId");
                 userConfigItemIds.add(itemId);
                 if (!internalItemIds.containsKey(itemId)) {
                     changed = true;
-                    additions.put(prepareFolder(folder));
+                    additions.put(name, prepareFolder(folder));
                 }
                 internalItemIds.remove(itemId);
             }
 
             // Handle deletions
             if (!internalItemIds.isEmpty()) {
-                for (Integer index : internalItemIds.values()) {
-                    internalConfigFolders.remove(index);
+                for (String name : internalItemIds.values()) {
+                    internalConfigFolders.remove(name);
                 }
                 changed = true;
             }
 
             // Add the new items
             if (!additions.isEmpty()) {
-                for (int index = 0; index < additions.length(); index++) {
-                    internalConfigFolders.put(additions.getJSONObject(index));
+                for (String name : additions.keySet()) {
+                    internalConfigFolders.put(name, additions.getJSONObject(name));
                 }
                 changed = true;
             }
+
+            //TODO: Update references in 'folderCaching' object if renames occurred
 
             return changed ? internalConfig : null;
         } catch (JSONException e) {
@@ -260,22 +261,24 @@ public class SchedJoulesCalendarProvider implements CalendarProvider {
 
     /**
      * Converts and adds the user configuration folders to internal configuration folders
+     * 
      * @param folders The array of the user configuration folders
      * @param internalConfigFolders The internal configuration folders
      * @throws OXException If an error is occurred
      * @throws JSONException if a JSON error is occurred
      */
-    private void addFolders(JSONArray folders, JSONArray internalConfigFolders) throws OXException, JSONException {
-        for (int index = 0; index < folders.length(); index++) {
-            JSONObject folder = folders.getJSONObject(index);
+    private void addFolders(JSONObject folders, JSONObject internalConfigFolders) throws OXException, JSONException {
+        for (String name : folders.keySet()) {
+            JSONObject folder = folders.getJSONObject(name);
             JSONObject internalItem = prepareFolder(folder);
-            internalConfigFolders.put(internalItem);
+            internalConfigFolders.put(name, internalItem);
         }
     }
 
     /**
      * Prepares a folder for internal configuration. Fetches the item via the itemId and
      * stores the URL
+     * 
      * @param folder The JSONObject that denotes a subscription candidate
      * @return The internal item
      * @throws JSONException if a JSON error is occurred
@@ -290,16 +293,16 @@ public class SchedJoulesCalendarProvider implements CalendarProvider {
             throw SchedJoulesExceptionCodes.NO_CALENDAR.create(itemId);
         }
 
-        String calendarName = page.getString("name");
+        //String calendarName = page.getString("name");
         String url = page.getString("url");
 
-        folder.put("name", calendarName);
+        //folder.put("name", calendarName);
 
         JSONObject internalItem = new JSONObject();
         internalItem.put("refreshInterval", "PT7D");
         internalItem.put("url", url);
         internalItem.put("itemId", itemId);
+        //internalItem.put("name", calendarName);
         return internalItem;
     }
-
 }
