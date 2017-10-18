@@ -268,8 +268,8 @@ public class RdbCalendarAccountStorage extends RdbStorage implements CalendarAcc
             try {
                 internalConfigStream = null != internalConfig ? serialize(internalConfig) : null;
                 userConfigStream = null != userConfig ? serialize(userConfig) : null;
-                stmt.setLong(parameterIndex++, account.getLastModified().getTime());
                 stmt.setBoolean(parameterIndex++, account.isEnabled());
+                stmt.setLong(parameterIndex++, account.getLastModified().getTime());
                 if (null != internalConfigStream) {
                     stmt.setBinaryStream(parameterIndex++, internalConfigStream);
                 }
