@@ -137,28 +137,7 @@ public class SchedJoulesCalendarProvider implements CalendarProvider {
         try {
             JSONObject internalConfig = new JSONObject();
             JSONArray internalConfigItems = new JSONArray();
-            for (int index = 0; index < folders.length(); index++) {
-                JSONObject userConfigItem = folders.getJSONObject(index);
-                int itemId = userConfigItem.getInt("itemId");
-                String locale = userConfigItem.optString("locale");
-
-                JSONObject page = SchedJoulesAPI.getInstance().pages().getPage(itemId, locale);
-                if (!page.hasAndNotNull("url")) {
-                    throw SchedJoulesExceptionCodes.NO_CALENDAR.create(itemId);
-                }
-
-                String calendarName = page.getString("name");
-                String url = page.getString("url");
-
-                userConfigItem.put("name", calendarName);
-
-                JSONObject internalItem = new JSONObject();
-                internalItem.put("refreshInterval", "PT7D");
-                internalItem.put("url", url);
-                internalItem.put("itemId", itemId);
-
-                internalConfigItems.put(internalItem);
-            }
+            addFolders(folders, internalConfigItems);
             internalConfig.put("folders", internalConfigItems);
             return internalConfig;
         } catch (JSONException e) {
@@ -187,8 +166,14 @@ public class SchedJoulesCalendarProvider implements CalendarProvider {
         JSONArray internalConfigFolders = internalConfig.optJSONArray("folders");
         // Add all user configuration folders
         if (internalConfigFolders == null) {
-            // TODO: invoke method to add
-            return null;
+            try {
+                internalConfigFolders = new JSONArray();
+                addFolders(userConfigFolders, internalConfigFolders);
+                internalConfig.put("folders", internalConfigFolders);
+                return internalConfig;
+            } catch (JSONException e) {
+                throw SchedJoulesExceptionCodes.JSON_ERROR.create(e.getMessage(), e);
+            }
         }
 
         // Check for differences and merge
@@ -211,7 +196,7 @@ public class SchedJoulesCalendarProvider implements CalendarProvider {
                 userConfigItemIds.add(itemId);
                 if (!internalItemIds.containsKey(itemId)) {
                     changed = true;
-                    // TODO: fetch and store to internal, invoke method add
+                    additions.put(prepareFolder(folder));
                 }
                 internalItemIds.remove(itemId);
             }
@@ -269,6 +254,52 @@ public class SchedJoulesCalendarProvider implements CalendarProvider {
     public void onAccountDeleted(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
         // TODO Auto-generated method stub
 
+    }
+
+    ///////////////////////////////////////////// HELPERS ///////////////////////////////////////////
+
+    /**
+     * Converts and adds the user configuration folders to internal configuration folders
+     * @param folders The array of the user configuration folders
+     * @param internalConfigFolders The internal configuration folders
+     * @throws OXException If an error is occurred
+     * @throws JSONException if a JSON error is occurred
+     */
+    private void addFolders(JSONArray folders, JSONArray internalConfigFolders) throws OXException, JSONException {
+        for (int index = 0; index < folders.length(); index++) {
+            JSONObject folder = folders.getJSONObject(index);
+            JSONObject internalItem = prepareFolder(folder);
+            internalConfigFolders.put(internalItem);
+        }
+    }
+
+    /**
+     * Prepares a folder for internal configuration. Fetches the item via the itemId and
+     * stores the URL
+     * @param folder The JSONObject that denotes a subscription candidate
+     * @return The internal item
+     * @throws JSONException if a JSON error is occurred
+     * @throws OXException if an error is occurred
+     */
+    private JSONObject prepareFolder(JSONObject folder) throws JSONException, OXException {
+        int itemId = folder.getInt("itemId");
+        String locale = folder.optString("locale");
+
+        JSONObject page = SchedJoulesAPI.getInstance().pages().getPage(itemId, locale);
+        if (!page.hasAndNotNull("url")) {
+            throw SchedJoulesExceptionCodes.NO_CALENDAR.create(itemId);
+        }
+
+        String calendarName = page.getString("name");
+        String url = page.getString("url");
+
+        folder.put("name", calendarName);
+
+        JSONObject internalItem = new JSONObject();
+        internalItem.put("refreshInterval", "PT7D");
+        internalItem.put("url", url);
+        internalItem.put("itemId", itemId);
+        return internalItem;
     }
 
 }
