@@ -202,15 +202,23 @@ public class SchedJoulesServiceImpl implements SchedJoulesService {
             if (userConfiguration == null) {
                 userConfiguration = new JSONObject();
             }
-
             JSONArray folders = userConfiguration.optJSONArray("folders");
             if (folders == null) {
                 folders = new JSONArray();
                 userConfiguration.put("folders", folders);
             }
-            // Prepare the folder configuration
-            String calendarName = page.getString("name");
 
+            // Check if the user already subscribed to that calendar
+            String calendarName = page.getString("name");
+            for (int index = 0; index < folders.length(); index++) {
+                JSONObject folder = folders.getJSONObject(index);
+                if (calendarName.equals(folder.getString("name"))) {
+                    // Already subscribed to the calendar, therefore return the folder id
+                    return IDMangling.mangleFolderId(accountId, calendarName);
+                }
+            }
+
+            // Prepare the folder configuration
             JSONObject singleCalendarConfiguration = new JSONObject();
             singleCalendarConfiguration.put("url", page.getString("url"));
             singleCalendarConfiguration.put("name", calendarName);
