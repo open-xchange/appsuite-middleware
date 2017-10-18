@@ -78,13 +78,13 @@ import com.openexchange.java.Enums;
 import com.openexchange.session.Session;
 
 /**
- * {@link SchedjoulesCalendarAccess}
+ * {@link SchedJoulesCalendarAccess}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class SchedjoulesCalendarAccess extends CachingCalendarAccess {
+public class SchedJoulesCalendarAccess extends CachingCalendarAccess {
 
-    private static final Logger LOG = LoggerFactory.getLogger(SchedjoulesCalendarAccess.class);
+    private static final Logger LOG = LoggerFactory.getLogger(SchedJoulesCalendarAccess.class);
 
     /**
      * Default 'X-WR-CALNAME' and 'SUMMARY' contents of an iCal that is not accessible
@@ -112,13 +112,13 @@ public class SchedjoulesCalendarAccess extends CachingCalendarAccess {
     private final Map<String, CalendarFolder> folders;
 
     /**
-     * Initialises a new {@link SchedjoulesCalendarAccess}.
+     * Initialises a new {@link SchedJoulesCalendarAccess}.
      *
      * @param account
      * @param parameters
      * @throws OXException
      */
-    protected SchedjoulesCalendarAccess(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
+    protected SchedJoulesCalendarAccess(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
         super(session, account, parameters);
         folders = new HashMap<>();
         prepareFolders();

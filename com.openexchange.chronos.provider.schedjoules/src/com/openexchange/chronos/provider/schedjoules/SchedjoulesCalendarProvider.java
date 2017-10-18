@@ -65,11 +65,11 @@ import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 
 /**
- * {@link SchedjoulesCalendarProvider}
+ * {@link SchedJoulesCalendarProvider}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class SchedjoulesCalendarProvider implements CalendarProvider {
+public class SchedJoulesCalendarProvider implements CalendarProvider {
 
     private static final String PROVIDER_ID = "schedjoules";
     private static final String DISPLAY_NAME = "SchedJoules";
@@ -77,11 +77,11 @@ public class SchedjoulesCalendarProvider implements CalendarProvider {
     private final ServiceLookup services;
 
     /**
-     * Initialises a new {@link SchedjoulesCalendarProvider}.
+     * Initialises a new {@link SchedJoulesCalendarProvider}.
      *
      * @param services The {@link ServiceLookup} reference
      */
-    public SchedjoulesCalendarProvider(ServiceLookup services) {
+    public SchedJoulesCalendarProvider(ServiceLookup services) {
         super();
         this.services = services;
     }
@@ -113,7 +113,7 @@ public class SchedjoulesCalendarProvider implements CalendarProvider {
      */
     @Override
     public CalendarAccess connect(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
-        return new SchedjoulesCalendarAccess(session, account, parameters);
+        return new SchedJoulesCalendarAccess(session, account, parameters);
     }
 
     /*
