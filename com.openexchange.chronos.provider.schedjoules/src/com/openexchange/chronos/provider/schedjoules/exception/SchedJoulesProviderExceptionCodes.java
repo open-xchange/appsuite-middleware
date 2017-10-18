@@ -65,7 +65,7 @@ public enum SchedJoulesProviderExceptionCodes implements DisplayableOXExceptionC
      * <li>The requested page does not denote to a calendar</li>
      * <li>The page with the id '%$1s' does not denote to a calendar</li>
      */
-    NO_CALENDAR("The page with the id '%$1s' does not denote to a calendar", SchedJoulesProviderExceptionMessages.NO_CALENDAR_MSG, CATEGORY_USER_INPUT, 1),
+    NO_CALENDAR("The page with the id '%1$s' does not denote to a calendar", SchedJoulesProviderExceptionMessages.NO_CALENDAR_MSG, CATEGORY_USER_INPUT, 1),
     /**
      * <li>You have no access to this calendar.</li>
      * <li>No access to calendar with id '%1$s'</li>
