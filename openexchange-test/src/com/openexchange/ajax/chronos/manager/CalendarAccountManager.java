@@ -90,7 +90,9 @@ public class CalendarAccountManager extends AbstractManager {
 
     public void cleanUp() {
         try {
-            userApi.getChronosApi().deleteAccount(userApi.getSession(), calAccIds);
+            for (CalendarAccountId id : calAccIds) {
+                userApi.getChronosApi().deleteAccount(userApi.getSession(), id.getId(), System.currentTimeMillis());
+            }
         } catch (ApiException e) {
             System.err.println("Could not clean up the calendar accounts for user " + userApi.getCalUser() + ": " + e.getMessage());
             e.printStackTrace();
@@ -105,12 +107,14 @@ public class CalendarAccountManager extends AbstractManager {
         return response;
     }
 
-    public CommonResponse deleteCalendarAccount(List<CalendarAccountId> idsToDelete) throws ApiException {
-        CommonResponse resp = userApi.getChronosApi().deleteAccount(userApi.getSession(), idsToDelete);
+    public void deleteCalendarAccount(List<CalendarAccountId> idsToDelete) throws ApiException {
+        for (CalendarAccountId id : idsToDelete) {
+            CommonResponse resp = userApi.getChronosApi().deleteAccount(userApi.getSession(), id.getId(), System.currentTimeMillis());
+            assertNull(resp.getError(), resp.getError());
+        }
         for (CalendarAccountId calendarAccountId : idsToDelete) {
             forgetCalendarAccountId(calendarAccountId);
         }
-        return resp;
     }
 
     public CalendarAccountResponse loadCalendarAccount(CalendarAccountId calAccId) throws ApiException {
@@ -130,7 +134,7 @@ public class CalendarAccountManager extends AbstractManager {
 
     public CalendarAccountResponse updateCalendarAccount(CalendarAccountId calAccId, String configuration) throws ApiException {
         forgetCalendarAccountId(calAccId);
-        CalendarAccountResponse response = userApi.getChronosApi().updateAccount(userApi.getSession(), calAccId.getId(), configuration);
+        CalendarAccountResponse response = userApi.getChronosApi().updateAccount(userApi.getSession(), calAccId.getId(), System.currentTimeMillis(), configuration);
         if (null != response.getData()) {
             rememberCalendarAccountId(createCalendarAccountId(response.getData().getId(), null));
         }
