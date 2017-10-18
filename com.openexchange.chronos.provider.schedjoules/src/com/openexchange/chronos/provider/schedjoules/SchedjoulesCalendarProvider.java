@@ -49,7 +49,11 @@
 
 package com.openexchange.chronos.provider.schedjoules;
 
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -60,7 +64,6 @@ import com.openexchange.chronos.schedjoules.api.SchedJoulesAPI;
 import com.openexchange.chronos.schedjoules.exception.SchedJoulesExceptionCodes;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 
@@ -133,11 +136,12 @@ public class SchedJoulesCalendarProvider implements CalendarProvider {
 
         try {
             JSONObject internalConfig = new JSONObject();
-            JSONArray subscriptions = new JSONArray();
+            JSONArray internalConfigItems = new JSONArray();
             for (int index = 0; index < folders.length(); index++) {
-                JSONObject folder = folders.getJSONObject(index);
-                int itemId = folder.getInt("itemId");
-                String locale = folder.optString("locale");
+                JSONObject userConfigItem = folders.getJSONObject(index);
+                int itemId = userConfigItem.getInt("itemId");
+                String locale = userConfigItem.optString("locale");
+
                 JSONObject page = SchedJoulesAPI.getInstance().pages().getPage(itemId, locale);
                 if (!page.hasAndNotNull("url")) {
                     throw SchedJoulesExceptionCodes.NO_CALENDAR.create(itemId);
@@ -146,17 +150,16 @@ public class SchedJoulesCalendarProvider implements CalendarProvider {
                 String calendarName = page.getString("name");
                 String url = page.getString("url");
 
-                folder.put("name", calendarName);
+                userConfigItem.put("name", calendarName);
 
-                JSONObject subscription = new JSONObject();
-                subscription.put("refreshInterval", "PT7D");
-                subscription.put("url", url);
-                subscription.put("itemId", itemId);
-                subscription.put("name", calendarName);
+                JSONObject internalItem = new JSONObject();
+                internalItem.put("refreshInterval", "PT7D");
+                internalItem.put("url", url);
+                internalItem.put("itemId", itemId);
 
-                subscriptions.put(subscription);
+                internalConfigItems.put(internalItem);
             }
-            internalConfig.put("folders", subscriptions);
+            internalConfig.put("folders", internalConfigItems);
             return internalConfig;
         } catch (JSONException e) {
             throw SchedJoulesExceptionCodes.JSON_ERROR.create(e.getMessage(), e);
@@ -170,8 +173,69 @@ public class SchedJoulesCalendarProvider implements CalendarProvider {
      */
     @Override
     public JSONObject reconfigureAccount(Session session, JSONObject internalConfig, JSONObject userConfig, CalendarParameters parameters) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        // User configuration is 'null' or empty, thus we have to remove all subscriptions
+        if (userConfig == null || userConfig.isEmpty()) {
+            return (internalConfig.remove("folders") == null) ? null : internalConfig;
+        }
+
+        // User configuration has no 'folders' attribute, thus we have to remove all subscriptions
+        JSONArray userConfigFolders = userConfig.optJSONArray("folders");
+        if (userConfigFolders == null || userConfigFolders.isEmpty()) {
+            return (internalConfig.remove("folders") == null) ? null : internalConfig;
+        }
+
+        JSONArray internalConfigFolders = internalConfig.optJSONArray("folders");
+        // Add all user configuration folders
+        if (internalConfigFolders == null) {
+            // TODO: invoke method to add
+            return null;
+        }
+
+        // Check for differences and merge
+        try {
+            // Build a set that contains all internal subscribed items and their position in the array 
+            Map<Integer, Integer> internalItemIds = new HashMap<>();
+            for (int index = 0; index < internalConfigFolders.length(); index++) {
+                JSONObject folder = internalConfigFolders.getJSONObject(index);
+                internalItemIds.put(folder.getInt("itemId"), index);
+            }
+
+            // Build a set that contains all user configured subscribed items
+            // and add any new items
+            Set<Integer> userConfigItemIds = new HashSet<>();
+            boolean changed = false;
+            JSONArray additions = new JSONArray();
+            for (int index = 0; index < userConfigFolders.length(); index++) {
+                JSONObject folder = userConfigFolders.getJSONObject(index);
+                int itemId = folder.getInt("itemId");
+                userConfigItemIds.add(itemId);
+                if (!internalItemIds.containsKey(itemId)) {
+                    changed = true;
+                    // TODO: fetch and store to internal, invoke method add
+                }
+                internalItemIds.remove(itemId);
+            }
+
+            // Handle deletions
+            if (!internalItemIds.isEmpty()) {
+                for (Integer index : internalItemIds.values()) {
+                    internalConfigFolders.remove(index);
+                }
+                changed = true;
+            }
+
+            // Add the new items
+            if (!additions.isEmpty()) {
+                for (int index = 0; index < additions.length(); index++) {
+                    internalConfigFolders.put(additions.getJSONObject(index));
+                }
+                changed = true;
+            }
+
+            return changed ? internalConfig : null;
+        } catch (JSONException e) {
+            throw SchedJoulesExceptionCodes.JSON_ERROR.create(e.getMessage(), e);
+        }
     }
 
     /*
