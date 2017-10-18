@@ -23,6 +23,10 @@
 
  - Fix for bug 40496: Do not require other tables for creation of "snippetAttachmentBinary" table
 
+* 2015-08-12 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 40343: Perform search with reduced number of tokens from query
+
 * 2015-08-12 - thorben.betten@open-xchange.com
 
  - Fix for OXTN#2015080610000286: Fixed conditional check if portal is available

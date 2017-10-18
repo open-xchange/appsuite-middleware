@@ -54,7 +54,6 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.regex.Pattern;
 import javax.mail.internet.AddressException;
@@ -62,11 +61,9 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeUtility;
 import javax.mail.internet.idn.IDNA;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.Reloadable;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.MsisdnCheck;
 import com.openexchange.mail.config.MailProperties;
-import com.openexchange.mail.config.MailReloadable;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.server.services.ServerServiceRegistry;
 
@@ -122,19 +119,27 @@ public final class QuotedInternetAddress extends InternetAddress {
         return tmp.booleanValue();
     }
 
-    static {
-        MailReloadable.getInstance().addReloadable(new Reloadable() {
+    private static volatile Boolean keepQuotesInEncodedPersonal;
+    private static boolean keepQuotesInEncodedPersonal() {
+        Boolean tmp = keepQuotesInEncodedPersonal;
+        if (null == tmp) {
+            synchronized (QuotedInternetAddress.class) {
+                tmp = keepQuotesInEncodedPersonal;
+                if (null == tmp) {
+                    // A workaround to fix bug 14050 (fat clients interpreting a comma as address separator), which became obsolete in the meantime
+                    // Therefore assuming 'false' as default here
+                    boolean defaultValue = false;
+                    ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+                    if (null == service) {
+                        return defaultValue;
+                    }
 
-            @Override
-            public void reloadConfiguration(ConfigurationService configService) {
-                preferSimpleAddressParsing = null;
+                    tmp = Boolean.valueOf(service.getBoolProperty("com.openexchange.mail.keepQuotesInEncodedPersonal", defaultValue));
+                    keepQuotesInEncodedPersonal = tmp;
+                }
             }
-
-            @Override
-            public Map<String, String[]> getConfigFileNames() {
-                return null;
-            }
-        });
+        }
+        return tmp.booleanValue();
     }
 
     /**
@@ -231,10 +236,23 @@ public final class QuotedInternetAddress extends InternetAddress {
         List<InternetAddress> l = new ArrayList<InternetAddress>(addrs.length);
         for (String addr : addrs) {
             if (addr.lastIndexOf('<') < 0 && addr.indexOf("=?") >= 0) {
-                addr = MimeMessageUtility.decodeMultiEncodedHeader(addr);
+                addr = init(MimeMessageUtility.decodeMultiEncodedHeader(addr));
+            } else if (addr.indexOf("'?= <") > 0) {
+                // Expect something like: =?utf-8?Q?...'?= <jane@doe.org>
+                String tmp = init(MimeMessageUtility.decodeMultiEncodedHeader(addr));
+
+                // Check if personal part is surrounded by single-quotes
+                if (tmp.startsWith("'")) {
+                    int pos = tmp.indexOf("' <");
+                    if (pos > 0) {
+                        // Replace with double-quotes
+                        addr = new StringBuilder(tmp.length()).append('"').append(tmp.substring(1, pos)).append("\" <").append(tmp.substring(pos + 3)).toString();
+                    }
+                }
             }
-            QuotedInternetAddress a = new QuotedInternetAddress(addr, strict);
-            l.add(a);
+
+
+            l.add(new QuotedInternetAddress(addr, strict));
         }
         return l.toArray(new InternetAddress[l.size()]);
     }
@@ -246,11 +264,47 @@ public final class QuotedInternetAddress extends InternetAddress {
     private static InternetAddress[] parse(String str, boolean strict, boolean parseHdr, boolean decodeFirst) throws AddressException {
         int start, end, index, nesting;
         int start_personal = -1, end_personal = -1;
-        String s = decodeFirst ? MimeMessageUtility.decodeMultiEncodedHeader(str) : str;
-        int length = s.length();
+        String s = init(decodeFirst ? MimeMessageUtility.decodeMultiEncodedHeader(str) : str);
         boolean ignoreErrors = parseHdr && !strict;
-        List<InternetAddress> list = new LinkedList<InternetAddress>();
 
+        int length = s.length();
+        for (int pos; (pos = s.indexOf('(')) >= 0;) {
+            int i = pos;
+            int nest;
+            for (i++, nest = 1; i < length && nest > 0; i++) {
+                char c = s.charAt(i);
+                switch (c) {
+                case '\\':
+                    i++; // skip both '\' and the escaped char
+                    break;
+                case '(':
+                    nest++;
+                    break;
+                case ')':
+                    nest--;
+                    break;
+                default:
+                    break;
+                }
+            }
+            if (nest > 0) {
+                if (!ignoreErrors) {
+                    throw new AddressException("Missing ')'", s, i);
+                }
+                // pretend the first paren was a regular character and
+                // continue parsing after it
+                i = pos + 1;
+                break;
+            }
+            if (i < s.length()) {
+                s = s.substring(0, pos) + s.substring(i);
+            } else {
+                s = s.substring(0, pos);
+            }
+        }
+
+        length = s.length();
+        List<InternetAddress> list = new LinkedList<InternetAddress>();
         boolean in_group = false; // we're processing a group term
         boolean route_addr = false; // address came from route-addr term
         boolean rfc822 = false; // looks like an RFC822 address
@@ -671,8 +725,7 @@ public final class QuotedInternetAddress extends InternetAddress {
                 pers = tmp;
             }
             if (rfc822 || strict || parseHdr) {
-                String ace = toACE(addr);
-                ace = MimeMessageUtility.decodeMultiEncodedHeader(ace);
+                String ace = toACE(init(MimeMessageUtility.decodeMultiEncodedHeader(addr)));
                 if (!ignoreErrors) {
                     checkAddress(ace, route_addr, false);
                 }
@@ -911,29 +964,7 @@ public final class QuotedInternetAddress extends InternetAddress {
      * @throws AddressException If parsing the address fails
      */
     public QuotedInternetAddress(final String address, final boolean strict) throws AddressException {
-        this(init(address, true));
-        if (strict) {
-            if (isGroup()) {
-                getGroup(true); // throw away the result
-            } else {
-                checkAddress(this.address, true, true);
-            }
-        }
-    }
-
-    /**
-     * Initializes a new {@link QuotedInternetAddress}.
-     * <p>
-     * Parse the given string and create an InternetAddress. If strict is <code>false</code>, the detailed syntax of the address isn't
-     * checked. toACE
-     *
-     * @param address The address in RFC822 format
-     * @param strict <code>true</code> enforce RFC822 syntax; otherwise <code>false</code>
-     * @param suppressControlOrWhitespace Whether to suppress control or whitespace characters possibly contained in given address string
-     * @throws AddressException If parsing the address fails
-     */
-    public QuotedInternetAddress(final String address, final boolean strict, final boolean suppressControlOrWhitespace) throws AddressException {
-        this(init(address, suppressControlOrWhitespace));
+        this(address);
         if (strict) {
             if (isGroup()) {
                 getGroup(true); // throw away the result
@@ -945,11 +976,14 @@ public final class QuotedInternetAddress extends InternetAddress {
 
     private static final Pattern WHITESPACE_OR_CONTROL = Pattern.compile("[\\p{Space}&&[^ ]]|\\p{Cntrl}|[^\\p{Print}\\p{L}]");
 
-    private static String init(final String address, final boolean suppressControlOrWhitespace) {
-        if (!suppressControlOrWhitespace) {
-            return address;
-        }
-        return WHITESPACE_OR_CONTROL.matcher(address).replaceAll("");
+    /**
+     * Initializes specified address by dropping possibly contained white-space and control characters.
+     *
+     * @param address The address to initialize
+     * @return The possibly initialized address string
+     */
+    public static String init(String address) {
+        return null == address ? null : WHITESPACE_OR_CONTROL.matcher(address).replaceAll("");
     }
 
     /**
@@ -977,7 +1011,7 @@ public final class QuotedInternetAddress extends InternetAddress {
      */
     public QuotedInternetAddress(final String address, final String personal, final String charset) throws AddressException, UnsupportedEncodingException {
         super();
-        this.address = toACE(address);
+        this.address = toACE(init(address));
         if (charset == null) {
             // use default charset
             jcharset = MailProperties.getInstance().getDefaultMimeCharset();
@@ -1053,8 +1087,9 @@ public final class QuotedInternetAddress extends InternetAddress {
 
     @Override
     public void setPersonal(String name, String charset) throws UnsupportedEncodingException {
-        personal = name;
-        if (name != null) {
+        String n = init(name);
+        personal = n;
+        if (n != null) {
             if (charset == null) {
                 // use default charset
                 jcharset = MailProperties.getInstance().getDefaultMimeCharset();
@@ -1066,7 +1101,7 @@ public final class QuotedInternetAddress extends InternetAddress {
                 }
                 jcharset = javaCharset;
             }
-            encodedPersonal = MimeUtility.encodeWord(name, charset, null);
+            encodedPersonal = MimeUtility.encodeWord(n, charset, null);
         } else {
             encodedPersonal = null;
         }
@@ -1079,11 +1114,12 @@ public final class QuotedInternetAddress extends InternetAddress {
      */
     @Override
     public void setAddress(final String address) {
+        String a = init(address);
         try {
-            this.address = toACE(address);
+            this.address = toACE(a);
         } catch (final AddressException e) {
-            LOG.error("ACE string could not be parsed from IDN string: {}", address, e);
-            this.address = address;
+            LOG.error("ACE string could not be parsed from IDN string: {}", a, e);
+            this.address = a;
         }
     }
 
@@ -1164,20 +1200,33 @@ public final class QuotedInternetAddress extends InternetAddress {
                     }
                 }
 
-                if (needQuoting(personal, true)) {
-                    try {
-                        encodedPersonal = MimeUtility.encodeWord(quotePhrase(personal, true), jcharset, null);
-                    } catch (final UnsupportedEncodingException e) {
-                        LOG.error("", e);
+                if (keepQuotesInEncodedPersonal()) {
+                    // A workaround to fix bug 14050 (fat clients interpreting a comma as address separator), which became obsolete in the meantime
+                    if (needQuoting(personal, true)) {
+                        // Personal phrase needs to be quoted
+                        try {
+                            encodedPersonal = MimeUtility.encodeWord(quotePhrase(personal, true), jcharset, null);
+                        } catch (final UnsupportedEncodingException e) {
+                            LOG.error("", e);
+                        }
+                    } else if (!isAscii(personal)) {
+                        try {
+                            encodedPersonal = MimeUtility.encodeWord(quotePhrase(personal, true), jcharset, null);
+                        } catch (final UnsupportedEncodingException e) {
+                            LOG.error("", e);
+                        }
                     }
-                } else if (!isAscii(personal)) {
+                    return new StringBuilder(32).append(encodedPersonal).append(" <").append(address).append('>').toString();
+                }
+
+                if (!isAscii(personal)) {
                     try {
-                        encodedPersonal = MimeUtility.encodeWord(quotePhrase(personal, true), jcharset, null);
+                        encodedPersonal = MimeUtility.encodeWord(personal, jcharset, null);
                     } catch (final UnsupportedEncodingException e) {
                         LOG.error("", e);
                     }
                 }
-                return new StringBuilder(32).append(encodedPersonal).append(" <").append(address).append('>').toString();
+                return new StringBuilder(32).append(quotePhrase(encodedPersonal, false)).append(" <").append(address).append('>').toString();
             } else if (toUpperCase(address).endsWith("/TYPE=PLMN")) {
                 return new StringBuilder().append('<').append(address).append('>').toString();
             } else if (isGroup() || isSimple()) {
@@ -1243,7 +1292,7 @@ public final class QuotedInternetAddress extends InternetAddress {
      * Is this a "simple" address? Simple addresses don't contain quotes or any RFC822 special characters other than '@' and '.'.
      */
     private boolean isSimple() {
-        return null == address || indexOfAny(address, SPECIALS_NO_DOT_NO_AT) < 0;
+        return null == address || indexOfAny(address, SPECIALS_NO_DOT_NO_AT_NO_QUOTE) < 0;
     }
 
     /**
@@ -1267,29 +1316,35 @@ public final class QuotedInternetAddress extends InternetAddress {
         }
     }
 
-    private static final String SPECIALS_NO_DOT_NO_AT = "()<>,;:\\\"[]";
+    private static final String SPECIALS_NO_DOT_NO_AT_NO_QUOTE = "()<>,;:\\[]";
 
     private static final String SPECIALS_NO_DOT = "()<>@,;:\\\"[]";
 
     private final static String RFC822 = "()<>@,;:\\\".[]";
 
     private static String quotePhrase(final String phrase, final boolean allowNonAscii) {
-        final int len = phrase.length();
+        int len = phrase.length();
         boolean needQuoting = false;
 
         for (int i = 0; i < len; i++) {
-            final char c = phrase.charAt(i);
+            char c = phrase.charAt(i);
             if (c == '"' || c == '\\') {
-                // need to escape them and then quote the whole string
-                final StringBuilder sb = new StringBuilder(len + 3);
+                // Need to escape that character and then quote the whole string
+                StringBuilder sb = new StringBuilder(len + 8);
                 sb.append('"');
-                for (int j = 0; j < len; j++) {
-                    final char cc = phrase.charAt(j);
-                    if (cc == '"' || cc == '\\') {
+                if (i > 0) {
+                    sb.append(phrase, 0, i);
+                }
+                sb.append('\\').append(c);
+
+                // Check remainder, too
+                for (int j = i + 1; j < len; j++) {
+                    c = phrase.charAt(j);
+                    if (c == '"' || c == '\\') {
                         // Escape the character
                         sb.append('\\');
                     }
-                    sb.append(cc);
+                    sb.append(c);
                 }
                 sb.append('"');
                 return sb.toString();
@@ -1299,12 +1354,7 @@ public final class QuotedInternetAddress extends InternetAddress {
             }
         }
 
-        if (needQuoting) {
-            final StringBuilder sb = new StringBuilder(len + 2);
-            sb.append('"').append(phrase).append('"');
-            return sb.toString();
-        }
-        return phrase;
+        return needQuoting ? new StringBuilder(len + 2).append('"').append(phrase).append('"').toString() : phrase;
     }
 
     private static boolean needQuoting(final String phrase, final boolean allowNonAscii) {
@@ -1408,7 +1458,7 @@ public final class QuotedInternetAddress extends InternetAddress {
         boolean ret = true;
         for (int i = 0; ret && i < len; i++) {
             final char c = str.charAt(i);
-            ret = (c > 32 && c <= 127);
+            ret = (c >= 32 && c <= 127);
         }
         return ret;
     }

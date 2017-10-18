@@ -1,3 +1,9 @@
+open-xchange-rest (7.6.3-32) stable; urgency=medium
+
+  * Build for Patch 2017-10-16 (4391)
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 13 Oct 2017 16:02:45 +0200
+
 open-xchange-rest (7.6.3-31) stable; urgency=medium
 
   * 2017-08-21 (4315)

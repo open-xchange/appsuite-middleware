@@ -49,8 +49,10 @@
 
 package com.openexchange.mail.mime;
 
-import java.util.Locale;
+import java.util.ArrayList;
+import java.util.List;
 import javax.mail.internet.InternetAddress;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 
 /**
@@ -81,7 +83,25 @@ public final class PlainTextAddress extends InternetAddress {
 
     private static final String TYPE = "rfc822";
 
-    private final String address;
+    /**
+     * Parses specified address list (split by comma) and generates <code>PlainTextAddress</code> instances for each "token".
+     *
+     * @param addressList The address list
+     * @return The <code>PlainTextAddress</code> instances
+     */
+    public static InternetAddress[] parseAddresses(String addressList) {
+        if (Strings.isEmpty(addressList)) {
+            return new PlainTextAddress[0];
+        }
+        String[] addrs = addressList.indexOf(',') >= 0 ? Strings.splitByCommaNotInQuotes(addressList) : new String[] { addressList };
+        List<InternetAddress> l = new ArrayList<InternetAddress>(addrs.length);
+        for (String addr : addrs) {
+            l.add(new PlainTextAddress(addr));
+        }
+        return l.toArray(new InternetAddress[l.size()]);
+    }
+
+    private final String plainAddress;
 
     private final int hashCode;
 
@@ -91,8 +111,8 @@ public final class PlainTextAddress extends InternetAddress {
      * @param address The plain text address
      */
     public PlainTextAddress(final String address) {
-        this.address = MimeMessageUtility.decodeMultiEncodedHeader(address);
-        hashCode = address.toLowerCase(Locale.ENGLISH).hashCode();
+        this.plainAddress = QuotedInternetAddress.init(MimeMessageUtility.decodeMultiEncodedHeader(address));
+        hashCode = Strings.asciiLowerCase(address).hashCode();
     }
 
     @Override
@@ -102,12 +122,12 @@ public final class PlainTextAddress extends InternetAddress {
 
     @Override
     public String toString() {
-        return address;
+        return plainAddress;
     }
 
     @Override
     public String getAddress() {
-        return address;
+        return plainAddress;
     }
 
     @Override
@@ -119,7 +139,7 @@ public final class PlainTextAddress extends InternetAddress {
     public boolean equals(final Object address) {
         if (address instanceof InternetAddress) {
             final InternetAddress ia = (InternetAddress) address;
-            return this.address.equalsIgnoreCase(ia.getAddress());
+            return this.plainAddress.equalsIgnoreCase(ia.getAddress());
         }
         return false;
     }
@@ -131,7 +151,7 @@ public final class PlainTextAddress extends InternetAddress {
 
     @Override
     public String toUnicodeString() {
-        return MimeMessageUtility.decodeMultiEncodedHeader(address);
+        return MimeMessageUtility.decodeMultiEncodedHeader(plainAddress);
     }
 
 }

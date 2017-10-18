@@ -200,6 +200,10 @@ public class APIResponseRenderer implements ResponseRenderer {
             } else if (req.getParameter(JSONP) != null) {
                 resp.setContentType("text/javascript");
                 final String call = AJAXUtility.sanitizeParam(req.getParameter(JSONP));
+                if (false == validateCallbackName(Strings.asciiLowerCase(call))) {
+                    resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid call-back name");
+                    return;
+                }
                 // Write: <call> + "(" + <json> + ")"
                 final PrintWriter writer = resp.getWriter();
                 writer.write(call);
@@ -224,6 +228,23 @@ public class APIResponseRenderer implements ResponseRenderer {
     }
 
     /**
+     * Validates specified call-back name.
+     *
+     * @param lowerCaseCallback The call-back name (in lower-case) to validate
+     * @return <code>true</code> if valid; otherwise <code>false</code>
+     */
+    private static boolean validateCallbackName(String lowerCaseCallback) {
+        int length = lowerCaseCallback.length();
+        for (int i = length; i-- > 0;) {
+            char ch = lowerCaseCallback.charAt(i);
+            if (('a' > ch || 'z' < ch) && ('0' > ch || '9' < ch) && '-' != ch && '_' != ch && '$' != ch) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
      * Checks if a JavaScript call-back is expected for given HTTP request
      *
      * @param req The HTTP request to check
@@ -238,16 +259,29 @@ public class APIResponseRenderer implements ResponseRenderer {
      *
      * @param response The response to output JavaScript call-back for
      * @param action The associated action
+     * @param writer The writer to output to
+     * @param req The HTTP request
+     * @param resp The HTTP response
+     * @throws IOException If an I/O error occurs
+     * @throws JSONException If a JSON error occurs
+     * @throws IllegalStateException If writer instance cannot be obtained from HTTP response
+     */
+    public static void writeJsCallback(Response response, String action, HttpServletRequest req, HttpServletResponse resp) throws IOException, JSONException {
+        writeJsCallback(response, action, resp.getWriter(), req, resp);
+    }
+
+    /**
+     * Writes common JavaScript call-back for given response.
+     *
+     * @param response The response to output JavaScript call-back for
+     * @param action The associated action
+     * @param writer The writer to output to
      * @param req The HTTP request
      * @param resp The HTTP response
      * @throws IOException If an I/O error occurs
      * @throws JSONException If a JSON error occurs
      */
-    public static void writeJsCallback(Response response, String action, HttpServletRequest req, HttpServletResponse resp) throws IOException, JSONException {
-        resp.setStatus(HttpServletResponse.SC_OK);
-        resp.setContentType(CONTENTTYPE_HTML);
-        resp.setHeader("Content-Disposition", "inline");
-
+    public static void writeJsCallback(Response response, String action, Writer writer, HttpServletRequest req, HttpServletResponse resp) throws IOException, JSONException {
         String callback = req.getParameter(CALLBACK);
         if (callback == null) {
             callback = action;
@@ -257,8 +291,14 @@ public class APIResponseRenderer implements ResponseRenderer {
             }
         }
         callback = AJAXUtility.sanitizeParam(callback);
+        if (false == validateCallbackName(Strings.asciiLowerCase(callback))) {
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid call-back name");
+            return;
+        }
 
-        final PrintWriter writer = resp.getWriter();
+        resp.setStatus(HttpServletResponse.SC_OK);
+        resp.setContentType(CONTENTTYPE_HTML);
+        resp.setHeader("Content-Disposition", "inline");
         writer.write(JS_FRAGMENT_PART1);
         writer.write(callback);
         writer.write(JS_FRAGMENT_PART2);
@@ -409,4 +449,5 @@ public class APIResponseRenderer implements ResponseRenderer {
         }
 
     }
+
 }

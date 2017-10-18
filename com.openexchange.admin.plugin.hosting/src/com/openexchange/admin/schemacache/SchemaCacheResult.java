@@ -57,6 +57,11 @@ package com.openexchange.admin.schemacache;
  */
 public class SchemaCacheResult {
 
+    /**
+     * The special result indicating that there are no suitable schemas available for a database (and thus a new one is required to be created).
+     */
+    public static final SchemaCacheResult DATABASE_EMPTY = new SchemaCacheResult(null, null);
+
     private final String schemaName;
     private final SchemaCacheFinalize finalize;
 

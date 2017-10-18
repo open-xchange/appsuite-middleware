@@ -501,7 +501,7 @@ distribution_check() {
 }
 
 exclude_secret_ox_properties_entries() {
-# This function only works on .properies* files and replace secret enties with an
+# This function only works on .properies* files and replace secret entries with an
 # '<REMOVED BY OXSYSREPORT>' marker on a working copy.
 # _file=/tmp/ox_support_infos-20140526-165503/opt/open-xchange/etc/msnoauth.properties
 # _original_line=com.openexchange.oauth.msn.apiSecret=secret
@@ -511,7 +511,7 @@ exclude_secret_ox_properties_entries() {
     local _ox_config_copy=${1}
     local _tmp_exclude_status=$(normalize_path ${TMP}/${LOGDIR}/ox-configs-secret-exclude)
     local _whitelist='enabledMailCapableKey|UserAttributePassword|^[[:blank:]]*#'
-    local _blacklist='[pP]assword[[:blank:]]*=|[sS]ecret[[:blank:]]*=|[kK]ey[[:blank:]]*=|secretSource[[:blank:]]*=|secretRandom[[:blank:]]*=|[sS]alt[[:blank:]]*=|SSLKey(Pass|Name)[[:blank:]]*='
+    local _blacklist='[pP]assword[[:blank:]]*=|[sS]ecret[[:blank:]]*=|[kK]ey[[:blank:]]*=|secretSource[[:blank:]]*=|secretRandom[[:blank:]]*=|[sS]alt[[:blank:]]*=|SSLKey(Pass|Name)[[:blank:]]*=|[lL]ogin[[:blank:]]*='
     find ${_ox_config_copy} -type f -name "*.properties*" | \
         xargs egrep -HrIv "${_whitelist}" | \
         egrep "${_blacklist}" >> ${_tmp_exclude_status}
@@ -523,6 +523,21 @@ exclude_secret_ox_properties_entries() {
         local _secret_part=$(echo ${_original_line} | \
             sed "s|${_plain_property}||g" | \
             sed 's|password=||g' )
+
+        # Replace special chars to wildcards (bug 43117)
+        local _secret_part=$(echo ${_secret_part} | \
+            sed 's|\[|.|g' | \
+            sed 's|\]|.|g' | \
+            sed 's|\||.|g' | \
+            sed 's|\*|.|g' | \
+            sed "s|'|.|g" )
+        local _original_line=$(echo ${_original_line} | \
+            sed 's|\[|.|g' | \
+            sed 's|\]|.|g' | \
+            sed 's|\||.|g' | \
+            sed 's|\*|.|g' | \
+            sed "s|'|.|g" )
+
         if [ -n "${_secret_part}" ]; then
             local _modified_line=$(echo ${_original_line} | \
                 sed "s|${_secret_part}|<REMOVED BY OXSYSREPORT>|g")

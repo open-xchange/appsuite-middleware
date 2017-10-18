@@ -52,6 +52,7 @@ package com.openexchange.admin.storage.mysqlStorage;
 import com.openexchange.admin.rmi.dataobjects.SchemaSelectStrategy;
 import com.openexchange.admin.rmi.dataobjects.SchemaSelectStrategy.Strategy;
 import com.openexchange.admin.schemacache.SchemaCacheFinalize;
+import com.openexchange.admin.schemacache.SchemaCacheResult;
 
 /**
  * {@link SchemaResult} - A simple class to reflect how a context's schema has been determined.
@@ -70,28 +71,28 @@ public class SchemaResult {
     /**
      * Gets a result for in-memory schema detection with given roll-back.
      *
-     * @param cacheFinalize The cache finalize
+     * @param cacheResult The cache result
      * @return The result for in-memory schema detection
      */
-    public static SchemaResult inMemoryWith(SchemaCacheFinalize cacheFinalize) {
-        return new SchemaResult(Strategy.IN_MEMORY, cacheFinalize);
+    public static SchemaResult inMemoryWith(SchemaCacheResult cacheResult) {
+        return new SchemaResult(Strategy.IN_MEMORY, cacheResult);
     }
 
     // -----------------------------------------------------------------------------------------------------------------
 
     private final SchemaSelectStrategy.Strategy strategy;
-    private final SchemaCacheFinalize cacheRollback;
+    private final SchemaCacheResult cacheResult;
 
     /**
      * Initializes a new {@link SchemaResult}.
      *
      * @param strategy The utilized strategy
-     * @param cacheRollback The optional cach roll-back
+     * @param cacheResult The cache result
      */
-    private SchemaResult(Strategy strategy, SchemaCacheFinalize cacheRollback) {
+    private SchemaResult(Strategy strategy, SchemaCacheResult cacheResult) {
         super();
         this.strategy = strategy;
-        this.cacheRollback = cacheRollback;
+        this.cacheResult = cacheResult;
     }
 
     /**
@@ -109,7 +110,7 @@ public class SchemaResult {
      * @return The cacheRollback or <code>null</code>
      */
     public SchemaCacheFinalize getCacheFinalize() {
-        return cacheRollback;
+        return null == cacheResult ? null : cacheResult.getFinalize();
     }
 
 }
