@@ -160,78 +160,11 @@ public class SchedJoulesServiceImpl implements SchedJoulesService {
     /*
      * (non-Javadoc)
      *
-     * @see com.openexchange.chronos.schedjoules.SchedJoulesService#subscribeCalendar(com.openexchange.session.Session, int, int)
-     */
-    @Override
-    public String subscribeCalendar(Session session, int id, int accountId) throws OXException {
-        return subscribeCalendar(session, id, accountId, null);
-    }
-
-    /*
-     * (non-Javadoc)
-     *
      * @see com.openexchange.chronos.schedjoules.SchedJoulesService#search(java.lang.String, java.lang.String, int, int, int)
      */
     @Override
     public SchedJoulesResult search(String query, String locale, int countryId, int categoryId, int maxRows) throws OXException {
         return new SchedJoulesResult(api.pages().search(query, locale, countryId, categoryId, maxRows));
-    }
-
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.chronos.schedjoules.SchedJoulesService#subscribeCalendar(com.openexchange.session.Session, int, int, java.lang.String)
-     */
-    @Override
-    public String subscribeCalendar(Session session, int id, int accountId, String locale) throws OXException {
-        // Resolve the user's SchedJoules calendar account
-        CalendarAccountService calendarAccountService = services.getService(CalendarAccountService.class);
-        CalendarAccount calendarAccount = calendarAccountService.getAccount(session, accountId);
-        if (calendarAccount == null) {
-            throw CalendarExceptionCodes.ACCOUNT_NOT_FOUND.create(accountId);
-        }
-
-        JSONObject page = api.pages().getPage(id, locale);
-        if (!page.hasAndNotNull("url")) {
-            throw SchedJoulesExceptionCodes.NO_CALENDAR.create(id);
-        }
-
-        try {
-            // Re-configure
-            JSONObject userConfiguration = calendarAccount.getUserConfiguration();
-            if (userConfiguration == null) {
-                userConfiguration = new JSONObject();
-            }
-            JSONArray folders = userConfiguration.optJSONArray("folders");
-            if (folders == null) {
-                folders = new JSONArray();
-                userConfiguration.put("folders", folders);
-            }
-
-            // Check if the user already subscribed to that calendar
-            String calendarName = page.getString("name");
-            for (int index = 0; index < folders.length(); index++) {
-                JSONObject folder = folders.getJSONObject(index);
-                if (calendarName.equals(folder.getString("name"))) {
-                    // Already subscribed to the calendar, therefore return the folder id
-                    return IDMangling.mangleFolderId(accountId, calendarName);
-                }
-            }
-
-            // Prepare the folder configuration
-            JSONObject singleCalendarConfiguration = new JSONObject();
-            singleCalendarConfiguration.put("url", page.getString("url"));
-            singleCalendarConfiguration.put("name", calendarName);
-            singleCalendarConfiguration.put("refreshInterval", "PT7D"); //TODO: either default or user defined
-
-            folders.put(singleCalendarConfiguration);
-
-            calendarAccountService.updateAccount(session, accountId, null, userConfiguration, System.currentTimeMillis() + 100, null); //FIXME: Get the client timestamp
-
-            return IDMangling.mangleFolderId(accountId, calendarName);
-        } catch (JSONException e) {
-            throw SchedJoulesExceptionCodes.JSON_ERROR.create(e.getMessage(), e);
-        }
     }
 
     /*
