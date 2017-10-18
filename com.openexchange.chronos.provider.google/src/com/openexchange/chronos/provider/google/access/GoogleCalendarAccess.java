@@ -172,7 +172,7 @@ public class GoogleCalendarAccess implements CalendarAccess {
 
                 if(updateConfig){
                     AdministrativeCalendarAccountService service = Services.getService(AdministrativeCalendarAccountService.class);
-                    account = service.updateAccount(session.getContextId(), session.getUserId(), account.getAccountId(), internalConfiguration, userConfiguration, account.getLastModified().getTime());
+                    account = service.updateAccount(session.getContextId(), session.getUserId(), account.getAccountId(), account.isEnabled(), internalConfiguration, userConfiguration, account.getLastModified().getTime());
                 }
             }
 
