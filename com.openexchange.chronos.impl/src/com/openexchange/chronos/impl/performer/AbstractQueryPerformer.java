@@ -122,7 +122,7 @@ public abstract class AbstractQueryPerformer {
         /*
          * construct search term
          */
-        CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.AND).addSearchTerm(getFolderIdTerm(folder));
+        CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.AND).addSearchTerm(getFolderIdTerm(session, folder));
         if (null != objectIDs) {
             if (0 == objectIDs.length) {
                 return Collections.emptyList();

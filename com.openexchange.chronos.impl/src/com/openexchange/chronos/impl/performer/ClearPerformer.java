@@ -117,7 +117,7 @@ public class ClearPerformer extends AbstractUpdatePerformer {
         /*
          * delete all events in folder in batches
          */
-        SearchTerm<?> searchTerm = getFolderIdTerm(folder);
+        SearchTerm<?> searchTerm = getFolderIdTerm(session, folder);
         SearchOptions searchOptions = new SearchOptions().addOrder(SortOrder.getSortOrder(EventField.ID, Order.ASC));
         int deleted = 0;
         do {

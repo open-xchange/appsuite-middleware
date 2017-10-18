@@ -280,30 +280,39 @@ public class Utils {
      * Constructs a search term to match events located in a specific folder. Depending on the folder's type, either a search term for
      * the {@link EventField#FOLDER_ID} and/or for the {@link AttendeeField#FOLDER_ID} is built.
      * <p/>
-     * The session user's read permissions in the folder ("own" vs "all") are considered automatically, too, by restricting via
+     * The session user's read permissions in the folder (<i>own</i> vs <i>all</i>) are considered automatically, too, by restricting via
      * {@link EventField#CREATED_BY} if needed.
      *
+     * @param session The calendar session
      * @param folder The folder to construct the search term for
      * @return The search term
      */
-    public static SearchTerm<?> getFolderIdTerm(UserizedFolder folder) {
-        /*
-         * match the event's common folder identifier
-         */
-        SearchTerm<?> searchTerm = getSearchTerm(EventField.FOLDER_ID, SingleOperation.EQUALS, folder.getID());
-        if (false == PublicType.getInstance().equals(folder.getType())) {
+    public static SearchTerm<?> getFolderIdTerm(CalendarSession session, UserizedFolder folder) {
+        SearchTerm<?> searchTerm;
+        if (PublicType.getInstance().equals(folder.getType())) {
             /*
-             * for personal folders, also match against the corresponding attendee's folder
+             * match the event's common folder identifier
              */
-            searchTerm = new CompositeSearchTerm(CompositeOperation.OR)
-                .addSearchTerm(searchTerm)
-                .addSearchTerm(new CompositeSearchTerm(CompositeOperation.AND)
-                    .addSearchTerm(getSearchTerm(AttendeeField.ENTITY, SingleOperation.EQUALS, I(folder.getCreatedBy())))
-                    .addSearchTerm(getSearchTerm(AttendeeField.FOLDER_ID, SingleOperation.EQUALS, folder.getID())));
+            searchTerm = getSearchTerm(EventField.FOLDER_ID, SingleOperation.EQUALS, folder.getID());
+        } else {
+            /*
+             * for personal folders, match against the corresponding attendee's folder
+             */
+            searchTerm = new CompositeSearchTerm(CompositeOperation.AND)
+                .addSearchTerm(getSearchTerm(AttendeeField.ENTITY, SingleOperation.EQUALS, I(folder.getCreatedBy())))
+                .addSearchTerm(getSearchTerm(AttendeeField.FOLDER_ID, SingleOperation.EQUALS, folder.getID()));
+            if (false == isEnforceDefaultAttendee(session)) {
+                /*
+                 * also match the event's common folder identifier if no default attendee is enforced
+                 */
+                searchTerm = new CompositeSearchTerm(CompositeOperation.AND)
+                    .addSearchTerm(getSearchTerm(EventField.FOLDER_ID, SingleOperation.EQUALS, folder.getID()))
+                    .addSearchTerm(searchTerm);
+            }
         }
         if (folder.getOwnPermission().getReadPermission() < Permission.READ_ALL_OBJECTS) {
             /*
-             * if only access to "own" objects; restrict to events created by the current session's user
+             * if only access to "own" objects, restrict to events created by the current session's user
              */
             searchTerm = new CompositeSearchTerm(CompositeOperation.AND)
                 .addSearchTerm(searchTerm)
@@ -687,6 +696,21 @@ public class Utils {
     public static <T> List<T> asList(Iterator<T> iterator) {
         List<T> list = new ArrayList<T>();
         while (iterator.hasNext()) {
+            list.add(iterator.next());
+        }
+        return list;
+    }
+
+    /**
+     * Gets a list containing all elements provided by the supplied iterator.
+     *
+     * @param itrerator The iterator to get the list for
+     * @param limit The maximum number of items to include
+     * @return The list
+     */
+    public static <T> List<T> asList(Iterator<T> iterator, int limit) {
+        List<T> list = new ArrayList<T>();
+        while (iterator.hasNext() && list.size() < limit) {
             list.add(iterator.next());
         }
         return list;

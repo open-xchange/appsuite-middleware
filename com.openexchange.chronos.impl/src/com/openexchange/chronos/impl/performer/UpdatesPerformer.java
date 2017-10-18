@@ -154,7 +154,7 @@ public class UpdatesPerformer extends AbstractQueryPerformer {
          * construct search term
          */
         CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.AND)
-            .addSearchTerm(getFolderIdTerm(folder))
+            .addSearchTerm(getFolderIdTerm(session, folder))
             .addSearchTerm(getSearchTerm(EventField.TIMESTAMP, SingleOperation.GREATER_THAN, L(since))
         );
         /*

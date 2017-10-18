@@ -91,7 +91,7 @@ public class SequenceNumberPerformer extends AbstractQueryPerformer {
     public long perform(UserizedFolder folder) throws OXException {
         requireCalendarPermission(folder, READ_FOLDER, NO_PERMISSIONS, NO_PERMISSIONS, NO_PERMISSIONS);
         long timestamp = folder.getLastModifiedUTC().getTime();
-        SearchTerm<?> searchTerm = getFolderIdTerm(folder);
+        SearchTerm<?> searchTerm = getFolderIdTerm(session, folder);
         SearchOptions sortOptions = new SearchOptions().addOrder(SortOrder.getSortOrder(EventField.TIMESTAMP, SortOrder.Order.DESC)).setLimits(0, 1);
         EventField[] fields = { EventField.TIMESTAMP };
         List<Event> events = storage.getEventStorage().searchEvents(searchTerm, sortOptions, fields);
