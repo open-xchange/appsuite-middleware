@@ -170,6 +170,8 @@ ChronosFreeBusyResponseData:
   $ref: ./chronos/FreeBusyResponseData.yaml
 ChronosConflictDataRaw:
   $ref: ./chronos/ConflictDataRaw.yaml
+ChronosFolderBody:
+  $ref: ./chronos/ChronosFolderBody.yaml
 # Module: chronos/alarm
 AlarmTriggerResponse:
   $ref: ./chronos/AlarmTriggerResponse.yaml
