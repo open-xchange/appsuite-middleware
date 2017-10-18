@@ -293,16 +293,10 @@ public class SchedJoulesCalendarProvider implements CalendarProvider {
             throw SchedJoulesProviderExceptionCodes.NO_CALENDAR.create(itemId);
         }
 
-        //String calendarName = page.getString("name");
-        String url = page.getString("url");
-
-        //folder.put("name", calendarName);
-
         JSONObject internalItem = new JSONObject();
         internalItem.put("refreshInterval", "PT7D");
-        internalItem.put("url", url);
+        internalItem.put("url", page.getString("url"));
         internalItem.put("itemId", itemId);
-        //internalItem.put("name", calendarName);
         return internalItem;
     }
 }
