@@ -65,6 +65,8 @@ import com.openexchange.java.Strings;
 
 /**
  * {@link SchedJoulesResponseParser} - Defines the types of the available stream parsers and their implementations
+ *
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public enum SchedJoulesResponseParser {
     /**
