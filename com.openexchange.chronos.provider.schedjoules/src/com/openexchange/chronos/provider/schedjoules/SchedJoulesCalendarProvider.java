@@ -146,6 +146,8 @@ public class SchedJoulesCalendarProvider extends CachingCalendarProvider {
     public JSONObject reconfigureAccount(Session session, JSONObject internalConfig, JSONObject userConfig, CalendarParameters parameters) throws OXException {
         // User configuration is 'null' or empty or has no 'folders' attribute, thus we have to remove all subscriptions
         if (userConfig == null || userConfig.isEmpty() || !userConfig.hasAndNotNull("folders")) {
+            // Remove cache information and folders
+            internalConfig = super.reconfigureAccount(session, internalConfig, userConfig, parameters);
             return (internalConfig.remove("folders") == null) ? null : internalConfig;
         }
 
