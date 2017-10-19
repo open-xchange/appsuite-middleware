@@ -135,7 +135,7 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
         this.calendarUser = getCalendarUser(session, folder);
         this.calendarUserId = calendarUser.getEntity();
         this.timestamp = new Date();
-        this.resultTracker = new ResultTracker(storage, session, folder, timestamp.getTime(), getSelfProctection());
+        this.resultTracker = new ResultTracker(storage, session, folder, timestamp.getTime(), getSelfProtection());
     }
 
     /**

@@ -109,7 +109,7 @@ public abstract class AbstractQueryPerformer {
         this.storage = storage;
     }
 
-    protected SelfProtection getSelfProctection() throws OXException{
+    protected SelfProtection getSelfProtection() throws OXException{
         if(selfProtection==null){
             LeanConfigurationService leanConfigurationService = Services.getService(LeanConfigurationService.class);
             selfProtection = SelfProtectionFactory.createSelfProtection(session.getSession(), leanConfigurationService);
@@ -193,7 +193,7 @@ public abstract class AbstractQueryPerformer {
             } else {
                 processedEvents.add(event);
             }
-            getSelfProctection().checkEventCollection(processedEvents);
+            getSelfProtection().checkEventCollection(processedEvents);
         }
         return sortEvents(processedEvents);
     }
@@ -230,7 +230,7 @@ public abstract class AbstractQueryPerformer {
             } else {
                 processedEvents.add(event);
             }
-            getSelfProctection().checkEventCollection(processedEvents);
+            getSelfProtection().checkEventCollection(processedEvents);
         }
         return sortEvents(processedEvents);
     }
@@ -271,7 +271,7 @@ public abstract class AbstractQueryPerformer {
         List<Event> list = new ArrayList<Event>();
         while (itrerator.hasNext()) {
             list.add(itrerator.next());
-            getSelfProctection().checkEventCollection(list);
+            getSelfProtection().checkEventCollection(list);
         }
         return list;
     }
