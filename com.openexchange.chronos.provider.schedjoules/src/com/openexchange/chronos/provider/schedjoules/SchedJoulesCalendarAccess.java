@@ -218,9 +218,6 @@ public class SchedJoulesCalendarAccess extends CachingCalendarAccess {
                 throw SchedJoulesProviderExceptionCodes.NO_USER_CONFIGURATION.create(getAccount().getAccountId(), getSession().getUserId(), getSession().getContextId());
             }
             JSONArray foldersArray = userConfig.optJSONArray(FOLDERS);
-            if (foldersArray == null || foldersArray.isEmpty()) {
-                throw SchedJoulesProviderExceptionCodes.NO_FOLDERS_METADATA.create(getAccount().getAccountId(), getSession().getUserId(), getSession().getContextId());
-            }
             JSONObject folder = findFolder(folderId, foldersArray);
             URL url = new URL(folder.getString(URL));
             SchedJoulesAPI api = SchedJoulesAPI.getInstance();
@@ -243,12 +240,14 @@ public class SchedJoulesCalendarAccess extends CachingCalendarAccess {
      * @param folderId The folder identifier
      * @param foldersArray The folders array
      * @return The found folder as a {@link JSONObject}
-     * @throws JSONException if a JSON error is occurred
      * @throws OXException if no folder metadata is found for the specified folder
      */
-    private JSONObject findFolder(String folderId, JSONArray foldersArray) throws JSONException, OXException {
+    private JSONObject findFolder(String folderId, JSONArray foldersArray) throws OXException {
+        if (foldersArray == null || foldersArray.isEmpty()) {
+            throw SchedJoulesProviderExceptionCodes.NO_FOLDERS_METADATA.create(getAccount().getAccountId(), getSession().getUserId(), getSession().getContextId());
+        }
         for (int index = 0; index < foldersArray.length(); index++) {
-            JSONObject folder = foldersArray.getJSONObject(index);
+            JSONObject folder = foldersArray.optJSONObject(index);
             if (!hasMetadata(folder)) {
                 continue;
             }
@@ -266,7 +265,7 @@ public class SchedJoulesCalendarAccess extends CachingCalendarAccess {
      */
     @Override
     public void handleExceptions(String calendarFolderId, OXException e) {
-        // TODO Auto-generated method stub
+        // no-op
     }
 
     ///////////////////////////////////// HELPERS /////////////////////////////////
@@ -276,20 +275,30 @@ public class SchedJoulesCalendarAccess extends CachingCalendarAccess {
      * 
      * @param folderName The folder name
      * @return the prepared {@link CalendarFolder}
+     * @throws OXException
+     * @throws JSONException
      */
-    private CalendarFolder prepareFolder(String folderName) {
+    private CalendarFolder prepareFolder(String folderName) throws OXException {
         DefaultCalendarFolder folder = new DefaultCalendarFolder();
+
         folder.setId(folderName);
         folder.setPermissions(Collections.singletonList(DefaultCalendarPermission.readOnlyPermissionsFor(getAccount().getUserId())));
         folder.setLastModified(getAccount().getLastModified());
+
         JSONObject userConfig = getAccount().getUserConfiguration();
-        if (null != userConfig) {
-            folder.setName(userConfig.optString(NAME, folderName));
-            folder.setColor(userConfig.optString("color", null));
-            folder.setDescription(userConfig.optString("description", null));
-            folder.setUsedForSync(userConfig.optBoolean("usedForSync", false));
-            folder.setScheduleTransparency(Enums.parse(TimeTransparency.class, userConfig.optString("scheduleTransp", null), TimeTransparency.OPAQUE));
+        if (userConfig == null) {
+            return folder;
         }
+
+        JSONArray folders = userConfig.optJSONArray(FOLDERS);
+        JSONObject folderJson = findFolder(folderName, folders);
+
+        folder.setName(folderJson.optString(NAME, folderName));
+        folder.setColor(folderJson.optString("color", null));
+        folder.setDescription(folderJson.optString("description", null));
+        folder.setUsedForSync(folderJson.optBoolean("usedForSync", false));
+        folder.setScheduleTransparency(Enums.parse(TimeTransparency.class, folderJson.optString("scheduleTransp", null), TimeTransparency.OPAQUE));
+
         return folder;
     }
 
