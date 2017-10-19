@@ -86,4 +86,14 @@ public class SchedJoulesProviderActivator extends HousekeepingActivator {
     protected void startBundle() throws Exception {
         registerService(CalendarProvider.class, new SchedJoulesCalendarProvider());
     }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.osgi.HousekeepingActivator#stopBundle()
+     */
+    @Override
+    protected void stopBundle() throws Exception {
+        super.stopBundle();
+    }
 }
