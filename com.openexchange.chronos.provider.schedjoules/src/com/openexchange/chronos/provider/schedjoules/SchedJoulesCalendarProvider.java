@@ -111,13 +111,8 @@ public class SchedJoulesCalendarProvider extends CachingCalendarProvider {
         return new SchedJoulesCalendarAccess(session, account, parameters);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.chronos.provider.CalendarProvider#configureAccount(com.openexchange.session.Session, org.json.JSONObject, com.openexchange.chronos.service.CalendarParameters)
-     */
     @Override
-    public JSONObject configureAccount(Session session, JSONObject userConfig, CalendarParameters parameters) throws OXException {
+    protected JSONObject configureAccountOpt(Session session, JSONObject userConfig, CalendarParameters parameters) throws OXException {
         if (userConfig == null) {
             return new JSONObject();
         }
@@ -143,11 +138,10 @@ public class SchedJoulesCalendarProvider extends CachingCalendarProvider {
      * @see com.openexchange.chronos.provider.CalendarProvider#reconfigureAccount(com.openexchange.session.Session, org.json.JSONObject, org.json.JSONObject, com.openexchange.chronos.service.CalendarParameters)
      */
     @Override
-    public JSONObject reconfigureAccount(Session session, JSONObject internalConfig, JSONObject userConfig, CalendarParameters parameters) throws OXException {
+    protected JSONObject reconfigureAccountOpt(Session session, JSONObject internalConfig, JSONObject userConfig, CalendarParameters parameters) throws OXException {
         // User configuration is 'null' or empty or has no 'folders' attribute, thus we have to remove all subscriptions
         if (userConfig == null || userConfig.isEmpty() || !userConfig.hasAndNotNull("folders")) {
             // Remove cache information and folders
-            internalConfig = super.reconfigureAccount(session, internalConfig, userConfig, parameters);
             return (internalConfig.remove("folders") == null) ? null : internalConfig;
         }
 
@@ -180,6 +174,21 @@ public class SchedJoulesCalendarProvider extends CachingCalendarProvider {
         } catch (JSONException e) {
             throw SchedJoulesProviderExceptionCodes.JSON_ERROR.create(e.getMessage(), e);
         }
+    }
+
+    @Override
+    protected void onAccountCreatedOpt(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
+        // nothing to do
+    }
+
+    @Override
+    protected void onAccountUpdatedOpt(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
+        // nothing to do
+    }
+
+    @Override
+    protected void onAccountDeletedOpt(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
+        // nothing to do
     }
 
     ///////////////////////////////////////////// HELPERS ///////////////////////////////////////////
@@ -278,5 +287,4 @@ public class SchedJoulesCalendarProvider extends CachingCalendarProvider {
         JSONObject internalConfigCaching = internalConfig.optJSONObject(CachingCalendarAccess.CACHING);
         return internalConfigCaching == null ? new JSONObject() : internalConfigCaching;
     }
-
 }

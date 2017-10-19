@@ -85,7 +85,7 @@ public class ICalCalendarProvider extends CachingCalendarProvider {
     }
 
     @Override
-    public JSONObject configureAccount(Session session, JSONObject userConfig, CalendarParameters parameters) throws OXException {
+    protected JSONObject configureAccountOpt(Session session, JSONObject userConfig, CalendarParameters parameters) throws OXException {
         ICalFeedConfig iCalFeedConfig = new ICalFeedConfig.Builder(userConfig, new JSONObject()).build();
 
         if (iCalFeedConfig.getAuthInfo().getAuthType().equals(AuthType.BASIC)) {
@@ -97,14 +97,22 @@ public class ICalCalendarProvider extends CachingCalendarProvider {
     }
 
     @Override
-    public JSONObject reconfigureAccount(Session session, JSONObject internalConfig, JSONObject userConfig, CalendarParameters parameters) throws OXException {
-        configureAccount(session, userConfig, parameters);
-
-        return super.reconfigureAccount(session, internalConfig, userConfig, parameters);
+    protected JSONObject reconfigureAccountOpt(Session session, JSONObject internalConfig, JSONObject userConfig, CalendarParameters parameters) throws OXException {
+        return configureAccountOpt(session, userConfig, parameters);
     }
 
     @Override
-    public void onAccountCreated(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
+    protected void onAccountCreatedOpt(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
+        // nothing to do
+    }
+
+    @Override
+    protected void onAccountUpdatedOpt(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
+        // nothing to do
+    }
+
+    @Override
+    protected void onAccountDeletedOpt(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
         // nothing to do
     }
 }

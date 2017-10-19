@@ -79,32 +79,94 @@ import com.openexchange.tools.sql.DBUtils;
 public abstract class CachingCalendarProvider implements CalendarProvider {
 
     @Override
-    public JSONObject configureAccount(Session session, JSONObject userConfig, CalendarParameters parameters) throws OXException {
-        return new JSONObject();
+    public final JSONObject configureAccount(Session session, JSONObject userConfig, CalendarParameters parameters) throws OXException {
+        //Nothing caching specific to do
+        return configureAccountOpt(session, userConfig, parameters);
     }
 
-    @Override
-    public void onAccountCreated(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
-        // Nothing to do
-    }
+    /**
+     * Initializes the configuration prior creating a new calendar account after the {@link CachingCalendarProvider} has executed desired preparations/cleanups.
+     * <p/>
+     * Any permission- or data validation checks are performed during this initialization phase. In case of erroneous or incomplete
+     * configuration data, an appropriate exception will be thrown. Upon success, any <i>internal</i> configuration data is returned for
+     * persisting along with the newly created calendar account.
+     *
+     * @param session The user's session
+     * @param userConfig The <i>user</i> configuration as supplied by the client
+     * @param parameters Additional calendar parameters, or <code>null</code> if not set
+     * @return A JSON object holding the <i>internal</i> configuration to store along with the new account
+     */
+    protected abstract JSONObject configureAccountOpt(Session session, JSONObject userConfig, CalendarParameters parameters) throws OXException;
 
     @Override
-    public JSONObject reconfigureAccount(Session session, JSONObject internalConfig, JSONObject userConfig, CalendarParameters parameters) throws OXException {
+    public final void onAccountCreated(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
+        //Nothing caching specific to do
+        onAccountCreatedOpt(session, account, parameters);
+    }
+
+    /**
+     * Callback routine that is invoked after a new account for the calendar provider has been created and after the {@link CachingCalendarProvider} has executed desired preparations/cleanups.
+     *
+     * @param session The user's session
+     * @param account The calendar account that was created
+     * @param parameters Additional calendar parameters, or <code>null</code> if not set
+     */
+    protected abstract void onAccountCreatedOpt(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException;
+
+    @Override
+    public final JSONObject reconfigureAccount(Session session, JSONObject internalConfig, JSONObject userConfig, CalendarParameters parameters) throws OXException {
         if (internalConfig.hasAndNotNull(CachingCalendarAccess.CACHING)) {
             internalConfig.remove(CachingCalendarAccess.CACHING);
         }
-        return internalConfig;
+        return reconfigureAccountOpt(session, internalConfig, userConfig, parameters);
     }
 
-    @Override
-    public void onAccountUpdated(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
-        delete(session, account);
-    }
+    /**
+     * Re-initializes the configuration prior updating an existing calendar account and after the {@link CachingCalendarProvider} has executed desired preparations/cleanups.
+     * <p/>
+     * Any permission- or data validation checks are performed during this initialization phase. In case of erroneous or incomplete
+     * configuration data, an appropriate exception will be thrown. Upon success, any updated <i>internal</i> configuration data is
+     * returned for persisting along with the updated calendar account.
+     *
+     * @param session The user's session
+     * @param internalConfig The <i>internal</i> configuration as retrieved from the currently stored account
+     * @param userConfig The updated <i>user</i> configuration as supplied by the client
+     * @param parameters Additional calendar parameters, or <code>null</code> if not set
+     * @return A JSON object holding the updated <i>internal</i> configuration to store along with update, or <code>null</code> if unchanged
+     */
+    protected abstract JSONObject reconfigureAccountOpt(Session session, JSONObject internalConfig, JSONObject userConfig, CalendarParameters parameters) throws OXException;
 
     @Override
-    public void onAccountDeleted(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
+    public final void onAccountUpdated(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
         delete(session, account);
+
+        onAccountUpdatedOpt(session, account, parameters);
     }
+
+    /**
+     * Callback routine that is invoked after an existing account for the calendar provider has been updated and after the {@link CachingCalendarProvider} has executed desired preparations/cleanups.
+     *
+     * @param session The user's session
+     * @param account The calendar account that was updated
+     * @param parameters Additional calendar parameters, or <code>null</code> if not set
+     */
+    protected abstract void onAccountUpdatedOpt(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException;
+
+    @Override
+    public final void onAccountDeleted(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
+        delete(session, account);
+
+        onAccountDeletedOpt(session, account, parameters);
+    }
+
+    /**
+     * Callback routine that is invoked after an existing account for the calendar provider has been deleted and after the {@link CachingCalendarProvider} has executed desired preparations/cleanups.
+     *
+     * @param session The user's session
+     * @param account The calendar account that was deleted
+     * @param parameters Additional calendar parameters, or <code>null</code> if not set
+     */
+    protected abstract void onAccountDeletedOpt(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException;
 
     private void delete(Session session, CalendarAccount account) throws OXException {
         ServerSession serverSession = ServerSessionAdapter.valueOf(session);
