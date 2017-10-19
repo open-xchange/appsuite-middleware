@@ -67,7 +67,7 @@ import com.openexchange.session.Session;
 
 /**
  *
- * The {@link SingleFolderCachingCalendarAccess} is a default implementation for single folder usage that only requires to do the {@link Event} retrieval by implementing {@link #getEvents()}
+ * The {@link SingleFolderCachingCalendarAccess} is a default implementation for single folder usage that only requires to do the {@link Event} retrieval by implementing {@link #getAllEvents()}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.10.0
@@ -112,12 +112,12 @@ public abstract class SingleFolderCachingCalendarAccess extends CachingCalendarA
      * @return {@link ExternalCalendarResult} containing the external events associated with the calendar account
      * @throws OXException
      */
-    public abstract ExternalCalendarResult getEvents() throws OXException;
+    public abstract ExternalCalendarResult getAllEvents() throws OXException;
 
     @Override
-    public final ExternalCalendarResult getEvents(String folderId) throws OXException {
+    public final ExternalCalendarResult getAllEvents(String folderId) throws OXException {
         checkFolderId(folderId);
-        ExternalCalendarResult externalCalendarResult = getEvents();
+        ExternalCalendarResult externalCalendarResult = getAllEvents();
         if (externalCalendarResult.isUpToDate()) {
             return externalCalendarResult;
         }
@@ -131,7 +131,7 @@ public abstract class SingleFolderCachingCalendarAccess extends CachingCalendarA
     public List<Event> getChangeExceptions(String folderId, String seriesId) throws OXException {
         checkFolderId(folderId);
         List<Event> events = new ArrayList<Event>();
-        ExternalCalendarResult externalCalendarResult = getEvents();
+        ExternalCalendarResult externalCalendarResult = getAllEvents();
         if (externalCalendarResult.isUpToDate()) {
             return externalCalendarResult.getEvents();
         }

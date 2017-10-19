@@ -153,9 +153,11 @@ public class UserConfigHelper {
              * notification settings
              */
             UserSettingMail userSettingMail = UserSettingMailStorage.getInstance().getUserSettingMail(session);
-            userConfig.put("notifyNewModifiedDeleted", userSettingMail.isNotifyAppointments());
-            userConfig.put("notifyAcceptedDeclinedAsCreator", userSettingMail.isNotifyAppointmentsConfirmOwner());
-            userConfig.put("notifyAcceptedDeclinedAsParticipant", userSettingMail.isNotifyAppointmentsConfirmParticipant());
+            if (userSettingMail != null) {
+                userConfig.put("notifyNewModifiedDeleted", userSettingMail.isNotifyAppointments());
+                userConfig.put("notifyAcceptedDeclinedAsCreator", userSettingMail.isNotifyAppointmentsConfirmOwner());
+                userConfig.put("notifyAcceptedDeclinedAsParticipant", userSettingMail.isNotifyAppointmentsConfirmParticipant());
+            }
         } catch (OXException | JSONException e) {
             LOG.warn("Error applying legacy calendar settings for user {} in context {}", I(session.getUserId()), I(session.getContextId()), e);
         }
@@ -163,8 +165,7 @@ public class UserConfigHelper {
 
     private String optDefaultFolderId(ServerSession session) {
         try {
-            UserizedFolder defaultFolder = requireService(FolderService.class, services).getDefaultFolder(
-                session.getUser(), TREE_ID, CONTENT_TYPE, PrivateType.getInstance(), session, null);
+            UserizedFolder defaultFolder = requireService(FolderService.class, services).getDefaultFolder(session.getUser(), TREE_ID, CONTENT_TYPE, PrivateType.getInstance(), session, null);
             return defaultFolder.getID();
         } catch (OXException e) {
             LOG.warn("Error getting default folder for user {} in context {}", I(session.getUserId()), I(session.getContextId()), e);
@@ -188,7 +189,7 @@ public class UserConfigHelper {
         //                workweekStart = Math.min(7, Math.max(1, workweekStart));
         //                int numDaysWorkweek = jsLob.getJsonObject().getInt("numDaysWorkweek");
         //                numDaysWorkweek = Math.min(7, Math.max(1, workweekStart));
-//
+        //
         //                Available available = new Available();
         //                available.setCreationTimestamp(new Date());
         //                Calendar calendar = CalendarUtils.initCalendar(TimeZones.UTC, null);
@@ -199,7 +200,7 @@ public class UserConfigHelper {
         //
         ////                    new WeekdayNum(0, Weekday.v)
         ////                    weekDays.add(new wee)
-//                }
+        //                }
         //                RecurrenceRule rule = new RecurrenceRule(Freq.WEEKLY);
         ////                rule.set
         ////
@@ -216,7 +217,7 @@ public class UserConfigHelper {
         ////                    LOG.warn("Error inserting default availability for user {} in context {}", I(session.getUserId()), I(session.getContextId()), e);
         ////                }
         ////
-//
+        //
         //            } catch (JSONException e) {
         //                LOG.warn("Error converting default alarm from JSlob for user {} in context {}", I(session.getUserId()), I(session.getContextId()), e);
         //            }

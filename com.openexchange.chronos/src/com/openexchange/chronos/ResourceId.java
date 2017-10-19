@@ -123,6 +123,9 @@ public class ResourceId {
             }
             try {
                 UUID uuid = UUID.fromString(uuidString);
+                if (0 == uuid.getLeastSignificantBits() >> 32) {
+                    return new ResourceId(decodeV1ContextID(uuid), decodeV1Entity(uuid), decodeV1Type(uuid));
+                }
                 return new ResourceId(decodeContextID(uuid), decodeEntity(uuid), decodeType(uuid));
             } catch (IllegalArgumentException e) {
                 // org.slf4j.LoggerFactory.getLogger(ResourceId.class).debug("Error parsing resource ID", e);
@@ -207,6 +210,21 @@ public class ResourceId {
 
     private static int decodeEntity(UUID encoded) {
         return (int) encoded.getMostSignificantBits();
+    }
+
+    private static int decodeV1ContextID(UUID encoded) {
+        long msb = encoded.getMostSignificantBits();
+        return (int) msb >> 16;
+    }
+
+    private static CalendarUserType decodeV1Type(UUID encoded) {
+        long msb = encoded.getMostSignificantBits();
+        long cid = msb >> 16;
+        return getCalendarUserType((int) (msb - (cid << 16)));
+    }
+
+    private static int decodeV1Entity(UUID encoded) {
+        return (int) encoded.getLeastSignificantBits();
     }
 
     /**

@@ -81,8 +81,8 @@ public class ICalFeedReader extends ICalFeedConnector {
         super(session, iCalFeedConfig);
     }
 
-    private HttpGet prepareGet(String uri) throws OXException {
-        HttpGet getMethod = new HttpGet(uri);
+    private HttpGet prepareGet() {
+        HttpGet getMethod = new HttpGet(iCalFeedConfig.getFeedUrl());
         getMethod.addHeader(HttpHeaders.ACCEPT, "text/calendar");
         handleAuth(getMethod);
         return getMethod;
@@ -107,11 +107,11 @@ public class ICalFeedReader extends ICalFeedConnector {
         }
     }
 
-    protected GetResult get(String uri) throws OXException {
+    protected GetResult get() throws OXException {
         HttpGet getMethod = null;
         CloseableHttpResponse response = null;
         try {
-            getMethod = prepareGet(uri);
+            getMethod = prepareGet();
             response = httpClient.execute(getMethod);
             GetResult result = new GetResult(response.getStatusLine(), response.getAllHeaders());
 
@@ -123,7 +123,7 @@ public class ICalFeedReader extends ICalFeedConnector {
                 result.setCalendar(importCalendar(httpEntity));
                 return result;
             }
-            throw ICalProviderExceptionCodes.UNEXPECTED_FEED_ERROR.create(uri);
+            throw ICalProviderExceptionCodes.UNEXPECTED_FEED_ERROR.create(iCalFeedConfig.getFeedUrl());
         } catch (IOException e) {
             //            throw OAuthExceptionCodes.OAUTH_ERROR.create(e, e.getMessage());
             throw OXException.general("", e);

@@ -69,8 +69,6 @@ import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.ical.exception.ICalProviderExceptionCodes;
 import com.openexchange.chronos.provider.ical.internal.ICalCalendarProviderProperties;
 import com.openexchange.chronos.provider.ical.internal.Services;
-import com.openexchange.chronos.provider.ical.internal.auth.ICalAuthParser;
-import com.openexchange.chronos.provider.ical.internal.auth.PasswordUtil;
 import com.openexchange.chronos.provider.ical.result.HeadResult;
 import com.openexchange.config.ConfigTools;
 import com.openexchange.config.lean.LeanConfigurationService;
@@ -128,26 +126,26 @@ public class ICalFeedConnector {
         config.setSocketReadTimeout(socketReadTimeout);
     }
 
-    protected HeadResult head(String uri) throws OXException {
+    protected HeadResult head() throws OXException {
         HttpHead headMethod = null;
         CloseableHttpResponse response = null;
         try {
-            headMethod = prepareHead(uri);
+            headMethod = prepareHead();
             response = httpClient.execute(headMethod);
             HeadResult result = new HeadResult(response.getStatusLine(), response.getAllHeaders());
             if (result.getStatusCode() >= 200 && result.getStatusCode() < 300) {
                 return result;
             }
             if (result.getStatusCode() == HttpStatus.SC_UNAUTHORIZED) {
-                throw CalendarExceptionCodes.AUTH_FAILED.create(uri);
+                throw CalendarExceptionCodes.AUTH_FAILED.create(iCalFeedConfig.getFeedUrl());
             }
             if (result.getStatusCode() == HttpStatus.SC_NOT_FOUND) {
-                throw ICalProviderExceptionCodes.NO_FEED.create(uri);
+                throw ICalProviderExceptionCodes.NO_FEED.create(iCalFeedConfig.getFeedUrl());
             }
 
-            throw ICalProviderExceptionCodes.UNEXPECTED_FEED_ERROR.create(uri);
+            throw ICalProviderExceptionCodes.UNEXPECTED_FEED_ERROR.create(iCalFeedConfig.getFeedUrl());
         } catch (IOException e) {
-            LOG.error("Error while executing the head request targeting {}: {}.", uri, e.getMessage(), e);
+            LOG.error("Error while executing the head request targeting {}: {}.", iCalFeedConfig.getFeedUrl(), e.getMessage(), e);
             throw CalendarExceptionCodes.UNEXPECTED_ERROR.create(e.getMessage());
         } finally {
             close(headMethod, response);
@@ -155,8 +153,8 @@ public class ICalFeedConnector {
         }
     }
 
-    private HttpHead prepareHead(String uri) throws OXException {
-        HttpHead headMethod = new HttpHead(uri);
+    private HttpHead prepareHead() {
+        HttpHead headMethod = new HttpHead(iCalFeedConfig.getFeedUrl());
         headMethod.addHeader(HttpHeaders.ACCEPT, "text/calendar");
 
         if (Strings.isNotEmpty(iCalFeedConfig.getEtag())) {
@@ -172,8 +170,8 @@ public class ICalFeedConnector {
         return headMethod;
     }
 
-    protected void handleAuth(HttpRequestBase method) throws OXException {
-        AuthInfo authInfo = ICalAuthParser.getInstance().getAuthInfoFromUnstructured(this.session, this.iCalFeedConfig.getUserConfiguration());
+    protected void handleAuth(HttpRequestBase method) {
+        AuthInfo authInfo = this.iCalFeedConfig.getAuthInfo();
         AuthType authType = authInfo.getAuthType();
         switch (authType) {
             case BASIC: {
@@ -184,8 +182,7 @@ public class ICalFeedConnector {
                 }
                 String password = authInfo.getPassword();
                 if (Strings.isNotEmpty(password)) {
-                    String decrypt = new String(PasswordUtil.decrypt(password, session.getPassword()));
-                    auth.append(decrypt);
+                    auth.append(password);
                 }
 
                 byte[] encodedAuth = Base64.encodeBase64(auth.toString().getBytes(Charset.forName("ISO-8859-1")));

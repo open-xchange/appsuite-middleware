@@ -146,7 +146,7 @@ public abstract class AbstractHandler implements CachingHandler {
     }
 
     protected ExternalCalendarResult getAndPrepareExtEvents(String folderId) throws OXException {
-        ExternalCalendarResult externalCalendarResult = this.cachedCalendarAccess.getEvents(folderId);
+        ExternalCalendarResult externalCalendarResult = this.cachedCalendarAccess.getAllEvents(folderId);
         List<Event> extEventsInFolder = externalCalendarResult.getEvents();
         HandlerHelper.setFolderId(extEventsInFolder, folderId);
 

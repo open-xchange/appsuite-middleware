@@ -83,6 +83,7 @@ public class Bug48917Test extends CalDAVTest {
 
     private CalendarTestManager manager2;
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -90,6 +91,7 @@ public class Bug48917Test extends CalDAVTest {
         manager2.setFailOnError(true);
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {
@@ -198,7 +200,8 @@ public class Bug48917Test extends CalDAVTest {
         assertTrue("no resource changes reported on sync collection", 0 < eTags.size());
         calendarData = calendarMultiget(eTags.keySet());
         iCalResource = assertContains(uid, calendarData);
-        assertEquals("Comment wrong", comment.replaceAll("\uD83D\uDCA9", ""), iCalResource.getVEvent().getPropertyValue("X-CALENDARSERVER-PRIVATE-COMMENT"));
+        String commentValue = iCalResource.getVEvent().getPropertyValue("X-CALENDARSERVER-PRIVATE-COMMENT");
+        assertTrue("Comment wrong", comment.equals(commentValue) || comment.replaceAll("\uD83D\uDCA9", "").equals(commentValue));
     }
 
 }

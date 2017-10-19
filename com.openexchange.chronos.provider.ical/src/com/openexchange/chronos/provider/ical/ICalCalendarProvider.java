@@ -51,9 +51,11 @@ package com.openexchange.chronos.provider.ical;
 
 import java.util.Locale;
 import org.json.JSONObject;
+import com.openexchange.auth.info.AuthType;
 import com.openexchange.chronos.provider.CalendarAccess;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.caching.CachingCalendarProvider;
+import com.openexchange.chronos.provider.ical.internal.auth.ICalAuthParser;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
@@ -83,23 +85,34 @@ public class ICalCalendarProvider extends CachingCalendarProvider {
     }
 
     @Override
-    public JSONObject configureAccount(Session session, JSONObject userConfig, CalendarParameters parameters) throws OXException {
+    protected JSONObject configureAccountOpt(Session session, JSONObject userConfig, CalendarParameters parameters) throws OXException {
         ICalFeedConfig iCalFeedConfig = new ICalFeedConfig.Builder(userConfig, new JSONObject()).build();
-        ICalFeedConnector iCalFeedConnector = new ICalFeedConnector(session, iCalFeedConfig);
 
-        iCalFeedConnector.head(iCalFeedConfig.getFeedUrl()); // check connections and authorization
+        if (iCalFeedConfig.getAuthInfo().getAuthType().equals(AuthType.BASIC)) {
+            ICalAuthParser.encrypt(userConfig, session.getPassword()); // encrypt password for persisting
+        }
+        ICalFeedConnector iCalFeedConnector = new ICalFeedConnector(session, iCalFeedConfig);
+        iCalFeedConnector.head(); // check connections and authorization
         return new JSONObject();
     }
 
     @Override
-    public JSONObject reconfigureAccount(Session session, JSONObject internalConfig, JSONObject userConfig, CalendarParameters parameters) throws OXException {
-        configureAccount(session, userConfig, parameters);
-
-        return super.reconfigureAccount(session, internalConfig, userConfig, parameters);
+    protected JSONObject reconfigureAccountOpt(Session session, JSONObject internalConfig, JSONObject userConfig, CalendarParameters parameters) throws OXException {
+        return configureAccountOpt(session, userConfig, parameters);
     }
 
     @Override
-    public void onAccountCreated(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
+    protected void onAccountCreatedOpt(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
+        // nothing to do
+    }
+
+    @Override
+    protected void onAccountUpdatedOpt(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
+        // nothing to do
+    }
+
+    @Override
+    protected void onAccountDeletedOpt(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
         // nothing to do
     }
 }

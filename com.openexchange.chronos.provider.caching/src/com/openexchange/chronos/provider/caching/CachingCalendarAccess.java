@@ -112,7 +112,8 @@ public abstract class CachingCalendarAccess implements WarningsAware {
     private final CalendarParameters parameters;
     private List<OXException> warnings = new ArrayList<>();
 
-    private JSONObject originConfiguration;
+    private JSONObject originInternalConfiguration;
+    private JSONObject originUserConfiguration;
 
     /**
      * Initializes a new {@link CachingCalendarAccess}.
@@ -126,7 +127,8 @@ public abstract class CachingCalendarAccess implements WarningsAware {
         this.parameters = parameters;
         this.session = ServerSessionAdapter.valueOf(session);
         this.account = account;
-        this.originConfiguration = new JSONObject(this.getAccount().getInternalConfiguration());
+        this.originInternalConfiguration = new JSONObject(this.getAccount().getInternalConfiguration());
+        this.originUserConfiguration = new JSONObject(this.getAccount().getUserConfiguration());
     }
 
     /**
@@ -146,12 +148,14 @@ public abstract class CachingCalendarAccess implements WarningsAware {
     public abstract long getExternalRequestTimeout();
 
     /**
-     * Returns an {@link ExternalCalendarResult} containing the external {@link Event}s by querying the underlying calendar for the given folder id and additional information.
+     * Returns an {@link ExternalCalendarResult} containing all external {@link Event}s by querying the underlying calendar for the given folder id and additional information.<b>
+     * <b>
+     * Make sure not to consider client parameters (available via {@link CachingCalendarAccess#getParameters()}) while requesting events!
      *
      * @param folderId The identifier of the folder to get the events from
      * @return {@link ExternalCalendarResult}
      */
-    public abstract ExternalCalendarResult getEvents(String folderId) throws OXException;
+    public abstract ExternalCalendarResult getAllEvents(String folderId) throws OXException;
 
     /**
      * Allows the underlying calendar provider to handle {@link OXException}s that might occur while retrieving data from the external source.
@@ -331,12 +335,13 @@ public abstract class CachingCalendarAccess implements WarningsAware {
      * Saves the current configuration for the account if it has been changed while processing
      */
     protected void saveConfig() {
-        if (Objects.equals(originConfiguration, getAccount().getInternalConfiguration())) {
+        if (Objects.equals(originInternalConfiguration, getAccount().getInternalConfiguration()) &&
+            Objects.equals(originUserConfiguration, getAccount().getUserConfiguration())) {
             return;
         }
         try {
             AdministrativeCalendarAccountService accountService = Services.getService(AdministrativeCalendarAccountService.class);
-            accountService.updateAccount(getSession().getContextId(), getSession().getUserId(), getAccount().getAccountId(), null, getAccount().getInternalConfiguration(), null, getAccount().getLastModified().getTime());
+            accountService.updateAccount(getSession().getContextId(), getSession().getUserId(), getAccount().getAccountId(), null, getAccount().getInternalConfiguration(), getAccount().getUserConfiguration(), getAccount().getLastModified().getTime());
         } catch (OXException e) {
             LOG.error("Unable to save configuration: {}", e.getMessage(), e);
         }

@@ -307,7 +307,8 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
         try {
             connection = dbProvider.getWriteConnection(context);
             txPolicy.setAutoCommit(connection, false);
-            updated = deleteEvents(connection);
+            updated += deleteEvents(connection);
+            updated += deleteTombstones(connection);
             txPolicy.commit(connection);
         } catch (SQLException e) {
             throw asOXException(e, MAPPER, (Event) null, connection, "calendar_event");
@@ -318,6 +319,14 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
 
     private int deleteEvents(Connection connection) throws SQLException {
         try (PreparedStatement stmt = connection.prepareStatement("DELETE FROM calendar_event WHERE cid=? AND account=?;")) {
+            stmt.setInt(1, context.getContextId());
+            stmt.setInt(2, accountId);
+            return logExecuteUpdate(stmt);
+        }
+    }
+
+    private int deleteTombstones(Connection connection) throws SQLException {
+        try (PreparedStatement stmt = connection.prepareStatement("DELETE FROM calendar_event_tombstone WHERE cid=? AND account=?;")) {
             stmt.setInt(1, context.getContextId());
             stmt.setInt(2, accountId);
             return logExecuteUpdate(stmt);

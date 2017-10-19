@@ -50,7 +50,10 @@
 package com.openexchange.chronos.provider.ical;
 
 import org.json.JSONObject;
+import com.openexchange.auth.info.AuthInfo;
 import com.openexchange.chronos.provider.caching.CachingCalendarAccess;
+import com.openexchange.chronos.provider.ical.internal.auth.ICalAuthParser;
+import com.openexchange.exception.OXException;
 
 /**
  *
@@ -64,28 +67,21 @@ public class ICalFeedConfig {
     public static final String ETAG = "etag";
 
     private final JSONObject userConfiguration;
-//    private long allowedMaxSize;
     private final String etag;
     private final long lastUpdated;
+    private final AuthInfo authInfo;
 
-    private ICalFeedConfig(JSONObject userConfiguration, String etag, long lastUpdated) {
+    private ICalFeedConfig(JSONObject userConfiguration, String etag, long lastUpdated, AuthInfo authInfo) {
         super();
         this.userConfiguration = userConfiguration;
         this.etag = etag;
         this.lastUpdated = lastUpdated;
+        this.authInfo = authInfo;
     }
 
     public String getFeedUrl() {
         return getUserConfiguration().optString("uri", null);
     }
-
-//    public long getAllowedMaxSize() {
-//        return allowedMaxSize;
-//    }
-//
-//    public void setAllowedMaxSize(long allowedMaxSize) {
-//        this.allowedMaxSize = allowedMaxSize;
-//    }
 
     public String getEtag() {
         return etag;
@@ -99,20 +95,33 @@ public class ICalFeedConfig {
         return userConfiguration;
     }
 
+    public AuthInfo getAuthInfo() {
+        return authInfo;
+    }
+
     public static class Builder {
 
         private final String etag;
         private final long lastUpdated;
         private final JSONObject userConfiguration;
+        private AuthInfo authInfo;
 
-        Builder(JSONObject userConfiguration, JSONObject folderConfig) {
+        /**
+         * Initializes a new {@link Builder}.
+         * 
+         * @param userConfiguration - the password has to be decrypted at this point
+         * @param folderConfig
+         * @throws OXException
+         */
+        Builder(JSONObject userConfiguration, JSONObject folderConfig) throws OXException {
             this.userConfiguration = userConfiguration;
             this.etag = folderConfig.optString(ETAG, null);
             this.lastUpdated = folderConfig.optLong(CachingCalendarAccess.LAST_UPDATE, -1L);
+            this.authInfo = ICalAuthParser.getInstance().getAuthInfoFromUnstructured(new JSONObject(this.userConfiguration));
         }
 
         public ICalFeedConfig build() {
-            return new ICalFeedConfig(userConfiguration, etag, lastUpdated);
+            return new ICalFeedConfig(userConfiguration, etag, lastUpdated, authInfo);
         }
     }
 }

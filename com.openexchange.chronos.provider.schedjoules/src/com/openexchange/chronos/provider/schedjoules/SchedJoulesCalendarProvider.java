@@ -49,21 +49,19 @@
 
 package com.openexchange.chronos.provider.schedjoules;
 
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Set;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.chronos.provider.CalendarAccess;
 import com.openexchange.chronos.provider.CalendarAccount;
-import com.openexchange.chronos.provider.CalendarProvider;
+import com.openexchange.chronos.provider.caching.CachingCalendarAccess;
+import com.openexchange.chronos.provider.caching.CachingCalendarProvider;
 import com.openexchange.chronos.provider.schedjoules.exception.SchedJoulesProviderExceptionCodes;
 import com.openexchange.chronos.schedjoules.api.SchedJoulesAPI;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 
 /**
@@ -71,21 +69,16 @@ import com.openexchange.session.Session;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class SchedJoulesCalendarProvider implements CalendarProvider {
+public class SchedJoulesCalendarProvider extends CachingCalendarProvider {
 
     private static final String PROVIDER_ID = "schedjoules";
     private static final String DISPLAY_NAME = "SchedJoules";
 
-    private final ServiceLookup services;
-
     /**
      * Initialises a new {@link SchedJoulesCalendarProvider}.
-     *
-     * @param services The {@link ServiceLookup} reference
      */
-    public SchedJoulesCalendarProvider(ServiceLookup services) {
+    public SchedJoulesCalendarProvider() {
         super();
-        this.services = services;
     }
 
     /*
@@ -118,13 +111,8 @@ public class SchedJoulesCalendarProvider implements CalendarProvider {
         return new SchedJoulesCalendarAccess(session, account, parameters);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.chronos.provider.CalendarProvider#configureAccount(com.openexchange.session.Session, org.json.JSONObject, com.openexchange.chronos.service.CalendarParameters)
-     */
     @Override
-    public JSONObject configureAccount(Session session, JSONObject userConfig, CalendarParameters parameters) throws OXException {
+    protected JSONObject configureAccountOpt(Session session, JSONObject userConfig, CalendarParameters parameters) throws OXException {
         if (userConfig == null) {
             return new JSONObject();
         }
@@ -150,21 +138,17 @@ public class SchedJoulesCalendarProvider implements CalendarProvider {
      * @see com.openexchange.chronos.provider.CalendarProvider#reconfigureAccount(com.openexchange.session.Session, org.json.JSONObject, org.json.JSONObject, com.openexchange.chronos.service.CalendarParameters)
      */
     @Override
-    public JSONObject reconfigureAccount(Session session, JSONObject internalConfig, JSONObject userConfig, CalendarParameters parameters) throws OXException {
-        // User configuration is 'null' or empty, thus we have to remove all subscriptions
-        if (userConfig == null || userConfig.isEmpty()) {
+    protected JSONObject reconfigureAccountOpt(Session session, JSONObject internalConfig, JSONObject userConfig, CalendarParameters parameters) throws OXException {
+        // User configuration is 'null' or empty or has no 'folders' attribute, thus we have to remove all subscriptions
+        if (userConfig == null || userConfig.isEmpty() || !userConfig.hasAndNotNull("folders")) {
+            // Remove cache information and folders
             return (internalConfig.remove("folders") == null) ? null : internalConfig;
         }
 
-        // User configuration has no 'folders' attribute, thus we have to remove all subscriptions
         JSONObject userConfigFolders = userConfig.optJSONObject("folders");
-        if (userConfigFolders == null || userConfigFolders.isEmpty()) {
-            return (internalConfig.remove("folders") == null) ? null : internalConfig;
-        }
-
         JSONObject internalConfigFolders = internalConfig.optJSONObject("folders");
-        // Add all user configuration folders
-        if (internalConfigFolders == null) {
+        if (internalConfigFolders == null || internalConfigFolders.isEmpty()) {
+            // Add all user configuration folders
             try {
                 internalConfigFolders = new JSONObject();
                 addFolders(userConfigFolders, internalConfigFolders);
@@ -177,84 +161,34 @@ public class SchedJoulesCalendarProvider implements CalendarProvider {
 
         // Check for differences and merge
         try {
-            // Build a set that contains all internal subscribed items and their position in the array 
-            Map<Integer, String> internalItemIds = new HashMap<>();
+            // Build a set that contains all internal subscribed items 
+            Set<String> internalItemIds = new HashSet<>();
             for (String name : internalConfigFolders.keySet()) {
-                JSONObject folder = internalConfigFolders.getJSONObject(name);
-                internalItemIds.put(folder.getInt("itemId"), name);
+                internalItemIds.add(name);
             }
 
-            // Build a set that contains all user configured subscribed items
-            // and add any new items
-            Set<Integer> userConfigItemIds = new HashSet<>();
-            boolean changed = false;
-            JSONObject additions = new JSONObject();
-            for (String name : userConfigFolders.keySet()) {
-                JSONObject folder = userConfigFolders.getJSONObject(name);
-                int itemId = folder.getInt("itemId");
-                userConfigItemIds.add(itemId);
-                if (!internalItemIds.containsKey(itemId)) {
-                    changed = true;
-                    additions.put(name, prepareFolder(folder));
-                }
-                internalItemIds.remove(itemId);
-            }
+            boolean added = handleAdditions(internalConfigFolders, userConfigFolders, internalItemIds);
+            boolean deleted = handleDeletions(getInternalConfigCaching(internalConfig), internalConfigFolders, internalItemIds);
 
-            // Handle deletions
-            if (!internalItemIds.isEmpty()) {
-                for (String name : internalItemIds.values()) {
-                    internalConfigFolders.remove(name);
-                }
-                changed = true;
-            }
-
-            // Add the new items
-            if (!additions.isEmpty()) {
-                for (String name : additions.keySet()) {
-                    internalConfigFolders.put(name, additions.getJSONObject(name));
-                }
-                changed = true;
-            }
-
-            //TODO: Update references in 'folderCaching' object if renames occurred
-
-            return changed ? internalConfig : null;
+            return (added || deleted) ? internalConfig : null;
         } catch (JSONException e) {
             throw SchedJoulesProviderExceptionCodes.JSON_ERROR.create(e.getMessage(), e);
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.chronos.provider.CalendarProvider#onAccountCreated(com.openexchange.session.Session, com.openexchange.chronos.provider.CalendarAccount, com.openexchange.chronos.service.CalendarParameters)
-     */
     @Override
-    public void onAccountCreated(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
-        // TODO Auto-generated method stub
-
+    protected void onAccountCreatedOpt(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
+        // nothing to do
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.chronos.provider.CalendarProvider#onAccountUpdated(com.openexchange.session.Session, com.openexchange.chronos.provider.CalendarAccount, com.openexchange.chronos.service.CalendarParameters)
-     */
     @Override
-    public void onAccountUpdated(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
-        // TODO Auto-generated method stub
-
+    protected void onAccountUpdatedOpt(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
+        // nothing to do
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.chronos.provider.CalendarProvider#onAccountDeleted(com.openexchange.session.Session, com.openexchange.chronos.provider.CalendarAccount, com.openexchange.chronos.service.CalendarParameters)
-     */
     @Override
-    public void onAccountDeleted(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
-        // TODO Auto-generated method stub
-
+    protected void onAccountDeletedOpt(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
+        // nothing to do
     }
 
     ///////////////////////////////////////////// HELPERS ///////////////////////////////////////////
@@ -298,5 +232,59 @@ public class SchedJoulesCalendarProvider implements CalendarProvider {
         internalItem.put("url", page.getString("url"));
         internalItem.put("itemId", itemId);
         return internalItem;
+    }
+
+    /**
+     * Handles the additions.
+     * 
+     * @param userConfigFolders The user configuration for 'folders'
+     * @param internalItemIds The internal items
+     * @param additions The target 'additions' object
+     * @return <code>true</code> if there were new additions, <code>false</code> otherwise
+     * @throws JSONException if a JSON error occurs
+     * @throws OXException if any other error occurs
+     */
+    private boolean handleAdditions(JSONObject internalConfigFolders, JSONObject userConfigFolders, Set<String> internalItemIds) throws JSONException, OXException {
+        int origLength = internalConfigFolders.length();
+        for (String name : userConfigFolders.keySet()) {
+            JSONObject folder = userConfigFolders.getJSONObject(name);
+            if (!internalItemIds.contains(name)) {
+                internalConfigFolders.put(name, prepareFolder(folder));
+            }
+            internalItemIds.remove(name);
+        }
+        return origLength != internalConfigFolders.length();
+    }
+
+    /**
+     * Handle any potential deletions.
+     * 
+     * @param internalConfigFolders The internal configuration for 'folderCaching'
+     * @param internalConfigFolders The internal configuration for 'folders'
+     * @param internalItemIds The items that are to be removed from the internal configuration
+     * @return <code>true</code> if the internal configuration was changed, <code>false</code> otherwise
+     */
+    private boolean handleDeletions(JSONObject internalConfigCaching, JSONObject internalConfigFolders, Set<String> internalItemIds) {
+        if (internalItemIds.isEmpty()) {
+            return false;
+        }
+
+        for (String name : internalItemIds) {
+            internalConfigFolders.remove(name);
+            internalConfigCaching.remove(name);
+        }
+        return true;
+    }
+
+    /**
+     * Returns the {@link CachingCalendarAccess#CACHING} attribute or an empty object
+     * 
+     * @param internalConfig The internal configuration
+     * @return the {@link CachingCalendarAccess#CACHING} attribute or an empty object if no caching elements exist
+     *         yet
+     */
+    private JSONObject getInternalConfigCaching(JSONObject internalConfig) {
+        JSONObject internalConfigCaching = internalConfig.optJSONObject(CachingCalendarAccess.CACHING);
+        return internalConfigCaching == null ? new JSONObject() : internalConfigCaching;
     }
 }
