@@ -78,6 +78,7 @@ public class ExternalCalendarResult {
     public ExternalCalendarResult(List<Event> events) {
         super();
         this.events = events;
+        this.isUpToDate = false;
     }
 
     /**
