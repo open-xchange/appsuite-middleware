@@ -54,8 +54,11 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.chronos.Calendar;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.TimeTransparency;
@@ -70,6 +73,7 @@ import com.openexchange.chronos.schedjoules.api.SchedJoulesAPI;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Enums;
+import com.openexchange.java.Strings;
 import com.openexchange.session.Session;
 
 /**
@@ -78,6 +82,8 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class SchedJoulesCalendarAccess extends CachingCalendarAccess {
+
+    private static final Logger LOG = LoggerFactory.getLogger(SchedJoulesCalendarAccess.class);
 
     /**
      * Default 'X-WR-CALNAME' and 'SUMMARY' contents of an iCal that is not accessible
@@ -132,13 +138,21 @@ public class SchedJoulesCalendarAccess extends CachingCalendarAccess {
      */
     @Override
     public List<CalendarFolder> getVisibleFolders() throws OXException {
-        JSONObject foldersObject = getAccount().getUserConfiguration().optJSONObject(FOLDERS);
-        if (foldersObject == null || foldersObject.isEmpty()) {
+        JSONArray foldersArray = getAccount().getUserConfiguration().optJSONArray(FOLDERS);
+        if (foldersArray == null || foldersArray.isEmpty()) {
             return Collections.emptyList();
         }
-        List<CalendarFolder> folders = new ArrayList<>(foldersObject.length());
-        for (String key : foldersObject.keySet()) {
-            folders.add(prepareFolder(key));
+        List<CalendarFolder> folders = new ArrayList<>(foldersArray.length());
+        for (int index = 0; index < foldersArray.length(); index++) {
+            JSONObject folder = foldersArray.optJSONObject(index);
+            if (!hasMetadata(folder)) {
+                continue;
+            }
+            String name = getFolderName(folder);
+            if (Strings.isEmpty(name)) {
+                continue;
+            }
+            folders.add(prepareFolder(name));
         }
         return folders;
     }
@@ -198,15 +212,11 @@ public class SchedJoulesCalendarAccess extends CachingCalendarAccess {
             if (userConfig == null || userConfig.isEmpty()) {
                 throw SchedJoulesProviderExceptionCodes.NO_USER_CONFIGURATION.create(getAccount().getAccountId(), getSession().getUserId(), getSession().getContextId());
             }
-            JSONObject foldersObject = userConfig.optJSONObject(FOLDERS);
-            if (foldersObject == null || foldersObject.isEmpty()) {
+            JSONArray foldersArray = userConfig.optJSONArray(FOLDERS);
+            if (foldersArray == null || foldersArray.isEmpty()) {
                 throw SchedJoulesProviderExceptionCodes.NO_FOLDERS_METADATA.create(getAccount().getAccountId(), getSession().getUserId(), getSession().getContextId());
             }
-            JSONObject folder = foldersObject.optJSONObject(folderId);
-            if (folder == null || folder.isEmpty()) {
-                throw SchedJoulesProviderExceptionCodes.NO_FOLDER_METADATA.create(folderId, getAccount().getAccountId(), getSession().getUserId(), getSession().getContextId());
-            }
-
+            JSONObject folder = findFolder(folderId, foldersArray);
             URL url = new URL(folder.getString(URL));
             SchedJoulesAPI api = SchedJoulesAPI.getInstance();
             Calendar calendar = api.calendar().getCalendar(url);
@@ -222,6 +232,28 @@ public class SchedJoulesCalendarAccess extends CachingCalendarAccess {
         } catch (MalformedURLException e) {
             throw SchedJoulesProviderExceptionCodes.INVALID_URL.create(folderId, e);
         }
+    }
+
+    /**
+     * Find the folder in the specified folders array
+     * 
+     * @param folderId The folder identifier
+     * @param foldersArray The folders array
+     * @return The found folder as a {@link JSONObject}
+     * @throws JSONException if a JSON error is occurred
+     * @throws OXException if no folder metadata is found for the specified folder
+     */
+    private JSONObject findFolder(String folderId, JSONArray foldersArray) throws JSONException, OXException {
+        for (int index = 0; index < foldersArray.length(); index++) {
+            JSONObject folder = foldersArray.getJSONObject(index);
+            if (!hasMetadata(folder)) {
+                continue;
+            }
+            if (folderId.equals(getFolderName(folder))) {
+                return folder;
+            }
+        }
+        throw SchedJoulesProviderExceptionCodes.NO_FOLDER_METADATA.create(folderId, getAccount().getAccountId(), getSession().getUserId(), getSession().getContextId());
     }
 
     /*
@@ -258,4 +290,31 @@ public class SchedJoulesCalendarAccess extends CachingCalendarAccess {
         return folder;
     }
 
+    /**
+     * Gets the folder's name from the specified {@link JSONObject} folder metadata
+     * 
+     * @param folder the metadata {@link JSONObject}
+     * @return The folder's name or <code>null</code> if the metdata have no 'name' information
+     */
+    private String getFolderName(JSONObject folder) {
+        String name = folder.optString("name");
+        if (Strings.isEmpty(name)) {
+            LOG.warn("Missing the 'name' attribute from folder metadata for account '{}' of user '{}' in context '{}'", getAccount().getAccountId(), getSession().getUserId(), getSession().getContextId());
+        }
+        return name;
+    }
+
+    /**
+     * Checks if the specified {@link JSONObject} has metadata stored
+     * 
+     * @param folder the metadata
+     * @return <code>true</code> if the metadata are present, <code>false</code> otherwise
+     */
+    private boolean hasMetadata(JSONObject folder) {
+        if (folder == null || folder.isEmpty()) {
+            LOG.warn("Encountered an empty folder metadata entry for account '{}' of user '{}' in context '{}'", getAccount().getAccountId(), getSession().getUserId(), getSession().getContextId());
+            return false;
+        }
+        return true;
+    }
 }
