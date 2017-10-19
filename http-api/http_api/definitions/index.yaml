@@ -170,6 +170,8 @@ ChronosFreeBusyResponseData:
   $ref: ./chronos/FreeBusyResponseData.yaml
 ChronosConflictDataRaw:
   $ref: ./chronos/ConflictDataRaw.yaml
+ChronosFolderBody:
+  $ref: ./chronos/ChronosFolderBody.yaml
 # Module: chronos/alarm
 AlarmTriggerResponse:
   $ref: ./chronos/AlarmTriggerResponse.yaml
@@ -676,8 +678,17 @@ GetSessionsResponse:
   $ref: ./sessionmanagement/GetSessionsResponse.yaml
 RemoveSessionBody:
   $ref: ./sessionmanagement/RemoveSessionBody.yaml
-RemoveAllOtherSessionsBody:
-  $ref: ./sessionmanagement/RemoveAllOtherSessionsBody.yaml
 # Module: Export
 InfoItemExport:
   $ref: ./export/InfoItemExport.yaml
+# Module Job Queue
+InfoJobData:
+  $ref: ./jobqueue/InfoJobData.yaml
+AllJobsResponse:
+  $ref: ./jobqueue/AllJobsResponse.yaml
+InfoJobResponse:
+  $ref: ./jobqueue/InfoJobResponse.yaml
+GetJobResponse:
+  $ref: ./jobqueue/GetJobResponse.yaml
+CancelJobResponse:
+  $ref: ./jobqueue/CancelJobResponse.yaml

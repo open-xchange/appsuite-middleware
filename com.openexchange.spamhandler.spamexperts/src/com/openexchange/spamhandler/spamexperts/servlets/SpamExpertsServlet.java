@@ -54,15 +54,19 @@ import java.io.IOException;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.DataServlet;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.exception.OXException;
+import com.openexchange.rest.client.httpclient.HttpClients;
+import com.openexchange.rest.client.httpclient.HttpClients.ClientConfig;
 import com.openexchange.session.Session;
 import com.openexchange.spamhandler.spamexperts.management.SpamExpertsConfig;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.version.Version;
 
 /**
  *
@@ -81,7 +85,8 @@ public final class SpamExpertsServlet extends DataServlet {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SpamExpertsServlet.class);
 
-    private final SpamExpertsConfig config;
+    private final transient SpamExpertsConfig config;
+    private final transient CloseableHttpClient httpClient;
 
     /**
      * Initializes a new {@link SpamExpertsServlet}.
@@ -91,6 +96,18 @@ public final class SpamExpertsServlet extends DataServlet {
     public SpamExpertsServlet(SpamExpertsConfig config) {
         super();
         this.config = config;
+
+        String versionString = Version.getInstance().optVersionString();
+        if (null == versionString) {
+            versionString = "<unknown version>";
+        }
+        httpClient = HttpClients.getHttpClient(ClientConfig.newInstance()
+            .setUserAgent("OX Spam Experts Client v" + versionString)
+            .setMaxTotalConnections(32)
+            .setMaxConnectionsPerRoute(32)
+            .setConnectionTimeout(5000)
+            .setSocketReadTimeout(30000)
+        );
     }
 
     @Override
@@ -116,20 +133,26 @@ public final class SpamExpertsServlet extends DataServlet {
                 return;
             }
 
-            SpamExpertsServletRequest proRequest = new SpamExpertsServletRequest(session, config);
+            SpamExpertsServletRequest proRequest = new SpamExpertsServletRequest(session, config, httpClient);
             Object responseObj = proRequest.action(action, jsonObj);
             response.setData(responseObj);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             LOG.error("", e);
             response.setException(e);
-        } catch (final JSONException e) {
-            final OXException oje = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
-            LOG.error("", oje);
-            response.setException(oje);
         }
 
         writeResponse(response, resp, session);
+    }
 
+    /**
+     * Shuts-down this servlet instance.
+     */
+    public void shutDown() {
+        try {
+            httpClient.close();
+        } catch (Exception e) {
+            // Ignore
+        }
     }
 
 }

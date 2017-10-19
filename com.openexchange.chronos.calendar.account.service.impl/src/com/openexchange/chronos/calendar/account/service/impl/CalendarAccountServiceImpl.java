@@ -51,6 +51,7 @@ package com.openexchange.chronos.calendar.account.service.impl;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -101,6 +102,9 @@ public class CalendarAccountServiceImpl implements CalendarAccountService, Admin
 
     @Override
     public CalendarAccount createAccount(Session session, String providerId, JSONObject userConfig, CalendarParameters parameters) throws OXException {
+        if (isGuest(session)) {
+            throw CalendarExceptionCodes.UNSUPPORTED_OPERATION_FOR_PROVIDER.create(providerId);
+        }
         /*
          * get associated calendar provider & initialize account config
          */
@@ -126,10 +130,14 @@ public class CalendarAccountServiceImpl implements CalendarAccountService, Admin
         if (null != storedAccount.getLastModified() && storedAccount.getLastModified().getTime() > clientTimestamp) {
             throw CalendarExceptionCodes.CONCURRENT_MODIFICATION.create(String.valueOf(id), clientTimestamp, storedAccount.getLastModified().getTime());
         }
+        if (isGuest(session)) {
+            throw CalendarExceptionCodes.UNSUPPORTED_OPERATION_FOR_PROVIDER.create(storedAccount.getProviderId());
+        }
         /*
          * get associated calendar provider & re-initialize account config
          */
         CalendarProvider calendarProvider = getProvider(storedAccount.getProviderId());
+
         JSONObject internalConfig = calendarProvider.reconfigureAccount(session, storedAccount.getInternalConfiguration(), userConfig, parameters);
         /*
          * update calendar account in storage within transaction
@@ -163,6 +171,9 @@ public class CalendarAccountServiceImpl implements CalendarAccountService, Admin
         CalendarProvider calendarProvider = getProviderRegistry().getCalendarProvider(storedAccount.getProviderId());
         if (null != calendarProvider && AutoProvisioningCalendarProvider.class.isInstance(calendarProvider)) {
             throw CalendarExceptionCodes.UNSUPPORTED_OPERATION_FOR_PROVIDER.create(calendarProvider.getId());
+        }
+        if (isGuest(session)) {
+            throw CalendarExceptionCodes.UNSUPPORTED_OPERATION_FOR_PROVIDER.create(storedAccount.getProviderId());
         }
         /*
          * delete calendar account in storage within transaction
@@ -201,10 +212,17 @@ public class CalendarAccountServiceImpl implements CalendarAccountService, Admin
             }
         }.executeQuery();
         if (null == storedAccount && CalendarAccount.DEFAULT_ACCOUNT.getAccountId() == id) {
-            /*
-             * get default account from list to implicitly trigger pending auto-provisioning tasks of the default account
-             */
-            storedAccount = find(getAccounts(session), CalendarAccount.DEFAULT_ACCOUNT.getProviderId());
+            if (isGuest(session)) {
+                /*
+                 * return a virtual default calendar account for guest users
+                 */
+                storedAccount = getVirtualDefaultAccount(session);
+            } else {
+                /*
+                 * get default account from list to implicitly trigger pending auto-provisioning tasks of the default account
+                 */
+                storedAccount = find(getAccounts(session), CalendarAccount.DEFAULT_ACCOUNT.getProviderId());
+            }
         }
         if (null == storedAccount) {
             throw CalendarExceptionCodes.ACCOUNT_NOT_FOUND.create(id);
@@ -221,7 +239,7 @@ public class CalendarAccountServiceImpl implements CalendarAccountService, Admin
         /*
          * check for pending provisioning tasks
          */
-        if (false == getProvidersRequiringProvisioning(accounts).isEmpty()) {
+        if (false == getProvidersRequiringProvisioning(accounts).isEmpty() && false == isGuest(session)) {
             CalendarParameters parameters = null;
             accounts = new OSGiCalendarStorageOperation<List<CalendarAccount>>(services, session.getContextId(), -1) {
 
@@ -245,6 +263,12 @@ public class CalendarAccountServiceImpl implements CalendarAccountService, Admin
              * (re-)invalidate caches outside of transaction
              */
             invalidateStorage(session.getContextId(), session.getUserId());
+        }
+        if (accounts.isEmpty() && isGuest(session)) {
+            /*
+             * include a virtual default calendar account for guest users
+             */
+            accounts = Collections.singletonList(getVirtualDefaultAccount(session));
         }
         return accounts;
     }
@@ -400,6 +424,14 @@ public class CalendarAccountServiceImpl implements CalendarAccountService, Admin
 
     private static boolean allowsMultipleAccounts(CalendarProvider provider) {
         return false == SingleAccountCalendarProvider.class.isInstance(provider);
+    }
+
+    private static boolean isGuest(Session session) {
+        return Boolean.TRUE.equals(session.getParameter(Session.PARAM_GUEST));
+    }
+
+    private static CalendarAccount getVirtualDefaultAccount(Session session) {
+        return new DefaultCalendarAccount(CalendarAccount.DEFAULT_ACCOUNT.getProviderId(), CalendarAccount.DEFAULT_ACCOUNT.getAccountId(), session.getUserId(), true, new JSONObject(), new JSONObject(), new Date());
     }
 
     private void invalidateStorage(int contextId, int userId) throws OXException {

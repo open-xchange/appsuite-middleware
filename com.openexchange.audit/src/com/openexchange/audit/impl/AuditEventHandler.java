@@ -445,8 +445,8 @@ public class AuditEventHandler implements EventHandler {
         logBuilder.append("CONTEXT ID: ").append(commonEvent.getContextId()).append("; ");
         logBuilder.append("OBJECT ID: ").append(event.getId()).append("; ");
 
-        appendIfSet(logBuilder, "CREATED BY: ", event.getCreatedBy());
-        appendIfSet(logBuilder, "MODIFIED BY: ", event.getModifiedBy());
+        appendIfSet(logBuilder, "CREATED BY: ", event.getCreatedBy().getCn());
+        appendIfSet(logBuilder, "MODIFIED BY: ", event.getModifiedBy().getCn());
 
         try {
             Map<Integer, Set<Integer>> affectedUsersWithFolder = commonEvent.getAffectedUsersWithFolder();
@@ -623,40 +623,6 @@ public class AuditEventHandler implements EventHandler {
             logBuilder.append(" (").append(userId).append(')');
         }
         logBuilder.append("; ");
-    }
-
-    /**
-     * Appends a user with given identifierText to the logBuilder
-     *
-     * @param userId The identifier of the user
-     * @param context The context of the user
-     * @param identifierText The text to identify the users role, e.g. 'CREATED'
-     * @param logBuilder The {@link StringBuilder}
-     */
-    private void appendBy(int userId, Context context, String identifierText, StringBuilder logBuilder) {
-        if (userId > 0) {
-            try {
-                logBuilder.append(identifierText).append(" BY: ").append(userService.getUser(userId, context).getDisplayName()).append("; ");
-                return;
-            } catch (OXException e) {
-                logger.debug("Failed to load user {} in context {}", userId, context.getContextId(), e);
-            }
-            logBuilder.append(identifierText).append(" BY: <unknown>; ");
-        }
-    }
-
-    /**
-     * Appends a user with given identifierText to the logBuilder
-     *
-     * @param calendarUser The calendar user
-     * @param identifierText The text to identify the users role, e.g. 'CREATED'
-     * @param logBuilder The {@link StringBuilder}
-     */
-    private void appendBy(CalendarUser calendarUser, String identifierText, StringBuilder logBuilder) {
-        if (null != calendarUser) {
-            logBuilder.append(identifierText).append(" BY: ").append(calendarUser.getCn()).append("; ");
-        }
-
     }
 
     /**

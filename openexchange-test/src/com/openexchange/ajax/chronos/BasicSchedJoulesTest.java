@@ -68,7 +68,6 @@ import com.openexchange.testing.httpclient.models.PageData;
 import com.openexchange.testing.httpclient.models.PageSectionsData;
 import com.openexchange.testing.httpclient.models.SearchData;
 import com.openexchange.testing.httpclient.models.SearchResponse;
-import com.openexchange.testing.httpclient.models.SubscribeResponse;
 
 /**
  * {@link BasicSchedJoulesTest}
@@ -161,51 +160,6 @@ public class BasicSchedJoulesTest extends AbstractChronosTest {
         response = chronosApi.browse(defaultUserApi.getSession(), itemData.getItem().getItemId(), getRandomLanguage(), null);
         assertNull("Errors detected", response.getError());
         assertTrue("Exception was thrown on server side", response.getErrorStack().isEmpty());
-    }
-
-    /**
-     * Tests the subscription of a calendar
-     */
-    @Test
-    public void testSubscribe() throws Exception {
-        Integer pageId = null;
-        boolean isCalendar = false;
-        String randomLanguage = getRandomLanguage();
-
-        do {
-            BrowseResponse response = chronosApi.browse(defaultUserApi.getSession(), pageId, randomLanguage, getRandomCountry());
-            assertNull("Errors detected", response.getError());
-            assertTrue("Exception was thrown on server side", response.getErrorStack().isEmpty());
-
-            PageData pageData = response.getData();
-            assertNotNull("No page data was returned", pageData);
-            assertFalse("The page sections are empty", pageData.getPageSections().isEmpty());
-
-            List<PageSectionsData> pageSections = pageData.getPageSections();
-            assertNotNull("The " + pageData.getItemId() + " page's sections is null", pageSections);
-            assertFalse("The root page has no page sections", pageSections.isEmpty());
-
-            PageSectionsData pageSectionsData = pageSections.get(0);
-            assertNotNull("The page section is null", pageSectionsData);
-
-            ItemsData itemsData = pageSectionsData.getItems();
-            for (ItemsDataInner itemData : itemsData) {
-                pageId = itemData.getItem().getItemId();
-                response = chronosApi.browse(defaultUserApi.getSession(), itemData.getItem().getItemId(), randomLanguage, null);
-                assertNull("Errors detected", response.getError());
-                assertTrue("Exception was thrown on server side", response.getErrorStack().isEmpty());
-                if (itemData.getItemClass().equals("calendar")) {
-                    isCalendar = true;
-                    break;
-                }
-            }
-        } while (!isCalendar);
-
-        SubscribeResponse response = chronosApi.subscribe(defaultUserApi.getSession(), pageId, randomLanguage);
-        assertNull("Errors detected", response.getError());
-        assertTrue("Exception was thrown on server side", response.getErrorStack().isEmpty());
-
-        assertNotNull("Unable to subscribe to calendar with id '" + pageId + "', no ical data returned", response.getData());
     }
 
     /**

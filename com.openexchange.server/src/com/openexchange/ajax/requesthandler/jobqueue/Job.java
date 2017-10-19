@@ -70,6 +70,13 @@ public interface Job {
     boolean isTrackable();
 
     /**
+     * Gets the optional job key.
+     *
+     * @return The key or <code>null</code>
+     */
+    JobKey getOptionalKey();
+
+    /**
      * Gets the associated user session
      *
      * @return The session

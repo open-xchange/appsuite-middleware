@@ -5,6 +5,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.pns.json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.pns.subscription.storage"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.pns.transport.apn"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.pns.transport.apns_http2"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.pns.transport.gcm"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.pns.transport.wns"/>
 </provider>

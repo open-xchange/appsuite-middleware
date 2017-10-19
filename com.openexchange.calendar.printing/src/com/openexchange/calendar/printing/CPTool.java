@@ -51,17 +51,14 @@ package com.openexchange.calendar.printing;
 
 import java.util.Calendar;
 import java.util.Collections;
-import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.dmfs.rfc5545.DateTime;
 import com.openexchange.calendar.printing.blocks.WeekAndDayCalculator;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.ParticipationStatus;
-import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.server.ServiceLookup;
 
@@ -72,6 +69,8 @@ public class CPTool extends WeekAndDayCalculator {
 
     /**
      * Based on the selected template, this method determines new start and end dates to present exactly the block that the template needs.
+     * 
+     * @param params The {@link CPParameters}
      */
     public void calculateNewStartAndEnd(final CPParameters params) {
         if (!isBlockTemplate(params)) {
@@ -98,6 +97,9 @@ public class CPTool extends WeekAndDayCalculator {
     /**
      * Checks whether the template given is one that prints a specific timeframe as a block, which might be different from the given start
      * and end date.
+     * 
+     * @param params The {@link CPParameters}
+     * @return <code>true</code> if the template given is one that prints a specific timeframe as a block, <code>false</code> otherwise
      */
     public boolean isBlockTemplate(final CPParameters params) {
         final String basic = "/[^/]+$";
@@ -109,58 +111,11 @@ public class CPTool extends WeekAndDayCalculator {
 
     /**
      * Sort a list of events by start date.
+     * 
      * @param events To sort
      */
     public void sort(final List<CPEvent> events) {
         Collections.sort(events, new StartDateComparator());
-    }
-
-    public List<Event> splitIntoSingleDays(final Event event) {
-        final List<Event> events = new LinkedList<Event>();
-
-        Date start = CalendarUtils.asDate(event.getStartDate());
-        Date end = CalendarUtils.asDate(event.getEndDate());
-        if (!isOnDifferentDays(start, end)) {
-            events.add(event);
-            return events;
-        }
-
-        final int duration = getMissingDaysInbetween(start, end).size() + 1;
-
-        final Calendar newStartCal = Calendar.getInstance();
-        newStartCal.setTime(start);
-        newStartCal.set(Calendar.HOUR_OF_DAY, 0);
-        newStartCal.set(Calendar.MINUTE, 0);
-        newStartCal.set(Calendar.SECOND, 0);
-        newStartCal.set(Calendar.MILLISECOND, 0);
-
-        final Calendar newEndCal = Calendar.getInstance();
-        newEndCal.setTime(start);
-        newEndCal.set(Calendar.HOUR_OF_DAY, 23);
-        newEndCal.set(Calendar.MINUTE, 59);
-        newEndCal.set(Calendar.SECOND, 59);
-        newEndCal.set(Calendar.MILLISECOND, 999);
-
-        final Event first = clone(event);
-        first.setEndDate(new DateTime(newEndCal.getTime().getTime()));
-        events.add(first);
-
-        for (int i = 1; i < duration; i++) {
-            final Event middle = clone(event);
-            newStartCal.add(Calendar.DAY_OF_YEAR, 1);
-            newEndCal.add(Calendar.DAY_OF_YEAR, 1);
-            DateTime dateTime = new DateTime(newEndCal.getTime().getTime());
-            middle.setStartDate(dateTime);
-            middle.setEndDate(dateTime);
-            events.add(middle);
-        }
-
-        final Event last = clone(event);
-        newStartCal.add(Calendar.DAY_OF_YEAR, 1);
-        last.setStartDate(new DateTime(newStartCal.getTime().getTime()));
-        events.add(last);
-
-        return events;
     }
 
     /**
@@ -182,59 +137,17 @@ public class CPTool extends WeekAndDayCalculator {
     /**
      * Converts {@link Event}s into {@link CPEvent}s
      * 
+     * @param services The {@link ServiceLookup}
      * @param events To convert
+     * @param cal The {@link CPCalendar}
+     * @param context The {@link Context}
      * @return The {@link Event}s as {@link CPEvent}s
      */
-    public List<CPEvent> toCPAppointment(ServiceLookup services, List<Event> events, CPCalendar cal, Context context) {
+    public List<CPEvent> toCPEvent(ServiceLookup services, List<Event> events, CPCalendar cal, Context context) {
         List<CPEvent> retval = new LinkedList<>();
-        for(Event event: events) {
+        for (Event event : events) {
             retval.add(new CPEvent(services, event, cal, context));
         }
         return retval;
-    }
-    
-    /**
-     * Clones an event
-     * 
-     * @param event To clone
-     * @return The cloned event
-     */
-    private Event clone(Event event) {
-        Event clone = new Event();
-        
-        clone.setAlarms(event.getAlarms());
-        clone.setAttachments(event.getAttachments());
-        clone.setAttendees(event.getAttendees());
-        clone.setCalendarUser(event.getCalendarUser());
-        clone.setCategories(event.getCategories());
-        clone.setClassification(event.getClassification());
-        clone.setColor(event.getColor());
-        clone.setCreated(event.getCreated());
-        clone.setCreatedBy(event.getCreatedBy());
-        clone.setDeleteExceptionDates(event.getDeleteExceptionDates());
-        clone.setDescription(event.getDescription());
-        clone.setEndDate(event.getEndDate());
-        clone.setExtendedProperties(event.getExtendedProperties());
-        clone.setFilename(event.getFilename());
-        clone.setFolderId(event.getFolderId());
-        clone.setGeo(event.getGeo());
-        clone.setId(event.getId());
-        clone.setLastModified(event.getLastModified());
-        clone.setLocation(event.getLocation());
-        clone.setModifiedBy(event.getModifiedBy());
-        clone.setOrganizer(event.getOrganizer());
-        clone.setRecurrenceId(event.getRecurrenceId());
-        clone.setRecurrenceRule(event.getRecurrenceRule());
-        clone.setSequence(event.getSequence());
-        clone.setSeriesId(event.getSeriesId());
-        clone.setStartDate(event.getStartDate());
-        clone.setStatus(event.getStatus());
-        clone.setSummary(event.getSummary());
-        clone.setTimestamp(event.getTimestamp());
-        clone.setTransp(event.getTransp());
-        clone.setUid(event.getUid());
-        clone.setUrl(event.getUrl());
-        
-        return clone;
     }
 }

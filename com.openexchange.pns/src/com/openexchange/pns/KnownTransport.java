@@ -74,6 +74,10 @@ public enum KnownTransport {
      * The transport by Windows Push Notification Services (WNS).
      */
     WNS("wns"),
+    /**
+     * The transport by Apple Push Notification Service (APNS) using HTTP/2.
+     */
+    APNS_HTTP2("apns_http2"),
 
     ;
 

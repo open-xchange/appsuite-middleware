@@ -116,7 +116,7 @@ public class ChangeExceptionsPerformer extends AbstractQueryPerformer {
          * construct search term to lookup all change exceptions
          */
         CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.AND)
-            .addSearchTerm(getFolderIdTerm(folder))
+            .addSearchTerm(getFolderIdTerm(session, folder))
             .addSearchTerm(getSearchTerm(EventField.SERIES_ID, SingleOperation.EQUALS, seriesID))
             .addSearchTerm(getSearchTerm(EventField.ID, SingleOperation.NOT_EQUALS, new ColumnFieldOperand<EventField>(EventField.SERIES_ID)))
         ;

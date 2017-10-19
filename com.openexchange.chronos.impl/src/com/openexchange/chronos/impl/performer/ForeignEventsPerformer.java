@@ -89,7 +89,7 @@ public class ForeignEventsPerformer extends AbstractQueryPerformer {
      */
     public boolean perform(UserizedFolder folder) throws OXException {
         SearchTerm<?> searchTerm = new CompositeSearchTerm(CompositeOperation.AND)
-            .addSearchTerm(getFolderIdTerm(folder))
+            .addSearchTerm(getFolderIdTerm(session, folder))
             .addSearchTerm(getSearchTerm(EventField.CREATED_BY, SingleOperation.NOT_EQUALS, I(session.getUserId())))
         ;
         SearchOptions searchOptions = new SearchOptions().setLimits(0, 1);

@@ -85,19 +85,6 @@ public class AddRecipientPacketProcessorHandler implements PacketProcessorHandle
         this.identitiesToAdd = identitiesToAdd;
     }
 
-    /**
-     * Simple factory method for creating a new Packet for the given identity
-     *
-     * @param identity The identity which should be able to decrypt the PGP Message
-     * @param sessionData The session data which get's encrypted for the given identity
-     * @return The packet to add
-     * @throws PGPException
-     */
-    private ContainedPacket createSessionPacketForIdentitiy(PGPPublicKey identity, byte[] sessionData) throws PGPException {
-        PGPKeyEncryptionMethodGenerator packetGenerator = new BcPublicKeyKeyEncryptionMethodGenerator(identity);
-        return packetGenerator.generate(identity.getAlgorithm(), sessionData);
-    }
-
     /*
      * (non-Javadoc)
      *
@@ -114,7 +101,7 @@ public class AddRecipientPacketProcessorHandler implements PacketProcessorHandle
             try {
                 //Creating a new session packet for each new identity
                 for (PGPPublicKey identities : identitiesToAdd) {
-                    ContainedPacket newPacket = createSessionPacketForIdentitiy(identities, symmetricSessionKey);
+                    ContainedPacket newPacket = PacketUtil.createSessionPacketForIdentitiy(identities, symmetricSessionKey);
                     ret.add(new PGPPacket(newPacket, null));
                 }
             } finally {

@@ -130,7 +130,7 @@ public class AllPerformer extends AbstractQueryPerformer {
          * perform search & userize the results based on the requested folder
          */
         requireCalendarPermission(folder, READ_FOLDER, READ_OWN_OBJECTS, NO_PERMISSIONS, NO_PERMISSIONS);
-        SearchTerm<?> searchTerm = getFolderIdTerm(folder);
+        SearchTerm<?> searchTerm = getFolderIdTerm(session, folder);
         EventField[] fields = getFields(session);
         List<Event> events = storage.getEventStorage().searchEvents(searchTerm, new SearchOptions(session), fields);
         events = storage.getUtilities().loadAdditionalEventData(getCalendarUserId(folder), events, fields);

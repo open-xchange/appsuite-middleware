@@ -71,6 +71,15 @@ public interface JobQueueService {
     long getMaxRequestAgeMillis() throws OXException;
 
     /**
+     * Checks if this job queue already contains a job of specified kind.
+     *
+     * @param key The job key describing/identifying a job
+     * @return The job identifier if contained; otherwise <code>null</code>
+     * @throws OXException If check fails
+     */
+    UUID contains(JobKey key) throws OXException;
+
+    /**
      * Enqueues specified job into this queue for execution
      *
      * @param job The job to perform

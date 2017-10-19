@@ -53,9 +53,11 @@ import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
+import java.security.SecureRandom;
 import java.security.Security;
 import java.util.Date;
 import java.util.List;
+import java.util.Random;
 import org.bouncycastle.bcpg.HashAlgorithmTags;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.openpgp.PGPEncryptedData;
@@ -86,6 +88,8 @@ public class AbstractPGPTest {
     protected int TEST_KEY_SIZE = 1024;
     protected String TEST_IDENTITY_NAME = "Max Mustermann";
     protected char[] TEST_IDENTITY_PASSWORD = "secret".toCharArray();
+
+    public static final String TEST_TEXT = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 
     /**
      *
@@ -267,5 +271,20 @@ public class AbstractPGPTest {
      */
     public byte[] generateTestData() {
         return "test".getBytes();
+    }
+
+    /**
+     * A helper method for creating clear text test data which can be used for encryption of specified length
+     *
+     * @return A bunch of test data
+     */
+    public byte[] generateTestData(int length) {
+        char[] buf = new char[length];
+        char[] textData = TEST_TEXT.toCharArray();
+        Random random = new SecureRandom();
+        for (int i = 0; i < length; i++) {
+            buf[i] = textData[random.nextInt(textData.length)];
+        }
+        return new String(buf).getBytes();
     }
 }

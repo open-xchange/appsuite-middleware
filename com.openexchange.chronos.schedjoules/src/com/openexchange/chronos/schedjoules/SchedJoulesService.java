@@ -137,28 +137,6 @@ public interface SchedJoulesService {
     SchedJoulesResult search(String query, String locale, int countryId, int categoryId, int maxRows) throws OXException;
 
     /**
-     * Subscribes to the SchedJoules calendar with the specified identifier
-     * 
-     * @param session The groupware {@link Session}
-     * @param id The calendar identifier
-     * @param accountId The identifier of the user's SchedJoules {@link CalendarAccount}
-     * @throws OXException if an error is occurred
-     */
-    String subscribeCalendar(Session session, int id, int accountId) throws OXException;
-
-    /**
-     * Subscribes to the SchedJoules calendar with the specified identifier and locale
-     * 
-     * @param session The groupware {@link Session}
-     * @param id The calendar identifier
-     * @param accountId The identifier of the user's SchedJoules {@link CalendarAccount}
-     * @param locale The locale
-     * @return The folder identifier of the subscribed calendar
-     * @throws OXException if an error is occurred
-     */
-    String subscribeCalendar(Session session, int id, int accountId, String locale) throws OXException;
-
-    /**
      * Un-subscribes from the specified SchedJoules calendar
      * 
      * @param session The groupware {@link Session}

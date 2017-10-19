@@ -99,6 +99,7 @@ public class SearchAdapter {
     private final String prefixAttendees;
 
     private boolean usesAttendees;
+    private boolean usesEvents;
 
     /**
      * Initializes a new {@link SearchAdapter}.
@@ -160,6 +161,15 @@ public class SearchAdapter {
      */
     public boolean usesAttendees() {
         return usesAttendees;
+    }
+
+    /**
+     * Gets a value indicating whether properties of events are present in the search term or not.
+     *
+     * @return <code>true</code> if events are used, <code>false</code>, otherwise
+     */
+    public boolean usesEvents() {
+        return usesEvents;
     }
 
     /**
@@ -284,6 +294,7 @@ public class SearchAdapter {
             stringBuilder.append(" AND ").append(prefixEvents).append("rangeUntil>? AND ").append(prefixEvents).append("rangeFrom<?");
             parameters.add(Long.valueOf(from.getTime()));
             parameters.add(Long.valueOf(until.getTime()));
+            usesEvents = true;
         }
     }
 
@@ -569,6 +580,7 @@ public class SearchAdapter {
             if (null == mapping) {
                 throw new IllegalArgumentException("No mapping available for: " + value);
             }
+            usesEvents = true;
             return Collections.<String, DbMapping<? extends Object, ?>> singletonMap(prefixEvents, mapping);
         }
         if (AttendeeField.class.isInstance(value)) {

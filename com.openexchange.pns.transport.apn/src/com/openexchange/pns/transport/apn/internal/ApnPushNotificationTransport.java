@@ -174,6 +174,14 @@ public class ApnPushNotificationTransport extends ServiceTracker<ApnOptionsProvi
     // ---------------------------------------------------------------------------------------------------------
 
     private ApnOptions getHighestRankedApnOptionsFor(String client) throws OXException {
+        ApnOptions options = optHighestRankedApnOptionsFor(client);
+        if (null == options) {
+            throw PushExceptionCodes.UNEXPECTED_ERROR.create("No options found for client: " + client);
+        }
+        return options;
+    }
+
+    private ApnOptions optHighestRankedApnOptionsFor(String client) {
         List<RankedService<ApnOptionsProvider>> list = trackedProviders.getSnapshot();
         for (RankedService<ApnOptionsProvider> rankedService : list) {
             ApnOptions options = rankedService.service.getOptions(client);
@@ -181,7 +189,7 @@ public class ApnPushNotificationTransport extends ServiceTracker<ApnOptionsProvi
                 return options;
             }
         }
-        throw PushExceptionCodes.UNEXPECTED_ERROR.create("No options found for client: " + client);
+        return null;
     }
 
     private Map<String, ApnOptions> getAllHighestRankedApnOptions() {
@@ -200,9 +208,7 @@ public class ApnPushNotificationTransport extends ServiceTracker<ApnOptionsProvi
     @Override
     public boolean servesClient(String client) throws OXException {
         try {
-            return null != getHighestRankedApnOptionsFor(client);
-        } catch (OXException x) {
-            return false;
+            return null != optHighestRankedApnOptionsFor(client);
         } catch (RuntimeException e) {
             throw PushExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }

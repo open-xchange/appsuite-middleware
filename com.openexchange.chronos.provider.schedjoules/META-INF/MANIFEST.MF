@@ -17,6 +17,8 @@ Import-Package: com.openexchange.chronos,
  com.openexchange.osgi,
  com.openexchange.server,
  com.openexchange.session,
+ com.openexchange.tools.session,
  org.json,
- org.osgi.framework
+ org.osgi.framework,
+ org.slf4j;version="1.7.25"
 Bundle-Activator: com.openexchange.chronos.provider.schedjoules.osgi.SchedJoulesProviderActivator

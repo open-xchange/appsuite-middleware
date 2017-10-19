@@ -55,7 +55,6 @@ import java.io.InputStream;
 import java.io.Serializable;
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -70,6 +69,7 @@ import java.util.regex.Pattern;
 import javax.mail.MessageRemovedException;
 import javax.mail.internet.MimeUtility;
 import org.slf4j.Logger;
+import com.google.common.collect.ImmutableMap;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.CharsetDetector;
 import com.openexchange.java.Charsets;
@@ -135,7 +135,7 @@ public class HeaderCollection implements Serializable {
         map.put("Resent-Cc".toLowerCase(l), "Resent-Cc");
         map.put("Resent-Bcc".toLowerCase(l), "Resent-Bcc");
         map.put("Resent-Message-ID".toLowerCase(l), "Resent-Message-ID");
-        CASE_SENSITIVE_LOOKUP = Collections.unmodifiableMap(map);
+        CASE_SENSITIVE_LOOKUP = ImmutableMap.copyOf(map);
     }
 
     /**

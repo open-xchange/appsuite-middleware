@@ -54,9 +54,9 @@ import java.util.List;
 import com.google.common.collect.ImmutableList;
 import com.openexchange.config.ConfigTools;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.http.grizzly.util.IPTools;
 import com.openexchange.java.Strings;
 import com.openexchange.net.IPRange;
+import com.openexchange.net.IPTools;
 
 /**
  * {@link GrizzlyConfig} Collects and exposes configuration parameters needed by GrizzlOX

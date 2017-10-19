@@ -54,19 +54,34 @@ import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_INCL
 import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_ORDER;
 import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_ORDER_BY;
 import static com.openexchange.tools.arrays.Collections.unmodifiableSet;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.common.SelfProtectionFactory;
+import com.openexchange.chronos.common.SelfProtectionFactory.SelfProtection;
 import com.openexchange.chronos.json.converter.EventResultConverter;
+import com.openexchange.chronos.json.converter.mapper.EventMapper;
 import com.openexchange.chronos.json.oauth.ChronosOAuthScope;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
+import com.openexchange.chronos.service.CalendarParameters;
+import com.openexchange.chronos.service.SortOrder;
+import com.openexchange.chronos.service.SortOrder.Order;
+import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
  * {@link AllAction}
@@ -80,6 +95,8 @@ public class AllAction extends ChronosAction {
     private static final Set<String> REQUIRED_PARAMETERS = unmodifiableSet("rangeStart", "rangeEnd");
 
     private static final Set<String> OPTIONAL_PARAMETERS = unmodifiableSet("expand", PARAMETER_ORDER_BY, PARAMETER_ORDER, PARAMETER_FIELDS, PARAMETER_INCLUDE_PRIVATE);
+
+    private static final String FOLDERS = "folders";
 
     /**
      * Initializes a new {@link AllAction}.
@@ -102,13 +119,61 @@ public class AllAction extends ChronosAction {
 
     @Override
     protected AJAXRequestResult perform(IDBasedCalendarAccess calendarAccess, AJAXRequestData requestData) throws OXException {
-        String folderId = requestData.getParameter(AJAXServlet.PARAMETER_FOLDERID);
-        List<Event> events = null != folderId ? calendarAccess.getEventsInFolder(folderId) : calendarAccess.getEventsOfUser();
-        long timestamp = 0L;
-        for (Event event : events) {
-            timestamp = Math.max(timestamp, event.getTimestamp());
+        SelfProtection protection = SelfProtectionFactory.createSelfProtection(requestData.getSession(), services.getService(LeanConfigurationService.class));
+        Object data = requestData.getData();
+        if (data != null) {
+            if (!(data instanceof JSONObject)) {
+                throw AjaxExceptionCodes.INVALID_REQUEST_BODY.create(JSONObject.class.getSimpleName(), data.getClass().getSimpleName());
+            }
+            JSONObject json = (JSONObject) data;
+
+            try {
+                JSONArray folders = json.getJSONArray(FOLDERS);
+                List<Event> result = new ArrayList<>();
+                long timestamp = 0L;
+                for(int x=0; x<folders.length(); x++){
+                    String folderId = folders.getString(x);
+                    result.addAll(calendarAccess.getEventsInFolder(folderId));
+                    protection.checkEventCollection(result);
+                }
+
+                EventField orderBy = calendarAccess.get(CalendarParameters.PARAMETER_ORDER_BY, EventField.class);
+                Order order = calendarAccess.get(CalendarParameters.PARAMETER_ORDER, SortOrder.Order.class, SortOrder.Order.ASC);
+                if (orderBy != null) {
+                    Collections.sort(result, new Comparator<Event>() {
+
+                        @Override
+                        public int compare(Event o1, Event o2) {
+                            try {
+                                if(order.equals(SortOrder.Order.ASC)){
+                                    return EventMapper.getInstance().get(orderBy).compare(o1, o2);
+                                } else {
+                                    return -1 * EventMapper.getInstance().get(orderBy).compare(o1, o2);
+                                }
+                            } catch (OXException e) {
+                                // Unexpected error
+                                return 0;
+                            }
+                        }
+                    });
+                }
+
+                for (Event event : result) {
+                    timestamp = Math.max(timestamp, event.getTimestamp());
+                }
+                return new AJAXRequestResult(result, new Date(timestamp), EventResultConverter.INPUT_FORMAT);
+            } catch (JSONException e) {
+                throw AjaxExceptionCodes.INVALID_JSON_REQUEST_BODY.create();
+            }
+        } else {
+            String folderId = requestData.getParameter(AJAXServlet.PARAMETER_FOLDERID);
+            List<Event> events = null != folderId ? calendarAccess.getEventsInFolder(folderId) : calendarAccess.getEventsOfUser();
+            long timestamp = 0L;
+            for (Event event : events) {
+                timestamp = Math.max(timestamp, event.getTimestamp());
+            }
+            return new AJAXRequestResult(events, new Date(timestamp), EventResultConverter.INPUT_FORMAT);
         }
-        return new AJAXRequestResult(events, new Date(timestamp), EventResultConverter.INPUT_FORMAT);
     }
 
 }
