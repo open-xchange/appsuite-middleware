@@ -114,7 +114,7 @@ public class ICalCalendarAccess extends SingleFolderCachingCalendarAccess {
     }
 
     @Override
-    public ExternalCalendarResult getEvents() throws OXException {
+    public ExternalCalendarResult getAllEvents() throws OXException {
         verifyURI();
 
         HeadResult headResult = reader.head();
