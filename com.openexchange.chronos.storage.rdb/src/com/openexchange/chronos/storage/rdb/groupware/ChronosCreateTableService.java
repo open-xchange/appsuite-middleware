@@ -62,6 +62,62 @@ import com.openexchange.database.AbstractCreateTableImpl;
  * @since v7.10.0
  */
 public class ChronosCreateTableService extends AbstractCreateTableImpl {
+    
+    // Table names
+    /**
+     * The CALENDAR_ACCOUNT table name
+     */
+    protected static final String CALENDAR_ACCOUNT = "calendar_account";
+
+    /**
+     * the CALENDAR_ALARM table name
+     */
+    protected static final String CALENDAR_ALARM = "calendar_alarm";
+
+    /**
+     * The CALENDAR_ALARM_SEQUENCE table name
+     */
+    protected static final String CALENDAR_ALARM_SEQUENCE = "calendar_alarm_sequence";
+
+    /**
+     * The CALENDAR_ALARM_TRIGGER table name
+     */
+    protected static final String CALENDAR_ALARM_TRIGGER = "calendar_alarm_trigger";
+
+    /**
+     * The CALENDAR_ATTENDEE table name
+     */
+    protected static final String CALENDAR_ATTENDEE = "calendar_attendee";
+
+    /**
+     * The CALENDAR_ATTENDEE_TOMBSTONE table name
+     */
+    protected static final String CALENDAR_ATTENDEE_TOMBSTONE = "calendar_attendee_tombstone";
+
+    /**
+     * The CALENDAR_AVAILABLE table name
+     */
+    protected static final String CALENDAR_AVAILABLE = "calendar_available";
+
+    /**
+     * The CALENDAR_AVAILABLE_SEQUENCE table name
+     */
+    protected static final String CALENDAR_AVAILABLE_SEQUENCE = "calendar_available_sequence";
+
+    /**
+     * The CALENDAR_EVENT table name
+     */
+    protected static final String CALENDAR_EVENT = "calendar_event";
+
+    /**
+     * The CALENDAR_EVENT_SEQUENCE table name
+     */
+    protected static final String CALENDAR_EVENT_SEQUENCE = "calendar_event_sequence";
+
+    /**
+     * The CALENDAR_EVENT_TOMBSTONE table name
+     */
+    protected static final String CALENDAR_EVENT_TOMBSTONE = "calendar_event_tombstone";
 
     /**
      * Gets the <code>CREATE TABLE</code> statements for the <i>chronos</i> tables, mapped by their table names.
@@ -69,8 +125,8 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
      * @return The <code>CREATE TABLE</code> statements mapped by their table name
      */
     static Map<String, String> getTablesByName() {
-        Map<String, String> tablesByName = new HashMap<String, String>(); //@formatter:off
-        tablesByName.put("calendar_account",
+        Map<String, String> tablesByName = new HashMap<String, String>(11); //@formatter:off
+        tablesByName.put(CALENDAR_ACCOUNT,
             "CREATE TABLE calendar_account (" +
                 "cid INT4 UNSIGNED NOT NULL," +
                 "id INT4 UNSIGNED NOT NULL," +
@@ -84,7 +140,7 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
                 "KEY user (cid,user,provider)" +
             ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;"
         );
-        tablesByName.put("calendar_event_sequence",
+        tablesByName.put(CALENDAR_EVENT_SEQUENCE,
             "CREATE TABLE calendar_event_sequence (" +
                 "cid INT4 UNSIGNED NOT NULL," +
                 "account INT4 UNSIGNED NOT NULL," +
@@ -92,7 +148,7 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
                 "PRIMARY KEY (cid,account)" +
             ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;"
         );
-        tablesByName.put("calendar_alarm_sequence",
+        tablesByName.put(CALENDAR_ALARM_SEQUENCE,
             "CREATE TABLE calendar_alarm_sequence (" +
                 "cid INT4 UNSIGNED NOT NULL," +
                 "account INT4 UNSIGNED NOT NULL," +
@@ -100,7 +156,7 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
                 "PRIMARY KEY (cid,account)" +
             ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;"
         );
-        tablesByName.put("calendar_event",
+        tablesByName.put(CALENDAR_EVENT,
             "CREATE TABLE calendar_event (" +
                 "cid INT4 UNSIGNED NOT NULL," +
                 "account INT4 UNSIGNED NOT NULL," +
@@ -143,12 +199,11 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
                 "KEY rangeUntil (cid,account,rangeUntil)," +
                 "KEY timestamp (cid,account,timestamp)," +
                 "KEY user (cid,account,user)," +
-                "KEY folder (cid,account,folder(191))," +
                 "KEY uid (cid,account,uid(191))," +
                 "KEY filename (cid,account,filename(191))" +
             ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;"
         );
-        tablesByName.put("calendar_event_tombstone",
+        tablesByName.put(CALENDAR_EVENT_TOMBSTONE,
             "CREATE TABLE calendar_event_tombstone (" +
                 "cid INT4 UNSIGNED NOT NULL," +
                 "account INT4 UNSIGNED NOT NULL," +
@@ -191,12 +246,11 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
                 "KEY rangeUntil (cid,account,rangeUntil)," +
                 "KEY timestamp (cid,account,timestamp)," +
                 "KEY user (cid,account,user)," +
-                "KEY folder (cid,account,folder(191))," +
                 "KEY uid (cid,account,uid(191))," +
                 "KEY filename (cid,account,filename(191))" +
             ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;"
         );
-        tablesByName.put("calendar_attendee",
+        tablesByName.put(CALENDAR_ATTENDEE,
             "CREATE TABLE calendar_attendee (" +
                 "cid INT4 UNSIGNED NOT NULL," +
                 "account INT4 UNSIGNED NOT NULL," +
@@ -212,10 +266,10 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
                 "member VARCHAR(1024) DEFAULT NULL," +
                 "PRIMARY KEY (cid,account,event,entity)," +
                 "KEY uri (cid,account,event,uri(191))," +
-                "KEY folder (cid,account,entity,folder(191))" +
+                "KEY folder (cid,account,event,folder(191))" +
             ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;"
         );
-        tablesByName.put("calendar_attendee_tombstone",
+        tablesByName.put(CALENDAR_ATTENDEE_TOMBSTONE,
             "CREATE TABLE calendar_attendee_tombstone (" +
                 "cid INT4 UNSIGNED NOT NULL," +
                 "account INT4 UNSIGNED NOT NULL," +
@@ -231,10 +285,10 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
                 "member VARCHAR(1024) DEFAULT NULL," +
                 "PRIMARY KEY (cid,account,event,entity)," +
                 "KEY uri (cid,account,event,uri(191))," +
-                "KEY folder (cid,account,entity,folder(191))" +
+                "KEY folder (cid,account,event,folder(191))" +
             ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;"
         );
-        tablesByName.put("calendar_alarm",
+        tablesByName.put(CALENDAR_ALARM,
             "CREATE TABLE calendar_alarm (" +
                 "cid INT4 UNSIGNED NOT NULL," +
                 "account INT4 UNSIGNED NOT NULL," +
@@ -254,7 +308,7 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
                 "KEY event_user (cid,account,event,user)" +
             ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;"
         );
-        tablesByName.put("calendar_alarm_trigger",
+        tablesByName.put(CALENDAR_ALARM_TRIGGER,
             "CREATE TABLE calendar_alarm_trigger (" +
                 "cid INT4 UNSIGNED NOT NULL," +
                 "account INT4 UNSIGNED NOT NULL," +
@@ -271,7 +325,7 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
                 "PRIMARY KEY (cid,account,alarm)" +
             ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;"
         );
-        tablesByName.put("calendar_available",
+        tablesByName.put(CALENDAR_AVAILABLE,
             "CREATE TABLE calendar_available (" +
                 "cid INT4 UNSIGNED NOT NULL," +
                 "id INT4 UNSIGNED NOT NULL," +
@@ -297,7 +351,7 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
                 "KEY uid (cid,user,uid(191))" +
             ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;"
         );
-        tablesByName.put("calendar_available_sequence",
+        tablesByName.put(CALENDAR_AVAILABLE_SEQUENCE,
             "CREATE TABLE calendar_available_sequence (" +
                 "cid INT4 UNSIGNED NOT NULL," +
                 "id INT4 UNSIGNED NOT NULL," +
