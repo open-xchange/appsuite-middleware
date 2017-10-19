@@ -49,10 +49,8 @@
 
 package com.openexchange.chronos.provider.schedjoules;
 
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Set;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -151,20 +149,15 @@ public class SchedJoulesCalendarProvider implements CalendarProvider {
      */
     @Override
     public JSONObject reconfigureAccount(Session session, JSONObject internalConfig, JSONObject userConfig, CalendarParameters parameters) throws OXException {
-        // User configuration is 'null' or empty, thus we have to remove all subscriptions
-        if (userConfig == null || userConfig.isEmpty()) {
+        // User configuration is 'null' or empty or has no 'folders' attribute, thus we have to remove all subscriptions
+        if (userConfig == null || userConfig.isEmpty() || !userConfig.hasAndNotNull("folders")) {
             return (internalConfig.remove("folders") == null) ? null : internalConfig;
         }
 
-        // User configuration has no 'folders' attribute, thus we have to remove all subscriptions
         JSONObject userConfigFolders = userConfig.optJSONObject("folders");
-        if (userConfigFolders == null || userConfigFolders.isEmpty()) {
-            return (internalConfig.remove("folders") == null) ? null : internalConfig;
-        }
-
         JSONObject internalConfigFolders = internalConfig.optJSONObject("folders");
-        // Add all user configuration folders
-        if (internalConfigFolders == null) {
+        if (internalConfigFolders == null || internalConfigFolders.isEmpty()) {
+            // Add all user configuration folders
             try {
                 internalConfigFolders = new JSONObject();
                 addFolders(userConfigFolders, internalConfigFolders);
@@ -177,48 +170,18 @@ public class SchedJoulesCalendarProvider implements CalendarProvider {
 
         // Check for differences and merge
         try {
-            // Build a set that contains all internal subscribed items and their position in the array 
-            Map<Integer, String> internalItemIds = new HashMap<>();
+            // Build a set that contains all internal subscribed items 
+            Set<String> internalItemIds = new HashSet<>();
             for (String name : internalConfigFolders.keySet()) {
-                JSONObject folder = internalConfigFolders.getJSONObject(name);
-                internalItemIds.put(folder.getInt("itemId"), name);
+                internalItemIds.add(name);
             }
 
-            // Build a set that contains all user configured subscribed items
-            // and add any new items
-            Set<Integer> userConfigItemIds = new HashSet<>();
-            boolean changed = false;
-            JSONObject additions = new JSONObject();
-            for (String name : userConfigFolders.keySet()) {
-                JSONObject folder = userConfigFolders.getJSONObject(name);
-                int itemId = folder.getInt("itemId");
-                userConfigItemIds.add(itemId);
-                if (!internalItemIds.containsKey(itemId)) {
-                    changed = true;
-                    additions.put(name, prepareFolder(folder));
-                }
-                internalItemIds.remove(itemId);
-            }
-
-            // Handle deletions
-            if (!internalItemIds.isEmpty()) {
-                for (String name : internalItemIds.values()) {
-                    internalConfigFolders.remove(name);
-                }
-                changed = true;
-            }
-
-            // Add the new items
-            if (!additions.isEmpty()) {
-                for (String name : additions.keySet()) {
-                    internalConfigFolders.put(name, additions.getJSONObject(name));
-                }
-                changed = true;
-            }
-
+            int origLength = internalConfigFolders.length();
+            handleAdditions(internalConfigFolders, userConfigFolders, internalItemIds);
+            handleDeletions(internalConfigFolders, internalItemIds);
             //TODO: Update references in 'folderCaching' object if renames occurred
 
-            return changed ? internalConfig : null;
+            return origLength != internalConfigFolders.length() ? internalConfig : null;
         } catch (JSONException e) {
             throw SchedJoulesProviderExceptionCodes.JSON_ERROR.create(e.getMessage(), e);
         }
@@ -298,5 +261,36 @@ public class SchedJoulesCalendarProvider implements CalendarProvider {
         internalItem.put("url", page.getString("url"));
         internalItem.put("itemId", itemId);
         return internalItem;
+    }
+
+    /**
+     * Handles the additions.
+     * 
+     * @param userConfigFolders The user configuration for 'folders'
+     * @param internalItemIds The internal items
+     * @param additions The target 'additions' object
+     * @throws JSONException if a JSON error occurs
+     * @throws OXException if any other error occurs
+     */
+    private void handleAdditions(JSONObject internalConfigFolders, JSONObject userConfigFolders, Set<String> internalItemIds) throws JSONException, OXException {
+        for (String name : userConfigFolders.keySet()) {
+            JSONObject folder = userConfigFolders.getJSONObject(name);
+            if (!internalItemIds.contains(name)) {
+                internalConfigFolders.put(name, prepareFolder(folder));
+            }
+            internalItemIds.remove(name);
+        }
+    }
+
+    /**
+     * Handle any potential deletions.
+     * 
+     * @param internalConfigFolders The internal configuration for 'folders'
+     * @param internalItemIds The items that are to be removed from the internal configuration
+     */
+    private void handleDeletions(JSONObject internalConfigFolders, Set<String> internalItemIds) {
+        for (String name : internalItemIds) {
+            internalConfigFolders.remove(name);
+        }
     }
 }
