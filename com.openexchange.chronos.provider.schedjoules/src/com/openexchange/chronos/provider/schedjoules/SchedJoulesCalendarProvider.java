@@ -62,7 +62,6 @@ import com.openexchange.chronos.provider.schedjoules.exception.SchedJoulesProvid
 import com.openexchange.chronos.schedjoules.api.SchedJoulesAPI;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 
 /**
@@ -75,16 +74,11 @@ public class SchedJoulesCalendarProvider implements CalendarProvider {
     private static final String PROVIDER_ID = "schedjoules";
     private static final String DISPLAY_NAME = "SchedJoules";
 
-    private final ServiceLookup services;
-
     /**
      * Initialises a new {@link SchedJoulesCalendarProvider}.
-     *
-     * @param services The {@link ServiceLookup} reference
      */
-    public SchedJoulesCalendarProvider(ServiceLookup services) {
+    public SchedJoulesCalendarProvider() {
         super();
-        this.services = services;
     }
 
     /*
@@ -193,8 +187,7 @@ public class SchedJoulesCalendarProvider implements CalendarProvider {
      */
     @Override
     public void onAccountCreated(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
-        // TODO Auto-generated method stub
-
+        // no-op
     }
 
     /*
@@ -204,8 +197,7 @@ public class SchedJoulesCalendarProvider implements CalendarProvider {
      */
     @Override
     public void onAccountUpdated(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
-        // TODO Auto-generated method stub
-
+        // no-op
     }
 
     /*
@@ -215,8 +207,7 @@ public class SchedJoulesCalendarProvider implements CalendarProvider {
      */
     @Override
     public void onAccountDeleted(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
-        // TODO Auto-generated method stub
-
+        // no-op
     }
 
     ///////////////////////////////////////////// HELPERS ///////////////////////////////////////////
@@ -303,16 +294,17 @@ public class SchedJoulesCalendarProvider implements CalendarProvider {
         }
         return true;
     }
-    
+
     /**
      * Returns the {@link CachingCalendarAccess#CACHING} attribute or an empty object
+     * 
      * @param internalConfig The internal configuration
      * @return the {@link CachingCalendarAccess#CACHING} attribute or an empty object if no caching elements exist
-     *  yet
+     *         yet
      */
     private JSONObject getInternalConfigCaching(JSONObject internalConfig) {
         JSONObject internalConfigCaching = internalConfig.optJSONObject(CachingCalendarAccess.CACHING);
         return internalConfigCaching == null ? new JSONObject() : internalConfigCaching;
     }
-    
+
 }
