@@ -229,9 +229,7 @@ public class SchedJoulesCalendarAccess extends CachingCalendarAccess {
                 throw SchedJoulesProviderExceptionCodes.NO_ACCESS.create(folderId);
             }
 
-            ExternalCalendarResult res = new ExternalCalendarResult();
-            res.addEvents(calendar.getEvents());
-            return res;
+            return new ExternalCalendarResult(calendar.getEvents());
         } catch (JSONException e) {
             throw SchedJoulesProviderExceptionCodes.JSON_ERROR.create(e.getMessage(), e);
         } catch (MalformedURLException e) {

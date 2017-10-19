@@ -61,19 +61,49 @@ import com.openexchange.chronos.Event;
  */
 public class ExternalCalendarResult {
 
-    private List<Event> events = new ArrayList<>();
+    private final List<Event> events;
 
     private boolean isUpToDate = true;
 
+    /**
+     * Initialises a new {@link ExternalCalendarResult}.
+     */
+    public ExternalCalendarResult() {
+        this(new ArrayList<>());
+    }
+
+    /**
+     * Initialises a new {@link ExternalCalendarResult}.
+     */
+    public ExternalCalendarResult(List<Event> events) {
+        super();
+        this.events = events;
+    }
+
+    /**
+     * Adds the specified events to the result
+     * 
+     * @param events The events to add
+     */
     public void addEvents(List<Event> events) {
         this.events.addAll(events);
         this.isUpToDate = false;
     }
 
+    /**
+     * Returns the events of the result
+     * 
+     * @return the events of the result
+     */
     public List<Event> getEvents() {
         return this.events;
     }
 
+    /**
+     * Returns whether the events are up-to-date
+     * 
+     * @return <code>true<code> if the events are up-to-date, <code>false</code> otherwise
+     */
     public boolean isUpToDate() {
         return this.isUpToDate;
     }
