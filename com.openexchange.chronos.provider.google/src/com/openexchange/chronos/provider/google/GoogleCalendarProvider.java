@@ -94,12 +94,12 @@ public class GoogleCalendarProvider implements CalendarProvider{
     public JSONObject configureAccount(Session session, JSONObject userConfig, CalendarParameters parameters) throws OXException {
         DefaultCalendarAccount account = new DefaultCalendarAccount(getId(), -1, session.getUserId(), true, null, userConfig, new Date());
         GoogleCalendarAccess access = new GoogleCalendarAccess(session, account, parameters, false);
-        JSONObject internalConfig = access.initCalendarFolder(true, false);
+        JSONObject internalConfig = access.initCalendarFolder(true);
         if(internalConfig == null){
             internalConfig = new JSONObject();
         }
         try {
-            userConfig.put("folders", internalConfig.get("folders"));
+            userConfig.put(GoogleCalendarConfigField.FOLDERS, internalConfig.get(GoogleCalendarConfigField.FOLDERS));
         } catch (JSONException e) {
             throw CalendarExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
@@ -110,12 +110,12 @@ public class GoogleCalendarProvider implements CalendarProvider{
     public JSONObject reconfigureAccount(Session session, JSONObject internalConfig, JSONObject userConfig, CalendarParameters parameters) throws OXException {
         DefaultCalendarAccount account = new DefaultCalendarAccount(getId(), -1, session.getUserId(), true, internalConfig, userConfig, new Date());
         GoogleCalendarAccess access = new GoogleCalendarAccess(session, account, parameters, false);
-        JSONObject resultConfig = access.initCalendarFolder(false, false);
+        JSONObject resultConfig = access.initCalendarFolder(false);
         if(resultConfig == null){
             resultConfig = internalConfig;
         }
         try {
-            userConfig.put("folders", resultConfig.get("folders"));
+            userConfig.put(GoogleCalendarConfigField.FOLDERS, resultConfig.get(GoogleCalendarConfigField.FOLDERS));
         } catch (JSONException e) {
             throw CalendarExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }

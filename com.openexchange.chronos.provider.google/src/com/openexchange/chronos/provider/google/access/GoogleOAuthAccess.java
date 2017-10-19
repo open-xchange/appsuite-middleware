@@ -49,9 +49,12 @@
 
 package com.openexchange.chronos.provider.google.access;
 
+import java.io.IOException;
 import org.json.JSONException;
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
+import com.google.api.client.http.HttpResponseException;
 import com.google.api.services.calendar.Calendar;
+import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.google.GoogleCalendarConfigField;
 import com.openexchange.exception.OXException;
@@ -102,14 +105,27 @@ public class GoogleOAuthAccess extends AbstractOAuthAccess {
             // Generate appropriate credentials for it
             GoogleCredential credentials = GoogleApiClients.getCredentials(oauthAccount, getSession());
 
-            // Establish Drive instance
+            // Establish Calendar instance
             setOAuthClient(new OAuthClient<Calendar>(new Calendar.Builder(credentials.getTransport(), credentials.getJsonFactory(), credentials).setApplicationName(GoogleApiClients.getGoogleProductName(getSession())).build(), getOAuthAccount().getToken()));
         }
     }
 
     @Override
     public boolean ping() throws OXException {
-        return false;
+        Calendar client = this.<Calendar> getClient().client;
+        try {
+            client.calendarList().list().execute();
+            return true;
+        } catch (final HttpResponseException e) {
+            if (401 == e.getStatusCode() || 403 == e.getStatusCode()) {
+                return false;
+            }
+            throw CalendarExceptionCodes.UNEXPECTED_ERROR.create(e.getMessage());
+        } catch (final IOException e) {
+            throw CalendarExceptionCodes.IO_ERROR.create(e, e.getMessage());
+        } catch (final RuntimeException e) {
+            throw CalendarExceptionCodes.UNEXPECTED_ERROR.create(e.getMessage());
+        }
     }
 
     @Override
@@ -117,11 +133,10 @@ public class GoogleOAuthAccess extends AbstractOAuthAccess {
         try {
             return acc.getUserConfiguration().getInt(GoogleCalendarConfigField.OAUTH_ID);
         } catch (IllegalArgumentException e) {
-//            throw FileStorageExceptionCodes.MISSING_CONFIG.create(GoogleDriveConstants.ID, fsAccount.getId());
+            throw CalendarExceptionCodes.UNEXPECTED_ERROR.create(e.getMessage());
         } catch (JSONException e) {
-            e.printStackTrace();
+            throw CalendarExceptionCodes.UNEXPECTED_ERROR.create(e.getMessage());
         }
-        return -1;
     }
 
     @Override

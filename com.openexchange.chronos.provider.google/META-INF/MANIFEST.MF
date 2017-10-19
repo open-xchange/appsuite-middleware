@@ -40,4 +40,5 @@ Import-Package: com.google.api.client.auth.oauth2,
  com.openexchange.tools.session,
  org.dmfs.rfc5545,
  org.json,
- org.osgi.framework
+ org.osgi.framework,
+ org.slf4j;version="1.7.25"
