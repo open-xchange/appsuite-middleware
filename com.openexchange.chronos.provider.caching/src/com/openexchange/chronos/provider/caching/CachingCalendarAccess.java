@@ -146,12 +146,14 @@ public abstract class CachingCalendarAccess implements WarningsAware {
     public abstract long getExternalRequestTimeout();
 
     /**
-     * Returns an {@link ExternalCalendarResult} containing the external {@link Event}s by querying the underlying calendar for the given folder id and additional information.
+     * Returns an {@link ExternalCalendarResult} containing all external {@link Event}s by querying the underlying calendar for the given folder id and additional information.<b>
+     * <b>
+     * Make sure not to consider client parameters (available via {@link CachingCalendarAccess#getParameters()}) while requesting events!
      *
      * @param folderId The identifier of the folder to get the events from
      * @return {@link ExternalCalendarResult}
      */
-    public abstract ExternalCalendarResult getEvents(String folderId) throws OXException;
+    public abstract ExternalCalendarResult getAllEvents(String folderId) throws OXException;
 
     /**
      * Allows the underlying calendar provider to handle {@link OXException}s that might occur while retrieving data from the external source.

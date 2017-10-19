@@ -115,7 +115,7 @@ public abstract class SingleFolderCachingCalendarAccess extends CachingCalendarA
     public abstract ExternalCalendarResult getEvents() throws OXException;
 
     @Override
-    public final ExternalCalendarResult getEvents(String folderId) throws OXException {
+    public final ExternalCalendarResult getAllEvents(String folderId) throws OXException {
         checkFolderId(folderId);
         ExternalCalendarResult externalCalendarResult = getEvents();
         if (externalCalendarResult.isUpToDate()) {

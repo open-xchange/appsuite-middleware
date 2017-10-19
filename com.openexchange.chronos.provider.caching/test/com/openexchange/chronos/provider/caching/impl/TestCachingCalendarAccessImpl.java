@@ -133,7 +133,7 @@ public class TestCachingCalendarAccessImpl extends CachingCalendarAccess {
      * @see com.openexchange.chronos.provider.caching.CachingCalendarAccess#getEvents(java.lang.String)
      */
     @Override
-    public ExternalCalendarResult getEvents(String folderId) throws OXException {
+    public ExternalCalendarResult getAllEvents(String folderId) throws OXException {
         return new ExternalCalendarResult();
     }
 

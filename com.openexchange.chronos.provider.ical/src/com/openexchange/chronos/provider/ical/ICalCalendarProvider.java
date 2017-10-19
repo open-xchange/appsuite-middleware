@@ -51,9 +51,11 @@ package com.openexchange.chronos.provider.ical;
 
 import java.util.Locale;
 import org.json.JSONObject;
+import com.openexchange.auth.info.AuthType;
 import com.openexchange.chronos.provider.CalendarAccess;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.caching.CachingCalendarProvider;
+import com.openexchange.chronos.provider.ical.internal.auth.ICalAuthParser;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
@@ -84,7 +86,11 @@ public class ICalCalendarProvider extends CachingCalendarProvider {
 
     @Override
     public JSONObject configureAccount(Session session, JSONObject userConfig, CalendarParameters parameters) throws OXException {
-        ICalFeedConfig iCalFeedConfig = new ICalFeedConfig.Builder(userConfig, new JSONObject()).build();
+        ICalFeedConfig iCalFeedConfig = new ICalFeedConfig.Builder(userConfig, new JSONObject(), session.getPassword(), true).build();
+      //TODO we might want to encrypt the password before generating the ICalFeedConfig (avoid boolean flag for encyrpted/decrypted password)... but the auth type isn't clear at that point 
+        if (iCalFeedConfig.getAuthInfo().getAuthType().equals(AuthType.BASIC)) {  
+            ICalAuthParser.encrypt(userConfig, session.getPassword());
+        }
         ICalFeedConnector iCalFeedConnector = new ICalFeedConnector(session, iCalFeedConfig);
 
         iCalFeedConnector.head(iCalFeedConfig.getFeedUrl()); // check connections and authorization

@@ -65,7 +65,6 @@ import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.CalendarAccountAttribute;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
-import com.openexchange.session.Session;
 
 /**
  * 
@@ -75,6 +74,8 @@ import com.openexchange.session.Session;
  * @since v7.10.0
  */
 public class ICalAuthParser {
+
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ICalAuthParser.class);
 
     private static final ICalAuthParser INSTANCE = new ICalAuthParser();
 
@@ -134,14 +135,15 @@ public class ICalAuthParser {
         }
     }
 
-    public AuthInfo getAuthInfoFromUnstructured(Session session, JSONObject userConfiguration) throws OXException {
+    public AuthInfo getAuthInfoFromUnstructured(JSONObject config, String password, boolean plainPassword) throws OXException {
+        JSONObject userConfiguration = new JSONObject(config);
         try {
-            Set<CalendarAccountAttribute> availableAttributes = parse(userConfiguration, session);
+            Set<CalendarAccountAttribute> availableAttributes = parse(userConfiguration);
             Set<CalendarAccountAttribute> authAttributes = validate(availableAttributes);
-            AuthInfo authInfo = generateAuthInfo(userConfiguration, authAttributes);
+            AuthInfo authInfo = generateAuthInfo(userConfiguration, authAttributes, password, plainPassword);
             return authInfo;
         } catch (JSONException e) {
-            //TODO
+            LOG.error("Unable to recognize auth information. Will try with no auth.", e);
         }
         return AuthInfo.NONE;
     }
@@ -155,7 +157,7 @@ public class ICalAuthParser {
      * @throws OXException
      * @throws JSONException
      */
-    private Set<CalendarAccountAttribute> parse(final JSONObject configuration, Session session) throws OXException, JSONException {
+    private Set<CalendarAccountAttribute> parse(final JSONObject configuration) throws JSONException {
         final Set<CalendarAccountAttribute> attributes = new HashSet<CalendarAccountAttribute>();
 
         String login = CalendarAccountAttribute.LOGIN_LITERAL.getName();
@@ -170,8 +172,7 @@ public class ICalAuthParser {
 
         String password = CalendarAccountAttribute.PASSWORD_LITERAL.getName();
         if (configuration.has(password)) {
-            String encrypt = PasswordUtil.encrypt(parseString(configuration, password), session.getPassword());
-            configuration.put(password, encrypt);
+            configuration.put(password, parseString(configuration, password));
             attributes.add(CalendarAccountAttribute.PASSWORD_LITERAL);
         }
 
@@ -210,7 +211,7 @@ public class ICalAuthParser {
         return copy;
     }
 
-    private AuthInfo generateAuthInfo(JSONObject configuration, Set<CalendarAccountAttribute> authAttributes) throws JSONException {
+    private AuthInfo generateAuthInfo(JSONObject configuration, Set<CalendarAccountAttribute> authAttributes, String password, boolean plainPassword) throws JSONException, OXException {
         AuthInfo authInfo = null;
         Builder builder = AuthInfo.builder();
         if (authAttributes.contains(CalendarAccountAttribute.OAUTH_ACCOUNT_ID_LITERAL)) {
@@ -223,14 +224,47 @@ public class ICalAuthParser {
             if (Strings.isNotEmpty(login)) {
                 builder.setLogin(login);
             }
-            String password = (String) configuration.get(CalendarAccountAttribute.PASSWORD_LITERAL.getName());
-            if (Strings.isNotEmpty(password)) {
-                builder.setPassword(password);
-            }
+            String feedPassword = (String) configuration.get(CalendarAccountAttribute.PASSWORD_LITERAL.getName());
+            if (Strings.isNotEmpty(feedPassword))
+                if (plainPassword) {
+                    builder.setPassword(feedPassword);
+                } else {
+                    builder.setPassword(decrypt(feedPassword, password));
+                }
             authInfo = builder.build();
         } else {
             authInfo = builder.setAuthType(AuthType.NONE).build();
         }
         return authInfo;
+    }
+
+    public static void encrypt(JSONObject userConfiguration, String password) throws OXException {
+        if (userConfiguration.has("password")) {
+            try {
+                String encrypt = encrypt(parseString(userConfiguration, "password"), password);
+                userConfiguration.put("password", encrypt);
+            } catch (JSONException e) {
+                LOG.error("Unable to encrypt password in user configuration.", e);
+            }
+        }
+    }
+
+    public static String encrypt(String passwordToEncrypt, String passwordToEncryptWith) throws OXException {
+        return PasswordUtil.encrypt(passwordToEncrypt, passwordToEncryptWith);
+    }
+
+    public static void decrypt(JSONObject userConfiguration, String password) throws OXException {
+        if (userConfiguration.has(password)) {
+            try {
+                String decrypt = decrypt(parseString(userConfiguration, password), password);
+                userConfiguration.put(password, decrypt);
+            } catch (JSONException e) {
+                LOG.error("Unable to encrypt password in user configuration.", e);
+            }
+        }
+    }
+
+    public static String decrypt(String passwordToEncrypt, String passwordToEncryptWith) throws OXException {
+        return PasswordUtil.decrypt(passwordToEncrypt, passwordToEncryptWith);
     }
 }

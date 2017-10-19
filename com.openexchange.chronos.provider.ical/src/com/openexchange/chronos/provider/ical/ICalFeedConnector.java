@@ -69,8 +69,6 @@ import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.ical.exception.ICalProviderExceptionCodes;
 import com.openexchange.chronos.provider.ical.internal.ICalCalendarProviderProperties;
 import com.openexchange.chronos.provider.ical.internal.Services;
-import com.openexchange.chronos.provider.ical.internal.auth.ICalAuthParser;
-import com.openexchange.chronos.provider.ical.internal.auth.PasswordUtil;
 import com.openexchange.chronos.provider.ical.result.HeadResult;
 import com.openexchange.config.ConfigTools;
 import com.openexchange.config.lean.LeanConfigurationService;
@@ -172,8 +170,8 @@ public class ICalFeedConnector {
         return headMethod;
     }
 
-    protected void handleAuth(HttpRequestBase method) throws OXException {
-        AuthInfo authInfo = ICalAuthParser.getInstance().getAuthInfoFromUnstructured(this.session, this.iCalFeedConfig.getUserConfiguration());
+    protected void handleAuth(HttpRequestBase method) {
+        AuthInfo authInfo = this.iCalFeedConfig.getAuthInfo();
         AuthType authType = authInfo.getAuthType();
         switch (authType) {
             case BASIC: {
@@ -184,8 +182,7 @@ public class ICalFeedConnector {
                 }
                 String password = authInfo.getPassword();
                 if (Strings.isNotEmpty(password)) {
-                    String decrypt = new String(PasswordUtil.decrypt(password, session.getPassword()));
-                    auth.append(decrypt);
+                    auth.append(password);
                 }
 
                 byte[] encodedAuth = Base64.encodeBase64(auth.toString().getBytes(Charset.forName("ISO-8859-1")));

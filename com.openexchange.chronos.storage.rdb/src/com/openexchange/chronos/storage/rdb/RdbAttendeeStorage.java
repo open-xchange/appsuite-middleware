@@ -199,6 +199,7 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
             connection = dbProvider.getWriteConnection(context);
             txPolicy.setAutoCommit(connection, false);
             updated += deleteAttendees(connection);
+            updated += deleteAttendeesTombstones(connection);
             txPolicy.commit(connection);
         } catch (SQLException e) {
             throw asOXException(e);
@@ -210,6 +211,16 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
     private int deleteAttendees(Connection connection) throws SQLException {
         int updated = 0;
         try (PreparedStatement stmt = connection.prepareStatement("DELETE FROM calendar_attendee WHERE cid=? AND account=?;")) {
+            stmt.setInt(1, context.getContextId());
+            stmt.setInt(2, accountId);
+            updated += logExecuteUpdate(stmt);
+        }
+        return updated;
+    }
+    
+    private int deleteAttendeesTombstones(Connection connection) throws SQLException {
+        int updated = 0;
+        try (PreparedStatement stmt = connection.prepareStatement("DELETE FROM calendar_attendee_tombstone WHERE cid=? AND account=?;")) {
             stmt.setInt(1, context.getContextId());
             stmt.setInt(2, accountId);
             updated += logExecuteUpdate(stmt);

@@ -94,7 +94,7 @@ public class ICalCalendarAccess extends SingleFolderCachingCalendarAccess {
      */
     public ICalCalendarAccess(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
         super(session, account, parameters);
-        this.iCalFeedConfig = new ICalFeedConfig.Builder(account.getUserConfiguration(), getFolderConfiguration()).build();
+        this.iCalFeedConfig = new ICalFeedConfig.Builder(account.getUserConfiguration(), getFolderConfiguration(), session.getPassword(), false).build();
         this.reader = new ICalFeedReader(session, iCalFeedConfig);
     }
 
@@ -172,7 +172,7 @@ public class ICalCalendarAccess extends SingleFolderCachingCalendarAccess {
     private void setRefreshInterval(GetResult importResult, JSONObject folderConfig) {
         long persistedInterval = folderConfig.optLong(REFRESH_INTERVAL, 0);
         String refreshInterval = importResult.getRefreshInterval();
-        
+
         if (Strings.isNotEmpty(refreshInterval)) {
             Duration duration = org.dmfs.rfc5545.Duration.parse(refreshInterval);
             long refreshIntervalFromFeed = TimeUnit.MILLISECONDS.toMinutes(duration.toMillis());
