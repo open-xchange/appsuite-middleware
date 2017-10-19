@@ -232,7 +232,6 @@ public class SchedJoulesCalendarAccess extends CachingCalendarAccess {
     @Override
     public void handleExceptions(String calendarFolderId, OXException e) {
         // TODO Auto-generated method stub
-
     }
 
     ///////////////////////////////////// HELPERS /////////////////////////////////
