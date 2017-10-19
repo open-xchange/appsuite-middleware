@@ -63,6 +63,7 @@ import com.openexchange.chronos.provider.schedjoules.exception.SchedJoulesProvid
 import com.openexchange.chronos.schedjoules.api.SchedJoulesAPI;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.session.Session;
 
 /**
@@ -245,21 +246,20 @@ public class SchedJoulesCalendarProvider extends CachingCalendarProvider {
     private JSONObject prepareFolder(JSONObject folder) throws JSONException, OXException {
         int itemId = folder.getInt("itemId");
         String locale = folder.optString("locale");
+        
         JSONObject page = SchedJoulesAPI.getInstance().pages().getPage(itemId, locale);
         if (!page.hasAndNotNull("url")) {
             throw SchedJoulesProviderExceptionCodes.NO_CALENDAR.create(itemId);
         }
-
-        String name;
-        if (!folder.hasAndNotNull("name")) {
+        
+        String name = folder.optString("name");
+        if (Strings.isEmpty(name)) {
             name = page.getString("name");
             folder.put("name", name);
-        } else {
-            name = folder.getString("name");
         }
 
         JSONObject internalItem = new JSONObject();
-        internalItem.put("refreshInterval", "PT7D");
+        internalItem.put("refreshInterval", "PT7D"); //TODO: user defined or default?
         internalItem.put("url", page.getString("url"));
         internalItem.put("itemId", itemId);
         internalItem.put("name", name);
