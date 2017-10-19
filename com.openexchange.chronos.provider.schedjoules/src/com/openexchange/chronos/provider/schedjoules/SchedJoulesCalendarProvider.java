@@ -168,11 +168,11 @@ public class SchedJoulesCalendarProvider extends CachingCalendarProvider {
 
         // Check for differences and merge
         try {
-            // Build a set that contains all internal subscribed items 
+            // Build a map that contains all internal subscribed items and their position in the array  
             Map<String, Integer> internalItemIds = new HashMap<>();
             for (int index = 0; index < internalConfigFolders.length(); index++) {
                 JSONObject folder = internalConfigFolders.getJSONObject(index);
-                internalItemIds.put(folder.getString("name"), folder.getInt("itemId"));
+                internalItemIds.put(folder.getString("name"), index);
             }
 
             JSONArray additions = new JSONArray();
@@ -246,12 +246,12 @@ public class SchedJoulesCalendarProvider extends CachingCalendarProvider {
     private JSONObject prepareFolder(JSONObject folder) throws JSONException, OXException {
         int itemId = folder.getInt("itemId");
         String locale = folder.optString("locale");
-        
+
         JSONObject page = SchedJoulesAPI.getInstance().pages().getPage(itemId, locale);
         if (!page.hasAndNotNull("url")) {
             throw SchedJoulesProviderExceptionCodes.NO_CALENDAR.create(itemId);
         }
-        
+
         String name = folder.optString("name");
         if (Strings.isEmpty(name)) {
             name = page.getString("name");
