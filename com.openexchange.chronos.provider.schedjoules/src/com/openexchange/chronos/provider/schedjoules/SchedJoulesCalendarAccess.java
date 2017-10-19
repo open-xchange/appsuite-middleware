@@ -101,6 +101,11 @@ public class SchedJoulesCalendarAccess extends CachingCalendarAccess {
     private static final String URL = "url";
 
     /**
+     * The user configuration's key for the folder's name
+     */
+    private static final String NAME = "name";
+
+    /**
      * Initialises a new {@link SchedJoulesCalendarAccess}.
      *
      * @param account
@@ -281,7 +286,7 @@ public class SchedJoulesCalendarAccess extends CachingCalendarAccess {
         folder.setLastModified(getAccount().getLastModified());
         JSONObject userConfig = getAccount().getUserConfiguration();
         if (null != userConfig) {
-            folder.setName(userConfig.optString("name", folderName));
+            folder.setName(userConfig.optString(NAME, folderName));
             folder.setColor(userConfig.optString("color", null));
             folder.setDescription(userConfig.optString("description", null));
             folder.setUsedForSync(userConfig.optBoolean("usedForSync", false));
@@ -297,7 +302,7 @@ public class SchedJoulesCalendarAccess extends CachingCalendarAccess {
      * @return The folder's name or <code>null</code> if the metdata have no 'name' information
      */
     private String getFolderName(JSONObject folder) {
-        String name = folder.optString("name");
+        String name = folder.optString(NAME);
         if (Strings.isEmpty(name)) {
             LOG.warn("Missing the 'name' attribute from folder metadata for account '{}' of user '{}' in context '{}'", getAccount().getAccountId(), getSession().getUserId(), getSession().getContextId());
         }
