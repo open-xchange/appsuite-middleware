@@ -444,8 +444,8 @@ public class AuditEventHandler implements EventHandler {
         logBuilder.append("CONTEXT ID: ").append(commonEvent.getContextId()).append("; ");
         logBuilder.append("OBJECT ID: ").append(event.getId()).append("; ");
 
-        appendIfSet(logBuilder, "CREATED BY: ", event.getCreatedBy().getCn());
-        appendIfSet(logBuilder, "MODIFIED BY: ", event.getModifiedBy().getCn());
+        appendIfSet(logBuilder, "CREATED BY: ", null == event.getCreatedBy() ? null: event.getCreatedBy().getCn());
+        appendIfSet(logBuilder, "MODIFIED BY: ", null == event.getModifiedBy() ? null : event.getModifiedBy().getCn());
 
         try {
             Map<Integer, Set<Integer>> affectedUsersWithFolder = commonEvent.getAffectedUsersWithFolder();
