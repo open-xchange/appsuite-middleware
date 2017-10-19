@@ -126,26 +126,26 @@ public class ICalFeedConnector {
         config.setSocketReadTimeout(socketReadTimeout);
     }
 
-    protected HeadResult head(String uri) throws OXException {
+    protected HeadResult head() throws OXException {
         HttpHead headMethod = null;
         CloseableHttpResponse response = null;
         try {
-            headMethod = prepareHead(uri);
+            headMethod = prepareHead();
             response = httpClient.execute(headMethod);
             HeadResult result = new HeadResult(response.getStatusLine(), response.getAllHeaders());
             if (result.getStatusCode() >= 200 && result.getStatusCode() < 300) {
                 return result;
             }
             if (result.getStatusCode() == HttpStatus.SC_UNAUTHORIZED) {
-                throw CalendarExceptionCodes.AUTH_FAILED.create(uri);
+                throw CalendarExceptionCodes.AUTH_FAILED.create(iCalFeedConfig.getFeedUrl());
             }
             if (result.getStatusCode() == HttpStatus.SC_NOT_FOUND) {
-                throw ICalProviderExceptionCodes.NO_FEED.create(uri);
+                throw ICalProviderExceptionCodes.NO_FEED.create(iCalFeedConfig.getFeedUrl());
             }
 
-            throw ICalProviderExceptionCodes.UNEXPECTED_FEED_ERROR.create(uri);
+            throw ICalProviderExceptionCodes.UNEXPECTED_FEED_ERROR.create(iCalFeedConfig.getFeedUrl());
         } catch (IOException e) {
-            LOG.error("Error while executing the head request targeting {}: {}.", uri, e.getMessage(), e);
+            LOG.error("Error while executing the head request targeting {}: {}.", iCalFeedConfig.getFeedUrl(), e.getMessage(), e);
             throw CalendarExceptionCodes.UNEXPECTED_ERROR.create(e.getMessage());
         } finally {
             close(headMethod, response);
@@ -153,8 +153,8 @@ public class ICalFeedConnector {
         }
     }
 
-    private HttpHead prepareHead(String uri) throws OXException {
-        HttpHead headMethod = new HttpHead(uri);
+    private HttpHead prepareHead() {
+        HttpHead headMethod = new HttpHead(iCalFeedConfig.getFeedUrl());
         headMethod.addHeader(HttpHeaders.ACCEPT, "text/calendar");
 
         if (Strings.isNotEmpty(iCalFeedConfig.getEtag())) {

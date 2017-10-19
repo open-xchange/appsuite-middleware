@@ -62,6 +62,7 @@ import com.openexchange.chronos.provider.caching.SingleFolderCachingCalendarAcce
 import com.openexchange.chronos.provider.ical.exception.ICalProviderExceptionCodes;
 import com.openexchange.chronos.provider.ical.internal.ICalCalendarProviderProperties;
 import com.openexchange.chronos.provider.ical.internal.Services;
+import com.openexchange.chronos.provider.ical.internal.auth.ICalAuthParser;
 import com.openexchange.chronos.provider.ical.result.GetResult;
 import com.openexchange.chronos.provider.ical.result.HeadResult;
 import com.openexchange.chronos.service.CalendarParameters;
@@ -94,13 +95,13 @@ public class ICalCalendarAccess extends SingleFolderCachingCalendarAccess {
      */
     public ICalCalendarAccess(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
         super(session, account, parameters);
-        this.iCalFeedConfig = new ICalFeedConfig.Builder(account.getUserConfiguration(), getFolderConfiguration(), session.getPassword(), false).build();
+        ICalAuthParser.decrypt(account.getUserConfiguration(), session.getPassword());
+        this.iCalFeedConfig = new ICalFeedConfig.Builder(account.getUserConfiguration(), getFolderConfiguration()).build();
         this.reader = new ICalFeedReader(session, iCalFeedConfig);
     }
 
     @Override
     public void close() {
-        // * FIXME - return connection to pool
     }
 
     @Override
@@ -114,38 +115,37 @@ public class ICalCalendarAccess extends SingleFolderCachingCalendarAccess {
 
     @Override
     public ExternalCalendarResult getEvents() throws OXException {
-        String uri = this.iCalFeedConfig.getFeedUrl();
-        verifyURI(uri);
+        verifyURI();
 
-        HeadResult headResult = reader.head(uri);
+        HeadResult headResult = reader.head();
         String etag = iCalFeedConfig.getEtag();
         if (headResult.getStatusCode() == HttpStatus.SC_NOT_MODIFIED || // response says not modified
             ((etag != null) && (headResult.getETag().equals(etag)))) { // same etag
             return new ExternalCalendarResult();
         }
-        return getAndHandleFeed(uri);
+        return getAndHandleFeed();
     }
 
-    private void verifyURI(String uri) throws OXException {
-        if (Strings.isEmpty(uri)) {
+    private void verifyURI() throws OXException {
+        if (Strings.isEmpty(iCalFeedConfig.getFeedUrl())) {
             throw ICalProviderExceptionCodes.MISSING_FEED_URI.create(getAccount().getAccountId(), getSession().getContextId());
         }
         try {
-            boolean denied = ICalCalendarProviderProperties.isDenied(new URI(uri));
+            boolean denied = ICalCalendarProviderProperties.isDenied(new URI(iCalFeedConfig.getFeedUrl()));
             if (denied) {
-                throw ICalProviderExceptionCodes.FEED_URI_NOT_ALLOWED.create(uri);
+                throw ICalProviderExceptionCodes.FEED_URI_NOT_ALLOWED.create(iCalFeedConfig.getFeedUrl());
             }
         } catch (URISyntaxException e) {
-            throw ICalProviderExceptionCodes.BAD_FEED_URI.create(uri, e);
+            throw ICalProviderExceptionCodes.BAD_FEED_URI.create(iCalFeedConfig.getFeedUrl(), e);
         }
     }
 
-    private ExternalCalendarResult getAndHandleFeed(String uri) throws OXException {
+    private ExternalCalendarResult getAndHandleFeed() throws OXException {
         ExternalCalendarResult externalCalendarResult = new ExternalCalendarResult();
-        GetResult importResult = reader.get(uri);
+        GetResult importResult = reader.get();
         if (importResult == null || importResult.getCalendar() == null) {
-            LOG.debug("Unable to retrieve data from feed URI {}.", uri);
-            throw ICalProviderExceptionCodes.NO_FEED.create(uri);
+            LOG.debug("Unable to retrieve data from feed URI {}.", iCalFeedConfig.getFeedUrl());
+            throw ICalProviderExceptionCodes.NO_FEED.create(iCalFeedConfig.getFeedUrl());
         }
 
         updateFolderConfiguration(importResult);

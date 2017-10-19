@@ -86,14 +86,13 @@ public class ICalCalendarProvider extends CachingCalendarProvider {
 
     @Override
     public JSONObject configureAccount(Session session, JSONObject userConfig, CalendarParameters parameters) throws OXException {
-        ICalFeedConfig iCalFeedConfig = new ICalFeedConfig.Builder(userConfig, new JSONObject(), session.getPassword(), true).build();
-      //TODO we might want to encrypt the password before generating the ICalFeedConfig (avoid boolean flag for encyrpted/decrypted password)... but the auth type isn't clear at that point 
-        if (iCalFeedConfig.getAuthInfo().getAuthType().equals(AuthType.BASIC)) {  
-            ICalAuthParser.encrypt(userConfig, session.getPassword());
+        ICalFeedConfig iCalFeedConfig = new ICalFeedConfig.Builder(userConfig, new JSONObject()).build();
+
+        if (iCalFeedConfig.getAuthInfo().getAuthType().equals(AuthType.BASIC)) {
+            ICalAuthParser.encrypt(userConfig, session.getPassword()); // encrypt password for persisting
         }
         ICalFeedConnector iCalFeedConnector = new ICalFeedConnector(session, iCalFeedConfig);
-
-        iCalFeedConnector.head(iCalFeedConfig.getFeedUrl()); // check connections and authorization
+        iCalFeedConnector.head(); // check connections and authorization
         return new JSONObject();
     }
 

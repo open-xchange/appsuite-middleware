@@ -135,12 +135,12 @@ public class ICalAuthParser {
         }
     }
 
-    public AuthInfo getAuthInfoFromUnstructured(JSONObject config, String password, boolean plainPassword) throws OXException {
+    public AuthInfo getAuthInfoFromUnstructured(JSONObject config) throws OXException {
         JSONObject userConfiguration = new JSONObject(config);
         try {
             Set<CalendarAccountAttribute> availableAttributes = parse(userConfiguration);
             Set<CalendarAccountAttribute> authAttributes = validate(availableAttributes);
-            AuthInfo authInfo = generateAuthInfo(userConfiguration, authAttributes, password, plainPassword);
+            AuthInfo authInfo = generateAuthInfo(userConfiguration, authAttributes);
             return authInfo;
         } catch (JSONException e) {
             LOG.error("Unable to recognize auth information. Will try with no auth.", e);
@@ -211,7 +211,7 @@ public class ICalAuthParser {
         return copy;
     }
 
-    private AuthInfo generateAuthInfo(JSONObject configuration, Set<CalendarAccountAttribute> authAttributes, String password, boolean plainPassword) throws JSONException, OXException {
+    private AuthInfo generateAuthInfo(JSONObject configuration, Set<CalendarAccountAttribute> authAttributes) throws JSONException, OXException {
         AuthInfo authInfo = null;
         Builder builder = AuthInfo.builder();
         if (authAttributes.contains(CalendarAccountAttribute.OAUTH_ACCOUNT_ID_LITERAL)) {
@@ -226,11 +226,7 @@ public class ICalAuthParser {
             }
             String feedPassword = (String) configuration.get(CalendarAccountAttribute.PASSWORD_LITERAL.getName());
             if (Strings.isNotEmpty(feedPassword))
-                if (plainPassword) {
-                    builder.setPassword(feedPassword);
-                } else {
-                    builder.setPassword(decrypt(feedPassword, password));
-                }
+                builder.setPassword(feedPassword);
             authInfo = builder.build();
         } else {
             authInfo = builder.setAuthType(AuthType.NONE).build();
@@ -254,10 +250,10 @@ public class ICalAuthParser {
     }
 
     public static void decrypt(JSONObject userConfiguration, String password) throws OXException {
-        if (userConfiguration.has(password)) {
+        if (userConfiguration.has("password")) {
             try {
-                String decrypt = decrypt(parseString(userConfiguration, password), password);
-                userConfiguration.put(password, decrypt);
+                String decrypt = decrypt(parseString(userConfiguration, "password"), password);
+                userConfiguration.put("password", decrypt);
             } catch (JSONException e) {
                 LOG.error("Unable to encrypt password in user configuration.", e);
             }

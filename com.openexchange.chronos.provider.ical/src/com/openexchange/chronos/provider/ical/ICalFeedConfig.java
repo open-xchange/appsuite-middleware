@@ -107,20 +107,17 @@ public class ICalFeedConfig {
         private AuthInfo authInfo;
 
         /**
-         * 
          * Initializes a new {@link Builder}.
          * 
-         * @param userConfiguration
+         * @param userConfiguration - the password has to be decrypted at this point
          * @param folderConfig
-         * @param password
-         * @param plainPassword - defines if the provided password in userConfiguration is encrypted or not
          * @throws OXException
          */
-        Builder(JSONObject userConfiguration, JSONObject folderConfig, String password, boolean plainPassword) throws OXException {
+        Builder(JSONObject userConfiguration, JSONObject folderConfig) throws OXException {
             this.userConfiguration = userConfiguration;
             this.etag = folderConfig.optString(ETAG, null);
             this.lastUpdated = folderConfig.optLong(CachingCalendarAccess.LAST_UPDATE, -1L);
-            this.authInfo = ICalAuthParser.getInstance().getAuthInfoFromUnstructured(new JSONObject(this.userConfiguration), password, plainPassword);
+            this.authInfo = ICalAuthParser.getInstance().getAuthInfoFromUnstructured(new JSONObject(this.userConfiguration));
         }
 
         public ICalFeedConfig build() {
