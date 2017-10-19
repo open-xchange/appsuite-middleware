@@ -57,6 +57,7 @@ import org.json.JSONObject;
 import com.openexchange.chronos.provider.CalendarAccess;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.CalendarProvider;
+import com.openexchange.chronos.provider.caching.CachingCalendarAccess;
 import com.openexchange.chronos.provider.schedjoules.exception.SchedJoulesProviderExceptionCodes;
 import com.openexchange.chronos.schedjoules.api.SchedJoulesAPI;
 import com.openexchange.chronos.service.CalendarParameters;
@@ -176,12 +177,10 @@ public class SchedJoulesCalendarProvider implements CalendarProvider {
                 internalItemIds.add(name);
             }
 
-            int origLength = internalConfigFolders.length();
-            handleAdditions(internalConfigFolders, userConfigFolders, internalItemIds);
-            handleDeletions(internalConfigFolders, internalItemIds);
-            //TODO: Update references in 'folderCaching' object if renames occurred
+            boolean added = handleAdditions(internalConfigFolders, userConfigFolders, internalItemIds);
+            boolean deleted = handleDeletions(getInternalConfigCaching(internalConfig), internalConfigFolders, internalItemIds);
 
-            return origLength != internalConfigFolders.length() ? internalConfig : null;
+            return (added || deleted) ? internalConfig : null;
         } catch (JSONException e) {
             throw SchedJoulesProviderExceptionCodes.JSON_ERROR.create(e.getMessage(), e);
         }
@@ -269,10 +268,12 @@ public class SchedJoulesCalendarProvider implements CalendarProvider {
      * @param userConfigFolders The user configuration for 'folders'
      * @param internalItemIds The internal items
      * @param additions The target 'additions' object
+     * @return <code>true</code> if there were new additions, <code>false</code> otherwise
      * @throws JSONException if a JSON error occurs
      * @throws OXException if any other error occurs
      */
-    private void handleAdditions(JSONObject internalConfigFolders, JSONObject userConfigFolders, Set<String> internalItemIds) throws JSONException, OXException {
+    private boolean handleAdditions(JSONObject internalConfigFolders, JSONObject userConfigFolders, Set<String> internalItemIds) throws JSONException, OXException {
+        int origLength = internalConfigFolders.length();
         for (String name : userConfigFolders.keySet()) {
             JSONObject folder = userConfigFolders.getJSONObject(name);
             if (!internalItemIds.contains(name)) {
@@ -280,17 +281,38 @@ public class SchedJoulesCalendarProvider implements CalendarProvider {
             }
             internalItemIds.remove(name);
         }
+        return origLength != internalConfigFolders.length();
     }
 
     /**
      * Handle any potential deletions.
      * 
+     * @param internalConfigFolders The internal configuration for 'folderCaching'
      * @param internalConfigFolders The internal configuration for 'folders'
      * @param internalItemIds The items that are to be removed from the internal configuration
+     * @return <code>true</code> if the internal configuration was changed, <code>false</code> otherwise
      */
-    private void handleDeletions(JSONObject internalConfigFolders, Set<String> internalItemIds) {
+    private boolean handleDeletions(JSONObject internalConfigCaching, JSONObject internalConfigFolders, Set<String> internalItemIds) {
+        if (internalItemIds.isEmpty()) {
+            return false;
+        }
+
         for (String name : internalItemIds) {
             internalConfigFolders.remove(name);
+            internalConfigCaching.remove(name);
         }
+        return true;
     }
+    
+    /**
+     * Returns the {@link CachingCalendarAccess#CACHING} attribute or an empty object
+     * @param internalConfig The internal configuration
+     * @return the {@link CachingCalendarAccess#CACHING} attribute or an empty object if no caching elements exist
+     *  yet
+     */
+    private JSONObject getInternalConfigCaching(JSONObject internalConfig) {
+        JSONObject internalConfigCaching = internalConfig.optJSONObject(CachingCalendarAccess.CACHING);
+        return internalConfigCaching == null ? new JSONObject() : internalConfigCaching;
+    }
+    
 }
