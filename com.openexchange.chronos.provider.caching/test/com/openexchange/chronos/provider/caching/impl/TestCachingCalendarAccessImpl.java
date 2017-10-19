@@ -123,7 +123,7 @@ public class TestCachingCalendarAccessImpl extends CachingCalendarAccess {
      * @see com.openexchange.chronos.provider.caching.CachingCalendarAccess#getRefreshInterval()
      */
     @Override
-    public long getRefreshInterval() {
+    public long getRefreshInterval(String folderId) {
         return 60;
     }
 

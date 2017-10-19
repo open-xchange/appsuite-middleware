@@ -95,8 +95,9 @@ public class ICalCalendarAccess extends SingleFolderCachingCalendarAccess {
      */
     public ICalCalendarAccess(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
         super(session, account, parameters);
-        ICalAuthParser.decrypt(account.getUserConfiguration(), session.getPassword());
-        this.iCalFeedConfig = new ICalFeedConfig.Builder(account.getUserConfiguration(), getFolderConfiguration()).build();
+        JSONObject userConfiguration = new JSONObject(account.getUserConfiguration());
+        ICalAuthParser.decrypt(userConfiguration, session.getPassword());
+        this.iCalFeedConfig = new ICalFeedConfig.Builder(userConfiguration, getFolderConfiguration()).build();
         this.reader = new ICalFeedReader(session, iCalFeedConfig);
     }
 
@@ -105,7 +106,7 @@ public class ICalCalendarAccess extends SingleFolderCachingCalendarAccess {
     }
 
     @Override
-    public long getRefreshInterval() {
+    public long getRefreshInterval(String folderId) {
         long refreshInterval = getFolderConfiguration().optLong(REFRESH_INTERVAL, 0);
         if (refreshInterval > 0) {
             return refreshInterval;

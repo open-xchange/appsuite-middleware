@@ -132,13 +132,13 @@ public abstract class CachingCalendarAccess implements WarningsAware {
     }
 
     /**
-     * Defines the refresh interval in minutes that has to be expired to contact the external event provider for the up-to-date calendar.<br>
+     * Defines the refresh interval in minutes that has to be expired to contact the external event provider for the up-to-date calendar. The interval can be defined on a per folder base.<br>
      * <br>
      * If the value is <=0 the default of one day will be used.
      *
      * @return The interval that defines the expire of the caching in {@link TimeUnit#MINUTES}
      */
-    protected abstract long getRefreshInterval();
+    protected abstract long getRefreshInterval(String folderId);
 
     /**
      * Defines how long should be wait for the next request to the external calendar provider in case an error occurred.
@@ -300,7 +300,7 @@ public abstract class CachingCalendarAccess implements WarningsAware {
             String folderId = folderUpdateState.getKey();
             Map<String, Object> folderConfig = (Map<String, Object>) folderUpdateState.getValue();
             Number lastFolderUpdate = (Number) folderConfig.get(LAST_UPDATE);
-            long refreshInterval = getCascadedRefreshInterval(folderConfig);
+            long refreshInterval = getCascadedRefreshInterval(folderId, folderConfig);
 
             if (lastFolderUpdate == null || lastFolderUpdate.longValue() <= 0) {
                 currentStates.add(new FolderUpdateState(folderId, 0, refreshInterval, FolderProcessingType.INITIAL_INSERT));
@@ -317,14 +317,14 @@ public abstract class CachingCalendarAccess implements WarningsAware {
         return currentStates;
     }
 
-    protected long getCascadedRefreshInterval(Map<String, Object> folderConfig) {
+    protected long getCascadedRefreshInterval(String folderId, Map<String, Object> folderConfig) {
         if (folderConfig != null && !folderConfig.isEmpty()) {
             Number calendarProviderInterval = (Number) folderConfig.get(REFRESH_INTERVAL);
             if (calendarProviderInterval != null) {
                 return calendarProviderInterval.longValue();
             }
         }
-        long providerRefreshInterval = getRefreshInterval();
+        long providerRefreshInterval = getRefreshInterval(folderId);
         if (providerRefreshInterval > TimeUnit.DAYS.toMinutes(1L)) {
             return providerRefreshInterval;
         }
@@ -335,8 +335,7 @@ public abstract class CachingCalendarAccess implements WarningsAware {
      * Saves the current configuration for the account if it has been changed while processing
      */
     protected void saveConfig() {
-        if (Objects.equals(originInternalConfiguration, getAccount().getInternalConfiguration()) &&
-            Objects.equals(originUserConfiguration, getAccount().getUserConfiguration())) {
+        if (Objects.equals(originInternalConfiguration, getAccount().getInternalConfiguration()) && Objects.equals(originUserConfiguration, getAccount().getUserConfiguration())) {
             return;
         }
         try {

@@ -54,7 +54,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -190,7 +189,8 @@ public class SchedJoulesCalendarAccess extends CachingCalendarAccess {
      * @see com.openexchange.chronos.provider.caching.CachingCalendarAccess#getRefreshInterval()
      */
     @Override
-    protected long getRefreshInterval() {
+    protected long getRefreshInterval(String folderId) {
+        // TODO Auto-generated method stub
         return 0;
     }
     
