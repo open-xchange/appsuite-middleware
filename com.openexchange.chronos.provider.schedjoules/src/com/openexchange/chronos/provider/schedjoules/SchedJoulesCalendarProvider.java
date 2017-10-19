@@ -249,7 +249,7 @@ public class SchedJoulesCalendarProvider extends CachingCalendarProvider {
         if (!page.hasAndNotNull("url")) {
             throw SchedJoulesProviderExceptionCodes.NO_CALENDAR.create(itemId);
         }
-        
+
         String name;
         if (!folder.hasAndNotNull("name")) {
             name = page.getString("name");
@@ -257,7 +257,7 @@ public class SchedJoulesCalendarProvider extends CachingCalendarProvider {
         } else {
             name = folder.getString("name");
         }
-        
+
         JSONObject internalItem = new JSONObject();
         internalItem.put("refreshInterval", "PT7D");
         internalItem.put("url", page.getString("url"));
@@ -310,11 +310,11 @@ public class SchedJoulesCalendarProvider extends CachingCalendarProvider {
     }
 
     /**
+     * Adds the new items to the internal configuration
      * 
-     * @param internalConfigFolders
-     * @param userConfigFolders
-     * @param additions
-     * @throws JSONException
+     * @param internalConfigFolders The internal configuration for folders
+     * @param additions The array holding the new items
+     * @throws JSONException if a JSON error is occurred
      */
     private void addToInternalConfiguration(JSONArray internalConfigFolders, JSONArray additions) throws JSONException {
         for (int index = 0; index < additions.length(); index++) {
@@ -326,8 +326,7 @@ public class SchedJoulesCalendarProvider extends CachingCalendarProvider {
      * Returns the {@link CachingCalendarAccess#CACHING} attribute or an empty object
      * 
      * @param internalConfig The internal configuration
-     * @return the {@link CachingCalendarAccess#CACHING} attribute or an empty object if no caching elements exist
-     *         yet
+     * @return the {@link CachingCalendarAccess#CACHING} attribute or an empty object if no caching elements exist yet
      */
     private JSONObject getInternalConfigCaching(JSONObject internalConfig) {
         JSONObject internalConfigCaching = internalConfig.optJSONObject(CachingCalendarAccess.CACHING);
