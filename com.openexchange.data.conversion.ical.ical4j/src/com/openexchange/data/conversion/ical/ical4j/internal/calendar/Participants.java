@@ -62,11 +62,12 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TimeZone;
-import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.idn.IDNA;
+import com.openexchange.chronos.CalendarUserType;
+import com.openexchange.chronos.ResourceId;
 import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.ConversionWarning.Code;
@@ -178,7 +179,7 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
     protected void addResourceAttendee(ResourceParticipant resourceParticipant, U calendarObject, T component, Context ctx) {
         Attendee attendee = new Attendee();
         try {
-            attendee.setValue("urn:uuid:" + encode(ctx.getContextId(), Participant.RESOURCE, resourceParticipant.getIdentifier()));
+            attendee.setValue(ResourceId.forResource(ctx.getContextId(), resourceParticipant.getIdentifier()));
             ParameterList parameters = attendee.getParameters();
             parameters.add(CuType.RESOURCE);
             parameters.add(PartStat.ACCEPTED);
@@ -388,26 +389,22 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
                 String specificPart = uri.getSchemeSpecificPart();
                 if (Strings.isNotEmpty(specificPart) && specificPart.startsWith("uuid:")) {
                     try {
-                        UUID uuid = UUID.fromString(specificPart.substring(5));
-                        if (ctx.getContextId() == decodeContextID(uuid)) {
-                            int entity = decodeEntity(uuid);
-                            switch (decodeType(uuid)) {
-                                case Participant.GROUP:
-                                    GroupService groupService = GROUP_SERVICE_REFERENCE.get();
-                                    if (null == groupService) {
-                                        throw new ConversionWarning(index, Code.CANT_RESOLVE_GROUP, ServiceExceptionCode.absentService(GroupService.class), attendee.toString());
-                                    }
-                                    groups.add(groupService.getGroup(ctx, decodeEntity(uuid)));
-                                    continue;
-                                case Participant.RESOURCE:
-                                    resources.add(resourceResolver.load(decodeEntity(uuid), ctx));
-                                    continue;
-                                case Participant.USER:
-                                    User user = userResolver.loadUser(entity, ctx);
-                                    addMail(index, user.getMail(), mails, attendee, comment, warnings);
-                                    continue;
-                                default:
-                                    break;
+                        ResourceId resourceId = ResourceId.parse(specificPart.substring(5));
+                        if (ctx.getContextId() == resourceId.getContextID()) {
+                            if (CalendarUserType.GROUP.equals(resourceId.getCalendarUserType())) {
+                                GroupService groupService = GROUP_SERVICE_REFERENCE.get();
+                                if (null == groupService) {
+                                    throw new ConversionWarning(index, Code.CANT_RESOLVE_GROUP, ServiceExceptionCode.absentService(GroupService.class), attendee.toString());
+                                }
+                                groups.add(groupService.getGroup(ctx, resourceId.getEntity()));
+                                continue;
+                            } else if (CalendarUserType.RESOURCE.equals(resourceId.getCalendarUserType())) {
+                                resources.add(resourceResolver.load(resourceId.getEntity(), ctx));
+                                continue;
+                            } else if (CalendarUserType.INDIVIDUAL.equals(resourceId.getCalendarUserType())) {
+                                User user = userResolver.loadUser(resourceId.getEntity(), ctx);
+                                addMail(index, user.getMail(), mails, attendee, comment, warnings);
+                                continue;
                             }
                         }
                     } catch (IllegalArgumentException | OXException e) {
@@ -636,9 +633,9 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
             String specificPart = uri.getSchemeSpecificPart();
             if (Strings.isNotEmpty(specificPart) && specificPart.startsWith("uuid:")) {
                 try {
-                    UUID uuid = UUID.fromString(specificPart.substring(5));
-                    if (context.getContextId() == decodeContextID(uuid) && Participant.RESOURCE == decodeType(uuid)) {
-                        return resourceResolver.load(decodeEntity(uuid), context);
+                    ResourceId resourceId = ResourceId.parse(specificPart.substring(5));
+                    if (context.getContextId() == resourceId.getContextID() && CalendarUserType.RESOURCE.equals(resourceId.getCalendarUserType())) {
+                        return resourceResolver.load(resourceId.getEntity(), context);
                     }
                 } catch (IllegalArgumentException | OXException e) {
                     throw new ConversionWarning(index, Code.CANT_RESOLVE_RESOURCE, e, specificPart);
@@ -684,9 +681,9 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
             String specificPart = uri.getSchemeSpecificPart();
             if (Strings.isNotEmpty(specificPart) && specificPart.startsWith("uuid:")) {
                 try {
-                    UUID uuid = UUID.fromString(specificPart.substring(5));
-                    if (context.getContextId() == decodeContextID(uuid) && Participant.GROUP == decodeType(uuid)) {
-                        return groupService.getGroup(context, decodeEntity(uuid));
+                    ResourceId resourceId = ResourceId.parse(specificPart.substring(5));
+                    if (context.getContextId() == resourceId.getContextID() && CalendarUserType.GROUP.equals(resourceId.getCalendarUserType())) {
+                        return groupService.getGroup(context, resourceId.getEntity());
                     }
                 } catch (IllegalArgumentException | OXException e) {
                     throw new ConversionWarning(index, Code.CANT_RESOLVE_GROUP, e, specificPart);
@@ -709,29 +706,6 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
             }
         }
         throw new ConversionWarning(index, Code.CANT_RESOLVE_GROUP, attendee.toString());
-    }
-
-    private static UUID encode(int contextID, int type, int entity) {
-        long lsb = entity;
-        long cid = contextID & 0xffffffffL;
-        long msb = cid << 16;
-        msb += type;
-        return new UUID(msb, lsb);
-    }
-
-    private static int decodeContextID(UUID encoded) {
-        long msb = encoded.getMostSignificantBits();
-        return (int) msb >> 16;
-    }
-
-    private static int decodeType(UUID encoded) {
-        long msb = encoded.getMostSignificantBits();
-        long cid = msb >> 16;
-        return (int) (msb - (cid << 16));
-    }
-
-    private static int decodeEntity(UUID encoded) {
-        return (int) encoded.getLeastSignificantBits();
     }
 
 }
