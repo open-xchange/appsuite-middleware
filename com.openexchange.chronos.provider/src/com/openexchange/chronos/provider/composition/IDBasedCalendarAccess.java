@@ -251,6 +251,27 @@ public interface IDBasedCalendarAccess extends TransactionAware, CalendarParamet
     UpdatesResult getUpdatedEventsOfUser(long updatedSince) throws OXException;
 
     /**
+     * Resolves a specific event (and any change exceptions) by its externally used resource name, which typically matches the event's
+     * UID or filename property. The lookup is performed in a specific folder, case-sensitive. If an event series with change exceptions
+     * is matched, the series master event will be the first event in the returned list.
+     * <p/>
+     * <b>Note:</b> Only available for {@link SyncAware} calendar providers.
+     * <p/>
+     * It is also possible that that only change exceptions are returned, which may be the case for <i>detached</i> instances where the
+     * user is not listed as attendee in the series master event.
+     * <p/>
+     * The following calendar parameters are evaluated:
+     * <ul>
+     * <li>{@link CalendarParameters#PARAMETER_FIELDS}</li>
+     * </ul>
+     *
+     * @param folderId The identifier of the folder to resolve the resource name in
+     * @param resourceName The resource name to resolve
+     * @return The resolved event(s), or <code>null</code> if no matching event was found
+     */
+    List<Event> resolveResource(String folderId, String resourceName) throws OXException;
+
+    /**
      * Gets a specific event.
      * <p/>
      * The following calendar parameters are evaluated:

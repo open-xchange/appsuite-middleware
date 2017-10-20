@@ -73,6 +73,7 @@ import com.openexchange.chronos.AlarmTrigger;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.RecurrenceId;
+import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.CalendarFolder;
 import com.openexchange.chronos.provider.extensions.PersonalAlarmAware;
@@ -168,8 +169,8 @@ public class InternalCalendarAccess implements GroupwareCalendarAccess, SyncAwar
     @Override
     public String updateFolder(String folderId, CalendarFolder folder, long clientTimestamp) throws OXException {
         ParameterizedFolder storageFolder = getStorageFolder(TREE_ID, QUALIFIED_ACCOUNT_ID, CONTENT_TYPE, folder);
-        getFolderService().updateFolder(storageFolder, new Date(clientTimestamp), session.getSession(), initDecorator());
         updateStoredFolderProperties(session.getContextId(), folderId, session.getUserId(), storageFolder.getProperties(), optConnection());
+        getFolderService().updateFolder(storageFolder, new Date(clientTimestamp), session.getSession(), initDecorator());
         return storageFolder.getID();
     }
 
@@ -221,6 +222,38 @@ public class InternalCalendarAccess implements GroupwareCalendarAccess, SyncAwar
     @Override
     public UpdatesResult getUpdatedEventsOfUser(long updatedSince) throws OXException {
         return getCalendarService().getUpdatedEventsOfUser(session, updatedSince);
+    }
+
+    @Override
+    public List<Event> resolveResource(String folderId, String resourceName) throws OXException {
+        CalendarService calendarService = getCalendarService();
+        String id = calendarService.getUtilities().resolveByUID(session, resourceName);
+        if (null == id) {
+            id = calendarService.getUtilities().resolveByFilename(session, resourceName);
+        }
+        if (null == id) {
+            return null;
+        }
+        try {
+            Event event = getCalendarService().getEvent(session, folderId, new EventID(folderId, id));
+            List<Event> events = new ArrayList<Event>();
+            events.add(event);
+            if (CalendarUtils.isSeriesMaster(event)) {
+                events.addAll(calendarService.getChangeExceptions(session, folderId, id));
+            }
+            return events;
+        } catch (OXException e) {
+            if ("CAL-4041".equals(e.getErrorCode())) {
+                /*
+                 * "Event not found in folder..." -> try to load detached occurrences
+                 */
+                List<Event> detachedOccurrences = calendarService.getChangeExceptions(session, folderId, id);
+                if (0 < detachedOccurrences.size()) {
+                    return detachedOccurrences;
+                }
+            }
+        }
+        return null;
     }
 
     @Override
