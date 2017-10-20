@@ -71,6 +71,9 @@ import com.openexchange.ajax.requesthandler.Dispatcher;
 import com.openexchange.ajax.requesthandler.Dispatchers;
 import com.openexchange.ajax.tools.JSONCoercion;
 import com.openexchange.ajax.writer.ResponseWriter;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.config.cascade.ConfigViews;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptions;
@@ -78,6 +81,7 @@ import com.openexchange.json.OXJSONWriter;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.osgi.ExceptionUtils;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.threadpool.AbstractTrackableTask;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.tools.session.ServerSession;
@@ -166,6 +170,55 @@ public abstract class DefaultAppSuiteLoginRampUp implements LoginRampUpService {
         KEYS = ImmutableList.copyOf(keys);
     }
 
+    /**
+     * Performs specified request.
+     *
+     * @param rampUpKey The ramp-up key for which the request is executed
+     * @param info Optional additional information
+     * @param requestData The request to perform
+     * @param session The session providing user data
+     * @param ox The dispatcher instance to use
+     * @param thresholdMillis The execution time threshold in milliseconds since when to track executions
+     * @return The result
+     * @throws OXException If performing the request fails
+     */
+    protected AJAXRequestResult performDispatcherRequest(RampUpKey rampUpKey, String info, AJAXRequestData requestData, ServerSession session, Dispatcher ox, long thresholdMillis) throws OXException {
+        if (thresholdMillis < 0) {
+            return ox.perform(requestData, null, session);
+        }
+
+        // Track execution time
+        long st = System.currentTimeMillis();
+        AJAXRequestResult requestResult = ox.perform(requestData, null, session);
+        long dur = System.currentTimeMillis() - st;
+        if (dur >= thresholdMillis) {
+            String infoToLog = null == info ? "" : (new StringBuilder(info.length() + 1).append(' ').append(info).toString());
+            LOG.debug("Ramp-up call \"{}\"{} took {}msec for session {}", rampUpKey.key, infoToLog, Long.valueOf(dur), session.getSessionID());
+        }
+        return requestResult;
+    }
+
+    /**
+     * Gets the execution time threshold in milliseconds since when to log ramp-up calls
+     *
+     * @param session The session providing user data
+     * @return The execution time threshold in milliseconds
+     */
+    protected long getExecutionTimeThreshold(ServerSession session) {
+        ConfigViewFactory factory = ServerServiceRegistry.getInstance().getService(ConfigViewFactory.class);
+        if (null == factory) {
+            return 0L;
+        }
+
+        try {
+            ConfigView view = factory.getView(session.getUserId(), session.getContextId());
+            return ConfigViews.getDefinedIntPropertyFrom("com.openexchange.ajax.login.rampup.debugThresholdMillis", 0, view);
+        } catch (Exception e) {
+            LOG.error("Failed to obtain execution time threshold from property \"com.openexchange.ajax.login.rampup.debugThresholdMillis\"", e);
+        }
+        return 0L;
+    }
+
     @Override
     public JSONObject getContribution(final ServerSession session, final AJAXRequestData loginRequest) throws OXException {
         int numberOfKeys = KEYS.size();
@@ -176,6 +229,7 @@ public abstract class DefaultAppSuiteLoginRampUp implements LoginRampUpService {
 
         final Dispatcher ox = services.getService(Dispatcher.class);
 
+        final long thresholdMillis = LOG.isDebugEnabled() ? getExecutionTimeThreshold(session) : -1;
         rampUps.put(RampUpKey.FOLDER_LIST.key, threads.submit(new AbstractTrackableTask<Object>() {
 
             @Override
@@ -185,7 +239,7 @@ public abstract class DefaultAppSuiteLoginRampUp implements LoginRampUpService {
                 try {
                     JSONObject folderlist = new JSONObject(2);
                     AJAXRequestData requestData = request().session(session).module("folders").action("list").params("parent", "1", "tree", "0", "altNames", "true", "timezone", "UTC", "columns", "1,2,3,4,5,6,20,23,300,301,302,304,305,306,307,308,309,310,311,312,313,314,315,316,317,318,3010,3020,3030").format("json").build(loginRequest);
-                    requestResult = ox.perform(requestData, null, session);
+                    requestResult = performDispatcherRequest(RampUpKey.FOLDER_LIST, null, requestData, session, ox, thresholdMillis);
                     folderlist.put("1", requestResult.getResultObject());
                     return folderlist;
                 } catch (OXException x) {
@@ -216,7 +270,7 @@ public abstract class DefaultAppSuiteLoginRampUp implements LoginRampUpService {
                     Exception exc = null;
                     try {
                         AJAXRequestData requestData = request().session(session).module("folders").action("get").params("id", "1", "tree", "1", "altNames", "true", "timezone", "UTC").format("json").build(loginRequest);
-                        requestResult = ox.perform(requestData, null, session);
+                        requestResult = performDispatcherRequest(RampUpKey.FOLDER, "\"private-folder\"", requestData, session, ox, thresholdMillis);
                         folder.put("1", requestResult.getResultObject());
                     } catch (OXException x) {
                         // Omit result on error. Let the UI deal with this
@@ -235,7 +289,7 @@ public abstract class DefaultAppSuiteLoginRampUp implements LoginRampUpService {
                     Exception exc = null;
                     try {
                         AJAXRequestData requestData = request().session(session).module("folders").action("get").params("id", "default0/INBOX", "tree", "1", "altNames", "true", "timezone", "UTC").format("json").build(loginRequest);
-                        requestResult = ox.perform(requestData, null, session);
+                        requestResult = performDispatcherRequest(RampUpKey.FOLDER, "\"INBOX\"", requestData, session, ox, thresholdMillis);
                         folder.put("default0/INBOX", requestResult.getResultObject());
                     } catch (OXException x) {
                         // Omit result on error. Let the UI deal with this
@@ -262,7 +316,7 @@ public abstract class DefaultAppSuiteLoginRampUp implements LoginRampUpService {
                 try {
                     JSONObject jslobs = new JSONObject();
                     AJAXRequestData requestData = request().session(session).module("jslob").action("list").data(new JSONArray(Arrays.asList("io.ox/core", "io.ox/core/updates", "io.ox/mail", "io.ox/contacts", "io.ox/calendar", "io.ox/caldav", "io.ox/files", "io.ox/tours", "io.ox/mail/emoji", "io.ox/tasks", "io.ox/office")), "json").format("json").build(loginRequest);
-                    requestResult = ox.perform(requestData, null, session);
+                    requestResult = performDispatcherRequest(RampUpKey.JSLOBS, null, requestData, session, ox, thresholdMillis);
                     JSONArray lobs = (JSONArray) requestResult.getResultObject();
                     for (int i = 0, size = lobs.length(); i < size; i++) {
                         JSONObject lob = lobs.getJSONObject(i);
@@ -292,7 +346,7 @@ public abstract class DefaultAppSuiteLoginRampUp implements LoginRampUpService {
                 Exception exc = null;
                 try {
                     AJAXRequestData requestData = request().session(session).module("apps/manifests").action("config").format("json").hostname(loginRequest.getHostname()).build(loginRequest);
-                    requestResult = ox.perform(requestData, null, session);
+                    requestResult = performDispatcherRequest(RampUpKey.SERVER_CONFIG, null, requestData, session, ox, thresholdMillis);
                     return requestResult.getResultObject();
                 } catch (OXException x) {
                     // Omit result on error. Let the UI deal with this
@@ -322,7 +376,7 @@ public abstract class DefaultAppSuiteLoginRampUp implements LoginRampUpService {
                 Exception exc = null;
                 try {
                     AJAXRequestData requestData = request().session(session).module("oauth/services").action("all").format("json").build(loginRequest);
-                    requestResult = ox.perform(requestData, null, session);
+                    requestResult = performDispatcherRequest(RampUpKey.OAUTH, "\"available-services\"", requestData, session, ox, thresholdMillis);
                     oauth.put("services", requestResult.getResultObject());
                 } catch (OXException x) {
                     // Omit result on error. Let the UI deal with this
@@ -340,7 +394,7 @@ public abstract class DefaultAppSuiteLoginRampUp implements LoginRampUpService {
                 exc = null;
                 try {
                     AJAXRequestData requestData = request().session(session).module("oauth/accounts").action("all").format("json").build(loginRequest);
-                    requestResult = ox.perform(requestData, null, session);
+                    requestResult = performDispatcherRequest(RampUpKey.OAUTH, "\"available-accounts\"", requestData, session, ox, thresholdMillis);
                     oauth.put("accounts", requestResult.getResultObject());
                 } catch (OXException x) {
                     // Omit result on error. Let the UI deal with this
@@ -358,7 +412,7 @@ public abstract class DefaultAppSuiteLoginRampUp implements LoginRampUpService {
                 exc = null;
                 try {
                     AJAXRequestData requestData = request().session(session).module("recovery/secret").action("check").format("json").build(loginRequest);
-                    requestResult = ox.perform(requestData, null, session);
+                    requestResult = performDispatcherRequest(RampUpKey.OAUTH, "\"password-check\"", requestData, session, ox, thresholdMillis);
                     oauth.put("secretCheck", requestResult.getResultObject());
                 } catch (OXException x) {
                     // Omit result on error. Let the UI deal with this
@@ -384,7 +438,7 @@ public abstract class DefaultAppSuiteLoginRampUp implements LoginRampUpService {
                 Exception exc = null;
                 try {
                     AJAXRequestData requestData = request().session(session).module("user").action("get").params("timezone", "utc", "id", Integer.toString(session.getUserId())).format("json").build(loginRequest);
-                    requestResult = ox.perform(requestData, null, session);
+                    requestResult = performDispatcherRequest(RampUpKey.USER, null, requestData, session, ox, thresholdMillis);
                     return requestResult.getResultObject();
                 } catch (OXException x) {
                     // Omit result on error. Let the UI deal with this
@@ -409,7 +463,7 @@ public abstract class DefaultAppSuiteLoginRampUp implements LoginRampUpService {
                 Exception exc = null;
                 try {
                     AJAXRequestData requestData = request().session(session).module("account").action("all").format("json").params("columns", "all").build(loginRequest);
-                    requestResult = ox.perform(requestData, null, session);
+                    requestResult = performDispatcherRequest(RampUpKey.ACCOUNTS, null, requestData, session, ox, thresholdMillis);
                     return requestResult.getResultObject();
                 } catch (OXException x) {
                     // Omit result on error. Let the UI deal with this
