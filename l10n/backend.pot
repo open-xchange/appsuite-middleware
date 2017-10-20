@@ -3779,6 +3779,23 @@ msgstr ""
 msgid "The common name for the certificate is invalid"
 msgstr ""
 
+#. The root authority for the certificate is untrusted
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.net.ssl/src/com/openexchange/net/ssl/exception/SSLExceptionMessages.java:85
+msgid "The root authority for the certificate is untrusted"
+msgstr ""
+
+#. The certificate is using a weak algorithm
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.net.ssl/src/com/openexchange/net/ssl/exception/SSLExceptionMessages.java:88
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.net.ssl/src/com/openexchange/net/ssl/internal/FailureReasonMessage.java:81
+msgid "The certificate is using a weak algorithm"
+msgstr ""
+
+#. The certificate was revoked
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.net.ssl/src/com/openexchange/net/ssl/exception/SSLExceptionMessages.java:91
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.net.ssl/src/com/openexchange/net/ssl/internal/FailureReasonMessage.java:84
+msgid "The certificate was revoked"
+msgstr ""
+
 #. The certificate was signed by an untrusted issuer
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.net.ssl/src/com/openexchange/net/ssl/internal/FailureReasonMessage.java:66
 msgid "The certificate was signed by an untrusted issuer"
