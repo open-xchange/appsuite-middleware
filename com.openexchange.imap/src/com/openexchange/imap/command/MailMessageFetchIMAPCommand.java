@@ -920,11 +920,13 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
             int length = addresses.length;
             InternetAddress[] ret = new InternetAddress[length];
             for (int i = length; i-- > 0;) {
+                String sAddress = addresses[i].toString();
                 try {
-                    ret[i] = new QuotedInternetAddress(addresses[i].toString(), false);
+                    ret[i] = new QuotedInternetAddress(sAddress, false);
                 } catch (AddressException e) {
                     // Use as-is
-                    ret[i] = new PlainTextAddress(e.getRef());
+                    String parsed = e.getRef();
+                    ret[i] = new PlainTextAddress(null == parsed ? sAddress : parsed);
                 }
             }
             return ret;
