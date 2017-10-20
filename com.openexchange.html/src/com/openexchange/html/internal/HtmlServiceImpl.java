@@ -555,7 +555,7 @@ public final class HtmlServiceImpl implements HtmlService {
             String html = htmlContent;
 
             boolean useJericho = /*Jericho parser is not yet prepared for non-sanitizing*/ options.isSanitize() && HtmlServices.useJericho();
-            if (useJericho) {
+            if (true || useJericho) {
                 // Normalize the string
                 {
                     Matcher matcher = PATTERN_URL.matcher(html);
