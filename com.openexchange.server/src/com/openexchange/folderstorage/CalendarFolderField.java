@@ -49,6 +49,7 @@
 
 package com.openexchange.folderstorage;
 
+import java.util.Map;
 import com.openexchange.chronos.Transp;
 
 /**
@@ -82,5 +83,23 @@ public enum CalendarFolderField {
      * @see <a href="https://tools.ietf.org/html/rfc6638#section-9.1">RFC 6638, section 9.1</a>
      */
     public static final FolderField SCHEDULE_TRANSP = new FolderField(3203, "cal.scheduleTransp", Transp.OPAQUE);
+
+    /**
+     * Optionally gets a folder field value from a folder properties collection.
+     *
+     * @param properties The folder properties
+     * @param field The field to get the value for
+     * @param clazz The value's target type
+     * @return The parameter value, or <code>null</code> if not set
+     */
+    public static <T> T optValue(Map<FolderField, FolderProperty> properties, FolderField field, Class<T> clazz) {
+        if (null != properties && 0 < properties.size()) {
+            FolderProperty property = properties.get(field);
+            if (null != property && null != property.getValue() && clazz.isInstance(property.getValue())) {
+                return clazz.cast(property.getValue());
+            }
+        }
+        return null;
+    }
 
 }
