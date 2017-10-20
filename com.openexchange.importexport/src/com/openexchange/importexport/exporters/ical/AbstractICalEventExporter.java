@@ -50,58 +50,76 @@
 package com.openexchange.importexport.exporters.ical;
 
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.ajax.container.ThresholdFileHolder;
+import com.openexchange.chronos.Event;
+import com.openexchange.chronos.ical.CalendarExport;
+import com.openexchange.chronos.ical.ICalParameters;
+import com.openexchange.chronos.ical.ICalService;
+import com.openexchange.chronos.service.EventID;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.Strings;
-import com.openexchange.tools.session.ServerSession;
+import com.openexchange.importexport.osgi.ImportExportServices;
+import com.openexchange.java.Streams;
 
 /**
- * {@link AbstractICalBatchExporter}
+ * {@link AbstractICalEventExporter}
  *
  * @author <a href="mailto:Jan-Oliver.Huhn@open-xchange.com">Jan-Oliver Huhn</a>
  * @since v7.10.0
  */
-public abstract class AbstractICalBatchExporter extends AbstractICalExporter {
+public abstract class AbstractICalEventExporter extends AbstractICalExporter {
 
-    public AbstractICalBatchExporter(String folderId) {
-        super(folderId);
+    public AbstractICalEventExporter(String folderId, Map<String, List<String>> batchIds) {
+        super(folderId, batchIds);
     }
-
-    public AbstractICalBatchExporter(Map<String, List<String>> batchIds) {
-        this.batchIds = batchIds;
-    }
-
-    private Map<String, List<String>> batchIds;
 
     /**
-     * Exports the requested batch of data
+     * Converts the batchId list to a list of {@link EventID}
      *
-     * @param session The user session
-     * @param out The output stream
-     * @return ThresholdFileHolder The file holder
-     * @throws OXException if export fails
+     * @return List The list of {@link EventID}
      */
-    abstract protected ThresholdFileHolder exportBatchData(ServerSession session, OutputStream out) throws OXException ;
-
-    @Override
-    protected ThresholdFileHolder exportData(ServerSession session, OutputStream out) throws OXException {
-        if (!isBatchExport()) {
-            return exportData(session, out);
+    protected List<EventID> convertBatchDataToEventIds() {
+        List<EventID> events = new ArrayList<>();
+        for (Map.Entry<String, List<String>> batchEntry : getBatchIds().entrySet()) {
+            for (String objectId : batchEntry.getValue()) {
+                events.add(new EventID(batchEntry.getKey(), objectId));
+            }
         }
-        return exportBatchData(session, out);
+        return events;
     }
 
-    private boolean isBatchExport() {
-        if (Strings.isEmpty(getFolderId())) {
-            return false;
+    /**
+     * Exports a list of {@link Event}
+     *
+     * @param eventList The event list to export
+     * @param optOut The output stream
+     * @return ThresholdFileHolder The file holder
+     * @throws OXException if the export fails
+     */
+    protected ThresholdFileHolder exportChronosEvents(List<Event> eventList, OutputStream optOut) throws OXException {
+        ICalService iCalService = ImportExportServices.getICalService();
+        ICalParameters iCalParameters = iCalService.initParameters();
+        CalendarExport calendarExport = iCalService.exportICal(iCalParameters);
+        for (Event event : eventList) {
+            calendarExport.add(event);
         }
-        return true;
-    }
-
-    public Map<String, List<String>> getBatchIds() {
-        return batchIds;
+        if (null != optOut) {
+            calendarExport.writeVCalendar(optOut);
+            return null;
+        }
+        ThresholdFileHolder sink = new ThresholdFileHolder();
+        boolean error = true;
+        try {
+            calendarExport.writeVCalendar(sink.asOutputStream());
+            error = false;
+            return sink;
+        } finally {
+            if (error) {
+                Streams.close(sink);
+            }
+        }
     }
 
 }

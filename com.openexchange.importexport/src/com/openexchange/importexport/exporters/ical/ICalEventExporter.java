@@ -50,13 +50,11 @@
 package com.openexchange.importexport.exporters.ical;
 
 import java.io.OutputStream;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.chronos.service.CalendarSession;
-import com.openexchange.chronos.service.EventID;
 import com.openexchange.exception.OXException;
 import com.openexchange.importexport.osgi.ImportExportServices;
 import com.openexchange.tools.session.ServerSession;
@@ -67,18 +65,14 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:Jan-Oliver.Huhn@open-xchange.com">Jan-Oliver Huhn</a>
  * @since v7.10.0
  */
-public class ICalEventExporter extends AbstractICalBatchExporter {
+public class ICalEventExporter extends AbstractICalEventExporter {
 
-    public ICalEventExporter(String folderId) {
-        super(folderId);
-    }
-
-    public ICalEventExporter(Map<String, List<String>> batchIds) {
-        super(batchIds);
+    public ICalEventExporter(String folderId, Map<String, List<String>> batchIds) {
+        super(folderId, batchIds);
     }
 
     @Override
-    protected ThresholdFileHolder exportData(ServerSession session, OutputStream out) throws OXException {
+    protected ThresholdFileHolder exportFolderData(ServerSession session, OutputStream out) throws OXException {
         CalendarService calendarService = ImportExportServices.getCalendarService();
         CalendarSession calendarSession = calendarService.init(session);
         return exportChronosEvents(calendarService.getEventsInFolder(calendarSession, getFolderId()), out);
@@ -88,18 +82,7 @@ public class ICalEventExporter extends AbstractICalBatchExporter {
     protected ThresholdFileHolder exportBatchData(ServerSession session, OutputStream out) throws OXException {
         CalendarService calendarService = ImportExportServices.getCalendarService();
         CalendarSession calendarSession = calendarService.init(session);
-        exportChronosEvents(calendarService.getEvents(calendarSession, convertBatchDataToEventIds()), out);
-        return null;
-    }
-
-    private List<EventID> convertBatchDataToEventIds() {
-        List<EventID> events = new ArrayList<>();
-        for (Map.Entry<String, List<String>> batchEntry : getBatchIds().entrySet()) {
-            for (String objectId : batchEntry.getValue()) {
-                events.add(new EventID(batchEntry.getKey(), objectId));
-            }
-        }
-        return events;
+        return exportChronosEvents(calendarService.getEvents(calendarSession, convertBatchDataToEventIds()), out);
     }
 
 }

@@ -49,17 +49,16 @@
 
 package com.openexchange.importexport.exporters;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.exception.OXException;
-import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.database.contentType.TaskContentType;
-import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.importexport.exceptions.ImportExportExceptionCodes;
 import com.openexchange.importexport.exporters.ical.ICalCompositeEventExporter;
 import com.openexchange.importexport.exporters.ical.ICalEventExporter;
@@ -68,7 +67,6 @@ import com.openexchange.importexport.exporters.ical.ICalTaskExporter;
 import com.openexchange.importexport.formats.Format;
 import com.openexchange.importexport.helpers.SizedInputStream;
 import com.openexchange.importexport.osgi.ImportExportServices;
-import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
 
 
@@ -85,9 +83,7 @@ public class ICalExporter extends AbstractExporter {
         if(!format.equals(Format.ICAL)){
             return false;
         }
-        FolderService service = ImportExportServices.getFolderService();
-        UserizedFolder userizedFolder = service.getFolder(FolderStorage.REAL_TREE_ID, folder, session, null);
-
+        UserizedFolder userizedFolder = getUserizedFolder(session, folder);
         if (TaskContentType.getInstance().equals(userizedFolder.getContentType())) {
             if (!session.getUserPermissionBits().hasTask()) {
                 return false;
@@ -129,24 +125,8 @@ public class ICalExporter extends AbstractExporter {
         if (!canExport(session, format, folder, optionalParams)) {
             throw ImportExportExceptionCodes.CANNOT_EXPORT.create(folder, format);
         }
-        FolderService service = ImportExportServices.getFolderService();
-        UserizedFolder userizedFolder = service.getFolder(FolderStorage.REAL_TREE_ID, folder, session, null);
         AJAXRequestData requestData = (AJAXRequestData) (optionalParams == null ? null : optionalParams.get("__requestData"));
-
-        ICalExport exporter;
-        if (TaskContentType.getInstance().equals(userizedFolder.getContentType())) {
-            //export task
-            exporter = new ICalTaskExporter(folder, fieldsToBeExported);
-        } else if (null == userizedFolder.getAccountID()) {
-            //export legacy call
-            exporter = new ICalEventExporter(folder);
-        } else if (null != userizedFolder.getAccountID()) {
-            //export new stack
-            exporter = new ICalCompositeEventExporter(folder);
-        } else {
-            throw ImportExportExceptionCodes.CANNOT_EXPORT.create(folder, format);
-        }
-        return exporter.exportData(session, requestData, isSaveToDisk(optionalParams), appendFileNameParameter(requestData, getFolderExportFileName(session, folder, Format.ICAL.getExtension())));
+        return getExporter(getUserizedFolder(session, folder), Collections.emptyMap(), fieldsToBeExported).exportData(session, requestData, isSaveToDisk(optionalParams), appendFileNameParameter(requestData, getFolderExportFileName(session, folder, Format.ICAL.getExtension())));
     }
 
     @Override
@@ -156,39 +136,31 @@ public class ICalExporter extends AbstractExporter {
                 throw ImportExportExceptionCodes.CANNOT_EXPORT.create(batchEntry.getKey(), format);
             }
         }
-        int folderModule = checkBatchModule(session, batchIds, format);
         AJAXRequestData requestData = (AJAXRequestData) (optionalParams == null ? null : optionalParams.get("__requestData"));
+        return getBatchExporter(session, batchIds, fieldsToBeExported).exportData(session, requestData, isSaveToDisk(optionalParams), appendFileNameParameter(requestData, getBatchExportFileName(session, batchIds, Format.ICAL.getExtension())));
+    }
+
+    private ICalExport getBatchExporter(ServerSession session, Map<String, List<String>> batchIds, int[] fieldsToBeExported) throws OXException {
+        return getExporter(getUserizedFolder(session, batchIds.keySet().stream().findFirst().get()), batchIds, fieldsToBeExported);
+    }
+
+    private ICalExport getExporter(UserizedFolder userizedFolder, Map<String, List<String>> batchIds, int[] fieldsToBeExported) throws OXException {
         ICalExport exporter;
-        if (folderModule == FolderObject.CALENDAR) {
-            exporter = new ICalEventExporter(batchIds);
-        } else if (folderModule == FolderObject.TASK) {
-            exporter = new ICalTaskExporter(batchIds, fieldsToBeExported);
+        String folderId = null == userizedFolder ? null : userizedFolder.getID();
+        if (TaskContentType.getInstance().equals(userizedFolder.getContentType())) {
+            exporter = new ICalTaskExporter(folderId, batchIds, fieldsToBeExported);
+        } else if (null == userizedFolder.getAccountID()) {
+            exporter = new ICalEventExporter(folderId, batchIds);
+        } else if (null != userizedFolder.getAccountID()) {
+            exporter = new ICalCompositeEventExporter(folderId, batchIds);
         } else {
             throw ImportExportExceptionCodes.ICAL_CONVERSION_FAILED.create();
         }
-        return exporter.exportData(session, requestData, isSaveToDisk(optionalParams), appendFileNameParameter(requestData, getBatchExportFileName(session, batchIds, Format.ICAL.getExtension())));
+        return exporter;
     }
 
-    private int checkBatchModule(ServerSession session, Map<String, List<String>> batchIds, Format format) throws OXException {
-        String firstId = batchIds.keySet().stream().findFirst().get();
-        FolderObject folder = getFolder(session, firstId);
-        for (String currentFolderId : batchIds.keySet()) {
-            FolderObject currentFolder = getFolder(session, currentFolderId);
-            if (folder.getModule() != currentFolder.getModule()) {
-                throw ImportExportExceptionCodes.CANNOT_EXPORT.create(currentFolderId, format);
-            }
-        }
-        return folder.getModule();
-    }
-
-    private static FolderObject getFolder(ServerSession session, String folderID) throws OXException {
-        try {
-            return new OXFolderAccess(session.getContext()).getFolderObject(Integer.parseInt(folderID));
-        } catch (OXException e) {
-            throw ImportExportExceptionCodes.LOADING_FOLDER_FAILED.create(e, folderID);
-        } catch (NumberFormatException e) {
-            throw ImportExportExceptionCodes.LOADING_FOLDER_FAILED.create(e, folderID);
-        }
+    private static UserizedFolder getUserizedFolder(ServerSession session, String folder) throws OXException {
+        return ImportExportServices.getFolderService().getFolder(FolderStorage.REAL_TREE_ID, folder, session, null);
     }
 
 }

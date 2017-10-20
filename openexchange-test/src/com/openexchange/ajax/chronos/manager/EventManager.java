@@ -530,6 +530,18 @@ public class EventManager extends AbstractManager {
     }
 
     /**
+     * Keeps track of the specified list of {@link EventId} for the specified user
+     *
+     * @param eventIds A list of {@link EventId}
+     */
+    public void rememberEventIds(List<EventId> eventIdList) {
+        if (eventIds == null) {
+            eventIds = new ArrayList<>();
+        }
+        eventIds.addAll(eventIdList);
+    }
+
+    /**
      * Removes the specified {@link EventId} for the specified user from the cache
      *
      * @param userApi The {@link UserApi}

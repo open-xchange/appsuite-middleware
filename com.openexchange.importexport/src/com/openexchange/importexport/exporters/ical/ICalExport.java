@@ -49,6 +49,8 @@
 
 package com.openexchange.importexport.exporters.ical;
 
+import java.io.OutputStream;
+import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.exception.OXException;
 import com.openexchange.importexport.helpers.SizedInputStream;
@@ -73,5 +75,15 @@ public interface ICalExport {
      * @throws OXException if export fails
      */
     SizedInputStream exportData(ServerSession session, AJAXRequestData requestData, boolean isSaveToDisk, String filename) throws OXException;
+
+     /**
+     * Checks if the export is folder or batch based
+     *
+     * @param session The session object
+     * @param out The output stream to write to
+     * @return ThresholdFileHolder The file holder to export
+     * @throws OXException if folder export fails
+     */
+    ThresholdFileHolder getExportDataSource(ServerSession session, OutputStream out) throws OXException;
 
 }

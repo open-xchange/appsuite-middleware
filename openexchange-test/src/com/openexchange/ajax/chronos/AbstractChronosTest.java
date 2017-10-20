@@ -60,6 +60,7 @@ import java.util.Map;
 import java.util.TimeZone;
 import com.openexchange.ajax.chronos.manager.CalendarAccountManager;
 import com.openexchange.ajax.chronos.manager.EventManager;
+import com.openexchange.ajax.chronos.manager.ICalImportExportManager;
 import com.openexchange.ajax.framework.AbstractAPIClientSession;
 import com.openexchange.configuration.asset.AssetManager;
 import com.openexchange.exception.OXException;
@@ -76,7 +77,9 @@ import com.openexchange.testing.httpclient.models.FolderPermission;
 import com.openexchange.testing.httpclient.models.FolderUpdateResponse;
 import com.openexchange.testing.httpclient.models.FoldersVisibilityResponse;
 import com.openexchange.testing.httpclient.modules.ChronosApi;
+import com.openexchange.testing.httpclient.modules.ExportApi;
 import com.openexchange.testing.httpclient.modules.FoldersApi;
+import com.openexchange.testing.httpclient.modules.ImportApi;
 
 /**
  * {@link AbstractChronosTest}
@@ -96,6 +99,9 @@ public class AbstractChronosTest extends AbstractAPIClientSession {
     protected EventManager eventManager;
     protected AssetManager assetManager;
     protected CalendarAccountManager calendarAccountManager;
+    protected ICalImportExportManager importExportManager;
+    protected ImportApi importApi;
+    protected ExportApi exportApi;
     protected String folderId;
 
     /**
@@ -118,6 +124,9 @@ public class AbstractChronosTest extends AbstractAPIClientSession {
         assetManager = new AssetManager();
         eventManager = new EventManager(defaultUserApi, folderId);
         calendarAccountManager = new CalendarAccountManager(defaultUserApi);
+        importApi = new ImportApi(client);
+        exportApi = new ExportApi(client);
+        importExportManager = new ICalImportExportManager(exportApi, importApi);
     }
 
     @Override
@@ -133,16 +142,16 @@ public class AbstractChronosTest extends AbstractAPIClientSession {
         } catch (Exception e) {
             exception = e;
         }
+        // Clean-up event manager
+        eventManager.cleanUp();
+
+        calendarAccountManager.cleanUp();
+
         if (folderToDelete != null) {
             for (UserApi api : folderToDelete.keySet()) {
                 api.getFoldersApi().deleteFolders(api.getSession(), folderToDelete.get(api), "0", System.currentTimeMillis(), "event", true, true, false);
             }
         }
-
-        // Clean-up event manager
-        eventManager.cleanUp();
-
-        calendarAccountManager.cleanUp();
 
         super.tearDown();
 
