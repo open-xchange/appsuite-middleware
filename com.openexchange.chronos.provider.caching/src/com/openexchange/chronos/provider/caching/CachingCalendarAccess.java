@@ -71,7 +71,9 @@ import com.openexchange.chronos.provider.caching.internal.handler.CachingExecuto
 import com.openexchange.chronos.provider.caching.internal.handler.FolderProcessingType;
 import com.openexchange.chronos.provider.caching.internal.handler.FolderUpdateState;
 import com.openexchange.chronos.provider.caching.internal.handler.utils.HandlerHelper;
-import com.openexchange.chronos.provider.caching.internal.handler.utils.ResultCollector;
+import com.openexchange.chronos.provider.caching.internal.response.DedicatedEventsResponseGenerator;
+import com.openexchange.chronos.provider.caching.internal.response.FolderEventsResponseGenerator;
+import com.openexchange.chronos.provider.caching.internal.response.SingleEventResponseGenerator;
 import com.openexchange.chronos.provider.extensions.WarningsAware;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.EventID;
@@ -169,10 +171,10 @@ public abstract class CachingCalendarAccess implements WarningsAware {
     public final Event getEvent(String folderId, String eventId, RecurrenceId recurrenceId) throws OXException {
         Set<FolderUpdateState> executionList = generateExecutionList(folderId);
 
-        ResultCollector resultCollector = new CachingExecutor(this, executionList).cache(this.warnings);
+        new CachingExecutor(this, executionList).cache(this.warnings);
         saveConfig();
 
-        return resultCollector.get(folderId, eventId, recurrenceId);
+        return new SingleEventResponseGenerator(this, folderId, eventId, recurrenceId).generate();
     }
 
     @Override
@@ -180,20 +182,20 @@ public abstract class CachingCalendarAccess implements WarningsAware {
         Map<String, List<EventID>> sortEventIDsPerFolderId = HandlerHelper.sortEventIDsPerFolderId(eventIDs);
 
         Set<FolderUpdateState> executionList = generateExecutionList(sortEventIDsPerFolderId.keySet().toArray(new String[sortEventIDsPerFolderId.size()]));
-        ResultCollector resultCollector = new CachingExecutor(this, executionList).cache(this.warnings);
+        new CachingExecutor(this, executionList).cache(this.warnings);
         saveConfig();
 
-        return resultCollector.get(eventIDs);
+        return new DedicatedEventsResponseGenerator(this, eventIDs).generate();
     }
 
     @Override
     public final List<Event> getEventsInFolder(String folderId) throws OXException {
         Set<FolderUpdateState> executionList = generateExecutionList(folderId);
 
-        ResultCollector resultCollector = new CachingExecutor(this, executionList).cache(this.warnings);
+        new CachingExecutor(this, executionList).cache(this.warnings);
         saveConfig();
 
-        return resultCollector.get(folderId);
+        return new FolderEventsResponseGenerator(this, folderId).generate();
     }
 
     private Set<FolderUpdateState> generateExecutionList(String... folderIds) throws OXException {

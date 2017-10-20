@@ -59,7 +59,6 @@ import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.caching.CachingCalendarAccess;
 import com.openexchange.chronos.provider.caching.ExternalCalendarResult;
 import com.openexchange.chronos.provider.caching.internal.handler.utils.EmptyUidUpdates;
-import com.openexchange.chronos.provider.caching.internal.handler.utils.ResultCollector;
 import com.openexchange.chronos.service.EventUpdates;
 import com.openexchange.exception.OXException;
 
@@ -84,12 +83,10 @@ public class CachingExecutor {
         this.executionList = executionList;
     }
 
-    public ResultCollector cache(List<OXException> warnings) {
-        ResultCollector resultCollector = new ResultCollector(this.cachingCalendarAccess);
-
+    public void cache(List<OXException> warnings) {
         if (executionList == null) {
             LOG.warn("Nothing to cache as the provided execution list is null.");
-            return resultCollector;
+            return;
         }
         for (FolderUpdateState folderUpdateState : executionList) {
             CachingHandler cachingHandler = CachingHandlerFactory.getInstance().get(folderUpdateState.getType(), cachingCalendarAccess);
@@ -123,7 +120,6 @@ public class CachingExecutor {
                 this.cachingCalendarAccess.handleExceptions(calendarFolderId, e);
             }
         }
-        return resultCollector;
     }
 
     private void handleInternally(CachingHandler cachingHandler, String calendarFolderId, OXException e) {
