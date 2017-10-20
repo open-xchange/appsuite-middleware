@@ -49,9 +49,7 @@
 
 package com.openexchange.chronos.provider.caching.internal.handler;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import com.openexchange.chronos.Event;
@@ -103,13 +101,9 @@ public class CachingExecutor {
                 if (!externalCalendarResult.isUpToDate()) {
                     List<Event> existingEvents = cachingHandler.getExistingEvents(calendarFolderId);
                     EventUpdates diff = null;
-                    Map<String, Event> cachedEvents = new HashMap<>(existingEvents.size());
-                    for(Event eve: existingEvents){
-                        cachedEvents.put(eve.getUid(), eve);
-                    }
 
                     if (externalCalendarResult instanceof DiffAwareExternalCalendarResult) {
-                        diff = ((DiffAwareExternalCalendarResult) externalCalendarResult).calculateDiff(cachedEvents);
+                        diff = ((DiffAwareExternalCalendarResult) externalCalendarResult).calculateDiff(existingEvents);
                     } else {
 
                         List<Event> externalEvents = externalCalendarResult.getEvents();

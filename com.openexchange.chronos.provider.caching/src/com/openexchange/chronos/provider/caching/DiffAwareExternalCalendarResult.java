@@ -49,7 +49,7 @@
 
 package com.openexchange.chronos.provider.caching;
 
-import java.util.Map;
+import java.util.List;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.service.EventUpdates;
 import com.openexchange.exception.OXException;
@@ -69,6 +69,6 @@ public interface DiffAwareExternalCalendarResult {
      * @return The difference
      * @throws OXException
      */
-    public EventUpdates calculateDiff(Map<String, Event> existingEvents) throws OXException;
+    public EventUpdates calculateDiff(List<Event> existingEvents) throws OXException;
 
 }

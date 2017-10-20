@@ -51,11 +51,15 @@ package com.openexchange.chronos.provider.google.access;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.EventStatus;
+import com.openexchange.chronos.RecurrenceId;
+import com.openexchange.chronos.common.mapping.EventMapper;
 import com.openexchange.chronos.common.mapping.EventUpdateImpl;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.caching.DiffAwareExternalCalendarResult;
@@ -100,7 +104,7 @@ public class GoogleCalendarResult extends ExternalCalendarResult implements Diff
     }
 
     @Override
-    public EventUpdates calculateDiff(Map<String, Event> existingEvents) throws OXException {
+    public EventUpdates calculateDiff(List<Event> existingEvents) throws OXException {
 
         List<Event> updates = currentResult.getEvents();
 
@@ -109,23 +113,24 @@ public class GoogleCalendarResult extends ExternalCalendarResult implements Diff
         final List<EventUpdate> updated = new ArrayList<>();
 
         for(Event update: updates){
-
+            Event foundEvent = getEvent(existingEvents, update);
             if(update.getStatus().equals(EventStatus.CANCELLED)){
-                if(existingEvents.containsKey(update.getUid())){
+                if(foundEvent != null){
                     // add to removed
-                    removed.add(existingEvents.get(update.getUid()));
+                    removed.add(foundEvent);
+                    continue;
                 }
-                continue;
+                if(isDeleteException(update)){
+                    // add to updated
+                    findAndUpdateMaster(existingEvents, update.getSeriesId(), update.getRecurrenceId(), added, updated);
+                    continue;
+                }
             }
 
-            if(existingEvents.containsKey(update.getUid())){
+            if(foundEvent != null){
                 // add to updated
-                Event event = existingEvents.get(update.getUid());
-                update.setId(event.getId());
-                if(event.getSeriesId() != null){
-                    update.setSeriesId(event.getSeriesId());
-                }
-                updated.add(new EventUpdateImpl(event, update, true));
+                update.setId(foundEvent.getId());
+                updated.add(new EventUpdateImpl(foundEvent, update, true));
                 continue;
             }
 
@@ -155,6 +160,79 @@ public class GoogleCalendarResult extends ExternalCalendarResult implements Diff
                 return updated;
             }
         };
+    }
+
+    /**
+     * @param existingEvents
+     * @param recurrenceId
+     * @throws OXException
+     */
+    private void findAndUpdateMaster(List<Event> existingEvents, String seriesId, RecurrenceId recurrenceId, List<Event> added, List<EventUpdate> updated) throws OXException {
+        // Find the master in added, updated or deleted
+        for(Event created: added){
+            if(isMaster(created, seriesId)){
+                SortedSet<RecurrenceId> deleteExceptionDates = created.getDeleteExceptionDates();
+                if(deleteExceptionDates == null){
+                    deleteExceptionDates = new TreeSet<>();
+                    created.setDeleteExceptionDates(deleteExceptionDates);
+                }
+                deleteExceptionDates.add(recurrenceId);
+                return;
+            }
+        }
+
+        for(EventUpdate eventUpdate: updated){
+            if(isMaster(eventUpdate.getOriginal(), seriesId)){
+                SortedSet<RecurrenceId> deleteExceptionDates = eventUpdate.getUpdate().getDeleteExceptionDates();
+                if(deleteExceptionDates == null){
+                    deleteExceptionDates = new TreeSet<>();
+                    eventUpdate.getUpdate().setDeleteExceptionDates(deleteExceptionDates);
+                }
+                deleteExceptionDates.add(recurrenceId);
+                return;
+            }
+        }
+
+        for(Event existing: existingEvents){
+            if(isMaster(existing, seriesId)){
+                Event newUpdate = new Event();
+                EventMapper.getInstance().copyIfNotSet(existing, newUpdate, EventField.values());
+                SortedSet<RecurrenceId> deleteExceptionDates = newUpdate.getDeleteExceptionDates();
+                if(deleteExceptionDates == null){
+                    deleteExceptionDates = new TreeSet<>();
+                    newUpdate.setDeleteExceptionDates(deleteExceptionDates);
+                }
+                deleteExceptionDates.add(recurrenceId);
+                updated.add(new EventUpdateImpl(existing, newUpdate, true));
+                return;
+            }
+        }
+
+
+
+    }
+
+    private boolean isMaster(Event event, String seriesId){
+        if(event.getExtendedProperties() == null || event.getExtendedProperties().get("GoogleId") == null){
+            return false;
+        }
+        String googleId = event.getExtendedProperties().get("GoogleId").getValue();
+        return googleId.equals(seriesId) && event.containsRecurrenceId() == false;
+    }
+
+    private Event getEvent(List<Event> existingEvents, Event updated) {
+        for (Event existing : existingEvents) {
+            if (existing.getUid().equals(updated.getUid())) {
+                if (existing.containsRecurrenceId() == updated.containsRecurrenceId() && (existing.containsRecurrenceId() == false || existing.getRecurrenceId().equals(updated.getRecurrenceId()))) {
+                    return existing;
+                }
+            }
+        }
+        return null;
+    }
+
+    private boolean isDeleteException(Event updated){
+        return updated.getUid() == null && updated.getRecurrenceId() != null && updated.getStatus().equals(EventStatus.CANCELLED);
     }
 
     @Override

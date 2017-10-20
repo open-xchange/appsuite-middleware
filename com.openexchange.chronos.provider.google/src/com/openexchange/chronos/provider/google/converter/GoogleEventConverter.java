@@ -132,7 +132,12 @@ public class GoogleEventConverter {
 
             @Override
             public void serialize(Event to, com.google.api.services.calendar.model.Event from) throws OXException {
-                // nothing to do here
+                ExtendedProperties extendedProperties = to.getExtendedProperties();
+                if(extendedProperties == null){
+                    extendedProperties = new ExtendedProperties();
+                    to.setExtendedProperties(extendedProperties);
+                }
+                extendedProperties.add(new ExtendedProperty("GoogleId", from.getId()));
             }
 
         });
@@ -472,6 +477,10 @@ public class GoogleEventConverter {
 
             @Override
             public void serialize(Event to, com.google.api.services.calendar.model.Event from) throws OXException {
+                if(from.getRecurringEventId() != null){
+                    // Add google id to identify delete exceptions
+                    to.setSeriesId(from.getRecurringEventId());
+                }
                 // Nothing to do here
             }
         });

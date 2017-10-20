@@ -71,6 +71,7 @@ import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.CalendarFolder;
 import com.openexchange.chronos.provider.DefaultCalendarFolder;
+import com.openexchange.chronos.provider.DefaultCalendarPermission;
 import com.openexchange.chronos.provider.account.AdministrativeCalendarAccountService;
 import com.openexchange.chronos.provider.caching.CachingCalendarAccess;
 import com.openexchange.chronos.provider.caching.ExternalCalendarResult;
@@ -197,7 +198,9 @@ public class GoogleCalendarAccess extends CachingCalendarAccess{
     }
 
     private void addEntry(CalendarListEntry entry, boolean enabled, JSONObject newConfig) throws JSONException{
-        folders.put(String.valueOf(entry.getId()), new DefaultCalendarFolder(entry.getId(), entry.getSummary()));
+        if(enabled){
+            folders.put(String.valueOf(entry.getId()), prepareFolder(entry.getId(), entry.getSummary()));
+        }
         JSONObject config = new JSONObject();
         config.put(GoogleCalendarConfigField.Folders.ENABLED, enabled);
         if(entry.getBackgroundColor() != null){
@@ -290,8 +293,6 @@ public class GoogleCalendarAccess extends CachingCalendarAccess{
                 } else {
                     list.setPageToken(token);
                 }
-            } else {
-                list.setShowDeleted(true);
             }
 
             Events events = list.execute();
@@ -323,7 +324,7 @@ public class GoogleCalendarAccess extends CachingCalendarAccess{
     }
 
     @Override
-    public ExternalCalendarResult getEvents(String folderId) throws OXException {
+    public ExternalCalendarResult getAllEvents(String folderId) throws OXException {
         return new GoogleCalendarResult(this, folderId);
     }
 
@@ -331,6 +332,16 @@ public class GoogleCalendarAccess extends CachingCalendarAccess{
     public void handleExceptions(String calendarFolderId, OXException e) {
         // TODO handle calendar missing
         LOG.error(e.getMessage());
+    }
+
+    private CalendarFolder prepareFolder(String folderId, String summary) {
+        DefaultCalendarFolder folder = new DefaultCalendarFolder();
+        folder.setId(folderId);
+        folder.setPermissions(Collections.singletonList(DefaultCalendarPermission.readOnlyPermissionsFor(account.getUserId())));
+        folder.setLastModified(account.getLastModified());
+        folder.setName(summary);
+        folder.setUsedForSync(true);
+        return folder;
     }
 
 }
