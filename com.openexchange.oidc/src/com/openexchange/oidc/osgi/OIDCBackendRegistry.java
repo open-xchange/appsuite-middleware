@@ -127,15 +127,15 @@ public class OIDCBackendRegistry extends ServiceTracker<OIDCBackend, OIDCBackend
                     throw OIDCExceptionCode.MISSING_BACKEND_CONFIGURATION.create(path.isEmpty() ? "No path available" : path);
                 }
                 if (!Strings.isEmpty(path)) {
-                    validatePath(path);
+                    OIDCTools.validatePath(path);
                 }
                 oidcBackend.setLoginConfiguration(this.loginConfiguration);
                 OIDCWebSSOProvider ssoProvider = new OIDCWebSSOProviderImpl(oidcBackend, new CoreStateManagement(this.services.getService(HazelcastInstance.class)), this.services, this.loginConfiguration);
                 OIDCExceptionHandler exceptionHandler = oidcBackend.getExceptionHandler();
-
-                this.registerServlet(servlets, httpService, this.getPrefix(oidcBackend), new InitService(ssoProvider, exceptionHandler), "init");
-                this.registerServlet(servlets, httpService, this.getPrefix(oidcBackend), new AuthenticationService(ssoProvider, exceptionHandler), "auth");
-                this.registerServlet(servlets, httpService, this.getPrefix(oidcBackend), new LogoutService(ssoProvider, exceptionHandler), "logout");
+                
+                this.registerServlet(servlets, httpService, OIDCTools.getPrefix(oidcBackend), new InitService(ssoProvider, exceptionHandler), "init");
+                this.registerServlet(servlets, httpService, OIDCTools.getPrefix(oidcBackend), new AuthenticationService(ssoProvider, exceptionHandler), "auth");
+                this.registerServlet(servlets, httpService, OIDCTools.getPrefix(oidcBackend), new LogoutService(ssoProvider, exceptionHandler), "logout");
                 this.registerRequestHandler(oidcBackend, serviceRegistrations, OIDCTools.OIDC_LOGIN, new OIDCLoginRequestHandler(this.loginConfiguration, oidcBackend, this.services));
                 this.registerRequestHandler(oidcBackend, serviceRegistrations, OIDCTools.OIDC_LOGOUT, new OIDCLogoutRequestHandler(this.loginConfiguration, oidcBackend));
 
@@ -164,29 +164,6 @@ public class OIDCBackendRegistry extends ServiceTracker<OIDCBackend, OIDCBackend
             }
         }
         return null;
-    }
-
-    private String getPrefix(final OIDCBackend oidcBackend) {
-        StringBuilder prefixBuilder = new StringBuilder();
-        prefixBuilder.append(this.services.getService(DispatcherPrefixService.class).getPrefix());
-        //TODO QS-VS: was soll das?? Hard coded ist vermutlich nicht die beste Idee...
-        prefixBuilder.append("oidc/");
-        String path = oidcBackend.getPath();
-        if (!Strings.isEmpty(path)) {
-            prefixBuilder.append(path).append("/");
-        }
-        return prefixBuilder.toString();
-    }
-
-    /**
-     * Helper method that validates the path to only contain allowed characters
-     * @param path The path to be checked.
-     * @return
-     */
-    private void validatePath(String path) throws OXException{
-        if (path.matches(".*[^a-zA-Z0-9].*")) {
-            throw OIDCExceptionCode.INVALID_BACKEND_PATH.create(path);
-        }
     }
 
     /**

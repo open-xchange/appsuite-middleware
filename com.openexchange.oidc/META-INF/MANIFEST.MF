@@ -68,4 +68,5 @@ Bundle-Activator: com.openexchange.oidc.osgi.OIDCActivator
 Bundle-ClassPath: .
 Export-Package: com.openexchange.oidc,
  com.openexchange.oidc.spi,
- com.openexchange.oidc.state
+ com.openexchange.oidc.state,
+ com.openexchange.oidc.tools

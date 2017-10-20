@@ -182,7 +182,7 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
     private void addAuthRequestToStateManager(HttpServletRequest request, State state, Nonce nonce) {
         LOG.trace("addAuthRequestToStateManager(HttpServletRequest request: {}, State state: {}, Nonce nonce: {})", request.getRequestURI(), state.getValue(), nonce.getValue());
         String deepLink = request.getParameter("deep_link");
-        String uiClientID = this.getUiClient(request);
+        String uiClientID = OIDCTools.getUiClient(request);
         String hostname = OIDCTools.getDomainName(request, services.getOptionalService(HostnameService.class));
         Map<String, String> additionalClientInformation = new HashMap<>();
 
@@ -194,18 +194,6 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
             .uiClientID(uiClientID)
             .build();
         this.stateManagement.addAuthenticationRequest(authenticationRequestInfo);
-    }
-
-    private String getUiClient(HttpServletRequest request) {
-        String uiClientID = request.getParameter("client");
-
-        if (uiClientID == null || uiClientID.isEmpty()) {
-
-            LoginConfiguration loginConfiguration =  LoginServlet.getLoginConfiguration();
-            uiClientID = loginConfiguration.getDefaultClient();
-        }
-
-        return uiClientID;
     }
 
     @Override
@@ -255,9 +243,9 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
         String loginRedirect = "";
         try {
             URIBuilder redirectLocation = new URIBuilder()
-                .setScheme(this.getRedirectScheme(request))
+                .setScheme(OIDCTools.getRedirectScheme(request))
                 .setHost(domainName)
-                .setPath(getRedirectPathPrefix() + "login")
+                .setPath(OIDCTools.getRedirectPathPrefix() + "login")
                 .setParameter(OIDCTools.SESSION_TOKEN, sessionToken)
                 .setParameter(LoginServlet.PARAMETER_ACTION, OIDCTools.OIDC_LOGIN + OIDCTools.getPathString(this.backend.getPath()));
             Tools.disableCaching(response);
@@ -270,16 +258,6 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
             throw OIDCExceptionCode.UNABLE_TO_SEND_REDIRECT.create(e, loginRedirect);
         }
         return null;
-    }
-
-    private String getRedirectScheme(HttpServletRequest request) {
-        boolean secure = Tools.considerSecure(request);
-        return secure ? "https" : "http";
-    }
-
-    private String getRedirectPathPrefix() {
-        DispatcherPrefixService prefixService = Services.getService(DispatcherPrefixService.class);
-        return prefixService.getPrefix();
     }
 
     private IDTokenClaimsSet validTokenResponse(OIDCTokenResponse tokenResponse, String nounce) throws OXException {
@@ -390,9 +368,9 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
         String redirectionURI = "";
         try {
             URIBuilder redirectLocation = new URIBuilder()
-                .setScheme(this.getRedirectScheme(request))
+                .setScheme(OIDCTools.getRedirectScheme(request))
                 .setHost(domainName)
-                .setPath(getRedirectPathPrefix() + "login")
+                .setPath(OIDCTools.getRedirectPathPrefix() + "login")
                 .setParameter(LoginServlet.PARAMETER_SESSION, sessionId)
                 .setParameter(LoginServlet.PARAMETER_ACTION, OIDCTools.OIDC_LOGOUT + OIDCTools.getPathString(this.backend.getPath()));
             Tools.disableCaching(response);

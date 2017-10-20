@@ -125,6 +125,7 @@ public class OIDCLoginRequestHandler implements LoginRequestHandler {
         }
     }
 
+    //TODO QS-VS: Die Login Prozedur wohl besser auslagern, aber wohin? Backend oder doch SSOProvider?
     private void performLogin(HttpServletRequest request, HttpServletResponse response) throws IOException, OXException {
         LOG.trace("performLogin(HttpServletRequest request: {}, HttpServletResponse response)", request.getRequestURI());
         String sessionToken = request.getParameter(OIDCTools.SESSION_TOKEN);

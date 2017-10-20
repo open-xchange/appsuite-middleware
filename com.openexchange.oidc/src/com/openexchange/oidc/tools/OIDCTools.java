@@ -67,6 +67,7 @@ import com.openexchange.ajax.login.LoginConfiguration;
 import com.openexchange.ajax.login.LoginTools;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ServerConfig;
+import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.java.Charsets;
@@ -74,9 +75,11 @@ import com.openexchange.java.Strings;
 import com.openexchange.oidc.OIDCBackendConfig;
 import com.openexchange.oidc.OIDCExceptionCode;
 import com.openexchange.oidc.osgi.Services;
+import com.openexchange.oidc.spi.OIDCBackend;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.tools.servlet.http.Cookies;
+import com.openexchange.tools.servlet.http.Tools;
 
 /**
  * {@link OIDCTools}
@@ -281,5 +284,73 @@ public class OIDCTools {
             uiWebPath = loginConfiguration.getUiWebPath();
         }
         return uiWebPath;
+    }
+    
+    /**
+     * Helper method that validates the path to only contain allowed characters
+     * @param path The path to be checked.
+     * @return
+     */
+    public static void validatePath(String path) throws OXException{
+        if (path.matches(".*[^a-zA-Z0-9].*")) {
+            throw OIDCExceptionCode.INVALID_BACKEND_PATH.create(path);
+        }
+    }
+    
+    
+    /**
+     * Get the prefix for the given path or set it to "oidc/" if not configured.
+     * 
+     * @param oidcBackend The backend which prefix should be determined
+     * @return the backends path or "oidc/"
+     */
+    public static String getPrefix(final OIDCBackend oidcBackend) {
+        StringBuilder prefixBuilder = new StringBuilder();
+        prefixBuilder.append(getRedirectPathPrefix());
+        prefixBuilder.append("oidc/");
+        String path = oidcBackend.getPath();
+        if (!Strings.isEmpty(path)) {
+            prefixBuilder.append(path).append("/");
+        }
+        return prefixBuilder.toString();
+    }
+    
+    /**
+     * Load the UI Client name from the given request. If not present,
+     * load the default client information from {@link LoginConfiguration}.
+     * 
+     * @param request The request for which the UI Client should be determined
+     * @return The UI client name
+     */
+    public static String getUiClient(HttpServletRequest request) {
+        String uiClientID = request.getParameter("client");
+
+        if (uiClientID == null || uiClientID.isEmpty()) {
+
+            LoginConfiguration loginConfiguration =  LoginServlet.getLoginConfiguration();
+            uiClientID = loginConfiguration.getDefaultClient();
+        }
+
+        return uiClientID;
+    }
+    
+    /**
+     * Determine whether the given request is secure or not.
+     * 
+     * @param request The request
+     * @return "https" if request is considered secure, "http" otherwise
+     */
+    public static String getRedirectScheme(HttpServletRequest request) {
+        boolean secure = Tools.considerSecure(request);
+        return secure ? "https" : "http";
+    }
+
+    /**
+     * Load prefix from {@link DispatcherPrefixService}
+     * @return The prefix
+     */
+    public static String getRedirectPathPrefix() {
+        DispatcherPrefixService prefixService = Services.getService(DispatcherPrefixService.class);
+        return prefixService.getPrefix();
     }
 }
