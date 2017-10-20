@@ -190,10 +190,20 @@ public class SchedJoulesCalendarAccess extends CachingCalendarAccess {
      */
     @Override
     protected long getRefreshInterval(String folderId) {
-        // TODO Auto-generated method stub
-        return 0;
+        JSONObject userConfig = getAccount().getInternalConfiguration();
+        if (userConfig == null || userConfig.isEmpty()) {
+            return 0;
+        }
+        JSONArray foldersArray = userConfig.optJSONArray(FOLDERS);
+        try {
+            JSONObject folder = findFolder(folderId, foldersArray);
+            return folder.optInt("refreshInterval", 0);
+        } catch (OXException e) {
+            LOG.debug("{}", e.getMessage(), e);
+            return 0;
+        }
     }
-    
+
     /*
      * (non-Javadoc)
      * 
