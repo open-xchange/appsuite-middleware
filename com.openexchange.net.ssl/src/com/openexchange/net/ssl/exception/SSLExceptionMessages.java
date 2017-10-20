@@ -77,10 +77,18 @@ public class SSLExceptionMessages implements LocalizableStrings {
 
     // The certificate is expired
     public final static String CERTIFICATE_IS_EXPIRED = "The certificate is expired";
-    
+
     // The common name for the certificate is invalid
     public final static String INVALID_COMMON_NAME = "The common name for the certificate is invalid";
 
+    // The root authority for the certificate is untrusted
+    public final static String UNTRUSTED_ROOT_AUTHORITY = "The root authority for the certificate is untrusted";
+
+    // The certificate is using a weak algorithm
+    public final static String WEAK_ALGORITHM = "The certificate is using a weak algorithm";
+
+    // The certificate was revoked
+    public final static String CERTIFICATE_REVOKED = "The certificate was revoked";
 
     private SSLExceptionMessages() {
         super();

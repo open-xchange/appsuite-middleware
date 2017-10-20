@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2017-2020 OX Software GmbH
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,41 +49,42 @@
 
 package com.openexchange.net.ssl.internal;
 
+import com.openexchange.net.ssl.exception.SSLExceptionCode;
+
 /**
- * {@link FailureReason}
+ * {@link FailureResponse}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
- * @since 7.8.4
  */
-enum FailureReason {
-    UNTRUSTED_CERTIFICATE(FailureReasonMessage.UNTRUSTED_CERTIFICATE),
-    SELF_SIGNED(FailureReasonMessage.SELF_SIGNED),
-    UNTRUSTED_ISSUER(FailureReasonMessage.UNTRUSTED_ISSUER),
-    EXPIRED(FailureReasonMessage.EXPIRED),
-    NOT_TRUSTED_BY_USER(FailureReasonMessage.NOT_TRUSTED_BY_USER),
-    INVALID_COMMON_NAME(FailureReasonMessage.INVALID_COMMON_NAME),
-    ALGORITHM_CONSTRAINED(FailureReasonMessage.ALGORITHM_CONSTRAINED),
-    REVOKED(FailureReasonMessage.REVOKED),
-    
-    ;
+class FailureResponse {
 
-    private final String detail;
+    private final FailureReason failureReason;
+    private final SSLExceptionCode sslExceptionCode;
 
     /**
-     * Initialises a new {@link FailureReason}.
-     *
-     * @param detail The detail message for the failure reason
+     * Initialises a new {@link FailureResponse}.
      */
-    private FailureReason(String detail) {
-        this.detail = detail;
+    public FailureResponse(FailureReason failureReason, SSLExceptionCode sslExceptionCode) {
+        super();
+        this.failureReason = failureReason;
+        this.sslExceptionCode = sslExceptionCode;
     }
 
     /**
-     * Gets the detail
+     * Gets the failureReason
      *
-     * @return The detail
+     * @return The failureReason
      */
-    public String getDetail() {
-        return detail;
+    public FailureReason getFailureReason() {
+        return failureReason;
+    }
+
+    /**
+     * Gets the sslExceptionCode
+     *
+     * @return The sslExceptionCode
+     */
+    public SSLExceptionCode getSSLExceptionCode() {
+        return sslExceptionCode;
     }
 }
