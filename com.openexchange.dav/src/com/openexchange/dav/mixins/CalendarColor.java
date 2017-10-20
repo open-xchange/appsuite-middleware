@@ -56,6 +56,7 @@ import org.jdom2.Namespace;
 import com.openexchange.dav.DAVProperty;
 import com.openexchange.dav.DAVProtocol;
 import com.openexchange.dav.resources.FolderCollection;
+import com.openexchange.folderstorage.CalendarFolderField;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.java.Strings;
@@ -101,6 +102,16 @@ public class CalendarColor extends SingleXMLPropertyMixin {
     }
 
     private static String getValue(UserizedFolder folder) {
+        if (null != folder) {
+            String value = CalendarFolderField.optValue(folder.getProperties(), CalendarFolderField.COLOR, String.class);
+            if (null != value) {
+                return null;
+            }
+        }
+        return getValueFromMeta(folder);
+    }
+
+    private static String getValueFromMeta(UserizedFolder folder) {
         if (null != folder && PrivateType.getInstance().equals(folder.getType())) {
             Map<String, Object> meta = folder.getMeta();
             if (null != meta) {
@@ -241,18 +252,25 @@ public class CalendarColor extends SingleXMLPropertyMixin {
     private static String getSymbolicColor(String hexColor) {
         switch (hexColor.toUpperCase()) {
             case "#FB0055FF":
+            case "RED":
                 return "red";
             case "#FD8208FF":
+            case "ORANGE":
                 return "orange";
             case "#FEC309FF":
+            case "YELLOW":
                 return "yellow";
             case "#56D72BFF":
+            case "GREEN":
                 return "green";
             case "#1D9BF6FF":
+            case "BLUE":
                 return "blue";
             case "#90714CFF":
+            case "BROWN":
                 return "brown";
             case "#BF57DAFF":
+            case "PURPLE":
                 return "purple";
             default:
                 return "custom";
