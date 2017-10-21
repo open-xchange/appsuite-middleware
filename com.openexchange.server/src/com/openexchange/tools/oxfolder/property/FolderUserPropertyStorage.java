@@ -64,7 +64,7 @@ public interface FolderUserPropertyStorage {
 
     /**
      * Deletes all given user-specific properties for a given folder.
-     * 
+     *
      * @param contextId The context ID of the user
      * @param folderId The ID of the folder
      * @param userId The ID of the user the user-specific folder belongs to
@@ -75,7 +75,7 @@ public interface FolderUserPropertyStorage {
 
     /**
      * Deletes all given user-specific properties for a given folder.
-     * 
+     *
      * @param contextId The context ID of the user
      * @param folderId The ID of the folder
      * @param userId The ID of the user the user-specific folder belongs to
@@ -87,7 +87,7 @@ public interface FolderUserPropertyStorage {
 
     /**
      * Deletes a single property for a user from a folder.
-     * 
+     *
      * @param contextId The context ID of the user
      * @param folderId The ID of the folder to delete
      * @param userId The ID of the user the user-specific folder belongs to
@@ -98,7 +98,7 @@ public interface FolderUserPropertyStorage {
 
     /**
      * Deletes a single property for a user from a folder.
-     * 
+     *
      * @param contextId The context ID of the user
      * @param folderId The ID of the folder to delete
      * @param userId The ID of the user the user-specific folder belongs to
@@ -110,7 +110,7 @@ public interface FolderUserPropertyStorage {
 
     /**
      * Check if a folder has user-specific properties and therefore exits
-     * 
+     *
      * @param contextId The context ID of the user
      * @param folderId The ID of the folder to check existence for
      * @param userId The ID of the user the user-specific folder belongs to
@@ -122,7 +122,7 @@ public interface FolderUserPropertyStorage {
 
     /**
      * Check if a folder has user-specific properties and therefore exits
-     * 
+     *
      * @param contextId The context ID of the user
      * @param folderId The ID of the folder to check existence for
      * @param userId The ID of the user the user-specific folder belongs to
@@ -135,7 +135,7 @@ public interface FolderUserPropertyStorage {
 
     /**
      * Get a {@link Map} with user-specific properties for the folder
-     * 
+     *
      * @param contextId The context ID of the user
      * @param folderId The ID of the folder
      * @param userId The ID of the user the user-specific folder belongs to
@@ -146,7 +146,7 @@ public interface FolderUserPropertyStorage {
 
     /**
      * Get a {@link Map} with user-specific properties for multiple folders
-     * 
+     *
      * @param contextId The context ID of the user
      * @param folderId The ID of the folder
      * @param userId The ID of the user the user-specific folder belongs to
@@ -158,7 +158,7 @@ public interface FolderUserPropertyStorage {
 
     /**
      * Get a {@link Map} with user-specific properties for the folder
-     * 
+     *
      * @param contextId The context ID of the user
      * @param folderIds The IDs of the folder to load
      * @param userId The ID of the user the user-specific folder belongs to
@@ -169,7 +169,7 @@ public interface FolderUserPropertyStorage {
 
     /**
      * Get a {@link Map} with user-specific properties for multiple folders
-     * 
+     *
      * @param contextId The context ID of the user
      * @param folderIds The IDs of the folder to load
      * @param userId The ID of the user the user-specific folder belongs to
@@ -181,7 +181,7 @@ public interface FolderUserPropertyStorage {
 
     /**
      * Get an user-specific property from a folder
-     * 
+     *
      * @param contextId The context ID of the user
      * @param folderId The ID of the folder
      * @param userId The ID of the user the user-specific folder belongs to
@@ -193,7 +193,7 @@ public interface FolderUserPropertyStorage {
 
     /**
      * Get an user-specific property from a folder
-     * 
+     *
      * @param contextId The context ID of the user
      * @param folderId The ID of the folder
      * @param userId The ID of the user the user-specific folder belongs to
@@ -206,7 +206,7 @@ public interface FolderUserPropertyStorage {
 
     /**
      * Insert user-specific values for a folder into the database.
-     * 
+     *
      * @param contextId The context ID of the user
      * @param folderId The ID of the folder to insert
      * @param userId The ID of the user the user-specific folder belongs to
@@ -218,7 +218,7 @@ public interface FolderUserPropertyStorage {
 
     /**
      * Insert user-specific values for a folder into the database.
-     * 
+     *
      * @param contextId The context ID of the user
      * @param folderId The ID of the folder to insert
      * @param userId The ID of the user the user-specific folder belongs to
@@ -231,7 +231,7 @@ public interface FolderUserPropertyStorage {
 
     /**
      * Insert user-specific values for a folder into the database.
-     * 
+     *
      * @param contextId The context ID of the user
      * @param folderId The ID of the folder to insert
      * @param userId The ID of the user the user-specific folder belongs to
@@ -244,7 +244,7 @@ public interface FolderUserPropertyStorage {
 
     /**
      * Insert user-specific values for a folder into the database.
-     * 
+     *
      * @param contextId The context ID of the user
      * @param folderId The ID of the folder to insert
      * @param userId The ID of the user the user-specific folder belongs to
@@ -258,7 +258,7 @@ public interface FolderUserPropertyStorage {
 
     /**
      * Insert user-specific values for the given folder. If a property already exists the value will be updated.
-     * 
+     *
      * @param contextId The context ID of the user
      * @param folderId The ID of the folder to insert
      * @param userId The ID of the user the user-specific folder belongs to
@@ -270,12 +270,12 @@ public interface FolderUserPropertyStorage {
 
     /**
      * Insert user-specific values for the given folder. If a property already exists the value will be updated.
-     * 
+     *
      * @param contextId The context ID of the user
      * @param folderId The ID of the folder to insert
      * @param userId The ID of the user the user-specific folder belongs to
      * @param properties The properties to add to the folder
-     * @param connection The {@link Connection} to use for the transaction
+     * @param connection The {@link Connection} to use for the transaction, or <code>null</code> to acquire the connection on demand
      * @return <code>true</code> if the insertion was successful, <code>false</code> otherwise
      * @throws OXException In case of missing service or no connection could be obtained
      */
@@ -283,7 +283,7 @@ public interface FolderUserPropertyStorage {
 
     /**
      * Updates a specific property on the folder
-     * 
+     *
      * @param contextId The context ID of the user
      * @param folderId The ID of the folder to insert
      * @param userId The ID of the user the user-specific folder belongs to
@@ -294,7 +294,7 @@ public interface FolderUserPropertyStorage {
 
     /**
      * Updates a specific property on the folder
-     * 
+     *
      * @param contextId The context ID of the user
      * @param folderId The ID of the folder to insert
      * @param userId The ID of the user the user-specific folder belongs to
@@ -306,7 +306,7 @@ public interface FolderUserPropertyStorage {
 
     /**
      * Updates a specific property on the folder
-     * 
+     *
      * @param contextId The context ID of the user
      * @param folderId The ID of the folder to insert
      * @param userId The ID of the user the user-specific folder belongs to
@@ -319,7 +319,7 @@ public interface FolderUserPropertyStorage {
 
     /**
      * Updates a specific property on the folder
-     * 
+     *
      * @param contextId The context ID of the user
      * @param folderId The ID of the folder to insert
      * @param userId The ID of the user the user-specific folder belongs to
