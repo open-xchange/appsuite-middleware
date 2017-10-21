@@ -726,10 +726,10 @@ public class Utils {
     public static SortedSet<RecurrenceId> combine(Collection<RecurrenceId> recurrenceIds1, Collection<RecurrenceId> recurrenceIds2) {
         SortedSet<RecurrenceId> recurrenceIds = new TreeSet<RecurrenceId>(RecurrenceIdComparator.DEFAULT_COMPARATOR);
         if (null != recurrenceIds1) {
-            recurrenceIds1.addAll(recurrenceIds1);
+            recurrenceIds.addAll(recurrenceIds1);
         }
         if (null != recurrenceIds2) {
-            recurrenceIds1.addAll(recurrenceIds2);
+            recurrenceIds.addAll(recurrenceIds2);
         }
         return recurrenceIds;
     }
