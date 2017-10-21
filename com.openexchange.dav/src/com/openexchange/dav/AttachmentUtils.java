@@ -130,7 +130,8 @@ public class AttachmentUtils {
      */
     public static int getModuleId(ContentType contentType) {
         if (null != contentType) {
-            if (CalendarContentType.getInstance().equals(contentType)) {
+            if (CalendarContentType.getInstance().equals(contentType) || 
+                com.openexchange.folderstorage.calendar.contentType.CalendarContentType.getInstance().equals(contentType)) {
                 return com.openexchange.groupware.Types.APPOINTMENT;
             }
             if (TaskContentType.getInstance().equals(contentType)) {

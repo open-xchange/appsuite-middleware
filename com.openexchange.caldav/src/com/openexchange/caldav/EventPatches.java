@@ -50,7 +50,6 @@
 package com.openexchange.caldav;
 
 import static com.openexchange.chronos.common.AlarmUtils.addExtendedProperty;
-import static com.openexchange.chronos.common.CalendarUtils.addExtendedProperty;
 import static com.openexchange.chronos.common.CalendarUtils.find;
 import static com.openexchange.chronos.common.CalendarUtils.isOrganizer;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesException;
@@ -67,6 +66,7 @@ import java.util.SortedSet;
 import java.util.TimeZone;
 import java.util.UUID;
 import org.dmfs.rfc5545.DateTime;
+import com.openexchange.caldav.resources.CalendarAccessOperation;
 import com.openexchange.caldav.resources.EventResource;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmAction;
@@ -85,10 +85,13 @@ import com.openexchange.chronos.common.AlarmUtils;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.ical.CalendarExport;
 import com.openexchange.chronos.ical.ICalParameters;
+import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
 import com.openexchange.chronos.service.CalendarParameters;
-import com.openexchange.chronos.service.CalendarSession;
+import com.openexchange.chronos.service.CalendarUtilities;
+import com.openexchange.chronos.service.EntityResolver;
 import com.openexchange.chronos.service.EventID;
 import com.openexchange.chronos.service.EventUpdate;
+import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.dav.AttachmentUtils;
 import com.openexchange.dav.DAVUserAgent;
 import com.openexchange.exception.OXException;
@@ -103,6 +106,24 @@ import com.openexchange.java.Strings;
  * @since v7.10.0
  */
 public class EventPatches {
+
+    /**
+     * Initializes a new {@link Incoming}.
+     *
+     * @param factory The factory
+     */
+    public static Incoming Incoming(GroupwareCaldavFactory factory) {
+        return new Incoming(factory);
+    }
+
+    /**
+     * Initializes a new {@link Outgoing}.
+     *
+     * @param factory The factory
+     */
+    public static Outgoing Outgoing(GroupwareCaldavFactory factory) {
+        return new Outgoing(factory);
+    }
 
     private static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(EventPatches.class);
 
@@ -186,11 +207,16 @@ public class EventPatches {
      */
     public static final class Incoming {
 
+        private final GroupwareCaldavFactory factory;
+
         /**
          * Initializes a new {@link Incoming}.
+         *
+         * @param factory The factory
          */
-        private Incoming() {
-        	// prevent instantiation
+        private Incoming(GroupwareCaldavFactory factory) {
+            super();
+            this.factory = factory;
         }
 
         /**
@@ -209,7 +235,7 @@ public class EventPatches {
          * @param eventResource The event resource
          * @param importedEvent The event
          */
-        private static void adjustAttendeeComments(EventResource eventResource, Event importedEvent) {
+        private void adjustAttendeeComments(EventResource eventResource, Event importedEvent) {
             /*
              * evaluate imported extra properties
              */
@@ -219,7 +245,8 @@ public class EventPatches {
                  * take over the user's attendee comment if set
                  */
                 try {
-                    eventResource.getCalendarSession().getEntityResolver().prepare(importedEvent.getAttendees());
+                    EntityResolver entityResolver = factory.requireService(CalendarUtilities.class).getEntityResolver(factory.getContext().getContextId());
+                    entityResolver.prepare(importedEvent.getAttendees());
                 } catch (OXException e) {
                     LOG.warn("Error preparing attendees for imported event", e);
                 }
@@ -266,7 +293,7 @@ public class EventPatches {
          * @param importedEvent The imported series master event as supplied by the client
          * @param importedChangeExceptions The imported change exceptions as supplied by the client
          */
-        private static void adjustSnoozeExceptions(EventResource resource, Event importedEvent, List<Event> importedChangeExceptions) {
+        private void adjustSnoozeExceptions(EventResource resource, Event importedEvent, List<Event> importedChangeExceptions) {
             if (DAVUserAgent.MAC_CALENDAR.equals(resource.getUserAgent()) && isSeriesMaster(resource.getEvent()) &&
                 null != importedEvent && null != importedChangeExceptions && 0 < importedChangeExceptions.size()) {
                 /*
@@ -292,22 +319,25 @@ public class EventPatches {
                     if (null == snoozedAlarm || null == snoozeAlarm) {
                         return;
                     }
+                    Event masterEvent = new CalendarAccessOperation<Event>(factory) {
+
+                        @Override
+                        protected Event perform(IDBasedCalendarAccess access) throws OXException {
+                            access.set(CalendarParameters.PARAMETER_FIELDS, null);
+                            EventID eventId = new EventID(resource.getEvent().getFolderId(), resource.getEvent().getId(), resource.getEvent().getRecurrenceId());
+                            return access.getEvent(eventId);
+                        }
+                    }.execute(factory.getSession());
                     RecurrenceId recurrenceId = newChangeException.getRecurrenceId();
-                    CalendarSession calendarSession = resource.getCalendarSession();
-                    calendarSession.set(CalendarParameters.PARAMETER_FIELDS, null);
-                    EventID eventId = new EventID(resource.getEvent().getFolderId(), resource.getEvent().getId(), resource.getEvent().getRecurrenceId());
-                    Event masterEvent = calendarSession.getCalendarService().getEvent(calendarSession, eventId.getFolderID(), eventId);
-                    Event originalOccurrence = null;
-                    Iterator<Event> iterator = resource.getCalendarSession().getRecurrenceService().iterateEventOccurrences(masterEvent, new Date(recurrenceId.getValue().getTimestamp()), null);
-                    if (iterator.hasNext()) {
-                        originalOccurrence = iterator.next();
-                    }
+                    Iterator<Event> iterator = factory.requireService(RecurrenceService.class).iterateEventOccurrences(masterEvent, new Date(recurrenceId.getValue().getTimestamp()), null);
+                    Event originalOccurrence = iterator.hasNext() ? iterator.next() : null;
                     if (null != originalOccurrence) {
                         if (null != originalOccurrence.getAlarms() && 1 == originalOccurrence.getAlarms().size() && snoozedAlarm.getTrigger().equals(originalOccurrence.getAlarms().get(0).getTrigger())) {
                             Alarm originalAlarm = originalOccurrence.getAlarms().get(0);
-                            originalOccurrence = resource.getCalendarSession().getUtilities().copyEvent(originalOccurrence, (EventField[]) null);
-                            originalOccurrence = EventPatches.Outgoing.applyAll(resource, originalOccurrence);
-                            EventUpdate eventUpdate = resource.getCalendarSession().getUtilities().compare(
+                            CalendarUtilities calendarUtilities = factory.requireService(CalendarUtilities.class);
+                            originalOccurrence = calendarUtilities.copyEvent(originalOccurrence, (EventField[]) null);
+                            originalOccurrence = EventPatches.Outgoing(factory).applyAll(resource, originalOccurrence);
+                            EventUpdate eventUpdate = calendarUtilities.compare(
                                 originalOccurrence, newChangeException, true, EventField.TIMESTAMP, EventField.LAST_MODIFIED, EventField.RECURRENCE_RULE, EventField.CREATED, EventField.ALARMS);
                             if (eventUpdate.getUpdatedFields().isEmpty() && eventUpdate.getAttendeeUpdates().isEmpty() && false == eventUpdate.getAlarmUpdates().isEmpty()) {
                                 List<Alarm> patchedAlarms = new ArrayList<Alarm>(2);
@@ -339,13 +369,18 @@ public class EventPatches {
          * @param importedChangeExceptions The imported change exceptions as supplied by the client
          * @return The new exceptions, or an empty list if there are none
          */
-        private static List<Event> getNewChangeExceptions(EventResource resource, List<Event> importedChangeExceptions) throws OXException {
+        private List<Event> getNewChangeExceptions(EventResource resource, List<Event> importedChangeExceptions) throws OXException {
             if (null == importedChangeExceptions || 0 == importedChangeExceptions.size()) {
                 return Collections.emptyList();
             }
-            CalendarSession session = resource.getCalendarSession();
             Event originalEvent = resource.getEvent();
-            List<Event> changeExceptions = session.getCalendarService().getChangeExceptions(session, originalEvent.getFolderId(), originalEvent.getSeriesId());
+            List<Event> changeExceptions = new CalendarAccessOperation<List<Event>>(factory) {
+
+                @Override
+                protected List<Event> perform(IDBasedCalendarAccess access) throws OXException {
+                    return access.getChangeExceptions(originalEvent.getFolderId(), originalEvent.getSeriesId());
+                }
+            }.execute(factory.getSession());
             SortedSet<RecurrenceId> changeExceptionDates = CalendarUtils.getRecurrenceIds(changeExceptions);
             List<Event> newChangeExceptions = new ArrayList<Event>(importedChangeExceptions.size());
             if (null == changeExceptionDates || 0 == changeExceptionDates.size()) {
@@ -529,7 +564,7 @@ public class EventPatches {
          * @param caldavImport The CalDAV import
          * @return The patched CalDAV import
          */
-        public static CalDAVImport applyAll(EventResource resource, CalDAVImport caldavImport) {
+        public CalDAVImport applyAll(EventResource resource, CalDAVImport caldavImport) {
             /*
              * patch the calendar
              */
@@ -574,11 +609,16 @@ public class EventPatches {
      */
     public static final class Outgoing {
 
+        private final GroupwareCaldavFactory factory;
+
         /**
          * Initializes a new {@link Outgoing}.
+         *
+         * @param factory The factory
          */
-        private Outgoing() {
-        	// prevent instantiation
+        private Outgoing(GroupwareCaldavFactory factory) {
+            super();
+            this.factory = factory;
         }
 
         /**
@@ -643,7 +683,7 @@ public class EventPatches {
             return alarm;
         }
 
-        private static Event adjustAlarms(EventResource resource, Event exportedEvent) {
+        private Event adjustAlarms(EventResource resource, Event exportedEvent) {
             List<Alarm> exportedAlarms = exportedEvent.getAlarms();
             try {
                 if (resource.getFactory().getUser().getId() != resource.getParent().getCalendarUser().getId()) {
@@ -689,7 +729,7 @@ public class EventPatches {
                             try {
                                 Trigger trigger = alarm.getTrigger();
                                 trigger.setDuration(AlarmUtils.getTriggerDuration(alarm.getTrigger(), exportedEvent,
-                                    resource.getCalendarSession().getRecurrenceService()));
+                                    factory.requireService(RecurrenceService.class)));
                                 trigger.setDateTime(null);
                             } catch (OXException e) {
                                 LOG.warn("Error converting snoozed alarm trigger", e);
@@ -710,7 +750,7 @@ public class EventPatches {
                             }
                             if (isSeriesMaster(exportedEvent) && null != snoozedAlarm.getAcknowledged()) {
                                 try {
-                                    Iterator<Event> iterator = resource.getCalendarSession().getRecurrenceService().iterateEventOccurrences(
+                                    Iterator<Event> iterator = factory.requireService(RecurrenceService.class).iterateEventOccurrences(
                                         exportedEvent, snoozedAlarm.getAcknowledged(), null);
                                     if (iterator.hasNext()) {
                                         DateTime relatedDate = AlarmUtils.getRelatedDate(alarm.getTrigger().getRelated(), iterator.next());
@@ -788,7 +828,7 @@ public class EventPatches {
          * @param exportedEvent The event being exported
          * @return The patched event
          */
-        public static Event applyAll(EventResource resource, Event exportedEvent) {
+        public Event applyAll(EventResource resource, Event exportedEvent) {
             exportedEvent = removeImplicitAttendee(resource, exportedEvent);
             exportedEvent = adjustProposedTimePrefixes(exportedEvent);
             exportedEvent = applyAttendeeComments(resource, exportedEvent);

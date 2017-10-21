@@ -47,62 +47,80 @@
  *
  */
 
-package com.openexchange.caldav.mixins;
+package com.openexchange.caldav.resources;
 
-import com.openexchange.caldav.CaldavProtocol;
-import com.openexchange.caldav.GroupwareCaldavFactory;
-import com.openexchange.caldav.Tools;
+import static com.openexchange.osgi.Tools.requireService;
+import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
+import com.openexchange.chronos.provider.composition.IDBasedCalendarAccessFactory;
+import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.exception.OXException;
-import com.openexchange.folderstorage.FolderStorage;
-import com.openexchange.folderstorage.UserizedFolder;
-import com.openexchange.folderstorage.calendar.contentType.CalendarContentType;
-import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.session.Session;
 
 /**
- * The {@link ScheduleDefaultCalendarURL}
- *
- * This property MAY be defined on a scheduling Inbox
- * collection.  If present, it contains zero or one DAV:href XML
- * elements.  When a DAV:href element is present, its value indicates
- * a URL to a calendar collection that is used as the default
- * calendar.  When no DAV:href element is present, it indicates that
- * there is no default calendar.  In the absence of this property,
- * there is no default calendar.  When there is no default calendar,
- * the server is free to choose the calendar in which a new
- * scheduling object resource is created.
- * <p/>
- * https://tools.ietf.org/html/rfc6638#section-9.2
+ * {@link CalendarAccessOperation}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @since v7.10.0
  */
-public class ScheduleDefaultCalendarURL extends SingleXMLPropertyMixin {
+public abstract class CalendarAccessOperation<T> {
 
-    private final GroupwareCaldavFactory factory;
+    private final ServiceLookup services;
 
     /**
-     * Initializes a new {@link ScheduleDefaultCalendarURL}.
+     * Initializes a new {@link CalendarAccessOperation}.
      *
-     * @param factory The CalDAV factory
+     * @param services A service lookup reference
      */
-    public ScheduleDefaultCalendarURL(GroupwareCaldavFactory factory) {
-        super(CaldavProtocol.CAL_NS.getURI(), "schedule-default-calendar-URL");
-        this.factory = factory;
+    public CalendarAccessOperation(ServiceLookup services) {
+        super();
+        this.services = services;
     }
 
-    @Override
-    protected String getValue() {
-        String value = null;
+    /**
+     * Performs the operation
+     *
+     * @param session The underlying session
+     * @return The result
+     */
+    public T execute(Session session) throws OXException {
+        T result;
+        IDBasedCalendarAccess calendarAccess = initCalendarAccess(session);
+        boolean committed = false;
         try {
-            String treeID = factory.getConfigValue("com.openexchange.caldav.tree", FolderStorage.REAL_TREE_ID);
-            UserizedFolder defaultFolder = factory.getFolderService().getDefaultFolder(
-                factory.getUser(), treeID, CalendarContentType.getInstance(), factory.getSession(), null);
-            if (null != defaultFolder) {
-                value = Tools.encodeFolderId(defaultFolder.getID());
+            calendarAccess.startTransaction();
+            result = perform(calendarAccess);
+            calendarAccess.commit();
+            committed = true;
+        } finally {
+            if (false == committed) {
+                calendarAccess.rollback();
             }
-        } catch (OXException e) {
-            org.slf4j.LoggerFactory.getLogger(ScheduleDefaultCalendarURL.class).warn("Error determining 'schedule-default-calendar-URL'", e);
+            calendarAccess.finish();
         }
-        return null == value ? null : "<D:href>/caldav/" + value + "/</D:href>";
+        return result;
     }
+
+    /**
+     * Initializes the calendar access for CalDAV operations and applies default parameters.
+     *
+     * @param session The underlying session
+     * @return The initialized calendar access
+     */
+    protected IDBasedCalendarAccess initCalendarAccess(Session session) throws OXException {
+        IDBasedCalendarAccess calendarAccess = requireService(IDBasedCalendarAccessFactory.class, services).createAccess(session);
+        calendarAccess.set(CalendarParameters.PARAMETER_INCLUDE_PRIVATE, Boolean.TRUE);
+        calendarAccess.set(CalendarParameters.PARAMETER_EXPAND_OCCURRENCES, Boolean.FALSE);
+        calendarAccess.set(CalendarParameters.PARAMETER_IGNORE_CONFLICTS, Boolean.TRUE);
+        return calendarAccess;
+    }
+
+    /**
+     * Performs the operation using the initialized calendar access.
+     *
+     * @param access The initialized calendar access to use
+     * @return The result
+     */
+    protected abstract T perform(IDBasedCalendarAccess access) throws OXException;
 
 }

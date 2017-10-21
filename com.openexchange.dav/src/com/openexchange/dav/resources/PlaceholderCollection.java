@@ -69,13 +69,13 @@ import com.openexchange.dav.reports.SyncStatus;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXException.IncorrectString;
 import com.openexchange.exception.OXException.ProblematicAttribute;
-import com.openexchange.folderstorage.AbstractFolder;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.DefaultPermission;
 import com.openexchange.folderstorage.FolderService;
+import com.openexchange.folderstorage.ParameterizedFolder;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.UserizedFolder;
-import com.openexchange.folderstorage.database.contentType.CalendarContentType;
+import com.openexchange.folderstorage.calendar.contentType.CalendarContentType;
 import com.openexchange.folderstorage.database.contentType.ContactContentType;
 import com.openexchange.folderstorage.database.contentType.TaskContentType;
 import com.openexchange.groupware.container.FolderObject;
@@ -183,7 +183,7 @@ public class PlaceholderCollection<T> extends FolderCollection<T> {
         try {
             FolderService folderService = factory.requireService(FolderService.class);
             UserizedFolder parentFolder = folderService.getDefaultFolder(factory.getUser(), treeID, contentType, factory.getSession(), null);
-            AbstractFolder folder = getFolderToUpdate();
+            ParameterizedFolder folder = getFolderToUpdate();
             folder.setParentID(parentFolder.getID());
             folder.setName(displayName);
             folder.setType(parentFolder.getType());

@@ -83,7 +83,7 @@ import com.openexchange.dav.PreconditionException;
 import com.openexchange.dav.mixins.CalendarColor;
 import com.openexchange.dav.resources.CommonFolderCollection;
 import com.openexchange.exception.OXException;
-import com.openexchange.folderstorage.AbstractFolder;
+import com.openexchange.folderstorage.ParameterizedFolder;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.folderstorage.type.PublicType;
@@ -217,7 +217,7 @@ public abstract class CalDAVFolderCollection<T extends CalendarObject> extends C
             /*
              * apply color to meta field
              */
-            AbstractFolder folderToUpdate = getFolderToUpdate();
+            ParameterizedFolder folderToUpdate = getFolderToUpdate();
             Map<String, Object> meta = folderToUpdate.getMeta();
             String value = CalendarColor.parse(prop);
             if (Strings.isEmpty(value)) {

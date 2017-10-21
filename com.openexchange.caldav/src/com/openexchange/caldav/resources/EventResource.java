@@ -68,17 +68,18 @@ import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.ical.CalendarExport;
 import com.openexchange.chronos.ical.ICalParameters;
 import com.openexchange.chronos.ical.ICalService;
+import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarResult;
-import com.openexchange.chronos.service.CalendarService;
-import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.CalendarUtilities;
+import com.openexchange.chronos.service.EntityResolver;
 import com.openexchange.chronos.service.EventID;
 import com.openexchange.dav.DAVProtocol;
 import com.openexchange.dav.DAVUserAgent;
 import com.openexchange.dav.PreconditionException;
 import com.openexchange.dav.resources.DAVCollection;
 import com.openexchange.dav.resources.DAVObjectResource;
+import com.openexchange.dav.resources.FolderCollection;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.notify.hostname.HostData;
@@ -114,7 +115,6 @@ public class EventResource extends DAVObjectResource<Event> {
      * @param parent The parent event collection
      * @param event The represented event
      * @param url The WebDAV path to the resource
-     * @throws OXException
      */
     public EventResource(EventCollection parent, Event event, WebdavPath url) throws OXException {
         super(parent, event, url);
@@ -140,15 +140,6 @@ public class EventResource extends DAVObjectResource<Event> {
         return object;
     }
 
-    /**
-     * Gets the calendar session.
-     *
-     * @return The calendar session
-     */
-    public CalendarSession getCalendarSession() throws WebdavProtocolException {
-        return parent.getCalendarSession();
-    }
-
     @Override
     protected String getFileExtension() {
         return CalDAVResource.EXTENSION_ICS;
@@ -167,6 +158,11 @@ public class EventResource extends DAVObjectResource<Event> {
     @Override
     protected int getId(Event object) {
         return null != object ? Integer.parseInt(object.getId()) : null;
+    }
+
+    @Override
+    protected int getId(FolderCollection<Event> collection) throws OXException {
+        return null != collection ? Tools.parse(collection.getFolder().getID()) : 0;
     }
 
     @Override
@@ -210,41 +206,50 @@ public class EventResource extends DAVObjectResource<Event> {
             /*
              * init export
              */
-            CalendarSession calendarSession = getCalendarSession();
-            calendarSession.set(CalendarParameters.PARAMETER_FIELDS, null);
             ICalService iCalService = getFactory().requireService(ICalService.class);
             ICalParameters iCalParameters = EventPatches.applyIgnoredProperties(this, iCalService.initParameters());
             CalendarExport calendarExport = iCalService.exportICal(iCalParameters);
-            List<Event> changeExceptions = null;
-            if (PhantomMaster.class.isInstance(object)) {
-                /*
-                 * no access to parent recurring master, use detached occurrences as exceptions
-                 */
-                changeExceptions = calendarSession.getCalendarService().getChangeExceptions(calendarSession, object.getFolderId(), object.getSeriesId());
-            } else {
-                /*
-                 * load all event data & add (master) event to export
-                 */
-                Event event = calendarSession.getCalendarService().getEvent(calendarSession, object.getFolderId(), new EventID(object.getFolderId(), object.getId(), object.getRecurrenceId()));
-                event = EventPatches.Outgoing.applyAll(this, event);
-                calendarExport.add(event);
-                if (CalendarUtils.isSeriesMaster(object)) {
-                    changeExceptions = calendarSession.getCalendarService().getChangeExceptions(calendarSession, object.getFolderId(), object.getSeriesId());
+            new CalendarAccessOperation<Void>(factory) {
+
+                @Override
+                protected Void perform(IDBasedCalendarAccess access) throws OXException {
+                    access.set(CalendarParameters.PARAMETER_FIELDS, null);
+                    List<Event> changeExceptions = null;
+                    if (PhantomMaster.class.isInstance(object)) {
+                        /*
+                         * no access to parent recurring master, use detached occurrences as exceptions
+                         */
+                        changeExceptions = access.getChangeExceptions(object.getFolderId(), object.getSeriesId());
+                    } else {
+                        /*
+                         * load all event data & add (master) event to export
+                         */
+                        Event event = access.getEvent(new EventID(object.getFolderId(), object.getId(), object.getRecurrenceId()));
+                        event = EventPatches.Outgoing(parent.getFactory()).applyAll(EventResource.this, event);
+                        calendarExport.add(event);
+                        if (CalendarUtils.isSeriesMaster(object)) {
+                            changeExceptions = access.getChangeExceptions(object.getFolderId(), object.getSeriesId());
+                        }
+                    }
+                    /*
+                     * add change exceptions to export
+                     */
+                    if (null != changeExceptions && 0 < changeExceptions.size()) {
+                        for (Event changeException : changeExceptions) {
+                            changeException = EventPatches.Outgoing(parent.getFactory()).applyAll(EventResource.this, changeException);
+                            calendarExport.add(changeException);
+                        }
+                    }
+                    /*
+                     * add any extended properties
+                     */
+                    EventPatches.Outgoing.applyExport(EventResource.this, calendarExport);
+                    return null;
                 }
-            }
+            }.execute(factory.getSession());
             /*
-             * add change exceptions to export
+             * do export
              */
-            if (null != changeExceptions && 0 < changeExceptions.size()) {
-                for (Event changeException : changeExceptions) {
-                    changeException = EventPatches.Outgoing.applyAll(this, changeException);
-                    calendarExport.add(changeException);
-                }
-            }
-            /*
-             * add any extended properties
-             */
-            EventPatches.Outgoing.applyExport(this, calendarExport);
             inputStream = calendarExport.getClosingStream();
             return Streams.stream2bytes(inputStream);
         } catch (IOException e) {
@@ -325,7 +330,7 @@ public class EventResource extends DAVObjectResource<Event> {
         if (false == parent.getClass().isInstance(destinationCollection)) {
             throw protocolException(getUrl(), HttpServletResponse.SC_FORBIDDEN);
         }
-        EventCollection targetCollection = null;
+        EventCollection targetCollection;
         try {
             targetCollection = (EventCollection) destinationCollection;
         } catch (ClassCastException e) {
@@ -333,9 +338,14 @@ public class EventResource extends DAVObjectResource<Event> {
         }
         EventID eventID = new EventID(parent.folderID, object.getId());
         try {
-            CalendarSession calendarSession = factory.getService(CalendarService.class).init(factory.getSession());
-            calendarSession.set(CalendarParameters.PARAMETER_IGNORE_CONFLICTS, Boolean.TRUE);
-            calendarSession.getCalendarService().moveEvent(calendarSession, eventID, targetCollection.folderID, object.getTimestamp());
+            new CalendarAccessOperation<Void>(factory) {
+
+                @Override
+                protected Void perform(IDBasedCalendarAccess access) throws OXException {
+                    access.moveEvent(eventID, targetCollection.folderID, object.getTimestamp());
+                    return null;
+                }
+            }.execute(factory.getSession());
         } catch (OXException e) {
             throw getProtocolException(e);
         }
@@ -419,46 +429,60 @@ public class EventResource extends DAVObjectResource<Event> {
         } else {
             eventIDs = Collections.singletonList(new EventID(event.getFolderId(), event.getId()));
         }
-        CalendarSession calendarSession = getCalendarSession();
-        for (EventID id: eventIDs){
-            calendarSession.getCalendarService().deleteEvent(calendarSession, id, event.getTimestamp());
-        }
+        new CalendarAccessOperation<Void>(factory) {
+
+            @Override
+            protected Void perform(IDBasedCalendarAccess access) throws OXException {
+                for (EventID id : eventIDs) {
+                    access.deleteEvent(id, event.getTimestamp());
+                }
+                return null;
+            }
+        }.execute(factory.getSession());
     }
 
     private void updateEvent(CalDAVImport caldavImport) throws OXException {
         if (false == exists()) {
             throw protocolException(getUrl(), HttpServletResponse.SC_NOT_FOUND);
         }
-        CalendarSession calendarSession = getCalendarSession();
-        calendarSession.set(CalendarParameters.PARAMETER_IGNORE_CONFLICTS, Boolean.TRUE);
-        long clientTimestamp = object.getTimestamp();
-        caldavImport = EventPatches.Incoming.applyAll(this, caldavImport);
-        if (null != caldavImport.getEvent() && false == Tools.isPhantomMaster(object)) {
-            /*
-             * update event
-             */
-            EventID eventID = new EventID(parent.folderID, object.getId());
-            CalendarResult result = calendarSession.getCalendarService().updateEvent(calendarSession, eventID, caldavImport.getEvent(), clientTimestamp);
-            if (result.getUpdates().isEmpty()) {
-                LOG.debug("{}: Master event {} not updated.", getUrl(), eventID);
-            } else {
-                clientTimestamp = result.getTimestamp();
-                calendarSession.getEntityResolver().trackAttendeeUsage(result);
+        CalDAVImport patchedImport = EventPatches.Incoming(parent.getFactory()).applyAll(this, caldavImport);
+        new CalendarAccessOperation<Void>(factory) {
+
+            @Override
+            protected Void perform(IDBasedCalendarAccess access) throws OXException {
+                access.set(CalendarParameters.PARAMETER_IGNORE_CONFLICTS, Boolean.TRUE);
+                long clientTimestamp = object.getTimestamp();
+                if (null != patchedImport.getEvent() && false == Tools.isPhantomMaster(object)) {
+                    /*
+                     * update event
+                     */
+                    EventID eventID = new EventID(parent.folderID, object.getId());
+                    CalendarResult result = access.updateEvent(eventID, patchedImport.getEvent(), clientTimestamp);
+                    if (result.getUpdates().isEmpty()) {
+                        LOG.debug("{}: Master event {} not updated.", getUrl(), eventID);
+                    } else {
+                        clientTimestamp = result.getTimestamp();
+                        EntityResolver entityResolver = factory.requireService(CalendarUtilities.class).getEntityResolver(factory.getContext().getContextId());
+                        entityResolver.trackAttendeeUsage(result);
+                    }
+                }
+                /*
+                 * update exceptions
+                 */
+                for (Event changeException : patchedImport.getChangeExceptions()) {
+                    EventID eventID = new EventID(parent.folderID, object.getId(), changeException.getRecurrenceId());
+                    CalendarResult result = access.updateEvent(eventID, changeException, clientTimestamp);
+                    if (result.getUpdates().isEmpty()) {
+                        LOG.debug("{}: Exception {} not updated.", getUrl(), eventID);
+                    } else {
+                        clientTimestamp = result.getTimestamp();
+                        EntityResolver entityResolver = factory.requireService(CalendarUtilities.class).getEntityResolver(factory.getContext().getContextId());
+                        entityResolver.trackAttendeeUsage(result);
+                    }
+                }
+                return null;
             }
-        }
-        /*
-         * update exceptions
-         */
-        for (Event changeException : caldavImport.getChangeExceptions()) {
-            EventID eventID = new EventID(parent.folderID, object.getId(), changeException.getRecurrenceId());
-            CalendarResult result = calendarSession.getCalendarService().updateEvent(calendarSession, eventID, changeException, clientTimestamp);
-            if (result.getUpdates().isEmpty()) {
-                LOG.debug("{}: Exception {} not updated.", getUrl(), eventID);
-            } else {
-                clientTimestamp = result.getTimestamp();
-                calendarSession.getEntityResolver().trackAttendeeUsage(result);
-            }
-        }
+        }.execute(factory.getSession());
     }
 
     private Event createEvent(CalDAVImport caldavImport) throws OXException {
@@ -471,31 +495,36 @@ public class EventResource extends DAVObjectResource<Event> {
         /*
          * create event
          */
-        CalendarSession calendarSession = factory.getService(CalendarService.class).init(factory.getSession());
-        calendarSession.set(CalendarParameters.PARAMETER_IGNORE_CONFLICTS, Boolean.TRUE);
-        caldavImport = EventPatches.Incoming.applyAll(this, caldavImport);
-        CalendarResult result = calendarSession.getCalendarService().createEvent(calendarSession, parent.folderID, caldavImport.getEvent());
-        if (result.getCreations().isEmpty()) {
-            LOG.warn("{}: No event created.", getUrl());
-            throw new PreconditionException(DAVProtocol.CAL_NS.getURI(), "valid-calendar-object-resource", url, HttpServletResponse.SC_FORBIDDEN);
-        }
-        Event createdEvent = result.getCreations().get(0).getCreatedEvent();
-        long clientTimestamp = result.getTimestamp();
-        calendarSession.getEntityResolver().trackAttendeeUsage(result);
-        /*
-         * create exceptions
-         */
-        for (Event changeException : caldavImport.getChangeExceptions()) {
-            EventID eventID = new EventID(createdEvent.getFolderId(), createdEvent.getId(), changeException.getRecurrenceId());
-            result = calendarSession.getCalendarService().updateEvent(calendarSession, eventID, changeException, clientTimestamp);
-            if (result.getCreations().isEmpty()) {
-                LOG.warn("{}: No exception created.", getUrl());
-                throw new PreconditionException(DAVProtocol.CAL_NS.getURI(), "valid-calendar-object-resource", url, HttpServletResponse.SC_FORBIDDEN);
+        CalDAVImport patchedImport = EventPatches.Incoming(parent.getFactory()).applyAll(this, caldavImport);
+        return new CalendarAccessOperation<Event>(factory) {
+
+            @Override
+            protected Event perform(IDBasedCalendarAccess access) throws OXException {
+                CalendarResult result = access.createEvent(parent.folderID, patchedImport.getEvent());
+                if (result.getCreations().isEmpty()) {
+                    LOG.warn("{}: No event created.", getUrl());
+                    throw new PreconditionException(DAVProtocol.CAL_NS.getURI(), "valid-calendar-object-resource", url, HttpServletResponse.SC_FORBIDDEN);
+                }
+                Event createdEvent = result.getCreations().get(0).getCreatedEvent();
+                long clientTimestamp = result.getTimestamp();
+                EntityResolver entityResolver = factory.requireService(CalendarUtilities.class).getEntityResolver(factory.getContext().getContextId());
+                entityResolver.trackAttendeeUsage(result);
+                /*
+                 * create exceptions
+                 */
+                for (Event changeException : patchedImport.getChangeExceptions()) {
+                    EventID eventID = new EventID(createdEvent.getFolderId(), createdEvent.getId(), changeException.getRecurrenceId());
+                    result = access.updateEvent(eventID, changeException, clientTimestamp);
+                    if (result.getCreations().isEmpty()) {
+                        LOG.warn("{}: No exception created.", getUrl());
+                        throw new PreconditionException(DAVProtocol.CAL_NS.getURI(), "valid-calendar-object-resource", url, HttpServletResponse.SC_FORBIDDEN);
+                    }
+                    clientTimestamp = result.getTimestamp();
+                    entityResolver.trackAttendeeUsage(result);
+                }
+                return createdEvent;
             }
-            clientTimestamp = result.getTimestamp();
-            calendarSession.getEntityResolver().trackAttendeeUsage(result);
-        }
-        return createdEvent;
+        }.execute(factory.getSession());
     }
 
     /**
@@ -561,7 +590,7 @@ public class EventResource extends DAVObjectResource<Event> {
          * replace mapped incorrect strings, indicate "try again" if replacements were possible
          */
         LOG.info("Incorrect string detected, replacing problematic characters and trying again.");
-        CalendarUtilities calendarUtilities = getCalendarSession().getUtilities();
+        CalendarUtilities calendarUtilities = factory.requireService(CalendarUtilities.class);
         boolean hasReplaced = calendarUtilities.handleIncorrectString(e, caldavImport.getEvent());
         for (Event changeException : caldavImport.getChangeExceptions()) {
             hasReplaced |= calendarUtilities.handleIncorrectString(e, changeException);
@@ -574,7 +603,7 @@ public class EventResource extends DAVObjectResource<Event> {
          * trim mapped data truncations, indicate "try again" if possible
          */
         LOG.info("Data truncation detected, trimming problematic fields and trying again.");
-        CalendarUtilities calendarUtilities = getCalendarSession().getUtilities();
+        CalendarUtilities calendarUtilities = factory.requireService(CalendarUtilities.class);
         boolean hasTrimmed = calendarUtilities.handleDataTruncation(e, caldavImport.getEvent());
         hasTrimmed |= calendarUtilities.handleDataTruncation(e, caldavImport.getEvent().getAttendees());
         for (Event changeException : caldavImport.getChangeExceptions()) {
@@ -594,22 +623,24 @@ public class EventResource extends DAVObjectResource<Event> {
         /*
          * get identifier of conflicting event
          */
-        CalendarSession calendarSession = parent.getCalendarSession();
         String conflictingId = null;
         if (null != e.getLogArgs() && 1 < e.getLogArgs().length && null != e.getLogArgs()[1] && String.class.isInstance(e.getLogArgs()[1])) {
             conflictingId = (String) e.getLogArgs()[1];
-        }
-        if (null == conflictingId) {
-            conflictingId = calendarSession.getCalendarService().getUtilities().resolveByUID(calendarSession, caldavImport.getUID());
         }
         if (null != conflictingId) {
             /*
              * try to perform an update of the existing event with the imported data from the client
              */
             LOG.info("Event {} already exists (id {}), trying again as update.", caldavImport.getUID(), conflictingId);
-            long clientTimestamp = System.currentTimeMillis(); //TODO timestamp from where?
+            long clientTimestamp = CalendarUtils.DISTANT_FUTURE; //TODO timestamp from where?
             EventID eventID = new EventID(parent.folderID, conflictingId);
-            CalendarResult result = calendarSession.getCalendarService().updateEvent(calendarSession, eventID, caldavImport.getEvent(), clientTimestamp);
+            CalendarResult result = new CalendarAccessOperation<CalendarResult>(factory) {
+
+                @Override
+                protected CalendarResult perform(IDBasedCalendarAccess access) throws OXException {
+                    return access.updateEvent(eventID, caldavImport.getEvent(), clientTimestamp);
+                }
+            }.execute(factory.getSession());
             if (0 < result.getUpdates().size()) {
                 return Boolean.FALSE;
             }

@@ -66,9 +66,9 @@ import com.openexchange.dav.mixins.PrincipalURL;
 import com.openexchange.dav.resources.FolderCollection;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
-import com.openexchange.folderstorage.AbstractFolder;
 import com.openexchange.folderstorage.DefaultPermission;
 import com.openexchange.folderstorage.FolderService;
+import com.openexchange.folderstorage.ParameterizedFolder;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.groupware.ldap.User;
@@ -76,7 +76,6 @@ import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.user.UserService;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
-
 
 /**
  * {@link ShareHelper}
@@ -115,7 +114,7 @@ public class ShareHelper {
             if (false == folder.getOwnPermission().isAdmin()) {
                 throw WebdavProtocolException.generalError(folderCollection.getUrl(), HttpServletResponse.SC_FORBIDDEN);
             }
-            AbstractFolder updatableFolder = FolderCollection.prepareUpdatableFolder(folder);
+            ParameterizedFolder updatableFolder = FolderCollection.prepareUpdatableFolder(folder);
             updatableFolder.setPermissions(updatedPermissions.toArray(new Permission[updatedPermissions.size()]));
             try {
                 factory.requireService(FolderService.class).updateFolder(updatableFolder, folder.getLastModifiedUTC(), factory.getSession(), null);

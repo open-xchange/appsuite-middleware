@@ -59,8 +59,9 @@ import com.openexchange.caldav.servlet.CalDAV;
 import com.openexchange.caldav.servlet.CaldavPerformer;
 import com.openexchange.capabilities.CapabilitySet;
 import com.openexchange.chronos.ical.ICalService;
+import com.openexchange.chronos.provider.composition.IDBasedCalendarAccessFactory;
 import com.openexchange.chronos.service.CalendarAvailabilityService;
-import com.openexchange.chronos.service.CalendarService;
+import com.openexchange.chronos.service.CalendarUtilities;
 import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.contact.ContactService;
@@ -109,7 +110,7 @@ public class CaldavActivator extends HousekeepingActivator {
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class[] {
-            ICalEmitter.class, ICalParser.class, FolderService.class, CalendarService.class, RecurrenceService.class,
+            ICalEmitter.class, ICalParser.class, FolderService.class, RecurrenceService.class, CalendarUtilities.class, IDBasedCalendarAccessFactory.class,
             UserService.class, ConfigViewFactory.class, HttpService.class, JDOMParser.class, GroupService.class,
             ContactService.class, ResourceService.class, DatabaseService.class, ICalService.class, CalendarAvailabilityService.class
         };

@@ -105,7 +105,7 @@ public class CalendarColor extends SingleXMLPropertyMixin {
         if (null != folder) {
             String value = CalendarFolderField.optValue(folder.getProperties(), CalendarFolderField.COLOR, String.class);
             if (null != value) {
-                return null;
+                return value;
             }
         }
         return getValueFromMeta(folder);

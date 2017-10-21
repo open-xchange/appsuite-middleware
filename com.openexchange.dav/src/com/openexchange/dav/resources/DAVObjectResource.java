@@ -90,7 +90,7 @@ public abstract class DAVObjectResource<T> extends DAVResource {
         this.parent = parent;
         this.object = object;
         this.exists = null != object;
-        this.parentFolderID = Tools.parse(parent.getFolder().getID());
+        this.parentFolderID = getId(parent);
     }
 
     /**
@@ -117,13 +117,20 @@ public abstract class DAVObjectResource<T> extends DAVResource {
     protected abstract Date getLastModified(T object);
 
     /**
-     * Gets the identifier of an object.
+     * Gets the numerical identifier of an object, as used by the attachment service.
      *
      * @param object The object to get the identifier for
      * @return The identifier
      */
     protected abstract int getId(T object);
 
+    /**
+     * Gets the numerical folder identifier of a collection, as used by the attachment service.
+     *
+     * @param collection The folder collection to get the identifier for
+     * @return The identifier
+     */
+    protected abstract int getId(FolderCollection<T> collection) throws OXException;
 
     @Override
     public Date getCreationDate() throws WebdavProtocolException {
@@ -222,7 +229,7 @@ public abstract class DAVObjectResource<T> extends DAVResource {
              * store new attachment & remove previous attachment
              */
             AttachmentMetadata metadata = addAttachment(attachments, inputStream, object, contentType, fileName, size);
-            attachments.detachFromObject(parentFolderID, getId(object), AttachmentUtils.getModuleId(parent.getFolder().getContentType()),
+            attachments.detachFromObject(getId(parent), getId(object), AttachmentUtils.getModuleId(parent.getFolder().getContentType()),
                 new int[] { attachmentId }, factory.getSession(), factory.getContext(), factory.getUser(), factory.getUserConfiguration());
             attachments.commit();
             return metadata.getId();
@@ -251,7 +258,7 @@ public abstract class DAVObjectResource<T> extends DAVResource {
             /*
              * detach attachment
              */
-            attachments.detachFromObject(parentFolderID, getId(object), AttachmentUtils.getModuleId(parent.getFolder().getContentType()),
+            attachments.detachFromObject(getId(parent), getId(object), AttachmentUtils.getModuleId(parent.getFolder().getContentType()),
                 new int[] { attachmentId }, factory.getSession(), factory.getContext(), factory.getUser(), factory.getUserConfiguration());
             attachments.commit();
         } catch (OXException e) {
