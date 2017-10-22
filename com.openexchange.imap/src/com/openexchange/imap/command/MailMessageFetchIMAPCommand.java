@@ -80,6 +80,7 @@ import javax.mail.internet.ParameterList;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.IMAPServerInfo;
 import com.openexchange.java.Strings;
+import com.openexchange.log.LogProperties;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.dataobjects.IDMailMessage;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -548,6 +549,10 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
                 m.setHasAttachment(new ContentType(cts).startsWith("multipart/mixed"));
             }
         }
+
+        // Drop possible set "com.openexchange.mail.mailId" log property
+        LogProperties.remove(LogProperties.Name.MAIL_MAIL_ID);
+
         return m;
     }
 
@@ -1131,8 +1136,10 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
         @Override
         public void handleItem(final Item item, final IDMailMessage msg, final org.slf4j.Logger logger) {
             long id = ((UID) item).uid;
-            msg.setMailId(Long.toString(id));
+            String sUid = Long.toString(id);
+            msg.setMailId(sUid);
             msg.setUid(id);
+            LogProperties.put(LogProperties.Name.MAIL_MAIL_ID, sUid);
         }
 
         @Override
