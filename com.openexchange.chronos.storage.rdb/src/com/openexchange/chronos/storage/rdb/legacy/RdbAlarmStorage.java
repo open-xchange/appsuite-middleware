@@ -320,7 +320,19 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
 
     @Override
     public void deleteAlarms(int userId) throws OXException {
-        throw new UnsupportedOperationException();
+        int updated = 0;
+        Connection connection = null;
+        try {
+            connection = dbProvider.getWriteConnection(context);
+            txPolicy.setAutoCommit(connection, false);
+            updated += deleteReminderMinutes(connection, context.getContextId(), userId);
+            updated += deleteReminderTriggers(connection, context.getContextId(), userId);
+            txPolicy.commit(connection);
+        } catch (SQLException e) {
+            throw asOXException(e);
+        } finally {
+            release(connection, updated);
+        }
     }
     
     @Override
@@ -616,6 +628,16 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
         }
     }
 
+    private static int deleteReminderTriggers(Connection connection, int contextID, int userID) throws SQLException {
+        try (PreparedStatement stmt = connection.prepareStatement("DELETE FROM reminder WHERE cid=? AND module=? AND userid=?")) {
+            int parameterIndex = 1;
+            stmt.setInt(parameterIndex++, contextID);
+            stmt.setInt(parameterIndex++, REMINDER_MODULE);
+            stmt.setInt(parameterIndex++, userID);
+            return logExecuteUpdate(stmt);
+        }
+    }
+    
     private static int deleteReminderTriggers(Connection connection, int contextID, List<String> eventIds) throws SQLException {
         StringBuilder stringBuilder = new StringBuilder()
             .append("DELETE FROM reminder WHERE cid=? AND module=? AND target_id")
@@ -649,6 +671,16 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
         }
     }
 
+    private static int deleteReminderMinutes(Connection connection, int contextID, int userID) throws SQLException {
+        try (PreparedStatement stmt = connection.prepareStatement("UPDATE prg_dates_members SET reminder=? WHERE cid=? AND member_uid=?")) {
+            int parameterIndex = 1;
+            stmt.setNull(parameterIndex++, java.sql.Types.INTEGER);
+            stmt.setInt(parameterIndex++, contextID);
+            stmt.setInt(parameterIndex++, userID);
+            return logExecuteUpdate(stmt);
+        }
+    }
+    
     private static int deleteReminderMinutes(Connection connection, int contextID, List<String> eventIds) throws SQLException {
         StringBuilder stringBuilder = new StringBuilder()
             .append("UPDATE prg_dates_members SET reminder=? WHERE cid=? AND object_id")
