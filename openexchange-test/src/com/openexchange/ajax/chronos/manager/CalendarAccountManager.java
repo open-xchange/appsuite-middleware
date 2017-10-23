@@ -59,6 +59,8 @@ import org.json.JSONObject;
 import com.openexchange.ajax.chronos.UserApi;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.CalendarAccountId;
+import com.openexchange.testing.httpclient.models.CalendarAccountProviderData;
+import com.openexchange.testing.httpclient.models.CalendarAccountProvidersResponse;
 import com.openexchange.testing.httpclient.models.CalendarAccountResponse;
 import com.openexchange.testing.httpclient.models.CalendarAccountsResponse;
 import com.openexchange.testing.httpclient.models.CommonResponse;
@@ -139,6 +141,17 @@ public class CalendarAccountManager extends AbstractManager {
             rememberCalendarAccountId(createCalendarAccountId(response.getData().getId(), null));
         }
         return response;
+    }
+
+    /**
+     * Returns a {@link List} with all available calendar providers
+     * 
+     * @return A {@link List} with all available calendar providers
+     * @throws ApiException if an API error is occurred
+     */
+    public List<CalendarAccountProviderData> listAvailableProviders() throws ApiException {
+        CalendarAccountProvidersResponse providersResponse = userApi.getChronosApi().providers(userApi.getSession());
+        return checkResponse(providersResponse.getError(), providersResponse.getErrorDesc(), providersResponse.getData());
     }
 
     private void rememberCalendarAccountId(CalendarAccountId calAccId) throws ApiException {
