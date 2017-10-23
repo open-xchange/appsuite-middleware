@@ -154,7 +154,8 @@ public class SchedJoulesCalendarProvider extends CachingCalendarProvider {
      * @see com.openexchange.chronos.provider.CalendarProvider#reconfigureAccount(com.openexchange.session.Session, org.json.JSONObject, org.json.JSONObject, com.openexchange.chronos.service.CalendarParameters)
      */
     @Override
-    protected JSONObject reconfigureAccountOpt(Session session, JSONObject internalConfig, JSONObject userConfig, CalendarParameters parameters) throws OXException {
+    protected JSONObject reconfigureAccountOpt(Session session, CalendarAccount calendarAccount, JSONObject userConfig, CalendarParameters parameters) throws OXException {
+        JSONObject internalConfig = calendarAccount.getInternalConfiguration();
         // User configuration is 'null' or empty or has no 'folders' attribute, thus we have to remove all subscriptions
         if (userConfig == null || userConfig.isEmpty() || !userConfig.hasAndNotNull(SchedJoulesFields.FOLDERS)) {
             // Remove cache information and folders
@@ -223,6 +224,12 @@ public class SchedJoulesCalendarProvider extends CachingCalendarProvider {
     @Override
     protected void onAccountDeletedOpt(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
         // nothing to do
+    }
+
+    @Override
+    public boolean recreateData(Session session, JSONObject originUserConfiguration, JSONObject newUserConfiguration) throws OXException {
+        // TODO Auto-generated method stub
+        return true;
     }
 
     ///////////////////////////////////////////// HELPERS ///////////////////////////////////////////

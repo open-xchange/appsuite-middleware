@@ -97,13 +97,12 @@ public class ICalCalendarAccess extends SingleFolderCachingCalendarAccess {
         super(session, account, parameters);
         JSONObject userConfiguration = new JSONObject(account.getUserConfiguration());
         ICalAuthParser.decrypt(userConfiguration, session.getPassword());
-        this.iCalFeedConfig = new ICalFeedConfig.Builder(userConfiguration, getFolderConfiguration()).build();
+        this.iCalFeedConfig = new ICalFeedConfig.Builder(session, userConfiguration, getFolderConfiguration(), false).build();
         this.reader = new ICalFeedReader(session, iCalFeedConfig);
     }
 
     @Override
-    public void close() {
-    }
+    public void close() {}
 
     @Override
     public long getRefreshInterval(String folderId) {
@@ -125,6 +124,12 @@ public class ICalCalendarAccess extends SingleFolderCachingCalendarAccess {
             return new ExternalCalendarResult();
         }
         return getAndHandleFeed();
+    }
+
+    @Override
+    public String updateFolder(String folderId, CalendarFolder folder, long clientTimestamp) throws OXException {
+        // nothing cahnged, return origin folder id
+        return folderId;
     }
 
     private void verifyURI() throws OXException {
@@ -193,11 +198,5 @@ public class ICalCalendarAccess extends SingleFolderCachingCalendarAccess {
     @Override
     public void handleExceptions(String calendarFolderId, OXException e) {
 
-    }
-
-    @Override
-    public String updateFolder(String folderId, CalendarFolder folder, long clientTimestamp) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
     }
 }

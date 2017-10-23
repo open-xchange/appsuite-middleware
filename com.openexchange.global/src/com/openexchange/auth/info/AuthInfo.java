@@ -185,4 +185,54 @@ public class AuthInfo {
         return token;
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (!AuthInfo.class.isInstance(obj)) {
+            return false;
+        }
+        AuthInfo other = (AuthInfo) obj;
+        if (authType != other.authType) {
+            return false;
+        }
+        if (login == null) {
+            if (other.login != null) {
+                return false;
+            }
+        } else if (!login.equals(other.login)) {
+            return false;
+        }
+
+        if (password == null) {
+            if (other.password != null) {
+                return false;
+            }
+        } else if (!password.equals(other.password)) {
+            return false;
+        }
+
+        if (oauthAccountId == null) {
+            if (other.oauthAccountId != null) {
+                return false;
+            }
+        } else if (!oauthAccountId.equals(other.oauthAccountId)) {
+            return false;
+        }
+
+        if (token == null) {
+            if (other.token != null) {
+                return false;
+            }
+        } else if (!token.equals(other.token)) {
+            return false;
+        }
+
+        return true;
+    }
+
 }

@@ -112,13 +112,13 @@ public class InternalCalendarProvider implements AutoProvisioningCalendarProvide
     }
 
     @Override
-    public JSONObject reconfigureAccount(Session session, JSONObject internalConfig, JSONObject userConfig, CalendarParameters parameters) throws OXException {
+    public JSONObject reconfigureAccount(Session session, CalendarAccount calendarAccount, JSONObject userConfig, CalendarParameters parameters) throws OXException {
         /*
          * initialize & check user config
          */
         ServerSession serverSession = ServerSessionAdapter.valueOf(session);
         new UserConfigHelper(services).checkUserConfig(serverSession, userConfig);
-        return internalConfig;
+        return calendarAccount.getInternalConfiguration();
     }
 
     @Override
