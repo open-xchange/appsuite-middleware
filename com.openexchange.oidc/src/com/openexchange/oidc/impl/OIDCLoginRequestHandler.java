@@ -90,6 +90,7 @@ import com.openexchange.session.reservation.SessionReservationService;
 import com.openexchange.sessiond.SessionFilter;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.tools.servlet.http.Cookies;
+import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.user.UserService;
 
@@ -247,7 +248,7 @@ public class OIDCLoginRequestHandler implements LoginRequestHandler {
         LOG.trace("createOIDCAutologinCookie(HttpServletRequest request: {}, Session session: {}, String uuid: {})", request.getRequestURI(), session.getSessionID(), uuid);
         Cookie oidcAutologinCookie = new Cookie(OIDCTools.AUTOLOGIN_COOKIE_PREFIX + session.getHash(), uuid);
         oidcAutologinCookie.setPath("/");
-        oidcAutologinCookie.setSecure(OIDCTools.considerSecure(request));
+        oidcAutologinCookie.setSecure(Tools.considerSecure(request));
         oidcAutologinCookie.setMaxAge(-1);
 
         String domain = OIDCTools.getDomainName(request, services.getOptionalService(HostnameService.class));

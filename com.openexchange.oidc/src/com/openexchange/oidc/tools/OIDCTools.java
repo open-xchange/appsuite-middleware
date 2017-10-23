@@ -127,9 +127,9 @@ public class OIDCTools {
     }
 
     /**
-     * Generates the relative redirect location to enter the web frontend directly with a session.
+     * Generates the relative redirect location of the web frontend.
      *
-     * @param session The session
+     * @param session The session to add to the location
      * @param uiWebPath The path to use
      */
     public static String buildFrontendRedirectLocation(Session session, String uiWebPath) {
@@ -178,23 +178,6 @@ public class OIDCTools {
         }
 
         return hostname;
-    }
-
-    /**
-     * Is the given {@link HttpServletRequest} secure by configuration or is the option set?
-     *
-     * @param request The {@link HttpServletRequest}
-     * @return Is the request considered secure or not
-     */
-    public static boolean considerSecure(final HttpServletRequest request) {
-        LOG.trace("considerSecure(final HttpServletRequest request: {})", request.getRequestURI());
-        boolean isSecure = request.isSecure();
-        final ConfigurationService configurationService = Services.getService(ConfigurationService.class);
-        if (configurationService != null && configurationService.getBoolProperty(ServerConfig.Property.FORCE_HTTPS.getPropertyName(), false) && !Cookies.isLocalLan(request)) {
-            // HTTPS is enforced by configuration
-            isSecure = true;
-        }
-        return isSecure;
     }
 
     /**
