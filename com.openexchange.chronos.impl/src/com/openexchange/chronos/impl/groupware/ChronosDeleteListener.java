@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.chronos.storage.rdb.groupware;
+package com.openexchange.chronos.impl.groupware;
 
 import java.sql.Connection;
 import java.util.Collections;
@@ -72,14 +72,12 @@ import com.openexchange.chronos.service.EntityResolver;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.chronos.storage.CalendarStorageFactory;
 import com.openexchange.chronos.storage.EventStorage;
-import com.openexchange.chronos.storage.rdb.osgi.Services;
 import com.openexchange.database.provider.DBTransactionPolicy;
 import com.openexchange.database.provider.SimpleDBProvider;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteListener;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.search.SearchTerm;
 import com.openexchange.search.SingleSearchTerm;
 import com.openexchange.search.SingleSearchTerm.SingleOperation;
@@ -88,7 +86,6 @@ import com.openexchange.search.internal.operands.ConstantOperand;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
-import com.openexchange.user.UserService;
 
 /**
  * {@link ChronosDeleteListener}
@@ -101,15 +98,18 @@ import com.openexchange.user.UserService;
 public final class ChronosDeleteListener implements DeleteListener {
 
     private CalendarStorageFactory factory;
+    private CalendarUtilities      calendarUtilities;
 
     /**
      * Initializes a new {@link ChronosDeleteListener}.
      * 
      * @param factory The {@link CalendarStorageFactory}
+     * @param calendarUtilities The {@link CalendarUtilities}
      */
-    public ChronosDeleteListener(CalendarStorageFactory factory) {
+    public ChronosDeleteListener(CalendarStorageFactory factory, CalendarUtilities calendarUtilities) {
         super();
         this.factory = factory;
+        this.calendarUtilities = calendarUtilities;
     }
 
     @Override
@@ -121,12 +121,11 @@ public final class ChronosDeleteListener implements DeleteListener {
                  */
                 purgeUserData(readCon, writeCon, event.getContext(), event.getId(), event.getSession());
             }
-        } else if (DeleteEvent.TYPE_CONTEXT == event.getType()) {
-            /*
-             * remove all calendar data of deleted context
-             */
-            purgeContextData(readCon, writeCon, event.getContext(), event.getSession());
         }
+        /*
+         * DeleteEvent.TYPE_CONTEXT is handled by com.openexchange.admin.storage.mysqlStorage.OXContextMySQLStorage.deleteTablesData(String, Integer, Connection, boolean)
+         * All tables containing a 'cid' will be cleaned up by this. So there is no need to delete anything here.
+         */
     }
 
     /**
@@ -143,8 +142,7 @@ public final class ChronosDeleteListener implements DeleteListener {
         int accountId = CalendarAccount.DEFAULT_ACCOUNT.getAccountId();
         Integer userID = Integer.valueOf(userId);
         SimpleDBProvider dbProvider = new SimpleDBProvider(readCon, writeCon);
-        CalendarUtilities calendarUtilities = Services.getOptionalService(CalendarUtilities.class);
-        EntityResolver entityResolver = null == calendarUtilities ? null : calendarUtilities.getEntityResolver(context.getContextId());
+        EntityResolver entityResolver = calendarUtilities.getEntityResolver(context.getContextId());
         CalendarStorage storage = factory.create(context, accountId, entityResolver, dbProvider, DBTransactionPolicy.NO_TRANSACTIONS);
 
         /*
@@ -172,14 +170,17 @@ public final class ChronosDeleteListener implements DeleteListener {
             List<Attendee> attendees = entry.getValue();
             if (null != attendees && false == attendees.isEmpty()) {
                 try {
+                    Event event = events.stream().filter(e -> e.getId().equals(entry.getKey())).findFirst().get();
                     if (CalendarUtils.isLastUserAttendee(attendees, userId)) {
                         // The user is the only attendee, delete event and its attachments
                         eventStorage.deleteEvent(entry.getKey());
-                        Event event = events.stream().filter(e -> e.getId().equals(entry.getKey())).findFirst().get();
                         event.setAttendees(attendees);
                         storage.getAttachmentStorage().deleteAttachments(serverSession, CalendarUtils.getFolderView(event, userId), entry.getKey());
                     } else {
+                        // The user needs to be removed from the event, this modifies the event
                         attendees = Collections.singletonList(attendees.stream().filter(a -> a.getEntity() == userId).findFirst().get());
+                        event.setLastModified(new Date());
+                        eventStorage.updateEvent(event);
                     }
                     storage.getAttendeeStorage().deleteAttendees(entry.getKey(), attendees);
                 } catch (NoSuchElementException e) {
@@ -194,7 +195,7 @@ public final class ChronosDeleteListener implements DeleteListener {
          */
 
         // Context administrator as replacement
-        CalendarUser admin = null == entityResolver ? getCalendarUser(context, context.getMailadmin()) : entityResolver.prepareUserAttendee(context.getMailadmin());
+        CalendarUser admin = entityResolver.prepareUserAttendee(context.getMailadmin());
 
         // Update events where the user is the calendar user
         events = eventStorage.searchEvents(equalsFieldUserTerm(EventField.CALENDAR_USER, userID), null, fields);
@@ -231,43 +232,11 @@ public final class ChronosDeleteListener implements DeleteListener {
          * Delete account
          */
         storage.getAccountStorage().deleteAccount(userId, accountId);
-
-        // TODO Remove Tombstones
-    }
-
-    /**
-     * Purges the context data
-     * 
-     * @param readCon The readable {@link Connection}
-     * @param writeCon The writable {@link Connection}
-     * @param context The {@link Context}
-     * @param session {@link Session} The users session
-     * @throws OXException In case service is unavailable or SQL error
-     */
-    private void purgeContextData(Connection readCon, Connection writeCon, Context context, Session session) throws OXException {
-        // TODO 
     }
 
     /*
      * ====== HELPERS ======
      */
-
-    /**
-     * Loads the user from the {@link UserService} and converts it to a {@link CalendarUser}
-     * 
-     * @param context The {@link Context}
-     * @param userId The identifier of the user
-     * @return The user as {@link CalendarUser}
-     * @throws OXException In case of missing service
-     */
-    private CalendarUser getCalendarUser(Context context, int userId) throws OXException {
-        User user = Services.getService(UserService.class, true).getUser(userId, context);
-        CalendarUser calendarUser = new CalendarUser();
-        calendarUser.setEntity(user.getId());
-        calendarUser.setCn(user.getDisplayName());
-        calendarUser.setUri(CalendarUtils.getURI(user.getMail()));
-        return calendarUser;
-    }
 
     /**
      * Get the organizer from the given user
@@ -300,8 +269,7 @@ public final class ChronosDeleteListener implements DeleteListener {
      * @return A new {@link SingleSearchTerm}
      */
     private SingleSearchTerm eqaulsFieldTerm(Enum<?> field) {
-        ColumnFieldOperand<Enum<?>> operand = new ColumnFieldOperand<Enum<?>>(field);
-        return equalsTerm().addOperand(operand);
+        return equalsTerm().addOperand(new ColumnFieldOperand<Enum<?>>(field));
     }
 
     /**
@@ -313,7 +281,6 @@ public final class ChronosDeleteListener implements DeleteListener {
      * @return A new {@link SingleSearchTerm}
      */
     private SingleSearchTerm equalsFieldUserTerm(Enum<?> field, Integer userID) {
-        ConstantOperand<Integer> user = new ConstantOperand<Integer>(userID);
-        return eqaulsFieldTerm(field).addOperand(user);
+        return eqaulsFieldTerm(field).addOperand(new ConstantOperand<Integer>(userID));
     }
 }
