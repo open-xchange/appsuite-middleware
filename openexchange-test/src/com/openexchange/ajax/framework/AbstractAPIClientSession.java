@@ -58,6 +58,7 @@ import org.junit.runner.RunWith;
 import com.google.code.tempusfugit.concurrency.ConcurrentTestRunner;
 import com.google.code.tempusfugit.concurrency.annotations.Concurrent;
 import com.openexchange.ajax.chronos.EnhancedApiClient;
+import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.test.pool.TestContext;
 import com.openexchange.test.pool.TestContextPool;
@@ -236,13 +237,25 @@ public abstract class AbstractAPIClientSession {
         ApiClient newClient;
         try {
             newClient = new ApiClient();
-            newClient.setBasePath("http://localhost/ajax");
+            setBasePath(newClient);
             newClient.setUserAgent("ox-test-client");
         } catch (Exception e) {
             LOG.error("Could not generate new client for user {} in context {} ", user.getUser(), user.getContext());
             throw new OXException();
         }
         return newClient;
+    }
+
+    private void setBasePath(ApiClient newClient) {
+        String hostname = AJAXConfig.getProperty(AJAXConfig.Property.HOSTNAME);
+        if (hostname == null) {
+            hostname = "localhost";
+        }
+        String protocol = AJAXConfig.getProperty(AJAXConfig.Property.PROTOCOL);
+        if (protocol == null) {
+            protocol = "http";
+        }
+        newClient.setBasePath(protocol + "://" + hostname + "/ajax");
     }
 
     /**
@@ -262,7 +275,7 @@ public abstract class AbstractAPIClientSession {
         EnhancedApiClient newClient;
         try {
             newClient = new EnhancedApiClient();
-            newClient.setBasePath("http://localhost/ajax");
+            setBasePath(newClient);
             newClient.setUserAgent("ox-test-client");
         } catch (Exception e) {
             LOG.error("Could not generate new client for user {} in context {} ", user.getUser(), user.getContext());

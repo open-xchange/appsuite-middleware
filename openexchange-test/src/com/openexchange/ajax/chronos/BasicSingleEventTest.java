@@ -90,7 +90,7 @@ import com.openexchange.testing.httpclient.models.UpdatesResult;
 public class BasicSingleEventTest extends AbstractChronosTest {
 
     /**
-     * Initialises a new {@link BasicSingleEventTest}.
+     * Initializes a new {@link BasicSingleEventTest}.
      */
     public BasicSingleEventTest() {
         super();
