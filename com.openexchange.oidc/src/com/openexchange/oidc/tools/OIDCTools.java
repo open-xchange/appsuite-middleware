@@ -65,8 +65,6 @@ import com.openexchange.ajax.SessionUtility;
 import com.openexchange.ajax.login.HashCalculator;
 import com.openexchange.ajax.login.LoginConfiguration;
 import com.openexchange.ajax.login.LoginTools;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.configuration.ServerConfig;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.notify.hostname.HostnameService;
@@ -308,7 +306,7 @@ public class OIDCTools {
     public static String getUiClient(HttpServletRequest request) {
         String uiClientID = request.getParameter("client");
 
-        if (uiClientID == null || uiClientID.isEmpty()) {
+        if (uiClientID == null || Strings.isEmpty(uiClientID)) {
 
             LoginConfiguration loginConfiguration =  LoginServlet.getLoginConfiguration();
             uiClientID = loginConfiguration.getDefaultClient();
