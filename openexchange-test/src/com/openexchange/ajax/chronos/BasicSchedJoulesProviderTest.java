@@ -75,6 +75,14 @@ import com.openexchange.testing.httpclient.models.CalendarAccountResponse;
  */
 public class BasicSchedJoulesProviderTest extends AbstractChronosTest {
 
+    /**
+     * _90734
+     */
+    private static final int CALENDAR_ONE = 90734;
+    /**
+     * _24428282
+     */
+    private static final int CALENDAR_TWO = 24428282;
     private static final String PROVIDER_ID = "schedjoules";
 
     /**
@@ -130,7 +138,7 @@ public class BasicSchedJoulesProviderTest extends AbstractChronosTest {
      */
     @Test
     public void testCreateAccountWithSchedJoulesSubscription() throws ApiException, JSONException, ChronosApiException {
-        CalendarAccountData accountData = calendarAccountManager.createCalendarAccount(PROVIDER_ID, createAccountConfiguration(90734, null, -1).toString(), false);
+        CalendarAccountData accountData = calendarAccountManager.createCalendarAccount(PROVIDER_ID, createAccountConfiguration(CALENDAR_ONE, null, -1).toString(), false);
         assertAccountConfiguration(accountData.getConfiguration(), 1);
     }
 
@@ -140,14 +148,19 @@ public class BasicSchedJoulesProviderTest extends AbstractChronosTest {
      */
     @Test
     public void testUpdateAccountAddOneSubscription() throws ApiException, JSONException {
-        JSONObject initialConfiguration = createAccountConfiguration(90734, null, -1);
+        JSONObject initialConfiguration = createAccountConfiguration(CALENDAR_ONE, null, -1);
         CalendarAccountResponse calendarAccount = calendarAccountManager.createCalendarAccount(PROVIDER_ID, initialConfiguration.toString());
         CalendarAccountData accountData = calendarAccount.getData();
 
-        JSONObject config = assertAccountConfiguration(accountData.getConfiguration(), 1);
-        config.getJSONArray("folders").put(createFolder(123, null, -1));
+        JSONObject accountConfig = assertAccountConfiguration(accountData.getConfiguration(), 1);
+        accountConfig.getJSONArray("folders").put(createFolder(CALENDAR_TWO, null, -1));
 
-        calendarAccountManager.updateCalendarAccount(accountData.getId(), accountData.getTimestamp(), config.toString());
+        JSONObject configuration = new JSONObject();
+        configuration.put("configuration", accountConfig);
+
+        // Add the second subscription
+        CalendarAccountData updatedAccountData = calendarAccountManager.updateCalendarAccount(accountData.getId(), accountData.getTimestamp(), configuration.toString());
+        assertAccountConfiguration(updatedAccountData.getConfiguration(), 2);
     }
 
     /**
@@ -155,8 +168,29 @@ public class BasicSchedJoulesProviderTest extends AbstractChronosTest {
      * removing one existing subscription
      */
     @Test
-    public void testUpdateAccountRemoveOneSubscription() {
-        fail("Not implemented yet");
+    public void testUpdateAccountRemoveOneSubscription() throws JSONException, ApiException {
+        JSONObject initialConfiguration = createAccountConfiguration(CALENDAR_ONE, null, -1);
+        CalendarAccountResponse calendarAccount = calendarAccountManager.createCalendarAccount(PROVIDER_ID, initialConfiguration.toString());
+        CalendarAccountData accountData = calendarAccount.getData();
+
+        JSONObject accountConfig = assertAccountConfiguration(accountData.getConfiguration(), 1);
+        accountConfig.getJSONArray("folders").put(createFolder(CALENDAR_TWO, null, -1));
+
+        JSONObject configuration = new JSONObject();
+        configuration.put("configuration", accountConfig);
+
+        // Add the second subscription
+        CalendarAccountData updatedAccountData = calendarAccountManager.updateCalendarAccount(accountData.getId(), accountData.getTimestamp(), configuration.toString());
+        accountConfig = assertAccountConfiguration(updatedAccountData.getConfiguration(), 2);
+
+        accountConfig.getJSONArray("folders").remove(0);
+
+        configuration = new JSONObject();
+        configuration.put("configuration", accountConfig);
+
+        // Remove the first subscription
+        updatedAccountData = calendarAccountManager.updateCalendarAccount(accountData.getId(), updatedAccountData.getTimestamp(), configuration.toString());
+        assertAccountConfiguration(updatedAccountData.getConfiguration(), 1);
     }
 
     /**

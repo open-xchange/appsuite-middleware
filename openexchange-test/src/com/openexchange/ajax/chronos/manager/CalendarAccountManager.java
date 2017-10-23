@@ -165,7 +165,7 @@ public class CalendarAccountManager extends AbstractManager {
      * @throws ApiException if an API error is occurred
      */
     public CalendarAccountData updateCalendarAccount(String accountId, long timestamp, String configuration) throws ApiException {
-        CalendarAccountResponse response = updateCalendarAccount(createCalendarAccountId(accountId, timestamp), configuration);
+        CalendarAccountResponse response = userApi.getChronosApi().updateAccount(userApi.getSession(), accountId, timestamp, configuration);
         return checkResponse(response.getError(), response.getErrorDesc(), response.getData());
     }
 
