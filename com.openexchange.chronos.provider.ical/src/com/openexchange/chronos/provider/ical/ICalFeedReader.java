@@ -120,6 +120,10 @@ public class ICalFeedReader extends ICalFeedConnector {
                 if (null == httpEntity) {
                     return null;
                 }
+                long contentLength = httpEntity.getContentLength();
+                if (contentLength > this.allowedFeedSize) {
+                    throw ICalProviderExceptionCodes.FEED_SIZE_EXCEEDED.create(iCalFeedConfig.getFeedUrl(), contentLength, this.allowedFeedSize);
+                }
                 result.setCalendar(importCalendar(httpEntity));
                 return result;
             }

@@ -133,6 +133,11 @@ public class ICalFeedConnector {
             headMethod = prepareHead();
             response = httpClient.execute(headMethod);
             HeadResult result = new HeadResult(response.getStatusLine(), response.getAllHeaders());
+
+            long contentLength = Long.parseLong(result.getContentLength());
+            if (contentLength > this.allowedFeedSize) {
+                throw ICalProviderExceptionCodes.FEED_SIZE_EXCEEDED.create(iCalFeedConfig.getFeedUrl(), contentLength, this.allowedFeedSize);
+            }
             if (result.getStatusCode() >= 200 && result.getStatusCode() < 300) {
                 return result;
             }
