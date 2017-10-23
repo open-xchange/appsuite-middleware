@@ -4,4 +4,4 @@ properties:
   data:
     type: array
     items:
-      $ref: "#/definitions/CalendarProviderData"
+      $ref: "#/definitions/CalendarAccountProviderData"
