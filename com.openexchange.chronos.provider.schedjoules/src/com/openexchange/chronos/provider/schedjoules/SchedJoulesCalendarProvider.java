@@ -57,7 +57,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.chronos.provider.CalendarAccess;
 import com.openexchange.chronos.provider.CalendarAccount;
-import com.openexchange.chronos.provider.caching.CachingCalendarAccess;
 import com.openexchange.chronos.provider.caching.CachingCalendarProvider;
 import com.openexchange.chronos.provider.schedjoules.exception.SchedJoulesProviderExceptionCodes;
 import com.openexchange.chronos.schedjoules.api.SchedJoulesAPI;
@@ -186,7 +185,7 @@ public class SchedJoulesCalendarProvider extends CachingCalendarProvider {
 
             JSONArray additions = new JSONArray();
             boolean added = handleAdditions(userConfigFolders, internalItemIds, additions);
-            boolean deleted = handleDeletions(getInternalConfigCaching(internalConfig), internalConfigFolders, internalItemIds);
+            boolean deleted = handleDeletions(internalConfigFolders, internalItemIds);
             addToInternalConfiguration(internalConfigFolders, additions);
 
             return (added || deleted) ? internalConfig : null;
@@ -304,20 +303,18 @@ public class SchedJoulesCalendarProvider extends CachingCalendarProvider {
     /**
      * Handle any potential deletions.
      * 
-     * @param internalConfigFolders The internal configuration for 'folderCaching'
      * @param internalConfigFolders The internal configuration for 'folders'
      * @param internalItemIds The items that are to be removed from the internal configuration
      * @return <code>true</code> if the internal configuration was changed, <code>false</code> otherwise
      * @throws JSONException if a JSON error occurs
      */
-    private boolean handleDeletions(JSONObject internalConfigCaching, JSONArray internalConfigFolders, Map<String, Integer> internalItemIds) throws JSONException {
+    private boolean handleDeletions(JSONArray internalConfigFolders, Map<String, Integer> internalItemIds) throws JSONException {
         if (internalItemIds.isEmpty()) {
             return false;
         }
 
         for (String name : internalItemIds.keySet()) {
             internalConfigFolders.remove(internalItemIds.get(name));
-            internalConfigCaching.remove(name);
         }
         return true;
     }
@@ -333,16 +330,5 @@ public class SchedJoulesCalendarProvider extends CachingCalendarProvider {
         for (int index = 0; index < additions.length(); index++) {
             internalConfigFolders.put(additions.getJSONObject(index));
         }
-    }
-
-    /**
-     * Returns the {@link CachingCalendarAccess#CACHING} attribute or an empty object
-     * 
-     * @param internalConfig The internal configuration
-     * @return the {@link CachingCalendarAccess#CACHING} attribute or an empty object if no caching elements exist yet
-     */
-    private JSONObject getInternalConfigCaching(JSONObject internalConfig) {
-        JSONObject internalConfigCaching = internalConfig.optJSONObject(CachingCalendarAccess.CACHING);
-        return internalConfigCaching == null ? new JSONObject() : internalConfigCaching;
     }
 }
