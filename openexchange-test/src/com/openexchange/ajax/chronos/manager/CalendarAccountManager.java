@@ -175,11 +175,7 @@ public class CalendarAccountManager extends AbstractManager {
     public String createCalendarAccountTestConfiguration(boolean updateConfig) throws JSONException {
         JSONObject obj = new JSONObject();
         obj.put("enabled", "true");
-        if (updateConfig) {
-            obj.put("color", "blue");
-        } else {
-            obj.put("color", "red");
-        }
+        obj.put("color", updateConfig ? "blue" : "red");
         return obj.toString();
     }
 
