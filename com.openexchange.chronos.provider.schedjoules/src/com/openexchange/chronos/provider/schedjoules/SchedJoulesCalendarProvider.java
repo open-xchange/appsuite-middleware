@@ -274,7 +274,7 @@ public class SchedJoulesCalendarProvider extends CachingCalendarProvider {
         JSONObject internalItem = new JSONObject();
         internalItem.put(SchedJoulesFields.REFRESH_INTERVAL, refreshInterval);
         internalItem.put(SchedJoulesFields.URL, page.getString(SchedJoulesFields.URL));
-        internalItem.put("itemId", itemId);
+        internalItem.put(SchedJoulesFields.ITEM_ID, itemId);
         internalItem.put(SchedJoulesFields.NAME, name);
         return internalItem;
     }
