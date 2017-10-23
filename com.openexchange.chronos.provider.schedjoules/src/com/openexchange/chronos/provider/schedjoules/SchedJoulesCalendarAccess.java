@@ -155,8 +155,16 @@ public class SchedJoulesCalendarAccess extends CachingCalendarAccess {
      */
     @Override
     public String updateFolder(String folderId, CalendarFolder folder, long clientTimestamp) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        try {
+            JSONObject folderJson = findFolder(folderId, getAccount().getUserConfiguration().optJSONArray(SchedJoulesFields.FOLDERS));
+            folderJson.put(SchedJoulesFields.COLOR, folder.getColor());
+            folderJson.put(SchedJoulesFields.USED_FOR_SYNC, folder.isUsedForSync());
+            folderJson.put(SchedJoulesFields.SCHEDULE_TRANSP, folder.getScheduleTransparency() == null ? null : folder.getScheduleTransparency().getValue());
+
+            return folderId;
+        } catch (JSONException e) {
+            throw SchedJoulesProviderExceptionCodes.JSON_ERROR.create(e.getMessage(), e);
+        }
     }
 
     /*
@@ -290,10 +298,10 @@ public class SchedJoulesCalendarAccess extends CachingCalendarAccess {
         JSONObject folderJson = findFolder(folderName, folders);
 
         folder.setName(folderJson.optString(SchedJoulesFields.NAME, folderName));
-        folder.setColor(folderJson.optString("color", null));
-        folder.setDescription(folderJson.optString("description", null));
-        folder.setUsedForSync(folderJson.optBoolean("usedForSync", false));
-        folder.setScheduleTransparency(Enums.parse(TimeTransparency.class, folderJson.optString("scheduleTransp", null), TimeTransparency.OPAQUE));
+        folder.setColor(folderJson.optString(SchedJoulesFields.COLOR, null));
+        folder.setDescription(folderJson.optString(SchedJoulesFields.DESCRIPTION, null));
+        folder.setUsedForSync(folderJson.optBoolean(SchedJoulesFields.USED_FOR_SYNC, false));
+        folder.setScheduleTransparency(Enums.parse(TimeTransparency.class, folderJson.optString(SchedJoulesFields.SCHEDULE_TRANSP, null), TimeTransparency.OPAQUE));
 
         return folder;
     }

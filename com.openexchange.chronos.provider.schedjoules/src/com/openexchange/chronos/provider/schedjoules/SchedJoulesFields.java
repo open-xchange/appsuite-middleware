@@ -85,4 +85,25 @@ final class SchedJoulesFields {
      * The optional locale for the item
      */
     static final String LOCALE = "locale";
+
+    /**
+     * The folder's color
+     */
+    static final String COLOR = "color";
+
+    /**
+     * Flag indicating whether the folder is used for sync
+     */
+    static final String USED_FOR_SYNC = "usedForSync";
+
+    /**
+     * The schedule transparency property
+     */
+    static final String SCHEDULE_TRANSP = "scheduleTransp";
+
+    /**
+     * The folder's description
+     */
+    static final String DESCRIPTION = "description";
+
 }
