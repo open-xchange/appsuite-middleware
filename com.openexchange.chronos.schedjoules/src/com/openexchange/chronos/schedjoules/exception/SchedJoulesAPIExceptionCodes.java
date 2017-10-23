@@ -65,7 +65,7 @@ public enum SchedJoulesAPIExceptionCodes implements DisplayableOXExceptionCode {
      * <li>You have no access to this calendar.</li>
      * <li>No access to calendar with id '%1$s'</li>
      */
-    NO_ACCESS("No access to calendar with id '%1$s'", SchedJoulesExceptionMessages.NO_ACCESS_MSG, CATEGORY_PERMISSION_DENIED, 2),
+    NO_ACCESS("No access to calendar with id '%1$s'", SchedJoulesAPIExceptionMessages.NO_ACCESS_MSG, CATEGORY_PERMISSION_DENIED, 2),
     /**
      * <li>An error occurred inside the server which prevented it from fulfilling the request.</li>
      * <li>A JSON error occurred: %1$s</li>
@@ -115,22 +115,22 @@ public enum SchedJoulesAPIExceptionCodes implements DisplayableOXExceptionCode {
      * <li>The requested page was not found.</li>
      * <li>The requested page was not found.</li>
      */
-    PAGE_NOT_FOUND("The requested page was not found.", SchedJoulesExceptionMessages.PAGE_NOT_FOUND, CATEGORY_ERROR, 12),
+    PAGE_NOT_FOUND("The requested page was not found.", SchedJoulesAPIExceptionMessages.PAGE_NOT_FOUND, CATEGORY_ERROR, 12),
     /**
      * <li>The remote SchedJoules service is unavailable at the moment. There is nothing we can do about it. Please try again later.</li>
      * <li>The remote service is unavailable at the moment: %1$s. Please try again later.</li>
      */
-    REMOTE_SERVICE_UNAVAILABLE("The remote service is unavailable at the moment: %1$s. Please try again later.", SchedJoulesExceptionMessages.REMOTE_SERVICE_UNAVAILABLE_MSG, CATEGORY_SERVICE_DOWN, 13),
+    REMOTE_SERVICE_UNAVAILABLE("The remote service is unavailable at the moment: %1$s. Please try again later.", SchedJoulesAPIExceptionMessages.REMOTE_SERVICE_UNAVAILABLE_MSG, CATEGORY_SERVICE_DOWN, 13),
     /**
      * <li>An internal server error occurred on SchedJoules side. There is nothing we can do about it.</li>
      * <li>A remote internal server error occurred: %1$s</li>
      */
-    REMOTE_INTERNAL_SERVER_ERROR("A remote internal server error occurred: %1$s", SchedJoulesExceptionMessages.REMOTE_INTERNAL_SERVER_ERROR_MSG, CATEGORY_SERVICE_DOWN, 14),
+    REMOTE_INTERNAL_SERVER_ERROR("A remote internal server error occurred: %1$s", SchedJoulesAPIExceptionMessages.REMOTE_INTERNAL_SERVER_ERROR_MSG, CATEGORY_SERVICE_DOWN, 14),
     /**
      * <li>A remote server error occurred on SchedJoules side. There is nothing we can do about it.</li>
      * <li>A remote server error occurred: %1$s</li>
      */
-    REMOTE_SERVER_ERROR("A remote server error occurred: %1$s", SchedJoulesExceptionMessages.REMOTE_SERVER_ERROR_MSG, CATEGORY_ERROR, 15),
+    REMOTE_SERVER_ERROR("A remote server error occurred: %1$s", SchedJoulesAPIExceptionMessages.REMOTE_SERVER_ERROR_MSG, CATEGORY_ERROR, 15),
     /**
      * <li>An error occurred inside the server which prevented it from fulfilling the request.</li>
      * <li>An unexpected error occurred: %1$s</li>

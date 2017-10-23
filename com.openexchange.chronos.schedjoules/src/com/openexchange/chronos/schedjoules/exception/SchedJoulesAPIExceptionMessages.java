@@ -50,11 +50,11 @@
 package com.openexchange.chronos.schedjoules.exception;
 
 /**
- * {@link SchedJoulesExceptionMessages}
+ * {@link SchedJoulesAPIExceptionMessages}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-final class SchedJoulesExceptionMessages {
+final class SchedJoulesAPIExceptionMessages {
 
     // The requested page does not denote to a calendar.
     static final String NO_CALENDAR_MSG = "The requested page does not denote to a calendar.";
