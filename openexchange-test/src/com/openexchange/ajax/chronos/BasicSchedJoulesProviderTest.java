@@ -60,6 +60,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Test;
+import com.openexchange.ajax.chronos.manager.ChronosApiException;
 import com.openexchange.ajax.tools.JSONCoercion;
 import com.openexchange.java.Strings;
 import com.openexchange.testing.httpclient.invoker.ApiException;
@@ -95,12 +96,41 @@ public class BasicSchedJoulesProviderTest extends AbstractChronosTest {
 
     /**
      * Tests the initial creation of a calendar account with
+     * a SchedJoules subscription to a non existing calendar
+     */
+    @Test
+    public void testCreateAccountWithNonExistingSchedJoulesCalendar() throws ApiException, JSONException {
+        try {
+            calendarAccountManager.createCalendarAccount(PROVIDER_ID, createAccountConfiguration(31145, null, -1).toString(), true);
+            fail("No exception was thrown");
+        } catch (ChronosApiException e) {
+            assertNotNull(e);
+            assertEquals("SCHEDJOULES-0007", e.getErrorCode());
+        }
+    }
+
+    /**
+     * Tests the initial creation of a calendar account with
+     * a SchedJoules subscription to an invalid calendar, i.e. a 'page' item_class
+     */
+    @Test
+    public void testCreateAccountWithInvalidSchedJoulesCalendar() throws ApiException, JSONException {
+        try {
+            calendarAccountManager.createCalendarAccount(PROVIDER_ID, createAccountConfiguration(115673, null, -1).toString(), true);
+            fail("No exception was thrown");
+        } catch (ChronosApiException e) {
+            assertNotNull(e);
+            assertEquals("SCHEDJOULES-0001", e.getErrorCode());
+        }
+    }
+
+    /**
+     * Tests the initial creation of a calendar account with
      * a SchedJoules subscription to a random calendar.
      */
     @Test
-    public void testCreateAccountWithSchedJoulesSubscription() throws ApiException, JSONException {
-        CalendarAccountResponse calendarAccount = calendarAccountManager.createCalendarAccount(PROVIDER_ID, createAccountConfiguration(90734, null, -1).toString());
-        CalendarAccountData accountData = calendarAccount.getData();
+    public void testCreateAccountWithSchedJoulesSubscription() throws ApiException, JSONException, ChronosApiException {
+        CalendarAccountData accountData = calendarAccountManager.createCalendarAccount(PROVIDER_ID, createAccountConfiguration(90734, null, -1).toString(), false);
         assertAccountConfiguration(accountData.getConfiguration(), 1);
     }
 
@@ -110,7 +140,14 @@ public class BasicSchedJoulesProviderTest extends AbstractChronosTest {
      */
     @Test
     public void testUpdateAccountAddOneSubscription() throws ApiException, JSONException {
-        fail("Not implemented yet");
+        JSONObject initialConfiguration = createAccountConfiguration(90734, null, -1);
+        CalendarAccountResponse calendarAccount = calendarAccountManager.createCalendarAccount(PROVIDER_ID, initialConfiguration.toString());
+        CalendarAccountData accountData = calendarAccount.getData();
+
+        JSONObject config = assertAccountConfiguration(accountData.getConfiguration(), 1);
+        config.getJSONArray("folders").put(createFolder(123, null, -1));
+
+        calendarAccountManager.updateCalendarAccount(accountData.getId(), accountData.getTimestamp(), config.toString());
     }
 
     /**
@@ -155,8 +192,9 @@ public class BasicSchedJoulesProviderTest extends AbstractChronosTest {
      * 
      * @param data The configuration data
      * @param expectedAmountOfFolders The amount of expected folders in the configuration
+     * @return the asserted configuration
      */
-    private void assertAccountConfiguration(Object data, int expectedAmountOfFolders) throws JSONException {
+    private JSONObject assertAccountConfiguration(Object data, int expectedAmountOfFolders) throws JSONException {
         assertNotNull("The account data is 'null'", data);
         assertTrue("The account data is of type: " + data.getClass(), data instanceof Map);
         JSONObject config = (JSONObject) JSONCoercion.coerceToJSON(data);
@@ -168,6 +206,8 @@ public class BasicSchedJoulesProviderTest extends AbstractChronosTest {
         for (int index = 0; index < folders.length(); index++) {
             assertFolder(folders.optJSONObject(index));
         }
+
+        return config;
     }
 
     /**
