@@ -92,6 +92,11 @@ public class SchedJoulesCalendarAccess extends CachingCalendarAccess {
     private static final String NO_ACCESS = "You have no access to this calendar";
 
     /**
+     * Defines the amount of time to wait before attempting another external request upon failure. Defaults in 60 minutes.
+     */
+    private static final int EXTERNAL_REQUEST_TIMEOUT = 60;
+
+    /**
      * Initialises a new {@link SchedJoulesCalendarAccess}.
      *
      * @param account
@@ -206,7 +211,7 @@ public class SchedJoulesCalendarAccess extends CachingCalendarAccess {
     @Override
     public long getExternalRequestTimeout() {
         // TODO: Make configurable?
-        return TimeUnit.MINUTES.toMinutes(60);
+        return TimeUnit.MINUTES.toMinutes(EXTERNAL_REQUEST_TIMEOUT);
     }
 
     /*
