@@ -68,7 +68,8 @@ import com.openexchange.test.concurrent.ParallelSuite;
     BasicFreeBusyTest.class,
     // FIXME: The SchedJoules tests were deactivated due to the nature of their implementation
     //        i.e. external/third party service provider. Will be re-activated for CI tests. 
-    //BasicSchedJoulesTest.class,
+    //BasicSchedJoulesAPITest.class,
+    //BasicSchedJoulesProviderTest.class,
     BasicSelfProtectionTest.class,
     BasicSeriesEventTest.class,
     BasicSingleEventTest.class,
