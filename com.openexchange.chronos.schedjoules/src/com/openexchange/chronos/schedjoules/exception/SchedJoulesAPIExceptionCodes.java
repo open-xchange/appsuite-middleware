@@ -56,11 +56,11 @@ import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionFactory;
 
 /**
- * {@link SchedJoulesExceptionCodes}
+ * {@link SchedJoulesAPIExceptionCodes}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public enum SchedJoulesExceptionCodes implements DisplayableOXExceptionCode {
+public enum SchedJoulesAPIExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * <li>You have no access to this calendar.</li>
      * <li>No access to calendar with id '%1$s'</li>
@@ -151,26 +151,26 @@ public enum SchedJoulesExceptionCodes implements DisplayableOXExceptionCode {
     private int number;
 
     /**
-     * Initialises a new {@link SchedJoulesExceptionCodes}.
+     * Initialises a new {@link SchedJoulesAPIExceptionCodes}.
      * 
      * @param message The exception message
      * @param displayMessage The display message
      * @param category The {@link Category}
      * @param number The error number
      */
-    private SchedJoulesExceptionCodes(String message, Category category, int number) {
+    private SchedJoulesAPIExceptionCodes(String message, Category category, int number) {
         this(message, null, category, number);
     }
 
     /**
-     * Initialises a new {@link SchedJoulesExceptionCodes}.
+     * Initialises a new {@link SchedJoulesAPIExceptionCodes}.
      * 
      * @param message The exception message
      * @param displayMessage The display message
      * @param category The {@link Category}
      * @param number The error number
      */
-    private SchedJoulesExceptionCodes(String message, String displayMessage, Category category, int number) {
+    private SchedJoulesAPIExceptionCodes(String message, String displayMessage, Category category, int number) {
         this.message = message;
         this.displayMessage = null != displayMessage ? displayMessage : MESSAGE;
         this.category = category;

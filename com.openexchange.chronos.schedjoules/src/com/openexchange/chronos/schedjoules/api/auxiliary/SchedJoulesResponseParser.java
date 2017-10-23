@@ -57,7 +57,7 @@ import org.json.JSONObject;
 import com.openexchange.chronos.ical.ICalParameters;
 import com.openexchange.chronos.ical.ICalService;
 import com.openexchange.chronos.schedjoules.api.client.SchedJoulesResponse;
-import com.openexchange.chronos.schedjoules.exception.SchedJoulesExceptionCodes;
+import com.openexchange.chronos.schedjoules.exception.SchedJoulesAPIExceptionCodes;
 import com.openexchange.chronos.schedjoules.osgi.Services;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
@@ -85,12 +85,12 @@ public enum SchedJoulesResponseParser {
                     case '[':
                         return new JSONArray(string);
                     default:
-                        throw SchedJoulesExceptionCodes.JSON_ERROR.create("Unexpected start token detected '" + c + "'");
+                        throw SchedJoulesAPIExceptionCodes.JSON_ERROR.create("Unexpected start token detected '" + c + "'");
                 }
             } catch (IOException e) {
-                throw SchedJoulesExceptionCodes.IO_ERROR.create(e.getMessage(), e);
+                throw SchedJoulesAPIExceptionCodes.IO_ERROR.create(e.getMessage(), e);
             } catch (JSONException e) {
-                throw SchedJoulesExceptionCodes.JSON_ERROR.create(e.getMessage(), e);
+                throw SchedJoulesAPIExceptionCodes.JSON_ERROR.create(e.getMessage(), e);
             }
         }
     },
@@ -108,7 +108,7 @@ public enum SchedJoulesResponseParser {
             try (InputStream inputStream = Streams.bufferedInputStreamFor(response.getStream())) {
                 return iCalService.importICal(inputStream, parameters);
             } catch (IOException e) {
-                throw SchedJoulesExceptionCodes.IO_ERROR.create(e.getMessage(), e);
+                throw SchedJoulesAPIExceptionCodes.IO_ERROR.create(e.getMessage(), e);
             }
         }
     };
@@ -152,7 +152,7 @@ public enum SchedJoulesResponseParser {
                 return streamParser.parseResponse(response);
             }
         }
-        throw SchedJoulesExceptionCodes.NO_STREAM_PARSER.create(contentType);
+        throw SchedJoulesAPIExceptionCodes.NO_STREAM_PARSER.create(contentType);
     }
 
     /**

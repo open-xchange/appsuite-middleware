@@ -60,7 +60,7 @@ import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.caching.CachingCalendarProvider;
 import com.openexchange.chronos.provider.schedjoules.exception.SchedJoulesProviderExceptionCodes;
 import com.openexchange.chronos.schedjoules.api.SchedJoulesAPI;
-import com.openexchange.chronos.schedjoules.exception.SchedJoulesExceptionCodes;
+import com.openexchange.chronos.schedjoules.exception.SchedJoulesAPIExceptionCodes;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
@@ -292,7 +292,7 @@ public class SchedJoulesCalendarProvider extends CachingCalendarProvider {
             }
             return page;
         } catch (OXException e) {
-            if (SchedJoulesExceptionCodes.PAGE_NOT_FOUND.equals(e)) {
+            if (SchedJoulesAPIExceptionCodes.PAGE_NOT_FOUND.equals(e)) {
                 throw SchedJoulesProviderExceptionCodes.CALENDAR_DOES_NOT_EXIST.create(itemId, e);
             }
             throw e;
