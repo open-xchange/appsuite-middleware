@@ -58,6 +58,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.chronos.UserApi;
 import com.openexchange.testing.httpclient.invoker.ApiException;
+import com.openexchange.testing.httpclient.models.CalendarAccountData;
 import com.openexchange.testing.httpclient.models.CalendarAccountId;
 import com.openexchange.testing.httpclient.models.CalendarAccountProviderData;
 import com.openexchange.testing.httpclient.models.CalendarAccountProvidersResponse;
@@ -69,6 +70,7 @@ import com.openexchange.testing.httpclient.models.CommonResponse;
  * {@link CalendarAccountManager}
  *
  * @author <a href="mailto:Jan-Oliver.Huhn@open-xchange.com">Jan-Oliver Huhn</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.0
  */
 public class CalendarAccountManager extends AbstractManager {
@@ -109,6 +111,25 @@ public class CalendarAccountManager extends AbstractManager {
         return response;
     }
 
+    /**
+     * Creates a calendar account with the specified configuration for the specified provider
+     * 
+     * @param providerId The calendar provider identifier
+     * @param configuration The configuration
+     * @param expectedException flag to indicate that an exception is expected
+     * @return The created {@link CalendarAccountData}
+     * @throws ApiException if an API error is occurred
+     * @throws ChronosApiException if a Chronos API error is occurred
+     */
+    public CalendarAccountData createCalendarAccount(String providerId, String configuration, boolean expectedException) throws ApiException, ChronosApiException {
+        CalendarAccountResponse response = userApi.getChronosApi().createAccount(userApi.getSession(), providerId, configuration);
+        if (expectedException) {
+            assertNotNull("An error was expected", response.getError());
+            throw new ChronosApiException(response.getCode(), response.getError());
+        }
+        return handleCreation(response);
+    }
+
     public void deleteCalendarAccount(List<CalendarAccountId> idsToDelete) throws ApiException {
         for (CalendarAccountId id : idsToDelete) {
             CommonResponse resp = userApi.getChronosApi().deleteAccount(userApi.getSession(), id.getId(), System.currentTimeMillis());
@@ -132,6 +153,20 @@ public class CalendarAccountManager extends AbstractManager {
         assertNull(response.getError(), response.getError());
         assertNotNull(response.getData());
         return response;
+    }
+
+    /**
+     * Helper method for {@link #updateCalendarAccount(CalendarAccountId, String)}
+     * 
+     * @param accountId The account identifier
+     * @param timestamp The latest known timestamp
+     * @param configuration The optional configuration
+     * @return The updated {@link CalendarAccountData}
+     * @throws ApiException if an API error is occurred
+     */
+    public CalendarAccountData updateCalendarAccount(String accountId, long timestamp, String configuration) throws ApiException {
+        CalendarAccountResponse response = updateCalendarAccount(createCalendarAccountId(accountId, timestamp), configuration);
+        return checkResponse(response.getError(), response.getErrorDesc(), response.getData());
     }
 
     public CalendarAccountResponse updateCalendarAccount(CalendarAccountId calAccId, String configuration) throws ApiException {
@@ -186,4 +221,16 @@ public class CalendarAccountManager extends AbstractManager {
         return calAccId;
     }
 
+    /**
+     * Handles the creation response and remembers the account id
+     * 
+     * @param response The {@link CalendarAccountResponse}
+     * @return The {@link CalendarAccountData}
+     * @throws ApiException if an API error is occurred
+     */
+    private CalendarAccountData handleCreation(CalendarAccountResponse response) throws ApiException {
+        CalendarAccountData data = checkResponse(response.getError(), response.getErrorDesc(), response.getData());
+        rememberCalendarAccountId(createCalendarAccountId(data.getId(), data.getTimestamp()));
+        return data;
+    }
 }
