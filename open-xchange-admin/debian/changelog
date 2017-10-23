@@ -1,3 +1,9 @@
+open-xchange-admin (7.8.4-15) stable; urgency=medium
+
+  * Build for patch 2017-10-29 (4425)
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 23 Oct 2017 16:19:31 +0200
+
 open-xchange-admin (7.8.4-14) stable; urgency=medium
 
   * Build for patch 2017-10-16 (4394)
