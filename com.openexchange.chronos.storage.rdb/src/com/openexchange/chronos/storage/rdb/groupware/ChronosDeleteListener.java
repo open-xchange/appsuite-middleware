@@ -54,6 +54,8 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
@@ -65,7 +67,8 @@ import com.openexchange.chronos.ResourceId;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.CalendarAccount;
-import com.openexchange.chronos.storage.AttendeeStorage;
+import com.openexchange.chronos.service.CalendarUtilities;
+import com.openexchange.chronos.service.EntityResolver;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.chronos.storage.CalendarStorageFactory;
 import com.openexchange.chronos.storage.EventStorage;
@@ -77,12 +80,13 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.java.Strings;
+import com.openexchange.search.SearchTerm;
 import com.openexchange.search.SingleSearchTerm;
 import com.openexchange.search.SingleSearchTerm.SingleOperation;
 import com.openexchange.search.internal.operands.ColumnFieldOperand;
 import com.openexchange.search.internal.operands.ConstantOperand;
 import com.openexchange.session.Session;
+import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.user.UserService;
 
@@ -136,28 +140,64 @@ public final class ChronosDeleteListener implements DeleteListener {
      * @throws OXException In case service is unavailable or SQL error
      */
     private void purgeUserData(Connection readCon, Connection writeCon, Context context, int userId, Session session) throws OXException {
+        int accountId = CalendarAccount.DEFAULT_ACCOUNT.getAccountId();
         Integer userID = Integer.valueOf(userId);
         SimpleDBProvider dbProvider = new SimpleDBProvider(readCon, writeCon);
-        int accountId = CalendarAccount.DEFAULT_ACCOUNT.getAccountId();
-        CalendarStorage storage = factory.create(context, accountId, null, dbProvider, DBTransactionPolicy.NO_TRANSACTIONS);
+        CalendarUtilities calendarUtilities = Services.getOptionalService(CalendarUtilities.class);
+        EntityResolver entityResolver = null == calendarUtilities ? null : calendarUtilities.getEntityResolver(context.getContextId());
+        CalendarStorage storage = factory.create(context, accountId, entityResolver, dbProvider, DBTransactionPolicy.NO_TRANSACTIONS);
 
-        // Delete alarms for the user
+        /*
+         * Delete alarms for the user
+         */
         storage.getAlarmStorage().deleteAlarms(userId);
         storage.getAlarmTriggerStorage().deleteTriggers(userId);
 
         /*
-         * Delete and update events.
+         * Delete and update events where the user is attendee
          */
         EventStorage eventStorage = storage.getEventStorage();
         EventField[] fields = new EventField[] { EventField.ID };
         List<Event> events = null;
+        events = eventStorage.searchEvents(equalsFieldUserTerm(AttendeeField.ENTITY, userID), null, fields);
 
-        // Admin CalendarUser as replacement
-        CalendarUser admin = getCalendarUser(context, context.getMailadmin());
+        // Get attendees
+        List<String> eventIds = events.stream().map(Event::getId).collect(Collectors.toList());
+        Map<String, List<Attendee>> eventToAttendee = storage.getAttendeeStorage().loadAttendees(eventIds.toArray(new String[] {}));
+
+        // We need to get the users view on the attachments, so create a session on behave of the deleted user
+        ServerSession serverSession = ServerSessionAdapter.valueOf(userId, context.getContextId());
+
+        for (Entry<String, List<Attendee>> entry : eventToAttendee.entrySet()) {
+            List<Attendee> attendees = entry.getValue();
+            if (null != attendees && false == attendees.isEmpty()) {
+                try {
+                    if (CalendarUtils.isLastUserAttendee(attendees, userId)) {
+                        // The user is the only attendee, delete event and its attachments
+                        eventStorage.deleteEvent(entry.getKey());
+                        Event event = events.stream().filter(e -> e.getId().equals(entry.getKey())).findFirst().get();
+                        event.setAttendees(attendees);
+                        storage.getAttachmentStorage().deleteAttachments(serverSession, CalendarUtils.getFolderView(event, userId), entry.getKey());
+                    } else {
+                        attendees = Collections.singletonList(attendees.stream().filter(a -> a.getEntity() == userId).findFirst().get());
+                    }
+                    storage.getAttendeeStorage().deleteAttendees(entry.getKey(), attendees);
+                } catch (NoSuchElementException e) {
+                    // This should never happen...
+                    throw CalendarExceptionCodes.ATTENDEE_NOT_FOUND.create(e, userID, entry.getKey());
+                }
+            }
+        }
+
+        /*
+         * Update event fields where the user might be referenced
+         */
+
+        // Context administrator as replacement
+        CalendarUser admin = null == entityResolver ? getCalendarUser(context, context.getMailadmin()) : entityResolver.prepareUserAttendee(context.getMailadmin());
 
         // Update events where the user is the calendar user
-        SingleSearchTerm user = new SingleSearchTerm(SingleOperation.EQUALS).addOperand(new ColumnFieldOperand<Enum<?>>(EventField.CALENDAR_USER)).addOperand(new ConstantOperand<Integer>(userID));
-        events = eventStorage.searchEvents(user, null, fields);
+        events = eventStorage.searchEvents(equalsFieldUserTerm(EventField.CALENDAR_USER, userID), null, fields);
         for (Event event : events) {
             event.setCalendarUser(admin);
             event.setLastModified(new Date());
@@ -165,23 +205,21 @@ public final class ChronosDeleteListener implements DeleteListener {
         }
 
         // Update events of the user which he created
-        SingleSearchTerm createdBy = new SingleSearchTerm(SingleOperation.EQUALS).addOperand(new ColumnFieldOperand<Enum<?>>(EventField.CREATED_BY)).addOperand(new ConstantOperand<Integer>(userID));
-        events = eventStorage.searchEvents(createdBy, null, fields);
+        events = eventStorage.searchEvents(equalsFieldUserTerm(EventField.CREATED_BY, userID), null, fields);
         for (Event event : events) {
             event.setCreatedBy(admin);
             event.setLastModified(new Date());
             eventStorage.updateEvent(event);
         }
         // Update events of the user where he is the modifier
-        SingleSearchTerm modifiedBy = new SingleSearchTerm(SingleOperation.EQUALS).addOperand(new ColumnFieldOperand<Enum<?>>(EventField.MODIFIED_BY)).addOperand(new ConstantOperand<Integer>(userID));
-        events = eventStorage.searchEvents(modifiedBy, null, fields);
+        events = eventStorage.searchEvents(equalsFieldUserTerm(EventField.MODIFIED_BY, userID), null, fields);
         for (Event event : events) {
             event.setModifiedBy(admin);
             event.setLastModified(new Date());
             eventStorage.updateEvent(event);
         }
         // Update events of the user where he is the organizer
-        SingleSearchTerm organizer = new SingleSearchTerm(SingleOperation.EQUALS).addOperand(new ColumnFieldOperand<Enum<?>>(EventField.ORGANIZER)).addOperand(new ConstantOperand<String>(ResourceId.forUser(context.getContextId(), userId)));
+        SingleSearchTerm organizer = eqaulsFieldTerm(EventField.ORGANIZER).addOperand(new ConstantOperand<String>(ResourceId.forUser(context.getContextId(), userId)));
         events = eventStorage.searchEvents(organizer, null, fields);
         for (Event event : events) {
             event.setOrganizer(getOrganizer(admin));
@@ -190,44 +228,11 @@ public final class ChronosDeleteListener implements DeleteListener {
         }
 
         /*
-         * Update events of the user where he is attendee.
-         * 1) load all remaining event
-         * 2) load the attendees for those events
-         * 3) find the user(as attendee)
-         * 4) (Optional) Delete event if the user is the only attendee
-         * 5) remove the user as attendee from the event
-         * 6) delete attachments
+         * Delete account
          */
-        fields = new EventField[] { EventField.ID, EventField.FOLDER_ID };
-        SingleSearchTerm allEvents = new SingleSearchTerm(SingleOperation.EQUALS).addOperand(new ColumnFieldOperand<Enum<?>>(AttendeeField.ENTITY)).addOperand(new ConstantOperand<Integer>(userID));
-        events = eventStorage.searchEvents(allEvents, null, fields);
-        if (false == events.isEmpty()) {
-            List<String> remainingEventIds = events.stream().map(Event::getId).collect(Collectors.toList());
-            AttendeeStorage attendeeStorage = storage.getAttendeeStorage();
-            Map<String, List<Attendee>> eventToAttendee = attendeeStorage.loadAttendees(remainingEventIds.toArray(new String[] {}));
-            for (Event event : events) {
-                List<Attendee> attendees = eventToAttendee.get(event.getId());
-                if (attendees.size() == 1) {
-                    // Only attendee, delete event
-                    eventStorage.deleteEvent(event.getId());
-                } else {
-                    // Throw error if the user is not attendee in the event
-                    attendees = Collections.singletonList(attendees.stream().filter(a -> a.getEntity() == userId).findFirst().orElseThrow(CalendarExceptionCodes.ATTENDEE_NOT_FOUND::create));
-                }
-                attendeeStorage.deleteAttendees(event.getId(), attendees);
-
-                // We need to get the users view on the attachments, so create a session on behave of the deleted user
-                String folderId = attendees.get(0).getFolderId();
-                if (false == Strings.isEmpty(folderId)) {
-                    storage.getAttachmentStorage().deleteAttachments(ServerSessionAdapter.valueOf(userId, context.getContextId()), folderId, event.getId());
-                }
-            }
-        }
-
-        // Delete account
         storage.getAccountStorage().deleteAccount(userId, accountId);
 
-        // TODO Remove Tombstone
+        // TODO Remove Tombstones
     }
 
     /**
@@ -240,8 +245,7 @@ public final class ChronosDeleteListener implements DeleteListener {
      * @throws OXException In case service is unavailable or SQL error
      */
     private void purgeContextData(Connection readCon, Connection writeCon, Context context, Session session) throws OXException {
-        // TODO Auto-generated method stub
-
+        // TODO 
     }
 
     /*
@@ -277,5 +281,39 @@ public final class ChronosDeleteListener implements DeleteListener {
         organizer.setCn(user.getCn());
         organizer.setUri(user.getUri());
         return organizer;
+    }
+
+    /**
+     * Creates a new {@link SearchTerm} with {@link SingleOperation#EQUALS} as operand
+     * 
+     * @return A new {@link SingleSearchTerm}
+     */
+    private SingleSearchTerm equalsTerm() {
+        return new SingleSearchTerm(SingleOperation.EQUALS);
+    }
+
+    /**
+     * Creates a new {@link SearchTerm} with {@link SingleOperation#EQUALS} as operand
+     * on the given field as {@link ColumnFieldOperand}
+     * 
+     * @param field The field to search on
+     * @return A new {@link SingleSearchTerm}
+     */
+    private SingleSearchTerm eqaulsFieldTerm(Enum<?> field) {
+        ColumnFieldOperand<Enum<?>> operand = new ColumnFieldOperand<Enum<?>>(field);
+        return equalsTerm().addOperand(operand);
+    }
+
+    /**
+     * Creates a new {@link SearchTerm} with {@link SingleOperation#EQUALS} as operand
+     * on the given field as {@link ColumnFieldOperand} for the specific user
+     * 
+     * @param field The field to search on
+     * @param userID The user to search
+     * @return A new {@link SingleSearchTerm}
+     */
+    private SingleSearchTerm equalsFieldUserTerm(Enum<?> field, Integer userID) {
+        ConstantOperand<Integer> user = new ConstantOperand<Integer>(userID);
+        return eqaulsFieldTerm(field).addOperand(user);
     }
 }
