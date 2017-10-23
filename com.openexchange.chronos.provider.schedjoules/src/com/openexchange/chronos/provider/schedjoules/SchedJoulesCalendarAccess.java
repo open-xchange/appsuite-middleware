@@ -92,21 +92,6 @@ public class SchedJoulesCalendarAccess extends CachingCalendarAccess {
     private static final String NO_ACCESS = "You have no access to this calendar";
 
     /**
-     * The user configuration's key for all available/visible folders
-     */
-    private static final String FOLDERS = "folders";
-
-    /**
-     * The user configuration's key for the feed's URL
-     */
-    private static final String URL = "url";
-
-    /**
-     * The user configuration's key for the folder's name
-     */
-    private static final String NAME = "name";
-
-    /**
      * Initialises a new {@link SchedJoulesCalendarAccess}.
      *
      * @param account
@@ -144,7 +129,7 @@ public class SchedJoulesCalendarAccess extends CachingCalendarAccess {
      */
     @Override
     public List<CalendarFolder> getVisibleFolders() throws OXException {
-        JSONArray foldersArray = getAccount().getUserConfiguration().optJSONArray(FOLDERS);
+        JSONArray foldersArray = getAccount().getUserConfiguration().optJSONArray(SchedJoulesFields.FOLDERS);
         if (foldersArray == null || foldersArray.isEmpty()) {
             return Collections.emptyList();
         }
@@ -195,10 +180,10 @@ public class SchedJoulesCalendarAccess extends CachingCalendarAccess {
         if (userConfig == null || userConfig.isEmpty()) {
             return 0;
         }
-        JSONArray foldersArray = userConfig.optJSONArray(FOLDERS);
+        JSONArray foldersArray = userConfig.optJSONArray(SchedJoulesFields.FOLDERS);
         try {
             JSONObject folder = findFolder(folderId, foldersArray);
-            return folder.optInt("refreshInterval", 0);
+            return folder.optInt(SchedJoulesFields.REFRESH_INTERVAL, 0);
         } catch (OXException e) {
             LOG.debug("{}", e.getMessage(), e);
             return 0;
@@ -228,9 +213,9 @@ public class SchedJoulesCalendarAccess extends CachingCalendarAccess {
             if (userConfig == null || userConfig.isEmpty()) {
                 throw SchedJoulesProviderExceptionCodes.NO_USER_CONFIGURATION.create(getAccount().getAccountId(), getSession().getUserId(), getSession().getContextId());
             }
-            JSONArray foldersArray = userConfig.optJSONArray(FOLDERS);
+            JSONArray foldersArray = userConfig.optJSONArray(SchedJoulesFields.FOLDERS);
             JSONObject folder = findFolder(folderId, foldersArray);
-            URL url = new URL(folder.getString(URL));
+            URL url = new URL(folder.getString(SchedJoulesFields.URL));
             SchedJoulesAPI api = SchedJoulesAPI.getInstance();
             Calendar calendar = api.calendar().getCalendar(url);
             if (NO_ACCESS.equals(calendar.getName())) {
@@ -301,10 +286,10 @@ public class SchedJoulesCalendarAccess extends CachingCalendarAccess {
             return folder;
         }
 
-        JSONArray folders = userConfig.optJSONArray(FOLDERS);
+        JSONArray folders = userConfig.optJSONArray(SchedJoulesFields.FOLDERS);
         JSONObject folderJson = findFolder(folderName, folders);
 
-        folder.setName(folderJson.optString(NAME, folderName));
+        folder.setName(folderJson.optString(SchedJoulesFields.NAME, folderName));
         folder.setColor(folderJson.optString("color", null));
         folder.setDescription(folderJson.optString("description", null));
         folder.setUsedForSync(folderJson.optBoolean("usedForSync", false));
@@ -320,7 +305,7 @@ public class SchedJoulesCalendarAccess extends CachingCalendarAccess {
      * @return The folder's name or <code>null</code> if the metdata have no 'name' information
      */
     private String getFolderName(JSONObject folder) {
-        String name = folder.optString(NAME);
+        String name = folder.optString(SchedJoulesFields.NAME);
         if (Strings.isEmpty(name)) {
             LOG.warn("Missing the 'name' attribute from folder metadata for account '{}' of user '{}' in context '{}'", getAccount().getAccountId(), getSession().getUserId(), getSession().getContextId());
         }

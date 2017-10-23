@@ -132,7 +132,7 @@ public class SchedJoulesCalendarProvider extends CachingCalendarProvider {
         if (userConfig == null) {
             return new JSONObject();
         }
-        JSONArray folders = userConfig.optJSONArray("folders");
+        JSONArray folders = userConfig.optJSONArray(SchedJoulesFields.FOLDERS);
         if (folders == null) {
             return new JSONObject();
         }
@@ -141,7 +141,7 @@ public class SchedJoulesCalendarProvider extends CachingCalendarProvider {
             JSONObject internalConfig = new JSONObject();
             JSONArray internalConfigItems = new JSONArray();
             addFolders(folders, internalConfigItems);
-            internalConfig.put("folders", internalConfigItems);
+            internalConfig.put(SchedJoulesFields.FOLDERS, internalConfigItems);
             return internalConfig;
         } catch (JSONException e) {
             throw SchedJoulesProviderExceptionCodes.JSON_ERROR.create(e.getMessage(), e);
@@ -156,19 +156,19 @@ public class SchedJoulesCalendarProvider extends CachingCalendarProvider {
     @Override
     protected JSONObject reconfigureAccountOpt(Session session, JSONObject internalConfig, JSONObject userConfig, CalendarParameters parameters) throws OXException {
         // User configuration is 'null' or empty or has no 'folders' attribute, thus we have to remove all subscriptions
-        if (userConfig == null || userConfig.isEmpty() || !userConfig.hasAndNotNull("folders")) {
+        if (userConfig == null || userConfig.isEmpty() || !userConfig.hasAndNotNull(SchedJoulesFields.FOLDERS)) {
             // Remove cache information and folders
-            return (internalConfig.remove("folders") == null) ? null : internalConfig;
+            return (internalConfig.remove(SchedJoulesFields.FOLDERS) == null) ? null : internalConfig;
         }
 
-        JSONArray userConfigFolders = userConfig.optJSONArray("folders");
-        JSONArray internalConfigFolders = internalConfig.optJSONArray("folders");
+        JSONArray userConfigFolders = userConfig.optJSONArray(SchedJoulesFields.FOLDERS);
+        JSONArray internalConfigFolders = internalConfig.optJSONArray(SchedJoulesFields.FOLDERS);
         if (internalConfigFolders == null || internalConfigFolders.isEmpty()) {
             // Add all user configuration folders
             try {
                 internalConfigFolders = new JSONArray();
                 addFolders(userConfigFolders, internalConfigFolders);
-                internalConfig.put("folders", internalConfigFolders);
+                internalConfig.put(SchedJoulesFields.FOLDERS, internalConfigFolders);
                 return internalConfig;
             } catch (JSONException e) {
                 throw SchedJoulesProviderExceptionCodes.JSON_ERROR.create(e.getMessage(), e);
@@ -181,7 +181,7 @@ public class SchedJoulesCalendarProvider extends CachingCalendarProvider {
             Map<String, Integer> internalItemIds = new HashMap<>();
             for (int index = 0; index < internalConfigFolders.length(); index++) {
                 JSONObject folder = internalConfigFolders.getJSONObject(index);
-                internalItemIds.put(folder.getString("name"), index);
+                internalItemIds.put(folder.getString(SchedJoulesFields.NAME), index);
             }
 
             JSONArray additions = new JSONArray();
@@ -253,29 +253,29 @@ public class SchedJoulesCalendarProvider extends CachingCalendarProvider {
      * @throws OXException if an error is occurred
      */
     private JSONObject prepareFolder(JSONObject folder) throws JSONException, OXException {
-        int itemId = folder.getInt("itemId");
-        String locale = folder.optString("locale");
-        int refreshInterval = folder.optInt("refreshInterval", DEFAULT_REFRESH_INTERVAL);
+        int itemId = folder.getInt(SchedJoulesFields.ITEM_ID);
+        String locale = folder.optString(SchedJoulesFields.LOCALE);
+        int refreshInterval = folder.optInt(SchedJoulesFields.REFRESH_INTERVAL, DEFAULT_REFRESH_INTERVAL);
         if (refreshInterval < MINIMUM_REFRESH_INTERVAL) {
             refreshInterval = MINIMUM_REFRESH_INTERVAL;
         }
 
         JSONObject page = SchedJoulesAPI.getInstance().pages().getPage(itemId, locale);
-        if (!page.hasAndNotNull("url")) {
+        if (!page.hasAndNotNull(SchedJoulesFields.URL)) {
             throw SchedJoulesProviderExceptionCodes.NO_CALENDAR.create(itemId);
         }
 
-        String name = folder.optString("name");
+        String name = folder.optString(SchedJoulesFields.NAME);
         if (Strings.isEmpty(name)) {
-            name = page.getString("name");
-            folder.put("name", name);
+            name = page.getString(SchedJoulesFields.NAME);
+            folder.put(SchedJoulesFields.NAME, name);
         }
 
         JSONObject internalItem = new JSONObject();
-        internalItem.put("refreshInterval", refreshInterval);
-        internalItem.put("url", page.getString("url"));
+        internalItem.put(SchedJoulesFields.REFRESH_INTERVAL, refreshInterval);
+        internalItem.put(SchedJoulesFields.URL, page.getString(SchedJoulesFields.URL));
         internalItem.put("itemId", itemId);
-        internalItem.put("name", name);
+        internalItem.put(SchedJoulesFields.NAME, name);
         return internalItem;
     }
 
@@ -292,7 +292,7 @@ public class SchedJoulesCalendarProvider extends CachingCalendarProvider {
     private boolean handleAdditions(JSONArray userConfigFolders, Map<String, Integer> internalItemIds, JSONArray additions) throws JSONException, OXException {
         for (int index = 0; index < userConfigFolders.length(); index++) {
             JSONObject folder = userConfigFolders.getJSONObject(index);
-            String name = folder.getString("name");
+            String name = folder.getString(SchedJoulesFields.NAME);
             if (!internalItemIds.containsKey(name)) {
                 additions.put(prepareFolder(folder));
             }
