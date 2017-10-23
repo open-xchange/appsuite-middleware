@@ -293,7 +293,7 @@ public class SchedJoulesCalendarProvider extends CachingCalendarProvider {
             return page;
         } catch (OXException e) {
             if (SchedJoulesAPIExceptionCodes.PAGE_NOT_FOUND.equals(e)) {
-                throw SchedJoulesProviderExceptionCodes.CALENDAR_DOES_NOT_EXIST.create(itemId, e);
+                throw SchedJoulesProviderExceptionCodes.CALENDAR_DOES_NOT_EXIST.create(e, itemId);
             }
             throw e;
         }
