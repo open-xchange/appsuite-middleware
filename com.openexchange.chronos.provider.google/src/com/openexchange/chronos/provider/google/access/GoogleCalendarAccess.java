@@ -61,6 +61,7 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.google.api.services.calendar.Calendar;
+import com.google.api.services.calendar.Calendar.Events.Get;
 import com.google.api.services.calendar.model.CalendarList;
 import com.google.api.services.calendar.model.CalendarListEntry;
 import com.google.api.services.calendar.model.EventReminder;
@@ -310,6 +311,18 @@ public class GoogleCalendarAccess extends CachingCalendarAccess{
             throw CalendarExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (JSONException e) {
             throw CalendarExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    Event getEvent(String folderId, String eventID) throws OXException {
+        try {
+            Calendar googleCal = (Calendar) oauthAccess.getClient().getClient();
+            Get get = googleCal.events().get(folderId, eventID);
+
+            com.google.api.services.calendar.model.Event event = get.execute();
+            return convertEvent(event);
+        } catch (IOException e) {
+            throw CalendarExceptionCodes.IO_ERROR.create(e, e.getMessage());
         }
     }
 
