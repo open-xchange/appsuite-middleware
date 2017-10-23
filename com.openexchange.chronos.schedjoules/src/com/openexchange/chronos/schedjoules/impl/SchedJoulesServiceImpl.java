@@ -49,20 +49,10 @@
 
 package com.openexchange.chronos.schedjoules.impl;
 
-import java.util.Iterator;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.chronos.exception.CalendarExceptionCodes;
-import com.openexchange.chronos.provider.CalendarAccount;
-import com.openexchange.chronos.provider.account.CalendarAccountService;
 import com.openexchange.chronos.schedjoules.SchedJoulesResult;
 import com.openexchange.chronos.schedjoules.SchedJoulesService;
 import com.openexchange.chronos.schedjoules.api.SchedJoulesAPI;
-import com.openexchange.chronos.schedjoules.exception.SchedJoulesExceptionCodes;
 import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.session.Session;
 
 /**
  * {@link SchedJoulesServiceImpl}
@@ -73,17 +63,13 @@ public class SchedJoulesServiceImpl implements SchedJoulesService {
 
     private final SchedJoulesAPI api;
 
-    private final ServiceLookup services;
-
     /**
      * Initialises a new {@link SchedJoulesServiceImpl}.
      *
-     * @services The {@link ServiceLookup} instance
      * @throws OXException if the {@link SchedJoulesAPI} cannot be initialised
      */
-    public SchedJoulesServiceImpl(ServiceLookup services) throws OXException {
+    public SchedJoulesServiceImpl() throws OXException {
         super();
-        this.services = services;
         api = SchedJoulesAPI.getInstance();
     }
 
@@ -165,51 +151,5 @@ public class SchedJoulesServiceImpl implements SchedJoulesService {
     @Override
     public SchedJoulesResult search(String query, String locale, int countryId, int categoryId, int maxRows) throws OXException {
         return new SchedJoulesResult(api.pages().search(query, locale, countryId, categoryId, maxRows));
-    }
-
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.chronos.schedjoules.SchedJoulesService#unsubscribeCalendar(com.openexchange.session.Session, java.lang.String, int)
-     */
-    @Override
-    public void unsubscribeCalendar(Session session, String folderId, int accountId) throws OXException {
-        // Resolve the user's SchedJoules calendar account
-        CalendarAccountService calendarAccountService = services.getService(CalendarAccountService.class);
-        CalendarAccount calendarAccount = calendarAccountService.getAccount(session, accountId);
-        if (calendarAccount == null) {
-            throw CalendarExceptionCodes.ACCOUNT_NOT_FOUND.create(accountId);
-        }
-
-        JSONObject userConfiguration = calendarAccount.getUserConfiguration();
-        if (userConfiguration == null) {
-            // Already unsubscribed
-            return;
-        }
-
-        JSONArray folders = userConfiguration.optJSONArray("folders");
-        if (folders == null || folders.isEmpty()) {
-            // Already unsubscribed
-            return;
-        }
-
-        String name = IDMangling.getRelativeFolderId(folderId);
-        try {
-            Iterator<Object> iterator = folders.iterator();
-            boolean removed = false;
-            while (iterator.hasNext()) {
-                JSONObject folder = (JSONObject) iterator.next();
-                if (name.equals(folder.getString("name"))) {
-                    iterator.remove();
-                    removed = true;
-                    break;
-                }
-            }
-            if (removed) {
-                calendarAccountService.updateAccount(session, accountId, null, userConfiguration, System.currentTimeMillis() + 100, null); //FIXME: Get the client timestamp
-            }
-        } catch (JSONException e) {
-            throw SchedJoulesExceptionCodes.JSON_ERROR.create(e.getMessage(), e);
-        }
     }
 }
