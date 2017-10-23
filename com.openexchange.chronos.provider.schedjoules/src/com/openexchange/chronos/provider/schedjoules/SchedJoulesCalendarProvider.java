@@ -319,7 +319,7 @@ public class SchedJoulesCalendarProvider extends CachingCalendarProvider {
     private boolean handleAdditions(JSONArray userConfigFolders, Map<String, Integer> internalItemIds, JSONArray additions) throws JSONException, OXException {
         for (int index = 0; index < userConfigFolders.length(); index++) {
             JSONObject folder = userConfigFolders.getJSONObject(index);
-            String name = folder.getString(SchedJoulesFields.NAME);
+            String name = folder.optString(SchedJoulesFields.NAME);
             if (!internalItemIds.containsKey(name)) {
                 additions.put(prepareFolder(folder));
             }
