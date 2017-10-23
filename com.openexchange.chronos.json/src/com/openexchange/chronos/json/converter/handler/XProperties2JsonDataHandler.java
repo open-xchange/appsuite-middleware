@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,41 +47,64 @@
  *
  */
 
-package com.openexchange.chronos.common;
+package com.openexchange.chronos.json.converter.handler;
 
-import com.openexchange.chronos.Alarm;
-import com.openexchange.chronos.Available;
-import com.openexchange.chronos.Event;
+import org.json.JSONException;
 import com.openexchange.chronos.ExtendedProperties;
+import com.openexchange.chronos.ExtendedProperty;
+import com.openexchange.chronos.json.converter.mapper.ExtendedPropertiesMapping;
+import com.openexchange.conversion.ConversionResult;
+import com.openexchange.conversion.Data;
+import com.openexchange.conversion.DataArguments;
+import com.openexchange.conversion.DataExceptionCodes;
+import com.openexchange.conversion.DataHandler;
+import com.openexchange.exception.OXException;
+import com.openexchange.session.Session;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
- * {@link DataHandlers}
+ * {@link XProperties2JsonDataHandler}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public enum DataHandlers {
-    ;
+public class XProperties2JsonDataHandler implements DataHandler {
 
-    /** The identifier of the data handler to convert from an event's JSON representation to {@link Event}s. */
-    public static final String JSON2EVENT = "com.openexchange.chronos.json2event";
+    /**
+     * Initializes a new {@link XProperties2JsonDataHandler}.
+     */
+    public XProperties2JsonDataHandler() {
+        super();
+    }
 
-    /** The identifier of the data handler to convert from an alarm's JSON representation to {@link Alarm}s. */
-    public static final String JSON2ALARM = "com.openexchange.chronos.json2alarm";
+    @Override
+    public String[] getRequiredArguments() {
+        return new String[0];
+    }
 
-    /** The identifier of the data handler to convert from an {@link Alarm} to its JSON representation. */
-    public static final String ALARM2JSON = "com.openexchange.chronos.alarm2json";
+    @Override
+    public Class<?>[] getTypes() {
+        return new Class<?>[] { ExtendedProperties.class, ExtendedProperty.class };
+    }
 
-    /** The identifier of the data handler to convert from an available's JSON representation to {@link Available}s. */
-    public static final String JSON2AVAILABLE = "com.openexchange.chronos.json2available";
-
-    /** The identifier of the data handler to convert from an {@link Available} to its JSON representation. */
-    public static final String AVAILABLE2JSON = "com.openexchange.chronos.available2json";
-
-    /** The identifier of the data handler to convert from an extended properties JSON representation to {@link ExtendedProperties}. */
-    public static final String JSON2XPROPERTIES = "com.openexchange.chronos.json2xproperties";
-
-    /** The identifier of the data handler to convert from an {@link ExtendedProperties} to its JSON representation. */
-    public static final String XPROPERTIES2JSON = "com.openexchange.chronos.xproperties2json";
+    @Override
+    public ConversionResult processData(Data<? extends Object> data, DataArguments dataArguments, Session session) throws OXException {
+        ConversionResult result = new ConversionResult();
+        Object sourceData = data.getData();
+        try {
+            if (null == sourceData) {
+                result.setData(null);
+            } else if (ExtendedProperties.class.isInstance(sourceData)) {
+                result.setData(ExtendedPropertiesMapping.serializeExtendedProperties((ExtendedProperties) sourceData));
+            } else if (ExtendedProperty.class.isInstance(sourceData)) {
+                result.setData(ExtendedPropertiesMapping.serializeExtendedProperty((ExtendedProperty) sourceData));
+            } else {
+                throw DataExceptionCodes.TYPE_NOT_SUPPORTED.create(sourceData.getClass().toString());
+            }
+        } catch (JSONException e) {
+            throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+        }
+        return result;
+    }
 
 }

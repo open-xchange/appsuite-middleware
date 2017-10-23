@@ -47,9 +47,10 @@
  *
  */
 
-package com.openexchange.chronos.json.converter.mapper;
+package com.openexchange.chronos.json.converter.handler;
 
-import java.util.Collection;
+import java.util.ArrayList;
+import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -66,29 +67,23 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
- * {@link Object2JsonDataHandler}
+ * {@link Json2ObjectDataHandler}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class Object2JsonDataHandler<O, E extends Enum<E>> implements DataHandler {
+public class Json2ObjectDataHandler<O, E extends Enum<E>> implements DataHandler {
 
     private final JsonMapper<O, E> mapper;
-    private final Class<O> clazz;
-    private final Class<O[]> arrayClass;
 
     /**
-     * Initializes a new {@link Object2JsonDataHandler}.
+     * Initializes a new {@link Json2ObjectDataHandler}.
      *
      * @param mapper The underlying JSON mapper
-     * @param clazz The object class
-     * @param arrayClass The array of objects class
      */
-    public Object2JsonDataHandler(JsonMapper<O, E> mapper, Class<O> clazz, Class<O[]> arrayClass) {
+    public Json2ObjectDataHandler(JsonMapper<O, E> mapper) {
         super();
         this.mapper = mapper;
-        this.clazz = clazz;
-        this.arrayClass = arrayClass;
     }
 
     @Override
@@ -98,53 +93,43 @@ public class Object2JsonDataHandler<O, E extends Enum<E>> implements DataHandler
 
     @Override
     public Class<?>[] getTypes() {
-        return new Class<?>[] { clazz, arrayClass, Collection.class };
+        return new Class<?>[] { JSONArray.class, JSONObject.class };
     }
 
     @Override
     public ConversionResult processData(Data<? extends Object> data, DataArguments dataArguments, Session session) throws OXException {
         ConversionResult result = new ConversionResult();
         Object sourceData = data.getData();
-        if (null == sourceData) {
+        if (null == sourceData || JSONObject.NULL.equals(sourceData)) {
             result.setData(null);
-        } else if (clazz.isInstance(sourceData)) {
-            result.setData(serialize(clazz.cast(sourceData), optTimeZoneID(dataArguments, session)));
-        } else if (arrayClass.isInstance(sourceData)) {
-            result.setData(serialize(arrayClass.cast(sourceData), optTimeZoneID(dataArguments, session)));
-        } else if (Collection.class.isInstance(sourceData)) {
-            result.setData(serialize((Collection<?>) sourceData, optTimeZoneID(dataArguments, session)));
+        } else if (JSONObject.class.isInstance(sourceData)) {
+            result.setData(deserialize((JSONObject) sourceData, optTimeZoneID(dataArguments, session)));
+        } else if (JSONArray.class.isInstance(sourceData)) {
+            result.setData(deserialize((JSONArray) sourceData, optTimeZoneID(dataArguments, session)));
         } else {
             throw DataExceptionCodes.TYPE_NOT_SUPPORTED.create(sourceData.getClass().toString());
         }
         return result;
     }
 
-    private JSONObject serialize(O object, String timeZoneID) throws OXException {
+    private O deserialize(JSONObject jsonObject, String timeZoneID) throws OXException {
         try {
-            return mapper.serialize(object, mapper.getAssignedFields(object), timeZoneID);
+            return mapper.deserialize(jsonObject, mapper.getMappedFields(), timeZoneID);
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
     }
 
-    private JSONArray serialize(O[] objects, String timeZoneID) throws OXException {
-        JSONArray jsonArray = new JSONArray(objects.length);
-        for (O object : objects) {
-            jsonArray.put(serialize(object, timeZoneID));
-        }
-        return jsonArray;
-    }
-
-    private JSONArray serialize(Collection<?> objects, String timeZoneID) throws OXException {
-        JSONArray jsonArray = new JSONArray(objects.size());
-        for (Object object : objects) {
-            try {
-                jsonArray.put(serialize(clazz.cast(object), timeZoneID));
-            } catch (ClassCastException e) {
-                throw DataExceptionCodes.TYPE_NOT_SUPPORTED.create(e, object.getClass().toString());
+    private List<O> deserialize(JSONArray jsonArray, String timeZoneID) throws OXException {
+        try {
+            List<O> objects = new ArrayList<O>(jsonArray.length());
+            for (int i = 0; i < jsonArray.length(); i++) {
+                objects.add(deserialize(jsonArray.getJSONObject(i), timeZoneID));
             }
+            return objects;
+        } catch (JSONException e) {
+            throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
-        return jsonArray;
     }
 
     private static String optTimeZoneID(DataArguments dataArguments, Session session) {
@@ -153,7 +138,7 @@ public class Object2JsonDataHandler<O, E extends Enum<E>> implements DataHandler
             try {
                 timeZoneID = ServerSessionAdapter.valueOf(session).getUser().getTimeZone();
             } catch (OXException e) {
-                org.slf4j.LoggerFactory.getLogger(Object2JsonDataHandler.class).warn("Error getting user timezone", e);
+                org.slf4j.LoggerFactory.getLogger(Json2ObjectDataHandler.class).warn("Error getting user timezone", e);
             }
         }
         return timeZoneID;
