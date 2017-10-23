@@ -68,11 +68,11 @@ import com.openexchange.testing.httpclient.models.CalendarAccountProviderData;
 import com.openexchange.testing.httpclient.models.CalendarAccountResponse;
 
 /**
- * {@link SchedJoulesSubscriptionTest}
+ * {@link BasicSchedJoulesProviderTest}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class SchedJoulesSubscriptionTest extends AbstractChronosTest {
+public class BasicSchedJoulesProviderTest extends AbstractChronosTest {
 
     private static final String PROVIDER_ID = "schedjoules";
 

@@ -70,11 +70,11 @@ import com.openexchange.testing.httpclient.models.SearchData;
 import com.openexchange.testing.httpclient.models.SearchResponse;
 
 /**
- * {@link BasicSchedJoulesTest}
+ * {@link BasicSchedJoulesAPITest}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class BasicSchedJoulesTest extends AbstractChronosTest {
+public class BasicSchedJoulesAPITest extends AbstractChronosTest {
 
     /**
      * Tests the available languages
