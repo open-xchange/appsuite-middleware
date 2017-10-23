@@ -143,7 +143,7 @@ public enum SchedJoulesExceptionCodes implements DisplayableOXExceptionCode {
     NO_CONTENT("No content was returned.", MESSAGE, CATEGORY_ERROR, 17),
     ;
 
-    public static final String PREFIX = "SCHEDJOULES";
+    public static final String PREFIX = "SCHEDJOULES-API";
 
     private String message;
     private String displayMessage;

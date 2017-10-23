@@ -60,6 +60,7 @@ import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.caching.CachingCalendarProvider;
 import com.openexchange.chronos.provider.schedjoules.exception.SchedJoulesProviderExceptionCodes;
 import com.openexchange.chronos.schedjoules.api.SchedJoulesAPI;
+import com.openexchange.chronos.schedjoules.exception.SchedJoulesExceptionCodes;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
@@ -259,10 +260,7 @@ public class SchedJoulesCalendarProvider extends CachingCalendarProvider {
             refreshInterval = MINIMUM_REFRESH_INTERVAL;
         }
 
-        JSONObject page = SchedJoulesAPI.getInstance().pages().getPage(itemId, locale);
-        if (!page.hasAndNotNull(SchedJoulesFields.URL)) {
-            throw SchedJoulesProviderExceptionCodes.NO_CALENDAR.create(itemId);
-        }
+        JSONObject page = fetchItem(itemId, locale);
 
         String name = folder.optString(SchedJoulesFields.NAME);
         if (Strings.isEmpty(name)) {
@@ -276,6 +274,29 @@ public class SchedJoulesCalendarProvider extends CachingCalendarProvider {
         internalItem.put(SchedJoulesFields.ITEM_ID, itemId);
         internalItem.put(SchedJoulesFields.NAME, name);
         return internalItem;
+    }
+
+    /**
+     * Fetches the calendar's metdata with the specified item and the specified locale from the SchedJoules server
+     * 
+     * @param itemId The item identifier
+     * @param locale The optional locale
+     * @return The calendar's metadata as JSONObject
+     * @throws OXException if the calendar is not found, or any other error is occurred
+     */
+    private JSONObject fetchItem(int itemId, String locale) throws OXException {
+        try {
+            JSONObject page = SchedJoulesAPI.getInstance().pages().getPage(itemId, locale);
+            if (!page.hasAndNotNull(SchedJoulesFields.URL)) {
+                throw SchedJoulesProviderExceptionCodes.NO_CALENDAR.create(itemId);
+            }
+            return page;
+        } catch (OXException e) {
+            if (SchedJoulesExceptionCodes.PAGE_NOT_FOUND.equals(e)) {
+                throw SchedJoulesProviderExceptionCodes.CALENDAR_DOES_NOT_EXIST.create(itemId, e);
+            }
+            throw e;
+        }
     }
 
     /**
