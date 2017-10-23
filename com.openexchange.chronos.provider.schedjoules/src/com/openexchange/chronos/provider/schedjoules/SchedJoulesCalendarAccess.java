@@ -54,6 +54,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -211,8 +212,8 @@ public class SchedJoulesCalendarAccess extends CachingCalendarAccess {
      */
     @Override
     public long getExternalRequestTimeout() {
-        // TODO Auto-generated method stub
-        return 0;
+        // TODO: Make configurable?
+        return TimeUnit.MINUTES.toMinutes(60);
     }
 
     /*

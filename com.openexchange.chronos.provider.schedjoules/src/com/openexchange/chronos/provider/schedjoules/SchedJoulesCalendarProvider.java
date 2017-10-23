@@ -75,11 +75,15 @@ public class SchedJoulesCalendarProvider extends CachingCalendarProvider {
 
     private static final String PROVIDER_ID = "schedjoules";
     private static final String DISPLAY_NAME = "SchedJoules";
-    
+
     /**
      * Default value for refreshInterval in minutes (1 week)
      */
     private static final int DEFAULT_REFRESH_INTERVAL = 10080;
+    /**
+     * The minumum value for the refreshInterval in minutes (1 day)
+     */
+    private static final int MINIMUM_REFRESH_INTERVAL = 1440;
 
     /**
      * Initialises a new {@link SchedJoulesCalendarProvider}.
@@ -252,6 +256,9 @@ public class SchedJoulesCalendarProvider extends CachingCalendarProvider {
         int itemId = folder.getInt("itemId");
         String locale = folder.optString("locale");
         int refreshInterval = folder.optInt("refreshInterval", DEFAULT_REFRESH_INTERVAL);
+        if (refreshInterval < MINIMUM_REFRESH_INTERVAL) {
+            refreshInterval = MINIMUM_REFRESH_INTERVAL;
+        }
 
         JSONObject page = SchedJoulesAPI.getInstance().pages().getPage(itemId, locale);
         if (!page.hasAndNotNull("url")) {
