@@ -246,7 +246,7 @@ public class ConflictCheckPerformer extends AbstractFreeBusyPerformer {
         while (recurrenceIterator.hasNext()) {
             eventRecurrenceIds.add(recurrenceIterator.next());
             try {
-                getSelfProctection().checkEventCollection(eventRecurrenceIds);
+                getSelfProtection().checkEventCollection(eventRecurrenceIds);
             } catch (OXException e) {
                 break;
             }
