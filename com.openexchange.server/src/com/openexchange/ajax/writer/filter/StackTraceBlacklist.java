@@ -87,11 +87,12 @@ public class StackTraceBlacklist {
             prefixes.add("SES");
         } else {
             // Prepare pattern
-            Pattern patternCode = Pattern.compile("[A-Z]{3}-[0-9]*");
-            Pattern patternPrefix = Pattern.compile("[A-Z]{3}(-|-\\*|\\*)?");
+            Pattern patternCode = Pattern.compile("[A-Z]*-[0-9]*");
+            Pattern patternPrefix = Pattern.compile("[A-Z]*(-|-\\*|\\*)?");
 
             // Parse
             for (String entry : Strings.splitByComma(blacklist)) {
+                entry = unquote(entry);
                 if (patternCode.matcher(entry).matches()) {
                     // Complete error code like 'SES-200'
                     codes.add(entry);
@@ -127,5 +128,15 @@ public class StackTraceBlacklist {
             return false;
         }
         return true;
+    }
+
+    /**
+     * Removes single or double quotes from a string if its quoted.
+     */
+    private String unquote(final String s) {
+        if (false == Strings.isEmpty(s) && ((s.startsWith("\"") && s.endsWith("\"")) || (s.startsWith("'") && s.endsWith("'")))) {
+            return s.substring(1, s.length() - 1);
+        }
+        return s;
     }
 }
