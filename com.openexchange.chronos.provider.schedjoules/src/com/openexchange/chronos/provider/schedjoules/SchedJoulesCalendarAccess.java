@@ -56,7 +56,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -135,13 +134,13 @@ public class SchedJoulesCalendarAccess extends CachingCalendarAccess {
      */
     @Override
     public List<CalendarFolder> getVisibleFolders() throws OXException {
-        JSONArray foldersArray = getAccount().getUserConfiguration().optJSONArray(SchedJoulesFields.FOLDERS);
-        if (foldersArray == null || foldersArray.isEmpty()) {
+        JSONObject foldersObject = getAccount().getUserConfiguration().optJSONObject(SchedJoulesFields.FOLDERS);
+        if (foldersObject == null || foldersObject.isEmpty()) {
             return Collections.emptyList();
         }
-        List<CalendarFolder> folders = new ArrayList<>(foldersArray.length());
-        for (int index = 0; index < foldersArray.length(); index++) {
-            JSONObject folder = foldersArray.optJSONObject(index);
+        List<CalendarFolder> folders = new ArrayList<>(foldersObject.length());
+        for (String key : foldersObject.keySet()) {
+            JSONObject folder = foldersObject.optJSONObject(key);
             if (!hasMetadata(folder)) {
                 continue;
             }
@@ -162,7 +161,7 @@ public class SchedJoulesCalendarAccess extends CachingCalendarAccess {
     @Override
     public String updateFolder(String folderId, CalendarFolder folder, long clientTimestamp) throws OXException {
         try {
-            JSONObject folderJson = findFolder(folderId, getAccount().getUserConfiguration().optJSONArray(SchedJoulesFields.FOLDERS));
+            JSONObject folderJson = findFolder(folderId, getAccount().getUserConfiguration().optJSONObject(SchedJoulesFields.FOLDERS));
             folderJson.put(SchedJoulesFields.COLOR, folder.getColor());
             folderJson.put(SchedJoulesFields.USED_FOR_SYNC, folder.isUsedForSync());
             folderJson.put(SchedJoulesFields.SCHEDULE_TRANSP, folder.getScheduleTransparency() == null ? null : folder.getScheduleTransparency().getValue());
@@ -194,9 +193,9 @@ public class SchedJoulesCalendarAccess extends CachingCalendarAccess {
         if (userConfig == null || userConfig.isEmpty()) {
             return 0;
         }
-        JSONArray foldersArray = userConfig.optJSONArray(SchedJoulesFields.FOLDERS);
+        JSONObject foldersObject = userConfig.optJSONObject(SchedJoulesFields.FOLDERS);
         try {
-            JSONObject folder = findFolder(folderId, foldersArray);
+            JSONObject folder = findFolder(folderId, foldersObject);
             return folder.optInt(SchedJoulesFields.REFRESH_INTERVAL, 0);
         } catch (OXException e) {
             LOG.debug("{}", e.getMessage(), e);
@@ -253,8 +252,8 @@ public class SchedJoulesCalendarAccess extends CachingCalendarAccess {
         if (internalUserConfig == null || internalUserConfig.isEmpty()) {
             throw SchedJoulesProviderExceptionCodes.NO_USER_CONFIGURATION.create(getAccount().getAccountId(), getSession().getUserId(), getSession().getContextId());
         }
-        JSONArray foldersArray = internalUserConfig.optJSONArray(SchedJoulesFields.FOLDERS);
-        JSONObject folder = findFolder(folderId, foldersArray);
+        JSONObject foldersObject = internalUserConfig.optJSONObject(SchedJoulesFields.FOLDERS);
+        JSONObject folder = findFolder(folderId, foldersObject);
         URL url = new URL(folder.getString(SchedJoulesFields.URL));
         UUID userKey = getUserKey(internalUserConfig);
         return new URL(url + "&u=" + userKey);
@@ -283,16 +282,16 @@ public class SchedJoulesCalendarAccess extends CachingCalendarAccess {
      * Find the folder in the specified folders array
      * 
      * @param folderId The folder identifier
-     * @param foldersArray The folders array
+     * @param foldersObject The folders array
      * @return The found folder as a {@link JSONObject}
      * @throws OXException if no folder metadata is found for the specified folder
      */
-    private JSONObject findFolder(String folderId, JSONArray foldersArray) throws OXException {
-        if (foldersArray == null || foldersArray.isEmpty()) {
+    private JSONObject findFolder(String folderId, JSONObject foldersObject) throws OXException {
+        if (foldersObject == null || foldersObject.isEmpty()) {
             throw SchedJoulesProviderExceptionCodes.NO_FOLDERS_METADATA.create(getAccount().getAccountId(), getSession().getUserId(), getSession().getContextId());
         }
-        for (int index = 0; index < foldersArray.length(); index++) {
-            JSONObject folder = foldersArray.optJSONObject(index);
+        for (String key : foldersObject.keySet()) {
+            JSONObject folder = foldersObject.optJSONObject(key);
             if (!hasMetadata(folder)) {
                 continue;
             }
@@ -335,7 +334,7 @@ public class SchedJoulesCalendarAccess extends CachingCalendarAccess {
             return folder;
         }
 
-        JSONArray folders = userConfig.optJSONArray(SchedJoulesFields.FOLDERS);
+        JSONObject folders = userConfig.optJSONObject(SchedJoulesFields.FOLDERS);
         JSONObject folderJson = findFolder(folderName, folders);
 
         folder.setName(folderJson.optString(SchedJoulesFields.NAME, folderName));
