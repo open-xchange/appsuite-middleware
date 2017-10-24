@@ -75,13 +75,9 @@ import com.openexchange.testing.httpclient.models.CalendarAccountResponse;
  */
 public class BasicSchedJoulesProviderTest extends AbstractChronosTest {
 
-    /**
-     * _90734
-     */
+    private static final int ROOT_PAGE = 115673;
+    private static final int NON_EXISTING_CALENDAR = 31145;
     private static final int CALENDAR_ONE = 90734;
-    /**
-     * _24428282
-     */
     private static final int CALENDAR_TWO = 24428282;
     private static final String PROVIDER_ID = "schedjoules";
 
@@ -109,7 +105,7 @@ public class BasicSchedJoulesProviderTest extends AbstractChronosTest {
     @Test
     public void testCreateAccountWithNonExistingSchedJoulesCalendar() throws ApiException, JSONException {
         try {
-            calendarAccountManager.createCalendarAccount(PROVIDER_ID, createAccountConfiguration(31145, null, -1).toString(), true);
+            calendarAccountManager.createCalendarAccount(PROVIDER_ID, createAccountConfiguration(NON_EXISTING_CALENDAR).toString(), true);
             fail("No exception was thrown");
         } catch (ChronosApiException e) {
             assertNotNull(e);
@@ -124,7 +120,7 @@ public class BasicSchedJoulesProviderTest extends AbstractChronosTest {
     @Test
     public void testCreateAccountWithInvalidSchedJoulesCalendar() throws ApiException, JSONException {
         try {
-            calendarAccountManager.createCalendarAccount(PROVIDER_ID, createAccountConfiguration(115673, null, -1).toString(), true);
+            calendarAccountManager.createCalendarAccount(PROVIDER_ID, createAccountConfiguration(ROOT_PAGE).toString(), true);
             fail("No exception was thrown");
         } catch (ChronosApiException e) {
             assertNotNull(e);
@@ -138,7 +134,7 @@ public class BasicSchedJoulesProviderTest extends AbstractChronosTest {
      */
     @Test
     public void testCreateAccountWithSchedJoulesSubscription() throws ApiException, JSONException, ChronosApiException {
-        CalendarAccountData accountData = calendarAccountManager.createCalendarAccount(PROVIDER_ID, createAccountConfiguration(CALENDAR_ONE, null, -1).toString(), false);
+        CalendarAccountData accountData = calendarAccountManager.createCalendarAccount(PROVIDER_ID, createAccountConfiguration(CALENDAR_ONE).toString(), false);
         assertAccountConfiguration(accountData.getConfiguration(), 1);
     }
 
@@ -148,12 +144,12 @@ public class BasicSchedJoulesProviderTest extends AbstractChronosTest {
      */
     @Test
     public void testUpdateAccountAddOneSubscription() throws ApiException, JSONException {
-        JSONObject initialConfiguration = createAccountConfiguration(CALENDAR_ONE, null, -1);
+        JSONObject initialConfiguration = createAccountConfiguration(CALENDAR_ONE);
         CalendarAccountResponse calendarAccount = calendarAccountManager.createCalendarAccount(PROVIDER_ID, initialConfiguration.toString());
         CalendarAccountData accountData = calendarAccount.getData();
 
         JSONObject accountConfig = assertAccountConfiguration(accountData.getConfiguration(), 1);
-        accountConfig.getJSONArray("folders").put(createFolder(CALENDAR_TWO, null, -1));
+        accountConfig.getJSONArray("folders").put(createFolder(CALENDAR_TWO));
 
         JSONObject configuration = new JSONObject();
         configuration.put("configuration", accountConfig);
@@ -169,12 +165,12 @@ public class BasicSchedJoulesProviderTest extends AbstractChronosTest {
      */
     @Test
     public void testUpdateAccountRemoveOneSubscription() throws JSONException, ApiException {
-        JSONObject initialConfiguration = createAccountConfiguration(CALENDAR_ONE, null, -1);
+        JSONObject initialConfiguration = createAccountConfiguration(CALENDAR_ONE);
         CalendarAccountResponse calendarAccount = calendarAccountManager.createCalendarAccount(PROVIDER_ID, initialConfiguration.toString());
         CalendarAccountData accountData = calendarAccount.getData();
 
         JSONObject accountConfig = assertAccountConfiguration(accountData.getConfiguration(), 1);
-        accountConfig.getJSONArray("folders").put(createFolder(CALENDAR_TWO, null, -1));
+        accountConfig.getJSONArray("folders").put(createFolder(CALENDAR_TWO));
 
         JSONObject configuration = new JSONObject();
         configuration.put("configuration", accountConfig);
@@ -257,7 +253,18 @@ public class BasicSchedJoulesProviderTest extends AbstractChronosTest {
     }
 
     /**
-     * Creates a calendar configuration object with the specified itemId
+     * Creates a calendar account configuration with the specified item identifier.
+     * 
+     * @param itemId The item identifier
+     * @return The configuration
+     * @throws JSONException if a JSON error is occurred
+     */
+    private JSONObject createAccountConfiguration(int itemId) throws JSONException {
+        return createAccountConfiguration(itemId, null, -1);
+    }
+
+    /**
+     * Creates a calendar configuration object with the specified itemId, locale and refresh interval
      * 
      * @param itemId The item identifier
      * @param locale The optional locale
@@ -276,6 +283,17 @@ public class BasicSchedJoulesProviderTest extends AbstractChronosTest {
         config.put("configuration", foldersJ);
 
         return config;
+    }
+
+    /**
+     * Creates a calendar folder configuration with the specified item id
+     * 
+     * @param itemId The item id
+     * @return The folder configuration
+     * @throws JSONException if a JSON error is occurred
+     */
+    private JSONObject createFolder(int itemId) throws JSONException {
+        return createFolder(itemId, null, -1);
     }
 
     /**
