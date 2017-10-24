@@ -52,6 +52,7 @@ package com.openexchange.chronos.provider.schedjoules;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.UUID;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -142,6 +143,7 @@ public class SchedJoulesCalendarProvider extends CachingCalendarProvider {
             JSONArray internalConfigItems = new JSONArray();
             addFolders(folders, internalConfigItems);
             internalConfig.put(SchedJoulesFields.FOLDERS, internalConfigItems);
+            internalConfig.put(SchedJoulesFields.USER_KEY, UUID.randomUUID().toString());
             return internalConfig;
         } catch (JSONException e) {
             throw SchedJoulesProviderExceptionCodes.JSON_ERROR.create(e.getMessage(), e);

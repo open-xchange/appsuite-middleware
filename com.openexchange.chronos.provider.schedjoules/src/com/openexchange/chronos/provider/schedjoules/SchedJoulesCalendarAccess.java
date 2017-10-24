@@ -54,6 +54,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -222,13 +223,7 @@ public class SchedJoulesCalendarAccess extends CachingCalendarAccess {
     @Override
     public ExternalCalendarResult getAllEvents(String folderId) throws OXException {
         try {
-            JSONObject userConfig = getAccount().getInternalConfiguration();
-            if (userConfig == null || userConfig.isEmpty()) {
-                throw SchedJoulesProviderExceptionCodes.NO_USER_CONFIGURATION.create(getAccount().getAccountId(), getSession().getUserId(), getSession().getContextId());
-            }
-            JSONArray foldersArray = userConfig.optJSONArray(SchedJoulesFields.FOLDERS);
-            JSONObject folder = findFolder(folderId, foldersArray);
-            URL url = new URL(folder.getString(SchedJoulesFields.URL));
+            URL url = getFeedURL(folderId);
             SchedJoulesAPI api = SchedJoulesAPI.getInstance();
             Calendar calendar = api.calendar().getCalendar(url);
             if (NO_ACCESS.equals(calendar.getName())) {
@@ -240,6 +235,47 @@ public class SchedJoulesCalendarAccess extends CachingCalendarAccess {
             throw SchedJoulesProviderExceptionCodes.JSON_ERROR.create(e.getMessage(), e);
         } catch (MalformedURLException e) {
             throw SchedJoulesProviderExceptionCodes.INVALID_URL.create(folderId, e);
+        }
+    }
+
+    /**
+     * Returns the feed URL for the specified folder
+     * 
+     * @param folderId The folder identifier
+     * @return The feed URL from which to fetch the events
+     * @throws MalformedURLException If the URL is invalid
+     * @throws JSONException if a JSON error occurs
+     * @throws OXException if the feed URL cannot be returned due to either malformed user key,
+     *             or non-existing configuration or folder
+     */
+    private URL getFeedURL(String folderId) throws MalformedURLException, JSONException, OXException {
+        JSONObject internalUserConfig = getAccount().getInternalConfiguration();
+        if (internalUserConfig == null || internalUserConfig.isEmpty()) {
+            throw SchedJoulesProviderExceptionCodes.NO_USER_CONFIGURATION.create(getAccount().getAccountId(), getSession().getUserId(), getSession().getContextId());
+        }
+        JSONArray foldersArray = internalUserConfig.optJSONArray(SchedJoulesFields.FOLDERS);
+        JSONObject folder = findFolder(folderId, foldersArray);
+        URL url = new URL(folder.getString(SchedJoulesFields.URL));
+        UUID userKey = getUserKey(internalUserConfig);
+        return new URL(url + "&u=" + userKey);
+    }
+
+    /**
+     * Retrieves the user's key
+     * 
+     * @param internalConfig The internal configuration
+     * @return The user key
+     * @throws OXException if the userKey is malformed or missing from the configuration
+     */
+    private UUID getUserKey(JSONObject internalConfig) throws OXException {
+        String key = internalConfig.optString(SchedJoulesFields.USER_KEY);
+        if (Strings.isEmpty(key)) {
+            throw SchedJoulesProviderExceptionCodes.MISSING_USER_KEY.create(getAccount().getAccountId(), getSession().getUserId(), getSession().getContextId());
+        }
+        try {
+            return UUID.fromString(key);
+        } catch (IllegalArgumentException e) {
+            throw SchedJoulesProviderExceptionCodes.MALFORMED_USER_KEY.create(e, getAccount().getAccountId(), getSession().getUserId(), getSession().getContextId());
         }
     }
 

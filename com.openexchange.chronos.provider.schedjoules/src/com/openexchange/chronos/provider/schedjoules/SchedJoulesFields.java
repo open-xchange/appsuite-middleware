@@ -106,4 +106,9 @@ final class SchedJoulesFields {
      */
     static final String DESCRIPTION = "description";
 
+    /**
+     * The unique user key
+     */
+    static final String USER_KEY = "userKey";
+
 }

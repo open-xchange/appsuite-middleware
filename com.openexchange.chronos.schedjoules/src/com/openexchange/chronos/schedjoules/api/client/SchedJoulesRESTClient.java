@@ -148,7 +148,22 @@ public class SchedJoulesRESTClient {
      * @throws OXException
      */
     private void prepareRequest(HttpRequestBase request, String path, String query) throws OXException {
-        prepareRequest(request, SCHEME, BASE_URL, path, query);
+        prepareAuthorizedRequest(request, SCHEME, BASE_URL, path, query);
+    }
+
+    /**
+     * Prepares the specified HTTP request and adds the Authorization header
+     * 
+     * @param request The {@link HttpRequestBase} to prepare
+     * @param scheme The mandatory scheme/protocol
+     * @param baseUrl The mandatory base URL
+     * @param path The mandatory path
+     * @param query The optional query string
+     * @throws OXException if the path is not valid
+     */
+    private void prepareAuthorizedRequest(HttpRequestBase request, String scheme, String baseUrl, String path, String query) throws OXException {
+        prepareRequest(request, scheme, baseUrl, path, query);
+        request.addHeader(HttpHeaders.AUTHORIZATION, authorizationHeader);
     }
 
     /**
@@ -164,7 +179,6 @@ public class SchedJoulesRESTClient {
     private void prepareRequest(HttpRequestBase request, String scheme, String baseUrl, String path, String query) throws OXException {
         try {
             request.setURI(new URI(scheme, baseUrl, path, query, null));
-            request.addHeader(HttpHeaders.AUTHORIZATION, authorizationHeader);
             request.addHeader(HttpHeaders.ACCEPT, acceptHeader);
         } catch (URISyntaxException e) {
             throw SchedJoulesAPIExceptionCodes.INVALID_URI_PATH.create(path, e);
@@ -218,7 +232,7 @@ public class SchedJoulesRESTClient {
      */
     private HttpUriRequest prepareRequest(URL url, HttpMethod httpMethod) throws OXException {
         HttpRequestBase httpRequest = createRequest(httpMethod);
-        prepareRequest(httpRequest, url.getProtocol(), url.getHost(), url.getPath(), null);
+        prepareRequest(httpRequest, url.getProtocol(), url.getHost(), url.getPath(), url.getQuery());
         return httpRequest;
     }
 
