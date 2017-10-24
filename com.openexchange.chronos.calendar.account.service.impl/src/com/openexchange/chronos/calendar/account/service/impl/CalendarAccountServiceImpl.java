@@ -138,7 +138,7 @@ public class CalendarAccountServiceImpl implements CalendarAccountService, Admin
          */
         CalendarProvider calendarProvider = getProvider(storedAccount.getProviderId());
 
-        JSONObject internalConfig = calendarProvider.reconfigureAccount(session, storedAccount.getInternalConfiguration(), userConfig, parameters);
+        JSONObject internalConfig = calendarProvider.reconfigureAccount(session, storedAccount, userConfig, parameters);
         /*
          * update calendar account in storage within transaction
          */

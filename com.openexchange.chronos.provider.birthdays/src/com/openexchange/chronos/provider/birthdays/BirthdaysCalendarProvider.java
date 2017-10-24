@@ -137,7 +137,7 @@ public class BirthdaysCalendarProvider implements AutoProvisioningCalendarProvid
     }
 
     @Override
-    public JSONObject reconfigureAccount(Session session, JSONObject internalConfig, JSONObject userConfig, CalendarParameters parameters) throws OXException {
+    public JSONObject reconfigureAccount(Session session, CalendarAccount calendarAccount, JSONObject userConfig, CalendarParameters parameters) throws OXException {
         /*
          * initialize & check user config
          */

@@ -100,12 +100,12 @@ public interface CalendarProvider {
      * returned for persisting along with the updated calendar account.
      *
      * @param session The user's session
-     * @param internalConfig The <i>internal</i> configuration as retrieved from the currently stored account
+     * @param calendarAccount The currently stored calendar account holding the obsolete user and current <i>internal</i> configuration
      * @param userConfig The updated <i>user</i> configuration as supplied by the client
      * @param parameters Additional calendar parameters, or <code>null</code> if not set
      * @return A JSON object holding the updated <i>internal</i> configuration to store along with update, or <code>null</code> if unchanged
      */
-    JSONObject reconfigureAccount(Session session, JSONObject internalConfig, JSONObject userConfig, CalendarParameters parameters) throws OXException;
+    JSONObject reconfigureAccount(Session session, CalendarAccount calendarAccount, JSONObject userConfig, CalendarParameters parameters) throws OXException;
 
     /**
      * Callback routine that is invoked after a new account for the calendar provider has been created.

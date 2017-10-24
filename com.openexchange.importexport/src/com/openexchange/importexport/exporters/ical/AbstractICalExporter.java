@@ -52,18 +52,15 @@ package com.openexchange.importexport.exporters.ical;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.List;
+import java.util.Map;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.chronos.Event;
-import com.openexchange.chronos.ical.CalendarExport;
-import com.openexchange.chronos.ical.ICalParameters;
-import com.openexchange.chronos.ical.ICalService;
 import com.openexchange.exception.OXException;
 import com.openexchange.importexport.exceptions.ImportExportExceptionCodes;
 import com.openexchange.importexport.formats.Format;
 import com.openexchange.importexport.helpers.SizedInputStream;
-import com.openexchange.importexport.osgi.ImportExportServices;
 import com.openexchange.java.Streams;
+import com.openexchange.java.Strings;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -78,22 +75,35 @@ public abstract class AbstractICalExporter implements ICalExport {
         super();
     }
 
-    public AbstractICalExporter(String folderId) {
+    public AbstractICalExporter(String folderId, Map<String, List<String>> batchIds) {
         super();
         this.folderId = folderId;
+        this.batchIds = batchIds;
     }
 
     private String folderId;
 
+    private Map<String, List<String>> batchIds;
+
     /**
-     * Exports the data
+     * Exports the requested batch of data
      *
-     * @param session The session object
-     * @param out The output stream to write to
-     * @return ThresholdFileHolder The file holder to export
-     * @throws OXException if folder export fails
+     * @param session The user session
+     * @param out The output stream
+     * @return ThresholdFileHolder The file holder
+     * @throws OXException if export fails
      */
-    abstract protected ThresholdFileHolder exportData(ServerSession session, OutputStream out) throws OXException;
+    abstract protected ThresholdFileHolder exportBatchData(ServerSession session, OutputStream out) throws OXException ;
+
+    /**
+     * Exports the requested folder
+     *
+     * @param session The user session
+     * @param out The output stream
+     * @return ThresholdFileHolder The file holder
+     * @throws OXException if export fails
+     */
+    abstract protected ThresholdFileHolder exportFolderData(ServerSession session, OutputStream out) throws OXException ;
 
     @Override
     public SizedInputStream exportData(ServerSession session, AJAXRequestData requestData, boolean isSaveToDisk, String filename) throws OXException {
@@ -105,7 +115,7 @@ public abstract class AbstractICalExporter implements ICalExport {
                     requestData.setResponseHeader("Content-Type", isSaveToDisk ? "application/octet-stream" : Format.ICAL.getMimeType() + "; charset=UTF-8");
                     requestData.setResponseHeader("Content-Disposition", "attachment"+filename);
                     requestData.removeCachingHeader();
-                    exportData(session, out);
+                    getExportDataSource(session, out);
                     return null;
                 }
             } catch (IOException e) {
@@ -116,7 +126,7 @@ public abstract class AbstractICalExporter implements ICalExport {
         ThresholdFileHolder sink = new ThresholdFileHolder();
         boolean error = true;
         try {
-            sink = exportData(session, null);
+            sink = getExportDataSource(session, null);
             error = false;
             return new SizedInputStream(sink.getClosingStream(), sink.getLength(), Format.ICAL);
         } finally {
@@ -126,33 +136,21 @@ public abstract class AbstractICalExporter implements ICalExport {
         }
     }
 
-    protected ThresholdFileHolder exportChronosEvents(List<Event> eventList, OutputStream optOut) throws OXException {
-        ICalService iCalService = ImportExportServices.getICalService();
-        ICalParameters iCalParameters = iCalService.initParameters();
-        CalendarExport calendarExport = iCalService.exportICal(iCalParameters);
-        for (Event event : eventList) {
-            calendarExport.add(event);
-        }
-        if (null != optOut) {
-            calendarExport.writeVCalendar(optOut);
-            return null;
-        }
-        ThresholdFileHolder sink = new ThresholdFileHolder();
-        boolean error = true;
-        try {
-            calendarExport.writeVCalendar(sink.asOutputStream());
-            error = false;
-            return sink;
-        } finally {
-            if (error) {
-                Streams.close(sink);
-            }
-        }
+    @Override
+    public ThresholdFileHolder getExportDataSource(ServerSession session, OutputStream out) throws OXException {
+        return isBatchExport() == true ? exportFolderData(session, out) : exportBatchData(session, out);
+    }
+
+    private boolean isBatchExport() {
+        return !Strings.isEmpty(getFolderId()) == true ? true : false;
     }
 
     public String getFolderId() {
         return folderId;
     }
 
+    public Map<String, List<String>> getBatchIds() {
+        return batchIds;
+    }
 
 }

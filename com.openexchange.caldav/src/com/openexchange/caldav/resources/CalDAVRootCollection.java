@@ -52,6 +52,7 @@ package com.openexchange.caldav.resources;
 import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.caldav.GroupwareCaldavFactory;
+import com.openexchange.caldav.Tools;
 import com.openexchange.caldav.mixins.ScheduleDefaultCalendarURL;
 import com.openexchange.caldav.mixins.ScheduleDefaultTasksURL;
 import com.openexchange.caldav.mixins.ScheduleInboxURL;
@@ -66,6 +67,7 @@ import com.openexchange.dav.resources.DAVRootCollection;
 import com.openexchange.dav.resources.FolderCollection;
 import com.openexchange.dav.resources.PlaceholderCollection;
 import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.CalendarFolderField;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.FolderResponse;
 import com.openexchange.folderstorage.FolderService;
@@ -73,7 +75,7 @@ import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.Type;
 import com.openexchange.folderstorage.UserizedFolder;
-import com.openexchange.folderstorage.database.contentType.CalendarContentType;
+import com.openexchange.folderstorage.calendar.contentType.CalendarContentType;
 import com.openexchange.folderstorage.database.contentType.TaskContentType;
 import com.openexchange.folderstorage.mail.contentType.TrashContentType;
 import com.openexchange.folderstorage.type.PrivateType;
@@ -145,16 +147,11 @@ public class CalDAVRootCollection extends DAVRootCollection {
         }
         try {
             for (UserizedFolder folder : getSubfolders()) {
-                if (name.equals(folder.getID())) {
-                    LOG.debug("{}: found child collection by name '{}'", this.getUrl(), name);
-                    return createCollection(folder);
-                }
-                if (null != folder.getMeta() && folder.getMeta().containsKey("resourceName") && name.equals(folder.getMeta().get("resourceName"))) {
-                    LOG.debug("{}: found child collection by resource name '{}'", this.getUrl(), name);
+                if (matches(name, folder)) {
                     return createCollection(folder);
                 }
             }
-            LOG.debug("{}: child collection '{}' not found, creating placeholder collection", this.getUrl(), name);
+            LOG.debug("{}: child collection '{}' not found, creating placeholder collection", getUrl(), name);
             return new PlaceholderCollection<CommonObject>(factory, constructPathForChildResource(name), CalendarContentType.getInstance(), getTreeID());
         } catch (OXException e) {
             throw DAVProtocol.protocolException(getUrl(), e);
@@ -196,11 +193,11 @@ public class CalDAVRootCollection extends DAVRootCollection {
     /**
      * Constructs a string representing the WebDAV name for a folder resource.
      *
-     * @param folder the folder to construct the name for
-     * @return the name
+     * @param folder The folder to construct the name for
+     * @return The resource name
      */
     private String constructNameForChildResource(UserizedFolder folder) {
-        return folder.getID();
+        return Tools.encodeFolderId(folder.getID());
     }
 
     private WebdavPath constructPathForChildResource(UserizedFolder folder) {
@@ -211,43 +208,60 @@ public class CalDAVRootCollection extends DAVRootCollection {
      * Gets a list of all visible and subscribed task- and calendar-folders in the configured folder tree.
      *
      * @return The visible folders
-     * @throws FolderException
      */
     private List<UserizedFolder> getVisibleFolders() throws OXException {
         UserPermissionBits permissionBits = ServerSessionAdapter.valueOf(factory.getSession()).getUserPermissionBits();
         List<UserizedFolder> folders = new ArrayList<UserizedFolder>();
         if (permissionBits.hasCalendar()) {
-            folders.addAll(getVisibleFolders(PrivateType.getInstance(), CalendarContentType.getInstance()));
+            folders.addAll(getSynchronizedFolders(PrivateType.getInstance(), CalendarContentType.getInstance()));
             if (permissionBits.hasFullPublicFolderAccess()) {
-                folders.addAll(getVisibleFolders(PublicType.getInstance(), CalendarContentType.getInstance()));
+                folders.addAll(getSynchronizedFolders(PublicType.getInstance(), CalendarContentType.getInstance()));
             }
             if (permissionBits.hasFullSharedFolderAccess()) {
-                folders.addAll(getVisibleFolders(SharedType.getInstance(), CalendarContentType.getInstance()));
+                folders.addAll(getSynchronizedFolders(SharedType.getInstance(), CalendarContentType.getInstance()));
             }
         }
         if (permissionBits.hasTask()) {
-            folders.addAll(getVisibleFolders(PrivateType.getInstance(), TaskContentType.getInstance()));
+            folders.addAll(getSynchronizedFolders(PrivateType.getInstance(), TaskContentType.getInstance()));
         }
         return folders;
     }
 
     /**
-     * Gets a list containing all visible folders of the given {@link Type}.
-     * @param type
-     * @return
-     * @throws FolderException
+     * Gets a list containing all visible and synchronizable folders of the given {@link Type}.
+     *
+     * @param type The type to get the folders for
+     * @param contentType The content type to get the folders for
+     * @return The synchronizable folders, or an empty list if there are none
      */
-    private List<UserizedFolder> getVisibleFolders(Type type, ContentType contentType) throws OXException {
+    private List<UserizedFolder> getSynchronizedFolders(Type type, ContentType contentType) throws OXException {
         List<UserizedFolder> folders = new ArrayList<UserizedFolder>();
         FolderResponse<UserizedFolder[]> visibleFoldersResponse = getFolderService().getVisibleFolders(
                 getTreeID(), contentType, type, false, factory.getSession(), null);
         UserizedFolder[] response = visibleFoldersResponse.getResponse();
         for (UserizedFolder folder : response) {
-            if (Permission.READ_OWN_OBJECTS < folder.getOwnPermission().getReadPermission() && false == isTrashFolder(folder)) {
+            if (isUsedForSync(folder)) {
                 folders.add(folder);
             }
         }
         return folders;
+    }
+
+    /**
+     * Gets a value indicating whether the folder should be considered for synchronization with external clients or not.
+     *
+     * @param folder The folder to check
+     * @return <code>true</code> if the folder should be considered for synchronization, <code>false</code>, otherwise
+     */
+    private boolean isUsedForSync(UserizedFolder folder) throws OXException {
+        if (Permission.READ_OWN_OBJECTS > folder.getOwnPermission().getReadPermission()) {
+            return false;
+        }
+        if (isTrashFolder(folder)) {
+            return false;
+        }
+        Boolean usedForSync = CalendarFolderField.optValue(folder.getProperties(), CalendarFolderField.USED_FOR_SYNC, Boolean.class);
+        return false == Boolean.FALSE.equals(usedForSync);
     }
 
     /**
@@ -315,6 +329,36 @@ public class CalDAVRootCollection extends DAVRootCollection {
             }
         }
         return treeID;
+    }
+
+    private static boolean matches(String resourceName, UserizedFolder folder) {
+        if (null == resourceName || null == folder || null == folder.getID()) {
+            return false;
+        }
+        /*
+         * match decoded name first
+         */
+        try {
+            if (Tools.decodeFolderId(resourceName).equals(folder.getID())) {
+                return true;
+            }
+        } catch (IllegalArgumentException e) {
+            LOG.debug("Error decoding child resource name {}, assuming legacy name.", resourceName, e);
+
+        }
+        /*
+         * try constructed composite identifier as fallback
+         */
+        if ((Tools.DEFAULT_ACCOUNT_PREFIX + resourceName).equals(folder.getID())) {
+            return true;
+        }
+        /*
+         * try via stored resource name, too
+         */
+        if (null != folder.getMeta() && folder.getMeta().containsKey("resourceName") && resourceName.equals(folder.getMeta().get("resourceName"))) {
+            return true;
+        }
+        return false;
     }
 
 }

@@ -329,7 +329,7 @@ public class ConflictCheckPerformer extends AbstractFreeBusyPerformer {
                     }
                 }
             }
-            getSelfProctection().checkEventCollection(conflicts);
+            getSelfProtection().checkEventCollection(conflicts);
         }
         return conflicts;
     }
@@ -397,7 +397,7 @@ public class ConflictCheckPerformer extends AbstractFreeBusyPerformer {
         if (0 == eventsInPeriod.size()) {
             return Collections.emptyList();
         }
-        getSelfProctection().checkEventCollection(eventsInPeriod);
+        getSelfProtection().checkEventCollection(eventsInPeriod);
         return readAttendeeData(eventsInPeriod, Boolean.TRUE);
     }
 

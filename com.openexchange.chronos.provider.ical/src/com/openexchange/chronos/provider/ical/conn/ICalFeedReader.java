@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.chronos.provider.ical;
+package com.openexchange.chronos.provider.ical.conn;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -59,6 +59,7 @@ import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.ical.ICalParameters;
 import com.openexchange.chronos.ical.ICalService;
 import com.openexchange.chronos.ical.ImportedCalendar;
+import com.openexchange.chronos.provider.ical.ICalFeedConfig;
 import com.openexchange.chronos.provider.ical.exception.ICalProviderExceptionCodes;
 import com.openexchange.chronos.provider.ical.internal.Services;
 import com.openexchange.chronos.provider.ical.result.GetResult;
@@ -107,18 +108,22 @@ public class ICalFeedReader extends ICalFeedConnector {
         }
     }
 
-    protected GetResult get() throws OXException {
+    public GetResult get() throws OXException {
         HttpGet getMethod = null;
         CloseableHttpResponse response = null;
         try {
             getMethod = prepareGet();
-            response = httpClient.execute(getMethod);
+            response = ICalFeedHttpClient.getInstance().execute(getMethod);
             GetResult result = new GetResult(response.getStatusLine(), response.getAllHeaders());
 
             if (result.getStatusCode() >= 200 && result.getStatusCode() < 300) {
                 HttpEntity httpEntity = response.getEntity();
                 if (null == httpEntity) {
                     return null;
+                }
+                long contentLength = httpEntity.getContentLength();
+                if (contentLength > this.allowedFeedSize) {
+                    throw ICalProviderExceptionCodes.FEED_SIZE_EXCEEDED.create(iCalFeedConfig.getFeedUrl(), contentLength, this.allowedFeedSize);
                 }
                 result.setCalendar(importCalendar(httpEntity));
                 return result;

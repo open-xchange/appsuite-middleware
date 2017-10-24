@@ -59,6 +59,7 @@ import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.CalendarFolder;
 import com.openexchange.chronos.provider.caching.ExternalCalendarResult;
 import com.openexchange.chronos.provider.caching.SingleFolderCachingCalendarAccess;
+import com.openexchange.chronos.provider.ical.conn.ICalFeedReader;
 import com.openexchange.chronos.provider.ical.exception.ICalProviderExceptionCodes;
 import com.openexchange.chronos.provider.ical.internal.ICalCalendarProviderProperties;
 import com.openexchange.chronos.provider.ical.internal.Services;
@@ -95,17 +96,17 @@ public class ICalCalendarAccess extends SingleFolderCachingCalendarAccess {
      */
     public ICalCalendarAccess(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
         super(session, account, parameters);
-        ICalAuthParser.decrypt(account.getUserConfiguration(), session.getPassword());
-        this.iCalFeedConfig = new ICalFeedConfig.Builder(account.getUserConfiguration(), getFolderConfiguration()).build();
+        JSONObject userConfiguration = new JSONObject(account.getUserConfiguration());
+        ICalAuthParser.decrypt(userConfiguration, session.getPassword());
+        this.iCalFeedConfig = new ICalFeedConfig.Builder(session, userConfiguration, getFolderConfiguration(), false).build();
         this.reader = new ICalFeedReader(session, iCalFeedConfig);
     }
 
     @Override
-    public void close() {
-    }
+    public void close() {}
 
     @Override
-    public long getRefreshInterval() {
+    public long getRefreshInterval(String folderId) {
         long refreshInterval = getFolderConfiguration().optLong(REFRESH_INTERVAL, 0);
         if (refreshInterval > 0) {
             return refreshInterval;
@@ -124,6 +125,12 @@ public class ICalCalendarAccess extends SingleFolderCachingCalendarAccess {
             return new ExternalCalendarResult();
         }
         return getAndHandleFeed();
+    }
+
+    @Override
+    public String updateFolder(String folderId, CalendarFolder folder, long clientTimestamp) throws OXException {
+        // nothing changed, return origin folder id
+        return folderId;
     }
 
     private void verifyURI() throws OXException {
@@ -192,11 +199,5 @@ public class ICalCalendarAccess extends SingleFolderCachingCalendarAccess {
     @Override
     public void handleExceptions(String calendarFolderId, OXException e) {
 
-    }
-
-    @Override
-    public String updateFolder(String folderId, CalendarFolder folder, long clientTimestamp) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
     }
 }

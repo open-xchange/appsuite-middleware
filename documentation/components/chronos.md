@@ -35,6 +35,11 @@ A precise calendar date and time consisting of day, year, month, date, hour, min
     - Example in iCal: ``DTSTART;TZID=America/New_York:19980119T020000``
     - In the database, the unix timestamp ans the timezone are stored
 
+### Usage
+
+Internally, througout the new Chronos stack, a DateTime object from the 3rd party library ``rfc5545-datetime`` is used, where dedicated support for the different modes are available. In the database, we have separat columns for the actual value of the start- and end-date of an event, the associated timezones and the *all-day* flag. 
+
+
 ### References / further reading
 - https://tools.ietf.org/html/rfc5545
 - https://devguide-calconnect.rhcloud.com/Handling-Dates-and-Times
@@ -305,11 +310,13 @@ When upgrading the server, several new database tables are created and existing 
 
 For table creation, the update task ``com.openexchange.chronos.storage.rdb.groupware.ChronosCreateTableTask`` is registered; the actual migration is performed within the task ``com.openexchange.chronos.storage.rdb.migration.ChronosStorageMigrationTask``. Depending on the amount of existing calendar data, the migration might take some time - in the magnitude of 1 second per 1K rows in ``prg_dates``. So as usual, the upgrade should be scheduled accordingly. To have a more verbose progress logging of the migration, the log level for ``com.openexchange.chronos.storage.rdb.migration`` should be increased to ``ALL``. 
 
-When the migration of calendar data is finished successfully, the contexts are marked with two special properties that render the calendar storage in a special mode where any changes that are persisted in the new tables are also *replayed* to the legacy tables: ``config/com.openexchange.chronos.useLegacyStorage=false`` and ``config/com.openexchange.chronos.replayToLegacyStorage=true``. This is done to still provide a downgrade option to the previous version of the groupware server in case such a disaster recovery should ever be required. Additionally, this ensures that during a *rolling upgrade* scenario, where all groupware nodes are updated one after each other, up-to-date calendar data can also be read from nodes that are still running the previous version of the server. However, write access to calendar data from not yet upgraded groupware nodes is actively prevented, which ensure that no stale data is produced in the legacy database tables during the upgrade phase. 
+When the migration of calendar data is finished successfully, the calendar stack will automatically switch into a special mode where any changes that are persisted in the new tables are also *replayed* to the legacy tables. This is done to still provide a downgrade option to the previous version of the groupware server in case such a disaster recovery should ever be required. Additionally, this ensures that during a *rolling upgrade* scenario, where all groupware nodes are updated one after each other, up-to-date calendar data can also be read from nodes that are still running the previous version of the server. However, write access to calendar data from not yet upgraded groupware nodes is actively prevented, which ensure that no stale data is produced in the legacy database tables during the upgrade phase.
 
-In case the migration task fails unexpectedly, the legacy data will still be used (due to the absence of the marker properties), so that the calendaring system is still in a working state, with a reduced functionality. A subsequent migration attempt can then be performed using the ``runupdate`` commandline utility.    
+With a future upgrade, the storage is then switched into a "normal" operation mode again, along with purging the no longer needed legacy database tables.
+ 
+In case the migration task fails unexpectedly, the legacy data will still be used for both reading and writing, so that the calendaring system is still in a working state, with a reduced functionality. A subsequent migration attempt can then be performed using the ``runupdate`` commandline utility after the issues that led to the failed migration have been resolved.    
 
-The aforementioned properties will get removed with another upgrade in the future automatically, along with purging the no longer needed legacy database tables. Of course, it is also possible to do this manually by removing the config-cascade property ``com.openexchange.chronos.replayToLegacyStorage`` for the respective context, e.g. by utilitzing the ``changecontext`` utility with ``--remove-config com.openexchange.chronos.replayToLegacyStorage`` argument.
+In case the migration task finishes successfully, but other circumstances force a disaster recovery in form of a downgrade of the installation to the previous version, downgraded nodes will still not be able to perform *write* operations on the legacy tables. To get out of this mode, it's necessary to unlist the successful execution of ``com.openexchange.chronos.storage.rdb.groupware.ChronosCreateTableTask`` manually from the system. Upon the next upgrade of the server to the new version, the migration will then be executed again.     
 
 
 ### Malformed Data

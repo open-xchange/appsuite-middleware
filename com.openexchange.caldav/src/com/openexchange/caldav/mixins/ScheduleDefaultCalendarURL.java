@@ -51,10 +51,11 @@ package com.openexchange.caldav.mixins;
 
 import com.openexchange.caldav.CaldavProtocol;
 import com.openexchange.caldav.GroupwareCaldavFactory;
+import com.openexchange.caldav.Tools;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.UserizedFolder;
-import com.openexchange.folderstorage.database.contentType.CalendarContentType;
+import com.openexchange.folderstorage.calendar.contentType.CalendarContentType;
 import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
 
 /**
@@ -96,7 +97,7 @@ public class ScheduleDefaultCalendarURL extends SingleXMLPropertyMixin {
             UserizedFolder defaultFolder = factory.getFolderService().getDefaultFolder(
                 factory.getUser(), treeID, CalendarContentType.getInstance(), factory.getSession(), null);
             if (null != defaultFolder) {
-                value = defaultFolder.getID();
+                value = Tools.encodeFolderId(defaultFolder.getID());
             }
         } catch (OXException e) {
             org.slf4j.LoggerFactory.getLogger(ScheduleDefaultCalendarURL.class).warn("Error determining 'schedule-default-calendar-URL'", e);

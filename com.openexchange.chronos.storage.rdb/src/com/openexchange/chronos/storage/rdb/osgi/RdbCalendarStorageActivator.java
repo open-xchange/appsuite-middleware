@@ -58,14 +58,12 @@ import com.openexchange.chronos.storage.CalendarAvailabilityStorageFactory;
 import com.openexchange.chronos.storage.CalendarStorageFactory;
 import com.openexchange.chronos.storage.rdb.groupware.ChronosCreateTableService;
 import com.openexchange.chronos.storage.rdb.groupware.ChronosCreateTableTask;
-import com.openexchange.chronos.storage.rdb.groupware.ChronosDeleteListener;
 import com.openexchange.chronos.storage.rdb.migration.ChronosStorageMigrationTask;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.provider.DatabaseServiceDBProvider;
-import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -91,7 +89,7 @@ public class RdbCalendarStorageActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { DatabaseService.class, ContextService.class, RecurrenceService.class, ConfigurationService.class, QuotaService.class };
+        return new Class<?>[] { DatabaseService.class, ContextService.class, RecurrenceService.class, ConfigurationService.class, QuotaService.class};
     }
 
     @Override
@@ -109,17 +107,17 @@ public class RdbCalendarStorageActivator extends HousekeepingActivator {
         try {
             LOG.info("starting bundle {}", context.getBundle());
             Services.set(this);
+            DatabaseServiceDBProvider defaultDbProvider = new DatabaseServiceDBProvider(getService(DatabaseService.class));
+            com.openexchange.chronos.storage.rdb.RdbCalendarStorageFactory storageFactory = new com.openexchange.chronos.storage.rdb.RdbCalendarStorageFactory(this, defaultDbProvider);
             /*
              * register services for infrastructure
              */
             registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new ChronosCreateTableTask(), new ChronosStorageMigrationTask(this)));
             registerService(CreateTableService.class, new ChronosCreateTableService());
-            registerService(DeleteListener.class, new ChronosDeleteListener());
             /*
              * register storage factory services
              */
-            DatabaseServiceDBProvider defaultDbProvider = new DatabaseServiceDBProvider(getService(DatabaseService.class));
-            registerService(CalendarStorageFactory.class, new com.openexchange.chronos.storage.rdb.RdbCalendarStorageFactory(this, defaultDbProvider));
+            registerService(CalendarStorageFactory.class, storageFactory);
             registerService(CalendarAvailabilityStorageFactory.class, new com.openexchange.chronos.storage.rdb.RdbCalendarAvailabilityStorageFactory());
         } catch (Exception e) {
             LOG.error("error starting {}", context.getBundle(), e);

@@ -65,7 +65,7 @@ abstract class AbstractManager {
     public AbstractManager() {
         super();
     }
-
+    
     /**
      * Checks if a response doesn't contain any errors
      *

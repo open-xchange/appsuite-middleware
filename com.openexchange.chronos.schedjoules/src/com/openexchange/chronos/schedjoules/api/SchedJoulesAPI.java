@@ -69,7 +69,11 @@ public final class SchedJoulesAPI {
      */
     public static SchedJoulesAPI getInstance() throws OXException {
         if (INSTANCE == null) {
-            INSTANCE = new SchedJoulesAPI();
+            synchronized (SchedJoulesAPI.class) {
+                if (INSTANCE == null) {
+                    INSTANCE = new SchedJoulesAPI();
+                }
+            }
         }
         return INSTANCE;
     }

@@ -47,62 +47,80 @@
  *
  */
 
-package com.openexchange.dav;
+package com.openexchange.caldav.resources;
 
-import com.openexchange.groupware.container.Participant;
+import static com.openexchange.osgi.Tools.requireService;
+import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
+import com.openexchange.chronos.provider.composition.IDBasedCalendarAccessFactory;
+import com.openexchange.chronos.service.CalendarParameters;
+import com.openexchange.exception.OXException;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.session.Session;
 
 /**
- * {@link CUType}
+ * {@link CalendarAccessOperation}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
- * @since v7.8.1
+ * @since v7.10.0
  */
-public enum CUType {
+public abstract class CalendarAccessOperation<T> {
+
+    private final ServiceLookup services;
 
     /**
-     * An individual
-     */
-    INDIVIDUAL(Participant.USER),
-
-    /**
-     * A group of individuals
-     */
-    GROUP(Participant.GROUP),
-
-    /**
-     * A physical resource
-     */
-    RESOURCE(Participant.RESOURCE),
-
-    /**
-     * A room resource
-     */
-    ROOM(Participant.NO_ID),
-
-    /**
-     * Otherwise not known
-     */
-    UNKNOWN(Participant.NO_ID)
-    ;
-
-    private final int type;
-
-    /**
-     * Initializes a new {@link CUType}.
+     * Initializes a new {@link CalendarAccessOperation}.
      *
-     * @param type The corresponding participant type
+     * @param services A service lookup reference
      */
-    private CUType(int type) {
-        this.type = type;
+    public CalendarAccessOperation(ServiceLookup services) {
+        super();
+        this.services = services;
     }
 
     /**
-     * Gets the corresponding participant type for this calendar user type.
+     * Performs the operation
      *
-     * @return The participant type, or <code>-1</code> if no matching participant type exists
+     * @param session The underlying session
+     * @return The result
      */
-    public int getType() {
-        return type;
+    public T execute(Session session) throws OXException {
+        T result;
+        IDBasedCalendarAccess calendarAccess = initCalendarAccess(session);
+        boolean committed = false;
+        try {
+            calendarAccess.startTransaction();
+            result = perform(calendarAccess);
+            calendarAccess.commit();
+            committed = true;
+        } finally {
+            if (false == committed) {
+                calendarAccess.rollback();
+            }
+            calendarAccess.finish();
+        }
+        return result;
     }
+
+    /**
+     * Initializes the calendar access for CalDAV operations and applies default parameters.
+     *
+     * @param session The underlying session
+     * @return The initialized calendar access
+     */
+    protected IDBasedCalendarAccess initCalendarAccess(Session session) throws OXException {
+        IDBasedCalendarAccess calendarAccess = requireService(IDBasedCalendarAccessFactory.class, services).createAccess(session);
+        calendarAccess.set(CalendarParameters.PARAMETER_INCLUDE_PRIVATE, Boolean.TRUE);
+        calendarAccess.set(CalendarParameters.PARAMETER_EXPAND_OCCURRENCES, Boolean.FALSE);
+        calendarAccess.set(CalendarParameters.PARAMETER_IGNORE_CONFLICTS, Boolean.TRUE);
+        return calendarAccess;
+    }
+
+    /**
+     * Performs the operation using the initialized calendar access.
+     *
+     * @param access The initialized calendar access to use
+     * @return The result
+     */
+    protected abstract T perform(IDBasedCalendarAccess access) throws OXException;
 
 }

@@ -47,43 +47,34 @@
  *
  */
 
-package com.openexchange.chronos.json.converter.mapper;
+package com.openexchange.chronos.json.converter.handler;
 
-import java.util.ArrayList;
-import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.chronos.service.CalendarParameters;
+import com.openexchange.chronos.json.converter.mapper.ExtendedPropertiesMapping;
 import com.openexchange.conversion.ConversionResult;
 import com.openexchange.conversion.Data;
 import com.openexchange.conversion.DataArguments;
 import com.openexchange.conversion.DataExceptionCodes;
 import com.openexchange.conversion.DataHandler;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.tools.mappings.json.JsonMapper;
 import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
-import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
- * {@link Json2ObjectDataHandler}
+ * {@link Json2XPropertiesDataHandler}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class Json2ObjectDataHandler<O, E extends Enum<E>> implements DataHandler {
-
-    private final JsonMapper<O, E> mapper;
+public class Json2XPropertiesDataHandler implements DataHandler {
 
     /**
-     * Initializes a new {@link Json2ObjectDataHandler}.
-     *
-     * @param mapper The underlying JSON mapper
+     * Initializes a new {@link Json2XPropertiesDataHandler}.
      */
-    public Json2ObjectDataHandler(JsonMapper<O, E> mapper) {
+    public Json2XPropertiesDataHandler() {
         super();
-        this.mapper = mapper;
     }
 
     @Override
@@ -93,55 +84,27 @@ public class Json2ObjectDataHandler<O, E extends Enum<E>> implements DataHandler
 
     @Override
     public Class<?>[] getTypes() {
-        return new Class<?>[] { JSONArray.class, JSONObject.class };
+        return new Class<?>[] { JSONObject.class, JSONArray.class };
     }
 
     @Override
     public ConversionResult processData(Data<? extends Object> data, DataArguments dataArguments, Session session) throws OXException {
         ConversionResult result = new ConversionResult();
         Object sourceData = data.getData();
-        if (null == sourceData || JSONObject.NULL.equals(sourceData)) {
-            result.setData(null);
-        } else if (JSONObject.class.isInstance(sourceData)) {
-            result.setData(deserialize((JSONObject) sourceData, optTimeZoneID(dataArguments, session)));
-        } else if (JSONArray.class.isInstance(sourceData)) {
-            result.setData(deserialize((JSONArray) sourceData, optTimeZoneID(dataArguments, session)));
-        } else {
-            throw DataExceptionCodes.TYPE_NOT_SUPPORTED.create(sourceData.getClass().toString());
+        try {
+            if (null == sourceData) {
+                result.setData(null);
+            } else if (JSONObject.class.isInstance(sourceData)) {
+                result.setData(ExtendedPropertiesMapping.deserializeExtendedProperty((JSONObject) sourceData));
+            } else if (JSONArray.class.isInstance(sourceData)) {
+                result.setData(ExtendedPropertiesMapping.deserializeExtendedProperties((JSONArray) sourceData));
+            } else {
+                throw DataExceptionCodes.TYPE_NOT_SUPPORTED.create(sourceData.getClass().toString());
+            }
+        } catch (JSONException e) {
+            throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
         return result;
-    }
-
-    private O deserialize(JSONObject jsonObject, String timeZoneID) throws OXException {
-        try {
-            return mapper.deserialize(jsonObject, mapper.getMappedFields(), timeZoneID);
-        } catch (JSONException e) {
-            throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
-        }
-    }
-
-    private List<O> deserialize(JSONArray jsonArray, String timeZoneID) throws OXException {
-        try {
-            List<O> objects = new ArrayList<O>(jsonArray.length());
-            for (int i = 0; i < jsonArray.length(); i++) {
-                objects.add(deserialize(jsonArray.getJSONObject(i), timeZoneID));
-            }
-            return objects;
-        } catch (JSONException e) {
-            throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
-        }
-    }
-
-    private static String optTimeZoneID(DataArguments dataArguments, Session session) {
-        String timeZoneID = dataArguments.get(CalendarParameters.PARAMETER_TIMEZONE);
-        if (null == timeZoneID && null != session) {
-            try {
-                timeZoneID = ServerSessionAdapter.valueOf(session).getUser().getTimeZone();
-            } catch (OXException e) {
-                org.slf4j.LoggerFactory.getLogger(Json2ObjectDataHandler.class).warn("Error getting user timezone", e);
-            }
-        }
-        return timeZoneID;
     }
 
 }

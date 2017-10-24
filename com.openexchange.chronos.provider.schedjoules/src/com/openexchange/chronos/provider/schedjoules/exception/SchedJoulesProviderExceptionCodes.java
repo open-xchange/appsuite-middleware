@@ -96,6 +96,21 @@ public enum SchedJoulesProviderExceptionCodes implements DisplayableOXExceptionC
      * <li>No folder metadata found [folderId %1$s, account %2$s, user %3$s, context %4$s]</li>
      */
     NO_FOLDER_METADATA("No folder metadata found [folderId %1$s, account %2$s, user %3$s, context %4$s]", CATEGORY_ERROR, 6),
+    /**
+     * <li>The requested calendar does not exist.</li>
+     * <li>The calendar with the id '%1$s' does not exist.</li>
+     */
+    CALENDAR_DOES_NOT_EXIST("The calendar with the id '%1$s' does not exist", SchedJoulesProviderExceptionMessages.CALENDAR_DOES_NOT_EXIST_MSG, CATEGORY_USER_INPUT, 7),
+    /**
+     * <li>Your SchedJoules account is malformed. Please re-create it.</li>
+     * <li>The user key is missing [account %1$s, user %2$s, context %3$s]</li>
+     */
+    MISSING_USER_KEY("The user key is missing [account %1$s, user %2$s, context %3$s]", SchedJoulesProviderExceptionMessages.MALFORMED_ACCOUNT_MSG, CATEGORY_ERROR, 8),
+    /**
+     * <li>Your SchedJoules account is malformed. Please re-create it.</li>
+     * <li>The user key is malformed [account %1$s, user %2$s, context %3$s]</li>
+     */
+    MALFORMED_USER_KEY("The user key is malformed [account %1$s, user %2$s, context %3$s]", SchedJoulesProviderExceptionMessages.MALFORMED_ACCOUNT_MSG, CATEGORY_ERROR, 9),
     ;
 
     public static final String PREFIX = "SCHEDJOULES";

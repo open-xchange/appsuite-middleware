@@ -58,17 +58,17 @@ import java.util.List;
 import javax.mail.internet.AddressException;
 import javax.servlet.http.HttpServletResponse;
 import org.jdom2.Element;
-import com.openexchange.dav.CUType;
+import com.openexchange.chronos.CalendarUserType;
+import com.openexchange.chronos.ResourceId;
 import com.openexchange.dav.DAVFactory;
 import com.openexchange.dav.DAVProtocol;
 import com.openexchange.dav.mixins.PrincipalURL;
-import com.openexchange.dav.mixins.ResourceId;
 import com.openexchange.dav.resources.FolderCollection;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
-import com.openexchange.folderstorage.AbstractFolder;
 import com.openexchange.folderstorage.DefaultPermission;
 import com.openexchange.folderstorage.FolderService;
+import com.openexchange.folderstorage.ParameterizedFolder;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.groupware.ldap.User;
@@ -76,7 +76,6 @@ import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.user.UserService;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
-
 
 /**
  * {@link ShareHelper}
@@ -115,7 +114,7 @@ public class ShareHelper {
             if (false == folder.getOwnPermission().isAdmin()) {
                 throw WebdavProtocolException.generalError(folderCollection.getUrl(), HttpServletResponse.SC_FORBIDDEN);
             }
-            AbstractFolder updatableFolder = FolderCollection.prepareUpdatableFolder(folder);
+            ParameterizedFolder updatableFolder = FolderCollection.prepareUpdatableFolder(folder);
             updatableFolder.setPermissions(updatedPermissions.toArray(new Permission[updatedPermissions.size()]));
             try {
                 factory.requireService(FolderService.class).updateFolder(updatableFolder, folder.getLastModifiedUTC(), factory.getSession(), null);
@@ -219,10 +218,10 @@ public class ShareHelper {
          */
         ResourceId resourceId = ResourceId.parse(href);
         if (null != resourceId) {
-            if (CUType.INDIVIDUAL.getType() == resourceId.getparticipantType()) {
-                return new PrincipalURL(resourceId.getPrincipalID(), CUType.INDIVIDUAL);
-            } else if (CUType.GROUP.getType() == resourceId.getparticipantType()) {
-                return new PrincipalURL(resourceId.getPrincipalID(), CUType.GROUP);
+            if (CalendarUserType.INDIVIDUAL.equals(resourceId.getCalendarUserType())) {
+                return new PrincipalURL(resourceId.getEntity(), CalendarUserType.INDIVIDUAL);
+            } else if (CalendarUserType.GROUP.equals(resourceId.getCalendarUserType())) {
+                return new PrincipalURL(resourceId.getEntity(), CalendarUserType.GROUP);
             } else {
                 throw new IllegalArgumentException("Unexpected resource type: " + href);
             }
@@ -238,7 +237,7 @@ public class ShareHelper {
         }
         if (Strings.isNotEmpty(mail)) {
             User user = factory.requireService(UserService.class).searchUser(mail, factory.getContext(), true, true, false);
-            return new PrincipalURL(user.getId(), CUType.INDIVIDUAL);
+            return new PrincipalURL(user.getId(), CalendarUserType.INDIVIDUAL);
         }
         return null;
     }
@@ -282,7 +281,7 @@ public class ShareHelper {
     private static Permission createReadWritePermission(PrincipalURL principal) {
         DefaultPermission permission = new DefaultPermission();
         permission.setEntity(principal.getPrincipalID());
-        permission.setGroup(CUType.GROUP.equals(principal.getType()));
+        permission.setGroup(CalendarUserType.GROUP.equals(principal.getType()));
         permission.setAllPermissions(Permission.CREATE_OBJECTS_IN_FOLDER, Permission.READ_ALL_OBJECTS, Permission.WRITE_ALL_OBJECTS, Permission.DELETE_ALL_OBJECTS);
         return permission;
     }
@@ -298,7 +297,7 @@ public class ShareHelper {
     private static Permission createReadOnlyPermission(PrincipalURL principal) {
         DefaultPermission permission = new DefaultPermission();
         permission.setEntity(principal.getPrincipalID());
-        permission.setGroup(CUType.GROUP.equals(principal.getType()));
+        permission.setGroup(CalendarUserType.GROUP.equals(principal.getType()));
         permission.setAllPermissions(Permission.READ_FOLDER, Permission.READ_ALL_OBJECTS, Permission.NO_PERMISSIONS, Permission.NO_PERMISSIONS);
         return permission;
     }

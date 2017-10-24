@@ -71,7 +71,9 @@ import com.openexchange.chronos.provider.caching.internal.handler.CachingExecuto
 import com.openexchange.chronos.provider.caching.internal.handler.FolderProcessingType;
 import com.openexchange.chronos.provider.caching.internal.handler.FolderUpdateState;
 import com.openexchange.chronos.provider.caching.internal.handler.utils.HandlerHelper;
-import com.openexchange.chronos.provider.caching.internal.handler.utils.ResultCollector;
+import com.openexchange.chronos.provider.caching.internal.response.DedicatedEventsResponseGenerator;
+import com.openexchange.chronos.provider.caching.internal.response.FolderEventsResponseGenerator;
+import com.openexchange.chronos.provider.caching.internal.response.SingleEventResponseGenerator;
 import com.openexchange.chronos.provider.extensions.WarningsAware;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.EventID;
@@ -132,13 +134,13 @@ public abstract class CachingCalendarAccess implements WarningsAware {
     }
 
     /**
-     * Defines the refresh interval in minutes that has to be expired to contact the external event provider for the up-to-date calendar.<br>
+     * Defines the refresh interval in minutes that has to be expired to contact the external event provider for the up-to-date calendar. The interval can be defined on a per folder base.<br>
      * <br>
      * If the value is <=0 the default of one day will be used.
      *
      * @return The interval that defines the expire of the caching in {@link TimeUnit#MINUTES}
      */
-    protected abstract long getRefreshInterval();
+    protected abstract long getRefreshInterval(String folderId);
 
     /**
      * Defines how long should be wait for the next request to the external calendar provider in case an error occurred.
@@ -169,10 +171,10 @@ public abstract class CachingCalendarAccess implements WarningsAware {
     public final Event getEvent(String folderId, String eventId, RecurrenceId recurrenceId) throws OXException {
         Set<FolderUpdateState> executionList = generateExecutionList(folderId);
 
-        ResultCollector resultCollector = new CachingExecutor(this, executionList).cache(this.warnings);
+        new CachingExecutor(this, executionList).cache(this.warnings);
         saveConfig();
 
-        return resultCollector.get(folderId, eventId, recurrenceId);
+        return new SingleEventResponseGenerator(this, folderId, eventId, recurrenceId).generate();
     }
 
     @Override
@@ -180,20 +182,20 @@ public abstract class CachingCalendarAccess implements WarningsAware {
         Map<String, List<EventID>> sortEventIDsPerFolderId = HandlerHelper.sortEventIDsPerFolderId(eventIDs);
 
         Set<FolderUpdateState> executionList = generateExecutionList(sortEventIDsPerFolderId.keySet().toArray(new String[sortEventIDsPerFolderId.size()]));
-        ResultCollector resultCollector = new CachingExecutor(this, executionList).cache(this.warnings);
+        new CachingExecutor(this, executionList).cache(this.warnings);
         saveConfig();
 
-        return resultCollector.get(eventIDs);
+        return new DedicatedEventsResponseGenerator(this, eventIDs).generate();
     }
 
     @Override
     public final List<Event> getEventsInFolder(String folderId) throws OXException {
         Set<FolderUpdateState> executionList = generateExecutionList(folderId);
 
-        ResultCollector resultCollector = new CachingExecutor(this, executionList).cache(this.warnings);
+        new CachingExecutor(this, executionList).cache(this.warnings);
         saveConfig();
 
-        return resultCollector.get(folderId);
+        return new FolderEventsResponseGenerator(this, folderId).generate();
     }
 
     private Set<FolderUpdateState> generateExecutionList(String... folderIds) throws OXException {
@@ -300,7 +302,7 @@ public abstract class CachingCalendarAccess implements WarningsAware {
             String folderId = folderUpdateState.getKey();
             Map<String, Object> folderConfig = (Map<String, Object>) folderUpdateState.getValue();
             Number lastFolderUpdate = (Number) folderConfig.get(LAST_UPDATE);
-            long refreshInterval = getCascadedRefreshInterval(folderConfig);
+            long refreshInterval = getCascadedRefreshInterval(folderId, folderConfig);
 
             if (lastFolderUpdate == null || lastFolderUpdate.longValue() <= 0) {
                 currentStates.add(new FolderUpdateState(folderId, 0, refreshInterval, FolderProcessingType.INITIAL_INSERT));
@@ -317,14 +319,14 @@ public abstract class CachingCalendarAccess implements WarningsAware {
         return currentStates;
     }
 
-    protected long getCascadedRefreshInterval(Map<String, Object> folderConfig) {
+    protected long getCascadedRefreshInterval(String folderId, Map<String, Object> folderConfig) {
         if (folderConfig != null && !folderConfig.isEmpty()) {
             Number calendarProviderInterval = (Number) folderConfig.get(REFRESH_INTERVAL);
             if (calendarProviderInterval != null) {
                 return calendarProviderInterval.longValue();
             }
         }
-        long providerRefreshInterval = getRefreshInterval();
+        long providerRefreshInterval = getRefreshInterval(folderId);
         if (providerRefreshInterval > TimeUnit.DAYS.toMinutes(1L)) {
             return providerRefreshInterval;
         }
@@ -335,8 +337,7 @@ public abstract class CachingCalendarAccess implements WarningsAware {
      * Saves the current configuration for the account if it has been changed while processing
      */
     protected void saveConfig() {
-        if (Objects.equals(originInternalConfiguration, getAccount().getInternalConfiguration()) &&
-            Objects.equals(originUserConfiguration, getAccount().getUserConfiguration())) {
+        if (Objects.equals(originInternalConfiguration, getAccount().getInternalConfiguration()) && Objects.equals(originUserConfiguration, getAccount().getUserConfiguration())) {
             return;
         }
         try {

@@ -73,6 +73,9 @@ import com.openexchange.chronos.AlarmTrigger;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.RecurrenceId;
+import com.openexchange.chronos.Transp;
+import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.compat.Appointment2Event;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.CalendarFolder;
 import com.openexchange.chronos.provider.extensions.PersonalAlarmAware;
@@ -89,6 +92,7 @@ import com.openexchange.chronos.service.EventID;
 import com.openexchange.chronos.service.SearchFilter;
 import com.openexchange.chronos.service.UpdatesResult;
 import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.CalendarFolderField;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderField;
@@ -168,8 +172,8 @@ public class InternalCalendarAccess implements GroupwareCalendarAccess, SyncAwar
     @Override
     public String updateFolder(String folderId, CalendarFolder folder, long clientTimestamp) throws OXException {
         ParameterizedFolder storageFolder = getStorageFolder(TREE_ID, QUALIFIED_ACCOUNT_ID, CONTENT_TYPE, folder);
-        getFolderService().updateFolder(storageFolder, new Date(clientTimestamp), session.getSession(), initDecorator());
         updateStoredFolderProperties(session.getContextId(), folderId, session.getUserId(), storageFolder.getProperties(), optConnection());
+        getFolderService().updateFolder(storageFolder, new Date(clientTimestamp), session.getSession(), initDecorator());
         return storageFolder.getID();
     }
 
@@ -221,6 +225,38 @@ public class InternalCalendarAccess implements GroupwareCalendarAccess, SyncAwar
     @Override
     public UpdatesResult getUpdatedEventsOfUser(long updatedSince) throws OXException {
         return getCalendarService().getUpdatedEventsOfUser(session, updatedSince);
+    }
+
+    @Override
+    public List<Event> resolveResource(String folderId, String resourceName) throws OXException {
+        CalendarService calendarService = getCalendarService();
+        String id = calendarService.getUtilities().resolveByUID(session, resourceName);
+        if (null == id) {
+            id = calendarService.getUtilities().resolveByFilename(session, resourceName);
+        }
+        if (null == id) {
+            return null;
+        }
+        try {
+            Event event = getCalendarService().getEvent(session, folderId, new EventID(folderId, id));
+            List<Event> events = new ArrayList<Event>();
+            events.add(event);
+            if (CalendarUtils.isSeriesMaster(event)) {
+                events.addAll(calendarService.getChangeExceptions(session, folderId, id));
+            }
+            return events;
+        } catch (OXException e) {
+            if ("CAL-4041".equals(e.getErrorCode())) {
+                /*
+                 * "Event not found in folder..." -> try to load detached occurrences
+                 */
+                List<Event> detachedOccurrences = calendarService.getChangeExceptions(session, folderId, id);
+                if (0 < detachedOccurrences.size()) {
+                    return detachedOccurrences;
+                }
+            }
+        }
+        return null;
     }
 
     @Override
@@ -347,19 +383,37 @@ public class InternalCalendarAccess implements GroupwareCalendarAccess, SyncAwar
      * @return The folder properties, or <code>null</code> if there are none
      */
     private static Map<FolderField, FolderProperty> getFolderProperties(int contextId, Folder folder, int userId, boolean loadOwner, Connection optConnection) {
-        Map<String, String> properties = getStoredFolderProperties(contextId, folder, userId, loadOwner, optConnection);
-        if (null == properties || properties.isEmpty()) {
-            return null;
+        Map<FolderField, FolderProperty> folderProperties = new HashMap<FolderField, FolderProperty>();
+        /*
+         * add default folder properties (migrating legacy properties from "meta")
+         */
+        folderProperties.put(USED_FOR_SYNC, new FolderProperty(USED_FOR_SYNC.getName(), Boolean.TRUE));
+        folderProperties.put(SCHEDULE_TRANSP, new FolderProperty(SCHEDULE_TRANSP.getName(), Transp.OPAQUE));
+        Map<String, Object> meta = folder.getMeta();
+        if (null != meta) {
+            Object colorValue = meta.get("color");
+            if (null != colorValue && String.class.isInstance(colorValue)) {
+                folderProperties.put(COLOR, new FolderProperty(COLOR.getName(), colorValue));
+            }
+            Object colorLabelValue = meta.get("color_label");
+            if (null != colorLabelValue && Integer.class.isInstance(colorLabelValue)) {
+                folderProperties.put(COLOR, new FolderProperty(COLOR.getName(), Appointment2Event.getColor(((Integer) colorLabelValue).intValue())));
+            }
         }
-        Map<FolderField, FolderProperty> folderProperties = new HashMap<FolderField, FolderProperty>(properties.size());
-        for (Entry<String, String> entry : properties.entrySet()) {
-            String name = entry.getKey();
-            if (COLOR.getName().equals(name)) {
-                folderProperties.put(COLOR, new FolderProperty(name, entry.getValue()));
-            } else if (USED_FOR_SYNC.getName().equals(name)) {
-                folderProperties.put(USED_FOR_SYNC, new FolderProperty(name, Boolean.valueOf(entry.getValue())));
-            } else if (SCHEDULE_TRANSP.getName().equals(name)) {
-                folderProperties.put(SCHEDULE_TRANSP, new FolderProperty(name, entry.getValue()));
+        /*
+         * load and apply stored folder properties
+         */
+        Map<String, String> properties = getStoredFolderProperties(contextId, folder, userId, loadOwner, optConnection);
+        if (null != properties && 0 < properties.size()) {
+            for (Entry<String, String> entry : properties.entrySet()) {
+                String name = entry.getKey();
+                if (COLOR.getName().equals(name)) {
+                    folderProperties.put(COLOR, new FolderProperty(name, entry.getValue()));
+                } else if (USED_FOR_SYNC.getName().equals(name)) {
+                    folderProperties.put(USED_FOR_SYNC, new FolderProperty(name, Boolean.valueOf(entry.getValue())));
+                } else if (SCHEDULE_TRANSP.getName().equals(name)) {
+                    folderProperties.put(SCHEDULE_TRANSP, new FolderProperty(name, entry.getValue()));
+                }
             }
         }
         return folderProperties;
@@ -383,14 +437,15 @@ public class InternalCalendarAccess implements GroupwareCalendarAccess, SyncAwar
             throw CalendarExceptionCodes.UNSUPPORTED_FOLDER.create(e, folderId, "");
         }
         for (Entry<FolderField, FolderProperty> entry : properties.entrySet()) {
+            if (false == CalendarFolderField.getValues().contains(entry.getKey())) {
+                continue;
+            }
             String key = entry.getKey().getName();
-            if (key.startsWith("cal.")) {
-                if (null == entry.getValue() || null == entry.getValue().getValue()) {
-                    propertyStorage.deleteFolderProperty(contextId, folder, userId, key);
-                } else {
-                    String value = String.valueOf(entry.getValue().getValue());
-                    propertyStorage.updateFolderProperties(contextId, folder, userId, Collections.singletonMap(key, value));
-                }
+            if (null == entry.getValue() || null == entry.getValue().getValue()) {
+                propertyStorage.deleteFolderProperty(contextId, folder, userId, key);
+            } else {
+                String value = String.valueOf(entry.getValue().getValue());
+                propertyStorage.setFolderProperties(contextId, folder, userId, Collections.singletonMap(key, value), optConnection);
             }
         }
     }

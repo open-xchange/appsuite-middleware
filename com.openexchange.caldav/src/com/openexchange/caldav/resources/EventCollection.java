@@ -55,6 +55,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.caldav.GroupwareCaldavFactory;
@@ -81,16 +82,17 @@ import com.openexchange.caldav.query.FilterAnalyzer;
 import com.openexchange.caldav.reports.FilteringResource;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
 import com.openexchange.chronos.service.CalendarParameters;
-import com.openexchange.chronos.service.CalendarService;
-import com.openexchange.chronos.service.CalendarSession;
-import com.openexchange.chronos.service.EventID;
 import com.openexchange.chronos.service.UpdatesResult;
 import com.openexchange.dav.DAVProtocol;
 import com.openexchange.dav.mixins.CalendarColor;
 import com.openexchange.dav.reports.SyncStatus;
 import com.openexchange.dav.resources.FolderCollection;
 import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.CalendarFolderField;
+import com.openexchange.folderstorage.ParameterizedFolder;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.folderstorage.type.PublicType;
@@ -100,6 +102,7 @@ import com.openexchange.java.Strings;
 import com.openexchange.login.Interface;
 import com.openexchange.user.UserService;
 import com.openexchange.webdav.protocol.WebdavPath;
+import com.openexchange.webdav.protocol.WebdavProperty;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
 import com.openexchange.webdav.protocol.WebdavStatusImpl;
@@ -123,7 +126,6 @@ public class EventCollection extends FolderCollection<Event> implements Filterin
     protected final GroupwareCaldavFactory factory;
     protected final String folderID;
 
-    private CalendarSession calendarSession;
     private final MinDateTime minDateTime;
     private final MaxDateTime maxDateTime;
     private Date lastModified;
@@ -166,20 +168,6 @@ public class EventCollection extends FolderCollection<Event> implements Filterin
         }
     }
 
-    public CalendarSession getCalendarSession() throws WebdavProtocolException {
-        if (null == calendarSession) {
-            try {
-                calendarSession = factory.getService(CalendarService.class).init(factory.getSession());
-                calendarSession.set(CalendarParameters.PARAMETER_INCLUDE_PRIVATE, Boolean.TRUE);
-                calendarSession.set(CalendarParameters.PARAMETER_EXPAND_OCCURRENCES, Boolean.FALSE);
-                calendarSession.set(CalendarParameters.PARAMETER_IGNORE_CONFLICTS, Boolean.TRUE);
-            } catch (OXException e) {
-                throw protocolException(getUrl(), e);
-            }
-        }
-        return calendarSession;
-    }
-
     /**
      * Gets the actual target calendar user of the collection. This is either the current session's user for "private" or "public"
      * folders, or the folder owner for "shared" calendar folders.
@@ -203,9 +191,14 @@ public class EventCollection extends FolderCollection<Event> implements Filterin
         if (null == this.lastModified) {
             lastModified = Tools.getLatestModified(minDateTime.getMinDateTime(), folder);
             try {
-                CalendarSession calendarSession = getCalendarSession();
-                calendarSession.set(CalendarParameters.PARAMETER_FIELDS, new EventField[] { EventField.TIMESTAMP });
-                UpdatesResult updates = calendarSession.getCalendarService().getUpdatedEventsInFolder(calendarSession, folderID, lastModified.getTime());
+                UpdatesResult updates = new CalendarAccessOperation<UpdatesResult>(factory) {
+
+                    @Override
+                    protected UpdatesResult perform(IDBasedCalendarAccess access) throws OXException {
+                        access.set(CalendarParameters.PARAMETER_FIELDS, new EventField[] { EventField.TIMESTAMP });
+                        return access.getUpdatedEventsInFolder(folderID, lastModified.getTime());
+                    }
+                }.execute(factory.getSession());
                 /*
                  * new and modified objects
                  */
@@ -256,19 +249,20 @@ public class EventCollection extends FolderCollection<Event> implements Filterin
             throw protocolException(getUrl(), HttpServletResponse.SC_NOT_IMPLEMENTED);
         }
         Date from = 0 < arguments.size() ? toDate(arguments.get(0)) : null;
-        if (null == from || from.before(minDateTime.getMinDateTime())) {
-            from = minDateTime.getMinDateTime();
-        }
         Date until = 1 < arguments.size() ? toDate(arguments.get(1)) : null;
-        if (null == until || until.after(maxDateTime.getMaxDateTime())) {
-            until = maxDateTime.getMaxDateTime();
-        }
+        Date rangeStart = null == from || from.before(minDateTime.getMinDateTime()) ? minDateTime.getMinDateTime() : from;
+        Date rangeEnd = null == until || until.after(maxDateTime.getMaxDateTime()) ? maxDateTime.getMaxDateTime() : until;
         try {
-            CalendarSession calendarSession = getCalendarSession();
-            calendarSession.set(CalendarParameters.PARAMETER_RANGE_START, from);
-            calendarSession.set(CalendarParameters.PARAMETER_RANGE_END, until);
-            calendarSession.set(CalendarParameters.PARAMETER_FIELDS, BASIC_FIELDS);
-            List<Event> events = calendarSession.getCalendarService().getEventsInFolder(calendarSession, folderID);
+            List<Event> events = new CalendarAccessOperation<List<Event>>(factory) {
+
+                @Override
+                protected List<Event> perform(IDBasedCalendarAccess access) throws OXException {
+                    access.set(CalendarParameters.PARAMETER_FIELDS, BASIC_FIELDS);
+                    access.set(CalendarParameters.PARAMETER_RANGE_START, rangeStart);
+                    access.set(CalendarParameters.PARAMETER_RANGE_END, rangeEnd);
+                    return access.getEventsInFolder(folderID);
+                }
+            }.execute(factory.getSession());
             List<WebdavResource> resources = new ArrayList<WebdavResource>(events.size());
             for (Event event : events) {
                 resources.add(createResource(event, constructPathForChildResource(event)));
@@ -289,11 +283,16 @@ public class EventCollection extends FolderCollection<Event> implements Filterin
 
     @Override
     protected Collection<Event> getObjects() throws OXException {
-        CalendarSession calendarSession = getCalendarSession();
-        calendarSession.set(CalendarParameters.PARAMETER_FIELDS, BASIC_FIELDS);
-        calendarSession.set(CalendarParameters.PARAMETER_RANGE_START, minDateTime.getMinDateTime());
-        calendarSession.set(CalendarParameters.PARAMETER_RANGE_END, maxDateTime.getMaxDateTime());
-        return calendarSession.getCalendarService().getEventsInFolder(calendarSession, folderID);
+        return new CalendarAccessOperation<Collection<Event>>(factory) {
+
+            @Override
+            protected Collection<Event> perform(IDBasedCalendarAccess access) throws OXException {
+                access.set(CalendarParameters.PARAMETER_FIELDS, BASIC_FIELDS);
+                access.set(CalendarParameters.PARAMETER_RANGE_START, minDateTime.getMinDateTime());
+                access.set(CalendarParameters.PARAMETER_RANGE_END, maxDateTime.getMaxDateTime());
+                return access.getEventsInFolder(folderID);
+            }
+        }.execute(factory.getSession());
     }
 
     @Override
@@ -301,33 +300,19 @@ public class EventCollection extends FolderCollection<Event> implements Filterin
         if (Strings.isEmpty(resourceName)) {
             return null;
         }
-        CalendarSession calendarSession = getCalendarSession();
-        calendarSession.set(CalendarParameters.PARAMETER_FIELDS, BASIC_FIELDS);
-        /*
-         * by default, try to resolve object by UID and filename
-         */
-        String objectID = calendarSession.getCalendarService().getUtilities().resolveByUID(calendarSession, resourceName);
-        if (null == objectID) {
-            objectID = calendarSession.getCalendarService().getUtilities().resolveByFilename(calendarSession, resourceName);
-        }
-        if (null != objectID) {
-            try {
-                return calendarSession.getCalendarService().getEvent(calendarSession, folderID, new EventID(folderID, objectID));
-            } catch (OXException e) {
-                if ("CAL-4041".equals(e.getErrorCode())) {
-                    /*
-                     * "Event not found in folder..." -> also try to load detached occurrences
-                     */
-                    List<Event> detachedOccurrences = calendarSession.getCalendarService().getChangeExceptions(calendarSession, folderID, objectID);
-                    if (0 < detachedOccurrences.size()) {
-                        return new PhantomMaster(detachedOccurrences);
-                    }
-                } else {
-                    throw e;
+        return new CalendarAccessOperation<Event>(factory) {
+
+            @Override
+            protected Event perform(IDBasedCalendarAccess access) throws OXException {
+                access.set(CalendarParameters.PARAMETER_FIELDS, BASIC_FIELDS);
+                List<Event> events = access.resolveResource(folderID, resourceName);
+                if (null == events || events.isEmpty()) {
+                    return null;
                 }
+                Event event = events.get(0);
+                return CalendarUtils.isSeriesException(event) ? new PhantomMaster(events) : event;
             }
-        }
-        return null; // not found
+        }.execute(factory.getSession());
     }
 
     @Override
@@ -361,9 +346,14 @@ public class EventCollection extends FolderCollection<Event> implements Filterin
         /*
          * get new, modified & deleted objects since client token
          */
-        CalendarSession calendarSession = getCalendarSession();
-        calendarSession.set(CalendarParameters.PARAMETER_FIELDS, BASIC_FIELDS);
-        UpdatesResult updates = calendarSession.getCalendarService().getUpdatedEventsInFolder(calendarSession, folderID, since.getTime());
+        UpdatesResult updates = new CalendarAccessOperation<UpdatesResult>(factory) {
+
+            @Override
+            protected UpdatesResult perform(IDBasedCalendarAccess access) throws OXException {
+                access.set(CalendarParameters.PARAMETER_FIELDS, BASIC_FIELDS);
+                return access.getUpdatedEventsInFolder(folderID, since.getTime());
+            }
+        }.execute(factory.getSession());
         /*
          * determine sync-status & overall last-modified
          */
@@ -394,6 +384,39 @@ public class EventCollection extends FolderCollection<Event> implements Filterin
          */
         multistatus.setToken(Long.toString(nextSyncToken.getTime()));
         return multistatus;
+    }
+
+    @Override
+    protected void internalPutProperty(WebdavProperty prop) throws WebdavProtocolException {
+        if (CalendarColor.NAMESPACE.getURI().equals(prop.getNamespace()) && CalendarColor.NAME.equals(prop.getName())) {
+            String value = CalendarColor.parse(prop);
+            /*
+             * apply color folder property
+             */
+            ParameterizedFolder folderToUpdate = getFolderToUpdate();
+            folderToUpdate.setProperty(CalendarFolderField.COLOR, Strings.isEmpty(value) ? null : value);
+            /*
+             * also apply color in meta field for private folders
+             */
+            if (PrivateType.getInstance().equals(folder.getType())) {
+                Map<String, Object> meta = folderToUpdate.getMeta();
+                if (Strings.isEmpty(value)) {
+                    meta.remove("color");
+                } else {
+                    meta.put("color", value);
+                }
+                /*
+                 * if possible, also try and match a specific color-label
+                 */
+                Map<String, String> attributes = prop.getAttributes();
+                if (null != attributes && attributes.containsKey(CalendarColor.SYMBOLIC_COLOR)) {
+                    Integer uiValue = CalendarColor.mapColorLabel(attributes.get(CalendarColor.SYMBOLIC_COLOR));
+                    if (uiValue != null) {
+                        meta.put("color_label", uiValue);
+                    }
+                }
+            }
+        }
     }
 
 }

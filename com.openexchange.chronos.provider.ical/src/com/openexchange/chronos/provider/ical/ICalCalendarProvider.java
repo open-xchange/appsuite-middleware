@@ -55,6 +55,7 @@ import com.openexchange.auth.info.AuthType;
 import com.openexchange.chronos.provider.CalendarAccess;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.caching.CachingCalendarProvider;
+import com.openexchange.chronos.provider.ical.conn.ICalFeedConnector;
 import com.openexchange.chronos.provider.ical.internal.auth.ICalAuthParser;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.exception.OXException;
@@ -86,8 +87,8 @@ public class ICalCalendarProvider extends CachingCalendarProvider {
 
     @Override
     protected JSONObject configureAccountOpt(Session session, JSONObject userConfig, CalendarParameters parameters) throws OXException {
-        ICalFeedConfig iCalFeedConfig = new ICalFeedConfig.Builder(userConfig, new JSONObject()).build();
-
+        ICalFeedConfig iCalFeedConfig = new ICalFeedConfig.Builder(session, new JSONObject(userConfig), new JSONObject(), false).build();
+        
         if (iCalFeedConfig.getAuthInfo().getAuthType().equals(AuthType.BASIC)) {
             ICalAuthParser.encrypt(userConfig, session.getPassword()); // encrypt password for persisting
         }
@@ -97,8 +98,8 @@ public class ICalCalendarProvider extends CachingCalendarProvider {
     }
 
     @Override
-    protected JSONObject reconfigureAccountOpt(Session session, JSONObject internalConfig, JSONObject userConfig, CalendarParameters parameters) throws OXException {
-        return configureAccountOpt(session, userConfig, parameters);
+    protected JSONObject reconfigureAccountOpt(Session session, CalendarAccount calendarAccount, JSONObject userConfig, CalendarParameters parameters) throws OXException {
+        return null; //everything required to adapt already done within ICalCalendarProvider.recreate(Session, JSONObject, JSONObject)
     }
 
     @Override
@@ -114,5 +115,16 @@ public class ICalCalendarProvider extends CachingCalendarProvider {
     @Override
     protected void onAccountDeletedOpt(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
         // nothing to do
+    }
+
+    @Override
+    public boolean recreateData(Session session, JSONObject originUserConfiguration, JSONObject newUserConfiguration) throws OXException {
+        ICalFeedConfig oldFeedConfig = new ICalFeedConfig.Builder(session, originUserConfiguration, new JSONObject(), false).build();
+        ICalFeedConfig newFeedConfig = new ICalFeedConfig.Builder(session, new JSONObject(newUserConfiguration), new JSONObject()).build();
+        if (newFeedConfig.getAuthInfo().getAuthType().equals(AuthType.BASIC)) {
+            ICalAuthParser.encrypt(newUserConfiguration, session.getPassword()); // encrypt password for persisting
+        }
+
+        return oldFeedConfig.mandatoryChanges(newFeedConfig);
     }
 }

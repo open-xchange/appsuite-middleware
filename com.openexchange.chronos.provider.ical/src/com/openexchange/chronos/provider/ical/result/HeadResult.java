@@ -91,6 +91,10 @@ public class HeadResult {
         return getHeader(HttpHeaders.DATE);
     }
 
+    public String getContentLength() {
+        return getHeader(HttpHeaders.CONTENT_LENGTH);
+    }
+
     private String getHeader(String name) {
         if (null != headers && 0 < headers.length) {
             for (Header header : headers) {

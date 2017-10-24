@@ -56,6 +56,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.dav.DAVFactory;
 import com.openexchange.dav.DAVProtocol;
@@ -77,8 +78,12 @@ import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXException.IncorrectString;
 import com.openexchange.exception.OXException.ProblematicAttribute;
 import com.openexchange.folderstorage.AbstractFolder;
+import com.openexchange.folderstorage.CalendarFolderField;
+import com.openexchange.folderstorage.FolderField;
+import com.openexchange.folderstorage.FolderProperty;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.FolderStorage;
+import com.openexchange.folderstorage.ParameterizedFolder;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.type.PrivateType;
@@ -103,7 +108,7 @@ public abstract class FolderCollection<T> extends DAVCollection {
     protected final DAVFactory factory;
     protected final UserizedFolder folder;
 
-    private AbstractFolder folderToUpdate;
+    private ParameterizedFolder folderToUpdate;
 
     /**
      * Initializes a new {@link FolderCollection}.
@@ -366,7 +371,7 @@ public abstract class FolderCollection<T> extends DAVCollection {
      *
      * @return An updatable folder based on the current folder
      */
-    protected AbstractFolder getFolderToUpdate() {
+    protected ParameterizedFolder getFolderToUpdate() {
         if (null == folderToUpdate) {
             folderToUpdate = prepareUpdatableFolder(getFolder());
         }
@@ -379,22 +384,15 @@ public abstract class FolderCollection<T> extends DAVCollection {
      * @param folder The original folder to use as template, or <code>null</code> to initialize a blank folder
      * @return The folder
      */
-    public static AbstractFolder prepareUpdatableFolder(UserizedFolder folder) {
-        AbstractFolder updatableFolder = new AbstractFolder() {
-
-            private static final long serialVersionUID = -367640273380922433L;
-
-            @Override
-            public boolean isGlobalID() {
-                return false;
-            }
-        };
+    public static ParameterizedFolder prepareUpdatableFolder(UserizedFolder folder) {
+        ParameterizedFolder updatableFolder = new FolderUpdate();
         if (null != folder) {
             updatableFolder.setID(folder.getID());
             updatableFolder.setTreeID(folder.getTreeID());
             updatableFolder.setType(folder.getType());
             updatableFolder.setParentID(folder.getParentID());
             updatableFolder.setMeta(null != folder.getMeta() ? new HashMap<String, Object>(folder.getMeta()) : new HashMap<String, Object>());
+            CalendarFolderField.setProperties(folder.getProperties(), updatableFolder);
         } else {
             updatableFolder.setMeta(new HashMap<String, Object>());
         }
@@ -409,6 +407,41 @@ public abstract class FolderCollection<T> extends DAVCollection {
             LOG.error("Error resolving owner", e);
         }
         return null != owner ? owner.getDisplayName() : null;
+    }
+
+    private static final class FolderUpdate extends AbstractFolder implements ParameterizedFolder {
+
+        private static final long serialVersionUID = -367640273380922433L;
+
+        private final Map<FolderField, FolderProperty> properties;
+
+        /**
+         * Initializes a new {@link FolderUpdate}.
+         */
+        public FolderUpdate() {
+            super();
+            this.properties = new HashMap<FolderField, FolderProperty>();
+        }
+
+        @Override
+        public boolean isGlobalID() {
+            return false;
+        }
+
+        @Override
+        public void setProperty(FolderField name, Object value) {
+            if (null == value) {
+                properties.remove(name);
+            } else {
+                properties.put(name, new FolderProperty(name.getName(), value));
+            }
+        }
+
+        @Override
+        public Map<FolderField, FolderProperty> getProperties() {
+            return properties;
+        }
+
     }
 
 }

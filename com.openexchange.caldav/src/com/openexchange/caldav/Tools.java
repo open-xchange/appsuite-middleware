@@ -58,6 +58,7 @@ import java.util.List;
 import java.util.TimeZone;
 import java.util.regex.Pattern;
 import org.slf4j.LoggerFactory;
+import com.google.common.io.BaseEncoding;
 import com.openexchange.caldav.resources.EventResource;
 import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Event;
@@ -70,6 +71,7 @@ import com.openexchange.groupware.attach.AttachmentMetadata;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.tasks.TaskExceptionCode;
+import com.openexchange.java.Charsets;
 import com.openexchange.java.Strings;
 import com.openexchange.webdav.protocol.WebdavPath;
 
@@ -81,7 +83,17 @@ import com.openexchange.webdav.protocol.WebdavPath;
  */
 public class Tools {
 
+    public static final String DEFAULT_ACCOUNT_PREFIX = "cal://0/";
+
     public static final String OAUTH_SCOPE = "caldav";
+
+    public static String encodeFolderId(String folderId) {
+        return null == folderId ? null : BaseEncoding.base64Url().omitPadding().encode(folderId.getBytes(Charsets.US_ASCII));
+    }
+
+    public static String decodeFolderId(String encodedFolderId) throws IllegalArgumentException {
+        return new String(BaseEncoding.base64Url().omitPadding().decode(encodedFolderId), Charsets.US_ASCII);
+    }
 
     /**
      * Gets a value indicating whether the supplied event represents a <i>phantom master</i>, i.e. a recurring event master the
@@ -199,6 +211,9 @@ public class Tools {
      * @throws OXException
      */
     public static int parse(String id) throws OXException {
+        if (null != id && id.startsWith(DEFAULT_ACCOUNT_PREFIX)) {
+            return parse(id.substring(DEFAULT_ACCOUNT_PREFIX.length()));
+        }
         try {
             return Integer.parseInt(id);
         } catch (NumberFormatException e) {

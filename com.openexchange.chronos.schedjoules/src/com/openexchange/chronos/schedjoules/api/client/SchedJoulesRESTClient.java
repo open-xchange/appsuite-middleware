@@ -63,7 +63,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.impl.client.CloseableHttpClient;
-import com.openexchange.chronos.schedjoules.exception.SchedJoulesExceptionCodes;
+import com.openexchange.chronos.schedjoules.exception.SchedJoulesAPIExceptionCodes;
 import com.openexchange.chronos.schedjoules.impl.SchedJoulesProperty;
 import com.openexchange.chronos.schedjoules.osgi.Services;
 import com.openexchange.config.lean.LeanConfigurationService;
@@ -113,7 +113,7 @@ public class SchedJoulesRESTClient {
         LeanConfigurationService service = Services.getService(LeanConfigurationService.class);
         String apiKey = service.getProperty(SchedJoulesProperty.apiKey);
         if (Strings.isEmpty(apiKey)) {
-            throw SchedJoulesExceptionCodes.NO_API_KEY_CONFIGURED.create();
+            throw SchedJoulesAPIExceptionCodes.NO_API_KEY_CONFIGURED.create();
         }
         return AUTHORIZATION_HEADER.replaceFirst("\\{\\{token\\}\\}", apiKey);
     }
@@ -148,7 +148,22 @@ public class SchedJoulesRESTClient {
      * @throws OXException
      */
     private void prepareRequest(HttpRequestBase request, String path, String query) throws OXException {
-        prepareRequest(request, SCHEME, BASE_URL, path, query);
+        prepareAuthorizedRequest(request, SCHEME, BASE_URL, path, query);
+    }
+
+    /**
+     * Prepares the specified HTTP request and adds the Authorization header
+     * 
+     * @param request The {@link HttpRequestBase} to prepare
+     * @param scheme The mandatory scheme/protocol
+     * @param baseUrl The mandatory base URL
+     * @param path The mandatory path
+     * @param query The optional query string
+     * @throws OXException if the path is not valid
+     */
+    private void prepareAuthorizedRequest(HttpRequestBase request, String scheme, String baseUrl, String path, String query) throws OXException {
+        prepareRequest(request, scheme, baseUrl, path, query);
+        request.addHeader(HttpHeaders.AUTHORIZATION, authorizationHeader);
     }
 
     /**
@@ -164,10 +179,9 @@ public class SchedJoulesRESTClient {
     private void prepareRequest(HttpRequestBase request, String scheme, String baseUrl, String path, String query) throws OXException {
         try {
             request.setURI(new URI(scheme, baseUrl, path, query, null));
-            request.addHeader(HttpHeaders.AUTHORIZATION, authorizationHeader);
             request.addHeader(HttpHeaders.ACCEPT, acceptHeader);
         } catch (URISyntaxException e) {
-            throw SchedJoulesExceptionCodes.INVALID_URI_PATH.create(path, e);
+            throw SchedJoulesAPIExceptionCodes.INVALID_URI_PATH.create(path, e);
         }
     }
 
@@ -202,7 +216,7 @@ public class SchedJoulesRESTClient {
                 httpRequest = new HttpGet();
                 break;
             default:
-                throw SchedJoulesExceptionCodes.UNKNOWN_HTTP_METHOD.create(httpMethod);
+                throw SchedJoulesAPIExceptionCodes.UNKNOWN_HTTP_METHOD.create(httpMethod);
         }
         return httpRequest;
     }
@@ -218,7 +232,7 @@ public class SchedJoulesRESTClient {
      */
     private HttpUriRequest prepareRequest(URL url, HttpMethod httpMethod) throws OXException {
         HttpRequestBase httpRequest = createRequest(httpMethod);
-        prepareRequest(httpRequest, url.getProtocol(), url.getHost(), url.getPath(), null);
+        prepareRequest(httpRequest, url.getProtocol(), url.getHost(), url.getPath(), url.getQuery());
         return httpRequest;
     }
 
@@ -296,9 +310,9 @@ public class SchedJoulesRESTClient {
             // Prepare the response
             return prepareResponse(httpResponse);
         } catch (ClientProtocolException e) {
-            throw SchedJoulesExceptionCodes.CLIENT_PROTOCOL_ERROR.create(e.getMessage(), e);
+            throw SchedJoulesAPIExceptionCodes.CLIENT_PROTOCOL_ERROR.create(e.getMessage(), e);
         } catch (IOException e) {
-            throw SchedJoulesExceptionCodes.IO_ERROR.create(e.getMessage(), e);
+            throw SchedJoulesAPIExceptionCodes.IO_ERROR.create(e.getMessage(), e);
         }
     }
 
@@ -313,7 +327,7 @@ public class SchedJoulesRESTClient {
     private SchedJoulesResponse prepareResponse(HttpResponse httpResponse) throws IOException, OXException {
         HttpEntity entity = httpResponse.getEntity();
         if (entity == null) {
-            throw SchedJoulesExceptionCodes.NO_CONTENT.create();
+            throw SchedJoulesAPIExceptionCodes.NO_CONTENT.create();
         }
         SchedJoulesResponse response = new SchedJoulesResponse(httpResponse.getStatusLine().getStatusCode());
         Header ctHeader = httpResponse.getFirstHeader("content-type");
@@ -338,23 +352,23 @@ public class SchedJoulesRESTClient {
         // Assert the 4xx codes
         switch (statusCode) {
             case 401:
-                throw SchedJoulesExceptionCodes.NOT_AUTHORIZED.create(httpResponse.getStatusLine().getReasonPhrase());
+                throw SchedJoulesAPIExceptionCodes.NOT_AUTHORIZED.create(httpResponse.getStatusLine().getReasonPhrase());
             case 404:
-                throw SchedJoulesExceptionCodes.PAGE_NOT_FOUND.create();
+                throw SchedJoulesAPIExceptionCodes.PAGE_NOT_FOUND.create();
         }
         if (statusCode >= 400 && statusCode <= 499) {
-            throw SchedJoulesExceptionCodes.UNEXPECTED_ERROR.create(httpResponse.getStatusLine());
+            throw SchedJoulesAPIExceptionCodes.UNEXPECTED_ERROR.create(httpResponse.getStatusLine());
         }
 
         // Assert the 5xx codes
         switch (statusCode) {
             case 500:
-                throw SchedJoulesExceptionCodes.REMOTE_INTERNAL_SERVER_ERROR.create(httpResponse.getStatusLine().getReasonPhrase());
+                throw SchedJoulesAPIExceptionCodes.REMOTE_INTERNAL_SERVER_ERROR.create(httpResponse.getStatusLine().getReasonPhrase());
             case 503:
-                throw SchedJoulesExceptionCodes.REMOTE_SERVICE_UNAVAILABLE.create(httpResponse.getStatusLine().getReasonPhrase());
+                throw SchedJoulesAPIExceptionCodes.REMOTE_SERVICE_UNAVAILABLE.create(httpResponse.getStatusLine().getReasonPhrase());
         }
         if (statusCode >= 500 && statusCode <= 599) {
-            throw SchedJoulesExceptionCodes.REMOTE_SERVER_ERROR.create(httpResponse.getStatusLine());
+            throw SchedJoulesAPIExceptionCodes.REMOTE_SERVER_ERROR.create(httpResponse.getStatusLine());
         }
         return statusCode;
     }

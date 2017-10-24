@@ -49,9 +49,7 @@ package com.openexchange.chronos.schedjoules;
  *
  */
 
-import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.exception.OXException;
-import com.openexchange.session.Session;
 
 /**
  * {@link SchedJoulesService}
@@ -135,14 +133,4 @@ public interface SchedJoulesService {
      * @throws OXException if an error is occurred
      */
     SchedJoulesResult search(String query, String locale, int countryId, int categoryId, int maxRows) throws OXException;
-
-    /**
-     * Un-subscribes from the specified SchedJoules calendar
-     * 
-     * @param session The groupware {@link Session}
-     * @param folderId The folder identifier
-     * @param accountId The identifier of the user's SchedJoules {@link CalendarAccount}
-     * @throws OXException if an error is occurred
-     */
-    void unsubscribeCalendar(Session session, String folderId, int accountId) throws OXException;
 }

@@ -56,6 +56,7 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccessFactory;
 import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.CalendarFolderField;
 import com.openexchange.folderstorage.FolderField;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.calendar.CalendarFolderStorage;
@@ -117,11 +118,9 @@ public final class CalendarFolderStorageActivator extends HousekeepingActivator 
         /*
          * register custom folder fields
          */
-        registerService(FolderField.class, new FolderField(3201, "cal.color", null));
-        registerService(FolderField.class, new FolderField(3202, "cal.synced", Boolean.TRUE));
-        registerService(FolderField.class, new FolderField(3203, "cal.desc", null));
-        registerService(FolderField.class, new FolderField(3204, "cal.name", null));
-
+        for (FolderField folderField : CalendarFolderField.getValues()) {
+            registerService(FolderField.class, folderField);
+        }
     }
 
     @Override

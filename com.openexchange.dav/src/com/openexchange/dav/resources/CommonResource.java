@@ -63,6 +63,7 @@ import java.util.Map.Entry;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.dav.AttachmentUtils;
+import com.openexchange.dav.internal.Tools;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.attach.AttachmentMetadata;
@@ -115,6 +116,11 @@ public abstract class CommonResource<T extends CommonObject> extends DAVObjectRe
     @Override
     protected int getId(T object) {
         return null != object ? object.getObjectID() : 0;
+    }
+
+    @Override
+    protected int getId(FolderCollection<T> collection) throws OXException {
+        return null != collection ? Tools.parse(collection.getFolder().getID()) : 0;
     }
 
     @Override

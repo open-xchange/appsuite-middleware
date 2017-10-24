@@ -50,6 +50,8 @@
 package com.openexchange.importexport.exporters.ical;
 
 import java.io.OutputStream;
+import java.util.List;
+import java.util.Map;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
 import com.openexchange.exception.OXException;
@@ -62,20 +64,24 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:Jan-Oliver.Huhn@open-xchange.com">Jan-Oliver Huhn</a>
  * @since v7.10.0
  */
-public class ICalCompositeEventExporter extends AbstractICalExporter {
+public class ICalCompositeEventExporter extends AbstractICalEventExporter {
 
-    public ICalCompositeEventExporter(String folderId) {
-        super(folderId);
+    public ICalCompositeEventExporter(String folderId, Map<String, List<String>> batchIds) {
+        super(folderId, batchIds);
     }
 
     @Override
-    protected ThresholdFileHolder exportData(ServerSession session, OutputStream out) throws OXException {
-        return exportFolderData(session, out);
+    protected ThresholdFileHolder exportFolderData(ServerSession session, OutputStream out) throws OXException {
+        return exportChronosEvents(getCalendarAccess(session).getEventsInFolder(getFolderId()), out);
     }
 
-    private ThresholdFileHolder exportFolderData(ServerSession session, OutputStream out) throws OXException {
-        IDBasedCalendarAccess calendarAccess = ImportExportServices.getIDBasedCalendarAccessFactory().createAccess(session);
-        return exportChronosEvents(calendarAccess.getEventsInFolder(getFolderId()), out);
+    @Override
+    protected ThresholdFileHolder exportBatchData(ServerSession session, OutputStream out) throws OXException {
+        return exportChronosEvents(getCalendarAccess(session).getEvents(convertBatchDataToEventIds()), out);
+    }
+
+    private IDBasedCalendarAccess getCalendarAccess(ServerSession session) throws OXException {
+        return ImportExportServices.getIDBasedCalendarAccessFactory().createAccess(session);
     }
 
 }

@@ -49,6 +49,7 @@
 
 package com.openexchange.tools.oxfolder.property.impl;
 
+import static com.openexchange.tools.oxfolder.property.sql.CreateFolderUserPropertyTable.TABLE_NAME;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -57,6 +58,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import org.slf4j.Logger;
 import com.openexchange.database.DatabaseService;
@@ -66,7 +68,6 @@ import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
 import com.openexchange.tools.oxfolder.property.FolderUserPropertyStorage;
-import static com.openexchange.tools.oxfolder.property.sql.CreateFolderUserPropertyTable.TABLE_NAME;
 
 /**
  * {@link FolderUserPropertyStorageImpl}
@@ -92,7 +93,7 @@ public class FolderUserPropertyStorageImpl implements FolderUserPropertyStorage 
 
     /**
      * Initializes a new {@link FolderUserPropertyStorageImpl}.
-     * 
+     *
      */
     public FolderUserPropertyStorageImpl(ServiceLookup service) {
         super();
@@ -168,7 +169,7 @@ public class FolderUserPropertyStorageImpl implements FolderUserPropertyStorage 
 
                     stmt.addBatch();
                 }
-                //Execute 
+                //Execute
                 stmt.executeBatch();
             }
         } catch (SQLException e) {
@@ -428,7 +429,7 @@ public class FolderUserPropertyStorageImpl implements FolderUserPropertyStorage 
         PreparedStatement stmt = null;
         try {
             for (String propertyName : properties.keySet()) {
-                // New entry 
+                // New entry
                 stmt = connection.prepareStatement(INSERT);
                 stmt.setInt(1, contextId);
                 stmt.setInt(2, folderId);
@@ -520,18 +521,17 @@ public class FolderUserPropertyStorageImpl implements FolderUserPropertyStorage 
         PreparedStatement stmt = null;
         try {
             stmt = connection.prepareStatement(SET);
-            for (String propertyName : properties.keySet()) {
-                // Update entry   
-                stmt.setString(1, properties.get(propertyName));
-                stmt.setInt(2, contextId);
-                stmt.setInt(3, folderId);
-                stmt.setInt(4, userId);
-                stmt.setString(5, propertyName);
-                stmt.setString(6, propertyName);
-
-                // Execute
+            for (Entry<String, String> entry : properties.entrySet()) {
+                // Update entry
+                stmt.setInt(1, contextId);
+                stmt.setInt(2, folderId);
+                stmt.setInt(3, userId);
+                stmt.setString(4, entry.getKey());
+                stmt.setString(5, entry.getValue());
+                stmt.setString(6, entry.getValue());
                 stmt.addBatch();
             }
+            // Execute
             stmt.executeBatch();
         } catch (SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
@@ -600,7 +600,7 @@ public class FolderUserPropertyStorageImpl implements FolderUserPropertyStorage 
         try {
             stmt = connection.prepareStatement(UPDATE);
             for (String propertyName : properties.keySet()) {
-                // Update entry   
+                // Update entry
                 stmt.setString(1, properties.get(propertyName));
                 stmt.setInt(2, contextId);
                 stmt.setInt(3, folderId);

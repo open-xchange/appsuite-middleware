@@ -282,6 +282,17 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
     }
 
     @Override
+    public List<Event> resolveResource(String folderId, String resourceName) throws OXException {
+        int accountId = getAccountId(folderId);
+        try {
+            List<Event> events = getAccess(accountId, SyncAware.class).resolveResource(getRelativeFolderId(folderId), resourceName);
+            return withUniqueIDs(events, accountId);
+        } catch (OXException e) {
+            throw withUniqueIDs(e, accountId);
+        }
+    }
+
+    @Override
     public CalendarFolder getDefaultFolder() throws OXException {
         try {
             GroupwareCalendarFolder defaultFolder = getGroupwareAccess(DEFAULT_ACCOUNT).getDefaultFolder();

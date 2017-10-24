@@ -52,6 +52,9 @@ package com.openexchange.caldav;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.api2.TasksSQLInterface;
 import com.openexchange.caldav.resources.CalDAVRootCollection;
+import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
+import com.openexchange.chronos.provider.composition.IDBasedCalendarAccessFactory;
+import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
@@ -130,6 +133,19 @@ public class GroupwareCaldavFactory extends DAVFactory {
             return mixin(new CalDAVRootCollection(this).getChild(path.parent().name()).getChild(path.name()));
         }
         throw WebdavProtocolException.generalError(url, HttpServletResponse.SC_NOT_FOUND);
+    }
+
+    /**
+     * Initializes the calendar access for CalDAV operations and applies default parameters.
+     *
+     * @return The initialized calendar access
+     */
+    public IDBasedCalendarAccess initCalendarAccess() throws OXException {
+        IDBasedCalendarAccess calendarAccess = requireService(IDBasedCalendarAccessFactory.class).createAccess(getSession());
+        calendarAccess.set(CalendarParameters.PARAMETER_INCLUDE_PRIVATE, Boolean.TRUE);
+        calendarAccess.set(CalendarParameters.PARAMETER_EXPAND_OCCURRENCES, Boolean.FALSE);
+        calendarAccess.set(CalendarParameters.PARAMETER_IGNORE_CONFLICTS, Boolean.TRUE);
+        return calendarAccess;
     }
 
     /**

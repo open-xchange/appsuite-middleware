@@ -78,6 +78,17 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public abstract class CachingCalendarProvider implements CalendarProvider {
 
+    /**
+     * Indicates whether a reconfiguration of the account should trigger a full recreation of the cached account data or not.
+     * 
+     * @param session The user's session
+     * @param originUserConfiguration Previously stored user configuration
+     * @param newUserConfiguration New user configuration
+     * @return <code>true</code> if the cached data should be recreated; otherwise <code>false</code>
+     * @see CachingCalendarProvider#reconfigureAccount(Session, CalendarAccount, JSONObject, CalendarParameters)
+     */
+    public abstract boolean recreateData(Session session, JSONObject originUserConfiguration, JSONObject newUserConfiguration) throws OXException;
+
     @Override
     public final JSONObject configureAccount(Session session, JSONObject userConfig, CalendarParameters parameters) throws OXException {
         //Nothing caching specific to do
@@ -114,11 +125,21 @@ public abstract class CachingCalendarProvider implements CalendarProvider {
     protected abstract void onAccountCreatedOpt(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException;
 
     @Override
-    public final JSONObject reconfigureAccount(Session session, JSONObject internalConfig, JSONObject userConfig, CalendarParameters parameters) throws OXException {
-        if (internalConfig.hasAndNotNull(CachingCalendarAccess.CACHING)) {
-            internalConfig.remove(CachingCalendarAccess.CACHING);
+    public final JSONObject reconfigureAccount(Session session, CalendarAccount calendarAccount, JSONObject userConfig, CalendarParameters parameters) throws OXException {
+        JSONObject internalConfiguration = calendarAccount.getInternalConfiguration();
+        if (recreateData(session, calendarAccount.getUserConfiguration(), userConfig)) {
+            if (internalConfiguration.hasAndNotNull(CachingCalendarAccess.CACHING)) {
+                internalConfiguration.remove(CachingCalendarAccess.CACHING);
+                delete(session, calendarAccount);
+            }
         }
-        return reconfigureAccountOpt(session, internalConfig, userConfig, parameters);
+
+        JSONObject reconfigureAccountOpt = reconfigureAccountOpt(session, calendarAccount, userConfig, parameters);
+        if (reconfigureAccountOpt == null) { // make sure changes from caching will be used
+            return internalConfiguration;
+        }
+
+        return reconfigureAccountOpt;
     }
 
     /**
@@ -129,17 +150,16 @@ public abstract class CachingCalendarProvider implements CalendarProvider {
      * returned for persisting along with the updated calendar account.
      *
      * @param session The user's session
-     * @param internalConfig The <i>internal</i> configuration as retrieved from the currently stored account
+     * @param calendarAccount The currently stored calendar account holding the obsolete user and current <i>internal</i> configuration
      * @param userConfig The updated <i>user</i> configuration as supplied by the client
      * @param parameters Additional calendar parameters, or <code>null</code> if not set
      * @return A JSON object holding the updated <i>internal</i> configuration to store along with update, or <code>null</code> if unchanged
      */
-    protected abstract JSONObject reconfigureAccountOpt(Session session, JSONObject internalConfig, JSONObject userConfig, CalendarParameters parameters) throws OXException;
+    protected abstract JSONObject reconfigureAccountOpt(Session session, CalendarAccount calendarAccount, JSONObject userConfig, CalendarParameters parameters) throws OXException;
 
     @Override
     public final void onAccountUpdated(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
-        delete(session, account);
-
+        //Nothing caching specific to do; a possible cleanup already happened here: CachingCalendarProvider.reconfigureAccount(Session, CalendarAccount, JSONObject, CalendarParameters)
         onAccountUpdatedOpt(session, account, parameters);
     }
 

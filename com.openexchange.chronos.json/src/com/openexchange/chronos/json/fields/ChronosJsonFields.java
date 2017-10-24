@@ -153,10 +153,6 @@ public class ChronosJsonFields {
      */
     public static final String RECURRENCE_ID = "recurrenceId";
     /**
-     * The change exception dates of the event. See {@link Event#getChangeExceptionDates()}
-     */
-    public static final String CHANGE_EXCEPTION_DATES = "changeExceptionDates";
-    /**
      * The delete exception dates of the event. See {@link Event#getDeleteExceptionDates()}
      */
     public static final String DELETE_EXCEPTION_DATES = "deleteExceptionDates";

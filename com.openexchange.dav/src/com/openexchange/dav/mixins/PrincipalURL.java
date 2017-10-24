@@ -51,7 +51,7 @@ package com.openexchange.dav.mixins;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import com.openexchange.dav.CUType;
+import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
 
@@ -106,11 +106,11 @@ public class PrincipalURL extends SingleXMLPropertyMixin {
                 try {
                     switch (matcher.group(1)) {
                         case "resources":
-                            return new PrincipalURL(Integer.parseInt(matcher.group(2)), CUType.RESOURCE);
+                            return new PrincipalURL(Integer.parseInt(matcher.group(2)), CalendarUserType.RESOURCE);
                         case "groups":
-                            return new PrincipalURL(Integer.parseInt(matcher.group(2)), CUType.GROUP);
+                            return new PrincipalURL(Integer.parseInt(matcher.group(2)), CalendarUserType.GROUP);
                         case "users":
-                            return new PrincipalURL(Integer.parseInt(matcher.group(2)), CUType.INDIVIDUAL);
+                            return new PrincipalURL(Integer.parseInt(matcher.group(2)), CalendarUserType.INDIVIDUAL);
                         default:
                             throw new IllegalArgumentException(matcher.group(1));
                     }
@@ -126,7 +126,7 @@ public class PrincipalURL extends SingleXMLPropertyMixin {
     private static final String PROPERTY_NAME = "principal-URL";
 
     private final int principalID;
-    private final CUType type;
+    private final CalendarUserType type;
 
     /**
      * Initializes a new {@link PrincipalURL}.
@@ -134,7 +134,7 @@ public class PrincipalURL extends SingleXMLPropertyMixin {
      * @param principalID The identifier of the principal
      * @param type The calendar user type of the principal
      */
-    public PrincipalURL(int principalID, CUType type) {
+    public PrincipalURL(int principalID, CalendarUserType type) {
         super(Protocol.DAV_NS.getURI(), PROPERTY_NAME);
         this.principalID = principalID;
         this.type = type;
@@ -154,25 +154,21 @@ public class PrincipalURL extends SingleXMLPropertyMixin {
      *
      * @return The calendar user type of the principal
      */
-    public CUType getType() {
+    public CalendarUserType getType() {
         return type;
     }
 
     @Override
     protected String getValue() {
         String url;
-        switch (type) {
-            case INDIVIDUAL:
-                url = forUser(principalID);
-                break;
-            case GROUP:
-                url = forGroup(principalID);
-                break;
-            case RESOURCE:
-                url = forResource(principalID);
-                break;
-            default:
-                throw new IllegalArgumentException(type.toString());
+        if (CalendarUserType.INDIVIDUAL.equals(type)) {
+            url = forUser(principalID);
+        } else if (CalendarUserType.GROUP.equals(type)) {
+            url = forGroup(principalID);
+        } else if (CalendarUserType.RESOURCE.equals(type)) {
+            url = forResource(principalID);
+        } else {
+            throw new IllegalArgumentException(type.toString());
         }
         return "<D:href>" + url + "</D:href>";
     }

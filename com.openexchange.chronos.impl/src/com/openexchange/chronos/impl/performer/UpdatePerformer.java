@@ -157,7 +157,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
      * @return The update result
      */
     public InternalCalendarResult perform(String objectId, RecurrenceId recurrenceId, Event updatedEventData, long clientTimestamp) throws OXException {
-        getSelfProctection().checkEvent(updatedEventData);
+        getSelfProtection().checkEvent(updatedEventData);
         /*
          * load original event data
          */
@@ -284,7 +284,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
          */
         AttendeeHelper attendeeHelper = AttendeeHelper.onUpdatedEvent(session, folder, originalEvent.getAttendees(), eventData);
         List<Attendee> newAttendees = attendeeHelper.previewChanges();
-        getSelfProctection().checkAttendeeCollection(newAttendees);
+        getSelfProtection().checkAttendeeCollection(newAttendees);
         ItemUpdate<Event, EventField> eventUpdate = prepareEventUpdate(originalEvent, eventData, newAttendees, ignoredFields);
         if (null != eventUpdate && 0 < eventUpdate.getUpdatedFields().size()) {
             /*

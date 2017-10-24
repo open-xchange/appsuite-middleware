@@ -93,7 +93,7 @@ public abstract class ExtendedPropertiesMapping<O> extends DefaultJsonMapping<Ex
         return serializeExtendedProperties(get(from));
     }
 
-    private static ExtendedProperties deserializeExtendedProperties(JSONArray jsonArray) throws JSONException {
+    public static ExtendedProperties deserializeExtendedProperties(JSONArray jsonArray) throws JSONException {
         if (null == jsonArray) {
             return null;
         }
@@ -104,7 +104,7 @@ public abstract class ExtendedPropertiesMapping<O> extends DefaultJsonMapping<Ex
         return extendedProperties;
     }
 
-    private static JSONArray serializeExtendedProperties(ExtendedProperties extendedProperties) throws JSONException {
+    public static JSONArray serializeExtendedProperties(ExtendedProperties extendedProperties) throws JSONException {
         if (null == extendedProperties) {
             return null;
         }
@@ -115,7 +115,7 @@ public abstract class ExtendedPropertiesMapping<O> extends DefaultJsonMapping<Ex
         return jsonArray;
     }
 
-    private static JSONObject serializeExtendedProperty(ExtendedProperty extendedProperty) throws JSONException {
+    public static JSONObject serializeExtendedProperty(ExtendedProperty extendedProperty) throws JSONException {
         JSONObject jsonExtendedProperty = new JSONObject();
         jsonExtendedProperty.put("name", extendedProperty.getName());
         jsonExtendedProperty.put("value", extendedProperty.getValue());
@@ -132,7 +132,7 @@ public abstract class ExtendedPropertiesMapping<O> extends DefaultJsonMapping<Ex
         return jsonExtendedProperty;
     }
 
-    private static ExtendedProperty deserializeExtendedProperty(JSONObject extendedProperty) throws JSONException {
+    public static ExtendedProperty deserializeExtendedProperty(JSONObject extendedProperty) throws JSONException {
         String name = extendedProperty.getString("name");
         String value = extendedProperty.getString("value");
         JSONArray jsonParameters = extendedProperty.optJSONArray("parameters");

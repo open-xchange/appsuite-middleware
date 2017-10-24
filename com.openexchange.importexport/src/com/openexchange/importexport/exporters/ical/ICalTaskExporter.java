@@ -81,17 +81,12 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:Jan-Oliver.Huhn@open-xchange.com">Jan-Oliver Huhn</a>
  * @since v7.10.0
  */
-public class ICalTaskExporter extends AbstractICalBatchExporter {
+public class ICalTaskExporter extends AbstractICalExporter {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ICalTaskExporter.class);
 
-    public ICalTaskExporter(String folderId, int[] fieldsToBeExported) {
-        super(folderId);
-        this.fieldsToBeExported = fieldsToBeExported;
-    }
-
-    public ICalTaskExporter(Map<String, List<String>> batchIds, int[] fieldsToBeExported) {
-        super(batchIds);
+    public ICalTaskExporter(String folderId, Map<String, List<String>> batchIds, int[] fieldsToBeExported) {
+        super(folderId, batchIds);
         this.fieldsToBeExported = fieldsToBeExported;
     }
 
@@ -138,7 +133,7 @@ public class ICalTaskExporter extends AbstractICalBatchExporter {
     };
 
     @Override
-    protected ThresholdFileHolder exportData(ServerSession session, OutputStream out) throws OXException {
+    protected ThresholdFileHolder exportFolderData(ServerSession session, OutputStream out) throws OXException {
         ICalEmitter emitter = ImportExportServices.getICalEmitter();
         List<ConversionError> errors = new LinkedList<>();
         List<ConversionWarning> warnings = new LinkedList<>();

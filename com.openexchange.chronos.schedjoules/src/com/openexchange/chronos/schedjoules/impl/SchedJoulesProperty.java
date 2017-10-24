@@ -50,6 +50,7 @@
 package com.openexchange.chronos.schedjoules.impl;
 
 import com.openexchange.config.lean.Property;
+import java.util.concurrent.TimeUnit;
 
 /**
  * {@link SchedJoulesProperty}
@@ -60,7 +61,12 @@ public enum SchedJoulesProperty implements Property {
     /**
      * The API key that gives access to the complete API of SchedJoules.
      */
-    apiKey;
+    apiKey,
+    /**
+     * The refresh interval of subscriptions in milliseconds.
+     * Defaults to 604800000 (1 week)
+     */
+    refreshInterval(TimeUnit.DAYS.toMillis(7));
 
     private final String fqn;
     private final Object defaultValue;

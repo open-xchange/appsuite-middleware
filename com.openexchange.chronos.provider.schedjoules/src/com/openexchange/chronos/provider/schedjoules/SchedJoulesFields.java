@@ -47,26 +47,68 @@
  *
  */
 
-package com.openexchange.chronos.schedjoules.exception;
+package com.openexchange.chronos.provider.schedjoules;
 
 /**
- * {@link SchedJoulesExceptionMessages}
+ * {@link SchedJoulesFields}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-final class SchedJoulesExceptionMessages {
+final class SchedJoulesFields {
 
-    // The requested page does not denote to a calendar.
-    static final String NO_CALENDAR_MSG = "The requested page does not denote to a calendar.";
-    // You have no access to this calendar.
-    public static final String NO_ACCESS_MSG = "You have no access to this calendar.";
-    // The requested page was not found.
-    public static final String PAGE_NOT_FOUND = "The requested page was not found.";
-    // The remote SchedJoules service is unavailable at the moment. There is nothing we can do about it. Please try again later.
-    public static final String REMOTE_SERVICE_UNAVAILABLE_MSG = "The remote SchedJoules service is unavailable at the moment. There is nothing we can do about it. Please try again later.";
-    // An internal server error occurred on SchedJoules side. There is nothing we can do about it.
-    public static final String REMOTE_INTERNAL_SERVER_ERROR_MSG = "An internal server error occurred on SchedJoules side. There is nothing we can do about it.";
-    // A remote server error occurred on SchedJoules side. There is nothing we can do about it.
-    public static final String REMOTE_SERVER_ERROR_MSG = "A remote server error occurred on SchedJoules side. There is nothing we can do about it.";
+    /**
+     * The user configuration's key for all available/visible folders
+     */
+    static final String FOLDERS = "folders";
+
+    /**
+     * The user configuration's key for the feed's URL
+     */
+    static final String URL = "url";
+
+    /**
+     * The user configuration's key for the folder's name
+     */
+    static final String NAME = "name";
+
+    /**
+     * The refreshInterval for a folder.
+     */
+    static final String REFRESH_INTERVAL = "refreshInterval";
+
+    /**
+     * The itemId that maps to a SchedJoules itemId
+     */
+    static final String ITEM_ID = "itemId";
+
+    /**
+     * The optional locale for the item
+     */
+    static final String LOCALE = "locale";
+
+    /**
+     * The folder's color
+     */
+    static final String COLOR = "color";
+
+    /**
+     * Flag indicating whether the folder is used for sync
+     */
+    static final String USED_FOR_SYNC = "usedForSync";
+
+    /**
+     * The schedule transparency property
+     */
+    static final String SCHEDULE_TRANSP = "scheduleTransp";
+
+    /**
+     * The folder's description
+     */
+    static final String DESCRIPTION = "description";
+
+    /**
+     * The unique user key
+     */
+    static final String USER_KEY = "userKey";
 
 }

@@ -4,3 +4,4 @@ requests:
   - GetRequest.yaml
   - UpdateRequest.yaml
   - NewRequest.yaml
+  - ProvidersRequest.yaml

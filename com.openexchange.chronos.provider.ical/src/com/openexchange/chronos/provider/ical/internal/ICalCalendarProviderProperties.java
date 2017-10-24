@@ -315,4 +315,9 @@ public enum ICalCalendarProviderProperties implements Property {
         return supportedSchemes.isEmpty() ? true : supportedSchemes.contains(scheme);
     }
 
+    protected static void reset() {
+        configuredSchemes = null;
+        configuredAllowedPorts = null;
+        configuredBlacklistedHosts = null;
+    }
 }

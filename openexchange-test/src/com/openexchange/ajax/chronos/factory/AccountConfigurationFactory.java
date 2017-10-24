@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2017-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,61 +47,21 @@
  *
  */
 
-package com.openexchange.importexport.exporters.ical;
+package com.openexchange.ajax.chronos.factory;
 
-import java.io.OutputStream;
-import java.util.List;
-import java.util.Map;
-import com.openexchange.ajax.container.ThresholdFileHolder;
-import com.openexchange.exception.OXException;
-import com.openexchange.java.Strings;
-import com.openexchange.tools.session.ServerSession;
+import org.json.JSONException;
+import com.openexchange.ajax.chronos.AccountConfiguration;
 
 /**
- * {@link AbstractICalBatchExporter}
+ * {@link AccountConfigurationFactory}
  *
- * @author <a href="mailto:Jan-Oliver.Huhn@open-xchange.com">Jan-Oliver Huhn</a>
- * @since v7.10.0
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public abstract class AbstractICalBatchExporter extends AbstractICalExporter {
+public class AccountConfigurationFactory {
 
-    public AbstractICalBatchExporter(String folderId) {
-        super(folderId);
+    public static AccountConfiguration createSubscriptionConfiguration(int itemId) throws JSONException {
+        AccountConfiguration accConfig = new AccountConfiguration();
+        accConfig.addFolderConfiguration(itemId);
+        return accConfig;
     }
-
-    public AbstractICalBatchExporter(Map<String, List<String>> batchIds) {
-        this.batchIds = batchIds;
-    }
-
-    private Map<String, List<String>> batchIds;
-
-    /**
-     * Exports the requested batch of data
-     *
-     * @param session The user session
-     * @param out The output stream
-     * @return ThresholdFileHolder The file holder
-     * @throws OXException if export fails
-     */
-    abstract protected ThresholdFileHolder exportBatchData(ServerSession session, OutputStream out) throws OXException ;
-
-    @Override
-    protected ThresholdFileHolder exportData(ServerSession session, OutputStream out) throws OXException {
-        if (!isBatchExport()) {
-            return exportData(session, out);
-        }
-        return exportBatchData(session, out);
-    }
-
-    private boolean isBatchExport() {
-        if (Strings.isEmpty(getFolderId())) {
-            return false;
-        }
-        return true;
-    }
-
-    public Map<String, List<String>> getBatchIds() {
-        return batchIds;
-    }
-
 }

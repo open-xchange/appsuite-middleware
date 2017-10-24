@@ -52,6 +52,7 @@ package com.openexchange.chronos.common;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Available;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.ExtendedProperties;
 
 /**
  * {@link DataHandlers}
@@ -76,5 +77,11 @@ public enum DataHandlers {
 
     /** The identifier of the data handler to convert from an {@link Available} to its JSON representation. */
     public static final String AVAILABLE2JSON = "com.openexchange.chronos.available2json";
+
+    /** The identifier of the data handler to convert from an extended properties JSON representation to {@link ExtendedProperties}. */
+    public static final String JSON2XPROPERTIES = "com.openexchange.chronos.json2xproperties";
+
+    /** The identifier of the data handler to convert from an {@link ExtendedProperties} to its JSON representation. */
+    public static final String XPROPERTIES2JSON = "com.openexchange.chronos.xproperties2json";
 
 }

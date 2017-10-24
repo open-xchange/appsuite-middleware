@@ -53,7 +53,9 @@ import static org.slf4j.LoggerFactory.getLogger;
 import com.openexchange.chronos.ical.ICalService;
 import com.openexchange.chronos.provider.CalendarProvider;
 import com.openexchange.chronos.provider.ical.ICalCalendarProvider;
+import com.openexchange.chronos.provider.ical.internal.ICalCalendarProviderReloadable;
 import com.openexchange.chronos.provider.ical.internal.Services;
+import com.openexchange.config.Reloadable;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.net.ssl.SSLSocketFactoryProvider;
@@ -89,6 +91,7 @@ public class ICalCalendarProviderActivator extends HousekeepingActivator {
             Services.setServiceLookup(this);
 
             registerService(CalendarProvider.class, new ICalCalendarProvider());
+            registerService(Reloadable.class, new ICalCalendarProviderReloadable());
         } catch (Exception e) {
             getLogger(ICalCalendarProviderActivator.class).error("error starting {}", context.getBundle(), e);
             throw e;

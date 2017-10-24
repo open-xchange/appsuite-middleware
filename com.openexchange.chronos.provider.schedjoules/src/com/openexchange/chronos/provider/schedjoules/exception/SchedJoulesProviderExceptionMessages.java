@@ -60,5 +60,8 @@ final class SchedJoulesProviderExceptionMessages {
     static final String NO_CALENDAR_MSG = "The requested page does not denote to a calendar.";
     // You have no access to this calendar.
     public static final String NO_ACCESS_MSG = "You have no access to this calendar.";
-
+    // The requested calendar does not exist.
+    static final String CALENDAR_DOES_NOT_EXIST_MSG = "The requested calendar does not exist.";
+    // Your SchedJoules account is malformed. Please re-create it.
+    static final String MALFORMED_ACCOUNT_MSG = "Your SchedJoules account is malformed. Please re-create it.";
 }
