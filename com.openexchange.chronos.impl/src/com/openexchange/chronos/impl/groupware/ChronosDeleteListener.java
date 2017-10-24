@@ -77,6 +77,7 @@ import com.openexchange.database.provider.SimpleDBProvider;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.delete.DeleteEvent;
+import com.openexchange.groupware.delete.DeleteFailedExceptionCodes;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.search.SearchTerm;
 import com.openexchange.search.SingleSearchTerm;
@@ -113,19 +114,33 @@ public final class ChronosDeleteListener implements DeleteListener {
     }
 
     @Override
-    public void deletePerformed(DeleteEvent event, Connection readCon, Connection writeCon) throws OXException {
-        if (DeleteEvent.TYPE_USER == event.getType()) {
-            if (DeleteEvent.SUBTYPE_ANONYMOUS_GUEST != event.getSubType() && DeleteEvent.SUBTYPE_INVITED_GUEST != event.getSubType()) {
+    public void deletePerformed(DeleteEvent deleteEvent, Connection readCon, Connection writeCon) throws OXException {
+        switch (deleteEvent.getType()) {
+            case DeleteEvent.TYPE_USER:
+                if (DeleteEvent.SUBTYPE_ANONYMOUS_GUEST != deleteEvent.getSubType() && DeleteEvent.SUBTYPE_INVITED_GUEST != deleteEvent.getSubType()) {
+                    /*
+                     * remove all calendar data of deleted user
+                     */
+                    purgeUserData(readCon, writeCon, deleteEvent.getContext(), deleteEvent.getId(), deleteEvent.getSession(), deleteEvent.getDestinationUserID());
+                }
+                break;
+            case DeleteEvent.TYPE_GROUP:
+                purgesGroupData(readCon, writeCon, deleteEvent.getContext(), deleteEvent.getId(), deleteEvent.getSession(), deleteEvent.getDestinationUserID());
+                break;
+            case DeleteEvent.TYPE_RESOURCE:
+                break;
+            case DeleteEvent.TYPE_RESOURCE_GROUP:
+                break;
+
+            case DeleteEvent.TYPE_CONTEXT:
                 /*
-                 * remove all calendar data of deleted user
+                 * DeleteEvent.TYPE_CONTEXT is handled by com.openexchange.admin.storage.mysqlStorage.OXContextMySQLStorage.deleteTablesData(String, Integer, Connection, boolean)
+                 * All tables containing a 'cid' will be cleaned up by this. So there is no need to delete anything here.
                  */
-                purgeUserData(readCon, writeCon, event.getContext(), event.getId(), event.getSession(), event.getDestinationUserID());
-            }
+                break;
+            default:
+                throw DeleteFailedExceptionCodes.UNKNOWN_TYPE.create(Integer.valueOf(deleteEvent.getType()));
         }
-        /*
-         * DeleteEvent.TYPE_CONTEXT is handled by com.openexchange.admin.storage.mysqlStorage.OXContextMySQLStorage.deleteTablesData(String, Integer, Connection, boolean)
-         * All tables containing a 'cid' will be cleaned up by this. So there is no need to delete anything here.
-         */
     }
 
     /**
@@ -233,6 +248,45 @@ public final class ChronosDeleteListener implements DeleteListener {
          * Delete account
          */
         storage.getAccountStorage().deleteAccount(userId, accountId);
+    }
+
+    /**
+     * Purges the group data
+     * 
+     * @param readCon The readable {@link Connection}
+     * @param writeCon The writable {@link Connection}
+     * @param context The {@link Context}
+     * @param groupId The group identifier
+     * @param session {@link Session} The users session
+     * @param destinationUserId The identifier of the destination user specified in {@link DeleteEvent#getDestinationUserID()}
+     * @throws OXException In case service is unavailable or SQL error
+     */
+    private void purgesGroupData(Connection readCon, Connection writeCon, Context context, int groupId, Session session, Integer destinationUserId) throws OXException {
+        EntityResolver entityResolver = calendarUtilities.getEntityResolver(context.getContextId());
+        SimpleDBProvider dbProvider = new SimpleDBProvider(readCon, writeCon);
+        CalendarStorage storage = factory.create(context, CalendarAccount.DEFAULT_ACCOUNT.getAccountId(), entityResolver, dbProvider, DBTransactionPolicy.NO_TRANSACTIONS);
+
+        // Get events the group attends
+        EventStorage eventStorage = storage.getEventStorage();
+        EventField[] fields = new EventField[] { EventField.ID };
+        List<Event> events = eventStorage.searchEvents(equalsFieldUserTerm(AttendeeField.ENTITY, Integer.valueOf(groupId)), null, fields);
+
+        // Get modifier and group
+        CalendarUser replacement = entityResolver.prepareUserAttendee(null == destinationUserId ? context.getMailadmin() : destinationUserId.intValue());
+        Attendee groupAttendee = entityResolver.prepareGroupAttendee(groupId);
+
+        for (Event event : events) {
+            /*
+             * Group members are already attendees of the event.
+             * So we just need to delete the group as attendee.
+             */
+            storage.getAttendeeStorage().deleteAttendees(event.getId(), Collections.singletonList(groupAttendee));
+
+            // Reflect deletion in event
+            event.setModifiedBy(replacement);
+            event.setLastModified(new Date());
+            eventStorage.updateEvent(event);
+        }
     }
 
     /*
