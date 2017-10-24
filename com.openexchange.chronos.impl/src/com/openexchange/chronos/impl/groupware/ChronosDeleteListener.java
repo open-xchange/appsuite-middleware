@@ -73,6 +73,7 @@ import com.openexchange.chronos.service.EntityResolver;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.chronos.storage.CalendarStorageFactory;
 import com.openexchange.chronos.storage.EventStorage;
+import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.provider.DBTransactionPolicy;
 import com.openexchange.database.provider.SimpleDBProvider;
 import com.openexchange.exception.OXException;
@@ -99,6 +100,8 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  */
 public final class ChronosDeleteListener implements DeleteListener {
 
+    private static final int ACCOUNT_ID = CalendarAccount.DEFAULT_ACCOUNT.getAccountId();
+
     private CalendarStorageFactory factory;
     private CalendarUtilities      calendarUtilities;
 
@@ -119,17 +122,14 @@ public final class ChronosDeleteListener implements DeleteListener {
         switch (deleteEvent.getType()) {
             case DeleteEvent.TYPE_USER:
                 if (DeleteEvent.SUBTYPE_ANONYMOUS_GUEST != deleteEvent.getSubType() && DeleteEvent.SUBTYPE_INVITED_GUEST != deleteEvent.getSubType()) {
-                    /*
-                     * remove all calendar data of deleted user
-                     */
-                    purgeUserData(readCon, writeCon, deleteEvent.getContext(), deleteEvent.getId(), deleteEvent.getSession(), deleteEvent.getDestinationUserID());
+                    purgeUserData(new SimpleDBProvider(readCon, writeCon), deleteEvent.getContext(), deleteEvent.getId(), deleteEvent.getSession(), deleteEvent.getDestinationUserID());
                 }
                 break;
             case DeleteEvent.TYPE_GROUP:
-                purgesGroupData(readCon, writeCon, deleteEvent.getContext(), deleteEvent.getId(), deleteEvent.getDestinationUserID());
+                purgesGroupData(new SimpleDBProvider(readCon, writeCon), deleteEvent.getContext(), deleteEvent.getId(), deleteEvent.getDestinationUserID());
                 break;
             case DeleteEvent.TYPE_RESOURCE:
-                purgesResourceData(readCon, writeCon, deleteEvent.getContext(), deleteEvent.getId(), deleteEvent.getDestinationUserID());
+                purgesResourceData(new SimpleDBProvider(readCon, writeCon), deleteEvent.getContext(), deleteEvent.getId(), deleteEvent.getDestinationUserID());
                 break;
             case DeleteEvent.TYPE_RESOURCE_GROUP:
                 throw DeleteFailedExceptionCodes.ERROR.create("Deletion of type RESOURCE_GROUP is not supported!");
@@ -147,20 +147,16 @@ public final class ChronosDeleteListener implements DeleteListener {
     /**
      * Purges the user data
      * 
-     * @param readCon The readable {@link Connection}
-     * @param writeCon The writable {@link Connection}
+     * @param dbProvider The {@link DBProvider}
      * @param context The {@link Context}
      * @param userId The user identifier
      * @param session {@link Session} The users session
      * @param destinationUserId The identifier of the destination user specified in {@link DeleteEvent#getDestinationUserID()}
      * @throws OXException In case service is unavailable or SQL error
      */
-    private void purgeUserData(Connection readCon, Connection writeCon, Context context, int userId, Session session, Integer destinationUserId) throws OXException {
-        int accountId = CalendarAccount.DEFAULT_ACCOUNT.getAccountId();
-        Integer userID = Integer.valueOf(userId);
-        SimpleDBProvider dbProvider = new SimpleDBProvider(readCon, writeCon);
+    private void purgeUserData(DBProvider dbProvider, Context context, int userId, Session session, Integer destinationUserId) throws OXException {
         EntityResolver entityResolver = calendarUtilities.getEntityResolver(context.getContextId());
-        CalendarStorage storage = factory.create(context, accountId, entityResolver, dbProvider, DBTransactionPolicy.NO_TRANSACTIONS);
+        CalendarStorage storage = factory.create(context, ACCOUNT_ID, entityResolver, dbProvider, DBTransactionPolicy.NO_TRANSACTIONS);
 
         /*
          * Delete alarms for the user
@@ -171,10 +167,11 @@ public final class ChronosDeleteListener implements DeleteListener {
         /*
          * Delete and update events where the user is attendee
          */
+        // Get events
         EventStorage eventStorage = storage.getEventStorage();
         EventField[] fields = new EventField[] { EventField.ID };
         List<Event> events = null;
-        events = eventStorage.searchEvents(equalsFieldUserTerm(AttendeeField.ENTITY, userID), null, fields);
+        events = eventStorage.searchEvents(equalsFieldUserTerm(AttendeeField.ENTITY, userId), null, fields);
 
         // Get attendees
         List<String> eventIds = events.stream().map(Event::getId).collect(Collectors.toList());
@@ -183,6 +180,7 @@ public final class ChronosDeleteListener implements DeleteListener {
         // We need to get the users view on the attachments, so create a session on behave of the deleted user
         ServerSession serverSession = ServerSessionAdapter.valueOf(userId, context.getContextId());
 
+        // Check events
         for (Entry<String, List<Attendee>> entry : eventToAttendee.entrySet()) {
             List<Attendee> attendees = entry.getValue();
             if (null != attendees && false == attendees.isEmpty()) {
@@ -202,7 +200,7 @@ public final class ChronosDeleteListener implements DeleteListener {
                     storage.getAttendeeStorage().deleteAttendees(entry.getKey(), attendees);
                 } catch (NoSuchElementException e) {
                     // This should never happen...
-                    throw CalendarExceptionCodes.ATTENDEE_NOT_FOUND.create(e, userID, entry.getKey());
+                    throw CalendarExceptionCodes.ATTENDEE_NOT_FOUND.create(e, Integer.valueOf(userId), entry.getKey());
                 }
             }
         }
@@ -210,37 +208,36 @@ public final class ChronosDeleteListener implements DeleteListener {
         /*
          * Update event fields where the user might be referenced
          */
-
         // Get replacement
         CalendarUser replacement = entityResolver.prepareUserAttendee(null == destinationUserId ? context.getMailadmin() : destinationUserId.intValue());
 
         // Update events where the user is the calendar user
-        events = eventStorage.searchEvents(equalsFieldUserTerm(EventField.CALENDAR_USER, userID), null, fields);
+        events = eventStorage.searchEvents(equalsFieldUserTerm(EventField.CALENDAR_USER, userId), null, fields);
         for (Event event : events) {
             event.setCalendarUser(replacement);
             event.setLastModified(new Date());
             eventStorage.updateEvent(event);
         }
 
-        // Update events of the user which he created
-        events = eventStorage.searchEvents(equalsFieldUserTerm(EventField.CREATED_BY, userID), null, fields);
+        // Update events which the user created
+        events = eventStorage.searchEvents(equalsFieldUserTerm(EventField.CREATED_BY, userId), null, fields);
         for (Event event : events) {
             event.setCreatedBy(replacement);
             event.setLastModified(new Date());
             eventStorage.updateEvent(event);
         }
-        // Update events of the user where he is the modifier
-        events = eventStorage.searchEvents(equalsFieldUserTerm(EventField.MODIFIED_BY, userID), null, fields);
+        // Update events where the user is the modifier
+        events = eventStorage.searchEvents(equalsFieldUserTerm(EventField.MODIFIED_BY, userId), null, fields);
         for (Event event : events) {
             event.setModifiedBy(replacement);
             event.setLastModified(new Date());
             eventStorage.updateEvent(event);
         }
-        // Update events of the user where he is the organizer
+        // Update events where the user is the organizer
         SingleSearchTerm organizer = eqaulsFieldTerm(EventField.ORGANIZER).addOperand(new ConstantOperand<String>(ResourceId.forUser(context.getContextId(), userId)));
         events = eventStorage.searchEvents(organizer, null, fields);
         for (Event event : events) {
-            event.setOrganizer(getOrganizer(replacement));
+            event.setOrganizer(entityResolver.applyEntityData(new Organizer(), replacement.getEntity()));
             event.setLastModified(new Date());
             eventStorage.updateEvent(event);
         }
@@ -248,62 +245,58 @@ public final class ChronosDeleteListener implements DeleteListener {
         /*
          * Delete account
          */
-        storage.getAccountStorage().deleteAccount(userId, accountId);
+        storage.getAccountStorage().deleteAccount(userId, ACCOUNT_ID);
     }
 
     /**
      * Purges the group data
      * 
-     * @param readCon The readable {@link Connection}
-     * @param writeCon The writable {@link Connection}
+     * @param dbProvider The {@link DBProvider}
      * @param context The {@link Context}
      * @param groupId The group identifier
      * @param destinationUserId The identifier of the destination user specified in {@link DeleteEvent#getDestinationUserID()}
      * @throws OXException In case service is unavailable or SQL error
      */
-    private void purgesGroupData(Connection readCon, Connection writeCon, Context context, int groupId, Integer destinationUserId) throws OXException {
+    private void purgesGroupData(DBProvider dbProvider, Context context, int groupId, Integer destinationUserId) throws OXException {
         EntityResolver entityResolver = calendarUtilities.getEntityResolver(context.getContextId());
         Attendee groupAttendee = entityResolver.prepareGroupAttendee(groupId);
 
-        deleteAttendee(readCon, writeCon, context, destinationUserId, entityResolver, groupAttendee);
+        deleteAttendee(dbProvider, context, destinationUserId, entityResolver, groupAttendee);
     }
 
     /**
      * Purges the resource data
      * 
-     * @param readCon The readable {@link Connection}
-     * @param writeCon The writable {@link Connection}
+     * @param dbProvider The {@link DBProvider}
      * @param context The {@link Context}
      * @param resourceId The identifier of the resource
      * @param destinationUserId The identifier of the destination user specified in {@link DeleteEvent#getDestinationUserID()}
      * @throws OXException In case service is unavailable or SQL error
      */
-    private void purgesResourceData(Connection readCon, Connection writeCon, Context context, int resourceId, Integer destinationUserId) throws OXException {
+    private void purgesResourceData(DBProvider dbProvider, Context context, int resourceId, Integer destinationUserId) throws OXException {
         EntityResolver entityResolver = calendarUtilities.getEntityResolver(context.getContextId());
         Attendee resourceAttendee = entityResolver.prepareResourceAttendee(resourceId);
 
-        deleteAttendee(readCon, writeCon, context, destinationUserId, entityResolver, resourceAttendee);
+        deleteAttendee(dbProvider, context, destinationUserId, entityResolver, resourceAttendee);
     }
 
     /**
      * Removes the given attendee from every event it attends and set the modification date in the event accordingly
      * 
-     * @param readCon The readable {@link Connection}
-     * @param writeCon The writable {@link Connection}
+     * @param dbProvider The {@link DBProvider}
      * @param context The {@link Context}
      * @param destinationUserId The identifier of the destination user specified in {@link DeleteEvent#getDestinationUserID()}
      * @param entityResolver The {@link EntityResolver}
      * @param attendee The {@link Attendee}. Either a {@link CalendarUserType#GROUP} or {@link CalendarUserType#RESOURCE}
      * @throws OXException In case service is unavailable or SQL error
      */
-    private void deleteAttendee(Connection readCon, Connection writeCon, Context context, Integer destinationUserId, EntityResolver entityResolver, Attendee attendee) throws OXException {
-        SimpleDBProvider dbProvider = new SimpleDBProvider(readCon, writeCon);
-        CalendarStorage storage = factory.create(context, CalendarAccount.DEFAULT_ACCOUNT.getAccountId(), entityResolver, dbProvider, DBTransactionPolicy.NO_TRANSACTIONS);
+    private void deleteAttendee(DBProvider dbProvider, Context context, Integer destinationUserId, EntityResolver entityResolver, Attendee attendee) throws OXException {
+        CalendarStorage storage = factory.create(context, ACCOUNT_ID, entityResolver, dbProvider, DBTransactionPolicy.NO_TRANSACTIONS);
 
         // Get events the group/resource attends
         EventStorage eventStorage = storage.getEventStorage();
         EventField[] fields = new EventField[] { EventField.ID };
-        List<Event> events = eventStorage.searchEvents(equalsFieldUserTerm(AttendeeField.ENTITY, Integer.valueOf(attendee.getEntity())), null, fields);
+        List<Event> events = eventStorage.searchEvents(equalsFieldUserTerm(AttendeeField.ENTITY, attendee.getEntity()), null, fields);
 
         // Get modifier
         CalendarUser replacement = entityResolver.prepareUserAttendee(null == destinationUserId ? context.getMailadmin() : destinationUserId.intValue());
@@ -311,6 +304,7 @@ public final class ChronosDeleteListener implements DeleteListener {
         for (Event event : events) {
             /*
              * Group members are already attendees of the event.
+             * For resources there are no members to resolve.
              * So we just need to delete the group/resource as attendee.
              */
             storage.getAttendeeStorage().deleteAttendees(event.getId(), Collections.singletonList(attendee));
@@ -325,20 +319,6 @@ public final class ChronosDeleteListener implements DeleteListener {
     /*
      * ====== HELPERS ======
      */
-
-    /**
-     * Get the organizer from the given user
-     * 
-     * @param user The {@link CalendarUser}
-     * @return The user as {@link Organizer}
-     */
-    private Organizer getOrganizer(CalendarUser user) {
-        Organizer organizer = new Organizer();
-        organizer.setEntity(user.getEntity());
-        organizer.setCn(user.getCn());
-        organizer.setUri(user.getUri());
-        return organizer;
-    }
 
     /**
      * Creates a new {@link SearchTerm} with {@link SingleOperation#EQUALS} as operand
@@ -368,7 +348,7 @@ public final class ChronosDeleteListener implements DeleteListener {
      * @param userID The user to search
      * @return A new {@link SingleSearchTerm}
      */
-    private SingleSearchTerm equalsFieldUserTerm(Enum<?> field, Integer userID) {
-        return eqaulsFieldTerm(field).addOperand(new ConstantOperand<Integer>(userID));
+    private SingleSearchTerm equalsFieldUserTerm(Enum<?> field, int userID) {
+        return eqaulsFieldTerm(field).addOperand(new ConstantOperand<Integer>(Integer.valueOf(userID)));
     }
 }
