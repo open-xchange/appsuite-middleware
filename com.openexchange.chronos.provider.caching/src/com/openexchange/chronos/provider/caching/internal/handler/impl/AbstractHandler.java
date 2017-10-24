@@ -222,7 +222,7 @@ public abstract class AbstractHandler implements CachingHandler {
         return importedEvent;
     }
 
-    private EventField[] getFields() {
+    protected EventField[] getFields() {
         EventField[] all = EventField.values();
 
         Set<EventField> fields = new HashSet<EventField>();

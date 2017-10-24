@@ -153,7 +153,7 @@ public class UpdateHandler extends AbstractHandler {
                 exceptions.add(exception);
             }
         }
-        return calendarStorage.getUtilities().loadAdditionalEventData(this.cachedCalendarAccess.getSession().getUserId(), exceptions, EventField.values());
+        return calendarStorage.getUtilities().loadAdditionalEventData(this.cachedCalendarAccess.getSession().getUserId(), exceptions, getFields());
     }
 
     private void create(String folderId, TruncationAwareCalendarStorage calendarStorage, EventUpdates diff) throws OXException {
