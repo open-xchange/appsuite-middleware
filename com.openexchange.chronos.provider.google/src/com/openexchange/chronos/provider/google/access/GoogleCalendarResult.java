@@ -321,7 +321,12 @@ public class GoogleCalendarResult extends ExternalCalendarResult implements Diff
         if(deleteExceptionDates == null){
             deleteExceptionDates = new TreeSet<>();
             master.setDeleteExceptionDates(deleteExceptionDates);
+        } else if(deleteExceptionDates.contains(recurrenceId)) {
+            // Remove recurrence id in case its already exists (double cancel)
+            deleteExceptionDates.remove(recurrenceId);
+            return;
         }
+
         deleteExceptionDates.add(recurrenceId);
     }
 
@@ -332,7 +337,7 @@ public class GoogleCalendarResult extends ExternalCalendarResult implements Diff
      * @return true if the event is the master, false otherwise
      */
     private boolean isMaster(Event event, String uid) {
-        if (event.getUid() == null) {
+        if (event.getUid() == null || event.getRecurrenceId() != null) {
             return false;
         }
         return event.getUid().equals(uid);

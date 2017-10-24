@@ -430,6 +430,15 @@ public class GoogleEventConverter {
                     String dateTimeStr = from.getId().substring(from.getRecurringEventId().length() + 1);
                     RecurrenceId recId = new DefaultRecurrenceId(dateTimeStr);
                     to.setRecurrenceId(recId);
+                } else if (from.getId().indexOf("_")>0){
+                    /* 
+                     * Additional check in case recurringEventId isn't set (null)
+                     * This check expects that google ids of occurences to be in the following format: [masterId]_[recurrenceid] 
+                     * E.g.: 4qebqgd7o0nrqdlnqhberc4d3l_20171025T173000Z 
+                     */
+                    String dateTimeStr = from.getId().substring(from.getId().indexOf("_")+1);
+                    RecurrenceId recId = new DefaultRecurrenceId(dateTimeStr);
+                    to.setRecurrenceId(recId);
                 }
             }
         });
