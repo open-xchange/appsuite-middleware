@@ -59,6 +59,7 @@ import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.CalendarFolder;
 import com.openexchange.chronos.provider.caching.ExternalCalendarResult;
 import com.openexchange.chronos.provider.caching.SingleFolderCachingCalendarAccess;
+import com.openexchange.chronos.provider.ical.conn.ICalFeedReader;
 import com.openexchange.chronos.provider.ical.exception.ICalProviderExceptionCodes;
 import com.openexchange.chronos.provider.ical.internal.ICalCalendarProviderProperties;
 import com.openexchange.chronos.provider.ical.internal.Services;
@@ -128,7 +129,7 @@ public class ICalCalendarAccess extends SingleFolderCachingCalendarAccess {
 
     @Override
     public String updateFolder(String folderId, CalendarFolder folder, long clientTimestamp) throws OXException {
-        // nothing cahnged, return origin folder id
+        // nothing changed, return origin folder id
         return folderId;
     }
 

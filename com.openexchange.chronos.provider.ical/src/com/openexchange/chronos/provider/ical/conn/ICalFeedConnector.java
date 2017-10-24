@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.chronos.provider.ical;
+package com.openexchange.chronos.provider.ical.conn;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -61,11 +61,11 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpHead;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.utils.DateUtils;
-import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.util.EntityUtils;
 import com.openexchange.auth.info.AuthInfo;
 import com.openexchange.auth.info.AuthType;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
+import com.openexchange.chronos.provider.ical.ICalFeedConfig;
 import com.openexchange.chronos.provider.ical.exception.ICalProviderExceptionCodes;
 import com.openexchange.chronos.provider.ical.internal.ICalCalendarProviderProperties;
 import com.openexchange.chronos.provider.ical.internal.Services;
@@ -75,10 +75,6 @@ import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
-import com.openexchange.net.ssl.SSLSocketFactoryProvider;
-import com.openexchange.net.ssl.config.SSLConfigurationService;
-import com.openexchange.rest.client.httpclient.HttpClients;
-import com.openexchange.rest.client.httpclient.HttpClients.ClientConfig;
 import com.openexchange.session.Session;
 
 /**
@@ -92,7 +88,6 @@ public class ICalFeedConnector {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ICalFeedConnector.class);
 
-    protected final CloseableHttpClient httpClient;
     protected final ICalFeedConfig iCalFeedConfig;
     protected Session session;
     protected long allowedFeedSize;
@@ -100,45 +95,23 @@ public class ICalFeedConnector {
     public ICalFeedConnector(Session session, ICalFeedConfig iCalFeedConfig) {
         this.session = session;
         this.iCalFeedConfig = iCalFeedConfig;
-
-        ClientConfig config = ClientConfig.newInstance();
-        config.setUserAgent("Open-Xchange Calendar Feed Client");
-        init(config);
-
-        this.httpClient = HttpClients.getHttpClient(config, Services.getService(SSLSocketFactoryProvider.class), Services.getService(SSLConfigurationService.class));
-    }
-
-    private void init(ClientConfig config) {
-        LeanConfigurationService leanConfigurationService = Services.getService(LeanConfigurationService.class);
-        String maxFileSize = leanConfigurationService.getProperty(session.getUserId(), session.getContextId(), ICalCalendarProviderProperties.maxFileSize);
+        String maxFileSize = Services.getService(LeanConfigurationService.class).getProperty(ICalCalendarProviderProperties.maxFileSize);
         this.allowedFeedSize = ConfigTools.parseBytes(maxFileSize);
-
-        int maxConnections = leanConfigurationService.getIntProperty(session.getUserId(), session.getContextId(), ICalCalendarProviderProperties.maxConnections);
-        config.setMaxTotalConnections(maxConnections);
-
-        int maxConnectionsPerRoute = leanConfigurationService.getIntProperty(session.getUserId(), session.getContextId(), ICalCalendarProviderProperties.maxConnectionsPerRoute);
-        config.setMaxConnectionsPerRoute(maxConnectionsPerRoute);
-
-        int connectionTimeout = leanConfigurationService.getIntProperty(session.getUserId(), session.getContextId(), ICalCalendarProviderProperties.connectionTimeout);
-        config.setConnectionTimeout(connectionTimeout);
-
-        int socketReadTimeout = leanConfigurationService.getIntProperty(session.getUserId(), session.getContextId(), ICalCalendarProviderProperties.socketReadTimeout);
-        config.setSocketReadTimeout(socketReadTimeout);
     }
 
-    protected HeadResult head() throws OXException {
+    public HeadResult head() throws OXException {
         HttpHead headMethod = null;
         CloseableHttpResponse response = null;
         try {
             headMethod = prepareHead();
-            response = httpClient.execute(headMethod);
+            response = ICalFeedHttpClient.getInstance().execute(headMethod);
             HeadResult result = new HeadResult(response.getStatusLine(), response.getAllHeaders());
 
-            long contentLength = Long.parseLong(result.getContentLength());
-            if (contentLength > this.allowedFeedSize) {
-                throw ICalProviderExceptionCodes.FEED_SIZE_EXCEEDED.create(iCalFeedConfig.getFeedUrl(), contentLength, this.allowedFeedSize);
-            }
             if (result.getStatusCode() >= 200 && result.getStatusCode() < 300) {
+                long contentLength = Long.parseLong(result.getContentLength());
+                if (contentLength > this.allowedFeedSize) {
+                    throw ICalProviderExceptionCodes.FEED_SIZE_EXCEEDED.create(iCalFeedConfig.getFeedUrl(), contentLength, this.allowedFeedSize);
+                }
                 return result;
             }
             if (result.getStatusCode() == HttpStatus.SC_UNAUTHORIZED) {

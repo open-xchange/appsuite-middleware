@@ -55,6 +55,7 @@ import com.openexchange.auth.info.AuthType;
 import com.openexchange.chronos.provider.CalendarAccess;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.caching.CachingCalendarProvider;
+import com.openexchange.chronos.provider.ical.conn.ICalFeedConnector;
 import com.openexchange.chronos.provider.ical.internal.auth.ICalAuthParser;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.exception.OXException;
