@@ -86,7 +86,6 @@ import com.openexchange.search.SingleSearchTerm;
 import com.openexchange.search.SingleSearchTerm.SingleOperation;
 import com.openexchange.search.internal.operands.ColumnFieldOperand;
 import com.openexchange.search.internal.operands.ConstantOperand;
-import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
@@ -122,7 +121,7 @@ public final class ChronosDeleteListener implements DeleteListener {
         switch (deleteEvent.getType()) {
             case DeleteEvent.TYPE_USER:
                 if (DeleteEvent.SUBTYPE_ANONYMOUS_GUEST != deleteEvent.getSubType() && DeleteEvent.SUBTYPE_INVITED_GUEST != deleteEvent.getSubType()) {
-                    purgeUserData(new SimpleDBProvider(readCon, writeCon), deleteEvent.getContext(), deleteEvent.getId(), deleteEvent.getSession(), deleteEvent.getDestinationUserID());
+                    purgeUserData(new SimpleDBProvider(readCon, writeCon), deleteEvent.getContext(), deleteEvent.getId(), deleteEvent.getDestinationUserID());
                 }
                 break;
             case DeleteEvent.TYPE_GROUP:
@@ -150,11 +149,10 @@ public final class ChronosDeleteListener implements DeleteListener {
      * @param dbProvider The {@link DBProvider}
      * @param context The {@link Context}
      * @param userId The user identifier
-     * @param session {@link Session} The users session
      * @param destinationUserId The identifier of the destination user specified in {@link DeleteEvent#getDestinationUserID()}
      * @throws OXException In case service is unavailable or SQL error
      */
-    private void purgeUserData(DBProvider dbProvider, Context context, int userId, Session session, Integer destinationUserId) throws OXException {
+    private void purgeUserData(DBProvider dbProvider, Context context, int userId, Integer destinationUserId) throws OXException {
         EntityResolver entityResolver = calendarUtilities.getEntityResolver(context.getContextId());
         CalendarStorage storage = factory.create(context, ACCOUNT_ID, entityResolver, dbProvider, DBTransactionPolicy.NO_TRANSACTIONS);
 
