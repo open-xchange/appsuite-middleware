@@ -60,6 +60,7 @@ import java.util.stream.Collectors;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.CalendarUser;
+import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.Organizer;
@@ -125,13 +126,13 @@ public final class ChronosDeleteListener implements DeleteListener {
                 }
                 break;
             case DeleteEvent.TYPE_GROUP:
-                purgesGroupData(readCon, writeCon, deleteEvent.getContext(), deleteEvent.getId(), deleteEvent.getSession(), deleteEvent.getDestinationUserID());
+                purgesGroupData(readCon, writeCon, deleteEvent.getContext(), deleteEvent.getId(), deleteEvent.getDestinationUserID());
                 break;
             case DeleteEvent.TYPE_RESOURCE:
+                purgesResourceData(readCon, writeCon, deleteEvent.getContext(), deleteEvent.getId(), deleteEvent.getDestinationUserID());
                 break;
             case DeleteEvent.TYPE_RESOURCE_GROUP:
-                break;
-
+                throw DeleteFailedExceptionCodes.ERROR.create("Deletion of type RESOURCE_GROUP is not supported!");
             case DeleteEvent.TYPE_CONTEXT:
                 /*
                  * DeleteEvent.TYPE_CONTEXT is handled by com.openexchange.admin.storage.mysqlStorage.OXContextMySQLStorage.deleteTablesData(String, Integer, Connection, boolean)
@@ -257,30 +258,62 @@ public final class ChronosDeleteListener implements DeleteListener {
      * @param writeCon The writable {@link Connection}
      * @param context The {@link Context}
      * @param groupId The group identifier
-     * @param session {@link Session} The users session
      * @param destinationUserId The identifier of the destination user specified in {@link DeleteEvent#getDestinationUserID()}
      * @throws OXException In case service is unavailable or SQL error
      */
-    private void purgesGroupData(Connection readCon, Connection writeCon, Context context, int groupId, Session session, Integer destinationUserId) throws OXException {
+    private void purgesGroupData(Connection readCon, Connection writeCon, Context context, int groupId, Integer destinationUserId) throws OXException {
         EntityResolver entityResolver = calendarUtilities.getEntityResolver(context.getContextId());
+        Attendee groupAttendee = entityResolver.prepareGroupAttendee(groupId);
+
+        deleteAttendee(readCon, writeCon, context, destinationUserId, entityResolver, groupAttendee);
+    }
+
+    /**
+     * Purges the resource data
+     * 
+     * @param readCon The readable {@link Connection}
+     * @param writeCon The writable {@link Connection}
+     * @param context The {@link Context}
+     * @param resourceId The identifier of the resource
+     * @param destinationUserId The identifier of the destination user specified in {@link DeleteEvent#getDestinationUserID()}
+     * @throws OXException In case service is unavailable or SQL error
+     */
+    private void purgesResourceData(Connection readCon, Connection writeCon, Context context, int resourceId, Integer destinationUserId) throws OXException {
+        EntityResolver entityResolver = calendarUtilities.getEntityResolver(context.getContextId());
+        Attendee resourceAttendee = entityResolver.prepareResourceAttendee(resourceId);
+
+        deleteAttendee(readCon, writeCon, context, destinationUserId, entityResolver, resourceAttendee);
+    }
+
+    /**
+     * Removes the given attendee from every event it attends and set the modification date in the event accordingly
+     * 
+     * @param readCon The readable {@link Connection}
+     * @param writeCon The writable {@link Connection}
+     * @param context The {@link Context}
+     * @param destinationUserId The identifier of the destination user specified in {@link DeleteEvent#getDestinationUserID()}
+     * @param entityResolver The {@link EntityResolver}
+     * @param attendee The {@link Attendee}. Either a {@link CalendarUserType#GROUP} or {@link CalendarUserType#RESOURCE}
+     * @throws OXException In case service is unavailable or SQL error
+     */
+    private void deleteAttendee(Connection readCon, Connection writeCon, Context context, Integer destinationUserId, EntityResolver entityResolver, Attendee attendee) throws OXException {
         SimpleDBProvider dbProvider = new SimpleDBProvider(readCon, writeCon);
         CalendarStorage storage = factory.create(context, CalendarAccount.DEFAULT_ACCOUNT.getAccountId(), entityResolver, dbProvider, DBTransactionPolicy.NO_TRANSACTIONS);
 
-        // Get events the group attends
+        // Get events the group/resource attends
         EventStorage eventStorage = storage.getEventStorage();
         EventField[] fields = new EventField[] { EventField.ID };
-        List<Event> events = eventStorage.searchEvents(equalsFieldUserTerm(AttendeeField.ENTITY, Integer.valueOf(groupId)), null, fields);
+        List<Event> events = eventStorage.searchEvents(equalsFieldUserTerm(AttendeeField.ENTITY, Integer.valueOf(attendee.getEntity())), null, fields);
 
-        // Get modifier and group
+        // Get modifier
         CalendarUser replacement = entityResolver.prepareUserAttendee(null == destinationUserId ? context.getMailadmin() : destinationUserId.intValue());
-        Attendee groupAttendee = entityResolver.prepareGroupAttendee(groupId);
 
         for (Event event : events) {
             /*
              * Group members are already attendees of the event.
-             * So we just need to delete the group as attendee.
+             * So we just need to delete the group/resource as attendee.
              */
-            storage.getAttendeeStorage().deleteAttendees(event.getId(), Collections.singletonList(groupAttendee));
+            storage.getAttendeeStorage().deleteAttendees(event.getId(), Collections.singletonList(attendee));
 
             // Reflect deletion in event
             event.setModifiedBy(replacement);
