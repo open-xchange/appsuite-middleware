@@ -87,8 +87,8 @@ public class StackTraceBlacklist {
             prefixes.add("SES");
         } else {
             // Prepare pattern
-            Pattern patternCode = Pattern.compile("[A-Z]{3}-[0-9]*");
-            Pattern patternPrefix = Pattern.compile("[A-Z]{3}(-|-\\*|\\*)?");
+            Pattern patternCode = Pattern.compile("[A-Z]*-[0-9]*");
+            Pattern patternPrefix = Pattern.compile("[A-Z]*(-|-\\*|\\*)?");
 
             // Parse
             for (String entry : Strings.splitByComma(blacklist)) {
