@@ -107,12 +107,12 @@ public class GoogleCalendarProvider implements CalendarProvider{
     }
 
     @Override
-    public JSONObject reconfigureAccount(Session session, JSONObject internalConfig, JSONObject userConfig, CalendarParameters parameters) throws OXException {
-        DefaultCalendarAccount account = new DefaultCalendarAccount(getId(), -1, session.getUserId(), true, internalConfig, userConfig, new Date());
+    public JSONObject reconfigureAccount(Session session, CalendarAccount calendarAccount, JSONObject userConfig, CalendarParameters parameters) throws OXException {
+        DefaultCalendarAccount account = new DefaultCalendarAccount(getId(), -1, session.getUserId(), true, calendarAccount.getInternalConfiguration(), userConfig, new Date());
         GoogleCalendarAccess access = new GoogleCalendarAccess(session, account, parameters, false);
         JSONObject resultConfig = access.initCalendarFolder(false);
         if(resultConfig == null){
-            resultConfig = internalConfig;
+            resultConfig = calendarAccount.getInternalConfiguration();
         }
         try {
             userConfig.put(GoogleCalendarConfigField.FOLDERS, resultConfig.get(GoogleCalendarConfigField.FOLDERS));
@@ -136,5 +136,4 @@ public class GoogleCalendarProvider implements CalendarProvider{
     public void onAccountDeleted(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
         // nothing to do
     }
-
 }

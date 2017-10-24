@@ -314,7 +314,7 @@ public class GoogleCalendarAccess extends CachingCalendarAccess{
     }
 
     @Override
-    protected long getRefreshInterval() {
+    protected long getRefreshInterval(String folderId) {
         return refreshInterval;
     }
 
