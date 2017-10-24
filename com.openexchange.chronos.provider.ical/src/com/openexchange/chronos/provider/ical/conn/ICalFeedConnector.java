@@ -52,6 +52,7 @@ package com.openexchange.chronos.provider.ical.conn;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.Date;
+import java.util.Map;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHeaders;
@@ -144,6 +145,7 @@ public class ICalFeedConnector {
             headMethod.setHeader(HttpHeaders.IF_MODIFIED_SINCE, ifModifiedSince);
         }
         handleAuth(headMethod);
+        addCustomHeader(headMethod);
 
         return headMethod;
     }
@@ -182,6 +184,13 @@ public class ICalFeedConnector {
             case NONE:
             default:
                 break;
+        }
+    }
+
+    protected void addCustomHeader(HttpRequestBase method) {
+        Map<String, String> customHeaders = iCalFeedConfig.getCustomHeaders();
+        for (Map.Entry<String, String> header : customHeaders.entrySet()) {
+            method.addHeader(header.getKey(), header.getValue());
         }
     }
 

@@ -86,6 +86,7 @@ public class ICalFeedReader extends ICalFeedConnector {
         HttpGet getMethod = new HttpGet(iCalFeedConfig.getFeedUrl());
         getMethod.addHeader(HttpHeaders.ACCEPT, "text/calendar");
         handleAuth(getMethod);
+        addCustomHeader(getMethod);
         return getMethod;
     }
 
