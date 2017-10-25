@@ -50,6 +50,7 @@
 package com.openexchange.chronos.provider.google.access;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -67,8 +68,10 @@ import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.caching.DiffAwareExternalCalendarResult;
 import com.openexchange.chronos.provider.caching.ExternalCalendarResult;
 import com.openexchange.chronos.provider.google.GoogleCalendarConfigField;
+import com.openexchange.chronos.provider.google.osgi.Services;
 import com.openexchange.chronos.service.EventUpdate;
 import com.openexchange.chronos.service.EventUpdates;
+import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.exception.OXException;
 
 /**
@@ -261,7 +264,9 @@ public class GoogleCalendarResult extends ExternalCalendarResult implements Diff
     private void addDeleteExceptionToNewOrUpdatedMaster(Event eve, List<Event> added, List<EventUpdate> updated){
         for(Event possibleMaster: added){
             if(possibleMaster.getFilename().equals(eve.getSeriesId())){
-                addRecurrenceIdToDeleteException(possibleMaster, eve.getRecurrenceId());
+                if(isValidException(eve.getRecurrenceId(), possibleMaster)) {
+                    addRecurrenceIdToDeleteException(possibleMaster, eve.getRecurrenceId());
+                }
                 return;
             }
         }
@@ -269,7 +274,9 @@ public class GoogleCalendarResult extends ExternalCalendarResult implements Diff
         for(EventUpdate update: updated){
             Event possibleMaster = update.getUpdate();
             if(possibleMaster.getFilename().equals(eve.getSeriesId())){
-                addRecurrenceIdToDeleteException(possibleMaster, eve.getRecurrenceId());
+                if(isValidException(eve.getRecurrenceId(), possibleMaster)) {
+                    addRecurrenceIdToDeleteException(possibleMaster, eve.getRecurrenceId());
+                }
                 return;
             }
         }
@@ -288,14 +295,18 @@ public class GoogleCalendarResult extends ExternalCalendarResult implements Diff
         // Find the master in added, updated or deleted
         for(Event created: added){
             if (isMaster(created, uid)) {
-                addRecurrenceIdToDeleteException(created, recurrenceId);
+                if(isValidException(recurrenceId, created)) {
+                    addRecurrenceIdToDeleteException(created, recurrenceId);
+                }
                 return;
             }
         }
 
         for(EventUpdate eventUpdate: updated){
             if (isMaster(eventUpdate.getOriginal(), uid)) {
-                addRecurrenceIdToDeleteException(eventUpdate.getUpdate(), recurrenceId);
+                if(isValidException(recurrenceId, eventUpdate.getUpdate())) {
+                    addRecurrenceIdToDeleteException(eventUpdate.getUpdate(), recurrenceId);
+                }
                 return;
             }
         }
@@ -308,6 +319,26 @@ public class GoogleCalendarResult extends ExternalCalendarResult implements Diff
                 updated.add(new EventUpdateImpl(existing, newUpdate, true));
                 return;
             }
+        }
+    }
+
+    /**
+     * Checks if the exception is a valid exception for the event master, by iterating its recurrence rule.
+     *
+     * If not this exception is probably a cancellation of a change exception for an master update.
+     *
+     * @param exception The {@link RecurrenceId} of the exception
+     * @param master The master event
+     * @return true if it is a valid Exception, false otherwise
+     */
+    private boolean isValidException(RecurrenceId exception, Event master){
+        RecurrenceService service = Services.getService(RecurrenceService.class);
+        Calendar cal = Calendar.getInstance(exception.getValue().getTimeZone());
+        cal.setTimeInMillis(exception.getValue().getTimestamp());
+        try {
+            return service.calculateRecurrencePosition(master, cal) > 0;
+        } catch (OXException e) {
+            return false;
         }
     }
 
