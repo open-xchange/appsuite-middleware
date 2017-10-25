@@ -15,7 +15,7 @@ BuildRequires: java7-devel
 BuildRequires: java-devel >= 1.7.0
 %endif
 Version:       @OXVERSION@
-%define        ox_release 37
+%define        ox_release 38
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -67,6 +67,8 @@ fi
 %doc com.openexchange.push.mail.notify/ChangeLog
 
 %changelog
+* Wed Oct 25 2017 Carsten Hoeger <choeger@open-xchange.com>
+Build for patch 2017-10-30 (4414)
 * Mon Oct 23 2017 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2017-10-29 (4426)
 * Mon Oct 09 2017 Carsten Hoeger <choeger@open-xchange.com>
