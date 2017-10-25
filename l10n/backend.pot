@@ -6,6 +6,17 @@
 #, fuzzy
 msgid ""
 msgstr ""
+"#-#-#-#-#  backend1.pot (PACKAGE VERSION)  #-#-#-#-#\n"
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"#-#-#-#-#  backend2.pot (PACKAGE VERSION)  #-#-#-#-#\n"
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
@@ -1122,10 +1133,19 @@ msgid "Birthdays"
 msgstr ""
 
 #. *
+#. * The description for the actual birthdays calendar folder.
+#.
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.birthdays/src/com/openexchange/chronos/provider/birthdays/BirthdaysCalendarStrings.java:75
+msgid ""
+"A calendar that automatically populates with the known birthdays of everyone "
+"in your address books."
+msgstr ""
+
+#. *
 #. * The event summary displayed for the birthday of a contact, with the first parameter being replaced by the contact's display name.
 #. * <code>????</code> is the <i>birthday cake</i> character (<code>U+1F382</code>).
 #.
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.birthdays/src/com/openexchange/chronos/provider/birthdays/BirthdaysCalendarStrings.java:76
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.birthdays/src/com/openexchange/chronos/provider/birthdays/BirthdaysCalendarStrings.java:81
 msgid "???? %1$s"
 msgstr ""
 
@@ -1133,7 +1153,7 @@ msgstr ""
 #. * The event description displayed for the birthday of a contact if the full date of birth is known, with the first parameter being
 #. * replaced by the contact's birthday in its localized medium date format.
 #.
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.birthdays/src/com/openexchange/chronos/provider/birthdays/BirthdaysCalendarStrings.java:82
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.birthdays/src/com/openexchange/chronos/provider/birthdays/BirthdaysCalendarStrings.java:87
 msgid "* %1$s"
 msgstr ""
 
@@ -1142,7 +1162,7 @@ msgstr ""
 #. * name, and the second one with the contact's age. <code>????</code> is the <i>birthday cake</i> character
 #. * (<code>U+1F382</code>).
 #.
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.birthdays/src/com/openexchange/chronos/provider/birthdays/BirthdaysCalendarStrings.java:89
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.birthdays/src/com/openexchange/chronos/provider/birthdays/BirthdaysCalendarStrings.java:94
 msgid "???? %1$s (%2$d. birthday)"
 msgstr ""
 
