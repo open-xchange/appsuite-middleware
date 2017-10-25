@@ -57,13 +57,19 @@ import java.util.UUID;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.json.JSONWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.SessionUtility;
+import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.login.LoginConfiguration;
 import com.openexchange.ajax.login.LoginRequestHandler;
+import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.authentication.Authenticated;
+import com.openexchange.authentication.LoginExceptionCodes;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -89,6 +95,7 @@ import com.openexchange.session.reservation.Reservation;
 import com.openexchange.session.reservation.SessionReservationService;
 import com.openexchange.sessiond.SessionFilter;
 import com.openexchange.sessiond.SessiondService;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.http.Cookies;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSessionAdapter;
@@ -118,48 +125,63 @@ public class OIDCLoginRequestHandler implements LoginRequestHandler {
 
     @Override
     public void handleRequest(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        boolean respondWithJson = false;
         try {
-            performLogin(request, response);
+            respondWithJson = respondWithJson(request);
+            performLogin(request, response, respondWithJson);
         } catch (OXException e) {
+            LOG.error(e.getLocalizedMessage(), e);
+            if (respondWithJson) {
+                try {
+                    ResponseWriter.writeException(e, new JSONWriter(
+                        response.getWriter()).object());
+                } catch (final JSONException jsonError) {
+                    LOG.error(e.getLocalizedMessage(), jsonError);
+                    response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                }
+            } else {
+                response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            }
+        } catch (JSONException e) {
             LOG.error(e.getLocalizedMessage(), e);
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
     }
 
     //TODO QS-VS: Die Login Prozedur wohl besser auslagern, aber wohin? Backend oder doch SSOProvider?
-    private void performLogin(HttpServletRequest request, HttpServletResponse response) throws IOException, OXException {
+    private void performLogin(HttpServletRequest request, HttpServletResponse response, boolean respondWithJson) throws IOException, OXException, JSONException {
         LOG.trace("performLogin(HttpServletRequest request: {}, HttpServletResponse response)", request.getRequestURI());
         String sessionToken = request.getParameter(OIDCTools.SESSION_TOKEN);
         LOG.trace("Login user with session token: {}", sessionToken);
         if (Strings.isEmpty(sessionToken)) {
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+            handleException(response, respondWithJson, AjaxExceptionCodes.BAD_REQUEST.create(), HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
 
         SessionReservationService sessionReservationService = Services.getService(SessionReservationService.class);
         Reservation reservation = sessionReservationService.removeReservation(sessionToken);
         if (null == reservation) {
-            response.sendError(HttpServletResponse.SC_FORBIDDEN);
+            handleException(response, respondWithJson, LoginExceptionCodes.INVALID_CREDENTIALS.create(), HttpServletResponse.SC_FORBIDDEN);
             return;
         }
 
         String idToken = reservation.getState().get(OIDCTools.IDTOKEN);
         if (Strings.isEmpty(idToken)) {
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+            handleException(response, respondWithJson, AjaxExceptionCodes.BAD_REQUEST.create(), HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
 
         ContextService contextService = Services.getService(ContextService.class);
         Context context = contextService.getContext(reservation.getContextId());
         if (!context.isEnabled()) {
-            response.sendError(HttpServletResponse.SC_FORBIDDEN);
+            handleException(response, respondWithJson, LoginExceptionCodes.INVALID_CREDENTIALS.create(), HttpServletResponse.SC_FORBIDDEN);
             return;
         }
 
         UserService userService = Services.getService(UserService.class);
         User user = userService.getUser(reservation.getUserId(), context);
         if (!user.isMailEnabled()) {
-            response.sendError(HttpServletResponse.SC_FORBIDDEN);
+            handleException(response, respondWithJson, LoginExceptionCodes.INVALID_CREDENTIALS.create(), HttpServletResponse.SC_FORBIDDEN);
             return;
         }
 
@@ -168,7 +190,7 @@ public class OIDCLoginRequestHandler implements LoginRequestHandler {
         String autologinCookieValue = null;
         if (autologinEnabled) {
             LOG.trace("Try OIDC auto-login with a cookie");
-            if (this.performCookieLogin(request, response, reservation)) {
+            if (this.performCookieLogin(request, response, reservation, respondWithJson)) {
                 return;
             }
             autologinCookieValue = UUIDs.getUnformattedString(UUID.randomUUID());
@@ -181,37 +203,68 @@ public class OIDCLoginRequestHandler implements LoginRequestHandler {
             response.addCookie(createOIDCAutologinCookie(request, session, autologinCookieValue));
         }
 
-        sendRedirect(session, request, response);
+        sendRedirect(session, request, response, respondWithJson);
     }
 
-    private boolean performCookieLogin(HttpServletRequest request, HttpServletResponse response, Reservation reservation) throws OXException, IOException {
-        LOG.trace("performCookieLogin(HttpServletRequest request: {}, HttpServletResponse response, Reservation reservation.token: {})", request.getRequestURI(), reservation.getToken());
+    private void handleException(HttpServletResponse response, boolean respondWithJson, OXException oxException, int sc) throws OXException, IOException {
+        LOG.trace("handleException (HttpServletResponse response, boolean respondWithJson {}, OXException oxException {}, int sc {})", respondWithJson, oxException, sc);
+        if (respondWithJson) {
+            throw oxException;
+        } else {
+            response.sendError(sc);
+        }
+    }
+
+    private boolean respondWithJson(HttpServletRequest request) {
+        LOG.trace("respondWithJson (HttpServletRequest request: {})", request.getRequestURI());
+        String acceptHeader = request.getHeader("Accept");
+        if (null != acceptHeader && acceptHeader.toLowerCase().equals("application/json")) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    private boolean performCookieLogin(HttpServletRequest request, HttpServletResponse response, Reservation reservation, boolean respondWithJson) throws IOException {
+        LOG.trace("performCookieLogin(HttpServletRequest request: {}, HttpServletResponse response, Reservation reservation.token: {}, boolean respondWithJson)", request.getRequestURI(), reservation.getToken(), respondWithJson);
         AutologinMode autologinMode = OIDCBackendConfig.AutologinMode.get(this.backend.getBackendConfig().autologinCookieMode());
 
         boolean ssoCookieLogin = autologinMode == OIDCBackendConfig.AutologinMode.SSO_REDIRECT;
         if (ssoCookieLogin) {
-            Cookie autologinCookie = OIDCTools.loadAutologinCookie(request, this.loginConfiguration);
-            if (autologinCookie != null) {
-                String cookieRedirectURL = this.getAutologinByCookieURL(request, response, reservation, autologinCookie);
-                if (cookieRedirectURL != null) {
-                    response.sendRedirect(cookieRedirectURL);
-                    return true;
+            try {
+                Cookie autologinCookie = OIDCTools.loadAutologinCookie(request, this.loginConfiguration);
+                if (autologinCookie != null) {
+                    return this.getAutologinByCookieURL(request, response, reservation, autologinCookie, respondWithJson);
                 }
+            } catch (OXException e) {
+                LOG.debug("Ignoring OIDC auto-login attempt due to failed IP or secret check", e);
             }
         }
         return false;
     }
 
-    private String getAutologinByCookieURL(HttpServletRequest request, HttpServletResponse response, Reservation reservation, Cookie oidcAtologinCookie) throws OXException {
-        LOG.trace("getAutologinByCookieURL(HttpServletRequest request: {}, HttpServletResponse response, Reservation reservation.token: {}, Cookie oidcAtologinCookie: {})", request.getRequestURI(), reservation.getToken(), oidcAtologinCookie != null ? oidcAtologinCookie.getValue() : "null");
+    private boolean getAutologinByCookieURL(HttpServletRequest request, HttpServletResponse response, Reservation reservation, Cookie oidcAtologinCookie, boolean respondWithJson) throws OXException, IOException {
+        LOG.trace("getAutologinByCookieURL(HttpServletRequest request: {}, HttpServletResponse response, Reservation reservation.token: {}, Cookie oidcAtologinCookie: {}, boolean respondWithJson)", request.getRequestURI(), reservation.getToken(), oidcAtologinCookie != null ? oidcAtologinCookie.getValue() : "null", respondWithJson);
         if (oidcAtologinCookie != null) {
-            Session session = this.getSessionFromAutologinCookie(oidcAtologinCookie);
-            if (session != null) {
-                this.backend.updateSession(session, reservation.getState());
-                return this.getRedirectLocationForSession(request, session, reservation);
+            try {
+                Session session = this.getSessionFromAutologinCookie(oidcAtologinCookie);
+                if (session != null) {
+                    this.backend.updateSession(session, reservation.getState());
+                    // the getRedirectLocationForSession does also the validation check of the session
+                    String redirectLocationForSession = this.getRedirectLocationForSession(request, session, reservation);
+                    if (respondWithJson) {
+                        writeSessionDataAsJson(session, response);
+                    } else {
+                        response.sendRedirect(redirectLocationForSession);
+                    }
+                    return true;
+                }
+                //No session found, log that
+                LOG.debug("No session found for OIDC Cookie with value: {}", oidcAtologinCookie.getValue());
             }
-            //No session found, log that
-            LOG.debug("No session found for OIDC Cookie with value: {}", oidcAtologinCookie.getValue());
+            catch (OXException | JSONException e) {
+                LOG.debug("Ignoring OIDC auto-login attempt due to failed IP or secret check", e);
+            }
         }
 
         if (oidcAtologinCookie != null) {
@@ -220,17 +273,16 @@ public class OIDCLoginRequestHandler implements LoginRequestHandler {
             response.addCookie(toRemove);
         }
 
-        return null;
+        return false;
     }
 
     private String getRedirectLocationForSession(HttpServletRequest request, Session session, Reservation reservation) throws OXException {
         LOG.trace("getRedirectLocationForSession(HttpServletRequest request: {}, Session session: {}, Reservation reservation: {})", request.getRequestURI(), session.getSessionID(), reservation.getToken());
         OIDCTools.validateSession(session, request);
-        String result = null;
         if (session.getContextId() == reservation.getContextId() && session.getUserId() == reservation.getUserId()) {
-            result = OIDCTools.buildFrontendRedirectLocation(session, OIDCTools.getUIWebPath(this.loginConfiguration, this.backend.getBackendConfig()));
+            throw LoginExceptionCodes.LOGIN_DENIED.create();
         }
-        return result;
+        return OIDCTools.buildFrontendRedirectLocation(session, OIDCTools.getUIWebPath(this.loginConfiguration, this.backend.getBackendConfig()));
     }
 
     private Session getSessionFromAutologinCookie(Cookie oidcAtologinCookie) throws OXException {
@@ -332,9 +384,25 @@ public class OIDCLoginRequestHandler implements LoginRequestHandler {
         };
     }
 
-    private void sendRedirect(Session session, HttpServletRequest request, HttpServletResponse response) throws IOException {
-        LOG.trace("sendRedirect(Session session: {}, HttpServletRequest request: {}, HttpServletResponse response)", session.getSessionID(), request.getRequestURI());
+    private void sendRedirect(Session session, HttpServletRequest request, HttpServletResponse response, boolean respondWithJson) throws IOException, JSONException {
+        LOG.trace("sendRedirect(Session session: {}, HttpServletRequest request: {}, HttpServletResponse response, boolean respondWithJson {})", session.getSessionID(), request.getRequestURI(), respondWithJson);
         String uiWebPath = OIDCTools.getUIWebPath(this.loginConfiguration, this.backend.getBackendConfig());
-        response.sendRedirect(OIDCTools.buildFrontendRedirectLocation(session, uiWebPath));
+        String frontendRedirectLocation = OIDCTools.buildFrontendRedirectLocation(session, uiWebPath);
+        if (respondWithJson) {
+            writeSessionDataAsJson(session, response);
+        } else {
+            response.sendRedirect(frontendRedirectLocation);
+        }
+    }
+
+    private void writeSessionDataAsJson(Session session, HttpServletResponse response) throws JSONException, IOException {
+        LOG.trace("writeSessionDataAsJson(Session session {}, HttpServletResponse response)", session.getSessionID());
+        Response responseObject = new Response();
+        JSONObject json = new JSONObject();
+        json.putSafe("session", session.getSessionID());
+        json.putSafe("user_id", session.getUserId());
+        json.putSafe("context_id", session.getContextId());
+        responseObject.setData(json);
+        ResponseWriter.write(responseObject, response.getWriter());
     }
 }
