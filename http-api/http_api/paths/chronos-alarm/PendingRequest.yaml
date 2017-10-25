@@ -1,4 +1,4 @@
-/chronos/alarm?action=until:
+/chronos/alarm?action=pending:
   get:
     operationId: getAlarmTrigger
     tags:

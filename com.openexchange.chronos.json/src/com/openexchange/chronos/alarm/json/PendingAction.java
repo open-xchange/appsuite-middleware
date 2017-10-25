@@ -63,12 +63,12 @@ import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link UntilAction}
+ * {@link PendingAction}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.0
  */
-public class UntilAction extends ChronosAction {
+public class PendingAction extends ChronosAction {
 
     private static final String ACTIONS_PARAM = "actions";
     private static final Set<String> REQUIRED_PARAMETERS = unmodifiableSet("rangeEnd");
@@ -77,10 +77,10 @@ public class UntilAction extends ChronosAction {
     private static final Set<String> DEFAULT_ACTIONS = unmodifiableSet("DISPLAY", "AUDIO");
 
     /**
-     * Initializes a new {@link UntilAction}.
+     * Initializes a new {@link PendingAction}.
      * @param services
      */
-    protected UntilAction(ServiceLookup services) {
+    protected PendingAction(ServiceLookup services) {
         super(services);
     }
 
