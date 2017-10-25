@@ -363,7 +363,7 @@ public class InternalCalendarAccess implements GroupwareCalendarAccess, SyncAwar
     }
 
     @Override
-    public List<AlarmTrigger> getAlarmTrigger(Set<String> actions) throws OXException {
+    public List<AlarmTrigger> getAlarmTriggers(Set<String> actions) throws OXException {
         return getCalendarService().getAlarmTrigger(session, actions);
     }
 

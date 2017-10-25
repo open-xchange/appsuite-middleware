@@ -109,7 +109,7 @@ public class UntilAction extends ChronosAction {
             actions = DEFAULT_ACTIONS;
         }
 
-        List<AlarmTrigger> alarmTrigger = calendarAccess.getAlarmTrigger(actions);
+        List<AlarmTrigger> alarmTrigger = calendarAccess.getAlarmTriggers(actions);
         return new AJAXRequestResult(alarmTrigger, AlarmTriggerConverter.INPUT_FORMAT);
     }
 

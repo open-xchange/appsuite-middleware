@@ -50,9 +50,7 @@
 package com.openexchange.chronos.provider.groupware;
 
 import java.util.List;
-import java.util.Set;
 import com.openexchange.ajax.fileholder.IFileHolder;
-import com.openexchange.chronos.AlarmTrigger;
 import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
@@ -91,6 +89,7 @@ public interface GroupwareCalendarAccess extends CalendarAccess, PermissionAware
      * @param clientTimestamp The last timestamp / sequence number known by the client to catch concurrent updates
      * @return The (possibly changed) identifier of the updated folder
      */
+    @Override
     String updateFolder(String folderId, CalendarFolder folder, long clientTimestamp) throws OXException;
 
     /**
@@ -215,21 +214,6 @@ public interface GroupwareCalendarAccess extends CalendarAccess, PermissionAware
      * @return The delete result
      */
     CalendarResult deleteEvent(EventID eventID, long clientTimestamp) throws OXException;
-
-    /**
-     * Retrieves upcoming alarm trigger.
-     *
-     * The following calendar parameters are evaluated:
-     * <ul>
-     * <li>{@link CalendarParameters#PARAMETER_RANGE_START}</li>
-     * <li>{@link CalendarParameters#PARAMETER_RANGE_END}</li>
-     * </ul>
-     *
-     * @param actions The actions to retrieve
-     * @return A list of {@link AlarmTrigger}
-     * @throws OXException
-     */
-    List<AlarmTrigger> getAlarmTrigger(Set<String> actions) throws OXException;
 
     /**
      * Retrieves the {@link IFileHolder} with the specified managed identifier from the {@link Event}

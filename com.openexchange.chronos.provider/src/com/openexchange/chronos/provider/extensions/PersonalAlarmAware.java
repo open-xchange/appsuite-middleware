@@ -50,8 +50,11 @@
 package com.openexchange.chronos.provider.extensions;
 
 import java.util.List;
+import java.util.Set;
 import com.openexchange.chronos.Alarm;
+import com.openexchange.chronos.AlarmTrigger;
 import com.openexchange.chronos.provider.CalendarAccess;
+import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarResult;
 import com.openexchange.chronos.service.EventID;
 import com.openexchange.exception.OXException;
@@ -74,5 +77,21 @@ public interface PersonalAlarmAware extends CalendarAccess {
      * @return The update result
      */
     CalendarResult updateAlarms(EventID eventID, List<Alarm> alarms, long clientTimestamp) throws OXException;
+
+
+    /**
+     * Retrieves upcoming alarm trigger.
+     *
+     * The following calendar parameters are evaluated:
+     * <ul>
+     * <li>{@link CalendarParameters#PARAMETER_RANGE_START}</li>
+     * <li>{@link CalendarParameters#PARAMETER_RANGE_END}</li>
+     * </ul>
+     *
+     * @param actions The actions to retrieve
+     * @return A list of {@link AlarmTrigger}
+     * @throws OXException
+     */
+    List<AlarmTrigger> getAlarmTriggers(Set<String> actions) throws OXException;
 
 }

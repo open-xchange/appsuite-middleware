@@ -56,9 +56,11 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import java.util.TimeZone;
 import org.json.JSONArray;
 import com.openexchange.chronos.Alarm;
+import com.openexchange.chronos.AlarmTrigger;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.RecurrenceId;
@@ -209,6 +211,12 @@ public class BirthdaysCalendarAccess extends SingleFolderCalendarAccess implemen
         Event originalEvent = eventConverter.getSeriesMaster(getBirthdayContact(eventID.getObjectID()));
         UpdateResult updateResult = getAlarmHelper().updateAlarms(originalEvent, alarms);
         return new DefaultCalendarResult(session, session.getUserId(), FOLDER_ID, null, null == updateResult ? null : Collections.singletonList(updateResult), null);
+    }
+
+    @Override
+    public List<AlarmTrigger> getAlarmTriggers(Set<String> actions) throws OXException {
+        // TODO retrieve alarm trigger
+        return Collections.emptyList();
     }
 
     @Override
@@ -387,5 +395,4 @@ public class BirthdaysCalendarAccess extends SingleFolderCalendarAccess implemen
         }
         return folderIds;
     }
-
 }
