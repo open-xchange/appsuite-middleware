@@ -100,9 +100,10 @@ public class SchedJoulesCalendarAccess extends CachingCalendarAccess {
     /**
      * Initialises a new {@link SchedJoulesCalendarAccess}.
      *
-     * @param account
-     * @param parameters
-     * @throws OXException
+     * @param session The groupware {@link Session}
+     * @param account The {@link CalendarAccount}
+     * @param parameters The optional {@link CalendarParameters}
+     * @throws OXException If the context cannot be resolved
      */
     protected SchedJoulesCalendarAccess(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
         super(session, account, parameters);
