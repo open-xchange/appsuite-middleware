@@ -51,6 +51,7 @@ package com.openexchange.chronos.provider.caching;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.CalendarAccount;
@@ -78,16 +79,7 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public abstract class CachingCalendarProvider implements CalendarProvider {
 
-    /**
-     * Indicates whether a reconfiguration of the account should trigger a full recreation of the cached account data or not.
-     * 
-     * @param session The user's session
-     * @param originUserConfiguration Previously stored user configuration
-     * @param newUserConfiguration New user configuration
-     * @return <code>true</code> if the cached data should be recreated; otherwise <code>false</code>
-     * @see CachingCalendarProvider#reconfigureAccount(Session, CalendarAccount, JSONObject, CalendarParameters)
-     */
-    public abstract boolean recreateData(Session session, JSONObject originUserConfiguration, JSONObject newUserConfiguration) throws OXException;
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CachingCalendarProvider.class);
 
     @Override
     public final JSONObject configureAccount(Session session, JSONObject userConfig, CalendarParameters parameters) throws OXException {
@@ -127,10 +119,9 @@ public abstract class CachingCalendarProvider implements CalendarProvider {
     @Override
     public final JSONObject reconfigureAccount(Session session, CalendarAccount calendarAccount, JSONObject userConfig, CalendarParameters parameters) throws OXException {
         JSONObject internalConfiguration = calendarAccount.getInternalConfiguration();
-        if (recreateData(session, calendarAccount.getUserConfiguration(), userConfig)) {
+        if (invalidateCache(session, calendarAccount.getUserConfiguration(), userConfig)) {
             if (internalConfiguration.hasAndNotNull(CachingCalendarAccess.CACHING)) {
                 internalConfiguration.remove(CachingCalendarAccess.CACHING);
-                delete(session, calendarAccount);
             }
         }
 
@@ -138,8 +129,38 @@ public abstract class CachingCalendarProvider implements CalendarProvider {
         if (reconfigureAccountOpt == null) { // make sure changes from caching will be used
             return internalConfiguration;
         }
-
         return reconfigureAccountOpt;
+    }
+
+    /**
+     * Returns if a reconfiguration of the account should trigger a cache invalidation (for all folders of the account!) to ensure all associated calendar data will be updated with the next request.
+     * 
+     * @param session The user's session
+     * @param originUserConfiguration Previously stored user configuration
+     * @param newUserConfiguration New user configuration
+     * @return <code>true</code> if the cached data should be recreated; otherwise <code>false</code>
+     * @see CachingCalendarProvider#reconfigureAccount(Session, CalendarAccount, JSONObject, CalendarParameters)
+     */
+    public abstract boolean invalidateCache(Session session, JSONObject originUserConfiguration, JSONObject newUserConfiguration) throws OXException;
+
+    /**
+     * Invalidates the cache for given {@link CalendarAccount} folder id so that the next request will update the data persisted for given folder
+     * 
+     * @param calendarAccount The calendar account to invalidate the cache should be invalidated
+     * @param folderId The id of the folder to invalidate the cache for
+     */
+    protected void invalidateFolderCache(CalendarAccount calendarAccount, String folderId) {
+        JSONObject internalConfiguration = calendarAccount.getInternalConfiguration();
+        if (internalConfiguration.hasAndNotNull(CachingCalendarAccess.CACHING)) {
+            try {
+                JSONObject caching = internalConfiguration.getJSONObject(CachingCalendarAccess.CACHING);
+                if (caching.hasAndNotNull(folderId)) {
+                    caching.remove(folderId);
+                }
+            } catch (JSONException e) {
+                LOG.error("Unable to retrieve caching information for calendar account {} with provider {}: {}", calendarAccount.getAccountId(), calendarAccount.getProviderId(), e.getMessage(), e);
+            }
+        }
     }
 
     /**

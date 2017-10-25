@@ -118,13 +118,12 @@ public class ICalCalendarProvider extends CachingCalendarProvider {
     }
 
     @Override
-    public boolean recreateData(Session session, JSONObject originUserConfiguration, JSONObject newUserConfiguration) throws OXException {
+    public boolean invalidateCache(Session session, JSONObject originUserConfiguration, JSONObject newUserConfiguration) throws OXException {
         ICalFeedConfig oldFeedConfig = new ICalFeedConfig.Builder(session, originUserConfiguration, new JSONObject(), false).build();
         ICalFeedConfig newFeedConfig = new ICalFeedConfig.Builder(session, new JSONObject(newUserConfiguration), new JSONObject()).build();
         if (newFeedConfig.getAuthInfo().getAuthType().equals(AuthType.BASIC)) {
             ICalAuthParser.encrypt(newUserConfiguration, session.getPassword()); // encrypt password for persisting
         }
-
         return oldFeedConfig.mandatoryChanges(newFeedConfig);
     }
 }

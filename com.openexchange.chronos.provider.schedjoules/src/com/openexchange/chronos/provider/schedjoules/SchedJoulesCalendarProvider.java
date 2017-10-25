@@ -234,7 +234,7 @@ public class SchedJoulesCalendarProvider extends CachingCalendarProvider {
      * @see com.openexchange.chronos.provider.caching.CachingCalendarProvider#recreateData(com.openexchange.session.Session, org.json.JSONObject, org.json.JSONObject)
      */
     @Override
-    public boolean recreateData(Session session, JSONObject originUserConfiguration, JSONObject newUserConfiguration) throws OXException {
+    public boolean invalidateCache(Session session, JSONObject originUserConfiguration, JSONObject newUserConfiguration) throws OXException {
         return false;
     }
 
