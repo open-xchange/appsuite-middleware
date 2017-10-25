@@ -140,18 +140,6 @@ public class SchedJoulesRESTClient {
     }
 
     /**
-     * Prepares the specified HTTP request
-     * 
-     * @param request The {@link HttpRequestBase} to prepare
-     * @param path The mandatory path
-     * @param query The optional query
-     * @throws OXException
-     */
-    private void prepareRequest(HttpRequestBase request, String path, String query) throws OXException {
-        prepareAuthorizedRequest(request, SCHEME, BASE_URL, path, query);
-    }
-
-    /**
      * Prepares the specified HTTP request and adds the Authorization header
      * 
      * @param request The {@link HttpRequestBase} to prepare
@@ -198,7 +186,7 @@ public class SchedJoulesRESTClient {
 
         // Prepare the request
         HttpRequestBase httpRequest = createRequest(request.getMethod());
-        prepareRequest(httpRequest, request.getPath(), query);
+        prepareAuthorizedRequest(httpRequest, SCHEME, BASE_URL, request.getPath(), query);
         return httpRequest;
     }
 
