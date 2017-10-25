@@ -76,7 +76,7 @@ import net.htmlparser.jericho.HTMLElementName;
 public final class HtmlServices {
 
     public static void main(String[] args) {
-        boolean nonJavaScriptURL = isNonJavaScriptURL("java&#09;script:alert(document.domain)", null);
+        boolean nonJavaScriptURL = containsEventHandler("on'onerror=\"alert(document.cookie)\";'");
 
         System.out.println(nonJavaScriptURL);
     }
@@ -275,6 +275,8 @@ public final class HtmlServices {
                         }
                     }
                 }
+
+                pos = lc.indexOf("on", pos + 1);
             }
             pos = lc.indexOf("on", pos + 1);
         }
