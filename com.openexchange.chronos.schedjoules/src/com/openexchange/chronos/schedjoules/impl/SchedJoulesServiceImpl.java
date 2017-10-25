@@ -173,7 +173,7 @@ public class SchedJoulesServiceImpl implements SchedJoulesService {
         try {
             long startTime = System.currentTimeMillis();
             filterJSONObject(content);
-            LOG.trace("Filtered content in " + (System.currentTimeMillis() - startTime) + " msec.");
+            LOG.trace("Filtered content in {} msec.", System.currentTimeMillis() - startTime);
             return content;
         } catch (JSONException e) {
             throw SchedJoulesAPIExceptionCodes.JSON_ERROR.create(e);
