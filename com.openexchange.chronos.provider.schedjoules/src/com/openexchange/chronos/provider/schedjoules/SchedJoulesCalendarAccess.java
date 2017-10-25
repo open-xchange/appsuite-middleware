@@ -63,8 +63,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.chronos.Calendar;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.ExtendedProperties;
+import com.openexchange.chronos.TimeTransparency;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.CalendarFolder;
+import com.openexchange.chronos.provider.CalendarFolderProperty;
 import com.openexchange.chronos.provider.DefaultCalendarFolder;
 import com.openexchange.chronos.provider.DefaultCalendarPermission;
 import com.openexchange.chronos.provider.caching.CachingCalendarAccess;
@@ -73,6 +76,7 @@ import com.openexchange.chronos.provider.schedjoules.exception.SchedJoulesProvid
 import com.openexchange.chronos.schedjoules.api.SchedJoulesAPI;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Enums;
 import com.openexchange.java.Strings;
 import com.openexchange.session.Session;
 
@@ -160,18 +164,20 @@ public class SchedJoulesCalendarAccess extends CachingCalendarAccess {
      */
     @Override
     public String updateFolder(String folderId, CalendarFolder folder, long clientTimestamp) throws OXException {
-        //TODO: store folder props in internal config (see com.openexchange.chronos.provider.birthdays.BirthdaysCalendarAccess.updateFolder for an example)
-        //        try {
-        //            JSONObject folderJson = findFolder(folderId, getAccount().getUserConfiguration().optJSONArray(SchedJoulesFields.FOLDERS));
-        //            folderJson.put(SchedJoulesFields.COLOR, folder.getColor());
-        //            folderJson.put(SchedJoulesFields.USED_FOR_SYNC, folder.isUsedForSync());
-        //            folderJson.put(SchedJoulesFields.SCHEDULE_TRANSP, folder.getScheduleTransparency() == null ? null : folder.getScheduleTransparency().getValue());
-        //
-        //            return folderId;
-        //        } catch (JSONException e) {
-        //            throw SchedJoulesProviderExceptionCodes.JSON_ERROR.create(e.getMessage(), e);
-        //        }
-        return folderId;
+        try {
+            ExtendedProperties extendedProperties = folder.getExtendedProperties();
+            JSONObject folderJson = findFolder(folderId, getAccount().getInternalConfiguration().optJSONArray(SchedJoulesFields.FOLDERS));
+
+            folderJson.put(SchedJoulesFields.COLOR, extendedProperties.get(CalendarFolderProperty.COLOR_LITERAL));
+            folderJson.put(SchedJoulesFields.USED_FOR_SYNC, extendedProperties.get(CalendarFolderProperty.USED_FOR_SYNC_LITERAL));
+            folderJson.put(SchedJoulesFields.SCHEDULE_TRANSP, extendedProperties.get(CalendarFolderProperty.SCHEDULE_TRANSP_LITERAL) == null ? null : extendedProperties.get(CalendarFolderProperty.SCHEDULE_TRANSP_LITERAL));
+
+            updateInternalConfigurationData(getAccount().getInternalConfiguration());
+
+            return folderId;
+        } catch (JSONException e) {
+            throw SchedJoulesProviderExceptionCodes.JSON_ERROR.create(e.getMessage(), e);
+        }
     }
 
     /*
@@ -191,11 +197,11 @@ public class SchedJoulesCalendarAccess extends CachingCalendarAccess {
      */
     @Override
     protected long getRefreshInterval(String folderId) {
-        JSONObject userConfig = getAccount().getInternalConfiguration();
-        if (userConfig == null || userConfig.isEmpty()) {
+        JSONObject internalConfig = getAccount().getInternalConfiguration();
+        if (internalConfig == null || internalConfig.isEmpty()) {
             return 0;
         }
-        JSONArray foldersArray = userConfig.optJSONArray(SchedJoulesFields.FOLDERS);
+        JSONArray foldersArray = internalConfig.optJSONArray(SchedJoulesFields.FOLDERS);
         try {
             JSONObject folder = findFolder(folderId, foldersArray);
             return folder.optInt(SchedJoulesFields.REFRESH_INTERVAL, 0);
@@ -252,7 +258,7 @@ public class SchedJoulesCalendarAccess extends CachingCalendarAccess {
     private URL getFeedURL(String folderId) throws MalformedURLException, JSONException, OXException {
         JSONObject internalUserConfig = getAccount().getInternalConfiguration();
         if (internalUserConfig == null || internalUserConfig.isEmpty()) {
-            throw SchedJoulesProviderExceptionCodes.NO_USER_CONFIGURATION.create(getAccount().getAccountId(), getSession().getUserId(), getSession().getContextId());
+            throw SchedJoulesProviderExceptionCodes.NO_INTERNAL_CONFIGURATION.create(getAccount().getAccountId(), getSession().getUserId(), getSession().getContextId());
         }
         JSONArray foldersArray = internalUserConfig.optJSONArray(SchedJoulesFields.FOLDERS);
         JSONObject folder = findFolder(folderId, foldersArray);
@@ -325,27 +331,27 @@ public class SchedJoulesCalendarAccess extends CachingCalendarAccess {
      * @throws JSONException
      */
     private CalendarFolder prepareFolder(String folderName) throws OXException {
-        DefaultCalendarFolder folder = new DefaultCalendarFolder();
+        DefaultCalendarFolder folder = new DefaultCalendarFolder(folderName, folderName);
 
-        folder.setId(folderName);
         folder.setPermissions(Collections.singletonList(DefaultCalendarPermission.readOnlyPermissionsFor(getAccount().getUserId())));
         folder.setLastModified(getAccount().getLastModified());
 
-        JSONObject userConfig = getAccount().getUserConfiguration();
-        if (userConfig == null) {
+        JSONObject internalConfig = getAccount().getInternalConfiguration();
+        if (internalConfig == null) {
             return folder;
         }
 
-        // TODO: apply properties from internal config, see com.openexchange.chronos.provider.birthdays.BirthdaysCalendarAccess.prepareFolder for an example
+        // Apply extended properties
+        JSONArray folders = internalConfig.optJSONArray(SchedJoulesFields.FOLDERS);
+        JSONObject folderJson = findFolder(folderName, folders);
 
-        //        JSONArray folders = userConfig.optJSONArray(SchedJoulesFields.FOLDERS);
-        //        JSONObject folderJson = findFolder(folderName, folders);
-        //
-        //        folder.setName(folderJson.optString(SchedJoulesFields.NAME, folderName));
-        //        folder.setColor(folderJson.optString(SchedJoulesFields.COLOR, null));
-        //        folder.setDescription(folderJson.optString(SchedJoulesFields.DESCRIPTION, null));
-        //        folder.setUsedForSync(folderJson.optBoolean(SchedJoulesFields.USED_FOR_SYNC, false));
-        //        folder.setScheduleTransparency(Enums.parse(TimeTransparency.class, folderJson.optString(SchedJoulesFields.SCHEDULE_TRANSP, null), TimeTransparency.OPAQUE));
+        ExtendedProperties extendedProperties = new ExtendedProperties();
+        extendedProperties.replace(CalendarFolderProperty.COLOR(folderJson.optString(SchedJoulesFields.COLOR, null), false));
+        extendedProperties.replace(CalendarFolderProperty.DESCRIPTION(folderJson.optString(SchedJoulesFields.DESCRIPTION, null), true));
+        extendedProperties.replace(CalendarFolderProperty.USED_FOR_SYNC(folderJson.optString(SchedJoulesFields.DESCRIPTION, null), true));
+        extendedProperties.replace(CalendarFolderProperty.SCHEDULE_TRANSP(Enums.parse(TimeTransparency.class, folderJson.optString(SchedJoulesFields.SCHEDULE_TRANSP, null), TimeTransparency.OPAQUE), true));
+
+        folder.setExtendedProperties(extendedProperties);
 
         return folder;
     }

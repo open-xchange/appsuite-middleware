@@ -110,8 +110,8 @@ public abstract class CachingCalendarAccess implements WarningsAware {
     public static final String REFRESH_INTERVAL = "refreshInterval";
 
     private final ServerSession session;
-    private final CalendarAccount account;
     private final CalendarParameters parameters;
+    private CalendarAccount account;
     private List<OXException> warnings = new ArrayList<>();
 
     private JSONObject originInternalConfiguration;
@@ -366,5 +366,24 @@ public abstract class CachingCalendarAccess implements WarningsAware {
             caching.putSafe(folderId, folderConfig);
         }
         return folderConfig;
+    }
+    
+    protected void updateInternalConfigurationData(JSONObject internalConfiguration) throws OXException {
+        updateConfigurationData(internalConfiguration, null);
+    }
+    
+    protected void updateExteralConfigurationData(JSONObject externalConfiguration) throws OXException {
+        updateConfigurationData(null, externalConfiguration);
+    }
+
+    /**
+     * Updates the configuration data of a specific calendar account.
+     *
+     * @param internalConfig The provider-specific <i>internal</i> configuration data for the calendar account, or <code>null</code> to skip
+     * @param userConfig The provider-specific <i>user</i> configuration data for the calendar account, or <code>null</code> to skip
+     */
+    protected void updateConfigurationData(JSONObject internalConfiguration, JSONObject userConfiguration) throws OXException {
+        AdministrativeCalendarAccountService service = Services.getService(AdministrativeCalendarAccountService.class);
+        account = service.updateAccount(getSession().getContextId(), getAccount().getUserId(), getAccount().getAccountId(), null, internalConfiguration, userConfiguration, getAccount().getLastModified().getTime());
     }
 }
