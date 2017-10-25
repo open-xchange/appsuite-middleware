@@ -231,7 +231,6 @@ public class GoogleCalendarResult extends ExternalCalendarResult implements Diff
         for(Event eve: deleteExceptions){
             findAndDeleteChangeException(existingEvents, eve.getFilename(), removed);
             if(eve.getUid() != null){
-                LOG.info("Delete exception contains a uid("+eve.getUid()+"): "+eve.toString());
                 findAndUpdateMaster(existingEvents, eve.getUid(), eve.getRecurrenceId(), added, updated);
             } else {
                 addDeleteExceptionToNewOrUpdatedMaster(eve, added, updated);
@@ -264,9 +263,7 @@ public class GoogleCalendarResult extends ExternalCalendarResult implements Diff
     private void addDeleteExceptionToNewOrUpdatedMaster(Event eve, List<Event> added, List<EventUpdate> updated){
         for(Event possibleMaster: added){
             if(possibleMaster.getFilename().equals(eve.getSeriesId())){
-                if(isValidException(eve.getRecurrenceId(), possibleMaster)) {
-                    addRecurrenceIdToDeleteException(possibleMaster, eve.getRecurrenceId());
-                }
+                addRecurrenceIdToDeleteException(possibleMaster, eve.getRecurrenceId(), true);
                 return;
             }
         }
@@ -274,9 +271,7 @@ public class GoogleCalendarResult extends ExternalCalendarResult implements Diff
         for(EventUpdate update: updated){
             Event possibleMaster = update.getUpdate();
             if(possibleMaster.getFilename().equals(eve.getSeriesId())){
-                if(isValidException(eve.getRecurrenceId(), possibleMaster)) {
-                    addRecurrenceIdToDeleteException(possibleMaster, eve.getRecurrenceId());
-                }
+                addRecurrenceIdToDeleteException(possibleMaster, eve.getRecurrenceId(), true);
                 return;
             }
         }
@@ -295,18 +290,14 @@ public class GoogleCalendarResult extends ExternalCalendarResult implements Diff
         // Find the master in added, updated or deleted
         for(Event created: added){
             if (isMaster(created, uid)) {
-                if(isValidException(recurrenceId, created)) {
-                    addRecurrenceIdToDeleteException(created, recurrenceId);
-                }
+                addRecurrenceIdToDeleteException(created, recurrenceId, true);
                 return;
             }
         }
 
         for(EventUpdate eventUpdate: updated){
             if (isMaster(eventUpdate.getOriginal(), uid)) {
-                if(isValidException(recurrenceId, eventUpdate.getUpdate())) {
-                    addRecurrenceIdToDeleteException(eventUpdate.getUpdate(), recurrenceId);
-                }
+                addRecurrenceIdToDeleteException(eventUpdate.getUpdate(), recurrenceId, true);
                 return;
             }
         }
@@ -315,7 +306,7 @@ public class GoogleCalendarResult extends ExternalCalendarResult implements Diff
             if (isMaster(existing, uid)) {
                 Event newUpdate = new Event();
                 EventMapper.getInstance().copyIfNotSet(existing, newUpdate, EventField.values());
-                addRecurrenceIdToDeleteException(newUpdate, recurrenceId);
+                addRecurrenceIdToDeleteException(newUpdate, recurrenceId, false);
                 updated.add(new EventUpdateImpl(existing, newUpdate, true));
                 return;
             }
@@ -347,7 +338,7 @@ public class GoogleCalendarResult extends ExternalCalendarResult implements Diff
      * @param master The master {@link Event}
      * @param recurrenceId The {@link RecurrenceId}
      */
-    private void addRecurrenceIdToDeleteException(Event master, RecurrenceId recurrenceId){
+    private void addRecurrenceIdToDeleteException(Event master, RecurrenceId recurrenceId, boolean needsCheck){
         SortedSet<RecurrenceId> deleteExceptionDates = master.getDeleteExceptionDates();
         if(deleteExceptionDates == null){
             deleteExceptionDates = new TreeSet<>();
@@ -358,7 +349,9 @@ public class GoogleCalendarResult extends ExternalCalendarResult implements Diff
             return;
         }
 
-        deleteExceptionDates.add(recurrenceId);
+        if(!needsCheck || isValidException(recurrenceId, master)) {
+            deleteExceptionDates.add(recurrenceId);
+        }
     }
 
     /**
