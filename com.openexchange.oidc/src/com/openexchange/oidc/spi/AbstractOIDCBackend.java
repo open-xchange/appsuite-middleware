@@ -210,18 +210,14 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
 
     @Override
     public Scope getScope() {
-        String scopes = getBackendConfig().getScope();
+        String scopes = this.getBackendConfig().getScope();
         String[] scopeArray = scopes.split(";");
         return new Scope(scopeArray);
     }
 
     @Override
     public LoginRequest getLoginRequest(HttpServletRequest request, int userID, int contextID, LoginConfiguration loginConfiguration) throws OXException {
-        StringBuilder sb = new StringBuilder();
-        sb.append(userID);
-        sb.append("@");
-        sb.append(contextID);
-        String login = sb.toString();
+        String login = userID + "@" + contextID;
         LOG.trace("getLoginRequest(...) login: {}", login);
         String defaultClient = loginConfiguration.getDefaultClient();
         LoginRequestImpl parseLogin = LoginTools.parseLogin(request, login, null, false, defaultClient, loginConfiguration.isCookieForceHTTPS(), false);
@@ -257,7 +253,6 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
         if (!afterLogoutURI.isEmpty() && !response.isCommitted()) {
             response.sendRedirect(afterLogoutURI);
         }
-
     }
 
     @Override
@@ -321,8 +316,8 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
     @Override
     public boolean updateOauthTokens(Session session) throws OXException {
         LOG.trace("updateOauthTokens(Session session: {})", session.getSessionID());
-        AccessTokenResponse accessToken = loadAccessToken(session);
-        if (accessToken.getTokens().getAccessToken() == null || accessToken.getTokens().getRefreshToken() == null) {
+        AccessTokenResponse accessToken = this.loadAccessToken(session);
+        if (accessToken == null || accessToken.getTokens() == null || accessToken.getTokens().getAccessToken() == null || accessToken.getTokens().getRefreshToken() == null) {
             return false;
         }
         Map<String, String> tokenMap = new HashMap<>();
