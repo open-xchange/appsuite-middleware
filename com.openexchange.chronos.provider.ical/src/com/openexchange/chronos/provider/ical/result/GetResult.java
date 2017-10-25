@@ -49,11 +49,14 @@
 
 package com.openexchange.chronos.provider.ical.result;
 
+import java.util.Collections;
+import java.util.List;
 import org.apache.http.Header;
 import org.apache.http.StatusLine;
 import com.openexchange.chronos.ExtendedProperty;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.ical.ImportedCalendar;
+import com.openexchange.exception.OXException;
 
 /**
  * 
@@ -76,6 +79,10 @@ public class GetResult extends HeadResult {
 
     public ImportedCalendar getCalendar() {
         return importedCalendar;
+    }
+
+    public List<OXException> getWarnings() {
+        return importedCalendar != null && importedCalendar.getWarnings() != null ? importedCalendar.getWarnings() : Collections.emptyList();
     }
 
     public String getRefreshInterval() {

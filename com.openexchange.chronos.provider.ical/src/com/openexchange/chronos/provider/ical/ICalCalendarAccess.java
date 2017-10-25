@@ -157,6 +157,7 @@ public class ICalCalendarAccess extends SingleFolderCachingCalendarAccess {
 
         updateFolderConfiguration(importResult);
         externalCalendarResult.addEvents(importResult.getCalendar().getEvents());
+        externalCalendarResult.addWarnings(importResult.getWarnings());
 
         return externalCalendarResult;
     }
