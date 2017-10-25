@@ -367,11 +367,23 @@ public abstract class CachingCalendarAccess implements WarningsAware {
         }
         return folderConfig;
     }
-    
+
+    /**
+     * Updates the internal configuration data of a specific calendar account.
+     * 
+     * @param internalConfiguration The internal configuration data.
+     * @throws OXException if an error is occurred
+     */
     protected void updateInternalConfigurationData(JSONObject internalConfiguration) throws OXException {
         updateConfigurationData(internalConfiguration, null);
     }
-    
+
+    /**
+     * Updates the external configuration data of a specific calendar account.
+     * 
+     * @param externalConfiguration The external configuration data.
+     * @throws OXException if an error is occurred
+     */
     protected void updateExteralConfigurationData(JSONObject externalConfiguration) throws OXException {
         updateConfigurationData(null, externalConfiguration);
     }
