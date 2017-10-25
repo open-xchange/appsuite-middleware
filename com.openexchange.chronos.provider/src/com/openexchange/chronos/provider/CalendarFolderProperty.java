@@ -106,12 +106,43 @@ public enum CalendarFolderProperty {
      * nature of the calendar data to a user.
      *
      * @param value The value to take over
+     * @return The extended property
+     * @see <a href="https://tools.ietf.org/html/rfc7986#section-5.2">RFC 7986, section 5.2</a>
+     * @see <a href="https://tools.ietf.org/html/rfc4791#section-5.2.1">RFC 4791, section 5.2.1</a>
+     */
+    public static ExtendedProperty DESCRIPTION(String value) {
+        return DESCRIPTION(value, false);
+    }
+
+    /**
+     * Initializes a new calendar folder property for the <code>description</code> property.
+     * <p/>
+     * The description is used to specify a lengthy textual description of the calendar that can be used by clients when describing the
+     * nature of the calendar data to a user.
+     *
+     * @param value The value to take over
      * @param protekted <code>true</code> if the property should be protected, <code>false</code>, otherwise
      * @return The extended property
      * @see <a href="https://tools.ietf.org/html/rfc7986#section-5.2">RFC 7986, section 5.2</a>
+     * @see <a href="https://tools.ietf.org/html/rfc4791#section-5.2.1">RFC 4791, section 5.2.1</a>
      */
     public static ExtendedProperty DESCRIPTION(String value, boolean protekted) {
         return createProperty(DESCRIPTION_LITERAL, value, protekted);
+    }
+
+    /**
+     * Initializes a new calendar folder property for the <code>scheduleTransp</code> property.
+     * <p/>
+     * The schedule transparency is used to determine whether the calendar object resources in a calendar collection will affect the
+     * owner's busy time information or not. The value is either {@link Transp#TRANSPARENT} if contained events do not contribute to the
+     * user's busy time, or {@link Transp#OPAQUE}, otherwise.
+     *
+     * @param value The value to take over
+     * @return The extended property
+     * @see <a href="https://tools.ietf.org/html/rfc6638#section-9.1">RFC 6638, section 9.1</a>
+     */
+    public static ExtendedProperty SCHEDULE_TRANSP(String value) {
+        return SCHEDULE_TRANSP(value);
     }
 
     /**
@@ -191,6 +222,7 @@ public enum CalendarFolderProperty {
      *
      * @param property The property to check
      * @return <code>true</code> if the property is protected, <code>false</code>, otherwise
+     * @see <a href="https://tools.ietf.org/html/rfc3253#section-1.4.2">RFC 3253, section 1.4.2</a>
      */
     public static boolean isProtected(ExtendedProperty property) {
         ExtendedPropertyParameter parameter = property.getParameter(PROTECTED_PARAMETER.getName());
