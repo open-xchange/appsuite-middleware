@@ -56,6 +56,7 @@ import com.openexchange.chronos.impl.CalendarServiceImpl;
 import com.openexchange.chronos.impl.FreeBusyServiceImpl;
 import com.openexchange.chronos.impl.availability.CalendarAvailabilityServiceImpl;
 import com.openexchange.chronos.impl.groupware.ChronosDeleteListener;
+import com.openexchange.chronos.impl.groupware.ChronosDowngradeListener;
 import com.openexchange.chronos.impl.osgi.event.EventAdminServiceListerner;
 import com.openexchange.chronos.impl.session.DefaultCalendarUtilities;
 import com.openexchange.chronos.service.CalendarAvailabilityService;
@@ -75,6 +76,7 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.group.GroupService;
 import com.openexchange.groupware.delete.DeleteListener;
+import com.openexchange.groupware.downgrade.DowngradeListener;
 import com.openexchange.objectusecount.ObjectUseCountService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.ServiceSet;
@@ -129,12 +131,16 @@ public class ChronosActivator extends HousekeepingActivator {
              */
 
             CalendarService calendarService = new CalendarServiceImpl(calendarHandlers);
+            DefaultCalendarUtilities calendarUtilities = new DefaultCalendarUtilities(this);
+            CalendarStorageFactory factory = getServiceSafe(CalendarStorageFactory.class);
+            FolderService folderService = getServiceSafe(FolderService.class);
+
             registerService(CalendarService.class, calendarService);
             registerService(FreeBusyService.class, new FreeBusyServiceImpl());
-            DefaultCalendarUtilities calendarUtilities = new DefaultCalendarUtilities(this);
             registerService(CalendarUtilities.class, calendarUtilities);
             registerService(CalendarAvailabilityService.class, new CalendarAvailabilityServiceImpl());
-            registerService(DeleteListener.class, new ChronosDeleteListener(getServiceSafe(CalendarStorageFactory.class), calendarUtilities));
+            registerService(DeleteListener.class, new ChronosDeleteListener(factory, calendarUtilities));
+            registerService(DowngradeListener.class, new ChronosDowngradeListener(factory, calendarUtilities, folderService));
             /*
              * register calendar handler to propagate OSGi events
              */
