@@ -52,8 +52,8 @@ package com.openexchange.chronos.itip;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
+import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.exception.OXException;
-import com.openexchange.tools.session.ServerSession;
 
 /**
  * 
@@ -64,5 +64,5 @@ import com.openexchange.tools.session.ServerSession;
  */
 public interface ITipAnalyzerService {
 
-    public List<ITipAnalysis> analyze(InputStream ical, String format, ServerSession session, Map<String, String> mailHeader) throws OXException;
+    public List<ITipAnalysis> analyze(InputStream ical, String format, CalendarSession session, Map<String, String> mailHeader) throws OXException;
 }

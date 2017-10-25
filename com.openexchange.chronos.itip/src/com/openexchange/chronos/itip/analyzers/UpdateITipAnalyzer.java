@@ -57,6 +57,10 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
+import com.openexchange.chronos.Attendee;
+import com.openexchange.chronos.CalendarUserType;
+import com.openexchange.chronos.Event;
+import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.itip.ITipAction;
 import com.openexchange.chronos.itip.ITipAnalysis;
 import com.openexchange.chronos.itip.ITipAnnotation;
@@ -67,17 +71,13 @@ import com.openexchange.chronos.itip.ITipMessage;
 import com.openexchange.chronos.itip.ITipMethod;
 import com.openexchange.chronos.itip.Messages;
 import com.openexchange.chronos.itip.generators.TypeWrapper;
+import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.calendar.CalendarDataObject;
-import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
-import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.impl.EffectivePermission;
-import com.openexchange.session.Session;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 
 /**
@@ -87,8 +87,8 @@ import com.openexchange.tools.oxfolder.OXFolderAccess;
  */
 public class UpdateITipAnalyzer extends AbstractITipAnalyzer {
 
-    public UpdateITipAnalyzer(final ITipIntegrationUtility util, final ServiceLookup services) {
-        super(util, services);
+    public UpdateITipAnalyzer(final ITipIntegrationUtility util) {
+        super(util);
     }
 
     @Override
@@ -97,23 +97,23 @@ public class UpdateITipAnalyzer extends AbstractITipAnalyzer {
     }
 
     @Override
-    public ITipAnalysis analyze(final ITipMessage message, final Map<String, String> header, final TypeWrapper wrapper, final Locale locale, final User user, final Context ctx, final Session session) throws OXException {
+    public ITipAnalysis analyze(final ITipMessage message, final Map<String, String> header, final TypeWrapper wrapper, final Locale locale, final User user, final Context ctx, final CalendarSession session) throws OXException {
         final ITipAnalysis analysis = new ITipAnalysis();
         analysis.setMessage(message);
 
         ITipChange change = new ITipChange();
 
-        CalendarDataObject update = message.getDataObject();
+        Event update = message.getEvent();
         String uid = null;
         if (update != null) {
             uid = update.getUid();
         } else if (message.exceptions().iterator().hasNext()) {
             uid = message.exceptions().iterator().next().getUid();
         }
-        CalendarDataObject original = util.resolveUid(uid, session);
+        Event original = util.resolveUid(uid, session);
 
         if (original == null && update == null && message.numberOfExceptions() > 0) {
-            analysis.addAnnotation(new ITipAnnotation(Messages.ADD_TO_UNKNOWN,  locale));
+            analysis.addAnnotation(new ITipAnnotation(Messages.ADD_TO_UNKNOWN, locale));
             analysis.recommendAction(ITipAction.IGNORE);
             return analysis;
         }
@@ -121,13 +121,10 @@ public class UpdateITipAnalyzer extends AbstractITipAnalyzer {
         if (update == null) {
             update = original;
         }
-    	analysis.setUid(update.getUid());
-    	if (update.getAttachmentLink() != null) {
-    	    analysis.getAttributes().put("attach", update.getAttachmentLink());
-    	}
+        analysis.setUid(update.getUid());
 
-    	CalendarDataObject master = update;
-        List<Appointment> exceptions = Collections.emptyList();
+        Event master = update;
+        List<Event> exceptions = Collections.emptyList();
 
         boolean differ = true;
 
@@ -137,18 +134,18 @@ public class UpdateITipAnalyzer extends AbstractITipAnalyzer {
             if (isOutdated(update, original)) {
                 analysis.addAnnotation(new ITipAnnotation(Messages.OLD_UPDATE, locale));
                 analysis.recommendAction(ITipAction.IGNORE);
-                change.setCurrentAppointment(original);
+                change.setCurrentEvent(original);
                 change.setType(ITipChange.Type.UPDATE);
                 analysis.addChange(change);
                 return analysis;
             }
             change.setType(ITipChange.Type.UPDATE);
-            change.setCurrentAppointment(original);
+            change.setCurrentEvent(original);
             differ = doAppointmentsDiffer(update, original);
-            exceptions = new ArrayList<Appointment>(util.getExceptions(original, session));
+            exceptions = new ArrayList<Event>(util.getExceptions(original, session));
         } else {
             if (message.getMethod() == ITipMethod.COUNTER) {
-                analysis.addAnnotation(new ITipAnnotation(Messages.COUNTER_UNKNOWN_APPOINTMENT,  locale));
+                analysis.addAnnotation(new ITipAnnotation(Messages.COUNTER_UNKNOWN_APPOINTMENT, locale));
                 analysis.recommendAction(ITipAction.IGNORE);
                 return analysis;
             }
@@ -161,28 +158,25 @@ public class UpdateITipAnalyzer extends AbstractITipAnalyzer {
         if (owner != session.getUserId()) {
             OXFolderAccess oxfs = new OXFolderAccess(ctx);
             FolderObject defaultFolder = oxfs.getDefaultFolder(owner, FolderObject.CALENDAR);
-            EffectivePermission permission = oxfs.getFolderPermission(
-                defaultFolder.getObjectID(),
-                session.getUserId(),
-                UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), ctx));
-            if (permission.canCreateObjects() && original!=null) {
-                original.setParentFolderID(defaultFolder.getObjectID());
+            EffectivePermission permission = oxfs.getFolderPermission(defaultFolder.getObjectID(), session.getUserId(), UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), ctx));
+            if (permission.canCreateObjects() && original != null) {
+                original.setFolderId(Integer.toString(defaultFolder.getObjectID()));
             } else {
                 analysis.addAnnotation(new ITipAnnotation(Messages.SHARED_FOLDER, locale));
                 return analysis;
             }
         }
 
-        if (differ && message.getDataObject() != null) {
-            CalendarDataObject dataObject = message.getDataObject().clone();
-            ensureParticipant(dataObject, session, owner);
+        if (differ && message.getEvent() != null) {
+            Event event = session.getUtilities().copyEvent(message.getEvent(), (EventField[]) null);
+            ensureParticipant(event, session, owner);
             if (original != null) {
-                dataObject.setParentFolderID(original.getParentFolderID());
+                event.setFolderId(original.getFolderId());
             }
 
-        	change.setNewAppointment(dataObject);
+            change.setNewEvent(event);
 
-            change.setConflicts(util.getConflicts(message.getDataObject(), session));
+            change.setConflicts(util.getConflicts(message.getEvent(), session));
 
             describeDiff(change, wrapper, session, message);
             analysis.addChange(change);
@@ -191,11 +185,11 @@ public class UpdateITipAnalyzer extends AbstractITipAnalyzer {
             master = original;
         }
 
-        for (CalendarDataObject exception : message.exceptions()) {
-        	exception = exception.clone();
-        	ensureParticipant(exception, session, owner);
+        for (Event exception : message.exceptions()) {
+            exception = session.getUtilities().copyEvent(exception, (EventField[]) null);
+            ensureParticipant(exception, session, owner);
 
-            final Appointment matchingException = findAndRemoveMatchingException(exception, exceptions);
+            final Event matchingException = findAndRemoveMatchingException(exception, exceptions);
             change = new ITipChange();
             change.setException(true);
             change.setMaster(master);
@@ -203,21 +197,21 @@ public class UpdateITipAnalyzer extends AbstractITipAnalyzer {
             differ = true;
             if (matchingException != null) {
                 change.setType(ITipChange.Type.UPDATE);
-                change.setCurrentAppointment(matchingException);
+                change.setCurrentEvent(matchingException);
                 differ = doAppointmentsDiffer(exception, matchingException);
             } else {
                 change.setType(ITipChange.Type.CREATE);
             }
             if (master == null) {
-            	final ITipAnnotation annotation = new ITipAnnotation(Messages.COUNTER_UNKNOWN_APPOINTMENT, locale); // FIXME: Choose better message once we can introduce new sentences again.
-            	annotation.setAppointment(exception);
-            	analysis.addAnnotation(annotation);
-            	break;
+                final ITipAnnotation annotation = new ITipAnnotation(Messages.COUNTER_UNKNOWN_APPOINTMENT, locale); // FIXME: Choose better message once we can introduce new sentences again.
+                annotation.setEvent(exception);
+                analysis.addAnnotation(annotation);
+                break;
             } else if (differ) {
                 if (original != null) {
-                    exception.setParentFolderID(original.getParentFolderID());
+                    exception.setFolderId(original.getFolderId());
                 }
-                change.setNewAppointment(exception);
+                change.setNewEvent(exception);
                 change.setConflicts(util.getConflicts(exception, session));
 
                 describeDiff(change, wrapper, session, message);
@@ -225,7 +219,7 @@ public class UpdateITipAnalyzer extends AbstractITipAnalyzer {
             }
         }
         if (exceptions != null && !exceptions.isEmpty()) {
-            for (final Appointment unmentionedExceptions : exceptions) {
+            for (final Event unmentionedExceptions : exceptions) {
                 change = new ITipChange();
                 change.setException(true);
                 change.setType(ITipChange.Type.DELETE);
@@ -253,25 +247,27 @@ public class UpdateITipAnalyzer extends AbstractITipAnalyzer {
                 }
             } else {
                 if (isCreate(analysis)) {
-                	if (message.getMethod() == ITipMethod.COUNTER) {
+                    if (message.getMethod() == ITipMethod.COUNTER) {
                         analysis.recommendActions(ITipAction.CREATE);
-                	} else {
+                    } else {
                         analysis.recommendActions(ITipAction.ACCEPT, ITipAction.DECLINE, ITipAction.TENTATIVE, ITipAction.DELEGATE, ITipAction.COUNTER);
-                	}
+                    }
                 } else {
-                	if (message.getMethod() == ITipMethod.COUNTER) {
+                    if (message.getMethod() == ITipMethod.COUNTER) {
                         analysis.recommendActions(ITipAction.UPDATE);
-                	} else {
-                    	analysis.recommendActions(ITipAction.UPDATE, ITipAction.ACCEPT, ITipAction.DECLINE, ITipAction.TENTATIVE, ITipAction.DELEGATE, ITipAction.COUNTER);
-                	}
+                    } else {
+                        analysis.recommendActions(ITipAction.UPDATE, ITipAction.ACCEPT, ITipAction.DECLINE, ITipAction.TENTATIVE, ITipAction.DELEGATE, ITipAction.COUNTER);
+                    }
                 }
             }
         }
         if (analysis.getChanges().isEmpty() && analysis.getAnnotations().isEmpty()) {
             change = new ITipChange();
-            change.setNewAppointment((original != null) ? original.clone() : update);
-            if (original != null) {
-            	change.setCurrentAppointment(original);
+            if (original == null) {
+                change.setNewEvent(update);
+            } else {
+                change.setNewEvent(session.getUtilities().copyEvent(original, (EventField[]) null));
+                change.setCurrentEvent(original);
             }
             change.setType(Type.UPDATE);
             analysis.addChange(change);
@@ -287,36 +283,23 @@ public class UpdateITipAnalyzer extends AbstractITipAnalyzer {
      * @param original
      * @param update
      */
-    private void addResourcesToUpdate(CalendarDataObject original, CalendarDataObject update) {
-        if (original.getParticipants() == null || original.getParticipants().length == 0) {
+    private void addResourcesToUpdate(Event original, Event update) {
+        if (original.getAttendees() == null || original.getAttendees().size() == 0) {
             return;
         }
 
-        List<Participant> newParticipants = new ArrayList<Participant>();
-        for (Participant p : original.getParticipants()) {
-            if (p.getType() == Participant.RESOURCE || p.getType() == Participant.RESOURCEGROUP) {
-                newParticipants.add(p);
-            }
-        }
-
-        if (newParticipants.isEmpty()) {
-            return;
-        }
-
-        if (update.getParticipants() == null || update.getParticipants().length == 0) {
-            update.setParticipants(newParticipants);
-            return;
-        }
-
-        List<Participant> participants = Arrays.asList(update.getParticipants());
-        for (Participant p : newParticipants) {
-            if (!participants.contains(p)) {
-                update.addParticipant(p);
+        for (Attendee a : original.getAttendees()) {
+            if (a.getCuType().equals(CalendarUserType.RESOURCE)) {
+                if (update.getAttendees() == null) {
+                    update.setAttendees(new ArrayList<>());
+                }
+                update.getAttendees().add(a);
             }
         }
     }
 
-    private boolean isOutdated(CalendarDataObject update, CalendarDataObject original) {
+    // TODO: redesign
+    private boolean isOutdated(Event update, Event original) {
         if (original.containsSequence() && update.containsSequence()) {
             if (original.getSequence() > update.getSequence()) {
                 return true;
@@ -329,17 +312,17 @@ public class UpdateITipAnalyzer extends AbstractITipAnalyzer {
         if (original.containsLastModified() && original.getLastModified() != null) {
             originalLastTouched = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
             originalLastTouched.setTime(original.getLastModified());
-        } else if (original.containsCreationDate() && original.getCreationDate() != null) {
+        } else if (original.containsCreated() && original.getCreated() != null) {
             originalLastTouched = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-            originalLastTouched.setTime(original.getCreationDate());
+            originalLastTouched.setTime(original.getCreated());
         }
         Calendar updateLastTouched = null;
         if (update.containsLastModified() && update.getLastModified() != null) {
             updateLastTouched = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
             updateLastTouched.setTime(update.getLastModified());
-        } else if (update.containsCreationDate() && update.getCreationDate() != null) {
+        } else if (update.containsCreated() && update.getCreated() != null) {
             updateLastTouched = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-            updateLastTouched.setTime(update.getCreationDate());
+            updateLastTouched.setTime(update.getCreated());
         }
 
         if (originalLastTouched != null && updateLastTouched != null) {

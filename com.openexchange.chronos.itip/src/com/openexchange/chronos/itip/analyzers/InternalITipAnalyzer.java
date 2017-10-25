@@ -59,12 +59,10 @@ import com.openexchange.chronos.itip.ITipMessage;
 import com.openexchange.chronos.itip.ITipMethod;
 import com.openexchange.chronos.itip.Messages;
 import com.openexchange.chronos.itip.generators.TypeWrapper;
+import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.session.Session;
-
 
 /**
  * {@link InternalITipAnalyzer}
@@ -73,8 +71,8 @@ import com.openexchange.session.Session;
  */
 public class InternalITipAnalyzer extends AbstractITipAnalyzer {
 
-    public InternalITipAnalyzer(ITipIntegrationUtility util, ServiceLookup services) {
-        super(util, services);
+    public InternalITipAnalyzer(ITipIntegrationUtility util) {
+        super(util);
     }
 
     @Override
@@ -84,11 +82,11 @@ public class InternalITipAnalyzer extends AbstractITipAnalyzer {
     }
 
     @Override
-    public ITipAnalysis analyze(ITipMessage message, Map<String, String> header, TypeWrapper wrapper, Locale locale, User user, Context ctx, Session session) throws OXException {
+    public ITipAnalysis analyze(ITipMessage message, Map<String, String> header, TypeWrapper wrapper, Locale locale, User user, Context ctx, CalendarSession session) throws OXException {
         ITipAnalysis analysis = new ITipAnalysis();
 
         ITipAnnotation annotation = new ITipAnnotation(Messages.INTERNAL_MAIL, locale);
-        annotation.setAppointment(message.getAppointment());
+        annotation.setEvent(message.getEvent());
         analysis.addAnnotation(annotation);
 
         return analysis;

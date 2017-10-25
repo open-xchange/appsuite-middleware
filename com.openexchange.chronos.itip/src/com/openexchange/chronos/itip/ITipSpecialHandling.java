@@ -47,52 +47,15 @@
  *
  */
 
-package com.openexchange.chronos.itip.performers;
-
-import java.util.Collection;
-import java.util.EnumMap;
-import com.openexchange.chronos.itip.CalendarITipIntegrationUtility;
-import com.openexchange.chronos.itip.ITipAction;
-import com.openexchange.chronos.itip.ITipActionPerformer;
-import com.openexchange.chronos.itip.ITipActionPerformerFactoryService;
-import com.openexchange.chronos.itip.ITipChange;
-import com.openexchange.chronos.itip.generators.ITipMailGeneratorFactory;
-import com.openexchange.chronos.itip.sender.MailSenderService;
+package com.openexchange.chronos.itip;
 
 /**
  * 
- * {@link ITipChange}
+ * {@link ITipSpecialHandling}
  *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  * @since v7.10.0
  */
-public class DefaultITipDingeMacherFactoryService implements ITipActionPerformerFactoryService {
-
-    public static final Integer RANKING = 0;
-
-    private final EnumMap<ITipAction, ITipActionPerformer> performerRegistry = new EnumMap<>(ITipAction.class);
-
-    public DefaultITipDingeMacherFactoryService(CalendarITipIntegrationUtility util, MailSenderService sender, ITipMailGeneratorFactory generators) {
-        addPerformer(new UpdatePerformer(util, sender, generators));
-        addPerformer(new CancelPerformer(util, sender, generators));
-        addPerformer(new MailPerformer(util, sender, generators));
-    }
-
-    public void addPerformer(ITipActionPerformer performer) {
-        Collection<ITipAction> supportedActions = performer.getSupportedActions();
-        for (ITipAction action : supportedActions) {
-            performerRegistry.put(action, performer);
-        }
-    }
-
-    @Override
-    public ITipActionPerformer getPerformer(ITipAction action) {
-        return performerRegistry.get(action);
-    }
-
-    @Override
-    public Collection<ITipAction> getSupportedActions() {
-        return performerRegistry.keySet();
-    }
-
+public enum ITipSpecialHandling {
+    MICROSOFT
 }

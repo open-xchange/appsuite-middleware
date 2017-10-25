@@ -50,12 +50,16 @@
 package com.openexchange.chronos.itip.performers;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import com.openexchange.chronos.Attendee;
+import com.openexchange.chronos.Event;
+import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.ParticipationStatus;
+import com.openexchange.chronos.common.mapping.EventMapper;
 import com.openexchange.chronos.itip.ITipAction;
 import com.openexchange.chronos.itip.ITipAnalysis;
 import com.openexchange.chronos.itip.ITipAttributes;
@@ -63,18 +67,10 @@ import com.openexchange.chronos.itip.ITipChange;
 import com.openexchange.chronos.itip.ITipIntegrationUtility;
 import com.openexchange.chronos.itip.generators.ITipMailGeneratorFactory;
 import com.openexchange.chronos.itip.sender.MailSenderService;
-import com.openexchange.chronos.itip.tools.AppointmentDiff;
-import com.openexchange.chronos.itip.tools.AppointmentDiff.FieldUpdate;
+import com.openexchange.chronos.service.CalendarSession;
+import com.openexchange.chronos.service.EventID;
+import com.openexchange.chronos.service.EventUpdate;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.calendar.CalendarDataObject;
-import com.openexchange.groupware.container.Appointment;
-import com.openexchange.groupware.container.CalendarObject;
-import com.openexchange.groupware.container.Change;
-import com.openexchange.groupware.container.ConfirmationChange;
-import com.openexchange.groupware.container.Difference;
-import com.openexchange.groupware.container.Participant;
-import com.openexchange.groupware.container.UserParticipant;
-import com.openexchange.session.Session;
 
 /**
  * 
@@ -84,7 +80,6 @@ import com.openexchange.session.Session;
  * @since v7.10.0
  */
 public class UpdatePerformer extends AbstractActionPerformer {
-
 
     public UpdatePerformer(ITipIntegrationUtility util, MailSenderService sender, ITipMailGeneratorFactory generators) {
         super(util, sender, generators);
@@ -96,222 +91,159 @@ public class UpdatePerformer extends AbstractActionPerformer {
     }
 
     @Override
-    public List<Appointment> perform(ITipAction action, ITipAnalysis analysis, Session session, ITipAttributes attributes) throws OXException {
+    public List<Event> perform(ITipAction action, ITipAnalysis analysis, CalendarSession session, ITipAttributes attributes) throws OXException {
         List<ITipChange> changes = analysis.getChanges();
-        List<Appointment> result = new ArrayList<Appointment>(changes.size());
+        List<Event> result = new ArrayList<Event>(changes.size());
 
-        Map<String, CalendarDataObject> processed = new HashMap<String, CalendarDataObject>();
+        Map<String, Event> processed = new HashMap<String, Event>();
 
         for (ITipChange change : changes) {
 
-            CalendarDataObject appointment = change.getNewAppointment();
-            if (appointment == null) {
-            	continue;
+            Event event = change.getNewEvent();
+            if (event == null) {
+                continue;
             }
-            appointment.setNotification(true);
+            // TODO: event.setNotification(true);
             int owner = session.getUserId();
             if (analysis.getMessage().getOwner() > 0) {
                 owner = analysis.getMessage().getOwner();
-            } else if (appointment.getPrincipalId() > 0) {
-                owner = appointment.getPrincipalId();
             }
-            ensureParticipant(appointment, change.getCurrentAppointment(), action, owner, attributes);
-            Appointment original = determineOriginalAppointment(change, processed, session);
-            Appointment forMail = appointment;
+            ensureAttendee(event, change.getCurrentEvent(), action, owner, attributes);
+            Event original = determineOriginalEvent(change, processed, session);
+            Event forMail = event;
             if (original != null) {
-                updateAppointment(original, appointment, session);
+                updateEvent(original, event, session);
             } else {
-                ensureFolderId(appointment, session);
-                createAppointment(appointment, session);
-                forMail = util.reloadAppointment(appointment, session);
+                ensureFolderId(event, session);
+                createEvent(event, session);
+                forMail = util.reloadEvent(event, session);
             }
 
-            if (appointment != null && !change.isException()) {
-                processed.put(appointment.getUid(), appointment);
+            if (event != null && !change.isException()) {
+                processed.put(event.getUid(), event);
             }
 
             writeMail(action, original, forMail, session, owner);
-            result.add(appointment);
+            result.add(event);
         }
 
         return result;
     }
 
+    private void updateEvent(Event original, Event event, CalendarSession session) throws OXException {
+        EventUpdate diff = session.getUtilities().compare(original, event, false, (EventField[]) null);
 
-
-    private void updateAppointment(Appointment original, CalendarDataObject appointment, Session session) throws OXException {
-        AppointmentDiff appointmentDiff = AppointmentDiff.compare(original, appointment);
-        CalendarDataObject update = new CalendarDataObject();
-        List<FieldUpdate> updates = appointmentDiff.getUpdates();
+        Event update = new Event();
         boolean write = false;
-        for (FieldUpdate fieldUpdate : updates) {
-            if (fieldUpdate.getFieldNumber() != CalendarObject.CONFIRMATIONS) {
-                update.set(fieldUpdate.getFieldNumber(), fieldUpdate.getNewValue());
-                write = true;
-            }
+        if (!diff.getUpdatedFields().isEmpty()) {
+            EventMapper.getInstance().copy(diff.getUpdate(), update, diff.getUpdatedFields().toArray(new EventField[diff.getUpdatedFields().size()]));
+            write = true;
         }
 
-        update.setParentFolderID(original.getParentFolderID());
-        update.setObjectID(original.getObjectID());
+        update.setFolderId(original.getFolderId());
+        update.setId(original.getId());
 
-        if (!original.containsRecurrencePosition() && !original.containsRecurrenceDatePosition()) {
-            if (appointment.containsRecurrencePosition()) {
-                update.setRecurrencePosition(appointment.getRecurrencePosition());
-            } else if (appointment.containsRecurrenceDatePosition()) {
-                update.setRecurrenceDatePosition(appointment.getRecurrenceDatePosition());
-            }
-        } else {
-            if (original.containsRecurrencePosition()) {
-                update.setRecurrencePosition(original.getRecurrencePosition());
-            } else if (original.containsRecurrenceDatePosition()) {
-                update.setRecurrenceDatePosition(original.getRecurrenceDatePosition());
-            }
+        if (!original.containsRecurrenceId() && event.containsRecurrenceId()) {
+            update.setRecurrenceId(event.getRecurrenceId());
+        } else if (original.containsRecurrenceId()) {
+            update.setRecurrenceId(original.getRecurrenceId());
         }
 
-        CalendarDataObject clone = update.clone();
         if (write) {
-            util.updateAppointment(clone, session, original.getLastModified());
-            original.setLastModified(clone.getLastModified());
+            session.getCalendarService().updateEvent(session, new EventID(update.getFolderId(), update.getId()), update, original.getLastModified().getTime());
         }
 
-        saveConfirmations(session, appointmentDiff, clone);
+        event.setId(update.getId());
+        event.setFolderId(update.getFolderId());
 
-        appointment.setObjectID(clone.getObjectID());
-        appointment.setParentFolderID(clone.getParentFolderID());
-
-        if (update.containsRecurrencePosition()) {
-            appointment.setRecurrencePosition(update.getRecurrencePosition());
+        if (update.containsRecurrenceId()) {
+            event.setRecurrenceId(update.getRecurrenceId());
         }
     }
 
-    private void saveConfirmations(Session session, AppointmentDiff appointmentDiff, Appointment update) throws OXException {
-        if (appointmentDiff.anyFieldChangedOf("confirmations")) {
-            FieldUpdate fieldUpdate = appointmentDiff.getUpdateFor("confirmations");
-            Difference extraInfo = (Difference) fieldUpdate.getExtraInfo();
-            List<Change> changed = extraInfo.getChanged();
-            for (Change change : changed) {
-                ConfirmationChange confirmationChange = (ConfirmationChange) change;
-                util.changeConfirmationForExternalParticipant(update, confirmationChange, session);
-            }
-
-        }
+    private void createEvent(Event event, CalendarSession session) throws OXException {
+        session.getCalendarService().createEvent(session, event.getFolderId(), event);
     }
 
-    private void createAppointment(CalendarDataObject appointment, Session session) throws OXException {
-        util.createAppointment(appointment, session);
-        // Update Confirmations
-        Appointment reloaded = util.reloadAppointment(appointment, session);
-        AppointmentDiff appointmentDiff = AppointmentDiff.compare(reloaded, appointment);
-        saveConfirmations(session, appointmentDiff, reloaded);
-    }
-
-
-    private void ensureParticipant(CalendarDataObject appointment, Appointment currentAppointment, ITipAction action, int owner, ITipAttributes attributes) {
-        int confirm = CalendarObject.NONE;
+    private void ensureAttendee(Event event, Event currentEvent, ITipAction action, int owner, ITipAttributes attributes) {
+        ParticipationStatus confirm = null;
         switch (action) {
-        case ACCEPT: case ACCEPT_AND_IGNORE_CONFLICTS: case CREATE: confirm = CalendarObject.ACCEPT; break;
-        case DECLINE: confirm = CalendarObject.DECLINE; break;
-        case TENTATIVE: confirm = CalendarObject.TENTATIVE; break;
-        case UPDATE: confirm = getCurrentConfirmation(currentAppointment, owner); break;
-        default: confirm = -1;
+            case ACCEPT:
+            case ACCEPT_AND_IGNORE_CONFLICTS:
+            case CREATE:
+                confirm = ParticipationStatus.ACCEPTED;
+                break;
+            case DECLINE:
+                confirm = ParticipationStatus.DECLINED;
+                break;
+            case TENTATIVE:
+                confirm = ParticipationStatus.TENTATIVE;
+                break;
+            case UPDATE:
+                confirm = getCurrentConfirmation(currentEvent, owner);
+                break;
+            default:
+                confirm = ParticipationStatus.NEEDS_ACTION;
         }
+
         String message = null;
         if (attributes != null && attributes.getConfirmationMessage() != null && !attributes.getConfirmationMessage().trim().equals("")) {
             message = attributes.getConfirmationMessage();
         } else {
-            message = getCurrentMessage(currentAppointment, owner);
+            message = getCurrentMessage(currentEvent, owner);
         }
-        Participant[] participants = appointment.getParticipants();
+
         boolean found = false;
-        if (null != participants) {
-            for (Participant participant : participants) {
-                if (participant instanceof UserParticipant) {
-                    UserParticipant up = (UserParticipant) participant;
-                    if (up.getIdentifier() == owner) {
-                        found = true;
-                        if (confirm != -1) {
-                            up.setConfirm(confirm);
-                        }
-                        if (message != null) {
-                            up.setConfirmMessage(message);
-                        }
-                    }
+        for (Attendee attendee : event.getAttendees()) {
+            if (attendee.getEntity() == owner) {
+                if (confirm != null) {
+                    attendee.setPartStat(confirm);
+                }
+                if (message != null) {
+                    attendee.setComment(message);
                 }
             }
         }
 
         if (!found) {
-            UserParticipant up = new UserParticipant(owner);
-            if (confirm != -1) {
-                up.setConfirm(confirm);
+            Attendee attendee = new Attendee();
+            attendee.setEntity(owner);
+            if (confirm != null) {
+                attendee.setPartStat(confirm);
             }
             if (message != null) {
-                up.setConfirmMessage(message);
+                attendee.setComment(message);
             }
-            Participant[] tmp = appointment.getParticipants();
-            List<Participant> participantList = (null == tmp) ? new ArrayList<Participant>(1) : new ArrayList<Participant>(Arrays.asList(tmp));
-            participantList.add(up);
-            appointment.setParticipants(participantList);
+            event.getAttendees().add(attendee);
         }
 
-        found = false;
-        UserParticipant[] users = appointment.getUsers();
-        if (users != null) {
-            for (UserParticipant userParticipant : users) {
-                if (userParticipant.getIdentifier() == owner) {
-                    found = true;
-                    if (confirm != -1) {
-                        userParticipant.setConfirm(confirm);
-                    }
-                    if (message != null) {
-                        userParticipant.setConfirmMessage(message);
-                    }
-                }
-            }
-        }
-
-        if (!found) {
-            UserParticipant up = new UserParticipant(owner);
-            if (confirm != -1) {
-                up.setConfirm(confirm);
-            }
-            if (message != null) {
-                up.setConfirmMessage(message);
-            }
-            UserParticipant[] tmp = appointment.getUsers();
-            List<UserParticipant> participantList = (tmp == null) ? new ArrayList<UserParticipant>(1) : new ArrayList<UserParticipant>(Arrays.asList(tmp));
-            participantList.add(up);
-            appointment.setUsers(participantList);
-        }
     }
 
-    private String getCurrentMessage(Appointment currentAppointment, int userId) {
-        if (currentAppointment == null || currentAppointment.getUsers() == null || currentAppointment.getUsers().length == 0) {
+    private String getCurrentMessage(Event event, int userId) {
+        if (event == null || event.getAttendees() == null || event.getAttendees().isEmpty()) {
             return null;
         }
 
-        for (UserParticipant up : currentAppointment.getUsers()) {
-            if (up.getIdentifier() == userId) {
-                if (up.containsConfirmMessage()) {
-                    return up.getConfirmMessage();
-                }
+        for (Attendee attendee : event.getAttendees()) {
+            if (attendee.getEntity() == userId) {
+                return attendee.getComment();
             }
         }
+
         return null;
     }
 
-    private int getCurrentConfirmation(Appointment currentAppointment, int userId) {
-        if (currentAppointment == null || currentAppointment.getUsers() == null || currentAppointment.getUsers().length == 0) {
-            return -1;
+    private ParticipationStatus getCurrentConfirmation(Event event, int userId) {
+        if (event == null || event.getAttendees() == null || event.getAttendees().isEmpty()) {
+            return null;
         }
 
-        for (UserParticipant up : currentAppointment.getUsers()) {
-            if (up.getIdentifier() == userId) {
-                if (up.containsConfirm()) {
-                    return up.getConfirm();
-                }
+        for (Attendee attendee : event.getAttendees()) {
+            if (attendee.getEntity() == userId) {
+                return attendee.getPartStat();
             }
         }
-        return -1;
+
+        return null;
     }
 }

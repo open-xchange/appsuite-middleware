@@ -49,12 +49,8 @@
 
 package com.openexchange.chronos.itip.generators.changes.generators;
 
-import static com.openexchange.ajax.fields.CalendarFields.CONFIRMATIONS;
-import static com.openexchange.ajax.fields.CalendarFields.PARTICIPANTS;
-import static com.openexchange.ajax.fields.CalendarFields.USERS;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -63,29 +59,25 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TimeZone;
+import com.openexchange.chronos.Attendee;
+import com.openexchange.chronos.AttendeeField;
+import com.openexchange.chronos.CalendarUserType;
+import com.openexchange.chronos.Event;
+import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.ParticipationStatus;
+import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.itip.Messages;
 import com.openexchange.chronos.itip.generators.ArgumentType;
 import com.openexchange.chronos.itip.generators.Sentence;
 import com.openexchange.chronos.itip.generators.changes.ChangeDescriptionGenerator;
-import com.openexchange.chronos.itip.tools.AppointmentDiff;
-import com.openexchange.chronos.itip.tools.AppointmentDiff.FieldUpdate;
+import com.openexchange.chronos.itip.tools.ITipEventUpdate;
+import com.openexchange.chronos.service.CollectionUpdate;
+import com.openexchange.chronos.service.ItemUpdate;
 import com.openexchange.exception.OXException;
 import com.openexchange.group.Group;
 import com.openexchange.group.GroupService;
-import com.openexchange.groupware.container.Appointment;
-import com.openexchange.groupware.container.CalendarObject;
-import com.openexchange.groupware.container.Change;
-import com.openexchange.groupware.container.ConfirmationChange;
-import com.openexchange.groupware.container.Difference;
-import com.openexchange.groupware.container.ExternalUserParticipant;
-import com.openexchange.groupware.container.GroupParticipant;
-import com.openexchange.groupware.container.Participant;
-import com.openexchange.groupware.container.ResourceParticipant;
-import com.openexchange.groupware.container.UserParticipant;
-import com.openexchange.groupware.container.participants.ConfirmStatus;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.java.Autoboxing;
 import com.openexchange.resource.Resource;
 import com.openexchange.resource.ResourceService;
 import com.openexchange.user.UserService;
@@ -95,46 +87,49 @@ import com.openexchange.user.UserService;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class Participants implements ChangeDescriptionGenerator{
+public class Participants implements ChangeDescriptionGenerator {
 
-    private static final EnumSet<ChangeType> STATE_CHANGES = EnumSet.of(ChangeType.ACCEPT, ChangeType.DECLINE, ChangeType.TENTATIVE);
-
-	private static final String[] FIELDS = new String[]{USERS, PARTICIPANTS, CONFIRMATIONS};
+    private static final EventField[] FIELDS = new EventField[] { EventField.ATTENDEES };
 
     protected static enum ChangeType {
         ADD, REMOVE, ACCEPT, DECLINE, TENTATIVE
     }
 
-    private static final Map<ChangeType, String> PARTICIPANT_MESSAGE_MAP = new HashMap<ChangeType, String>(){{
-        put(ChangeType.ADD, Messages.HAS_ADDED_PARTICIPANT);
+    private static final Map<ChangeType, String> PARTICIPANT_MESSAGE_MAP = new HashMap<ChangeType, String>() {
 
-        put(ChangeType.REMOVE,  Messages.HAS_REMOVED_PARTICIPANT);
+        {
+            put(ChangeType.ADD, Messages.HAS_ADDED_PARTICIPANT);
 
-        put(ChangeType.ACCEPT, Messages.HAS_CHANGED_STATE);
-        put(ChangeType.DECLINE, Messages.HAS_CHANGED_STATE);
-        put(ChangeType.TENTATIVE, Messages.HAS_CHANGED_STATE);
+            put(ChangeType.REMOVE, Messages.HAS_REMOVED_PARTICIPANT);
 
-    }};
+            put(ChangeType.ACCEPT, Messages.HAS_CHANGED_STATE);
+            put(ChangeType.DECLINE, Messages.HAS_CHANGED_STATE);
+            put(ChangeType.TENTATIVE, Messages.HAS_CHANGED_STATE);
 
-    private static final Map<ChangeType,String> GROUP_MESSAGE_MAP = new HashMap<ChangeType, String>(){{
-        put(ChangeType.ADD, Messages.HAS_INVITED_GROUP);
-        put(ChangeType.REMOVE, Messages.HAS_REMOVED_GROUP);
-    }};
+        }
+    };
 
-    private static final Map<ChangeType, String> RESOURCE_MESSAGE_MAP = new HashMap<ChangeType, String>(){{
-        put(ChangeType.ADD,  Messages.HAS_ADDED_RESOURCE);
-        put(ChangeType.REMOVE, Messages.HAS_REMOVED_RESOURCE);
-    }};
+    private static final Map<ChangeType, String> GROUP_MESSAGE_MAP = new HashMap<ChangeType, String>() {
 
+        {
+            put(ChangeType.ADD, Messages.HAS_INVITED_GROUP);
+            put(ChangeType.REMOVE, Messages.HAS_REMOVED_GROUP);
+        }
+    };
 
+    private static final Map<ChangeType, String> RESOURCE_MESSAGE_MAP = new HashMap<ChangeType, String>() {
+
+        {
+            put(ChangeType.ADD, Messages.HAS_ADDED_RESOURCE);
+            put(ChangeType.REMOVE, Messages.HAS_REMOVED_RESOURCE);
+        }
+    };
 
     private final UserService users;
     private final GroupService groups;
     private final ResourceService resources;
 
-	private final boolean stateChanges;
-
-
+    private final boolean stateChanges;
 
     public Participants(UserService users, GroupService groups, ResourceService resources, boolean stateChanges) {
         super();
@@ -145,83 +140,59 @@ public class Participants implements ChangeDescriptionGenerator{
     }
 
     @Override
-    public List<Sentence> getDescriptions(Context ctx, Appointment original, Appointment updated, AppointmentDiff diff, Locale locale, TimeZone timezone) throws OXException {
+    public List<Sentence> getDescriptions(Context ctx, Event original, Event updated, ITipEventUpdate diff, Locale locale, TimeZone timezone) throws OXException {
+        Set<Integer> attendeeIds = new HashSet<>();
+        Set<Integer> groupAttendeeIds = new HashSet<>();
+        Set<Integer> resourceAttendeeIds = new HashSet<>();
 
-        Set<Integer> userIds = new HashSet<Integer>();
-        Set<Integer> groupIds = new HashSet<Integer>();
-        Set<Integer> resourceIds = new HashSet<Integer>();
+        Map<Integer, ChangeType> attendeeChange = new HashMap<>();
+        Map<Integer, ChangeType> groupChange = new HashMap<>();
+        Map<Integer, ChangeType> resourceChange = new HashMap<>();
+        Map<String, ChangeType> externalChange = new HashMap<>();
 
-        Map<Integer,ChangeType> userChange = new HashMap<Integer, ChangeType>();
-        Map<Integer,ChangeType> resourceChange = new HashMap<Integer, ChangeType>();
-        Map<Integer,ChangeType> groupChange = new HashMap<Integer, ChangeType>();
-        Map<String,ChangeType> externalChange = new HashMap<String, ChangeType>();
-
-        Set<String> external = new HashSet<String>();
-        Participant[] participants = updated.getParticipants();
-        if (participants != null) {
-            for(Participant p : participants) {
-                if (p instanceof ExternalUserParticipant) {
-                    ExternalUserParticipant ep = (ExternalUserParticipant) p;
-                    external.add(ep.getEmailAddress());
+        Set<String> external = new HashSet<>();
+        if (updated.getAttendees() != null) {
+            for (Attendee a : updated.getAttendees()) {
+                if (!CalendarUtils.isInternal(a)) {
+                    external.add(a.getEMail());
                 }
             }
         }
 
-        participants = original.getParticipants();
-        if (participants != null) {
-            for(Participant p : participants) {
-                if (p instanceof ExternalUserParticipant) {
-                    ExternalUserParticipant ep = (ExternalUserParticipant) p;
-                    external.add(ep.getEmailAddress());
+        if (original.getAttendees() != null) {
+            for (Attendee a : original.getAttendees()) {
+                if (!CalendarUtils.isInternal(a)) {
+                    external.add(a.getEMail());
                 }
             }
         }
 
-
-        FieldUpdate update = diff.getUpdateFor("participants");
-        if (update != null) {
-            Difference difference = (Difference) update.getExtraInfo();
-            investigateSetOperation(difference, userIds, groupIds, resourceIds, userChange, resourceChange, groupChange, externalChange, ChangeType.ADD, difference.getAdded());
-            investigateSetOperation(difference, userIds, groupIds, resourceIds, userChange, resourceChange, groupChange, externalChange, ChangeType.REMOVE, difference.getRemoved());
-            investigateChanges(difference, userIds, userChange, externalChange, external);
-        }
-
-
-        update = diff.getUpdateFor("confirmations");
-        if (update != null) {
-            Difference difference = (Difference) update.getExtraInfo();
-
-            investigateSetOperation(difference, userIds, groupIds, resourceIds, userChange, resourceChange, groupChange, externalChange, ChangeType.ADD, difference.getAdded());
-            investigateSetOperation(difference, userIds, groupIds, resourceIds, userChange, resourceChange, groupChange, externalChange, ChangeType.REMOVE, difference.getRemoved());
-            investigateChanges( difference, userIds, userChange, externalChange, external);
-        }
-
-
-        update = diff.getUpdateFor("users");
-        if (update != null) {
-            Difference difference = (Difference) update.getExtraInfo();
-
-            investigateChanges(difference, userIds, userChange, externalChange, external);
-
+        if (diff.getUpdatedFields().contains(EventField.ATTENDEES)) {
+            CollectionUpdate<Attendee, AttendeeField> attendeeUpdates = diff.getAttendeeUpdates();
+            investigateSetOperation(attendeeUpdates, attendeeIds, groupAttendeeIds, resourceAttendeeIds, attendeeChange, resourceChange, groupChange, externalChange, ChangeType.ADD, attendeeUpdates.getAddedItems());
+            investigateSetOperation(attendeeUpdates, attendeeIds, groupAttendeeIds, resourceAttendeeIds, attendeeChange, resourceChange, groupChange, externalChange, ChangeType.REMOVE, attendeeUpdates.getRemovedItems());
+            investigateChanges(attendeeUpdates, attendeeIds, attendeeChange, externalChange, external);
         }
 
         List<Sentence> changes = new ArrayList<Sentence>();
 
-        User[] user = users.getUser(ctx, Autoboxing.Coll2i(userIds));
-        for (User u : user) {
-            ChangeType changeType = userChange.get(u.getId());
-            if (changeType == null) {
-                continue;
-            }
-//            Does this check make sense here? If we are already creating a mail, we should include all given changes...
-//            if (STATE_CHANGES.contains(changeType) && !stateChanges) {
-//            	continue;
-//            }
+        for (Integer attendeeId : attendeeIds) {
+            User u = users.getUser(attendeeId, ctx);
+            ChangeType changeType = attendeeChange.get(attendeeId);
             switch (changeType) {
-            case ADD: case REMOVE: changes.add(new Sentence(PARTICIPANT_MESSAGE_MAP.get(changeType)).add(u.getDisplayName(), ArgumentType.PARTICIPANT)); break;
-            case ACCEPT: changes.add(new Sentence(PARTICIPANT_MESSAGE_MAP.get(changeType)).add(u.getDisplayName(), ArgumentType.PARTICIPANT).addStatus(ConfirmStatus.ACCEPT)); break;
-            case DECLINE: changes.add(new Sentence(PARTICIPANT_MESSAGE_MAP.get(changeType)).add(u.getDisplayName(), ArgumentType.PARTICIPANT).addStatus(ConfirmStatus.DECLINE)); break;
-            case TENTATIVE: changes.add(new Sentence(PARTICIPANT_MESSAGE_MAP.get(changeType)).add(u.getDisplayName(), ArgumentType.PARTICIPANT).addStatus(ConfirmStatus.TENTATIVE)); break;
+                case ADD:
+                case REMOVE:
+                    changes.add(new Sentence(PARTICIPANT_MESSAGE_MAP.get(changeType)).add(u.getDisplayName(), ArgumentType.PARTICIPANT));
+                    break;
+                case ACCEPT:
+                    changes.add(new Sentence(PARTICIPANT_MESSAGE_MAP.get(changeType)).add(u.getDisplayName(), ArgumentType.PARTICIPANT).addStatus(ParticipationStatus.ACCEPTED));
+                    break;
+                case DECLINE:
+                    changes.add(new Sentence(PARTICIPANT_MESSAGE_MAP.get(changeType)).add(u.getDisplayName(), ArgumentType.PARTICIPANT).addStatus(ParticipationStatus.DECLINED));
+                    break;
+                case TENTATIVE:
+                    changes.add(new Sentence(PARTICIPANT_MESSAGE_MAP.get(changeType)).add(u.getDisplayName(), ArgumentType.PARTICIPANT).addStatus(ParticipationStatus.TENTATIVE));
+                    break;
             }
         }
 
@@ -232,140 +203,126 @@ public class Participants implements ChangeDescriptionGenerator{
             if (changeType == null) {
                 continue;
             }
-//            Does this check make sense here? If we are already creating a mail, we should include all given changes...
-//            if (STATE_CHANGES.contains(changeType) && !stateChanges) {
-//            	continue;
-//            }
             switch (changeType) {
-            case ADD: case REMOVE: changes.add(new Sentence(PARTICIPANT_MESSAGE_MAP.get(changeType)).add(mail, ArgumentType.PARTICIPANT)); break;
-            case ACCEPT: changes.add(new Sentence(PARTICIPANT_MESSAGE_MAP.get(changeType)).add(mail, ArgumentType.PARTICIPANT).addStatus(ConfirmStatus.ACCEPT)); break;
-            case DECLINE: changes.add(new Sentence(PARTICIPANT_MESSAGE_MAP.get(changeType)).add(mail, ArgumentType.PARTICIPANT).addStatus(ConfirmStatus.DECLINE)); break;
-            case TENTATIVE: changes.add(new Sentence(PARTICIPANT_MESSAGE_MAP.get(changeType)).add(mail, ArgumentType.PARTICIPANT).addStatus(ConfirmStatus.TENTATIVE)); break;
+                case ADD:
+                case REMOVE:
+                    changes.add(new Sentence(PARTICIPANT_MESSAGE_MAP.get(changeType)).add(mail, ArgumentType.PARTICIPANT));
+                    break;
+                case ACCEPT:
+                    changes.add(new Sentence(PARTICIPANT_MESSAGE_MAP.get(changeType)).add(mail, ArgumentType.PARTICIPANT).addStatus(ParticipationStatus.ACCEPTED));
+                    break;
+                case DECLINE:
+                    changes.add(new Sentence(PARTICIPANT_MESSAGE_MAP.get(changeType)).add(mail, ArgumentType.PARTICIPANT).addStatus(ParticipationStatus.DECLINED));
+                    break;
+                case TENTATIVE:
+                    changes.add(new Sentence(PARTICIPANT_MESSAGE_MAP.get(changeType)).add(mail, ArgumentType.PARTICIPANT).addStatus(ParticipationStatus.TENTATIVE));
+                    break;
             }
         }
 
-        for(Integer id : groupChange.keySet()) {
-            Group group = groups.getGroup(ctx, id.intValue());
+        for (Integer id : groupChange.keySet()) {
+            Group group = groups.getGroup(ctx, id);
             ChangeType changeType = groupChange.get(id);
             if (changeType == null) {
                 continue;
             }
             switch (changeType) {
-            case ADD: case REMOVE: changes.add(new Sentence(GROUP_MESSAGE_MAP.get(changeType)).add(group.getDisplayName(), ArgumentType.PARTICIPANT)); break;
-            default: // Skip
+                case ADD:
+                case REMOVE:
+                    changes.add(new Sentence(GROUP_MESSAGE_MAP.get(changeType)).add(group.getDisplayName(), ArgumentType.PARTICIPANT));
+                    break;
+                default: // Skip
             }
         }
 
         for (Entry<Integer, ChangeType> entry : resourceChange.entrySet()) {
-            Resource resource = resources.getResource(entry.getKey().intValue(), ctx);
+            Resource resource = resources.getResource(entry.getKey(), ctx);
             ChangeType changeType = entry.getValue();
             if (changeType == null) {
                 continue;
             }
             switch (changeType) {
-            case ADD: case REMOVE: changes.add(new Sentence(RESOURCE_MESSAGE_MAP.get(changeType)).add(resource.getDisplayName(), ArgumentType.PARTICIPANT)); break;
-            default: // Skip
+                case ADD:
+                case REMOVE:
+                    changes.add(new Sentence(RESOURCE_MESSAGE_MAP.get(changeType)).add(resource.getDisplayName(), ArgumentType.PARTICIPANT));
+                    break;
+                default: // Skip
             }
         }
-
 
         return changes;
     }
 
-    private void investigateChanges(Difference difference, Set<Integer> userIds, Map<Integer, ChangeType> userChange, Map<String, ChangeType> externalChange, Set<String> external) {
+    private void investigateChanges(CollectionUpdate<Attendee, AttendeeField> difference, Set<Integer> userIds, Map<Integer, ChangeType> userChange, Map<String, ChangeType> externalChange, Set<String> external) {
 
-        for(Change change : difference.getChanged()) {
-            if (change instanceof ConfirmationChange) {
-                ConfirmationChange cchange = (ConfirmationChange) change;
-                String identifier = cchange.getIdentifier();
-
-                int newStatus = cchange.getNewStatus();
-                ChangeType changeType = null;
-                switch (newStatus) {
-                case CalendarObject.ACCEPT:
-                    changeType = ChangeType.ACCEPT;
-                    break;
-                case CalendarObject.DECLINE:
+        List<? extends ItemUpdate<Attendee, AttendeeField>> updatedItems = difference.getUpdatedItems();
+        for (ItemUpdate<Attendee, AttendeeField> itemUpdate : updatedItems) {
+            ChangeType changeType = null;
+            if (itemUpdate.getUpdatedFields().contains(AttendeeField.PARTSTAT)) {
+                ParticipationStatus newPartStat = itemUpdate.getUpdate().getPartStat();
+                if (newPartStat.equals(ParticipationStatus.DECLINED)) {
                     changeType = ChangeType.DECLINE;
-                    break;
-                case CalendarObject.TENTATIVE:
+                } else if (newPartStat.equals(ParticipationStatus.TENTATIVE)) {
                     changeType = ChangeType.TENTATIVE;
-                    break;
-                }
-
-
-                if (external.contains(identifier)) {
-                    externalChange.put(identifier, changeType);
                 } else {
-                    int id = Integer.parseInt(identifier);
-                    userIds.add(id);
-                    userChange.put(id, changeType);
+                    changeType = ChangeType.ACCEPT;
+                }
+            }
+
+            Attendee original = itemUpdate.getOriginal();
+            if (CalendarUtils.isInternal(original)) {
+                userIds.add(original.getEntity());
+                userChange.put(original.getEntity(), changeType);
+            } else {
+                externalChange.put(original.getEMail(), changeType);
+            }
+        }
+
+        if (difference.getAddedItems() != null && !difference.getAddedItems().isEmpty()) {
+            for (Attendee added : difference.getAddedItems()) {
+                if (CalendarUtils.isInternal(added)) {
+                    userIds.add(added.getEntity());
+                    userChange.put(added.getEntity(), ChangeType.ADD);
+                } else {
+                    externalChange.put(added.getEMail(), ChangeType.ADD);
                 }
             }
         }
 
-        if (difference.getAdded() != null) {
-            for (Object added : difference.getAdded()) {
-                if (added instanceof UserParticipant) {
-                    UserParticipant up = (UserParticipant) added;
-                    int id = up.getIdentifier();
-                    userIds.add(id);
-                    userChange.put(id, ChangeType.ADD);
-                } else if (added instanceof ExternalUserParticipant) {
-                    ExternalUserParticipant ep = (ExternalUserParticipant) added;
-                    externalChange.put(ep.getEmailAddress(), ChangeType.ADD);
-                }
-            }
-        }
-
-        if (difference.getRemoved() != null) {
-            for (Object removed : difference.getRemoved()) {
-                if (removed instanceof UserParticipant) {
-                    UserParticipant up = (UserParticipant) removed;
-                    int id = up.getIdentifier();
-                    userIds.add(id);
-                    userChange.put(id, ChangeType.REMOVE);
-                } else if (removed instanceof ExternalUserParticipant) {
-                    ExternalUserParticipant ep = (ExternalUserParticipant) removed;
-                    externalChange.put(ep.getEmailAddress(), ChangeType.REMOVE);
+        if (difference.getRemovedItems() != null && !difference.getRemovedItems().isEmpty()) {
+            for (Attendee removed : difference.getRemovedItems()) {
+                if (CalendarUtils.isInternal(removed)) {
+                    userIds.add(removed.getEntity());
+                    userChange.put(removed.getEntity(), ChangeType.REMOVE);
+                } else {
+                    externalChange.put(removed.getEMail(), ChangeType.REMOVE);
                 }
             }
         }
     }
 
-    private void investigateSetOperation(Difference difference, Set<Integer> userIds, Set<Integer> groupIds, Set<Integer> resourceIds, Map<Integer, ChangeType> userChange, Map<Integer, ChangeType> resourceChange, Map<Integer, ChangeType> groupChange, Map<String, ChangeType> externalChange, ChangeType changeType, List<Object> list) {
-        for(Object added : list) {
-            if (added instanceof UserParticipant) {
-                UserParticipant up = (UserParticipant) added;
-                userIds.add(up.getIdentifier());
-                userChange.put(up.getIdentifier(), changeType);
-            }
-
-            if (added instanceof ExternalUserParticipant) {
-                ExternalUserParticipant ep = (ExternalUserParticipant) added;
-                externalChange.put(ep.getEmailAddress(), changeType);
-            }
-
-            if (added instanceof ResourceParticipant) {
-                ResourceParticipant rp = (ResourceParticipant) added;
-                resourceIds.add(rp.getIdentifier());
-                resourceChange.put(rp.getIdentifier(), changeType);
-
-            }
-
-            if (added instanceof GroupParticipant) {
-                GroupParticipant gp = (GroupParticipant) added;
-                groupIds.add(gp.getIdentifier());
-                groupChange.put(gp.getIdentifier(), changeType);
+    private void investigateSetOperation(CollectionUpdate<Attendee, AttendeeField> difference, Set<Integer> userIds, Set<Integer> groupIds, Set<Integer> resourceIds, Map<Integer, ChangeType> userChange, Map<Integer, ChangeType> resourceChange, Map<Integer, ChangeType> groupChange, Map<String, ChangeType> externalChange, ChangeType changeType, List<Attendee> list) {
+        for (Attendee added : list) {
+            if (added.getCuType().equals(CalendarUserType.INDIVIDUAL)) {
+                if (CalendarUtils.isInternal(added)) {
+                    userIds.add(added.getEntity());
+                    userChange.put(added.getEntity(), changeType);
+                } else {
+                    externalChange.put(added.getEMail(), changeType);
+                }
+            } else if (added.getCuType().equals(CalendarUserType.RESOURCE)) {
+                resourceIds.add(added.getEntity());
+                resourceChange.put(added.getEntity(), changeType);
+            } else if (added.getCuType().equals(CalendarUserType.GROUP)) {
+                groupIds.add(added.getEntity());
+                groupChange.put(added.getEntity(), changeType);
             }
         }
     }
 
     @Override
-    public String[] getFields() {
+    public EventField[] getFields() {
         return FIELDS;
     }
-
-
 
 }

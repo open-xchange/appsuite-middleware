@@ -49,9 +49,9 @@
 
 package com.openexchange.chronos.itip.generators;
 
+import com.openexchange.chronos.Event;
+import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.container.Appointment;
-import com.openexchange.session.Session;
 
 /**
  * {@link ITipMailGeneratorFactory}
@@ -60,6 +60,6 @@ import com.openexchange.session.Session;
  */
 public interface ITipMailGeneratorFactory {
 
-    ITipMailGenerator create(Appointment original, Appointment appointment, Session session, int onBehalfOfId) throws OXException;
+    ITipMailGenerator create(Event original, Event event, CalendarSession session, int onBehalfOfId) throws OXException;
 
 }

@@ -54,14 +54,12 @@ import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
 import java.util.TimeZone;
+import com.openexchange.chronos.Attendee;
+import com.openexchange.chronos.ParticipationStatus;
+import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.itip.ITipRole;
-import com.openexchange.groupware.container.ExternalUserParticipant;
-import com.openexchange.groupware.container.Participant;
-import com.openexchange.groupware.container.UserParticipant;
-import com.openexchange.groupware.container.participants.ConfirmStatus;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-
 
 /**
  * {@link NotificationParticipant}
@@ -75,16 +73,16 @@ public class NotificationParticipant implements Cloneable {
     private String email;
     private int identifier = -1;
     private String displayName;
-    private ConfirmStatus confirmStatus = ConfirmStatus.NONE;
+    private ParticipationStatus confirmStatus = ParticipationStatus.NEEDS_ACTION;
     private String comment;
     private User user;
     private Context ctx;
     private NotificationConfiguration configuration;
-	private Locale locale;
-	private boolean resource;
-	private TimeZone tz;
-	private int folderId;
-	private boolean virtual;
+    private Locale locale;
+    private boolean resource;
+    private TimeZone tz;
+    private String folderId;
+    private boolean virtual;
 
     public NotificationParticipant(ITipRole role, boolean external, String email) {
         super();
@@ -123,40 +121,35 @@ public class NotificationParticipant implements Cloneable {
         return displayName;
     }
 
-
     public void setDisplayName(String displayName) {
         this.displayName = displayName;
     }
 
     public boolean hasRole(ITipRole role) {
-    	return roles.contains(role);
+        return roles.contains(role);
     }
 
     public boolean isExternal() {
         return external;
     }
 
-
     public void setExternal(boolean external) {
         this.external = external;
     }
-
 
     public String getEmail() {
         return email;
     }
 
-
     public void setEmail(String email) {
         this.email = email;
     }
 
-    public ConfirmStatus getConfirmStatus() {
+    public ParticipationStatus getConfirmStatus() {
         return confirmStatus;
     }
 
-
-    public void setConfirmStatus(ConfirmStatus confirmStatus) {
+    public void setConfirmStatus(ParticipationStatus confirmStatus) {
         this.confirmStatus = confirmStatus;
     }
 
@@ -167,7 +160,6 @@ public class NotificationParticipant implements Cloneable {
         result = prime * result + ((email == null) ? 0 : email.hashCode());
         return result;
     }
-
 
     @Override
     public boolean equals(Object obj) {
@@ -191,42 +183,37 @@ public class NotificationParticipant implements Cloneable {
         return true;
     }
 
-
-    public boolean matches(Participant object) {
-        if (object instanceof ExternalUserParticipant) {
-            return ((ExternalUserParticipant) object).getEmailAddress().equalsIgnoreCase(email);
+    public boolean matches(Attendee attendee) {
+        if (CalendarUtils.isInternal(attendee)) {
+            return attendee.getEntity() == identifier;
+        } else {
+            if (attendee.getEMail() == null) {
+                return false;
+            } else {
+                return attendee.getEMail().equals(email);
+            }
         }
-        if (object instanceof UserParticipant) {
-            UserParticipant up = (UserParticipant) object;
-            return up.getIdentifier() == identifier;
-        }
-        return false;
     }
 
     public int getIdentifier() {
         return identifier;
     }
 
-
     public String getComment() {
         return comment;
     }
-
 
     public void setComment(String comment) {
         this.comment = comment;
     }
 
-
     public User getUser() {
         return user;
     }
 
-
     public void setUser(User user) {
         this.user = user;
     }
-
 
     public void setContext(Context ctx) {
         this.ctx = ctx;
@@ -244,79 +231,77 @@ public class NotificationParticipant implements Cloneable {
         this.configuration = configuration;
     }
 
-	public Locale getLocale() {
-		if (locale == null) {
-			return Locale.getDefault();
-		}
-		return locale;
-	}
+    public Locale getLocale() {
+        if (locale == null) {
+            return Locale.getDefault();
+        }
+        return locale;
+    }
 
-	public void setLocale(Locale locale) {
-		this.locale = locale;
-	}
+    public void setLocale(Locale locale) {
+        this.locale = locale;
+    }
 
-	public void setResource(boolean b) {
-		this.resource = true;
-	}
+    public void setResource(boolean b) {
+        this.resource = true;
+    }
 
-	public boolean isResource() {
-		return resource;
-	}
+    public boolean isResource() {
+        return resource;
+    }
 
-	public TimeZone getTimeZone() {
-		if (tz == null) {
-			return TimeZone.getDefault();
-		}
-		return tz;
-	}
+    public TimeZone getTimeZone() {
+        if (tz == null) {
+            return TimeZone.getDefault();
+        }
+        return tz;
+    }
 
-	public void setTimezone(TimeZone tz) {
-		this.tz = tz;
-	}
+    public void setTimezone(TimeZone tz) {
+        this.tz = tz;
+    }
 
-	@Override
-	public String toString() {
-		return "NotificationParticipant [roles=" + roles + ", external="
-				+ external + ", email=" + email + ", identifier=" + identifier
-				+ ", displayName=" + displayName + "]";
-	}
+    @Override
+    public String toString() {
+        return "NotificationParticipant [roles=" + roles + ", external=" + external + ", email=" + email + ", identifier=" + identifier + ", displayName=" + displayName + "]";
+    }
 
-	public int getFolderId() {
-		return folderId;
-	}
+    public String getFolderId() {
+        return folderId;
+    }
 
-	public void setFolderId(int folderId) {
-		this.folderId = folderId;
-	}
+    public void setFolderId(String folderId) {
+        this.folderId = folderId;
+    }
 
-	@Override
+    @Override
     public NotificationParticipant clone() {
-		NotificationParticipant clone = new NotificationParticipant(roles, external, comment);
-		clone.roles = new HashSet<ITipRole>(this.roles);
-		clone.external = this.external;
-		clone.email = this.email;
-		clone.identifier = this.identifier;
-		clone.displayName = this.displayName;
-		clone.confirmStatus = this.confirmStatus;
-		clone.comment = this.comment;
-		clone.user = this.user;
-		clone.ctx = this.ctx;
-		clone.configuration = this.configuration;
-		clone.locale = this.locale;
-		clone.resource = this.resource;
-		clone.tz = this.tz;
-		clone.folderId = this.folderId;
-		clone.virtual = this.virtual;
+        NotificationParticipant clone = new NotificationParticipant(roles, external, comment);
+        clone.roles = new HashSet<ITipRole>(this.roles);
+        clone.external = this.external;
+        clone.email = this.email;
+        clone.identifier = this.identifier;
+        clone.displayName = this.displayName;
+        clone.confirmStatus = this.confirmStatus;
+        clone.comment = this.comment;
+        clone.user = this.user;
+        clone.ctx = this.ctx;
+        clone.configuration = this.configuration;
+        clone.locale = this.locale;
+        clone.resource = this.resource;
+        clone.tz = this.tz;
+        clone.folderId = this.folderId;
+        clone.virtual = this.virtual;
 
-		return clone;
-	}
+        return clone;
+    }
 
-	public void setVirtual(boolean b) {
-		this.virtual = b;
-	}
+    public void setVirtual(boolean b) {
+        this.virtual = b;
+    }
 
-	public boolean isVirtual() {
-		return virtual;
-	}
+    public boolean isVirtual() {
+        return virtual;
+    }
 
 }

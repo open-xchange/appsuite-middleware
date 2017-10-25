@@ -53,13 +53,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
+import com.openexchange.chronos.Event;
 import com.openexchange.chronos.itip.generators.Sentence;
 import com.openexchange.chronos.itip.generators.TypeWrapper;
-import com.openexchange.chronos.itip.tools.AppointmentDiff;
+import com.openexchange.chronos.itip.tools.ITipEventUpdate;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.contexts.Context;
-
 
 /**
  * {@link ChangeDescriber}
@@ -67,16 +66,17 @@ import com.openexchange.groupware.contexts.Context;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class ChangeDescriber {
+
     private final ChangeDescriptionGenerator[] generators;
 
-    public ChangeDescriber(ChangeDescriptionGenerator...generators) {
+    public ChangeDescriber(ChangeDescriptionGenerator... generators) {
         this.generators = generators;
     }
 
-    public List<String> getChanges(Context ctx, Appointment original, Appointment update, AppointmentDiff diff, TypeWrapper wrapper, Locale locale, TimeZone timezone) throws OXException {
+    public List<String> getChanges(Context ctx, Event original, Event update, ITipEventUpdate diff, TypeWrapper wrapper, Locale locale, TimeZone timezone) throws OXException {
         List<String> changeDescriptions = new ArrayList<String>();
         for (ChangeDescriptionGenerator generator : generators) {
-            if (diff.anyFieldChangedOf(generator.getFields())) {
+            if (diff.containsAnyChangeOf(generator.getFields())) {
                 List<Sentence> descriptions = generator.getDescriptions(ctx, original, update, diff, locale, timezone);
                 for (Sentence changeDescription : descriptions) {
                     changeDescriptions.add(changeDescription.getMessage(wrapper, locale));

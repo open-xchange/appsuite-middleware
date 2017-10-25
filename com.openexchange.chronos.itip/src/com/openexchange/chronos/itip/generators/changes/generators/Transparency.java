@@ -47,20 +47,44 @@
  *
  */
 
-package com.openexchange.chronos.itip.generators;
+package com.openexchange.chronos.itip.generators.changes.generators;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.Locale;
+import java.util.TimeZone;
 import com.openexchange.chronos.Event;
-import com.openexchange.chronos.itip.ITipMessage;
-import com.openexchange.chronos.service.CalendarSession;
+import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.Transp;
+import com.openexchange.chronos.itip.Messages;
+import com.openexchange.chronos.itip.generators.ArgumentType;
+import com.openexchange.chronos.itip.generators.Sentence;
+import com.openexchange.chronos.itip.generators.changes.ChangeDescriptionGenerator;
+import com.openexchange.chronos.itip.tools.ITipEventUpdate;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.Context;
 
-/**
- * {@link ITipMessageGenerator}
- *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- */
-public interface ITipMessageGenerator {
+public class Transparency implements ChangeDescriptionGenerator {
 
-    ITipMessage generate(Event original, Event updated, CalendarSession session) throws OXException;
+    @Override
+    public EventField[] getFields() {
+        return new EventField[] { EventField.TRANSP };
+    }
+
+    @Override
+    public List<Sentence> getDescriptions(Context ctx, Event original, Event updated, ITipEventUpdate diff, Locale locale, TimeZone timezone) throws OXException {
+
+        Sentence sentence = new Sentence(Messages.HAS_CHANGED_SHOWN_AS).add(string(updated.getTransp()), ArgumentType.SHOWN_AS, updated.getTransp());
+
+        return Arrays.asList(sentence);
+    }
+
+    private Object string(Transp transparency) {
+        if (transparency.equals(Transp.TRANSPARENT)) {
+            return Messages.FREE;
+        } else {
+            return Messages.RESERVERD;
+        }
+    }
 
 }

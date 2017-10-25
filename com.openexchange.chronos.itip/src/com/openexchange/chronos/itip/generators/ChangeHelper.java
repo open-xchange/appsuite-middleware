@@ -52,21 +52,20 @@ package com.openexchange.chronos.itip.generators;
 import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
+import com.openexchange.chronos.Event;
 import com.openexchange.chronos.itip.generators.changes.ChangeDescriber;
 import com.openexchange.chronos.itip.generators.changes.generators.Attachments;
 import com.openexchange.chronos.itip.generators.changes.generators.Details;
 import com.openexchange.chronos.itip.generators.changes.generators.Participants;
 import com.openexchange.chronos.itip.generators.changes.generators.Rescheduling;
-import com.openexchange.chronos.itip.generators.changes.generators.ShownAs;
-import com.openexchange.chronos.itip.tools.AppointmentDiff;
+import com.openexchange.chronos.itip.generators.changes.generators.Transparency;
+import com.openexchange.chronos.itip.tools.ITipEventUpdate;
 import com.openexchange.exception.OXException;
 import com.openexchange.group.GroupService;
-import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.resource.ResourceService;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.user.UserService;
-
 
 /**
  * {@link ChangeHelper}
@@ -77,18 +76,18 @@ public class ChangeHelper {
 
     private final ChangeDescriber describer;
 
-    private final AppointmentDiff diff;
-    private final Appointment update;
-    private final Appointment original;
+    private final ITipEventUpdate diff;
+    private final Event update;
+    private final Event original;
     private final TypeWrapper wrapper;
 
     private final Context ctx;
 
-	private final Locale locale;
+    private final Locale locale;
 
-	private final TimeZone timezone;
+    private final TimeZone timezone;
 
-    public ChangeHelper(final Context ctx, final NotificationParticipant participant, final Appointment original, final Appointment update, final AppointmentDiff diff, final Locale locale, final TimeZone tz, final TypeWrapper wrapper, final AttachmentMemory attachmentMemory, final ServiceLookup services) {
+    public ChangeHelper(final Context ctx, final NotificationParticipant participant, final Event original, final Event update, final ITipEventUpdate diff, final Locale locale, final TimeZone tz, final TypeWrapper wrapper, final AttachmentMemory attachmentMemory, final ServiceLookup services) {
         super();
         this.original = original;
         this.update = update;
@@ -100,21 +99,19 @@ public class ChangeHelper {
         final Rescheduling rescheduling = new Rescheduling();
         boolean interested = true;
         if (participant.getConfiguration() != null) {
-        	interested = participant.getConfiguration().interestedInStateChanges();
+            interested = participant.getConfiguration().interestedInStateChanges();
         }
-        final Participants participants =  new Participants(services.getService(UserService.class), services.getService(GroupService.class), services.getService(ResourceService.class), interested);
+        final Participants participants = new Participants(services.getService(UserService.class), services.getService(GroupService.class), services.getService(ResourceService.class), interested);
         final Details details = new Details();
         final Attachments attachments = new Attachments(attachmentMemory);
-        ShownAs shownAs = new ShownAs();
+        Transparency shownAs = new Transparency();
 
-    	describer = new ChangeDescriber(rescheduling, details, participants, shownAs, attachments);
+        describer = new ChangeDescriber(rescheduling, details, participants, shownAs, attachments);
 
     }
 
     public List<String> getChanges() throws OXException {
         return describer.getChanges(ctx, original, update, diff, wrapper, locale, timezone);
     }
-
-
 
 }

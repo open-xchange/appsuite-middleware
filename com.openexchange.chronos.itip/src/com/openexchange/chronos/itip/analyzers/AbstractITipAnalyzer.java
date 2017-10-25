@@ -50,18 +50,19 @@
 package com.openexchange.chronos.itip.analyzers;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
-import com.openexchange.ajax.fields.CalendarFields;
+import com.openexchange.chronos.Attendee;
+import com.openexchange.chronos.AttendeeField;
+import com.openexchange.chronos.Event;
+import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.Organizer;
+import com.openexchange.chronos.ParticipationStatus;
+import com.openexchange.chronos.common.mapping.EventUpdateImpl;
 import com.openexchange.chronos.itip.ITipAnalysis;
 import com.openexchange.chronos.itip.ITipAnalyzer;
 import com.openexchange.chronos.itip.ITipChange;
@@ -79,26 +80,19 @@ import com.openexchange.chronos.itip.generators.changes.PassthroughWrapper;
 import com.openexchange.chronos.itip.generators.changes.generators.Details;
 import com.openexchange.chronos.itip.generators.changes.generators.Participants;
 import com.openexchange.chronos.itip.generators.changes.generators.Rescheduling;
-import com.openexchange.chronos.itip.generators.changes.generators.ShownAs;
-import com.openexchange.chronos.itip.tools.AppointmentDiff;
-import com.openexchange.chronos.itip.tools.AppointmentDiff.FieldUpdate;
+import com.openexchange.chronos.itip.generators.changes.generators.Transparency;
+import com.openexchange.chronos.itip.tools.ITipEventUpdate;
+import com.openexchange.chronos.service.CalendarSession;
+import com.openexchange.chronos.service.CollectionUpdate;
+import com.openexchange.chronos.service.EventConflict;
+import com.openexchange.chronos.service.ItemUpdate;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.group.GroupService;
-import com.openexchange.groupware.calendar.CalendarDataObject;
-import com.openexchange.groupware.container.Appointment;
-import com.openexchange.groupware.container.CalendarObject;
-import com.openexchange.groupware.container.Change;
-import com.openexchange.groupware.container.ConfirmationChange;
-import com.openexchange.groupware.container.Difference;
-import com.openexchange.groupware.container.Participant;
-import com.openexchange.groupware.container.UserParticipant;
-import com.openexchange.groupware.container.participants.ConfirmStatus;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.resource.ResourceService;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.session.Session;
 import com.openexchange.user.UserService;
 
 /**
@@ -108,476 +102,344 @@ import com.openexchange.user.UserService;
  *         Laguna</a>
  */
 public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
-	public static final int[] SKIP = new int[] { Appointment.FOLDER_ID,
-			Appointment.OBJECT_ID, Appointment.CREATED_BY,
-			Appointment.CREATION_DATE, Appointment.LAST_MODIFIED,
-			Appointment.LAST_MODIFIED_UTC, Appointment.MODIFIED_BY,
-			Appointment.SEQUENCE, Appointment.ALARM };
-	protected ITipIntegrationUtility util;
-	protected ServiceLookup services;
 
-	@Override
-    public ITipAnalysis analyze(final ITipMessage message, Map<String, String> header,
-			final String style, final Session session) throws OXException {
-		if (header == null) {
-			header = new HashMap<String, String>();
-		}
-		header = lowercase(header);
-		if (services != null) {
+    public static final EventField[] SKIP = new EventField[] { EventField.FOLDER_ID, EventField.ID, EventField.CREATED_BY, EventField.CREATED, EventField.TIMESTAMP, EventField.LAST_MODIFIED, EventField.MODIFIED_BY, EventField.SEQUENCE, EventField.ALARMS };
+    protected ITipIntegrationUtility util;
+    protected ServiceLookup services;
 
-			final ContextService contexts = services.getService(ContextService.class);
-			final UserService users = services.getService(UserService.class);
+    @Override
+    public ITipAnalysis analyze(final ITipMessage message, Map<String, String> header, final String style, final CalendarSession session) throws OXException {
+        if (header == null) {
+            header = new HashMap<String, String>();
+        }
+        header = lowercase(header);
+        if (services != null) {
 
-			final Context ctx = contexts.getContext(session.getContextId());
-			final User user = users.getUser(session.getUserId(), ctx);
+            final ContextService contexts = services.getService(ContextService.class);
+            final UserService users = services.getService(UserService.class);
 
-			return analyze(message, header, wrapperFor(style), user.getLocale(), user, ctx, session);
+            final Context ctx = contexts.getContext(session.getContextId());
+            final User user = users.getUser(session.getUserId(), ctx);
 
-		}
+            return analyze(message, header, wrapperFor(style), user.getLocale(), user, ctx, session);
 
-		return analyze(message, header, wrapperFor(style), null, null, null, session);
-	}
+        }
 
-	private Map<String, String> lowercase(final Map<String, String> header) {
-		final Map<String, String> copy = new HashMap<String, String>();
-		for(final Map.Entry<String, String> entry : header.entrySet()) {
-			copy.put(entry.getKey().toLowerCase(), entry.getValue());
-		}
-		return copy;
-	}
+        return analyze(message, header, wrapperFor(style), null, null, null, session);
+    }
 
-	protected abstract ITipAnalysis analyze(ITipMessage message, Map<String, String> header, TypeWrapper wrapper, Locale locale, User user, Context ctx, Session session) throws OXException;
+    private Map<String, String> lowercase(final Map<String, String> header) {
+        final Map<String, String> copy = new HashMap<String, String>();
+        for (final Map.Entry<String, String> entry : header.entrySet()) {
+            copy.put(entry.getKey().toLowerCase(), entry.getValue());
+        }
+        return copy;
+    }
 
-	public AbstractITipAnalyzer(final ITipIntegrationUtility util,
-			final ServiceLookup services) {
-		this.util = util;
-		this.services = services;
-	}
+    protected abstract ITipAnalysis analyze(ITipMessage message, Map<String, String> header, TypeWrapper wrapper, Locale locale, User user, Context ctx, CalendarSession session) throws OXException;
 
-	protected TypeWrapper wrapperFor(final String style) {
-		TypeWrapper w = new PassthroughWrapper();
-		if (style != null && style.equalsIgnoreCase("html")) {
-			w = new HTMLWrapper();
-		}
-		return w;
-	}
+    public AbstractITipAnalyzer(final ITipIntegrationUtility util) {
+        this.util = util;
+    }
 
+    protected TypeWrapper wrapperFor(final String style) {
+        TypeWrapper w = new PassthroughWrapper();
+        if (style != null && style.equalsIgnoreCase("html")) {
+            w = new HTMLWrapper();
+        }
+        return w;
+    }
 
-	public void describeDiff(final ITipChange change, final TypeWrapper wrapper,
-			final Session session, ITipMessage message) throws OXException {
-		if (services == null) {
-			change.setDiffDescription(new ArrayList<String>());
-			return;
-		}
+    public void describeDiff(final ITipChange change, final TypeWrapper wrapper, final CalendarSession session, ITipMessage message) throws OXException {
+        if (services == null) {
+            change.setDiffDescription(new ArrayList<String>());
+            return;
+        }
 
-		final ContextService contexts = services.getService(ContextService.class);
-		final UserService users = services.getService(UserService.class);
-		final GroupService groups = services.getService(GroupService.class);
-		final ResourceService resources = services.getService(ResourceService.class);
+        final ContextService contexts = services.getService(ContextService.class);
+        final UserService users = services.getService(UserService.class);
+        final GroupService groups = services.getService(GroupService.class);
+        final ResourceService resources = services.getService(ResourceService.class);
 
-		final Context ctx = contexts.getContext(session.getContextId());
-		final User user = users.getUser(session.getUserId(), ctx);
+        final Context ctx = contexts.getContext(session.getContextId());
+        final User user = users.getUser(session.getUserId(), ctx);
 
-		switch (change.getType()) {
-		case CREATE:
-			createIntro(change, users, ctx, wrapper, user.getLocale());
-			break;
-		case UPDATE:
-			updateIntro(change, users, ctx, wrapper, user.getLocale(), message);
-			break;
-		case CREATE_DELETE_EXCEPTION:
-		case DELETE:
-			deleteIntro(change, users, ctx, wrapper, user.getLocale());
-			break;
-		}
+        switch (change.getType()) {
+            case CREATE:
+                createIntro(change, users, ctx, wrapper, user.getLocale());
+                break;
+            case UPDATE:
+                updateIntro(change, users, ctx, wrapper, user.getLocale(), message);
+                break;
+            case CREATE_DELETE_EXCEPTION:
+            case DELETE:
+                deleteIntro(change, users, ctx, wrapper, user.getLocale());
+                break;
+        }
 
-		final Appointment currentAppointment = change.getCurrentAppointment();
-		final CalendarDataObject newAppointment = change.getNewAppointment();
+        final Event currentEvent = change.getCurrentEvent();
+        final Event newEvent = change.getNewEvent();
 
-		if (currentAppointment == null || newAppointment == null) {
-			change.setDiffDescription(new ArrayList<String>());
-			return;
-		}
+        if (currentEvent == null || newEvent == null) {
+            change.setDiffDescription(new ArrayList<String>());
+            return;
+        }
 
+        final ChangeDescriber cd = new ChangeDescriber(new Rescheduling(), new Details(), new Participants(users, groups, resources, true), new Transparency());
 
+        final List<String> descriptions = cd.getChanges(ctx, currentEvent, newEvent, change.getDiff(), wrapper, user.getLocale(), TimeZone.getTimeZone(user.getTimeZone()));
+        change.setDiffDescription(descriptions);
 
-		String organizer = currentAppointment.getOrganizer();
-		if (organizer == null) {
-			organizer = newAppointment.getOrganizer();
-		}
+        // Now let's choose an introduction sentence
+        switch (change.getType()) {
+            case CREATE:
+                if (!change.isException()) {
+                    createIntro(change, users, ctx, wrapper, user.getLocale());
+                    break;
+                } // Else Fall Through, creating change exceptions is more similar to updates
+            case UPDATE:
+                updateIntro(change, users, ctx, wrapper, user.getLocale(), message);
+                break;
+            case CREATE_DELETE_EXCEPTION:
+            case DELETE:
+                deleteIntro(change, users, ctx, wrapper, user.getLocale());
+                break;
+        }
+    }
 
+    private void deleteIntro(final ITipChange change, final UserService users, final Context ctx, final TypeWrapper wrapper, final Locale locale) throws OXException {
+        final String displayName = displayNameFor(change.getDeletedEvent().getOrganizer(), users, ctx);
+        change.setIntroduction(new Sentence(Messages.DELETE_INTRO).add(displayName, ArgumentType.PARTICIPANT).getMessage(wrapper, locale));
 
-		final ChangeDescriber cd = new ChangeDescriber(new Rescheduling(),
-				new Details(), new Participants(users, groups, resources,
-						true), new ShownAs());
+    }
 
-		final List<String> descriptions = cd.getChanges(ctx, currentAppointment,
-				newAppointment, change.getDiff(), wrapper, user.getLocale(),
-				TimeZone.getTimeZone(user.getTimeZone()));
-		change.setDiffDescription(descriptions);
+    private void updateIntro(final ITipChange change, final UserService users, final Context ctx, final TypeWrapper wrapper, final Locale locale, ITipMessage message) throws OXException {
+        String displayName = displayNameFor(change.getCurrentEvent().getOrganizer(), users, ctx);
+        if (onlyStateChanged(change.getDiff())) {
+            // External Participant
 
-		// Now let's choose an introduction sentence
-		switch (change.getType()) {
-		case CREATE:
-			if (!change.isException()) {
-				createIntro(change, users, ctx, wrapper, user.getLocale());
-				break;
-			} // Else Fall Through, creating change exceptions is more similar to updates
-		case UPDATE:
-			updateIntro(change, users, ctx, wrapper, user.getLocale(), message);
-			break;
-		case CREATE_DELETE_EXCEPTION:
-		case DELETE:
-			deleteIntro(change, users, ctx, wrapper, user.getLocale());
-			break;
-		}
-	}
+            ParticipationStatus newStatus = null;
 
-	private void deleteIntro(final ITipChange change, final UserService users, final Context ctx,
-			final TypeWrapper wrapper, final Locale locale) throws OXException {
-		final String displayName = displayNameFor(change.getDeletedAppointment()
-				.getOrganizer(), users, ctx);
-		change.setIntroduction(new Sentence(Messages.DELETE_INTRO).add(
-				displayName, ArgumentType.PARTICIPANT).getMessage(wrapper,
-				locale));
+            outer: for (ItemUpdate<Attendee, AttendeeField> attendeeUpdate : change.getDiff().getAttendeeUpdates().getUpdatedItems()) {
+                for (AttendeeField attendeeField : attendeeUpdate.getUpdatedFields()) {
+                    if (attendeeField.equals(AttendeeField.PARTSTAT)) {
+                        newStatus = attendeeUpdate.getUpdate().getPartStat();
+                        displayName = attendeeUpdate.getOriginal().getCn() == null ? attendeeUpdate.getOriginal().getEMail() : attendeeUpdate.getOriginal().getCn();
+                        break outer;
+                    }
+                }
+            }
 
-	}
+            Sentence sentence = null;
+            if (newStatus != null) {
+                if (newStatus.equals(ParticipationStatus.ACCEPTED)) {
+                    sentence = new Sentence(Messages.ACCEPT_INTRO).add(displayName, ArgumentType.PARTICIPANT).add("", ArgumentType.STATUS, newStatus);
+                } else if (newStatus.equals(ParticipationStatus.DECLINED)) {
+                    sentence = new Sentence(Messages.DECLINE_INTRO).add(displayName, ArgumentType.PARTICIPANT).add("", ArgumentType.STATUS, newStatus);
+                } else if (newStatus.equals(ParticipationStatus.TENTATIVE)) {
+                    sentence = new Sentence(Messages.TENTATIVE_INTRO).add(displayName, ArgumentType.PARTICIPANT).add("", ArgumentType.STATUS, newStatus);
+                }
 
-	private void updateIntro(final ITipChange change, final UserService users, final Context ctx,
-			final TypeWrapper wrapper, final Locale locale, ITipMessage message) throws OXException {
-		String displayName = displayNameFor(change.getCurrentAppointment()
-				.getOrganizer(), users, ctx);
-		if (onlyStateChanged(change.getDiff())) {
-			// External Participant
+                if (sentence != null) {
+                    change.setIntroduction(sentence.getMessage(wrapper, locale));
+                }
+            }
+        } else {
+            if (message.getMethod() != ITipMethod.COUNTER) {
+                change.setIntroduction(new Sentence(Messages.UPDATE_INTRO).add(displayName, ArgumentType.PARTICIPANT).getMessage(wrapper, locale));
+            }
+        }
+    }
 
-			ConfirmStatus newStatus = null;
+    AttendeeField[] ALL_BUT_CONFIRMATION = new AttendeeField[] { AttendeeField.CN, AttendeeField.CU_TYPE, AttendeeField.EMAIL, AttendeeField.ENTITY, AttendeeField.FOLDER_ID, AttendeeField.MEMBER, AttendeeField.ROLE, AttendeeField.RSVP, AttendeeField.SENT_BY, AttendeeField.URI };
 
-			final AppointmentDiff diff = change.getDiff();
-			FieldUpdate update = diff
-					.getUpdateFor(CalendarFields.CONFIRMATIONS);
-			if (update != null) {
-				final Difference difference = (Difference) update.getExtraInfo();
-				final List<Change> changed = difference.getChanged();
-				if (changed != null && !changed.isEmpty()) {
-					final ConfirmationChange chng = (ConfirmationChange) changed
-							.get(0);
-					displayName = chng.getIdentifier();
-					newStatus = ConfirmStatus.byId(chng.getNewStatus());
-				}
-			}
+    private boolean onlyStateChanged(ITipEventUpdate diff) {
+        if (diff.containsAnyChangesBeside(new EventField[] { EventField.ATTENDEES })) {
+            return false;
+        }
 
-			// Internal Participant
-			update = diff.getUpdateFor("users");
-			if (update != null && newStatus == null) {
-				final Difference difference = (Difference) update.getExtraInfo();
-				final List<Change> changed = difference.getChanged();
-				if (changed != null && !changed.isEmpty()) {
-					final ConfirmationChange chng = (ConfirmationChange) changed
-							.get(0);
-					displayName = users.getUser(
-							Integer.valueOf(chng.getIdentifier()), ctx)
-							.getDisplayName();
-					newStatus = ConfirmStatus.byId(chng.getNewStatus());
-				}
-			}
+        CollectionUpdate<Attendee, AttendeeField> attendeeUpdates = diff.getAttendeeUpdates();
 
-			Sentence sentence = null;
-			if (newStatus != null) {
-				switch (newStatus) {
-				case ACCEPT:
-					sentence = new Sentence(Messages.ACCEPT_INTRO).add(displayName,
-							ArgumentType.PARTICIPANT).add("",
-							ArgumentType.STATUS, newStatus);
-					break;
-				case DECLINE:
-					sentence = new Sentence(Messages.DECLINE_INTRO).add(
-							displayName, ArgumentType.PARTICIPANT).add(
-							"", ArgumentType.STATUS, newStatus);
-					break;
-				case TENTATIVE:
-					sentence = new Sentence(Messages.TENTATIVE_INTRO).add(
-							displayName, ArgumentType.PARTICIPANT).add(
-							"", ArgumentType.STATUS, newStatus);
-					break;
-				}
+        if (attendeeUpdates == null || attendeeUpdates.isEmpty()) {
+            return true;
+        }
 
-				if (sentence != null) {
-					change.setIntroduction(sentence.getMessage(wrapper, locale));
-				}
-			}
-		} else {
-		    if (message.getMethod() != ITipMethod.COUNTER) {
-	            change.setIntroduction(new Sentence(Messages.UPDATE_INTRO).add(
-                    displayName, ArgumentType.PARTICIPANT).getMessage(wrapper,
-                    locale));		        
-		    }
-		}
-	}
+        if (attendeeUpdates.getAddedItems() != null && !attendeeUpdates.getAddedItems().isEmpty()) {
+            return false;
+        }
 
-	private boolean onlyStateChanged(final AppointmentDiff diff) {
-		// First, let's see if any fields besides the state tracking fields have
-		// changed
-		final HashSet<String> differing = new HashSet<String>(
-				diff.getDifferingFieldNames());
+        if (attendeeUpdates.getRemovedItems() != null && !attendeeUpdates.getRemovedItems().isEmpty()) {
+            return false;
+        }
 
-		for (final String field : new String[] { CalendarFields.PARTICIPANTS,
-				CalendarFields.USERS, CalendarFields.CONFIRMATIONS }) {
-			differing.remove(field);
-		}
-		if (!differing.isEmpty()) {
-			return false;
-		}
+        List<? extends ItemUpdate<Attendee, AttendeeField>> updatedItems = attendeeUpdates.getUpdatedItems();
+        for (ItemUpdate<Attendee, AttendeeField> attendeeUpdate : updatedItems) {
+            if (attendeeUpdate.containsAnyChangeOf(ALL_BUT_CONFIRMATION))
+                ;
+        }
 
-		// Hm, okay, so no let's see if any participants were added or removed.
-		for (final String field : new String[] { CalendarFields.PARTICIPANTS,
-				CalendarFields.USERS, CalendarFields.CONFIRMATIONS }) {
-			final FieldUpdate update = diff.getUpdateFor(field);
-			if (update == null) {
-				continue;
-			}
-			final Difference extraInfo = (Difference) update.getExtraInfo();
-			if (!extraInfo.getAdded().isEmpty()) {
-				return false;
-			}
-			if (!extraInfo.getRemoved().isEmpty()) {
-				return false;
-			}
+        return true;
+    }
 
-		}
+    private void createIntro(final ITipChange change, final UserService users, final Context ctx, final TypeWrapper wrapper, final Locale locale) throws OXException {
+        final String displayName = displayNameFor(change.getNewEvent().getOrganizer(), users, ctx);
+        change.setIntroduction(new Sentence(Messages.CREATE_INTRO).add(displayName, ArgumentType.PARTICIPANT).getMessage(wrapper, locale));
+    }
 
-		return true;
-	}
+    protected String displayNameFor(Organizer organizer, final UserService users, final Context ctx) throws OXException {
+        if (organizer == null) {
+            return "unknown";
+        }
 
-	private void createIntro(final ITipChange change, final UserService users, final Context ctx,
-			final TypeWrapper wrapper, final Locale locale) throws OXException {
-		final String displayName = displayNameFor(change.getNewAppointment()
-				.getOrganizer(), users, ctx);
-		change.setIntroduction(new Sentence(Messages.CREATE_INTRO).add(
-				displayName, ArgumentType.PARTICIPANT).getMessage(wrapper,
-				locale));
-	}
+        if (organizer.getCn() != null) {
+            return organizer.getCn();
+        }
 
-	protected String displayNameFor(String organizer, final UserService users,
-			final Context ctx) throws OXException {
-		if (organizer == null) {
-			return "unknown";
-		}
-		organizer = organizer.toLowerCase();
-		if (organizer.startsWith("mailto:")) {
-			organizer = organizer.substring(7);
-		}
+        if (organizer.getEMail() != null) {
+            return organizer.getEMail();
+        }
 
-		try {
-			final User result = users.searchUser(organizer, ctx);
-			if (result != null) {
-				if (result.getDisplayName() != null) {
-					return result.getDisplayName();
-				}
-			}
-		} catch (final OXException x) {
-			return organizer;
-		}
+        return "unknown";
+    }
 
-		return organizer;
-	}
+    protected Event findAndRemoveMatchingException(final Event exception, final List<Event> exceptions) {
+        for (Iterator<Event> iterator = exceptions.iterator(); iterator.hasNext();) {
+            Event existingException = iterator.next();
+            if (existingException.getRecurrenceId().compareTo(exception.getRecurrenceId()) == 0) {
+                iterator.remove();
+                return existingException;
+            }
+        }
+        return null;
+    }
 
-	protected Appointment findAndRemoveMatchingException(final Appointment exception, final List<Appointment> exceptions) {
-		for (final Iterator<Appointment> iterator = exceptions.iterator(); iterator.hasNext();) {
-			final Appointment existingException = iterator.next();
-			if (sameDay(existingException.getRecurrenceDatePosition(), exception.getRecurrenceDatePosition())) {
-				iterator.remove();
-				return existingException;
-			}
-		}
-		return null;
-	}
+    public boolean doAppointmentsDiffer(final Event update, final Event original) throws OXException {
+        final ITipEventUpdate diff = new ITipEventUpdate(new EventUpdateImpl(original, update, false, AbstractITipAnalyzer.SKIP));
+        return !diff.getUpdatedFields().isEmpty();
+    }
 
-	private boolean sameDay(final Date date1, final Date date2) {
-		final GregorianCalendar gregorianCalendar1 = new GregorianCalendar();
-		gregorianCalendar1.setTime(date1);
-		gregorianCalendar1.setTimeZone(TimeZone.getTimeZone("UTC"));
+    public boolean hasConflicts(final ITipAnalysis analysis) {
+        for (final ITipChange change : analysis.getChanges()) {
+            if (change.getConflicts() != null && !change.getConflicts().isEmpty()) {
+                return true;
+            }
+        }
+        return false;
+    }
 
-		final GregorianCalendar gregorianCalendar2 = new GregorianCalendar();
-		gregorianCalendar2.setTime(date2);
-		gregorianCalendar2.setTimeZone(TimeZone.getTimeZone("UTC"));
+    public void purgeConflicts(final ITipAnalysis analysis) throws OXException {
+        final Map<String, ITipChange> knownAppointments = new HashMap<>();
+        for (final ITipChange change : analysis.getChanges()) {
+            final Event currentAppointment = change.getCurrentEvent();
+            if (currentAppointment != null) {
+                knownAppointments.put(currentAppointment.getId(), change);
+            }
+            final Event deletedAppointment = change.getDeletedEvent();
+            if (deletedAppointment != null) {
+                knownAppointments.put(deletedAppointment.getId(), change);
+            }
+        }
 
-		for (final int field : new int[] { Calendar.DAY_OF_YEAR, Calendar.YEAR }) {
-			if (gregorianCalendar1.get(field) != gregorianCalendar2.get(field)) {
-				return false;
-			}
-		}
-
-		return true;
-	}
-
-	public boolean doAppointmentsDiffer(final Appointment update, final Appointment original) {
-		final AppointmentDiff diff = AppointmentDiff.compare(original, update, SKIP);
-
-		return !diff.getDifferingFieldNames().isEmpty();
-	}
-
-	public boolean hasConflicts(final ITipAnalysis analysis) {
-		for (final ITipChange change : analysis.getChanges()) {
-			if (change.getConflicts() != null
-					&& !change.getConflicts().isEmpty()) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	public void purgeConflicts(final ITipAnalysis analysis) {
-		final Map<Integer, ITipChange> knownAppointments = new HashMap<Integer, ITipChange>();
-		for (final ITipChange change : analysis.getChanges()) {
-			final Appointment currentAppointment = change.getCurrentAppointment();
-			if (currentAppointment != null) {
-				knownAppointments.put(currentAppointment.getObjectID(), change);
-			}
-			final Appointment deletedAppointment = change.getDeletedAppointment();
-			if (deletedAppointment != null) {
-				knownAppointments.put(deletedAppointment.getObjectID(), change);
-			}
-		}
-
-		for (final ITipChange change : analysis.getChanges()) {
-			final List<Appointment> conflicts = change.getConflicts();
-			if (conflicts == null) {
-				continue;
-			}
-			final CalendarDataObject newAppointment = change.getNewAppointment();
-			if (newAppointment == null) {
-				continue;
-			}
-			final Appointment currentAppointment = change.getCurrentAppointment();
-			final CalendarDataObject masterAppointment = change
-					.getMasterAppointment();
-			for (final Iterator<Appointment> iterator = conflicts.iterator(); iterator
-					.hasNext();) {
-				final Appointment conflict = iterator.next();
-				if (currentAppointment != null
-						&& (currentAppointment.getObjectID() == conflict
-								.getObjectID())) {
-					iterator.remove();
-					continue;
-				}
-				if (masterAppointment != null
-						&& (masterAppointment.getObjectID() == conflict
-								.getObjectID())) {
-					iterator.remove();
-					continue;
-				}
-				final ITipChange changeToConflict = knownAppointments.get(conflict
-						.getObjectID());
-				if (changeToConflict == null) {
-					continue;
-				}
-				if (changeToConflict.getType() == ITipChange.Type.DELETE) {
-					iterator.remove();
-				} else {
-					final CalendarDataObject changedAppointment = changeToConflict
-							.getNewAppointment();
-					if (changedAppointment == null) {
-						continue;
-					}
-					if (!overlaps(changedAppointment, newAppointment)) {
-						iterator.remove();
-					}
-				}
-			}
-		}
-	}
-
-	public boolean overlaps(final CalendarDataObject app1, final CalendarDataObject app2) {
-		if (app2.getStartDate().after(app1.getEndDate())) {
-			return false;
-		}
-
-		if (app1.getStartDate().after(app2.getEndDate())) {
-			return false;
-		}
-
-		return true;
-	}
-
-	public boolean isCreate(final ITipAnalysis analysis) {
-		for (final ITipChange change : analysis.getChanges()) {
-			if (change.getType() == Type.CREATE) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	public boolean rescheduling(final ITipAnalysis analysis) {
-		for (final ITipChange change : analysis.getChanges()) {
-			if (change.getType() == Type.CREATE && change.isException()) {
-				final AppointmentDiff diff = AppointmentDiff.compare(
-						change.getCurrentAppointment(),
-						change.getNewAppointment());
-				if (diff.anyFieldChangedOf(CalendarFields.START_DATE,
-						CalendarFields.END_DATE)) {
-					return true;
-				}
-				return false;
-			}
-			if (change.getType() != Type.UPDATE) {
-				return true;
-			}
-			final AppointmentDiff diff = change.getDiff();
-			if (diff != null
-					&& diff.anyFieldChangedOf(CalendarFields.START_DATE,
-							CalendarFields.END_DATE)) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	protected void ensureParticipant(final CalendarDataObject appointment, final Session session, int owner) {
-        final int confirm = CalendarObject.NONE;
-        final Participant[] participants = appointment.getParticipants();
-        boolean found = false;
-        if (null != participants) {
-            for (final Participant participant : participants) {
-                if (participant instanceof UserParticipant) {
-                    final UserParticipant up = (UserParticipant) participant;
-                    if (up.getIdentifier() == owner) {
-                        found = true;
+        for (final ITipChange change : analysis.getChanges()) {
+            final List<EventConflict> conflicts = change.getConflicts();
+            if (conflicts == null) {
+                continue;
+            }
+            final Event newAppointment = change.getNewEvent();
+            if (newAppointment == null) {
+                continue;
+            }
+            final Event currentAppointment = change.getCurrentEvent();
+            final Event masterAppointment = change.getMasterEvent();
+            for (final Iterator<EventConflict> iterator = conflicts.iterator(); iterator.hasNext();) {
+                final EventConflict conflict = iterator.next();
+                if (currentAppointment != null && (currentAppointment.getId().equals(conflict.getConflictingEvent().getId()))) {
+                    iterator.remove();
+                    continue;
+                }
+                if (masterAppointment != null && (masterAppointment.getId().equals(conflict.getConflictingEvent().getId()))) {
+                    iterator.remove();
+                    continue;
+                }
+                final ITipChange changeToConflict = knownAppointments.get(conflict.getConflictingEvent().getId());
+                if (changeToConflict == null) {
+                    continue;
+                }
+                if (changeToConflict.getType() == ITipChange.Type.DELETE) {
+                    iterator.remove();
+                } else {
+                    final Event changedAppointment = changeToConflict.getNewEvent();
+                    if (changedAppointment == null) {
+                        continue;
+                    }
+                    if (!overlaps(changedAppointment, newAppointment)) {
+                        iterator.remove();
                     }
                 }
             }
         }
+    }
 
-        if (!found) {
-            final UserParticipant up = new UserParticipant(owner);
-            up.setConfirm(confirm);
-            final Participant[] tmp = appointment.getParticipants();
-            final List<Participant> participantList = (null == tmp) ? new ArrayList<Participant>(1) : new ArrayList<Participant>(Arrays.asList(tmp));
-            participantList.add(up);
-            appointment.setParticipants(participantList);
+    public boolean overlaps(final Event event1, final Event event2) {
+        if (event2.getStartDate().after(event1.getEndDate())) {
+            return false;
         }
-        
-        List<UserParticipant> users = appointment.getUsers() == null ? new ArrayList<UserParticipant>() : new ArrayList<UserParticipant>(Arrays.asList(appointment.getUsers()));
-        for (Participant p : appointment.getParticipants()) {
-            if (p.getType() == Participant.USER) {
-                users.add((UserParticipant) p);
+
+        if (event1.getStartDate().after(event2.getEndDate())) {
+            return false;
+        }
+
+        return true;
+    }
+
+    public boolean isCreate(final ITipAnalysis analysis) {
+        for (final ITipChange change : analysis.getChanges()) {
+            if (change.getType() == Type.CREATE) {
+                return true;
             }
         }
+        return false;
+    }
 
-        found = false;
-        if (users != null) {
-            for (UserParticipant userParticipant : users) {
-                if (userParticipant.getIdentifier() == owner) {
+    public boolean rescheduling(final ITipAnalysis analysis) throws OXException {
+        for (final ITipChange change : analysis.getChanges()) {
+            if (change.getType() == Type.CREATE && change.isException()) {
+                final ITipEventUpdate diff = new ITipEventUpdate(new EventUpdateImpl(change.getCurrentEvent(), change.getNewEvent(), false, (EventField[]) null));
+                if (diff.containsAnyChangeOf(new EventField[] { EventField.START_DATE, EventField.END_DATE })) {
+                    return true;
+                }
+                return false;
+            }
+            if (change.getType() != Type.UPDATE) {
+                return true;
+            }
+            final ITipEventUpdate diff = change.getDiff();
+            if (diff != null && diff.containsAnyChangeOf(new EventField[] { EventField.START_DATE, EventField.END_DATE })) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    protected void ensureParticipant(final Event event, final CalendarSession session, int owner) {
+        List<Attendee> attendees = event.getAttendees();
+        boolean found = false;
+        if (attendees != null) {
+            for (Attendee attendee : attendees) {
+                if (attendee.getEntity() == owner) {
                     found = true;
                 }
             }
         }
 
         if (!found) {
-            UserParticipant up = new UserParticipant(owner);
-            up.setConfirm(confirm);
-            users.add(up);
+            Attendee attendee = new Attendee();
+            attendee.setEntity(owner);
+            attendee.setPartStat(ParticipationStatus.NEEDS_ACTION);
+            if (event.getAttendees() == null) {
+                event.setAttendees(new ArrayList<>());
+            }
+            event.getAttendees().add(attendee);
         }
-        appointment.setUsers(users);
     }
 }

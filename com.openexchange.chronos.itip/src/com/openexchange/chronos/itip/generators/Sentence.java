@@ -53,11 +53,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.regex.Pattern;
+import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.itip.ContextSensitiveMessages;
 import com.openexchange.chronos.itip.generators.changes.PassthroughWrapper;
 import com.openexchange.groupware.container.participants.ConfirmStatus;
 import com.openexchange.i18n.tools.StringHelper;
-
 
 /**
  * {@link Sentence}
@@ -65,6 +65,7 @@ import com.openexchange.i18n.tools.StringHelper;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class Sentence {
+
     private final String message;
     private final List<Object> arguments = new ArrayList<Object>();
     private final List<ArgumentType> types = new ArrayList<ArgumentType>();
@@ -74,7 +75,7 @@ public class Sentence {
         this.message = message;
     }
 
-    public Sentence add(Object argument, ArgumentType type, Object...extra) {
+    public Sentence add(Object argument, ArgumentType type, Object... extra) {
         arguments.add(argument);
         types.add(type);
         this.extra.add(extra);
@@ -84,44 +85,66 @@ public class Sentence {
     public Sentence add(Object argument) {
         return add(argument, ArgumentType.NONE);
     }
-    
-    public Sentence addStatus(ConfirmStatus status) {
+
+    public Sentence addStatus(ParticipationStatus status) {
         return add("", ArgumentType.STATUS, status);
     }
-
 
     public String getMessage(TypeWrapper wrapper, Locale locale) {
         List<String> wrapped = new ArrayList<String>(arguments.size());
         StringHelper sh = StringHelper.valueOf(locale);
 
-        for(int i = 0, size = arguments.size(); i < size; i++) {
+        for (int i = 0, size = arguments.size(); i < size; i++) {
             Object argument = arguments.get(i);
             ArgumentType type = types.get(i);
             Object[] extraInfo = extra.get(i);
             if (argument instanceof String) {
-				String str = (String) argument;
-				if (type == ArgumentType.SHOWN_AS && str != null && str.trim().length() != 0) {
-					argument = sh.getString(str);
-				}
-			}
+                String str = (String) argument;
+                if (type == ArgumentType.SHOWN_AS && str != null && str.trim().length() != 0) {
+                    argument = sh.getString(str);
+                }
+            }
             if (type == ArgumentType.STATUS) {
                 ConfirmStatus status = (ConfirmStatus) extraInfo[0];
                 switch (status) {
-                    case ACCEPT: argument = ContextSensitiveMessages.accepted(locale, ContextSensitiveMessages.Context.VERB); break;
-                    case DECLINE: argument = ContextSensitiveMessages.declined(locale, ContextSensitiveMessages.Context.VERB); break;
-                    case TENTATIVE: argument = ContextSensitiveMessages.tentative(locale, ContextSensitiveMessages.Context.VERB); break;
-                    case NONE: argument = sh.getString((String)argument);
+                    case ACCEPT:
+                        argument = ContextSensitiveMessages.accepted(locale, ContextSensitiveMessages.Context.VERB);
+                        break;
+                    case DECLINE:
+                        argument = ContextSensitiveMessages.declined(locale, ContextSensitiveMessages.Context.VERB);
+                        break;
+                    case TENTATIVE:
+                        argument = ContextSensitiveMessages.tentative(locale, ContextSensitiveMessages.Context.VERB);
+                        break;
+                    case NONE:
+                        argument = sh.getString((String) argument);
                 }
             }
             switch (type) {
-            case NONE: wrapped.add(wrapper.none(argument)); break;
-            case ORIGINAL: wrapped.add(wrapper.original(argument)); break;
-            case UPDATED: wrapped.add(wrapper.updated(argument)); break;
-            case PARTICIPANT: wrapped.add(wrapper.participant(argument)); break;
-            case STATUS: wrapped.add(wrapper.state(argument, (ConfirmStatus) extraInfo[0])); break;
-            case EMPHASIZED: wrapped.add(wrapper.emphasiszed(argument)); break;
-            case REFERENCE: wrapped.add(wrapper.reference(argument)); break;
-            case SHOWN_AS: wrapped.add(wrapper.shownAs(argument,  (Integer) extraInfo[0])); break;
+                case NONE:
+                    wrapped.add(wrapper.none(argument));
+                    break;
+                case ORIGINAL:
+                    wrapped.add(wrapper.original(argument));
+                    break;
+                case UPDATED:
+                    wrapped.add(wrapper.updated(argument));
+                    break;
+                case PARTICIPANT:
+                    wrapped.add(wrapper.participant(argument));
+                    break;
+                case STATUS:
+                    wrapped.add(wrapper.state(argument, (ConfirmStatus) extraInfo[0]));
+                    break;
+                case EMPHASIZED:
+                    wrapped.add(wrapper.emphasiszed(argument));
+                    break;
+                case REFERENCE:
+                    wrapped.add(wrapper.reference(argument));
+                    break;
+                case SHOWN_AS:
+                    wrapped.add(wrapper.shownAs(argument, (Integer) extraInfo[0]));
+                    break;
             }
         }
 
@@ -130,6 +153,7 @@ public class Sentence {
     }
 
     private static final Pattern SANE_FORMAT = Pattern.compile("(%[0-9]+)?" + Pattern.quote("$") + "(\\s|$)");
+
     private static String saneFormatString(final String format) {
         if (com.openexchange.java.Strings.isEmpty(format) || format.indexOf('$') < 0) {
             return format;

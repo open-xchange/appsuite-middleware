@@ -51,10 +51,8 @@ package com.openexchange.chronos.itip;
 
 import java.util.List;
 import java.util.Map;
-
+import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.exception.OXException;
-import com.openexchange.session.Session;
-
 
 /**
  * An {@link ITipAnalyzer} knows how to assemble and represent all relevant data about an iTip Message
@@ -62,6 +60,8 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public interface ITipAnalyzer {
+
     public List<ITipMethod> getMethods();
-    public ITipAnalysis analyze(ITipMessage message, Map<String, String> header, String style, Session session) throws OXException;
+
+    public ITipAnalysis analyze(ITipMessage message, Map<String, String> header, String style, CalendarSession session) throws OXException;
 }

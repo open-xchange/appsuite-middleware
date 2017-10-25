@@ -51,19 +51,18 @@ package com.openexchange.chronos.itip.generators.changes.generators;
 
 import java.text.DateFormat;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
+import org.dmfs.rfc5545.DateTime;
+import com.openexchange.chronos.Event;
+import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.itip.Messages;
 import com.openexchange.chronos.itip.generators.ArgumentType;
 import com.openexchange.chronos.itip.generators.Sentence;
 import com.openexchange.chronos.itip.generators.changes.ChangeDescriptionGenerator;
-import com.openexchange.chronos.itip.tools.AppointmentDiff;
-import com.openexchange.chronos.itip.tools.AppointmentDiff.FieldUpdate;
-import com.openexchange.groupware.container.Appointment;
+import com.openexchange.chronos.itip.tools.ITipEventUpdate;
 import com.openexchange.groupware.contexts.Context;
 
 /**
@@ -78,73 +77,69 @@ public class Rescheduling implements ChangeDescriptionGenerator {
         SAME_DAY, DIFFERENT_DAYS
     }
 
-    private final String[] FIELDS = new String[] { "start_date", "end_date" };
+    private final EventField[] FIELDS = new EventField[] { EventField.START_DATE, EventField.END_DATE };
 
     @Override
-    public List<Sentence> getDescriptions(Context ctx, Appointment original, Appointment updated, AppointmentDiff diff, Locale locale, TimeZone timezone) {
+    public List<Sentence> getDescriptions(Context ctx, Event original, Event updated, ITipEventUpdate diff, Locale locale, TimeZone timezone) {
         String msg = Messages.HAS_RESCHEDULED;
 
-        return Arrays.asList(
-            new Sentence(msg)
-            .add(timeString(original, diff, locale, timezone), ArgumentType.ORIGINAL)
-            .add(updatedTimeString(updated, diff, locale, timezone), ArgumentType.UPDATED)
-        );
+        return Arrays.asList(new Sentence(msg).add(timeString(original, diff, locale, timezone), ArgumentType.ORIGINAL).add(updatedTimeString(updated, diff, locale, timezone), ArgumentType.UPDATED));
     }
 
-    private String timeString(Appointment appointment, AppointmentDiff diff, Locale locale, TimeZone timezone) {
+    private String timeString(Event appointment, ITipEventUpdate diff, Locale locale, TimeZone timezone) {
         Format format = chooseFormat(diff, timezone);
         if (differentDays(appointment.getStartDate(), appointment.getEndDate(), timezone)) {
-        	format = Format.DIFFERENT_DAYS;
+            format = Format.DIFFERENT_DAYS;
         }
         return time(format, appointment, locale, timezone);
     }
 
-    private String updatedTimeString(Appointment appointment, AppointmentDiff diff, Locale locale, TimeZone timezone) {
+    private String updatedTimeString(Event appointment, ITipEventUpdate diff, Locale locale, TimeZone timezone) {
         Format format = chooseFormat(diff, timezone);
         if (differentDays(appointment.getStartDate(), appointment.getEndDate(), timezone)) {
-        	format = Format.DIFFERENT_DAYS;
+            format = Format.DIFFERENT_DAYS;
         }
         return updatedTime(format, appointment, locale, timezone);
     }
 
-    private String updatedTime(Format format, Appointment updated, Locale locale, TimeZone timezone) {
-        Date startDate = updated.getStartDate();
-		Date endDate = updated.getEndDate();
+    private String updatedTime(Format format, Event updated, Locale locale, TimeZone timezone) {
+        Date startDate = new Date(updated.getStartDate().getTimestamp());
+        Date endDate = new Date(updated.getEndDate().getTimestamp());
 
-		DateFormat longDate = DateFormat.getDateInstance(DateFormat.LONG, locale);
+        DateFormat longDate = DateFormat.getDateInstance(DateFormat.LONG, locale);
         longDate.setTimeZone(timezone);
-        if (updated.getFullTime()) {
-        	longDate.setTimeZone(TimeZone.getTimeZone("UTC"));
-        	endDate = forceCorrectDay(endDate);
+        if (updated.getStartDate().isAllDay()) {
+            longDate.setTimeZone(TimeZone.getTimeZone("UTC"));
+            endDate = forceCorrectDay(endDate);
         }
 
         DateFormat time = DateFormat.getTimeInstance(DateFormat.SHORT, locale);
         time.setTimeZone(timezone);
-		switch (format) {
-        case SAME_DAY:
-        	if (updated.getFullTime()) {
-        		return String.format("%s (%s)", longDate.format(startDate), Messages.FULL_TIME);
-        	} else {
-                return String.format("%s - %s", time.format(startDate), time.format(endDate));
-        	}
-        case DIFFERENT_DAYS:
-        	if (updated.getFullTime()) {
-        		return String.format("%s - %s (%s)", longDate.format(startDate), longDate.format(endDate), new Sentence(Messages.FULL_TIME).getMessage(locale));
-        	} else {
-        		return String.format("%s - %s", longDate.format(startDate) + " " +time.format(startDate), longDate.format(endDate) + " " + time.format(endDate));
-        	}
+        switch (format) {
+            case SAME_DAY:
+                if (updated.getStartDate().isAllDay()) {
+                    return String.format("%s (%s)", longDate.format(startDate), Messages.FULL_TIME);
+                } else {
+                    return String.format("%s - %s", time.format(startDate), time.format(endDate));
+                }
+            case DIFFERENT_DAYS:
+                if (updated.getStartDate().isAllDay()) {
+                    return String.format("%s - %s (%s)", longDate.format(startDate), longDate.format(endDate), new Sentence(Messages.FULL_TIME).getMessage(locale));
+                } else {
+                    return String.format("%s - %s", longDate.format(startDate) + " " + time.format(startDate), longDate.format(endDate) + " " + time.format(endDate));
+                }
         }
         return ""; // Won't happen
     }
 
-    private String time(Format format, Appointment original, Locale locale, TimeZone timezone) {
-        Date startDate = original.getStartDate();
-		Date endDate = original.getEndDate();
+    private String time(Format format, Event original, Locale locale, TimeZone timezone) {
+        Date startDate = new Date(original.getStartDate().getTimestamp());
+        Date endDate = new Date(original.getEndDate().getTimestamp());
 
-		DateFormat longDate = DateFormat.getDateInstance(DateFormat.LONG, locale);
-        if (original.getFullTime()) {
+        DateFormat longDate = DateFormat.getDateInstance(DateFormat.LONG, locale);
+        if (original.getStartDate().isAllDay()) {
             longDate.setTimeZone(TimeZone.getTimeZone("UTC"));
-        	endDate = forceCorrectDay(endDate);
+            endDate = forceCorrectDay(endDate);
         } else {
             longDate.setTimeZone(timezone);
         }
@@ -152,40 +147,37 @@ public class Rescheduling implements ChangeDescriptionGenerator {
         DateFormat time = DateFormat.getTimeInstance(DateFormat.SHORT, locale);
         time.setTimeZone(timezone);
 
-		switch (format) {
-        case SAME_DAY:
-        	if (original.getFullTime()) {
-        		return String.format("%s (%s)", longDate.format(startDate), Messages.FULL_TIME);
-        	} else {
-                return String.format("%s - %s", longDate.format(startDate) + " " +time.format(startDate), time.format(endDate));
-        	}
-        case DIFFERENT_DAYS:
-        	if (original.getFullTime()) {
-        		return String.format("%s - %s (%s)", longDate.format(startDate), longDate.format(endDate), new Sentence(Messages.FULL_TIME).getMessage(locale));
-        	} else {
-            	return String.format("%s - %s", longDate.format(startDate) + " " +time.format(startDate), longDate.format(endDate) + " " + time.format(endDate));
-        	}
+        switch (format) {
+            case SAME_DAY:
+                if (original.getStartDate().isAllDay()) {
+                    return String.format("%s (%s)", longDate.format(startDate), Messages.FULL_TIME);
+                } else {
+                    return String.format("%s - %s", longDate.format(startDate) + " " + time.format(startDate), time.format(endDate));
+                }
+            case DIFFERENT_DAYS:
+                if (original.getStartDate().isAllDay()) {
+                    return String.format("%s - %s (%s)", longDate.format(startDate), longDate.format(endDate), new Sentence(Messages.FULL_TIME).getMessage(locale));
+                } else {
+                    return String.format("%s - %s", longDate.format(startDate) + " " + time.format(startDate), longDate.format(endDate) + " " + time.format(endDate));
+                }
         }
         return ""; // Won't happen
     }
 
     private Date forceCorrectDay(Date endDate) {
-    	return new Date(endDate.getTime()-1000); // Move this before midnight, so the time formatting routines don't lie
-	}
+        return new Date(endDate.getTime() - 1000); // Move this before midnight, so the time formatting routines don't lie
+    }
 
-	private Format chooseFormat(AppointmentDiff diff, TimeZone timezone) {
+    private Format chooseFormat(ITipEventUpdate diff, TimeZone timezone) {
 
-        FieldUpdate update = diff.getUpdateFor("start_date");
-        if (update != null) {
-            if (differentDays(update.getOriginalValue(), update.getNewValue(), timezone)) {
+        if (diff.getUpdatedFields().contains(EventField.START_DATE)) {
+            if (differentDays(diff.getOriginal().getStartDate(), diff.getUpdate().getStartDate(), timezone)) {
                 return Format.DIFFERENT_DAYS;
             }
         }
 
-        update = diff.getUpdateFor("end_date");
-
-        if (update != null) {
-            if (differentDays(update.getOriginalValue(), update.getNewValue(), timezone)) {
+        if (diff.getUpdatedFields().contains(EventField.END_DATE)) {
+            if (differentDays(diff.getOriginal().getEndDate(), diff.getUpdate().getEndDate(), timezone)) {
                 return Format.DIFFERENT_DAYS;
             }
         }
@@ -193,23 +185,24 @@ public class Rescheduling implements ChangeDescriptionGenerator {
         return Format.SAME_DAY;
     }
 
-    private boolean differentDays(Object originalValue, Object newValue, TimeZone timezone) {
-        Date o = (Date) originalValue;
-        Date n = (Date) newValue;
-        GregorianCalendar cal1 = new GregorianCalendar();
-        cal1.setTimeZone(timezone);
-        cal1.setTime(o);
+    private boolean differentDays(DateTime original, DateTime update, TimeZone timezone) {
+        if (original.getYear() != update.getYear()) {
+            return true;
+        }
 
-        GregorianCalendar cal2 = new GregorianCalendar();
-        cal2.setTimeZone(timezone);
-        cal2.setTime(n);
+        if (original.getMonth() != update.getMonth()) {
+            return true;
+        }
 
-        return cal1.get(Calendar.YEAR) != cal2.get(Calendar.YEAR) || cal1.get(Calendar.DAY_OF_YEAR) != cal2.get(Calendar.DAY_OF_YEAR);
+        if (original.getDayOfMonth() != update.getDayOfMonth()) {
+            return true;
+        }
+
+        return false;
     }
 
-
     @Override
-    public String[] getFields() {
+    public EventField[] getFields() {
         return FIELDS;
     }
 

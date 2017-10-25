@@ -53,6 +53,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
+import com.openexchange.chronos.Event;
 import com.openexchange.chronos.itip.ITipAction;
 import com.openexchange.chronos.itip.ITipAnalysis;
 import com.openexchange.chronos.itip.ITipAnnotation;
@@ -61,10 +62,8 @@ import com.openexchange.chronos.itip.ITipChange;
 import com.openexchange.chronos.itip.ITipIntegrationUtility;
 import com.openexchange.chronos.itip.generators.ITipMailGeneratorFactory;
 import com.openexchange.chronos.itip.sender.MailSenderService;
+import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.calendar.CalendarDataObject;
-import com.openexchange.groupware.container.Appointment;
-import com.openexchange.session.Session;
 
 /**
  * 
@@ -85,19 +84,19 @@ public class MailPerformer extends AbstractActionPerformer {
     }
 
     @Override
-    public List<Appointment> perform(ITipAction action, ITipAnalysis analysis, Session session, ITipAttributes attributes) throws OXException {
+    public List<Event> perform(ITipAction action, ITipAnalysis analysis, CalendarSession session, ITipAttributes attributes) throws OXException {
         List<ITipChange> changes = analysis.getChanges();
         for (ITipChange change : changes) {
-            CalendarDataObject appointment = change.getNewAppointment();
-            appointment.setNotification(true);
+            Event appointment = change.getNewEvent();
+            // TODO: appointment.setNotification(true);
             int owner = getOwner(session, analysis, appointment);
             writeMail(action, null, appointment, session, owner);
         }
 
         List<ITipAnnotation> annotations = analysis.getAnnotations();
         for (ITipAnnotation annotation : annotations) {
-            Appointment appointment = annotation.getAppointment();
-            appointment.setNotification(true);
+            Event appointment = annotation.getEvent();
+            // TODO: appointment.setNotification(true);
             int owner = getOwner(session, analysis, appointment);
             writeMail(action, null, appointment, session, owner);
         }

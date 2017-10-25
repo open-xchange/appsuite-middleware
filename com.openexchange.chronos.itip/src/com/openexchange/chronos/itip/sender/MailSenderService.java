@@ -50,8 +50,8 @@
 package com.openexchange.chronos.itip.sender;
 
 import com.openexchange.chronos.itip.generators.NotificationMail;
-import com.openexchange.session.Session;
-
+import com.openexchange.chronos.service.CalendarSession;
+import com.openexchange.exception.OXException;
 
 /**
  * {@link MailSenderService}
@@ -59,5 +59,6 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public interface MailSenderService {
-    public void sendMail(NotificationMail mail, Session session);
+
+    public void sendMail(NotificationMail mail, CalendarSession session) throws OXException;
 }

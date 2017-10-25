@@ -49,14 +49,27 @@
 
 package com.openexchange.chronos.itip.osgi;
 
+import java.util.Dictionary;
+import java.util.Hashtable;
+import org.osgi.framework.Constants;
 import com.openexchange.chronos.ical.ICalService;
+import com.openexchange.chronos.itip.AppointmentNotificationPool;
+import com.openexchange.chronos.itip.CalendarITipIntegrationUtility;
+import com.openexchange.chronos.itip.ITipActionPerformerFactoryService;
+import com.openexchange.chronos.itip.ITipAnalyzerService;
+import com.openexchange.chronos.itip.analyzers.DefaultITipAnalyzerService;
+import com.openexchange.chronos.itip.generators.AttachmentMemory;
+import com.openexchange.chronos.itip.generators.DefaultNotificationParticipantResolver;
+import com.openexchange.chronos.itip.generators.ITipMailGeneratorFactory;
+import com.openexchange.chronos.itip.generators.NotificationMailGeneratorFactory;
+import com.openexchange.chronos.itip.performers.DefaultITipActionPerformerFactoryService;
+import com.openexchange.chronos.itip.sender.DefaultMailSenderService;
 import com.openexchange.chronos.itip.sender.MailSenderService;
+import com.openexchange.chronos.itip.sender.PoolingMailSenderService;
+import com.openexchange.chronos.service.RecurrenceService;
+import com.openexchange.chronos.storage.rdb.RdbCalendarStorageFactory;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
-import com.openexchange.group.GroupService;
-import com.openexchange.groupware.attach.AttachmentBase;
-import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
-import com.openexchange.html.HtmlService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.resource.ResourceService;
 import com.openexchange.timer.TimerService;
@@ -73,30 +86,41 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] {};
+        return new Class<?>[] { ConfigurationService.class, TimerService.class, ContextService.class, RdbCalendarStorageFactory.class, RecurrenceService.class, UserService.class, ResourceService.class, ICalService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
-        final ContextService contexts = getService(ContextService.class);
-        final UserService users = getService(UserService.class);
-        final ResourceService resources = getService(ResourceService.class);
-        final GroupService groups = getService(GroupService.class);
-        final ConfigurationService config = getService(ConfigurationService.class);
-        final ICalService icalService = getService(ICalService.class);
-        final HtmlService htmlService = getService(HtmlService.class);
-        final AttachmentBase attachments = getService(AttachmentBase.class);
-        final UserConfigurationStorage userConfigs = UserConfigurationStorage.getInstance();
-        final TimerService timers = getService(TimerService.class);
+        Services.set(this);
+        ConfigurationService config = Services.getService(ConfigurationService.class);
 
         int detailInterval = config.getIntProperty("com.openexchange.calendar.notify.interval.detail", 120000);
         int stateChangeInterval = config.getIntProperty("com.openexchange.calendar.notify.interval.states", 600000);
         int priorityInterval = config.getIntProperty("com.openexchange.calendar.notify.interval.priority", 900000);
-        boolean poolEnabled = false;
-        
+        boolean poolEnabled = config.getBoolProperty("com.openexchange.calendar.notify.poolenabled", true);
 
-        MailSenderService sender = new DefaultMailSenderService(icalService, htmlService, attachments, contexts, users, userConfigs, attachmentMemory);
+        TimerService timers = Services.getService(TimerService.class);
+        AttachmentMemory attachmentMemory = new AttachmentMemory(detailInterval * 3, timers);
+        MailSenderService sender = new DefaultMailSenderService();
 
+        CalendarITipIntegrationUtility util = new CalendarITipIntegrationUtility();
+        DefaultNotificationParticipantResolver resolver = new DefaultNotificationParticipantResolver(util);
+        NotificationMailGeneratorFactory mails = new NotificationMailGeneratorFactory(resolver, util, this, attachmentMemory);
+
+        if (poolEnabled) {
+            AppointmentNotificationPool pool = new AppointmentNotificationPool(timers, mails, sender, detailInterval, stateChangeInterval, priorityInterval);
+            sender = new PoolingMailSenderService(pool, sender);
+        }
+
+        Dictionary<String, Object> analyzerProps = new Hashtable<String, Object>();
+        analyzerProps.put(Constants.SERVICE_RANKING, DefaultITipAnalyzerService.RANKING); // Default
+        registerService(ITipAnalyzerService.class, new DefaultITipAnalyzerService(util), analyzerProps);
+        Dictionary<String, Object> factoryProps = new Hashtable<String, Object>();
+        factoryProps.put(Constants.SERVICE_RANKING, DefaultITipActionPerformerFactoryService.RANKING); // Default
+        registerService(ITipActionPerformerFactoryService.class, new DefaultITipActionPerformerFactoryService(util, sender, mails), factoryProps);
+
+        registerService(ITipMailGeneratorFactory.class, mails);
+        registerService(MailSenderService.class, sender);
     }
 
 }
