@@ -49,10 +49,11 @@
 
 package com.openexchange.chronos.provider.schedjoules;
 
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.Locale;
-import java.util.Set;
+import java.util.Map;
 import java.util.UUID;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.chronos.provider.CalendarAccess;
@@ -132,14 +133,14 @@ public class SchedJoulesCalendarProvider extends CachingCalendarProvider {
         if (userConfig == null) {
             return new JSONObject();
         }
-        JSONObject folders = userConfig.optJSONObject(SchedJoulesFields.FOLDERS);
+        JSONArray folders = userConfig.optJSONArray(SchedJoulesFields.FOLDERS);
         if (folders == null) {
             return new JSONObject();
         }
 
         try {
             JSONObject internalConfig = new JSONObject();
-            JSONObject internalConfigItems = new JSONObject();
+            JSONArray internalConfigItems = new JSONArray();
             addFolders(folders, internalConfigItems);
             internalConfig.put(SchedJoulesFields.FOLDERS, internalConfigItems);
             internalConfig.put(SchedJoulesFields.USER_KEY, UUID.randomUUID().toString());
@@ -163,12 +164,12 @@ public class SchedJoulesCalendarProvider extends CachingCalendarProvider {
             return (internalConfig.remove(SchedJoulesFields.FOLDERS) == null) ? null : internalConfig;
         }
 
-        JSONObject userConfigFolders = userConfig.optJSONObject(SchedJoulesFields.FOLDERS);
-        JSONObject internalConfigFolders = internalConfig.optJSONObject(SchedJoulesFields.FOLDERS);
+        JSONArray userConfigFolders = userConfig.optJSONArray(SchedJoulesFields.FOLDERS);
+        JSONArray internalConfigFolders = internalConfig.optJSONArray(SchedJoulesFields.FOLDERS);
         if (internalConfigFolders == null || internalConfigFolders.isEmpty()) {
             // Add all user configuration folders
             try {
-                internalConfigFolders = new JSONObject();
+                internalConfigFolders = new JSONArray();
                 addFolders(userConfigFolders, internalConfigFolders);
                 internalConfig.put(SchedJoulesFields.FOLDERS, internalConfigFolders);
                 return internalConfig;
@@ -179,14 +180,17 @@ public class SchedJoulesCalendarProvider extends CachingCalendarProvider {
 
         // Check for differences and merge
         try {
-            // Build a set that contains all internal subscribed items
-            Set<String> internalItemIds = new HashSet<>();
-            for (String key : internalConfigFolders.keySet()) {
-                internalItemIds.add(key);
+            // Build a map that contains all internal subscribed items and their position in the array  
+            Map<String, Integer> internalItemIds = new HashMap<>();
+            for (int index = 0; index < internalConfigFolders.length(); index++) {
+                JSONObject folder = internalConfigFolders.getJSONObject(index);
+                internalItemIds.put(folder.getString(SchedJoulesFields.NAME), index);
             }
 
-            boolean added = handleAdditions(userConfigFolders, internalConfigFolders, internalItemIds);
+            JSONArray additions = new JSONArray();
+            boolean added = handleAdditions(userConfigFolders, internalItemIds, additions);
             boolean deleted = handleDeletions(internalConfigFolders, internalItemIds);
+            addToInternalConfiguration(internalConfigFolders, additions);
 
             return (added || deleted) ? internalConfig : null;
         } catch (JSONException e) {
@@ -240,11 +244,11 @@ public class SchedJoulesCalendarProvider extends CachingCalendarProvider {
      * @throws OXException If an error is occurred
      * @throws JSONException if a JSON error is occurred
      */
-    private void addFolders(JSONObject folders, JSONObject internalConfigFolders) throws OXException, JSONException {
-        for (String key : folders.keySet()) {
-            JSONObject folder = folders.getJSONObject(key);
-            JSONObject internalItem = prepareFolder(key, folder);
-            internalConfigFolders.put(key, internalItem);
+    private void addFolders(JSONArray folders, JSONArray internalConfigFolders) throws OXException, JSONException {
+        for (int index = 0; index < folders.length(); index++) {
+            JSONObject folder = folders.getJSONObject(index);
+            JSONObject internalItem = prepareFolder(folder);
+            internalConfigFolders.put(internalItem);
         }
     }
 
@@ -257,14 +261,15 @@ public class SchedJoulesCalendarProvider extends CachingCalendarProvider {
      * @throws JSONException if a JSON error is occurred
      * @throws OXException if an error is occurred
      */
-    private JSONObject prepareFolder(String key, JSONObject folder) throws JSONException, OXException {
+    private JSONObject prepareFolder(JSONObject folder) throws JSONException, OXException {
+        int itemId = folder.getInt(SchedJoulesFields.ITEM_ID);
         String locale = folder.optString(SchedJoulesFields.LOCALE);
         int refreshInterval = folder.optInt(SchedJoulesFields.REFRESH_INTERVAL, DEFAULT_REFRESH_INTERVAL);
         if (refreshInterval < MINIMUM_REFRESH_INTERVAL) {
             refreshInterval = MINIMUM_REFRESH_INTERVAL;
         }
 
-        JSONObject page = fetchItem(key, locale);
+        JSONObject page = fetchItem(itemId, locale);
 
         String name = folder.optString(SchedJoulesFields.NAME);
         if (Strings.isEmpty(name)) {
@@ -275,7 +280,7 @@ public class SchedJoulesCalendarProvider extends CachingCalendarProvider {
         JSONObject internalItem = new JSONObject();
         internalItem.put(SchedJoulesFields.REFRESH_INTERVAL, refreshInterval);
         internalItem.put(SchedJoulesFields.URL, page.getString(SchedJoulesFields.URL));
-        //internalItem.put(SchedJoulesFields.ITEM_ID, itemId);
+        internalItem.put(SchedJoulesFields.ITEM_ID, itemId);
         internalItem.put(SchedJoulesFields.NAME, name);
         return internalItem;
     }
@@ -288,9 +293,8 @@ public class SchedJoulesCalendarProvider extends CachingCalendarProvider {
      * @return The calendar's metadata as JSONObject
      * @throws OXException if the calendar is not found, or any other error is occurred
      */
-    private JSONObject fetchItem(String key, String locale) throws OXException {
+    private JSONObject fetchItem(int itemId, String locale) throws OXException {
         try {
-            int itemId = Integer.parseInt(key);
             JSONObject page = SchedJoulesAPI.getInstance().pages().getPage(itemId, locale);
             if (!page.hasAndNotNull(SchedJoulesFields.URL)) {
                 throw SchedJoulesProviderExceptionCodes.NO_CALENDAR.create(itemId);
@@ -298,11 +302,8 @@ public class SchedJoulesCalendarProvider extends CachingCalendarProvider {
             return page;
         } catch (OXException e) {
             if (SchedJoulesAPIExceptionCodes.PAGE_NOT_FOUND.equals(e)) {
-                throw SchedJoulesProviderExceptionCodes.CALENDAR_DOES_NOT_EXIST.create(e, key);
+                throw SchedJoulesProviderExceptionCodes.CALENDAR_DOES_NOT_EXIST.create(e, itemId);
             }
-            throw e;
-        } catch (NumberFormatException e) {
-            // TODO: Introduce a dedicated exception
             throw e;
         }
     }
@@ -311,24 +312,22 @@ public class SchedJoulesCalendarProvider extends CachingCalendarProvider {
      * Handles the additions.
      * 
      * @param userConfigFolders The user configuration for 'folders'
-     * @param internalConfigFolders The internal configuration for 'folders'
      * @param internalItemIds The internal items
+     * @param additions The target 'additions' object
      * @return <code>true</code> if there were new additions, <code>false</code> otherwise
      * @throws JSONException if a JSON error occurs
      * @throws OXException if any other error occurs
      */
-    private boolean handleAdditions(JSONObject userConfigFolders, JSONObject internalConfigFolders, Set<String> internalItemIds) throws JSONException, OXException {
-        for (String key : userConfigFolders.keySet()) {
-            JSONObject folder = userConfigFolders.getJSONObject(key);
-            if (!internalConfigFolders.hasAndNotNull(key)) {
-                internalConfigFolders.put(key, prepareFolder(key, folder));
-            } else {
-                JSONObject internalFolder = internalConfigFolders.getJSONObject(key);
-                // TODO: check for updates
+    private boolean handleAdditions(JSONArray userConfigFolders, Map<String, Integer> internalItemIds, JSONArray additions) throws JSONException, OXException {
+        for (int index = 0; index < userConfigFolders.length(); index++) {
+            JSONObject folder = userConfigFolders.getJSONObject(index);
+            String name = folder.optString(SchedJoulesFields.NAME);
+            if (!internalItemIds.containsKey(name)) {
+                additions.put(prepareFolder(folder));
             }
-            internalItemIds.remove(key);
+            internalItemIds.remove(name);
         }
-        return !internalItemIds.isEmpty();
+        return !additions.isEmpty();
     }
 
     /**
@@ -339,14 +338,27 @@ public class SchedJoulesCalendarProvider extends CachingCalendarProvider {
      * @return <code>true</code> if the internal configuration was changed, <code>false</code> otherwise
      * @throws JSONException if a JSON error occurs
      */
-    private boolean handleDeletions(JSONObject internalConfigFolders, Set<String> internalItemIds) throws JSONException {
+    private boolean handleDeletions(JSONArray internalConfigFolders, Map<String, Integer> internalItemIds) throws JSONException {
         if (internalItemIds.isEmpty()) {
             return false;
         }
 
-        for (String itemId : internalItemIds) {
-            internalConfigFolders.remove(itemId);
+        for (String name : internalItemIds.keySet()) {
+            internalConfigFolders.remove(internalItemIds.get(name));
         }
         return true;
+    }
+
+    /**
+     * Adds the new items to the internal configuration
+     * 
+     * @param internalConfigFolders The internal configuration for folders
+     * @param additions The array holding the new items
+     * @throws JSONException if a JSON error is occurred
+     */
+    private void addToInternalConfiguration(JSONArray internalConfigFolders, JSONArray additions) throws JSONException {
+        for (int index = 0; index < additions.length(); index++) {
+            internalConfigFolders.put(additions.getJSONObject(index));
+        }
     }
 }
