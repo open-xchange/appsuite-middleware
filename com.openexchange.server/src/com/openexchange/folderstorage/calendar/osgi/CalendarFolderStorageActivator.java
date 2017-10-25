@@ -56,10 +56,10 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccessFactory;
 import com.openexchange.exception.OXException;
-import com.openexchange.folderstorage.CalendarFolderField;
 import com.openexchange.folderstorage.FolderField;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.calendar.CalendarFolderStorage;
+import com.openexchange.folderstorage.calendar.ExtendedPropertiesField;
 import com.openexchange.osgi.DependentServiceRegisterer;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.server.ServiceExceptionCode;
@@ -116,11 +116,9 @@ public final class CalendarFolderStorageActivator extends HousekeepingActivator 
         this.dependentTracker = tracker;
         tracker.open();
         /*
-         * register custom folder fields
+         * register custom folder field for extended calendar properties
          */
-        for (FolderField folderField : CalendarFolderField.getValues()) {
-            registerService(FolderField.class, folderField);
-        }
+        registerService(FolderField.class, ExtendedPropertiesField.getInstance());
     }
 
     @Override

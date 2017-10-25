@@ -57,6 +57,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Map.Entry;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.dav.DAVFactory;
 import com.openexchange.dav.DAVProtocol;
@@ -78,7 +79,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXException.IncorrectString;
 import com.openexchange.exception.OXException.ProblematicAttribute;
 import com.openexchange.folderstorage.AbstractFolder;
-import com.openexchange.folderstorage.CalendarFolderField;
 import com.openexchange.folderstorage.FolderField;
 import com.openexchange.folderstorage.FolderProperty;
 import com.openexchange.folderstorage.FolderService;
@@ -392,7 +392,11 @@ public abstract class FolderCollection<T> extends DAVCollection {
             updatableFolder.setType(folder.getType());
             updatableFolder.setParentID(folder.getParentID());
             updatableFolder.setMeta(null != folder.getMeta() ? new HashMap<String, Object>(folder.getMeta()) : new HashMap<String, Object>());
-            CalendarFolderField.setProperties(folder.getProperties(), updatableFolder);
+            if (null != folder.getProperties()) {
+                for (Entry<FolderField, FolderProperty> entry : folder.getProperties().entrySet()) {
+                    updatableFolder.setProperty(entry.getKey(), null != entry.getValue() ? entry.getValue().getValue() : null);
+                }
+            }
         } else {
             updatableFolder.setMeta(new HashMap<String, Object>());
         }

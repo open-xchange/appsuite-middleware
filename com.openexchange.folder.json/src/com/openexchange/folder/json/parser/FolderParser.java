@@ -268,7 +268,7 @@ public final class FolderParser {
         Map<com.openexchange.folderstorage.FolderField, FolderProperty> properties = new HashMap<com.openexchange.folderstorage.FolderField, FolderProperty>();
         for (com.openexchange.folderstorage.FolderField field : FolderFieldRegistry.getInstance().getPairs()) {
             if (folderJsonObject.has(field.getName())) {
-                properties.put(field, new FolderProperty(field.getName(), folderJsonObject.opt(field.getName())));
+                properties.put(field, field.parse(folderJsonObject.opt(field.getName())));
             }
         }
         return properties.isEmpty() ? null : properties;

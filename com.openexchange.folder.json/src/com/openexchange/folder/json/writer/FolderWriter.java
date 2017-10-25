@@ -800,7 +800,7 @@ public final class FolderWriter {
         @Override
         public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder) throws JSONException {
             final FolderProperty property = folder.getProperties().get(field);
-            jsonPutter.put(jsonPutter.withKey() ? name : null, null == property ? field.getDefaultValue() : property.getValue());
+            jsonPutter.put(jsonPutter.withKey() ? name : null, field.write(property));
         }
 
     }

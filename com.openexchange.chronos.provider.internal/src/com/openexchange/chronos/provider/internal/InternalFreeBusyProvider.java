@@ -63,6 +63,7 @@ import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.FreeBusyResult;
 import com.openexchange.exception.OXException;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 
 /**
@@ -73,17 +74,21 @@ import com.openexchange.session.Session;
  */
 public class InternalFreeBusyProvider implements FreeBusyProvider {
 
+    private final ServiceLookup services;
+
     /**
      * Initializes a new {@link InternalFreeBusyProvider}.
+     *
+     * @param services A service lookup reference
      */
-    public InternalFreeBusyProvider() {
+    public InternalFreeBusyProvider(ServiceLookup services) {
         super();
+        this.services = services;
     }
 
     @Override
     public Map<Attendee, Map<Integer, FreeBusyResult>> query(Session session, List<Attendee> attendees, Date from, Date until, CalendarParameters parameters) throws OXException {
-        CalendarService calendarService = Services.getService(CalendarService.class);
-        CalendarSession calendarSession = calendarService.init(session, parameters);
+        CalendarSession calendarSession = services.getService(CalendarService.class).init(session, parameters);
         Map<Attendee, FreeBusyResult> results = calendarSession.getFreeBusyService().calculateFreeBusyTime(calendarSession, attendees, from, until);
         if (null == results || results.isEmpty()) {
             return Collections.emptyMap();
@@ -94,6 +99,5 @@ public class InternalFreeBusyProvider implements FreeBusyProvider {
         }
         return resultsPerAccountId;
     }
-
 
 }

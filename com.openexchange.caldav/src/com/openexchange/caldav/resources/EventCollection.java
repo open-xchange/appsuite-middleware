@@ -83,6 +83,7 @@ import com.openexchange.caldav.reports.FilteringResource;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.provider.CalendarFolderProperty;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.UpdatesResult;
@@ -91,7 +92,7 @@ import com.openexchange.dav.mixins.CalendarColor;
 import com.openexchange.dav.reports.SyncStatus;
 import com.openexchange.dav.resources.FolderCollection;
 import com.openexchange.exception.OXException;
-import com.openexchange.folderstorage.CalendarFolderField;
+import com.openexchange.folderstorage.CalendarFolderConverter;
 import com.openexchange.folderstorage.ParameterizedFolder;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.type.PrivateType;
@@ -394,7 +395,7 @@ public class EventCollection extends FolderCollection<Event> implements Filterin
              * apply color folder property
              */
             ParameterizedFolder folderToUpdate = getFolderToUpdate();
-            folderToUpdate.setProperty(CalendarFolderField.COLOR, Strings.isEmpty(value) ? null : value);
+            CalendarFolderConverter.setExtendedProperty(folderToUpdate, CalendarFolderProperty.COLOR(value));
             /*
              * also apply color in meta field for private folders
              */

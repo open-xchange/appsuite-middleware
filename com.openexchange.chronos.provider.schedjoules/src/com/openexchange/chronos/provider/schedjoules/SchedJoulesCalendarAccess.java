@@ -63,7 +63,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.chronos.Calendar;
 import com.openexchange.chronos.Event;
-import com.openexchange.chronos.TimeTransparency;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.CalendarFolder;
 import com.openexchange.chronos.provider.DefaultCalendarFolder;
@@ -74,7 +73,6 @@ import com.openexchange.chronos.provider.schedjoules.exception.SchedJoulesProvid
 import com.openexchange.chronos.schedjoules.api.SchedJoulesAPI;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.Enums;
 import com.openexchange.java.Strings;
 import com.openexchange.session.Session;
 
@@ -121,7 +119,7 @@ public class SchedJoulesCalendarAccess extends CachingCalendarAccess {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.chronos.provider.CalendarAccess#getFolder(java.lang.String)
      */
     @Override
@@ -131,7 +129,7 @@ public class SchedJoulesCalendarAccess extends CachingCalendarAccess {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.chronos.provider.CalendarAccess#getVisibleFolders()
      */
     @Override
@@ -157,26 +155,28 @@ public class SchedJoulesCalendarAccess extends CachingCalendarAccess {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.chronos.provider.CalendarAccess#updateFolder(java.lang.String, com.openexchange.chronos.provider.CalendarFolder, long)
      */
     @Override
     public String updateFolder(String folderId, CalendarFolder folder, long clientTimestamp) throws OXException {
-        try {
-            JSONObject folderJson = findFolder(folderId, getAccount().getUserConfiguration().optJSONArray(SchedJoulesFields.FOLDERS));
-            folderJson.put(SchedJoulesFields.COLOR, folder.getColor());
-            folderJson.put(SchedJoulesFields.USED_FOR_SYNC, folder.isUsedForSync());
-            folderJson.put(SchedJoulesFields.SCHEDULE_TRANSP, folder.getScheduleTransparency() == null ? null : folder.getScheduleTransparency().getValue());
-
-            return folderId;
-        } catch (JSONException e) {
-            throw SchedJoulesProviderExceptionCodes.JSON_ERROR.create(e.getMessage(), e);
-        }
+        //TODO: store folder props in internal config (see com.openexchange.chronos.provider.birthdays.BirthdaysCalendarAccess.updateFolder for an example)
+        //        try {
+        //            JSONObject folderJson = findFolder(folderId, getAccount().getUserConfiguration().optJSONArray(SchedJoulesFields.FOLDERS));
+        //            folderJson.put(SchedJoulesFields.COLOR, folder.getColor());
+        //            folderJson.put(SchedJoulesFields.USED_FOR_SYNC, folder.isUsedForSync());
+        //            folderJson.put(SchedJoulesFields.SCHEDULE_TRANSP, folder.getScheduleTransparency() == null ? null : folder.getScheduleTransparency().getValue());
+        //
+        //            return folderId;
+        //        } catch (JSONException e) {
+        //            throw SchedJoulesProviderExceptionCodes.JSON_ERROR.create(e.getMessage(), e);
+        //        }
+        return folderId;
     }
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.chronos.provider.CalendarAccess#getChangeExceptions(java.lang.String, java.lang.String)
      */
     @Override
@@ -186,7 +186,7 @@ public class SchedJoulesCalendarAccess extends CachingCalendarAccess {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.chronos.provider.caching.CachingCalendarAccess#getRefreshInterval()
      */
     @Override
@@ -207,7 +207,7 @@ public class SchedJoulesCalendarAccess extends CachingCalendarAccess {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.chronos.provider.caching.CachingCalendarAccess#getExternalRequestTimeout()
      */
     @Override
@@ -218,7 +218,7 @@ public class SchedJoulesCalendarAccess extends CachingCalendarAccess {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.chronos.provider.caching.CachingCalendarAccess#getEvents(java.lang.String)
      */
     @Override
@@ -241,7 +241,7 @@ public class SchedJoulesCalendarAccess extends CachingCalendarAccess {
 
     /**
      * Returns the feed URL for the specified folder
-     * 
+     *
      * @param folderId The folder identifier
      * @return The feed URL from which to fetch the events
      * @throws MalformedURLException If the URL is invalid
@@ -263,7 +263,7 @@ public class SchedJoulesCalendarAccess extends CachingCalendarAccess {
 
     /**
      * Retrieves the user's key
-     * 
+     *
      * @param internalConfig The internal configuration
      * @return The user key
      * @throws OXException if the userKey is malformed or missing from the configuration
@@ -282,7 +282,7 @@ public class SchedJoulesCalendarAccess extends CachingCalendarAccess {
 
     /**
      * Find the folder in the specified folders array
-     * 
+     *
      * @param folderId The folder identifier
      * @param foldersArray The folders array
      * @return The found folder as a {@link JSONObject}
@@ -306,7 +306,7 @@ public class SchedJoulesCalendarAccess extends CachingCalendarAccess {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.chronos.provider.caching.CachingCalendarAccess#handleExceptions(java.lang.String, com.openexchange.exception.OXException)
      */
     @Override
@@ -318,7 +318,7 @@ public class SchedJoulesCalendarAccess extends CachingCalendarAccess {
 
     /**
      * Prepares the specified folder
-     * 
+     *
      * @param folderName The folder name
      * @return the prepared {@link CalendarFolder}
      * @throws OXException
@@ -336,21 +336,23 @@ public class SchedJoulesCalendarAccess extends CachingCalendarAccess {
             return folder;
         }
 
-        JSONArray folders = userConfig.optJSONArray(SchedJoulesFields.FOLDERS);
-        JSONObject folderJson = findFolder(folderName, folders);
+        // TODO: apply properties from internal config, see com.openexchange.chronos.provider.birthdays.BirthdaysCalendarAccess.prepareFolder for an example
 
-        folder.setName(folderJson.optString(SchedJoulesFields.NAME, folderName));
-        folder.setColor(folderJson.optString(SchedJoulesFields.COLOR, null));
-        folder.setDescription(folderJson.optString(SchedJoulesFields.DESCRIPTION, null));
-        folder.setUsedForSync(folderJson.optBoolean(SchedJoulesFields.USED_FOR_SYNC, false));
-        folder.setScheduleTransparency(Enums.parse(TimeTransparency.class, folderJson.optString(SchedJoulesFields.SCHEDULE_TRANSP, null), TimeTransparency.OPAQUE));
+        //        JSONArray folders = userConfig.optJSONArray(SchedJoulesFields.FOLDERS);
+        //        JSONObject folderJson = findFolder(folderName, folders);
+        //
+        //        folder.setName(folderJson.optString(SchedJoulesFields.NAME, folderName));
+        //        folder.setColor(folderJson.optString(SchedJoulesFields.COLOR, null));
+        //        folder.setDescription(folderJson.optString(SchedJoulesFields.DESCRIPTION, null));
+        //        folder.setUsedForSync(folderJson.optBoolean(SchedJoulesFields.USED_FOR_SYNC, false));
+        //        folder.setScheduleTransparency(Enums.parse(TimeTransparency.class, folderJson.optString(SchedJoulesFields.SCHEDULE_TRANSP, null), TimeTransparency.OPAQUE));
 
         return folder;
     }
 
     /**
      * Gets the folder's name from the specified {@link JSONObject} folder metadata
-     * 
+     *
      * @param folder the metadata {@link JSONObject}
      * @return The folder's name or <code>null</code> if the metdata have no 'name' information
      */
@@ -364,7 +366,7 @@ public class SchedJoulesCalendarAccess extends CachingCalendarAccess {
 
     /**
      * Checks if the specified {@link JSONObject} has metadata stored
-     * 
+     *
      * @param folder the metadata
      * @return <code>true</code> if the metadata are present, <code>false</code> otherwise
      */

@@ -54,7 +54,6 @@ import com.openexchange.chronos.provider.CalendarProvider;
 import com.openexchange.chronos.provider.FreeBusyProvider;
 import com.openexchange.chronos.provider.internal.InternalCalendarProvider;
 import com.openexchange.chronos.provider.internal.InternalFreeBusyProvider;
-import com.openexchange.chronos.provider.internal.Services;
 import com.openexchange.chronos.provider.internal.share.CalendarFolderHandlerModuleExtension;
 import com.openexchange.chronos.provider.internal.share.CalendarModuleAdjuster;
 import com.openexchange.chronos.service.CalendarService;
@@ -99,9 +98,8 @@ public class InternalCalendarProviderActivator extends HousekeepingActivator {
         openTrackers();
         try {
             getLogger(InternalCalendarProviderActivator.class).info("starting bundle {}", context.getBundle());
-            Services.setServiceLookup(this);
             registerService(CalendarProvider.class, new InternalCalendarProvider(this));
-            registerService(FreeBusyProvider.class, new InternalFreeBusyProvider());
+            registerService(FreeBusyProvider.class, new InternalFreeBusyProvider(this));
             registerService(ModuleAdjuster.class, new CalendarModuleAdjuster());
             registerService(FolderHandlerModuleExtension.class, new CalendarFolderHandlerModuleExtension(this));
         } catch (Exception e) {
@@ -113,7 +111,6 @@ public class InternalCalendarProviderActivator extends HousekeepingActivator {
     @Override
     protected void stopBundle() throws Exception {
         getLogger(InternalCalendarProviderActivator.class).info("stopping bundle {}", context.getBundle());
-        Services.setServiceLookup(null);
         super.stopBundle();
     }
 

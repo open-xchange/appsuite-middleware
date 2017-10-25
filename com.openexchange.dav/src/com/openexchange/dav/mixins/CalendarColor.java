@@ -49,6 +49,8 @@
 
 package com.openexchange.dav.mixins;
 
+import static com.openexchange.chronos.provider.CalendarFolderProperty.COLOR_LITERAL;
+import static com.openexchange.chronos.provider.CalendarFolderProperty.optPropertyValue;
 import java.util.Map;
 import java.util.regex.Pattern;
 import org.jdom2.Element;
@@ -56,7 +58,7 @@ import org.jdom2.Namespace;
 import com.openexchange.dav.DAVProperty;
 import com.openexchange.dav.DAVProtocol;
 import com.openexchange.dav.resources.FolderCollection;
-import com.openexchange.folderstorage.CalendarFolderField;
+import com.openexchange.folderstorage.CalendarFolderConverter;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.java.Strings;
@@ -103,7 +105,7 @@ public class CalendarColor extends SingleXMLPropertyMixin {
 
     private static String getValue(UserizedFolder folder) {
         if (null != folder) {
-            String value = CalendarFolderField.optValue(folder.getProperties(), CalendarFolderField.COLOR, String.class);
+            String value = optPropertyValue(CalendarFolderConverter.getExtendedProperties(folder), COLOR_LITERAL);
             if (null != value) {
                 return value;
             }

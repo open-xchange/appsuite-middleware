@@ -54,7 +54,6 @@ import java.util.Collections;
 import java.util.List;
 import org.json.JSONObject;
 import com.openexchange.chronos.Event;
-import com.openexchange.chronos.TimeTransparency;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.CalendarFolder;
@@ -62,7 +61,6 @@ import com.openexchange.chronos.provider.DefaultCalendarFolder;
 import com.openexchange.chronos.provider.DefaultCalendarPermission;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.Enums;
 import com.openexchange.session.Session;
 
 /**
@@ -159,10 +157,11 @@ public abstract class SingleFolderCachingCalendarAccess extends CachingCalendarA
         JSONObject userConfig = account.getUserConfiguration();
         if (null != userConfig) {
             folder.setName(userConfig.optString("name", FOLDER_ID));
-            folder.setColor(userConfig.optString("color", null));
-            folder.setDescription(userConfig.optString("description", null));
-            folder.setUsedForSync(userConfig.optBoolean("usedForSync", false));
-            folder.setScheduleTransparency(Enums.parse(TimeTransparency.class, userConfig.optString("scheduleTransp", null), TimeTransparency.OPAQUE));
+            //TODO: set extended properties
+            //            folder.setColor(userConfig.optString("color", null));
+            //            folder.setDescription(userConfig.optString("description", null));
+            //            folder.setUsedForSync(userConfig.optBoolean("usedForSync", false));
+            //            folder.setScheduleTransparency(Enums.parse(TimeTransparency.class, userConfig.optString("scheduleTransp", null), TimeTransparency.OPAQUE));
         }
         return folder;
     }

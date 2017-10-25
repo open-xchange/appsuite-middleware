@@ -51,7 +51,7 @@ package com.openexchange.chronos.provider;
 
 import java.util.Date;
 import java.util.List;
-import com.openexchange.chronos.Transp;
+import com.openexchange.chronos.ExtendedProperties;
 
 /**
  * {@link CalendarFolder}
@@ -76,27 +76,6 @@ public interface CalendarFolder {
     String getName();
 
     /**
-     * Gets the permissions
-     *
-     * @return
-     */
-    List<CalendarPermission> getPermissions();
-
-    /**
-     * Gets the calendar description.
-     *
-     * @return The calendar description, or <code>null</code> if not defined
-     */
-    String getDescription();
-
-    /**
-     * Gets the calendar color.
-     *
-     * @return The calendar color as a <code>CSS3</code> color value, or <code>null</code> if not defined
-     */
-    String getColor();
-
-    /**
      * Gets the last modification date of the calendar.
      *
      * @return The last modification date, or <code>null</code> if not defined
@@ -104,18 +83,19 @@ public interface CalendarFolder {
     Date getLastModified();
 
     /**
-     * Gets a value indicating whether the calendar object resources in the calendar will affect the owner's free/busy time information or not.
+     * Gets the permissions
      *
-     * @return {@link Transp#TRANSPARENT} if contained events do not contribute to the user's busy time, {@link Transp#OPAQUE}, otherwise
-     * @see <a href="https://tools.ietf.org/html/rfc6638#section-9.1">RFC 6638, section 9.1</a>
+     * @return The permissions
      */
-    Transp getScheduleTransparency();
+    List<CalendarPermission> getPermissions();
 
     /**
-     * Gets a value indicating whether the folder should be considered for synchronization with external clients or not.
+     * Gets the extended properties of the folder.
+     * <p/>
+     * See {@link CalendarFolderProperty} for a list of common folder properties evaluated by clients.
      *
-     * @return <code>true</code> if the folder should be considered for synchronization with external clients, <code>false</code>, otherwise
+     * @return The extended properties, or <code>null</code> if not defined
      */
-    boolean isUsedForSync();
+    ExtendedProperties getExtendedProperties();
 
 }

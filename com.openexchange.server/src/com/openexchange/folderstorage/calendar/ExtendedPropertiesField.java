@@ -47,61 +47,76 @@
  *
  */
 
-package com.openexchange.chronos.json.converter.handler;
+package com.openexchange.folderstorage.calendar;
 
-import org.json.JSONException;
-import com.openexchange.chronos.ExtendedProperties;
-import com.openexchange.chronos.json.converter.mapper.ExtendedPropertiesMapping;
+import com.openexchange.chronos.common.DataHandlers;
 import com.openexchange.conversion.ConversionResult;
-import com.openexchange.conversion.Data;
+import com.openexchange.conversion.ConversionService;
 import com.openexchange.conversion.DataArguments;
-import com.openexchange.conversion.DataExceptionCodes;
 import com.openexchange.conversion.DataHandler;
-import com.openexchange.exception.OXException;
-import com.openexchange.session.Session;
-import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import com.openexchange.conversion.SimpleData;
+import com.openexchange.folderstorage.FolderField;
+import com.openexchange.folderstorage.FolderProperty;
+import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
- * {@link XProperties2JsonDataHandler}
+ * {@link ExtendedPropertiesField}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class XProperties2JsonDataHandler implements DataHandler {
+public class ExtendedPropertiesField extends FolderField {
+
+    /** The column identifier of the field as used in the HTTP API */
+    private static final int COLUMN_ID = 3201;
+
+    /** The column name of the field as used in the HTTP API */
+    private static final String COLUMN_NAME = "com.openexchange.calendar.extendedProperties";
+
+    private static final long serialVersionUID = -6859701869502421711L;
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ExtendedPropertiesField.class);
+    private static final ExtendedPropertiesField INSTANCE = new ExtendedPropertiesField();
 
     /**
-     * Initializes a new {@link XProperties2JsonDataHandler}.
+     * Gets the extended properties field instance.
+     *
+     * @return The instance
      */
-    public XProperties2JsonDataHandler() {
-        super();
+    public static ExtendedPropertiesField getInstance() {
+        return INSTANCE;
+    }
+
+    /**
+     * Initializes a new {@link ExtendedPropertiesField}.
+     */
+    private ExtendedPropertiesField() {
+        super(COLUMN_ID, COLUMN_NAME, null);
     }
 
     @Override
-    public String[] getRequiredArguments() {
-        return new String[0];
-    }
-
-    @Override
-    public Class<?>[] getTypes() {
-        return new Class<?>[] { ExtendedProperties.class };
-    }
-
-    @Override
-    public ConversionResult processData(Data<? extends Object> data, DataArguments dataArguments, Session session) throws OXException {
-        ConversionResult result = new ConversionResult();
-        Object sourceData = data.getData();
+    public FolderProperty parse(Object value) {
         try {
-            if (null == sourceData) {
-                result.setData(null);
-            } else if (ExtendedProperties.class.isInstance(sourceData)) {
-                result.setData(ExtendedPropertiesMapping.serializeExtendedProperties((ExtendedProperties) sourceData));
-            } else {
-                throw DataExceptionCodes.TYPE_NOT_SUPPORTED.create(sourceData.getClass().toString());
-            }
-        } catch (JSONException e) {
-            throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+            DataHandler dataHandler = ServerServiceRegistry.getServize(ConversionService.class).getDataHandler(DataHandlers.JSON2XPROPERTIES);
+            ConversionResult result = dataHandler.processData(new SimpleData<Object>(value), new DataArguments(), null);
+            return new FolderProperty(getName(), result.getData());
+        } catch (Exception e) {
+            LOG.warn("Error parsing extended calendar properties from \"{}\": {}", value, e.getMessage(), e);
         }
-        return result;
+        return null;
+    }
+
+    @Override
+    public Object write(FolderProperty property) {
+        if (null != property) {
+            try {
+                DataHandler dataHandler = ServerServiceRegistry.getServize(ConversionService.class).getDataHandler(DataHandlers.XPROPERTIES2JSON);
+                ConversionResult result = dataHandler.processData(new SimpleData<Object>(property.getValue()), new DataArguments(), null);
+                return result.getData();
+            } catch (Exception e) {
+                LOG.warn("Error writing extended calendar properties \"{}\": {}", property.getValue(), e.getMessage(), e);
+            }
+        }
+        return getDefaultValue();
     }
 
 }

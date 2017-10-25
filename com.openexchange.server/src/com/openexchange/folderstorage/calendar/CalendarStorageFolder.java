@@ -93,6 +93,11 @@ public class CalendarStorageFolder extends AbstractFolder implements Parameteriz
     }
 
     @Override
+    public boolean isCacheable() {
+        return false;
+    }
+
+    @Override
     public void setProperty(FolderField name, Object value) {
         if (null == value) {
             properties.remove(name);

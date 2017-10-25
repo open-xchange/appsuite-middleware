@@ -49,6 +49,8 @@
 
 package com.openexchange.caldav.resources;
 
+import static com.openexchange.chronos.provider.CalendarFolderProperty.USED_FOR_SYNC_LITERAL;
+import static com.openexchange.chronos.provider.CalendarFolderProperty.optPropertyValue;
 import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.caldav.GroupwareCaldavFactory;
@@ -67,7 +69,7 @@ import com.openexchange.dav.resources.DAVRootCollection;
 import com.openexchange.dav.resources.FolderCollection;
 import com.openexchange.dav.resources.PlaceholderCollection;
 import com.openexchange.exception.OXException;
-import com.openexchange.folderstorage.CalendarFolderField;
+import com.openexchange.folderstorage.CalendarFolderConverter;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.FolderResponse;
 import com.openexchange.folderstorage.FolderService;
@@ -110,7 +112,7 @@ public class CalDAVRootCollection extends DAVRootCollection {
     /**
      * Initializes a new {@link CalDAVRootCollection}.
      *
-     * @param factory the factory
+     * @param factory The factory
      */
     public CalDAVRootCollection(GroupwareCaldavFactory factory) {
         super(factory, "Calendars");
@@ -260,8 +262,8 @@ public class CalDAVRootCollection extends DAVRootCollection {
         if (isTrashFolder(folder)) {
             return false;
         }
-        Boolean usedForSync = CalendarFolderField.optValue(folder.getProperties(), CalendarFolderField.USED_FOR_SYNC, Boolean.class);
-        return false == Boolean.FALSE.equals(usedForSync);
+        String value = optPropertyValue(CalendarFolderConverter.getExtendedProperties(folder), USED_FOR_SYNC_LITERAL);
+        return null == value || Boolean.parseBoolean(value);
     }
 
     /**
