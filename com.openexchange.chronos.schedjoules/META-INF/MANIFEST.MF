@@ -23,7 +23,8 @@ Import-Package: com.openexchange.chronos,
  org.apache.http.impl.client,
  org.apache.http.message,
  org.json,
- org.osgi.framework
+ org.osgi.framework,
+ org.slf4j;version="1.7.25"
 Bundle-Activator: com.openexchange.chronos.schedjoules.osgi.SchedJoulesActivator
 Export-Package: com.openexchange.chronos.schedjoules,
  com.openexchange.chronos.schedjoules.api,

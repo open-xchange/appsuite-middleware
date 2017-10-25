@@ -49,9 +49,16 @@
 
 package com.openexchange.chronos.schedjoules.impl;
 
+import java.util.Iterator;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.chronos.schedjoules.SchedJoulesResult;
 import com.openexchange.chronos.schedjoules.SchedJoulesService;
 import com.openexchange.chronos.schedjoules.api.SchedJoulesAPI;
+import com.openexchange.chronos.schedjoules.exception.SchedJoulesAPIExceptionCodes;
 import com.openexchange.exception.OXException;
 
 /**
@@ -60,6 +67,8 @@ import com.openexchange.exception.OXException;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class SchedJoulesServiceImpl implements SchedJoulesService {
+
+    private static final Logger LOG = LoggerFactory.getLogger(SchedJoulesServiceImpl.class);
 
     private final SchedJoulesAPI api;
 
@@ -80,7 +89,7 @@ public class SchedJoulesServiceImpl implements SchedJoulesService {
      */
     @Override
     public SchedJoulesResult getRoot() throws OXException {
-        return new SchedJoulesResult(api.pages().getRootPage());
+        return new SchedJoulesResult(filterContent(api.pages().getRootPage()));
     }
 
     /*
@@ -90,7 +99,7 @@ public class SchedJoulesServiceImpl implements SchedJoulesService {
      */
     @Override
     public SchedJoulesResult getRoot(String locale, String location) throws OXException {
-        return new SchedJoulesResult(api.pages().getRootPage(locale, location));
+        return new SchedJoulesResult(filterContent(api.pages().getRootPage(locale, location)));
     }
 
     /*
@@ -100,7 +109,7 @@ public class SchedJoulesServiceImpl implements SchedJoulesService {
      */
     @Override
     public SchedJoulesResult getPage(int pageId) throws OXException {
-        return new SchedJoulesResult(api.pages().getPage(pageId));
+        return new SchedJoulesResult(filterContent(api.pages().getPage(pageId)));
     }
 
     /*
@@ -110,7 +119,7 @@ public class SchedJoulesServiceImpl implements SchedJoulesService {
      */
     @Override
     public SchedJoulesResult getPage(int pageId, String locale) throws OXException {
-        return new SchedJoulesResult(api.pages().getPage(pageId, locale));
+        return new SchedJoulesResult(filterContent(api.pages().getPage(pageId, locale)));
     }
 
     /*
@@ -150,6 +159,71 @@ public class SchedJoulesServiceImpl implements SchedJoulesService {
      */
     @Override
     public SchedJoulesResult search(String query, String locale, int countryId, int categoryId, int maxRows) throws OXException {
-        return new SchedJoulesResult(api.pages().search(query, locale, countryId, categoryId, maxRows));
+        return new SchedJoulesResult(filterContent(api.pages().search(query, locale, countryId, categoryId, maxRows)));
+    }
+
+    /**
+     * Filters the specified {@link JSONObject}
+     * 
+     * @param content the {@link JSONObject} to filter
+     * @return the filtered {@link JSONObject}
+     * @throws OXException if a JSON error is occurred
+     */
+    private JSONObject filterContent(JSONObject content) throws OXException {
+        try {
+            long startTime = System.currentTimeMillis();
+            filterJSONObject(content);
+            LOG.trace("Filtered content in " + (System.currentTimeMillis() - startTime) + " msec.");
+            return content;
+        } catch (JSONException e) {
+            throw SchedJoulesAPIExceptionCodes.JSON_ERROR.create(e);
+        }
+    }
+
+    /**
+     * Filters the specified {@link JSONObject} and removes the 'url' field
+     * 
+     * @param content the {@link JSONObject} to filter
+     * @return the filtered {@link JSONObject}
+     * @throws OXException if a JSON error is occurred
+     */
+    private void filterJSONObject(JSONObject object) throws JSONException, OXException {
+        Iterator<String> keys = object.keys();
+        while (keys.hasNext()) {
+            String key = keys.next();
+            if (key.equals("url")) {
+                keys.remove();
+            } else {
+                filterObject(object.get(key));
+            }
+        }
+    }
+
+    /**
+     * Filters the specified {@link JSONArray}
+     * 
+     * @param array The {@link JSONArray} to filter
+     * @throws OXException if a JSON error is occurred
+     * @throws JSONException if JSON parsing error is occurred
+     */
+    private void filterJSONArray(JSONArray array) throws OXException, JSONException {
+        for (int index = 0; index < array.length(); index++) {
+            filterObject(array.get(index));
+        }
+    }
+
+    /**
+     * Filters the specified {@link JSONObject}
+     * 
+     * @param array The {@link JSONObject} to filter
+     * @throws OXException if a JSON error is occurred
+     * @throws JSONException if JSON parsing error is occurred
+     */
+    private void filterObject(Object obj) throws JSONException, OXException {
+        if (obj instanceof JSONObject) {
+            filterJSONObject((JSONObject) obj);
+        } else if (obj instanceof JSONArray) {
+            filterJSONArray((JSONArray) obj);
+        }
     }
 }
