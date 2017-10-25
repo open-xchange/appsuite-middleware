@@ -113,7 +113,7 @@ public class SchedJoulesRESTClient {
         LeanConfigurationService service = Services.getService(LeanConfigurationService.class);
         String apiKey = service.getProperty(SchedJoulesProperty.apiKey);
         if (Strings.isEmpty(apiKey)) {
-            throw SchedJoulesAPIExceptionCodes.NO_API_KEY_CONFIGURED.create();
+            throw SchedJoulesAPIExceptionCodes.NO_API_KEY_CONFIGURED.create(SchedJoulesProperty.apiKey.getFQPropertyName());
         }
         return AUTHORIZATION_HEADER.replaceFirst("\\{\\{token\\}\\}", apiKey);
     }
@@ -340,7 +340,7 @@ public class SchedJoulesRESTClient {
         // Assert the 4xx codes
         switch (statusCode) {
             case 401:
-                throw SchedJoulesAPIExceptionCodes.NOT_AUTHORIZED.create(httpResponse.getStatusLine().getReasonPhrase());
+                throw SchedJoulesAPIExceptionCodes.NOT_AUTHORIZED.create(httpResponse.getStatusLine().getReasonPhrase(), SchedJoulesProperty.apiKey.getFQPropertyName());
             case 404:
                 throw SchedJoulesAPIExceptionCodes.PAGE_NOT_FOUND.create();
         }
