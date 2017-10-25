@@ -166,6 +166,10 @@ public class SchedJoulesCalendarAccess extends CachingCalendarAccess {
     public String updateFolder(String folderId, CalendarFolder folder, long clientTimestamp) throws OXException {
         try {
             ExtendedProperties extendedProperties = folder.getExtendedProperties();
+            if (extendedProperties == null) {
+                extendedProperties = new ExtendedProperties();
+            }
+
             JSONObject folderJson = findFolder(folderId, getAccount().getInternalConfiguration().optJSONArray(SchedJoulesFields.FOLDERS));
 
             folderJson.put(SchedJoulesFields.COLOR, extendedProperties.get(CalendarFolderProperty.COLOR_LITERAL));
