@@ -50,6 +50,7 @@
 package com.openexchange.oidc.impl;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -64,7 +65,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.SessionUtility;
-import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.login.LoginConfiguration;
 import com.openexchange.ajax.login.LoginRequestHandler;
 import com.openexchange.ajax.writer.ResponseWriter;
@@ -75,6 +75,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.notify.hostname.HostnameService;
+import com.openexchange.java.Charsets;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.login.LoginRequest;
@@ -397,12 +398,15 @@ public class OIDCLoginRequestHandler implements LoginRequestHandler {
 
     private void writeSessionDataAsJson(Session session, HttpServletResponse response) throws JSONException, IOException {
         LOG.trace("writeSessionDataAsJson(Session session {}, HttpServletResponse response)", session.getSessionID());
-        Response responseObject = new Response();
         JSONObject json = new JSONObject();
         json.putSafe("session", session.getSessionID());
         json.putSafe("user_id", session.getUserId());
         json.putSafe("context_id", session.getContextId());
-        responseObject.setData(json);
-        ResponseWriter.write(responseObject, response.getWriter());
+        response.setStatus(HttpServletResponse.SC_OK);
+        response.setCharacterEncoding(Charsets.UTF_8_NAME);
+        response.setContentType("application/json");
+        PrintWriter writer = response.getWriter();
+        json.write(writer);
+        writer.flush();
     }
 }

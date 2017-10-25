@@ -5,7 +5,8 @@ Bundle-SymbolicName: com.openexchange.oidc
 Bundle-Version: 7.8.10
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Import-Package: com.hazelcast.core,
+Import-Package: com.fasterxml.jackson.core,
+ com.hazelcast.core,
  com.hazelcast.nio.serialization,
  com.nimbusds.jose,
  com.nimbusds.jose.proc,
