@@ -54,6 +54,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import org.json.JSONArray;
@@ -61,6 +62,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Test;
 import com.openexchange.ajax.chronos.factory.AccountConfigurationFactory;
+import com.openexchange.ajax.chronos.factory.AccountFactory;
 import com.openexchange.ajax.chronos.manager.ChronosApiException;
 import com.openexchange.ajax.tools.JSONCoercion;
 import com.openexchange.testing.httpclient.invoker.ApiException;
@@ -237,7 +239,7 @@ public class BasicSchedJoulesProviderTest extends AbstractChronosTest {
         CalendarAccountData accountData = calendarAccount.getData();
         assertAccountConfiguration(accountData.getConfiguration(), 2);
 
-        ///calendarAccountManager.deleteCalendarAccount(Collections.singletonList(accountData.getId()));
+        calendarAccountManager.deleteCalendarAccount(Collections.singletonList(AccountFactory.createCalendarAccountId(accountData.getId(), accountData.getTimestamp())));
     }
 
     ////////////////////////////////// HELPERS ///////////////////////////////////
