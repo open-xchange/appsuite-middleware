@@ -259,6 +259,7 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
             if (validTokenResponse != null) {
                 this.sendLoginRequestToServer(request, response, tokenResponse, storedRequestInformation.getDomainName());
             }
+            throw OIDCExceptionCode.IDTOKEN_GATHERING_ERROR.create("IDToken validation failed, no claim set could be extracted");
         } catch (OXException e) {
             throw OIDCExceptionCode.IDTOKEN_GATHERING_ERROR.create(e, e.getMessage());
         }
@@ -367,7 +368,7 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
             throw OIDCExceptionCode.INVALID_LOGOUT_REQUEST.create("No session parameter set.");
         }
 
-        Session session = getSessionFromId(sessionId);
+        Session session = this.getSessionFromId(sessionId);
         if (session == null) {
             throw OIDCExceptionCode.INVALID_LOGOUT_REQUEST.create("Invalid session parameter, no session found.");
         }
