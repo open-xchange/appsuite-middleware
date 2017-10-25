@@ -122,7 +122,7 @@ public class BasicSchedJoulesAPITest extends AbstractChronosTest {
     public void testGetNonExistentPage() throws Exception {
         BrowseResponse response = chronosApi.browse(defaultUserApi.getSession(), 1138, null, null);
         assertNotNull("There was no error returned", response.getError());
-        assertEquals("The exception code does not match", "SCHEDJOULES-0012", response.getCode());
+        assertEquals("The exception code does not match", "SCHEDJOULES-API-0012", response.getCode());
     }
 
     /**
