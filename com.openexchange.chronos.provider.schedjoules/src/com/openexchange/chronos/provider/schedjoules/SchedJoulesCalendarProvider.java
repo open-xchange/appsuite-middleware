@@ -228,10 +228,14 @@ public class SchedJoulesCalendarProvider extends CachingCalendarProvider {
         // nothing to do
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.chronos.provider.caching.CachingCalendarProvider#recreateData(com.openexchange.session.Session, org.json.JSONObject, org.json.JSONObject)
+     */
     @Override
     public boolean recreateData(Session session, JSONObject originUserConfiguration, JSONObject newUserConfiguration) throws OXException {
-        // TODO Auto-generated method stub
-        return true;
+        return false;
     }
 
     ///////////////////////////////////////////// HELPERS ///////////////////////////////////////////
