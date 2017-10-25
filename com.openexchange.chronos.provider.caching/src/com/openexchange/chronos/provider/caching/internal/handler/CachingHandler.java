@@ -52,7 +52,6 @@ package com.openexchange.chronos.provider.caching.internal.handler;
 import java.util.List;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.provider.caching.ExternalCalendarResult;
-import com.openexchange.chronos.service.EventUpdate;
 import com.openexchange.chronos.service.EventUpdates;
 import com.openexchange.exception.OXException;
 
@@ -88,7 +87,7 @@ public interface CachingHandler {
      * Persists the given {@link EventUpdates}
      * 
      * @param folderId The folder identifier to persist the {@link Event}s for
-     * @param diff The {@link EventUpdate} diff to persist
+     * @param diff The {@link EventUpdates} diff to persist
      * @throws OXException
      */
     void persist(String folderId, EventUpdates diff) throws OXException;
