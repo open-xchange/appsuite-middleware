@@ -49,6 +49,8 @@
 
 package com.openexchange.chronos.impl.groupware;
 
+import static com.openexchange.chronos.impl.groupware.ListenerHelper.eqaulsFieldTerm;
+import static com.openexchange.chronos.impl.groupware.ListenerHelper.equalsFieldUserTerm;
 import java.sql.Connection;
 import java.util.Collections;
 import java.util.Date;
@@ -81,10 +83,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteFailedExceptionCodes;
 import com.openexchange.groupware.delete.DeleteListener;
-import com.openexchange.search.SearchTerm;
 import com.openexchange.search.SingleSearchTerm;
-import com.openexchange.search.SingleSearchTerm.SingleOperation;
-import com.openexchange.search.internal.operands.ColumnFieldOperand;
 import com.openexchange.search.internal.operands.ConstantOperand;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
@@ -143,6 +142,8 @@ public final class ChronosDeleteListener implements DeleteListener {
         }
     }
 
+    // TODO Add OSGi events for modified events
+
     /**
      * Purges the user data
      * 
@@ -188,7 +189,7 @@ public final class ChronosDeleteListener implements DeleteListener {
                         // The user is the only attendee, delete event and its attachments
                         eventStorage.deleteEvent(entry.getKey());
                         event.setAttendees(attendees);
-                        storage.getAttachmentStorage().deleteAttachments(serverSession, CalendarUtils.getFolderView(event, userId), entry.getKey());
+                        storage.getAttachmentStorage().deleteAttachments(serverSession, CalendarUtils.getFolderView(event, userId), entry.getKey()); //TODO Should load folder id ?!
                     } else {
                         // The user needs to be removed from the event, this modifies the event
                         attendees = Collections.singletonList(attendees.stream().filter(a -> a.getEntity() == userId).findFirst().get());
@@ -312,41 +313,5 @@ public final class ChronosDeleteListener implements DeleteListener {
             event.setLastModified(new Date());
             eventStorage.updateEvent(event);
         }
-    }
-
-    /*
-     * ====== HELPERS ======
-     */
-
-    /**
-     * Creates a new {@link SearchTerm} with {@link SingleOperation#EQUALS} as operand
-     * 
-     * @return A new {@link SingleSearchTerm}
-     */
-    private SingleSearchTerm equalsTerm() {
-        return new SingleSearchTerm(SingleOperation.EQUALS);
-    }
-
-    /**
-     * Creates a new {@link SearchTerm} with {@link SingleOperation#EQUALS} as operand
-     * on the given field as {@link ColumnFieldOperand}
-     * 
-     * @param field The field to search on
-     * @return A new {@link SingleSearchTerm}
-     */
-    private SingleSearchTerm eqaulsFieldTerm(Enum<?> field) {
-        return equalsTerm().addOperand(new ColumnFieldOperand<Enum<?>>(field));
-    }
-
-    /**
-     * Creates a new {@link SearchTerm} with {@link SingleOperation#EQUALS} as operand
-     * on the given field as {@link ColumnFieldOperand} for the specific user
-     * 
-     * @param field The field to search on
-     * @param userID The user to search
-     * @return A new {@link SingleSearchTerm}
-     */
-    private SingleSearchTerm equalsFieldUserTerm(Enum<?> field, int userID) {
-        return eqaulsFieldTerm(field).addOperand(new ConstantOperand<Integer>(Integer.valueOf(userID)));
     }
 }
