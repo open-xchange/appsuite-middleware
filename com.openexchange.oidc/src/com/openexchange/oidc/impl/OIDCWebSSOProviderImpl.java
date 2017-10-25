@@ -85,7 +85,6 @@ import com.nimbusds.openid.connect.sdk.OIDCTokenResponseParser;
 import com.nimbusds.openid.connect.sdk.claims.IDTokenClaimsSet;
 import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.login.LoginConfiguration;
-import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.login.internal.LoginPerformer;
@@ -142,7 +141,7 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
         AutologinMode autologinMode = OIDCBackendConfig.AutologinMode.get(this.backend.getBackendConfig().autologinCookieMode());
 
         if (autologinMode != null && autologinMode == AutologinMode.OX_DIRECT) {
-            String autologinRedirect = getAutologinURLFromOIDCCookie(request, response);
+            String autologinRedirect = this.getAutologinURLFromOIDCCookie(request, response);
             if (autologinRedirect != null && !autologinRedirect.isEmpty()) {
                 return autologinRedirect;
             }
@@ -159,6 +158,54 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
         this.addAuthRequestToStateManager(request, state, nonce);
         LOG.trace("Login redirect request: {}", loginRequest);
         return loginRequest;
+    }
+    
+    private String getAutologinURLFromOIDCCookie(HttpServletRequest request, HttpServletResponse response) throws OXException {
+        LOG.trace("getAutologinURLFromOIDCCookie(HttpServletRequest request: {}, HttpServletResponse response)", request.getRequestURI());
+        Cookie autologinCookie = OIDCTools.loadAutologinCookie(request, this.loginConfiguration);
+
+        if (autologinCookie == null) {
+            return null;
+        }
+
+        return getAutologinByCookieURL(request, response, autologinCookie);
+    }
+    
+    private String getAutologinByCookieURL(HttpServletRequest request, HttpServletResponse response, Cookie oidcAtologinCookie) throws OXException {
+        LOG.trace("getAutologinByCookieURL(HttpServletRequest request: {}, HttpServletResponse response, Cookie oidcAtologinCookie: {})", request.getRequestURI(), oidcAtologinCookie != null ? oidcAtologinCookie.getValue() : "null");
+        if (oidcAtologinCookie != null) {
+            Session session = this.getSessionFromAutologinCookie(oidcAtologinCookie);
+            if (session != null) {
+                return this.getRedirectLocationForSession(request, session);
+            }
+            //No session found, log that
+            LOG.debug("No session found for OIDC Cookie with value: {}", oidcAtologinCookie.getValue());
+        }
+
+        if (oidcAtologinCookie != null) {
+            Cookie toRemove = (Cookie) oidcAtologinCookie.clone();
+            toRemove.setMaxAge(0);
+            response.addCookie(toRemove);
+        }
+
+        return null;
+    }
+    
+    private Session getSessionFromAutologinCookie(Cookie oidcAtologinCookie) throws OXException {
+        LOG.trace("getSessionFromAutologinCookie(Cookie oidcAtologinCookie: {})", oidcAtologinCookie.getValue());
+        Session session = null;
+        SessiondService sessiondService = Services.getService(SessiondService.class);
+        Collection<String> sessions = sessiondService.findSessions(SessionFilter.create("(" + OIDCTools.SESSION_COOKIE + "=" + oidcAtologinCookie.getValue() + ")"));
+        if (sessions.size() > 0) {
+            session = sessiondService.getSession(sessions.iterator().next());
+        }
+        return session;
+    }
+
+    private String getRedirectLocationForSession(HttpServletRequest request, Session session) throws OXException {
+        LOG.trace("getRedirectLocationForSession(HttpServletRequest request: {}, Session session: {})", request.getRequestURI(), session.getSessionID());
+        OIDCTools.validateSession(session, request);
+        return OIDCTools.buildFrontendRedirectLocation(session, OIDCTools.getUIWebPath(this.loginConfiguration, this.backend.getBackendConfig()));
     }
 
     private String buildLoginRequest(State state, Nonce nonce, HttpServletRequest request) throws OXException {
@@ -208,7 +255,7 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
         try {
             TokenRequest tokenReq = this.createTokenRequest(request);
             OIDCTokenResponse tokenResponse = this.getTokenResponse(tokenReq);
-            IDTokenClaimsSet validTokenResponse = this.validTokenResponse(tokenResponse, storedRequestInformation.getNonce());
+            IDTokenClaimsSet validTokenResponse = this.backend.validateIdToken(tokenResponse.getOIDCTokens().getIDToken(), storedRequestInformation.getNonce());
             if (validTokenResponse != null) {
                 this.sendLoginRequestToServer(request, response, tokenResponse, storedRequestInformation.getDomainName());
             }
@@ -216,7 +263,45 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
             throw OIDCExceptionCode.IDTOKEN_GATHERING_ERROR.create(e, e.getMessage());
         }
     }
+    
+    private TokenRequest createTokenRequest(HttpServletRequest request) throws OXException {
+        LOG.trace("createTokenRequest(HttpServletRequest request: {})", request.getRequestURI());
+        AuthorizationCode code = new AuthorizationCode(request.getParameter("code"));
+        URI callback = OIDCTools.getURIFromPath(this.backend.getBackendConfig().getRedirectURIAuth());
+        AuthorizationGrant codeGrant = new AuthorizationCodeGrant(code, callback);
 
+        ClientAuthentication clientAuth = this.backend.getClientAuthentication();
+
+        URI tokenEndpoint = OIDCTools.getURIFromPath(this.backend.getBackendConfig().getTokenEndpoint());
+
+        TokenRequest tokenRequest = new TokenRequest(tokenEndpoint, clientAuth, codeGrant, this.backend.getScope());
+        return this.backend.getTokenRequest(tokenRequest);
+    }
+    
+    private OIDCTokenResponse getTokenResponse(TokenRequest tokenReq) throws OXException {
+        LOG.trace("OIDCTokenResponse getTokenResponse(TokenRequest tokenReq {})", tokenReq);
+        HTTPRequest httpRequest = this.backend.getHttpRequest(tokenReq.toHTTPRequest());
+        HTTPResponse httpResponse = null;
+        try {
+            httpResponse = httpRequest.send();
+        } catch (IOException e) {
+            throw OIDCExceptionCode.UNABLE_TO_SEND_REQUEST.create(e, GET_THE_ID_TOKEN);
+        }
+        TokenResponse tokenResponse = null;
+        try {
+            tokenResponse = OIDCTokenResponseParser.parse(httpResponse);
+        } catch (ParseException e) {
+            throw OIDCExceptionCode.UNABLE_TO_PARSE_RESPONSE_FROM_IDP.create(e, GET_THE_ID_TOKEN);
+        }
+
+        if (tokenResponse instanceof TokenErrorResponse) {
+            ErrorObject error = ((TokenErrorResponse) tokenResponse).getErrorObject();
+            throw OIDCExceptionCode.IDTOKEN_GATHERING_ERROR.create(error.getCode() + ", " + error.getDescription());
+        }
+
+        return (OIDCTokenResponse) tokenResponse;
+    }
+    
     private String sendLoginRequestToServer(HttpServletRequest request, HttpServletResponse response, OIDCTokenResponse tokenResponse, String domainName) throws OXException {
         LOG.trace("sendLoginRequestToServer(HttpServletRequest request: {}, HttpServletResponse response, OIDCTokenResponse tokenResponse: {}, String domainName: {})",
             request.getRequestURI(), tokenResponse.getOIDCTokens().toJSONObject().toJSONString(), domainName);
@@ -258,48 +343,6 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
             throw OIDCExceptionCode.UNABLE_TO_SEND_REDIRECT.create(e, loginRedirect);
         }
         return null;
-    }
-
-    private IDTokenClaimsSet validTokenResponse(OIDCTokenResponse tokenResponse, String nounce) throws OXException {
-        return this.backend.validateIdToken(tokenResponse.getOIDCTokens().getIDToken(), nounce);
-    }
-
-    private TokenRequest createTokenRequest(HttpServletRequest request) throws OXException {
-        LOG.trace("createTokenRequest(HttpServletRequest request: {})", request.getRequestURI());
-        AuthorizationCode code = new AuthorizationCode(request.getParameter("code"));
-        URI callback = OIDCTools.getURIFromPath(this.backend.getBackendConfig().getRedirectURIAuth());
-        AuthorizationGrant codeGrant = new AuthorizationCodeGrant(code, callback);
-
-        ClientAuthentication clientAuth = this.backend.getClientAuthentication();
-
-        URI tokenEndpoint = OIDCTools.getURIFromPath(this.backend.getBackendConfig().getTokenEndpoint());
-
-        TokenRequest tokenRequest = new TokenRequest(tokenEndpoint, clientAuth, codeGrant, this.backend.getScope());
-        return this.backend.getTokenRequest(tokenRequest);
-    }
-
-    private OIDCTokenResponse getTokenResponse(TokenRequest tokenReq) throws OXException {
-        LOG.trace("OIDCTokenResponse getTokenResponse(TokenRequest tokenReq {})", tokenReq);
-        HTTPRequest httpRequest = this.backend.getHttpRequest(tokenReq.toHTTPRequest());
-        HTTPResponse httpResponse = null;
-        try {
-            httpResponse = httpRequest.send();
-        } catch (IOException e) {
-            throw OIDCExceptionCode.UNABLE_TO_SEND_REQUEST.create(e, GET_THE_ID_TOKEN);
-        }
-        TokenResponse tokenResponse = null;
-        try {
-            tokenResponse = OIDCTokenResponseParser.parse(httpResponse);
-        } catch (ParseException e) {
-            throw OIDCExceptionCode.UNABLE_TO_PARSE_RESPONSE_FROM_IDP.create(e, GET_THE_ID_TOKEN);
-        }
-
-        if (tokenResponse instanceof TokenErrorResponse) {
-            ErrorObject error = ((TokenErrorResponse) tokenResponse).getErrorObject();
-            throw OIDCExceptionCode.IDTOKEN_GATHERING_ERROR.create(error.getCode() + ", " + error.getDescription());
-        }
-
-        return (OIDCTokenResponse) tokenResponse;
     }
 
     @Override
@@ -380,54 +423,6 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
         } catch (URISyntaxException e) {
             throw OIDCExceptionCode.UNABLE_TO_PARSE_URI.create(e, "automated construction of logout request URI");
         }
-    }
-
-    private String getAutologinURLFromOIDCCookie(HttpServletRequest request, HttpServletResponse response) throws OXException {
-        LOG.trace("getAutologinURLFromOIDCCookie(HttpServletRequest request: {}, HttpServletResponse response)", request.getRequestURI());
-        Cookie autologinCookie = OIDCTools.loadAutologinCookie(request, this.loginConfiguration);
-
-        if (autologinCookie == null) {
-            return null;
-        }
-
-        return getAutologinByCookieURL(request, response, autologinCookie);
-    }
-
-    private String getAutologinByCookieURL(HttpServletRequest request, HttpServletResponse response, Cookie oidcAtologinCookie) throws OXException {
-        LOG.trace("getAutologinByCookieURL(HttpServletRequest request: {}, HttpServletResponse response, Cookie oidcAtologinCookie: {})", request.getRequestURI(), oidcAtologinCookie != null ? oidcAtologinCookie.getValue() : "null");
-        if (oidcAtologinCookie != null) {
-            Session session = this.getSessionFromAutologinCookie(oidcAtologinCookie);
-            if (session != null) {
-                return this.getRedirectLocationForSession(request, session);
-            }
-            //No session found, log that
-            LOG.debug("No session found for OIDC Cookie with value: {}", oidcAtologinCookie.getValue());
-        }
-
-        if (oidcAtologinCookie != null) {
-            Cookie toRemove = (Cookie) oidcAtologinCookie.clone();
-            toRemove.setMaxAge(0);
-            response.addCookie(toRemove);
-        }
-
-        return null;
-    }
-
-    private Session getSessionFromAutologinCookie(Cookie oidcAtologinCookie) throws OXException {
-        LOG.trace("getSessionFromAutologinCookie(Cookie oidcAtologinCookie: {})", oidcAtologinCookie.getValue());
-        Session session = null;
-        SessiondService sessiondService = Services.getService(SessiondService.class);
-        Collection<String> sessions = sessiondService.findSessions(SessionFilter.create("(" + OIDCTools.SESSION_COOKIE + "=" + oidcAtologinCookie.getValue() + ")"));
-        if (sessions.size() > 0) {
-            session = sessiondService.getSession(sessions.iterator().next());
-        }
-        return session;
-    }
-
-    private String getRedirectLocationForSession(HttpServletRequest request, Session session) throws OXException {
-        LOG.trace("getRedirectLocationForSession(HttpServletRequest request: {}, Session session: {})", request.getRequestURI(), session.getSessionID());
-        OIDCTools.validateSession(session, request);
-        return OIDCTools.buildFrontendRedirectLocation(session, OIDCTools.getUIWebPath(this.loginConfiguration, this.backend.getBackendConfig()));
     }
 
     @Override
