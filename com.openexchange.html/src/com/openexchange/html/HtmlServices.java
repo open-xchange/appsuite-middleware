@@ -76,7 +76,7 @@ import net.htmlparser.jericho.HTMLElementName;
 public final class HtmlServices {
 
     public static void main(String[] args) {
-        boolean nonJavaScriptURL = isNonJavaScriptURL("java&#09;script:alert(document.domain)", null);
+        boolean nonJavaScriptURL = containsEventHandler("on'onerror=\"alert(document.cookie)\";'");
 
         System.out.println(nonJavaScriptURL);
     }
@@ -264,7 +264,7 @@ public final class HtmlServices {
 
     private static boolean doContainsEventHandler(String lc) {
         int pos = lc.indexOf("on");
-        if (pos >= 0) {
+        while (pos >= 0) {
             if (pos == 0 ? true : (false == isWordCharacter(lc.charAt(pos - 1)))) {
                 for (String globalEventHandler : GlobalEventHandler.getInstance().getGlobalEventHandlerIdentifiers()) {
                     if (lc.regionMatches(false, pos, globalEventHandler, 0, globalEventHandler.length())) {
@@ -275,6 +275,8 @@ public final class HtmlServices {
                         }
                     }
                 }
+
+                pos = lc.indexOf("on", pos + 1);
             }
         }
         return false;
