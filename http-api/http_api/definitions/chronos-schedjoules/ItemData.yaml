@@ -6,9 +6,6 @@ properties:
   name:
     type: string
     description: The item's name (localisable)
-  url:
-    type: string
-    description: The item's url. If the item's class (see below) denotes an iCal item, then this is the subscription URL
   category_id:
     type: integer
     description: The item's category identifier
