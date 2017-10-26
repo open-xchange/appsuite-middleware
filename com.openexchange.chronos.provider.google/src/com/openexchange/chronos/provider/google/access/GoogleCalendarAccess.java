@@ -49,6 +49,12 @@
 
 package com.openexchange.chronos.provider.google.access;
 
+import static com.openexchange.chronos.provider.CalendarFolderProperty.COLOR;
+import static com.openexchange.chronos.provider.CalendarFolderProperty.COLOR_LITERAL;
+import static com.openexchange.chronos.provider.CalendarFolderProperty.DESCRIPTION;
+import static com.openexchange.chronos.provider.CalendarFolderProperty.SCHEDULE_TRANSP;
+import static com.openexchange.chronos.provider.CalendarFolderProperty.USED_FOR_SYNC;
+import static com.openexchange.osgi.Tools.requireService;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -67,9 +73,14 @@ import com.google.api.services.calendar.model.EventReminder;
 import com.google.api.services.calendar.model.Events;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.ExtendedProperties;
+import com.openexchange.chronos.ExtendedProperty;
+import com.openexchange.chronos.TimeTransparency;
+import com.openexchange.chronos.common.DataHandlers;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.CalendarFolder;
+import com.openexchange.chronos.provider.CalendarFolderProperty;
 import com.openexchange.chronos.provider.DefaultCalendarFolder;
 import com.openexchange.chronos.provider.DefaultCalendarPermission;
 import com.openexchange.chronos.provider.account.AdministrativeCalendarAccountService;
@@ -82,6 +93,11 @@ import com.openexchange.chronos.provider.google.converter.GoogleEventConverter.G
 import com.openexchange.chronos.provider.google.osgi.Services;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.service.CalendarParameters;
+import com.openexchange.conversion.ConversionResult;
+import com.openexchange.conversion.ConversionService;
+import com.openexchange.conversion.DataArguments;
+import com.openexchange.conversion.DataHandler;
+import com.openexchange.conversion.SimpleData;
 import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
 
@@ -97,7 +113,7 @@ public class GoogleCalendarAccess extends CachingCalendarAccess{
 
     private final GoogleOAuthAccess oauthAccess;
     private final CalendarParameters parameters;
-    private final CalendarAccount account;
+    private CalendarAccount account;
 
     private final Map<String, CalendarFolder> folders = new HashMap<>(1);
     private final Session session;
@@ -197,9 +213,9 @@ public class GoogleCalendarAccess extends CachingCalendarAccess{
         return map == null ? null : !map.containsKey(key) ? null : Boolean.valueOf((boolean) ((Map<String, Object>) map.get(key)).get(GoogleCalendarConfigField.Folders.ENABLED));
     }
 
-    private void addEntry(CalendarListEntry entry, boolean enabled, JSONObject newConfig) throws JSONException{
+    private void addEntry(CalendarListEntry entry, boolean enabled, JSONObject newConfig) throws JSONException, OXException{
         if(enabled){
-            folders.put(String.valueOf(entry.getId()), prepareFolder(entry.getId(), entry.getSummary()));
+            folders.put(String.valueOf(entry.getId()), prepareFolder(entry.getId(), entry.getSummary(), getCalendarColor(entry), entry.getDescription(), Services.getService(ConversionService.class)));
         }
         JSONObject config = new JSONObject();
         config.put(GoogleCalendarConfigField.Folders.ENABLED, enabled);
@@ -227,6 +243,20 @@ public class GoogleCalendarAccess extends CachingCalendarAccess{
         newConfig.put(entry.getId(), config);
     }
 
+    private String getCalendarColor(CalendarListEntry entry){
+        if(entry.getBackgroundColor() != null){
+            return entry.getBackgroundColor();
+        }
+        if(entry.getForegroundColor() != null){
+            return entry.getForegroundColor();
+        }
+
+        if(entry.getColorId() != null){
+            return entry.getColorId();
+        }
+        return null;
+    }
+
     @Override
     public void close() {
         oauthAccess.dispose();
@@ -244,27 +274,83 @@ public class GoogleCalendarAccess extends CachingCalendarAccess{
 
     @Override
     public String updateFolder(String folderId, CalendarFolder folder, long clientTimestamp) throws OXException {
-        JSONObject internalConfiguration = this.getAccount().getInternalConfiguration();
+            JSONObject internalConfiguration = this.getAccount().getInternalConfiguration();
         try {
             JSONObject folders = internalConfiguration.getJSONObject(GoogleCalendarConfigField.FOLDERS);
 
             if(folders != null && folders.has(folderId)){
                 JSONObject folderConfig = folders.getJSONObject(folderId);
-                String color = folderConfig.getString(GoogleCalendarConfigField.Folders.COLOR);
-                if(color != folder.getColor()){
-                    folderConfig.put(GoogleCalendarConfigField.Folders.COLOR, folder.getColor());
-                    getAccount().getUserConfiguration().put(GoogleCalendarConfigField.FOLDERS, folders);
-                    AdministrativeCalendarAccountService service = Services.getService(AdministrativeCalendarAccountService.class);
-                    service.updateAccount(session.getContextId(), session.getUserId(), getAccount().getAccountId(), getAccount().isEnabled(), getAccount().getInternalConfiguration(), getAccount().getUserConfiguration() , getAccount().getLastModified().getTime());
+                ExtendedProperties originalProperties = (ExtendedProperties) folderConfig.get("extendedProperties");
+
+                ExtendedProperties updatedProperties = merge(originalProperties, folder.getExtendedProperties());
+                if (false == originalProperties.equals(updatedProperties)) {
+                    JSONObject internalConfig;
+                    try {
+                        internalConfig = null == account.getInternalConfiguration() ? new JSONObject() : new JSONObject(account.getInternalConfiguration().toString());
+                        internalConfig.put("extendedProperties", writeExtendedProperties(requireService(ConversionService.class, Services.getServiceLookup()), updatedProperties));
+                    } catch (JSONException e) {
+                        throw CalendarExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+                    }
+                    account = Services.getService(AdministrativeCalendarAccountService.class).updateAccount(session.getContextId(), account.getUserId(), account.getAccountId(), null, internalConfig, null, account.getLastModified().getTime());
                 }
 
+
             }
-            folder.getColor();
         } catch (JSONException e) {
             throw CalendarExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
 
         return folderId;
+    }
+
+    /**
+     * Merges incoming extended properties as passed from the client during an update operation into a collection of original extended
+     * properties.
+     * <p>/
+     * Any new properties or attempts to modify <i>protected</i> properties are rejected implicitly.
+     *
+     * @param originalProperties The original properties
+     * @param updatedProperties The updated properties
+     * @return The merged properties
+     */
+    protected static ExtendedProperties merge(ExtendedProperties originalProperties, ExtendedProperties updatedProperties) throws OXException {
+        //TODO: improve
+        ExtendedProperties mergedProperties = new ExtendedProperties(originalProperties);
+        if (null != updatedProperties && 0 < updatedProperties.size()) {
+            for (ExtendedProperty updatedProperty : updatedProperties) {
+                ExtendedProperty originalProperty = originalProperties.get(updatedProperty.getName());
+                if (null == originalProperty) {
+                    throw OXException.noPermissionForFolder();
+                }
+                if (originalProperty.equals(updatedProperty)) {
+                    continue;
+                }
+                if (CalendarFolderProperty.isProtected(originalProperty)) {
+                    throw OXException.noPermissionForFolder();
+                }
+                mergedProperties.remove(originalProperty);
+                mergedProperties.add(updatedProperty);
+            }
+        }
+        return mergedProperties;
+    }
+
+    /**
+     * Serializes an extended properties container to JSON.
+     *
+     * @param conversionService A reference to the conversion service
+     * @param properties The properties to serialize
+     * @return The serialized extended properties
+     */
+    protected static JSONObject writeExtendedProperties(ConversionService conversionService, ExtendedProperties properties) throws OXException {
+        if (null != properties) {
+            DataHandler dataHandler = conversionService.getDataHandler(DataHandlers.XPROPERTIES2JSON);
+            ConversionResult result = dataHandler.processData(new SimpleData<ExtendedProperties>(properties), new DataArguments(), null);
+            if (null != result && null != result.getData() && JSONObject.class.isInstance(result.getData())) {
+                return (JSONObject) result.getData();
+            }
+        }
+        return null;
     }
 
     private Event convertEvent(com.google.api.services.calendar.model.Event event) throws OXException{
@@ -334,14 +420,55 @@ public class GoogleCalendarAccess extends CachingCalendarAccess{
         LOG.error(e.getMessage());
     }
 
-    private CalendarFolder prepareFolder(String folderId, String summary) {
+    private CalendarFolder prepareFolder(String folderId, String summary, String color, String description, ConversionService conversionService) throws OXException {
         DefaultCalendarFolder folder = new DefaultCalendarFolder();
         folder.setId(folderId);
         folder.setPermissions(Collections.singletonList(DefaultCalendarPermission.readOnlyPermissionsFor(account.getUserId())));
         folder.setLastModified(account.getLastModified());
         folder.setName(summary);
-        folder.setUsedForSync(true);
+
+        JSONObject folderConfig = account.getInternalConfiguration().optJSONObject(folderId);
+
+        ExtendedProperties extendedProperties = null;
+        if(folderConfig != null){
+            extendedProperties = parseExtendedProperties(conversionService, folderConfig.optJSONObject("extendedProperties"));
+        }
+        if (null == extendedProperties) {
+            extendedProperties = new ExtendedProperties();
+        }
+        /*
+         * always apply or overwrite protected defaults
+         */
+        extendedProperties.replace(SCHEDULE_TRANSP(TimeTransparency.OPAQUE, true));
+        extendedProperties.replace(DESCRIPTION(description, true));
+        extendedProperties.replace(USED_FOR_SYNC(Boolean.FALSE, true));
+        /*
+         * insert further defaults if missing
+         */
+        if (false == extendedProperties.contains(COLOR_LITERAL)) {
+            extendedProperties.add(COLOR(color, false));
+        }
+        folder.setExtendedProperties(extendedProperties);
+
         return folder;
+    }
+
+    /**
+     * Deserializes an extended properties container from JSON.
+     *
+     * @param conversionService A reference to the conversion service
+     * @param jsonObject The JSON object to parse the properties from
+     * @return The parsed extended properties
+     */
+    protected static ExtendedProperties parseExtendedProperties(ConversionService conversionService, JSONObject jsonObject) throws OXException {
+        if (null != jsonObject) {
+            DataHandler dataHandler = conversionService.getDataHandler(DataHandlers.JSON2XPROPERTIES);
+            ConversionResult result = dataHandler.processData(new SimpleData<JSONObject>(jsonObject), new DataArguments(), null);
+            if (null != result && null != result.getData() && ExtendedProperties.class.isInstance(result.getData())) {
+                return (ExtendedProperties) result.getData();
+            }
+        }
+        return null;
     }
 
 }
