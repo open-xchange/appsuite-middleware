@@ -67,6 +67,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -466,11 +467,18 @@ public class InternalCalendarAccess implements GroupwareCalendarAccess, SyncAwar
             propertiesToStore.add(property);
         }
         if (0 < propertiesToStore.size()) {
-            Map<String, String> userProperties = new HashMap<String, String>(propertiesToStore.size());
+            Map<String, String> updatedProperties = new HashMap<String, String>(propertiesToStore.size());
+            Set<String> removedProperties = new HashSet<String>();
             for (ExtendedProperty property : propertiesToStore) {
-                userProperties.put(USER_PROPERTY_PREFIX + property.getName(), property.getValue());
+                String name = USER_PROPERTY_PREFIX + property.getName();
+                if (null != property.getValue()) {
+                    updatedProperties.put(name, property.getValue());
+                } else {
+                    removedProperties.add(name);
+                }
             }
-            storeUserProperties(session.getContextId(), originalFolder.getId(), session.getUserId(), userProperties);
+            removeUserProperties(session.getContextId(), originalFolder.getId(), session.getUserId(), removedProperties);
+            storeUserProperties(session.getContextId(), originalFolder.getId(), session.getUserId(), updatedProperties);
         }
     }
 
@@ -484,13 +492,29 @@ public class InternalCalendarAccess implements GroupwareCalendarAccess, SyncAwar
         }
     }
 
-    private void storeUserProperties(int contextId, String folderId, int userId, Map<String, String> userProperties) throws OXException {
+    private void storeUserProperties(int contextId, String folderId, int userId, Map<String, String> properties) throws OXException {
+        if (null == properties || properties.isEmpty()) {
+            return;
+        }
         FolderUserPropertyStorage propertyStorage = requireService(FolderUserPropertyStorage.class, services);
         Connection connection = optConnection();
         if (null == connection) {
-            propertyStorage.setFolderProperties(contextId, asInt(folderId), userId, userProperties);
+            propertyStorage.setFolderProperties(contextId, asInt(folderId), userId, properties);
         } else {
-            propertyStorage.setFolderProperties(contextId, asInt(folderId), userId, userProperties, connection);
+            propertyStorage.setFolderProperties(contextId, asInt(folderId), userId, properties, connection);
+        }
+    }
+
+    private void removeUserProperties(int contextId, String folderId, int userId, Set<String> propertyNames) throws OXException {
+        if (null == propertyNames || propertyNames.isEmpty()) {
+            return;
+        }
+        FolderUserPropertyStorage propertyStorage = requireService(FolderUserPropertyStorage.class, services);
+        Connection connection = optConnection();
+        if (null == connection) {
+            propertyStorage.deleteFolderProperties(contextId, asInt(folderId), userId, propertyNames);
+        } else {
+            propertyStorage.deleteFolderProperties(contextId, asInt(folderId), userId, propertyNames, connection);
         }
     }
 
