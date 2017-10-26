@@ -220,6 +220,10 @@ SearchData:
   $ref: ./chronos-schedjoules/SearchData.yaml
 SearchResponse:
   $ref: ./chronos-schedjoules/SearchResponse.yaml
+FolderConfigurationData:
+  $ref: ./chronos-schedjoules/FolderConfigurationData.yaml
+FoldersConfigurationData:
+  $ref: ./chronos-schedjoules/FoldersConfigurationData.yaml
 # Module: mail
 MailCountResponse:
   $ref: ./mail/MailCountResponse.yaml

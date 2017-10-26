@@ -1,0 +1,9 @@
+type: object
+properties:
+  folders:
+    type: array
+    items:
+      type: object
+      properties:
+        item:
+          $ref: "#/definitions/FolderConfigurationData"
