@@ -52,6 +52,7 @@ package com.openexchange.chronos.provider.schedjoules.osgi;
 import com.openexchange.chronos.provider.CalendarProvider;
 import com.openexchange.chronos.provider.schedjoules.SchedJoulesCalendarProvider;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.user.UserService;
 
 /**
  * {@link SchedJoulesProviderActivator}
@@ -74,7 +75,7 @@ public class SchedJoulesProviderActivator extends HousekeepingActivator {
      */
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] {};
+        return new Class<?>[] { UserService.class };
     }
 
     /*
@@ -84,7 +85,7 @@ public class SchedJoulesProviderActivator extends HousekeepingActivator {
      */
     @Override
     protected void startBundle() throws Exception {
-        registerService(CalendarProvider.class, new SchedJoulesCalendarProvider());
+        registerService(CalendarProvider.class, new SchedJoulesCalendarProvider(this));
     }
 
     /*

@@ -52,7 +52,7 @@ package com.openexchange.chronos.provider.schedjoules;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
-import java.util.UUID;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -64,8 +64,12 @@ import com.openexchange.chronos.schedjoules.api.SchedJoulesAPI;
 import com.openexchange.chronos.schedjoules.exception.SchedJoulesAPIExceptionCodes;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.Strings;
+import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
+import com.openexchange.user.UserService;
 
 /**
  * {@link SchedJoulesCalendarProvider}
@@ -81,12 +85,16 @@ public class SchedJoulesCalendarProvider extends CachingCalendarProvider {
      * The minumum value for the refreshInterval in minutes (1 day)
      */
     private static final int MINIMUM_REFRESH_INTERVAL = 1440;
+    private ServiceLookup services;
 
     /**
      * Initialises a new {@link SchedJoulesCalendarProvider}.
+     * 
+     * @param services The ServiceLookup instance
      */
-    public SchedJoulesCalendarProvider() {
+    public SchedJoulesCalendarProvider(ServiceLookup services) {
         super();
+        this.services = services;
     }
 
     /*
@@ -139,7 +147,7 @@ public class SchedJoulesCalendarProvider extends CachingCalendarProvider {
             JSONArray internalConfigItems = new JSONArray();
             addFolders(folders, internalConfigItems);
             internalConfig.put(SchedJoulesFields.FOLDERS, internalConfigItems);
-            internalConfig.put(SchedJoulesFields.USER_KEY, UUID.randomUUID().toString());
+            internalConfig.put(SchedJoulesFields.USER_KEY, generateUserKey(session));
             return internalConfig;
         } catch (JSONException e) {
             throw SchedJoulesProviderExceptionCodes.JSON_ERROR.create(e.getMessage(), e);
@@ -360,5 +368,21 @@ public class SchedJoulesCalendarProvider extends CachingCalendarProvider {
         for (int index = 0; index < additions.length(); index++) {
             internalConfigFolders.put(additions.getJSONObject(index));
         }
+    }
+
+    /**
+     * Generates a user key from the user's primary e-mail address
+     * 
+     * @param session The session to retrieve the user information
+     * @return The user key
+     * @throws OXException if the {@link UserService} is missing or if the user does not exist.
+     */
+    private String generateUserKey(Session session) throws OXException {
+        UserService userService = services.getService(UserService.class);
+        if (userService == null) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(UserService.class.getSimpleName());
+        }
+        User user = userService.getUser(session.getUserId(), session.getContextId());
+        return new String(DigestUtils.sha256(user.getMail()));
     }
 }

@@ -54,7 +54,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -273,7 +272,7 @@ public class SchedJoulesCalendarAccess extends CachingCalendarAccess {
     private URL getFeedURL(String folderId) throws MalformedURLException, JSONException, OXException {
         JSONObject folder = findFolderInInternalConfiguration(folderId);
         URL url = new URL(folder.getString(SchedJoulesFields.URL));
-        UUID userKey = getUserKey();
+        String userKey = getUserKey();
         return new URL(generateURL(url, userKey));
     }
 
@@ -284,9 +283,14 @@ public class SchedJoulesCalendarAccess extends CachingCalendarAccess {
      * @param userKey The user key to append
      * @return The generated URL
      */
-    private String generateURL(URL url, UUID userKey) {
+    private String generateURL(URL url, String userKey) {
+        String urlStr = url.toString();
+
         StringBuilder sb = new StringBuilder();
-        sb.append(url.toString()).append("&u").append(userKey.toString());
+        sb.append(urlStr);
+        sb.append(urlStr.contains("?") ? "&" : "?");
+        sb.append("u=").append(userKey);
+
         return sb.toString();
     }
 
@@ -297,16 +301,12 @@ public class SchedJoulesCalendarAccess extends CachingCalendarAccess {
      * @return The user key
      * @throws OXException if the userKey is malformed or missing from the configuration
      */
-    private UUID getUserKey() throws OXException {
+    private String getUserKey() throws OXException {
         String key = getAccount().getInternalConfiguration().optString(SchedJoulesFields.USER_KEY);
         if (Strings.isEmpty(key)) {
             throw SchedJoulesProviderExceptionCodes.MISSING_USER_KEY.create(getAccount().getAccountId(), getSession().getUserId(), getSession().getContextId());
         }
-        try {
-            return UUID.fromString(key);
-        } catch (IllegalArgumentException e) {
-            throw SchedJoulesProviderExceptionCodes.MALFORMED_USER_KEY.create(e, getAccount().getAccountId(), getSession().getUserId(), getSession().getContextId());
-        }
+        return key;
     }
 
     /**
