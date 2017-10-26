@@ -64,7 +64,7 @@ public class ExternalCalendarResult {
 
     private final List<Event> events;
 
-    private List<OXException> warnings;
+    private List<OXException> warnings = new ArrayList<>();
 
     private boolean isUpToDate = true;
 
