@@ -56,12 +56,17 @@ import com.box.sdk.BoxAPIConnection;
 import com.box.sdk.BoxAPIException;
 import com.box.sdk.BoxFolder.Info;
 import com.box.sdk.BoxItem;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.config.cascade.ConfigViews;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
+import com.openexchange.file.storage.FileStorageAutoRenameFoldersAccess;
 import com.openexchange.file.storage.FileStorageCaseInsensitiveAccess;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageFolderAccess;
+import com.openexchange.file.storage.NameBuilder;
 import com.openexchange.file.storage.Quota;
 import com.openexchange.file.storage.Quota.Type;
 import com.openexchange.file.storage.boxcom.access.BoxOAuthAccess;
@@ -74,10 +79,11 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public final class BoxFolderAccess extends AbstractBoxResourceAccess implements FileStorageFolderAccess, FileStorageCaseInsensitiveAccess {
+public final class BoxFolderAccess extends AbstractBoxResourceAccess implements FileStorageFolderAccess, FileStorageCaseInsensitiveAccess, FileStorageAutoRenameFoldersAccess {
 
     private final int userId;
     private final String accountDisplayName;
+    private final boolean useOptimisticSubfolderDetection;
 
     /**
      * Initializes a new {@link BoxFolderAccess}.
@@ -86,6 +92,9 @@ public final class BoxFolderAccess extends AbstractBoxResourceAccess implements 
         super(boxAccess, account, session);
         userId = session.getUserId();
         accountDisplayName = account.getDisplayName();
+        ConfigViewFactory viewFactory = Services.getOptionalService(ConfigViewFactory.class);
+        ConfigView view = viewFactory.getView(session.getUserId(), session.getContextId());
+        useOptimisticSubfolderDetection = ConfigViews.getDefinedBoolPropertyFrom("com.openexchange.file.storage.boxcom.useOptimisticSubfolderDetection", true, view);
     }
 
     protected void checkFolderValidity(Info folderInfo) throws OXException {
@@ -94,8 +103,25 @@ public final class BoxFolderAccess extends AbstractBoxResourceAccess implements 
         }
     }
 
-    protected com.openexchange.file.storage.boxcom.BoxFolder parseBoxFolder(Info dir) throws OXException {
-        return new com.openexchange.file.storage.boxcom.BoxFolder(userId).parseDirEntry(dir, rootFolderId, accountDisplayName);
+    protected com.openexchange.file.storage.boxcom.BoxFolder parseBoxFolder(com.box.sdk.BoxFolder.Info folderInfo, com.box.sdk.BoxFolder boxFolder) throws OXException {
+        boolean hasSubfolders = hasSubfolders(folderInfo, boxFolder);
+        return new com.openexchange.file.storage.boxcom.BoxFolder(userId).parseDirEntry(folderInfo, rootFolderId, accountDisplayName, hasSubfolders);
+    }
+
+    protected boolean hasSubfolders(com.box.sdk.BoxFolder.Info folderInfo, com.box.sdk.BoxFolder boxFolder) throws OXException {
+        if (useOptimisticSubfolderDetection) {
+            return true;
+        }
+
+        if (boxFolder == null) {
+            boxFolder = new com.box.sdk.BoxFolder(getAPIConnection(), folderInfo.getID());
+        }
+        for (BoxItem.Info itemInfo : boxFolder) {
+            if (itemInfo instanceof com.box.sdk.BoxFolder.Info) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
@@ -129,10 +155,9 @@ public final class BoxFolderAccess extends AbstractBoxResourceAccess implements 
                 try {
                     BoxAPIConnection apiConnection = getAPIConnection();
                     com.box.sdk.BoxFolder boxFolder = new com.box.sdk.BoxFolder(apiConnection, toBoxFolderId(folderId));
-                    Info folderInfo = boxFolder.getInfo();
-                    checkFolderValidity(folderInfo);
+                    checkFolderValidity(boxFolder.getInfo());
 
-                    return parseBoxFolder(folderInfo);
+                    return parseBoxFolder(boxFolder.getInfo(), boxFolder);
                 } catch (final BoxAPIException e) {
                     if (SC_UNAUTHORIZED == e.getResponseCode()) {
                         throw e;
@@ -176,7 +201,7 @@ public final class BoxFolderAccess extends AbstractBoxResourceAccess implements 
                     for (BoxItem.Info itemInfo : parentBoxFolder) {
                         if (itemInfo instanceof com.box.sdk.BoxFolder.Info) {
                             com.box.sdk.BoxFolder.Info i = (com.box.sdk.BoxFolder.Info) itemInfo;
-                            folders.add(parseBoxFolder(i));
+                            folders.add(parseBoxFolder(i, null));
                         }
                     }
                     return folders.toArray(new FileStorageFolder[folders.size()]);
@@ -204,6 +229,11 @@ public final class BoxFolderAccess extends AbstractBoxResourceAccess implements 
 
     @Override
     public String createFolder(final FileStorageFolder toCreate) throws OXException {
+        return createFolder(toCreate, true);
+    }
+
+    @Override
+    public String createFolder(final FileStorageFolder toCreate, final boolean autoRename) throws OXException {
         return perform(new BoxClosure<String>() {
 
             @Override
@@ -211,15 +241,31 @@ public final class BoxFolderAccess extends AbstractBoxResourceAccess implements 
                 BoxAPIConnection apiConnection = getAPIConnection();
                 com.box.sdk.BoxFolder parentBoxFolder = new com.box.sdk.BoxFolder(apiConnection, toBoxFolderId(toCreate.getParentId()));
 
-                try {
-                    Info createdChildFolder = parentBoxFolder.createFolder(toCreate.getName());
-                    return toFileStorageFolderId(createdChildFolder.getID());
-                } catch (BoxAPIException e) {
-                    if (SC_CONFLICT != e.getResponseCode()) {
-                        throw e;
-                    }
+                if (false == autoRename) {
+                    try {
+                        Info createdChildFolder = parentBoxFolder.createFolder(toCreate.getName());
+                        return toFileStorageFolderId(createdChildFolder.getID());
+                    } catch (BoxAPIException e) {
+                        if (SC_CONFLICT != e.getResponseCode()) {
+                            throw e;
+                        }
 
-                    throw FileStorageExceptionCodes.DUPLICATE_FOLDER.create(e, toCreate.getName(), parentBoxFolder.getInfo().getName());
+                        throw FileStorageExceptionCodes.DUPLICATE_FOLDER.create(e, toCreate.getName(), parentBoxFolder.getInfo().getName());
+                    }
+                }
+
+                NameBuilder name = new NameBuilder(toCreate.getName());
+                while (true) {
+                    try {
+                        Info createdChildFolder = parentBoxFolder.createFolder(name.toString());
+                        return toFileStorageFolderId(createdChildFolder.getID());
+                    } catch (BoxAPIException e) {
+                        if (SC_CONFLICT != e.getResponseCode()) {
+                            throw e;
+                        }
+
+                        name.advance();
+                    }
                 }
             }
         });
@@ -238,37 +284,136 @@ public final class BoxFolderAccess extends AbstractBoxResourceAccess implements 
 
     @Override
     public String moveFolder(final String folderId, final String newParentId, final String newName) throws OXException {
+        return moveFolder(folderId, newParentId, newName, true);
+    }
+
+    @Override
+    public String moveFolder(final String folderId, final String newParentId, final String newName, final boolean autoRename) throws OXException {
         return perform(new BoxClosure<String>() {
 
             @Override
             protected String doPerform() throws OXException, BoxAPIException, UnsupportedEncodingException {
                 BoxAPIConnection apiConnection = getAPIConnection();
+
                 com.box.sdk.BoxFolder boxFolder = new com.box.sdk.BoxFolder(apiConnection, toBoxFolderId(folderId));
+                com.box.sdk.BoxFolder destinationBoxFolder = new com.box.sdk.BoxFolder(apiConnection, toBoxFolderId(newParentId));
 
-                // Rename & Move has to be done with two subsequent requests
-                // Rename
-                if (!Strings.isEmpty(newName)) {
-                    try {
-                        boxFolder.rename(newName);
-                    } catch (BoxAPIException e) {
-                        if (SC_CONFLICT != e.getResponseCode()) {
-                            throw e;
+                if (autoRename) {
+                    // Move
+                    {
+                        NameBuilder name = null;
+                        boolean success = false;
+                        while (!success) {
+                            try {
+                                boxFolder.move(destinationBoxFolder);
+                                success = true;
+                            } catch (BoxAPIException e) {
+                                if (SC_CONFLICT != e.getResponseCode()) {
+                                    throw e;
+                                }
+
+                                if (null == name) {
+                                    name = new NameBuilder(boxFolder.getInfo().getName());
+                                }
+                                name.advance();
+                                while (!success) {
+                                    try {
+                                        boxFolder.rename(name.toString());
+                                        success = true;
+                                    } catch (BoxAPIException e1) {
+                                        if (SC_CONFLICT != e1.getResponseCode()) {
+                                            throw e1;
+                                        }
+
+                                        name.advance();
+                                    }
+                                }
+                                success = false;
+                            }
                         }
-
-                        throw FileStorageExceptionCodes.DUPLICATE_FOLDER.create(e, newName, boxFolder.getInfo().getParent().getName());
                     }
-                }
-                // Move
-                if (!Strings.isEmpty(newParentId)) {
-                    com.box.sdk.BoxFolder destinationBoxFolder = new com.box.sdk.BoxFolder(apiConnection, toBoxFolderId(newParentId));
-                    try {
-                        boxFolder.move(destinationBoxFolder);
-                    } catch (BoxAPIException e) {
-                        if (SC_CONFLICT != e.getResponseCode()) {
-                            throw e;
+
+                    if (null != newName) {
+                        NameBuilder name = new NameBuilder(newName);
+                        boolean success = false;
+                        while (!success) {
+                            try {
+                                boxFolder.rename(name.toString());
+                                success = true;
+                            } catch (BoxAPIException e) {
+                                if (SC_CONFLICT != e.getResponseCode()) {
+                                    throw e;
+                                }
+
+                                name.advance();
+                            }
+                        }
+                    }
+                } else {
+                    // No auto-rename...
+                    if (null != newName) {
+                        // Check if there is already such a folder carrying the new name
+                        for (BoxItem.Info itemInfo : destinationBoxFolder) {
+                            if (itemInfo instanceof com.box.sdk.BoxFolder.Info) {
+                                com.box.sdk.BoxFolder.Info i = (com.box.sdk.BoxFolder.Info) itemInfo;
+                                if (i.getName().equalsIgnoreCase(newName)) {
+                                    throw FileStorageExceptionCodes.DUPLICATE_FOLDER.create(newName, destinationBoxFolder.getInfo().getName());
+                                }
+                            }
                         }
 
-                        throw FileStorageExceptionCodes.DUPLICATE_FOLDER.create(e, boxFolder.getInfo().getName(), destinationBoxFolder.getInfo().getName());
+                        // Move, with auto-rename since actual rename happens later on
+                        NameBuilder name = null;
+                        boolean success = false;
+                        while (!success) {
+                            try {
+                                boxFolder.move(destinationBoxFolder);
+                                success = true;
+                            } catch (BoxAPIException e) {
+                                if (SC_CONFLICT != e.getResponseCode()) {
+                                    throw e;
+                                }
+
+                                if (null == name) {
+                                    name = new NameBuilder(boxFolder.getInfo().getName());
+                                }
+                                name.advance();
+                                while (!success) {
+                                    try {
+                                        boxFolder.rename(name.toString());
+                                        success = true;
+                                    } catch (BoxAPIException e1) {
+                                        if (SC_CONFLICT != e1.getResponseCode()) {
+                                            throw e1;
+                                        }
+
+                                        name.advance();
+                                    }
+                                }
+                                success = false;
+                            }
+                        }
+
+                        // Now, rename
+                        try {
+                            boxFolder.rename(newName);
+                        } catch (BoxAPIException e) {
+                            if (SC_CONFLICT != e.getResponseCode()) {
+                                throw e;
+                            }
+
+                            throw FileStorageExceptionCodes.DUPLICATE_FOLDER.create(e, newName, boxFolder.getInfo().getParent().getName());
+                        }
+                    } else {
+                        try {
+                            boxFolder.move(destinationBoxFolder);
+                        } catch (BoxAPIException e) {
+                            if (SC_CONFLICT != e.getResponseCode()) {
+                                throw e;
+                            }
+
+                            throw FileStorageExceptionCodes.DUPLICATE_FOLDER.create(e, boxFolder.getInfo().getName(), destinationBoxFolder.getInfo().getName());
+                        }
                     }
                 }
 
@@ -375,7 +520,7 @@ public final class BoxFolderAccess extends AbstractBoxResourceAccess implements 
                 Info info = boxFolder.getInfo();
                 List<FileStorageFolder> list = new LinkedList<FileStorageFolder>();
 
-                FileStorageFolder f = parseBoxFolder(info);
+                FileStorageFolder f = parseBoxFolder(info, boxFolder);
                 list.add(f);
                 while (!rootFolderId.equals(fid)) {
                     // Check if we reached a root folder
@@ -386,7 +531,7 @@ public final class BoxFolderAccess extends AbstractBoxResourceAccess implements 
                     fid = info.getParent().getID();
                     boxFolder = new com.box.sdk.BoxFolder(apiConnection, fid);
                     info = boxFolder.getInfo();
-                    f = parseBoxFolder(info);
+                    f = parseBoxFolder(info, null);
                     list.add(f);
                 }
 

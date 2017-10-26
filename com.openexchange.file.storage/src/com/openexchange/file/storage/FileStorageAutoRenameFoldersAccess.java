@@ -47,59 +47,45 @@
  *
  */
 
-package com.openexchange.file.storage.dropbox;
+package com.openexchange.file.storage;
 
-import java.util.Collections;
-import java.util.List;
 import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.CompositeFileStorageAccountManagerProvider;
-import com.openexchange.file.storage.DefaultFileStoragePermission;
-import com.openexchange.file.storage.FileStorageAccount;
-import com.openexchange.file.storage.FileStorageAccountAccess;
-import com.openexchange.file.storage.FileStoragePermission;
-import com.openexchange.file.storage.RootFolderPermissionsAware;
-import com.openexchange.file.storage.dropbox.access.DropboxAccountAccess;
-import com.openexchange.file.storage.oauth.AbstractOAuthFileStorageService;
-import com.openexchange.oauth.KnownApi;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.session.Session;
 
 /**
- * {@link DropboxFileStorageService} - The Dropbox file storage service.
+ * {@link FileStorageAutoRenameFoldersAccess} - Marks whether file storage automatically renames folder names to prevent from conflicts.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.10.0
  */
-public final class DropboxFileStorageService extends AbstractOAuthFileStorageService implements RootFolderPermissionsAware {
+public interface FileStorageAutoRenameFoldersAccess {
 
     /**
-     * Initializes a new {@link BoxFileStorageService}.
-     */
-    public DropboxFileStorageService(ServiceLookup services) {
-        super(services, KnownApi.DROPBOX, DropboxConstants.DISPLAY_NAME, DropboxConstants.ID);
-    }
-
-    /**
-     * Initialises a new {@link BoxFileStorageService}.
+     * Creates a new file storage folder with attributes taken from given file storage folder description
      *
-     * @param services
-     * @param compositeFileStorageAccountManagerProvider
+     * @param toCreate The file storage folder to create
+     * @param autoRename <code>true</code> to rename the folder (e.g. adding <code>" (1)"</code> appendix) to avoid conflicts; otherwise <code>false</code>
+     * @return The identifier of the created file storage folder
+     * @throws OXException If creation fails
      */
-    public DropboxFileStorageService(ServiceLookup services, CompositeFileStorageAccountManagerProvider compositeFileStorageAccountManagerProvider) {
-        super(services, KnownApi.DROPBOX, DropboxConstants.DISPLAY_NAME, DropboxConstants.ID, compositeFileStorageAccountManagerProvider);
-    }
+    String createFolder(FileStorageFolder toCreate, boolean autoRename) throws OXException;
 
-    @Override
-    public FileStorageAccountAccess getAccountAccess(final String accountId, final Session session) throws OXException {
-        final FileStorageAccount account = getAccountAccess(session, accountId);
-        return new DropboxAccountAccess(this, account, session);
-    }
+    /**
+     * Moves the folder identified through given identifier to the parent specified through argument <code>newParentId</code>, renaming
+     * it to the supplied new name.
+     * <p>
+     * E.g.:
+     *
+     * <pre>
+     * my.path.to.folder -&gt; my.newpath.to.folder
+     * </pre>
+     *
+     * @param folderId The folder identifier
+     * @param newParentId The identifier of the new parent to move to
+     * @param newName The new name to use for the folder, or <code>null</code> to keep the existing name
+     * @param autoRename <code>true</code> to rename the folder (e.g. adding <code>" (1)"</code> appendix) to avoid conflicts; otherwise <code>false</code>
+     * @return The new identifier where the folder has been moved
+     * @throws OXException If either folder does not exist or cannot be moved
+     */
+    String moveFolder(String folderId, String newParentId, String newName, boolean autoRename) throws OXException;
 
-    @Override
-    public List<FileStoragePermission> getRootFolderPermissions(String accountId, Session session) throws OXException {
-        DefaultFileStoragePermission permission = DefaultFileStoragePermission.newInstance();
-        permission.setAdmin(false);
-        permission.setFolderPermission(FileStoragePermission.CREATE_SUB_FOLDERS);
-        permission.setEntity(session.getUserId());
-        return Collections.<FileStoragePermission>singletonList(permission);
-    }
 }
