@@ -61,6 +61,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.DefaultFileStorageFolder;
 import com.openexchange.file.storage.File;
+import com.openexchange.file.storage.FileStorageAutoRenameFoldersAccess;
 import com.openexchange.file.storage.FileStorageCapability;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess;
@@ -182,7 +183,7 @@ public class StorageTransfer {
          * collect warnings beforehand, create folder when not in dry-run mode
          */
         List<OXException> warnings = collectWarnings(sourceFolder, sourcePath, targetParentFolderID);
-        String newID = dryRun ? "virtual" : targetFolderAccess.createFolder(targetFolder);
+        String newID = dryRun ? "virtual" : (targetFolderAccess instanceof FileStorageAutoRenameFoldersAccess) ? ((FileStorageAutoRenameFoldersAccess) targetFolderAccess).createFolder(targetFolder, false) : targetFolderAccess.createFolder(targetFolder);
         /*
          * prepare transfer result based on target folder information
          */

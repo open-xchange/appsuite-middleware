@@ -95,9 +95,11 @@ import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileDelta;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountAccess;
+import com.openexchange.file.storage.FileStorageAutoRenameFoldersAccess;
 import com.openexchange.file.storage.FileStorageCaseInsensitiveAccess;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess;
+import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageSequenceNumberProvider;
 import com.openexchange.file.storage.FileStorageUtility;
 import com.openexchange.file.storage.FileTimedResult;
@@ -119,11 +121,12 @@ import com.openexchange.tools.iterator.SearchIteratorAdapter;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class DropboxFileAccess extends AbstractDropboxAccess implements ThumbnailAware, FileStorageSequenceNumberProvider, FileStorageCaseInsensitiveAccess {
+public class DropboxFileAccess extends AbstractDropboxAccess implements ThumbnailAware, FileStorageSequenceNumberProvider, FileStorageCaseInsensitiveAccess, FileStorageAutoRenameFoldersAccess {
 
     private static final Logger LOG = LoggerFactory.getLogger(DropboxFileAccess.class);
 
     private final DropboxAccountAccess accountAccess;
+    private final DropboxFolderAccess folderAccess;
     private final int userId;
     private final String accountDisplayName;
 
@@ -137,11 +140,22 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
      *
      * @throws OXException
      */
-    public DropboxFileAccess(final AbstractOAuthAccess dropboxOAuthAccess, final FileStorageAccount account, final Session session, final DropboxAccountAccess accountAccess) throws OXException {
+    public DropboxFileAccess(final AbstractOAuthAccess dropboxOAuthAccess, final FileStorageAccount account, final Session session, final DropboxAccountAccess accountAccess, DropboxFolderAccess folderAccess) throws OXException {
         super(dropboxOAuthAccess, account, session);
         this.accountAccess = accountAccess;
+        this.folderAccess = folderAccess;
         accountDisplayName = account.getDisplayName();
         userId = session.getUserId();
+    }
+
+    @Override
+    public String createFolder(FileStorageFolder toCreate, boolean autoRename) throws OXException {
+        return folderAccess.createFolder(toCreate, autoRename);
+    }
+
+    @Override
+    public String moveFolder(String folderId, String newParentId, String newName, boolean autoRename) throws OXException {
+        return folderAccess.moveFolder(folderId, newParentId, newName, autoRename);
     }
 
     /*

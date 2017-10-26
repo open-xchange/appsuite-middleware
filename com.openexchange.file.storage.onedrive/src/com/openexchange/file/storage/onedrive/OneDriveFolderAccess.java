@@ -65,13 +65,17 @@ import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.config.cascade.ConfigViews;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
+import com.openexchange.file.storage.FileStorageAutoRenameFoldersAccess;
 import com.openexchange.file.storage.FileStorageCaseInsensitiveAccess;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageFolderAccess;
+import com.openexchange.file.storage.NameBuilder;
 import com.openexchange.file.storage.Quota;
 import com.openexchange.file.storage.Quota.Type;
 import com.openexchange.file.storage.onedrive.access.OneDriveOAuthAccess;
@@ -85,28 +89,7 @@ import com.openexchange.session.Session;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class OneDriveFolderAccess extends AbstractOneDriveResourceAccess implements FileStorageFolderAccess, FileStorageCaseInsensitiveAccess {
-
-    private static volatile Boolean optimisticSubfolderCheck;
-
-    private static boolean optimisticSubfolderCheck() {
-        Boolean tmp = optimisticSubfolderCheck;
-        if (null == tmp) {
-            synchronized (OneDriveFolderAccess.class) {
-                tmp = optimisticSubfolderCheck;
-                if (null == tmp) {
-                    boolean defaultValue = true;
-                    ConfigurationService service = Services.getOptionalService(ConfigurationService.class);
-                    if (null == service) {
-                        return defaultValue;
-                    }
-                    tmp = Boolean.valueOf(service.getBoolProperty("com.openexchange.file.storage.onedrive.optimisticSubfolderCheck", defaultValue));
-                    optimisticSubfolderCheck = tmp;
-                }
-            }
-        }
-        return tmp.booleanValue();
-    }
+public final class OneDriveFolderAccess extends AbstractOneDriveResourceAccess implements FileStorageFolderAccess, FileStorageCaseInsensitiveAccess, FileStorageAutoRenameFoldersAccess {
 
     private static final String FILTER_FOLDERS = OneDriveConstants.FILTER_FOLDERS;
     private static final String QUERY_PARAM_LIMIT = OneDriveConstants.QUERY_PARAM_LIMIT;
@@ -116,19 +99,23 @@ public final class OneDriveFolderAccess extends AbstractOneDriveResourceAccess i
     private final OneDriveAccountAccess accountAccess;
     private final int userId;
     private final String accountDisplayName;
+    private final boolean useOptimisticSubfolderDetection;
 
     /**
      * Initializes a new {@link OneDriveFolderAccess}.
      */
-    public OneDriveFolderAccess(final OneDriveOAuthAccess oneDriveAccess, final FileStorageAccount account, final Session session, final OneDriveAccountAccess accountAccess) {
+    public OneDriveFolderAccess(final OneDriveOAuthAccess oneDriveAccess, final FileStorageAccount account, final Session session, final OneDriveAccountAccess accountAccess) throws OXException {
         super(oneDriveAccess, account, session);
         this.accountAccess = accountAccess;
         userId = session.getUserId();
         accountDisplayName = account.getDisplayName();
+        ConfigViewFactory viewFactory = Services.getOptionalService(ConfigViewFactory.class);
+        ConfigView view = viewFactory.getView(session.getUserId(), session.getContextId());
+        useOptimisticSubfolderDetection = ConfigViews.getDefinedBoolPropertyFrom("com.openexchange.file.storage.onedrive.useOptimisticSubfolderDetection", true, view);
     }
 
     private boolean hasSubfolders(String oneDriveFolderId, DefaultHttpClient httpClient) throws OXException, JSONException, IOException {
-        if (optimisticSubfolderCheck()) {
+        if (useOptimisticSubfolderDetection) {
             return true;
         }
         HttpRequestBase request = null;
@@ -294,31 +281,77 @@ public final class OneDriveFolderAccess extends AbstractOneDriveResourceAccess i
     }
 
     @Override
-    public String createFolder(final FileStorageFolder toCreate) throws OXException {
-        return perform(new OneDriveClosure<String>() {
+    public String createFolder(FileStorageFolder toCreate) throws OXException {
+        return createFolder(toCreate, true);
+    }
 
-            @Override
-            protected String doPerform(DefaultHttpClient httpClient) throws OXException, JSONException, IOException {
-                String parentId = toCreate.getParentId();
-                HttpPost request = null;
-                try {
-                    request = new HttpPost(buildUri(toOneDriveFolderId(parentId), initiateQueryString()));
-                    request.setHeader("Content-Type", "application/json");
-                    request.setEntity(asHttpEntity(new JSONObject(1).put("name", toCreate.getName())));
+    @Override
+    public String createFolder(final FileStorageFolder toCreate, final boolean autoRename) throws OXException {
+        if (false == autoRename) {
+            return perform(new OneDriveClosure<String>() {
+
+                @Override
+                protected String doPerform(DefaultHttpClient httpClient) throws OXException, JSONException, IOException {
+                    String parentId = toCreate.getParentId();
+                    HttpPost request = null;
                     try {
-                        JSONObject jResponse = handleHttpResponse(execute(request, httpClient), JSONObject.class);
-                        return jResponse.getString("id");
-                    } catch (DuplicateResourceException e) {
-                        FileStorageFolder parent = getFolder(parentId);
-                        throw FileStorageExceptionCodes.DUPLICATE_FOLDER.create(e, toCreate.getName(), parent.getName());
+                        request = new HttpPost(buildUri(toOneDriveFolderId(parentId), initiateQueryString()));
+                        request.setHeader("Content-Type", "application/json");
+                        request.setEntity(asHttpEntity(new JSONObject(1).put("name", toCreate.getName())));
+                        try {
+                            JSONObject jResponse = handleHttpResponse(execute(request, httpClient), JSONObject.class);
+                            return jResponse.getString("id");
+                        } catch (DuplicateResourceException e) {
+                            FileStorageFolder parent = getFolder(parentId);
+                            throw FileStorageExceptionCodes.DUPLICATE_FOLDER.create(e, toCreate.getName(), parent.getName());
+                        }
+                    } catch (HttpResponseException e) {
+                        throw handleHttpResponseError(parentId, account.getId(), e);
+                    } finally {
+                        reset(request);
                     }
-                } catch (HttpResponseException e) {
-                    throw handleHttpResponseError(parentId, account.getId(), e);
-                } finally {
-                    reset(request);
                 }
+            });
+        }
+
+        // With auto-rename
+        final String parentId = toCreate.getParentId();
+
+        String baseName = toCreate.getName();
+        final NameBuilder name = new NameBuilder(baseName);
+        while (true) {
+            try {
+                return perform(new OneDriveClosure<String>() {
+
+                    @Override
+                    protected String doPerform(DefaultHttpClient httpClient) throws OXException, JSONException, IOException {
+                        HttpPost request = null;
+                        try {
+                            request = new HttpPost(buildUri(toOneDriveFolderId(parentId), initiateQueryString()));
+                            request.setHeader("Content-Type", "application/json");
+                            request.setEntity(asHttpEntity(new JSONObject(1).put("name", name.toString())));
+                            try {
+                                JSONObject jResponse = handleHttpResponse(execute(request, httpClient), JSONObject.class);
+                                return jResponse.getString("id");
+                            } catch (DuplicateResourceException e) {
+                                FileStorageFolder parent = getFolder(parentId);
+                                throw FileStorageExceptionCodes.DUPLICATE_FOLDER.create(e, name.toString(), parent.getName());
+                            }
+                        } catch (HttpResponseException e) {
+                            throw handleHttpResponseError(parentId, account.getId(), e);
+                        } finally {
+                            reset(request);
+                        }
+                    }
+                });
+            } catch (OXException e) {
+                if (false == FileStorageExceptionCodes.DUPLICATE_FOLDER.equals(e)) {
+                    throw e;
+                }
+
+                name.advance();
             }
-        });
+        }
     }
 
     @Override
@@ -333,57 +366,187 @@ public final class OneDriveFolderAccess extends AbstractOneDriveResourceAccess i
     }
 
     @Override
-    public String moveFolder(final String folderId, final String newParentId, final String newName) throws OXException {
+    public String moveFolder(String folderId, String newParentId, String newName) throws OXException {
+        return moveFolder(folderId, newParentId, newName, true);
+    }
+
+    @Override
+    public String moveFolder(final String folderId, final String newParentId, final String newName, final boolean autoRename) throws OXException {
+        if (false == autoRename) {
+            if (null != newName) {
+                // Check if there is already such a folder carrying the new name
+                for (FileStorageFolder f : getSubfolders(newParentId, true)) {
+                    if (f.getName().equalsIgnoreCase(newName)) {
+                        FileStorageFolder newParent = getFolder(newParentId);
+                        throw FileStorageExceptionCodes.DUPLICATE_FOLDER.create(newName, newParent.getName());
+                    }
+                }
+
+                // Move, with auto-rename since actual rename happens later on
+                String id = perform(new OneDriveClosure<String>() {
+
+                    @Override
+                    protected String doPerform(DefaultHttpClient httpClient) throws OXException, JSONException, IOException {
+                        String baseName = getFolder(folderId).getName();
+
+                        String oneDriveFolderId = toOneDriveFolderId(folderId);
+                        String oneDriveParentId = toOneDriveFolderId(newParentId);
+
+                        NameBuilder name = new NameBuilder(baseName);
+                        NextTry: while (true) {
+                            HttpMove request = null;
+                            HttpResponse httpResponse = null;
+                            try {
+                                request = new HttpMove(buildUri(oneDriveFolderId, initiateQueryString()));
+                                request.setHeader("Content-Type", "application/json");
+                                request.setEntity(asHttpEntity(new JSONObject(1).put("destination", oneDriveParentId)));
+                                try {
+                                    httpResponse = execute(request, httpClient);
+                                    JSONObject jResponse = handleHttpResponse(httpResponse, JSONObject.class);
+                                    return jResponse.getString("id");
+                                } catch (DuplicateResourceException e) {
+                                    if (autoRename) {
+                                        close(request, httpResponse);
+                                        request = null;
+                                        httpResponse = null;
+
+                                        name.advance();
+                                        oneDriveFolderId = renameFolder(folderId, oneDriveFolderId, name, true);
+                                        continue NextTry;
+                                    }
+
+                                    FileStorageFolder folder = getFolder(folderId);
+                                    FileStorageFolder newParent = getFolder(newParentId);
+                                    throw FileStorageExceptionCodes.DUPLICATE_FOLDER.create(e, folder.getName(), newParent.getName());
+                                }
+                            } catch (HttpResponseException e) {
+                                throw handleHttpResponseError(folderId, account.getId(), e);
+                            } finally {
+                                close(request, httpResponse);
+                            }
+                        }
+                    }
+                });
+
+                return renameFolder(id, newName);
+            }
+
+            // Only move w/o auto-rename
+            return perform(new OneDriveClosure<String>() {
+
+                @Override
+                protected String doPerform(DefaultHttpClient httpClient) throws OXException, JSONException, IOException {
+                    HttpMove request = null;
+                    try {
+                        request = new HttpMove(buildUri(toOneDriveFolderId(folderId), initiateQueryString()));
+                        request.setHeader("Content-Type", "application/json");
+                        request.setEntity(asHttpEntity(new JSONObject(1).put("destination", toOneDriveFolderId(newParentId))));
+                        try {
+                            JSONObject jResponse = handleHttpResponse(execute(request, httpClient), JSONObject.class);
+                            return jResponse.getString("id");
+                        } catch (DuplicateResourceException e) {
+                            FileStorageFolder folder = getFolder(folderId);
+                            FileStorageFolder newParent = getFolder(newParentId);
+                            throw FileStorageExceptionCodes.DUPLICATE_FOLDER.create(e, folder.getName(), newParent.getName());
+                        }
+                    } catch (HttpResponseException e) {
+                        throw handleHttpResponseError(folderId, account.getId(), e);
+                    } finally {
+                        reset(request);
+                    }
+                }
+            });
+        }
+
+        // With auto-rename
         String id = perform(new OneDriveClosure<String>() {
 
             @Override
             protected String doPerform(DefaultHttpClient httpClient) throws OXException, JSONException, IOException {
-                HttpMove request = null;
-                try {
-                    request = new HttpMove(buildUri(toOneDriveFolderId(folderId), initiateQueryString()));
-                    request.setHeader("Content-Type", "application/json");
-                    request.setEntity(asHttpEntity(new JSONObject(1).put("destination", toOneDriveFolderId(newParentId))));
+                String baseName = getFolder(folderId).getName();
+
+                String oneDriveFolderId = toOneDriveFolderId(folderId);
+                String oneDriveParentId = toOneDriveFolderId(newParentId);
+
+                NameBuilder name = new NameBuilder(baseName);
+                NextTry: while (true) {
+                    HttpMove request = null;
+                    HttpResponse httpResponse = null;
                     try {
-                        JSONObject jResponse = handleHttpResponse(execute(request, httpClient), JSONObject.class);
-                        return jResponse.getString("id");
-                    } catch (DuplicateResourceException e) {
-                        FileStorageFolder folder = getFolder(folderId);
-                        FileStorageFolder newParent = getFolder(newParentId);
-                        throw FileStorageExceptionCodes.DUPLICATE_FOLDER.create(e, folder.getName(), newParent.getName());
+                        request = new HttpMove(buildUri(oneDriveFolderId, initiateQueryString()));
+                        request.setHeader("Content-Type", "application/json");
+                        request.setEntity(asHttpEntity(new JSONObject(1).put("destination", oneDriveParentId)));
+                        try {
+                            httpResponse = execute(request, httpClient);
+                            JSONObject jResponse = handleHttpResponse(httpResponse, JSONObject.class);
+                            return jResponse.getString("id");
+                        } catch (DuplicateResourceException e) {
+                            if (autoRename) {
+                                close(request, httpResponse);
+                                request = null;
+                                httpResponse = null;
+
+                                name.advance();
+                                oneDriveFolderId = renameFolder(folderId, oneDriveFolderId, name, true);
+                                continue NextTry;
+                            }
+
+                            FileStorageFolder folder = getFolder(folderId);
+                            FileStorageFolder newParent = getFolder(newParentId);
+                            throw FileStorageExceptionCodes.DUPLICATE_FOLDER.create(e, folder.getName(), newParent.getName());
+                        }
+                    } catch (HttpResponseException e) {
+                        throw handleHttpResponseError(folderId, account.getId(), e);
+                    } finally {
+                        close(request, httpResponse);
                     }
-                } catch (HttpResponseException e) {
-                    throw handleHttpResponseError(folderId, account.getId(), e);
-                } finally {
-                    reset(request);
                 }
             }
         });
-        return null != newName ? renameFolder(id, newName) : id;
+
+        // Then rename (if required)
+        return null != newName ? renameFolder(folderId, id, new NameBuilder(newName), true) : id;
     }
 
     @Override
     public String renameFolder(final String folderId, final String newName) throws OXException {
+        return renameFolder(folderId, toOneDriveFolderId(folderId), new NameBuilder(newName), false);
+    }
+
+    private String renameFolder(final String folderId, final String oneDriveFolderId, final NameBuilder newName, final boolean autoRename) throws OXException {
         return perform(new OneDriveClosure<String>() {
 
             @Override
             protected String doPerform(DefaultHttpClient httpClient) throws OXException, JSONException, IOException {
-                HttpPut request = null;
-                try {
-                    request = new HttpPut(buildUri(toOneDriveFolderId(folderId), initiateQueryString()));
-                    request.setHeader("Content-Type", "application/json");
-                    request.setEntity(asHttpEntity(new JSONObject(1).put("name", newName)));
+                NextTry: while (true) {
+                    HttpPut request = null;
+                    HttpResponse httpResponse = null;
                     try {
-                        JSONObject jResponse = handleHttpResponse(execute(request, httpClient), JSONObject.class);
-                        return jResponse.getString("id");
-                    } catch (DuplicateResourceException e) {
-                        FileStorageFolder folder = getFolder(folderId);
-                        FileStorageFolder parent = getFolder(folder.getParentId());
-                        throw FileStorageExceptionCodes.DUPLICATE_FOLDER.create(e, folder.getName(), parent.getName());
+                        request = new HttpPut(buildUri(oneDriveFolderId, initiateQueryString()));
+                        request.setHeader("Content-Type", "application/json");
+                        request.setEntity(asHttpEntity(new JSONObject(1).put("name", newName.toString())));
+                        try {
+                            httpResponse = execute(request, httpClient);
+                            JSONObject jResponse = handleHttpResponse(httpResponse, JSONObject.class);
+                            return jResponse.getString("id");
+                        } catch (DuplicateResourceException e) {
+                            if (autoRename) {
+                                newName.advance();
+                                close(request, httpResponse);
+                                httpResponse = null;
+                                request = null;
+                                continue NextTry;
+                            }
+
+                            FileStorageFolder folder = getFolder(folderId);
+                            FileStorageFolder parent = getFolder(folder.getParentId());
+                            throw FileStorageExceptionCodes.DUPLICATE_FOLDER.create(e, newName.toString(), parent.getName());
+                        }
+                    } catch (HttpResponseException e) {
+                        throw handleHttpResponseError(folderId, account.getId(), e);
+                    } finally {
+                        close(request, httpResponse);
                     }
-                } catch (HttpResponseException e) {
-                    throw handleHttpResponseError(folderId, account.getId(), e);
-                } finally {
-                    reset(request);
                 }
             }
         });

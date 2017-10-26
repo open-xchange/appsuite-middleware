@@ -53,6 +53,7 @@ import static com.openexchange.mail.utils.MailFolderUtility.prepareFullname;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -64,6 +65,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.CompletionService;
 import java.util.concurrent.ConcurrentHashMap;
+import com.google.common.collect.ImmutableSet;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
@@ -83,6 +85,7 @@ import com.openexchange.folderstorage.SortableId;
 import com.openexchange.folderstorage.StorageParameters;
 import com.openexchange.folderstorage.StoragePriority;
 import com.openexchange.folderstorage.StorageType;
+import com.openexchange.folderstorage.SubfolderListingFolderStorage;
 import com.openexchange.folderstorage.Type;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.cache.memory.FolderMap;
@@ -132,7 +135,7 @@ import gnu.trove.map.hash.TObjectIntHashMap;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class CacheFolderStorage implements ReinitializableFolderStorage, FolderCacheInvalidationService {
+public final class CacheFolderStorage implements ReinitializableFolderStorage, FolderCacheInvalidationService, SubfolderListingFolderStorage {
 
     protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CacheFolderStorage.class);
 
@@ -590,14 +593,26 @@ public final class CacheFolderStorage implements ReinitializableFolderStorage, F
             /*
              * Load parent from real tree
              */
-            Folder parentFolder = loadFolder(realTreeId, folder.getParentID(), StorageType.WORKING, true, storageParameters);
-            if (parentFolder.isCacheable()) {
-                putFolder(parentFolder, realTreeId, storageParameters, true);
-            }
-            if (null != createdFolder && false == createdFolder.getParentID().equals(folder.getParentID())) {
-                parentFolder = loadFolder(realTreeId, createdFolder.getParentID(), StorageType.WORKING, true, storageParameters);
+            Folder parentFolder;
+            Folder parentFromCache = getRefFromCache(treeId, folder.getParentID(), storageParameters);
+            if (null != parentFromCache && null != parentFromCache.getSubfolderIDs()) {
+                // Only update cache reference if sub-folders are contained
+                parentFolder = loadFolder(realTreeId, folder.getParentID(), StorageType.WORKING, true, storageParameters);
                 if (parentFolder.isCacheable()) {
                     putFolder(parentFolder, realTreeId, storageParameters, true);
+                } else {
+                    removeSingleFromCache(Collections.singletonList(folder.getParentID()), treeId, userId, session, false);
+                }
+            }
+            if (null != createdFolder && false == createdFolder.getParentID().equals(folder.getParentID())) {
+                parentFromCache = getRefFromCache(treeId, createdFolder.getParentID(), storageParameters);
+                if (null != parentFromCache && null != parentFromCache.getSubfolderIDs()) {
+                    parentFolder = loadFolder(realTreeId, createdFolder.getParentID(), StorageType.WORKING, true, storageParameters);
+                    if (parentFolder.isCacheable()) {
+                        putFolder(parentFolder, realTreeId, storageParameters, true);
+                    }
+                } else {
+                    removeSingleFromCache(Collections.singletonList(createdFolder.getParentID()), treeId, userId, session, false);
                 }
             }
         } finally {
@@ -1392,6 +1407,45 @@ public final class CacheFolderStorage implements ReinitializableFolderStorage, F
     }
 
     @Override
+    public Folder[] getSubfolderObjects(String treeId, String parentId, StorageParameters storageParameters) throws OXException {
+        if (ROOT_ID.equals(parentId)) {
+            // Cannot be served
+            return null;
+        }
+
+        FolderStorage[] neededStorages = registry.getFolderStoragesForParent(treeId, parentId);
+        if (0 == neededStorages.length) {
+            return new Folder[0];
+        }
+
+        if (neededStorages.length > 1) {
+            // Cannot be served from one storage
+            return null;
+        }
+
+        FolderStorage neededStorage = neededStorages[0];
+        if (!(neededStorage instanceof SubfolderListingFolderStorage)) {
+            // Cannot be delegated
+            return null;
+        }
+
+        SubfolderListingFolderStorage listingStorage = (SubfolderListingFolderStorage) neededStorage;
+        boolean started = neededStorage.startTransaction(storageParameters, false);
+        try {
+            Folder[] folders = listingStorage.getSubfolderObjects(treeId, parentId, storageParameters);
+            if (started) {
+                neededStorage.commitTransaction(storageParameters);
+                started = false;
+            }
+            return folders;
+        } finally {
+            if (started) {
+                neededStorage.rollback(storageParameters);
+            }
+        }
+    }
+
+    @Override
     public SortableId[] getSubfolders(final String treeId, final String parentId, final StorageParameters storageParameters) throws OXException {
         Folder parent = getFolder(treeId, parentId, storageParameters);
         String[] subfolders = ROOT_ID.equals(parentId) ? null : parent.getSubfolderIDs();
@@ -1541,66 +1595,49 @@ public final class CacheFolderStorage implements ReinitializableFolderStorage, F
         /*
          * Refresh/Invalidate folder
          */
-        Folder updatedFolder = loadFolder(treeId, newFolderId, StorageType.WORKING, true, storageParameters);
-        int userId = storageParameters.getUserId();
-        int contextId = storageParameters.getContextId();
-        {
-            FolderMapManagement folderMapManagement = FolderMapManagement.getInstance();
-            List<String> ids = new ArrayList<String>(isMove ? Arrays.asList(oldFolderId, oldParentId, updatedFolder.getParentID()) : Arrays.asList(oldFolderId, oldParentId));
-            folderMapManagement.dropHierarchyFor(ids, treeId, userId, contextId);
-            if (!treeId.equals(realTreeId)) {
-                folderMapManagement.dropHierarchyFor(ids, realTreeId, userId, contextId);
-            }
-
-            List<Serializable> keys = new LinkedList<Serializable>();
-            if (Tools.isGlobalId(oldFolderId)) {
-                keys.add(newCacheKey(oldFolderId, treeId));
-            }
-            if (isMove) {
-                if (Tools.isGlobalId(oldParentId)) {
-                    keys.add(newCacheKey(oldParentId, treeId));
-                }
-                if (Tools.isGlobalId(updatedFolder.getParentID())) {
-                    keys.add(newCacheKey(updatedFolder.getParentID(), treeId));
+        Folder updatedFolder = null;
+        if (storageVersion.isCacheable()) {
+            updatedFolder = loadFolder(treeId, newFolderId, StorageType.WORKING, true, storageParameters);
+            int userId = storageParameters.getUserId();
+            int contextId = storageParameters.getContextId();
+            {
+                Collection<String> ids = isMove ? ImmutableSet.of(oldFolderId, oldParentId, updatedFolder.getParentID()) : ImmutableSet.of(oldFolderId, oldParentId);
+                FolderMapManagement folderMapManagement = FolderMapManagement.getInstance();
+                folderMapManagement.dropHierarchyFor(ids, treeId, userId, contextId);
+                if (!treeId.equals(realTreeId)) {
+                    folderMapManagement.dropHierarchyFor(ids, realTreeId, userId, contextId);
                 }
             }
-            if (!treeId.equals(realTreeId)) {
-                if (Tools.isGlobalId(oldFolderId)) {
-                    keys.add(newCacheKey(oldFolderId, realTreeId));
-                }
-                if (isMove) {
-                    if (Tools.isGlobalId(oldParentId)) {
-                        keys.add(newCacheKey(oldParentId, realTreeId));
-                    }
-                    if (Tools.isGlobalId(updatedFolder.getParentID())) {
-                        keys.add(newCacheKey(updatedFolder.getParentID(), realTreeId));
-                    }
-                }
-            }
-            if (!keys.isEmpty()) {
-                globalCache.removeFromGroup(keys, Integer.toString(contextId));
-            }
-
-            registry.clearCaches(storageParameters.getUserId(), storageParameters.getContextId());
         }
-
+        registry.clearCaches(storageParameters.getUserId(), storageParameters.getContextId());
         /*
          * Put updated folder
          */
         if (isMove) {
             /*-
              * Do not reload folders.
-             * 
+             *
              * In case of a cross file storage move (e.g. Dropbox to InfoStore), the previously opened in-transaction connection will not
              * see the newly created folder (as not yet committed) or read a stale state.
              */
         } else {
-            Folder f = loadFolder(realTreeId, newFolderId, StorageType.WORKING, true, storageParameters);
+            Folder f;
+            if (null != updatedFolder && treeId.equals(realTreeId)) {
+                f = updatedFolder;
+            } else {
+                f = loadFolder(realTreeId, newFolderId, StorageType.WORKING, true, storageParameters);
+                int userId = storageParameters.getUserId();
+                int contextId = storageParameters.getContextId();
+                {
+                    Collection<String> ids = isMove ? ImmutableSet.of(oldFolderId, oldParentId, f.getParentID()) : ImmutableSet.of(oldFolderId, oldParentId);
+                    FolderMapManagement.getInstance().dropHierarchyFor(ids, realTreeId, userId, contextId);
+                }
+            }
             if (f.isCacheable()) {
                 putFolder(f, realTreeId, storageParameters, true);
             }
         }
-        if (updatedFolder.isCacheable()) {
+        if (null != updatedFolder && updatedFolder.isCacheable()) {
             putFolder(updatedFolder, treeId, storageParameters, true);
         }
     }
@@ -1735,11 +1772,11 @@ public final class CacheFolderStorage implements ReinitializableFolderStorage, F
     public Folder loadFolder(String treeId, String folderId, StorageType storageType, StorageParameters storageParameters) throws OXException {
         return loadFolder(treeId, folderId, storageType, false, storageParameters);
     }
-    
+
     private Folder loadFolder(String treeId, String folderId, StorageType storageType, boolean readWrite, StorageParameters storageParameters) throws OXException {
         return loadFolder0(treeId, folderId, storageType, readWrite, storageParameters);
     }
-    
+
     private Folder optLoadFolder(String treeId, String folderId, StorageType storageType, boolean readWrite, StorageParameters storageParameters) throws OXException {
         try {
             return loadFolder0(treeId, folderId, storageType, readWrite, storageParameters);
