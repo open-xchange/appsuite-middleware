@@ -51,6 +51,7 @@ package com.openexchange.chronos.impl.groupware;
 
 import static com.openexchange.chronos.impl.groupware.ListenerUtils.eqaulsFieldTerm;
 import static com.openexchange.chronos.impl.groupware.ListenerUtils.equalsFieldUserTerm;
+import static com.openexchange.chronos.impl.groupware.ListenerUtils.getAttendeeFolders;
 import java.sql.Connection;
 import java.util.Collections;
 import java.util.Date;
@@ -161,6 +162,7 @@ public final class ChronosDeleteListener implements DeleteListener {
      * @throws OXException In case service is unavailable or SQL error
      */
     private void purgeUserData(DBProvider dbProvider, Context context, int userId, Integer destinationUserId, Session adminSession) throws OXException {
+        SimpleResultTracker tracker = new SimpleResultTracker(calendarHandlers);
         EntityResolver entityResolver = calendarUtilities.getEntityResolver(context.getContextId());
         CalendarStorage storage = factory.create(context, ACCOUNT_ID, entityResolver, dbProvider, DBTransactionPolicy.NO_TRANSACTIONS);
 
@@ -200,15 +202,17 @@ public final class ChronosDeleteListener implements DeleteListener {
                     if (CalendarUtils.isLastUserAttendee(attendees, userId)) {
                         // The user is the only attendee, delete event and its attachments
                         eventStorage.deleteEvent(entry.getKey());
+                        tracker.addDelete(Collections.singletonList(folderId), event, date.getTime());
                         event.setAttendees(attendees);
                         storage.getAttachmentStorage().deleteAttachments(serverSession, folderId, entry.getKey());
                     } else {
                         // The user needs to be removed from the event, this modifies the event
-                        attendees = Collections.singletonList(attendees.stream().filter(a -> a.getEntity() == userId).findFirst().get());
-                        Event originalEvent = calendarUtilities.copyEvent(event, null);
+                        Event originalEvent = copyEvent(event);
                         event.setLastModified(date);
                         event.setTimestamp(date.getTime());
                         eventStorage.updateEvent(event);
+                        tracker.addUpdate(getAttendeeFolders(attendees), originalEvent, event);
+                        attendees = Collections.singletonList(attendees.stream().filter(a -> a.getEntity() == userId).findFirst().get());
                     }
                     storage.getAttendeeStorage().deleteAttendees(entry.getKey(), attendees);
                 } catch (NoSuchElementException e) {
@@ -227,37 +231,46 @@ public final class ChronosDeleteListener implements DeleteListener {
         // Update events where the user is the calendar user
         events = eventStorage.searchEvents(equalsFieldUserTerm(EventField.CALENDAR_USER, userId), null, fields);
         for (Event event : events) {
+            Event originalEvent = copyEvent(event);
             event.setCalendarUser(replacement);
             event.setLastModified(date);
             event.setTimestamp(date.getTime());
             eventStorage.updateEvent(event);
+            tracker.addUpdate(getAttendeeFolders(eventToAttendee.get(event.getId())), originalEvent, event);
         }
 
         // Update events which the user created
         events = eventStorage.searchEvents(equalsFieldUserTerm(EventField.CREATED_BY, userId), null, fields);
         for (Event event : events) {
+            Event originalEvent = copyEvent(event);
             event.setCreatedBy(replacement);
             event.setLastModified(date);
             event.setTimestamp(date.getTime());
             eventStorage.updateEvent(event);
+            tracker.addUpdate(getAttendeeFolders(eventToAttendee.get(event.getId())), originalEvent, event);
         }
         // Update events where the user is the modifier
         events = eventStorage.searchEvents(equalsFieldUserTerm(EventField.MODIFIED_BY, userId), null, fields);
         for (Event event : events) {
+            Event originalEvent = copyEvent(event);
             event.setModifiedBy(replacement);
             event.setLastModified(date);
             event.setTimestamp(date.getTime());
             eventStorage.updateEvent(event);
+            tracker.addUpdate(getAttendeeFolders(eventToAttendee.get(event.getId())), originalEvent, event);
         }
         // Update events where the user is the organizer
         SingleSearchTerm organizer = eqaulsFieldTerm(EventField.ORGANIZER).addOperand(new ConstantOperand<String>(ResourceId.forUser(context.getContextId(), userId)));
         events = eventStorage.searchEvents(organizer, null, fields);
         for (Event event : events) {
+            Event originalEvent = copyEvent(event);
             event.setOrganizer(entityResolver.applyEntityData(new Organizer(), replacement.getEntity()));
             event.setLastModified(date);
             event.setTimestamp(date.getTime());
             eventStorage.updateEvent(event);
+            tracker.addUpdate(getAttendeeFolders(eventToAttendee.get(event.getId())), originalEvent, event);
         }
+        tracker.throwCalendarEvent(dbProvider.getWriteConnection(context), context, adminSession, entityResolver);
 
         /*
          * Delete account
@@ -333,5 +346,16 @@ public final class ChronosDeleteListener implements DeleteListener {
             event.setTimestamp(date.getTime());
             eventStorage.updateEvent(event);
         }
+    }
+
+    /**
+     * Copies an event
+     * 
+     * @param event The event to copy
+     * @return The copied event
+     * @throws OXException See {@link CalendarUtilities#copyEvent(Event, EventField...)}
+     */
+    private Event copyEvent(Event event) throws OXException {
+        return calendarUtilities.copyEvent(event, null);
     }
 }

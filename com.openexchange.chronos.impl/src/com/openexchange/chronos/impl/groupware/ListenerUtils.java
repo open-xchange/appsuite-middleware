@@ -49,6 +49,10 @@
 
 package com.openexchange.chronos.impl.groupware;
 
+import java.util.List;
+import java.util.stream.Collectors;
+import com.openexchange.chronos.Attendee;
+import com.openexchange.java.Strings;
 import com.openexchange.search.SearchTerm;
 import com.openexchange.search.SingleSearchTerm;
 import com.openexchange.search.SingleSearchTerm.SingleOperation;
@@ -93,6 +97,16 @@ final class ListenerUtils {
      */
     static SingleSearchTerm equalsFieldUserTerm(Enum<?> field, int userID) {
         return eqaulsFieldTerm(field).addOperand(new ConstantOperand<Integer>(Integer.valueOf(userID)));
+    }
+
+    /**
+     * Get folder identifier per attendee. Empty folder IDs will be skipped.
+     * 
+     * @param list The {@link Attendee}s list
+     * @return A {@link List} containing the attendees folder identifiers
+     */
+    static List<String> getAttendeeFolders(List<Attendee> list) {
+        return list.stream().filter(a -> !Strings.isEmpty(a.getFolderId())).map(Attendee::getFolderId).collect(Collectors.toList());
     }
 
 }
