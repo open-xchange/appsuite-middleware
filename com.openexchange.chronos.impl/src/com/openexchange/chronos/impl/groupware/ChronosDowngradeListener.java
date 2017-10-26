@@ -49,7 +49,7 @@
 
 package com.openexchange.chronos.impl.groupware;
 
-import static com.openexchange.chronos.impl.groupware.ListenerHelper.equalsFieldUserTerm;
+import static com.openexchange.chronos.impl.groupware.ListenerUtils.equalsFieldUserTerm;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -60,6 +60,7 @@ import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.provider.CalendarAccount;
+import com.openexchange.chronos.service.CalendarHandler;
 import com.openexchange.chronos.service.CalendarUtilities;
 import com.openexchange.chronos.service.EntityResolver;
 import com.openexchange.chronos.storage.CalendarStorage;
@@ -73,6 +74,8 @@ import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.downgrade.DowngradeEvent;
 import com.openexchange.groupware.downgrade.DowngradeListener;
+import com.openexchange.osgi.ServiceSet;
+import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
@@ -84,11 +87,10 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  */
 public class ChronosDowngradeListener extends DowngradeListener {
 
-    private static final int ACCOUNT_ID = CalendarAccount.DEFAULT_ACCOUNT.getAccountId();
-
-    private CalendarStorageFactory factory;
-    private CalendarUtilities      calendarUtilities;
-    private FolderService          folderService;
+    private CalendarStorageFactory      factory;
+    private CalendarUtilities           calendarUtilities;
+    private FolderService               folderService;
+    private ServiceSet<CalendarHandler> calendarHandlers;
 
     /**
      * Initializes a new {@link ChronosDeleteListener}.
@@ -96,55 +98,60 @@ public class ChronosDowngradeListener extends DowngradeListener {
      * @param factory The {@link CalendarStorageFactory}
      * @param calendarUtilities The {@link CalendarUtilities}
      * @param folderService The {@link FolderService}
+     * @param calendarHandlers The {@link CalendarHandler}s to notify
      */
-    public ChronosDowngradeListener(CalendarStorageFactory factory, CalendarUtilities calendarUtilities, FolderService folderService) {
+    public ChronosDowngradeListener(CalendarStorageFactory factory, CalendarUtilities calendarUtilities, FolderService folderService, ServiceSet<CalendarHandler> calendarHandlers) {
         super();
         this.factory = factory;
         this.calendarUtilities = calendarUtilities;
         this.folderService = folderService;
+        this.calendarHandlers = calendarHandlers;
     }
 
     @Override
     public void downgradePerformed(DowngradeEvent event) throws OXException {
         if (false == event.getNewUserConfiguration().hasCalendar()) {
-            // Delete user data
-            purgeUserData(new SimpleDBProvider(event.getReadCon(), event.getWriteCon()), event.getContext(), event.getNewUserConfiguration().getUserId());
+            // Delete data
+            purgeData(new SimpleDBProvider(event.getReadCon(), event.getWriteCon()), event.getContext(), event.getNewUserConfiguration().getUserId(), event.getSession());
         }
     }
 
-    private void purgeUserData(SimpleDBProvider dbProvider, Context context, int userId) throws OXException {
+    // TODO OSGI Events
+
+    private void purgeData(SimpleDBProvider dbProvider, Context context, int userId, Session adminSession) throws OXException {
         EntityResolver entityResolver = calendarUtilities.getEntityResolver(context.getContextId());
-        CalendarStorage storage = factory.create(context, ACCOUNT_ID, entityResolver, dbProvider, DBTransactionPolicy.NO_TRANSACTIONS);
+        CalendarStorage storage = factory.create(context, CalendarAccount.DEFAULT_ACCOUNT.getAccountId(), entityResolver, dbProvider, DBTransactionPolicy.NO_TRANSACTIONS);
 
         EventField[] fields = new EventField[] { EventField.ID, EventField.FOLDER_ID };
         List<Event> events = storage.getEventStorage().searchEvents(equalsFieldUserTerm(AttendeeField.ENTITY, userId), null, fields);
 
-        ServerSession session = ServerSessionAdapter.valueOf(userId, context.getContextId());
+        ServerSession serverSession = ServerSessionAdapter.valueOf(userId, context.getContextId());
 
         for (Event event : events) {
             String eventId = event.getId();
             String folderId = CalendarUtils.getFolderView(event, userId);
 
-            UserizedFolder folder = folderService.getFolder(FolderStorage.REAL_TREE_ID, folderId, session, null);
+            UserizedFolder folder = folderService.getFolder(FolderStorage.REAL_TREE_ID, folderId, serverSession, null);
             List<Attendee> attendees = storage.getAttendeeStorage().loadAttendees(eventId);
 
             if (folder.isGlobalID() || CalendarUtils.isLastUserAttendee(attendees, userId)) {
                 // Private or user is last attendee, so delete
                 storage.getAlarmStorage().deleteAlarms(eventId);
                 storage.getAlarmTriggerStorage().deleteTriggers(eventId);
-                storage.getAttachmentStorage().deleteAttachments(session, folderId, eventId);
+                storage.getAttachmentStorage().deleteAttachments(serverSession, folderId, eventId);
                 storage.getAttendeeStorage().deleteAttendees(eventId);
                 storage.getEventStorage().deleteEvent(eventId);
+
             } else {
                 // Remove user from event
                 storage.getAttendeeStorage().deleteAttendees(eventId, attendees.stream().filter(e -> e.getEntity() == userId).collect(Collectors.toList()));
+                Event originalEvent = calendarUtilities.copyEvent(event, null);
                 CalendarUser admin = entityResolver.prepareUserAttendee(context.getMailadmin());
                 event.setLastModified(new Date());
                 event.setModifiedBy(admin);
                 storage.getEventStorage().updateEvent(event);
             }
         }
-
     }
 
     @Override

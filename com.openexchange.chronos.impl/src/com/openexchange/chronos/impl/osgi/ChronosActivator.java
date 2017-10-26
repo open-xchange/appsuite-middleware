@@ -57,7 +57,7 @@ import com.openexchange.chronos.impl.FreeBusyServiceImpl;
 import com.openexchange.chronos.impl.availability.CalendarAvailabilityServiceImpl;
 import com.openexchange.chronos.impl.groupware.ChronosDeleteListener;
 import com.openexchange.chronos.impl.groupware.ChronosDowngradeListener;
-import com.openexchange.chronos.impl.osgi.event.EventAdminServiceListerner;
+import com.openexchange.chronos.impl.osgi.event.EventAdminServiceTracker;
 import com.openexchange.chronos.impl.session.DefaultCalendarUtilities;
 import com.openexchange.chronos.service.CalendarAvailabilityService;
 import com.openexchange.chronos.service.CalendarHandler;
@@ -139,12 +139,12 @@ public class ChronosActivator extends HousekeepingActivator {
             registerService(FreeBusyService.class, new FreeBusyServiceImpl());
             registerService(CalendarUtilities.class, calendarUtilities);
             registerService(CalendarAvailabilityService.class, new CalendarAvailabilityServiceImpl());
-            registerService(DeleteListener.class, new ChronosDeleteListener(factory, calendarUtilities));
-            registerService(DowngradeListener.class, new ChronosDowngradeListener(factory, calendarUtilities, folderService));
+            registerService(DeleteListener.class, new ChronosDeleteListener(factory, calendarUtilities, calendarHandlers));
+            registerService(DowngradeListener.class, new ChronosDowngradeListener(factory, calendarUtilities, folderService, calendarHandlers));
             /*
              * register calendar handler to propagate OSGi events
              */
-            track(EventAdmin.class, new EventAdminServiceListerner(context));
+            track(EventAdmin.class, new EventAdminServiceTracker(context));
             openTrackers();
         } catch (Exception e) {
             LOG.error("error starting {}", context.getBundle(), e);

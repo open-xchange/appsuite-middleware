@@ -47,46 +47,52 @@
  *
  */
 
-package com.openexchange.chronos.impl.osgi.event;
+package com.openexchange.chronos.impl.groupware;
 
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
-import org.osgi.framework.ServiceRegistration;
-import org.osgi.service.event.EventAdmin;
-import com.openexchange.chronos.service.CalendarHandler;
-import com.openexchange.osgi.SimpleRegistryListener;
+import com.openexchange.search.SearchTerm;
+import com.openexchange.search.SingleSearchTerm;
+import com.openexchange.search.SingleSearchTerm.SingleOperation;
+import com.openexchange.search.internal.operands.ColumnFieldOperand;
+import com.openexchange.search.internal.operands.ConstantOperand;
 
 /**
- * {@link EventAdminServiceListerner}
+ * {@link ListenerUtils}
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.0
  */
-public class EventAdminServiceListerner implements SimpleRegistryListener<EventAdmin> {
-
-    private final BundleContext context;
-
-    private volatile ServiceRegistration<CalendarHandler> handlerRegistration;
+final class ListenerUtils {
 
     /**
-     * Initializes a new {@link EventAdminServiceListerner}.
+     * Creates a new {@link SearchTerm} with {@link SingleOperation#EQUALS} as operand
      * 
-     * @param context The {@link BundleContext}
+     * @return A new {@link SingleSearchTerm}
      */
-    public EventAdminServiceListerner(BundleContext context) {
-        super();
-        this.context = context;
+    static SingleSearchTerm equalsTerm() {
+        return new SingleSearchTerm(SingleOperation.EQUALS);
     }
 
-    @Override
-    public void added(ServiceReference<EventAdmin> ref, EventAdmin service) {
-        handlerRegistration = context.registerService(CalendarHandler.class, new EventCalendarHandler(service), null);
+    /**
+     * Creates a new {@link SearchTerm} with {@link SingleOperation#EQUALS} as operand
+     * on the given field as {@link ColumnFieldOperand}
+     * 
+     * @param field The field to search on
+     * @return A new {@link SingleSearchTerm}
+     */
+    static SingleSearchTerm eqaulsFieldTerm(Enum<?> field) {
+        return equalsTerm().addOperand(new ColumnFieldOperand<Enum<?>>(field));
     }
 
-    @Override
-    public void removed(ServiceReference<EventAdmin> ref, EventAdmin service) {
-        context.ungetService(ref);
-        handlerRegistration.unregister();
+    /**
+     * Creates a new {@link SearchTerm} with {@link SingleOperation#EQUALS} as operand
+     * on the given field as {@link ColumnFieldOperand} for the specific user
+     * 
+     * @param field The field to search on
+     * @param userID The user to search
+     * @return A new {@link SingleSearchTerm}
+     */
+    static SingleSearchTerm equalsFieldUserTerm(Enum<?> field, int userID) {
+        return eqaulsFieldTerm(field).addOperand(new ConstantOperand<Integer>(Integer.valueOf(userID)));
     }
 
 }

@@ -49,8 +49,8 @@
 
 package com.openexchange.chronos.impl.groupware;
 
-import static com.openexchange.chronos.impl.groupware.ListenerHelper.eqaulsFieldTerm;
-import static com.openexchange.chronos.impl.groupware.ListenerHelper.equalsFieldUserTerm;
+import static com.openexchange.chronos.impl.groupware.ListenerUtils.eqaulsFieldTerm;
+import static com.openexchange.chronos.impl.groupware.ListenerUtils.equalsFieldUserTerm;
 import java.sql.Connection;
 import java.util.Collections;
 import java.util.Date;
@@ -70,6 +70,7 @@ import com.openexchange.chronos.ResourceId;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.CalendarAccount;
+import com.openexchange.chronos.service.CalendarHandler;
 import com.openexchange.chronos.service.CalendarUtilities;
 import com.openexchange.chronos.service.EntityResolver;
 import com.openexchange.chronos.storage.CalendarStorage;
@@ -83,8 +84,10 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteFailedExceptionCodes;
 import com.openexchange.groupware.delete.DeleteListener;
+import com.openexchange.osgi.ServiceSet;
 import com.openexchange.search.SingleSearchTerm;
 import com.openexchange.search.internal.operands.ConstantOperand;
+import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
@@ -100,19 +103,22 @@ public final class ChronosDeleteListener implements DeleteListener {
 
     private static final int ACCOUNT_ID = CalendarAccount.DEFAULT_ACCOUNT.getAccountId();
 
-    private CalendarStorageFactory factory;
-    private CalendarUtilities      calendarUtilities;
+    private CalendarStorageFactory      factory;
+    private CalendarUtilities           calendarUtilities;
+    private ServiceSet<CalendarHandler> calendarHandlers;
 
     /**
      * Initializes a new {@link ChronosDeleteListener}.
      * 
      * @param factory The {@link CalendarStorageFactory}
      * @param calendarUtilities The {@link CalendarUtilities}
+     * @param calendarHandlers The {@link CalendarHandler}s to notify
      */
-    public ChronosDeleteListener(CalendarStorageFactory factory, CalendarUtilities calendarUtilities) {
+    public ChronosDeleteListener(CalendarStorageFactory factory, CalendarUtilities calendarUtilities, ServiceSet<CalendarHandler> calendarHandlers) {
         super();
         this.factory = factory;
         this.calendarUtilities = calendarUtilities;
+        this.calendarHandlers = calendarHandlers;
     }
 
     @Override
@@ -120,7 +126,7 @@ public final class ChronosDeleteListener implements DeleteListener {
         switch (deleteEvent.getType()) {
             case DeleteEvent.TYPE_USER:
                 if (DeleteEvent.SUBTYPE_ANONYMOUS_GUEST != deleteEvent.getSubType() && DeleteEvent.SUBTYPE_INVITED_GUEST != deleteEvent.getSubType()) {
-                    purgeUserData(new SimpleDBProvider(readCon, writeCon), deleteEvent.getContext(), deleteEvent.getId(), deleteEvent.getDestinationUserID());
+                    purgeUserData(new SimpleDBProvider(readCon, writeCon), deleteEvent.getContext(), deleteEvent.getId(), deleteEvent.getDestinationUserID(), deleteEvent.getSession());
                 }
                 break;
             case DeleteEvent.TYPE_GROUP:
@@ -151,9 +157,10 @@ public final class ChronosDeleteListener implements DeleteListener {
      * @param context The {@link Context}
      * @param userId The user identifier
      * @param destinationUserId The identifier of the destination user specified in {@link DeleteEvent#getDestinationUserID()}
+     * @param adminSession The context admins session
      * @throws OXException In case service is unavailable or SQL error
      */
-    private void purgeUserData(DBProvider dbProvider, Context context, int userId, Integer destinationUserId) throws OXException {
+    private void purgeUserData(DBProvider dbProvider, Context context, int userId, Integer destinationUserId, Session adminSession) throws OXException {
         EntityResolver entityResolver = calendarUtilities.getEntityResolver(context.getContextId());
         CalendarStorage storage = factory.create(context, ACCOUNT_ID, entityResolver, dbProvider, DBTransactionPolicy.NO_TRANSACTIONS);
 
@@ -168,9 +175,11 @@ public final class ChronosDeleteListener implements DeleteListener {
          */
         // Get events
         EventStorage eventStorage = storage.getEventStorage();
-        EventField[] fields = new EventField[] { EventField.ID };
-        List<Event> events = null;
-        events = eventStorage.searchEvents(equalsFieldUserTerm(AttendeeField.ENTITY, userId), null, fields);
+        EventField[] fields = new EventField[] { EventField.ID, EventField.FOLDER_ID };
+        List<Event> events = eventStorage.searchEvents(equalsFieldUserTerm(AttendeeField.ENTITY, userId), null, fields);
+        if (events.isEmpty()) {
+            return;
+        }
 
         // Get attendees
         List<String> eventIds = events.stream().map(Event::getId).collect(Collectors.toList());
@@ -180,20 +189,25 @@ public final class ChronosDeleteListener implements DeleteListener {
         ServerSession serverSession = ServerSessionAdapter.valueOf(userId, context.getContextId());
 
         // Check events
+        Date date = new Date();
         for (Entry<String, List<Attendee>> entry : eventToAttendee.entrySet()) {
             List<Attendee> attendees = entry.getValue();
             if (null != attendees && false == attendees.isEmpty()) {
                 try {
                     Event event = events.stream().filter(e -> e.getId().equals(entry.getKey())).findFirst().get();
+                    event.setAttendees(attendees);
+                    String folderId = CalendarUtils.getFolderView(event, userId);
                     if (CalendarUtils.isLastUserAttendee(attendees, userId)) {
                         // The user is the only attendee, delete event and its attachments
                         eventStorage.deleteEvent(entry.getKey());
                         event.setAttendees(attendees);
-                        storage.getAttachmentStorage().deleteAttachments(serverSession, CalendarUtils.getFolderView(event, userId), entry.getKey()); //TODO Should load folder id ?!
+                        storage.getAttachmentStorage().deleteAttachments(serverSession, folderId, entry.getKey());
                     } else {
                         // The user needs to be removed from the event, this modifies the event
                         attendees = Collections.singletonList(attendees.stream().filter(a -> a.getEntity() == userId).findFirst().get());
-                        event.setLastModified(new Date());
+                        Event originalEvent = calendarUtilities.copyEvent(event, null);
+                        event.setLastModified(date);
+                        event.setTimestamp(date.getTime());
                         eventStorage.updateEvent(event);
                     }
                     storage.getAttendeeStorage().deleteAttendees(entry.getKey(), attendees);
@@ -214,7 +228,8 @@ public final class ChronosDeleteListener implements DeleteListener {
         events = eventStorage.searchEvents(equalsFieldUserTerm(EventField.CALENDAR_USER, userId), null, fields);
         for (Event event : events) {
             event.setCalendarUser(replacement);
-            event.setLastModified(new Date());
+            event.setLastModified(date);
+            event.setTimestamp(date.getTime());
             eventStorage.updateEvent(event);
         }
 
@@ -222,14 +237,16 @@ public final class ChronosDeleteListener implements DeleteListener {
         events = eventStorage.searchEvents(equalsFieldUserTerm(EventField.CREATED_BY, userId), null, fields);
         for (Event event : events) {
             event.setCreatedBy(replacement);
-            event.setLastModified(new Date());
+            event.setLastModified(date);
+            event.setTimestamp(date.getTime());
             eventStorage.updateEvent(event);
         }
         // Update events where the user is the modifier
         events = eventStorage.searchEvents(equalsFieldUserTerm(EventField.MODIFIED_BY, userId), null, fields);
         for (Event event : events) {
             event.setModifiedBy(replacement);
-            event.setLastModified(new Date());
+            event.setLastModified(date);
+            event.setTimestamp(date.getTime());
             eventStorage.updateEvent(event);
         }
         // Update events where the user is the organizer
@@ -237,7 +254,8 @@ public final class ChronosDeleteListener implements DeleteListener {
         events = eventStorage.searchEvents(organizer, null, fields);
         for (Event event : events) {
             event.setOrganizer(entityResolver.applyEntityData(new Organizer(), replacement.getEntity()));
-            event.setLastModified(new Date());
+            event.setLastModified(date);
+            event.setTimestamp(date.getTime());
             eventStorage.updateEvent(event);
         }
 
@@ -299,6 +317,7 @@ public final class ChronosDeleteListener implements DeleteListener {
 
         // Get modifier
         CalendarUser replacement = entityResolver.prepareUserAttendee(null == destinationUserId ? context.getMailadmin() : destinationUserId.intValue());
+        Date date = new Date();
 
         for (Event event : events) {
             /*
@@ -310,7 +329,8 @@ public final class ChronosDeleteListener implements DeleteListener {
 
             // Reflect deletion in event
             event.setModifiedBy(replacement);
-            event.setLastModified(new Date());
+            event.setLastModified(date);
+            event.setTimestamp(date.getTime());
             eventStorage.updateEvent(event);
         }
     }
