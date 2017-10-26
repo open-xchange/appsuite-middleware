@@ -268,7 +268,20 @@ public class SchedJoulesCalendarAccess extends CachingCalendarAccess {
         JSONObject folder = findFolder(folderId, foldersArray);
         URL url = new URL(folder.getString(SchedJoulesFields.URL));
         UUID userKey = getUserKey(internalUserConfig);
-        return new URL(url + "&u=" + userKey);
+        return new URL(generateURL(url, userKey));
+    }
+
+    /**
+     * Appends the specified user key to the specified URL
+     * 
+     * @param url The URL
+     * @param userKey The user key to append
+     * @return The generated URL
+     */
+    private String generateURL(URL url, UUID userKey) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(url.toString()).append("&u").append(userKey.toString());
+        return sb.toString();
     }
 
     /**
