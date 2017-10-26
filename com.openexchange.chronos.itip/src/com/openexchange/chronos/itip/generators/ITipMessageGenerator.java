@@ -49,11 +49,10 @@
 
 package com.openexchange.chronos.itip.generators;
 
+import com.openexchange.chronos.Event;
 import com.openexchange.chronos.itip.ITipMessage;
+import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.container.Appointment;
-import com.openexchange.session.Session;
-
 
 /**
  * {@link ITipMessageGenerator}
@@ -62,6 +61,6 @@ import com.openexchange.session.Session;
  */
 public interface ITipMessageGenerator {
 
-    ITipMessage generate(Appointment original, Appointment updated, Session session) throws OXException;
+    ITipMessage generate(Event original, Event updated, CalendarSession session) throws OXException;
 
 }

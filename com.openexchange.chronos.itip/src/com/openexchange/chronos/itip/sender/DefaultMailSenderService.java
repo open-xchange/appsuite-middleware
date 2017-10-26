@@ -52,10 +52,8 @@ package com.openexchange.chronos.itip.sender;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
-import java.sql.SQLException;
 import java.util.List;
 import java.util.Locale;
-import java.util.regex.Pattern;
 import javax.activation.DataHandler;
 import javax.mail.BodyPart;
 import javax.mail.MessagingException;
@@ -64,34 +62,28 @@ import javax.mail.Part;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMultipart;
+import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.ical.CalendarExport;
 import com.openexchange.chronos.ical.ICalService;
 import com.openexchange.chronos.itip.ITipMethod;
-import com.openexchange.chronos.itip.generators.AttachmentMemory;
 import com.openexchange.chronos.itip.generators.NotificationConfiguration;
 import com.openexchange.chronos.itip.generators.NotificationMail;
 import com.openexchange.chronos.itip.generators.NotificationParticipant;
+import com.openexchange.chronos.itip.osgi.Services;
 import com.openexchange.chronos.itip.sender.datasources.MessageDataSource;
-import com.openexchange.context.ContextService;
+import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
-import com.openexchange.groupware.attach.AttachmentBase;
-import com.openexchange.groupware.attach.AttachmentMetadata;
-import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.mail.MailObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.notify.NotificationConfig;
 import com.openexchange.groupware.notify.NotificationConfig.NotificationProperty;
 import com.openexchange.groupware.notify.State;
-import com.openexchange.groupware.userconfiguration.CapabilityUserConfigurationStorage;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.html.HtmlService;
 import com.openexchange.java.Streams;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
@@ -101,10 +93,8 @@ import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mail.utils.MessageUtility;
-import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
-import com.openexchange.user.UserService;
 
 /**
  * {@link DefaultMailSenderService}
@@ -119,25 +109,13 @@ public class DefaultMailSenderService implements MailSenderService {
 
     private final HtmlService htmlService;
 
-    private final AttachmentBase attachments;
-
-    private final ContextService contexts;
-
-    private final UserService users;
-
-    private final UserConfigurationStorage userConfigurations;
-
-    public DefaultMailSenderService(ICalService icalService, HtmlService htmlService, AttachmentBase attachments, ContextService contexts, UserService users, UserConfigurationStorage userConfigs, AttachmentMemory attachmentMemory) {
-        this.icalService = icalService;
-        this.htmlService = htmlService;
-        this.attachments = attachments;
-        this.contexts = contexts;
-        this.users = users;
-        this.userConfigurations = userConfigs;
+    public DefaultMailSenderService() {
+        this.icalService = Services.getService(ICalService.class);
+        this.htmlService = Services.getService(HtmlService.class);
     }
 
     @Override
-    public void sendMail(NotificationMail mail, Session session) {
+    public void sendMail(NotificationMail mail, CalendarSession session) throws OXException {
         if (!mail.shouldBeSent()) {
             return;
         }
@@ -145,14 +123,14 @@ public class DefaultMailSenderService implements MailSenderService {
         send(mail, session, mail.getStateType());
     }
 
-    private void send(NotificationMail mail, Session session, State.Type type) {
-        Appointment app = (mail.getOriginal() == null || mail.getAppointment().getObjectID() > 0) ? mail.getAppointment() : mail.getOriginal();
+    private void send(NotificationMail mail, CalendarSession session, State.Type type) {
+        Event app = (mail.getOriginal() == null || mail.getEvent().getId() != null) ? mail.getEvent() : mail.getOriginal();
         MailObject message;
         {
-            final int appointmentId = app.getObjectID();
-            final int folderId = mail.getRecipient().getFolderId();
+            final String appointmentId = app.getId();
+            final String folderId = mail.getRecipient().getFolderId();
             final String sType = type != null ? type.toString() : null;
-            message = new MailObject(session, appointmentId, folderId, Types.APPOINTMENT, sType);
+            message = new MailObject(session.getSession(), appointmentId, folderId, Types.APPOINTMENT, sType);
             message.setAdditionalHeaders(mail.getAdditionalHeaders());
         }
         try {
@@ -162,8 +140,8 @@ public class DefaultMailSenderService implements MailSenderService {
             message.setSubject(mail.getSubject());
             message.setUid(app.getUid());
             message.setAutoGenerated(true);
-            if (app.containsRecurrenceDatePosition()) {
-                message.setRecurrenceDatePosition(app.getRecurrenceDatePosition().getTime());
+            if (app.containsRecurrenceId()) {
+                message.setRecurrenceDatePosition(app.getRecurrenceId().getValue().getTimestamp());
             }
             addBody(mail, message, session);
             message.send();
@@ -182,14 +160,14 @@ public class DefaultMailSenderService implements MailSenderService {
      * @param sender
      * @throws OXException
      */
-    private String getSenderAddress(NotificationParticipant sender, Session session) throws OXException {
+    private String getSenderAddress(NotificationParticipant sender, CalendarSession session) throws OXException {
         if (sender.getUser() == null || sender.getUser().getId() != session.getUserId()) {
             return getAddress(sender);
         }
 
         ServerSession serverSession = null;
         try {
-            serverSession = ServerSessionAdapter.valueOf(session);
+            serverSession = ServerSessionAdapter.valueOf(session.getSession());
         } catch (OXException e) {
             LOG.error("Unable to retrieve ServerSession for UserSettings", e);
             return getAddress(sender);
@@ -213,15 +191,11 @@ public class DefaultMailSenderService implements MailSenderService {
         return getAddress(sender);
     }
 
-    private UserConfiguration getUserConfiguration(final int id, final int[] groups, final Context context) throws SQLException, OXException {
-        return CapabilityUserConfigurationStorage.loadUserConfiguration(id, groups, context);
-    }
-
     private UserSettingMail getUserSettingMail(final int id, final Context context) throws OXException {
         return UserSettingMailStorage.getInstance().loadUserSettingMail(id, context);
     }
 
-    private void addBody(NotificationMail mail, MailObject message, Session session) throws MessagingException, OXException, UnsupportedEncodingException {
+    private void addBody(NotificationMail mail, MailObject message, CalendarSession session) throws MessagingException, OXException, UnsupportedEncodingException {
         NotificationConfiguration recipientConfig = mail.getRecipient().getConfiguration();
 
         String charset = MailProperties.getInstance().getDefaultMimeCharset();
@@ -283,25 +257,17 @@ public class DefaultMailSenderService implements MailSenderService {
         return part;
     }
 
-    private void addAttachments(NotificationMail mail, Multipart multipart, Session session) throws OXException {
+    private void addAttachments(NotificationMail mail, Multipart multipart, CalendarSession session) throws OXException {
         try {
-            Context context = contexts.getContext(session.getContextId());
-            User user = users.getUser(session.getUserId(), context);
-            UserConfiguration config = userConfigurations.getUserConfiguration(session.getUserId(), context);
-
-            Appointment effective = (mail.getAppointment() != null) ? mail.getAppointment() : mail.getOriginal();
-            int folderId = effective.getParentFolderID();
-            int attachedId = effective.getObjectID();
-
-            for (AttachmentMetadata metadata : mail.getAttachments()) {
+            for (Attachment attachment : mail.getAttachments()) {
                 /*
                  * Create appropriate MIME body part
                  */
                 final MimeBodyPart bodyPart = new MimeBodyPart();
                 final ContentType ct;
                 {
-                    String mimeType = metadata.getFileMIMEType();
-                    if (null == mimeType) {
+                    String mimeType = attachment.getFormatType();
+                    if (Strings.isEmpty(mimeType)) {
                         mimeType = "application/octet-stream";
                     }
                     ct = new ContentType(mimeType);
@@ -309,8 +275,9 @@ public class DefaultMailSenderService implements MailSenderService {
                 /*
                  * Set content through a DataHandler
                  */
-                bodyPart.setDataHandler(new DataHandler(new MessageDataSource(attachments.getAttachedFile(session, folderId, attachedId, Types.APPOINTMENT, metadata.getId(), context, user, config), ct)));
-                final String fileName = metadata.getFilename();
+                InputStream attachedFile = attachment.getData().getStream();
+                bodyPart.setDataHandler(new DataHandler(new MessageDataSource(attachedFile, ct)));
+                final String fileName = attachment.getFilename();
                 if (fileName != null && !ct.containsNameParameter()) {
                     ct.setNameParameter(fileName);
                 }
@@ -334,7 +301,7 @@ public class DefaultMailSenderService implements MailSenderService {
         }
     }
 
-    private Multipart generateTextAndHtmlAndIcalAndIcalAttachment(NotificationMail mail, String charset, Session session, boolean iCalAsAttachment) throws MessagingException, OXException, UnsupportedEncodingException {
+    private Multipart generateTextAndHtmlAndIcalAndIcalAttachment(NotificationMail mail, String charset, CalendarSession session, boolean iCalAsAttachment) throws MessagingException, OXException, UnsupportedEncodingException {
         BodyPart textAndHtml = new MimeBodyPart();
         Multipart textAndHtmlAndIcalMultipart = generateTextAndIcalAndHtmlMultipart(mail, charset, session);
         MessageUtility.setContent(textAndHtmlAndIcalMultipart, textAndHtml);
@@ -347,7 +314,7 @@ public class DefaultMailSenderService implements MailSenderService {
         return multipart;
     }
 
-    private Multipart generateTextAndIcalAndHtmlMultipart(NotificationMail mail, String charset, Session session) throws MessagingException, OXException, UnsupportedEncodingException {
+    private Multipart generateTextAndIcalAndHtmlMultipart(NotificationMail mail, String charset, CalendarSession session) throws MessagingException, OXException, UnsupportedEncodingException {
         BodyPart textPart = generateTextPart(mail, charset);
         BodyPart htmlPart = generateHtmlPart(mail, charset);
         BodyPart iCalPart = generateIcalPart(mail, charset, session);
@@ -359,7 +326,7 @@ public class DefaultMailSenderService implements MailSenderService {
         return multipart;
     }
 
-    private Multipart generateTextAndIcalMultipart(NotificationMail mail, String charset, Session session) throws MessagingException, OXException, UnsupportedEncodingException {
+    private Multipart generateTextAndIcalMultipart(NotificationMail mail, String charset, CalendarSession session) throws MessagingException, OXException, UnsupportedEncodingException {
         BodyPart textPart = generateTextPart(mail, charset);
         BodyPart iCalPart = generateIcalPart(mail, charset, session);
 
@@ -369,9 +336,8 @@ public class DefaultMailSenderService implements MailSenderService {
         return multipart;
     }
 
-    private BodyPart generateIcalPart(NotificationMail mail, String charset, Session session) throws MessagingException, OXException, UnsupportedEncodingException {
+    private BodyPart generateIcalPart(NotificationMail mail, String charset, CalendarSession session) throws MessagingException, OXException, UnsupportedEncodingException {
         MimeBodyPart icalPart = new MimeBodyPart();
-        Context ctx = ContextStorage.getStorageContext(session.getContextId());
         final ContentType ct = new ContentType();
         ct.setPrimaryType("text");
         ct.setSubType("calendar");
@@ -414,9 +380,8 @@ public class DefaultMailSenderService implements MailSenderService {
         return icalPart;
     }
 
-    private BodyPart generateIcalAttachmentPart(NotificationMail mail, String charset, Session session) throws MessagingException, OXException, UnsupportedEncodingException {
+    private BodyPart generateIcalAttachmentPart(NotificationMail mail, String charset, CalendarSession session) throws MessagingException, OXException, UnsupportedEncodingException {
         MimeBodyPart icalPart = new MimeBodyPart();
-        Context ctx = ContextStorage.getStorageContext(session.getContextId());
         /*
          * Determine file name
          */
@@ -541,12 +506,6 @@ public class DefaultMailSenderService implements MailSenderService {
         }
         // Without personal part
         return participant.getEmail();
-    }
-
-    private static final Pattern P_TRIM = Pattern.compile("[a-zA-Z-_]+:\r?\n");
-
-    private static String trimICal(final String ical) {
-        return P_TRIM.matcher(ical).replaceAll("");
     }
 
     private static boolean isAscii(final byte[] bytes) {

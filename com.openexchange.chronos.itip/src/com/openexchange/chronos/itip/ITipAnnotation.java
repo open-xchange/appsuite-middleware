@@ -52,8 +52,7 @@ package com.openexchange.chronos.itip;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
-
-import com.openexchange.groupware.container.Appointment;
+import com.openexchange.chronos.Event;
 import com.openexchange.i18n.tools.StringHelper;
 
 /**
@@ -67,12 +66,12 @@ public class ITipAnnotation {
 
     private String message;
     private List<Object> args;
-    private Appointment additional;
+    private Event additional;
 
-    public ITipAnnotation(String message, Locale locale, Object...args) {
-    	if (locale != null) {
-        	message = StringHelper.valueOf(locale).getString(message);
-    	}
+    public ITipAnnotation(String message, Locale locale, Object... args) {
+        if (locale != null) {
+            message = StringHelper.valueOf(locale).getString(message);
+        }
         this.message = message;
         this.args = Arrays.asList(args);
     }
@@ -93,15 +92,15 @@ public class ITipAnnotation {
         this.args = args;
     }
 
-    public void setArgs(Object...args) {
+    public void setArgs(Object... args) {
         this.args = Arrays.asList(args);
     }
 
-    public Appointment getAppointment() {
+    public Event getEvent() {
         return additional;
     }
 
-    public void setAppointment(Appointment additional) {
+    public void setEvent(Event additional) {
         this.additional = additional;
     }
 

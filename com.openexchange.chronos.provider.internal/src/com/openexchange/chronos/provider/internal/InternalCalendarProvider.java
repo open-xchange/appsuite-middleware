@@ -98,9 +98,9 @@ public class InternalCalendarProvider implements AutoProvisioningCalendarProvide
 
     @Override
     public CalendarAccess connect(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
-        CalendarService calendarService = Services.getService(CalendarService.class);
+        CalendarService calendarService = services.getService(CalendarService.class);
         CalendarSession calendarSession = calendarService.init(session, parameters);
-        return new InternalCalendarAccess(calendarSession);
+        return new InternalCalendarAccess(calendarSession, services);
     }
 
     @Override
@@ -142,7 +142,7 @@ public class InternalCalendarProvider implements AutoProvisioningCalendarProvide
          * init user config based on migrated legacy settings
          */
         ServerSession serverSession = ServerSessionAdapter.valueOf(session);
-        new UserConfigHelper(Services.getServiceLookup()).applyLegacyConfig(serverSession, userConfig);
+        new UserConfigHelper(services).applyLegacyConfig(serverSession, userConfig);
         return new JSONObject();
     }
 

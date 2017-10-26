@@ -139,4 +139,16 @@ public class ExtendedProperties extends ArrayList<ExtendedProperty> {
         return removed;
     }
 
+    /**
+     * Adds an extended property to this collection after all previous extended properties with the same property name have been removed,
+     * thus effectively replacing any previously set properties with the same name.
+     *
+     * @param e The replacing property
+     * @return <code>true</code> if this list changed as a result of the call
+     */
+    public boolean replace(ExtendedProperty e) {
+        removeAll(e.getName());
+        return add(e);
+    }
+
 }

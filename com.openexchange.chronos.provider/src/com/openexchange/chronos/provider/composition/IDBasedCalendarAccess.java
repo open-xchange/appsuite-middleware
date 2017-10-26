@@ -404,7 +404,7 @@ public interface IDBasedCalendarAccess extends TransactionAware, CalendarParamet
      * @return A list of upcoming alarm triggers
      * @throws OXException
      */
-    List<AlarmTrigger> getAlarmTrigger(Set<String> actions) throws OXException;
+    List<AlarmTrigger> getAlarmTriggers(Set<String> actions) throws OXException;
 
     /**
      * Retrieves the {@link IFileHolder} with the specified managed identifier from the {@link Event}

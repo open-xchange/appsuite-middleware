@@ -1,4 +1,4 @@
 requests:
-  - UntilRequest.yaml
+  - PendingRequest.yaml
   - SnoozeRequest.yaml
   - AcknowledgeRequest.yaml

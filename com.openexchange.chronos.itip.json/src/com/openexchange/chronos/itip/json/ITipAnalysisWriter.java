@@ -61,8 +61,8 @@ import com.openexchange.chronos.itip.ITipAnalysis;
 import com.openexchange.chronos.itip.ITipAnnotation;
 import com.openexchange.chronos.itip.ITipChange;
 import com.openexchange.chronos.itip.ParticipantChange;
-import com.openexchange.chronos.itip.tools.AppointmentDiff;
-import com.openexchange.chronos.itip.tools.AppointmentDiff.FieldUpdate;
+import com.openexchange.chronos.itip.tools.EventDiff;
+import com.openexchange.chronos.itip.tools.EventDiff.FieldUpdate;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Change;
@@ -180,7 +180,7 @@ public class ITipAnalysisWriter {
         final ParticipantChange participantChange = change.getParticipantChange();
         // TODO
 
-        final AppointmentDiff diff = change.getDiff();
+        final EventDiff diff = change.getDiff();
         if (diff != null) {
             final JSONObject diffObject = new JSONObject();
             writeDiff(diffObject, diff);
@@ -197,7 +197,7 @@ public class ITipAnalysisWriter {
         }
     }
 
-    private void writeDiff(final JSONObject diffObject, final AppointmentDiff diff) throws JSONException {
+    private void writeDiff(final JSONObject diffObject, final EventDiff diff) throws JSONException {
         final List<FieldUpdate> updates = diff.getUpdates();
         for (final FieldUpdate fieldUpdate : updates) {
             final JSONObject difference = new JSONObject();

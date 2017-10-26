@@ -256,6 +256,9 @@ public abstract class ChronosAction extends AbstractChronosAction {
         for (UploadFile uploadFile : uploadFiles) {
             String contentId = uploadFile.getContentId();
             if (Strings.isEmpty(contentId)) {
+                contentId = uploadFile.getFieldName(); // fallback to 'name'
+            }
+            if (Strings.isEmpty(contentId)) {
                 throw AjaxExceptionCodes.BAD_REQUEST_CUSTOM.create("Unable to extract the Content-ID for the attachment.");
             }
             uploads.put(contentId, uploadFile);

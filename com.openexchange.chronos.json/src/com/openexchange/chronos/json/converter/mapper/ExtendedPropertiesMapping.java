@@ -50,7 +50,10 @@
 package com.openexchange.chronos.json.converter.mapper;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -61,6 +64,7 @@ import com.openexchange.chronos.ExtendedPropertyParameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tools.mappings.json.DefaultJsonMapping;
 import com.openexchange.session.Session;
+import com.openexchange.tools.arrays.Collections;
 
 /**
  *
@@ -84,7 +88,7 @@ public abstract class ExtendedPropertiesMapping<O> extends DefaultJsonMapping<Ex
     @Override
     public void deserialize(JSONObject from, O to) throws JSONException, OXException {
         if (from.has(getAjaxName())) {
-            set(to, deserializeExtendedProperties(from.getJSONArray(getAjaxName())));
+            set(to, deserializeExtendedProperties(from.getJSONObject(getAjaxName())));
         }
     }
 
@@ -93,58 +97,89 @@ public abstract class ExtendedPropertiesMapping<O> extends DefaultJsonMapping<Ex
         return serializeExtendedProperties(get(from));
     }
 
-    public static ExtendedProperties deserializeExtendedProperties(JSONArray jsonArray) throws JSONException {
-        if (null == jsonArray) {
+    public static ExtendedProperties deserializeExtendedProperties(JSONObject jsonObject) throws JSONException {
+        if (null == jsonObject) {
             return null;
         }
         ExtendedProperties extendedProperties = new ExtendedProperties();
-        for (int x = 0; x < jsonArray.length(); x++) {
-            extendedProperties.add(deserializeExtendedProperty(jsonArray.getJSONObject(x)));
+        for (Entry<String, Object> entry : jsonObject.entrySet()) {
+            String name = entry.getKey();
+            if (JSONObject.class.isInstance(entry.getValue())) {
+                extendedProperties.add(deserializeExtendedProperty(name, (JSONObject) entry.getValue()));
+            } else if (JSONArray.class.isInstance(entry.getValue())) {
+                extendedProperties.addAll(deserializeExtendedProperties(name, (JSONArray) entry.getValue()));
+            } else {
+                throw new JSONException("unsupported property value: " + entry.getValue());
+            }
         }
         return extendedProperties;
     }
 
-    public static JSONArray serializeExtendedProperties(ExtendedProperties extendedProperties) throws JSONException {
+    public static JSONObject serializeExtendedProperties(ExtendedProperties extendedProperties) throws JSONException {
         if (null == extendedProperties) {
             return null;
         }
-        JSONArray jsonArray = new JSONArray(extendedProperties.size());
+        Map<String, List<ExtendedProperty>> propertiesByName = new HashMap<String, List<ExtendedProperty>>(extendedProperties.size());
         for (ExtendedProperty extendedProperty : extendedProperties) {
-            jsonArray.put(serializeExtendedProperty(extendedProperty));
+            Collections.put(propertiesByName, extendedProperty.getName(), extendedProperty);
         }
-        return jsonArray;
+        JSONObject jsonObject = new JSONObject(extendedProperties.size());
+        for (Entry<String, List<ExtendedProperty>> entry : propertiesByName.entrySet()) {
+            List<ExtendedProperty> properties = entry.getValue();
+            String name = entry.getKey();
+            if (1 == properties.size()) {
+                jsonObject.put(name, serializeExtendedProperty(properties.get(0).getValue(), properties.get(0).getParameters()));
+            } else {
+                JSONArray jsonArray = new JSONArray(properties.size());
+                for (ExtendedProperty property : properties) {
+                    jsonArray.put(serializeExtendedProperty(property.getValue(), property.getParameters()));
+                }
+                jsonObject.put(name, jsonArray);
+            }
+        }
+        return jsonObject;
     }
 
-    public static JSONObject serializeExtendedProperty(ExtendedProperty extendedProperty) throws JSONException {
-        JSONObject jsonExtendedProperty = new JSONObject();
-        jsonExtendedProperty.put("name", extendedProperty.getName());
-        jsonExtendedProperty.put("value", extendedProperty.getValue());
-        List<ExtendedPropertyParameter> parameters = extendedProperty.getParameters();
-        if (null == parameters || parameters.isEmpty()) {
-            return jsonExtendedProperty;
+    private static ExtendedProperty deserializeExtendedProperty(String name, JSONObject jsonObject) throws JSONException {
+        if (null == jsonObject || 0 == jsonObject.length()) {
+            return new ExtendedProperty(name, null);
         }
-        JSONArray jsonParameters = new JSONArray(parameters.size());
-        for (int i = 0; i < parameters.size(); i++) {
-            ExtendedPropertyParameter parameter = parameters.get(i);
-            jsonParameters.add(i, new JSONObject().putOpt("name", parameter.getName()).putOpt("value", parameter.getValue()));
+        if (1 == jsonObject.length() && jsonObject.has("value")) {
+            return new ExtendedProperty(name, jsonObject.getString("value"));
         }
-        jsonExtendedProperty.put("parameters", jsonParameters);
-        return jsonExtendedProperty;
-    }
-
-    public static ExtendedProperty deserializeExtendedProperty(JSONObject extendedProperty) throws JSONException {
-        String name = extendedProperty.getString("name");
-        String value = extendedProperty.getString("value");
-        JSONArray jsonParameters = extendedProperty.optJSONArray("parameters");
-        if (null == jsonParameters) {
-            return new ExtendedProperty(name, value);
-        }
-        List<ExtendedPropertyParameter> parameters = new ArrayList<ExtendedPropertyParameter>(jsonParameters.length());
-        for (int i = 0; i < jsonParameters.length(); i++) {
-            JSONObject jsonParameter = jsonParameters.getJSONObject(i);
-            parameters.add(new ExtendedPropertyParameter(jsonParameter.optString("name", null), jsonParameter.optString("value", null)));
+        List<ExtendedPropertyParameter> parameters = new ArrayList<ExtendedPropertyParameter>(jsonObject.length());
+        String value = null;
+        for (Entry<String, Object> entry : jsonObject.entrySet()) {
+            if ("value".equals(entry.getKey())) {
+                value = (String) entry.getValue();
+            } else {
+                parameters.add(new ExtendedPropertyParameter(entry.getKey(), (String) entry.getValue()));
+            }
         }
         return new ExtendedProperty(name, value, parameters);
+    }
+
+    private static List<ExtendedProperty> deserializeExtendedProperties(String name, JSONArray jsonArray) throws JSONException {
+        if (null == jsonArray || 0 == jsonArray.length()) {
+            return java.util.Collections.emptyList();
+        }
+        List<ExtendedProperty> extendedProperties = new ArrayList<ExtendedProperty>(jsonArray.length());
+        for (int i = 0; i < jsonArray.length(); i++) {
+            extendedProperties.add(deserializeExtendedProperty(name, jsonArray.getJSONObject(i)));
+        }
+        return extendedProperties;
+    }
+
+    private static JSONObject serializeExtendedProperty(String value, List<ExtendedPropertyParameter> parameters) throws JSONException {
+        if (null == parameters || parameters.isEmpty()) {
+            return new JSONObject(1).put("value", value);
+        }
+        JSONObject jsonObject = new JSONObject(1 + parameters.size());
+        jsonObject.put("value", value);
+        for (ExtendedPropertyParameter parameter : parameters) {
+            jsonObject.put(parameter.getName(), parameter.getValue());
+        }
+        return jsonObject;
     }
 
 }

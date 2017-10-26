@@ -56,11 +56,10 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Locale;
 import java.util.TimeZone;
+import com.openexchange.chronos.Event;
+import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.itip.HumanReadableRecurrences;
 import com.openexchange.chronos.itip.Messages;
-import com.openexchange.groupware.container.Appointment;
-import com.openexchange.groupware.container.CalendarObject;
-
 
 /**
  * {@link DateHelper}
@@ -73,13 +72,12 @@ public class DateHelper {
     private DateFormat dateFormat;
     private DateFormat weekdayFormat;
 
-    private final Appointment appointment;
+    private final Event appointment;
     private Locale locale;
-	private TimeZone timezone;
-	private final TimeZone utc = TimeZone.getTimeZone("UTC");
+    private TimeZone timezone;
+    private final TimeZone utc = TimeZone.getTimeZone("UTC");
 
-
-    public DateHelper(Appointment appointment, Locale locale, TimeZone tz) {
+    public DateHelper(Event appointment, Locale locale, TimeZone tz) {
         super();
         this.appointment = appointment;
         if (locale != null && tz != null) {
@@ -96,47 +94,46 @@ public class DateHelper {
     }
 
     public String getRecurrenceDatePosition() {
-        return formatDate(appointment.getRecurrenceDatePosition());
+        return formatDate(new Date(appointment.getRecurrenceId().getValue().getTimestamp()));
     }
 
     public String getInterval() {
         return formatInterval(appointment);
     }
 
-
     public String getDateSpec() {
         StringBuilder b = new StringBuilder();
         b.append(formatDate(appointment));
-        if (appointment.getRecurrenceType() != CalendarObject.NO_RECURRENCE) {
+        if (appointment.getRecurrenceId() != null) {
             b.append(" - ").append(formatRecurrenceRule(appointment));
         }
         return b.toString();
     }
 
-    public String formatRecurrenceRule(Appointment appointment) {
-        if (appointment.isMaster()) {
-            HumanReadableRecurrences recurInfo = new HumanReadableRecurrences(appointment);
-            return recurInfo.getString(locale)+", "+recurInfo.getEnd(locale);
+    public String formatRecurrenceRule(Event appointment) {
+        if (CalendarUtils.isSeriesMaster(appointment)) {
+            HumanReadableRecurrences recurInfo = new HumanReadableRecurrences(appointment, locale);
+            return recurInfo.getString() + ", " + recurInfo.getEnd();
         }
         return "";
     }
 
-    public String formatDate(Appointment appointment) {
-    	Date startDate = appointment.getStartDate();
-    	Date endDate = appointment.getEndDate();
-    	if (appointment.getFullTime()) {
-    		endDate = new Date(endDate.getTime()-1000);
-    	}
+    public String formatDate(Event appointment) {
+        Date startDate = new Date(appointment.getStartDate().getTimestamp());
+        Date endDate = new Date(appointment.getEndDate().getTimestamp());
+        if (appointment.getStartDate().isAllDay()) {
+            endDate = new Date(endDate.getTime() - 1000);
+        }
 
-    	if (differentDays(startDate, endDate)) {
-    		if (appointment.getFullTime()) {
-        		return String.format("%s - %s", formatDate(startDate, utc), formatDate(endDate, utc));
-    		} else {
-        		return String.format("%s - %s", formatDate(startDate), formatDate(endDate));
-    		}
-    	} else {
+        if (differentDays(startDate, endDate)) {
+            if (appointment.getStartDate().isAllDay()) {
+                return String.format("%s - %s", formatDate(startDate, utc), formatDate(endDate, utc));
+            } else {
+                return String.format("%s - %s", formatDate(startDate), formatDate(endDate));
+            }
+        } else {
             return formatDate(startDate);
-    	}
+        }
     }
 
     public String formatDate(Date date) {
@@ -155,32 +152,31 @@ public class DateHelper {
         return format.format(date);
     }
 
-
     public String formatTime(Date date) {
         return timeFormat.format(date);
     }
 
-    public String formatInterval(Appointment appointment) {
-        if (appointment.getFullTime()) {
+    public String formatInterval(Event appointment) {
+        if (appointment.getStartDate().isAllDay()) {
             return new Sentence(Messages.FULL_TIME).getMessage(locale);
         }
         // TODO: Longer than a day
-        Date startDate = appointment.getStartDate();
-		Date endDate = appointment.getEndDate();
+        Date startDate = new Date(appointment.getStartDate().getTimestamp());
+        Date endDate = new Date(appointment.getEndDate().getTimestamp());
 
-		if (differentDays(startDate, endDate)) {
-			if (differentWeeks(startDate, endDate)) {
-				return formatTimeAndDay(startDate) + " - " + formatTimeAndDay(endDate);
-			} else {
-				return formatTimeAndWeekday(startDate) + " - " + formatTimeAndWeekday(endDate);
-			}
-		} else {
-			return formatTime(startDate) + " - " + formatTime(endDate);
-		}
+        if (differentDays(startDate, endDate)) {
+            if (differentWeeks(startDate, endDate)) {
+                return formatTimeAndDay(startDate) + " - " + formatTimeAndDay(endDate);
+            } else {
+                return formatTimeAndWeekday(startDate) + " - " + formatTimeAndWeekday(endDate);
+            }
+        } else {
+            return formatTime(startDate) + " - " + formatTime(endDate);
+        }
     }
 
     private boolean differentDays(Date startDate, Date endDate) {
-    	GregorianCalendar cal1 = new GregorianCalendar();
+        GregorianCalendar cal1 = new GregorianCalendar();
         cal1.setTime(startDate);
         cal1.setTimeZone(timezone);
 
@@ -189,10 +185,10 @@ public class DateHelper {
         cal2.setTimeZone(timezone);
 
         return cal1.get(Calendar.YEAR) != cal2.get(Calendar.YEAR) || cal1.get(Calendar.DAY_OF_YEAR) != cal2.get(Calendar.DAY_OF_YEAR);
-	}
+    }
 
-	private boolean differentWeeks(Date startDate, Date endDate) {
-	   	GregorianCalendar cal1 = new GregorianCalendar();
+    private boolean differentWeeks(Date startDate, Date endDate) {
+        GregorianCalendar cal1 = new GregorianCalendar();
         cal1.setTimeZone(timezone);
         cal1.setTime((new Date(startDate.getTime())));
 
@@ -201,26 +197,24 @@ public class DateHelper {
         cal2.setTime(new Date(endDate.getTime()));
 
         return cal1.get(Calendar.YEAR) != cal2.get(Calendar.YEAR) || cal1.get(Calendar.WEEK_OF_YEAR) != cal2.get(Calendar.WEEK_OF_YEAR);
-	}
+    }
 
-	private String formatTimeAndDay(Date date) {
-		return String.format("%s, %s", formatDate(date), formatTime(date));
-	}
+    private String formatTimeAndDay(Date date) {
+        return String.format("%s, %s", formatDate(date), formatTime(date));
+    }
 
-	private String formatTimeAndWeekday(Date date) {
-		return String.format("%s, %s", weekdayFormat.format(date), formatTime(date));
-	}
+    private String formatTimeAndWeekday(Date date) {
+        return String.format("%s, %s", weekdayFormat.format(date), formatTime(date));
+    }
 
-	public String getCreated() {
-        Date date = appointment.getCreationDate();
-        return formatDate(date)+" "+formatTime(date);
+    public String getCreated() {
+        Date date = appointment.getCreated();
+        return formatDate(date) + " " + formatTime(date);
     }
 
     public String getModified() {
         Date date = appointment.getLastModified();
-        return formatDate(date)+" "+formatTime(date);
+        return formatDate(date) + " " + formatTime(date);
     }
-
-
 
 }

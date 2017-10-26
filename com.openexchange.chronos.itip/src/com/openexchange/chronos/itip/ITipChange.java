@@ -49,18 +49,18 @@
 
 package com.openexchange.chronos.itip;
 
-import static com.openexchange.chronos.itip.tools.ITipUtils.endOfTheDay;
-import static com.openexchange.chronos.itip.tools.ITipUtils.startOfTheDay;
-import java.util.Date;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.List;
-import com.openexchange.calendar.api.CalendarCollection;
+import com.openexchange.chronos.Event;
+import com.openexchange.chronos.common.mapping.EventUpdateImpl;
 import com.openexchange.chronos.itip.analyzers.AbstractITipAnalyzer;
-import com.openexchange.chronos.itip.tools.AppointmentDiff;
+import com.openexchange.chronos.itip.osgi.Services;
+import com.openexchange.chronos.itip.tools.ITipEventUpdate;
+import com.openexchange.chronos.service.EventConflict;
+import com.openexchange.chronos.service.RecurrenceIterator;
+import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.calendar.CalendarDataObject;
-import com.openexchange.groupware.calendar.RecurringResultInterface;
-import com.openexchange.groupware.calendar.RecurringResultsInterface;
-import com.openexchange.groupware.container.Appointment;
 
 /**
  * 
@@ -77,25 +77,25 @@ public class ITipChange {
 
     private Type type;
 
-    private Appointment currentAppointment;
+    private Event currentEvent;
 
-    private CalendarDataObject newAppointment;
+    private Event newEvent;
 
-    private List<Appointment> conflicts;
+    private List<EventConflict> conflicts;
 
-    private CalendarDataObject master;
+    private Event master;
 
-    private Appointment deleted;
+    private Event deleted;
 
     private boolean isException = false;
 
     private ParticipantChange participantChange;
 
-    private AppointmentDiff diff;
+    private ITipEventUpdate diff;
 
     private List<String> diffDescription;
 
-	private String introduction;
+    private String introduction;
 
     public void setType(Type type) {
         this.type = type;
@@ -105,65 +105,61 @@ public class ITipChange {
         return type;
     }
 
-    public CalendarDataObject getNewAppointment() {
-        return newAppointment;
+    public Event getNewEvent() {
+        return newEvent;
     }
 
-    public void setNewAppointment(CalendarDataObject newAppointment) {
-        this.newAppointment = newAppointment;
+    public void setNewEvent(Event newEvent) {
+        this.newEvent = newEvent;
     }
 
-    public Appointment getCurrentAppointment() {
-        if (currentAppointment == null) {
-            if (isException && master != null && newAppointment != null && newAppointment.getRecurrenceDatePosition() != null) {
+    public Event getCurrentEvent() throws OXException {
+        if (currentEvent == null) {
+            if (isException && master != null && newEvent != null && newEvent.getRecurrenceId() != null) {
                 // TODO: Calculate original ocurrence time for diff
-                CalendarDataObject originalOcurrence = master.clone();
-                CalendarCollection calCol = new CalendarCollection();
-                try {
-                    if (!originalOcurrence.containsTimezone()) {
-                        originalOcurrence.setTimezone("UTC");
+                RecurrenceService recurrenceService = Services.getService(RecurrenceService.class);
+                Calendar recurrenceId = GregorianCalendar.getInstance(newEvent.getRecurrenceId().getValue().getTimeZone());
+                recurrenceId.setTimeInMillis(newEvent.getRecurrenceId().getValue().getTimestamp());
+                int position = recurrenceService.calculateRecurrencePosition(master, recurrenceId);
+
+                RecurrenceIterator<Event> recurrenceIterator = recurrenceService.iterateEventOccurrences(master, null, null);
+                int count = 0;
+                while (recurrenceIterator.hasNext()) {
+                    count++;
+                    if (count == position) {
+                        return recurrenceIterator.next();
                     }
-                    RecurringResultsInterface recurring = calCol.calculateRecurring(originalOcurrence, startOfTheDay(newAppointment.getRecurrenceDatePosition()), endOfTheDay(newAppointment.getRecurrenceDatePosition()), 0);
-                    if (recurring != null && recurring.size() > 0) {
-                        RecurringResultInterface recurringResult = recurring.getRecurringResult(0);
-                        originalOcurrence.setStartDate(new Date(recurringResult.getStart()));
-                        originalOcurrence.setEndDate(new Date(recurringResult.getEnd()));
-                    }
-                } catch (OXException e) {
-                    // IGNORE
-                    originalOcurrence = master;
                 }
-                return originalOcurrence;
             }
         }
-        return currentAppointment;
+        return currentEvent;
     }
 
-    public void setCurrentAppointment(Appointment currentAppointment) {
-        this.currentAppointment = currentAppointment;
+    public void setCurrentEvent(Event currentEvent) {
+        this.currentEvent = currentEvent;
     }
 
-    public List<Appointment> getConflicts() {
+    public List<EventConflict> getConflicts() {
         return conflicts;
     }
 
-    public void setConflicts(List<Appointment> conflicts) {
+    public void setConflicts(List<EventConflict> conflicts) {
         this.conflicts = conflicts;
     }
 
-    public CalendarDataObject getMasterAppointment() {
+    public Event getMasterEvent() {
         return master;
     }
 
-    public void setMaster(CalendarDataObject master) {
+    public void setMaster(Event master) {
         this.master = master;
     }
 
-    public Appointment getDeletedAppointment() {
+    public Event getDeletedEvent() {
         return deleted;
     }
 
-    public void setDeleted(Appointment deleted) {
+    public void setDeleted(Event deleted) {
         this.deleted = deleted;
     }
 
@@ -183,35 +179,31 @@ public class ITipChange {
         this.participantChange = participantChange;
     }
 
-    public AppointmentDiff getDiff() {
+    public ITipEventUpdate getDiff() throws OXException {
         autodiff();
         return diff;
     }
 
-    private void autodiff() {
-        if (currentAppointment != null && newAppointment != null && type == Type.UPDATE) {
-            diff = AppointmentDiff.compare(currentAppointment, newAppointment, AbstractITipAnalyzer.SKIP);
+    private void autodiff() throws OXException {
+        if (currentEvent != null && newEvent != null && type == Type.UPDATE) {
+            diff = new ITipEventUpdate(new EventUpdateImpl(currentEvent, newEvent, false, AbstractITipAnalyzer.SKIP));
         }
 
-        if (isException && master != null && newAppointment != null && type == Type.CREATE) {
-            // TODO: Calculate original ocurrence time for diff
-            CalendarDataObject originalOcurrence = master.clone();
-            CalendarCollection calCol = new CalendarCollection();
-            try {
-                if (!originalOcurrence.containsTimezone()) {
-                    originalOcurrence.setTimezone("UTC");
+        if (isException && master != null && newEvent != null && type == Type.CREATE) {
+            RecurrenceService recurrenceService = Services.getService(RecurrenceService.class);
+            Calendar recurrenceId = GregorianCalendar.getInstance(newEvent.getRecurrenceId().getValue().getTimeZone());
+            recurrenceId.setTimeInMillis(newEvent.getRecurrenceId().getValue().getTimestamp());
+            int position = recurrenceService.calculateRecurrencePosition(master, recurrenceId);
+
+            RecurrenceIterator<Event> recurrenceIterator = recurrenceService.iterateEventOccurrences(master, null, null);
+            int count = 0;
+            while (recurrenceIterator.hasNext()) {
+                count++;
+                if (count == position) {
+                    Event occurrence = recurrenceIterator.next();
+                    diff = new ITipEventUpdate(new EventUpdateImpl(occurrence, newEvent, false, AbstractITipAnalyzer.SKIP));
                 }
-                RecurringResultsInterface recurring = calCol.calculateRecurring(originalOcurrence, startOfTheDay(newAppointment.getRecurrenceDatePosition()), endOfTheDay(newAppointment.getRecurrenceDatePosition()), 0);
-                if (recurring != null && recurring.size() > 0) {
-                    RecurringResultInterface recurringResult = recurring.getRecurringResult(0);
-                    originalOcurrence.setStartDate(new Date(recurringResult.getStart()));
-                    originalOcurrence.setEndDate(new Date(recurringResult.getEnd()));
-                }
-            } catch (OXException e) {
-                // IGNORE
-                originalOcurrence = master;
             }
-            diff = AppointmentDiff.compare(originalOcurrence, newAppointment, AbstractITipAnalyzer.SKIP);
         }
     }
 
@@ -223,14 +215,12 @@ public class ITipChange {
         return diffDescription;
     }
 
-	public void setIntroduction(String message) {
-		this.introduction = message;
-	}
+    public void setIntroduction(String message) {
+        this.introduction = message;
+    }
 
-	public String getIntroduction() {
-		return introduction;
-	}
-
-
+    public String getIntroduction() {
+        return introduction;
+    }
 
 }

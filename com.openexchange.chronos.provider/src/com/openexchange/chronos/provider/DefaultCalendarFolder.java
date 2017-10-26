@@ -51,7 +51,7 @@ package com.openexchange.chronos.provider;
 
 import java.util.Date;
 import java.util.List;
-import com.openexchange.chronos.Transp;
+import com.openexchange.chronos.ExtendedProperties;
 
 /**
  * {@link DefaultCalendarFolder}
@@ -63,12 +63,9 @@ public class DefaultCalendarFolder implements CalendarFolder {
 
     private String id;
     private String name;
-    private String description;
-    private String color;
     private Date lastModified;
     private List<CalendarPermission> permissions;
-    private Transp transp;
-    private boolean usedForSync;
+    private ExtendedProperties extendedProperties;
 
     /**
      * Initializes a new {@link DefaultCalendarFolder}.
@@ -117,24 +114,6 @@ public class DefaultCalendarFolder implements CalendarFolder {
     }
 
     @Override
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    @Override
-    public String getColor() {
-        return color;
-    }
-
-    public void setColor(String color) {
-        this.color = color;
-    }
-
-    @Override
     public Date getLastModified() {
         return lastModified;
     }
@@ -144,21 +123,12 @@ public class DefaultCalendarFolder implements CalendarFolder {
     }
 
     @Override
-    public Transp getScheduleTransparency() {
-        return transp;
+    public ExtendedProperties getExtendedProperties() {
+        return extendedProperties;
     }
 
-    public void setScheduleTransparency(Transp transp) {
-        this.transp = transp;
-    }
-
-    @Override
-    public boolean isUsedForSync() {
-        return usedForSync;
-    }
-
-    public void setUsedForSync(boolean usedForSync) {
-        this.usedForSync = usedForSync;
+    public void setExtendedProperties(ExtendedProperties extendedProperties) {
+        this.extendedProperties = extendedProperties;
     }
 
     @Override

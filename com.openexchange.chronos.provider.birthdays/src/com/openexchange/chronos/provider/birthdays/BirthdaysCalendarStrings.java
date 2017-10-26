@@ -70,6 +70,11 @@ public class BirthdaysCalendarStrings implements LocalizableStrings {
     public static final String CALENDAR_NAME = "Birthdays";
 
     /**
+     * The description for the actual birthdays calendar folder.
+     */
+    public static final String CALENDAR_DESCRIPTION = "A calendar that automatically populates with the known birthdays of everyone in your address books.";
+
+    /**
      * The event summary displayed for the birthday of a contact, with the first parameter being replaced by the contact's display name.
      * <code>\ud83c\udf82</code> is the <i>birthday cake</i> character (<code>U+1F382</code>).
      */

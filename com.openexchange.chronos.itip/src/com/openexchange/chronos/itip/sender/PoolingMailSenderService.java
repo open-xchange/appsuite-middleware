@@ -49,118 +49,120 @@
 
 package com.openexchange.chronos.itip.sender;
 
+import com.openexchange.chronos.Event;
+import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.itip.AppointmentNotificationPoolService;
 import com.openexchange.chronos.itip.generators.NotificationMail;
+import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.notify.State.Type;
-import com.openexchange.session.Session;
 
 public class PoolingMailSenderService implements MailSenderService {
 
-	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PoolingMailSenderService.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PoolingMailSenderService.class);
 
-	private final AppointmentNotificationPoolService pool;
-	private final MailSenderService delegate;
+    private final AppointmentNotificationPoolService pool;
+    private final MailSenderService delegate;
 
-	public PoolingMailSenderService(AppointmentNotificationPoolService pool, MailSenderService delegate) {
-		this.pool = pool;
-		this.delegate = delegate;
-	}
+    public PoolingMailSenderService(AppointmentNotificationPoolService pool, MailSenderService delegate) {
+        this.pool = pool;
+        this.delegate = delegate;
+    }
 
-	@Override
-    public void sendMail(NotificationMail mail, Session session) {
-		if (!mail.shouldBeSent()) {
-			return;
-		}
-		try {
+    @Override
+    public void sendMail(NotificationMail mail, CalendarSession session) throws OXException {
+        if (!mail.shouldBeSent()) {
+            return;
+        }
+        try {
 
-			// Pool messages if this is a create mail or a modify mail
-			// Dump messages if the appointment is deleted
-			if (isDeleteMail(mail)) {
-				pool.drop(mail.getAppointment(), session);
-				delegate.sendMail(mail, session);
-				return;
-			}
+            // Pool messages if this is a create mail or a modify mail
+            // Dump messages if the appointment is deleted
+            if (isDeleteMail(mail)) {
+                pool.drop(mail.getEvent(), session);
+                delegate.sendMail(mail, session);
+                return;
+            }
 
-			if (shouldEnqueue(mail)) {
-				int sharedFolderOwner = -1;
-				if (mail.getSharedCalendarOwner() != null) {
-					sharedFolderOwner = mail.getSharedCalendarOwner().getIdentifier();
-				}
-				pool.enqueue(mail.getOriginal(), mail.getAppointment(), session, sharedFolderOwner);
-				return;
-			}
+            if (shouldEnqueue(mail)) {
+                int sharedFolderOwner = -1;
+                if (mail.getSharedCalendarOwner() != null) {
+                    sharedFolderOwner = mail.getSharedCalendarOwner().getIdentifier();
+                }
+                pool.enqueue(mail.getOriginal(), mail.getEvent(), session, sharedFolderOwner);
+                return;
+            }
 
-			// Fasttrack messages prior to creating a change or delete exception
-			if (needsFastTrack(mail)) {
-                Appointment app = mail.getOriginal();
+            // Fasttrack messages prior to creating a change or delete exception
+            if (needsFastTrack(mail)) {
+                Event app = mail.getOriginal();
                 if (app == null) {
-                    app = mail.getAppointment();
+                    app = mail.getEvent();
                 }
                 pool.fasttrack(app, session);
-				delegate.sendMail(mail, session);
-				return;
-			}
-			poolAwareDirectSend(mail, session);
-			//delegate.sendMail(mail, session);
+                delegate.sendMail(mail, session);
+                return;
+            }
+            poolAwareDirectSend(mail, session);
+            //delegate.sendMail(mail, session);
 
-		} catch (OXException x) {
-			LOG.error("", x);
-		}
-	}
+        } catch (OXException x) {
+            LOG.error("", x);
+        }
+    }
 
-	/**
-	 * Sends the mail directly, but makes the aware of this to avoid duplicate Mails.
-	 * @param mail
-	 * @param session
-	 */
-	private void poolAwareDirectSend(NotificationMail mail, Session session) {
-	    pool.aware(mail.getAppointment(), mail.getRecipient(), session);
-	    delegate.sendMail(mail, session);
-	}
+    /**
+     * Sends the mail directly, but makes the aware of this to avoid duplicate Mails.
+     * 
+     * @param mail
+     * @param session
+     * @throws OXException
+     */
+    private void poolAwareDirectSend(NotificationMail mail, CalendarSession session) throws OXException {
+        pool.aware(mail.getEvent(), mail.getRecipient(), session);
+        delegate.sendMail(mail, session);
+    }
 
+    private boolean isStateChange(NotificationMail mail) {
+        Type stateType = mail.getStateType();
+        if (stateType == Type.ACCEPTED || stateType == Type.DECLINED || stateType == Type.TENTATIVELY_ACCEPTED || stateType == Type.NONE_ACCEPTED) {
+            return true;
+        }
+        return false;
+    }
 
-	private boolean isStateChange(NotificationMail mail) {
-		Type stateType = mail.getStateType();
-		if (stateType == Type.ACCEPTED || stateType == Type.DECLINED || stateType == Type.TENTATIVELY_ACCEPTED || stateType == Type.NONE_ACCEPTED) {
-			return true;
-		}
-		return false;
-	}
+    private boolean shouldEnqueue(NotificationMail mail) throws OXException {
+        if (!mail.getActor().equals(mail.getOnBehalfOf())) {
+            return false;
+        }
+        if (mail.getOriginal() == null || mail.getEvent() == null) {
+            return false;
+        }
+        Type stateType = mail.getStateType();
+        if (stateType == Type.MODIFIED || isStateChange(mail)) {
+            return !needsFastTrack(mail);
+        }
 
-	private boolean shouldEnqueue(NotificationMail mail) {
-	    if (!mail.getActor().equals(mail.getOnBehalfOf())) {
-	        return false;
-	    }
-		if (mail.getOriginal() == null || mail.getAppointment() == null) {
-			return false;
-		}
-		Type stateType = mail.getStateType();
-		if (stateType == Type.MODIFIED || isStateChange(mail)) {
-			return !needsFastTrack(mail);
-		}
+        return false;
+    }
 
-		return false;
-	}
+    private boolean needsFastTrack(NotificationMail mail) {
+        if (mail.getOriginal() == null || mail.getEvent() == null) {
+            return true;
+        }
+        return isChangeExceptionsMail(mail);
+    }
 
-	private boolean needsFastTrack(NotificationMail mail) {
-		if (mail.getOriginal() == null || mail.getAppointment() == null) {
-			return true;
-		}
-		return isChangeExceptionsMail(mail);
-	}
+    private boolean isChangeExceptionsMail(NotificationMail mail) {
+        if (mail.getOriginal() != null && CalendarUtils.isSeriesMaster(mail.getOriginal()) && ((mail.getEvent().containsRecurrenceId() && mail.getEvent().getRecurrenceId() != null))) {
+            return true;
+        }
 
-	private boolean isChangeExceptionsMail(NotificationMail mail) {
-		if (mail.getOriginal() != null && mail.getOriginal().isMaster() &&  ((mail.getAppointment().containsRecurrenceDatePosition() && mail.getAppointment().getRecurrenceDatePosition() != null) || (mail.getAppointment().containsRecurrencePosition() && mail.getAppointment().getRecurrencePosition() != 0))) {
-			return true;
-		}
+        return false;
+    }
 
-		return false;
-	}
-
-	private boolean isDeleteMail(NotificationMail mail) {
-		return mail.getStateType() == Type.DELETED && ! isChangeExceptionsMail(mail);
-	}
+    private boolean isDeleteMail(NotificationMail mail) {
+        return mail.getStateType() == Type.DELETED && !isChangeExceptionsMail(mail);
+    }
 
 }

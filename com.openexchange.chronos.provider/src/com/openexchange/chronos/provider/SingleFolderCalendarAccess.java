@@ -53,18 +53,23 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.ExtendedProperties;
+import com.openexchange.chronos.ExtendedProperty;
 import com.openexchange.chronos.RecurrenceId;
-import com.openexchange.chronos.TimeTransparency;
 import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.common.DataHandlers;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.account.CalendarAccountService;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.EventID;
+import com.openexchange.conversion.ConversionResult;
+import com.openexchange.conversion.ConversionService;
+import com.openexchange.conversion.DataArguments;
+import com.openexchange.conversion.DataHandler;
+import com.openexchange.conversion.SimpleData;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.Enums;
 import com.openexchange.java.util.TimeZones;
 import com.openexchange.session.Session;
 
@@ -91,17 +96,6 @@ public abstract class SingleFolderCalendarAccess implements CalendarAccess {
      * @param session The user session
      * @param parameters The calendar parameters
      * @param account The calendar account
-     */
-    protected SingleFolderCalendarAccess(Session session, CalendarAccount account, CalendarParameters parameters) {
-        this(session, account, parameters, prepareFolder(session, account));
-    }
-
-    /**
-     * Initializes a new {@link SingleFolderCalendarAccess}.
-     *
-     * @param session The user session
-     * @param parameters The calendar parameters
-     * @param account The calendar account
      * @param folder The folder to use
      */
     protected SingleFolderCalendarAccess(Session session, CalendarAccount account, CalendarParameters parameters, CalendarFolder folder) {
@@ -121,22 +115,6 @@ public abstract class SingleFolderCalendarAccess implements CalendarAccess {
     @Override
     public List<CalendarFolder> getVisibleFolders() throws OXException {
         return Collections.singletonList(folder);
-    }
-
-    @Override
-    public String updateFolder(String folderId, CalendarFolder folder, long clientTimestamp) throws OXException {
-        checkFolderId(folderId);
-        try {
-            JSONObject userConfig = account.getUserConfiguration();
-            userConfig.put("color", folder.getColor());
-            //        userConfig.put("description", null);
-            userConfig.put("scheduleTransp", null != folder.getScheduleTransparency() ? folder.getScheduleTransparency().getValue() : null);
-            userConfig.put("usedForSync", Boolean.valueOf(folder.isUsedForSync()));
-            this.account = getAccountService().updateAccount(session, account.getAccountId(), null, userConfig, clientTimestamp, parameters);
-        } catch (JSONException e) {
-            throw CalendarExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-        }
-        return folderId;
     }
 
     @Override
@@ -204,20 +182,84 @@ public abstract class SingleFolderCalendarAccess implements CalendarAccess {
         return folderId;
     }
 
-    protected static DefaultCalendarFolder prepareFolder(Session session, CalendarAccount account) {
-        DefaultCalendarFolder folder = new DefaultCalendarFolder();
-        folder.setId(FOLDER_ID);
-        folder.setPermissions(Collections.singletonList(DefaultCalendarPermission.readOnlyPermissionsFor(account.getUserId())));
-        folder.setLastModified(account.getLastModified());
-        JSONObject userConfig = account.getUserConfiguration();
-        if (null != userConfig) {
-            folder.setName(userConfig.optString("name", FOLDER_ID));
-            folder.setColor(userConfig.optString("color", null));
-            folder.setDescription(userConfig.optString("description", null));
-            folder.setUsedForSync(userConfig.optBoolean("usedForSync", false));
-            folder.setScheduleTransparency(Enums.parse(TimeTransparency.class, userConfig.optString("scheduleTransp", null), TimeTransparency.OPAQUE));
+    //    protected static DefaultCalendarFolder prepareFolder(ConversionService conversionService, Session session, CalendarAccount account) throws OXException {
+    //        DefaultCalendarFolder folder = new DefaultCalendarFolder();
+    //        folder.setId(FOLDER_ID);
+    //        folder.setPermissions(Collections.singletonList(DefaultCalendarPermission.readOnlyPermissionsFor(account.getUserId())));
+    //        folder.setLastModified(account.getLastModified());
+    //        JSONObject userConfig = account.getUserConfiguration();
+    //        if (null != userConfig) {
+    //            folder.setExtendedProperties(parseExtendedProperties(conversionService, userConfig.optJSONArray("extendedProperties")));
+    //        }
+    //        return folder;
+    //    }
+    //
+    /**
+     * Deserializes an extended properties container from JSON.
+     *
+     * @param conversionService A reference to the conversion service
+     * @param jsonObject The JSON object to parse the properties from
+     * @return The parsed extended properties
+     */
+    protected static ExtendedProperties parseExtendedProperties(ConversionService conversionService, JSONObject jsonObject) throws OXException {
+        if (null != jsonObject) {
+            DataHandler dataHandler = conversionService.getDataHandler(DataHandlers.JSON2XPROPERTIES);
+            ConversionResult result = dataHandler.processData(new SimpleData<JSONObject>(jsonObject), new DataArguments(), null);
+            if (null != result && null != result.getData() && ExtendedProperties.class.isInstance(result.getData())) {
+                return (ExtendedProperties) result.getData();
+            }
         }
-        return folder;
+        return null;
+    }
+
+    /**
+     * Serializes an extended properties container to JSON.
+     *
+     * @param conversionService A reference to the conversion service
+     * @param properties The properties to serialize
+     * @return The serialized extended properties
+     */
+    protected static JSONObject writeExtendedProperties(ConversionService conversionService, ExtendedProperties properties) throws OXException {
+        if (null != properties) {
+            DataHandler dataHandler = conversionService.getDataHandler(DataHandlers.XPROPERTIES2JSON);
+            ConversionResult result = dataHandler.processData(new SimpleData<ExtendedProperties>(properties), new DataArguments(), null);
+            if (null != result && null != result.getData() && JSONObject.class.isInstance(result.getData())) {
+                return (JSONObject) result.getData();
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Merges incoming extended properties as passed from the client during an update operation into a collection of original extended
+     * properties.
+     * <p>/
+     * Any new properties or attempts to modify <i>protected</i> properties are rejected implicitly.
+     *
+     * @param originalProperties The original properties
+     * @param updatedProperties The updated properties
+     * @return The merged properties
+     */
+    protected static ExtendedProperties merge(ExtendedProperties originalProperties, ExtendedProperties updatedProperties) throws OXException {
+        //TODO: improve
+        ExtendedProperties mergedProperties = new ExtendedProperties(originalProperties);
+        if (null != updatedProperties && 0 < updatedProperties.size()) {
+            for (ExtendedProperty updatedProperty : updatedProperties) {
+                ExtendedProperty originalProperty = originalProperties.get(updatedProperty.getName());
+                if (null == originalProperty) {
+                    throw OXException.noPermissionForFolder();
+                }
+                if (originalProperty.equals(updatedProperty)) {
+                    continue;
+                }
+                if (CalendarFolderProperty.isProtected(originalProperty)) {
+                    throw OXException.noPermissionForFolder();
+                }
+                mergedProperties.remove(originalProperty);
+                mergedProperties.add(updatedProperty);
+            }
+        }
+        return mergedProperties;
     }
 
 }

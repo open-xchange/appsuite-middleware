@@ -50,13 +50,11 @@
 package com.openexchange.chronos.itip.performers;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 import java.util.EnumSet;
-import java.util.GregorianCalendar;
 import java.util.List;
-import java.util.TimeZone;
+import com.openexchange.chronos.Event;
 import com.openexchange.chronos.itip.ITipAction;
 import com.openexchange.chronos.itip.ITipAnalysis;
 import com.openexchange.chronos.itip.ITipAttributes;
@@ -64,11 +62,8 @@ import com.openexchange.chronos.itip.ITipChange;
 import com.openexchange.chronos.itip.ITipIntegrationUtility;
 import com.openexchange.chronos.itip.generators.ITipMailGeneratorFactory;
 import com.openexchange.chronos.itip.sender.MailSenderService;
+import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.calendar.RecurringResultInterface;
-import com.openexchange.groupware.calendar.RecurringResultsInterface;
-import com.openexchange.groupware.container.Appointment;
-import com.openexchange.session.Session;
 
 /**
  * 
@@ -83,62 +78,28 @@ public class CancelPerformer extends AbstractActionPerformer {
         super(util, sender, generators);
     }
 
-
     @Override
     public Collection<ITipAction> getSupportedActions() {
         return EnumSet.of(ITipAction.DELETE);
     }
 
-
     @Override
-    public List<Appointment> perform(ITipAction action, ITipAnalysis analysis, Session session, ITipAttributes attributes) throws OXException {
+    public List<Event> perform(ITipAction action, ITipAnalysis analysis, CalendarSession session, ITipAttributes attributes) throws OXException {
         List<ITipChange> changes = analysis.getChanges();
-        List<Appointment> deleted = new ArrayList<Appointment>();
+        List<Event> deleted = new ArrayList<Event>();
 
         for (ITipChange change : changes) {
-            Appointment appointment = change.getDeletedAppointment();
+            Event appointment = change.getDeletedEvent();
             if (appointment == null) {
                 continue;
             }
-            appointment.setNotification(true);
+            // TODO: appointment.setNotification(true);
             if (change.getType() == ITipChange.Type.CREATE_DELETE_EXCEPTION) {
-                appointment = change.getCurrentAppointment();
-                appointment.setRecurrencePosition(determineRecurrencePosition(change.getDeletedAppointment(), appointment));
+                appointment = change.getCurrentEvent();
             }
             deleted.add(appointment);
-            util.deleteAppointment(appointment, session, new Date(Long.MAX_VALUE));
+            util.deleteEvent(appointment, session, new Date(Long.MAX_VALUE));
         }
         return deleted;
-    }
-
-
-    private int determineRecurrencePosition(Appointment appointment, Appointment master) throws OXException {
-        RecurringResultsInterface recurring = new CalendarCollection().calculateRecurring(master, startOfTheDay(appointment.getRecurrenceDatePosition()), endOfTheDay(appointment.getRecurrenceDatePosition()), 0);
-        if (null != recurring && recurring.size() > 0) {
-            RecurringResultInterface recurringResult = recurring.getRecurringResult(0);
-            return recurringResult.getPosition();
-        }
-        return 0;
-    }
-
-    private long startOfTheDay(Date recurrenceDatePosition) {
-        GregorianCalendar calendar = new GregorianCalendar();
-        calendar.setTimeZone(TimeZone.getTimeZone("UTC"));
-        calendar.setTime(recurrenceDatePosition);
-        calendar.set(Calendar.HOUR, 0);
-        calendar.set(Calendar.MINUTE, 0);
-        calendar.set(Calendar.SECOND, 0);
-        return calendar.getTimeInMillis();
-    }
-
-    private long endOfTheDay(Date recurrenceDatePosition) {
-        GregorianCalendar calendar = new GregorianCalendar();
-        calendar.setTimeZone(TimeZone.getTimeZone("UTC"));
-        calendar.setTime(recurrenceDatePosition);
-        calendar.set(Calendar.HOUR, 0);
-        calendar.set(Calendar.MINUTE, 0);
-        calendar.set(Calendar.SECOND, 0);
-        calendar.add(Calendar.DAY_OF_YEAR, 1);
-        return calendar.getTimeInMillis();
     }
 }

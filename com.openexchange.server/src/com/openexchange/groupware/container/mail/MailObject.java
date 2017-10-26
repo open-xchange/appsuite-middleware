@@ -142,9 +142,9 @@ public class MailObject {
 
     private final Session session;
 
-    private final int objectId;
+    private final String objectId;
 
-    private final int folderId;
+    private final String folderId;
 
     private final int module;
 
@@ -171,7 +171,7 @@ public class MailObject {
      * @param module The module of the referred object
      * @param type The object's notification type
      */
-    public MailObject(final Session session, final int objectId, final int folderId, final int module, final String type) {
+    public MailObject(final Session session, final String objectId, final String folderId, final int module, final String type) {
         super();
         additionalHeaders = new LinkedHashMap<>(4);
         internalRecipient = true;
@@ -180,6 +180,19 @@ public class MailObject {
         this.folderId = folderId;
         this.module = module;
         this.type = type;
+    }
+
+    /**
+     * Initializes a new {@link MailObject}
+     *
+     * @param session The session providing needed user data
+     * @param objectId The object ID this message refers to
+     * @param folderId The folder ID to which the referred object belongs
+     * @param module The module of the referred object
+     * @param type The object's notification type
+     */
+    public MailObject(final Session session, final int objectId, final int folderId, final int module, final String type) {
+        this(session, String.valueOf(objectId), String.valueOf(folderId), module, type);
     }
 
     private final void validateMailObject() throws OXException {
@@ -560,7 +573,13 @@ public class MailObject {
             /*
              * Set ox reference
              */
-            if (internalRecipient && folderId != DONT_SET) {
+            int fid = 0;
+            try {
+                fid = Integer.parseInt(folderId);
+            } catch (NumberFormatException nfe) {
+                // Don't change it.
+            }
+            if (internalRecipient && fid != DONT_SET) {
                 msg.setHeader(HEADER_XOXREMINDER, new StringBuilder().append(objectId).append(',').append(folderId).append(',').append(
                     module).toString());
             }
@@ -589,7 +608,7 @@ public class MailObject {
              * X-Open-Xchange-Object
              */
             if (internalRecipient) {
-                msg.setHeader(HEADER_X_OX_OBJECT, Integer.toString(objectId));
+                msg.setHeader(HEADER_X_OX_OBJECT, (objectId));
             }
 
             if (internalRecipient && uid != null) {

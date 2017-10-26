@@ -58,6 +58,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.servlet.http.HttpServletResponse;
+import org.jdom2.Element;
 import com.openexchange.caldav.GroupwareCaldavFactory;
 import com.openexchange.caldav.PhantomMaster;
 import com.openexchange.caldav.Tools;
@@ -83,15 +84,19 @@ import com.openexchange.caldav.reports.FilteringResource;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.provider.CalendarFolderProperty;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.UpdatesResult;
+import com.openexchange.dav.DAVProperty;
 import com.openexchange.dav.DAVProtocol;
 import com.openexchange.dav.mixins.CalendarColor;
+import com.openexchange.dav.mixins.CalendarDescription;
+import com.openexchange.dav.mixins.ScheduleCalendarTransp;
 import com.openexchange.dav.reports.SyncStatus;
 import com.openexchange.dav.resources.FolderCollection;
 import com.openexchange.exception.OXException;
-import com.openexchange.folderstorage.CalendarFolderField;
+import com.openexchange.folderstorage.CalendarFolderConverter;
 import com.openexchange.folderstorage.ParameterizedFolder;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.type.PrivateType;
@@ -157,7 +162,8 @@ public class EventCollection extends FolderCollection<Event> implements Filterin
         this.maxDateTime = new MaxDateTime(factory);
         includeProperties(new SupportedReportSet(), minDateTime, maxDateTime, new Invite(factory, this),
             new AllowedSharingModes(factory.getSession()), new CalendarOwner(this), new Organizer(this),
-            new ScheduleDefaultCalendarURL(factory), new ScheduleDefaultTasksURL(factory), new CalendarColor(this),
+            new ScheduleDefaultCalendarURL(factory), new ScheduleDefaultTasksURL(factory),
+            new CalendarColor(this), new CalendarDescription(this), new ScheduleCalendarTransp(this),
             new ManagedAttachmentsServerURL(), new CalendarTimezone(factory, this),
             new SupportedCalendarComponentSet(SupportedCalendarComponentSet.VEVENT),
             new SupportedCalendarComponentSets(SupportedCalendarComponentSets.VEVENT),
@@ -387,14 +393,14 @@ public class EventCollection extends FolderCollection<Event> implements Filterin
     }
 
     @Override
-    protected void internalPutProperty(WebdavProperty prop) throws WebdavProtocolException {
-        if (CalendarColor.NAMESPACE.getURI().equals(prop.getNamespace()) && CalendarColor.NAME.equals(prop.getName())) {
-            String value = CalendarColor.parse(prop);
+    protected void internalPutProperty(WebdavProperty property) throws WebdavProtocolException {
+        if (CalendarColor.NAMESPACE.getURI().equals(property.getNamespace()) && CalendarColor.NAME.equals(property.getName())) {
+            String value = CalendarColor.parse(property);
             /*
              * apply color folder property
              */
             ParameterizedFolder folderToUpdate = getFolderToUpdate();
-            folderToUpdate.setProperty(CalendarFolderField.COLOR, Strings.isEmpty(value) ? null : value);
+            CalendarFolderConverter.setExtendedProperty(folderToUpdate, CalendarFolderProperty.COLOR(value));
             /*
              * also apply color in meta field for private folders
              */
@@ -408,7 +414,7 @@ public class EventCollection extends FolderCollection<Event> implements Filterin
                 /*
                  * if possible, also try and match a specific color-label
                  */
-                Map<String, String> attributes = prop.getAttributes();
+                Map<String, String> attributes = property.getAttributes();
                 if (null != attributes && attributes.containsKey(CalendarColor.SYMBOLIC_COLOR)) {
                     Integer uiValue = CalendarColor.mapColorLabel(attributes.get(CalendarColor.SYMBOLIC_COLOR));
                     if (uiValue != null) {
@@ -416,6 +422,32 @@ public class EventCollection extends FolderCollection<Event> implements Filterin
                     }
                 }
             }
+        } else if (CalendarDescription.NAMESPACE.getURI().equals(property.getNamespace()) && CalendarDescription.NAME.equals(property.getName())) {
+            /*
+             * apply description folder property
+             */
+            String value;
+            if (DAVProperty.class.isInstance(property)) {
+                Element element = ((DAVProperty) property).getElement();
+                value = null != element ? element.getValue() : null;
+            } else {
+                value = property.getValue();
+            }
+            ParameterizedFolder folderToUpdate = getFolderToUpdate();
+            CalendarFolderConverter.setExtendedProperty(folderToUpdate, CalendarFolderProperty.DESCRIPTION(value));
+        } else if (ScheduleCalendarTransp.NAMESPACE.getURI().equals(property.getNamespace()) && ScheduleCalendarTransp.NAME.equals(property.getName())) {
+            /*
+             * apply schedule transparency folder property
+             */
+            String value;
+            if (DAVProperty.class.isInstance(property)) {
+                Element element = ((DAVProperty) property).getElement();
+                value = null != element ? element.getValue() : null;
+            } else {
+                value = property.getValue();
+            }
+            ParameterizedFolder folderToUpdate = getFolderToUpdate();
+            CalendarFolderConverter.setExtendedProperty(folderToUpdate, CalendarFolderProperty.SCHEDULE_TRANSP(value));
         }
     }
 

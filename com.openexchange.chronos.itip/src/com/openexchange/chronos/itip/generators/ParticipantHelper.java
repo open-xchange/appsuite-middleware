@@ -50,6 +50,7 @@
 package com.openexchange.chronos.itip.generators;
 
 import java.util.Locale;
+import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.itip.ContextSensitiveMessages;
 import com.openexchange.chronos.itip.Messages;
 import com.openexchange.i18n.tools.StringHelper;
@@ -72,25 +73,20 @@ public class ParticipantHelper {
     public String participantLine(final NotificationParticipant participant) {
         // TODO: Same width
         final String sConfirmStatus;
-        switch (participant.getConfirmStatus()) {
-        case ACCEPT:
+        ParticipationStatus status = participant.getConfirmStatus();
+        if (status.equals(ParticipationStatus.ACCEPTED)) {
             sConfirmStatus = ContextSensitiveMessages.accepted(recipientLocale, ContextSensitiveMessages.Context.ADJECTIVE);
-            break;
-        case DECLINE:
+        } else if (status.equals(ParticipationStatus.DECLINED)) {
             sConfirmStatus = ContextSensitiveMessages.declined(recipientLocale, ContextSensitiveMessages.Context.ADJECTIVE);
-            break;
-        case TENTATIVE:
+        } else if (status.equals(ParticipationStatus.TENTATIVE)) {
             sConfirmStatus = ContextSensitiveMessages.tentative(recipientLocale, ContextSensitiveMessages.Context.ADJECTIVE);
-            break;
-        default:
+        } else {
             sConfirmStatus = StringHelper.valueOf(recipientLocale).getString(Messages.WAITING);
-            break;
         }
         final String comment = participant.getComment();
         if (com.openexchange.java.Strings.isEmpty(comment)) {
             return new StringBuilder(24).append(participant.getDisplayName()).append(" (").append(sConfirmStatus).append(')').toString();
         }
-        return new StringBuilder(24).append(participant.getDisplayName()).append(" (").append(sConfirmStatus).append(") (\"").append(
-            comment).append("\")").toString();
+        return new StringBuilder(24).append(participant.getDisplayName()).append(" (").append(sConfirmStatus).append(") (\"").append(comment).append("\")").toString();
     }
 }

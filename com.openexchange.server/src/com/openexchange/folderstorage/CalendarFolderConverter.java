@@ -49,15 +49,11 @@
 
 package com.openexchange.folderstorage;
 
-import static com.openexchange.folderstorage.CalendarFolderField.COLOR;
-import static com.openexchange.folderstorage.CalendarFolderField.SCHEDULE_TRANSP;
-import static com.openexchange.folderstorage.CalendarFolderField.USED_FOR_SYNC;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-import org.slf4j.LoggerFactory;
-import com.openexchange.chronos.TimeTransparency;
+import com.openexchange.chronos.ExtendedProperties;
+import com.openexchange.chronos.ExtendedProperty;
 import com.openexchange.chronos.provider.CalendarFolder;
 import com.openexchange.chronos.provider.CalendarPermission;
 import com.openexchange.chronos.provider.DefaultCalendarPermission;
@@ -66,10 +62,10 @@ import com.openexchange.chronos.provider.groupware.GroupwareCalendarFolder;
 import com.openexchange.chronos.provider.groupware.GroupwareFolderType;
 import com.openexchange.folderstorage.calendar.CalendarFolderStorage;
 import com.openexchange.folderstorage.calendar.CalendarStorageFolder;
+import com.openexchange.folderstorage.calendar.ExtendedPropertiesField;
 import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.folderstorage.type.SharedType;
-import com.openexchange.java.Enums;
 
 /**
  * {@link CalendarFolderConverter}
@@ -78,6 +74,8 @@ import com.openexchange.java.Enums;
  * @since v7.10.0
  */
 public class CalendarFolderConverter {
+
+    private static final FolderField EXTENDED_PROPERTIES_FIELD = ExtendedPropertiesField.getInstance();
 
     /**
      * Converts a calendar folder into a folder storage compatible folder.
@@ -100,9 +98,7 @@ public class CalendarFolderConverter {
         folder.setPermissions(getStoragePermissions(calendarFolder.getPermissions()));
         folder.setSubfolderIDs(new String[0]);
         folder.setSubscribedSubfolders(false);
-        folder.setProperty(COLOR, calendarFolder.getColor());
-        folder.setProperty(SCHEDULE_TRANSP, null != calendarFolder.getScheduleTransparency() ? calendarFolder.getScheduleTransparency().getValue() : null);
-        folder.setProperty(USED_FOR_SYNC, calendarFolder.isUsedForSync());
+        folder.setProperty(EXTENDED_PROPERTIES_FIELD, calendarFolder.getExtendedProperties());
         return folder;
     }
 
@@ -129,9 +125,7 @@ public class CalendarFolderConverter {
         folder.setType(getStorageType(calendarFolder.getType()));
         folder.setDefault(calendarFolder.isDefaultFolder());
         //        folder.setSupportedCapabilities(capabilities);
-        folder.setProperty(COLOR, calendarFolder.getColor());
-        folder.setProperty(SCHEDULE_TRANSP, null != calendarFolder.getScheduleTransparency() ? calendarFolder.getScheduleTransparency().getValue() : null);
-        folder.setProperty(USED_FOR_SYNC, calendarFolder.isUsedForSync());
+        folder.setProperty(EXTENDED_PROPERTIES_FIELD, calendarFolder.getExtendedProperties());
         return folder;
     }
 
@@ -199,23 +193,8 @@ public class CalendarFolderConverter {
      * @param folder The storage folder as used by the folder service
      * @return The groupware calendar folder
      */
-    public static GroupwareCalendarFolder getCalendarFolder(Folder folder) {
+    public static DefaultGroupwareCalendarFolder getCalendarFolder(Folder folder) {
         return newCalendarFolder(folder);
-    }
-
-    /**
-     * Gets a groupware calendar folder representing the supplied folder storage folder.
-     *
-     * @param folder The storage folder as used by the folder service
-     * @param folderProperties The additional user-specific properties for the folder
-     * @return The groupware calendar folder
-     */
-    public static GroupwareCalendarFolder getCalendarFolder(Folder folder, Map<FolderField, FolderProperty> folderProperties) {
-        DefaultGroupwareCalendarFolder calendarFolder = newCalendarFolder(folder);
-        if (null != folderProperties) {
-            applyFolderProperties(calendarFolder, folderProperties);
-        }
-        return calendarFolder;
     }
 
     /**
@@ -274,6 +253,60 @@ public class CalendarFolderConverter {
     }
 
     /**
+     * Extracts the extended calendar folder properties from the supplied storage folder.
+     *
+     * @param folder The storage folder as used by the folder service
+     * @return The extracted extended calendar properties, or <code>null</code> if not set
+     */
+    public static ExtendedProperties getExtendedProperties(Folder folder) {
+        if (ParameterizedFolder.class.isInstance(folder)) {
+            return getExtendedProperties(((ParameterizedFolder) folder).getProperties());
+        }
+        return null;
+    }
+
+    /**
+     * Applies an extended calendar property in the supplied storage folder. Any previous property value with the same name is replaced
+     * implicitly, while others are untouched.
+     *
+     * @param folder The storage folder as used by the folder service
+     * @param property The extended property to set
+     * @return <code>true</code> if the folder was actually changed, <code>false</code>, otherwise
+     */
+    public static boolean setExtendedProperty(ParameterizedFolder folder, ExtendedProperty property) {
+        ExtendedProperties extendedProperties = new ExtendedProperties();
+        extendedProperties.add(property);
+        return setExtendedProperties(folder, extendedProperties, true);
+    }
+
+    /**
+     * Applies an extended properties container in the supplied storage folder.
+     *
+     * @param folder The storage folder as used by the folder service
+     * @param properties The extended properties to set
+     * @param merge <code>true</code> to merge with an already existing properties container in the folder, <code>false</code> to replace
+     * @return <code>true</code> if the folder was actually changed, <code>false</code>, otherwise
+     */
+    public static boolean setExtendedProperties(ParameterizedFolder folder, ExtendedProperties properties, boolean merge) {
+        ExtendedProperties folderProperties = getExtendedProperties(folder.getProperties());
+        if (null == folderProperties || null == properties || false == merge) {
+            folder.setProperty(EXTENDED_PROPERTIES_FIELD, properties);
+            return true;
+        }
+        boolean changed = false;
+        for (ExtendedProperty property : properties) {
+            ExtendedProperty originalProperty = folderProperties.get(property.getName());
+            if (null == originalProperty) {
+                changed = folderProperties.add(property);
+            } else if (false == originalProperty.equals(property)) {
+                folderProperties.remove(originalProperty);
+                changed = folderProperties.add(property);
+            }
+        }
+        return changed;
+    }
+
+    /**
      * Initializes a new folder as used by the internal folder storage.
      *
      * @param treeId The identifier of the folder tree to take over
@@ -298,7 +331,7 @@ public class CalendarFolderConverter {
         calendarFolder.setParentId(getCalendarParent(folder.getParentID()));
         calendarFolder.setPermissions(getCalendarPermissions(folder.getPermissions()));
         if (ParameterizedFolder.class.isInstance(folder)) {
-            applyFolderProperties(calendarFolder, ((ParameterizedFolder) folder).getProperties());
+            calendarFolder.setExtendedProperties(getExtendedProperties(((ParameterizedFolder) folder).getProperties()));
         }
         return calendarFolder;
     }
@@ -310,27 +343,15 @@ public class CalendarFolderConverter {
         return storageParentId;
     }
 
-    private static void applyFolderProperties(DefaultGroupwareCalendarFolder calendarFolder, Map<FolderField, FolderProperty> folderProperties) {
-        if (null != folderProperties && 0 < folderProperties.size()) {
-            for (Entry<FolderField, FolderProperty> entry : folderProperties.entrySet()) {
-                applyFolderProperty(calendarFolder, entry.getKey(), entry.getValue());
-            }
+    private static ExtendedProperties getExtendedProperties(Map<FolderField, FolderProperty> folderProperties) {
+        if (null == folderProperties) {
+            return null;
         }
-    }
-
-    private static void applyFolderProperty(DefaultGroupwareCalendarFolder calendarFolder, FolderField field, FolderProperty property) {
-        try {
-            if (COLOR.equals(field)) {
-                calendarFolder.setColor((String) property.getValue());
-            } else if (USED_FOR_SYNC.equals(field)) {
-                calendarFolder.setUsedForSync((Boolean) property.getValue());
-            } else if (SCHEDULE_TRANSP.equals(field)) {
-                calendarFolder.setScheduleTransparency(Enums.parse(TimeTransparency.class, (String) property.getValue(), null));
-            }
-        } catch (RuntimeException e) {
-            LoggerFactory.getLogger(CalendarFolderConverter.class).error(
-                "Error applying folder property {} for field {}: {}", property, field, e.getMessage(), e);
+        FolderProperty folderProperty = folderProperties.get(EXTENDED_PROPERTIES_FIELD);
+        if (null != folderProperty && null != folderProperty.getValue() && ExtendedProperties.class.isInstance(folderProperty.getValue())) {
+            return (ExtendedProperties) folderProperty.getValue();
         }
+        return null;
     }
 
     /**

@@ -59,9 +59,7 @@ import java.util.List;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Classification;
 import com.openexchange.chronos.Event;
-import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.common.CalendarUtils;
-import com.openexchange.chronos.common.mapping.EventMapper;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.performer.ConflictCheckPerformer;
 import com.openexchange.chronos.impl.performer.ResolveUidPerformer;
@@ -74,7 +72,6 @@ import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.database.contentType.CalendarContentType;
 import com.openexchange.folderstorage.type.PublicType;
-import com.openexchange.groupware.tools.mappings.Mapping;
 import com.openexchange.java.Strings;
 import com.openexchange.quota.Quota;
 import com.openexchange.quota.QuotaExceptionCodes;
@@ -197,51 +194,6 @@ public class Check extends com.openexchange.chronos.common.Check {
             throw CalendarExceptionCodes.EVENT_NOT_FOUND_IN_FOLDER.create(folder.getID(), event.getId());
         }
         return folder.getID();
-    }
-
-    /**
-     * Checks that all specified mandatory fields are <i>set</i> and not <code>null</code> in the event.
-     *
-     * @param event The event to check
-     * @param fields The mandatory fields
-     * @throws OXException {@link CalendarExceptionCodes#MANDATORY_FIELD}
-     */
-    public static void mandatoryFields(Event event, EventField... fields) throws OXException {
-        if (null != fields) {
-            for (EventField field : fields) {
-                Mapping<? extends Object, Event> mapping = EventMapper.getInstance().get(field);
-                if (false == mapping.isSet(event) || null == mapping.get(event)) {
-                    String readableName = String.valueOf(field); //TODO i18n
-                    throw CalendarExceptionCodes.MANDATORY_FIELD.create(readableName, String.valueOf(field));
-                }
-            }
-        }
-    }
-
-    /**
-     * Checks
-     * <ul>
-     * <li>that the start- and enddate properties are set in the event</li>
-     * <li>that the end date does is not before the start date</li>
-     * <li>that both start and enddate are either both <i>all-day</i> or not</li>
-     * <li>that both start and enddate are either both <i>floating</i> or not</li>
-     * </ul>
-     *
-     * @param event The event to check
-     * @see Check#mandatoryFields(Event, EventField...)
-     * @throws OXException {@link CalendarExceptionCodes#MANDATORY_FIELD}, {@link CalendarExceptionCodes#END_BEFORE_START}
-     */
-    public static void startAndEndDate(Event event) throws OXException {
-        mandatoryFields(event, EventField.START_DATE, EventField.END_DATE);
-        if (event.getStartDate().after(event.getEndDate())) {
-            throw CalendarExceptionCodes.END_BEFORE_START.create(L(event.getStartDate().getTimestamp()), L(event.getEndDate().getTimestamp()));
-        }
-        if (event.getStartDate().isAllDay() != event.getEndDate().isAllDay()) {
-            throw CalendarExceptionCodes.INCOMPATIBLE_DATE_TYPES.create(String.valueOf(event.getStartDate()), String.valueOf(event.getEndDate()));
-        }
-        if (event.getStartDate().isFloating() != event.getEndDate().isFloating()) {
-            throw CalendarExceptionCodes.INCOMPATIBLE_DATE_TYPES.create(String.valueOf(event.getStartDate()), String.valueOf(event.getEndDate()));
-        }
     }
 
     /**

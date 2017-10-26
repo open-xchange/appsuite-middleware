@@ -57,94 +57,95 @@ import com.openexchange.timer.TimerService;
  */
 public class AttachmentMemory {
 
-	private final ConcurrentHashMap<TimestampedAttachmentChange, TimestampedAttachmentChange> memory = new ConcurrentHashMap<AttachmentMemory.TimestampedAttachmentChange, AttachmentMemory.TimestampedAttachmentChange>();
+    private final ConcurrentHashMap<TimestampedAttachmentChange, TimestampedAttachmentChange> memory = new ConcurrentHashMap<AttachmentMemory.TimestampedAttachmentChange, AttachmentMemory.TimestampedAttachmentChange>();
 
-	private int purgeInterval;
+    private int purgeInterval;
 
-	public AttachmentMemory(int purgeInterval, TimerService timer) {
-		timer.scheduleAtFixedRate(new Runnable() {
+    public AttachmentMemory(int purgeInterval, TimerService timer) {
+        timer.scheduleAtFixedRate(new Runnable() {
 
-			@Override
+            @Override
             public void run() {
-				purge();
-			}
+                purge();
+            }
 
-		}, purgeInterval, purgeInterval);
-	}
+        }, purgeInterval, purgeInterval);
+    }
 
-	public void rememberAttachmentChange(int objectId, int ctxId) {
-		TimestampedAttachmentChange tac = new TimestampedAttachmentChange(objectId, ctxId);
-		TimestampedAttachmentChange existing = memory.putIfAbsent(tac, tac);
-		if (existing != null) {
-			existing.timestamp = System.currentTimeMillis();
-		}
-	}
+    public void rememberAttachmentChange(String objectId, int ctxId) {
+        TimestampedAttachmentChange tac = new TimestampedAttachmentChange(objectId, ctxId);
+        TimestampedAttachmentChange existing = memory.putIfAbsent(tac, tac);
+        if (existing != null) {
+            existing.timestamp = System.currentTimeMillis();
+        }
+    }
 
-	public void forgetAttachmentChange(int objectId, int ctxId) {
-		memory.remove(new TimestampedAttachmentChange(objectId, ctxId));
-	}
+    public void forgetAttachmentChange(String objectId, int ctxId) {
+        memory.remove(new TimestampedAttachmentChange(objectId, ctxId));
+    }
 
-	public boolean hasAttachmentChanged(int objectId, int ctxId) {
-		return memory.containsKey(new TimestampedAttachmentChange(objectId, ctxId));
-	}
+    public boolean hasAttachmentChanged(String objectId, int ctxId) {
+        return memory.containsKey(new TimestampedAttachmentChange(objectId, ctxId));
+    }
 
-	private void purge() {
-		long now = System.currentTimeMillis();
+    private void purge() {
+        long now = System.currentTimeMillis();
 
-		for (TimestampedAttachmentChange change : memory.keySet()) {
-			if (now - change.timestamp > purgeInterval) {
-				memory.remove(change);
-			}
-		}
-	}
+        for (TimestampedAttachmentChange change : memory.keySet()) {
+            if (now - change.timestamp > purgeInterval) {
+                memory.remove(change);
+            }
+        }
+    }
 
-	private static class TimestampedAttachmentChange {
-		public int objectId;
-		public int ctxId;
-		public long timestamp = System.currentTimeMillis();
+    private static class TimestampedAttachmentChange {
 
-		public TimestampedAttachmentChange(int objectId, int ctxId) {
-			super();
-			this.objectId = objectId;
-			this.ctxId = ctxId;
-		}
-		@Override
-		public int hashCode() {
-			final int prime = 31;
-			int result = 1;
-			result = prime * result + ctxId;
-			result = prime * result + objectId;
-			return result;
-		}
-		@Override
-		public boolean equals(Object obj) {
-			if (this == obj) {
+        public String objectId;
+        public int ctxId;
+        public long timestamp = System.currentTimeMillis();
+
+        public TimestampedAttachmentChange(String objectId, int ctxId) {
+            super();
+            this.objectId = objectId;
+            this.ctxId = ctxId;
+        }
+
+        @Override
+        public int hashCode() {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + ctxId;
+            result = prime * result + ((objectId == null) ? 0 : objectId.hashCode());
+            result = prime * result + (int) (timestamp ^ (timestamp >>> 32));
+            return result;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj)
                 return true;
-            }
-			if (obj == null) {
+            if (obj == null)
                 return false;
-            }
-			if (getClass() != obj.getClass()) {
+            if (getClass() != obj.getClass())
                 return false;
-            }
-			TimestampedAttachmentChange other = (TimestampedAttachmentChange) obj;
-			if (ctxId != other.ctxId) {
+            TimestampedAttachmentChange other = (TimestampedAttachmentChange) obj;
+            if (ctxId != other.ctxId)
                 return false;
-            }
-			if (objectId != other.objectId) {
+            if (objectId == null) {
+                if (other.objectId != null)
+                    return false;
+            } else if (!objectId.equals(other.objectId))
                 return false;
-            }
-			return true;
-		}
-		@Override
-		public String toString() {
-			return "TimestampedAttachmentChange [objectId=" + objectId
-					+ ", ctxId=" + ctxId + ", timestamp=" + timestamp + "]";
-		}
+            if (timestamp != other.timestamp)
+                return false;
+            return true;
+        }
 
+        @Override
+        public String toString() {
+            return "TimestampedAttachmentChange [objectId=" + objectId + ", ctxId=" + ctxId + ", timestamp=" + timestamp + "]";
+        }
 
-	}
-
-
+    }
 
 }

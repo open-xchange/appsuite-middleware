@@ -52,6 +52,7 @@ package com.openexchange.chronos.provider.caching;
 import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.chronos.Event;
+import com.openexchange.exception.OXException;
 
 /**
  * Container holding the external events (if available) and additional information, for instance if there have been updates
@@ -63,17 +64,19 @@ public class ExternalCalendarResult {
 
     private final List<Event> events;
 
+    private List<OXException> warnings;
+
     private boolean isUpToDate = true;
 
     /**
-     * Initialises a new {@link ExternalCalendarResult}.
+     * Initializes a new {@link ExternalCalendarResult}.
      */
     public ExternalCalendarResult() {
         this(new ArrayList<>());
     }
 
     /**
-     * Initialises a new {@link ExternalCalendarResult}.
+     * Initializes a new {@link ExternalCalendarResult}.
      */
     public ExternalCalendarResult(List<Event> events) {
         super();
@@ -98,6 +101,14 @@ public class ExternalCalendarResult {
      */
     public List<Event> getEvents() {
         return this.events;
+    }
+
+    public void addWarnings(List<OXException> warnings) {
+        this.warnings.addAll(warnings);
+    }
+
+    public List<OXException> getWarnings() {
+        return warnings;
     }
 
     /**

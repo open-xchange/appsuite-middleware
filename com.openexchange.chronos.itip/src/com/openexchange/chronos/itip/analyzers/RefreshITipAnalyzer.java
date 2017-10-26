@@ -53,6 +53,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import com.openexchange.chronos.Event;
 import com.openexchange.chronos.itip.ITipAction;
 import com.openexchange.chronos.itip.ITipAnalysis;
 import com.openexchange.chronos.itip.ITipAnnotation;
@@ -61,14 +62,10 @@ import com.openexchange.chronos.itip.ITipMessage;
 import com.openexchange.chronos.itip.ITipMethod;
 import com.openexchange.chronos.itip.Messages;
 import com.openexchange.chronos.itip.generators.TypeWrapper;
+import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.calendar.CalendarDataObject;
-import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.session.Session;
-
 
 /**
  * {@link RefreshITipAnalyzer}
@@ -77,8 +74,8 @@ import com.openexchange.session.Session;
  */
 public class RefreshITipAnalyzer extends AbstractITipAnalyzer {
 
-    public RefreshITipAnalyzer(ITipIntegrationUtility util, ServiceLookup services) {
-        super(util, services);
+    public RefreshITipAnalyzer(ITipIntegrationUtility util) {
+        super(util);
     }
 
     @Override
@@ -87,31 +84,31 @@ public class RefreshITipAnalyzer extends AbstractITipAnalyzer {
     }
 
     @Override
-    public ITipAnalysis analyze(ITipMessage message, Map<String, String> header, TypeWrapper wrapper, Locale locale, User user, Context ctx, Session session) throws OXException {
+    public ITipAnalysis analyze(ITipMessage message, Map<String, String> header, TypeWrapper wrapper, Locale locale, User user, Context ctx, CalendarSession session) throws OXException {
         ITipAnalysis analysis = new ITipAnalysis();
         analysis.setMessage(message);
 
-        CalendarDataObject appointment = message.getDataObject();
+        Event event = message.getEvent();
 
-        Appointment refreshed = null;
+        Event refreshed = null;
         boolean isException = false;
-        if (appointment == null) {
+        if (event == null) {
             isException = true;
-            for (CalendarDataObject exception : message.exceptions()) {
-                appointment = exception;
+            for (Event exception : message.exceptions()) {
+                event = exception;
             }
         }
 
-        if (null == appointment) {
+        if (null == event) {
             throw new OXException(new IllegalArgumentException("No appointment instance given"));
         }
 
-        analysis.setUid(appointment.getUid());
+        analysis.setUid(event.getUid());
 
-        refreshed = util.resolveUid(appointment.getUid(), session);
+        refreshed = util.resolveUid(event.getUid(), session);
 
-        if (isException && refreshed!=null) {
-            refreshed = findAndRemoveMatchingException(appointment, util.getExceptions(refreshed, session));
+        if (isException && refreshed != null) {
+            refreshed = findAndRemoveMatchingException(event, util.getExceptions(refreshed, session));
         }
 
         if (refreshed == null) {
@@ -121,13 +118,11 @@ public class RefreshITipAnalyzer extends AbstractITipAnalyzer {
         }
 
         ITipAnnotation annotation = new ITipAnnotation(Messages.REQUESTED_A_REFRESHER, locale);
-        annotation.setAppointment(refreshed);
+        annotation.setEvent(refreshed);
         analysis.addAnnotation(annotation);
         analysis.recommendAction(ITipAction.SEND_APPOINTMENT);
 
-
         return analysis;
     }
-
 
 }

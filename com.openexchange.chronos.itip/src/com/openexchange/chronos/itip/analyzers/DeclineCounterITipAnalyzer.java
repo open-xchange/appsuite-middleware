@@ -53,6 +53,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import com.openexchange.chronos.Event;
 import com.openexchange.chronos.itip.ITipAction;
 import com.openexchange.chronos.itip.ITipAnalysis;
 import com.openexchange.chronos.itip.ITipAnnotation;
@@ -61,14 +62,10 @@ import com.openexchange.chronos.itip.ITipMessage;
 import com.openexchange.chronos.itip.ITipMethod;
 import com.openexchange.chronos.itip.Messages;
 import com.openexchange.chronos.itip.generators.TypeWrapper;
+import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.calendar.CalendarDataObject;
-import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.session.Session;
-
 
 /**
  * {@link DeclineCounterITipAnalyzer}
@@ -77,8 +74,8 @@ import com.openexchange.session.Session;
  */
 public class DeclineCounterITipAnalyzer extends AbstractITipAnalyzer {
 
-    public DeclineCounterITipAnalyzer(ITipIntegrationUtility util, ServiceLookup services) {
-        super(util, services);
+    public DeclineCounterITipAnalyzer(ITipIntegrationUtility util) {
+        super(util);
     }
 
     @Override
@@ -87,37 +84,37 @@ public class DeclineCounterITipAnalyzer extends AbstractITipAnalyzer {
     }
 
     @Override
-    public ITipAnalysis analyze(ITipMessage message, Map<String, String> header, TypeWrapper wrapper, Locale locale, User user, Context ctx, Session session) throws OXException {
+    public ITipAnalysis analyze(ITipMessage message, Map<String, String> header, TypeWrapper wrapper, Locale locale, User user, Context ctx, CalendarSession session) throws OXException {
         ITipAnalysis analysis = new ITipAnalysis();
         analysis.setMessage(message);
 
-        CalendarDataObject appointment = message.getDataObject();
+        Event event = message.getEvent();
         boolean isException = false;
-        if (appointment == null) {
-            for (CalendarDataObject exception : message.exceptions()) {
-                appointment = exception;
+        if (event == null) {
+            for (Event exception : message.exceptions()) {
+                event = exception;
                 isException = true;
                 break;
             }
         }
-        analysis.setUid(appointment.getUid());
+        analysis.setUid(event.getUid());
 
-        Appointment declinedFor = util.resolveUid(appointment.getUid(), session);
+        Event declinedFor = util.resolveUid(event.getUid(), session);
         if (declinedFor == null) {
             analysis.addAnnotation(new ITipAnnotation(Messages.DECLINED_FOR_UNKNOWN, locale));
             analysis.recommendActions(ITipAction.IGNORE, ITipAction.REFRESH);
             return analysis;
         }
 
-        if (declinedFor.containsSequence() && appointment.containsSequence() && declinedFor.getSequence() > appointment.getSequence()) {
+        if (declinedFor.containsSequence() && event.containsSequence() && declinedFor.getSequence() > event.getSequence()) {
             analysis.addAnnotation(new ITipAnnotation(Messages.OLD_UPDATE, locale));
             analysis.recommendAction(ITipAction.IGNORE);
             return analysis;
         }
 
         if (isException) {
-            List<Appointment> exceptions = util.getExceptions(declinedFor, session);
-            declinedFor = findAndRemoveMatchingException(appointment, exceptions);
+            List<Event> exceptions = util.getExceptions(declinedFor, session);
+            declinedFor = findAndRemoveMatchingException(event, exceptions);
             if (declinedFor == null) {
                 analysis.addAnnotation(new ITipAnnotation(Messages.DECLINED_FOR_UNKNOWN, locale));
                 analysis.recommendActions(ITipAction.IGNORE, ITipAction.REFRESH);
@@ -125,15 +122,13 @@ public class DeclineCounterITipAnalyzer extends AbstractITipAnalyzer {
             }
         }
 
-
         ITipAnnotation annotation = new ITipAnnotation(Messages.DECLINED_COUNTER_PROPOSAL, locale);
-        annotation.setAppointment(declinedFor);
+        annotation.setEvent(declinedFor);
         analysis.addAnnotation(annotation);
 
         analysis.recommendActions(ITipAction.DECLINE, ITipAction.REFRESH);
 
         return analysis;
     }
-
 
 }

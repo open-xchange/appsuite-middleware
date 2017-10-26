@@ -49,8 +49,7 @@
 
 package com.openexchange.chronos.itip;
 
-import com.openexchange.groupware.container.participants.ConfirmStatus;
-
+import com.openexchange.chronos.ParticipationStatus;
 
 /**
  * {@link ParticipantChange}
@@ -58,7 +57,8 @@ import com.openexchange.groupware.container.participants.ConfirmStatus;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class ParticipantChange {
-    private ConfirmStatus confirmStatusUpdate;
+
+    private ParticipationStatus confirmStatusUpdate;
 
     private String comment;
 
@@ -66,44 +66,36 @@ public class ParticipantChange {
 
     private String delegateeOf;
 
-    public ConfirmStatus getConfirmStatusUpdate() {
+    public ParticipationStatus getConfirmStatusUpdate() {
         return confirmStatusUpdate;
     }
 
-
-    public void setConfirmStatusUpdate(ConfirmStatus confirmStatusUpdate) {
+    public void setConfirmStatusUpdate(ParticipationStatus confirmStatusUpdate) {
         this.confirmStatusUpdate = confirmStatusUpdate;
     }
-
 
     public String getComment() {
         return comment;
     }
 
-
     public void setComment(String comment) {
         this.comment = comment;
     }
-
 
     public boolean isPartyCrasher() {
         return partyCrasher;
     }
 
-
     public void setPartyCrasher(boolean partyCrasher) {
         this.partyCrasher = partyCrasher;
     }
-
 
     public String getDelegateeOf() {
         return delegateeOf;
     }
 
-
     public void setDelegateeOf(String delegateeOf) {
         this.delegateeOf = delegateeOf;
     }
-
 
 }

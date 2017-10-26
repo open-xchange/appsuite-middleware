@@ -49,6 +49,7 @@
 
 package com.openexchange.folderstorage.calendar;
 
+import static com.openexchange.chronos.common.CalendarUtils.DISTANT_FUTURE;
 import static com.openexchange.folderstorage.CalendarFolderConverter.getCalendarFolder;
 import static com.openexchange.folderstorage.CalendarFolderConverter.getCalendarType;
 import static com.openexchange.folderstorage.CalendarFolderConverter.getStorageFolder;
@@ -56,7 +57,6 @@ import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.provider.CalendarFolder;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccessFactory;
@@ -242,11 +242,8 @@ public class CalendarFolderStorage implements FolderStorage {
     @Override
     public void deleteFolder(String treeId, String folderId, StorageParameters storageParameters) throws OXException {
         IDBasedCalendarAccess calendarAccess = getCalendarAccess(storageParameters);
-        Date timeStamp = storageParameters.getTimeStamp();
-        if (null == timeStamp) {
-            throw FolderExceptionErrorMessage.MISSING_PARAMETER.create("timestamp");
-        }
-        calendarAccess.deleteFolder(folderId, timeStamp.getTime());
+        long timestamp = null != storageParameters.getTimeStamp() ? storageParameters.getTimeStamp().getTime() : DISTANT_FUTURE;
+        calendarAccess.deleteFolder(folderId, timestamp);
     }
 
     @Override
@@ -356,16 +353,12 @@ public class CalendarFolderStorage implements FolderStorage {
     @Override
     public void updateFolder(Folder folder, StorageParameters storageParameters) throws OXException {
         IDBasedCalendarAccess calendarAccess = getCalendarAccess(storageParameters);
-        Date timeStamp = storageParameters.getTimeStamp();
-        if (null == timeStamp) {
-            timeStamp = new Date(CalendarUtils.DISTANT_FUTURE);
-            //            throw FolderExceptionErrorMessage.MISSING_PARAMETER.create("timestamp");
-        }
         /*
          * update folder
          */
+        long timestamp = null != storageParameters.getTimeStamp() ? storageParameters.getTimeStamp().getTime() : DISTANT_FUTURE;
         GroupwareCalendarFolder folderToUpdate = getCalendarFolder(folder);
-        String updatedFolderID = calendarAccess.updateFolder(folder.getID(), folderToUpdate, timeStamp.getTime());
+        String updatedFolderID = calendarAccess.updateFolder(folder.getID(), folderToUpdate, timestamp);
         /*
          * take over updated identifiers in passed folder reference
          */

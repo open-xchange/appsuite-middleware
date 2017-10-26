@@ -57,6 +57,7 @@ import java.util.List;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.BlockJUnit4ClassRunner;
+import com.openexchange.ajax.chronos.factory.AccountFactory;
 import com.openexchange.testing.httpclient.models.CalendarAccountId;
 import com.openexchange.testing.httpclient.models.CalendarAccountResponse;
 import com.openexchange.testing.httpclient.models.CalendarAccountsResponse;
@@ -81,11 +82,11 @@ public class CalendarAccountTest extends AbstractChronosTest {
     public void testCreateAndLoadCalendarAccount() throws Exception {
         CalendarAccountResponse response = calendarAccountManager.createCalendarAccount(TEST_PROVIDER_ID, calendarAccountManager.createCalendarAccountTestConfiguration(false));
 
-        response = calendarAccountManager.loadCalendarAccount(calendarAccountManager.createCalendarAccountId(response.getData().getId(), response.getData().getTimestamp()));
+        response = calendarAccountManager.loadCalendarAccount(AccountFactory.createCalendarAccountId(response.getData().getId(), response.getData().getTimestamp()));
         assertEquals("The providerId of the calendar account is invalid!", TEST_PROVIDER_ID, response.getData().getProvider());
 
         //      Test for default Account
-        response = calendarAccountManager.loadCalendarAccount(calendarAccountManager.createCalendarAccountId(calendarAccountManager.DEFAULT_ACCOUNT_ID, null));
+        response = calendarAccountManager.loadCalendarAccount(AccountFactory.createCalendarAccountId(calendarAccountManager.DEFAULT_ACCOUNT_ID, null));
         assertEquals("The id of the default calendar account is invalid!", calendarAccountManager.DEFAULT_ACCOUNT_ID, response.getData().getId());
     }
 
@@ -110,13 +111,13 @@ public class CalendarAccountTest extends AbstractChronosTest {
     public void testUpdateCalendarAccount() throws Exception {
         CalendarAccountResponse response = calendarAccountManager.createCalendarAccount(TEST_PROVIDER_ID, calendarAccountManager.createCalendarAccountTestConfiguration(false));
 
-        response = calendarAccountManager.updateCalendarAccount(calendarAccountManager.createCalendarAccountId(response.getData().getId(), response.getData().getTimestamp()), calendarAccountManager.createCalendarAccountTestConfiguration(true));
+        response = calendarAccountManager.updateCalendarAccount(AccountFactory.createCalendarAccountId(response.getData().getId(), response.getData().getTimestamp()), calendarAccountManager.createCalendarAccountTestConfiguration(true));
         assertNull(response.getError(), response.getError());
 
-        response = calendarAccountManager.loadCalendarAccount(calendarAccountManager.createCalendarAccountId(response.getData().getId(), response.getData().getTimestamp()));
+        response = calendarAccountManager.loadCalendarAccount(AccountFactory.createCalendarAccountId(response.getData().getId(), response.getData().getTimestamp()));
 
         //Test for default account
-        response = calendarAccountManager.updateCalendarAccount(calendarAccountManager.createCalendarAccountId(calendarAccountManager.DEFAULT_ACCOUNT_ID, System.currentTimeMillis()), calendarAccountManager.createCalendarAccountTestConfiguration(true));
+        response = calendarAccountManager.updateCalendarAccount(AccountFactory.createCalendarAccountId(calendarAccountManager.DEFAULT_ACCOUNT_ID, System.currentTimeMillis()), calendarAccountManager.createCalendarAccountTestConfiguration(true));
         assertNotNull(response.getError(), response.getError());
     }
 
@@ -126,28 +127,28 @@ public class CalendarAccountTest extends AbstractChronosTest {
 
         String id = response.getData().getId();
 
-        response = calendarAccountManager.loadCalendarAccount(calendarAccountManager.createCalendarAccountId(response.getData().getId(), response.getData().getTimestamp()));
+        response = calendarAccountManager.loadCalendarAccount(AccountFactory.createCalendarAccountId(response.getData().getId(), response.getData().getTimestamp()));
 
         assertEquals(id, response.getData().getId());
         assertEquals(TEST_PROVIDER_ID, response.getData().getProvider());
 
         List<CalendarAccountId> idsToDelete = new ArrayList<>(2);
-        idsToDelete.add(calendarAccountManager.createCalendarAccountId(response.getData().getId(), response.getData().getTimestamp()));
+        idsToDelete.add(AccountFactory.createCalendarAccountId(response.getData().getId(), response.getData().getTimestamp()));
 
         response = calendarAccountManager.createCalendarAccount(TEST_PROVIDER_ID, calendarAccountManager.createCalendarAccountTestConfiguration(false));
 
         id = response.getData().getId();
 
-        response = calendarAccountManager.loadCalendarAccount(calendarAccountManager.createCalendarAccountId(response.getData().getId(), response.getData().getTimestamp()));
+        response = calendarAccountManager.loadCalendarAccount(AccountFactory.createCalendarAccountId(response.getData().getId(), response.getData().getTimestamp()));
         assertEquals(id, response.getData().getId());
         assertEquals(TEST_PROVIDER_ID, response.getData().getProvider());
-        idsToDelete.add(calendarAccountManager.createCalendarAccountId(response.getData().getId(), response.getData().getTimestamp()));
+        idsToDelete.add(AccountFactory.createCalendarAccountId(response.getData().getId(), response.getData().getTimestamp()));
 
         calendarAccountManager.deleteCalendarAccount(idsToDelete);
 
         //Try test to delete default account
         idsToDelete.clear();
-        idsToDelete.add(calendarAccountManager.createCalendarAccountId(calendarAccountManager.DEFAULT_ACCOUNT_ID, System.currentTimeMillis()));
+        idsToDelete.add(AccountFactory.createCalendarAccountId(calendarAccountManager.DEFAULT_ACCOUNT_ID, System.currentTimeMillis()));
         calendarAccountManager.deleteCalendarAccount(idsToDelete);
     }
 

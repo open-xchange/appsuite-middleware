@@ -52,12 +52,12 @@ package com.openexchange.chronos.itip.generators.changes;
 import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
+import com.openexchange.chronos.Event;
+import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.itip.generators.Sentence;
-import com.openexchange.chronos.itip.tools.AppointmentDiff;
+import com.openexchange.chronos.itip.tools.ITipEventUpdate;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.contexts.Context;
-
 
 /**
  * {@link ChangeDescriptionGenerator}
@@ -65,6 +65,8 @@ import com.openexchange.groupware.contexts.Context;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public interface ChangeDescriptionGenerator {
-    public String[] getFields();
-    public List<Sentence> getDescriptions(Context ctx, Appointment original, Appointment updated, AppointmentDiff diff, Locale locale, TimeZone timezone) throws OXException;
+
+    public EventField[] getFields();
+
+    public List<Sentence> getDescriptions(Context ctx, Event original, Event updated, ITipEventUpdate diff, Locale locale, TimeZone timezone) throws OXException;
 }

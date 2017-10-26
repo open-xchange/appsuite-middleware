@@ -53,6 +53,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import com.openexchange.chronos.Event;
+import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.itip.ITipAction;
 import com.openexchange.chronos.itip.ITipAnalysis;
 import com.openexchange.chronos.itip.ITipAnnotation;
@@ -63,13 +65,10 @@ import com.openexchange.chronos.itip.ITipMessage;
 import com.openexchange.chronos.itip.ITipMethod;
 import com.openexchange.chronos.itip.Messages;
 import com.openexchange.chronos.itip.generators.TypeWrapper;
+import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.calendar.CalendarDataObject;
-import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.session.Session;
 
 /**
  * {@link AddITipAnalyzer}
@@ -78,8 +77,8 @@ import com.openexchange.session.Session;
  */
 public class AddITipAnalyzer extends AbstractITipAnalyzer {
 
-    public AddITipAnalyzer(ITipIntegrationUtility util, ServiceLookup services) {
-        super(util, services);
+    public AddITipAnalyzer(ITipIntegrationUtility util) {
+        super(util);
     }
 
     @Override
@@ -88,17 +87,16 @@ public class AddITipAnalyzer extends AbstractITipAnalyzer {
     }
 
     @Override
-    public ITipAnalysis analyze(ITipMessage message, Map<String, String> header, TypeWrapper wrapper, Locale locale, User user, Context ctx, Session session) throws OXException {
-
+    public ITipAnalysis analyze(ITipMessage message, Map<String, String> header, TypeWrapper wrapper, Locale locale, User user, Context ctx, CalendarSession session) throws OXException {
 
         ITipAnalysis analysis = new ITipAnalysis();
         analysis.setMessage(message);
 
-        CalendarDataObject master = null;
-        List<Appointment> exceptions = null;
+        Event master = null;
+        List<Event> exceptions = null;
         boolean findActions = true;
-        for (CalendarDataObject exception : message.exceptions()) {
-            exception = exception.clone();
+        for (Event exception : message.exceptions()) {
+            exception = session.getUtilities().copyEvent(exception, (EventField[]) null);
             int owner = session.getUserId();
             if (message.getOwner() > 0 && message.getOwner() != session.getUserId()) {
                 owner = message.getOwner();
@@ -109,7 +107,7 @@ public class AddITipAnalyzer extends AbstractITipAnalyzer {
             change.setType(Type.CREATE);
             change.setException(true);
             if (master == null) {
-            	analysis.setUid(exception.getUid());
+                analysis.setUid(exception.getUid());
                 master = util.resolveUid(exception.getUid(), session);
                 if (master == null) {
                     analysis.addAnnotation(new ITipAnnotation(Messages.ADD_TO_UNKNOWN, locale));
@@ -118,19 +116,18 @@ public class AddITipAnalyzer extends AbstractITipAnalyzer {
                 }
                 exceptions = util.getExceptions(master, session);
             }
-            Appointment existingException = findAndRemoveMatchingException(exception, exceptions);
+            Event existingException = findAndRemoveMatchingException(exception, exceptions);
             if (existingException != null) {
-                change.setCurrentAppointment(existingException);
+                change.setCurrentEvent(existingException);
                 analysis.recommendActions(ITipAction.IGNORE, ITipAction.ACCEPT_AND_REPLACE);
                 findActions = false;
             }
             change.setConflicts(util.getConflicts(exception, session));
-            change.setNewAppointment(exception);
+            change.setNewEvent(exception);
             change.setMaster(master);
 
             describeDiff(change, wrapper, session, message);
             analysis.addChange(change);
-
 
         }
 

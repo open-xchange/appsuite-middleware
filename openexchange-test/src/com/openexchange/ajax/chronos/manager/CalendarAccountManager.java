@@ -57,6 +57,7 @@ import java.util.List;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.chronos.UserApi;
+import com.openexchange.ajax.chronos.factory.AccountFactory;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.CalendarAccountData;
 import com.openexchange.testing.httpclient.models.CalendarAccountId;
@@ -107,7 +108,7 @@ public class CalendarAccountManager extends AbstractManager {
         CalendarAccountResponse response = userApi.getChronosApi().createAccount(userApi.getSession(), providerId, configuration);
         assertNull(response.getError(), response.getError());
         assertNotNull(response.getData());
-        rememberCalendarAccountId(createCalendarAccountId(response.getData().getId(), response.getData().getTimestamp()));
+        rememberCalendarAccountId(AccountFactory.createCalendarAccountId(response.getData().getId(), response.getData().getTimestamp()));
         return response;
     }
 
@@ -173,7 +174,7 @@ public class CalendarAccountManager extends AbstractManager {
         forgetCalendarAccountId(calAccId);
         CalendarAccountResponse response = userApi.getChronosApi().updateAccount(userApi.getSession(), calAccId.getId(), System.currentTimeMillis(), configuration);
         if (null != response.getData()) {
-            rememberCalendarAccountId(createCalendarAccountId(response.getData().getId(), null));
+            rememberCalendarAccountId(AccountFactory.createCalendarAccountId(response.getData().getId(), null));
         }
         return response;
     }
@@ -194,7 +195,7 @@ public class CalendarAccountManager extends AbstractManager {
         if (calAccIds == null) {
             calAccIds = new ArrayList<>();
         }
-        calAccIds.add(createCalendarAccountId(response.getData().getId(), response.getData().getTimestamp()));
+        calAccIds.add(AccountFactory.createCalendarAccountId(response.getData().getId(), response.getData().getTimestamp()));
     }
 
     private void forgetCalendarAccountId(CalendarAccountId calAccId) throws ApiException {
@@ -203,7 +204,7 @@ public class CalendarAccountManager extends AbstractManager {
             calAccIds = new ArrayList<>();
         }
         if (null != response.getData()) {
-            calAccIds.remove(createCalendarAccountId(response.getData().getId(), response.getData().getTimestamp()));
+            calAccIds.remove(AccountFactory.createCalendarAccountId(response.getData().getId(), response.getData().getTimestamp()));
         }
     }
 
@@ -212,13 +213,6 @@ public class CalendarAccountManager extends AbstractManager {
         obj.put("enabled", "true");
         obj.put("color", updateConfig ? "blue" : "red");
         return obj.toString();
-    }
-
-    public CalendarAccountId createCalendarAccountId(String id, Long timestamp) {
-        CalendarAccountId calAccId = new CalendarAccountId();
-        calAccId.setId(id);
-        calAccId.setTimestamp(timestamp);
-        return calAccId;
     }
 
     /**
@@ -230,7 +224,7 @@ public class CalendarAccountManager extends AbstractManager {
      */
     private CalendarAccountData handleCreation(CalendarAccountResponse response) throws ApiException {
         CalendarAccountData data = checkResponse(response.getError(), response.getErrorDesc(), response.getData());
-        rememberCalendarAccountId(createCalendarAccountId(data.getId(), data.getTimestamp()));
+        rememberCalendarAccountId(AccountFactory.createCalendarAccountId(data.getId(), data.getTimestamp()));
         return data;
     }
 }

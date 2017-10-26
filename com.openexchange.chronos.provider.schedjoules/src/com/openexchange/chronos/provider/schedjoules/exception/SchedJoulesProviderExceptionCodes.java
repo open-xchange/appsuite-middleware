@@ -111,6 +111,11 @@ public enum SchedJoulesProviderExceptionCodes implements DisplayableOXExceptionC
      * <li>The user key is malformed [account %1$s, user %2$s, context %3$s]</li>
      */
     MALFORMED_USER_KEY("The user key is malformed [account %1$s, user %2$s, context %3$s]", SchedJoulesProviderExceptionMessages.MALFORMED_ACCOUNT_MSG, CATEGORY_ERROR, 9),
+    /**
+     * <li>An error occurred inside the server which prevented it from fulfilling the request.</li>
+     * <li>No internal configuration found [account %1$s, user %2$s, context %3$s]</li>
+     */
+    NO_INTERNAL_CONFIGURATION("No user configuration found [account %1$s, user %2$s, context %3$s]", CATEGORY_ERROR, 10),
     ;
 
     public static final String PREFIX = "SCHEDJOULES";

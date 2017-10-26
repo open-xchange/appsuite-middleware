@@ -49,11 +49,10 @@
 
 package com.openexchange.chronos.itip;
 
-
+import com.openexchange.chronos.Event;
 import com.openexchange.chronos.itip.generators.NotificationParticipant;
+import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.container.Appointment;
-import com.openexchange.session.Session;
 
 /**
  * {@link AppointmentNotificationPoolService}
@@ -62,11 +61,11 @@ import com.openexchange.session.Session;
  */
 public interface AppointmentNotificationPoolService {
 
-	public void enqueue(Appointment original, Appointment newAppointment, Session session, int sharedFolderOwner) throws OXException;
+    public void enqueue(Event original, Event newAppointment, CalendarSession session, int sharedFolderOwner) throws OXException;
 
-    public void fasttrack(Appointment appointment, Session session) throws OXException;
+    public void fasttrack(Event appointment, CalendarSession session) throws OXException;
 
-    public void drop(Appointment appointment, Session session) throws OXException;
+    public void drop(Event appointment, CalendarSession session) throws OXException;
 
-    public void aware(Appointment appointment, NotificationParticipant recipient, Session session);
+    public void aware(Event appointment, NotificationParticipant recipient, CalendarSession session);
 }

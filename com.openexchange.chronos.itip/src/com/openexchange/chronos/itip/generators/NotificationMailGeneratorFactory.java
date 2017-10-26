@@ -49,16 +49,15 @@
 
 package com.openexchange.chronos.itip.generators;
 
+import com.openexchange.chronos.Event;
 import com.openexchange.chronos.itip.ITipIntegrationUtility;
+import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.session.Session;
 import com.openexchange.user.UserService;
-
 
 /**
  * {@link NotificationMailGeneratorFactory}
@@ -66,13 +65,12 @@ import com.openexchange.user.UserService;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class NotificationMailGeneratorFactory implements ITipMailGeneratorFactory {
+
     private final NotificationParticipantResolver resolver;
     private final ITipIntegrationUtility util;
 
     private final AttachmentMemory attachmentMemory;
     private final ServiceLookup services;
-
-
 
     public NotificationMailGeneratorFactory(NotificationParticipantResolver resolver, ITipIntegrationUtility util, ServiceLookup services, AttachmentMemory attachmentMemory) {
         super();
@@ -82,10 +80,8 @@ public class NotificationMailGeneratorFactory implements ITipMailGeneratorFactor
         this.attachmentMemory = attachmentMemory;
     }
 
-
-
     @Override
-    public ITipMailGenerator create(Appointment original, Appointment appointment, Session session, int onBehalfOfId) throws OXException {
+    public ITipMailGenerator create(Event original, Event appointment, CalendarSession session, int onBehalfOfId) throws OXException {
         Context ctx = services.getService(ContextService.class).getContext(session.getContextId());
         User user = services.getService(UserService.class).getUser(session.getUserId(), ctx);
         User onBehalfOf = (onBehalfOfId <= 0) ? user : services.getService(UserService.class).getUser(onBehalfOfId, ctx);

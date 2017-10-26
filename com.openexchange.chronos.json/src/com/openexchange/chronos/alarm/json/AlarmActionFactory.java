@@ -73,7 +73,7 @@ public class AlarmActionFactory implements AJAXActionServiceFactory {
     public AlarmActionFactory(ServiceLookup services) {
         super();
         ImmutableMap.Builder<String, AJAXActionService> actions = ImmutableMap.builder();
-        actions.put("until", new UntilAction(services));
+        actions.put("pending", new PendingAction(services));
         actions.put("ack", new AcknowledgeAction(services));
         actions.put("snooze", new SnoozeAction(services));
         this.actions = actions.build();

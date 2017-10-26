@@ -51,10 +51,21 @@ package com.openexchange.chronos.itip;
 
 import java.text.DateFormat;
 import java.util.Calendar;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 import java.util.regex.Pattern;
-import com.openexchange.groupware.container.CalendarObject;
+import org.dmfs.rfc5545.Weekday;
+import org.dmfs.rfc5545.recur.Freq;
+import org.dmfs.rfc5545.recur.InvalidRecurrenceRuleException;
+import org.dmfs.rfc5545.recur.RecurrenceRule;
+import org.dmfs.rfc5545.recur.RecurrenceRule.Part;
+import org.dmfs.rfc5545.recur.RecurrenceRule.WeekdayNum;
+import com.openexchange.chronos.Event;
 import com.openexchange.i18n.tools.StringHelper;
+import edu.emory.mathcs.backport.java.util.Arrays;
 
 /**
  * {@link HumanReadableRecurrences}
@@ -63,107 +74,142 @@ import com.openexchange.i18n.tools.StringHelper;
  */
 public class HumanReadableRecurrences {
 
-    private final CalendarObject cdao;
+    private RecurrenceRule rrule;
+    private Locale locale;
 
-    public HumanReadableRecurrences(CalendarObject cdao) {
-        this.cdao = cdao;
-    }
+    public HumanReadableRecurrences(Event event, Locale locale) {
+        this.locale = locale;
 
-    public String getString(Locale locale) {
-        switch (cdao.getRecurrenceType()) {
-        case CalendarObject.DAILY:
-            return daily(locale);
-        case CalendarObject.WEEKLY:
-            return weekly(locale);
-        case CalendarObject.MONTHLY:
-            return monthly(locale);
-        case CalendarObject.YEARLY:
-            return yearly(locale);
-        case CalendarObject.NO_RECURRENCE:
-        default:
-            return no(locale);
+        try {
+            rrule = new RecurrenceRule(event.getRecurrenceRule());
+        } catch (InvalidRecurrenceRuleException e) {
+            rrule = null;
         }
     }
 
-    public String getEnd(Locale locale) {
-        if (cdao.containsOccurrence() && cdao.getOccurrence() > 0) {
-            return format(locale, HRRStrings.OCCURRENCES, cdao.getOccurrence());
+    public String getString() {
+        if (rrule == null) {
+            return no();
         }
 
-        if (cdao.containsUntil() && cdao.getUntil() != null) {
-            return format(locale, HRRStrings.UNTIL, DateFormat.getDateInstance(DateFormat.FULL, locale).format(cdao.getUntil()));
+        Freq freq = rrule.getFreq();
+        switch (freq) {
+            case DAILY:
+                return daily();
+            case WEEKLY:
+                return weekly();
+            case MONTHLY:
+                return monthly();
+            case YEARLY:
+                return yearly();
+            default:
+                return no();
+        }
+    }
+
+    public String getEnd() {
+        if (rrule.getCount() != null) {
+            return format(locale, HRRStrings.OCCURRENCES, rrule.getCount());
+        }
+
+        if (rrule.getUntil() != null) {
+            return format(locale, HRRStrings.UNTIL, DateFormat.getDateInstance(DateFormat.FULL, locale).format(new Date(rrule.getUntil().getTimestamp())));
         }
 
         return format(locale, HRRStrings.FOREVER);
     }
 
-    private String no(Locale locale) {
+    private String no() {
         return format(locale, HRRStrings.NO);
     }
 
-    private String yearly(Locale locale) {
-        if (cdao.containsDays()) {
-            return format(locale, HRRStrings.YEARLY_1, parseCount(locale), parseDays(locale), parseMonth(locale));
+    private String yearly() {
+        List<WeekdayNum> byDayPart = rrule.getByDayPart();
+        if (byDayPart != null) {
+            if (byDayPart.size() > 1) {
+                return no();
+            } else {
+                return format(locale, HRRStrings.YEARLY_1, parseCount(locale), parseDays(locale), parseMonth(locale));
+            }
+        } else {
+            List<Integer> byMonthDay = rrule.getByPart(Part.BYMONTHDAY);
+            if (byMonthDay.size() > 1) {
+                return no();
+            } else {
+                return format(locale, HRRStrings.YEARLY_2, byMonthDay.get(0), parseMonth(locale));
+            }
         }
-        return format(locale, HRRStrings.YEARLY_2, cdao.getDayInMonth(), parseMonth(locale));
     }
 
-    private String monthly(Locale locale) {
-        if (cdao.containsDays()) {
-            return format(locale, HRRStrings.MONTHLY_2, parseCount(locale), parseDays(locale), cdao.getInterval());
+    private String monthly() {
+        List<WeekdayNum> byDayPart = rrule.getByDayPart();
+        if (byDayPart != null) {
+            if (byDayPart.size() > 1) {
+                return no();
+            } else {
+                return format(locale, HRRStrings.MONTHLY_2, parseCount(locale), parseDays(locale), rrule.getInterval());
+            }
+        } else {
+            List<Integer> byMonthDay = rrule.getByPart(Part.BYMONTHDAY);
+            if (byMonthDay.size() > 1) {
+                return no();
+            } else {
+                return format(locale, HRRStrings.MONTHLY_1, byMonthDay.get(0), rrule.getInterval());
+            }
         }
-        return format(locale, HRRStrings.MONTHLY_1, cdao.getDayInMonth(), cdao.getInterval());
     }
 
-    private String weekly(Locale locale) {
-        if (cdao.getInterval() == 1) {
+    private String weekly() {
+        if (rrule.getInterval() == 1) {
             return format(locale, HRRStrings.WEEKLY_EACH, parseDays(locale));
         }
-        return format(locale, HRRStrings.WEEKLY, cdao.getInterval(), parseDays(locale));
+        return format(locale, HRRStrings.WEEKLY, rrule.getInterval(), parseDays(locale));
     }
 
-    private String daily(Locale locale) {
-        return format(locale, HRRStrings.DAILY, cdao.getInterval());
+    private String daily() {
+        return format(locale, HRRStrings.DAILY, rrule.getInterval());
     }
 
     private String parseDays(Locale locale) {
-        if (cdao.getDays() < 1 || cdao.getDays() > 127) {
-            return "";
+        List<WeekdayNum> byDayPart = rrule.getByDayPart();
+        Set<Weekday> weekdays = new HashSet<>();
+        for (WeekdayNum weekdayNum : byDayPart) {
+            weekdays.add(weekdayNum.weekday);
         }
 
-        if (cdao.getDays() == CalendarObject.WEEKDAY) {
+        if (weekdays.size() == 5 && weekdays.containsAll(Arrays.asList(new Weekday[] { Weekday.MO, Weekday.TU, Weekday.WE, Weekday.TH, Weekday.FR }))) {
             return format(locale, HRRStrings.WORK_DAY);
         }
 
-        if (cdao.getDays() == CalendarObject.WEEKENDDAY) {
+        if (weekdays.size() == 2 && weekdays.containsAll(Arrays.asList(new Weekday[] { Weekday.SA, Weekday.SU }))) {
             return format(locale, HRRStrings.WEEKEND_DAY);
         }
 
-        if (cdao.getDays() == CalendarObject.DAY) {
+        if (weekdays.size() == 7 && weekdays.containsAll(Arrays.asList(Weekday.values()))) {
             return format(locale, HRRStrings.DAY);
         }
 
         StringBuilder days = new StringBuilder();
 
-        if ((cdao.getDays() & CalendarObject.MONDAY) == CalendarObject.MONDAY) {
+        if (weekdays.contains(Weekday.MO)) {
             days.append(format(locale, HRRStrings.MONDAY)).append(", ");
         }
-        if ((cdao.getDays() & CalendarObject.TUESDAY) == CalendarObject.TUESDAY) {
+        if (weekdays.contains(Weekday.TU)) {
             days.append(format(locale, HRRStrings.TUESDAY)).append(", ");
         }
-        if ((cdao.getDays() & CalendarObject.WEDNESDAY) == CalendarObject.WEDNESDAY) {
+        if (weekdays.contains(Weekday.WE)) {
             days.append(format(locale, HRRStrings.WEDNESDAY)).append(", ");
         }
-        if ((cdao.getDays() & CalendarObject.THURSDAY) == CalendarObject.THURSDAY) {
+        if (weekdays.contains(Weekday.TH)) {
             days.append(format(locale, HRRStrings.THURSDAY)).append(", ");
         }
-        if ((cdao.getDays() & CalendarObject.FRIDAY) == CalendarObject.FRIDAY) {
+        if (weekdays.contains(Weekday.FR)) {
             days.append(format(locale, HRRStrings.FRIDAY)).append(", ");
         }
-        if ((cdao.getDays() & CalendarObject.SATURDAY) == CalendarObject.SATURDAY) {
+        if (weekdays.contains(Weekday.SA)) {
             days.append(format(locale, HRRStrings.SATURDAY)).append(", ");
         }
-        if ((cdao.getDays() & CalendarObject.SUNDAY) == CalendarObject.SUNDAY) {
+        if (weekdays.contains(Weekday.SU)) {
             days.append(format(locale, HRRStrings.SUNDAY)).append(", ");
         }
 
@@ -171,51 +217,61 @@ public class HumanReadableRecurrences {
     }
 
     private String parseMonth(Locale locale) {
-        switch (cdao.getMonth()) {
-        case Calendar.JANUARY:
-            return format(locale, HRRStrings.JANUARY);
-        case Calendar.FEBRUARY:
-            return format(locale, HRRStrings.FEBRUARY);
-        case Calendar.MARCH:
-            return format(locale, HRRStrings.MARCH);
-        case Calendar.APRIL:
-            return format(locale, HRRStrings.APRIL);
-        case Calendar.MAY:
-            return format(locale, HRRStrings.MAY);
-        case Calendar.JUNE:
-            return format(locale, HRRStrings.JUNE);
-        case Calendar.JULY:
-            return format(locale, HRRStrings.JULY);
-        case Calendar.AUGUST:
-            return format(locale, HRRStrings.AUGUST);
-        case Calendar.SEPTEMBER:
-            return format(locale, HRRStrings.SEPTEMBER);
-        case Calendar.OCTOBER:
-            return format(locale, HRRStrings.OCTOBER);
-        case Calendar.NOVEMBER:
-            return format(locale, HRRStrings.NOVEMBER);
-        case Calendar.DECEMBER:
-            return format(locale, HRRStrings.DECEMBER);
-        default:
-            return "";
+        List<Integer> byMonth = rrule.getByPart(Part.BYMONTH);
+        if (byMonth.size() > 1) {
+            return no();
+        }
+
+        switch (byMonth.get(0)) {
+            case Calendar.JANUARY:
+                return format(locale, HRRStrings.JANUARY);
+            case Calendar.FEBRUARY:
+                return format(locale, HRRStrings.FEBRUARY);
+            case Calendar.MARCH:
+                return format(locale, HRRStrings.MARCH);
+            case Calendar.APRIL:
+                return format(locale, HRRStrings.APRIL);
+            case Calendar.MAY:
+                return format(locale, HRRStrings.MAY);
+            case Calendar.JUNE:
+                return format(locale, HRRStrings.JUNE);
+            case Calendar.JULY:
+                return format(locale, HRRStrings.JULY);
+            case Calendar.AUGUST:
+                return format(locale, HRRStrings.AUGUST);
+            case Calendar.SEPTEMBER:
+                return format(locale, HRRStrings.SEPTEMBER);
+            case Calendar.OCTOBER:
+                return format(locale, HRRStrings.OCTOBER);
+            case Calendar.NOVEMBER:
+                return format(locale, HRRStrings.NOVEMBER);
+            case Calendar.DECEMBER:
+                return format(locale, HRRStrings.DECEMBER);
+            default:
+                return "";
         }
     }
 
     private Object parseCount(Locale locale) {
-        switch (cdao.getDayInMonth()) {
-        case 1:
-            return format(locale, HRRStrings.FIRST);
-        case 2:
-            return format(locale, HRRStrings.SECOND);
-        case 3:
-            return format(locale, HRRStrings.THIRD);
-        case 4:
-            return format(locale, HRRStrings.FOURTH);
-        case 5:
-        case -1:
-            return format(locale, HRRStrings.LAST);
-        default:
+        List<WeekdayNum> byDayPart = rrule.getByDayPart();
+        if (byDayPart.size() != 1) {
             return "";
+        }
+
+        switch (byDayPart.get(0).pos) {
+            case 1:
+                return format(locale, HRRStrings.FIRST);
+            case 2:
+                return format(locale, HRRStrings.SECOND);
+            case 3:
+                return format(locale, HRRStrings.THIRD);
+            case 4:
+                return format(locale, HRRStrings.FOURTH);
+            case 5:
+            case -1:
+                return format(locale, HRRStrings.LAST);
+            default:
+                return "";
         }
     }
 
@@ -224,6 +280,7 @@ public class HumanReadableRecurrences {
     }
 
     private static final Pattern SANE_FORMAT = Pattern.compile("(%[0-9]+)?" + Pattern.quote("$") + "(\\s|$)");
+
     private static String saneFormatString(final String format) {
         if (com.openexchange.java.Strings.isEmpty(format) || format.indexOf('$') < 0) {
             return format;

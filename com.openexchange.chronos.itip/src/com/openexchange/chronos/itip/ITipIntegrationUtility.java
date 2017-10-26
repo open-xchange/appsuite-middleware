@@ -51,11 +51,10 @@ package com.openexchange.chronos.itip;
 
 import java.util.Date;
 import java.util.List;
+import com.openexchange.chronos.Event;
+import com.openexchange.chronos.service.CalendarSession;
+import com.openexchange.chronos.service.EventConflict;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.calendar.CalendarDataObject;
-import com.openexchange.groupware.container.Appointment;
-import com.openexchange.groupware.container.ConfirmationChange;
-import com.openexchange.session.Session;
 
 /**
  * 
@@ -66,26 +65,26 @@ import com.openexchange.session.Session;
  */
 public interface ITipIntegrationUtility {
 
-    CalendarDataObject resolveUid(String uid, Session session) throws OXException;
+    Event resolveUid(String uid, CalendarSession session) throws OXException;
 
-    List<Appointment> getConflicts(CalendarDataObject appointment, Session session) throws OXException;
+    List<EventConflict> getConflicts(Event event, CalendarSession session) throws OXException;
 
-    List<Appointment> getExceptions(Appointment original, Session session) throws OXException;
+    List<Event> getExceptions(Event original, CalendarSession session) throws OXException;
 
-    int getPrivateCalendarFolderId(Session session) throws OXException;
+    String getPrivateCalendarFolderId(CalendarSession session) throws OXException;
 
-    void createAppointment(CalendarDataObject appointment, Session session) throws OXException;
+    void createEvent(Event event, CalendarSession session) throws OXException;
 
-    void updateAppointment(CalendarDataObject update, Session session, Date clientLastModified) throws OXException;
+    void updateEvent(Event update, CalendarSession session, Date clientLastModified) throws OXException;
 
-    void changeConfirmationForExternalParticipant(Appointment update, ConfirmationChange change, Session session) throws OXException;
+    void changeConfirmationForExternalParticipant(Event update, ConfirmationChange change, CalendarSession session) throws OXException;
 
-    void deleteAppointment(Appointment appointment, Session session, Date clientLastModified) throws OXException;
+    void deleteEvent(Event event, CalendarSession session, Date clientLastModified) throws OXException;
 
-    Appointment reloadAppointment(Appointment appointment, Session session) throws OXException;
+    Event reloadEvent(Event event, CalendarSession session) throws OXException;
 
-    Appointment loadAppointment(Appointment appointment, Session session) throws OXException;
+    Event loadEvent(Event event, CalendarSession session) throws OXException;
 
-    int getFolderIdForUser(int appId, int userId, int contextId) throws OXException;
+    String getFolderIdForUser(CalendarSession session, String eventId) throws OXException;
 
 }

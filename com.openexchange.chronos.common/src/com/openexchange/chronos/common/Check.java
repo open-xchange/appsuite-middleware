@@ -50,6 +50,7 @@
 package com.openexchange.chronos.common;
 
 import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.L;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -63,11 +64,14 @@ import com.openexchange.chronos.AlarmField;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.RecurrenceId;
+import com.openexchange.chronos.common.mapping.EventMapper;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.service.RecurrenceData;
 import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.tools.mappings.Mapping;
 
 /**
  * {@link Check}
@@ -249,4 +253,48 @@ public class Check {
         return calendarUser;
     }
 
+    /**
+     * Checks that all specified mandatory fields are <i>set</i> and not <code>null</code> in the event.
+     *
+     * @param event The event to check
+     * @param fields The mandatory fields
+     * @throws OXException {@link CalendarExceptionCodes#MANDATORY_FIELD}
+     */
+    public static void mandatoryFields(Event event, EventField... fields) throws OXException {
+        if (null != fields) {
+            for (EventField field : fields) {
+                Mapping<? extends Object, Event> mapping = EventMapper.getInstance().get(field);
+                if (false == mapping.isSet(event) || null == mapping.get(event)) {
+                    String readableName = String.valueOf(field); //TODO i18n
+                    throw CalendarExceptionCodes.MANDATORY_FIELD.create(readableName, String.valueOf(field));
+                }
+            }
+        }
+    }
+
+    /**
+     * Checks
+     * <ul>
+     * <li>that the start- and enddate properties are set in the event</li>
+     * <li>that the end date does is not before the start date</li>
+     * <li>that both start and enddate are either both <i>all-day</i> or not</li>
+     * <li>that both start and enddate are either both <i>floating</i> or not</li>
+     * </ul>
+     *
+     * @param event The event to check
+     * @see Check#mandatoryFields(Event, EventField...)
+     * @throws OXException {@link CalendarExceptionCodes#MANDATORY_FIELD}, {@link CalendarExceptionCodes#END_BEFORE_START}
+     */
+    public static void startAndEndDate(Event event) throws OXException {
+        mandatoryFields(event, EventField.START_DATE, EventField.END_DATE);
+        if (event.getStartDate().after(event.getEndDate())) {
+            throw CalendarExceptionCodes.END_BEFORE_START.create(L(event.getStartDate().getTimestamp()), L(event.getEndDate().getTimestamp()));
+        }
+        if (event.getStartDate().isAllDay() != event.getEndDate().isAllDay()) {
+            throw CalendarExceptionCodes.INCOMPATIBLE_DATE_TYPES.create(String.valueOf(event.getStartDate()), String.valueOf(event.getEndDate()));
+        }
+        if (event.getStartDate().isFloating() != event.getEndDate().isFloating()) {
+            throw CalendarExceptionCodes.INCOMPATIBLE_DATE_TYPES.create(String.valueOf(event.getStartDate()), String.valueOf(event.getEndDate()));
+        }
+    }
 }

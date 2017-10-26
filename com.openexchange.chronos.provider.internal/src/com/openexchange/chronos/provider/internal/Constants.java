@@ -85,4 +85,7 @@ public enum Constants {
     /** The identifier of the "shared" root folder */
     static final String SHARED_FOLDER_ID = String.valueOf(FolderObject.SYSTEM_SHARED_FOLDER_ID);
 
+    /** The prefix used for stored user properties of folders */
+    static final String USER_PROPERTY_PREFIX = "cal/";
+
 }

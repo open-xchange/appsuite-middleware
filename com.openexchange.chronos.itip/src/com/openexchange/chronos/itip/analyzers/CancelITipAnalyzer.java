@@ -50,11 +50,13 @@
 package com.openexchange.chronos.itip.analyzers;
 
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.RecurrenceId;
+import com.openexchange.chronos.common.mapping.EventMapper;
 import com.openexchange.chronos.itip.ITipAction;
 import com.openexchange.chronos.itip.ITipAnalysis;
 import com.openexchange.chronos.itip.ITipAnnotation;
@@ -65,29 +67,26 @@ import com.openexchange.chronos.itip.ITipMessage;
 import com.openexchange.chronos.itip.ITipMethod;
 import com.openexchange.chronos.itip.Messages;
 import com.openexchange.chronos.itip.generators.TypeWrapper;
+import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.calendar.CalendarDataObject;
-import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.session.Session;
-
 
 /**
  * {@link CancelITipAnalyzer}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class CancelITipAnalyzer extends AbstractITipAnalyzer{
+public class CancelITipAnalyzer extends AbstractITipAnalyzer {
 
     /**
      * Initializes a new {@link CancelITipAnalyzer}.
+     * 
      * @param util
      * @param services TODO
      */
-    public CancelITipAnalyzer(final ITipIntegrationUtility util, final ServiceLookup services) {
-        super(util, services);
+    public CancelITipAnalyzer(final ITipIntegrationUtility util) {
+        super(util);
     }
 
     @Override
@@ -96,7 +95,7 @@ public class CancelITipAnalyzer extends AbstractITipAnalyzer{
     }
 
     @Override
-    public ITipAnalysis analyze(final ITipMessage message, final Map<String, String> header, final TypeWrapper wrapper, final Locale locale, final User user, final Context ctx, final Session session) throws OXException {
+    public ITipAnalysis analyze(final ITipMessage message, final Map<String, String> header, final TypeWrapper wrapper, final Locale locale, final User user, final Context ctx, final CalendarSession session) throws OXException {
 
         final ITipAnalysis analysis = new ITipAnalysis();
         analysis.setMessage(message);
@@ -104,37 +103,37 @@ public class CancelITipAnalyzer extends AbstractITipAnalyzer{
         final ITipChange change = new ITipChange();
         change.setType(Type.DELETE);
 
-        Event appointment = message.getEvent();
-        if (appointment == null && message.exceptions().iterator().hasNext()) {
-            appointment = message.exceptions().iterator().next();
+        Event event = message.getEvent();
+        if (event == null && message.exceptions().iterator().hasNext()) {
+            event = message.exceptions().iterator().next();
         }
-        if (appointment == null) {
+        if (event == null) {
             analysis.addAnnotation(new ITipAnnotation(Messages.CANCEL_UNKNOWN_APPOINTMENT, locale));
             analysis.recommendAction(ITipAction.IGNORE);
             return analysis;
         }
-        analysis.setUid(appointment.getUid());
-        Appointment toDelete = getToDelete(session, appointment);
+        analysis.setUid(event.getUid());
+        Event toDelete = getToDelete(session, event);
         if (toDelete == null) {
             analysis.addAnnotation(new ITipAnnotation(Messages.CANCEL_UNKNOWN_APPOINTMENT, locale));
             analysis.recommendAction(ITipAction.IGNORE);
             return analysis;
         }
-        change.setCurrentAppointment(toDelete);
-        if (appointment.containsRecurrenceDatePosition()) {
-            final List<Appointment> exceptions = util.getExceptions(toDelete, session);
-            toDelete = findAndRemoveMatchingException(appointment, exceptions);
+        change.setCurrentEvent(toDelete);
+        if (event.containsRecurrenceId()) {
+            List<Event> exceptions = util.getExceptions(toDelete, session);
+            toDelete = findAndRemoveMatchingException(event, exceptions);
             if (toDelete == null) {
-                toDelete = appointment;
+                toDelete = event;
                 change.setType(Type.CREATE_DELETE_EXCEPTION);
             }
             change.setException(true);
         }
         // Update toDelete with changes in this cancel mail
-        for (final int field: Appointment.ALL_COLUMNS) {
-        	if (appointment.contains(field)) {
-        		toDelete.set(field, appointment.get(field));
-        	}
+        for (EventField field : EventField.values()) {
+            if (event.isSet(field)) {
+                EventMapper.getInstance().copy(event, toDelete, field);
+            }
         }
         change.setDeleted(toDelete);
 
@@ -146,22 +145,19 @@ public class CancelITipAnalyzer extends AbstractITipAnalyzer{
         return analysis;
     }
 
-    private CalendarDataObject getToDelete(final Session session, Event appointment) throws OXException {
-        CalendarDataObject toDelete = util.resolveUid(appointment.getUid(), session);
+    private Event getToDelete(CalendarSession session, Event event) throws OXException {
+        Event toDelete = util.resolveUid(event.getUid(), session);
         if (toDelete == null) {
             return null;
         }
-        if (appointment.containsRecurrenceDatePosition() && toDelete.containsDeleteExceptions() && toDelete.getDeleteException() != null) {
-            for (Date deleteException : toDelete.getDeleteException()) {
-                if (deleteException.equals(appointment.getRecurrenceDatePosition())) {
+        if (event.containsRecurrenceId() && toDelete.containsDeleteExceptionDates() && toDelete.getDeleteExceptionDates() != null) {
+            for (RecurrenceId deleteException : toDelete.getDeleteExceptionDates()) {
+                if (deleteException.equals(event.getRecurrenceId())) {
                     return null;
                 }
             }
         }
         return toDelete;
     }
-
-
-
 
 }

@@ -51,9 +51,9 @@ package com.openexchange.chronos.itip;
 
 import java.util.Collection;
 import java.util.List;
+import com.openexchange.chronos.Event;
+import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.container.Appointment;
-import com.openexchange.session.Session;
 
 /**
  * 
@@ -64,7 +64,7 @@ import com.openexchange.session.Session;
  */
 public interface ITipActionPerformer {
 
-    List<Appointment> perform(ITipAction action, ITipAnalysis analysis, Session session, ITipAttributes attributes) throws OXException;
+    List<Event> perform(ITipAction action, ITipAnalysis analysis, CalendarSession session, ITipAttributes attributes) throws OXException;
 
     Collection<ITipAction> getSupportedActions();
 

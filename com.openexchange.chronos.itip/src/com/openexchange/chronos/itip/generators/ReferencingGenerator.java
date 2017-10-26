@@ -49,11 +49,11 @@
 
 package com.openexchange.chronos.itip.generators;
 
+import com.openexchange.chronos.Event;
+import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.itip.ITipMessage;
 import com.openexchange.chronos.itip.ITipMethod;
-import com.openexchange.groupware.calendar.CalendarDataObject;
-import com.openexchange.groupware.container.Appointment;
-import com.openexchange.session.Session;
-
+import com.openexchange.chronos.service.CalendarSession;
 
 /**
  * {@link ReferencingGenerator}
@@ -70,18 +70,17 @@ public class ReferencingGenerator implements ITipMessageGenerator {
     }
 
     @Override
-    public ITipMessage generate(Appointment original, Appointment updated, Session session) {
+    public ITipMessage generate(Event original, Event updated, CalendarSession session) {
         ITipMessage message = new ITipMessage();
         message.setMethod(method);
 
-        CalendarDataObject address = new CalendarDataObject();
+        Event address = new Event();
         address.setUid(updated.getUid());
-        if (updated.isException()) {
-            address.setRecurrenceDatePosition(updated.getRecurrenceDatePosition());
-            address.setRecurrencePosition(updated.getRecurrencePosition());
+        if (CalendarUtils.isSeriesException(updated)) {
+            address.setRecurrenceId(updated.getRecurrenceId());
         }
 
-        message.setAppointment(address);
+        message.setEvent(address);
         return message;
     }
 

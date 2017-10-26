@@ -51,7 +51,7 @@ package com.openexchange.chronos.provider.composition.impl.idmangling;
 
 import java.util.Date;
 import java.util.List;
-import com.openexchange.chronos.Transp;
+import com.openexchange.chronos.ExtendedProperties;
 import com.openexchange.chronos.provider.CalendarFolder;
 import com.openexchange.chronos.provider.CalendarPermission;
 
@@ -89,16 +89,6 @@ public class IDManglingFolder implements CalendarFolder {
     }
 
     @Override
-    public String getDescription() {
-        return delegate.getDescription();
-    }
-
-    @Override
-    public String getColor() {
-        return delegate.getColor();
-    }
-
-    @Override
     public Date getLastModified() {
         return delegate.getLastModified();
     }
@@ -109,13 +99,8 @@ public class IDManglingFolder implements CalendarFolder {
     }
 
     @Override
-    public Transp getScheduleTransparency() {
-        return delegate.getScheduleTransparency();
-    }
-
-    @Override
-    public boolean isUsedForSync() {
-        return delegate.isUsedForSync();
+    public ExtendedProperties getExtendedProperties() {
+        return delegate.getExtendedProperties();
     }
 
     @Override

@@ -50,32 +50,30 @@
 package com.openexchange.chronos.itip.generators;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import com.openexchange.ajax.fields.AppointmentFields;
-import com.openexchange.ajax.fields.CalendarFields;
+import org.dmfs.rfc5545.recur.InvalidRecurrenceRuleException;
+import org.dmfs.rfc5545.recur.RecurrenceRule;
+import com.openexchange.chronos.Attachment;
+import com.openexchange.chronos.Attendee;
+import com.openexchange.chronos.Event;
+import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.common.mapping.EventUpdateImpl;
 import com.openexchange.chronos.itip.ITipMessage;
 import com.openexchange.chronos.itip.ITipMethod;
 import com.openexchange.chronos.itip.ITipRole;
-import com.openexchange.chronos.itip.tools.AppointmentDiff;
-import com.openexchange.chronos.itip.tools.AppointmentDiff.FieldUpdate;
-import com.openexchange.chronos.itip.tools.CalendarField;
-import com.openexchange.groupware.attach.AttachmentMetadata;
-import com.openexchange.groupware.container.Appointment;
-import com.openexchange.groupware.container.CalendarObject;
-import com.openexchange.groupware.container.Difference;
-import com.openexchange.groupware.container.Participant;
-import com.openexchange.groupware.container.UserParticipant;
+import com.openexchange.chronos.itip.osgi.Services;
+import com.openexchange.chronos.itip.tools.ITipEventUpdate;
+import com.openexchange.chronos.service.RecurrenceService;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.notify.State.Type;
 import com.openexchange.mail.config.MailProperties;
-
 
 /**
  * {@link NotificationMail}
@@ -93,9 +91,9 @@ public class NotificationMail {
     private String html;
     private String subject;
 
-    private Appointment original;
-    private Appointment appointment;
-    private AppointmentDiff diff;
+    private Event original;
+    private Event event;
+    private ITipEventUpdate diff;
 
     private NotificationParticipant sender;
     private NotificationParticipant recipient;
@@ -108,7 +106,7 @@ public class NotificationMail {
 
     private NotificationParticipant actor;
 
-    private final List<AttachmentMetadata> attachments = new ArrayList<AttachmentMetadata>();
+    private final List<Attachment> attachments = new ArrayList<>();
 
     private Type stateType;
 
@@ -182,25 +180,25 @@ public class NotificationMail {
         this.html = html;
     }
 
-    public Appointment getOriginal() {
+    public Event getOriginal() {
         return original;
     }
 
-    public void setOriginal(Appointment original) {
+    public void setOriginal(Event original) {
         this.original = original;
     }
 
-    public Appointment getAppointment() {
-        return appointment;
+    public Event getEvent() {
+        return event;
     }
 
-    public void setAppointment(Appointment updated) {
-        this.appointment = updated;
+    public void setEvent(Event updated) {
+        this.event = updated;
     }
 
-    public AppointmentDiff getDiff() {
-        if (diff == null && original != null && appointment != null) {
-            diff = AppointmentDiff.compare(original, appointment, NotificationMailGenerator.DEFAULT_SKIP);
+    public ITipEventUpdate getDiff() throws OXException {
+        if (diff == null && original != null && event != null) {
+            diff = new ITipEventUpdate(new EventUpdateImpl(original, event, false, NotificationMailGenerator.DEFAULT_SKIP));
         }
         return diff;
     }
@@ -229,11 +227,9 @@ public class NotificationMail {
         this.templateName = templateName;
     }
 
-
     public NotificationParticipant getOrganizer() {
         return organizer;
     }
-
 
     public void setOrganizer(NotificationParticipant organizer) {
         this.organizer = organizer;
@@ -250,7 +246,7 @@ public class NotificationMail {
         this.principal = principal;
     }
 
-    public NotificationParticipant getOnBehalfOf() {
+    public NotificationParticipant getOnBehalfOf() throws OXException {
         if (isAboutActorsStateChangeOnly()) {
             return actor;
         }
@@ -270,14 +266,14 @@ public class NotificationMail {
         this.sharedCalendarOwner = sharedCalendarOwner;
     }
 
-    public boolean actionIsDoneOnBehalfOfAnother() {
+    public boolean actionIsDoneOnBehalfOfAnother() throws OXException {
         if (getActor().hasRole(ITipRole.PRINCIPAL)) {
             return false;
         }
         return !getActor().equals(getOnBehalfOf());
     }
 
-    public boolean actionIsDoneOnMyBehalf() {
+    public boolean actionIsDoneOnMyBehalf() throws OXException {
         if (isAboutActorsStateChangeOnly()) {
             return false;
         }
@@ -285,7 +281,7 @@ public class NotificationMail {
             return false;
         }
 
-        return recipient.equals(principal) ||recipient.equals(sharedCalendarOwner);
+        return recipient.equals(principal) || recipient.equals(sharedCalendarOwner);
     }
 
     public void setParticipants(List<NotificationParticipant> recipients) {
@@ -298,8 +294,7 @@ public class NotificationMail {
             Collections.sort(participants, new Comparator<NotificationParticipant>() {
 
                 @Override
-                public int compare(NotificationParticipant p1,
-                        NotificationParticipant p2) {
+                public int compare(NotificationParticipant p1, NotificationParticipant p2) {
                     return p1.getDisplayName().compareTo(p2.getDisplayName());
                 }
 
@@ -348,8 +343,8 @@ public class NotificationMail {
         return true;
     }
 
-    public boolean shouldBeSent() {
-        if (appointment != null && endsInPast(appointment)) {
+    public boolean shouldBeSent() throws OXException {
+        if (event != null && endsInPast(event)) {
             return false;
         }
         if (!recipientIsOrganizerAndHasNoAccess()) {
@@ -358,17 +353,17 @@ public class NotificationMail {
         if (recipient.getConfiguration().forceCancelMails() && isCancelMail()) {
             return true;
         }
-        if (appointment != null && appointment.containsNotification() && !appointment.getNotification()) {
+        // TODO
+        //        if (event != null && event.containsNotification() && !event.getNotification()) {
+        //            return false;
+        //        }
+        if (event != null && stateType.equals(Type.NEW) && endsInPast(event)) {
             return false;
         }
-        if (appointment != null && stateType.equals(Type.NEW) && endsInPast(appointment)) {
+        if (event != null && original != null && stateType.equals(Type.MODIFIED) && isNotWorthUpdateNotification(original, event)) {
             return false;
         }
-        if (appointment != null && original != null && stateType.equals(Type.MODIFIED)
-                                && isNotWorthUpdateNotification(original, appointment)) {
-            return false;
-        }
-        if (appointment != null && stateType.equals(Type.DELETED)) {
+        if (event != null && stateType.equals(Type.DELETED)) {
             return false;
         }
 
@@ -429,19 +424,17 @@ public class NotificationMail {
             public String toString() {
                 StringBuilder sb = new StringBuilder(" Changed Users: ");
                 try {
-                    if (getDiff().anyFieldChangedOf(AppointmentFields.USERS)) {
-                        FieldUpdate userChange = getDiff().getUpdateFor(AppointmentFields.USERS);
-                        Difference extraInfo = (Difference) userChange.getExtraInfo();
-                        if (!extraInfo.getAdded().isEmpty()) {
+                    if (getDiff().getAttendeeUpdates() != null) {
+                        if (getDiff().getAttendeeUpdates().getAddedItems() != null && getDiff().getAttendeeUpdates().getAddedItems().size() > 0) {
                             sb.append("A: ");
-                            for (Object added : extraInfo.getAdded()) {
-                                sb.append(((UserParticipant) added).getIdentifier()).append(", ");
+                            for (Attendee added : getDiff().getAttendeeUpdates().getAddedItems()) {
+                                sb.append(added.getEMail() + "(" + added.getEntity() + "), ");
                             }
                         }
-                        if (!extraInfo.getRemoved().isEmpty()) {
+                        if (getDiff().getAttendeeUpdates().getRemovedItems() != null && getDiff().getAttendeeUpdates().getRemovedItems().size() > 0) {
                             sb.append("R: ");
-                            for (Object removed : extraInfo.getRemoved()) {
-                                sb.append(((UserParticipant) removed).getIdentifier()).append(", ");
+                            for (Attendee removed : getDiff().getAttendeeUpdates().getRemovedItems()) {
+                                sb.append(removed.getEMail() + "(" + removed.getEntity() + "), ");
                             }
                         }
                     }
@@ -460,7 +453,7 @@ public class NotificationMail {
             @Override
             public String toString() {
                 try {
-                    return getDiff().getDifferingFieldNames().toString();
+                    return getDiff().getUpdatedFields().toString();
                 } catch (Exception e) {
                     return "NPE";
                 }
@@ -498,60 +491,31 @@ public class NotificationMail {
         };
     }
 
-    private boolean onlyPseudoChangesOnParticipants() {
-        AppointmentDiff appDiff = getDiff();
+    private boolean onlyPseudoChangesOnParticipants() throws OXException {
+        ITipEventUpdate appDiff = getDiff();
         if (appDiff == null) {
             return false;
         }
-        boolean onlyParticipantsChanged = appDiff.exactlyTheseChanged(CalendarField.getByColumn(CalendarObject.PARTICIPANTS).getJsonName());
-        if (onlyParticipantsChanged) {
-            FieldUpdate participantUpdate = appDiff.getUpdateFor(CalendarField.getByColumn(CalendarObject.PARTICIPANTS).getJsonName());
-            if (participantUpdate == null) {
-                return false;
-            }
-            Participant[] oldParticipants = (Participant[]) participantUpdate.getOriginalValue();
-            Participant[] newParticipants = (Participant[]) participantUpdate.getNewValue();
 
-            for (Participant pOld : oldParticipants) {
-                if (pOld.getType() == Participant.RESOURCE) {
-                    boolean found = false;
-                    for (Participant pNew : newParticipants) {
-                        if (pNew.getType() == Participant.RESOURCE && pNew.getIdentifier() == pOld.getIdentifier()) {
-                            found = true;
-                            break;
-                        }
-                    }
-                    if (!found) {
-                        return false;
-                    }
-                }
+        if (appDiff.containsExactTheseChanges(new EventField[] { EventField.ATTENDEES })) {
+            if (appDiff.getAttendeeUpdates().getAddedItems() != null && appDiff.getAttendeeUpdates().getAddedItems().size() > 0) {
+                return true;
             }
 
-            for (Participant pNew : newParticipants) {
-                if (pNew.getType() == Participant.RESOURCE) {
-                    boolean found = false;
-                    for (Participant pOld : oldParticipants) {
-                        if (pOld.getType() == Participant.RESOURCE && pOld.getIdentifier() == pNew.getIdentifier()) {
-                            found = true;
-                            break;
-                        }
-                    }
-                    if (!found) {
-                        return false;
-                    }
-                }
+            if (appDiff.getAttendeeUpdates().getRemovedItems() != null && appDiff.getAttendeeUpdates().getRemovedItems().size() > 0) {
+                return true;
             }
-            return true;
         }
+
         return false;
     }
 
-    private boolean isNotWorthUpdateNotification(final Appointment original, final Appointment modified) {
-        if (original.containsRecurrenceType() && original.getRecurrenceType() != CalendarObject.NO_RECURRENCE) {
+    private boolean isNotWorthUpdateNotification(final Event original, final Event modified) throws OXException {
+        if (CalendarUtils.isSeriesMaster(original) || CalendarUtils.isSeriesException(original)) {
             if (endsInPast(original)) {
                 return endsInPast(modified);
             } else {
-                if (modified.isException()) {
+                if (CalendarUtils.isSeriesException(modified)) {
                     return endsInPast(modified);
                 } else {
                     return false;
@@ -566,61 +530,82 @@ public class NotificationMail {
         }
     }
 
-    private boolean endsInPast(final Appointment appointment) {
+    private boolean endsInPast(final Event event) throws OXException {
         final Date now = new Date();
         Date endDate;
-        Date until;
-        if (original == null || appointment.getEndDate().after(original.getEndDate())) {
-            endDate = appointment.getEndDate();
+
+        // Get latest end date
+        if (original == null || event.getEndDate().after(original.getEndDate())) {
+            endDate = new Date(event.getEndDate().getTimestamp());
         } else {
-            endDate = original.getEndDate();
+            endDate = new Date(original.getEndDate().getTimestamp());
         }
 
-        if (original == null || appointment.getUntil().after(original.getUntil())) {
-            until = appointment.getUntil();
-        } else {
-            until = original.getUntil();
-        }
-
-        if (appointment.isException() || appointment.getRecurrenceType() == CalendarObject.NO_RECURRENCE) {
+        // No recurrence at all
+        if (!CalendarUtils.isSeriesMaster(event) && !CalendarUtils.isSeriesException(event) && !CalendarUtils.isSeriesMaster(original) && !CalendarUtils.isSeriesException(original)) {
             return endDate.before(now);
-        } else {
-            if (until == null) {
+        }
+
+        // Exception update/create
+        if (CalendarUtils.isSeriesException(event)) {
+            return endDate.before(now);
+        }
+
+        // Series update
+        if (CalendarUtils.isSeriesMaster(event) && CalendarUtils.isSeriesMaster(original)) {
+            RecurrenceRule origRrule;
+            RecurrenceRule eventRule;
+            try {
+                origRrule = new RecurrenceRule(original.getRecurrenceRule());
+                eventRule = new RecurrenceRule(event.getRecurrenceRule());
+            } catch (InvalidRecurrenceRuleException e) {
+                LOG.error("Invalid recurrence rule. Fallback to notify");
                 return false;
             }
+            Date origEnd = null;
+            Date eventEnd = null;
 
-            return until.before(now);
+            RecurrenceService rService = Services.getService(RecurrenceService.class);
+            if (origRrule.getUntil() != null) {
+                origEnd = new Date(origRrule.getUntil().getTimestamp());
+            } else if (origRrule.getCount() != null) {
+                Iterator<Event> instances = rService.calculateInstances(original, null, null, null);
+                while (instances.hasNext()) {
+                    if (!instances.hasNext()) {
+                        origEnd = new Date(instances.next().getEndDate().getTimestamp());
+                    }
+                }
+            }
+            if (eventRule.getUntil() != null) {
+                eventEnd = new Date(eventRule.getUntil().getTimestamp());
+            } else if (eventRule.getCount() != null) {
+                Iterator<Event> instances = rService.calculateInstances(event, null, null, null);
+                while (instances.hasNext()) {
+                    if (!instances.hasNext()) {
+                        eventEnd = new Date(instances.next().getEndDate().getTimestamp());
+                    }
+                }
+            }
+
+            if (origEnd == null || eventEnd == null) {
+                return false;
+            } else {
+                return eventEnd.before(now) || origEnd.before(now);
+            }
+
         }
+
+        LOG.error("Unexpected case found. Fallback to notify");
+        return false;
     }
 
     private boolean isCancelMail() {
         return itipMessage != null && itipMessage.getMethod() == ITipMethod.CANCEL;
     }
 
+    private static final EventField[] FIELDS_TO_REPORT = new EventField[] { EventField.LOCATION, EventField.SUMMARY, EventField.START_DATE, EventField.END_DATE, EventField.DESCRIPTION, EventField.RECURRENCE_RULE, EventField.ATTENDEES };
 
-    private static final Set<String> FIELDS_TO_REPORT = new HashSet<String>(Arrays.asList(
-            AppointmentFields.LOCATION,
-            AppointmentFields.FULL_TIME,
-            AppointmentFields.RECURRENCE_START,
-            AppointmentFields.TITLE,
-            AppointmentFields.START_DATE,
-            AppointmentFields.END_DATE,
-            AppointmentFields.NOTE,
-            AppointmentFields.RECURRENCE_DATE_POSITION,
-            AppointmentFields.RECURRENCE_POSITION,
-            AppointmentFields.RECURRENCE_TYPE,
-            AppointmentFields.DAYS,
-            AppointmentFields.DAY_IN_MONTH,
-            AppointmentFields.MONTH,
-            AppointmentFields.INTERVAL,
-            AppointmentFields.UNTIL,
-            AppointmentFields.RECURRENCE_CALCULATOR,
-            AppointmentFields.PARTICIPANTS,
-            AppointmentFields.USERS,
-            AppointmentFields.CONFIRMATIONS
-        ));
-
-    private boolean anInterestingFieldChanged() {
+    private boolean anInterestingFieldChanged() throws OXException {
         if (getDiff() == null) {
             return true;
         }
@@ -631,14 +616,14 @@ public class NotificationMail {
             return false;
         }
 
-        return getDiff().anyFieldChangedOf(FIELDS_TO_REPORT);
+        return getDiff().containsAnyChangeOf(FIELDS_TO_REPORT);
     }
 
     private boolean isChangeUserSpecific() {
-        return diff.exactlyTheseChanged(CalendarFields.CHANGE_EXCEPTIONS, CalendarFields.RECURRENCE_DATE_POSITION, CalendarFields.RECURRENCE_POSITION);
+        return diff.containsExactTheseChanges(new EventField[] { EventField.RECURRENCE_ID });
     }
 
-    public boolean isAboutStateChangesOnly() {
+    public boolean isAboutStateChangesOnly() throws OXException {
         if (getDiff() == null) {
             return false;
         }
@@ -653,7 +638,7 @@ public class NotificationMail {
         return diff.isAboutStateChangesOnly(FIELDS_TO_REPORT);
     }
 
-    public boolean isAboutStateChanges() {
+    public boolean isAboutStateChanges() throws OXException {
         if (getDiff() == null) {
             return false;
         }
@@ -661,7 +646,7 @@ public class NotificationMail {
         return diff.isAboutStateChanges();
     }
 
-    public boolean isAboutActorsStateChangeOnly() {
+    public boolean isAboutActorsStateChangeOnly() throws OXException {
         if (!isAboutStateChangesOnly()) {
             return false;
         }
@@ -675,15 +660,8 @@ public class NotificationMail {
         return diff.isAboutCertainParticipantsStateChangeOnly(Integer.toString(getPrincipal().getIdentifier()));
     }
 
-    private boolean isAboutRecipientsStateChangeOnly() {
-        if (!isAboutStateChangesOnly()) {
-            return false;
-        }
-        return diff.isAboutCertainParticipantsStateChangeOnly(recipient.getEmail());
-    }
-
     public boolean isStateChangeExceptionCreate() {
-        boolean candidate = diff.exactlyTheseChanged(CalendarFields.CHANGE_EXCEPTIONS, CalendarFields.RECURRENCE_DATE_POSITION, CalendarFields.RECURRENCE_POSITION, CalendarFields.USERS);
+        boolean candidate = diff.containsExactTheseChanges(new EventField[] { EventField.RECURRENCE_ID, EventField.ATTENDEES });
         if (candidate) {
             return diff.isAboutStateChanges();
         }
@@ -706,13 +684,12 @@ public class NotificationMail {
         this.stateType = stateType;
     }
 
-    public void addAttachment(AttachmentMetadata attachment) {
+    public void addAttachment(Attachment attachment) {
         attachments.add(attachment);
     }
 
-    public List<AttachmentMetadata> getAttachments() {
+    public List<Attachment> getAttachments() {
         return attachments;
     }
-
 
 }

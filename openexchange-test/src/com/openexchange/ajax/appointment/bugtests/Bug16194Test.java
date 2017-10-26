@@ -126,7 +126,7 @@ public class Bug16194Test extends AbstractAJAXSession {
         folder.setModule(FolderObject.CALENDAR);
         folder.setParentFolderID(FolderObject.SYSTEM_PUBLIC_FOLDER_ID);
         folder.setPermissions(PermissionTools.P(I(getClient().getValues().getUserId()), PermissionTools.ADMIN, I(userId2), PermissionTools.ADMIN));
-        folder.setFolderName("testFolder4Bug16194");
+        folder.setFolderName("testFolder4Bug16194" + System.currentTimeMillis());
         com.openexchange.ajax.folder.actions.InsertRequest iReq = new com.openexchange.ajax.folder.actions.InsertRequest(EnumAPI.OX_NEW, folder);
         com.openexchange.ajax.folder.actions.InsertResponse iResp = getClient().execute(iReq);
         iResp.fillObject(folder);

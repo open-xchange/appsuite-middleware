@@ -49,6 +49,9 @@
 
 package com.openexchange.chronos.provider.ical;
 
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.TreeMap;
 import org.apache.commons.lang3.Validate;
 import org.json.JSONObject;
 import com.openexchange.auth.info.AuthInfo;
@@ -73,13 +76,15 @@ public class ICalFeedConfig {
     private final String etag;
     private final long lastUpdated;
     private final AuthInfo authInfo;
+    private final Map<String, String> customHeaders;
 
-    private ICalFeedConfig(String feedUrl, String etag, long lastUpdated, AuthInfo authInfo) {
+    private ICalFeedConfig(String feedUrl, String etag, long lastUpdated, AuthInfo authInfo, Map<String, String> customHeaders) {
         super();
         this.feedUrl = feedUrl;
         this.etag = etag;
         this.lastUpdated = lastUpdated;
         this.authInfo = authInfo;
+        this.customHeaders = customHeaders;
     }
 
     public String getFeedUrl() {
@@ -98,18 +103,24 @@ public class ICalFeedConfig {
         return authInfo;
     }
 
+    public Map<String, String> getCustomHeaders() {
+        return customHeaders;
+    }
+
     public static class Builder {
 
         private final String etag;
         private final long lastUpdated;
         private final String feedUrl;
+        private final Map<String, String> customHeaders;
         private AuthInfo authInfo;
 
         /**
          * Initializes a new {@link Builder}.
          * 
-         * @param userConfiguration - the password has to be decrypted at this point
+         * @param userConfiguration
          * @param folderConfig
+         * @param encrypt - defines if the (possibly available) password has to be encrypted with the session password
          * @throws OXException
          */
         Builder(Session session, JSONObject userConfiguration, JSONObject folderConfig, boolean encrypt) throws OXException {
@@ -125,6 +136,14 @@ public class ICalFeedConfig {
             }
             this.etag = folderConfig.optString(ETAG, null);
             this.lastUpdated = folderConfig.optLong(CachingCalendarAccess.LAST_UPDATE, -1L);
+            
+            JSONObject headerObj = userConfiguration.optJSONObject("header");
+            customHeaders = new TreeMap<String,String>();
+            if(headerObj != null){
+                for(Entry<String, Object> entry : headerObj.entrySet()){
+                    customHeaders.put(entry.getKey(), String.valueOf(entry.getValue()));
+                }
+            }
         }
 
         Builder(Session session, JSONObject userConfiguration, JSONObject folderConfig) throws OXException {
@@ -138,7 +157,7 @@ public class ICalFeedConfig {
         }
 
         public ICalFeedConfig build() {
-            return new ICalFeedConfig(feedUrl, etag, lastUpdated, authInfo);
+            return new ICalFeedConfig(feedUrl, etag, lastUpdated, authInfo, customHeaders);
         }
     }
 

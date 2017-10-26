@@ -49,12 +49,14 @@
 
 package com.openexchange.chronos.provider.caching.internal.handler;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.common.Check;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.caching.CachingCalendarAccess;
 import com.openexchange.chronos.provider.caching.DiffAwareExternalCalendarResult;
@@ -104,6 +106,7 @@ public class CachingExecutor {
                     } else {
 
                         List<Event> externalEvents = externalCalendarResult.getEvents();
+                        cleanupEvents(externalEvents);
 
                         boolean containsUID = containsUid(externalEvents);
                         if (containsUID) {
@@ -125,6 +128,18 @@ public class CachingExecutor {
 
                 handleInternally(cachingHandler, calendarFolderId, e);
                 this.cachingCalendarAccess.handleExceptions(calendarFolderId, e);
+            }
+        }
+    }
+
+    private void cleanupEvents(List<Event> externalEvents) {
+        List<Event> addedItems = new ArrayList<Event>(externalEvents);
+        for (Event event : addedItems) {
+            try {
+                Check.mandatoryFields(event, EventField.START_DATE, EventField.TIMESTAMP);
+            } catch (OXException e) {
+                LOG.debug("Removed event with uid {} from list to add because of the following corrupt data: {}", event.getUid(), e.getMessage());
+                externalEvents.remove(event);
             }
         }
     }

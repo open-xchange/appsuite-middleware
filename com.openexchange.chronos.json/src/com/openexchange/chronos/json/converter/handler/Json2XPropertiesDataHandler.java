@@ -49,7 +49,6 @@
 
 package com.openexchange.chronos.json.converter.handler;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.chronos.json.converter.mapper.ExtendedPropertiesMapping;
@@ -84,7 +83,7 @@ public class Json2XPropertiesDataHandler implements DataHandler {
 
     @Override
     public Class<?>[] getTypes() {
-        return new Class<?>[] { JSONObject.class, JSONArray.class };
+        return new Class<?>[] { JSONObject.class };
     }
 
     @Override
@@ -95,9 +94,7 @@ public class Json2XPropertiesDataHandler implements DataHandler {
             if (null == sourceData) {
                 result.setData(null);
             } else if (JSONObject.class.isInstance(sourceData)) {
-                result.setData(ExtendedPropertiesMapping.deserializeExtendedProperty((JSONObject) sourceData));
-            } else if (JSONArray.class.isInstance(sourceData)) {
-                result.setData(ExtendedPropertiesMapping.deserializeExtendedProperties((JSONArray) sourceData));
+                result.setData(ExtendedPropertiesMapping.deserializeExtendedProperties((JSONObject) sourceData));
             } else {
                 throw DataExceptionCodes.TYPE_NOT_SUPPORTED.create(sourceData.getClass().toString());
             }

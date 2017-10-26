@@ -49,6 +49,10 @@
 
 package com.openexchange.chronos.provider.birthdays;
 
+import static com.openexchange.chronos.provider.CalendarFolderProperty.DESCRIPTION;
+import static com.openexchange.chronos.provider.CalendarFolderProperty.SCHEDULE_TRANSP;
+import static com.openexchange.chronos.provider.CalendarFolderProperty.USED_FOR_SYNC;
+import static com.openexchange.osgi.Tools.requireService;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
@@ -56,6 +60,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.chronos.Alarm;
+import com.openexchange.chronos.ExtendedProperties;
+import com.openexchange.chronos.TimeTransparency;
 import com.openexchange.chronos.common.Check;
 import com.openexchange.chronos.common.DataHandlers;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
@@ -123,9 +129,22 @@ public class BirthdaysCalendarProvider implements AutoProvisioningCalendarProvid
          */
         initializeUserConfig(serverSession, userConfig);
         /*
-         * no further internal config needed
+         * apply default properties for internal config
          */
-        return new JSONObject();
+        StringHelper stringHelper = StringHelper.valueOf(serverSession.getUser().getLocale());
+        ExtendedProperties extendedProperties = new ExtendedProperties();
+        extendedProperties.add(SCHEDULE_TRANSP(TimeTransparency.TRANSPARENT, true));
+        extendedProperties.add(DESCRIPTION(stringHelper.getString(BirthdaysCalendarStrings.CALENDAR_DESCRIPTION), true));
+        extendedProperties.add(USED_FOR_SYNC(Boolean.FALSE, true));
+        JSONObject internalConfig = new JSONObject();
+        try {
+            DataHandler dataHandler = requireService(ConversionService.class, services).getDataHandler(DataHandlers.XPROPERTIES2JSON);
+            ConversionResult result = dataHandler.processData(new SimpleData<ExtendedProperties>(extendedProperties), new DataArguments(), null);
+            internalConfig.put("extendedProperties", result.getData());
+        } catch (JSONException e) {
+            throw CalendarExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+        return internalConfig;
     }
 
     @Override

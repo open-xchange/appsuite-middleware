@@ -49,26 +49,22 @@
 
 package com.openexchange.chronos.itip.generators.changes.generators;
 
-import static com.openexchange.ajax.fields.AppointmentFields.LOCATION;
-import static com.openexchange.ajax.fields.AppointmentFields.TIMEZONE;
-import static com.openexchange.ajax.fields.CalendarFields.NOTE;
-import static com.openexchange.ajax.fields.CalendarFields.TITLE;
-import static com.openexchange.ajax.fields.CommonFields.NUMBER_OF_ATTACHMENTS;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
+import com.openexchange.chronos.Event;
+import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.common.mapping.EventMapper;
 import com.openexchange.chronos.itip.Messages;
 import com.openexchange.chronos.itip.generators.ArgumentType;
 import com.openexchange.chronos.itip.generators.Sentence;
 import com.openexchange.chronos.itip.generators.changes.ChangeDescriptionGenerator;
-import com.openexchange.chronos.itip.tools.AppointmentDiff;
-import com.openexchange.chronos.itip.tools.AppointmentDiff.FieldUpdate;
-import com.openexchange.groupware.container.Appointment;
+import com.openexchange.chronos.itip.tools.ITipEventUpdate;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-
 
 /**
  * {@link Details}
@@ -77,44 +73,45 @@ import com.openexchange.groupware.contexts.Context;
  */
 public class Details implements ChangeDescriptionGenerator {
 
-    private static final String[] FIELDS = {TITLE, LOCATION, NOTE, NUMBER_OF_ATTACHMENTS};
+    private static final EventField[] FIELDS = { EventField.SUMMARY, EventField.LOCATION, EventField.DESCRIPTION };
 
-    private static final Map<String, String> MESSAGE_MAP = new HashMap<String, String>(){{
-        put(TITLE, Messages.HAS_CHANGED_TITLE);
-        put(LOCATION, Messages.HAS_CHANGED_LOCATION);
-        put(NOTE, Messages.HAS_CHANGED_NOTE);
-        put(TIMEZONE, Messages.HAS_CHANGED_TIMEZONE);
-        put(NUMBER_OF_ATTACHMENTS, "Blubb");
-    }};
+    private static final Map<EventField, String> MESSAGE_MAP = new HashMap<EventField, String>() {
+
+        {
+            put(EventField.SUMMARY, Messages.HAS_CHANGED_TITLE);
+            put(EventField.LOCATION, Messages.HAS_CHANGED_LOCATION);
+            put(EventField.DESCRIPTION, Messages.HAS_CHANGED_NOTE);
+            //put(TIMEZONE, Messages.HAS_CHANGED_TIMEZONE);
+        }
+    };
 
     @Override
-    public List<Sentence> getDescriptions(Context ctx, Appointment original, Appointment updated, AppointmentDiff diff, Locale locale, TimeZone timezone) {
+    public List<Sentence> getDescriptions(Context ctx, Event original, Event updated, ITipEventUpdate diff, Locale locale, TimeZone timezone) throws OXException {
         List<Sentence> changes = new ArrayList<Sentence>();
-        add(TITLE, diff, changes, true);
-        add(LOCATION, diff, changes, true);
-        add(TIMEZONE, diff, changes, true);
-        add(NOTE, diff, changes, false);
-        add(NUMBER_OF_ATTACHMENTS, diff, changes, false);
+        add(EventField.SUMMARY, diff, changes, true);
+        add(EventField.LOCATION, diff, changes, true);
+        add(EventField.DESCRIPTION, diff, changes, false);
+        //add(TIMEZONE, diff, changes, true);
 
         return changes;
     }
 
-    private void add(String field, AppointmentDiff diff, List<Sentence> changes, boolean includeNewValue) {
-        String message = MESSAGE_MAP.get(field);
-        FieldUpdate update = diff.getUpdateFor(field);
-        if (update == null) {
+    private void add(EventField field, ITipEventUpdate diff, List<Sentence> changes, boolean includeNewValue) throws OXException {
+        if (!diff.getUpdatedFields().contains(field)) {
             return;
         }
 
+        String message = MESSAGE_MAP.get(field);
+
         Sentence changeDescription = new Sentence(message);
         if (includeNewValue) {
-            changeDescription.add(update.getNewValue(), ArgumentType.UPDATED);
+            changeDescription.add(EventMapper.getInstance().get(field).get(diff.getUpdate()), ArgumentType.UPDATED);
         }
         changes.add(changeDescription);
     }
 
     @Override
-    public String[] getFields() {
+    public EventField[] getFields() {
         return FIELDS;
     }
 

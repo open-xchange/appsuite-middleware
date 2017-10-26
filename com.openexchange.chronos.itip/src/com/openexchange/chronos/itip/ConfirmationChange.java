@@ -47,72 +47,77 @@
  *
  */
 
-package com.openexchange.chronos.provider.internal;
+package com.openexchange.chronos.itip;
 
-import java.util.concurrent.atomic.AtomicReference;
-import com.openexchange.server.ServiceLookup;
+import com.openexchange.chronos.ParticipationStatus;
 
 /**
- * {@link Services}
+ * 
+ * {@link ConfirmationChange}
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
+ * @since v7.10.0
  */
-public final class Services {
+public class ConfirmationChange {
 
-    /**
-     * Initializes a new {@link Services}.
-     */
-    private Services() {
-        super();
+    private ParticipationStatus oldStatus = null;
+
+    private ParticipationStatus newStatus = null;
+
+    private String oldMessage;
+
+    private String newMessage;
+
+    private final String identifier;
+
+    public ConfirmationChange(String identifier) {
+        this.identifier = identifier;
     }
 
-    private static final AtomicReference<ServiceLookup> REF = new AtomicReference<ServiceLookup>();
-
-    /**
-     * Sets the service lookup.
-     *
-     * @param serviceLookup The service lookup or <code>null</code>
-     */
-    public static void setServiceLookup(ServiceLookup serviceLookup) {
-        REF.set(serviceLookup);
+    public void setStatus(ParticipationStatus oldStatus, ParticipationStatus newStatus) {
+        setOldStatus(oldStatus);
+        setNewStatus(newStatus);
     }
 
-    /**
-     * Gets the service lookup.
-     *
-     * @return The service lookup or <code>null</code>
-     */
-    public static ServiceLookup getServiceLookup() {
-        return REF.get();
+    public void setMessage(String oldMessage, String newMessage) {
+        setOldMessage(oldMessage);
+        setNewMessage(newMessage);
     }
 
-    /**
-     * Gets the service of specified type
-     *
-     * @param clazz The service's class
-     * @return The service
-     * @throws IllegalStateException If an error occurs while returning the demanded service
-     */
-    public static <S extends Object> S getService(final Class<? extends S> clazz) {
-        final com.openexchange.server.ServiceLookup serviceLookup = REF.get();
-        if (null == serviceLookup) {
-            throw new IllegalStateException("Missing ServiceLookup instance.");
-        }
-        return serviceLookup.getService(clazz);
+    public ParticipationStatus getOldStatus() {
+        return oldStatus;
     }
 
-    /**
-     * (Optionally) Gets the service of specified type
-     *
-     * @param clazz The service's class
-     * @return The service or <code>null</code> if absent
-     */
-    public static <S extends Object> S optService(final Class<? extends S> clazz) {
-        try {
-            return getService(clazz);
-        } catch (final IllegalStateException e) {
-            return null;
-        }
+    public void setOldStatus(ParticipationStatus oldStatus) {
+        this.oldStatus = oldStatus;
+    }
+
+    public ParticipationStatus getNewStatus() {
+        return newStatus;
+    }
+
+    public void setNewStatus(ParticipationStatus newStatus) {
+        this.newStatus = newStatus;
+    }
+
+    public String getOldMessage() {
+        return oldMessage;
+    }
+
+    public void setOldMessage(String oldMessage) {
+        this.oldMessage = oldMessage;
+    }
+
+    public String getNewMessage() {
+        return newMessage;
+    }
+
+    public void setNewMessage(String newMessage) {
+        this.newMessage = newMessage;
+    }
+
+    public String getIdentifier() {
+        return identifier;
     }
 
 }

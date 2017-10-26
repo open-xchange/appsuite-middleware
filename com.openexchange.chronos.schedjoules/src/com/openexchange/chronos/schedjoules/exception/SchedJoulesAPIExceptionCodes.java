@@ -90,7 +90,7 @@ public enum SchedJoulesAPIExceptionCodes implements DisplayableOXExceptionCode {
      * <li>An error occurred inside the server which prevented it from fulfilling the request.</li>
      * <li>The apiKey is missing from the 'schedjoules.properties'. Please configure the service properly.</li>
      */
-    NO_API_KEY_CONFIGURED("The apiKey is missing from the 'schedjoules.properties'. Please configure the service properly.", CATEGORY_ERROR, 7),
+    NO_API_KEY_CONFIGURED("The apiKey is missing from the '%1$s' property. Please configure the service properly.", CATEGORY_ERROR, 7),
     /**
      * <li>An error occurred inside the server which prevented it from fulfilling the request.</li>
      * <li>The URI path '%1$s' is not valid.</li>
@@ -110,7 +110,7 @@ public enum SchedJoulesAPIExceptionCodes implements DisplayableOXExceptionCode {
      * <li>An error occurred inside the server which prevented it from fulfilling the request.</li>
      * <li>The middleware is not authorized to access the SchedJoules API: %1$s. Check your API key in 'schedjoules.properties'</li>
      */
-    NOT_AUTHORIZED("The middleware is not authorized to access the SchedJoules API: %1$s. Check your API key in 'schedjoules.properties'", CATEGORY_PERMISSION_DENIED, 11),
+    NOT_AUTHORIZED("The middleware is not authorized to access the SchedJoules API: %1$s. Check your API key is set in the %2$s property.", CATEGORY_PERMISSION_DENIED, 11),
     /**
      * <li>The requested page was not found.</li>
      * <li>The requested page was not found.</li>
