@@ -50,6 +50,7 @@
 package com.openexchange.caldav.mixins;
 
 import java.io.UnsupportedEncodingException;
+import org.jdom2.Namespace;
 import com.openexchange.caldav.GroupwareCaldavFactory;
 import com.openexchange.chronos.ical.ICalService;
 import com.openexchange.dav.DAVProtocol;
@@ -67,6 +68,9 @@ import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
  */
 public class CalendarTimezone extends SingleXMLPropertyMixin {
 
+    public static final String NAME = "calendar-timezone";
+    public static final Namespace NAMESPACE = DAVProtocol.CAL_NS;
+
     private final GroupwareCaldavFactory factory;
     private final FolderCollection<?> collection;
 
@@ -77,7 +81,7 @@ public class CalendarTimezone extends SingleXMLPropertyMixin {
      * @param collection The collection
      */
     public CalendarTimezone(GroupwareCaldavFactory factory, FolderCollection<?> collection) {
-        super(DAVProtocol.CAL_NS.getURI(), "calendar-timezone");
+        super(NAMESPACE.getURI(), NAME);
         this.factory = factory;
         this.collection = collection;
     }
