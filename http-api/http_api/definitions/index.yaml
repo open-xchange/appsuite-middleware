@@ -216,8 +216,6 @@ PageData:
   $ref: ./chronos-schedjoules/PageData.yaml
 PageSectionsData:
   $ref: ./chronos-schedjoules/PageSectionsData.yaml
-SubscribeResponse:
-  $ref: ./chronos-schedjoules/SubscribeResponse.yaml
 SearchData:
   $ref: ./chronos-schedjoules/SearchData.yaml
 SearchResponse:
