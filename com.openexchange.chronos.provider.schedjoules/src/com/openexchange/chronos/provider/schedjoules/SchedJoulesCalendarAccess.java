@@ -170,7 +170,7 @@ public class SchedJoulesCalendarAccess extends CachingCalendarAccess {
                 extendedProperties = new ExtendedProperties();
             }
 
-            JSONObject folderJson = findFolder(folderId, getAccount().getInternalConfiguration().optJSONArray(SchedJoulesFields.FOLDERS));
+            JSONObject folderJson = findFolderInInternalConfiguration(folderId);
 
             folderJson.put(SchedJoulesFields.COLOR, extendedProperties.get(CalendarFolderProperty.COLOR_LITERAL));
             folderJson.put(SchedJoulesFields.USED_FOR_SYNC, extendedProperties.get(CalendarFolderProperty.USED_FOR_SYNC_LITERAL));
@@ -260,14 +260,9 @@ public class SchedJoulesCalendarAccess extends CachingCalendarAccess {
      *             or non-existing configuration or folder
      */
     private URL getFeedURL(String folderId) throws MalformedURLException, JSONException, OXException {
-        JSONObject internalUserConfig = getAccount().getInternalConfiguration();
-        if (internalUserConfig == null || internalUserConfig.isEmpty()) {
-            throw SchedJoulesProviderExceptionCodes.NO_INTERNAL_CONFIGURATION.create(getAccount().getAccountId(), getSession().getUserId(), getSession().getContextId());
-        }
-        JSONArray foldersArray = internalUserConfig.optJSONArray(SchedJoulesFields.FOLDERS);
-        JSONObject folder = findFolder(folderId, foldersArray);
+        JSONObject folder = findFolderInInternalConfiguration(folderId);
         URL url = new URL(folder.getString(SchedJoulesFields.URL));
-        UUID userKey = getUserKey(internalUserConfig);
+        UUID userKey = getUserKey();
         return new URL(generateURL(url, userKey));
     }
 
@@ -291,8 +286,8 @@ public class SchedJoulesCalendarAccess extends CachingCalendarAccess {
      * @return The user key
      * @throws OXException if the userKey is malformed or missing from the configuration
      */
-    private UUID getUserKey(JSONObject internalConfig) throws OXException {
-        String key = internalConfig.optString(SchedJoulesFields.USER_KEY);
+    private UUID getUserKey() throws OXException {
+        String key = getAccount().getInternalConfiguration().optString(SchedJoulesFields.USER_KEY);
         if (Strings.isEmpty(key)) {
             throw SchedJoulesProviderExceptionCodes.MISSING_USER_KEY.create(getAccount().getAccountId(), getSession().getUserId(), getSession().getContextId());
         }
@@ -301,6 +296,21 @@ public class SchedJoulesCalendarAccess extends CachingCalendarAccess {
         } catch (IllegalArgumentException e) {
             throw SchedJoulesProviderExceptionCodes.MALFORMED_USER_KEY.create(e, getAccount().getAccountId(), getSession().getUserId(), getSession().getContextId());
         }
+    }
+
+    /**
+     * Finds the folder with the specified identifier in the internal configuration
+     * 
+     * @param folderId The folder identifier
+     * @return The found folder as a {@link JSONObject}
+     * @throws OXException if no internal configuration exists or no folder metadata is found for the specified folder
+     */
+    private JSONObject findFolderInInternalConfiguration(String folderId) throws OXException {
+        JSONObject internalUserConfig = getAccount().getInternalConfiguration();
+        if (internalUserConfig == null || internalUserConfig.isEmpty()) {
+            throw SchedJoulesProviderExceptionCodes.NO_INTERNAL_CONFIGURATION.create(getAccount().getAccountId(), getSession().getUserId(), getSession().getContextId());
+        }
+        return findFolder(folderId, internalUserConfig.optJSONArray(SchedJoulesFields.FOLDERS));
     }
 
     /**
