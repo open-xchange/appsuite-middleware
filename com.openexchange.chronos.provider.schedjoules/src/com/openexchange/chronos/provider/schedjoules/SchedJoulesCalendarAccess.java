@@ -249,6 +249,18 @@ public class SchedJoulesCalendarAccess extends CachingCalendarAccess {
         }
     }
 
+    /*
+     * (non-Javadoc)
+     *
+     * @see com.openexchange.chronos.provider.caching.CachingCalendarAccess#handleExceptions(java.lang.String, com.openexchange.exception.OXException)
+     */
+    @Override
+    public void handleExceptions(String calendarFolderId, OXException e) {
+        // no-op
+    }
+
+    ///////////////////////////////////// HELPERS /////////////////////////////////
+
     /**
      * Returns the feed URL for the specified folder
      *
@@ -336,18 +348,6 @@ public class SchedJoulesCalendarAccess extends CachingCalendarAccess {
         }
         throw SchedJoulesProviderExceptionCodes.NO_FOLDER_METADATA.create(folderId, getAccount().getAccountId(), getSession().getUserId(), getSession().getContextId());
     }
-
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.chronos.provider.caching.CachingCalendarAccess#handleExceptions(java.lang.String, com.openexchange.exception.OXException)
-     */
-    @Override
-    public void handleExceptions(String calendarFolderId, OXException e) {
-        // no-op
-    }
-
-    ///////////////////////////////////// HELPERS /////////////////////////////////
 
     /**
      * Prepares the specified folder
