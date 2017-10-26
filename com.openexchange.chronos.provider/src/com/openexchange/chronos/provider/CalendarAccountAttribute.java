@@ -61,7 +61,6 @@ public enum CalendarAccountAttribute {
     PROVIDER_LITERAL("provider"),
     LOGIN_LITERAL("login"),
     PASSWORD_LITERAL("password"),
-    OAUTH_ACCOUNT_ID_LITERAL("oauthAccountId"),
     TOKEN_LITERAL("token"), // for instance schedjoules
     ;
 

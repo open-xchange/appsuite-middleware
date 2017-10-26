@@ -101,10 +101,10 @@ public enum ICalProviderExceptionCodes implements DisplayableOXExceptionCode {
     FEED_SIZE_EXCEEDED("The requested feed with URI %1$s does exceed the configured maximum size. Allowed %2$s but was %3$s.", FEED_SIZE_EXCEEDED_MSG, Category.CATEGORY_USER_INPUT, 4001),
 
     /**
-     * <li>Unfortunately the given feed URL cannot be executed as expected.</li>
-     * <li>An error occurred while retrieving the desired feed URI: %1$s</li>
+     * <li>Unfortunately the given feed URL cannot be processed as expected.</li>
+     * <li>An error occurred while retrieving the desired feed URI '%1$s': %2$s</li>
      */
-    UNEXPECTED_FEED_ERROR("An error occurred while retrieving the desired feed URI: %1$s", UNEXPECTED_FEED_ERROR_MSG, Category.CATEGORY_USER_INPUT, 4001),
+    UNEXPECTED_FEED_ERROR("An error occurred while retrieving the desired feed URI '%1$s': %2$s", UNEXPECTED_FEED_ERROR_MSG, Category.CATEGORY_USER_INPUT, 4001),
 
     ;
 
