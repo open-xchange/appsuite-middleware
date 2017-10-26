@@ -160,8 +160,6 @@ ChronosUpdatesResponse:
   $ref: ./chronos/UpdatesResponse.yaml
 ChronosAttachment:
   $ref: ./chronos/Attachment.yaml
-ChronosExtendedProperty:
-  $ref: ./chronos/ExtendedProperty.yaml
 DateTimeData:
   $ref: ./chronos/DateTimeData.yaml
 ChronosFreeBusyResponse:

@@ -45,7 +45,5 @@ properties:
     type: string
     description: The description of this alarm.
   extendedProperties:
-    type: array
-    description: An array of extended properties of this alarm.
-    items: 
-      $ref: "#/definitions/ChronosExtendedProperty"
+    type: string
+    description: A JSONObect of extended properties of this alarm.

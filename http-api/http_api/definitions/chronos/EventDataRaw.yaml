@@ -94,10 +94,8 @@ attachments:
   items:
     $ref: "#/definitions/ChronosAttachment"
 extendedProperties:
-  type: array
-  description: An array of extended properties of this event.
-  items:
-    $ref: "#/definitions/ChronosExtendedProperty"
+  type: string
+  description: An JSONObject of extended properties of this event.
 geo:
   type: object
   title: Geo
