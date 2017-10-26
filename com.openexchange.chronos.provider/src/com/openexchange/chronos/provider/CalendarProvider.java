@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.provider;
 
+import java.util.EnumSet;
 import java.util.Locale;
 import org.json.JSONObject;
 import com.openexchange.chronos.service.CalendarParameters;
@@ -77,6 +78,13 @@ public interface CalendarProvider {
      * @return The display name
      */
     String getDisplayName(Locale locale);
+
+    /**
+     * Gets the supported capabilities for a calendar access of this calendar provider, describing the usable extended feature set.
+     *
+     * @return The supported calendar capabilities, or an empty set if no extended functionality is available
+     */
+    EnumSet<CalendarCapability> getCapabilities();
 
     /**
      * Initializes the configuration prior creating a new calendar account.

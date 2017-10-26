@@ -49,12 +49,14 @@
 
 package com.openexchange.chronos.provider.internal;
 
+import java.util.EnumSet;
 import java.util.Locale;
 import org.json.JSONObject;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.AutoProvisioningCalendarProvider;
 import com.openexchange.chronos.provider.CalendarAccess;
 import com.openexchange.chronos.provider.CalendarAccount;
+import com.openexchange.chronos.provider.CalendarCapability;
 import com.openexchange.chronos.provider.SingleAccountCalendarProvider;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarService;
@@ -94,6 +96,11 @@ public class InternalCalendarProvider implements AutoProvisioningCalendarProvide
     @Override
     public String getDisplayName(Locale locale) {
         return StringHelper.valueOf(locale).getString(InternalCalendarStrings.PROVIDER_NAME);
+    }
+
+    @Override
+    public EnumSet<CalendarCapability> getCapabilities() {
+        return CalendarCapability.getCapabilities(InternalCalendarAccess.class);
     }
 
     @Override

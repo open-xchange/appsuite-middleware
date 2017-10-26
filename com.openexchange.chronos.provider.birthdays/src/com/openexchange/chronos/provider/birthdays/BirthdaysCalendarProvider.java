@@ -53,6 +53,7 @@ import static com.openexchange.chronos.provider.CalendarFolderProperty.DESCRIPTI
 import static com.openexchange.chronos.provider.CalendarFolderProperty.SCHEDULE_TRANSP;
 import static com.openexchange.chronos.provider.CalendarFolderProperty.USED_FOR_SYNC;
 import static com.openexchange.osgi.Tools.requireService;
+import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
@@ -68,6 +69,7 @@ import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.AutoProvisioningCalendarProvider;
 import com.openexchange.chronos.provider.CalendarAccess;
 import com.openexchange.chronos.provider.CalendarAccount;
+import com.openexchange.chronos.provider.CalendarCapability;
 import com.openexchange.chronos.provider.SingleAccountCalendarProvider;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.conversion.ConversionResult;
@@ -113,6 +115,11 @@ public class BirthdaysCalendarProvider implements AutoProvisioningCalendarProvid
     @Override
     public String getDisplayName(Locale locale) {
         return StringHelper.valueOf(locale).getString(BirthdaysCalendarStrings.PROVIDER_NAME);
+    }
+
+    @Override
+    public EnumSet<CalendarCapability> getCapabilities() {
+        return CalendarCapability.getCapabilities(BirthdaysCalendarAccess.class);
     }
 
     @Override

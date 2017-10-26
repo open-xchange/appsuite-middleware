@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.provider.schedjoules;
 
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -58,6 +59,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.chronos.provider.CalendarAccess;
 import com.openexchange.chronos.provider.CalendarAccount;
+import com.openexchange.chronos.provider.CalendarCapability;
 import com.openexchange.chronos.provider.caching.CachingCalendarProvider;
 import com.openexchange.chronos.provider.schedjoules.exception.SchedJoulesProviderExceptionCodes;
 import com.openexchange.chronos.schedjoules.api.SchedJoulesAPI;
@@ -89,12 +91,17 @@ public class SchedJoulesCalendarProvider extends CachingCalendarProvider {
 
     /**
      * Initialises a new {@link SchedJoulesCalendarProvider}.
-     * 
+     *
      * @param services The ServiceLookup instance
      */
     public SchedJoulesCalendarProvider(ServiceLookup services) {
         super();
         this.services = services;
+    }
+
+    @Override
+    public EnumSet<CalendarCapability> getCapabilities() {
+        return CalendarCapability.getCapabilities(SchedJoulesCalendarAccess.class);
     }
 
     /*
@@ -129,7 +136,7 @@ public class SchedJoulesCalendarProvider extends CachingCalendarProvider {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.chronos.provider.caching.CachingCalendarProvider#configureAccountOpt(com.openexchange.session.Session, org.json.JSONObject, com.openexchange.chronos.service.CalendarParameters)
      */
     @Override
@@ -156,7 +163,7 @@ public class SchedJoulesCalendarProvider extends CachingCalendarProvider {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.chronos.provider.CalendarProvider#reconfigureAccount(com.openexchange.session.Session, org.json.JSONObject, org.json.JSONObject, com.openexchange.chronos.service.CalendarParameters)
      */
     @Override
@@ -184,7 +191,7 @@ public class SchedJoulesCalendarProvider extends CachingCalendarProvider {
 
         // Check for differences and merge
         try {
-            // Build a map that contains all internal subscribed items and their position in the array  
+            // Build a map that contains all internal subscribed items and their position in the array
             Map<String, Integer> internalItemIds = new HashMap<>();
             for (int index = 0; index < internalConfigFolders.length(); index++) {
                 JSONObject folder = internalConfigFolders.getJSONObject(index);
@@ -204,7 +211,7 @@ public class SchedJoulesCalendarProvider extends CachingCalendarProvider {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.chronos.provider.caching.CachingCalendarProvider#onAccountCreatedOpt(com.openexchange.session.Session, com.openexchange.chronos.provider.CalendarAccount, com.openexchange.chronos.service.CalendarParameters)
      */
     @Override
@@ -214,7 +221,7 @@ public class SchedJoulesCalendarProvider extends CachingCalendarProvider {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.chronos.provider.caching.CachingCalendarProvider#onAccountUpdatedOpt(com.openexchange.session.Session, com.openexchange.chronos.provider.CalendarAccount, com.openexchange.chronos.service.CalendarParameters)
      */
     @Override
@@ -224,7 +231,7 @@ public class SchedJoulesCalendarProvider extends CachingCalendarProvider {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.chronos.provider.caching.CachingCalendarProvider#onAccountDeletedOpt(com.openexchange.session.Session, com.openexchange.chronos.provider.CalendarAccount, com.openexchange.chronos.service.CalendarParameters)
      */
     @Override
@@ -234,7 +241,7 @@ public class SchedJoulesCalendarProvider extends CachingCalendarProvider {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.chronos.provider.caching.CachingCalendarProvider#recreateData(com.openexchange.session.Session, org.json.JSONObject, org.json.JSONObject)
      */
     @Override
@@ -246,7 +253,7 @@ public class SchedJoulesCalendarProvider extends CachingCalendarProvider {
 
     /**
      * Converts and adds the user configuration folders to internal configuration folders
-     * 
+     *
      * @param folders The array of the user configuration folders
      * @param internalConfigFolders The internal configuration folders
      * @throws OXException If an error is occurred
@@ -263,7 +270,7 @@ public class SchedJoulesCalendarProvider extends CachingCalendarProvider {
     /**
      * Prepares a folder for internal configuration. Fetches the item via the itemId and
      * stores the URL
-     * 
+     *
      * @param folder The JSONObject that denotes a subscription candidate
      * @return The internal item
      * @throws JSONException if a JSON error is occurred
@@ -295,7 +302,7 @@ public class SchedJoulesCalendarProvider extends CachingCalendarProvider {
 
     /**
      * Fetches the calendar's metdata with the specified item and the specified locale from the SchedJoules server
-     * 
+     *
      * @param itemId The item identifier
      * @param locale The optional locale
      * @return The calendar's metadata as JSONObject
@@ -318,7 +325,7 @@ public class SchedJoulesCalendarProvider extends CachingCalendarProvider {
 
     /**
      * Handles the additions.
-     * 
+     *
      * @param userConfigFolders The user configuration for 'folders'
      * @param internalItemIds The internal items
      * @param additions The target 'additions' object
@@ -340,7 +347,7 @@ public class SchedJoulesCalendarProvider extends CachingCalendarProvider {
 
     /**
      * Handle any potential deletions.
-     * 
+     *
      * @param internalConfigFolders The internal configuration for 'folders'
      * @param internalItemIds The items that are to be removed from the internal configuration
      * @return <code>true</code> if the internal configuration was changed, <code>false</code> otherwise
@@ -359,7 +366,7 @@ public class SchedJoulesCalendarProvider extends CachingCalendarProvider {
 
     /**
      * Adds the new items to the internal configuration
-     * 
+     *
      * @param internalConfigFolders The internal configuration for folders
      * @param additions The array holding the new items
      * @throws JSONException if a JSON error is occurred
@@ -372,7 +379,7 @@ public class SchedJoulesCalendarProvider extends CachingCalendarProvider {
 
     /**
      * Generates a user key from the user's primary e-mail address
-     * 
+     *
      * @param session The session to retrieve the user information
      * @return The user key
      * @throws OXException if the {@link UserService} is missing or if the user does not exist.
