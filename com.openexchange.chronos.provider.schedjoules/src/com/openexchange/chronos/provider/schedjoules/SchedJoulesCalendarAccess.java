@@ -222,7 +222,6 @@ public class SchedJoulesCalendarAccess extends CachingCalendarAccess {
      */
     @Override
     public long getExternalRequestTimeout() {
-        // TODO: Make configurable?
         return TimeUnit.MINUTES.toMinutes(EXTERNAL_REQUEST_TIMEOUT);
     }
 

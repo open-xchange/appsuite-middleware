@@ -78,10 +78,6 @@ public class SchedJoulesCalendarProvider extends CachingCalendarProvider {
     private static final String DISPLAY_NAME = "SchedJoules";
 
     /**
-     * Default value for refreshInterval in minutes (1 week)
-     */
-    private static final int DEFAULT_REFRESH_INTERVAL = 10080;
-    /**
      * The minumum value for the refreshInterval in minutes (1 day)
      */
     private static final int MINIMUM_REFRESH_INTERVAL = 1440;
@@ -268,7 +264,7 @@ public class SchedJoulesCalendarProvider extends CachingCalendarProvider {
     private JSONObject prepareFolder(JSONObject folder) throws JSONException, OXException {
         int itemId = folder.getInt(SchedJoulesFields.ITEM_ID);
         String locale = folder.optString(SchedJoulesFields.LOCALE);
-        int refreshInterval = folder.optInt(SchedJoulesFields.REFRESH_INTERVAL, DEFAULT_REFRESH_INTERVAL);
+        int refreshInterval = folder.optInt(SchedJoulesFields.REFRESH_INTERVAL, MINIMUM_REFRESH_INTERVAL);
         if (refreshInterval < MINIMUM_REFRESH_INTERVAL) {
             refreshInterval = MINIMUM_REFRESH_INTERVAL;
         }
