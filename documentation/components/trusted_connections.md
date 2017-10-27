@@ -52,6 +52,7 @@ com.openexchange.net.ssl.ciphersuites=TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA, TLS_
 
 ## Disable hostname verification
 Hostname verification can be disabled by setting following property:  
+
 ```
 # Disables the hostname verification
 com.openexchange.net.ssl.hostname.verification.enabled=false
@@ -59,6 +60,7 @@ com.openexchange.net.ssl.hostname.verification.enabled=false
 
 ## Use a whitelist 
 A whitelist of hostnames and/or IP ranges can be set by following property
+
 ```
 # A comma-separated list of hosts certificates shouldn't be checked for validity. The list can contain wildcards and ip ranges.
 com.openexchange.net.ssl.whitelist=127.0.0.1-127.255.255.255,localhost
@@ -66,6 +68,7 @@ com.openexchange.net.ssl.whitelist=127.0.0.1-127.255.255.255,localhost
 
 ## Enable user configuration
 It is possible to let the user decide if he wants to trust a restricted set of certificates or to trust all certificates. If enabled, the user can choose to trust all certificates in his general settings.
+
 ```
 # Defines if the user is able to define a more unsecure trust level than it is defined globally the administrator
 com.openexchange.net.ssl.user.configuration.enabled=true
