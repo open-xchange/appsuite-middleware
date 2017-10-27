@@ -87,6 +87,7 @@ import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.login.LoginConfiguration;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.notify.hostname.HostnameService;
+import com.openexchange.java.Strings;
 import com.openexchange.login.internal.LoginPerformer;
 import com.openexchange.oidc.OIDCBackendConfig;
 import com.openexchange.oidc.OIDCBackendConfig.AutologinMode;
@@ -142,7 +143,7 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
 
         if (autologinMode != null && autologinMode == AutologinMode.OX_DIRECT) {
             String autologinRedirect = this.getAutologinURLFromOIDCCookie(request, response);
-            if (autologinRedirect != null && !autologinRedirect.isEmpty()) {
+            if (!Strings.isEmpty(autologinRedirect)) {
                 return autologinRedirect;
             }
         }
@@ -151,11 +152,11 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
         Nonce nonce = new Nonce();
 
         String loginRequest = this.buildLoginRequest(state, nonce, request);
-        if (loginRequest.isEmpty()) {
+        if (Strings.isEmpty(loginRequest)) {
             throw OIDCExceptionCode.UNABLE_TO_CREATE_AUTHENTICATION_REQUEST.create(backend.getPath());
         }
 
-        this.addAuthRequestToStateManager(request, state, nonce);
+        this.addAuthRequestToStateManager(state, nonce, request);
         LOG.trace("Login redirect request: {}", loginRequest);
         return loginRequest;
     }
@@ -226,8 +227,8 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
         return requestString;
     }
 
-    private void addAuthRequestToStateManager(HttpServletRequest request, State state, Nonce nonce) {
-        LOG.trace("addAuthRequestToStateManager(HttpServletRequest request: {}, State state: {}, Nonce nonce: {})", request.getRequestURI(), state.getValue(), nonce.getValue());
+    private void addAuthRequestToStateManager(State state, Nonce nonce, HttpServletRequest request) {
+        LOG.trace("addAuthRequestToStateManager(State state: {}, Nonce nonce: {}, HttpServletRequest request: {})", state.getValue(), nonce.getValue(), request.getRequestURI());
         String deepLink = request.getParameter("deep_link");
         String uiClientID = OIDCTools.getUiClient(request);
         String hostname = OIDCTools.getDomainName(request, services.getOptionalService(HostnameService.class));
@@ -258,10 +259,14 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
             IDTokenClaimsSet validTokenResponse = this.backend.validateIdToken(tokenResponse.getOIDCTokens().getIDToken(), storedRequestInformation.getNonce());
             if (validTokenResponse != null) {
                 this.sendLoginRequestToServer(request, response, tokenResponse, storedRequestInformation.getDomainName());
+                return;
             }
             throw OIDCExceptionCode.IDTOKEN_GATHERING_ERROR.create("IDToken validation failed, no claim set could be extracted");
         } catch (OXException e) {
-            throw OIDCExceptionCode.IDTOKEN_GATHERING_ERROR.create(e, e.getMessage());
+            if (e.getExceptionCode() != OIDCExceptionCode.IDTOKEN_GATHERING_ERROR) {
+                throw OIDCExceptionCode.IDTOKEN_GATHERING_ERROR.create(e, e.getMessage());
+            }
+            throw e;
         }
     }
     
@@ -303,7 +308,7 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
         return (OIDCTokenResponse) tokenResponse;
     }
     
-    private String sendLoginRequestToServer(HttpServletRequest request, HttpServletResponse response, OIDCTokenResponse tokenResponse, String domainName) throws OXException {
+    private void sendLoginRequestToServer(HttpServletRequest request, HttpServletResponse response, OIDCTokenResponse tokenResponse, String domainName) throws OXException {
         LOG.trace("sendLoginRequestToServer(HttpServletRequest request: {}, HttpServletResponse response, OIDCTokenResponse tokenResponse: {}, String domainName: {})",
             request.getRequestURI(), tokenResponse.getOIDCTokens().toJSONObject().toJSONString(), domainName);
         AuthenticationInfo authInfo = this.backend.resolveAuthenticationResponse(request, tokenResponse);
@@ -343,7 +348,6 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
         } catch (IOException e) {
             throw OIDCExceptionCode.UNABLE_TO_SEND_REDIRECT.create(e, loginRedirect);
         }
-        return null;
     }
 
     @Override

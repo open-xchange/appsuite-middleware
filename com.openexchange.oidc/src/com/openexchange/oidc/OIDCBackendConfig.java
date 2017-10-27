@@ -98,7 +98,7 @@ public interface OIDCBackendConfig {
             this.value = value;
         }
         
-        private String getValue() {
+        public String getValue() {
             return this.value;
         }
         
