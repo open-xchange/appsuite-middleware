@@ -72,6 +72,10 @@ import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.SortableConcurrentList;
 import com.openexchange.osgi.util.RankedService;
+import com.openexchange.pns.DefaultPushSubscription;
+import com.openexchange.pns.EnabledKey;
+import com.openexchange.pns.KnownTransport;
+import com.openexchange.pns.Message;
 import com.openexchange.pns.PushExceptionCodes;
 import com.openexchange.pns.PushMatch;
 import com.openexchange.pns.PushMessageGenerator;
@@ -79,11 +83,8 @@ import com.openexchange.pns.PushMessageGeneratorRegistry;
 import com.openexchange.pns.PushNotification;
 import com.openexchange.pns.PushNotificationTransport;
 import com.openexchange.pns.PushNotifications;
-import com.openexchange.pns.DefaultPushSubscription;
-import com.openexchange.pns.EnabledKey;
-import com.openexchange.pns.KnownTransport;
 import com.openexchange.pns.PushSubscriptionRegistry;
-import com.openexchange.pns.Message;
+import com.openexchange.pns.transport.apn.ApnConstants;
 import com.openexchange.pns.transport.apn.ApnOptions;
 import com.openexchange.pns.transport.apn.ApnOptionsPerClient;
 import com.openexchange.pns.transport.apn.ApnOptionsProvider;
@@ -114,8 +115,6 @@ public class ApnPushNotificationTransport extends ServiceTracker<ApnOptionsProvi
     private static final int STATUS_INVALID_TOKEN_SIZE = 5;
 
     private static final int STATUS_INVALID_TOKEN = 8;
-
-    private static final int MAX_PAYLOAD_SIZE = 256;
 
     // ---------------------------------------------------------------------------------------------------------------
 
@@ -356,8 +355,8 @@ public class ApnPushNotificationTransport extends ServiceTracker<ApnOptionsProvi
     private void addCheckPayload(Payload payload, PushMatch match, List<PayloadPerDevice> payloads) throws OXException {
         int payloadLength = PushNotifications.getPayloadLength(payload.toString());
         // Check payload length
-        if (payloadLength > MAX_PAYLOAD_SIZE) {
-            throw PushExceptionCodes.MESSAGE_TOO_BIG.create(MAX_PAYLOAD_SIZE, payloadLength);
+        if (payloadLength > ApnConstants.APNS_MAX_PAYLOAD_SIZE) {
+            throw PushExceptionCodes.MESSAGE_TOO_BIG.create(ApnConstants.APNS_MAX_PAYLOAD_SIZE, payloadLength);
         }
 
         try {
