@@ -60,7 +60,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.openexchange.chronos.Calendar;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.ExtendedProperties;
 import com.openexchange.chronos.TimeTransparency;
@@ -72,6 +71,7 @@ import com.openexchange.chronos.provider.DefaultCalendarPermission;
 import com.openexchange.chronos.provider.caching.CachingCalendarAccess;
 import com.openexchange.chronos.provider.caching.ExternalCalendarResult;
 import com.openexchange.chronos.provider.schedjoules.exception.SchedJoulesProviderExceptionCodes;
+import com.openexchange.chronos.schedjoules.SchedJoulesCalendar;
 import com.openexchange.chronos.schedjoules.api.SchedJoulesAPI;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.exception.OXException;
@@ -232,9 +232,15 @@ public class SchedJoulesCalendarAccess extends CachingCalendarAccess {
     @Override
     public ExternalCalendarResult getAllEvents(String folderId) throws OXException {
         try {
-            URL url = getFeedURL(folderId);
+            JSONObject folder = findFolderInInternalConfiguration(folderId);
+            String eTag = folder.optString(SchedJoulesFields.ETAG);
+            URL url = getFeedURL(folder);
+
             SchedJoulesAPI api = SchedJoulesAPI.getInstance();
-            Calendar calendar = api.calendar().getCalendar(url);
+            SchedJoulesCalendar calendar = api.calendar().getCalendar(url, eTag);
+            if (eTag.equals(calendar.getETag())) {
+                return new ExternalCalendarResult();
+            }
             if (NO_ACCESS.equals(calendar.getName())) {
                 throw SchedJoulesProviderExceptionCodes.NO_ACCESS.create(folderId);
             }
@@ -262,15 +268,13 @@ public class SchedJoulesCalendarAccess extends CachingCalendarAccess {
     /**
      * Returns the feed URL for the specified folder
      *
-     * @param folderId The folder identifier
+     * @param folder The folder metadata
      * @return The feed URL from which to fetch the events
      * @throws MalformedURLException If the URL is invalid
      * @throws JSONException if a JSON error occurs
-     * @throws OXException if the feed URL cannot be returned due to either malformed user key,
-     *             or non-existing configuration or folder
+     * @throws OXException if the feed URL cannot be returned due to either malformed user key
      */
-    private URL getFeedURL(String folderId) throws MalformedURLException, JSONException, OXException {
-        JSONObject folder = findFolderInInternalConfiguration(folderId);
+    private URL getFeedURL(JSONObject folder) throws MalformedURLException, JSONException, OXException {
         URL url = new URL(folder.getString(SchedJoulesFields.URL));
         String userKey = getUserKey();
         return new URL(generateURL(url, userKey));

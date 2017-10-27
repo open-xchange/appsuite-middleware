@@ -54,8 +54,10 @@ import java.io.InputStream;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.chronos.Calendar;
 import com.openexchange.chronos.ical.ICalParameters;
 import com.openexchange.chronos.ical.ICalService;
+import com.openexchange.chronos.schedjoules.SchedJoulesCalendar;
 import com.openexchange.chronos.schedjoules.api.client.SchedJoulesResponse;
 import com.openexchange.chronos.schedjoules.exception.SchedJoulesAPIExceptionCodes;
 import com.openexchange.chronos.schedjoules.osgi.Services;
@@ -106,7 +108,8 @@ public enum SchedJoulesResponseParser {
             parameters.set(ICalParameters.IGNORE_UNSET_PROPERTIES, Boolean.TRUE);
 
             try (InputStream inputStream = Streams.bufferedInputStreamFor(response.getStream())) {
-                return iCalService.importICal(inputStream, parameters);
+                Calendar calendar = iCalService.importICal(inputStream, parameters);
+                return new SchedJoulesCalendar(calendar.getName(), calendar.getEvents(), response.getETag());
             } catch (IOException e) {
                 throw SchedJoulesAPIExceptionCodes.IO_ERROR.create(e.getMessage(), e);
             }

@@ -60,6 +60,7 @@ import org.apache.http.HttpHeaders;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpHead;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -149,8 +150,8 @@ public class SchedJoulesRESTClient {
      * @param query The optional query string
      * @throws OXException if the path is not valid
      */
-    private void prepareAuthorizedRequest(HttpRequestBase request, String scheme, String baseUrl, String path, String query) throws OXException {
-        prepareRequest(request, scheme, baseUrl, path, query);
+    private void prepareAuthorizedRequest(HttpRequestBase request, String scheme, String baseUrl, String path, String query, String eTag) throws OXException {
+        prepareRequest(request, scheme, baseUrl, path, query, eTag);
         request.addHeader(HttpHeaders.AUTHORIZATION, authorizationHeader);
     }
 
@@ -164,10 +165,13 @@ public class SchedJoulesRESTClient {
      * @param query The optional query string
      * @throws OXException if the path is not valid
      */
-    private void prepareRequest(HttpRequestBase request, String scheme, String baseUrl, String path, String query) throws OXException {
+    private void prepareRequest(HttpRequestBase request, String scheme, String baseUrl, String path, String query, String eTag) throws OXException {
         try {
             request.setURI(new URI(scheme, baseUrl, path, query, null));
             request.addHeader(HttpHeaders.ACCEPT, acceptHeader);
+            if (!Strings.isEmpty(eTag)) {
+                request.addHeader(HttpHeaders.IF_NONE_MATCH, eTag);
+            }
         } catch (URISyntaxException e) {
             throw SchedJoulesAPIExceptionCodes.INVALID_URI_PATH.create(path, e);
         }
@@ -186,7 +190,7 @@ public class SchedJoulesRESTClient {
 
         // Prepare the request
         HttpRequestBase httpRequest = createRequest(request.getMethod());
-        prepareAuthorizedRequest(httpRequest, SCHEME, BASE_URL, request.getPath(), query);
+        prepareAuthorizedRequest(httpRequest, SCHEME, BASE_URL, request.getPath(), query, request.getETag());
         return httpRequest;
     }
 
@@ -203,6 +207,9 @@ public class SchedJoulesRESTClient {
             case GET:
                 httpRequest = new HttpGet();
                 break;
+            case HEAD:
+                httpRequest = new HttpHead();
+                break;
             default:
                 throw SchedJoulesAPIExceptionCodes.UNKNOWN_HTTP_METHOD.create(httpMethod);
         }
@@ -218,9 +225,9 @@ public class SchedJoulesRESTClient {
      * @throws OXException if an unknown HTTP method is provided
      * @throws URISyntaxException If an invalid URL is provided
      */
-    private HttpUriRequest prepareRequest(URL url, HttpMethod httpMethod) throws OXException {
+    private HttpUriRequest prepareRequest(URL url, HttpMethod httpMethod, String eTag) throws OXException {
         HttpRequestBase httpRequest = createRequest(httpMethod);
-        prepareRequest(httpRequest, url.getProtocol(), url.getHost(), url.getPath(), url.getQuery());
+        prepareRequest(httpRequest, url.getProtocol(), url.getHost(), url.getPath(), url.getQuery(), eTag);
         return httpRequest;
     }
 
@@ -261,7 +268,7 @@ public class SchedJoulesRESTClient {
      * @throws OXException if an error is occurred
      */
     public SchedJoulesResponse executeRequest(URL url) throws OXException {
-        return executeRequest(url, HttpMethod.GET);
+        return executeRequest(url, HttpMethod.GET, null);
     }
 
     /**
@@ -272,8 +279,8 @@ public class SchedJoulesRESTClient {
      * @return The {@link SchedJoulesResponse}
      * @throws OXException if an error is occurred
      */
-    public SchedJoulesResponse executeRequest(URL url, HttpMethod httpMethod) throws OXException {
-        return executeRequest(prepareRequest(url, httpMethod));
+    public SchedJoulesResponse executeRequest(URL url, HttpMethod httpMethod, String eTag) throws OXException {
+        return executeRequest(prepareRequest(url, httpMethod, eTag));
     }
 
     /**
@@ -313,17 +320,22 @@ public class SchedJoulesRESTClient {
      * @throws OXException if any other error is occurred
      */
     private SchedJoulesResponse prepareResponse(HttpResponse httpResponse) throws IOException, OXException {
-        HttpEntity entity = httpResponse.getEntity();
-        if (entity == null) {
-            throw SchedJoulesAPIExceptionCodes.NO_CONTENT.create();
-        }
         SchedJoulesResponse response = new SchedJoulesResponse(httpResponse.getStatusLine().getStatusCode());
-        Header ctHeader = httpResponse.getFirstHeader("content-type");
+        Header ctHeader = httpResponse.getFirstHeader(HttpHeaders.CONTENT_TYPE);
         if (ctHeader != null) {
             String ct = ctHeader.getValue();
             String contentType = ct.substring(0, ct.indexOf(';'));
             response.setContentType(contentType);
         }
+        Header eTagHeader = httpResponse.getFirstHeader(HttpHeaders.ETAG);
+        if (eTagHeader != null) {
+            response.setETag(eTagHeader.getValue());
+        }
+        HttpEntity entity = httpResponse.getEntity();
+        if (entity == null) {
+            return response;
+        }
+
         response.setStream(entity.getContent());
         return response;
     }

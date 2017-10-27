@@ -63,6 +63,7 @@ public class SchedJoulesRequest {
     private final String path;
     private final Map<String, String> queryParameters;
     private final HttpMethod method;
+    private String eTag;
 
     /**
      * Initialises a new {@link SchedJoulesRequest}.
@@ -126,5 +127,23 @@ public class SchedJoulesRequest {
      */
     public HttpMethod getMethod() {
         return method;
+    }
+
+    /**
+     * Gets the eTag
+     *
+     * @return The eTag
+     */
+    public String getETag() {
+        return eTag;
+    }
+
+    /**
+     * Sets the eTag
+     *
+     * @param eTag The eTag to set
+     */
+    public void setETag(String eTag) {
+        this.eTag = eTag;
     }
 }
