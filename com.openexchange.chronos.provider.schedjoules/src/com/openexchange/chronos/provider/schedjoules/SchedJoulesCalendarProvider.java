@@ -195,7 +195,7 @@ public class SchedJoulesCalendarProvider extends CachingCalendarProvider {
             Map<String, Integer> internalItemIds = new HashMap<>();
             for (int index = 0; index < internalConfigFolders.length(); index++) {
                 JSONObject folder = internalConfigFolders.getJSONObject(index);
-                internalItemIds.put(folder.getString(SchedJoulesFields.NAME), index);
+                internalItemIds.put(folder.getString(SchedJoulesFields.ITEM_ID), index);
             }
 
             JSONArray additions = new JSONArray();
@@ -336,11 +336,11 @@ public class SchedJoulesCalendarProvider extends CachingCalendarProvider {
     private boolean handleAdditions(JSONArray userConfigFolders, Map<String, Integer> internalItemIds, JSONArray additions) throws JSONException, OXException {
         for (int index = 0; index < userConfigFolders.length(); index++) {
             JSONObject folder = userConfigFolders.getJSONObject(index);
-            String name = folder.optString(SchedJoulesFields.NAME);
-            if (!internalItemIds.containsKey(name)) {
+            String itemId = folder.optString(SchedJoulesFields.ITEM_ID);
+            if (!internalItemIds.containsKey(itemId)) {
                 additions.put(prepareFolder(folder));
             }
-            internalItemIds.remove(name);
+            internalItemIds.remove(itemId);
         }
         return !additions.isEmpty();
     }
@@ -358,8 +358,8 @@ public class SchedJoulesCalendarProvider extends CachingCalendarProvider {
             return false;
         }
 
-        for (String name : internalItemIds.keySet()) {
-            internalConfigFolders.remove(internalItemIds.get(name));
+        for (String itemId : internalItemIds.keySet()) {
+            internalConfigFolders.remove(internalItemIds.get(itemId));
         }
         return true;
     }

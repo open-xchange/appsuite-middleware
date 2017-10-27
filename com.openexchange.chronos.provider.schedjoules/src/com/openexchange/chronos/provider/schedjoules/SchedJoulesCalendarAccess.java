@@ -147,11 +147,11 @@ public class SchedJoulesCalendarAccess extends CachingCalendarAccess {
             if (!hasMetadata(folder)) {
                 continue;
             }
-            String name = getFolderName(folder);
-            if (Strings.isEmpty(name)) {
+            String itemId = getFolderAttribute(folder, SchedJoulesFields.ITEM_ID);
+            if (Strings.isEmpty(itemId)) {
                 continue;
             }
-            folders.add(prepareFolder(name));
+            folders.add(prepareFolder(itemId));
         }
         return folders;
     }
@@ -341,7 +341,7 @@ public class SchedJoulesCalendarAccess extends CachingCalendarAccess {
             if (!hasMetadata(folder)) {
                 continue;
             }
-            if (folderId.equals(getFolderName(folder))) {
+            if (folderId.equals(getFolderAttribute(folder, SchedJoulesFields.ITEM_ID))) {
                 return folder;
             }
         }
@@ -351,25 +351,68 @@ public class SchedJoulesCalendarAccess extends CachingCalendarAccess {
     /**
      * Prepares the specified folder
      *
-     * @param folderName The folder name
+     * @param folderId The folder identifier
      * @return the prepared {@link CalendarFolder}
-     * @throws OXException
-     * @throws JSONException
+     * @throws OXException if the folder does not exist
+     * @throws JSONException if a JSON error occurs
      */
-    private CalendarFolder prepareFolder(String folderName) throws OXException {
-        DefaultCalendarFolder folder = new DefaultCalendarFolder(folderName, folderName);
+    private CalendarFolder prepareFolder(String folderId) throws OXException {
+        DefaultCalendarFolder folder = new DefaultCalendarFolder();
+        folder.setId(folderId);
 
         folder.setPermissions(Collections.singletonList(DefaultCalendarPermission.readOnlyPermissionsFor(getAccount().getUserId())));
         folder.setLastModified(getAccount().getLastModified());
 
+        applyConfiguration(folder, folderId);
+        return folder;
+    }
+
+    /**
+     * Applies the configuration to the folder with the specified identifier
+     * 
+     * @param folder The {@link DefaultCalendarFolder} to apply the configuration to
+     * @param folderId The folder identifier
+     * @throws OXException if no such folder exists
+     */
+    private void applyConfiguration(DefaultCalendarFolder folder, String folderId) throws OXException {
+        applyUserConfiguration(folder, folderId);
+        applyInternalConfiguration(folder, folderId);
+    }
+
+    /**
+     * Applies the user configuration
+     * 
+     * @param folder The {@link DefaultCalendarFolder} to apply the configuration to
+     * @param folderId The folder identifier
+     * @throws OXException if no such folder exists in the user configuration
+     */
+    private void applyUserConfiguration(DefaultCalendarFolder folder, String folderId) throws OXException {
+        JSONObject userConfig = getAccount().getUserConfiguration();
+        if (userConfig == null) {
+            folder.setName(folderId);
+            return;
+        }
+        JSONArray folders = userConfig.optJSONArray(SchedJoulesFields.FOLDERS);
+        JSONObject folderJson = findFolder(folderId, folders);
+        folder.setName(folderJson.optString(SchedJoulesFields.NAME));
+    }
+
+    /**
+     * Applies the internal configuration
+     * 
+     * @param folder The {@link DefaultCalendarFolder} to apply the configuration to
+     * @param folderId The folder identifier
+     * @throws OXException if no such folder exists in the internal configuration
+     */
+    private void applyInternalConfiguration(DefaultCalendarFolder folder, String folderId) throws OXException {
         JSONObject internalConfig = getAccount().getInternalConfiguration();
         if (internalConfig == null) {
-            return folder;
+            return;
         }
 
         // Apply extended properties
         JSONArray folders = internalConfig.optJSONArray(SchedJoulesFields.FOLDERS);
-        JSONObject folderJson = findFolder(folderName, folders);
+        JSONObject folderJson = findFolder(folderId, folders);
 
         ExtendedProperties extendedProperties = new ExtendedProperties();
         extendedProperties.replace(CalendarFolderProperty.COLOR(folderJson.optString(SchedJoulesFields.COLOR, null), false));
@@ -378,8 +421,6 @@ public class SchedJoulesCalendarAccess extends CachingCalendarAccess {
         extendedProperties.replace(CalendarFolderProperty.SCHEDULE_TRANSP(Enums.parse(TimeTransparency.class, folderJson.optString(SchedJoulesFields.SCHEDULE_TRANSP, null), TimeTransparency.OPAQUE), true));
 
         folder.setExtendedProperties(extendedProperties);
-
-        return folder;
     }
 
     /**
@@ -388,12 +429,12 @@ public class SchedJoulesCalendarAccess extends CachingCalendarAccess {
      * @param folder the metadata {@link JSONObject}
      * @return The folder's name or <code>null</code> if the metdata have no 'name' information
      */
-    private String getFolderName(JSONObject folder) {
-        String name = folder.optString(SchedJoulesFields.NAME);
-        if (Strings.isEmpty(name)) {
-            LOG.warn("Missing the 'name' attribute from folder metadata for account '{}' of user '{}' in context '{}'", getAccount().getAccountId(), getSession().getUserId(), getSession().getContextId());
+    private String getFolderAttribute(JSONObject folder, String folderAttribute) {
+        String attrValue = folder.optString(folderAttribute);
+        if (Strings.isEmpty(attrValue)) {
+            LOG.warn("Missing the '{}' attribute from folder metadata for account '{}' of user '{}' in context '{}'", folderAttribute, getAccount().getAccountId(), getSession().getUserId(), getSession().getContextId());
         }
-        return name;
+        return attrValue;
     }
 
     /**
