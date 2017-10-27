@@ -56,8 +56,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -274,26 +272,17 @@ public class ReportingMBean implements DynamicMBean {
         final TabularDataSupport total = new TabularDataSupport(totalType);
 
         try {
-            int userCount = 0;
-            int guestCount = 0;
-            int linkCount = 0;
+            int nruser = 0;
+            int nrguests = 0;
+            int nrlinks = 0;
+            int nrctx = 0;
 
-            List<Integer> allContextIds = Tools.getAllContextIds();
-
-            List<Integer> contextsToProcess = Collections.synchronizedList(new ArrayList<>(allContextIds));
-            while (!contextsToProcess.isEmpty()) {
-                Integer firstRemainingContext = contextsToProcess.get(0);
-                List<Integer> contextInSameSchema = Tools.getContextInSameSchema(firstRemainingContext.intValue());
-                userCount = userCount + Tools.getNumberOfUsers(contextInSameSchema);
-                guestCount = guestCount + Tools.getNumberOfGuests(contextInSameSchema);
-                linkCount = linkCount + Tools.getNumberOfLinks(contextInSameSchema);
-
-                contextsToProcess.removeAll(contextInSameSchema);
+            for (List<Integer> contextsInSameSchema : Tools.getSchemaAssociations().values()) {
+                nrctx += contextsInSameSchema.size();
+                nruser = nruser + Tools.getNumberOfUsers(contextsInSameSchema);
+                nrguests = nrguests + Tools.getNumberOfGuests(contextsInSameSchema);
+                nrlinks = nrlinks + Tools.getNumberOfLinks(contextsInSameSchema);
             }
-            int nrctx = allContextIds.size();
-            int nruser = userCount;
-            int nrguests = guestCount;
-            int nrlinks = linkCount;
 
             final CompositeDataSupport value = new CompositeDataSupport(totalRow, totalNames, new Object[] { I(nrctx), I(nruser), I(nrguests), I(nrlinks) });
             total.put(value);

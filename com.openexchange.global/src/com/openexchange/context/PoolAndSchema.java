@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,86 +47,79 @@
  *
  */
 
-package com.openexchange.oauth.impl.osgi;
-
-import java.util.List;
-import java.util.Map;
-import com.openexchange.context.ContextService;
-import com.openexchange.context.PoolAndSchema;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
+package com.openexchange.context;
 
 /**
- * {@link OSGiContextService}
+ * {@link PoolAndSchema} - A pair of a database (write) pool identifier and a schema name.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.10.0
  */
-public final class OSGiContextService extends AbstractOSGiDelegateService<ContextService> implements ContextService {
+public class PoolAndSchema {
+
+    private final int poolId;
+    private final String schema;
+    private final int hash;
 
     /**
-     * Initializes a new {@link OSGiContextService}.
+     * Initializes a new {@link PoolAndSchema}.
+     *
+     * @param poolId The pool identifier
+     * @param schema The name of the associated database schema
      */
-    public OSGiContextService() {
-        super(ContextService.class);
+    public PoolAndSchema(int poolId, String schema) {
+        super();
+        this.poolId = poolId;
+        this.schema = schema;
+
+        int result = 31 * 1 + poolId;
+        result = 31 * result + ((schema == null) ? 0 : schema.hashCode());
+        this.hash = result;
+    }
+
+    /**
+     * Gets the name of the associated database schema
+     *
+     * @return The name of the associated database schema
+     */
+    public String getSchema() {
+        return schema;
+    }
+
+    /**
+     * Gets the pool identifier
+     *
+     * @return The pool identifier
+     */
+    public int getPoolId() {
+        return poolId;
     }
 
     @Override
-    public void setAttribute(String name, String value, int contextId) throws OXException {
-        getService().setAttribute(name, value, contextId);
+    public int hashCode() {
+        return hash;
     }
 
     @Override
-    public List<Integer> getAllContextIds() throws OXException {
-        return getService().getAllContextIds();
-    }
-
-    @Override
-    public List<Integer> getDistinctContextsPerSchema() throws OXException {
-        return getService().getDistinctContextsPerSchema();
-    }
-
-    @Override
-    public Map<PoolAndSchema, List<Integer>> getSchemaAssociations() throws OXException {
-        return getService().getSchemaAssociations();
-    }
-
-    @Override
-    public Map<PoolAndSchema, List<Integer>> getSchemaAssociationsFor(List<Integer> contextIds) throws OXException {
-        return getService().getSchemaAssociationsFor(contextIds);
-    }
-
-    @Override
-    public Context getContext(int contextId) throws OXException {
-        return getService().getContext(contextId);
-    }
-
-    @Override
-    public int getContextId(final String loginContextInfo) throws OXException {
-        return getService().getContextId(loginContextInfo);
-    }
-
-    @Override
-    public void invalidateContext(final int contextId) throws OXException {
-        getService().invalidateContext(contextId);
-    }
-
-    @Override
-    public void invalidateContexts(int[] contextIDs) throws OXException {
-        try {
-            getService().invalidateContexts(contextIDs);
-        } catch (final OXException e) {
-            throw e;
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
         }
-    }
-
-    @Override
-    public void invalidateLoginInfo(final String loginContextInfo) throws OXException {
-        getService().invalidateLoginInfo(loginContextInfo);
-    }
-
-    @Override
-    public Context loadContext(final int contextId) throws OXException {
-        return getService().loadContext(contextId);
+        if (!(obj instanceof PoolAndSchema)) {
+            return false;
+        }
+        PoolAndSchema other = (PoolAndSchema) obj;
+        if (poolId != other.poolId) {
+            return false;
+        }
+        if (schema == null) {
+            if (other.schema != null) {
+                return false;
+            }
+        } else if (!schema.equals(other.schema)) {
+            return false;
+        }
+        return true;
     }
 
 }
