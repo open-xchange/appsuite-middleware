@@ -125,6 +125,24 @@ public class Event {
     }
 
     /**
+     * Gets a value indicating whether multiple properties are set in the event or not.
+     *
+     * @param fields The fields to check
+     * @return <code>true</code> if all fields are <i>set</i>, <code>false</code>, otherwise
+     */
+    public boolean areSet(EventField... fields) {
+        if (null == fields || 0 == fields.length) {
+            return true;
+        }
+        for (EventField field : fields) {
+            if (false == isSet(field)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
      * Gets the object identifier of the event.
      *
      * @return The object identifier

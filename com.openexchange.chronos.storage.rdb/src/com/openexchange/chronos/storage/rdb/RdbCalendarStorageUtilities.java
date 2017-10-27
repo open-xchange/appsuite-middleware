@@ -49,12 +49,15 @@
 
 package com.openexchange.chronos.storage.rdb;
 
+import static com.openexchange.chronos.common.CalendarUtils.getExceptionDates;
 import static com.openexchange.chronos.common.CalendarUtils.getObjectIDs;
+import static com.openexchange.chronos.common.CalendarUtils.getRecurrenceIds;
 import static com.openexchange.tools.arrays.Arrays.contains;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeSet;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Attendee;
@@ -62,8 +65,12 @@ import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.RecurrenceId;
+import com.openexchange.chronos.common.DefaultRecurrenceData;
+import com.openexchange.chronos.common.RecurrenceIdComparator;
 import com.openexchange.chronos.common.mapping.AttendeeMapper;
 import com.openexchange.chronos.common.mapping.EventMapper;
+import com.openexchange.chronos.service.RecurrenceData;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.chronos.storage.CalendarStorageUtilities;
 import com.openexchange.exception.OXException;
@@ -180,10 +187,36 @@ public class RdbCalendarStorageUtilities implements CalendarStorageUtilities {
     }
 
     @Override
+    public RecurrenceData loadRecurrenceData(Event seriesMaster) throws OXException {
+        /*
+         * ensure all required fields are known
+         */
+        EventField[] requiredFields = new EventField[] { EventField.DELETE_EXCEPTION_DATES, EventField.START_DATE, EventField.RECURRENCE_RULE };
+        if (false == seriesMaster.areSet(requiredFields)) {
+            seriesMaster = storage.getEventStorage().loadEvent(seriesMaster.getId(), requiredFields);
+        }
+        /*
+         * prepare exception dates (delete exception dates and overridden instances)
+         */
+        TreeSet<RecurrenceId> recurrenceIds = new TreeSet<RecurrenceId>(RecurrenceIdComparator.DEFAULT_COMPARATOR);
+        if (null != seriesMaster.getDeleteExceptionDates()) {
+            recurrenceIds.addAll(seriesMaster.getDeleteExceptionDates());
+        }
+        EventField[] fields = new EventField[] { EventField.RECURRENCE_ID, EventField.ID, EventField.SERIES_ID };
+        List<Event> changeExceptions = storage.getEventStorage().loadExceptions(seriesMaster.getSeriesId(), fields);
+        recurrenceIds.addAll(getRecurrenceIds(changeExceptions));
+        /*
+         * construct & return recurrence data
+         */
+        return new DefaultRecurrenceData(seriesMaster.getRecurrenceRule(), seriesMaster.getStartDate(), getExceptionDates(recurrenceIds));
+    }
+
+    @Override
     public void deleteAllData() throws OXException {
         storage.getEventStorage().deleteAllEvents();
         storage.getAlarmStorage().deleteAllAlarms();
         storage.getAlarmTriggerStorage().deleteAllTriggers();
         storage.getAttendeeStorage().deleteAllAttendees();
     }
+
 }
