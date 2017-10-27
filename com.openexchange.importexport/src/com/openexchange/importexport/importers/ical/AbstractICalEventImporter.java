@@ -110,6 +110,18 @@ public abstract class AbstractICalEventImporter extends AbstractICalImporter{
      */
     abstract protected CalendarResult updateEvent(EventID eventId, Event event) throws OXException ;
 
+    /**
+     * Initializes the appropriate calendar access
+     *
+     * @param userizedFolder The folder to import to
+     * @param eventList The event list to import
+     * @param optionalParams The optional parameters of the request
+     * @param list The list which contains the import results
+     * @return TruncationInfo The truncation info of the import
+     * @throws OXException if the import fails
+     */
+    abstract protected TruncationInfo initImporter(UserizedFolder userizedFolder, List<Event> eventList, Map<String, String[]> optionalParams, List<ImportResult> list) throws OXException;
+
     @Override
     public TruncationInfo importData(UserizedFolder userizedFolder, InputStream is, List<ImportResult> list, Map<String, String[]> optionalParams) throws OXException {
         ICalService iCalService = ImportExportServices.getICalService();
@@ -119,7 +131,7 @@ public abstract class AbstractICalEventImporter extends AbstractICalImporter{
         ImportedCalendar calendarImport;
         try {
             calendarImport = iCalService.importICal(is, iCalParameters);
-            return importEvents(userizedFolder, calendarImport.getEvents(), optionalParams, list);
+            return initImporter(userizedFolder, calendarImport.getEvents(), optionalParams, list);
         } catch (OXException e) {
             if ("ICAL-0003".equals(e.getErrorCode())) {
                 // "No calendar data found", silently ignore, as expected by com.openexchange.ajax.importexport.Bug9209Test.test9209ICal()
@@ -135,7 +147,7 @@ public abstract class AbstractICalEventImporter extends AbstractICalImporter{
         }
     }
 
-    private TruncationInfo importEvents(UserizedFolder userizedFolder, List<Event> eventList, Map<String, String[]> optionalParams, List<ImportResult> list) {
+    protected TruncationInfo importEvents(UserizedFolder userizedFolder, List<Event> eventList, Map<String, String[]> optionalParams, List<ImportResult> list) {
         boolean ignoreUIDs = isIgnoreUIDs(optionalParams);
         List<ImportResult> importResults = new ArrayList<>();
         int createdEventCount = 0;
@@ -154,9 +166,7 @@ public abstract class AbstractICalEventImporter extends AbstractICalImporter{
             /*
              * create first event (master or non-recurring)
              */
-
-
-            ImportResult result = createImportResult(userizedFolder.getID(), events.get(0));
+            ImportResult result = createImportResult(userizedFolder.getID(), null, events.get(0));
             importResults.add(result);
             EventID masterEventID = new EventID(userizedFolder.getID(), result.getObjectId());
             /*
@@ -165,7 +175,7 @@ public abstract class AbstractICalEventImporter extends AbstractICalImporter{
             if (1 < events.size() && false == result.hasError()) {
                 createdEventCount++;
                 for (int i = 1; i < events.size(); i++) {
-                    importResults.add(createImportResultEventException(masterEventID, events.get(i)));
+                    importResults.add(createImportResult(null, masterEventID, events.get(i)));
                     createdEventCount++;
                 }
             }
@@ -174,50 +184,18 @@ public abstract class AbstractICalEventImporter extends AbstractICalImporter{
         return new TruncationInfo(eventList.size(), createdEventCount);
     }
 
-    private ImportResult createImportResult(String folder, Event importedEvent) {
+    private ImportResult createImportResult(String folder, EventID masterEventID, Event importedEvent) {
         final int MAX_RETRIES = 5;
         ImportResult importResult = prepareResult(importedEvent);
         for (int retryCount = 1; retryCount <= MAX_RETRIES; retryCount++) {
             try {
-                CalendarResult result = createEvent(folder, importedEvent);
+                CalendarResult result = null == masterEventID ? createEvent(folder, importedEvent) : createEventException(masterEventID, importedEvent);
                 importResult.setDate(new Date(result.getTimestamp()));
                 if (result.getCreations().isEmpty()) {
                     importResult.setException(ImportExportExceptionCodes.COULD_NOT_CREATE.create(importedEvent));
                 } else {
                     importResult.setFolder(result.getCreations().get(0).getCreatedEvent().getFolderId());
                     importResult.setObjectId(result.getCreations().get(0).getCreatedEvent().getId());
-                }
-            } catch (OXException e) {
-                if (retryCount < MAX_RETRIES && handle(e, importedEvent)) {
-                    // try again
-                    LOG.debug("{} - trying again ({}/{})", e.getMessage(), retryCount, MAX_RETRIES, e);
-                    importResult.addWarnings(Collections.singletonList(
-                        new ConversionWarning(importResult.getEntryNumber(), ConversionWarning.Code.TRUNCATION_WARNING, e.getMessage())));
-                    continue;
-                }
-                // "re-throw"
-                importResult.setException(e);
-            }
-            if (false == importResult.hasError() && null != importResult.getWarnings() && 0 < importResult.getWarnings().size()) {
-                importResult.setException(ImportExportExceptionCodes.WARNINGS.create(I(importResult.getWarnings().size())));
-            }
-            return importResult;
-        }
-        throw new AssertionError(); // should not get here
-    }
-
-    private ImportResult createImportResultEventException(EventID masterEventID, Event importedEvent) {
-        final int MAX_RETRIES = 5;
-        ImportResult importResult = prepareResult(importedEvent);
-        for (int retryCount = 1; retryCount <= MAX_RETRIES; retryCount++) {
-            try {
-                CalendarResult result = createEventException(masterEventID, importedEvent);
-                importResult.setDate(new Date(result.getTimestamp()));
-                if (result.getUpdates().isEmpty()) {
-                    importResult.setException(ImportExportExceptionCodes.COULD_NOT_CREATE.create(importedEvent));
-                } else {
-                    importResult.setFolder(result.getUpdates().get(0).getUpdate().getFolderId());
-                    importResult.setObjectId(result.getUpdates().get(0).getUpdate().getId());
                 }
             } catch (OXException e) {
                 if (retryCount < MAX_RETRIES && handle(e, importedEvent)) {
@@ -288,6 +266,14 @@ public abstract class AbstractICalEventImporter extends AbstractICalImporter{
             }
         }
         return importResult;
+    }
+
+    /**
+     * @param optionalParams The optional parameters of the request
+     * @return <code>true</code> if the notification should be suppressed, <code>false</code>, otherwise
+     */
+    protected boolean isSupressNotification(Map<String, String[]> optionalParams) {
+        return null != optionalParams && optionalParams.containsKey("suppressNotification") ? true : false;
     }
 
 }

@@ -49,13 +49,19 @@
 
 package com.openexchange.importexport.importers.ical;
 
+import java.util.List;
+import java.util.Map;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarResult;
 import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.EventID;
+import com.openexchange.data.conversion.ical.TruncationInfo;
 import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.UserizedFolder;
+import com.openexchange.groupware.importexport.ImportResult;
+import com.openexchange.importexport.osgi.ImportExportServices;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -69,10 +75,8 @@ public class ICalEventImporter extends AbstractICalEventImporter {
     CalendarService calendarService;
     CalendarSession calendarSession;
 
-    public ICalEventImporter(ServerSession session, CalendarService calendarService, CalendarSession calendarSession) {
+    public ICalEventImporter(ServerSession session) {
         super(session);
-        this.calendarService = calendarService;
-        this.calendarSession = calendarSession;
     }
 
     @Override
@@ -92,6 +96,21 @@ public class ICalEventImporter extends AbstractICalEventImporter {
     private CalendarResult setCalendarSessionTimestamp(CalendarResult calendarResult) {
         calendarSession.set(CalendarParameters.PARAMETER_TIMESTAMP, Long.valueOf(calendarResult.getTimestamp()));
         return calendarResult;
+    }
+
+    @Override
+    protected TruncationInfo initImporter(UserizedFolder userizedFolder, List<Event> eventList, Map<String, String[]> optionalParams, List<ImportResult> list) throws OXException {
+        initCalendarService(optionalParams);
+        return importEvents(userizedFolder, eventList, optionalParams, list);
+    }
+
+    private void initCalendarService(Map<String, String[]> optionalParams) throws OXException {
+        this.calendarService = ImportExportServices.getCalendarService();
+        this.calendarSession = calendarService.init(session);
+        calendarSession.set(CalendarParameters.PARAMETER_IGNORE_CONFLICTS, Boolean.TRUE);
+        if (isSupressNotification(optionalParams)) {
+            calendarSession.set(CalendarParameters.PARAMETER_NOTIFICATION, Boolean.FALSE);
+        }
     }
 
 }
