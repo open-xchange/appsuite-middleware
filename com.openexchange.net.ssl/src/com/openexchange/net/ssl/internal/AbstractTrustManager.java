@@ -479,6 +479,8 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
             }
         }
 
+        logChain(chain);
+        
         String fingerprint = cacheCertificate(userId, contextId, chain[0], hostname, FailureReason.INVALID_COMMON_NAME);
         throw new CertificateException(SSLExceptionCode.INVALID_HOSTNAME.create(Collections.singletonMap(FINGERPRINT_NAME, fingerprint), fingerprint, hostname));
     }
