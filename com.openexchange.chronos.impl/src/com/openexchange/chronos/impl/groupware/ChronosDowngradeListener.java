@@ -69,12 +69,6 @@ import com.openexchange.chronos.storage.CalendarStorageFactory;
 import com.openexchange.database.provider.DBTransactionPolicy;
 import com.openexchange.database.provider.SimpleDBProvider;
 import com.openexchange.exception.OXException;
-import com.openexchange.folderstorage.FolderResponse;
-import com.openexchange.folderstorage.FolderService;
-import com.openexchange.folderstorage.FolderStorage;
-import com.openexchange.folderstorage.UserizedFolder;
-import com.openexchange.folderstorage.database.contentType.CalendarContentType;
-import com.openexchange.folderstorage.type.CalendarType;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.downgrade.DowngradeEvent;
 import com.openexchange.groupware.downgrade.DowngradeListener;
@@ -93,7 +87,6 @@ public class ChronosDowngradeListener extends DowngradeListener {
 
     private CalendarStorageFactory      factory;
     private CalendarUtilities           calendarUtilities;
-    private FolderService               folderService;
     private ServiceSet<CalendarHandler> calendarHandlers;
 
     /**
@@ -101,14 +94,12 @@ public class ChronosDowngradeListener extends DowngradeListener {
      * 
      * @param factory The {@link CalendarStorageFactory}
      * @param calendarUtilities The {@link CalendarUtilities}
-     * @param folderService The {@link FolderService}
      * @param calendarHandlers The {@link CalendarHandler}s to notify
      */
-    public ChronosDowngradeListener(CalendarStorageFactory factory, CalendarUtilities calendarUtilities, FolderService folderService, ServiceSet<CalendarHandler> calendarHandlers) {
+    public ChronosDowngradeListener(CalendarStorageFactory factory, CalendarUtilities calendarUtilities, ServiceSet<CalendarHandler> calendarHandlers) {
         super();
         this.factory = factory;
         this.calendarUtilities = calendarUtilities;
-        this.folderService = folderService;
         this.calendarHandlers = calendarHandlers;
     }
 
@@ -135,15 +126,12 @@ public class ChronosDowngradeListener extends DowngradeListener {
             String eventId = event.getId();
             List<Attendee> attendees = storage.getAttendeeStorage().loadAttendees(eventId);
             event.setAttendees(attendees);
-            
-            String folderId = CalendarUtils.getFolderView(event, userId);
-            UserizedFolder folder = folderService.getFolder(FolderStorage.REAL_TREE_ID, folderId, serverSession, null);
 
-            if (folder.isGlobalID() || CalendarUtils.isLastUserAttendee(attendees, userId)) {
+            if (isPrivate(event) || CalendarUtils.isLastUserAttendee(attendees, userId)) {
                 // Private or user is last attendee, so delete
                 storage.getAlarmStorage().deleteAlarms(eventId);
                 storage.getAlarmTriggerStorage().deleteTriggers(eventId);
-                storage.getAttachmentStorage().deleteAttachments(serverSession, folderId, eventId);
+                storage.getAttachmentStorage().deleteAttachments(serverSession, CalendarUtils.getFolderView(event, userId), eventId);
                 storage.getAttendeeStorage().deleteAttendees(eventId);
                 storage.getEventStorage().deleteEvent(eventId);
                 tracker.addDelete(getAttendeeFolders(attendees), event, date.getTime());
@@ -160,6 +148,14 @@ public class ChronosDowngradeListener extends DowngradeListener {
                 tracker.addUpdate(getAttendeeFolders(attendees), originalEvent, event);
             }
         }
+    }
+
+    private boolean isPrivate(Event event) {
+        if (null != event.getFolderId()) {
+            // Only public and not group-sheduled events have folder ID in event
+            return false;
+        }
+        return true;
     }
 
     @Override

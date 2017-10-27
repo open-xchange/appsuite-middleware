@@ -76,7 +76,6 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.group.GroupService;
 import com.openexchange.groupware.delete.DeleteListener;
-import com.openexchange.groupware.downgrade.DowngradeListener;
 import com.openexchange.groupware.downgrade.DowngradeRegistry;
 import com.openexchange.objectusecount.ObjectUseCountService;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -134,14 +133,13 @@ public class ChronosActivator extends HousekeepingActivator {
             CalendarService calendarService = new CalendarServiceImpl(calendarHandlers);
             DefaultCalendarUtilities calendarUtilities = new DefaultCalendarUtilities(this);
             CalendarStorageFactory factory = getServiceSafe(CalendarStorageFactory.class);
-            FolderService folderService = getServiceSafe(FolderService.class);
 
             registerService(CalendarService.class, calendarService);
             registerService(FreeBusyService.class, new FreeBusyServiceImpl());
             registerService(CalendarUtilities.class, calendarUtilities);
             registerService(CalendarAvailabilityService.class, new CalendarAvailabilityServiceImpl());
             registerService(DeleteListener.class, new ChronosDeleteListener(factory, calendarUtilities, calendarHandlers));
-            DowngradeRegistry.getInstance().registerDowngradeListener(new ChronosDowngradeListener(factory, calendarUtilities, folderService, calendarHandlers));
+            DowngradeRegistry.getInstance().registerDowngradeListener(new ChronosDowngradeListener(factory, calendarUtilities, calendarHandlers));
             /*
              * register calendar handler to propagate OSGi events
              */
