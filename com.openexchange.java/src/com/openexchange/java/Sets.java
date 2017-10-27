@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,25 +47,66 @@
  *
  */
 
-package com.openexchange.report.appsuite;
+package com.openexchange.java;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.report.appsuite.serialization.Report;
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
 
 /**
- * The {@link ReportFinishingTouches} run after all analyzers and cumulators and can be used to reformat the report.
+ * {@link Sets} - A utility class for <code>java.util.Set</code>.
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.10.0
  */
-public interface ReportFinishingTouches {
-    /**
-     * Declare whether to run as part of this reportType
-     */
-    boolean appliesTo(String reportType);
+public class Sets {
 
     /**
-     * Modify the report, as needed
-     * @throws OXException 
+     * Initializes a new {@link Sets}.
      */
-    void finish(Report report) throws OXException;
+    private Sets() {
+        super();
+    }
+
+    /**
+     * Generates consecutive subsets of a set, each of the same size (the final list may be smaller).
+     *
+     * @param original The set to return consecutive subsets of
+     * @param partitionSize The desired size for each subset
+     * @return A list of consecutive subsets
+     * @throws IllegalArgumentException if {@code partitionSize} is not positive
+     */
+    public static <T> List<Set<T>> partition(Set<T> original, int partitionSize) {
+        checkNotNull(original, "Set must not be null");
+        checkArgument(partitionSize > 0);
+        int total = original.size();
+        if (partitionSize >= total) {
+            return Collections.singletonList(original);
+        }
+
+        // Create a list of sets to return.
+        List<Set<T>> result = new LinkedList<Set<T>>();
+
+        // Create an iterator for the original set.
+        Iterator<T> it = original.iterator();
+
+        // Create each new set.
+        Set<T> s = new LinkedHashSet<T>(partitionSize);
+        s.add(it.next());
+        for (int i = 1; i < total; i++) {
+            if ((i % partitionSize) == 0) {
+                result.add(s);
+                s = new LinkedHashSet<T>(partitionSize);
+            }
+            s.add(it.next());
+        }
+        result.add(s);
+        return result;
+    }
+
 }
