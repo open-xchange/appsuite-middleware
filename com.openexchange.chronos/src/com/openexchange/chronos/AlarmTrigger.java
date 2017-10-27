@@ -71,13 +71,10 @@ public class AlarmTrigger {
     private Boolean pushed;
     private TimeZone timezone;
 
-    private Integer contextId;
-    private Integer account;
-
-    private boolean isAccountSet = false;
+    private final boolean isAccountSet = false;
     private boolean isActionSet=false;
     private boolean isAlarmSet=false;
-    private boolean isContextIdSet = false;
+    private final boolean isContextIdSet = false;
     private boolean isEventIdSet=false;
     private boolean isRecurrenceIdSet = false;
     private boolean isTimeSet=false;
@@ -395,55 +392,6 @@ public class AlarmTrigger {
         this.eventId = eventId;
         this.isEventIdSet=true;
     }
-
-    /**
-     * Gets the contextId
-     *
-     * @return The contextId
-     */
-    public Integer getContextId() {
-        return contextId;
-    }
-
-    /**
-     * Sets the contextId
-     *
-     * @param contextId The contextId to set
-     */
-    public void setContextId(Integer contextId) {
-        this.contextId = contextId;
-        this.isContextIdSet = true;
-    }
-
-    /**
-     * Gets the account
-     *
-     * @return The account
-     */
-    public Integer getAccount() {
-        return account;
-    }
-
-    /**
-     * Sets the account
-     *
-     * @param account The account to set
-     */
-    public void setAccount(Integer account) {
-        this.account = account;
-        this.isAccountSet = true;
-    }
-
-    public void removeAccount() {
-        this.account = null;
-        this.isAccountSet = false;
-    }
-
-    public void removeContextId() {
-        this.contextId = null;
-        this.isContextIdSet = false;
-    }
-
 
     /**
      * Gets the timezone

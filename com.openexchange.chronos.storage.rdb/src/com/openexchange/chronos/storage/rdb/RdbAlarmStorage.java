@@ -339,7 +339,7 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
             release(connection, updated);
         }
     }
-    
+
     @Override
     public void deleteAllAlarms() throws OXException {
         int updated = 0;
@@ -627,6 +627,10 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
         if (null != attachmentProperties && 0 < attachmentProperties.size()) {
             alarm.setAttachments(decodeAttachments(eventId, attachmentProperties));
             extendedProperties.removeAll(attachmentProperties);
+        }
+
+        if (extendedProperties.size() == 0) {
+            alarm.removeExtendedProperties();
         }
         return alarm;
     }

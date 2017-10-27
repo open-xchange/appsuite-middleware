@@ -68,11 +68,6 @@ public class ChronosAlarmTriggerJsonFields {
      * The alarm id of the alarm. See {@link AlarmTrigger#getAlarm()}
      */
     public static final String ALARM = "alarmId";
-
-    /**
-     * The calendar account. See {@link AlarmTrigger#getAccount()}
-     */
-    public static final String ACCOUNT = "account";
     /**
      * The event id. See {@link AlarmTrigger#getEventId()}
      */

@@ -107,7 +107,7 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
         getAndCheckAlarmTrigger(currentTime + TimeUnit.HOURS.toMillis(1), null, 0); // No triggers
 
         // 2. Get alarms within the next two days
-        AlarmTriggerData triggers = getAndCheckAlarmTrigger(1); // No triggers
+        AlarmTriggerData triggers = getAndCheckAlarmTrigger(1); // One trigger
         assertTrue(triggers.get(0).getEventId().equals(event.getId()));
         // 3. Get only mail alarms within the next two days
         getAndCheckAlarmTrigger(currentTime + TimeUnit.DAYS.toMillis(2), "MAIL", 0); // No triggers
