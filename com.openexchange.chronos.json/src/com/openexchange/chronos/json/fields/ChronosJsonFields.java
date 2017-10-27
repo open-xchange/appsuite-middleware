@@ -307,12 +307,6 @@ public class ChronosJsonFields {
          */
         public static final String URI = "uri";
 
-        /**
-         * The Content-ID that uniquely identifies an attachment with an upload request.
-         * See {@link com.openexchange.chronos.Attachment#getContentId()}
-         */
-        public static final String CID = "cid";
-
     }
 
     /**

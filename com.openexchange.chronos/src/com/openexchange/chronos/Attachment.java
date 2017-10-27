@@ -64,7 +64,6 @@ public class Attachment {
     private int managedId;
     private String uri;
     private IFileHolder data;
-    private String contentId;
     private Date created;
     private String formatType;
     private long size;
@@ -134,14 +133,6 @@ public class Attachment {
 	public void setUri(String uri) {
 		this.uri = uri;
 	}
-
-    public String getContentId() {
-        return contentId;
-    }
-
-    public void setContentId(String contentId) {
-        this.contentId = contentId;
-    }
 
     public Date getCreated() {
         return created;
