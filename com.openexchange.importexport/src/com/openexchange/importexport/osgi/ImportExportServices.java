@@ -53,6 +53,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.chronos.ical.ICalService;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccessFactory;
 import com.openexchange.chronos.service.CalendarService;
+import com.openexchange.chronos.service.CalendarUtilities;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.contact.ContactService;
@@ -125,6 +126,10 @@ public class ImportExportServices {
 
     public static CalendarService getCalendarService() {
         return LOOKUP.get().getService(CalendarService.class);
+    }
+
+    public static CalendarUtilities getCalendarUtilities() {
+        return LOOKUP.get().getService(CalendarUtilities.class);
     }
 
 }

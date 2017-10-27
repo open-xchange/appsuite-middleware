@@ -54,6 +54,7 @@ import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.chronos.ical.ICalService;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccessFactory;
 import com.openexchange.chronos.service.CalendarService;
+import com.openexchange.chronos.service.CalendarUtilities;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.contact.ContactService;
@@ -95,7 +96,8 @@ public class ImportExportActivator extends AJAXModuleActivator{
 			FolderService.class,
 			IDBasedCalendarAccessFactory.class,
 			ICalService.class,
-			CalendarService.class
+			CalendarService.class,
+			CalendarUtilities.class
 		};
 	}
 

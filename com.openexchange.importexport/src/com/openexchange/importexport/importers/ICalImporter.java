@@ -55,9 +55,12 @@ import java.util.List;
 import java.util.Map;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.api2.TasksSQLInterface;
+import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
+import com.openexchange.chronos.service.CalendarParameters;
+import com.openexchange.chronos.service.CalendarService;
+import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.data.conversion.ical.TruncationInfo;
 import com.openexchange.exception.OXException;
-import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.UserizedFolder;
@@ -100,19 +103,16 @@ public class ICalImporter extends AbstractImporter {
 	    if(!format.equals(Format.ICAL)){
             return false;
         }
-
-        FolderService service = ImportExportServices.getFolderService();
-        UserizedFolder userizedFolder = service.getFolder(FolderStorage.REAL_TREE_ID, folders.get(0), session, null);
-
+        UserizedFolder userizedFolder = getUserizedFolder(session, folders.get(0));
         if (TaskContentType.getInstance().equals(userizedFolder.getContentType())) {
             if (!session.getUserPermissionBits().hasTask()) {
                 return false;
             }
-        } else if (null == userizedFolder.getAccountID()) {
+        } else if (com.openexchange.folderstorage.database.contentType.CalendarContentType.getInstance().equals(userizedFolder.getContentType())) {
             if (!session.getUserConfiguration().hasCalendar()) {
                 return false;
             }
-        } else if (null != userizedFolder.getAccountID()) {
+        } else if (com.openexchange.folderstorage.calendar.contentType.CalendarContentType.getInstance().equals(userizedFolder.getContentType())) {
             if (!session.getUserConfiguration().hasCalendar()) {
                 return false;
             }
@@ -131,23 +131,51 @@ public class ICalImporter extends AbstractImporter {
 			final List<String> folders,
 			final Map<String, String[]> optionalParams)
 			throws OXException {
+        UserizedFolder userizedFolder = getUserizedFolder(session, folders.get(0));
+	    if (!canImport(session, format, folders, optionalParams)) {
+	        throw ImportExportExceptionCodes.CANNOT_IMPORT.create(format, userizedFolder.getID());
+        }
 		TruncationInfo truncationInfo = null;
 		final List<ImportResult> list = new ArrayList<>();
-
-        FolderService service = ImportExportServices.getFolderService();
-        UserizedFolder userizedFolder = service.getFolder(FolderStorage.REAL_TREE_ID, folders.get(0), session, null);
         ICalImport importer;
         if (TaskContentType.getInstance().equals(userizedFolder.getContentType())) {
             importer = new ICalTaskImporter(session);
         } else if (null != userizedFolder.getAccountID()) {
-            importer = new ICalCompositeEventImporter(session);
+            importer = initCompositeImporter(session, optionalParams);
         } else if (null == userizedFolder.getAccountID()) {
-            importer = new ICalEventImporter(session);
+            importer = initEventImporter(session, optionalParams);
         } else {
-            throw ImportExportExceptionCodes.RESOURCE_HARD_CONFLICT.create();
+            throw ImportExportExceptionCodes.CANNOT_IMPORT.create(format, userizedFolder.getID());
         }
         truncationInfo = importer.importData(userizedFolder, is, list, optionalParams);
 		return new DefaultImportResults(list, truncationInfo);
 	}
+
+    private ICalEventImporter initEventImporter(ServerSession session, Map<String, String[]> optionalParams) throws OXException {
+        CalendarService calendarService = ImportExportServices.getCalendarService();
+        CalendarSession calendarSession = calendarService.init(session);
+        calendarSession.set(CalendarParameters.PARAMETER_IGNORE_CONFLICTS, Boolean.TRUE);
+        if (isSupressNotification(optionalParams)) {
+            calendarSession.set(CalendarParameters.PARAMETER_NOTIFICATION, Boolean.FALSE);
+        }
+        return new ICalEventImporter(session, calendarService, calendarSession);
+    }
+
+    private ICalCompositeEventImporter initCompositeImporter(ServerSession session, Map<String, String[]> optionalParams) throws OXException {
+        IDBasedCalendarAccess calendarAccess = ImportExportServices.getIDBasedCalendarAccessFactory().createAccess(session);
+        calendarAccess.set(CalendarParameters.PARAMETER_IGNORE_CONFLICTS, Boolean.TRUE);
+        if (isSupressNotification(optionalParams)) {
+            calendarAccess.set(CalendarParameters.PARAMETER_NOTIFICATION, Boolean.FALSE);
+        }
+        return new ICalCompositeEventImporter(session, calendarAccess);
+    }
+
+    private boolean isSupressNotification(Map<String, String[]> optionalParams) {
+        return null != optionalParams && optionalParams.containsKey("suppressNotification") ? true : false;
+    }
+
+    private UserizedFolder getUserizedFolder(ServerSession session, String folder) throws OXException {
+        return ImportExportServices.getFolderService().getFolder(FolderStorage.REAL_TREE_ID, folder, session, null);
+    }
 
 }

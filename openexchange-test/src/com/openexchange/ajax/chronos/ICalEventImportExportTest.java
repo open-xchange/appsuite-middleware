@@ -50,6 +50,7 @@
 package com.openexchange.ajax.chronos;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import java.io.File;
@@ -162,6 +163,7 @@ public class ICalEventImportExportTest extends AbstractChronosTest {
     @Test
     public void testICalEventRecurrenceImport() throws Exception {
         List<EventData> eventData = getEventData(ICalImportExportManager.RECURRENCE_IMPORT_ICS);
+        assertFalse(eventData.isEmpty());
         for (EventData event : eventData) {
             assertEquals(ICalImportExportManager.RECURRENCE_IMPORT_ICS_SUMMARY, event.getSummary());
             assertEquals(ICalImportExportManager.RECURRENCE_IMPORT_ICS_UID, event.getUid());

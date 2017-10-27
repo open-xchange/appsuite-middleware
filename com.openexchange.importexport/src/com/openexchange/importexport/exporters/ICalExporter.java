@@ -88,11 +88,11 @@ public class ICalExporter extends AbstractExporter {
             if (!session.getUserPermissionBits().hasTask()) {
                 return false;
             }
-        } else if (null == userizedFolder.getAccountID()) {
+        } else if (com.openexchange.folderstorage.database.contentType.CalendarContentType.getInstance().equals(userizedFolder.getContentType())) {
             if (!session.getUserConfiguration().hasCalendar()) {
                 return false;
             }
-        } else if (null != userizedFolder.getAccountID()) {
+        } else if (com.openexchange.folderstorage.calendar.contentType.CalendarContentType.getInstance().equals(userizedFolder.getContentType())) {
             if (!session.getUserConfiguration().hasCalendar()) {
                 return false;
             }
@@ -159,7 +159,7 @@ public class ICalExporter extends AbstractExporter {
         return exporter;
     }
 
-    private static UserizedFolder getUserizedFolder(ServerSession session, String folder) throws OXException {
+    private UserizedFolder getUserizedFolder(ServerSession session, String folder) throws OXException {
         return ImportExportServices.getFolderService().getFolder(FolderStorage.REAL_TREE_ID, folder, session, null);
     }
 
