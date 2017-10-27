@@ -53,13 +53,16 @@ import static com.openexchange.chronos.common.CalendarUtils.getAlarmIDs;
 import static com.openexchange.java.Autoboxing.I;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import org.json.JSONObject;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmField;
+import com.openexchange.chronos.AlarmTrigger;
 import com.openexchange.chronos.DelegatingEvent;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.ExtendedProperty;
@@ -252,6 +255,17 @@ public class AlarmHelper {
                 return null;
             }
         }.executeUpdate();
+    }
+
+    public List<AlarmTrigger> getAlarmTriggers(Date until, Set<String> actions) throws OXException {
+        List<AlarmTrigger> triggers = new OSGiCalendarStorageOperation<List<AlarmTrigger>>(services, context.getContextId(), account.getAccountId()) {
+
+            @Override
+            protected List<AlarmTrigger> call(CalendarStorage storage) throws OXException {
+                return storage.getAlarmTriggerStorage().loadTriggers(account.getUserId(), until);
+            }
+        }.executeQuery();
+        return AlarmUtils.filter(triggers, actions.toArray(new String[actions.size()]));
     }
 
     /**

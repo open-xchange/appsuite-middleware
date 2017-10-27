@@ -233,8 +233,8 @@ public class BirthdaysCalendarAccess extends SingleFolderCalendarAccess implemen
 
     @Override
     public List<AlarmTrigger> getAlarmTriggers(Set<String> actions) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        Date until = parameters.get(CalendarParameters.PARAMETER_RANGE_END, Date.class);
+        return getAlarmHelper().getAlarmTriggers(until, actions);
     }
 
     @Override
