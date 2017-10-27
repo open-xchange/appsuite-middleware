@@ -55,7 +55,6 @@ import org.apache.http.HttpEntity;
 import org.apache.http.HttpHeaders;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
-import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.ical.ICalParameters;
 import com.openexchange.chronos.ical.ICalService;
 import com.openexchange.chronos.ical.ImportedCalendar;
@@ -103,7 +102,7 @@ public class ICalFeedReader extends ICalFeedConnector {
             return iCalService.importICal(inputStream, parameters);
         } catch (UnsupportedOperationException | IOException e) {
             LOG.error("Error while processing the retrieved information:{}.", e.getMessage(), e);
-            throw CalendarExceptionCodes.UNEXPECTED_ERROR.create(e.getMessage());
+            throw ICalProviderExceptionCodes.UNEXPECTED_FEED_ERROR.create(iCalFeedConfig.getFeedUrl(), e.getMessage());
         } finally {
             Streams.close(inputStream);
         }
@@ -129,10 +128,10 @@ public class ICalFeedReader extends ICalFeedConnector {
                 result.setCalendar(importCalendar(httpEntity));
                 return result;
             }
-            throw ICalProviderExceptionCodes.UNEXPECTED_FEED_ERROR.create(iCalFeedConfig.getFeedUrl());
+            throw ICalProviderExceptionCodes.UNEXPECTED_FEED_ERROR.create(iCalFeedConfig.getFeedUrl(), "Unknown server response.");
         } catch (IOException e) {
-            //            throw OAuthExceptionCodes.OAUTH_ERROR.create(e, e.getMessage());
-            throw OXException.general("", e);
+            LOG.error("Error while processing the retrieved information:{}.", e.getMessage(), e);
+            throw ICalProviderExceptionCodes.UNEXPECTED_FEED_ERROR.create(iCalFeedConfig.getFeedUrl(), e.getMessage());
         } finally {
             close(getMethod, response);
             Streams.close(response);

@@ -49,15 +49,10 @@
 
 package com.openexchange.chronos.provider.ical.internal.auth;
 
-import java.io.IOException;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.openexchange.auth.info.AuthInfo;
 import com.openexchange.auth.info.AuthInfo.Builder;
 import com.openexchange.auth.info.AuthType;
@@ -79,8 +74,6 @@ public class ICalAuthParser {
 
     private static final ICalAuthParser INSTANCE = new ICalAuthParser();
 
-    private final ObjectMapper mapper = new ObjectMapper().setSerializationInclusion(Include.NON_NULL);
-
     /**
      * Gets the instance.
      *
@@ -92,47 +85,6 @@ public class ICalAuthParser {
 
     private ICalAuthParser() {
         super();
-    }
-
-    /**
-     * Updates the configuration map to hold the authentication information in a structured way based on the given {@link AuthInfo} object. All previously contained auth information will be removed from configuration map and replaced by those from
-     * {@link AuthInfo}.
-     * 
-     * @param authInfo {@link AuthInfo} that will be added to the configuration
-     * @param configuration {@link Map} that will be enhanced (and cleaned up)
-     * @throws OXException
-     */
-    public void updateConfiguration(AuthInfo authInfo, Map<String, Object> configuration) throws OXException {
-        configuration.remove(CalendarAccountAttribute.OAUTH_ACCOUNT_ID_LITERAL.getName());
-        configuration.remove(CalendarAccountAttribute.TOKEN_LITERAL.getName());
-        configuration.remove(CalendarAccountAttribute.LOGIN_LITERAL.getName());
-        configuration.remove(CalendarAccountAttribute.PASSWORD_LITERAL.getName());
-
-        try {
-            String auth = mapper.writeValueAsString(authInfo);
-            configuration.put("auth", auth);
-        } catch (JsonProcessingException e) {
-            throw CalendarExceptionCodes.UNEXPECTED_ERROR.create(e.getMessage());
-        }
-    }
-
-    /**
-     * Returns the {@link AuthInfo} based on {@link JSONObject} configuration
-     * 
-     * @param configuration The {@link JSONObject}
-     * @return {@link AuthInfo} if "auth" is available in configuration; otherwise <code>com.openexchange.auth.info.AuthInfo.NONE</code>
-     * @throws OXException
-     */
-    public AuthInfo getAuthInfo(JSONObject configuration) throws OXException {
-        Object auth = configuration.optString("auth", null);
-        if (auth == null) {
-            return AuthInfo.NONE;
-        }
-        try {
-            return mapper.readValue((String) auth, AuthInfo.class);
-        } catch (IOException e) {
-            throw CalendarExceptionCodes.UNEXPECTED_ERROR.create(e.getMessage());
-        }
     }
 
     public AuthInfo getAuthInfoFromUnstructured(JSONObject config) throws OXException {
@@ -176,12 +128,6 @@ public class ICalAuthParser {
             attributes.add(CalendarAccountAttribute.PASSWORD_LITERAL);
         }
 
-        String oauthToken = CalendarAccountAttribute.OAUTH_ACCOUNT_ID_LITERAL.getName();
-        if (configuration.has(oauthToken)) {
-            configuration.remove(password);
-            attributes.add(CalendarAccountAttribute.OAUTH_ACCOUNT_ID_LITERAL);
-        }
-
         String token = CalendarAccountAttribute.TOKEN_LITERAL.getName();
         if (configuration.has(token)) {
             attributes.add(CalendarAccountAttribute.TOKEN_LITERAL);
@@ -214,9 +160,7 @@ public class ICalAuthParser {
     private AuthInfo generateAuthInfo(JSONObject configuration, Set<CalendarAccountAttribute> authAttributes) throws JSONException, OXException {
         AuthInfo authInfo = null;
         Builder builder = AuthInfo.builder();
-        if (authAttributes.contains(CalendarAccountAttribute.OAUTH_ACCOUNT_ID_LITERAL)) {
-            authInfo = builder.setAuthType(AuthType.OAUTH).setOauthAccountId(configuration.getInt(CalendarAccountAttribute.OAUTH_ACCOUNT_ID_LITERAL.getName())).build();
-        } else if (authAttributes.contains(CalendarAccountAttribute.TOKEN_LITERAL)) {
+        if (authAttributes.contains(CalendarAccountAttribute.TOKEN_LITERAL)) {
             authInfo = builder.setAuthType(AuthType.TOKEN).setToken((String) configuration.get(CalendarAccountAttribute.TOKEN_LITERAL.getName())).build();
         } else if (authAttributes.contains(CalendarAccountAttribute.LOGIN_LITERAL) || authAttributes.contains(CalendarAccountAttribute.PASSWORD_LITERAL)) {
             builder.setAuthType(AuthType.BASIC);

@@ -1190,7 +1190,7 @@ msgid ""
 msgstr ""
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:73
-msgid "Unfortunately the given feed URL cannot be executed as expected."
+msgid "Unfortunately the given feed URL cannot be processed as expected."
 msgstr ""
 
 #. *

@@ -121,9 +121,6 @@ public abstract class AttachmentsMapping<O> extends ListItemMapping<Attachment, 
             }
             attachment.setCreated(new Date(date));
         }
-        if (from.has(ChronosJsonFields.Attachment.CID)) {
-            attachment.setContentId(from.getString(ChronosJsonFields.Attachment.CID));
-        }
         /**
          * The attachment is either a uri or a managed id.
          */
@@ -158,13 +155,9 @@ public abstract class AttachmentsMapping<O> extends ListItemMapping<Attachment, 
             }
             jsonObject.put(ChronosJsonFields.Attachment.CREATED, date);
         }
-        if (null != attachment.getContentId()) {
-            jsonObject.put(ChronosJsonFields.Attachment.CID, attachment.getContentId());
-        }
         if (0 < attachment.getManagedId()) {
             jsonObject.put(ChronosJsonFields.Attachment.MANAGED_ID, attachment.getManagedId());
         }
-
         if (null != attachment.getUri()) {
             jsonObject.put(ChronosJsonFields.Attachment.URI, attachment.getUri());
         }

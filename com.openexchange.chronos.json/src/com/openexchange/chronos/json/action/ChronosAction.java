@@ -50,6 +50,8 @@
 package com.openexchange.chronos.json.action;
 
 import java.io.File;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -225,16 +227,28 @@ public abstract class ChronosAction extends AbstractChronosAction {
             return;
         }
         for (Attachment attachment : event.getAttachments()) {
-            // We skip already uploaded files that have a managedId reference
-            if (attachment.getManagedId() > 0) {
+            /*
+             * skip all non-URI- and managed attachments
+             */
+            if (null == attachment.getUri() || 0 < attachment.getManagedId()) {
                 continue;
             }
-            if (attachment.getContentId() == null) {
-                throw CalendarExceptionCodes.MISSING_METADATA_ATTACHMENT_REFERENCE.create(attachment.getFilename());
+            /*
+             * associate uploads to attachments by matching 'cid' URI
+             */
+            String contentId;
+            try {
+                URI uri = new URI(attachment.getUri());
+                if (false == "cid".equalsIgnoreCase(uri.getScheme())) {
+                    continue;
+                }
+                contentId = uri.getSchemeSpecificPart();
+            } catch (URISyntaxException e) {
+                throw CalendarExceptionCodes.MISSING_METADATA_ATTACHMENT_REFERENCE.create(e, attachment.getFilename());
             }
-            UploadFile uploadFile = uploads.get(attachment.getContentId());
+            UploadFile uploadFile = uploads.get(contentId);
             if (uploadFile == null) {
-                throw CalendarExceptionCodes.MISSING_BODY_PART_ATTACHMENT_REFERENCE.create(attachment.getContentId());
+                throw CalendarExceptionCodes.MISSING_BODY_PART_ATTACHMENT_REFERENCE.create(contentId);
             }
             File tmpFile = uploadFile.getTmpFile();
             FileHolder fileHolder = new FileHolder(FileHolder.newClosureFor(tmpFile), tmpFile.length(), attachment.getFormatType(), attachment.getFilename());

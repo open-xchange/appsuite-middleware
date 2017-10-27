@@ -90,7 +90,7 @@ public class CalendarDescription extends SingleXMLPropertyMixin {
     @Override
     protected String getValue() {
         if (null != collection.getFolder()) {
-            return "hallo " + optPropertyValue(CalendarFolderConverter.getExtendedProperties(collection.getFolder()), DESCRIPTION_LITERAL);
+            return optPropertyValue(CalendarFolderConverter.getExtendedProperties(collection.getFolder()), DESCRIPTION_LITERAL);
         }
         return null;
     }

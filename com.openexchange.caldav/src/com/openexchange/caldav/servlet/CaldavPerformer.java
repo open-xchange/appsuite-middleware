@@ -61,6 +61,7 @@ import com.openexchange.dav.DAVFactory;
 import com.openexchange.dav.DAVPerformer;
 import com.openexchange.dav.actions.ACLAction;
 import com.openexchange.dav.actions.ExtendedMKCOLAction;
+import com.openexchange.dav.actions.PROPPATCHAction;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.webdav.action.WebdavAction;
 import com.openexchange.webdav.action.WebdavCopyAction;
@@ -74,7 +75,6 @@ import com.openexchange.webdav.action.WebdavLockAction;
 import com.openexchange.webdav.action.WebdavMoveAction;
 import com.openexchange.webdav.action.WebdavOptionsAction;
 import com.openexchange.webdav.action.WebdavPropfindAction;
-import com.openexchange.webdav.action.WebdavProppatchAction;
 import com.openexchange.webdav.action.WebdavReportAction;
 import com.openexchange.webdav.action.WebdavTraceAction;
 import com.openexchange.webdav.action.WebdavUnlockAction;
@@ -87,7 +87,7 @@ import com.openexchange.webdav.protocol.WebdavMethod;
  */
 public class CaldavPerformer extends DAVPerformer {
 
-    private final CaldavProtocol PROTOCOL = new CaldavProtocol();
+    private static final CaldavProtocol PROTOCOL = new CaldavProtocol();
 
     private final GroupwareCaldavFactory factory;
     private final Map<WebdavMethod, WebdavAction> actions;
@@ -111,7 +111,7 @@ public class CaldavPerformer extends DAVPerformer {
     private EnumMap<WebdavMethod, WebdavAction> initActions() {
         EnumMap<WebdavMethod, WebdavAction> actions = new EnumMap<WebdavMethod, WebdavAction>(WebdavMethod.class);
         actions.put(WebdavMethod.UNLOCK, prepare(new WebdavUnlockAction(), true, true, new WebdavIfAction(0, false, false)));
-        actions.put(WebdavMethod.PROPPATCH, prepare(new WebdavProppatchAction(PROTOCOL), true, true, new WebdavExistsAction(), new WebdavIfAction(0, true, false)));
+        actions.put(WebdavMethod.PROPPATCH, prepare(new PROPPATCHAction(PROTOCOL), true, true, new WebdavExistsAction(), new WebdavIfAction(0, true, false)));
         actions.put(WebdavMethod.PROPFIND, prepare(new WebdavPropfindAction(PROTOCOL), true, true, new WebdavExistsAction(), new WebdavIfAction(0, false, false)));
         actions.put(WebdavMethod.REPORT, prepare(new WebdavReportAction(PROTOCOL), true, true, new WebdavExistsAction(), new WebdavIfAction(0, false, false)));
         actions.put(WebdavMethod.OPTIONS, prepare(new WebdavOptionsAction(), true, true, false, null, new WebdavIfAction(0, false, false)));

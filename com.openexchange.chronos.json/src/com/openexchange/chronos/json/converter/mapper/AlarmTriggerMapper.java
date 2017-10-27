@@ -95,6 +95,7 @@ public class AlarmTriggerMapper extends DefaultJsonMapper<AlarmTrigger, AlarmTri
         this.mappedFields = mappings.keySet().toArray(newArray(mappings.keySet().size()));
     }
 
+    @Override
     public AlarmTriggerField[] getMappedFields() {
         return mappedFields;
     }
@@ -174,29 +175,6 @@ public class AlarmTriggerMapper extends DefaultJsonMapper<AlarmTrigger, AlarmTri
             @Override
             public void remove(AlarmTrigger object) {
                 object.removeAlarm();
-            }
-        });
-
-        mappings.put(AlarmTriggerField.ACCOUNT, new IntegerMapping<AlarmTrigger>(ChronosAlarmTriggerJsonFields.ACCOUNT, null) {
-
-            @Override
-            public boolean isSet(AlarmTrigger object) {
-                return object.containsAccount();
-            }
-
-            @Override
-            public void set(AlarmTrigger object, Integer value) throws OXException {
-                object.setAccount(value);
-            }
-
-            @Override
-            public Integer get(AlarmTrigger object) {
-                return object.getAccount();
-            }
-
-            @Override
-            public void remove(AlarmTrigger object) {
-                object.removeAccount();
             }
         });
 

@@ -66,6 +66,8 @@ import com.openexchange.testing.httpclient.modules.LoginApi;
  */
 public class UserApi {
 
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(UserApi.class);
+
     private String session;
     private Integer calUser;
     private FoldersApi foldersApi;
@@ -81,7 +83,7 @@ public class UserApi {
 
     /**
      * Initialises a new {@link UserApi}.
-     * 
+     *
      * @param client
      * @param user
      * @throws Exception
@@ -105,7 +107,7 @@ public class UserApi {
     }
 
     /**
-     * 
+     *
      * @param login
      * @param password
      * @param client
@@ -115,6 +117,7 @@ public class UserApi {
     protected LoginResponse login(String login, String password, ApiClient client) throws Exception {
         LoginResponse doLogin = new LoginApi(client).doLogin(login, password, null, null, null, null, null, null, null);
         if (doLogin.getError() == null) {
+            LOG.info("Login succesfull for user " + login);
             return doLogin;
         }
         throw new Exception("Error during login: " + doLogin.getError());

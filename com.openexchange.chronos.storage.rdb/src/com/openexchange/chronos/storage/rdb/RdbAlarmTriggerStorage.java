@@ -226,13 +226,14 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
                 .append(MAPPER.getColumns(mappedFields))
                 .append(" FROM ")
                 .append("calendar_alarm_trigger")
-                .append(" WHERE cid=? AND user=? AND triggerDate<? ORDER BY triggerDate");
+                .append(" WHERE cid=? AND user=? AND account=? AND triggerDate<? ORDER BY triggerDate");
 
             List<AlarmTrigger> alrmTriggers = new ArrayList<AlarmTrigger>();
             try (PreparedStatement stmt = con.prepareStatement(stringBuilder.toString())) {
                 int parameterIndex = 1;
                 stmt.setInt(parameterIndex++, context.getContextId());
                 stmt.setInt(parameterIndex++, user);
+                stmt.setInt(parameterIndex++, accountId);
                 stmt.setLong(parameterIndex++, until);
 
                 try (ResultSet resultSet = logExecuteQuery(stmt)) {
@@ -257,10 +258,7 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
      * @throws OXException
      */
     private AlarmTrigger readTrigger(ResultSet resultSet, AlarmTriggerField... fields) throws SQLException, OXException {
-        AlarmTrigger result = MAPPER.fromResultSet(resultSet, fields);
-        result.setAccount(accountId);
-        result.setContextId(context.getContextId());
-        return result;
+        return MAPPER.fromResultSet(resultSet, fields);
     }
 
     @Override
@@ -392,7 +390,7 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
             release(connection, updated);
         }
     }
-    
+
     @Override
     public void deleteAllTriggers() throws OXException {
         int updated = 0;

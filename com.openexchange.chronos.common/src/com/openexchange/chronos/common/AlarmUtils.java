@@ -64,6 +64,7 @@ import org.dmfs.rfc5545.DateTime;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmAction;
 import com.openexchange.chronos.AlarmField;
+import com.openexchange.chronos.AlarmTrigger;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.ExtendedProperties;
 import com.openexchange.chronos.ExtendedProperty;
@@ -678,6 +679,29 @@ public class AlarmUtils extends CalendarUtils {
     public static String optExtendedPropertyValue(Alarm alarm, String name) {
         ExtendedProperty extendedProperty = optExtendedProperty(alarm, name);
         return null != extendedProperty ? extendedProperty.getValue() : null;
+    }
+
+    /**
+     * Filters a list of alarm triggers based on their action type.
+     *
+     * @param triggers The triggers to filter
+     * @param actions The alarm actions to consider
+     * @return The filtered triggers, or an empty list if there were no matching triggers
+     */
+    public static List<AlarmTrigger> filter(List<AlarmTrigger> triggers, String... actions) {
+        if (null == triggers) {
+            return Collections.emptyList();
+        }
+        if (null == actions) {
+            return triggers;
+        }
+        List<AlarmTrigger> filteredTriggers = new ArrayList<AlarmTrigger>(triggers.size());
+        for (AlarmTrigger trigger : triggers) {
+            if (null == actions || com.openexchange.tools.arrays.Arrays.contains(actions, trigger.getAction())) {
+                filteredTriggers.add(trigger);
+            }
+        }
+        return filteredTriggers;
     }
 
 }

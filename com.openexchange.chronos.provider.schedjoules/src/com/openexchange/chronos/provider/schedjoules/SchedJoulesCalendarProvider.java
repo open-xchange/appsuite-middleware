@@ -49,23 +49,29 @@
 
 package com.openexchange.chronos.provider.schedjoules;
 
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
-import java.util.UUID;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.chronos.provider.CalendarAccess;
 import com.openexchange.chronos.provider.CalendarAccount;
+import com.openexchange.chronos.provider.CalendarCapability;
 import com.openexchange.chronos.provider.caching.CachingCalendarProvider;
 import com.openexchange.chronos.provider.schedjoules.exception.SchedJoulesProviderExceptionCodes;
 import com.openexchange.chronos.schedjoules.api.SchedJoulesAPI;
 import com.openexchange.chronos.schedjoules.exception.SchedJoulesAPIExceptionCodes;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.Strings;
+import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
+import com.openexchange.user.UserService;
 
 /**
  * {@link SchedJoulesCalendarProvider}
@@ -78,19 +84,24 @@ public class SchedJoulesCalendarProvider extends CachingCalendarProvider {
     private static final String DISPLAY_NAME = "SchedJoules";
 
     /**
-     * Default value for refreshInterval in minutes (1 week)
-     */
-    private static final int DEFAULT_REFRESH_INTERVAL = 10080;
-    /**
      * The minumum value for the refreshInterval in minutes (1 day)
      */
     private static final int MINIMUM_REFRESH_INTERVAL = 1440;
+    private ServiceLookup services;
 
     /**
      * Initialises a new {@link SchedJoulesCalendarProvider}.
+     *
+     * @param services The ServiceLookup instance
      */
-    public SchedJoulesCalendarProvider() {
+    public SchedJoulesCalendarProvider(ServiceLookup services) {
         super();
+        this.services = services;
+    }
+
+    @Override
+    public EnumSet<CalendarCapability> getCapabilities() {
+        return CalendarCapability.getCapabilities(SchedJoulesCalendarAccess.class);
     }
 
     /*
@@ -125,7 +136,7 @@ public class SchedJoulesCalendarProvider extends CachingCalendarProvider {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.chronos.provider.caching.CachingCalendarProvider#configureAccountOpt(com.openexchange.session.Session, org.json.JSONObject, com.openexchange.chronos.service.CalendarParameters)
      */
     @Override
@@ -143,7 +154,7 @@ public class SchedJoulesCalendarProvider extends CachingCalendarProvider {
             JSONArray internalConfigItems = new JSONArray();
             addFolders(folders, internalConfigItems);
             internalConfig.put(SchedJoulesFields.FOLDERS, internalConfigItems);
-            internalConfig.put(SchedJoulesFields.USER_KEY, UUID.randomUUID().toString());
+            internalConfig.put(SchedJoulesFields.USER_KEY, generateUserKey(session));
             return internalConfig;
         } catch (JSONException e) {
             throw SchedJoulesProviderExceptionCodes.JSON_ERROR.create(e.getMessage(), e);
@@ -152,7 +163,7 @@ public class SchedJoulesCalendarProvider extends CachingCalendarProvider {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.chronos.provider.CalendarProvider#reconfigureAccount(com.openexchange.session.Session, org.json.JSONObject, org.json.JSONObject, com.openexchange.chronos.service.CalendarParameters)
      */
     @Override
@@ -180,11 +191,11 @@ public class SchedJoulesCalendarProvider extends CachingCalendarProvider {
 
         // Check for differences and merge
         try {
-            // Build a map that contains all internal subscribed items and their position in the array  
+            // Build a map that contains all internal subscribed items and their position in the array
             Map<String, Integer> internalItemIds = new HashMap<>();
             for (int index = 0; index < internalConfigFolders.length(); index++) {
                 JSONObject folder = internalConfigFolders.getJSONObject(index);
-                internalItemIds.put(folder.getString(SchedJoulesFields.NAME), index);
+                internalItemIds.put(folder.getString(SchedJoulesFields.ITEM_ID), index);
             }
 
             JSONArray additions = new JSONArray();
@@ -200,7 +211,7 @@ public class SchedJoulesCalendarProvider extends CachingCalendarProvider {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.chronos.provider.caching.CachingCalendarProvider#onAccountCreatedOpt(com.openexchange.session.Session, com.openexchange.chronos.provider.CalendarAccount, com.openexchange.chronos.service.CalendarParameters)
      */
     @Override
@@ -210,7 +221,7 @@ public class SchedJoulesCalendarProvider extends CachingCalendarProvider {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.chronos.provider.caching.CachingCalendarProvider#onAccountUpdatedOpt(com.openexchange.session.Session, com.openexchange.chronos.provider.CalendarAccount, com.openexchange.chronos.service.CalendarParameters)
      */
     @Override
@@ -220,7 +231,7 @@ public class SchedJoulesCalendarProvider extends CachingCalendarProvider {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.chronos.provider.caching.CachingCalendarProvider#onAccountDeletedOpt(com.openexchange.session.Session, com.openexchange.chronos.provider.CalendarAccount, com.openexchange.chronos.service.CalendarParameters)
      */
     @Override
@@ -230,7 +241,7 @@ public class SchedJoulesCalendarProvider extends CachingCalendarProvider {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.chronos.provider.caching.CachingCalendarProvider#recreateData(com.openexchange.session.Session, org.json.JSONObject, org.json.JSONObject)
      */
     @Override
@@ -242,7 +253,7 @@ public class SchedJoulesCalendarProvider extends CachingCalendarProvider {
 
     /**
      * Converts and adds the user configuration folders to internal configuration folders
-     * 
+     *
      * @param folders The array of the user configuration folders
      * @param internalConfigFolders The internal configuration folders
      * @throws OXException If an error is occurred
@@ -259,7 +270,7 @@ public class SchedJoulesCalendarProvider extends CachingCalendarProvider {
     /**
      * Prepares a folder for internal configuration. Fetches the item via the itemId and
      * stores the URL
-     * 
+     *
      * @param folder The JSONObject that denotes a subscription candidate
      * @return The internal item
      * @throws JSONException if a JSON error is occurred
@@ -268,7 +279,7 @@ public class SchedJoulesCalendarProvider extends CachingCalendarProvider {
     private JSONObject prepareFolder(JSONObject folder) throws JSONException, OXException {
         int itemId = folder.getInt(SchedJoulesFields.ITEM_ID);
         String locale = folder.optString(SchedJoulesFields.LOCALE);
-        int refreshInterval = folder.optInt(SchedJoulesFields.REFRESH_INTERVAL, DEFAULT_REFRESH_INTERVAL);
+        int refreshInterval = folder.optInt(SchedJoulesFields.REFRESH_INTERVAL, MINIMUM_REFRESH_INTERVAL);
         if (refreshInterval < MINIMUM_REFRESH_INTERVAL) {
             refreshInterval = MINIMUM_REFRESH_INTERVAL;
         }
@@ -291,7 +302,7 @@ public class SchedJoulesCalendarProvider extends CachingCalendarProvider {
 
     /**
      * Fetches the calendar's metdata with the specified item and the specified locale from the SchedJoules server
-     * 
+     *
      * @param itemId The item identifier
      * @param locale The optional locale
      * @return The calendar's metadata as JSONObject
@@ -314,7 +325,7 @@ public class SchedJoulesCalendarProvider extends CachingCalendarProvider {
 
     /**
      * Handles the additions.
-     * 
+     *
      * @param userConfigFolders The user configuration for 'folders'
      * @param internalItemIds The internal items
      * @param additions The target 'additions' object
@@ -325,18 +336,18 @@ public class SchedJoulesCalendarProvider extends CachingCalendarProvider {
     private boolean handleAdditions(JSONArray userConfigFolders, Map<String, Integer> internalItemIds, JSONArray additions) throws JSONException, OXException {
         for (int index = 0; index < userConfigFolders.length(); index++) {
             JSONObject folder = userConfigFolders.getJSONObject(index);
-            String name = folder.optString(SchedJoulesFields.NAME);
-            if (!internalItemIds.containsKey(name)) {
+            String itemId = folder.optString(SchedJoulesFields.ITEM_ID);
+            if (!internalItemIds.containsKey(itemId)) {
                 additions.put(prepareFolder(folder));
             }
-            internalItemIds.remove(name);
+            internalItemIds.remove(itemId);
         }
         return !additions.isEmpty();
     }
 
     /**
      * Handle any potential deletions.
-     * 
+     *
      * @param internalConfigFolders The internal configuration for 'folders'
      * @param internalItemIds The items that are to be removed from the internal configuration
      * @return <code>true</code> if the internal configuration was changed, <code>false</code> otherwise
@@ -347,15 +358,15 @@ public class SchedJoulesCalendarProvider extends CachingCalendarProvider {
             return false;
         }
 
-        for (String name : internalItemIds.keySet()) {
-            internalConfigFolders.remove(internalItemIds.get(name));
+        for (String itemId : internalItemIds.keySet()) {
+            internalConfigFolders.remove(internalItemIds.get(itemId));
         }
         return true;
     }
 
     /**
      * Adds the new items to the internal configuration
-     * 
+     *
      * @param internalConfigFolders The internal configuration for folders
      * @param additions The array holding the new items
      * @throws JSONException if a JSON error is occurred
@@ -364,5 +375,21 @@ public class SchedJoulesCalendarProvider extends CachingCalendarProvider {
         for (int index = 0; index < additions.length(); index++) {
             internalConfigFolders.put(additions.getJSONObject(index));
         }
+    }
+
+    /**
+     * Generates a user key from the user's primary e-mail address
+     *
+     * @param session The session to retrieve the user information
+     * @return The user key
+     * @throws OXException if the {@link UserService} is missing or if the user does not exist.
+     */
+    private String generateUserKey(Session session) throws OXException {
+        UserService userService = services.getService(UserService.class);
+        if (userService == null) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(UserService.class.getSimpleName());
+        }
+        User user = userService.getUser(session.getUserId(), session.getContextId());
+        return DigestUtils.sha256Hex(user.getMail());
     }
 }

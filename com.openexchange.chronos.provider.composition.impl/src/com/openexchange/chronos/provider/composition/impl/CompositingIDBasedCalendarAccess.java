@@ -82,6 +82,7 @@ import com.openexchange.chronos.common.SelfProtectionFactory;
 import com.openexchange.chronos.common.SelfProtectionFactory.SelfProtection;
 import com.openexchange.chronos.provider.CalendarAccess;
 import com.openexchange.chronos.provider.CalendarAccount;
+import com.openexchange.chronos.provider.CalendarCapability;
 import com.openexchange.chronos.provider.CalendarFolder;
 import com.openexchange.chronos.provider.CalendarProviderRegistry;
 import com.openexchange.chronos.provider.FreeBusyProvider;
@@ -242,19 +243,16 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
 
     public List<Event> searchEvents(List<SearchFilter> filters, List<String> queries) throws OXException {
         List<Event> events = new ArrayList<Event>();
-        for (CalendarAccount account : getAccounts()) {
-            CalendarAccess access = getAccess(account);
-            if (SearchAware.class.isInstance(access)) {
-                try {
-                    List<Event> eventsInAccount = getAccess(account, SearchAware.class).searchEvents(null, filters, queries);
-                    events.addAll(withUniqueIDs(eventsInAccount, account.getAccountId()));
-                    getSelfProtection().checkEventCollection(events);
-                } catch (OXException e) {
-                    //TODO: persist exception in account data
-                    e = withUniqueIDs(e, account.getAccountId());
-                    LOG.warn("Error performing search in calendar account {}: {}", I(account.getAccountId()), e.getMessage(), e);
-                    continue;
-                }
+        for (CalendarAccount account : getAccounts(CalendarCapability.SEARCH)) {
+            try {
+                List<Event> eventsInAccount = getAccess(account, SearchAware.class).searchEvents(null, filters, queries);
+                events.addAll(withUniqueIDs(eventsInAccount, account.getAccountId()));
+                getSelfProtection().checkEventCollection(events);
+            } catch (OXException e) {
+                //TODO: persist exception in account data
+                e = withUniqueIDs(e, account.getAccountId());
+                LOG.warn("Error performing search in calendar account {}: {}", I(account.getAccountId()), e.getMessage(), e);
+                continue;
             }
         }
         return sort(events);
@@ -444,17 +442,13 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
 
     @Override
     public List<AlarmTrigger> getAlarmTriggers(Set<String> actions) throws OXException {
-        List<CalendarAccount> accounts = getAccounts();
         List<AlarmTrigger> result = new ArrayList<>();
-        for (CalendarAccount account : accounts) {
-            CalendarAccess access = getAccess(account);
-            if(access instanceof PersonalAlarmAware){
-                result.addAll(((PersonalAlarmAware) access).getAlarmTriggers(actions));
+        for (CalendarAccount account : getAccounts(CalendarCapability.ALARMS)) {
+            List<AlarmTrigger> alarmTriggers = getAccess(account, PersonalAlarmAware.class).getAlarmTriggers(actions);
+            for (AlarmTrigger trigger : alarmTriggers) {
+                trigger.setFolder(getUniqueFolderId(account.getAccountId(), trigger.getFolder()));
             }
-        }
-
-        for (AlarmTrigger trigger : result) {
-            trigger.setFolder(getUniqueFolderId(trigger.getAccount(), trigger.getFolder()));
+            result.addAll(alarmTriggers);
         }
         return result;
     }

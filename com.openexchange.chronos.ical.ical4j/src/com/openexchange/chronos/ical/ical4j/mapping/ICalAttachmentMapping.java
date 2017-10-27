@@ -143,9 +143,6 @@ public abstract class ICalAttachmentMapping<T extends CalendarComponent, U> exte
         } else if (null != attachment.getUri()) {
             property.setUri(new URI(attachment.getUri()));
         }
-        if (null != attachment.getContentId()) {
-            property.getParameters().add(new XParameter("CID", attachment.getContentId()));
-        }
         if (null != attachment.getFilename()) {
             property.getParameters().add(new XParameter("FILENAME", attachment.getFilename()));
         }
@@ -168,13 +165,8 @@ public abstract class ICalAttachmentMapping<T extends CalendarComponent, U> exte
             fileHolder.write(property.getBinary());
             attachment.setData(fileHolder);
             property.setBinary(null);
-        }
-        if (null != property.getUri()) {
+        } else if (null != property.getUri()) {
             attachment.setUri(property.getUri().toString());
-        }
-        Parameter cidParameter = property.getParameter("CID");
-        if (null != cidParameter) {
-            attachment.setContentId(cidParameter.getValue());
         }
         attachment.setFilename(extractFilename(property));
         Parameter fmtTypeParameter = property.getParameter(Parameter.FMTTYPE);

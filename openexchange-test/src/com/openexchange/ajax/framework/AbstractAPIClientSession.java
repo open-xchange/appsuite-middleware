@@ -138,7 +138,9 @@ public abstract class AbstractAPIClientSession {
     @After
     public void tearDown() throws Exception {
         for (ApiClient client : apiClients) {
-            logoutClient(client);
+            if (client.getSession() != null) {
+                logoutClient(client, true);
+            }
         }
         TestContextPool.backContext(testContext);
     }
@@ -176,6 +178,7 @@ public abstract class AbstractAPIClientSession {
         try {
             if (client != null) {
                 client.logout();
+                LOG.info("Logout succesfull for user " + client.getUser());
             }
         } catch (Exception e) {
             if (loggin) {

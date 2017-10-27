@@ -200,6 +200,13 @@ public interface CalendarParameters {
     static final String PARAMETER_MASK_ID = "maskId";
 
     /**
+     * {@link Long}
+     * <p/>
+     * Specifies the field for the timestamp.
+     */
+    static final String PARAMETER_TIMESTAMP = "timestamp";
+
+    /**
      * Sets a parameter.
      *
      * @param parameter The parameter name to set

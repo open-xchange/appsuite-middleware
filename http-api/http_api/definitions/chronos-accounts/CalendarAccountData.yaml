@@ -8,7 +8,7 @@ properties:
     description: The provider for the calendar account.
   configuration:
     type: object
-    description: Provider-specific configuration data of the calendar account.
+    description: Provider-specific configuration data of the calendar account ([SchedJoules Provider](#/definitions/FoldersConfigurationData)).
   timestamp:
     type: integer
     format: int64

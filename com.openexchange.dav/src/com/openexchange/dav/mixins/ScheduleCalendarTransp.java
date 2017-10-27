@@ -94,7 +94,7 @@ public class ScheduleCalendarTransp extends SingleXMLPropertyMixin {
             String value = optPropertyValue(CalendarFolderConverter.getExtendedProperties(collection.getFolder()), SCHEDULE_TRANSP_LITERAL);
             if (null != value) {
                 value = Transp.TRANSPARENT.equals(value) ? Transp.TRANSPARENT : Transp.OPAQUE;
-                return "<CAL:" + Transp.TRANSPARENT.toLowerCase() + "/>";
+                return "<CAL:" + value.toLowerCase() + "/>";
             }
         }
         return null;

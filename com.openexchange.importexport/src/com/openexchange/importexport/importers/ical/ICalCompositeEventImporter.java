@@ -50,10 +50,10 @@
 package com.openexchange.importexport.importers.ical;
 
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
 import com.openexchange.chronos.service.CalendarResult;
 import com.openexchange.chronos.service.EventID;
 import com.openexchange.exception.OXException;
-import com.openexchange.importexport.osgi.ImportExportServices;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -64,18 +64,21 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class ICalCompositeEventImporter extends AbstractICalEventImporter {
 
-    public ICalCompositeEventImporter(ServerSession session) {
+    IDBasedCalendarAccess calendarAccess;
+
+    public ICalCompositeEventImporter(ServerSession session, IDBasedCalendarAccess calendarAccess) {
         super(session);
+        this.calendarAccess = calendarAccess;
     }
 
     @Override
     public CalendarResult createEvent(String folderId, Event event) throws OXException {
-        return ImportExportServices.getIDBasedCalendarAccessFactory().createAccess(session).createEvent(folderId, event);
+        return calendarAccess.createEvent(folderId, event);
     }
 
     @Override
     public CalendarResult updateEvent(EventID eventId, Event event) throws OXException {
-        return ImportExportServices.getIDBasedCalendarAccessFactory().createAccess(session).updateEvent(eventId, event, System.currentTimeMillis());
+        return calendarAccess.updateEvent(eventId, event, System.currentTimeMillis());
     }
 
 }

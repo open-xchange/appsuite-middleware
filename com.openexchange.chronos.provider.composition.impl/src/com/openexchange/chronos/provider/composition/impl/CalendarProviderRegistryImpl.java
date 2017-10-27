@@ -53,6 +53,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import com.openexchange.chronos.provider.AutoProvisioningCalendarProvider;
+import com.openexchange.chronos.provider.CalendarCapability;
 import com.openexchange.chronos.provider.CalendarProvider;
 import com.openexchange.chronos.provider.CalendarProviderRegistry;
 import com.openexchange.chronos.provider.FreeBusyProvider;
@@ -94,6 +95,16 @@ public class CalendarProviderRegistryImpl implements CalendarProviderRegistry {
     @Override
     public List<CalendarProvider> getCalendarProviders() {
         return Collections.unmodifiableList(new ArrayList<CalendarProvider>(calendarProviders));
+    }
+
+    public List<CalendarProvider> getCalendarProviders(CalendarCapability capabilitiy) {
+        List<CalendarProvider> providers = new ArrayList<CalendarProvider>();
+        for (CalendarProvider provider : calendarProviders) {
+            if (provider.getCapabilities().contains(capabilitiy)) {
+                providers.add(provider);
+            }
+        }
+        return Collections.unmodifiableList(providers);
     }
 
     @Override

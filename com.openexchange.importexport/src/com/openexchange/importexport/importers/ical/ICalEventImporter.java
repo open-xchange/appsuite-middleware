@@ -50,11 +50,12 @@
 package com.openexchange.importexport.importers.ical;
 
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarResult;
 import com.openexchange.chronos.service.CalendarService;
+import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.EventID;
 import com.openexchange.exception.OXException;
-import com.openexchange.importexport.osgi.ImportExportServices;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -63,22 +64,34 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:Jan-Oliver.Huhn@open-xchange.com">Jan-Oliver Huhn</a>
  * @since v7.10.0
  */
-public class ICalEventImporter extends AbstractICalEventImporter{
+public class ICalEventImporter extends AbstractICalEventImporter {
 
-    public ICalEventImporter(ServerSession session) {
+    CalendarService calendarService;
+    CalendarSession calendarSession;
+
+    public ICalEventImporter(ServerSession session, CalendarService calendarService, CalendarSession calendarSession) {
         super(session);
+        this.calendarService = calendarService;
+        this.calendarSession = calendarSession;
     }
 
     @Override
     protected CalendarResult createEvent(String folderId, Event event) throws OXException {
-        CalendarService calendarService = ImportExportServices.getCalendarService();
-        return calendarService.createEvent(calendarService.init(session), folderId, event);
+        CalendarResult calendarResult = calendarService.createEvent(calendarSession, folderId, event);
+        setCalendarSessionTimestamp(calendarResult);
+        return calendarResult;
     }
 
     @Override
     protected CalendarResult updateEvent(EventID eventId, Event event) throws OXException{
-        CalendarService calendarService = ImportExportServices.getCalendarService();
-        return calendarService.updateEvent(calendarService.init(session), eventId, event, System.currentTimeMillis());
+        CalendarResult calendarResult = calendarService.updateEvent(calendarSession, eventId, event, System.currentTimeMillis());
+        setCalendarSessionTimestamp(calendarResult);
+        return calendarResult;
+    }
+
+    private CalendarResult setCalendarSessionTimestamp(CalendarResult calendarResult) {
+        calendarSession.set(CalendarParameters.PARAMETER_TIMESTAMP, Long.valueOf(calendarResult.getTimestamp()));
+        return calendarResult;
     }
 
 }

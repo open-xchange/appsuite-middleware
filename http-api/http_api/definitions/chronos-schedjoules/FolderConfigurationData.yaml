@@ -1,0 +1,14 @@
+type: object
+properties:
+  itemId:
+    type: integer
+    description: The identifier of a subscribable SchedJoules calendar
+  name:
+    type: string
+    description: The name of the calendar (optional; if not defined, the SchedJoules calendar name will be used)
+  refreshInterval:
+    type: integer
+    description: The refresh interval of the calendar in minutes (optional; if not defined the default value of 1440 minutes, i.e. 1 day will be used which is also the minimum allowed value)
+  locale:
+    type: string
+    description: The desired language of the calendar (optional; if not specified the locale from the user's session will be used)

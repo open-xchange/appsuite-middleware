@@ -49,11 +49,13 @@
 
 package com.openexchange.chronos.provider.ical;
 
+import java.util.EnumSet;
 import java.util.Locale;
 import org.json.JSONObject;
 import com.openexchange.auth.info.AuthType;
 import com.openexchange.chronos.provider.CalendarAccess;
 import com.openexchange.chronos.provider.CalendarAccount;
+import com.openexchange.chronos.provider.CalendarCapability;
 import com.openexchange.chronos.provider.caching.CachingCalendarProvider;
 import com.openexchange.chronos.provider.ical.conn.ICalFeedConnector;
 import com.openexchange.chronos.provider.ical.internal.auth.ICalAuthParser;
@@ -81,6 +83,11 @@ public class ICalCalendarProvider extends CachingCalendarProvider {
     }
 
     @Override
+    public EnumSet<CalendarCapability> getCapabilities() {
+        return CalendarCapability.getCapabilities(ICalCalendarAccess.class);
+    }
+
+    @Override
     public CalendarAccess connect(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
         return new ICalCalendarAccess(session, account, parameters);
     }
@@ -88,7 +95,7 @@ public class ICalCalendarProvider extends CachingCalendarProvider {
     @Override
     protected JSONObject configureAccountOpt(Session session, JSONObject userConfig, CalendarParameters parameters) throws OXException {
         ICalFeedConfig iCalFeedConfig = new ICalFeedConfig.Builder(session, new JSONObject(userConfig), new JSONObject(), false).build();
-        
+
         if (iCalFeedConfig.getAuthInfo().getAuthType().equals(AuthType.BASIC)) {
             ICalAuthParser.encrypt(userConfig, session.getPassword()); // encrypt password for persisting
         }

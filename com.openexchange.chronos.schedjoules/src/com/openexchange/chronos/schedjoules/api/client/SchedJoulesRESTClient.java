@@ -81,7 +81,7 @@ public class SchedJoulesRESTClient {
 
     private static final String SCHEME = "https";
     private static final String BASE_URL = "api.schedjoules.com";
-    private static final String USER_AGENT = "Open-Xchange SchedJoules Client (pre-Alpha)";
+    private static final String USER_AGENT = "Open-Xchange SchedJoules Client";
     private static final int API_VERSION = 1;
 
     private static final String ACCEPT_HEADER = "application/vnd.schedjoules; version={{version}}";

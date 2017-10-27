@@ -160,8 +160,6 @@ ChronosUpdatesResponse:
   $ref: ./chronos/UpdatesResponse.yaml
 ChronosAttachment:
   $ref: ./chronos/Attachment.yaml
-ChronosExtendedProperty:
-  $ref: ./chronos/ExtendedProperty.yaml
 DateTimeData:
   $ref: ./chronos/DateTimeData.yaml
 ChronosFreeBusyResponse:
@@ -216,12 +214,14 @@ PageData:
   $ref: ./chronos-schedjoules/PageData.yaml
 PageSectionsData:
   $ref: ./chronos-schedjoules/PageSectionsData.yaml
-SubscribeResponse:
-  $ref: ./chronos-schedjoules/SubscribeResponse.yaml
 SearchData:
   $ref: ./chronos-schedjoules/SearchData.yaml
 SearchResponse:
   $ref: ./chronos-schedjoules/SearchResponse.yaml
+FolderConfigurationData:
+  $ref: ./chronos-schedjoules/FolderConfigurationData.yaml
+FoldersConfigurationData:
+  $ref: ./chronos-schedjoules/FoldersConfigurationData.yaml
 # Module: mail
 MailCountResponse:
   $ref: ./mail/MailCountResponse.yaml

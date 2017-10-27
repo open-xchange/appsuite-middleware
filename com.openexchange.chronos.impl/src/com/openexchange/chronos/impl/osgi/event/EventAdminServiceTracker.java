@@ -57,23 +57,23 @@ import com.openexchange.chronos.service.CalendarHandler;
 import com.openexchange.osgi.SimpleRegistryListener;
 
 /**
- * {@link EventAdminServiceListerner}
+ * {@link EventAdminServiceTracker}
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.0
  */
-public class EventAdminServiceListerner implements SimpleRegistryListener<EventAdmin> {
+public class EventAdminServiceTracker implements SimpleRegistryListener<EventAdmin> {
 
     private final BundleContext context;
 
     private volatile ServiceRegistration<CalendarHandler> handlerRegistration;
 
     /**
-     * Initializes a new {@link EventAdminServiceListerner}.
+     * Initializes a new {@link EventAdminServiceTracker}.
      * 
      * @param context The {@link BundleContext}
      */
-    public EventAdminServiceListerner(BundleContext context) {
+    public EventAdminServiceTracker(BundleContext context) {
         super();
         this.context = context;
     }
@@ -87,6 +87,15 @@ public class EventAdminServiceListerner implements SimpleRegistryListener<EventA
     public void removed(ServiceReference<EventAdmin> ref, EventAdmin service) {
         context.ungetService(ref);
         handlerRegistration.unregister();
+    }
+
+    /**
+     * Get the {@link CalendarHandler} hold by this registry
+     * 
+     * @return the {@link CalendarHandler}
+     */
+    public CalendarHandler getCalendarHandler() {
+        return context.getService(handlerRegistration.getReference());
     }
 
 }

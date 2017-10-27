@@ -20,6 +20,3 @@ properties:
   uri:
     type: string
     description: A uniform resource identifier to the attachment file.
-  cid:
-    type: string
-    description: The Content-ID that uniquely identifies an attachment with an upload request.

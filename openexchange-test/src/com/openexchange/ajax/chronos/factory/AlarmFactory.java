@@ -66,7 +66,7 @@ import com.openexchange.testing.httpclient.models.Trigger.RelatedEnum;
 public final class AlarmFactory {
 
     public enum AlarmAction {
-        display, audio, mail;
+        DISPLAY, AUDIO, MAIL;
     }
 
     /**
@@ -76,7 +76,7 @@ public final class AlarmFactory {
      * @return The new {@link Alarm}
      */
     public static Alarm createDisplayAlarm(String duration) {
-        return createAlarm(duration, RelatedEnum.START, AlarmAction.display);
+        return createAlarm(duration, RelatedEnum.START, AlarmAction.DISPLAY);
     }
 
     /**
@@ -96,7 +96,7 @@ public final class AlarmFactory {
         attachment.setFmtType(mimeType);
         attachments.add(attachment);
 
-        Alarm audioAlarm = createAlarm(duration, AlarmAction.audio);
+        Alarm audioAlarm = createAlarm(duration, AlarmAction.AUDIO);
         audioAlarm.setAttachments(attachments);
 
         return audioAlarm;
@@ -118,7 +118,7 @@ public final class AlarmFactory {
         attendee.setEmail(mailAddress);
         attendees.add(attendee);
 
-        Alarm mailAlarm = createAlarm(duration, AlarmAction.mail);
+        Alarm mailAlarm = createAlarm(duration, AlarmAction.MAIL);
         mailAlarm.setDescription(description);
         mailAlarm.setSummary(summary);
         mailAlarm.setAttendees(attendees);
@@ -133,7 +133,7 @@ public final class AlarmFactory {
      * @return The new {@link Alarm}
      */
     public static Alarm createAlarm(String duration, RelatedEnum related) {
-        return createAlarm(duration, related, AlarmAction.display);
+        return createAlarm(duration, related, AlarmAction.DISPLAY);
     }
 
     /**

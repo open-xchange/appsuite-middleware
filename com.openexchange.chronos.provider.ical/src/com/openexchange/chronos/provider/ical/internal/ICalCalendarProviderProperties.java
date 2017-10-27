@@ -74,7 +74,7 @@ public enum ICalCalendarProviderProperties implements Property {
     /**
      * Defines the maximum possible number of connections used to access the calendar feed
      */
-    maxConnections(100, ICalCalendarProviderProperties.PREFIX),
+    maxConnections(1000, ICalCalendarProviderProperties.PREFIX),
     /**
      * Defines the maximum possible number of connections per host used to access the calendar feed
      */

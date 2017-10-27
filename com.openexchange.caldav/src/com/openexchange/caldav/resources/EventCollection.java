@@ -58,7 +58,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.servlet.http.HttpServletResponse;
-import org.jdom2.Element;
+import org.jdom2.Namespace;
 import com.openexchange.caldav.GroupwareCaldavFactory;
 import com.openexchange.caldav.PhantomMaster;
 import com.openexchange.caldav.Tools;
@@ -83,6 +83,8 @@ import com.openexchange.caldav.query.FilterAnalyzer;
 import com.openexchange.caldav.reports.FilteringResource;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.TimeTransparency;
+import com.openexchange.chronos.Transp;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.provider.CalendarFolderProperty;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
@@ -90,6 +92,7 @@ import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.UpdatesResult;
 import com.openexchange.dav.DAVProperty;
 import com.openexchange.dav.DAVProtocol;
+import com.openexchange.dav.PreconditionException;
 import com.openexchange.dav.mixins.CalendarColor;
 import com.openexchange.dav.mixins.CalendarDescription;
 import com.openexchange.dav.mixins.ScheduleCalendarTransp;
@@ -394,12 +397,20 @@ public class EventCollection extends FolderCollection<Event> implements Filterin
 
     @Override
     protected void internalPutProperty(WebdavProperty property) throws WebdavProtocolException {
-        if (CalendarColor.NAMESPACE.getURI().equals(property.getNamespace()) && CalendarColor.NAME.equals(property.getName())) {
+        if (DAVProperty.class.isInstance(property)) {
+            putProperty((DAVProperty) property);
+            return;
+        }
+        throw new PreconditionException(DAVProtocol.DAV_NS.getURI(), "cannot-modify-protected-property", getUrl(), HttpServletResponse.SC_FORBIDDEN);
+    }
+
+    private void putProperty(DAVProperty property) throws WebdavProtocolException {
+        ParameterizedFolder folderToUpdate = getFolderToUpdate();
+        if (matches(property, CalendarColor.NAMESPACE, CalendarColor.NAME)) {
             String value = CalendarColor.parse(property);
             /*
              * apply color folder property
              */
-            ParameterizedFolder folderToUpdate = getFolderToUpdate();
             CalendarFolderConverter.setExtendedProperty(folderToUpdate, CalendarFolderProperty.COLOR(value));
             /*
              * also apply color in meta field for private folders
@@ -422,33 +433,28 @@ public class EventCollection extends FolderCollection<Event> implements Filterin
                     }
                 }
             }
-        } else if (CalendarDescription.NAMESPACE.getURI().equals(property.getNamespace()) && CalendarDescription.NAME.equals(property.getName())) {
+        } else if (matches(property, CalendarDescription.NAMESPACE, CalendarDescription.NAME)) {
             /*
              * apply description folder property
              */
-            String value;
-            if (DAVProperty.class.isInstance(property)) {
-                Element element = ((DAVProperty) property).getElement();
-                value = null != element ? element.getValue() : null;
-            } else {
-                value = property.getValue();
-            }
-            ParameterizedFolder folderToUpdate = getFolderToUpdate();
+            String value = null != property.getElement() ? property.getElement().getText() : null;
             CalendarFolderConverter.setExtendedProperty(folderToUpdate, CalendarFolderProperty.DESCRIPTION(value));
         } else if (ScheduleCalendarTransp.NAMESPACE.getURI().equals(property.getNamespace()) && ScheduleCalendarTransp.NAME.equals(property.getName())) {
             /*
              * apply schedule transparency folder property
              */
-            String value;
-            if (DAVProperty.class.isInstance(property)) {
-                Element element = ((DAVProperty) property).getElement();
-                value = null != element ? element.getValue() : null;
-            } else {
-                value = property.getValue();
+            Transp value = TimeTransparency.OPAQUE;
+            if (null != property.getElement() && null != property.getElement().getChild(Transp.TRANSPARENT.toLowerCase(), DAVProtocol.CAL_NS)) {
+                value = TimeTransparency.TRANSPARENT;
             }
-            ParameterizedFolder folderToUpdate = getFolderToUpdate();
             CalendarFolderConverter.setExtendedProperty(folderToUpdate, CalendarFolderProperty.SCHEDULE_TRANSP(value));
+        } else if (matches(property, CalendarTimezone.NAMESPACE, CalendarTimezone.NAME)) {
+            throw new PreconditionException(DAVProtocol.DAV_NS.getURI(), "cannot-modify-protected-property", getUrl(), HttpServletResponse.SC_FORBIDDEN);
         }
+    }
+
+    private static boolean matches(WebdavProperty property, Namespace namespace, String name) {
+        return null != property && namespace.getURI().equals(property.getNamespace()) && name.equals(property.getName());
     }
 
 }

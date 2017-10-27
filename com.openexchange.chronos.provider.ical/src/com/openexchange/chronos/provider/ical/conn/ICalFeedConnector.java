@@ -121,8 +121,7 @@ public class ICalFeedConnector {
             if (result.getStatusCode() == HttpStatus.SC_NOT_FOUND) {
                 throw ICalProviderExceptionCodes.NO_FEED.create(iCalFeedConfig.getFeedUrl());
             }
-
-            throw ICalProviderExceptionCodes.UNEXPECTED_FEED_ERROR.create(iCalFeedConfig.getFeedUrl());
+            throw ICalProviderExceptionCodes.UNEXPECTED_FEED_ERROR.create(iCalFeedConfig.getFeedUrl(), "Unknown server response.");
         } catch (IOException e) {
             LOG.error("Error while executing the head request targeting {}: {}.", iCalFeedConfig.getFeedUrl(), e.getMessage(), e);
             throw CalendarExceptionCodes.UNEXPECTED_ERROR.create(e.getMessage());
@@ -171,10 +170,6 @@ public class ICalFeedConnector {
                 method.addHeader(HttpHeaders.AUTHORIZATION, authHeader);
             }
                 break;
-            case OAUTH:
-                //TODO
-            case OAUTHBEARER:
-                //TODO
             case TOKEN: {
                 String token = authInfo.getToken();
                 String authHeader = "Token token=" + token;

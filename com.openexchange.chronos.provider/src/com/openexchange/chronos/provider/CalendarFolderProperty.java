@@ -169,6 +169,21 @@ public enum CalendarFolderProperty {
      * user's busy time, or {@link Transp#OPAQUE}, otherwise.
      *
      * @param value The value to take over
+     * @return The extended property
+     * @see <a href="https://tools.ietf.org/html/rfc6638#section-9.1">RFC 6638, section 9.1</a>
+     */
+    public static ExtendedProperty SCHEDULE_TRANSP(Transp value) {
+        return SCHEDULE_TRANSP(value, false);
+    }
+
+    /**
+     * Initializes a new calendar folder property for the <code>scheduleTransp</code> property.
+     * <p/>
+     * The schedule transparency is used to determine whether the calendar object resources in a calendar collection will affect the
+     * owner's busy time information or not. The value is either {@link Transp#TRANSPARENT} if contained events do not contribute to the
+     * user's busy time, or {@link Transp#OPAQUE}, otherwise.
+     *
+     * @param value The value to take over
      * @param protekted <code>true</code> if the property should be protected, <code>false</code>, otherwise
      * @return The extended property
      * @see <a href="https://tools.ietf.org/html/rfc6638#section-9.1">RFC 6638, section 9.1</a>

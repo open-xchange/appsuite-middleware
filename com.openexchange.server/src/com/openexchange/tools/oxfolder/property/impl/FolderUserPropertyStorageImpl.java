@@ -158,7 +158,6 @@ public class FolderUserPropertyStorageImpl implements FolderUserPropertyStorage 
                 // Execute
                 stmt.executeUpdate();
             } else {
-                Databases.autocommit(connection);
                 // Prepare statement for every property
                 stmt = connection.prepareStatement(DELETE_PROP);
                 for (String key : propertyKeys) {
