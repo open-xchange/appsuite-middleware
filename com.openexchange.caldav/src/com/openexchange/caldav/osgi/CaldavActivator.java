@@ -50,6 +50,8 @@
 package com.openexchange.caldav.osgi;
 
 import org.osgi.service.http.HttpService;
+import com.openexchange.ajax.customizer.folder.AdditionalFolderField;
+import com.openexchange.caldav.CalDAVURLField;
 import com.openexchange.caldav.Tools;
 import com.openexchange.caldav.mixins.DefaultAlarmVeventDate;
 import com.openexchange.caldav.mixins.DefaultAlarmVeventDatetime;
@@ -154,7 +156,7 @@ public class CaldavActivator extends HousekeepingActivator {
 
                 @Override
                 public String[] getPath() {
-                    return new String[]{"modules", "caldav", "module"};
+                    return new String[] { "modules", "caldav", "module" };
                 }
             });
 
@@ -204,6 +206,8 @@ public class CaldavActivator extends HousekeepingActivator {
                     return capabilities.contains(Permission.CALDAV.getCapabilityName());
                 }
             });
+
+            registerService(AdditionalFolderField.class, new CalDAVURLField(this));
 
             openTrackers();
         } catch (final Exception e) {

@@ -50,6 +50,7 @@
 package com.openexchange.chronos.provider;
 
 import java.util.Date;
+import java.util.EnumSet;
 import java.util.List;
 import com.openexchange.chronos.ExtendedProperties;
 
@@ -66,6 +67,7 @@ public class DefaultCalendarFolder implements CalendarFolder {
     private Date lastModified;
     private List<CalendarPermission> permissions;
     private ExtendedProperties extendedProperties;
+    private EnumSet<CalendarCapability> supportedCapabilites;
 
     /**
      * Initializes a new {@link DefaultCalendarFolder}.
@@ -129,6 +131,15 @@ public class DefaultCalendarFolder implements CalendarFolder {
 
     public void setExtendedProperties(ExtendedProperties extendedProperties) {
         this.extendedProperties = extendedProperties;
+    }
+
+    @Override
+    public EnumSet<CalendarCapability> getSupportedCapabilites() {
+        return supportedCapabilites;
+    }
+
+    public void setSupportedCapabilites(EnumSet<CalendarCapability> supportedCapabilites) {
+        this.supportedCapabilites = supportedCapabilites;
     }
 
     @Override

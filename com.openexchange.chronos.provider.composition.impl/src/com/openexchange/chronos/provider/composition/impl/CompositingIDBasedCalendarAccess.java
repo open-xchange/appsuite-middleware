@@ -444,10 +444,11 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
     public List<AlarmTrigger> getAlarmTriggers(Set<String> actions) throws OXException {
         List<AlarmTrigger> result = new ArrayList<>();
         for (CalendarAccount account : getAccounts(CalendarCapability.ALARMS)) {
-            result.addAll(getAccess(account, PersonalAlarmAware.class).getAlarmTriggers(actions));
-        }
-        for (AlarmTrigger trigger : result) {
-            trigger.setFolder(getUniqueFolderId(trigger.getAccount(), trigger.getFolder()));
+            List<AlarmTrigger> alarmTriggers = getAccess(account, PersonalAlarmAware.class).getAlarmTriggers(actions);
+            for (AlarmTrigger trigger : alarmTriggers) {
+                trigger.setFolder(getUniqueFolderId(account.getAccountId(), trigger.getFolder()));
+            }
+            result.addAll(alarmTriggers);
         }
         return result;
     }

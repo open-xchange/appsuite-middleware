@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.chronos;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import java.rmi.server.UID;
@@ -66,10 +65,7 @@ import com.openexchange.configuration.asset.AssetManager;
 import com.openexchange.exception.OXException;
 import com.openexchange.testing.httpclient.invoker.ApiClient;
 import com.openexchange.testing.httpclient.invoker.ApiException;
-import com.openexchange.testing.httpclient.models.CalendarResult;
-import com.openexchange.testing.httpclient.models.ChronosCalendarResultResponse;
 import com.openexchange.testing.httpclient.models.CommonResponse;
-import com.openexchange.testing.httpclient.models.EventData;
 import com.openexchange.testing.httpclient.models.EventId;
 import com.openexchange.testing.httpclient.models.FolderBody;
 import com.openexchange.testing.httpclient.models.FolderData;
@@ -89,6 +85,8 @@ import com.openexchange.testing.httpclient.modules.ImportApi;
  * @since v7.10.0
  */
 public class AbstractChronosTest extends AbstractAPIClientSession {
+
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractChronosTest.class);
 
     Map<UserApi, List<EventId>> eventIds;
     Map<UserApi, List<String>> folderToDelete;
@@ -114,6 +112,7 @@ public class AbstractChronosTest extends AbstractAPIClientSession {
     @Override
     public void setUp() throws Exception {
         super.setUp();
+        LOG.info("Setup for test ...");
         ApiClient client = getClient();
         rememberClient(client);
         EnhancedApiClient enhancedClient = getEnhancedApiClient();
@@ -131,6 +130,7 @@ public class AbstractChronosTest extends AbstractAPIClientSession {
 
     @Override
     public void tearDown() throws Exception {
+        LOG.info("Teardown...");
         Exception exception = null;
         try {
             if (eventIds != null) {
@@ -146,11 +146,14 @@ public class AbstractChronosTest extends AbstractAPIClientSession {
         eventManager.cleanUp();
 
         calendarAccountManager.cleanUp();
-
-        if (folderToDelete != null) {
-            for (UserApi api : folderToDelete.keySet()) {
-                api.getFoldersApi().deleteFolders(api.getSession(), folderToDelete.get(api), "0", System.currentTimeMillis(), "event", true, true, false);
+        try {
+            if (folderToDelete != null) {
+                for (UserApi api : folderToDelete.keySet()) {
+                    api.getFoldersApi().deleteFolders(api.getSession(), folderToDelete.get(api), "0", System.currentTimeMillis(), "event", true, true, false);
+                }
             }
+        } catch (Exception e) {
+            exception = e;
         }
 
         super.tearDown();
@@ -324,21 +327,4 @@ public class AbstractChronosTest extends AbstractAPIClientSession {
         return data;
     }
 
-    /**
-     * Handles the result response of an event creation
-     *
-     * @param createEvent The result
-     * @return The created event
-     */
-    protected EventData handleCreation(ChronosCalendarResultResponse createEvent) {
-        CalendarResult result = checkResponse(createEvent.getError(), createEvent.getErrorDesc(), createEvent.getData());
-        assertEquals("Found unexpected conflicts", 0, result.getConflicts().size());
-        EventData event = result.getCreated().get(0);
-        EventId eventId = new EventId();
-        eventId.setId(event.getId());
-        eventId.setFolderId(event.getFolder());
-        rememberEventId(defaultUserApi, eventId);
-        this.setLastTimestamp(createEvent.getTimestamp());
-        return event;
-    }
 }

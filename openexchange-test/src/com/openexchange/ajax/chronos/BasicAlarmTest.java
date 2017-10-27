@@ -71,7 +71,7 @@ import com.openexchange.testing.httpclient.models.EventData;
 public class BasicAlarmTest extends AbstractAlarmTest {
 
     /**
-     * Initialises a new {@link BasicAlarmTest}.
+     * Initializes a new {@link BasicAlarmTest}.
      */
     public BasicAlarmTest() {
         super();

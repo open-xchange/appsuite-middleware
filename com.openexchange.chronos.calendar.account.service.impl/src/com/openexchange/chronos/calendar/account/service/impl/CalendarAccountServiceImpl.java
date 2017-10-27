@@ -317,10 +317,14 @@ public class CalendarAccountServiceImpl implements CalendarAccountService, Admin
                 if (Boolean.FALSE.equals(enabled) && CalendarAccount.DEFAULT_ACCOUNT.getProviderId().equals(account.getProviderId())) {
                     throw CalendarExceptionCodes.UNSUPPORTED_OPERATION_FOR_PROVIDER.create(account.getProviderId());
                 }
-                CalendarAccount updatedAccount = new DefaultCalendarAccount(account.getProviderId(), account.getAccountId(), account.getUserId(),
-                    null != enabled ? enabled.booleanValue() : account.isEnabled(), internalConfig, userConfig, new Date());
-                storage.getAccountStorage().updateAccount(updatedAccount);
-                return updatedAccount;
+                Date now = new Date();
+                CalendarAccount accountUpdate = new DefaultCalendarAccount(account.getProviderId(), account.getAccountId(), account.getUserId(),
+                    null != enabled ? enabled.booleanValue() : account.isEnabled(), internalConfig, userConfig, now);
+                storage.getAccountStorage().updateAccount(accountUpdate);                
+                return new DefaultCalendarAccount(account.getProviderId(), account.getAccountId(), account.getUserId(),
+                    null != enabled ? enabled.booleanValue() : account.isEnabled(), 
+                    null != internalConfig ? internalConfig : account.getInternalConfiguration(), 
+                    null != userConfig ? userConfig : account.getUserConfiguration(), now);
             }
         }.executeUpdate();
         invalidateStorage(contextId, userId, accountId);

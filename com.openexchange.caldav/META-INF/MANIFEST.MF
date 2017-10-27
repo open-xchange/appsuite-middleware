@@ -6,7 +6,9 @@ Bundle-Version: 7.10.0
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.google.common.io,
+ com.openexchange.ajax.customizer.folder,
  com.openexchange.ajax.fileholder,
+ com.openexchange.ajax.requesthandler,
  com.openexchange.ajax.requesthandler.oauth,
  com.openexchange.api2,
  com.openexchange.authentication,

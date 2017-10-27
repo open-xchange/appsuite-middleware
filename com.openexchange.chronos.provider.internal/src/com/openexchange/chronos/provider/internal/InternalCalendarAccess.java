@@ -82,6 +82,7 @@ import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.TimeTransparency;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.compat.Appointment2Event;
+import com.openexchange.chronos.provider.CalendarCapability;
 import com.openexchange.chronos.provider.CalendarFolder;
 import com.openexchange.chronos.provider.CalendarFolderProperty;
 import com.openexchange.chronos.provider.extensions.PersonalAlarmAware;
@@ -378,6 +379,7 @@ public class InternalCalendarAccess implements GroupwareCalendarAccess, SyncAwar
     private DefaultGroupwareCalendarFolder getCalendarFolder(UserizedFolder userizedFolder) throws OXException {
         DefaultGroupwareCalendarFolder calendarFolder = CalendarFolderConverter.getCalendarFolder(userizedFolder);
         calendarFolder.setExtendedProperties(getProperties(userizedFolder));
+        calendarFolder.setSupportedCapabilites(CalendarCapability.getCapabilities(InternalCalendarAccess.class));
         return calendarFolder;
     }
 
