@@ -84,6 +84,7 @@ import com.openexchange.pns.PushNotification;
 import com.openexchange.pns.PushNotificationTransport;
 import com.openexchange.pns.PushNotifications;
 import com.openexchange.pns.PushSubscriptionRegistry;
+import com.openexchange.pns.transport.apn.ApnConstants;
 import com.openexchange.pns.transport.apn.ApnOptions;
 import com.openexchange.pns.transport.apn.ApnOptionsPerClient;
 import com.openexchange.pns.transport.apn.ApnOptionsProvider;
@@ -113,8 +114,6 @@ public class ApnPushNotificationTransport extends ServiceTracker<ApnOptionsProvi
     private static final int STATUS_INVALID_TOKEN_SIZE = 5;
 
     private static final int STATUS_INVALID_TOKEN = 8;
-
-    private static final int MAX_PAYLOAD_SIZE = 256;
 
     /** The maximum number of simultaneously transported payloads per request */
     private static final int TRANSPORT_CHUNK_SIZE = 100;
@@ -401,8 +400,8 @@ public class ApnPushNotificationTransport extends ServiceTracker<ApnOptionsProvi
     private PayloadPerDevice getPayloadPerDevice(Payload payload, PushMatch match) throws OXException {
         int payloadLength = PushNotifications.getPayloadLength(payload.toString());
         // Check payload length
-        if (payloadLength > MAX_PAYLOAD_SIZE) {
-            throw PushExceptionCodes.MESSAGE_TOO_BIG.create(MAX_PAYLOAD_SIZE, payloadLength);
+        if (payloadLength > ApnConstants.APNS_MAX_PAYLOAD_SIZE) {
+            throw PushExceptionCodes.MESSAGE_TOO_BIG.create(ApnConstants.APNS_MAX_PAYLOAD_SIZE, payloadLength);
         }
         try {
             return new PayloadPerDevice(payload, match.getToken());
