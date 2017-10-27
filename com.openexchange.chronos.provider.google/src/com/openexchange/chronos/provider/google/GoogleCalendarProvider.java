@@ -50,12 +50,14 @@
 package com.openexchange.chronos.provider.google;
 
 import java.util.Date;
+import java.util.EnumSet;
 import java.util.Locale;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.CalendarAccess;
 import com.openexchange.chronos.provider.CalendarAccount;
+import com.openexchange.chronos.provider.CalendarCapability;
 import com.openexchange.chronos.provider.CalendarProvider;
 import com.openexchange.chronos.provider.DefaultCalendarAccount;
 import com.openexchange.chronos.provider.google.access.GoogleCalendarAccess;
@@ -135,5 +137,10 @@ public class GoogleCalendarProvider implements CalendarProvider{
     @Override
     public void onAccountDeleted(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
         // nothing to do
+    }
+
+    @Override
+    public EnumSet<CalendarCapability> getCapabilities() {
+        return CalendarCapability.getCapabilities(GoogleCalendarAccess.class);
     }
 }
