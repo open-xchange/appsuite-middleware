@@ -1,6 +1,4 @@
 type: object
-required: 
-  - module
 properties:
   id:
     type: string
@@ -37,7 +35,6 @@ properties:
   module:
     type: string
     description: Name of the module which implements this folder; e.g. "tasks", "calendar", "contacts", "infostore", or "mail"
-    readOnly: true
   type:
     type: integer
     description: Type of folder.
