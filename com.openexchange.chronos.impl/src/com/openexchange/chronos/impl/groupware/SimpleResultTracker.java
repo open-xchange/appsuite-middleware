@@ -79,7 +79,8 @@ import com.openexchange.session.Session;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 
 /**
- * {@link SimpleResultTracker}
+ * {@link SimpleResultTracker} - Tracks update and delete operations on calendar events. This tracker
+ * is only meant to be used by the {@link ChronosDeleteListener}. For other purposes use {@link com.openexchange.chronos.impl.performer.ResultTracker}.
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.0

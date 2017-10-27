@@ -52,6 +52,7 @@ package com.openexchange.chronos.impl.groupware;
 import static com.openexchange.chronos.impl.groupware.ListenerUtils.eqaulsFieldTerm;
 import static com.openexchange.chronos.impl.groupware.ListenerUtils.equalsFieldUserTerm;
 import static com.openexchange.chronos.impl.groupware.ListenerUtils.getAttendeeFolders;
+import static com.openexchange.chronos.impl.groupware.ListenerUtils.getUser;
 import java.sql.Connection;
 import java.util.Collections;
 import java.util.Date;
@@ -93,8 +94,14 @@ import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
- * {@link ChronosDeleteListener}
- *
+ * {@link ChronosDeleteListener} - Cleans up calendar data on deletion of types
+ * <li>{@link DeleteEvent#TYPE_USER}</li>
+ * <li>{@link DeleteEvent#TYPE_GROUP}</li>
+ * <li>{@link DeleteEvent#TYPE_RESOURCE} </li>
+ * 
+ * Type {@link DeleteEvent#TYPE_CONTEXT} is handled by {@link com.openexchange.admin.storage.mysqlStorage.OXContextMySQLStorage#deleteTablesData}
+ * Type {@link DeleteEvent#TYPE_RESOURCE_GROUP} will thrown an appropriated error.
+ * 
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
@@ -202,6 +209,7 @@ public final class ChronosDeleteListener implements DeleteListener {
                         eventStorage.deleteEvent(entry.getKey());
                         tracker.addDelete(Collections.singletonList(folderId), event, date.getTime());
                         event.setAttendees(attendees);
+
                         storage.getAttachmentStorage().deleteAttachments(serverSession, folderId, entry.getKey());
                     } else {
                         // The user needs to be removed from the event, this modifies the event
@@ -210,7 +218,8 @@ public final class ChronosDeleteListener implements DeleteListener {
                         event.setTimestamp(date.getTime());
                         eventStorage.updateEvent(event);
                         tracker.addUpdate(getAttendeeFolders(attendees), originalEvent, event);
-                        attendees = Collections.singletonList(attendees.stream().filter(a -> a.getEntity() == userId).findFirst().get());
+
+                        attendees = getUser(userId, attendees);
                     }
                     storage.getAttendeeStorage().deleteAttendees(entry.getKey(), attendees);
                 } catch (NoSuchElementException e) {

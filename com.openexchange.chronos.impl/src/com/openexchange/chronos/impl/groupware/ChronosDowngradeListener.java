@@ -51,9 +51,9 @@ package com.openexchange.chronos.impl.groupware;
 
 import static com.openexchange.chronos.impl.groupware.ListenerUtils.equalsFieldUserTerm;
 import static com.openexchange.chronos.impl.groupware.ListenerUtils.getAttendeeFolders;
+import static com.openexchange.chronos.impl.groupware.ListenerUtils.getUser;
 import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.CalendarUser;
@@ -69,9 +69,12 @@ import com.openexchange.chronos.storage.CalendarStorageFactory;
 import com.openexchange.database.provider.DBTransactionPolicy;
 import com.openexchange.database.provider.SimpleDBProvider;
 import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.FolderResponse;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.UserizedFolder;
+import com.openexchange.folderstorage.database.contentType.CalendarContentType;
+import com.openexchange.folderstorage.type.CalendarType;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.downgrade.DowngradeEvent;
 import com.openexchange.groupware.downgrade.DowngradeListener;
@@ -117,8 +120,6 @@ public class ChronosDowngradeListener extends DowngradeListener {
         }
     }
 
-    // TODO OSGI Events
-
     private void purgeData(SimpleDBProvider dbProvider, Context context, int userId, Session adminSession) throws OXException {
         EntityResolver entityResolver = calendarUtilities.getEntityResolver(context.getContextId());
         CalendarStorage storage = factory.create(context, CalendarAccount.DEFAULT_ACCOUNT.getAccountId(), entityResolver, dbProvider, DBTransactionPolicy.NO_TRANSACTIONS);
@@ -132,10 +133,11 @@ public class ChronosDowngradeListener extends DowngradeListener {
 
         for (Event event : events) {
             String eventId = event.getId();
-            String folderId = CalendarUtils.getFolderView(event, userId);
-
-            UserizedFolder folder = folderService.getFolder(FolderStorage.REAL_TREE_ID, folderId, serverSession, null);
             List<Attendee> attendees = storage.getAttendeeStorage().loadAttendees(eventId);
+            event.setAttendees(attendees);
+            
+            String folderId = CalendarUtils.getFolderView(event, userId);
+            UserizedFolder folder = folderService.getFolder(FolderStorage.REAL_TREE_ID, folderId, serverSession, null);
 
             if (folder.isGlobalID() || CalendarUtils.isLastUserAttendee(attendees, userId)) {
                 // Private or user is last attendee, so delete
@@ -148,7 +150,7 @@ public class ChronosDowngradeListener extends DowngradeListener {
 
             } else {
                 // Remove user from event
-                storage.getAttendeeStorage().deleteAttendees(eventId, attendees.stream().filter(e -> e.getEntity() == userId).collect(Collectors.toList()));
+                storage.getAttendeeStorage().deleteAttendees(eventId, getUser(userId, attendees));
                 Event originalEvent = calendarUtilities.copyEvent(event, null);
                 CalendarUser admin = entityResolver.prepareUserAttendee(context.getMailadmin());
                 event.setLastModified(date);

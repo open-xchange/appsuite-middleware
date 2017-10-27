@@ -109,4 +109,15 @@ final class ListenerUtils {
         return list.stream().filter(a -> !Strings.isEmpty(a.getFolderId())).map(Attendee::getFolderId).collect(Collectors.toList());
     }
 
+    /**
+     * Get the user from an attendee list.
+     * 
+     * @param userId The identifier of the user
+     * @param attendees The {@link Attendee}s
+     * @return The user as {@link List} of {@link Attendee}s. {@link List#size()} might be greater than <code>1</code>!
+     */
+    static List<Attendee> getUser(int userId, List<Attendee> attendees) {
+        return attendees.stream().filter(e -> e.getEntity() == userId).collect(Collectors.toList());
+    }
+
 }
