@@ -191,7 +191,8 @@ public class RdbCalendarStorageUtilities implements CalendarStorageUtilities {
         /*
          * ensure all required fields are known
          */
-        EventField[] requiredFields = new EventField[] { EventField.DELETE_EXCEPTION_DATES, EventField.START_DATE, EventField.RECURRENCE_RULE };
+        EventField[] requiredFields = new EventField[] {
+            EventField.ID, EventField.SERIES_ID, EventField.DELETE_EXCEPTION_DATES, EventField.START_DATE, EventField.RECURRENCE_RULE };
         if (false == seriesMaster.areSet(requiredFields)) {
             seriesMaster = storage.getEventStorage().loadEvent(seriesMaster.getId(), requiredFields);
         }
@@ -203,7 +204,7 @@ public class RdbCalendarStorageUtilities implements CalendarStorageUtilities {
             recurrenceIds.addAll(seriesMaster.getDeleteExceptionDates());
         }
         EventField[] fields = new EventField[] { EventField.RECURRENCE_ID, EventField.ID, EventField.SERIES_ID };
-        List<Event> changeExceptions = storage.getEventStorage().loadExceptions(seriesMaster.getSeriesId(), fields);
+        List<Event> changeExceptions = storage.getEventStorage().loadExceptions(seriesMaster.getId(), fields);
         recurrenceIds.addAll(getRecurrenceIds(changeExceptions));
         /*
          * construct & return recurrence data

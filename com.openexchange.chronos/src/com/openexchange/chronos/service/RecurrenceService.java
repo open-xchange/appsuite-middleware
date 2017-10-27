@@ -122,8 +122,26 @@ public interface RecurrenceService {
      * @param from The left side (inclusive) boundary for the calculation, or <code>null</code> to start with the first occurrence
      * @param until The right side (exclusive) boundary for the calculation, or <code>null</code> for no limitation
      * @return The resulting event occurrence iterator
+     * @deprecated Use {@link RecurrenceService#iterateEventOccurrences(RecurrenceData, Event, Date, Date)} instead, after loading the recurrence data via
+     *             com.openexchange.chronos.storage.CalendarStorageUtilities.loadRecurrenceData(Event)
      */
+    @Deprecated
     RecurrenceIterator<Event> iterateEventOccurrences(Event seriesMaster, Date from, Date until) throws OXException;
+
+    /**
+     * Initializes a new recurrence iterator for the occurrences of an event series.
+     * <p/>
+     * Any exception dates (as defined in the passed recurrence data) are ignored implicitly, and won't be contained in the resulting
+     * iterator. Iteration starts with the first occurrence matching the recurrence rule, i.e. the iterator is forwarded to the first
+     * occurrence automatically if the recurrence start does not fall into the pattern.
+     *
+     * @param recurrenceData The recurrence data
+     * @param seriesMaster The series master event to use as template for the expanded occurrences
+     * @param from The left side (inclusive) boundary for the calculation, or <code>null</code> to start with the first occurrence
+     * @param until The right side (exclusive) boundary for the calculation, or <code>null</code> for no limitation
+     * @return The resulting event occurrence iterator
+     */
+    RecurrenceIterator<Event> iterateEventOccurrences(RecurrenceData recurrenceData, Event seriesMaster, Date from, Date until) throws OXException;
 
     /**
      * Initializes a new recurrence iterator for the recurrence identifiers of a recurrence data object.
@@ -133,7 +151,7 @@ public interface RecurrenceService {
      * occurrence automatically if the recurrence start does not fall into the pattern.
      *
      * @param recurrenceData The recurrence data
-     * @return The resulting event occurrence iterator
+     * @return The resulting recurrence id iterator
      */
     RecurrenceIterator<RecurrenceId> iterateRecurrenceIds(RecurrenceData recurrenceData) throws OXException;
 

@@ -50,7 +50,6 @@
 package com.openexchange.chronos.impl;
 
 import static com.openexchange.chronos.common.CalendarUtils.find;
-import static com.openexchange.chronos.common.CalendarUtils.getExceptionDates;
 import static com.openexchange.chronos.common.CalendarUtils.getFolderView;
 import static com.openexchange.chronos.common.CalendarUtils.isClassifiedFor;
 import static com.openexchange.chronos.common.CalendarUtils.isGroupScheduled;
@@ -91,7 +90,6 @@ import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.CalendarUtils;
-import com.openexchange.chronos.common.DefaultRecurrenceData;
 import com.openexchange.chronos.common.RecurrenceIdComparator;
 import com.openexchange.chronos.common.mapping.EventMapper;
 import com.openexchange.chronos.compat.Event2Appointment;
@@ -925,24 +923,8 @@ public class Utils {
      * @see #getChangeExceptionDates(String)
      */
     public static Iterator<Event> resolveOccurrences(CalendarStorage storage, CalendarSession session, Event masterEvent, Date from, Date until) throws OXException {
-        final TreeSet<RecurrenceId> recurrenceIds = new TreeSet<RecurrenceId>(RecurrenceIdComparator.DEFAULT_COMPARATOR);
-        recurrenceIds.addAll(getChangeExceptionDates(storage, masterEvent.getSeriesId()));
-        if (null != masterEvent.getDeleteExceptionDates()) {
-            recurrenceIds.addAll(masterEvent.getDeleteExceptionDates());
-        }
-        Event adjustedSeriesMaster = new DelegatingEvent(masterEvent) {
-
-            @Override
-            public SortedSet<RecurrenceId> getDeleteExceptionDates() {
-                return recurrenceIds;
-            }
-
-            @Override
-            public boolean containsDeleteExceptionDates() {
-                return true;
-            }
-        };
-        return session.getRecurrenceService().iterateEventOccurrences(adjustedSeriesMaster, from, until);
+        RecurrenceData recurrenceData = storage.getUtilities().loadRecurrenceData(masterEvent);
+        return session.getRecurrenceService().iterateEventOccurrences(recurrenceData, masterEvent, from, until);
     }
 
     /**
@@ -978,14 +960,7 @@ public class Utils {
      * @see #getChangeExceptionDates(String)
      */
     public static Iterator<RecurrenceId> getRecurrenceIterator(CalendarStorage storage, CalendarSession session, Event masterEvent, Date from, Date until) throws OXException {
-        SortedSet<RecurrenceId> recurrenceIds = new TreeSet<RecurrenceId>();
-        if (null != masterEvent.getSeriesId()) {
-            recurrenceIds.addAll(getChangeExceptionDates(storage, masterEvent.getSeriesId()));
-        }
-        if (null != masterEvent.getDeleteExceptionDates()) {
-            recurrenceIds.addAll(masterEvent.getDeleteExceptionDates());
-        }
-        RecurrenceData recurrenceData = new DefaultRecurrenceData(masterEvent.getRecurrenceRule(), masterEvent.getStartDate(), getExceptionDates(recurrenceIds));
+        RecurrenceData recurrenceData = storage.getUtilities().loadRecurrenceData(masterEvent);
         return session.getRecurrenceService().iterateRecurrenceIds(recurrenceData, from, until);
     }
 
