@@ -249,7 +249,11 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                     } else {
                         Map<FolderField, FolderProperty> storageProperties = ParameterizedFolder.class.isInstance(storageFolder) ?
                             ((ParameterizedFolder) storageFolder).getProperties() : null;
-                        changedProperties = null == storageProperties || false == storageProperties.equals(properties);
+                        if ((null == storageProperties || storageProperties.isEmpty()) && (properties.isEmpty())) {
+                            changedProperties = false;
+                        } else {
+                            changedProperties = false == storageProperties.equals(properties);
+                        }
                     }
                 } else {
                     changedProperties = false;

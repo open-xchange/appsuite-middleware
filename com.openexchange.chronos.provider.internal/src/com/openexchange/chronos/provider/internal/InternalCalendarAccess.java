@@ -176,16 +176,19 @@ public class InternalCalendarAccess implements GroupwareCalendarAccess, SyncAwar
 
     @Override
     public String updateFolder(String folderId, CalendarFolder folder, long clientTimestamp) throws OXException {
-        ParameterizedFolder storageFolder = getStorageFolder(TREE_ID, QUALIFIED_ACCOUNT_ID, CONTENT_TYPE, folder);
         /*
          * update extended properties
          */
         if (null != folder.getExtendedProperties()) {
             updateProperties(getFolder(folderId), folder.getExtendedProperties());
+            DefaultGroupwareCalendarFolder folderUpdate = new DefaultGroupwareCalendarFolder(folder);
+            folderUpdate.setExtendedProperties(null);
+            folder = folderUpdate;
         }
         /*
          * perform common folder update
          */
+        ParameterizedFolder storageFolder = getStorageFolder(TREE_ID, QUALIFIED_ACCOUNT_ID, CONTENT_TYPE, folder);
         getFolderService().updateFolder(storageFolder, new Date(clientTimestamp), session.getSession(), initDecorator());
         return storageFolder.getID();
     }
