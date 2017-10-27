@@ -71,7 +71,7 @@ public enum Constants {
     public static final String QUALIFIED_ACCOUNT_ID = "cal://0";
 
     /** The identifier of the folder tree the calendar provider is using */
-    public static final String TREE_ID = "1";
+    public static final String TREE_ID = com.openexchange.folderstorage.FolderStorage.REAL_TREE_ID;
 
     /** The used folder storage content type */
     public static final ContentType CONTENT_TYPE = com.openexchange.folderstorage.database.contentType.CalendarContentType.getInstance();

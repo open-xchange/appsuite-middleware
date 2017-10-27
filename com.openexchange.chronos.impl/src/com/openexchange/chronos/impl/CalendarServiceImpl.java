@@ -52,7 +52,6 @@ package com.openexchange.chronos.impl;
 import static com.openexchange.chronos.impl.Utils.getFolder;
 import static com.openexchange.java.Autoboxing.L;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -62,6 +61,7 @@ import com.openexchange.chronos.AlarmTrigger;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.UnmodifiableEvent;
+import com.openexchange.chronos.common.AlarmUtils;
 import com.openexchange.chronos.impl.performer.AllPerformer;
 import com.openexchange.chronos.impl.performer.ChangeExceptionsPerformer;
 import com.openexchange.chronos.impl.performer.ClearPerformer;
@@ -413,21 +413,14 @@ public class CalendarServiceImpl implements CalendarService {
 
     @Override
     public List<AlarmTrigger> getAlarmTrigger(CalendarSession session, Set<String> actions) throws OXException {
-        List<AlarmTrigger> result = new InternalCalendarStorageOperation<List<AlarmTrigger>>(session) {
+        List<AlarmTrigger> triggers = new InternalCalendarStorageOperation<List<AlarmTrigger>>(session) {
 
             @Override
             protected List<AlarmTrigger> execute(CalendarSession session, CalendarStorage storage) throws OXException {
                 return storage.getAlarmTriggerStorage().loadTriggers(session.getUserId(), session.get(CalendarParameters.PARAMETER_RANGE_END, Date.class));
             }
         }.executeQuery();
-
-        Iterator<AlarmTrigger> iter = result.iterator();
-        while (iter.hasNext()) {
-            if (!actions.contains(iter.next().getAction().toUpperCase())) {
-                iter.remove();
-            }
-        }
-        return result;
+        return AlarmUtils.filter(triggers, actions.toArray(new String[actions.size()]));
     }
 
     @Override

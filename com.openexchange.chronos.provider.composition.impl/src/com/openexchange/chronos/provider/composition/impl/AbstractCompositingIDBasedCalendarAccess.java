@@ -63,6 +63,7 @@ import java.util.concurrent.ConcurrentMap;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.CalendarAccess;
 import com.openexchange.chronos.provider.CalendarAccount;
+import com.openexchange.chronos.provider.CalendarCapability;
 import com.openexchange.chronos.provider.CalendarProvider;
 import com.openexchange.chronos.provider.CalendarProviderRegistry;
 import com.openexchange.chronos.provider.FreeBusyProvider;
@@ -258,6 +259,26 @@ public abstract class AbstractCompositingIDBasedCalendarAccess implements Transa
     }
 
     /**
+     * Gets all calendar accesses implementing a specific extension. The underlying accounts are connected implicitly and
+     * remembered to be closed during {@link #finish()} implicitly, if not already done.
+     *
+     * @param extensionClass The targeted extension class
+     * @return The calendar accesses for all accounts supporting the extension, or an empty list if there are none
+     */
+    protected <T extends CalendarAccess> List<T> getAccesses(Class<T> extensionClass) throws OXException {
+        List<T> accesses = new ArrayList<T>();
+        for (CalendarAccount account : getAccounts()) {
+            CalendarProvider provider = providerRegistry.getCalendarProvider(account.getProviderId());
+            for (CalendarCapability capability : provider.getCapabilities()) {
+                if (capability.getAccessInterface().isAssignableFrom(extensionClass)) {
+                    accesses.add(getAccess(account, extensionClass));
+                }
+            }
+        }
+        return accesses;
+    }
+
+    /**
      * Gets the groupware calendar access for a specific account. The account is connected implicitly and remembered to be closed during
      * {@link #finish()} implicitly, if not already done.
      *
@@ -303,6 +324,38 @@ public abstract class AbstractCompositingIDBasedCalendarAccess implements Transa
     }
 
     /**
+     * Gets all calendar accounts of the current session's user supporting a specific calendar capability..
+     *
+     * @param capability The targeted capability
+     * @return The calendar accounts supporting the capability, or an empty list if there are none
+     */
+    protected <T extends CalendarAccess> List<CalendarAccount> getAccounts(CalendarCapability capability) throws OXException {
+        List<CalendarAccount> accounts = new ArrayList<CalendarAccount>();
+        for (CalendarAccount account : getAccounts()) {
+            if (supports(account, capability)) {
+                accounts.add(account);
+            }
+        }
+        return accounts;
+    }
+
+    /**
+     * Gets all calendar accounts of the current session's user implementing a specific extension.
+     *
+     * @param extensionClass The targeted extension class
+     * @return The calendar accounts supporting the extension, or an empty list if there are none
+     */
+    protected <T extends CalendarAccess> List<CalendarAccount> getAccounts(Class<T> extensionClass) throws OXException {
+        List<CalendarAccount> accounts = new ArrayList<CalendarAccount>();
+        for (CalendarAccount account : getAccounts()) {
+            if (supports(account, extensionClass)) {
+                accounts.add(account);
+            }
+        }
+        return accounts;
+    }
+
+    /**
      * Gets a specific calendar account.
      *
      * @param accountId The identifier of the account to get
@@ -338,6 +391,29 @@ public abstract class AbstractCompositingIDBasedCalendarAccess implements Transa
      */
     protected List<FreeBusyProvider> getFreeBusyProviders() {
         return providerRegistry.getFreeBusyProviders();
+    }
+
+    private <T extends CalendarAccess> boolean supports(CalendarAccount account, Class<T> extensionClass) throws OXException {
+        CalendarProvider provider = providerRegistry.getCalendarProvider(account.getProviderId());
+        if (null == provider) {
+            LOG.warn("Calendar provider \"{}\" for account {} not found; skipping.", account.getProviderId(), account.getAccountId());
+            return false;
+        }
+        for (CalendarCapability capability : provider.getCapabilities()) {
+            if (capability.getAccessInterface().isAssignableFrom(extensionClass)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private <T extends CalendarAccess> boolean supports(CalendarAccount account, CalendarCapability capability) throws OXException {
+        CalendarProvider provider = providerRegistry.getCalendarProvider(account.getProviderId());
+        if (null == provider) {
+            LOG.warn("Calendar provider \"{}\" for account {} not found; skipping.", account.getProviderId(), account.getAccountId());
+            return false;
+        }
+        return provider.getCapabilities().contains(capability);
     }
 
     @Override

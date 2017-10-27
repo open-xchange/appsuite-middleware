@@ -51,7 +51,6 @@ package com.openexchange.chronos.provider.composition.impl;
 
 import java.util.LinkedList;
 import java.util.List;
-import com.openexchange.chronos.provider.CalendarAccess;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.CalendarProviderRegistry;
 import com.openexchange.chronos.provider.extensions.QuotaAware;
@@ -106,11 +105,8 @@ public class CompositingIDBasedCalendarQuotaProvider extends AbstractCompositing
     public List<AccountQuota> get() throws OXException {
         // Get accounts
         List<AccountQuota> accountQuotas = new LinkedList<>();
-        for (CalendarAccount account : getAccounts()) {
-            CalendarAccess access = getAccess(account);
-            if (QuotaAware.class.isInstance(access)) {
-                accountQuotas.add(getAccountQuota(account, getAccess(account, QuotaAware.class).getQuotas()));
-            }
+        for (CalendarAccount account : getAccounts(QuotaAware.class)) {
+            accountQuotas.add(getAccountQuota(account, getAccess(account, QuotaAware.class).getQuotas()));
         }
         return accountQuotas;
     }
