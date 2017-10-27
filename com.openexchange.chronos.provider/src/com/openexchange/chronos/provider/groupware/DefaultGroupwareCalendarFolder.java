@@ -50,6 +50,7 @@
 package com.openexchange.chronos.provider.groupware;
 
 import java.util.Date;
+import com.openexchange.chronos.provider.CalendarFolder;
 import com.openexchange.chronos.provider.DefaultCalendarFolder;
 
 /**
@@ -72,6 +73,24 @@ public class DefaultGroupwareCalendarFolder extends DefaultCalendarFolder implem
      */
     public DefaultGroupwareCalendarFolder() {
         super();
+    }
+
+    /**
+     * Initializes a new {@link DefaultGroupwareCalendarFolder}, taking over the properties from another folder.
+     *
+     * @param folder The folder to copy the properties from
+     */
+    public DefaultGroupwareCalendarFolder(CalendarFolder folder) {
+        super(folder);
+        if (GroupwareCalendarFolder.class.isInstance(folder)) {
+            GroupwareCalendarFolder groupwareFolder = (GroupwareCalendarFolder) folder;
+            parentId = groupwareFolder.getParentId();
+            isDefaultFolder = groupwareFolder.isDefaultFolder();
+            modifiedBy = groupwareFolder.getModifiedBy();
+            createdBy = groupwareFolder.getCreatedBy();
+            creationDate = groupwareFolder.getCreationDate();
+            folderType = groupwareFolder.getType();
+        }
     }
 
     @Override

@@ -77,6 +77,21 @@ public class DefaultCalendarFolder implements CalendarFolder {
     }
 
     /**
+     * Initializes a new {@link DefaultCalendarFolder}, taking over the properties from another folder.
+     *
+     * @param folder The folder to copy the properties from
+     */
+    public DefaultCalendarFolder(CalendarFolder folder) {
+        super();
+        id = folder.getId();
+        name = folder.getName();
+        lastModified = folder.getLastModified();
+        permissions = folder.getPermissions();
+        extendedProperties = folder.getExtendedProperties();
+        supportedCapabilites = folder.getSupportedCapabilites();
+    }
+
+    /**
      * Initializes a new {@link DefaultCalendarFolder}.
      *
      * @param id The folder identifier
