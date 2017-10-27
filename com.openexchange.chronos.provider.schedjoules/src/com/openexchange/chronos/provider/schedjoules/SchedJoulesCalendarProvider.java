@@ -390,6 +390,6 @@ public class SchedJoulesCalendarProvider extends CachingCalendarProvider {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(UserService.class.getSimpleName());
         }
         User user = userService.getUser(session.getUserId(), session.getContextId());
-        return new String(DigestUtils.sha256(user.getMail()));
+        return DigestUtils.sha256Hex(user.getMail());
     }
 }
