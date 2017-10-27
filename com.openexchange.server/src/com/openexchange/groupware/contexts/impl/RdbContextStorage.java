@@ -57,9 +57,13 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import org.slf4j.Logger;
+import com.google.common.collect.Lists;
+import com.openexchange.context.PoolAndSchema;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.databaseold.Database;
@@ -383,6 +387,47 @@ public class RdbContextStorage extends ContextStorage {
     }
 
     @Override
+    public Map<PoolAndSchema, List<Integer>> getSchemaAssociationsFor(List<Integer> contextIds) throws OXException {
+        Connection con = DBPool.pickup();
+        try {
+            // Use a map to group by database schema association
+            Map<PoolAndSchema, List<Integer>> map = new LinkedHashMap<>(contextIds.size() >> 1, 0.9F);
+            for (List<Integer> chunk : Lists.partition(contextIds, Databases.IN_LIMIT)) {
+                PreparedStatement stmt = null;
+                ResultSet result = null;
+                try {
+                    stmt = con.prepareStatement(Databases.getIN("SELECT cid, write_db_pool_id, db_schema FROM context_server2db_pool WHERE cid IN (", chunk.size()));
+                    int pos = 1;
+                    for (Integer contextId : chunk) {
+                        stmt.setInt(pos++, contextId.intValue());
+                    }
+                    result = stmt.executeQuery();
+                    if (result.next()) {
+                        do {
+                            PoolAndSchema pas = new PoolAndSchema(result.getInt(2), result.getString(3));
+                            List<Integer> cids = map.get(pas);
+                            if (null == cids) {
+                                cids = new LinkedList<>();
+                                map.put(pas, cids);
+                            }
+                            cids.add(Integer.valueOf(result.getInt(1)));
+                        } while (result.next());
+                    }
+                } finally {
+                    closeSQLStuff(result, stmt);
+                }
+            }
+            return map;
+        } catch (final SQLException e) {
+            throw ContextExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            if (null != con) {
+                DBPool.closeReaderSilent(con);
+            }
+        }
+    }
+
+    @Override
     public List<Integer> getAllContextIdsForFilestore(int filestoreId) throws OXException {
         Connection con = DBPool.pickup();
         PreparedStatement stmt = null;
@@ -510,6 +555,55 @@ public class RdbContextStorage extends ContextStorage {
             Databases.closeSQLStuff(stmt);
             Databases.autocommit(con);
         }
+    }
+
+    private static final class SchemaAndWritePool {
+
+        final String schema;
+        final int writePool;
+        private final int hash;
+
+        SchemaAndWritePool(int writePool, String schema) {
+            super();
+            this.writePool = writePool;
+            this.schema = schema;
+            int prime = 31;
+            int result = 1;
+            result = prime * result + ((schema == null) ? 0 : schema.hashCode());
+            result = prime * result + writePool;
+            hash = result;
+        }
+
+        @Override
+        public int hashCode() {
+            return hash;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (obj == null) {
+                return false;
+            }
+            if (getClass() != obj.getClass()) {
+                return false;
+            }
+            SchemaAndWritePool other = (SchemaAndWritePool) obj;
+            if (writePool != other.writePool) {
+                return false;
+            }
+            if (schema == null) {
+                if (other.schema != null) {
+                    return false;
+                }
+            } else if (!schema.equals(other.schema)) {
+                return false;
+            }
+            return true;
+        }
+
     }
 
 }
