@@ -1101,6 +1101,24 @@ public class CalendarUtils {
     }
 
     /**
+     * Combines multiple collections of recurrence identifiers within a sorted set.
+     *
+     * @param recurrenceIds1 The first collection of recurrence identifiers, or <code>null</code> if not defined
+     * @param recurrenceIds2 The second collection of recurrence identifiers, or <code>null</code> if not defined
+     * @return A sorted set of all recurrence identifiers found in the supplied collections
+     */
+    public static SortedSet<RecurrenceId> combine(Collection<RecurrenceId> recurrenceIds1, Collection<RecurrenceId> recurrenceIds2) {
+        SortedSet<RecurrenceId> recurrenceIds = new TreeSet<RecurrenceId>(RecurrenceIdComparator.DEFAULT_COMPARATOR);
+        if (null != recurrenceIds1) {
+            recurrenceIds.addAll(recurrenceIds1);
+        }
+        if (null != recurrenceIds2) {
+            recurrenceIds.addAll(recurrenceIds2);
+        }
+        return recurrenceIds;
+    }
+
+    /**
      * Maps a list of events based on their UID property, so that each event series including any change exceptions are grouped separately.
      *
      * @param events The events to map
@@ -1437,7 +1455,7 @@ public class CalendarUtils {
      * @param changeExceptions The change exceptions to get the recurrence identifiers from
      * @return The recurrence identifiers, or an empty set if there are none
      */
-    public static SortedSet<RecurrenceId> getRecurrenceIds(List<Event> changeExceptions) {
+    public static SortedSet<RecurrenceId> getRecurrenceIds(Collection<Event> changeExceptions) {
         SortedSet<RecurrenceId> recurrenceIds = new TreeSet<RecurrenceId>();
         if (null != changeExceptions) {
             for (Event changeException : changeExceptions) {

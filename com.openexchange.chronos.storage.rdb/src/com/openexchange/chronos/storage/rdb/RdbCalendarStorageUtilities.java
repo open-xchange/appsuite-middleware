@@ -49,7 +49,6 @@
 
 package com.openexchange.chronos.storage.rdb;
 
-import static com.openexchange.chronos.common.CalendarUtils.getExceptionDates;
 import static com.openexchange.chronos.common.CalendarUtils.getObjectIDs;
 import static com.openexchange.chronos.common.CalendarUtils.getRecurrenceIds;
 import static com.openexchange.tools.arrays.Arrays.contains;
@@ -57,7 +56,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeSet;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Attendee;
@@ -65,9 +63,7 @@ import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
-import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.DefaultRecurrenceData;
-import com.openexchange.chronos.common.RecurrenceIdComparator;
 import com.openexchange.chronos.common.mapping.AttendeeMapper;
 import com.openexchange.chronos.common.mapping.EventMapper;
 import com.openexchange.chronos.service.RecurrenceData;
@@ -200,19 +196,14 @@ public class RdbCalendarStorageUtilities implements CalendarStorageUtilities {
             }
         }
         /*
-         * prepare exception dates (delete exception dates and overridden instances)
+         * lookup any change exceptions & initialize recurrence data
          */
-        TreeSet<RecurrenceId> recurrenceIds = new TreeSet<RecurrenceId>(RecurrenceIdComparator.DEFAULT_COMPARATOR);
-        if (null != seriesMaster.getDeleteExceptionDates()) {
-            recurrenceIds.addAll(seriesMaster.getDeleteExceptionDates());
-        }
         EventField[] fields = new EventField[] { EventField.RECURRENCE_ID, EventField.ID, EventField.SERIES_ID };
         List<Event> changeExceptions = storage.getEventStorage().loadExceptions(seriesMaster.getId(), fields);
-        recurrenceIds.addAll(getRecurrenceIds(changeExceptions));
         /*
          * construct & return recurrence data
          */
-        return new DefaultRecurrenceData(seriesMaster.getRecurrenceRule(), seriesMaster.getStartDate(), getExceptionDates(recurrenceIds));
+        return new DefaultRecurrenceData(seriesMaster, getRecurrenceIds(changeExceptions));
     }
 
     @Override

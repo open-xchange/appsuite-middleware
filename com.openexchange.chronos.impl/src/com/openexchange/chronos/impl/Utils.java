@@ -64,7 +64,6 @@ import java.sql.Connection;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -90,7 +89,7 @@ import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.CalendarUtils;
-import com.openexchange.chronos.common.RecurrenceIdComparator;
+import com.openexchange.chronos.common.DefaultRecurrenceData;
 import com.openexchange.chronos.common.mapping.EventMapper;
 import com.openexchange.chronos.compat.Event2Appointment;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
@@ -460,8 +459,8 @@ public class Utils {
                 /*
                  * excluded if there are no actual occurrences in range
                  */
-                Iterator<Event> iterator = session.getRecurrenceService().iterateEventOccurrences(event, from, until);
-                return false == iterator.hasNext();
+                return false == session.getRecurrenceService().iterateEventOccurrences(
+                    new DefaultRecurrenceData(event, null), event, from, until).hasNext();
             } else {
                 /*
                  * excluded if event period not in range
@@ -712,24 +711,6 @@ public class Utils {
             list.add(iterator.next());
         }
         return list;
-    }
-
-    /**
-     * Combines multiple collections of recurrence identifiers within a sorted set.
-     *
-     * @param recurrenceIds1 The first collection of recurrence identifiers, or <code>null</code> if not defined
-     * @param recurrenceIds2 The second collection of recurrence identifiers, or <code>null</code> if not defined
-     * @return A sorted set of all recurrence identifiers found in the supplied collections
-     */
-    public static SortedSet<RecurrenceId> combine(Collection<RecurrenceId> recurrenceIds1, Collection<RecurrenceId> recurrenceIds2) {
-        SortedSet<RecurrenceId> recurrenceIds = new TreeSet<RecurrenceId>(RecurrenceIdComparator.DEFAULT_COMPARATOR);
-        if (null != recurrenceIds1) {
-            recurrenceIds.addAll(recurrenceIds1);
-        }
-        if (null != recurrenceIds2) {
-            recurrenceIds.addAll(recurrenceIds2);
-        }
-        return recurrenceIds;
     }
 
     /**
