@@ -188,7 +188,7 @@ public class RdbCalendarStorageUtilities implements CalendarStorageUtilities {
          * ensure all required fields are known
          */
         EventField[] requiredFields = new EventField[] {
-            EventField.ID, EventField.SERIES_ID, EventField.DELETE_EXCEPTION_DATES, EventField.START_DATE, EventField.RECURRENCE_RULE };
+            EventField.ID, EventField.SERIES_ID, EventField.DELETE_EXCEPTION_DATES, EventField.START_DATE, EventField.END_DATE, EventField.RECURRENCE_RULE };
         if (false == seriesMaster.areSet(requiredFields)) {
             Event reloadedEvent = storage.getEventStorage().loadEvent(seriesMaster.getId(), requiredFields);
             if (null != reloadedEvent) {
