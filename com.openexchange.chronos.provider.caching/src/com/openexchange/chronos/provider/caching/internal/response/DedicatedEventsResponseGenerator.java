@@ -64,7 +64,9 @@ import java.util.Map.Entry;
 import java.util.Set;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.common.DefaultRecurrenceData;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.caching.CachingCalendarAccess;
 import com.openexchange.chronos.provider.caching.internal.Services;
@@ -136,19 +138,23 @@ public class DedicatedEventsResponseGenerator extends ResponseGenerator {
             if (null == event) {
                 continue;
             }
+            RecurrenceId recurrenceId = eventID.getRecurrenceID();
             event.setFolderId(folderId);
-            if (null != eventID.getRecurrenceID()) {
+            if (null != recurrenceId) {
                 if (isSeriesMaster(event)) {
-                    RecurrenceService recurrenceService = Services.getService(RecurrenceService.class);
-                    Iterator<Event> iterator = recurrenceService.iterateEventOccurrences(event, new Date(eventID.getRecurrenceID().getValue().getTimestamp()), null);
+                    if (null != calendarStorage.getEventStorage().loadException(event.getId(), recurrenceId, new EventField[] { EventField.ID })) {
+                        throw CalendarExceptionCodes.EVENT_RECURRENCE_NOT_FOUND.create(eventID.getObjectID(), recurrenceId);
+                    }
+                    Iterator<Event> iterator = Services.getService(RecurrenceService.class).iterateEventOccurrences(
+                        new DefaultRecurrenceData(event, null), event, new Date(recurrenceId.getValue().getTimestamp()), null);
                     if (false == iterator.hasNext()) {
-                        throw CalendarExceptionCodes.EVENT_RECURRENCE_NOT_FOUND.create(eventID.getObjectID(), eventID.getRecurrenceID());
+                        throw CalendarExceptionCodes.EVENT_RECURRENCE_NOT_FOUND.create(eventID.getObjectID(), recurrenceId);
                     }
                     orderedEvents.add(iterator.next());
-                } else if (eventID.getRecurrenceID().equals(event.getRecurrenceId())) {
+                } else if (recurrenceId.equals(event.getRecurrenceId())) {
                     orderedEvents.add(event);
                 } else {
-                    throw CalendarExceptionCodes.EVENT_RECURRENCE_NOT_FOUND.create(eventID.getObjectID(), eventID.getRecurrenceID());
+                    throw CalendarExceptionCodes.EVENT_RECURRENCE_NOT_FOUND.create(eventID.getObjectID(), recurrenceId);
                 }
             } else {
                 orderedEvents.add(event);

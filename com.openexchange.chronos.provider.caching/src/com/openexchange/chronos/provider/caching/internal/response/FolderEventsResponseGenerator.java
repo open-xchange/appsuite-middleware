@@ -59,6 +59,7 @@ import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.provider.caching.CachingCalendarAccess;
 import com.openexchange.chronos.provider.caching.internal.Services;
 import com.openexchange.chronos.service.CalendarParameters;
+import com.openexchange.chronos.service.RecurrenceData;
 import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.chronos.service.SearchOptions;
 import com.openexchange.chronos.storage.CalendarStorage;
@@ -96,7 +97,8 @@ public class FolderEventsResponseGenerator extends ResponseGenerator {
                 List<Event> allEvents = new ArrayList<>();
                 for (Event event : enhancedEvents) {
                     if (CalendarUtils.isSeriesMaster(event) && isResolveOccurrences(parameters)) {
-                        allEvents.addAll(Lists.newArrayList(Services.getService(RecurrenceService.class).iterateEventOccurrences(event, getFrom(parameters), getUntil(parameters))));
+                        RecurrenceData recurrenceData = storage.getUtilities().loadRecurrenceData(event);
+                        allEvents.addAll(Lists.newArrayList(Services.getService(RecurrenceService.class).iterateEventOccurrences(recurrenceData, event, getFrom(parameters), getUntil(parameters))));
                     } else {
                         allEvents.add(event);
                     }

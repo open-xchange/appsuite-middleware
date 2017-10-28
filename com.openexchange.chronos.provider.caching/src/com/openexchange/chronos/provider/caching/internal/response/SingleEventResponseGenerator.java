@@ -55,6 +55,7 @@ import java.util.Iterator;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.RecurrenceId;
+import com.openexchange.chronos.common.DefaultRecurrenceData;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.caching.CachingCalendarAccess;
 import com.openexchange.chronos.provider.caching.internal.Services;
@@ -95,20 +96,21 @@ public class SingleEventResponseGenerator extends ResponseGenerator {
                 }
 
                 event = storage.getUtilities().loadAdditionalEventData(cachedCalendarAccess.getAccount().getUserId(), event, fields);
-                if (getRecurrenceId() != null) {
+                if (null != recurrenceId) {
                     if (isSeriesMaster(event)) {
-                        Event exceptionEvent = storage.getEventStorage().loadException(getEventId(), getRecurrenceId(), fields);
+                        Event exceptionEvent = storage.getEventStorage().loadException(eventId, recurrenceId, fields);
                         if (null != exceptionEvent) {
                             exceptionEvent = storage.getUtilities().loadAdditionalEventData(cachedCalendarAccess.getAccount().getUserId(), exceptionEvent, fields);
-                            exceptionEvent.setFolderId(getFolderId());
+                            exceptionEvent.setFolderId(folderId);
                             event = exceptionEvent;
                         } else {
-                            Iterator<Event> iterator = Services.getService(RecurrenceService.class).iterateEventOccurrences(event, new Date(getRecurrenceId().getValue().getTimestamp()), null);
+                            Iterator<Event> iterator = Services.getService(RecurrenceService.class).iterateEventOccurrences(
+                                new DefaultRecurrenceData(event, null), event, new Date(recurrenceId.getValue().getTimestamp()), null);
                             event = iterator.hasNext() ? iterator.next() : null;
                         }
                     }
-                    if (null == event || false == getRecurrenceId().equals(event.getRecurrenceId())) {
-                        throw CalendarExceptionCodes.EVENT_RECURRENCE_NOT_FOUND.create(getEventId(), getRecurrenceId());
+                    if (null == event || false == recurrenceId.equals(event.getRecurrenceId())) {
+                        throw CalendarExceptionCodes.EVENT_RECURRENCE_NOT_FOUND.create(eventId, recurrenceId);
                     }
                 }
                 return event;
