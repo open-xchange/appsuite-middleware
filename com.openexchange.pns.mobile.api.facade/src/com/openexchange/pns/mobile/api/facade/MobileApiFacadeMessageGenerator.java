@@ -54,12 +54,12 @@ import org.json.JSONException;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
+import com.openexchange.pns.ApnsConstants;
 import com.openexchange.pns.KnownTransport;
 import com.openexchange.pns.Message;
 import com.openexchange.pns.PushExceptionCodes;
 import com.openexchange.pns.PushMessageGenerator;
 import com.openexchange.pns.PushNotification;
-import com.openexchange.pns.transport.apn.ApnConstants;
 import javapns.notification.PushNotificationPayload;
 
 /**
@@ -144,7 +144,7 @@ public class MobileApiFacadeMessageGenerator implements PushMessageGenerator {
                     sb.append("\n");
                     sb.append(subject);
                     String alertMessage = sb.toString();
-                    alertMessage = alertMessage.length() > ApnConstants.APNS_MAX_ALERT_LENGTH ? alertMessage.substring(0, ApnConstants.APNS_MAX_ALERT_LENGTH) : alertMessage;
+                    alertMessage = alertMessage.length() > ApnsConstants.APNS_MAX_ALERT_LENGTH ? alertMessage.substring(0, ApnsConstants.APNS_MAX_ALERT_LENGTH) : alertMessage;
                     payload.addAlert(alertMessage);
 
                     MobileApiFacadePushConfiguration config = MobileApiFacadePushConfiguration.getConfigFor(notification.getUserId(), notification.getContextId(), viewFactory);
