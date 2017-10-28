@@ -72,6 +72,7 @@ import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.SortableConcurrentList;
 import com.openexchange.osgi.util.RankedService;
+import com.openexchange.pns.ApnsConstants;
 import com.openexchange.pns.DefaultPushSubscription;
 import com.openexchange.pns.EnabledKey;
 import com.openexchange.pns.KnownTransport;
@@ -84,7 +85,6 @@ import com.openexchange.pns.PushNotification;
 import com.openexchange.pns.PushNotificationTransport;
 import com.openexchange.pns.PushNotifications;
 import com.openexchange.pns.PushSubscriptionRegistry;
-import com.openexchange.pns.transport.apn.ApnConstants;
 import com.openexchange.pns.transport.apn.ApnOptions;
 import com.openexchange.pns.transport.apn.ApnOptionsPerClient;
 import com.openexchange.pns.transport.apn.ApnOptionsProvider;
@@ -355,8 +355,8 @@ public class ApnPushNotificationTransport extends ServiceTracker<ApnOptionsProvi
     private void addCheckPayload(Payload payload, PushMatch match, List<PayloadPerDevice> payloads) throws OXException {
         int payloadLength = PushNotifications.getPayloadLength(payload.toString());
         // Check payload length
-        if (payloadLength > ApnConstants.APNS_MAX_PAYLOAD_SIZE) {
-            throw PushExceptionCodes.MESSAGE_TOO_BIG.create(ApnConstants.APNS_MAX_PAYLOAD_SIZE, payloadLength);
+        if (payloadLength > ApnsConstants.APNS_MAX_PAYLOAD_SIZE) {
+            throw PushExceptionCodes.MESSAGE_TOO_BIG.create(ApnsConstants.APNS_MAX_PAYLOAD_SIZE, payloadLength);
         }
 
         try {

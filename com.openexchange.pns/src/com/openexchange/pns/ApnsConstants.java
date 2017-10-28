@@ -47,21 +47,21 @@
  *
  */
 
-package com.openexchange.pns.transport.apn;
+package com.openexchange.pns;
 
 
 /**
- * {@link ApnConstants} - Provides useful constants for APNS transport.
+ * {@link ApnsConstants} - Provides useful constants for {@link KnownTransport#APNS APNS} transport.
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.10.0
  */
-public class ApnConstants {
+public class ApnsConstants {
 
     /**
      * Prevent initialization
      */
-    private ApnConstants() {
+    private ApnsConstants() {
         super();
     }
 
