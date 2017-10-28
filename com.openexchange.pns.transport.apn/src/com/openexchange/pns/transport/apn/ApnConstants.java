@@ -51,15 +51,24 @@ package com.openexchange.pns.transport.apn;
 
 
 /**
- * {@link ApnConstants}
+ * {@link ApnConstants} - Provides useful constants for APNS transport.
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.10.0
  */
 public class ApnConstants {
 
+    /**
+     * Prevent initialization
+     */
+    private ApnConstants() {
+        super();
+    }
+
+    /** The max. payload size in bytes for an APNS message */
     public static final int APNS_MAX_PAYLOAD_SIZE = 2048;
 
+    /** The max. alert size in bytes for an APNS message */
     public static final int APNS_MAX_ALERT_LENGTH = APNS_MAX_PAYLOAD_SIZE - 1024;
 
 }
