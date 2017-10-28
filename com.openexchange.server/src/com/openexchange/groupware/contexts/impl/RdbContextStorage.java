@@ -58,11 +58,12 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.slf4j.Logger;
-import com.google.common.collect.Lists;
 import com.openexchange.context.PoolAndSchema;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
@@ -71,6 +72,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.LdapExceptionCode;
 import com.openexchange.groupware.ldap.UserExceptionCode;
+import com.openexchange.java.Sets;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -388,11 +390,15 @@ public class RdbContextStorage extends ContextStorage {
 
     @Override
     public Map<PoolAndSchema, List<Integer>> getSchemaAssociationsFor(List<Integer> contextIds) throws OXException {
+        if (null == contextIds || contextIds.isEmpty()) {
+            return Collections.emptyMap();
+        }
+
         Connection con = DBPool.pickup();
         try {
             // Use a map to group by database schema association
             Map<PoolAndSchema, List<Integer>> map = new LinkedHashMap<>(contextIds.size() >> 1, 0.9F);
-            for (List<Integer> chunk : Lists.partition(contextIds, Databases.IN_LIMIT)) {
+            for (Set<Integer> chunk : Sets.partition(new LinkedHashSet<>(contextIds), Databases.IN_LIMIT)) {
                 PreparedStatement stmt = null;
                 ResultSet result = null;
                 try {
@@ -404,13 +410,13 @@ public class RdbContextStorage extends ContextStorage {
                     result = stmt.executeQuery();
                     if (result.next()) {
                         do {
-                            PoolAndSchema pas = new PoolAndSchema(result.getInt(2), result.getString(3));
+                            PoolAndSchema pas = new PoolAndSchema(result.getInt(2)/*write_db_pool_id*/, result.getString(3)/*db_schema*/);
                             List<Integer> cids = map.get(pas);
                             if (null == cids) {
                                 cids = new LinkedList<>();
                                 map.put(pas, cids);
                             }
-                            cids.add(Integer.valueOf(result.getInt(1)));
+                            cids.add(Integer.valueOf(result.getInt(1)/*cid*/));
                         } while (result.next());
                     }
                 } finally {
