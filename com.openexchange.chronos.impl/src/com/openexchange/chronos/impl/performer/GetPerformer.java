@@ -65,6 +65,7 @@ import java.util.Iterator;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.RecurrenceId;
+import com.openexchange.chronos.common.DefaultRecurrenceData;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.Check;
 import com.openexchange.chronos.service.CalendarSession;
@@ -128,7 +129,8 @@ public class GetPerformer extends AbstractQueryPerformer {
                     exceptionEvent.setFolderId(Check.eventIsInFolder(exceptionEvent, folder));
                     event = exceptionEvent;
                 } else {
-                    Iterator<Event> iterator = session.getRecurrenceService().iterateEventOccurrences(event, new Date(recurrenceId.getValue().getTimestamp()), null);
+                    Iterator<Event> iterator = session.getRecurrenceService().iterateEventOccurrences(
+                        new DefaultRecurrenceData(event, null), event, new Date(recurrenceId.getValue().getTimestamp()), null);
                     event = iterator.hasNext() ? iterator.next() : null;
                 }
             }
