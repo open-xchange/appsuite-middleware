@@ -65,7 +65,7 @@ public enum KnownTransport {
     /**
      * The transport by Apple Push Notification Service (APNS).
      */
-    APNS("apn"),
+    APNS("apn", "apns"),
     /**
      * The transport by Google Cloud Messaging service (GCM).
      */
@@ -82,9 +82,11 @@ public enum KnownTransport {
     ;
 
     private final String transportId;
+    private final String[] aliases;
 
-    private KnownTransport(String transportId) {
+    private KnownTransport(String transportId, String... aliases) {
         this.transportId = transportId;
+        this.aliases = aliases;
     }
 
     /**
@@ -105,8 +107,19 @@ public enum KnownTransport {
     public static KnownTransport knownTransportFor(String transportId) {
         if (null != transportId) {
             for (KnownTransport knownTransport : values()) {
+                // Check transport identifier
                 if (transportId.equals(knownTransport.transportId)) {
                     return knownTransport;
+                }
+
+                // Check against aliases
+                String[] aliases = knownTransport.aliases;
+                if (null != aliases && aliases.length > 0) {
+                    for (String alias : aliases) {
+                        if (transportId.equals(alias)) {
+                            return knownTransport;
+                        }
+                    }
                 }
             }
         }
