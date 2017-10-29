@@ -47,44 +47,35 @@
  *
  */
 
-package com.openexchange.chronos.provider.ical.internal;
+package com.openexchange.chronos.provider.ical.internal.utils;
 
-import com.openexchange.chronos.provider.ical.conn.ICalFeedHttpClient;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.DefaultInterests;
-import com.openexchange.config.Interests;
-import com.openexchange.config.Reloadable;
-
+import java.net.URI;
+import java.net.URISyntaxException;
+import com.openexchange.chronos.provider.ical.exception.ICalProviderExceptionCodes;
+import com.openexchange.chronos.provider.ical.internal.ICalCalendarProviderProperties;
+import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 
 /**
- * {@link ICalCalendarProviderReloadable}
+ * {@link ICalProviderUtils}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.10.0
  */
-public class ICalCalendarProviderReloadable implements Reloadable {
+public class ICalProviderUtils {
 
-    @Override
-    public void reloadConfiguration(ConfigurationService configService) {
-        ICalFeedHttpClient.reset();
-        ICalCalendarProviderProperties.reset();
+    public static void verifyURI(String feedUrl) throws OXException {
+        if (Strings.isEmpty(feedUrl)) {
+            throw ICalProviderExceptionCodes.MISSING_FEED_URI.create();
+        }
+        try {
+            boolean denied = ICalCalendarProviderProperties.isDenied(new URI(feedUrl));
+            if (denied) {
+                throw ICalProviderExceptionCodes.FEED_URI_NOT_ALLOWED.create(feedUrl);
+            }
+        } catch (URISyntaxException e) {
+            throw ICalProviderExceptionCodes.BAD_FEED_URI.create(feedUrl, e);
+        }
     }
 
-    private static final String[] PROPERTIES = new String[] {
-        ICalCalendarProviderProperties.refreshInterval.getFQPropertyName(), // reloadable via LeanConfigurationService
-        ICalCalendarProviderProperties.maxFileSize.getFQPropertyName(), // reloadable via LeanConfigurationService
-
-        ICalCalendarProviderProperties.connectionTimeout.getFQPropertyName(),
-        ICalCalendarProviderProperties.maxConnections.getFQPropertyName(),
-        ICalCalendarProviderProperties.maxConnectionsPerRoute.getFQPropertyName(),
-        ICalCalendarProviderProperties.socketReadTimeout.getFQPropertyName(),
-        
-        ICalCalendarProviderProperties.blacklistedHosts.getFQPropertyName(),
-        ICalCalendarProviderProperties.schemes.getFQPropertyName(),
-    };
-
-    @Override
-    public Interests getInterests() {
-        return DefaultInterests.builder().propertiesOfInterest(PROPERTIES).build();
-    }
 }

@@ -92,13 +92,9 @@ public enum ICalCalendarProviderProperties implements Property {
      */
     blacklistedHosts("127.0.0.1-127.255.255.255,localhost", ICalCalendarProviderProperties.PREFIX),
     /**
-     * Defines ports that are allowed to access the feed
+     * Defines schemes that are allowed to access a feed. All given schemes have to support port 80 or 443.
      */
-    whitelistedPorts("80,443", ICalCalendarProviderProperties.PREFIX),
-    /**
-     * Defines schemes that are allowed to access the feed
-     */
-    schemes("http, https, ftp", ICalCalendarProviderProperties.PREFIX),
+    schemes("http, https, webcal", ICalCalendarProviderProperties.PREFIX),
     /**
      * Defines the maximum size of an ICal file that will be allowed for processing. Feeds that exceed this limit will be ignored
      */
@@ -202,46 +198,6 @@ public enum ICalCalendarProviderProperties implements Property {
         return blacklistedHosts().contains(hostName);
     }
 
-    private static volatile Set<Integer> configuredAllowedPorts;
-
-    private static Set<Integer> allowedPorts() {
-        Set<Integer> tmp = configuredAllowedPorts;
-        if (null == tmp) {
-            synchronized (ICalCalendarProviderProperties.class) {
-                tmp = configuredAllowedPorts;
-                if (null == tmp) {
-                    LeanConfigurationService service = Services.getService(LeanConfigurationService.class);
-                    String prop = service.getProperty(whitelistedPorts);
-                    if (Strings.isNotEmpty(prop)) {
-                        prop = prop.trim();
-                    }
-                    if (Strings.isEmpty(prop)) {
-                        tmp = Collections.<Integer> emptySet();
-                    } else {
-                        tmp = toIntSet(prop);
-                    }
-                    configuredAllowedPorts = tmp;
-                }
-            }
-        }
-        return tmp;
-    }
-
-    private static Set<Integer> toIntSet(String prop) {
-        String[] tokens = Strings.splitByComma(prop);
-        Set<Integer> tmp = new HashSet<Integer>(tokens.length);
-        for (String token : tokens) {
-            if (Strings.isNotEmpty(token)) {
-                try {
-                    tmp.add(Integer.valueOf(token.trim()));
-                } catch (NumberFormatException e) {
-                    // Ignore
-                }
-            }
-        }
-        return tmp;
-    }
-
     /**
      * Checks if specified host name and port are denied to connect against.
      * <p>
@@ -253,37 +209,16 @@ public enum ICalCalendarProviderProperties implements Property {
      * @return <code>true</code> if denied; otherwise <code>false</code>
      */
     public static boolean isDenied(String scheme, String hostName, int port) {
-        return !isAllowed(port) || isBlacklisted(hostName) || !isAllowedScheme(scheme);
+        return isBlacklisted(hostName) || !isAllowedScheme(scheme);
     }
 
     public static boolean isDenied(URI uri) {
         return isDenied(uri.getScheme(), uri.getHost(), uri.getPort());
     }
 
-    /**
-     * Checks if specified port is allowed.
-     *
-     * @param port The port to check
-     * @return <code>true</code> if allowed; otherwise <code>false</code>
-     */
-    public static boolean isAllowed(int port) {
-        if (port < 0) {
-            // Not set; always allow
-            return true;
-        }
-
-        if (port > 65535) {
-            // Invalid port
-            return false;
-        }
-
-        Set<Integer> lAllowedPorts = allowedPorts();
-        return lAllowedPorts.isEmpty() ? true : lAllowedPorts.contains(Integer.valueOf(port));
-    }
-
     private static volatile Set<String> configuredSchemes;
 
-    private static Set<String> supportedSchemes() {
+    public static Set<String> supportedSchemes() {
         Set<String> tmp = configuredSchemes;
         if (null == tmp) {
             synchronized (ICalCalendarProviderProperties.class) {
@@ -317,7 +252,6 @@ public enum ICalCalendarProviderProperties implements Property {
 
     protected static void reset() {
         configuredSchemes = null;
-        configuredAllowedPorts = null;
         configuredBlacklistedHosts = null;
     }
 }

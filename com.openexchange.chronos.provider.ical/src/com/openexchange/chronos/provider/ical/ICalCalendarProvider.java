@@ -106,7 +106,11 @@ public class ICalCalendarProvider extends CachingCalendarProvider {
 
     @Override
     protected JSONObject reconfigureAccountOpt(Session session, CalendarAccount calendarAccount, JSONObject userConfig, CalendarParameters parameters) throws OXException {
-        return null; //everything required to adapt already done within ICalCalendarProvider.recreate(Session, JSONObject, JSONObject)
+        ICalFeedConfig iCalFeedConfig = new ICalFeedConfig.Builder(session, new JSONObject(userConfig), new JSONObject(), false).build();
+        ICalFeedConnector iCalFeedConnector = new ICalFeedConnector(session, iCalFeedConfig);
+        iCalFeedConnector.head(); // check connections and authorization
+
+        return null; //everything required to adapt already done within ICalCalendarProvider.invalidateCache(Session, JSONObject, JSONObject)
     }
 
     @Override
@@ -126,10 +130,11 @@ public class ICalCalendarProvider extends CachingCalendarProvider {
 
     @Override
     public boolean invalidateCache(Session session, JSONObject originUserConfiguration, JSONObject newUserConfiguration) throws OXException {
-        ICalFeedConfig oldFeedConfig = new ICalFeedConfig.Builder(session, originUserConfiguration, new JSONObject(), false).build();
-        ICalFeedConfig newFeedConfig = new ICalFeedConfig.Builder(session, new JSONObject(newUserConfiguration), new JSONObject()).build();
+        ICalFeedConfig oldFeedConfig = new ICalFeedConfig.Builder(session, new JSONObject(originUserConfiguration), new JSONObject(), false).build();
+        JSONObject newUserConfigurationCopy = new JSONObject(newUserConfiguration);
+        ICalFeedConfig newFeedConfig = new ICalFeedConfig.Builder(session, newUserConfigurationCopy, new JSONObject()).build();
         if (newFeedConfig.getAuthInfo().getAuthType().equals(AuthType.BASIC)) {
-            ICalAuthParser.encrypt(newUserConfiguration, session.getPassword()); // encrypt password for persisting
+            ICalAuthParser.encrypt(newUserConfigurationCopy, session.getPassword()); // encrypt password for persisting
         }
         return oldFeedConfig.mandatoryChanges(newFeedConfig);
     }

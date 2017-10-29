@@ -49,14 +49,18 @@
 
 package com.openexchange.chronos.provider.ical;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 import org.apache.commons.lang3.Validate;
+import org.apache.http.client.utils.URIBuilder;
 import org.json.JSONObject;
 import com.openexchange.auth.info.AuthInfo;
 import com.openexchange.auth.info.AuthType;
 import com.openexchange.chronos.provider.caching.CachingCalendarAccess;
+import com.openexchange.chronos.provider.ical.internal.ICalCalendarProviderProperties;
 import com.openexchange.chronos.provider.ical.internal.auth.ICalAuthParser;
 import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
@@ -109,9 +113,11 @@ public class ICalFeedConfig {
 
     public static class Builder {
 
+        private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ICalFeedConfig.Builder.class);
+
         private final String etag;
         private final long lastUpdated;
-        private final String feedUrl;
+        private String feedUrl;
         private final Map<String, String> customHeaders;
         private AuthInfo authInfo;
 
@@ -128,6 +134,7 @@ public class ICalFeedConfig {
 
             this.feedUrl = newUserConfiguration.optString("uri", null);
             Validate.notNull(this.feedUrl, "Feed URL might not be null!");
+            adaptScheme();
 
             this.authInfo = ICalAuthParser.getInstance().getAuthInfoFromUnstructured(newUserConfiguration);
             if (encrypt) {
@@ -136,13 +143,25 @@ public class ICalFeedConfig {
             }
             this.etag = folderConfig.optString(ETAG, null);
             this.lastUpdated = folderConfig.optLong(CachingCalendarAccess.LAST_UPDATE, -1L);
-            
+
             JSONObject headerObj = userConfiguration.optJSONObject("header");
-            customHeaders = new TreeMap<String,String>();
-            if(headerObj != null){
-                for(Entry<String, Object> entry : headerObj.entrySet()){
+            customHeaders = new TreeMap<String, String>();
+            if (headerObj != null) {
+                for (Entry<String, Object> entry : headerObj.entrySet()) {
                     customHeaders.put(entry.getKey(), String.valueOf(entry.getValue()));
                 }
+            }
+        }
+
+        private void adaptScheme() {
+            try {
+                URI uri = new URI(this.feedUrl);
+                if (ICalCalendarProviderProperties.supportedSchemes().contains(uri.getScheme())) {
+                    URIBuilder newUriBuilder = new URIBuilder(uri).setScheme("http");
+                    this.feedUrl = newUriBuilder.build().toString();
+                }
+            } catch (URISyntaxException e) {
+                LOG.error("Unable to verify and adapt scheme for URL {}.", this.feedUrl);
             }
         }
 

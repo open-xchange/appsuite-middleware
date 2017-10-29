@@ -70,6 +70,7 @@ import com.openexchange.chronos.provider.ical.ICalFeedConfig;
 import com.openexchange.chronos.provider.ical.exception.ICalProviderExceptionCodes;
 import com.openexchange.chronos.provider.ical.internal.ICalCalendarProviderProperties;
 import com.openexchange.chronos.provider.ical.internal.Services;
+import com.openexchange.chronos.provider.ical.internal.utils.ICalProviderUtils;
 import com.openexchange.chronos.provider.ical.result.HeadResult;
 import com.openexchange.config.ConfigTools;
 import com.openexchange.config.lean.LeanConfigurationService;
@@ -101,6 +102,8 @@ public class ICalFeedConnector {
     }
 
     public HeadResult head() throws OXException {
+        ICalProviderUtils.verifyURI(this.iCalFeedConfig.getFeedUrl());
+
         HttpHead headMethod = null;
         CloseableHttpResponse response = null;
         try {
