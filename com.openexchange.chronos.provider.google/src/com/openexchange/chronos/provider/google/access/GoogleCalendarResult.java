@@ -141,6 +141,7 @@ public class GoogleCalendarResult extends ExternalCalendarResult implements Diff
             if(foundEvent != null){
                 // add to updated
                 update.setId(foundEvent.getId());
+                update.setSeriesId(foundEvent.getSeriesId());
                 updated.add(new EventUpdateImpl(foundEvent, update, true));
                 continue;
             }
