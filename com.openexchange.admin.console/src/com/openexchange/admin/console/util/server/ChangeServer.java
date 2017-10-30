@@ -82,7 +82,6 @@ public class ChangeServer extends ServerAbstraction {
      * 
      * @param args The command line arguments
      */
-    @SuppressWarnings("unused")
     public static void main(String[] args) {
         new ChangeServer(args);
     }
@@ -119,7 +118,7 @@ public class ChangeServer extends ServerAbstraction {
                 sysexit(1);
                 return;
             }
-            
+
             try {
                 serverId = Integer.valueOf(sid);
             } catch (NumberFormatException e) {
