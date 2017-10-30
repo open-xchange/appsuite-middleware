@@ -88,6 +88,7 @@ import com.openexchange.chronos.provider.extensions.PersonalAlarmAware;
 import com.openexchange.chronos.provider.extensions.QuotaAware;
 import com.openexchange.chronos.provider.extensions.SearchAware;
 import com.openexchange.chronos.provider.extensions.SyncAware;
+import com.openexchange.chronos.provider.extensions.WarningsAware;
 import com.openexchange.chronos.provider.groupware.DefaultGroupwareCalendarFolder;
 import com.openexchange.chronos.provider.groupware.GroupwareCalendarAccess;
 import com.openexchange.chronos.provider.groupware.GroupwareCalendarFolder;
@@ -120,7 +121,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.0
  */
-public class InternalCalendarAccess implements GroupwareCalendarAccess, SyncAware, PersonalAlarmAware, SearchAware, QuotaAware {
+public class InternalCalendarAccess implements GroupwareCalendarAccess, SyncAware, PersonalAlarmAware, SearchAware, QuotaAware, WarningsAware {
 
     private final CalendarSession session;
     private final ServiceLookup services;
@@ -303,6 +304,11 @@ public class InternalCalendarAccess implements GroupwareCalendarAccess, SyncAwar
     @Override
     public IFileHolder getAttachment(EventID eventID, int managedId) throws OXException {
         return getCalendarService().getAttachment(session, eventID, managedId);
+    }
+
+    @Override
+    public List<OXException> getWarnings() {
+        return session.getWarnings();
     }
 
     /**

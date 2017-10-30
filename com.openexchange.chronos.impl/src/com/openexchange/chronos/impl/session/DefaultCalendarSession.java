@@ -49,8 +49,10 @@
 
 package com.openexchange.chronos.impl.session;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -90,6 +92,7 @@ public class DefaultCalendarSession implements CalendarSession {
     private final EntityResolver entityResolver;
     private final HostData hostData;
     private final CalendarConfig config;
+    private final List<OXException> warnings;
 
     /**
      * Initializes a new {@link DefaultCalendarSession}.
@@ -105,6 +108,7 @@ public class DefaultCalendarSession implements CalendarSession {
         this.entityResolver = new DefaultEntityResolver(this.session, Services.getServiceLookup());
         RequestContext requestContext = RequestContextHolder.get();
         this.hostData = null != requestContext ? requestContext.getHostData() : null;
+        this.warnings = new ArrayList<OXException>();
         this.config = new CalendarConfigImpl(this);
         if (isDebugEnabled()) {
             debug("New DefaultCalendarSession created. User: " + session.getUserId() + ", Context: " + session.getContextId());
@@ -159,6 +163,16 @@ public class DefaultCalendarSession implements CalendarSession {
     @Override
     public EntityResolver getEntityResolver() {
         return entityResolver;
+    }
+
+    @Override
+    public void addWarning(OXException warning) {
+        warnings.add(warning);
+    }
+
+    @Override
+    public List<OXException> getWarnings() {
+        return warnings;
     }
 
     @Override

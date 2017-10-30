@@ -49,6 +49,8 @@
 
 package com.openexchange.chronos.service;
 
+import java.util.List;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.session.Session;
 
@@ -129,6 +131,20 @@ public interface CalendarSession extends CalendarParameters {
      * @return The calendar config
      */
     CalendarConfig getConfig();
+
+    /**
+     * Adds a warning.
+     *
+     * @param warning The warning to add
+     */
+    void addWarning(OXException warning);
+
+    /**
+     * Gets a list of warnings that occurred while processing.
+     *
+     * @return The warnings, or <code>null</code> or an empty list if there were none
+     */
+    List<OXException> getWarnings();
 
     /**
      * Logs a debug message with an associated identifier of this particular CalendarSession.
