@@ -175,6 +175,7 @@ public abstract class ListCore extends UserAbstraction {
             columnnames.add(UserAbstraction.OPT_ACCESS_TASKS);
             columnnames.add(UserAbstraction.OPT_ACCESS_VCARD);
             columnnames.add(UserAbstraction.OPT_ACCESS_WEBDAV);
+            columnnames.add(UserAbstraction.OPT_ACCESS_WEBDAV_XML);
             columnnames.add(UserAbstraction.OPT_ACCESS_WEBMAIL);
             columnnames.add(UserAbstraction.OPT_ACCESS_EDIT_GROUP);
             columnnames.add(UserAbstraction.OPT_ACCESS_EDIT_RESOURCE);
