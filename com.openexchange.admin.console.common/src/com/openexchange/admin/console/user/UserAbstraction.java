@@ -205,6 +205,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         accessTasks(9, OPT_ACCESS_TASKS, false),
         accessVcard(10, OPT_ACCESS_VCARD, false),
         accessWebdav(11, OPT_ACCESS_WEBDAV, false),
+        /** @deprecated */
         accessWebdavxml(12, OPT_ACCESS_WEBDAV_XML, false),
         accessWebmail(13, OPT_ACCESS_WEBMAIL, false),
         accessEditgroup(14, OPT_ACCESS_EDIT_GROUP, false),
@@ -463,6 +464,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     protected static final String OPT_ACCESS_TASKS = "access-tasks";
     protected static final String OPT_ACCESS_VCARD = "access-vcard";
     protected static final String OPT_ACCESS_WEBDAV = "access-webdav";
+    /** @deprecated */
     protected static final String OPT_ACCESS_WEBDAV_XML = "access-webdav-xml";
     protected static final String OPT_ACCESS_WEBMAIL = "access-webmail";
     protected static final String OPT_ACCESS_EDIT_GROUP = "access-edit-group";
@@ -649,6 +651,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     protected CLIOption accessTasksOption = null;
     protected CLIOption accessVcardOption = null;
     protected CLIOption accessWebdavOption = null;
+    /** @deprecated */
     protected CLIOption accessWebdavXmlOption = null;
     protected CLIOption accessWebmailOption = null;
     protected CLIOption accessEditGroupOption = null;
