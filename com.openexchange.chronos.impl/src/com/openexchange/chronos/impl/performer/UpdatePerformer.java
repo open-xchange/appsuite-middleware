@@ -287,24 +287,27 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
         ItemUpdate<Event, EventField> eventUpdate = prepareEventUpdate(originalEvent, eventData, newAttendees, ignoredFields);
         if (null != eventUpdate && 0 < eventUpdate.getUpdatedFields().size()) {
             /*
-             * check permissions & conflicts
+             * check permissions
              */
             requireWritePermissions(originalEvent);
-            if (needsConflictCheck(eventUpdate, attendeeHelper)) {
-                Event changedEvent = EventMapper.getInstance().copy(originalEvent, new Event(), (EventField[]) null);
-                changedEvent = EventMapper.getInstance().copy(eventUpdate.getUpdate(), changedEvent, (EventField[]) null);
-                Check.noConflicts(storage, session, changedEvent, newAttendees);
-            }
+            /*
+             * increment sequence number as needed
+             */
             if (needsSequenceNumberIncrement(eventUpdate, attendeeHelper)) {
-                /*
-                 * increment sequence number
-                 */
                 eventUpdate.getUpdate().setSequence(originalEvent.getSequence() + 1);
             }
             /*
              * adjust change & delete exceptions as needed
              */
             adjustExceptionsOnReschedule(eventUpdate);
+            /*
+             * check for conflicts
+             */
+            if (needsConflictCheck(eventUpdate, attendeeHelper)) {
+                Event changedEvent = EventMapper.getInstance().copy(originalEvent, new Event(), (EventField[]) null);
+                changedEvent = EventMapper.getInstance().copy(eventUpdate.getUpdate(), changedEvent, (EventField[]) null);
+                Check.noConflicts(storage, session, changedEvent, newAttendees);
+            }
             /*
              * perform update
              */
@@ -745,7 +748,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
                     /*
                      * ensure all necessary recurrence related data is present in passed event update & check rule validity
                      */
-                    EventMapper.getInstance().copyIfNotSet(originalEvent, eventUpdate, EventField.SERIES_ID, EventField.START_DATE, EventField.END_DATE);
+                    EventMapper.getInstance().copyIfNotSet(originalEvent, eventUpdate, EventField.SERIES_ID, EventField.START_DATE, EventField.END_DATE, EventField.RECURRENCE_ID);
                     Check.recurrenceRuleIsValid(session.getRecurrenceService(), eventUpdate);
                     /*
                      * single event to series, assign new recurrence id
@@ -759,7 +762,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
                     /*
                      * ensure all necessary recurrence related data is present in passed event update, adjust start/end & re-validate start- and end date
                      */
-                    EventMapper.getInstance().copyIfNotSet(originalEvent, eventUpdate, EventField.RECURRENCE_RULE, EventField.SERIES_ID, EventField.START_DATE, EventField.END_DATE);
+                    EventMapper.getInstance().copyIfNotSet(originalEvent, eventUpdate, EventField.RECURRENCE_RULE, EventField.SERIES_ID, EventField.START_DATE, EventField.END_DATE, EventField.RECURRENCE_ID);
                     Consistency.adjustAllDayDates(eventUpdate);
                     Check.startAndEndDate(eventUpdate);
                     break;

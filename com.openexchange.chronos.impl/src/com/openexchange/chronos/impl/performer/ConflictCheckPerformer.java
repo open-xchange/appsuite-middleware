@@ -85,10 +85,12 @@ import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.Transp;
 import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.common.DefaultRecurrenceData;
 import com.openexchange.chronos.impl.EventConflictImpl;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.EventConflict;
+import com.openexchange.chronos.service.RecurrenceData;
 import com.openexchange.chronos.service.SearchOptions;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
@@ -144,14 +146,15 @@ public class ConflictCheckPerformer extends AbstractFreeBusyPerformer {
         /*
          * get conflicts for series or regular event
          */
-        List<EventConflict> conflicts = isSeriesMaster(event) || (event.getId() == null && event.getRecurrenceRule() != null) ? getSeriesConflicts(event, attendeesToCheck) : getEventConflicts(event, attendeesToCheck);
-        if (1 < conflicts.size()) {
-            Collections.sort(conflicts, HARD_CONFLICTS_FIRST_COMPARATOR);
-            if (maxConflicts < conflicts.size()) {
-                conflicts = conflicts.subList(0, maxConflicts);
-            }
+        List<EventConflict> conflicts;
+        if (isSeriesMaster(event)) {
+            conflicts = getSeriesConflicts(storage.getUtilities().loadRecurrenceData(event), event, attendeesToCheck);
+        } else if (null == event.getId() && null != event.getRecurrenceRule()) {
+            conflicts = getSeriesConflicts(new DefaultRecurrenceData(event, null), event, attendeesToCheck);
+        } else {
+            conflicts = getEventConflicts(event, attendeesToCheck);
         }
-        return conflicts;
+        return sortAndTrim(conflicts);
     }
 
     /**
@@ -233,15 +236,16 @@ public class ConflictCheckPerformer extends AbstractFreeBusyPerformer {
     /**
      * Checks for conflicts for a recurring event, considering every occurrence of the series.
      *
+     * @param recurrenceData The recurrence data for the checked event series
      * @param masterEvent The series master event being inserted/updated
      * @param attendeesToCheck The attendees to check
      * @return The conflicts, or an empty list if there are none
      */
-    private List<EventConflict> getSeriesConflicts(Event masterEvent, List<Attendee> attendeesToCheck) throws OXException {
+    private List<EventConflict> getSeriesConflicts(RecurrenceData recurrenceData, Event masterEvent, List<Attendee> attendeesToCheck) throws OXException {
         /*
          * resolve occurrences for event series & derive checked period
          */
-        Iterator<RecurrenceId> recurrenceIterator = getRecurrenceIterator(storage, session, masterEvent, today, null);
+        Iterator<RecurrenceId> recurrenceIterator = session.getRecurrenceService().iterateRecurrenceIds(recurrenceData, today, null);
         List<RecurrenceId> eventRecurrenceIds = new ArrayList<RecurrenceId>();
         while (recurrenceIterator.hasNext()) {
             eventRecurrenceIds.add(recurrenceIterator.next());
@@ -520,6 +524,16 @@ public class ConflictCheckPerformer extends AbstractFreeBusyPerformer {
             }
         }
         return checkedAttendees;
+    }
+
+    private List<EventConflict> sortAndTrim(List<EventConflict> conflicts) {
+        if (null != conflicts && 1 < conflicts.size()) {
+            Collections.sort(conflicts, HARD_CONFLICTS_FIRST_COMPARATOR);
+            if (maxConflicts < conflicts.size()) {
+                conflicts = conflicts.subList(0, maxConflicts);
+            }
+        }
+        return conflicts;
     }
 
     /**
