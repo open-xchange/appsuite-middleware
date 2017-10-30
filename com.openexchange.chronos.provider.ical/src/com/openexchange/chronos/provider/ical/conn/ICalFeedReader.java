@@ -61,6 +61,7 @@ import com.openexchange.chronos.ical.ImportedCalendar;
 import com.openexchange.chronos.provider.ical.ICalFeedConfig;
 import com.openexchange.chronos.provider.ical.exception.ICalProviderExceptionCodes;
 import com.openexchange.chronos.provider.ical.internal.Services;
+import com.openexchange.chronos.provider.ical.internal.utils.ICalProviderUtils;
 import com.openexchange.chronos.provider.ical.result.GetResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
@@ -109,6 +110,8 @@ public class ICalFeedReader extends ICalFeedConnector {
     }
 
     public GetResult get() throws OXException {
+        ICalProviderUtils.verifyURI(this.iCalFeedConfig.getFeedUrl());
+
         HttpGet getMethod = null;
         CloseableHttpResponse response = null;
         try {

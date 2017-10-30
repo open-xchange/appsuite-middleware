@@ -49,8 +49,6 @@
 
 package com.openexchange.chronos.provider.ical;
 
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.concurrent.TimeUnit;
 import org.apache.http.HttpStatus;
 import org.dmfs.rfc5545.Duration;
@@ -116,8 +114,6 @@ public class ICalCalendarAccess extends SingleFolderCachingCalendarAccess {
 
     @Override
     public ExternalCalendarResult getAllEvents() throws OXException {
-        verifyURI();
-
         HeadResult headResult = reader.head();
         String etag = iCalFeedConfig.getEtag();
         if (headResult.getStatusCode() == HttpStatus.SC_NOT_MODIFIED || // response says not modified
@@ -131,20 +127,6 @@ public class ICalCalendarAccess extends SingleFolderCachingCalendarAccess {
     public String updateFolder(String folderId, CalendarFolder folder, long clientTimestamp) throws OXException {
         // nothing changed, return origin folder id
         return folderId;
-    }
-
-    private void verifyURI() throws OXException {
-        if (Strings.isEmpty(iCalFeedConfig.getFeedUrl())) {
-            throw ICalProviderExceptionCodes.MISSING_FEED_URI.create(getAccount().getAccountId(), getSession().getContextId());
-        }
-        try {
-            boolean denied = ICalCalendarProviderProperties.isDenied(new URI(iCalFeedConfig.getFeedUrl()));
-            if (denied) {
-                throw ICalProviderExceptionCodes.FEED_URI_NOT_ALLOWED.create(iCalFeedConfig.getFeedUrl());
-            }
-        } catch (URISyntaxException e) {
-            throw ICalProviderExceptionCodes.BAD_FEED_URI.create(iCalFeedConfig.getFeedUrl(), e);
-        }
     }
 
     private ExternalCalendarResult getAndHandleFeed() throws OXException {

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2017-2020 OX Software GmbH
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,73 +47,56 @@
  *
  */
 
-package com.openexchange.chronos.provider.schedjoules;
+package com.openexchange.chronos.schedjoules;
+
+import java.util.List;
+import com.openexchange.chronos.Event;
 
 /**
- * {@link SchedJoulesFields}
+ * {@link SchedJoulesCalendar}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-final class SchedJoulesFields {
+public class SchedJoulesCalendar {
+
+    private final List<Event> events;
+    private final String eTag;
+    private final String name;
 
     /**
-     * The user configuration's key for all available/visible folders
+     * Initialises a new {@link SchedJoulesCalendar}.
      */
-    static final String FOLDERS = "folders";
+    public SchedJoulesCalendar(String name, List<Event> events, String eTag) {
+        super();
+        this.name = name;
+        this.events = events;
+        this.eTag = eTag;
+    }
 
     /**
-     * The user configuration's key for the feed's URL
+     * Gets the eTag
+     *
+     * @return The eTag
      */
-    static final String URL = "url";
+    public String getETag() {
+        return eTag;
+    }
 
     /**
-     * The user configuration's key for the folder's name
+     * Gets the events
+     *
+     * @return The events
      */
-    static final String NAME = "name";
+    public List<Event> getEvents() {
+        return events;
+    }
 
     /**
-     * The refreshInterval for a folder.
+     * Gets the name
+     *
+     * @return The name
      */
-    static final String REFRESH_INTERVAL = "refreshInterval";
-
-    /**
-     * The itemId that maps to a SchedJoules itemId
-     */
-    static final String ITEM_ID = "itemId";
-
-    /**
-     * The optional locale for the item
-     */
-    static final String LOCALE = "locale";
-
-    /**
-     * The folder's color
-     */
-    static final String COLOR = "color";
-
-    /**
-     * Flag indicating whether the folder is used for sync
-     */
-    static final String USED_FOR_SYNC = "usedForSync";
-
-    /**
-     * The schedule transparency property
-     */
-    static final String SCHEDULE_TRANSP = "scheduleTransp";
-
-    /**
-     * The folder's description
-     */
-    static final String DESCRIPTION = "description";
-
-    /**
-     * The unique user key
-     */
-    static final String USER_KEY = "userKey";
-
-    /**
-     * The etag of a folder/calendar
-     */
-    static final String ETAG = "etag";
-
+    public String getName() {
+        return name;
+    }
 }

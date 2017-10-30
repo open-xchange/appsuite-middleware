@@ -61,6 +61,7 @@ public class SchedJoulesResponse {
     private InputStream stream;
     private final int statusCode;
     private String contentType;
+    private String eTag;
 
     /**
      * Initialises a new {@link SchedJoulesResponse}.
@@ -113,5 +114,23 @@ public class SchedJoulesResponse {
      */
     public void setContentType(String contentType) {
         this.contentType = contentType;
+    }
+
+    /**
+     * Gets the eTag
+     *
+     * @return The eTag
+     */
+    public String getETag() {
+        return eTag;
+    }
+
+    /**
+     * Sets the eTag
+     *
+     * @param eTag The eTag to set
+     */
+    public void setETag(String eTag) {
+        this.eTag = eTag;
     }
 }

@@ -74,7 +74,7 @@ public enum ICalProviderExceptionCodes implements DisplayableOXExceptionCode {
      * <li>The feed URI is missing.</li>
      * <li>The feed URI for account %1$s in context %2$s is missing</li>
      */
-    MISSING_FEED_URI("The feed URI for account %1$s in context %2$s is missing.", MISSING_FEED_URI_MSG, Category.CATEGORY_USER_INPUT, 4040),
+    MISSING_FEED_URI("The feed URI is missing.", MISSING_FEED_URI_MSG, Category.CATEGORY_USER_INPUT, 4040),
 
     /**
      * <li>The feed URI does not match the standard.</li>

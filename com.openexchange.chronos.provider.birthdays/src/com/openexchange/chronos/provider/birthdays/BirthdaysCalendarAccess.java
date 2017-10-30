@@ -78,6 +78,7 @@ import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.DefaultCalendarResult;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.CalendarAccount;
+import com.openexchange.chronos.provider.CalendarCapability;
 import com.openexchange.chronos.provider.CalendarFolder;
 import com.openexchange.chronos.provider.CalendarPermission;
 import com.openexchange.chronos.provider.DefaultCalendarFolder;
@@ -370,6 +371,7 @@ public class BirthdaysCalendarAccess extends SingleFolderCalendarAccess implemen
     private static DefaultCalendarFolder prepareFolder(ConversionService conversionService, ServerSession session, CalendarAccount account) throws OXException {
         StringHelper stringHelper = StringHelper.valueOf(session.getUser().getLocale());
         DefaultCalendarFolder folder = new DefaultCalendarFolder(FOLDER_ID, stringHelper.getString(BirthdaysCalendarStrings.CALENDAR_NAME));
+        folder.setSupportedCapabilites(CalendarCapability.getCapabilities(BirthdaysCalendarAccess.class));
         folder.setLastModified(account.getLastModified());
         ExtendedProperties extendedProperties = parseExtendedProperties(conversionService, account.getInternalConfiguration().optJSONObject("extendedProperties"));
         if (null == extendedProperties) {

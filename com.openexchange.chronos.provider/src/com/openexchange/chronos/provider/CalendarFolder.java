@@ -50,6 +50,7 @@
 package com.openexchange.chronos.provider;
 
 import java.util.Date;
+import java.util.EnumSet;
 import java.util.List;
 import com.openexchange.chronos.ExtendedProperties;
 
@@ -97,5 +98,12 @@ public interface CalendarFolder {
      * @return The extended properties, or <code>null</code> if not defined
      */
     ExtendedProperties getExtendedProperties();
+
+    /**
+     * Gets the supported capabilities for a calendar access in this folder, describing the usable extended feature set.
+     *
+     * @return The supported calendar capabilities, or an empty set if no extended functionality is available
+     */
+    EnumSet<CalendarCapability> getSupportedCapabilites();
 
 }

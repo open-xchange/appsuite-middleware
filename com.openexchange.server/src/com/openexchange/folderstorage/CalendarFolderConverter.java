@@ -49,6 +49,8 @@
 
 package com.openexchange.folderstorage;
 
+import static com.openexchange.chronos.provider.CalendarCapability.getCapabilities;
+import static com.openexchange.chronos.provider.CalendarCapability.getCapabilityNames;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -99,6 +101,7 @@ public class CalendarFolderConverter {
         folder.setSubfolderIDs(new String[0]);
         folder.setSubscribedSubfolders(false);
         folder.setProperty(EXTENDED_PROPERTIES_FIELD, calendarFolder.getExtendedProperties());
+        folder.setSupportedCapabilities(getCapabilityNames(calendarFolder.getSupportedCapabilites()));
         return folder;
     }
 
@@ -124,8 +127,8 @@ public class CalendarFolderConverter {
         folder.setPermissions(getStoragePermissions(calendarFolder.getPermissions()));
         folder.setType(getStorageType(calendarFolder.getType()));
         folder.setDefault(calendarFolder.isDefaultFolder());
-        //        folder.setSupportedCapabilities(capabilities);
         folder.setProperty(EXTENDED_PROPERTIES_FIELD, calendarFolder.getExtendedProperties());
+        folder.setSupportedCapabilities(getCapabilityNames(calendarFolder.getSupportedCapabilites()));
         return folder;
     }
 
@@ -333,6 +336,7 @@ public class CalendarFolderConverter {
         if (ParameterizedFolder.class.isInstance(folder)) {
             calendarFolder.setExtendedProperties(getExtendedProperties(((ParameterizedFolder) folder).getProperties()));
         }
+        calendarFolder.setSupportedCapabilites(getCapabilities(folder.getSupportedCapabilities()));
         return calendarFolder;
     }
 

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2017-2020 OX Software GmbH
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,73 +47,35 @@
  *
  */
 
-package com.openexchange.chronos.provider.schedjoules;
+package com.openexchange.chronos.provider.ical.internal.utils;
+
+import java.net.URI;
+import java.net.URISyntaxException;
+import com.openexchange.chronos.provider.ical.exception.ICalProviderExceptionCodes;
+import com.openexchange.chronos.provider.ical.internal.ICalCalendarProviderProperties;
+import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 
 /**
- * {@link SchedJoulesFields}
+ * {@link ICalProviderUtils}
  *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since v7.10.0
  */
-final class SchedJoulesFields {
+public class ICalProviderUtils {
 
-    /**
-     * The user configuration's key for all available/visible folders
-     */
-    static final String FOLDERS = "folders";
-
-    /**
-     * The user configuration's key for the feed's URL
-     */
-    static final String URL = "url";
-
-    /**
-     * The user configuration's key for the folder's name
-     */
-    static final String NAME = "name";
-
-    /**
-     * The refreshInterval for a folder.
-     */
-    static final String REFRESH_INTERVAL = "refreshInterval";
-
-    /**
-     * The itemId that maps to a SchedJoules itemId
-     */
-    static final String ITEM_ID = "itemId";
-
-    /**
-     * The optional locale for the item
-     */
-    static final String LOCALE = "locale";
-
-    /**
-     * The folder's color
-     */
-    static final String COLOR = "color";
-
-    /**
-     * Flag indicating whether the folder is used for sync
-     */
-    static final String USED_FOR_SYNC = "usedForSync";
-
-    /**
-     * The schedule transparency property
-     */
-    static final String SCHEDULE_TRANSP = "scheduleTransp";
-
-    /**
-     * The folder's description
-     */
-    static final String DESCRIPTION = "description";
-
-    /**
-     * The unique user key
-     */
-    static final String USER_KEY = "userKey";
-
-    /**
-     * The etag of a folder/calendar
-     */
-    static final String ETAG = "etag";
+    public static void verifyURI(String feedUrl) throws OXException {
+        if (Strings.isEmpty(feedUrl)) {
+            throw ICalProviderExceptionCodes.MISSING_FEED_URI.create();
+        }
+        try {
+            boolean denied = ICalCalendarProviderProperties.isDenied(new URI(feedUrl));
+            if (denied) {
+                throw ICalProviderExceptionCodes.FEED_URI_NOT_ALLOWED.create(feedUrl);
+            }
+        } catch (URISyntaxException e) {
+            throw ICalProviderExceptionCodes.BAD_FEED_URI.create(feedUrl, e);
+        }
+    }
 
 }

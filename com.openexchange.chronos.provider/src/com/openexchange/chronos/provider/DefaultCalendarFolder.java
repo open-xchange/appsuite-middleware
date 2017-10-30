@@ -50,6 +50,7 @@
 package com.openexchange.chronos.provider;
 
 import java.util.Date;
+import java.util.EnumSet;
 import java.util.List;
 import com.openexchange.chronos.ExtendedProperties;
 
@@ -66,12 +67,28 @@ public class DefaultCalendarFolder implements CalendarFolder {
     private Date lastModified;
     private List<CalendarPermission> permissions;
     private ExtendedProperties extendedProperties;
+    private EnumSet<CalendarCapability> supportedCapabilites;
 
     /**
      * Initializes a new {@link DefaultCalendarFolder}.
      */
     public DefaultCalendarFolder() {
         super();
+    }
+
+    /**
+     * Initializes a new {@link DefaultCalendarFolder}, taking over the properties from another folder.
+     *
+     * @param folder The folder to copy the properties from
+     */
+    public DefaultCalendarFolder(CalendarFolder folder) {
+        super();
+        id = folder.getId();
+        name = folder.getName();
+        lastModified = folder.getLastModified();
+        permissions = folder.getPermissions();
+        extendedProperties = folder.getExtendedProperties();
+        supportedCapabilites = folder.getSupportedCapabilites();
     }
 
     /**
@@ -129,6 +146,15 @@ public class DefaultCalendarFolder implements CalendarFolder {
 
     public void setExtendedProperties(ExtendedProperties extendedProperties) {
         this.extendedProperties = extendedProperties;
+    }
+
+    @Override
+    public EnumSet<CalendarCapability> getSupportedCapabilites() {
+        return supportedCapabilites;
+    }
+
+    public void setSupportedCapabilites(EnumSet<CalendarCapability> supportedCapabilites) {
+        this.supportedCapabilites = supportedCapabilites;
     }
 
     @Override

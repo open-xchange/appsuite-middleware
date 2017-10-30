@@ -69,22 +69,28 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.SortedSet;
 import java.util.TimeZone;
+import java.util.TreeSet;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import org.dmfs.rfc5545.DateTime;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmAction;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.RelatedTo;
 import com.openexchange.chronos.Trigger;
 import com.openexchange.chronos.common.AlarmUtils;
 import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.common.DefaultRecurrenceId;
 import com.openexchange.chronos.exception.ProblemSeverity;
 import com.openexchange.chronos.service.EntityResolver;
 import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.chronos.storage.AlarmStorage;
 import com.openexchange.chronos.storage.CalendarStorage;
+import com.openexchange.chronos.storage.CalendarStorageUtilities;
 import com.openexchange.chronos.storage.rdb.RdbStorage;
 import com.openexchange.chronos.storage.rdb.osgi.Services;
 import com.openexchange.database.provider.DBProvider;
@@ -107,18 +113,21 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
     private static final int REMINDER_MODULE = Types.APPOINTMENT;
 
     private final EntityResolver entityResolver;
+    private final CalendarStorageUtilities utilities;
 
     /**
      * Initializes a new {@link RdbAlarmStorage}.
      *
      * @param context The context
      * @param entityResolver The entity resolver to use
+     * @param utilities The storage utilities
      * @param dbProvider The database provider to use
      * @param txPolicy The transaction policy
      */
-    public RdbAlarmStorage(Context context, EntityResolver entityResolver, DBProvider dbProvider, DBTransactionPolicy txPolicy) {
+    public RdbAlarmStorage(Context context, EntityResolver entityResolver, CalendarStorageUtilities utilities, DBProvider dbProvider, DBTransactionPolicy txPolicy) {
         super(context, dbProvider, txPolicy);
         this.entityResolver = entityResolver;
+        this.utilities = utilities;
     }
 
     @Override
@@ -334,7 +343,7 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
             release(connection, updated);
         }
     }
-    
+
     @Override
     public void deleteAllAlarms() throws OXException {
         throw new UnsupportedOperationException();
@@ -466,8 +475,14 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
         return null;
     }
 
-    private static int getReminderMinutes(Trigger trigger, Event event, TimeZone timeZone) throws OXException {
-        String duration = AlarmUtils.getTriggerDuration(trigger, event, Services.getService(RecurrenceService.class));
+    private int getReminderMinutes(Trigger trigger, Event event, TimeZone timeZone) throws OXException {
+        SortedSet<RecurrenceId> exceptions;
+        if (isSeriesMaster(event)) {
+            exceptions = getRecurrenceIds(utilities.loadRecurrenceData(event).getExceptionDates());
+        } else {
+            exceptions = null;
+        }
+        String duration = AlarmUtils.getTriggerDuration(trigger, event, Services.getService(RecurrenceService.class), exceptions);
         return null == duration ? 0 : -1 * (int) TimeUnit.MILLISECONDS.toMinutes(AlarmUtils.getTriggerDuration(duration));
     }
 
@@ -637,7 +652,7 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
             return logExecuteUpdate(stmt);
         }
     }
-    
+
     private static int deleteReminderTriggers(Connection connection, int contextID, List<String> eventIds) throws SQLException {
         StringBuilder stringBuilder = new StringBuilder()
             .append("DELETE FROM reminder WHERE cid=? AND module=? AND target_id")
@@ -680,7 +695,7 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
             return logExecuteUpdate(stmt);
         }
     }
-    
+
     private static int deleteReminderMinutes(Connection connection, int contextID, List<String> eventIds) throws SQLException {
         StringBuilder stringBuilder = new StringBuilder()
             .append("UPDATE prg_dates_members SET reminder=? WHERE cid=? AND object_id")
@@ -743,7 +758,7 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
      * @param timeZone The timezone to consider if the event has <i>floating</i> dates
      * @return The next trigger time, or <code>null</code> if there is none
      */
-    private static Date optNextTriggerTime(Event event, Alarm alarm, TimeZone timeZone) {
+    private Date optNextTriggerTime(Event event, Alarm alarm, TimeZone timeZone) {
         return optNextTriggerTime(event, alarm, timeZone, null);
     }
 
@@ -762,12 +777,13 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
      *            to select automatically
      * @return The next trigger time, or <code>null</code> if there is none
      */
-    private static Date optNextTriggerTime(Event event, Alarm alarm, TimeZone timeZone, Date startDate) {
+    private Date optNextTriggerTime(Event event, Alarm alarm, TimeZone timeZone, Date startDate) {
         if (false == isSeriesMaster(event)) {
             return AlarmUtils.getTriggerTime(alarm.getTrigger(), event, timeZone);
         }
         try {
-            return AlarmUtils.getNextTriggerTime(event, alarm, startDate, timeZone, Services.getService(RecurrenceService.class));
+            SortedSet<RecurrenceId> exceptions = getRecurrenceIds(utilities.loadRecurrenceData(event).getExceptionDates());
+            return AlarmUtils.getNextTriggerTime(event, alarm, startDate, timeZone, Services.getService(RecurrenceService.class), exceptions);
         } catch (OXException e) {
             LOG.warn("Error determining next trigger time for alarm", e);
         }
@@ -783,7 +799,7 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
      * @param timeZone The timezone to consider when evaluating the next trigger time of <i>floating</i> events
      * @return The next alarm, or <code>null</code> if there is none
      */
-    private static Alarm chooseNextAlarm(Event event, ReminderData originalReminder, List<Alarm> alarms, TimeZone timeZone) throws OXException {
+    private Alarm chooseNextAlarm(Event event, ReminderData originalReminder, List<Alarm> alarms, TimeZone timeZone) throws OXException {
         if (null == alarms || 0 == alarms.size()) {
             return null;
         }
@@ -825,6 +841,15 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
         return null;
     }
 
+    private static SortedSet<RecurrenceId> getRecurrenceIds(long[] exceptionDates) {
+        SortedSet<RecurrenceId> recurrenceIds = new TreeSet<RecurrenceId>();
+        if (null != exceptionDates) {
+            for (long exceptionDate : exceptionDates) {
+                recurrenceIds.add(new DefaultRecurrenceId(new DateTime(exceptionDate)));
+            }
+        }
+        return recurrenceIds;
+    }
 
     private static final class ReminderData {
 

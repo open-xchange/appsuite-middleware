@@ -50,6 +50,7 @@
 package com.openexchange.chronos.provider;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Set;
@@ -124,12 +125,36 @@ public enum CalendarCapability {
     }
 
     /**
+     * Gets a list of all capabilities based on a collection of capability names.
+     *
+     * @param capabilityNames The capability names to derive the capabilities from
+     * @return The corresponding calendar capabilities
+     */
+    public static EnumSet<CalendarCapability> getCapabilities(Set<String> capabilityNames) {
+        EnumSet<CalendarCapability> capabilities = EnumSet.noneOf(CalendarCapability.class);
+        if (null != capabilityNames) {
+            for (String capabilityName : capabilityNames) {
+                for (CalendarCapability capability : CalendarCapability.values()) {
+                    if (capability.getName().equals(capabilityName)) {
+                        capabilities.add(capability);
+                        break;
+                    }
+                }
+            }
+        }
+        return capabilities;
+    }
+
+    /**
      * Gets the names of a collection of calendar capabilities.
      *
      * @param capabilities The capabilities to get the corresponding capability names for
      * @return The capability names
      */
     public static Set<String> getCapabilityNames(Collection<CalendarCapability> capabilities) {
+        if (null == capabilities) {
+            return Collections.emptySet();
+        }
         Set<String> capabilityNames = new HashSet<String>(capabilities.size());
         for (CalendarCapability capability : capabilities) {
             capabilityNames.add(capability.getName());

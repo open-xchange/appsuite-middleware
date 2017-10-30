@@ -109,7 +109,6 @@ import com.openexchange.chronos.impl.AttendeeHelper;
 import com.openexchange.chronos.impl.Check;
 import com.openexchange.chronos.impl.Consistency;
 import com.openexchange.chronos.impl.InternalCalendarResult;
-import com.openexchange.chronos.impl.Utils;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.ItemUpdate;
 import com.openexchange.chronos.service.RecurrenceData;
@@ -422,7 +421,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
             /*
              * recurrence rule changed, build list of possible exception dates matching the new rule
              */
-            SortedSet<RecurrenceId> exceptionDates = Utils.combine(deleteExceptionDates, changeExceptionDates);
+            SortedSet<RecurrenceId> exceptionDates = CalendarUtils.combine(deleteExceptionDates, changeExceptionDates);
             RecurrenceData recurrenceData = new DefaultRecurrenceData(
                 eventUpdate.getUpdate().getRecurrenceRule(), eventUpdate.getOriginal().getStartDate(), getExceptionDates(exceptionDates));
             Calendar untilCalendar = initCalendar(TimeZones.UTC, exceptionDates.last().getValue().getTimestamp());

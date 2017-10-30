@@ -291,7 +291,7 @@ public abstract class AbstractRecurrenceIterator<T> implements RecurrenceIterato
      * @param event The event
      * @return The duration
      */
-    private static long getEventDuration(Event event) {
+    protected static long getEventDuration(Event event) {
         return event.getEndDate().getTimestamp() - event.getStartDate().getTimestamp();
     }
 

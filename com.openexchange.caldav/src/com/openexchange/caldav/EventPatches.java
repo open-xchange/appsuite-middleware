@@ -50,6 +50,7 @@
 package com.openexchange.caldav;
 
 import static com.openexchange.chronos.common.AlarmUtils.addExtendedProperty;
+import static com.openexchange.chronos.common.CalendarUtils.addExtendedProperty;
 import static com.openexchange.chronos.common.CalendarUtils.find;
 import static com.openexchange.chronos.common.CalendarUtils.isOrganizer;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesException;
@@ -62,6 +63,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import java.util.SortedSet;
 import java.util.TimeZone;
 import java.util.UUID;
@@ -726,10 +728,11 @@ public class EventPatches {
                          */
                         if (isSeriesMaster(exportedEvent) && null != alarm.getTrigger() && null != alarm.getTrigger().getDateTime() &&
                             (DAVUserAgent.IOS.equals(resource.getUserAgent()) || DAVUserAgent.MAC_CALENDAR.equals(resource.getUserAgent()))) {
+                            Set<RecurrenceId> exceptions = null; //TODO: get actual change exceptions
                             try {
                                 Trigger trigger = alarm.getTrigger();
                                 trigger.setDuration(AlarmUtils.getTriggerDuration(alarm.getTrigger(), exportedEvent,
-                                    factory.requireService(RecurrenceService.class)));
+                                    factory.requireService(RecurrenceService.class), exceptions));
                                 trigger.setDateTime(null);
                             } catch (OXException e) {
                                 LOG.warn("Error converting snoozed alarm trigger", e);

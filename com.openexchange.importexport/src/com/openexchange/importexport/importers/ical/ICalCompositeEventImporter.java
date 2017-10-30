@@ -49,11 +49,18 @@
 
 package com.openexchange.importexport.importers.ical;
 
+import java.util.List;
+import java.util.Map;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
+import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarResult;
 import com.openexchange.chronos.service.EventID;
+import com.openexchange.data.conversion.ical.TruncationInfo;
 import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.UserizedFolder;
+import com.openexchange.groupware.importexport.ImportResult;
+import com.openexchange.importexport.osgi.ImportExportServices;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -66,9 +73,8 @@ public class ICalCompositeEventImporter extends AbstractICalEventImporter {
 
     IDBasedCalendarAccess calendarAccess;
 
-    public ICalCompositeEventImporter(ServerSession session, IDBasedCalendarAccess calendarAccess) {
+    public ICalCompositeEventImporter(ServerSession session) {
         super(session);
-        this.calendarAccess = calendarAccess;
     }
 
     @Override
@@ -79,6 +85,34 @@ public class ICalCompositeEventImporter extends AbstractICalEventImporter {
     @Override
     public CalendarResult updateEvent(EventID eventId, Event event) throws OXException {
         return calendarAccess.updateEvent(eventId, event, System.currentTimeMillis());
+    }
+
+    @Override
+    protected TruncationInfo initImporter(UserizedFolder userizedFolder, List<Event> eventList, Map<String, String[]> optionalParams, List<ImportResult> list) throws OXException {
+        this.calendarAccess = initCalendarAccess(optionalParams);
+        TruncationInfo truncationInfo;
+        boolean committed = false;
+        try {
+            calendarAccess.startTransaction();
+            truncationInfo = importEvents(userizedFolder, eventList, optionalParams, list);
+            calendarAccess.commit();
+            committed = true;
+        } finally {
+            if (false == committed) {
+                calendarAccess.rollback();
+            }
+            calendarAccess.finish();
+        }
+        return truncationInfo;
+    }
+
+    private IDBasedCalendarAccess initCalendarAccess(Map<String, String[]> optionalParams) throws OXException {
+        IDBasedCalendarAccess calendarAccess = ImportExportServices.getIDBasedCalendarAccessFactory().createAccess(session);
+        calendarAccess.set(CalendarParameters.PARAMETER_IGNORE_CONFLICTS, Boolean.TRUE);
+        if (isSupressNotification(optionalParams)) {
+            calendarAccess.set(CalendarParameters.PARAMETER_NOTIFICATION, Boolean.FALSE);
+        }
+        return calendarAccess;
     }
 
 }

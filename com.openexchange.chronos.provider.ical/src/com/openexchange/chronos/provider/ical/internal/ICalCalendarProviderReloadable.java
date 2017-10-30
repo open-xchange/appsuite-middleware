@@ -81,7 +81,6 @@ public class ICalCalendarProviderReloadable implements Reloadable {
         
         ICalCalendarProviderProperties.blacklistedHosts.getFQPropertyName(),
         ICalCalendarProviderProperties.schemes.getFQPropertyName(),
-        ICalCalendarProviderProperties.whitelistedPorts.getFQPropertyName()
     };
 
     @Override

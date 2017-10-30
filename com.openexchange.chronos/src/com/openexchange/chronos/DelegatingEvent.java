@@ -80,6 +80,11 @@ public abstract class DelegatingEvent extends Event {
     }
 
     @Override
+    public boolean areSet(EventField... fields) {
+        return delegate.areSet(fields);
+    }
+
+    @Override
     public String getId() {
         return delegate.getId();
     }

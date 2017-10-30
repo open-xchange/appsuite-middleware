@@ -50,8 +50,10 @@
 package com.openexchange.chronos.schedjoules.api;
 
 import java.net.URL;
-import com.openexchange.chronos.Calendar;
+import java.util.Collections;
+import com.openexchange.chronos.schedjoules.SchedJoulesCalendar;
 import com.openexchange.chronos.schedjoules.api.auxiliary.SchedJoulesResponseParser;
+import com.openexchange.chronos.schedjoules.api.client.HttpMethod;
 import com.openexchange.chronos.schedjoules.api.client.SchedJoulesRESTClient;
 import com.openexchange.chronos.schedjoules.api.client.SchedJoulesResponse;
 import com.openexchange.exception.OXException;
@@ -74,11 +76,27 @@ public class SchedJoulesCalendarAPI extends AbstractSchedJoulesAPI {
      * Retrieves the iCal from the specified {@link URL}
      * 
      * @param url The {@link URL} for the iCal
-     * @return The iCal parsed as a {@link Calendar}
+     * @return The iCal parsed as a {@link SchedJoulesCalendar}
      * @throws OXException if a parsing error is occurred
      */
-    public Calendar getCalendar(URL url) throws OXException {
+    public SchedJoulesCalendar getCalendar(URL url) throws OXException {
         SchedJoulesResponse response = client.executeRequest(url);
-        return (Calendar) SchedJoulesResponseParser.parse(response);
+        return (SchedJoulesCalendar) SchedJoulesResponseParser.parse(response);
+    }
+
+    /**
+     * Retrieves the iCal from the specified {@link URL}
+     * 
+     * @param url The {@link URL} for the iCal
+     * @param eTag The last known etag
+     * @return The iCal parsed as a {@link SchedJoulesCalendar}
+     * @throws OXException if an error is occurred
+     */
+    public SchedJoulesCalendar getCalendar(URL url, String eTag) throws OXException {
+        SchedJoulesResponse response = client.executeRequest(url, HttpMethod.HEAD, eTag);
+        if (response.getStatusCode() == 304) {
+            return new SchedJoulesCalendar(null, Collections.emptyList(), eTag); // Nothing modified
+        }
+        return getCalendar(url);
     }
 }

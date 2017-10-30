@@ -85,6 +85,7 @@ public class CalendarStorageFolder extends AbstractFolder implements Parameteriz
         setSubscribed(true);
         setContentType(contentType);
         setDefaultType(contentType.getModule());
+        setMeta(null);
     }
 
     @Override
