@@ -50,6 +50,7 @@
 package com.openexchange.find.basic.calendar;
 
 import static com.openexchange.chronos.common.CalendarUtils.add;
+import static com.openexchange.chronos.common.CalendarUtils.getRecurrenceIds;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.find.facet.Facets.newDefaultBuilder;
 import static com.openexchange.find.facet.Facets.newExclusiveBuilder;
@@ -69,6 +70,7 @@ import java.util.TimeZone;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.common.DefaultRecurrenceData;
 import com.openexchange.chronos.common.DefaultSearchFilter;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccessFactory;
@@ -213,7 +215,7 @@ public class BasicCalendarDriver extends AbstractContactFacetingModuleSearchDriv
         for (ListIterator<Event> iterator = events.listIterator(); iterator.hasNext();) {
             Event event = iterator.next();
             if (isSeriesMaster(event)) {
-                event = getBestMatchingOccurrence(event, searchRange);
+                event = getBestMatchingOccurrence(calendarAccess, event, searchRange);
                 if (null == event) {
                     iterator.remove();
                 } else {
@@ -254,11 +256,12 @@ public class BasicCalendarDriver extends AbstractContactFacetingModuleSearchDriv
      * Chooses a single occurrence from a recurring event series based on the supplied minimum end and maximum start date boundaries.
      * Invoking this method on a non-recurring event has no effect.
      *
+     * @param calendarAccess The underlying calendar access
      * @param event The recurring event
      * @param range The time range as derived from the value of the query's range facet filter, or <code>null</code> if not restricted
      * @return The best matching occurrence, or <code>null</code> if there's no suitable occurrence available
      */
-    private static Event getBestMatchingOccurrence(Event event, RangeOption range) throws OXException {
+    private static Event getBestMatchingOccurrence(IDBasedCalendarAccess calendarAccess, Event event, RangeOption range) throws OXException {
         if (false == isSeriesMaster(event)) {
             return null;
         }
@@ -267,17 +270,19 @@ public class BasicCalendarDriver extends AbstractContactFacetingModuleSearchDriv
         RecurrenceService recurrenceService = Services.requireService(RecurrenceService.class);
         Event occurrence = null;
         Date now = new Date();
+        List<Event> changeExceptions = calendarAccess.getChangeExceptions(event.getFolderId(), event.getId());
+        DefaultRecurrenceData recurrenceData = new DefaultRecurrenceData(event, getRecurrenceIds(changeExceptions));
         /*
          * prefer the "next" occurrence if possible
          */
-        Iterator<Event> iterator = recurrenceService.iterateEventOccurrences(event, now, until);
+        Iterator<Event> iterator = recurrenceService.iterateEventOccurrences(recurrenceData, event, now, until);
         if (iterator.hasNext()) {
             return iterator.next();
         }
         /*
          * prefer the "last" occurrence, otherwise
          */
-        iterator = recurrenceService.iterateEventOccurrences(event, from, now);
+        iterator = recurrenceService.iterateEventOccurrences(recurrenceData, event, from, now);
         if (iterator.hasNext()) {
             while (iterator.hasNext()) {
                 occurrence = iterator.next();
@@ -287,7 +292,7 @@ public class BasicCalendarDriver extends AbstractContactFacetingModuleSearchDriv
         /*
          * fall back to very first occurrence, otherwise
          */
-        iterator = recurrenceService.iterateEventOccurrences(event, from, until);
+        iterator = recurrenceService.iterateEventOccurrences(recurrenceData, event, from, until);
         if (iterator.hasNext()) {
             return iterator.next();
         }
