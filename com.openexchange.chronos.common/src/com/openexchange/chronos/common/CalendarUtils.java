@@ -210,6 +210,25 @@ public class CalendarUtils {
     }
 
     /**
+     * Finds all overridden instances (<i>change exceptions</i>) of a specific recurring event series in a collection.
+     *
+     * @param events The events to search in
+     * @param seriesId The series identifier to search the overridden instances for
+     * @return All matching overridden instances (<i>change exceptions</i>) of the series, or an empty list if there are none
+     */
+    public static List<Event> findExceptions(Collection<Event> events, String seriesId) {
+        List<Event> changeExceptions = new ArrayList<Event>();
+        if (null != events) {
+            for (Event event : events) {
+                if (seriesId.equals(event.getSeriesId()) && isSeriesException(event)) {
+                    changeExceptions.add(event);
+                }
+            }
+        }
+        return changeExceptions;
+    }
+
+    /**
      * Finds a specific event identified by its object-identifier and an optional recurrence identifier in a collection.
      *
      * @param events The events to search in

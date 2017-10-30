@@ -50,7 +50,11 @@
 package com.openexchange.chronos.impl.performer;
 
 import static com.openexchange.chronos.common.CalendarUtils.add;
+import static com.openexchange.chronos.common.CalendarUtils.calculateEnd;
+import static com.openexchange.chronos.common.CalendarUtils.calculateStart;
 import static com.openexchange.chronos.common.CalendarUtils.find;
+import static com.openexchange.chronos.common.CalendarUtils.findExceptions;
+import static com.openexchange.chronos.common.CalendarUtils.getRecurrenceIds;
 import static com.openexchange.chronos.common.CalendarUtils.isAttendee;
 import static com.openexchange.chronos.common.CalendarUtils.isFloating;
 import static com.openexchange.chronos.common.CalendarUtils.isGroupScheduled;
@@ -63,7 +67,6 @@ import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.chronos.common.CalendarUtils.matches;
 import static com.openexchange.chronos.common.CalendarUtils.truncateTime;
 import static com.openexchange.chronos.impl.Utils.getFields;
-import static com.openexchange.chronos.impl.Utils.getRecurrenceIterator;
 import static com.openexchange.chronos.impl.Utils.getTimeZone;
 import static com.openexchange.chronos.impl.Utils.isIgnoreConflicts;
 import java.util.ArrayList;
@@ -84,7 +87,6 @@ import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.Transp;
-import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.DefaultRecurrenceData;
 import com.openexchange.chronos.impl.EventConflictImpl;
 import com.openexchange.chronos.service.CalendarParameters;
@@ -205,14 +207,16 @@ public class ConflictCheckPerformer extends AbstractFreeBusyPerformer {
             }
             if (isSeriesMaster(eventInPeriod)) {
                 /*
-                 * expand & check all occurrences of event series in period
+                 * expand & check all (non overridden) instances of event series in period
                  */
-                Iterator<RecurrenceId> iterator = getRecurrenceIterator(storage, session, eventInPeriod, from, until);
+                List<Event> knownExceptions = findExceptions(eventsInPeriod, eventInPeriod.getSeriesId());
+                DefaultRecurrenceData recurrenceData = new DefaultRecurrenceData(eventInPeriod, getRecurrenceIds(knownExceptions));
+                Iterator<RecurrenceId> iterator = session.getRecurrenceService().iterateRecurrenceIds(recurrenceData, from, until);
                 while (iterator.hasNext()) {
                     RecurrenceId recurrenceId = iterator.next();
-                    DateTime occurrenceEnd = CalendarUtils.calculateEnd(eventInPeriod, recurrenceId);
+                    DateTime occurrenceEnd = calculateEnd(eventInPeriod, recurrenceId);
                     if (event.getStartDate().before(occurrenceEnd)) {
-                        DateTime occurrenceStart = CalendarUtils.calculateStart(eventInPeriod, recurrenceId);
+                        DateTime occurrenceStart = calculateStart(eventInPeriod, recurrenceId);
                         if (event.getEndDate().after(occurrenceStart)) {
                             /*
                              * add conflict for occurrence
@@ -296,11 +300,14 @@ public class ConflictCheckPerformer extends AbstractFreeBusyPerformer {
             }
             if (isSeriesMaster(eventInPeriod)) {
                 /*
-                 * expand & check all occurrences of event series in period
+                 * expand & check all (non overridden) instances of event series in period
                  */
                 int count = 0;
                 long duration = eventInPeriod.getEndDate().getTimestamp() - eventInPeriod.getStartDate().getTimestamp();
-                Iterator<RecurrenceId> iterator = getRecurrenceIterator(storage, session, eventInPeriod, from, until);
+
+                List<Event> knownExceptions = findExceptions(eventsInPeriod, eventInPeriod.getSeriesId());
+                Iterator<RecurrenceId> iterator = session.getRecurrenceService().iterateRecurrenceIds(
+                    new DefaultRecurrenceData(eventInPeriod, getRecurrenceIds(knownExceptions)), from, until);
                 while (iterator.hasNext() && count < maxConflictsPerRecurrence) {
                     RecurrenceId recurrenceId = iterator.next();
                     for (RecurrenceId eventRecurrenceId : eventRecurrenceIds) {
@@ -373,8 +380,8 @@ public class ConflictCheckPerformer extends AbstractFreeBusyPerformer {
      */
     private EventConflict getSeriesConflict(Event seriesMaster, RecurrenceId recurrenceId, List<Attendee> conflictingAttendees, Boolean hardConflict) throws OXException {
         Event eventData = new Event();
-        eventData.setStartDate(CalendarUtils.calculateStart(seriesMaster, recurrenceId));
-        eventData.setEndDate(CalendarUtils.calculateEnd(seriesMaster, recurrenceId));
+        eventData.setStartDate(calculateStart(seriesMaster, recurrenceId));
+        eventData.setEndDate(calculateEnd(seriesMaster, recurrenceId));
         eventData.setId(seriesMaster.getId());
         eventData.setRecurrenceId(recurrenceId);
         eventData.setCreatedBy(seriesMaster.getCreatedBy());
