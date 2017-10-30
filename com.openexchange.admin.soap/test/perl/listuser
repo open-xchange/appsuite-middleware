@@ -201,6 +201,7 @@ sub doRequest {
 			   "tasks",
 			   "webmail",
 			   "infostore",
+			   "webdavXml",
 			   "calendar",
 			   "editGroup",
 			   "syncml",
