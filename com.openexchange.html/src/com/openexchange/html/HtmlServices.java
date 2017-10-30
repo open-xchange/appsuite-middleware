@@ -275,9 +275,8 @@ public final class HtmlServices {
                         }
                     }
                 }
-
-                pos = lc.indexOf("on", pos + 1);
             }
+            pos = lc.indexOf("on", pos + 1);
         }
         return false;
     }
