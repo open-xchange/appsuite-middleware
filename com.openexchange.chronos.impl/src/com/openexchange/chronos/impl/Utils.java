@@ -64,6 +64,7 @@ import java.sql.Connection;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -486,6 +487,20 @@ public class Utils {
      */
     public static boolean isIncludeClassifiedEvents(CalendarParameters parameters) {
         return parameters.get(CalendarParameters.PARAMETER_INCLUDE_PRIVATE, Boolean.class, Boolean.FALSE).booleanValue();
+    }
+
+    /**
+     * Adds one or more warnings in the calendar session.
+     *
+     * @param session The calendar session
+     * @param warnings The warnings to add, or <code>null</code> to ignore
+     */
+    public static void addWarnings(CalendarSession session, Collection<OXException> warnings) {
+        if (null != warnings && 0 < warnings.size()) {
+            for (OXException warning : warnings) {
+                session.addWarning(warning);
+            }
+        }
     }
 
     /**
