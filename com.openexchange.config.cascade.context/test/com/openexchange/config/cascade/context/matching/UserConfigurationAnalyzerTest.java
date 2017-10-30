@@ -49,37 +49,41 @@
 
 package com.openexchange.config.cascade.context.matching;
 
-import static org.junit.Assert.assertTrue;
 import java.util.Arrays;
 import java.util.Set;
 import org.junit.Test;
 import org.mockito.Mockito;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
+
 
 /**
  * {@link UserConfigurationAnalyzerTest}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class UserConfigurationAnalyzerTest {
-
-    @Test
-    public void testSample() {
+public class UserConfigurationAnalyzerTest {         @Test
+     public void testSample() {
         UserPermissionBits permissionBits = new UserPermissionBits(0, 0, Mockito.mock(Context.class));
         permissionBits.setActiveSync(true);
         permissionBits.setEditPassword(true);
         permissionBits.setInfostore(true);
+        permissionBits.setWebDAVXML(true);
 
         UserConfigurationAnalyzer analyzer = new UserConfigurationAnalyzer();
 
         Set<String> tags = analyzer.getTags(permissionBits);
 
-        for (String tag : Arrays.asList("ucActiveSync", "ucEditPassword", "ucInfostore")) {
-            assertTrue(tags.toString() + " did not contain " + tag, tags.remove(tag));
+        for(String tag : Arrays.asList("ucActiveSync", "ucEditPassword", "ucInfostore", "ucWebDAVXML")) {
+            assertTrue(tags.toString()+ " did not contain "+tag, tags.remove(tag));
         }
 
-        assertTrue(tags.toString() + " were not expected", tags.isEmpty());
+        assertTrue(tags.toString()+" were not expected", tags.isEmpty());
+
 
     }
 }

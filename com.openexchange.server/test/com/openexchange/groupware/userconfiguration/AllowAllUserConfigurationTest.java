@@ -74,152 +74,158 @@ public class AllowAllUserConfigurationTest {
     }
 
     @After
-    public void tearDown() {
+    public void tearDown()
+ {
         userPermission = null;
     }
 
-    @Test
-    public void testHasWebMail() {
+     @Test
+     public void testHasWebMail() {
         assertTrue(userPermission.hasWebMail());
     }
 
-    @Test
-    public void testHasCalendar() {
+     @Test
+     public void testHasCalendar() {
         assertTrue(userPermission.hasCalendar());
     }
 
-    @Test
-    public void testHasContact() {
+     @Test
+     public void testHasContact() {
         assertTrue(userPermission.hasContact());
     }
 
-    @Test
-    public void testHasTask() {
+     @Test
+     public void testHasTask() {
         assertTrue(userPermission.hasTask());
     }
 
-    @Test
-    public void testHasInfostore() {
+     @Test
+     public void testHasInfostore() {
         assertTrue(userPermission.hasInfostore());
     }
 
-    @Test
-    public void testHasWebDAV() {
+     @Test
+     public void testHasWebDAVXML() {
+        assertTrue(userPermission.hasWebDAVXML());
+    }
+
+     @Test
+     public void testHasWebDAV() {
         assertTrue(userPermission.hasWebDAV());
     }
 
-    @Test
-    public void testHasICal() {
+     @Test
+     public void testHasICal() {
         assertTrue(userPermission.hasICal());
     }
 
-    @Test
-    public void testHasVCard() {
+     @Test
+     public void testHasVCard() {
         assertTrue(userPermission.hasVCard());
     }
 
-    @Test
-    public void testHasSyncML() {
+     @Test
+     public void testHasSyncML() {
         assertTrue(userPermission.hasSyncML());
     }
 
-    @Test
-    public void testHasPIM() {
+     @Test
+     public void testHasPIM() {
         assertTrue(userPermission.hasPIM());
     }
 
-    @Test
-    public void testHasTeamView() {
+     @Test
+     public void testHasTeamView() {
         assertTrue(userPermission.hasTeamView());
     }
 
-    @Test
-    public void testHasFreeBusy() {
+     @Test
+     public void testHasFreeBusy() {
         assertTrue(userPermission.hasFreeBusy());
     }
 
-    @Test
-    public void testHasConflictHandling() {
+     @Test
+     public void testHasConflictHandling() {
         assertTrue(userPermission.hasConflictHandling());
     }
 
-    @Test
-    public void testHasParticipantsDialog() {
+     @Test
+     public void testHasParticipantsDialog() {
         assertTrue(userPermission.hasParticipantsDialog());
     }
 
-    @Test
-    public void testHasGroupware() {
+     @Test
+     public void testHasGroupware() {
         assertTrue(userPermission.hasGroupware());
     }
 
-    @Test
-    public void testHasPortal() {
+     @Test
+     public void testHasPortal() {
         assertTrue(userPermission.hasPortal());
     }
 
-    @Test
-    public void testHasFullPublicFolderAccess() {
+     @Test
+     public void testHasFullPublicFolderAccess() {
         assertTrue(userPermission.hasFullPublicFolderAccess());
     }
 
-    @Test
-    public void testHasFullSharedFolderAccess() {
+     @Test
+     public void testHasFullSharedFolderAccess() {
         assertTrue(userPermission.hasFullSharedFolderAccess());
     }
 
-    @Test
-    public void testCanDelegateTasks() {
+     @Test
+     public void testCanDelegateTasks() {
         assertTrue(userPermission.canDelegateTasks());
     }
 
-    @Test
-    public void testIsCollectEmailAddresses() {
+     @Test
+     public void testIsCollectEmailAddresses() {
         assertTrue(userPermission.isCollectEmailAddresses());
     }
 
-    @Test
-    public void testIsMultipleMailAccounts() {
+     @Test
+     public void testIsMultipleMailAccounts() {
         assertTrue(userPermission.isMultipleMailAccounts());
     }
 
-    @Test
-    public void testIsSubscription() {
+     @Test
+     public void testIsSubscription() {
         assertTrue(userPermission.isSubscription());
     }
 
-    @Test
-    public void testIsPublication() {
+     @Test
+     public void testIsPublication() {
         assertTrue(userPermission.isPublication());
     }
 
-    @Test
-    public void testHasActiveSync() {
+     @Test
+     public void testHasActiveSync() {
         assertTrue(userPermission.hasActiveSync());
     }
 
-    @Test
-    public void testHasUSM() {
+     @Test
+     public void testHasUSM() {
         assertTrue(userPermission.hasUSM());
     }
 
-    @Test
-    public void testHasOLOX20() {
+     @Test
+     public void testHasOLOX20() {
         assertTrue(userPermission.hasOLOX20());
     }
 
-    @Test
-    public void testIsEditGroup() {
+     @Test
+     public void testIsEditGroup() {
         assertTrue(userPermission.isEditGroup());
     }
 
-    @Test
-    public void testIsEditResource() {
+     @Test
+     public void testIsEditResource() {
         assertTrue(userPermission.isEditResource());
     }
 
-    @Test
-    public void testIsEditPassword() {
+     @Test
+     public void testIsEditPassword() {
         assertTrue(userPermission.isEditPassword());
     }
 }

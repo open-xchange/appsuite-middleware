@@ -60,8 +60,8 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.TimeZone;
+import java.util.Map.Entry;
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.rmi.OXUserInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
@@ -74,6 +74,7 @@ import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
 import com.openexchange.admin.rmi.exceptions.NoSuchUserException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
+
 
 /**
  * {@link ListCore}
@@ -236,6 +237,7 @@ public abstract class ListCore extends UserAbstraction {
             datarow.add(String.valueOf(access.getTasks()));
             datarow.add(String.valueOf(access.getVcard()));
             datarow.add(String.valueOf(access.getWebdav()));
+            datarow.add(String.valueOf(access.getWebdavXml()));
             datarow.add(String.valueOf(access.getWebmail()));
             datarow.add(String.valueOf(access.getEditGroup()));
             datarow.add(String.valueOf(access.getEditResource()));
@@ -279,7 +281,8 @@ public abstract class ListCore extends UserAbstraction {
 
     protected final String maptostring(final Map<?, ?> map) {
         if (null != map && map.size() > 0) {
-            @SuppressWarnings("unchecked") final HashMap<String, String> hashMap = (HashMap<String, String>) map;
+            @SuppressWarnings("unchecked")
+            final HashMap<String, String> hashMap = (HashMap<String, String>) map;
             final Iterator<Entry<String, String>> i = hashMap.entrySet().iterator();
             final StringBuilder sb = new StringBuilder();
             while (i.hasNext()) {
@@ -305,7 +308,8 @@ public abstract class ListCore extends UserAbstraction {
         }
 
         //        doOutput(new String[] { "3r", "30l", "30l", "14l" },
-        doOutput(new String[] { "r", "l", "l", "l", "l", "l" }, new String[] { "Id", "Name", "Displayname", "Email", "qmax", "qused" }, data);
+        doOutput(new String[] { "r", "l", "l", "l", "l", "l" },
+            new String[] { "Id", "Name", "Displayname", "Email", "qmax", "qused" }, data);
     }
 
     private ArrayList<String> makeStandardData(final User user) {

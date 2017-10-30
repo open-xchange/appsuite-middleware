@@ -53,6 +53,7 @@ import java.util.List;
 import java.util.Set;
 import com.openexchange.groupware.contexts.Context;
 
+
 /**
  * {@link MutableUserConfiguration}
  *
@@ -107,6 +108,15 @@ public class MutableUserConfiguration extends UserConfiguration {
      */
     public void setInfostore(final boolean enableInfostore) {
         setPermission(enableInfostore, INFOSTORE);
+    }
+
+    /**
+     * Enables/Disables WebDAV XML access in user configuration.
+     *
+     * @param enableWebDAVXML
+     */
+    public void setWebDAVXML(final boolean enableWebDAVXML) {
+        setPermission(enableWebDAVXML, WEBDAV_XML);
     }
 
     /**
@@ -199,6 +209,7 @@ public class MutableUserConfiguration extends UserConfiguration {
         setPermission(multipleMailAccounts, MULTIPLE_MAIL_ACCOUNTS);
     }
 
+
     /**
      * Sets if this user configuration indicates to enable subscription.
      *
@@ -238,6 +249,7 @@ public class MutableUserConfiguration extends UserConfiguration {
     public void setOLOX20(final boolean olox20) {
         setPermission(olox20, OLOX20);
     }
+
 
     /**
      * Sets if this user configuration indicates that groups are allowed to be edited.

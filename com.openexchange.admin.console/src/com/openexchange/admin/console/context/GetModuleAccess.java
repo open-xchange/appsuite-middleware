@@ -110,6 +110,7 @@ public class GetModuleAccess extends ContextAbstraction {
         datarow.add(String.valueOf(access.getTasks()));
         datarow.add(String.valueOf(access.getVcard()));
         datarow.add(String.valueOf(access.getWebdav()));
+        datarow.add(String.valueOf(access.getWebdavXml()));
         datarow.add(String.valueOf(access.getWebmail()));
         datarow.add(String.valueOf(access.getEditGroup()));
         datarow.add(String.valueOf(access.getEditResource()));
