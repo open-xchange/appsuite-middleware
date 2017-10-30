@@ -195,6 +195,16 @@ public final class MessagingPermissions {
             throw new UnsupportedOperationException("MessagingPermissions.UnmodifiableMessagingPermission.setWritePermission()");
         }
 
+        @Override
+        public MessagingFolderPermissionType getType() {
+            return delegate.getType();
+        }
+
+        @Override
+        public void setType(MessagingFolderPermissionType type) {
+            throw new UnsupportedOperationException("MessagingPermissions.UnmodifiableMessagingPermission.setType()");
+        }
+
     } // End of UnmodifiableMessagingPermission
 
 }

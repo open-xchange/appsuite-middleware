@@ -60,6 +60,7 @@ import java.util.Map.Entry;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.AbstractFolder;
+import com.openexchange.folderstorage.FolderPermissionType;
 import com.openexchange.folderstorage.FolderResponse;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.FolderServiceDecorator;
@@ -160,11 +161,11 @@ public class TargetUpdateImpl extends AbstractTargetUpdate {
         }
 
         for(Permission add : added){
-            add.setSystem(2);
+            add.setType(FolderPermissionType.INHERITED);
         }
 
         for(Permission rem : removed){
-            rem.setSystem(2);
+            rem.setType(FolderPermissionType.INHERITED);
         }
 
         List<Permission> permissions = new ArrayList<>(originalPermissions.length + added.size());

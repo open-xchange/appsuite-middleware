@@ -51,6 +51,7 @@ package com.openexchange.folderstorage.outlook.memory;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import com.openexchange.folderstorage.FolderPermissionType;
 import com.openexchange.folderstorage.Permission;
 
 /**
@@ -60,7 +61,14 @@ import com.openexchange.folderstorage.Permission;
  */
 public final class MemoryPermission implements Permission {
 
+    /**
+     * serialVersionUID
+     */
+    private static final long serialVersionUID = 1L;
+
     private int system;
+
+    private FolderPermissionType type;
 
     private int deletePermission;
 
@@ -85,7 +93,7 @@ public final class MemoryPermission implements Permission {
 
     /**
      * Initializes a {@link MemoryPermission} from specified {@link ResultSet}'s currently select row:<br>
-     * <code>SELECT entity, fp, orp, owp, odp, adminFlag, groupFlag, system FROM virtualPermission ...</code>
+     * <code>SELECT entity, fp, orp, owp, odp, adminFlag, groupFlag, system, type FROM virtualPermission ...</code>
      *
      * @throws SQLException If reading from result set fails
      */
@@ -99,6 +107,7 @@ public final class MemoryPermission implements Permission {
         admin = rs.getInt(6) > 0;
         group = rs.getInt(7) > 0;
         system = rs.getInt(8);
+        type = FolderPermissionType.getType(rs.getInt(9));
     }
 
     @Override
@@ -112,6 +121,7 @@ public final class MemoryPermission implements Permission {
         result = prime * result + (group ? 1231 : 1237);
         result = prime * result + readPermission;
         result = prime * result + system;
+        result = prime * result + type.getTypeNumber();
         result = prime * result + writePermission;
         return result;
     }
@@ -144,6 +154,9 @@ public final class MemoryPermission implements Permission {
             return false;
         }
         if (system != other.getSystem()) {
+            return false;
+        }
+        if (type != other.getType()) {
             return false;
         }
         if (writePermission != other.getWritePermission()) {
@@ -270,6 +283,16 @@ public final class MemoryPermission implements Permission {
     @Override
     public boolean isVisible() {
         return isAdmin() || getFolderPermission() > NO_PERMISSIONS;
+    }
+
+    @Override
+    public FolderPermissionType getType() {
+        return type;
+    }
+
+    @Override
+    public void setType(FolderPermissionType type) {
+        this.type = type;
     }
 
 }

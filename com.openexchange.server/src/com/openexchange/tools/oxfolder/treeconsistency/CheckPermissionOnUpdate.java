@@ -59,6 +59,7 @@ import org.osgi.service.event.EventAdmin;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.cache.impl.FolderQueryCacheManager;
 import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.FolderPermissionType;
 import com.openexchange.groupware.calendar.CalendarCache;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
@@ -235,6 +236,7 @@ public final class CheckPermissionOnUpdate extends CheckPermission {
             OCLPermission.NO_PERMISSIONS,
             false,
             OCLPermission.SYSTEM_SYSTEM,
+            FolderPermissionType.NORMAL, 
             writeCon,
             ctx);
     }

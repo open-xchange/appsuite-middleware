@@ -94,6 +94,7 @@ import com.openexchange.exception.OXExceptionConstants;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.folder.FolderDeleteListenerService;
 import com.openexchange.folder.internal.FolderDeleteListenerRegistry;
+import com.openexchange.folderstorage.FolderPermissionType;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.cache.CacheFolderStorage;
 import com.openexchange.groupware.Types;
@@ -1053,7 +1054,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
                     try {
                         final FolderObject tmp = new FolderObject(subfolderId);
                         FolderObject folderFromMaster = getFolderFromMaster(subfolderId);
-                        setProperSystemValues(permissions, folderFromMaster.getPermissions());
+                        adjustTypeOfInheritedPermissions(permissions, folderFromMaster.getPermissions());
                         tmp.setPermissions(permissions);
                         doUpdate(tmp, options, folderFromMaster, lastModified, true, alreadyCheckedParents);  // Calls handDown() for subfolder, as well
                         if (null != cacheManager) {
@@ -1071,12 +1072,19 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
         }
     }
 
-    void setProperSystemValues(List<OCLPermission> permissions, List<OCLPermission> original) {
+    /**
+     * Ensures that permissions of the type LEGATOR are not overwritten with type INHERITED.
+     * 
+     * @param permissions The new permissions
+     * @param original The original permissions
+     */
+    void adjustTypeOfInheritedPermissions(List<OCLPermission> permissions, List<OCLPermission> original) {
         for (OCLPermission perm : permissions) {
-            if (perm.getSystem() != 1) {
+            if (!perm.isSystem()) {
                 for (OCLPermission originalPerm : original) {
-                    if (originalPerm.getSystem() == 2 && perm.isGroupPermission() == originalPerm.isGroupPermission() && perm.getEntity() == originalPerm.getEntity()) {
-                        perm.setSystem(2);
+                    if (originalPerm.getType() == FolderPermissionType.LEGATOR && perm.isGroupPermission() == originalPerm.isGroupPermission() && perm.getEntity() == originalPerm.getEntity()) {
+                        perm.setType(FolderPermissionType.LEGATOR);
+                        break;
                     }
                 }
             }

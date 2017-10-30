@@ -349,7 +349,7 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                     /*
                      * Check permissions of anonymous guest users
                      */
-//                    checkGuestPermissions(storageFolder, comparedPermissions);
+                    checkGuestPermissions(storageFolder, comparedPermissions);
                     /*
                      * prepare new shares for added guest permissions
                      */

@@ -61,6 +61,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
+import com.openexchange.folderstorage.FolderPermissionType;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderStorageDiscoverer;
 import com.openexchange.folderstorage.Permission;
@@ -167,9 +168,6 @@ final class MovePerformer extends AbstractPerformer {
     }
 
     void doMoveReal(final Folder folder, final FolderStorage folderStorage, final FolderStorage realParentStorage, final FolderStorage newRealParentStorage) throws OXException {
-        // if (folderStorage.equals(realParentStorage) && newRealParentStorage.equals(realParentStorage)) {
-        // throw FolderExceptionErrorMessage.MOVE_NOT_PERMITTED.create(new Object[0]);
-        // }
         List<Permission> permissionsToUpdate = adjustPermission(folder, folder, newRealParentStorage);
         folderStorage.updateFolder(folder, storageParameters);
         if(!permissionsToUpdate.isEmpty()){
@@ -185,27 +183,32 @@ final class MovePerformer extends AbstractPerformer {
         List<Permission> addParentLinkPermission = addParentLinkPermission(newFolder, newRealParentStorage);
         List<Permission> cleanedPermissions = new ArrayList<>(permissions.length);
         for(Permission perm : permissions){
-            if(perm.getSystem()!=2){
+            if (perm.getType() != FolderPermissionType.INHERITED) {
+                // Skip all inherited permissions
                 cleanedPermissions.add(perm);
             }
         }
-        cleanedPermissions.addAll(addParentLinkPermission);
+        cleanedPermissions.addAll(addParentLinkPermission); // TODO eventually check for duplicate
         return cleanedPermissions;
     }
 
+    /**
+     * Return a list of permissions which must be inherited from the parent folder
+     *
+     * @param folder The folder to check
+     * @param newRealParentStorage The storage of the folder
+     * @return A list of {@link Permission}s
+     * @throws OXException
+     */
     private List<Permission> addParentLinkPermission(Folder folder, FolderStorage newRealParentStorage) throws OXException {
         List<Permission> result = new ArrayList<>();
         Folder parent = newRealParentStorage.getFolder(folder.getTreeID(), folder.getParentID(), storageParameters);
         for (Permission perm : parent.getPermissions()) {
-            if (perm.getSystem() == 3) {
+            if (perm.getType() == FolderPermissionType.INHERITED || perm.getType() == FolderPermissionType.LEGATOR) {
                 Permission cloned = (Permission) perm.clone();
-                cloned.setSystem(2);
+                cloned.setType(FolderPermissionType.INHERITED);
                 result.add(cloned);
             }
-        }
-
-        if (!folder.getParentID().equals("10")) {
-            result.addAll(addParentLinkPermission(parent, newRealParentStorage));
         }
         return result;
     }

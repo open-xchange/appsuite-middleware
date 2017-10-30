@@ -403,10 +403,10 @@ public class DefaultShareService implements ShareService {
     /**
      * Optionally gets an existing share link for a specific share target, i.e. a share to an anonymous guest user.
      *
-     * @param connectionHelper A (started) connection helper, or <code>null</code> if not available
+     * @param session The user session
      * @param context The context
-     * @param target The share target
      * @param proxy The target proxy
+     * @param connectionHelper A (started) connection helper, or <code>null</code> if not available
      * @return The share link, if one exists for the target, or <code>null</code>, otherwise
      */
     private DefaultShareInfo optLinkShare(Session session, Context context, TargetProxy proxy, ConnectionHelper connectionHelper) throws OXException {

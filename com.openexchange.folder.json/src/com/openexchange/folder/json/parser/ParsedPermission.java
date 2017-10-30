@@ -49,6 +49,7 @@
 
 package com.openexchange.folder.json.parser;
 
+import com.openexchange.folderstorage.FolderPermissionType;
 import com.openexchange.folderstorage.Permission;
 
 /**
@@ -61,6 +62,8 @@ public class ParsedPermission implements Permission {
     private static final long serialVersionUID = -2384707153822857968L;
 
     private int system;
+
+    private FolderPermissionType type;
 
     private int deletePermission;
 
@@ -203,61 +206,75 @@ public class ParsedPermission implements Permission {
         }
     }
 
-  @Override
-  public int hashCode() {
-      final int prime = 31;
-      int result = 1;
-      result = prime * result + (admin ? 1231 : 1237);
-      result = prime * result + deletePermission;
-      result = prime * result + entity;
-      result = prime * result + folderPermission;
-      result = prime * result + (group ? 1231 : 1237);
-      result = prime * result + readPermission;
-      result = prime * result + system;
-      result = prime * result + writePermission;
-      return result;
-  }
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + (admin ? 1231 : 1237);
+        result = prime * result + deletePermission;
+        result = prime * result + entity;
+        result = prime * result + folderPermission;
+        result = prime * result + (group ? 1231 : 1237);
+        result = prime * result + readPermission;
+        result = prime * result + system;
+        result = prime * result + type.getTypeNumber();
+        result = prime * result + writePermission;
+        return result;
+    }
 
-  @Override
-  public boolean equals(final Object obj) {
-      if (this == obj) {
-          return true;
-      }
-      if (obj == null) {
-          return false;
-      }
+    @Override
+    public boolean equals(final Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
 
-      if (!(obj instanceof Permission)) {
-          return false;
-      }
+        if (!(obj instanceof Permission)) {
+            return false;
+        }
 
-      final Permission other = (Permission) obj;
-      if (admin != other.isAdmin()) {
-          return false;
-      }
-      if (deletePermission != other.getDeletePermission()) {
-          return false;
-      }
-      if (entity != other.getEntity()) {
-          return false;
-      }
-      if (folderPermission != other.getFolderPermission()) {
-          return false;
-      }
-      if (group != other.isGroup()) {
-          return false;
-      }
-      if (readPermission != other.getReadPermission()) {
-          return false;
-      }
-      if (system != other.getSystem()) {
-          return false;
-      }
-      if (writePermission != other.getWritePermission()) {
-          return false;
-      }
+        final Permission other = (Permission) obj;
+        if (admin != other.isAdmin()) {
+            return false;
+        }
+        if (deletePermission != other.getDeletePermission()) {
+            return false;
+        }
+        if (entity != other.getEntity()) {
+            return false;
+        }
+        if (folderPermission != other.getFolderPermission()) {
+            return false;
+        }
+        if (group != other.isGroup()) {
+            return false;
+        }
+        if (readPermission != other.getReadPermission()) {
+            return false;
+        }
+        if (system != other.getSystem()) {
+            return false;
+        }
+        if (type != other.getType()) {
+            return false;
+        }
+        if (writePermission != other.getWritePermission()) {
+            return false;
+        }
 
-      return true;
-  }
+        return true;
+    }
+
+    @Override
+    public FolderPermissionType getType() {
+        return type;
+    }
+
+    @Override
+    public void setType(FolderPermissionType type) {
+        this.type = type;
+    }
 
 }

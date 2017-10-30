@@ -47,63 +47,38 @@
  *
  */
 
-package com.openexchange.groupware.update;
-
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.sql.Statement;
-import com.openexchange.database.Databases;
-import com.openexchange.exception.OXException;
-import com.openexchange.tools.update.Column;
-import com.openexchange.tools.update.Tools;
+package com.openexchange.file.storage;
 
 /**
- * {@link SimpleColumnCreationTask}
+ * {@link FileStorageFolderPermissionType}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.10.0
  */
-public abstract class SimpleColumnCreationTask extends UpdateTaskAdapter {
+public enum FileStorageFolderPermissionType {
+    normal(0),
+    legator(1),
+    inherited(2);
 
-    @Override
-    public void perform(PerformParameters params) throws OXException {
-        Connection con = params.getConnection();
-        boolean rollback = false;
-        try {
-            if (columnExists(con)) {
-                return;
-            }
-            con.setAutoCommit(false);
-            rollback = true;
+    private final int type;
 
-            Statement stmt = null;
-            try {
-                stmt = con.createStatement();
-                Tools.addColumns(con, getTableName(), new Column(getColumnName(), getColumnDefinition()));
-            } finally {
-                Databases.closeSQLStuff(stmt);
-            }
+    /**
+     * Initializes a new {@link FolderPermissionType}.
+     */
+    private FileStorageFolderPermissionType(int type) {
+        this.type = type;
+    }
 
-            con.commit();
-            rollback = false;
-        } catch (SQLException e) {
-            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
-        } finally {
-            if (rollback) {
-                Databases.rollback(con);
+    public static FileStorageFolderPermissionType getType(int type) {
+        for (FileStorageFolderPermissionType tmp : FileStorageFolderPermissionType.values()) {
+            if (tmp.type == type) {
+                return tmp;
             }
-            Databases.autocommit(con);
         }
+        return normal;
     }
 
-    private boolean columnExists(Connection con) throws SQLException {
-        return Tools.columnExists(con, getTableName(), getColumnName());
+    public int getTypeNumber() {
+        return type;
     }
-
-    protected abstract String getTableName();
-
-    protected abstract String getColumnName();
-
-    protected abstract String getColumnDefinition();
-
-
 }

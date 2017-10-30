@@ -54,6 +54,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import com.openexchange.folderstorage.DefaultPermission;
+import com.openexchange.folderstorage.FolderPermissionType;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.Permissions;
 import com.openexchange.folderstorage.UserizedFolder;
@@ -129,7 +130,7 @@ public class FolderTargetProxy extends AbstractTargetProxy {
         }
         List<TargetPermission> targetPermissions = new ArrayList<TargetPermission>(permissions.length);
         for (Permission permission : permissions) {
-            if(permission.getSystem() == 2){
+            if (permission.getType() == FolderPermissionType.INHERITED) {
                 continue;
             }
             targetPermissions.add(CONVERTER.convert(permission));
@@ -210,7 +211,7 @@ public class FolderTargetProxy extends AbstractTargetProxy {
         @Override
         public Permission convert(TargetPermission permission) {
             DefaultPermission result = new DefaultPermission(permission.getEntity(), permission.isGroup(), permission.getBits());
-            result.setSystem(3);
+            result.setType(FolderPermissionType.LEGATOR);
             return result;
         }
 

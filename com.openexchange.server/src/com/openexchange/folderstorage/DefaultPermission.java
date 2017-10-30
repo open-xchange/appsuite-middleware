@@ -65,6 +65,8 @@ public class DefaultPermission implements Permission {
 
     private int system;
 
+    private FolderPermissionType type;
+
     private boolean admin;
 
     private int folderPermission;
@@ -111,6 +113,7 @@ public class DefaultPermission implements Permission {
         entity = permission.getEntity();
         group = permission.isGroup();
         system = permission.getSystem();
+        type = permission.getType();
         admin = permission.isAdmin();
         folderPermission = permission.getFolderPermission();
         readPermission = permission.getReadPermission();
@@ -245,6 +248,7 @@ public class DefaultPermission implements Permission {
         result = prime * result + (group ? 1231 : 1237);
         result = prime * result + readPermission;
         result = prime * result + system;
+        result = prime * result + type.getTypeNumber();
         result = prime * result + writePermission;
         return result;
     }
@@ -284,6 +288,9 @@ public class DefaultPermission implements Permission {
         if (system != other.getSystem()) {
             return false;
         }
+        if (type != other.getType()) {
+            return false;
+        }
         if (writePermission != other.getWritePermission()) {
             return false;
         }
@@ -294,6 +301,16 @@ public class DefaultPermission implements Permission {
     @Override
     public String toString() {
         return "DefaultPermission [entity=" + entity + ", group=" + group + ", admin=" + admin + ", system=" + system + ", folderPermission=" + folderPermission + ", readPermission=" + readPermission + ", writePermission=" + writePermission + ", deletePermission=" + deletePermission + "]";
+    }
+
+    @Override
+    public FolderPermissionType getType() {
+        return type;
+    }
+
+    @Override
+    public void setType(FolderPermissionType type) {
+        this.type = type;
     }
 
 }
