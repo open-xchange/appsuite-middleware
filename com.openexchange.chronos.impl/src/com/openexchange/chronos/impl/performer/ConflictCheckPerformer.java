@@ -53,8 +53,6 @@ import static com.openexchange.chronos.common.CalendarUtils.add;
 import static com.openexchange.chronos.common.CalendarUtils.calculateEnd;
 import static com.openexchange.chronos.common.CalendarUtils.calculateStart;
 import static com.openexchange.chronos.common.CalendarUtils.find;
-import static com.openexchange.chronos.common.CalendarUtils.findExceptions;
-import static com.openexchange.chronos.common.CalendarUtils.getRecurrenceIds;
 import static com.openexchange.chronos.common.CalendarUtils.isAttendee;
 import static com.openexchange.chronos.common.CalendarUtils.isFloating;
 import static com.openexchange.chronos.common.CalendarUtils.isGroupScheduled;
@@ -209,8 +207,7 @@ public class ConflictCheckPerformer extends AbstractFreeBusyPerformer {
                 /*
                  * expand & check all (non overridden) instances of event series in period
                  */
-                List<Event> knownExceptions = findExceptions(eventsInPeriod, eventInPeriod.getSeriesId());
-                DefaultRecurrenceData recurrenceData = new DefaultRecurrenceData(eventInPeriod, getRecurrenceIds(knownExceptions));
+                RecurrenceData recurrenceData = storage.getUtilities().loadRecurrenceData(eventInPeriod);
                 Iterator<RecurrenceId> iterator = session.getRecurrenceService().iterateRecurrenceIds(recurrenceData, from, until);
                 while (iterator.hasNext()) {
                     RecurrenceId recurrenceId = iterator.next();
@@ -304,10 +301,8 @@ public class ConflictCheckPerformer extends AbstractFreeBusyPerformer {
                  */
                 int count = 0;
                 long duration = eventInPeriod.getEndDate().getTimestamp() - eventInPeriod.getStartDate().getTimestamp();
-
-                List<Event> knownExceptions = findExceptions(eventsInPeriod, eventInPeriod.getSeriesId());
                 Iterator<RecurrenceId> iterator = session.getRecurrenceService().iterateRecurrenceIds(
-                    new DefaultRecurrenceData(eventInPeriod, getRecurrenceIds(knownExceptions)), from, until);
+                    storage.getUtilities().loadRecurrenceData(eventInPeriod), from, until);
                 while (iterator.hasNext() && count < maxConflictsPerRecurrence) {
                     RecurrenceId recurrenceId = iterator.next();
                     for (RecurrenceId eventRecurrenceId : eventRecurrenceIds) {
