@@ -4499,7 +4499,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
 
             // Check if all contexts that reside with in the specified schema are disabled.
             for (List<Integer> partition : Lists.partition(contextIds, Databases.IN_LIMIT)) {
-                stmt = connection.prepareStatement(Databases.getIN("SELECT cid WHERE enabled = 1 AND cid IN (", partition.size()));
+                stmt = connection.prepareStatement(Databases.getIN("SELECT cid FROM context WHERE enabled = 1 AND cid IN (", partition.size()));
                 int index = 1;
                 for (Integer contextId : partition) {
                     stmt.setInt(index++, contextId.intValue());
