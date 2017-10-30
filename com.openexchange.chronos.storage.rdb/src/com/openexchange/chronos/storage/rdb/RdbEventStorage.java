@@ -50,7 +50,9 @@
 package com.openexchange.chronos.storage.rdb;
 
 import static com.openexchange.chronos.common.CalendarUtils.add;
+import static com.openexchange.chronos.common.CalendarUtils.compare;
 import static com.openexchange.chronos.common.CalendarUtils.isFloating;
+import static com.openexchange.chronos.common.CalendarUtils.isSeriesException;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.I2i;
@@ -83,6 +85,7 @@ import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.provider.DBTransactionPolicy;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.java.util.TimeZones;
 import com.openexchange.search.SearchTerm;
 
 /**
@@ -740,6 +743,9 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
      * expanded with the minimum/maximum timezone offsets, and the period for recurring event series will span from the first until the
      * last possible occurrence (or {@link Long#MAX_VALUE} for never ending series).
      * <p/>
+     * For overridden instances (<i>change exceptions</i>), the start of the effective range is determined as the minimum of the event's
+     * actual, and the original start date (as per its recurrence identifier).
+     * <p/>
      * If no start- and end-date are set in the event, the "from" value for the maximum range {@link Long#MIN_VALUE} is returned.
      *
      * @param event The event to get the range for
@@ -752,6 +758,12 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
              * (legacy) tombstone event without persisted start-/end-date
              */
             return Long.MIN_VALUE;
+        }
+        /*
+         * extend range to include original event start date (based on recurrence id) for overridden instances
+         */
+        if (isSeriesException(event) && null != event.getRecurrenceId() && 0 > compare(event.getRecurrenceId().getValue(), rangeFrom, TimeZones.UTC)) {
+            rangeFrom = event.getRecurrenceId().getValue();
         }
         if (isFloating(event)) {
             /*
@@ -768,7 +780,10 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
      * expanded with the minimum/maximum timezone offsets, and the period for recurring event series will span from the first until the
      * last possible occurrence (or {@link Long#MAX_VALUE} for never ending series).
      * <p/>
-     * If no start- and end-date are set in the event, the "until" valud for the maximum range {@link Long#MAX_VALUE} is returned.
+     * For overridden instances (<i>change exceptions</i>), the end of the effective range is determined as the maximum of the event's
+     * actual end date, and the original start date (as per its recurrence identifier).
+     * <p/>
+     * If no start- and end-date are set in the event, the "until" valid for the maximum range {@link Long#MAX_VALUE} is returned.
      *
      * @param event The event to get the range for
      * @return The start time of the effective range of an event
@@ -792,6 +807,11 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
             }
             long eventDuration = event.getEndDate().getTimestamp() - event.getStartDate().getTimestamp();
             rangeUntil = new DateTime(rangeUntil.getTimeZone(), lastRecurrenceId.getValue().getTimestamp() + eventDuration);
+        } else if (isSeriesException(event) && null != event.getRecurrenceId() && 0 < compare(event.getRecurrenceId().getValue(), rangeUntil, TimeZones.UTC)) {
+            /*
+             * extend range to include original event start date (based on recurrence id) for overridden instances
+             */
+            rangeUntil = event.getRecurrenceId().getValue();
         }
         if (isFloating(event)) {
             /*
