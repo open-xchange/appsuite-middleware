@@ -49,12 +49,17 @@
 
 package com.openexchange.chronos.impl;
 
+import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.chronos.impl.Utils.getFolder;
 import static com.openexchange.java.Autoboxing.B;
 import static com.openexchange.java.Autoboxing.L;
+import java.util.ArrayList;
+import java.util.List;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.impl.performer.ChangeExceptionsPerformer;
 import com.openexchange.chronos.impl.performer.CountEventsPerformer;
 import com.openexchange.chronos.impl.performer.ForeignEventsPerformer;
+import com.openexchange.chronos.impl.performer.GetPerformer;
 import com.openexchange.chronos.impl.performer.ResolveFilenamePerformer;
 import com.openexchange.chronos.impl.performer.ResolveIdPerformer;
 import com.openexchange.chronos.impl.performer.ResolveUidPerformer;
@@ -62,6 +67,7 @@ import com.openexchange.chronos.service.CalendarServiceUtilities;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.quota.Quota;
 
 /**
@@ -155,6 +161,50 @@ public class CalendarServiceUtilitiesImpl implements CalendarServiceUtilities {
             @Override
             protected Event execute(CalendarSession session, CalendarStorage storage) throws OXException {
                 return new ResolveIdPerformer(session, storage).perform(id);
+            }
+        }.executeQuery();
+    }
+
+    @Override
+    public List<Event> resolveResource(CalendarSession session, String folderID, String resourceName) throws OXException {
+        return new InternalCalendarStorageOperation<List<Event>>(session) {
+
+            @Override
+            protected List<Event> execute(CalendarSession session, CalendarStorage storage) throws OXException {
+                /*
+                 * resolve by UID or filename
+                 */
+                String id = new ResolveUidPerformer(storage).perform(resourceName);
+                if (null == id) {
+                    id = new ResolveFilenamePerformer(storage).perform(resourceName);
+                }
+                if (null == id) {
+                    return null;
+                }
+                /*
+                 * get event & any overridden instances in folder
+                 */
+                UserizedFolder folder = getFolder(session, folderID);
+                try {
+                    Event event = new GetPerformer(session, storage).perform(folder, id, null);
+                    List<Event> events = new ArrayList<Event>();
+                    events.add(event);
+                    if (isSeriesMaster(event)) {
+                        events.addAll(new ChangeExceptionsPerformer(session, storage).perform(folder, id));
+                    }
+                    return events;
+                } catch (OXException e) {
+                    if ("CAL-4041".equals(e.getErrorCode())) {
+                        /*
+                         * "Event not found in folder..." -> try to load detached occurrences
+                         */
+                        List<Event> detachedOccurrences = new ChangeExceptionsPerformer(session, storage).perform(folder, id);
+                        if (0 < detachedOccurrences.size()) {
+                            return detachedOccurrences;
+                        }
+                    }
+                }
+                return null;
             }
         }.executeQuery();
     }

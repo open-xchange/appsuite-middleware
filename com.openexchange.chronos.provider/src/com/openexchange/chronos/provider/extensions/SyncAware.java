@@ -93,12 +93,12 @@ public interface SyncAware extends CalendarAccess {
     long getSequenceNumber(String folderId) throws OXException;
 
     /**
-     * Resolves a specific event (and any change exceptions) by its externally used resource name, which typically matches the event's
-     * UID or filename property. The lookup is performed in a specific folder, case-sensitive. If an event series with change exceptions
-     * is matched, the series master event will be the first event in the returned list.
+     * Resolves a specific event (and any overridden instances or <i>change exceptions</i>) by its externally used resource name, which
+     * typically matches the event's UID or filename property. The lookup is performed within a specific folder in a case-sensitive way.
+     * If an event series with overridden instances is matched, the series master event will be the first event in the returned list.
      * <p/>
-     * It is also possible that that only change exceptions are returned, which may be the case for <i>detached</i> instances where the
-     * user is not listed as attendee in the series master event.
+     * It is also possible that that only overridden instances of an event series are returned, which may be the case for <i>detached</i>
+     * instances where the user has no access to the corresponding series master event.
      * <p/>
      * The following calendar parameters are evaluated:
      * <ul>
@@ -108,6 +108,7 @@ public interface SyncAware extends CalendarAccess {
      * @param folderId The identifier of the folder to resolve the resource name in
      * @param resourceName The resource name to resolve
      * @return The resolved event(s), or <code>null</code> if no matching event was found
+     * @see <a href="https://tools.ietf.org/html/rfc4791#section-4.1">RFC 4791, section 4.1</a>
      */
     List<Event> resolveResource(String folderId, String resourceName) throws OXException;
 
