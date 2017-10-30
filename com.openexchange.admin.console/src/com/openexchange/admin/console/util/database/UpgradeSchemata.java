@@ -49,7 +49,11 @@
 
 package com.openexchange.admin.console.util.database;
 
+import java.io.IOException;
+import java.net.MalformedURLException;
 import java.rmi.Naming;
+import java.util.HashMap;
+import java.util.Map;
 import javax.management.MBeanServerConnection;
 import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
@@ -75,8 +79,14 @@ public class UpgradeSchemata extends UtilAbstraction {
     private static final String OPT_NAME_LONG = "name";
     private static final char OPT_NAME_SHORT = 'n';
     private CLIOption serverNameOption;
+    private CLIOption jmxHostNameOption;
+    private CLIOption jmxPortNameOption;
+    private CLIOption jmxLoginNameOption;
+    private CLIOption jmxPasswordNameOption;
 
     private Server server;
+    private String jmxHost;
+    private int jmxPort;
 
     /**
      * Entry point
@@ -95,12 +105,13 @@ public class UpgradeSchemata extends UtilAbstraction {
     public UpgradeSchemata(String[] args) {
         super();
 
-        final AdminParser parser = new AdminParser("upgradeschemata");
+        AdminParser parser = new AdminParser("upgradeschemata");
         setOptions(parser);
         try {
             parser.ownparse(args);
             execute(parser);
         } catch (Exception e) {
+            System.err.println("An error occurred during schema upgrade. Manual intervention is advised.");
             printErrors(null, null, e, parser);
         }
     }
@@ -133,14 +144,10 @@ public class UpgradeSchemata extends UtilAbstraction {
         System.out.println("The server with name '" + server.getName() + "' was successfully registered with id '" + server.getId() + "'.");
 
         // List all database schemata
-        final Database[] databases = oxUtil.listDatabaseSchema("*", false, auth);
+        Database[] databases = oxUtil.listDatabaseSchema("*", false, auth);
 
         SchemaMoveRemote smr = (SchemaMoveRemote) Naming.lookup(RMI_HOSTNAME + SchemaMoveRemote.RMI_NAME);
-
-        //TODO: add prameters for JMX
-        final JMXServiceURL url = new JMXServiceURL("service:jmx:rmi:///jndi/rmi://localhost:9999/server");
-        final JMXConnector jmxConnector = JMXConnectorFactory.connect(url, null);
-        final MBeanServerConnection mbsc = jmxConnector.getMBeanServerConnection();
+        MBeanServerConnection mbeanConnection = getMBeanConnection(parser);
 
         for (Database database : databases) {
             // Disable schema
@@ -155,7 +162,7 @@ public class UpgradeSchemata extends UtilAbstraction {
 
             // Perform upgrade
             System.out.println("Running updates...");
-            Object failures = mbsc.invoke(Constants.OBJECT_NAME, "runUpdate", new Object[] { schemaName }, null);
+            Object failures = mbeanConnection.invoke(Constants.OBJECT_NAME, "runUpdate", new Object[] { schemaName }, null);
             if (null != failures) {
                 String message = failures.toString();
                 message = message.replaceAll("\\\\R", System.getProperty("line.separator"));
@@ -170,6 +177,37 @@ public class UpgradeSchemata extends UtilAbstraction {
     }
 
     /**
+     * Create an {@link MBeanServerConnection}
+     * 
+     * @param parser The {@link AdminParser} to extract the optional jmx user and password
+     * @return The {@link MBeanServerConnection}
+     * @throws MalformedURLException if the URL is malformed
+     * @throws IOException if an I/O error occurs
+     */
+    private MBeanServerConnection getMBeanConnection(AdminParser parser) throws MalformedURLException, IOException {
+        String jmxUsername = null;
+        if (parser.hasOption(jmxLoginNameOption)) {
+            jmxUsername = (String) parser.getOptionValue(jmxLoginNameOption);
+        }
+        String jmxPassword = null;
+        if (parser.hasOption(jmxPasswordNameOption)) {
+            jmxPassword = (String) parser.getOptionValue(jmxPasswordNameOption);
+        }
+        Map<String, Object> environment;
+        if (jmxUsername == null || jmxPassword == null) {
+            environment = null;
+        } else {
+            environment = new HashMap<String, Object>(1);
+            String[] creds = new String[] { jmxUsername, jmxPassword };
+            environment.put(JMXConnector.CREDENTIALS, creds);
+        }
+
+        JMXServiceURL url = new JMXServiceURL("service:jmx:rmi:///jndi/rmi://" + jmxHost + ":" + jmxPort + "/server");
+        JMXConnector jmxConnector = JMXConnectorFactory.connect(url, null);
+        return jmxConnector.getMBeanServerConnection();
+    }
+
+    /**
      * Checks the arguments
      * 
      * @param parser The {@link AdminParser}
@@ -179,6 +217,35 @@ public class UpgradeSchemata extends UtilAbstraction {
         String serverName = (String) parser.getOptionValue(serverNameOption);
         server = new Server();
         server.setName(serverName);
+
+        // Parse the optional jmx port
+        jmxPort = 9999;
+        if (parser.hasOption(jmxPortNameOption)) {
+            String val = (String) parser.getOptionValue(jmxPortNameOption);
+            if (null != val) {
+                try {
+                    jmxPort = Integer.parseInt(val.trim());
+                } catch (NumberFormatException e) {
+                    System.err.println("Port parameter is not a number: " + val);
+                    parser.printUsage();
+                    System.exit(1);
+                }
+                if (jmxPort < 1 || jmxPort > 65535) {
+                    System.err.println("Port parameter is out of range: " + val + ". Valid range is from 1 to 65535.");
+                    parser.printUsage();
+                    System.exit(1);
+                }
+            }
+        }
+
+        // Parser the optional jmx host
+        jmxHost = "localhost";
+        if (parser.hasOption(jmxHostNameOption)) {
+            String tmp = (String) parser.getOptionValue(jmxHostNameOption);
+            if (null != tmp) {
+                jmxHost = tmp.trim();
+            }
+        }
     }
 
     /**
@@ -188,6 +255,11 @@ public class UpgradeSchemata extends UtilAbstraction {
      */
     private void setOptions(AdminParser parser) {
         serverNameOption = setShortLongOpt(parser, OPT_NAME_SHORT, OPT_NAME_LONG, "The name of the server", true, NeededQuadState.needed);
+        jmxHostNameOption = setShortLongOpt(parser, 'H', "host", "The optional JMX host (default:localhost)", true, NeededQuadState.possibly);
+        jmxPortNameOption = setShortLongOpt(parser, 'p', "port", "The optional JMX port (default:9999)", true, NeededQuadState.possibly);
+        jmxLoginNameOption = setShortLongOpt(parser, 'l', "login", "The optional JMX login (if JMX has authentication enabled)", true, NeededQuadState.possibly);
+        jmxPasswordNameOption = setShortLongOpt(parser, 's', "password", "The optional JMX password (if JMX has authentication enabled)", true, NeededQuadState.possibly);
+
         setDefaultCommandLineOptionsWithoutContextID(parser);
     }
 }
