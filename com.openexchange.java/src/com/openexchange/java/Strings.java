@@ -492,15 +492,19 @@ public class Strings {
         if (length == 0) {
             return new String[] { trimMatches ? s.trim() : s };
         }
+
+        int pos = s.indexOf(delim, 0);
+        if (pos < 0) {
+            return new String[] { trimMatches ? s.trim() : s };
+        }
+
         List<String> matchList = new ArrayList<>();
         int prevPos = 0;
-        for (int pos = s.indexOf(delim, prevPos); pos >= 0; pos = prevPos < length ? s.indexOf(delim, prevPos) : -1) {
+        do {
             matchList.add(trimMatches ? s.substring(prevPos, pos).trim() : s.substring(prevPos, pos));
             prevPos = pos + 1;
-        }
-        if (prevPos == 0) {
-            return new String[] { s.trim() };
-        }
+            pos = prevPos < length ? s.indexOf(delim, prevPos) : -1;
+        } while (pos >= 0);
         if (prevPos <= length) {
             matchList.add(trimMatches ? s.substring(prevPos).trim() : s.substring(prevPos));
         }
