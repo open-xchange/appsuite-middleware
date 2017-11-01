@@ -830,6 +830,11 @@ public final class LogProperties {
         if (Strings.isEmpty(queryString)) {
             return queryString;
         }
+
+        if (Strings.asciiLowerCase(queryString).indexOf("password=", 0) < 0) {
+            return queryString;
+        }
+
         String[] pairs = Strings.splitByAmps(queryString);
         StringBuilder sb = new StringBuilder(queryString.length());
         boolean first = true;
