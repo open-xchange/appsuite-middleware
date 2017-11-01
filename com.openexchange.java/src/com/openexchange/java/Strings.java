@@ -448,7 +448,7 @@ public class Strings {
         return splitByDelimNotInQuotes(str, ',');
     }
 
-    private static final Pattern P_SPLIT_COMMA = Pattern.compile("\\s*,\\s*");
+    // private static final Pattern P_SPLIT_COMMA = Pattern.compile("\\s*,\\s*");
 
     /**
      * Splits given string by comma separator.
@@ -460,7 +460,23 @@ public class Strings {
         if (null == s) {
             return null;
         }
-        return P_SPLIT_COMMA.split(s, 0);
+        int length = s.length();
+        if (length == 0) {
+            return new String[] { s.trim() };
+        }
+        List<String> matchList = new ArrayList<>();
+        int prevPos = 0;
+        for (int pos = s.indexOf(',', 0); pos >= 0; pos = prevPos < length ? s.indexOf(',', prevPos) : -1) {
+            matchList.add(s.substring(prevPos, pos).trim());
+            prevPos = pos + 1;
+        }
+        if (prevPos == 0) {
+            return new String[] { s.trim() };
+        }
+        if (prevPos <= length) {
+            matchList.add(s.substring(prevPos).trim());
+        }
+        return matchList.toArray(new String[matchList.size()]);
     }
 
     private static final Pattern P_SPLIT_COLON = Pattern.compile("\\s*\\:\\s*");
