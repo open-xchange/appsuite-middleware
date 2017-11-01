@@ -82,6 +82,7 @@ import com.openexchange.file.storage.onedrive.access.OneDriveOAuthAccess;
 import com.openexchange.file.storage.onedrive.http.client.methods.HttpMove;
 import com.openexchange.file.storage.onedrive.osgi.Services;
 import com.openexchange.file.storage.onedrive.rest.folder.RestFolder;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
 
 /**
@@ -110,6 +111,9 @@ public final class OneDriveFolderAccess extends AbstractOneDriveResourceAccess i
         userId = session.getUserId();
         accountDisplayName = account.getDisplayName();
         ConfigViewFactory viewFactory = Services.getOptionalService(ConfigViewFactory.class);
+        if (viewFactory == null) {
+            throw ServiceExceptionCode.absentService(ConfigViewFactory.class);
+        }
         ConfigView view = viewFactory.getView(session.getUserId(), session.getContextId());
         useOptimisticSubfolderDetection = ConfigViews.getDefinedBoolPropertyFrom("com.openexchange.file.storage.onedrive.useOptimisticSubfolderDetection", true, view);
     }

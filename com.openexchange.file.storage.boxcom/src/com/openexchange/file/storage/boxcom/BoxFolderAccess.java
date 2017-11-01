@@ -71,6 +71,7 @@ import com.openexchange.file.storage.Quota;
 import com.openexchange.file.storage.Quota.Type;
 import com.openexchange.file.storage.boxcom.access.BoxOAuthAccess;
 import com.openexchange.java.Strings;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
 
 /**
@@ -93,6 +94,9 @@ public final class BoxFolderAccess extends AbstractBoxResourceAccess implements 
         userId = session.getUserId();
         accountDisplayName = account.getDisplayName();
         ConfigViewFactory viewFactory = Services.getOptionalService(ConfigViewFactory.class);
+        if (viewFactory == null) {
+            throw ServiceExceptionCode.absentService(ConfigViewFactory.class);
+        }
         ConfigView view = viewFactory.getView(session.getUserId(), session.getContextId());
         useOptimisticSubfolderDetection = ConfigViews.getDefinedBoolPropertyFrom("com.openexchange.file.storage.boxcom.useOptimisticSubfolderDetection", true, view);
     }
