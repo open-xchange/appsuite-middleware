@@ -54,9 +54,11 @@ import java.net.MalformedURLException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 import javax.management.InstanceNotFoundException;
@@ -106,6 +108,7 @@ public class UpgradeSchemata extends UtilAbstraction {
     private CLIOption jmxLoginNameOption;
     private CLIOption jmxPasswordNameOption;
     private CLIOption forceOption;
+    private CLIOption skipOption;
 
     private Server server;
     private String jmxHost;
@@ -118,6 +121,7 @@ public class UpgradeSchemata extends UtilAbstraction {
     private SchemaMoveRemote schemaMoveUtil;
     private MBeanServerConnection mbeanConnection;
     private String startFromSchema;
+    private List<String> skippedSchemata = new ArrayList<>();
 
     /**
      * Entry point
@@ -433,6 +437,14 @@ public class UpgradeSchemata extends UtilAbstraction {
 
         force = parser.hasOption(forceOption);
 
+        String skippedSchemata = (String) parser.getOptionValue(skipOption);
+        if (skippedSchemata != null) {
+            String[] split = skippedSchemata.split(",");
+            for (String s : split) {
+                this.skippedSchemata.add(s);
+            }
+        }
+
         // Parse the optional JMX port
         jmxPort = 9999;
         if (parser.hasOption(jmxPortNameOption)) {
@@ -478,6 +490,7 @@ public class UpgradeSchemata extends UtilAbstraction {
         jmxPasswordNameOption = setShortLongOpt(parser, 's', "password", "The optional JMX password (if JMX has authentication enabled)", true, NeededQuadState.possibly);
         schemaNameOption = setShortLongOpt(parser, 'm', "schema-name", "The optional schema name to continue from", true, NeededQuadState.possibly);
         forceOption = setShortLongOpt(parser, 'f', "force", "Forces the upgrade even if the updates fail in some schemata", false, NeededQuadState.notneeded);
+        skipOption = setShortLongOpt(parser, 'k', "skip-schemata", "Defines the names of the schemata as a comma separated list that should be skipped during the upgrde phase", true, NeededQuadState.possibly);
 
         setDefaultCommandLineOptionsWithoutContextID(parser);
     }
