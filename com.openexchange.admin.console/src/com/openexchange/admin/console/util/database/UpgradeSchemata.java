@@ -55,6 +55,7 @@ import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 import javax.management.InstanceNotFoundException;
@@ -216,12 +217,13 @@ public class UpgradeSchemata extends UtilAbstraction {
      */
     private Database[] listSchemata() throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
         Database[] databases = oxUtil.listDatabaseSchema("*", false, credentials);
-        if (Strings.isEmpty(startFromSchema)) {
+        if (Strings.isEmpty(startFromSchema) || databases.length == 1) {
             return databases;
         }
 
-        Arrays.sort(databases, (o1, o2) -> o1.getName().compareTo(o2.getName()));
-        int position = Arrays.binarySearch(databases, startFromSchema);
+        Comparator<Database> comparator = (o1, o2) -> o1.getName().compareTo(o2.getName());
+        Arrays.sort(databases, comparator);
+        int position = Arrays.binarySearch(databases, new Database(-1, startFromSchema), comparator);
         if (position < 0) {
             return databases;
         }
