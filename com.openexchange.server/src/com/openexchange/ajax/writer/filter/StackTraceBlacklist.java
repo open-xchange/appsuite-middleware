@@ -50,6 +50,7 @@
 package com.openexchange.ajax.writer.filter;
 
 import java.util.Set;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import com.google.common.collect.ImmutableSet;
 import com.openexchange.exception.OXException;
@@ -88,17 +89,18 @@ public class StackTraceBlacklist {
         } else {
             // Prepare pattern
             Pattern patternCode = Pattern.compile("[A-Z]*-[0-9]*");
-            Pattern patternPrefix = Pattern.compile("[A-Z]*(-|-\\*|\\*)?");
+            Pattern patternPrefix = Pattern.compile("([A-Z]*)(-|-\\*|\\*)?");
 
             // Parse
+            Matcher m;
             for (String entry : Strings.splitByComma(blacklist)) {
                 entry = unquote(entry);
-                if (patternCode.matcher(entry).matches()) {
+                if ((m = patternCode.matcher(entry)).matches()) {
                     // Complete error code like 'SES-200'
                     codes.add(entry);
-                } else if (patternPrefix.matcher(entry).matches()) {
+                } else if ((m = patternPrefix.matcher(entry)).matches()) {
                     // Prefix like 'SES', 'SES*' or 'SES-*'
-                    prefixes.add(entry.substring(0, 3));
+                    prefixes.add(m.group(1));
                 } else {
                     // Not supported
                     LOGGER.warn("{} does not match any known format for exception prefix or exception code. Therefore it won't be part of the blacklist.", entry);
