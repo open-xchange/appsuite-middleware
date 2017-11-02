@@ -223,7 +223,7 @@ public class UpgradeSchemata extends UtilAbstraction {
     private Database[] listSchemata() throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
         Database[] databases = oxUtil.listDatabaseSchema("*", false, credentials);
         if (Strings.isEmpty(startFromSchema) || databases.length == 1) {
-            return databases;
+            return databases[0].getScheme().equals(startFromSchema) ? new Database[0] : databases;
         }
 
         Comparator<Database> comparator = (o1, o2) -> o1.getName().compareTo(o2.getName());
@@ -330,36 +330,50 @@ public class UpgradeSchemata extends UtilAbstraction {
         if (listServer != null && listServer.length == 1) {
             // If the 'schema-name' is present it means that there is a continuation which implies
             // that a server was previously registered, thus simply use the already existing server.
+            Server s = listServer[0];
             if (!Strings.isEmpty(startFromSchema)) {
-                server = listServer[0];
-                System.out.println("OK, proceeding with the upgrade. The server '" + server.getName() + "' with id '" + server.getId() + "' will be used to point the updated schemata after the update tasks complete.");
+                System.out.println("The server '" + s.getName() + "' with id '" + s.getId() + "' will be used to point the updated schemata after the update tasks complete.");
+                System.out.println("Type 'abort' to abort the upgrade process, or 'continue' to proceed ['abort'/'continue']:");
+                prompt();
+                server = s;
                 return;
             }
 
             // The 'schema-name' is not present, and a server with the same name exist.
-            System.out.println("WARNING: The specified server is already registered with id '" + listServer[0].getId() + "'.");
-            System.out.println("         If that shouldn't be the case, type 'abort' to abort the upgrade process, otherwise, type 'continue' to proceed.");
+            System.out.println("WARNING: The specified server is already registered with id '" + s.getId() + "'.");
             System.out.println("         If you continue the already existing server will be used to point the updated schemata after the update tasks complete.");
-            Scanner scanner = new Scanner(System.in);
-            while (true) {
-                String word = scanner.next();
-                switch (word) {
-                    case ABORT:
-                        System.out.println("OK, aborting upgrade");
-                        sysexit(0);
-                    case CONTINUE:
-                        scanner.close();
-                        System.out.println("OK, proceeding with the upgrade");
-                        server = listServer[0];
-                        return;
-                }
-            }
+            System.out.println("         If that shouldn't be the case, type 'abort' to abort the upgrade process, otherwise, type 'continue' to proceed ['abort'/'continue']:");
+            prompt();
+            server = s;
+            return;
         }
 
         // All good, proceed with server registration
         System.out.print("Registering the server with name '" + server.getName() + "'...");
         server = oxUtil.registerServer(server, credentials);
         ok();
+    }
+
+    /**
+     * Prompts and waits for user interaction
+     */
+    private void prompt() {
+        Scanner scanner = new Scanner(System.in);
+        while (true) {
+            String word = scanner.next();
+            switch (word) {
+                case ABORT:
+                    System.out.println("OK, aborting upgrade");
+                    sysexit(0);
+                case CONTINUE:
+                    scanner.close();
+                    System.out.println("OK, proceeding with the upgrade");
+                    return;
+                default:
+                    System.err.println("Unrecognized command: '" + word + "'");
+                    System.out.println("Type 'abort' to abort the upgrade process, otherwise, type 'continue' to proceed ['abort'/'continue']:");
+            }
+        }
     }
 
     /**
