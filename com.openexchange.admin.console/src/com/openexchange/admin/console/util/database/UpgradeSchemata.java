@@ -260,7 +260,7 @@ public class UpgradeSchemata extends UtilAbstraction {
         System.err.println(message);
 
         if (!force) {
-            System.err.println("Schema upgrade aborted. Manual intervention might be required.");
+            System.err.println("Schema upgrade for schema '" + schemaName + "' was aborted. Manual intervention might be required.");
             sysexit(1);
         }
     }
