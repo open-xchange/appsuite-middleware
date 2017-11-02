@@ -59,16 +59,47 @@ import java.util.Locale;
  */
 public interface ClientInfo {
 
+    /**
+     * Get client info type
+     * 
+     * @return
+     */
     ClientInfoType getType();
 
+    /**
+     * Get platform
+     * 
+     * @return
+     */
     String getPlatform();
 
+    /**
+     * Get platform version
+     * 
+     * @return
+     */
     String getPlatformVersion();
 
+    /**
+     * Get client
+     * 
+     * @return
+     */
     String getApp();
 
+    /**
+     * Get client version
+     * 
+     * @return
+     */
     String getAppVersion();
 
+    /**
+     * Formats a string in user locale describing client info
+     * 
+     * @param locale The user's locale
+     * @return
+     */
     String toString(Locale locale);
 
 }

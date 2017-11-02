@@ -50,6 +50,7 @@
 package com.openexchange.session.management.json.actions;
 
 import java.util.Collection;
+import java.util.Locale;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -66,6 +67,7 @@ import com.openexchange.session.management.SessionManagementService;
 import com.openexchange.session.management.SessionManagementStrings;
 import com.openexchange.session.management.json.osgi.Services;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.UserService;
 
 /**
  * {@link AllAction}
@@ -84,6 +86,15 @@ public class AllAction implements AJAXActionService {
         SessionManagementService service = Services.getService(SessionManagementService.class);
         if (null == service) {
             throw ServiceExceptionCode.absentService(SessionManagementService.class);
+        }
+        UserService userService = Services.getService(UserService.class);
+        Locale locale = Locale.getDefault();
+        if (null != userService) {
+            locale = userService.getUser(session.getUserId(), session.getContextId()).getLocale();
+        }
+        boolean extendedInfo = false;
+        if ("true".equalsIgnoreCase(requestData.getParameter("extendedInfo"))) {
+            extendedInfo = true;
         }
         Collection<ManagedSession> sessions = service.getSessionsForUser(session);
         JSONArray browsers = new JSONArray();
@@ -106,7 +117,7 @@ public class AllAction implements AJAXActionService {
                 if (0 < loginTime) {
                     json.put("loginTime", loginTime);
                 }
-                JSONObject deviceInfo = getDeviceInfo(s.getSessionId(), s.getClient());
+                JSONObject deviceInfo = getDeviceInfo(s, locale, extendedInfo);
                 if (null != deviceInfo) {
                     json.put("deviceInfo", deviceInfo);
                     String type = deviceInfo.getString("type");
@@ -146,31 +157,34 @@ public class AllAction implements AJAXActionService {
         return new AJAXRequestResult(result, "json");
     }
 
-    private JSONObject getDeviceInfo(String sessionId, String client) {
+    private JSONObject getDeviceInfo(ManagedSession session, Locale locale, boolean extendedInfo) {
         ClientInfoService service = Services.getService(ClientInfoService.class);
         if (null == service) {
             return null;
         }
-        ClientInfo info = service.getClientInfo(sessionId);
+        ClientInfo info = service.getClientInfo(session);
         if (null != info) {
             JSONObject deviceInfo = new JSONObject(5);
             try {
+                deviceInfo.put("info", info.toString(locale));
                 deviceInfo.put("type", info.getType().getName());
-                String app = info.getApp();
-                if (Strings.isNotEmpty(app)) {
-                    deviceInfo.put("client", app);
-                }
-                String appVersion = info.getAppVersion();
-                if (Strings.isNotEmpty(appVersion)) {
-                    deviceInfo.put("clientVersion", appVersion);
-                }
-                String platform = info.getPlatform();
-                if (Strings.isNotEmpty(platform)) {
-                    deviceInfo.put("platform", platform);
-                }
-                String platformVersion = info.getPlatformVersion();
-                if (Strings.isNotEmpty(platformVersion)) {
-                    deviceInfo.put("platformVersion", platformVersion);
+                if (extendedInfo) {
+                    String app = info.getApp();
+                    if (Strings.isNotEmpty(app)) {
+                        deviceInfo.put("client", app);
+                    }
+                    String appVersion = info.getAppVersion();
+                    if (Strings.isNotEmpty(appVersion)) {
+                        deviceInfo.put("clientVersion", appVersion);
+                    }
+                    String platform = info.getPlatform();
+                    if (Strings.isNotEmpty(platform)) {
+                        deviceInfo.put("platform", platform);
+                    }
+                    String platformVersion = info.getPlatformVersion();
+                    if (Strings.isNotEmpty(platformVersion)) {
+                        deviceInfo.put("platformVersion", platformVersion);
+                    }
                 }
                 return deviceInfo;
             } catch (JSONException e) {

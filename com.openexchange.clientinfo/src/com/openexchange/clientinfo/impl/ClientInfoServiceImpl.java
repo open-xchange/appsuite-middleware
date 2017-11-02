@@ -55,10 +55,9 @@ import java.util.Map;
 import com.openexchange.clientinfo.ClientInfo;
 import com.openexchange.clientinfo.ClientInfoProvider;
 import com.openexchange.clientinfo.ClientInfoService;
-import com.openexchange.clientinfo.osgi.Services;
 import com.openexchange.osgi.ServiceSet;
 import com.openexchange.session.Session;
-import com.openexchange.sessiond.SessiondService;
+import com.openexchange.session.management.ManagedSession;
 
 
 /**
@@ -77,18 +76,21 @@ public class ClientInfoServiceImpl implements ClientInfoService {
     }
 
     @Override
-    public ClientInfo getClientInfo(String sessionId) {
-        SessiondService sessiondService = Services.getService(SessiondService.class);
-        Session session = sessiondService.getSession(sessionId);
-        return getClientInfo(session);
+    public ClientInfo getClientInfo(ManagedSession session) {
+        if (null != session) {
+            return getClientInfo(session.getSession());
+        }
+        return null;
     }
 
     @Override
     public ClientInfo getClientInfo(Session session) {
-        for (ClientInfoProvider provider : providers) {
-            ClientInfo info = provider.getClientInfo(session);
-            if (null != info) {
-                return info;
+        if (null != session) {
+            for (ClientInfoProvider provider : providers) {
+                ClientInfo info = provider.getClientInfo(session);
+                if (null != info) {
+                    return info;
+                }
             }
         }
         return null;

@@ -60,8 +60,8 @@ import com.openexchange.i18n.LocalizableStrings;
  */
 public class ClientInfoStrings implements LocalizableStrings {
 
-    // %1$s %2$s %3$s on %4$s %5$s
-    public final static String DEFAULT_CLIENT_INFO_MESSAGE = "%1$s %2$s %3$s on %4$s %5$s";
+    // %1$s, %2$s %3$s on %4$s %5$s
+    public final static String DEFAULT_CLIENT_INFO_MESSAGE = "%1$s, %2$s %3$s on %4$s %5$s";
 
     // %1$s on %2$s %3$s
     public final static String CLIENT_BROWSER_INFO_MESSAGE = "%1$s on %2$s %3$s";

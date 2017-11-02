@@ -50,6 +50,7 @@
 package com.openexchange.ajax.sessionmanagement.actions;
 
 import java.io.IOException;
+import org.json.JSONArray;
 import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.container.Response;
@@ -61,26 +62,37 @@ import com.openexchange.ajax.sessionmanagement.AbstractSessionManagementTest;
 
 
 /**
- * {@link GetSessionsRequest}
+ * {@link DeleteRequest}
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since v7.10.0
  */
-public class GetSessionsRequest implements AJAXRequest<GetSessionsResponse> {
+public class DeleteRequest implements AJAXRequest<DeleteResponse> {
 
+    private final String[] sessionIdsToDelete;
     private boolean failOnError;
 
-    public GetSessionsRequest(boolean failOnError) {
+    public DeleteRequest(String sessionIdToDelete) {
+        this(new String[] { sessionIdToDelete }, true);
+    }
+
+    public DeleteRequest(String[] sessionIdsToDelete) {
+        this(sessionIdsToDelete, true);
+    }
+
+    public DeleteRequest(String[] sessionIdsToDelete, boolean failOnError) {
+        super();
+        this.sessionIdsToDelete = sessionIdsToDelete;
         this.failOnError = failOnError;
     }
 
-    public GetSessionsRequest() {
-        this(true);
+    public DeleteRequest(String sessionIdToDelete, boolean failOnError) {
+        this(new String[] { sessionIdToDelete }, failOnError);
     }
 
     @Override
     public com.openexchange.ajax.framework.AJAXRequest.Method getMethod() {
-        return Method.GET;
+        return Method.PUT;
     }
 
     @Override
@@ -90,17 +102,21 @@ public class GetSessionsRequest implements AJAXRequest<GetSessionsResponse> {
 
     @Override
     public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() throws IOException, JSONException {
-        return new Params(AJAXServlet.PARAMETER_ACTION, "getSessions").toArray();
+        return new Params(AJAXServlet.PARAMETER_ACTION, "delete").toArray();
     }
 
     @Override
-    public AbstractAJAXParser<? extends GetSessionsResponse> getParser() {
+    public AbstractAJAXParser<? extends DeleteResponse> getParser() {
         return new Parser(failOnError);
     }
 
     @Override
     public Object getBody() throws IOException, JSONException {
-        return null;
+        JSONArray body = new JSONArray();
+        for (String session : sessionIdsToDelete) {
+            body.add(0, session);
+        }
+        return body;
     }
 
     @Override
@@ -112,15 +128,15 @@ public class GetSessionsRequest implements AJAXRequest<GetSessionsResponse> {
         this.failOnError = failOnError;
     }
 
-    private static final class Parser extends AbstractAJAXParser<GetSessionsResponse> {
+    private static final class Parser extends AbstractAJAXParser<DeleteResponse> {
 
         protected Parser(boolean failOnError) {
             super(failOnError);
         }
 
         @Override
-        protected GetSessionsResponse createResponse(Response response) throws JSONException {
-            return new GetSessionsResponse(response);
+        protected DeleteResponse createResponse(Response response) throws JSONException {
+            return new DeleteResponse(response);
         }
 
     }

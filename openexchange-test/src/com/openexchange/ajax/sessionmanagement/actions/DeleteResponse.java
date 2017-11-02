@@ -52,20 +52,16 @@ package com.openexchange.ajax.sessionmanagement.actions;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 
+
 /**
- * {@link RemoveAllOtherSessionsResponse}
+ * {@link DeleteResponse}
  *
- * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
+ * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since v7.10.0
  */
-public class RemoveAllOtherSessionsResponse extends AbstractAJAXResponse {
+public class DeleteResponse extends AbstractAJAXResponse {
 
-    /**
-     * Initializes a new {@link RemoveAllOtherSessionsResponse}.
-     * 
-     * @param response
-     */
-    protected RemoveAllOtherSessionsResponse(Response response) {
+    protected DeleteResponse(Response response) {
         super(response);
     }
 

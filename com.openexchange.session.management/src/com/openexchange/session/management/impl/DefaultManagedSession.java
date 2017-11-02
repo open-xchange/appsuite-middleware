@@ -87,6 +87,7 @@ public class DefaultManagedSession implements ManagedSession {
         private String userAgent;
         private long loginTime;
         private String location;
+        private Session session;
 
         Builder() {
             super();
@@ -100,6 +101,7 @@ public class DefaultManagedSession implements ManagedSession {
             this.userAgent = (String) session.getParameter(Session.PARAM_USER_AGENT);
             this.loginTime = parseLoginTime(session);
             location = SessionManagementStrings.UNKNOWN_LOCATION;
+            this.session = session;
         }
 
         private static long parseLoginTime(Session session) {
@@ -150,8 +152,13 @@ public class DefaultManagedSession implements ManagedSession {
             return this;
         }
 
+        public Builder setSession(Session session) {
+            this.session = session;
+            return this;
+        }
+
         public DefaultManagedSession build() {
-            return new DefaultManagedSession(sessionId, ipAddress, client, userAgent, loginTime, location);
+            return new DefaultManagedSession(sessionId, ipAddress, client, userAgent, loginTime, location, session);
         }
     }
 
@@ -163,8 +170,9 @@ public class DefaultManagedSession implements ManagedSession {
     private final String userAgent;
     private final long loginTime;
     private final String location;
+    private final Session session;
 
-    DefaultManagedSession(String sessionId, String ipAddress, String client, String userAgent, long loginTime, String location) {
+    DefaultManagedSession(String sessionId, String ipAddress, String client, String userAgent, long loginTime, String location, Session session) {
         super();
         this.sessionId = sessionId;
         this.ipAddress = ipAddress;
@@ -172,6 +180,7 @@ public class DefaultManagedSession implements ManagedSession {
         this.userAgent = userAgent;
         this.loginTime = loginTime;
         this.location = location;
+        this.session = session;
     }
 
     @Override
@@ -202,6 +211,11 @@ public class DefaultManagedSession implements ManagedSession {
     @Override
     public String getLocation() {
         return location;
+    }
+
+    @Override
+    public Session getSession() {
+        return session;
     }
 
 }

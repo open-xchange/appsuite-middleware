@@ -70,26 +70,28 @@ public class WebClientInfoProvider implements ClientInfoProvider {
 
     @Override
     public ClientInfo getClientInfo(Session session) {
-        UserAgentParser parser = Services.getService(UserAgentParser.class);
-        String userAgent = (String) session.getParameter(Session.PARAM_USER_AGENT);
-        if (null != parser && Strings.isNotEmpty(userAgent)) {
-            ReadableUserAgent info = parser.parse(userAgent);
-            OperatingSystem operatingSystem = info.getOperatingSystem();
-            String os = null;
-            String osVersion = null;
-            if (null != operatingSystem) {
-                os = operatingSystem.getName();
-                osVersion = operatingSystem.getVersionNumber().getMajor();
+        if (null != session) {
+            UserAgentParser parser = Services.getService(UserAgentParser.class);
+            String userAgent = (String) session.getParameter(Session.PARAM_USER_AGENT);
+            if (null != parser && Strings.isNotEmpty(userAgent)) {
+                ReadableUserAgent info = parser.parse(userAgent);
+                OperatingSystem operatingSystem = info.getOperatingSystem();
+                String os = null;
+                String osVersion = null;
+                if (null != operatingSystem) {
+                    os = operatingSystem.getName();
+                    osVersion = operatingSystem.getVersionNumber().getMajor();
+                }
+                String browser = info.getName();
+                String browserVersion = info.getVersionNumber().getMajor();
+                String client = "";
+                if (Client.APPSUITE_UI.getClientId().equals(session.getClient())) {
+                    client = "Appsuite UI";
+                } else if (Client.OX6_UI.getClientId().equals(session.getClient())) {
+                    client = "OX6 UI";
+                }
+                return new WebClientInfo(client, os, osVersion, browser, browserVersion);
             }
-            String browser = info.getName();
-            String browserVersion = info.getVersionNumber().getMajor();
-            String client = "";
-            if (Client.APPSUITE_UI.getClientId().equals(session.getClient())) {
-                client = "Appsuite UI";
-            } else if (Client.OX6_UI.getClientId().equals(session.getClient())) {
-                client = "OX6 UI";
-            }
-            return new WebClientInfo(client, os, osVersion, browser, browserVersion);
         }
 
         return null;

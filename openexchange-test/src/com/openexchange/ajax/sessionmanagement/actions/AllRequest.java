@@ -51,7 +51,6 @@ package com.openexchange.ajax.sessionmanagement.actions;
 
 import java.io.IOException;
 import org.json.JSONException;
-import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AJAXRequest;
@@ -60,28 +59,28 @@ import com.openexchange.ajax.framework.Header;
 import com.openexchange.ajax.framework.Params;
 import com.openexchange.ajax.sessionmanagement.AbstractSessionManagementTest;
 
+
 /**
- * {@link RemoveAllOtherSessionsRequest}
+ * {@link AllRequest}
  *
- * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
+ * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since v7.10.0
  */
-public class RemoveAllOtherSessionsRequest implements AJAXRequest<RemoveAllOtherSessionsResponse> {
+public class AllRequest implements AJAXRequest<AllResponse> {
 
     private boolean failOnError;
 
-    public RemoveAllOtherSessionsRequest() {
-        this(true);
+    public AllRequest(boolean failOnError) {
+        this.failOnError = failOnError;
     }
 
-    public RemoveAllOtherSessionsRequest(boolean failOnError) {
-        super();
-        this.failOnError = failOnError;
+    public AllRequest() {
+        this(true);
     }
 
     @Override
     public com.openexchange.ajax.framework.AJAXRequest.Method getMethod() {
-        return Method.PUT;
+        return Method.GET;
     }
 
     @Override
@@ -91,17 +90,17 @@ public class RemoveAllOtherSessionsRequest implements AJAXRequest<RemoveAllOther
 
     @Override
     public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() throws IOException, JSONException {
-        return new Params(AJAXServlet.PARAMETER_ACTION, "removeAllOtherSessions").toArray();
+        return new Params(AJAXServlet.PARAMETER_ACTION, "all").toArray();
     }
 
     @Override
-    public AbstractAJAXParser<? extends RemoveAllOtherSessionsResponse> getParser() {
+    public AbstractAJAXParser<? extends AllResponse> getParser() {
         return new Parser(failOnError);
     }
 
     @Override
     public Object getBody() throws IOException, JSONException {
-        return new JSONObject();
+        return null;
     }
 
     @Override
@@ -113,16 +112,17 @@ public class RemoveAllOtherSessionsRequest implements AJAXRequest<RemoveAllOther
         this.failOnError = failOnError;
     }
 
-    private static final class Parser extends AbstractAJAXParser<RemoveAllOtherSessionsResponse> {
+    private static final class Parser extends AbstractAJAXParser<AllResponse> {
 
         protected Parser(boolean failOnError) {
             super(failOnError);
         }
 
         @Override
-        protected RemoveAllOtherSessionsResponse createResponse(Response response) throws JSONException {
-            return new RemoveAllOtherSessionsResponse(response);
+        protected AllResponse createResponse(Response response) throws JSONException {
+            return new AllResponse(response);
         }
 
     }
+
 }

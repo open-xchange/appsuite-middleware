@@ -60,25 +60,22 @@ import com.openexchange.ajax.framework.Header;
 import com.openexchange.ajax.framework.Params;
 import com.openexchange.ajax.sessionmanagement.AbstractSessionManagementTest;
 
-
 /**
- * {@link RemoveSessionRequest}
+ * {@link ClearRequest}
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.0
  */
-public class RemoveSessionRequest implements AJAXRequest<RemoveSessionResponse> {
+public class ClearRequest implements AJAXRequest<ClearResponse> {
 
-    private final String sessionIdToRemove;
     private boolean failOnError;
 
-    public RemoveSessionRequest(String sessionIdToRemove) {
-        this(sessionIdToRemove, true);
+    public ClearRequest() {
+        this(true);
     }
 
-    public RemoveSessionRequest(String sessionIdToRemove, boolean failOnError) {
+    public ClearRequest(boolean failOnError) {
         super();
-        this.sessionIdToRemove = sessionIdToRemove;
         this.failOnError = failOnError;
     }
 
@@ -94,19 +91,17 @@ public class RemoveSessionRequest implements AJAXRequest<RemoveSessionResponse> 
 
     @Override
     public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() throws IOException, JSONException {
-        return new Params(AJAXServlet.PARAMETER_ACTION, "removeSession").toArray();
+        return new Params(AJAXServlet.PARAMETER_ACTION, "clear").toArray();
     }
 
     @Override
-    public AbstractAJAXParser<? extends RemoveSessionResponse> getParser() {
+    public AbstractAJAXParser<? extends ClearResponse> getParser() {
         return new Parser(failOnError);
     }
 
     @Override
     public Object getBody() throws IOException, JSONException {
-        JSONObject body = new JSONObject();
-        body.put("sessionIdToRemove", sessionIdToRemove);
-        return body;
+        return new JSONObject();
     }
 
     @Override
@@ -118,17 +113,16 @@ public class RemoveSessionRequest implements AJAXRequest<RemoveSessionResponse> 
         this.failOnError = failOnError;
     }
 
-    private static final class Parser extends AbstractAJAXParser<RemoveSessionResponse> {
+    private static final class Parser extends AbstractAJAXParser<ClearResponse> {
 
         protected Parser(boolean failOnError) {
             super(failOnError);
         }
 
         @Override
-        protected RemoveSessionResponse createResponse(Response response) throws JSONException {
-            return new RemoveSessionResponse(response);
+        protected ClearResponse createResponse(Response response) throws JSONException {
+            return new ClearResponse(response);
         }
 
     }
-
 }

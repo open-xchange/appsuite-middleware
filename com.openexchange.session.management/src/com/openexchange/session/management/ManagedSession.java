@@ -49,6 +49,8 @@
 
 package com.openexchange.session.management;
 
+import com.openexchange.session.Session;
+
 /**
  * {@link ManagedSession} - Represents a managed session providing login and session information.
  *
@@ -98,5 +100,12 @@ public interface ManagedSession {
      * @return The location or {@link SessionManagementStrings#UNKNOWN_LOCATION}
      */
     String getLocation();
+
+    /**
+     * Get the session object associated with spawned session
+     * 
+     * @return The session
+     */
+    Session getSession();
 
 }

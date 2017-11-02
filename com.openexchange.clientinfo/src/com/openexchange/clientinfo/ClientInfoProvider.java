@@ -59,8 +59,20 @@ import com.openexchange.session.Session;
  */
 public interface ClientInfoProvider {
 
+    /**
+     * Get client info for given session
+     * 
+     * @param session The session
+     * @return Client info
+     */
     ClientInfo getClientInfo(Session session);
 
+    /**
+     * Get client info for given client identifier
+     * 
+     * @param clientId The client identifier
+     * @return Client info
+     */
     ClientInfo getClientInfo(String clientId);
 
 }

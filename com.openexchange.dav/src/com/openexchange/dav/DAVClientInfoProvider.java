@@ -77,7 +77,7 @@ public class DAVClientInfoProvider implements ClientInfoProvider {
         }
         DAVUserAgent userAgent = getDAVUserAgent(session);
         if (DAVUserAgent.UNKNOWN.equals(userAgent)) {
-            return null;
+            return getClientInfo(session.getClient());
         }
         return new DAVClientInfo(userAgent.getReadableName());
     }

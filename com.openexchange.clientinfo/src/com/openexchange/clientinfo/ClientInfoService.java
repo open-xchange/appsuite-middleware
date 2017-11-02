@@ -53,6 +53,7 @@ import java.util.List;
 import java.util.Map;
 import com.openexchange.osgi.annotation.SingletonService;
 import com.openexchange.session.Session;
+import com.openexchange.session.management.ManagedSession;
 
 /**
  * {@link ClientInfoService}
@@ -63,10 +64,28 @@ import com.openexchange.session.Session;
 @SingletonService
 public interface ClientInfoService {
 
-    ClientInfo getClientInfo(String sessionId);
+    /**
+     * Get client information for given managed session
+     * 
+     * @param session The session
+     * @return Client info
+     */
+    ClientInfo getClientInfo(ManagedSession session);
 
+    /**
+     * Get client information for given session
+     * 
+     * @param session The session
+     * @return Client info
+     */
     ClientInfo getClientInfo(Session session);
 
+    /**
+     * Get client info for a list of sessions
+     * 
+     * @param sessions The sessions
+     * @return Client info mapped to session IDs
+     */
     Map<String, ClientInfo> getClientInfos(List<Session> sessions);
 
 }
