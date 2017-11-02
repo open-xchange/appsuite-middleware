@@ -1054,8 +1054,8 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
                     try {
                         final FolderObject tmp = new FolderObject(subfolderId);
                         FolderObject folderFromMaster = getFolderFromMaster(subfolderId);
-                        adjustTypeOfInheritedPermissions(permissions, folderFromMaster.getPermissions());
-                        tmp.setPermissions(permissions);
+                        List<OCLPermission> mergePermissions = mergePermissionsForHandDown(permissions, folderFromMaster.getPermissions());
+                        tmp.setPermissions(mergePermissions);
                         doUpdate(tmp, options, folderFromMaster, lastModified, true, alreadyCheckedParents);  // Calls handDown() for subfolder, as well
                         if (null != cacheManager) {
                             cacheManager.removeFolderObject(subfolderId, ctx);
@@ -1072,21 +1072,59 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
         }
     }
 
+
     /**
-     * Ensures that permissions of the type LEGATOR are not overwritten with type INHERITED.
-     * 
+     * Merges old and new permissions for hand down
+     *
      * @param permissions The new permissions
-     * @param original The original permissions
+     * @param originalPermissions The original permissions
      */
-    void adjustTypeOfInheritedPermissions(List<OCLPermission> permissions, List<OCLPermission> original) {
+    List<OCLPermission> mergePermissionsForHandDown(List<OCLPermission> permissions, List<OCLPermission> originalPermissions) {
+        List<OCLPermission> result = new ArrayList<>(permissions);
+        adjustTypeOfInheritedPermissions(permissions, originalPermissions);
+        for(OCLPermission orig: originalPermissions){
+            if(!containsEntity(orig, permissions)){
+                result.add(orig);
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Checks if the list of permissions contains a permission with the same entity
+     *
+     * @param perm
+     * @param permissions
+     * @return
+     */
+    private boolean containsEntity(OCLPermission perm, List<OCLPermission> permissions){
+        for(OCLPermission tmp: permissions){
+            if(tmp.getEntity() == perm.getEntity() && perm.isGroupPermission() ==  tmp.isGroupPermission()){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Ensures that {@link FolderPermissionType#LEGATOR} is handed down as {@link FolderPermissionType#INHERITED}
+     *
+     * @param permissions The new permissions
+     * @param originalPermissions The original permissions
+     */
+    void adjustTypeOfInheritedPermissions(List<OCLPermission> permissions, List<OCLPermission> originalPermissions) {
         for (OCLPermission perm : permissions) {
-            if (!perm.isSystem()) {
-                for (OCLPermission originalPerm : original) {
-                    if (originalPerm.getType() == FolderPermissionType.LEGATOR && perm.isGroupPermission() == originalPerm.isGroupPermission() && perm.getEntity() == originalPerm.getEntity()) {
-                        perm.setType(FolderPermissionType.LEGATOR);
-                        break;
-                    }
-                }
+            if (!perm.isSystem() && perm.getType() == FolderPermissionType.LEGATOR) {
+//                boolean isInherited = true;
+//                for(OCLPermission orig: originalPermissions){
+//                    if(orig.getType() == FolderPermissionType.LEGATOR && orig.getEntity() == perm.getEntity() && orig.isGroupPermission() == perm.isGroupPermission()){
+//                        isInherited = false;
+//                        break;
+//                    }
+//                }
+//                if(isInherited){
+                perm.setType(FolderPermissionType.INHERITED);
+//                }
             }
         }
     }

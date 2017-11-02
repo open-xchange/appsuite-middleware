@@ -51,7 +51,6 @@ package com.openexchange.groupware.update;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.sql.Statement;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.tools.update.Column;
@@ -69,18 +68,14 @@ public abstract class SimpleColumnCreationTask extends UpdateTaskAdapter {
         Connection con = params.getConnection();
         boolean rollback = false;
         try {
-            if (columnExists(con)) {
-                return;
-            }
+
             con.setAutoCommit(false);
             rollback = true;
-
-            Statement stmt = null;
-            try {
-                stmt = con.createStatement();
-                Tools.addColumns(con, getTableName(), new Column(getColumnName(), getColumnDefinition()));
-            } finally {
-                Databases.closeSQLStuff(stmt);
+            for(String table: getTableNames()){
+                if (columnExists(con, table)) {
+                    continue;
+                }
+                Tools.addColumns(con, table, new Column(getColumnName(), getColumnDefinition()));
             }
 
             con.commit();
@@ -95,11 +90,11 @@ public abstract class SimpleColumnCreationTask extends UpdateTaskAdapter {
         }
     }
 
-    private boolean columnExists(Connection con) throws SQLException {
-        return Tools.columnExists(con, getTableName(), getColumnName());
+    private boolean columnExists(Connection con, String tableName) throws SQLException {
+        return Tools.columnExists(con, tableName, getColumnName());
     }
 
-    protected abstract String getTableName();
+    protected abstract String[] getTableNames();
 
     protected abstract String getColumnName();
 

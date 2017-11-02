@@ -99,7 +99,7 @@ public final class FileStoragePermissionImpl implements Permission {
         group = fsPermission.isGroup();
         readPermission = fsPermission.getReadPermission();
         system = fsPermission.getSystem();
-        type = FolderPermissionType.getType(fsPermission.getType().getTypeNumber());
+        type = fsPermission.getType() != null ? FolderPermissionType.getType(fsPermission.getType().getTypeNumber()) : FolderPermissionType.NORMAL;
         writePermission = fsPermission.getWritePermission();
     }
 

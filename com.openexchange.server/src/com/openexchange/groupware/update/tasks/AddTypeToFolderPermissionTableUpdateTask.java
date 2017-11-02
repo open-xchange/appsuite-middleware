@@ -70,8 +70,8 @@ public final class AddTypeToFolderPermissionTableUpdateTask extends SimpleColumn
     }
 
     @Override
-    protected String getTableName() {
-        return "oxfolder_permissions";
+    protected String[] getTableNames() {
+        return new String[] {"oxfolder_permissions","del_oxfolder_permissions"};
     }
 
     @Override

@@ -1783,7 +1783,7 @@ public final class OXFolderSQL {
                     stmt.setInt(pos++, oclPerm.getDeletePermission());
                     stmt.setInt(pos++, oclPerm.isFolderAdmin() ? 1 : 0);
                     stmt.setInt(pos++, oclPerm.isGroupPermission() ? 1 : 0);
-                    stmt.setInt(pos++, oclPerm.getSystem());
+                    stmt.setInt(pos++, oclPerm.getType().getTypeNumber());
                     stmt.addBatch();
                 }
                 executeBatch(stmt);

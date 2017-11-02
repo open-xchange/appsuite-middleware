@@ -99,6 +99,7 @@ import com.openexchange.folderstorage.AfterReadAwareFolderStorage;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
+import com.openexchange.folderstorage.FolderPermissionType;
 import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderType;
@@ -586,11 +587,17 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
                         if ((permission.getSystem() <= 0) && !ignore.contains(permission.getEntity())) {
                             if (false == permission.isGroupPermission()) {
                                 GuestInfo guestInfo = ServerServiceRegistry.getServize(ShareService.class).getGuestInfo(session, permission.getEntity());
-                                if (null != guestInfo && RecipientType.ANONYMOUS.equals(guestInfo.getRecipientType())) {
+                                if (null != guestInfo && RecipientType.ANONYMOUS.equals(guestInfo.getRecipientType()) && permission.getType() == FolderPermissionType.NORMAL) {
                                     continue; // don't inherit anonymous share links
                                 }
                             }
-                            permissions.add(permission);
+                            if(permission.getType() == FolderPermissionType.LEGATOR){
+                                OCLPermission tmp = permission.deepClone();
+                                tmp.setType(FolderPermissionType.INHERITED);
+                                permissions.add(tmp);
+                            } else {
+                                permissions.add(permission);
+                            }
                         }
                     }
                 }
@@ -626,6 +633,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
         oclPerm.setFolderAdmin(p.isAdmin());
         oclPerm.setAllPermission(p.getFolderPermission(), p.getReadPermission(), p.getWritePermission(), p.getDeletePermission());
         oclPerm.setSystem(p.getSystem());
+        oclPerm.setType(p.getType() == null ? FolderPermissionType.NORMAL: p.getType());
         return oclPerm;
     }
 
