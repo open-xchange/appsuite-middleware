@@ -58,6 +58,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Scanner;
 import javax.management.InstanceNotFoundException;
 import javax.management.MBeanException;
 import javax.management.MBeanServerConnection;
@@ -116,6 +117,7 @@ public class UpgradeSchemata extends UtilAbstraction {
      * 
      * @param args The command line arguments
      */
+    @SuppressWarnings("unused")
     public static void main(String args[]) {
         new UpgradeSchemata(args);
     }
@@ -312,6 +314,9 @@ public class UpgradeSchemata extends UtilAbstraction {
         ok();
     }
 
+    private static final String ABORT = "abort";
+    private static final String CONTINUE = "continue";
+
     /**
      * Registers the server
      * 
@@ -321,6 +326,25 @@ public class UpgradeSchemata extends UtilAbstraction {
      * @throws InvalidDataException
      */
     private void registerServer() throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
+        Server[] listServer = oxUtil.listServer(server.getName(), credentials);
+        if (listServer != null && listServer.length == 1) {
+            System.out.println("WARNING: The specified server is already registered with id '" + listServer[0].getId() + "'.");
+            System.out.println("         If that shouldn't be the case, type 'abort' to abort the upgrade process, otherwise, type 'continue' to proceed.");
+            System.out.println("         If you continue the already existing server will be used to point the upgraded schemata to.");
+            Scanner scanner = new Scanner(System.in);
+            while (true) {
+                String word = scanner.next();
+                switch (word) {
+                    case ABORT:
+                        System.out.println("OK, aborting upgrade");
+                        sysexit(0);
+                    case CONTINUE:
+                        scanner.close();
+                        System.out.println("OK, proceeding with the upgrade");
+                        return;
+                }
+            }
+        }
         System.out.print("Registering the server with name '" + server.getName() + "'...");
         server = oxUtil.registerServer(server, credentials);
         ok();
