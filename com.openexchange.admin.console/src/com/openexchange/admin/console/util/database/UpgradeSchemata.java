@@ -249,10 +249,15 @@ public class UpgradeSchemata extends UtilAbstraction {
             return;
         }
 
-        System.out.println("\nErrors while running updates for schema '" + schemaName + "': ");
+        System.err.println("\nErrors while running updates for schema '" + schemaName + "': ");
         String message = failures.toString();
         message = message.replaceAll("\\\\R", System.getProperty("line.separator"));
-        System.out.println(message);
+        System.err.println(message);
+
+        if (!force) {
+            System.err.println("Schema upgrade aborted. Manual intervention might be required.");
+            sysexit(1);
+        }
     }
 
     /**
