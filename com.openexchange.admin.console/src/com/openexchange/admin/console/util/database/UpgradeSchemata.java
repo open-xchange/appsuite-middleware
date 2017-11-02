@@ -341,6 +341,7 @@ public class UpgradeSchemata extends UtilAbstraction {
                     case CONTINUE:
                         scanner.close();
                         System.out.println("OK, proceeding with the upgrade");
+                        server = listServer[0];
                         return;
                 }
             }
