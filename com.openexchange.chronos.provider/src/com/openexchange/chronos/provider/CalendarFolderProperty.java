@@ -142,7 +142,7 @@ public enum CalendarFolderProperty {
      * @see <a href="https://tools.ietf.org/html/rfc6638#section-9.1">RFC 6638, section 9.1</a>
      */
     public static ExtendedProperty SCHEDULE_TRANSP(String value) {
-        return SCHEDULE_TRANSP(value);
+        return SCHEDULE_TRANSP(value, false);
     }
 
     /**
