@@ -78,6 +78,7 @@ public class UpgradeSchemata extends UtilAbstraction {
 
     private static final String OPT_NAME_LONG = "name";
     private static final char OPT_NAME_SHORT = 'n';
+    
     private CLIOption serverNameOption;
     private CLIOption jmxHostNameOption;
     private CLIOption jmxPortNameOption;
@@ -218,7 +219,7 @@ public class UpgradeSchemata extends UtilAbstraction {
         server = new Server();
         server.setName(serverName);
 
-        // Parse the optional jmx port
+        // Parse the optional JMX port
         jmxPort = 9999;
         if (parser.hasOption(jmxPortNameOption)) {
             String val = (String) parser.getOptionValue(jmxPortNameOption);
@@ -238,7 +239,7 @@ public class UpgradeSchemata extends UtilAbstraction {
             }
         }
 
-        // Parser the optional jmx host
+        // Parser the optional JMX host
         jmxHost = "localhost";
         if (parser.hasOption(jmxHostNameOption)) {
             String tmp = (String) parser.getOptionValue(jmxHostNameOption);
