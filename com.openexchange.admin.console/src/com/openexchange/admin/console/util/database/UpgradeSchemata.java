@@ -75,6 +75,7 @@ import com.openexchange.admin.rmi.dataobjects.Database;
 import com.openexchange.admin.rmi.dataobjects.Server;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
+import com.openexchange.admin.rmi.exceptions.MissingOptionException;
 import com.openexchange.admin.rmi.exceptions.MissingServiceException;
 import com.openexchange.admin.rmi.exceptions.NoSuchObjectException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
@@ -98,10 +99,12 @@ public class UpgradeSchemata extends UtilAbstraction {
     private CLIOption jmxPortNameOption;
     private CLIOption jmxLoginNameOption;
     private CLIOption jmxPasswordNameOption;
+    private CLIOption forceOption;
 
     private Server server;
     private String jmxHost;
     private int jmxPort;
+    private boolean force;
 
     private Credentials credentials;
 
@@ -133,6 +136,8 @@ public class UpgradeSchemata extends UtilAbstraction {
             parser.ownparse(args);
             initialiseRMIServices(parser);
             execute(parser);
+        } catch (MissingOptionException e) {
+            printErrors(null, null, e, parser);
         } catch (Exception e) {
             System.err.println("An error occurred during schema upgrade. Manual intervention is advised.");
             printErrors(null, null, e, parser);
@@ -180,6 +185,7 @@ public class UpgradeSchemata extends UtilAbstraction {
         checkAndSetArguments(parser);
         registerServer();
         for (Database database : listSchemata()) {
+            boolean error = false;
             String schemaName = database.getScheme();
             try {
                 disableSchema(schemaName);
@@ -187,10 +193,17 @@ public class UpgradeSchemata extends UtilAbstraction {
                 runUpdates(schemaName);
                 enableSchema(schemaName);
             } catch (TargetDatabaseException e) {
+                error = true;
                 System.err.println("An error occurred while trying to disable schema '" + schemaName + "': " + e.getMessage());
+                printServerException(e, parser);
             } catch (IOException e) {
+                error = true;
                 System.err.println("An I/O error occurred while trying to upgrade schema '" + schemaName + "': " + e.getMessage());
-                e.printStackTrace();
+                printServerException(e, parser);
+            } finally {
+                if (!force && error) {
+                    sysexit(1);
+                }
             }
         }
     }
@@ -359,6 +372,8 @@ public class UpgradeSchemata extends UtilAbstraction {
 
         startFromSchema = (String) parser.getOptionValue(schemaNameOption);
 
+        force = parser.hasOption(forceOption);
+
         // Parse the optional JMX port
         jmxPort = 9999;
         if (parser.hasOption(jmxPortNameOption)) {
@@ -403,6 +418,7 @@ public class UpgradeSchemata extends UtilAbstraction {
         jmxLoginNameOption = setShortLongOpt(parser, 'l', "login", "The optional JMX login (if JMX has authentication enabled)", true, NeededQuadState.possibly);
         jmxPasswordNameOption = setShortLongOpt(parser, 's', "password", "The optional JMX password (if JMX has authentication enabled)", true, NeededQuadState.possibly);
         schemaNameOption = setShortLongOpt(parser, 'm', "schema-name", "The optional schema name to continue from", true, NeededQuadState.possibly);
+        forceOption = setShortLongOpt(parser, 'f', "force", "Forces the upgrade even if the updates fail in some schemata", false, NeededQuadState.notneeded);
 
         setDefaultCommandLineOptionsWithoutContextID(parser);
     }
