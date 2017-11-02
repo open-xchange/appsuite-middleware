@@ -69,6 +69,8 @@ import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Classification;
 import com.openexchange.chronos.DelegatingEvent;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.ExtendedProperties;
+import com.openexchange.chronos.ExtendedProperty;
 import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.TimeTransparency;
@@ -129,6 +131,10 @@ public class EventConverter {
         event.setSummary(getSummary(contact));
         event.setDescription(getDescription(contact));
         event.setAttendees(Collections.singletonList(getAttendee(contact)));
+        ExtendedProperties extendedProperties = new ExtendedProperties();
+        extendedProperties.add(new ExtendedProperty("X-OX-CONTACT-ID", String.valueOf(contact.getObjectID())));
+        extendedProperties.add(new ExtendedProperty("X-OX-CONTACT-FOLDER-ID", String.valueOf(contact.getParentFolderID())));
+        event.setExtendedProperties(extendedProperties);
         return event;
     }
 
