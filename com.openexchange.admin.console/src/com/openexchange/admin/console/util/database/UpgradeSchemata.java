@@ -131,6 +131,7 @@ public class UpgradeSchemata extends UtilAbstraction {
         setOptions(parser);
         try {
             parser.ownparse(args);
+            checkAndSetArguments(parser);
             initialiseRMIServices(parser);
             execute(parser);
         } catch (MissingOptionException e) {
@@ -179,7 +180,6 @@ public class UpgradeSchemata extends UtilAbstraction {
      * @throws Exception if a fatal error is occurred
      */
     private void execute(AdminParser parser) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, NoSuchObjectException, MissingServiceException, InstanceNotFoundException, MBeanException, ReflectionException {
-        checkAndSetArguments(parser);
         registerServer();
         for (Database database : listSchemata()) {
             boolean error = false;
@@ -220,6 +220,7 @@ public class UpgradeSchemata extends UtilAbstraction {
             return databases;
         }
 
+        Arrays.sort(databases, (o1, o2) -> o1.getName().compareTo(o2.getName()));
         int position = Arrays.binarySearch(databases, startFromSchema);
         if (position < 0) {
             return databases;
