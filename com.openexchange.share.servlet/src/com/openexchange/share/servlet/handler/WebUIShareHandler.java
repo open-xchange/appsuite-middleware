@@ -145,7 +145,7 @@ public class WebUIShareHandler extends AbstractShareHandler {
                         .share(guestInfo.getBaseToken())
                         .target(targetPath)
                         .message(MessageType.INFO, translator.translate(ShareServletStrings.NO_ACCESS_TO_SHARE_CONTACT_OWNER_CONTINUE))
-                        .loginName(guestInfo.getEmailAddress());
+                        .loginName(guestInfo.getGuestID(), guestInfo.getContextID());
                 } else {
                     location = new LoginLocation()
                         .share(guestInfo.getBaseToken())
@@ -153,7 +153,7 @@ public class WebUIShareHandler extends AbstractShareHandler {
                         .target(targetPath)
                         .message(MessageType.INFO, translator.translate(ShareServletStrings.NO_ACCESS_TO_SHARE_CONTACT_OWNER_LOG_IN));
                     if (guestInfo.getAuthentication() == AuthenticationMode.GUEST_PASSWORD) {
-                        location.loginName(guestInfo.getEmailAddress());
+                        location.loginName(guestInfo.getGuestID(), guestInfo.getContextID());
                     }
                 }
 
@@ -171,7 +171,7 @@ public class WebUIShareHandler extends AbstractShareHandler {
                 .loginType(guestInfo.getAuthentication())
                 .message(MessageType.INFO, message);
             if (guestInfo.getAuthentication() == AuthenticationMode.GUEST_PASSWORD) {
-                location.loginName(guestInfo.getEmailAddress());
+                location.loginName(guestInfo.getGuestID(), guestInfo.getContextID());
             }
             if (targetPath != null) {
                 location.target(targetPath);
