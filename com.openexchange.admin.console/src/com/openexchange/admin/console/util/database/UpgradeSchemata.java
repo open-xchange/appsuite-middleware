@@ -52,9 +52,15 @@ package com.openexchange.admin.console.util.database;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.rmi.Naming;
+import java.rmi.NotBoundException;
+import java.rmi.RemoteException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import javax.management.InstanceNotFoundException;
+import javax.management.MBeanException;
 import javax.management.MBeanServerConnection;
+import javax.management.ReflectionException;
 import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
@@ -62,12 +68,19 @@ import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.AdminParser.NeededQuadState;
 import com.openexchange.admin.console.CLIOption;
 import com.openexchange.admin.console.util.UtilAbstraction;
+import com.openexchange.admin.exceptions.TargetDatabaseException;
 import com.openexchange.admin.rmi.OXUtilInterface;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Database;
 import com.openexchange.admin.rmi.dataobjects.Server;
+import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
+import com.openexchange.admin.rmi.exceptions.InvalidDataException;
+import com.openexchange.admin.rmi.exceptions.MissingServiceException;
+import com.openexchange.admin.rmi.exceptions.NoSuchObjectException;
+import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.schemamove.mbean.SchemaMoveRemote;
 import com.openexchange.groupware.update.tools.Constants;
+import com.openexchange.java.Strings;
 
 /**
  * {@link UpgradeSchemata}
@@ -78,8 +91,9 @@ public class UpgradeSchemata extends UtilAbstraction {
 
     private static final String OPT_NAME_LONG = "name";
     private static final char OPT_NAME_SHORT = 'n';
-    
+
     private CLIOption serverNameOption;
+    private CLIOption schemaNameOption;
     private CLIOption jmxHostNameOption;
     private CLIOption jmxPortNameOption;
     private CLIOption jmxLoginNameOption;
@@ -88,6 +102,13 @@ public class UpgradeSchemata extends UtilAbstraction {
     private Server server;
     private String jmxHost;
     private int jmxPort;
+
+    private Credentials credentials;
+
+    private OXUtilInterface oxUtil;
+    private SchemaMoveRemote schemaMoveUtil;
+    private MBeanServerConnection mbeanConnection;
+    private String startFromSchema;
 
     /**
      * Entry point
@@ -110,6 +131,7 @@ public class UpgradeSchemata extends UtilAbstraction {
         setOptions(parser);
         try {
             parser.ownparse(args);
+            initialiseRMIServices(parser);
             execute(parser);
         } catch (Exception e) {
             System.err.println("An error occurred during schema upgrade. Manual intervention is advised.");
@@ -128,59 +150,175 @@ public class UpgradeSchemata extends UtilAbstraction {
     }
 
     //////////////////////// HELPERS //////////////////////////
+    /**
+     * Initialises the RMI services
+     * 
+     * @throws NotBoundException if the required RMI services are absent
+     * @throws RemoteException if the RMI registry cannot be contacted
+     * @throws MalformedURLException if the names or the required RMI services are not appropriately formatted URLs
+     * @throws IOException if an I/O error occurs
+     */
+    private void initialiseRMIServices(AdminParser parser) throws MalformedURLException, RemoteException, NotBoundException, IOException {
+        oxUtil = (OXUtilInterface) Naming.lookup(RMI_HOSTNAME + OXUtilInterface.RMI_NAME);
+        schemaMoveUtil = (SchemaMoveRemote) Naming.lookup(RMI_HOSTNAME + SchemaMoveRemote.RMI_NAME);
+        mbeanConnection = getMBeanConnection(parser);
+    }
 
     /**
      * Executes the command
      * 
      * @param parser The {@link AdminParser}
-     * @throws Exception
+     * @throws InvalidDataException
+     * @throws InvalidCredentialsException
+     * @throws StorageException
+     * @throws RemoteException
+     * @throws MissingServiceException
+     * @throws NoSuchObjectException
+     * @throws Exception if a fatal error is occurred
      */
-    private void execute(AdminParser parser) throws Exception {
+    private void execute(AdminParser parser) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, NoSuchObjectException, MissingServiceException, InstanceNotFoundException, MBeanException, ReflectionException {
         checkAndSetArguments(parser);
-        Credentials auth = credentialsparsing(parser);
-
-        // Register server
-        OXUtilInterface oxUtil = (OXUtilInterface) Naming.lookup(RMI_HOSTNAME + OXUtilInterface.RMI_NAME);
-        server = oxUtil.registerServer(server, auth);
-        System.out.println("The server with name '" + server.getName() + "' was successfully registered with id '" + server.getId() + "'.");
-
-        // List all database schemata
-        Database[] databases = oxUtil.listDatabaseSchema("*", false, auth);
-
-        SchemaMoveRemote smr = (SchemaMoveRemote) Naming.lookup(RMI_HOSTNAME + SchemaMoveRemote.RMI_NAME);
-        MBeanServerConnection mbeanConnection = getMBeanConnection(parser);
-
-        for (Database database : databases) {
-            // Disable schema
+        registerServer();
+        for (Database database : listSchemata()) {
             String schemaName = database.getScheme();
-            System.out.println("Disabling schema '" + schemaName + "'");
-            smr.disableSchema(auth, schemaName);
-            smr.invalidateContexts(auth, schemaName, true);
-
-            // Change server
-            System.out.println("Changing server for schema '" + schemaName + "' to '" + server.getName() + "'");
-            oxUtil.changeServer(server, schemaName, auth);
-
-            // Perform upgrade
-            System.out.println("Running updates...");
-            Object failures = mbeanConnection.invoke(Constants.OBJECT_NAME, "runUpdate", new Object[] { schemaName }, null);
-            if (null != failures) {
-                String message = failures.toString();
-                message = message.replaceAll("\\\\R", System.getProperty("line.separator"));
-                System.out.println(message);
+            try {
+                disableSchema(schemaName);
+                changeServer(schemaName);
+                runUpdates(schemaName);
+                enableSchema(schemaName);
+            } catch (TargetDatabaseException e) {
+                System.err.println("An error occurred while trying to disable schema '" + schemaName + "': " + e.getMessage());
+            } catch (IOException e) {
+                System.err.println("An I/O error occurred while trying to upgrade schema '" + schemaName + "': " + e.getMessage());
+                e.printStackTrace();
             }
-
-            // Enable schema
-            System.out.println("Enabling schema '" + schemaName + "'");
-            smr.enableSchema(auth, schemaName);
-            smr.invalidateContexts(auth, schemaName, false);
         }
+    }
+
+    /**
+     * Lists all known schemata
+     * 
+     * @return The known schemata
+     * @throws RemoteException
+     * @throws StorageException
+     * @throws InvalidCredentialsException
+     * @throws InvalidDataException
+     */
+    private Database[] listSchemata() throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
+        Database[] databases = oxUtil.listDatabaseSchema("*", false, credentials);
+        if (Strings.isEmpty(startFromSchema)) {
+            return databases;
+        }
+
+        int position = Arrays.binarySearch(databases, startFromSchema);
+        if (position < 0) {
+            return databases;
+        }
+
+        System.out.println("Skipping to schema '" + startFromSchema + "'");
+        return Arrays.copyOfRange(databases, position, databases.length);
+    }
+
+    /**
+     * Run the updates on the specified schema
+     * 
+     * @param schemaName The schema name for which to run the updates
+     * @throws InstanceNotFoundException if the required MBean does not exist in the registry
+     * @throws MBeanException if an error during the runUpdate method is occurred
+     * @throws ReflectionException if an invocation error is occurred
+     * @throws IOExceptionif an I/O error is occurred
+     */
+    private void runUpdates(String schemaName) throws InstanceNotFoundException, MBeanException, ReflectionException, IOException {
+        System.out.print("Running updates...");
+        Object failures = mbeanConnection.invoke(Constants.OBJECT_NAME, "runUpdate", new Object[] { schemaName }, null);
+        if (failures == null) {
+            ok();
+            return;
+        }
+
+        System.out.println("\nErrors while running updates for schema '" + schemaName + "': ");
+        String message = failures.toString();
+        message = message.replaceAll("\\\\R", System.getProperty("line.separator"));
+        System.out.println(message);
+    }
+
+    /**
+     * Enables the schema with the specified name
+     * 
+     * @param schemaName
+     * @throws StorageException
+     * @throws NoSuchObjectException
+     * @throws MissingServiceException
+     * @throws RemoteException
+     * @throws InvalidCredentialsException
+     * @throws InvalidDataException
+     */
+    private void enableSchema(String schemaName) throws StorageException, NoSuchObjectException, MissingServiceException, RemoteException, InvalidCredentialsException, InvalidDataException {
+        System.out.print("Enabling schema '" + schemaName + "'...");
+        schemaMoveUtil.enableSchema(credentials, schemaName);
+        schemaMoveUtil.invalidateContexts(credentials, schemaName, false);
+        ok();
+    }
+
+    /**
+     * Changes the server
+     * 
+     * @param schemaName
+     * @throws RemoteException
+     * @throws StorageException
+     * @throws InvalidCredentialsException
+     * @throws InvalidDataException
+     */
+    private void changeServer(String schemaName) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
+        System.out.print("Changing server for schema '" + schemaName + "' to '" + server.getName() + "'...");
+        oxUtil.changeServer(server, schemaName, credentials);
+        ok();
+    }
+
+    /**
+     * Disables the schema with the specified name
+     * 
+     * @param schemaName
+     * @throws TargetDatabaseException
+     * @throws StorageException
+     * @throws NoSuchObjectException
+     * @throws MissingServiceException
+     * @throws RemoteException
+     * @throws InvalidCredentialsException
+     * @throws InvalidDataException
+     */
+    private void disableSchema(String schemaName) throws StorageException, NoSuchObjectException, MissingServiceException, RemoteException, InvalidCredentialsException, InvalidDataException, TargetDatabaseException {
+        System.out.print("Disabling schema '" + schemaName + "'...");
+        schemaMoveUtil.disableSchema(credentials, schemaName);
+        schemaMoveUtil.invalidateContexts(credentials, schemaName, true);
+        ok();
+    }
+
+    /**
+     * Registers the server
+     * 
+     * @throws RemoteException
+     * @throws StorageException
+     * @throws InvalidCredentialsException
+     * @throws InvalidDataException
+     */
+    private void registerServer() throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
+        System.out.print("Registering the server with name '" + server.getName() + "'...");
+        server = oxUtil.registerServer(server, credentials);
+        ok();
+    }
+
+    /**
+     * Prints OK
+     */
+    private void ok() {
+        System.out.println("OK");
     }
 
     /**
      * Create an {@link MBeanServerConnection}
      * 
-     * @param parser The {@link AdminParser} to extract the optional jmx user and password
+     * @param parser The {@link AdminParser} to extract the optional JMX user and password
      * @return The {@link MBeanServerConnection}
      * @throws MalformedURLException if the URL is malformed
      * @throws IOException if an I/O error occurs
@@ -219,6 +357,8 @@ public class UpgradeSchemata extends UtilAbstraction {
         server = new Server();
         server.setName(serverName);
 
+        startFromSchema = (String) parser.getOptionValue(schemaNameOption);
+
         // Parse the optional JMX port
         jmxPort = 9999;
         if (parser.hasOption(jmxPortNameOption)) {
@@ -247,6 +387,8 @@ public class UpgradeSchemata extends UtilAbstraction {
                 jmxHost = tmp.trim();
             }
         }
+
+        credentials = credentialsparsing(parser);
     }
 
     /**
@@ -255,11 +397,12 @@ public class UpgradeSchemata extends UtilAbstraction {
      * @param parser the {@link AdminParser}
      */
     private void setOptions(AdminParser parser) {
-        serverNameOption = setShortLongOpt(parser, OPT_NAME_SHORT, OPT_NAME_LONG, "The name of the server", true, NeededQuadState.needed);
+        serverNameOption = setShortLongOpt(parser, OPT_NAME_SHORT, OPT_NAME_LONG, "The name of the server to register and point all upgraded schemata to", true, NeededQuadState.needed);
         jmxHostNameOption = setShortLongOpt(parser, 'H', "host", "The optional JMX host (default:localhost)", true, NeededQuadState.possibly);
         jmxPortNameOption = setShortLongOpt(parser, 'p', "port", "The optional JMX port (default:9999)", true, NeededQuadState.possibly);
         jmxLoginNameOption = setShortLongOpt(parser, 'l', "login", "The optional JMX login (if JMX has authentication enabled)", true, NeededQuadState.possibly);
         jmxPasswordNameOption = setShortLongOpt(parser, 's', "password", "The optional JMX password (if JMX has authentication enabled)", true, NeededQuadState.possibly);
+        schemaNameOption = setShortLongOpt(parser, 'm', "schema-name", "The optional schema name to continue from", true, NeededQuadState.possibly);
 
         setDefaultCommandLineOptionsWithoutContextID(parser);
     }
