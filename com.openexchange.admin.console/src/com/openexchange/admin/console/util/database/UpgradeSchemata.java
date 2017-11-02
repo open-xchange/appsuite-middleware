@@ -234,7 +234,7 @@ public class UpgradeSchemata extends UtilAbstraction {
         }
 
         System.out.println("Skipping to schema '" + startFromSchema + "'");
-        return Arrays.copyOfRange(databases, position, databases.length);
+        return Arrays.copyOfRange(databases, position + 1, databases.length);
     }
 
     /**
@@ -331,8 +331,8 @@ public class UpgradeSchemata extends UtilAbstraction {
             // If the 'schema-name' is present it means that there is a continuation which implies
             // that a server was previously registered, thus simply use the already existing server.
             if (!Strings.isEmpty(startFromSchema)) {
-                System.out.println("OK, proceeding with the upgrade. The server '" + server.getName() + "' with id '" + server.getId() + "' will be used to point the updated schemata after the update tasks complete.");
                 server = listServer[0];
+                System.out.println("OK, proceeding with the upgrade. The server '" + server.getName() + "' with id '" + server.getId() + "' will be used to point the updated schemata after the update tasks complete.");
                 return;
             }
 
