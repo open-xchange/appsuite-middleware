@@ -287,9 +287,9 @@ public final class QuotedInternetAddress extends InternetAddress {
         String s = init(decodeFirst ? MimeMessageUtility.decodeMultiEncodedHeader(str) : str);
         boolean ignoreErrors = parseHdr && !strict;
         
-        int length = s.length();
         for (int pos; (pos = s.indexOf('(')) >= 0;) {
             int i = pos;
+            int length = s.length();
             int nest;
             for (i++, nest = 1; i < length && nest > 0; i++) {
                 char c = s.charAt(i);
@@ -316,14 +316,14 @@ public final class QuotedInternetAddress extends InternetAddress {
                 i = pos + 1;
                 break;
             }
-            if (i < s.length()) {                
+            if (i < length) {                
                 s = s.substring(0, pos) + s.substring(i);
             } else {
                 s = s.substring(0, pos);
             }
         }
 
-        length = s.length();
+        int length = s.length();
         List<InternetAddress> list = new LinkedList<InternetAddress>();
         boolean in_group = false; // we're processing a group term
         boolean route_addr = false; // address came from route-addr term
