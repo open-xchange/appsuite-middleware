@@ -115,7 +115,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
         ResultSet rs = null;
 
         log.debug("change admin {}", adm);
-        
+
         boolean rollback = false;
         try {
             oxcon = cache.getWriteConnectionForConfigDB();
@@ -1085,6 +1085,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             ubp.setTask(access.getTasks());
             ubp.setVCard(access.getVcard());
             ubp.setWebDAV(access.getWebdav());
+            ubp.setWebDAVXML(access.getWebdavXml());
             ubp.setWebMail(access.getWebmail());
             ubp.setDelegateTasks(access.getDelegateTask());
             ubp.setEditGroup(access.getEditGroup());
@@ -1758,7 +1759,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             prep.setInt(1, ctx.getId());
             rs = prep.executeQuery();
 
-            if( rs.next() ) {
+            if (rs.next()) {
                 prep.close();
                 rs.close();
                 prep = con.prepareStatement("UPDATE context_customfields SET modifyTimestamp=? WHERE cid=?");

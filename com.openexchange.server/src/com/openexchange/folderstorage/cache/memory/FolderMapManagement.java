@@ -50,6 +50,7 @@
 package com.openexchange.folderstorage.cache.memory;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -302,7 +303,7 @@ public final class FolderMapManagement {
      * @param contextId The context identifier
      * @param notify Whether to post notification or not
      */
-    public void dropHierarchyFor(List<String> folderIds, String treeId, int optUser, int contextId) {
+    public void dropHierarchyFor(Collection<String> folderIds, String treeId, int optUser, int contextId) {
         dropHierarchyFor(folderIds, treeId, optUser, contextId, true);
     }
 
@@ -315,7 +316,7 @@ public final class FolderMapManagement {
      * @param contextId The context identifier
      * @param notify Whether to post notification or not
      */
-    public void dropHierarchyFor(List<String> folderIds, String treeId, int optUser, int contextId, boolean notify) {
+    public void dropHierarchyFor(Collection<String> folderIds, String treeId, int optUser, int contextId, boolean notify) {
         if ((null == folderIds) || (null == treeId)) {
             return;
         }

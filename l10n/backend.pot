@@ -1981,9 +1981,11 @@ msgid "The file version you requested does not exist."
 msgstr ""
 
 #. A folder named "%1$s" already exists below the parent folder "%2$s".
+#. A folder named "%1$s" already exists.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:74
-msgid ""
-"A folder named \"%1$s\" already exists below the parent folder \"%2$s\"."
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:74
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:128
+msgid "A folder named \"%1$s\" already exists."
 msgstr ""
 
 #. You do not have the appropriate permissions to create a subfolder below the folder "%1$s".
@@ -3790,6 +3792,23 @@ msgstr ""
 msgid "The common name for the certificate is invalid"
 msgstr ""
 
+#. The root authority for the certificate is untrusted
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.net.ssl/src/com/openexchange/net/ssl/exception/SSLExceptionMessages.java:85
+msgid "The root authority for the certificate is untrusted"
+msgstr ""
+
+#. The certificate is using a weak algorithm
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.net.ssl/src/com/openexchange/net/ssl/exception/SSLExceptionMessages.java:88
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.net.ssl/src/com/openexchange/net/ssl/internal/FailureReasonMessage.java:81
+msgid "The certificate is using a weak algorithm"
+msgstr ""
+
+#. The certificate was revoked
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.net.ssl/src/com/openexchange/net/ssl/exception/SSLExceptionMessages.java:91
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.net.ssl/src/com/openexchange/net/ssl/internal/FailureReasonMessage.java:84
+msgid "The certificate was revoked"
+msgstr ""
+
 #. The certificate was signed by an untrusted issuer
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.net.ssl/src/com/openexchange/net/ssl/internal/FailureReasonMessage.java:66
 msgid "The certificate was signed by an untrusted issuer"
@@ -4901,12 +4920,6 @@ msgstr ""
 #. You do not have appropriate permissions to move the folder.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:71
 msgid "You do not have appropriate permissions to move the folder."
-msgstr ""
-
-#. A folder named "%1$s" already exists.
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:74
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:128
-msgid "A folder named \"%1$s\" already exists."
 msgstr ""
 
 #. You do not have the appropriate permissions to delete the folder.
@@ -8201,6 +8214,11 @@ msgstr ""
 #. The message advertising that affected account is currently in setup phase and does not yet reflect up-to-date information
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/KnownStatusMessage.java:83
 msgid "Account is currently being set-up."
+msgstr ""
+
+#. The message advertising that the affected account is facing an SSL problem
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/KnownStatusMessage.java:86
+msgid "There was an SSL problem."
 msgstr ""
 
 #. Cannot find mail account for user "%2$s".

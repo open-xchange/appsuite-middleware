@@ -59,6 +59,7 @@ import java.net.URISyntaxException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.StatusLine;
@@ -71,6 +72,7 @@ import org.apache.http.entity.ContentType;
 import org.apache.http.entity.InputStreamEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.util.EntityUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONValue;
@@ -330,6 +332,33 @@ public abstract class AbstractOneDriveResourceAccess {
      * @param request The HTTP request
      */
     public static void reset(HttpRequestBase request) {
+        if (null != request) {
+            try {
+                request.reset();
+            } catch (Exception e) {
+                // Ignore
+            }
+        }
+    }
+
+    /**
+     * Closes the supplied HTTP request & response resources silently.
+     *
+     * @param request The HTTP request to reset
+     * @param response The HTTP response to consume and close
+     */
+    public static void close(HttpRequestBase request, HttpResponse response) {
+        if (null != response) {
+            HttpEntity entity = response.getEntity();
+            if (null != entity) {
+                try {
+                    EntityUtils.consume(entity);
+                } catch (Exception e) {
+                    // Ignore
+                }
+            }
+        }
+
         if (null != request) {
             try {
                 request.reset();

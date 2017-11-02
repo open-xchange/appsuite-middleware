@@ -337,4 +337,10 @@ glbQueryParamsRampUpFor:
   type: string
   description: Optional client identifier which is used to retrieve the rampup data.
   required: false
-
+glbQueryParamsAllowEnqueue:
+  in: query
+  name: allow_enqueue
+  type: boolean
+  description: Optional flag that specifies whether the request is allowed for being submitted to job queue.
+  required: false
+  default: false

@@ -51,7 +51,6 @@ package com.openexchange.groupware.update.tasks;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
@@ -109,7 +108,6 @@ public class DropRendundantIndicesUpdateTask extends UpdateTaskAdapter {
                 DBUtils.rollback(con);
             }
             DBUtils.autocommit(con);
-            Database.getDatabaseService().backForUpdateTask(con);
         }
 
     }

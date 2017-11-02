@@ -52,7 +52,7 @@ package com.openexchange.groupware.alias.impl;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.locks.Lock;
@@ -178,19 +178,19 @@ public class CachingAliasStorage implements UserAliasStorage {
         if (!toLoad.isEmpty()) {
             TIntObjectMap<ImmutableSet<String>> loaded = delegate.getAliasesMapping(contextId, toLoad.toArray());
             map.putAll(loaded);
-            
+
             LockService lockService = ServerServiceRegistry.getInstance().getService(LockService.class);
             TIntObjectIterator<ImmutableSet<String>> iterator = loaded.iterator();
             for (int i = loaded.size(); i-- > 0;) {
                 iterator.advance();
-                
+
                 int userId = iterator.key();
                 Lock lock = null == lockService ? LockService.EMPTY_LOCK : lockService.getSelfCleaningLockFor(new StringBuilder(32).append("loadaliases-").append(contextId).append('-').append(userId).toString());
                 lock.lock();
                 try {
                     CacheKey key = newCacheKey(cacheService, userId, contextId);
                     Object object = cache.get(key);
-                    if (!(object instanceof Set)) {                        
+                    if (!(object instanceof Set)) {
                         ImmutableSet<String> aliases = iterator.value();
                         cache.put(key, aliases, false);
                     }
@@ -216,7 +216,16 @@ public class CachingAliasStorage implements UserAliasStorage {
     public boolean createAlias(Connection con, int contextId, int userId, String alias) throws OXException {
         boolean success = delegate.createAlias(con, contextId, userId, alias);
         if (success) {
-            invalidateAliases(contextId, userId);
+            CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
+            if (null != cacheService) {
+                Cache cache = cacheService.getCache(REGION_NAME);
+                CacheKey key = newCacheKey(cacheService, userId, contextId);
+                Object object = cache.get(key);
+                if (object instanceof Set) {
+                    ImmutableSet<String> newAliases = ImmutableSet.<String> builder().addAll((Set<String>) object).add(alias).build();
+                    cache.put(key, newAliases, true);
+                }
+            }
         }
         return success;
     }
@@ -225,7 +234,18 @@ public class CachingAliasStorage implements UserAliasStorage {
     public boolean updateAlias(Connection con, int contextId, int userId, String oldAlias, String newAlias) throws OXException {
         boolean success = delegate.updateAlias(con, contextId, userId, oldAlias, newAlias);
         if (success) {
-            invalidateAliases(contextId, userId);
+            CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
+            if (null != cacheService) {
+                Cache cache = cacheService.getCache(REGION_NAME);
+                CacheKey key = newCacheKey(cacheService, userId, contextId);
+                Object object = cache.get(key);
+                if (object instanceof Set) {
+                    Set<String> newAliases = new LinkedHashSet<>((Set<String>) object);
+                    newAliases.remove(oldAlias);
+                    newAliases.add(newAlias);
+                    cache.put(key, ImmutableSet.copyOf(newAliases), true);
+                }
+            }
         }
         return success;
     }
@@ -234,7 +254,17 @@ public class CachingAliasStorage implements UserAliasStorage {
     public boolean deleteAlias(Connection con, int contextId, int userId, String alias) throws OXException {
         boolean success = delegate.deleteAlias(con, contextId, userId, alias);
         if (success) {
-            invalidateAliases(contextId, userId);
+            CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
+            if (null != cacheService) {
+                Cache cache = cacheService.getCache(REGION_NAME);
+                CacheKey key = newCacheKey(cacheService, userId, contextId);
+                Object object = cache.get(key);
+                if (object instanceof Set) {
+                    Set<String> newAliases = new LinkedHashSet<>((Set<String>) object);
+                    newAliases.remove(alias);
+                    cache.put(key, ImmutableSet.copyOf(newAliases), true);
+                }
+            }
         }
         return success;
     }
@@ -243,7 +273,15 @@ public class CachingAliasStorage implements UserAliasStorage {
     public boolean deleteAliases(Connection con, int contextId, int userId) throws OXException {
         boolean success = delegate.deleteAliases(con, contextId, userId);
         if (success) {
-            invalidateAliases(contextId, userId);
+            CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
+            if (null != cacheService) {
+                Cache cache = cacheService.getCache(REGION_NAME);
+                CacheKey key = newCacheKey(cacheService, userId, contextId);
+                Object object = cache.get(key);
+                if (object instanceof Set) {
+                    cache.put(key, ImmutableSet.<String> builder().build(), true);
+                }
+            }
         }
         return success;
     }

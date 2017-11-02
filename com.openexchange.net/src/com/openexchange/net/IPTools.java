@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.http.grizzly.util;
+package com.openexchange.net;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -58,7 +58,6 @@ import org.slf4j.Logger;
 import com.google.common.collect.ImmutableList;
 import com.google.common.net.InetAddresses;
 import com.openexchange.java.Strings;
-import com.openexchange.net.IPRange;
 
 /**
  * {@link IPTools} - Detects the first IP that isn't one of our known proxies and represents our new remoteIP.
@@ -97,14 +96,32 @@ public class IPTools {
         if (Strings.isEmpty(forwardedIPs) || knownProxies.isEmpty()) {
             return null;
         }
+        return getRemoteIP(Strings.splitByComma(forwardedIPs), knownProxies);
+    }
 
-        // Split & iterate in reverse order until first remote IP occurs
-        String[] ips = Strings.splitByComma(forwardedIPs);
+    /**
+     * Detects the first IP that isn't one of our known proxies and represents our new remoteIP. This is done by removing all known proxies
+     * from the list of forwarded-for header beginning from the right side of the list. The rightmost leftover IP is then seen as our new
+     * remote IP as it represents the first IP not known to us. <h4>Example:</h4>
+     *
+     * <pre>
+     * remotes = 192.168.32.50, 192.168.33.225, 192.168.33.224
+     * known = 192.168.33.225, 192.168.33.224
+     * remoteIP = 192.168.32.50
+     * </pre>
+     *
+     * @param forwardedIPs An Array of Strings containing the forwarded IPs
+     * @param knownProxies A List of {@link IPRange}s containing the known proxies
+     * @return The first IP that isn't a known proxy address. The remote IP or <code>null</code> if no valid remote IP could be found or an IP address is malformed
+     */
+    public static String getRemoteIP(String[] forwardedIPs, Collection<IPRange> knownProxies) {
+
+        // Iterate in reverse order until first remote IP occurs
         String remoteIP = null;
         String previousIP = null;
         try {
-            for (int i = ips.length; null == remoteIP && i-- > 0;) {
-                previousIP = ips[i];
+            for (int i = forwardedIPs.length; null == remoteIP && i-- > 0;) {
+                previousIP = forwardedIPs[i];
                 boolean unknownByProxies = true;
                 for (IPRange range : knownProxies) {
                     if (range.contains(previousIP)) {
@@ -147,7 +164,7 @@ public class IPTools {
      * @throws PatternSyntaxException - if the regular expression's syntax of separator is invalid
      */
     public static List<String> splitAndTrim(String input, String separator) {
-        return Strings.splitAndTrim(input, separator);
+        return com.openexchange.java.Strings.splitAndTrim(input, separator);
     }
 
     /**

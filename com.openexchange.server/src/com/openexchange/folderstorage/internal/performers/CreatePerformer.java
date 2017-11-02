@@ -170,6 +170,7 @@ public final class CreatePerformer extends AbstractUserizedFolderPerformer {
         try {
             final Folder parent = parentStorage.getFolder(treeId, parentId, storageParameters);
             boolean ignoreCase = supportsCaseInsensitive(parent);
+            boolean supportsAutoRename = supportsAutoRename(parent);
             /*
              * Check folder permission for parent folder
              */
@@ -191,12 +192,14 @@ public final class CreatePerformer extends AbstractUserizedFolderPerformer {
             /*
              * Check for duplicates for OLOX-covered folders
              */
-            UserizedFolder existingFolder = checkForEqualName(treeId, parentId, toCreate, toCreate.getContentType(), CheckOptions.builder().allowAutorename(true).ignoreCase(ignoreCase).build());
-            if (null != existingFolder) {
-                if (null != session && "USM-JSON".equals(session.getClient())) {
-                    return existingFolder.getID(); // taken over from fix for bug #21286 ...
+            if (false == supportsAutoRename) {
+                UserizedFolder existingFolder = checkForEqualName(treeId, parentId, toCreate, toCreate.getContentType(), CheckOptions.builder().allowAutorename(true).ignoreCase(ignoreCase).build());
+                if (null != existingFolder) {
+                    if (null != session && "USM-JSON".equals(session.getClient())) {
+                        return existingFolder.getID(); // taken over from fix for bug #21286 ...
+                    }
+                    throw FolderExceptionErrorMessage.EQUAL_NAME.create(toCreate.getName(), parent.getLocalizedName(getLocale()), treeId);
                 }
-                throw FolderExceptionErrorMessage.EQUAL_NAME.create(toCreate.getName(), parent.getLocalizedName(getLocale()), treeId);
             }
             String reservedName = checkForReservedName(treeId, parentId, toCreate, toCreate.getContentType(), CheckOptions.builder().allowAutorename(false).ignoreCase(ignoreCase).build());
             if (null != reservedName) {

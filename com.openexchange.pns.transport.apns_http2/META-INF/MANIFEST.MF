@@ -1,0 +1,31 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: The implementation for APNS HTTP/2 backed transport of push notifcations
+Bundle-SymbolicName: com.openexchange.pns.transport.apns_http2
+Bundle-Version: 7.10.0
+Bundle-Vendor: OX Software GmbH
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Import-Package: com.clevertap.apns,
+ com.clevertap.apns.clients,
+ com.clevertap.apns.exceptions,
+ com.google.common.annotations,
+ com.google.common.base,
+ com.google.common.cache,
+ com.openexchange.config,
+ com.openexchange.config.cascade,
+ com.openexchange.configuration,
+ com.openexchange.exception,
+ com.openexchange.java,
+ com.openexchange.osgi,
+ com.openexchange.osgi.util,
+ com.openexchange.pns,
+ com.openexchange.server,
+ com.openexchange.timer,
+ com.openexchange.tools.arrays,
+ com.openexchange.tools.strings,
+ org.json,
+ org.osgi.framework,
+ org.osgi.util.tracker,
+ org.slf4j
+Export-Package: com.openexchange.pns.transport.apns_http2
+Bundle-Activator: com.openexchange.pns.transport.apns_http2.osgi.ApnsHttp2PushNotificationTransportActivator

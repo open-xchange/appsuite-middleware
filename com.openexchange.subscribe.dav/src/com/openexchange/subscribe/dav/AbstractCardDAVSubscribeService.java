@@ -187,6 +187,7 @@ public abstract class AbstractCardDAVSubscribeService extends AbstractDAVSubscri
                 for (final List<String> contactChunk : Lists.partition(contactHrefs, chunkSize)) {
                     if (first) {
                         retval = processAddressBookChunk(addressBook, contactChunk, httpClient, login, password, subscription, vcardService);
+                        first = false;
                     } else {
                         final FolderUpdaterService<Contact> updaterToUse = null == folderUpdater ? folderUpdaterRegistry.<Contact> getFolderUpdater(subscription) : folderUpdater;
                         Task<Void> task = new AbstractTask<Void>() {

@@ -1,0 +1,9 @@
+type: object
+properties:
+  $ref: ../common/CommonResponseData.yaml
+  data:
+    type: object
+    properties:
+      job:
+        type: string
+        description: The job identifier

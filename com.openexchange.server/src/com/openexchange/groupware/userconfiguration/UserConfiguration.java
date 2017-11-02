@@ -49,14 +49,14 @@
 
 package com.openexchange.groupware.userconfiguration;
 
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
-import gnu.trove.list.TIntList;
-import gnu.trove.list.array.TIntArrayList;
 
 /**
  * {@link UserConfiguration} - Represents a user configuration.
@@ -108,6 +108,12 @@ public class UserConfiguration implements Serializable, Cloneable {
      * @Obsolete Unused permission was removed. Leaving it here to prevent confusion.
      */
     private static final int PINBOARD_WRITE_ACCESS = UserPermissionBits.PINBOARD_WRITE_ACCESS;
+
+    /**
+     * The permission bit for WebDAV/XML access.
+     * @deprecated
+     */
+    public static final int WEBDAV_XML = UserPermissionBits.WEBDAV_XML;
 
     /**
      * The permission bit for WebDAV access.
@@ -355,6 +361,7 @@ public class UserConfiguration implements Serializable, Cloneable {
         return UserPermissionBits.getPermissionBits(capabilities);
     }
 
+
     /**
      * Detects if user configuration allows web mail access.
      *
@@ -398,6 +405,16 @@ public class UserConfiguration implements Serializable, Cloneable {
      */
     public boolean hasInfostore() {
         return capabilities.contains(Permission.INFOSTORE.getCapabilityName());
+    }
+
+    /**
+     * Detects if user configuration allows WebDAV XML.
+     *
+     * @return <code>true</code> if enabled; otherwise <code>false</code>
+     * @deprecated
+     */
+    public boolean hasWebDAVXML() {
+        return capabilities.contains(Permission.WEBDAV_XML.getCapabilityName());
     }
 
     /**
@@ -756,7 +773,7 @@ public class UserConfiguration implements Serializable, Cloneable {
      *
      * @return The extended permissions
      * @deprecated Might return incomplete capabilities as capabilities are loaded by user/context identifier pair not providing further
-     *             session attributes
+     * session attributes
      */
     @Deprecated
     public Set<String> getExtendedPermissions() {

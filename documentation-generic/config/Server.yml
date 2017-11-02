@@ -812,8 +812,8 @@ properties:
       Configures wether the stacktrace of specific exceptions should be included into a response or not. This has to be done as a 
       comma separated list of exceptions codes and prefixes. A wildcard pattern can be used to define the exceptions. 
       E.g. "SES", "SES*" or "SES-*" will exclude stacktraces in responses for all SessionExceptionCodes. For single ExceptionsCodes 
-      to omit, the ExceptionCode itself must be added. E.g. "SES-203" will exclude the stacktrace for SessionExceptionCode "SESSION_EXPIRED" on responses. 
-    defaultValue: "SES"
+      to omit, the ExceptionCode itself must be added. E.g. "SES-0203" will exclude the stacktrace for SessionExceptionCode "SESSION_EXPIRED" on responses. 
+    defaultValue: SES
     version: 7.10.0
     reloadable: true
     configcascadeAware: false
