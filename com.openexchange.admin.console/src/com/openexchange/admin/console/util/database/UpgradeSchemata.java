@@ -92,6 +92,9 @@ import com.openexchange.java.Strings;
  */
 public class UpgradeSchemata extends UtilAbstraction {
 
+    private static final String ABORT = "abort";
+    private static final String CONTINUE = "continue";
+
     private CLIOption serverNameOption;
     private CLIOption schemaNameOption;
     private CLIOption jmxHostNameOption;
@@ -313,9 +316,6 @@ public class UpgradeSchemata extends UtilAbstraction {
         schemaMoveUtil.invalidateContexts(credentials, schemaName, true);
         ok();
     }
-
-    private static final String ABORT = "abort";
-    private static final String CONTINUE = "continue";
 
     /**
      * Registers the server
