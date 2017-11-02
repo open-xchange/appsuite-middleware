@@ -48,20 +48,8 @@ export NO_BRP_CHECK_BYTECODE_VERSION=true
 ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} -f build/build.xml clean build
 
 %post
-if [ ${1:-0} -eq 2 ]; then
-    # only when updating
-    . /opt/open-xchange/lib/oxfunctions.sh
-
-    # prevent bash from expanding, see bug 13316
-    GLOBIGNORE='*'
-
-    ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc ldapauth.properties
-
-    ox_update_permissions "/opt/open-xchange/etc/ldapauth.properties" root:open-xchange 640
-
-    # SoftwareChange_Request-2083
-    ox_add_property useFullLoginInfo false /opt/open-xchange/etc/ldapauth.properties
-fi
+. /opt/open-xchange/lib/oxfunctions.sh
+ox_update_permissions "/opt/open-xchange/etc/ldapauth.properties" root:open-xchange 640
 
 %clean
 %{__rm} -rf %{buildroot}

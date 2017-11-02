@@ -83,7 +83,6 @@ if [ ${1:-0} -eq 2 ]; then # only when updating
     # SoftwareChange_Request-3414
     sed -i 's/-> Requires "emclient" capability/-> Requires "emclient_basic" or "emclient_premium" capability/' /opt/open-xchange/etc/client-onboarding-scenarios.yml
 
-
     # SoftwareChange_Request-3954
     PFILE=/opt/open-xchange/etc/client-onboarding.properties
     NAMES=( com.openexchange.client.onboarding.apple.mac.scenarios com.openexchange.client.onboarding.apple.ipad.scenarios com.openexchange.client.onboarding.apple.iphone.scenarios com.openexchange.client.onboarding.android.tablet.scenarios com.openexchange.client.onboarding.android.phone.scenarios com.openexchange.client.onboarding.windows.desktop.scenarios )

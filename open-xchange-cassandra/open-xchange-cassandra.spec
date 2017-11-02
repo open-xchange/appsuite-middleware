@@ -42,17 +42,6 @@ Authors:
 export NO_BRP_CHECK_BYTECODE_VERSION=true
 ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} -f build/build.xml clean build
 
-%post
-if [ ${1:-0} -eq 2 ]; then
-    # only when updating
-    . /opt/open-xchange/lib/oxfunctions.sh
-
-    # prevent bash from expanding, see bug 13316
-    GLOBIGNORE='*'
-
-    PFILE=/opt/open-xchange/etc/cassandra.properties
-fi
-
 %clean
 %{__rm} -rf %{buildroot}
 
