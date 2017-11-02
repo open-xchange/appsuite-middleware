@@ -60,6 +60,7 @@ import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmTrigger;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.UnmodifiableEvent;
 import com.openexchange.chronos.common.AlarmUtils;
 import com.openexchange.chronos.impl.performer.AllPerformer;
@@ -219,6 +220,17 @@ public class CalendarServiceImpl implements CalendarService {
             @Override
             protected List<Event> execute(CalendarSession session, CalendarStorage storage) throws OXException {
                 return new AllPerformer(session, storage).perform();
+            }
+        }.executeQuery();
+    }
+
+    @Override
+    public List<Event> getEventsOfUser(final CalendarSession session, Boolean rsvp, ParticipationStatus[] partStats) throws OXException {
+        return new InternalCalendarStorageOperation<List<Event>>(session) {
+
+            @Override
+            protected List<Event> execute(CalendarSession session, CalendarStorage storage) throws OXException {
+                return new AllPerformer(session, storage).perform(rsvp, partStats);
             }
         }.executeQuery();
     }

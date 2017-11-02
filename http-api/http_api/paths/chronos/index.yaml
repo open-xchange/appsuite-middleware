@@ -10,3 +10,5 @@ requests:
   - UpdateAttendeeRequest.yaml
   - MoveRequest.yaml
   - FreeBusyRequest.yaml
+  - NeedsActionRequest.yaml
+  

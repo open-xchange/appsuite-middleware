@@ -60,10 +60,12 @@ import static com.openexchange.folderstorage.Permission.NO_PERMISSIONS;
 import static com.openexchange.folderstorage.Permission.READ_FOLDER;
 import static com.openexchange.folderstorage.Permission.READ_OWN_OBJECTS;
 import static com.openexchange.java.Autoboxing.I;
+import java.util.Collections;
 import java.util.List;
 import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.SearchOptions;
 import com.openexchange.chronos.storage.CalendarStorage;
@@ -98,10 +100,46 @@ public class AllPerformer extends AbstractQueryPerformer {
      * @return The loaded events
      */
     public List<Event> perform() throws OXException {
+        return perform(null, null);
+    }
+
+    /**
+     * Performs the operation.
+     *
+     * @param partStats The participation status to include, or <code>null</code> to include all events independently of the user
+     *            attendee's participation status
+     * @param rsvp The reply expectation to include, or <code>null</code> to include all events independently of the user attendee's
+     *            rsvp status
+     * @return The loaded events
+     */
+    public List<Event> perform(Boolean rsvp, ParticipationStatus[] partStats) throws OXException {
         /*
          * search for events the current session's user attends
          */
         SearchTerm<?> searchTerm = getSearchTerm(AttendeeField.ENTITY, SingleOperation.EQUALS, I(session.getUserId()));
+        if (null != rsvp) {
+            /*
+             * only include events with matching rsvp
+             */
+            searchTerm = new CompositeSearchTerm(CompositeOperation.AND).addSearchTerm(searchTerm).addSearchTerm(getSearchTerm(AttendeeField.RSVP, SingleOperation.EQUALS, rsvp));
+        }
+        if (null != partStats) {
+            /*
+             * only include events with matching participation status
+             */
+            if (0 == partStats.length) {
+                return Collections.emptyList();
+            }
+            if (1 == partStats.length) {
+                searchTerm = new CompositeSearchTerm(CompositeOperation.AND).addSearchTerm(searchTerm).addSearchTerm(getSearchTerm(AttendeeField.PARTSTAT, SingleOperation.EQUALS, partStats[0].getValue()));
+            } else {
+                CompositeSearchTerm orTerm = new CompositeSearchTerm(CompositeOperation.OR);
+                for (ParticipationStatus partStat : partStats) {
+                    orTerm.addSearchTerm(getSearchTerm(AttendeeField.PARTSTAT, SingleOperation.EQUALS, partStat.getValue()));
+                }
+                searchTerm = new CompositeSearchTerm(CompositeOperation.AND).addSearchTerm(searchTerm).addSearchTerm(orTerm);
+            }
+        }
         if (false == isEnforceDefaultAttendee(session)) {
             /*
              * also include not group-scheduled events associated with the calendar user

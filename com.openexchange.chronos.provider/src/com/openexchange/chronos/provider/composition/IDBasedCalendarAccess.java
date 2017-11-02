@@ -60,6 +60,7 @@ import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.provider.CalendarFolder;
 import com.openexchange.chronos.provider.extensions.PersonalAlarmAware;
 import com.openexchange.chronos.provider.extensions.SearchAware;
@@ -167,7 +168,7 @@ public interface IDBasedCalendarAccess extends TransactionAware, CalendarParamet
     List<Event> getEventsInFolder(String folderId) throws OXException;
 
     /**
-     * Gets all events of the session's user.
+     * Gets all events of the session's user attends in.
      * <p/>
      * <b>Note:</b> Only events from the internal <i>groupware</i> calendar provider are considered.
      * <p/>
@@ -184,6 +185,30 @@ public interface IDBasedCalendarAccess extends TransactionAware, CalendarParamet
      * @return The events
      */
     List<Event> getEventsOfUser() throws OXException;
+
+    /**
+     * Gets all events the session's user attends in, having a particular participation status.
+     * <p/>
+     * <b>Note:</b> Only events from the internal <i>groupware</i> calendar provider are considered.
+     * <p/>
+     * The following calendar parameters are evaluated:
+     * <ul>
+     * <li>{@link CalendarParameters#PARAMETER_FIELDS}</li>
+     * <li>{@link CalendarParameters#PARAMETER_RANGE_START}</li>
+     * <li>{@link CalendarParameters#PARAMETER_RANGE_END}</li>
+     * <li>{@link CalendarParameters#PARAMETER_ORDER}</li>
+     * <li>{@link CalendarParameters#PARAMETER_ORDER_BY}</li>
+     * <li>{@link CalendarParameters#PARAMETER_RIGHT_HAND_LIMIT}</li>
+     * <li>{@link CalendarParameters#PARAMETER_LEFT_HAND_LIMIT}</li>
+     * </ul>
+     *
+     * @param partStats The participation status to include, or <code>null</code> to include all events independently of the user
+     *            attendee's participation status
+     * @param rsvp The reply expectation to include, or <code>null</code> to include all events independently of the user attendee's
+     *            rsvp status
+     * @return The events
+     */
+    List<Event> getEventsOfUser(Boolean rsvp, ParticipationStatus[] partStats) throws OXException;
 
     /**
      * Searches for events by one or more queries in the fields {@link EventField#SUMMARY}, {@link EventField#DESCRIPTION} and

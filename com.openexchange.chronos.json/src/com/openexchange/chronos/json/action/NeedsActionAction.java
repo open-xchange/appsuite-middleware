@@ -49,54 +49,63 @@
 
 package com.openexchange.chronos.json.action;
 
-import java.util.Collection;
-import java.util.Map;
-import com.google.common.collect.ImmutableMap;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
+import static com.openexchange.chronos.common.CalendarUtils.getMaximumTimestamp;
+import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_FIELDS;
+import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_LEFT_HAND_LIMIT;
+import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_ORDER;
+import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_ORDER_BY;
+import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_RIGHT_HAND_LIMIT;
+import static com.openexchange.tools.arrays.Collections.unmodifiableSet;
+import java.util.Date;
+import java.util.List;
+import java.util.Set;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.chronos.Event;
+import com.openexchange.chronos.ParticipationStatus;
+import com.openexchange.chronos.json.converter.EventResultConverter;
+import com.openexchange.chronos.json.oauth.ChronosOAuthScope;
+import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
 import com.openexchange.exception.OXException;
-import com.openexchange.oauth.provider.resourceserver.annotations.OAuthModule;
+import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link ChronosActionFactory}
+ * {@link NeedsActionAction}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.0
  */
-@OAuthModule
-public class ChronosActionFactory implements AJAXActionServiceFactory {
+@OAuthAction(ChronosOAuthScope.OAUTH_READ_SCOPE)
+public class NeedsActionAction extends ChronosAction {
 
-    private final Map<String, AJAXActionService> actions;
+    private static final Set<String> REQUIRED_PARAMETERS = unmodifiableSet("rangeStart", "rangeEnd");
 
-    public ChronosActionFactory(ServiceLookup services) {
-        super();
-        ImmutableMap.Builder<String, AJAXActionService> actions = ImmutableMap.builder();
-        actions.put("get", new GetAction(services));
-        actions.put("all", new AllAction(services));
-        actions.put("list", new ListAction(services));
-        actions.put("new", new NewAction(services));
-        actions.put("update", new UpdateAction(services));
-        actions.put("delete", new DeleteAction(services));
-        actions.put("updateAttendee", new UpdateAttendeeAction(services));
-        actions.put("updateAlarms", new UpdateAlarmsAction(services));
-        actions.put("updates", new UpdatesAction(services));
-        actions.put("move", new MoveAction(services));
-        actions.put("getAttachment", new GetAttachment(services));
-        actions.put("freeBusy", new FreeBusyAction(services));
-        actions.put("needsAction", new NeedsActionAction(services));
-        this.actions = actions.build();
+    private static final Set<String> OPTIONAL_PARAMETERS = unmodifiableSet(PARAMETER_ORDER_BY, PARAMETER_ORDER, PARAMETER_FIELDS, PARAMETER_LEFT_HAND_LIMIT, PARAMETER_RIGHT_HAND_LIMIT);
+
+    /**
+     * Initializes a new {@link NeedsActionAction}.
+     *
+     * @param services A service lookup reference
+     */
+    protected NeedsActionAction(ServiceLookup services) {
+        super(services);
     }
 
     @Override
-    public AJAXActionService createActionService(String action) throws OXException {
-        return actions.get(action);
+    protected Set<String> getRequiredParameters() {
+        return REQUIRED_PARAMETERS;
     }
 
     @Override
-    public Collection<? extends AJAXActionService> getSupportedServices() {
-        return java.util.Collections.unmodifiableCollection(actions.values());
+    protected Set<String> getOptionalParameters() {
+        return OPTIONAL_PARAMETERS;
+    }
+
+    @Override
+    protected AJAXRequestResult perform(IDBasedCalendarAccess calendarAccess, AJAXRequestData requestData) throws OXException {
+        List<Event> events = calendarAccess.getEventsOfUser(null, new ParticipationStatus[] { ParticipationStatus.NEEDS_ACTION });
+        return new AJAXRequestResult(events, new Date(getMaximumTimestamp(events)), EventResultConverter.INPUT_FORMAT);
     }
 
 }

@@ -78,6 +78,7 @@ import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.ExtendedProperties;
 import com.openexchange.chronos.ExtendedProperty;
+import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.TimeTransparency;
 import com.openexchange.chronos.compat.Appointment2Event;
@@ -239,6 +240,11 @@ public class InternalCalendarAccess implements GroupwareCalendarAccess, SyncAwar
     @Override
     public List<Event> getEventsOfUser() throws OXException {
         return getCalendarService().getEventsOfUser(session);
+    }
+
+    @Override
+    public List<Event> getEventsOfUser(Boolean rsvp, ParticipationStatus[] partStats) throws OXException {
+        return getCalendarService().getEventsOfUser(session, rsvp, partStats);
     }
 
     @Override

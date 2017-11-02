@@ -75,6 +75,7 @@ import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmTrigger;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.FreeBusyUtils;
@@ -215,6 +216,15 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
     public List<Event> getEventsOfUser() throws OXException {
         try {
             return withUniqueIDs(getGroupwareAccess(DEFAULT_ACCOUNT).getEventsOfUser(), DEFAULT_ACCOUNT.getAccountId());
+        } catch (OXException e) {
+            throw withUniqueIDs(e, DEFAULT_ACCOUNT.getAccountId());
+        }
+    }
+
+    @Override
+    public List<Event> getEventsOfUser(Boolean rsvp, ParticipationStatus[] partStats) throws OXException {
+        try {
+            return withUniqueIDs(getGroupwareAccess(DEFAULT_ACCOUNT).getEventsOfUser(rsvp, partStats), DEFAULT_ACCOUNT.getAccountId());
         } catch (OXException e) {
             throw withUniqueIDs(e, DEFAULT_ACCOUNT.getAccountId());
         }

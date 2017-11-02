@@ -58,6 +58,7 @@ import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.exception.OXException;
 import com.openexchange.osgi.annotation.SingletonService;
 import com.openexchange.session.Session;
@@ -235,6 +236,29 @@ public interface CalendarService {
     List<Event> getEventsOfUser(CalendarSession session) throws OXException;
 
     /**
+     * Gets all events the session's user attends in, having a particular participation status.
+     * <p/>
+     * The following calendar parameters are evaluated:
+     * <ul>
+     * <li>{@link CalendarParameters#PARAMETER_FIELDS}</li>
+     * <li>{@link CalendarParameters#PARAMETER_RANGE_START}</li>
+     * <li>{@link CalendarParameters#PARAMETER_RANGE_END}</li>
+     * <li>{@link CalendarParameters#PARAMETER_ORDER}</li>
+     * <li>{@link CalendarParameters#PARAMETER_ORDER_BY}</li>
+     * <li>{@link CalendarParameters#PARAMETER_RIGHT_HAND_LIMIT}</li>
+     * <li>{@link CalendarParameters#PARAMETER_LEFT_HAND_LIMIT}</li>
+     * </ul>
+     *
+     * @param session The calendar session
+     * @param partStats The participation status to include, or <code>null</code> to include all events independently of the user
+     *            attendee's participation status
+     * @param rsvp The reply expectation to include, or <code>null</code> to include all events independently of the user attendee's
+     *            rsvp status
+     * @return The events
+     */
+    List<Event> getEventsOfUser(CalendarSession session, Boolean rsvp, ParticipationStatus[] partStats) throws OXException;
+
+    /**
      * Gets lists of new and updated as well as deleted events since a specific timestamp in a folder.
      * <p/>
      * The following calendar parameters are evaluated:
@@ -393,7 +417,7 @@ public interface CalendarService {
     /**
      * Retrieves the {@link IFileHolder} with the specified managed identifier from the {@link Event}
      * with the specified {@link EventID}
-     * 
+     *
      * @param session The {@link CalendarSession}
      * @param eventID The {@link Event} identifier
      * @param managedId The managed identifier of the {@link Attachment}
