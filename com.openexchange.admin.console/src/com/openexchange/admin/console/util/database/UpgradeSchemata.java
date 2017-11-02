@@ -92,6 +92,10 @@ import com.openexchange.java.Strings;
  */
 public class UpgradeSchemata extends UtilAbstraction {
 
+    /**
+     * TYPE_ABORT_TO_ABORT_THE_UPGRADE_PROCESS_OR_CONTINUE_TO_PROCEED_ABORT_CONTINUE
+     */
+    private static final String PROMPT = "Type 'abort' to abort the upgrade process, or 'continue' to proceed ['abort'/'continue']:";
     private static final String ABORT = "abort";
     private static final String CONTINUE = "continue";
 
@@ -333,7 +337,7 @@ public class UpgradeSchemata extends UtilAbstraction {
             Server s = listServer[0];
             if (!Strings.isEmpty(startFromSchema)) {
                 System.out.println("The server '" + s.getName() + "' with id '" + s.getId() + "' will be used to point the updated schemata after the update tasks complete.");
-                System.out.println("Type 'abort' to abort the upgrade process, or 'continue' to proceed ['abort'/'continue']:");
+                System.out.println(PROMPT);
                 prompt();
                 server = s;
                 return;
@@ -342,7 +346,7 @@ public class UpgradeSchemata extends UtilAbstraction {
             // The 'schema-name' is not present, and a server with the same name exist.
             System.out.println("WARNING: The specified server is already registered with id '" + s.getId() + "'.");
             System.out.println("         If you continue the already existing server will be used to point the updated schemata after the update tasks complete.");
-            System.out.println("         If that shouldn't be the case, type 'abort' to abort the upgrade process, otherwise, type 'continue' to proceed ['abort'/'continue']:");
+            System.out.println("         " + PROMPT);
             prompt();
             server = s;
             return;
@@ -371,7 +375,7 @@ public class UpgradeSchemata extends UtilAbstraction {
                     return;
                 default:
                     System.err.println("Unrecognized command: '" + word + "'");
-                    System.out.println("Type 'abort' to abort the upgrade process, otherwise, type 'continue' to proceed ['abort'/'continue']:");
+                    System.out.println(PROMPT);
             }
         }
     }
