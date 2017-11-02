@@ -90,9 +90,6 @@ import com.openexchange.java.Strings;
  */
 public class UpgradeSchemata extends UtilAbstraction {
 
-    private static final String OPT_NAME_LONG = "name";
-    private static final char OPT_NAME_SHORT = 'n';
-
     private CLIOption serverNameOption;
     private CLIOption schemaNameOption;
     private CLIOption jmxHostNameOption;
@@ -412,7 +409,7 @@ public class UpgradeSchemata extends UtilAbstraction {
      * @param parser the {@link AdminParser}
      */
     private void setOptions(AdminParser parser) {
-        serverNameOption = setShortLongOpt(parser, OPT_NAME_SHORT, OPT_NAME_LONG, "The name of the server to register and point all upgraded schemata to", true, NeededQuadState.needed);
+        serverNameOption = setShortLongOpt(parser, 'n', "server-name", "The name of the server to register and point all upgraded schemata to", true, NeededQuadState.needed);
         jmxHostNameOption = setShortLongOpt(parser, 'H', "host", "The optional JMX host (default:localhost)", true, NeededQuadState.possibly);
         jmxPortNameOption = setShortLongOpt(parser, 'p', "port", "The optional JMX port (default:9999)", true, NeededQuadState.possibly);
         jmxLoginNameOption = setShortLongOpt(parser, 'l', "login", "The optional JMX login (if JMX has authentication enabled)", true, NeededQuadState.possibly);
