@@ -328,9 +328,18 @@ public class UpgradeSchemata extends UtilAbstraction {
     private void registerServer() throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
         Server[] listServer = oxUtil.listServer(server.getName(), credentials);
         if (listServer != null && listServer.length == 1) {
+            // If the 'schema-name' is present it means that there is a continuation which implies
+            // that a server was previously registered, thus simply use the already existing server.
+            if (!Strings.isEmpty(startFromSchema)) {
+                System.out.println("OK, proceeding with the upgrade. The server '" + server.getName() + "' with id '" + server.getId() + "' will be used to point the updated schemata after the update tasks complete.");
+                server = listServer[0];
+                return;
+            }
+
+            // The 'schema-name' is not present, and a server with the same name exist.
             System.out.println("WARNING: The specified server is already registered with id '" + listServer[0].getId() + "'.");
             System.out.println("         If that shouldn't be the case, type 'abort' to abort the upgrade process, otherwise, type 'continue' to proceed.");
-            System.out.println("         If you continue the already existing server will be used to point the upgraded schemata to.");
+            System.out.println("         If you continue the already existing server will be used to point the updated schemata after the update tasks complete.");
             Scanner scanner = new Scanner(System.in);
             while (true) {
                 String word = scanner.next();
@@ -346,6 +355,8 @@ public class UpgradeSchemata extends UtilAbstraction {
                 }
             }
         }
+
+        // All good, proceed with server registration
         System.out.print("Registering the server with name '" + server.getName() + "'...");
         server = oxUtil.registerServer(server, credentials);
         ok();
