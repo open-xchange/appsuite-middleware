@@ -101,7 +101,6 @@ public class ShowDepartmentJSlobEntry implements JSlobEntry {
      */
     @Override
     public boolean isWritable(Session session) throws OXException {
-        // TODO: is it?
         return false;
     }
 
@@ -124,7 +123,7 @@ public class ShowDepartmentJSlobEntry implements JSlobEntry {
      */
     @Override
     public void setValue(Object value, Session session) throws OXException {
-        //TODO: implement if it is writable
+        // not writable
     }
 
     /*
