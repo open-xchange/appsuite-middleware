@@ -51,6 +51,8 @@ package com.openexchange.file.storage.boxcom;
 
 import static com.openexchange.java.Strings.isEmpty;
 import java.io.ByteArrayInputStream;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PipedOutputStream;
@@ -82,13 +84,14 @@ import com.openexchange.file.storage.FileStorageCaseInsensitiveAccess;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageLockedFileAccess;
-import com.openexchange.file.storage.FileStorageUtility;
 import com.openexchange.file.storage.FileTimedResult;
+import com.openexchange.file.storage.NameBuilder;
 import com.openexchange.file.storage.ThumbnailAware;
 import com.openexchange.file.storage.boxcom.access.BoxOAuthAccess;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.java.ExceptionAwarePipedInputStream;
+import com.openexchange.java.FileKnowingInputStream;
 import com.openexchange.java.SizeKnowingInputStream;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
@@ -518,47 +521,67 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
 
                     String fileId = file.getId();
                     String boxFolderId = toBoxFolderId(file.getFolderId());
-
-                    // Pre-flight Check
-                    com.box.sdk.BoxFile boxFile = new com.box.sdk.BoxFile(apiConnection, file.getId());
-                    try {
-                        boxFile.canUploadVersion(file.getFileName(), file.getFileSize(), boxFolderId);
-                    } catch (BoxAPIException e) {
-                        if (e.getResponseCode() != SC_NOT_FOUND) {
-                            throw handleHttpResponseError(file.getId(), account.getId(), e);
-                        }
-
-                        LOGGER.debug("Pre-flight check: File does not exist.");
-                    }
+                    com.box.sdk.BoxFile boxFile = new com.box.sdk.BoxFile(apiConnection, fileId);
 
                     // Upload new
                     Info fileInfo = null;
                     if (isEmpty(fileId) || !exists(null, fileId, CURRENT_VERSION)) {
-                        ThresholdFileHolder sink = null;
-                        try {
-                            sink = new ThresholdFileHolder();
-                            sink.write(data); // Implicitly closes 'data' input stream
+                        if (data instanceof FileKnowingInputStream) {
+                            java.io.File backingFile = ((FileKnowingInputStream) data).getFile();
+                            InputStream in = data;
+                            long length = backingFile.length();
 
-                            int count = 0;
-                            String name = file.getFileName();
-                            String fileName = name;
-
-                            // TODO: Should we retry a max number of tries or for ever?
+                            NameBuilder name = NameBuilder.nameBuilderFor(file.getFileName());
                             boolean retry = true;
                             while (retry) {
                                 try {
-                                    com.box.sdk.BoxFolder boxFolder = new com.box.sdk.BoxFolder(apiConnection, boxFolderId);
-                                    fileInfo = boxFolder.uploadFile(sink.getStream(), fileName, sink.getLength(), new UploadProgressListener());
-                                    retry = false;
+                                    try {
+                                        com.box.sdk.BoxFolder boxFolder = new com.box.sdk.BoxFolder(apiConnection, boxFolderId);
+                                        fileInfo = boxFolder.uploadFile(in, name.toString(), length, new UploadProgressListener());
+                                        retry = false;
+                                    } finally {
+                                        Streams.close(in);
+                                    }
                                 } catch (BoxAPIException e) {
                                     if (SC_CONFLICT != e.getResponseCode()) {
                                         throw e;
                                     }
-                                    fileName = FileStorageUtility.enhance(name, ++count);
+                                    name.advance();
+                                    try {
+                                        in = new FileInputStream(backingFile);
+                                    } catch (FileNotFoundException fnfe) {
+                                        throw FileStorageExceptionCodes.IO_ERROR.create(fnfe, fnfe.getMessage());
+                                    }
                                 }
                             }
-                        } finally {
-                            Streams.close(sink);
+                        } else {
+                            ThresholdFileHolder sink = null;
+                            try {
+                                sink = new ThresholdFileHolder();
+                                sink.write(data); // Implicitly closes 'data' input stream
+
+                                NameBuilder name = NameBuilder.nameBuilderFor(file.getFileName());
+                                boolean retry = true;
+                                while (retry) {
+                                    try {
+                                        InputStream in = sink.getStream();
+                                        try {
+                                            com.box.sdk.BoxFolder boxFolder = new com.box.sdk.BoxFolder(apiConnection, boxFolderId);
+                                            fileInfo = boxFolder.uploadFile(in, name.toString(), sink.getLength(), new UploadProgressListener());
+                                            retry = false;
+                                        } finally {
+                                            Streams.close(in);
+                                        }
+                                    } catch (BoxAPIException e) {
+                                        if (SC_CONFLICT != e.getResponseCode()) {
+                                            throw e;
+                                        }
+                                        name.advance();
+                                    }
+                                }
+                            } finally {
+                                Streams.close(sink);
+                            }
                         }
                     } else {
                         try {
