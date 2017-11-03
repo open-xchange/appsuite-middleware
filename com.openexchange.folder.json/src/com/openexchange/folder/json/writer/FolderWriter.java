@@ -469,7 +469,7 @@ public final class FolderWriter {
                     } else {
                         ja = new JSONArray();
                         for (final Permission permission : obj) {
-                            if (permission.getType() != FolderPermissionType.NORMAL) {
+                            if (permission.getType() == FolderPermissionType.INHERITED) {
                                 continue;
                             }
                             final JSONObject jo = new JSONObject(4);
