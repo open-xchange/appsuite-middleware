@@ -41,10 +41,6 @@ Authors:
 export NO_BRP_CHECK_BYTECODE_VERSION=true
 ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} -f build/build.xml clean build
 
-%post
-. /opt/open-xchange/lib/oxfunctions.sh
-ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc configjump.properties
-
 %clean
 %{__rm} -rf %{buildroot}
 
