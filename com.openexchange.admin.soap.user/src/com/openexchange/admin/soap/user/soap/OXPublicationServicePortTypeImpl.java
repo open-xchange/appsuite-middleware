@@ -47,8 +47,8 @@ import com.openexchange.tools.net.URIParser;
  */
 
 @javax.jws.WebService(serviceName = "OXPublicationService", portName = "OXPublicationServiceHttpsEndpoint", targetNamespace = "http://soap.admin.openexchange.com",
-    // wsdlLocation = "null",
-    endpointInterface = "com.openexchange.admin.soap.user.soap.OXPublicationServicePortType")
+// wsdlLocation = "null",
+endpointInterface = "com.openexchange.admin.soap.user.soap.OXPublicationServicePortType")
 public class OXPublicationServicePortTypeImpl implements OXPublicationServicePortType {
 
     public static final AtomicReference<OXPublicationInterface> RMI_REFERENCE = new AtomicReference<OXPublicationInterface>();
@@ -364,18 +364,19 @@ public class OXPublicationServicePortTypeImpl implements OXPublicationServicePor
                         final StringBuilder sb = new StringBuilder(32);
                         for (int j = 1; j <= 3; j++) {
                             switch (j) {
-                                case 1: {
+                            case 1:
+                                {
                                     final String schema = matcher.group(1);
                                     if (null != schema) {
                                         sb.append(schema);
                                     }
                                 }
-                                    break;
-                                case 2:
-                                    sb.append(matcher.group(2));
-                                    break;
-                                default:
-                                    break;
+                                break;
+                            case 2:
+                                sb.append(matcher.group(2));
+                                break;
+                            default:
+                                break;
                             }
                         }
                         sb.append(':').append(i);
@@ -564,18 +565,19 @@ public class OXPublicationServicePortTypeImpl implements OXPublicationServicePor
                         final StringBuilder sb = new StringBuilder(32);
                         for (int j = 1; j <= 3; j++) {
                             switch (j) {
-                                case 1: {
-                                    final String schema = matcher.group(1);
-                                    if (null != schema) {
-                                        sb.append(schema);
-                                    }
+                            case 1:
+                            {
+                                final String schema = matcher.group(1);
+                                if (null != schema) {
+                                    sb.append(schema);
                                 }
-                                    break;
-                                case 2:
-                                    sb.append(matcher.group(2));
-                                    break;
-                                default:
-                                    break;
+                            }
+                            break;
+                            case 2:
+                                sb.append(matcher.group(2));
+                                break;
+                            default:
+                                break;
                             }
                         }
                         sb.append(':').append(i);
@@ -1428,6 +1430,11 @@ public class OXPublicationServicePortTypeImpl implements OXPublicationServicePor
             moduleAccess.setWebdav(booleanValue(tmp));
         }
 
+        tmp = soapModuleAccess.isWebdavXml();
+        if (tmp != null) {
+            moduleAccess.setWebdavXml(booleanValue(tmp));
+        }
+
         tmp = soapModuleAccess.isWebmail();
         if (tmp != null) {
             moduleAccess.setWebmail(booleanValue(tmp));
@@ -1468,6 +1475,7 @@ public class OXPublicationServicePortTypeImpl implements OXPublicationServicePor
         soapModuleAccess.setUSM(Boolean.valueOf(moduleAccess.isUSM()));
         soapModuleAccess.setVcard(Boolean.valueOf(moduleAccess.getVcard()));
         soapModuleAccess.setWebdav(Boolean.valueOf(moduleAccess.getWebdav()));
+        soapModuleAccess.setWebdavXml(Boolean.valueOf(moduleAccess.getWebdavXml()));
         soapModuleAccess.setWebmail(Boolean.valueOf(moduleAccess.getWebmail()));
         return soapModuleAccess;
     }

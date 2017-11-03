@@ -54,10 +54,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
 import java.sql.Statement;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.Set;
+import com.google.common.collect.ImmutableSet;
 import com.openexchange.database.Databases;
 import com.openexchange.database.IncorrectStringSQLException;
 
@@ -72,7 +70,7 @@ public abstract class JDBC4StatementWrapper implements Statement {
 
     private static final String SQL_STATE_ABSENT_TABLE = "42S02";
 
-    private static final Set<String> IGNORABLE_SQL_STATES = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(SQL_STATE_ABSENT_TABLE)));
+    private static final Set<String> IGNORABLE_SQL_STATES = ImmutableSet.of(SQL_STATE_ABSENT_TABLE);
 
     /**
      * Logs the given syntax error (if appropriate)
@@ -148,8 +146,8 @@ public abstract class JDBC4StatementWrapper implements Statement {
 
     // ---------------------------------------------------------------------------------------------------------------------------------
 
-    private final Statement delegate;
-    private final JDBC4ConnectionReturner con;
+    protected final Statement delegate;
+    protected final JDBC4ConnectionReturner con;
 
     /**
      * Initializes a new {@link JDBC4StatementWrapper}.
@@ -292,7 +290,9 @@ public abstract class JDBC4StatementWrapper implements Statement {
     @Override
     public ResultSet executeQuery(final String sql) throws SQLException {
         try {
-            return new JDBC41ResultSetWrapper(delegate.executeQuery(sql), this);
+            JDBC41ResultSetWrapper retval = new JDBC41ResultSetWrapper(delegate.executeQuery(sql), this);
+            con.touch();
+            return retval;
         } catch (java.sql.SQLSyntaxErrorException syntaxError) {
             logSyntaxError(syntaxError, delegate, sql, con);
             throw syntaxError;

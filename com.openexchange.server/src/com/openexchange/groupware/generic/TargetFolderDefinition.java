@@ -87,7 +87,7 @@ public class TargetFolderDefinition {
         try {
             retval = Integer.parseInt(folderId);
         } catch (final NumberFormatException e) {
-            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create( folderId);
+            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create("folder", folderId);
         }
         return retval;
     }

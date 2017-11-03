@@ -119,7 +119,7 @@ import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.FileStorageUtility;
+import com.openexchange.file.storage.NameBuilder;
 import com.openexchange.filestore.FileStorages;
 import com.openexchange.filestore.Info;
 import com.openexchange.filestore.QuotaFileStorage;
@@ -332,18 +332,21 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             rollback = false;
 
             // Invalidate cache
-            {
-                CacheService cacheService = AdminServiceRegistry.getInstance().getService(CacheService.class);
-                if (null != cacheService) {
-                    try {
+            try {
+                MailAccountStorageService mass = AdminServiceRegistry.getInstance().getService(MailAccountStorageService.class);
+                if (null != mass) {
+                    mass.invalidateMailAccount(0, userId, contextId);
+                } else {
+                    CacheService cacheService = AdminServiceRegistry.getInstance().getService(CacheService.class);
+                    if (null != cacheService) {
                         Cache cache = cacheService.getCache("MailAccount");
                         cache.remove(cacheService.newCacheKey(ctx.getId().intValue(), Integer.toString(0), Integer.toString(userId)));
                         cache.remove(cacheService.newCacheKey(ctx.getId().intValue(), Integer.toString(userId)));
                         cache.invalidateGroup(ctx.getId().toString());
-                    } catch (final OXException e) {
-                        log.error("", e);
                     }
                 }
+            } catch (final OXException e) {
+                log.error("", e);
             }
 
         } catch (final SQLException e) {
@@ -1310,9 +1313,19 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                         cache.remove(key);
                         cache = cacheService.getCache("Capabilities");
                         cache.removeFromGroup(Integer.valueOf(userId), ctx.getId().toString());
-                        cache = cacheService.getCache("MailAccount");
-                        cache.remove(cacheService.newCacheKey(ctx.getId().intValue(), Integer.toString(0), Integer.toString(userId)));
-                        cache.invalidateGroup(ctx.getId().toString());
+
+                        {
+                            MailAccountStorageService mass = AdminServiceRegistry.getInstance().getService(MailAccountStorageService.class);
+                            if (null != mass) {
+                                mass.invalidateMailAccount(0, userId, contextId);
+                            } else {
+                                cache = cacheService.getCache("MailAccount");
+                                cache.remove(cacheService.newCacheKey(ctx.getId().intValue(), Integer.toString(0), Integer.toString(userId)));
+                                cache.remove(cacheService.newCacheKey(ctx.getId().intValue(), Integer.toString(userId)));
+                                cache.invalidateGroup(ctx.getId().toString());
+                            }
+                        }
+
                         cache = cacheService.getCache("QuotaFileStorages");
                         cache.invalidateGroup(Integer.toString(contextId));
                         if (displayNameUpdate) {
@@ -3357,6 +3370,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             acc.setTasks(user.hasPermission(UserConfiguration.TASKS));
             acc.setVcard(user.hasPermission(UserConfiguration.VCARD));
             acc.setWebdav(user.hasPermission(UserConfiguration.WEBDAV));
+            acc.setWebdavXml(user.hasPermission(UserConfiguration.WEBDAV_XML));
             acc.setWebmail(user.hasPermission(UserConfiguration.WEBMAIL));
             acc.setDelegateTask(user.hasPermission(UserConfiguration.DELEGATE_TASKS));
             acc.setEditGroup(user.hasPermission(UserConfiguration.EDIT_GROUP));
@@ -3575,6 +3589,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             user.setTask(access.getTasks());
             user.setVCard(access.getVcard());
             user.setWebDAV(access.getWebdav());
+            user.setWebDAVXML(access.getWebdavXml());
             user.setWebMail(access.getWebmail());
             user.setDelegateTasks(access.getDelegateTask());
             user.setEditGroup(access.getEditGroup());
@@ -3612,6 +3627,9 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 throw new StorageException("Global address book can not be disabled for non-PIM users.");
             }
             if (access.getReadCreateSharedFolders()) {
+                throw new StorageException("Global address book can not be disabled for non-PIM users.");
+            }
+            if (access.getWebdavXml()) {
                 throw new StorageException("Global address book can not be disabled for non-PIM users.");
             }
             if (access.getDelegateTask()) {
@@ -3769,9 +3787,12 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 if (needTranslation) {
                     int parent = rs.getInt(3);
                     translatedName = helper.getString(name);
-                    int i = 1;
+                    NameBuilder nb = null;
                     while (existsFolder(contextId, parent, folderId, translatedName, con)) {
-                        translatedName = FileStorageUtility.enhance(translatedName, i++);
+                        if (null == nb) {
+                            nb = new NameBuilder(translatedName);
+                        }
+                        translatedName = nb.advance().toString();
                     }
                 }
                 result.add(new Pair<Integer, String>(folderId, translatedName));

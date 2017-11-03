@@ -63,14 +63,20 @@ import com.google.api.services.drive.model.ChildList;
 import com.google.api.services.drive.model.ChildReference;
 import com.google.api.services.drive.model.File;
 import com.google.api.services.drive.model.ParentReference;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.config.cascade.ConfigViews;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
+import com.openexchange.file.storage.FileStorageAutoRenameFoldersAccess;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageFolderAccess;
+import com.openexchange.file.storage.NameBuilder;
 import com.openexchange.file.storage.Quota;
 import com.openexchange.file.storage.Quota.Type;
 import com.openexchange.file.storage.googledrive.access.GoogleDriveOAuthAccess;
+import com.openexchange.file.storage.googledrive.osgi.Services;
 import com.openexchange.session.Session;
 
 /**
@@ -78,7 +84,7 @@ import com.openexchange.session.Session;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class GoogleDriveFolderAccess extends AbstractGoogleDriveAccess implements FileStorageFolderAccess {
+public final class GoogleDriveFolderAccess extends AbstractGoogleDriveAccess implements FileStorageFolderAccess, FileStorageAutoRenameFoldersAccess {
 
     private static final String QUERY_STRING_DIRECTORIES_ONLY = GoogleDriveConstants.QUERY_STRING_DIRECTORIES_ONLY;
 
@@ -86,6 +92,7 @@ public final class GoogleDriveFolderAccess extends AbstractGoogleDriveAccess imp
 
     private final int userId;
     private final String accountDisplayName;
+    private final boolean useOptimisticSubfolderDetection;
 
     /**
      * Initializes a new {@link GoogleDriveFolderAccess}.
@@ -94,6 +101,10 @@ public final class GoogleDriveFolderAccess extends AbstractGoogleDriveAccess imp
         super(googleDriveAccess, account, session);
         userId = session.getUserId();
         accountDisplayName = account.getDisplayName();
+        ConfigViewFactory viewFactory = Services.optService(ConfigViewFactory.class);
+        ConfigView view = viewFactory.getView(session.getUserId(), session.getContextId());
+        useOptimisticSubfolderDetection = ConfigViews.getDefinedBoolPropertyFrom("com.openexchange.file.storage.googledrive.useOptimisticSubfolderDetection", true, view);
+
     }
 
     private void checkDirValidity(com.google.api.services.drive.model.File file) throws OXException {
@@ -104,7 +115,7 @@ public final class GoogleDriveFolderAccess extends AbstractGoogleDriveAccess imp
     }
 
     private GoogleDriveFolder parseGoogleDriveFolder(com.google.api.services.drive.model.File dir, Drive drive) throws OXException, IOException {
-        return new GoogleDriveFolder(userId).parseDirEntry(dir, getRootFolderId(), accountDisplayName, drive);
+        return new GoogleDriveFolder(userId).parseDirEntry(dir, getRootFolderId(), accountDisplayName, useOptimisticSubfolderDetection, drive);
     }
 
     @Override
@@ -271,28 +282,65 @@ public final class GoogleDriveFolderAccess extends AbstractGoogleDriveAccess imp
 
     @Override
     public String createFolder(FileStorageFolder toCreate) throws OXException {
-        return createFolder(toCreate, 0);
+        return createFolder(toCreate, true);
     }
 
-    private String createFolder(FileStorageFolder toCreate, int retryCount) throws OXException {
+    @Override
+    public String createFolder(FileStorageFolder toCreate, boolean autoRename) throws OXException {
+        return createFolder(toCreate, autoRename, 0);
+    }
+
+    private String createFolder(FileStorageFolder toCreate, boolean autorename, int retryCount) throws OXException {
         String parentId = toGoogleDriveFolderId(toCreate.getParentId());
         try {
             Drive drive = googleDriveAccess.<Drive> getClient().client;
+            String baseName = toCreate.getName();
 
-            Drive.Children.List list = drive.children().list(parentId);
-            list.setQ("title='" + toCreate.getName() + "' and " + GoogleDriveConstants.QUERY_STRING_DIRECTORIES_ONLY_EXCLUDING_TRASH);
-            if (!list.execute().getItems().isEmpty()) {
-                // Already such a folder
-                throw FileStorageExceptionCodes.DUPLICATE_FOLDER.create(toCreate.getName(), drive.files().get(parentId).execute().getTitle());
+            NameBuilder name = new NameBuilder(baseName);
+            if (autorename) {
+                // Duplicate name needs to be explicitly checked since Google Drive allows multiple folders with the same name next to each other
+                {
+                    Drive.Children.List list = drive.children().list(parentId);
+                    list.setQ(GoogleDriveConstants.QUERY_STRING_DIRECTORIES_ONLY_EXCLUDING_TRASH);
+                    List<ChildReference> existingFolders = list.execute().getItems();
+                    if (!existingFolders.isEmpty()) {
+                        // Check if there is already such a folder
+                        boolean alreadySuchAFolder;
+                        do {
+                            alreadySuchAFolder = false;
+                            String nameToCheck = name.toString();
+                            for (ChildReference childReference : existingFolders) {
+                                if (drive.files().get(childReference.getId()).execute().getTitle().equals(nameToCheck)) {
+                                    name.advance();
+                                    alreadySuchAFolder = true;
+                                    break;
+                                }
+                            }
+                        } while (alreadySuchAFolder);
+                    }
+                }
+            } else {
+                String nameToCheck = name.toString();
+                Drive.Children.List list = drive.children().list(parentId);
+                list.setQ("title='" + nameToCheck + "' and " + GoogleDriveConstants.QUERY_STRING_DIRECTORIES_ONLY_EXCLUDING_TRASH);
+                List<ChildReference> existingFolders = list.execute().getItems();
+                if (!existingFolders.isEmpty()) {
+                    // Check if there is already such a folder
+                    for (ChildReference childReference : existingFolders) {
+                        if (drive.files().get(childReference.getId()).execute().getTitle().equals(nameToCheck)) {
+                            throw FileStorageExceptionCodes.DUPLICATE_FOLDER.create(nameToCheck, drive.files().get(parentId).execute().getTitle());
+                        }
+                    }
+                }
             }
+
 
             File driveDir = new File();
             driveDir.setParents(Collections.singletonList(new ParentReference().setId(parentId)));
-            driveDir.setTitle(toCreate.getName());
+            driveDir.setTitle(name.toString());
             driveDir.setMimeType(GoogleDriveConstants.MIME_TYPE_DIRECTORY);
 
             File newDir = drive.files().insert(driveDir).execute();
-
             return toFileStorageFolderId(newDir.getId());
         } catch (final HttpResponseException e) {
             if (!isUserRateLimitExceeded(e)) {
@@ -309,7 +357,7 @@ public final class GoogleDriveFolderAccess extends AbstractGoogleDriveAccess imp
 
             long nanosToWait = TimeUnit.NANOSECONDS.convert((retry * 1000) + ((long) (Math.random() * 1000)), TimeUnit.MILLISECONDS);
             LockSupport.parkNanos(nanosToWait);
-            return createFolder(toCreate, retry);
+            return createFolder(toCreate, autorename, retry);
         } catch (final IOException e) {
             throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
@@ -330,30 +378,63 @@ public final class GoogleDriveFolderAccess extends AbstractGoogleDriveAccess imp
 
     @Override
     public String moveFolder(String folderId, String newParentId, String newName) throws OXException {
-        return moveFolder(folderId, newParentId, newName, 0);
+        return moveFolder(folderId, newParentId, newName, true);
     }
 
-    private String moveFolder(String folderId, String newParentId, String newName, int retryCount) throws OXException {
+    @Override
+    public String moveFolder(String folderId, String newParentId, String newName, boolean autoRename) throws OXException {
+        return moveFolder(folderId, newParentId, newName, autoRename, 0);
+    }
+
+    private String moveFolder(String folderId, String newParentId, String newName, boolean autoRename, int retryCount) throws OXException {
         String fid = toGoogleDriveFolderId(folderId);
         String nfid = toGoogleDriveFolderId(newParentId);
         try {
             Drive drive = googleDriveAccess.<Drive>getClient().client;
 
-            String title = null == newName ? drive.files().get(fid).execute().getTitle() : newName;
+            String baseName = null == newName ? drive.files().get(fid).execute().getTitle() : newName;
 
-            Drive.Children.List list = drive.children().list(nfid);
-            list.setQ("title='" + title + "' and " + GoogleDriveConstants.QUERY_STRING_DIRECTORIES_ONLY_EXCLUDING_TRASH);
-            if (!list.execute().getItems().isEmpty()) {
-                // Already such a folder
-                throw FileStorageExceptionCodes.DUPLICATE_FOLDER.create(title, drive.files().get(nfid).execute().getTitle());
+            // Duplicate name needs to be explicitly checked since Google Drive allows multiple folders with the same name next to each other
+            NameBuilder name = new NameBuilder(baseName);
+            if (autoRename) {
+                Drive.Children.List list = drive.children().list(nfid);
+                list.setQ(GoogleDriveConstants.QUERY_STRING_DIRECTORIES_ONLY_EXCLUDING_TRASH);
+                List<ChildReference> existingFolders = list.execute().getItems();
+                if (!existingFolders.isEmpty()) {
+                    // Check if there is already such a folder
+                    int retries = 0;
+                    boolean alreadySuchAFolder;
+                    do {
+                        alreadySuchAFolder = false;
+                        String nameToCheck = name.toString();
+                        for (ChildReference childReference : existingFolders) {
+                            if (drive.files().get(childReference.getId()).execute().getTitle().equals(nameToCheck)) {
+                                name.advance();
+                                alreadySuchAFolder = true;
+                                break;
+                            }
+                        }
+                    } while (alreadySuchAFolder);
+                }
+            } else {
+                String nameToCheck = name.toString();
+                Drive.Children.List list = drive.children().list(nfid);
+                list.setQ("title='" + nameToCheck + "' and " + GoogleDriveConstants.QUERY_STRING_DIRECTORIES_ONLY_EXCLUDING_TRASH);
+                List<ChildReference> existingFolders = list.execute().getItems();
+                if (!existingFolders.isEmpty()) {
+                    // Check if there is already such a folder
+                    for (ChildReference childReference : existingFolders) {
+                        if (drive.files().get(childReference.getId()).execute().getTitle().equals(nameToCheck)) {
+                            throw FileStorageExceptionCodes.DUPLICATE_FOLDER.create(nameToCheck, drive.files().get(nfid).execute().getTitle());
+                        }
+                    }
+                }
             }
 
             File driveDir = new File();
             driveDir.setId(fid);
             driveDir.setParents(Collections.singletonList(new ParentReference().setId(nfid)));
-            if (null != newName) {
-                driveDir.setTitle(newName);
-            }
+            driveDir.setTitle(name.toString());
             driveDir.setMimeType(GoogleDriveConstants.MIME_TYPE_DIRECTORY);
 
             File movedDir = drive.files().patch(fid, driveDir).execute();
@@ -373,7 +454,7 @@ public final class GoogleDriveFolderAccess extends AbstractGoogleDriveAccess imp
 
             long nanosToWait = TimeUnit.NANOSECONDS.convert((retry * 1000) + ((long) (Math.random() * 1000)), TimeUnit.MILLISECONDS);
             LockSupport.parkNanos(nanosToWait);
-            return moveFolder(folderId, newParentId, newName, retry);
+            return moveFolder(folderId, newParentId, newName, autoRename, retry);
         } catch (final IOException e) {
             throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
@@ -404,8 +485,14 @@ public final class GoogleDriveFolderAccess extends AbstractGoogleDriveAccess imp
             for (ParentReference parentReference : parentReferences) {
                 Drive.Children.List list = drive.children().list(parentReference.getId());
                 list.setQ("title='" + newName + "' and " + GoogleDriveConstants.QUERY_STRING_DIRECTORIES_ONLY_EXCLUDING_TRASH);
-                if (false == list.execute().getItems().isEmpty()) {
-                    throw FileStorageExceptionCodes.DUPLICATE_FOLDER.create(newName, drive.files().get(parentReference.getId()).execute().getTitle());
+                List<ChildReference> existingFolders = list.execute().getItems();
+                if (!existingFolders.isEmpty()) {
+                    // Check if there is already such a folder
+                    for (ChildReference childReference : existingFolders) {
+                        if (drive.files().get(childReference.getId()).execute().getTitle().equals(newName)) {
+                            throw FileStorageExceptionCodes.DUPLICATE_FOLDER.create(newName, drive.files().get(parentReference.getId()).execute().getTitle());
+                        }
+                    }
                 }
             }
             /*

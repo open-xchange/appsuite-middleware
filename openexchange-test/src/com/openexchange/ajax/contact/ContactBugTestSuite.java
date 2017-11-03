@@ -78,7 +78,7 @@ import com.openexchange.test.concurrent.ParallelSuite;
     Bug36943Test.class,
     Bug42225Test.class,
     Bug46654Test.class,
-
+    Bug55703Test.class,
 })
 public final class ContactBugTestSuite  {
 

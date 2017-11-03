@@ -52,6 +52,7 @@ package com.openexchange.share.impl.groupware;
 import static com.openexchange.osgi.Tools.requireService;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -72,11 +73,14 @@ import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.modules.Module;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.ShareTargetPath;
+import com.openexchange.share.core.HandlerParameters;
+import com.openexchange.share.core.ModuleHandler;
 import com.openexchange.share.groupware.TargetProxy;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIterators;
@@ -103,6 +107,11 @@ public class FileStorageHandler implements ModuleHandler {
     public FileStorageHandler(ServiceLookup services) {
         super();
         this.services = services;
+    }
+
+    @Override
+    public Collection<String> getModules() {
+        return Arrays.asList(Module.INFOSTORE.getName(), Module.FILES.getName());
     }
 
     @Override
@@ -369,6 +378,9 @@ public class FileStorageHandler implements ModuleHandler {
 
     @Override
     public ShareTarget adjustTarget(ShareTarget target, int contextId, int requestUserId, int targetUserId) throws OXException {
+        if (requestUserId == targetUserId) {
+            return target;
+        }
         FolderID folderID = new FolderID(SHARED_FILES_FOLDER_ID);
         FileID fileID = new FileID(target.getItem());
         fileID.setFolderId(folderID.getFolderId());

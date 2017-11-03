@@ -8,6 +8,8 @@
       The login module is used to obtain a session from the user's login
       credentials. Parameters are normally expected in the POST request body.
     parameters:
+      - $ref: "#/parameters/glbQueryParamsRampUp"
+      - $ref: "#/parameters/glbQueryParamsRampUpFor"
       - in: formData
         name: name
         type: string

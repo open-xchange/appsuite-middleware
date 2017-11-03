@@ -57,7 +57,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.AccountAware;
@@ -138,7 +140,8 @@ public class AllAction extends AbstractFileStorageAccountAction {
                     } else {
                         // Add account with error
                         Set<String> caps = determineCapabilities(access);
-                        result.put(writer.write(account, null, caps, e, session));
+                        boolean includeStackTraceOnError = AJAXRequestDataTools.parseBoolParameter(AJAXServlet.PARAMETER_INCLUDE_STACK_TRACE_ON_ERROR, request);
+                        result.put(writer.write(account, null, caps, e, session, includeStackTraceOnError));
                     }
                 }
             }
@@ -198,6 +201,16 @@ public class AllAction extends AbstractFileStorageAccountAction {
         supported = capabilityAware.supports(FileStorageCapability.COUNT_TOTAL);
         if (null != supported && supported.booleanValue()) {
             caps.add(FileStorageCapability.COUNT_TOTAL.name());
+        }
+
+        supported = capabilityAware.supports(FileStorageCapability.CASE_INSENSITIVE);
+        if (null != supported && supported.booleanValue()) {
+            caps.add(FileStorageCapability.CASE_INSENSITIVE.name());
+        }
+
+        supported = capabilityAware.supports(FileStorageCapability.AUTO_RENAME_FOLDERS);
+        if (null != supported && supported.booleanValue()) {
+            caps.add(FileStorageCapability.AUTO_RENAME_FOLDERS.name());
         }
 
         return caps;

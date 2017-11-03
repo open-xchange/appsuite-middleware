@@ -2214,7 +2214,7 @@ public final class MimeMessageUtility {
             /*
              * Write headers
              */
-            @SuppressWarnings("unchecked") final Enumeration<Header> headers = p.getAllHeaders();
+            Enumeration<Header> headers = p.getAllHeaders();
             final StringBuilder sb = new StringBuilder(256);
             while (headers.hasMoreElements()) {
                 final Header header = headers.nextElement();

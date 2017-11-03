@@ -191,7 +191,7 @@ public final class CSSMatcher {
 
         final String strTIME = "(?:" + strNUMBER + RegexUtility.optional(strTIME_UNITS) + ")";
 
-        final String strURL = "url\\(\"?[\\p{ASCII}\\p{L}]+\"?\\)";
+        final String strURL = "url\\((\"?[\\p{ASCII}\\p{L}]+\"?)\\)";
 
         final String strURLCid = "url\\(\"?cid:[\\p{ASCII}\\p{L}]+\"?\\)";
 
@@ -323,7 +323,11 @@ public final class CSSMatcher {
                     return Result.NEUTRAL;
                 }
                 Result dataUriResult = HtmlServices.isAcceptableDataUri(value, null);
-                return Result.NEUTRAL == dataUriResult ? Result.ALLOW : dataUriResult;
+                if (Result.NEUTRAL == dataUriResult) {
+                    String url = matcher.group(1);
+                    return url.indexOf('<') >= 0 || url.indexOf('>') >= 0 ? Result.DENY : Result.ALLOW;
+                }
+                return dataUriResult;
             }
         case 'n':
             return PAT_n.matcher(value).matches() ? Result.ALLOW : Result.NEUTRAL;

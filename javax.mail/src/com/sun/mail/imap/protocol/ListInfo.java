@@ -1,19 +1,19 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2013 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2017 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
  * and Distribution License("CDDL") (collectively, the "License").  You
  * may not use this file except in compliance with the License.  You can
  * obtain a copy of the License at
- * https://glassfish.dev.java.net/public/CDDL+GPL_1_1.html
- * or packager/legal/LICENSE.txt.  See the License for the specific
+ * https://oss.oracle.com/licenses/CDDL+GPL-1.1
+ * or LICENSE.txt.  See the License for the specific
  * language governing permissions and limitations under the License.
  *
  * When distributing the software, include this License Header Notice in each
- * file and include the License file at packager/legal/LICENSE.txt.
+ * file and include the License file at LICENSE.txt.
  *
  * GPL Classpath Exception:
  * Oracle designates this particular file as subject to the "Classpath"
@@ -67,7 +67,7 @@ public class ListInfo {
     public ListInfo(IMAPResponse r) throws ParsingException {
 	String[] s = r.readSimpleList();
 
-	List<String> v = new ArrayList<String>();	// accumulate attributes
+	List<String> v = new ArrayList<>();	// accumulate attributes
 	if (s != null) {
 	    // non-empty attribute list
 	    for (int i = 0; i < s.length; i++) {
@@ -96,7 +96,8 @@ public class ListInfo {
 	r.skipSpaces();
 	name = r.readAtomString();
 
-	// decode the name (using RFC2060's modified UTF7)
-	name = BASE64MailboxDecoder.decode(name);
+	if (!r.supportsUtf8())
+	    // decode the name (using RFC2060's modified UTF7)
+	    name = BASE64MailboxDecoder.decode(name);
     }
 }

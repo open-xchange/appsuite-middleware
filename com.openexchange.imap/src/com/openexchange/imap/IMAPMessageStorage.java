@@ -1853,8 +1853,9 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
 
             int[] seqNumsToFetch = null;
 
+            boolean sortByUnseen = MailSortField.FLAG_SEEN == sortField;
             if (OrderDirection.ASC.equals(order)) {
-                SearchTerm<?> flagSearchTerm = createFlagsSearchTermFor(sortField, false);
+                SearchTerm<?> flagSearchTerm = createFlagsSearchTermFor(sortField, sortByUnseen ? false : true);
                 unflaggedSeqNums = IMAPSort.sortMessages(imapFolder, flagSearchTerm, MailSortField.RECEIVED_DATE, OrderDirection.DESC, null, false, false, fallbackOnFailedSORT, imapConfig, session).msgIds;
 
                 if (unflaggedSeqNums.length == 0) {
@@ -1867,7 +1868,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                     seqNumsToFetch = applyIndexRange(unflaggedSeqNums, indexRange);
                 }
             } else {
-                SearchTerm<?> flagSearchTerm = createFlagsSearchTermFor(sortField, true);
+                SearchTerm<?> flagSearchTerm = createFlagsSearchTermFor(sortField, sortByUnseen ? true : false);
                 flaggedSeqNums = IMAPSort.sortMessages(imapFolder, flagSearchTerm, MailSortField.RECEIVED_DATE, OrderDirection.DESC, null, false, false, fallbackOnFailedSORT, imapConfig, session).msgIds;
 
                 if (flaggedSeqNums.length == 0) {
@@ -1883,11 +1884,11 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
 
             if (null == seqNumsToFetch) {
                 if (null == unflaggedSeqNums) {
-                    SearchTerm<?> unseenSearchterm = createFlagsSearchTermFor(sortField, false);
+                    SearchTerm<?> unseenSearchterm = createFlagsSearchTermFor(sortField, sortByUnseen ? false : true);
                     unflaggedSeqNums = IMAPSort.sortMessages(imapFolder, unseenSearchterm, MailSortField.RECEIVED_DATE, OrderDirection.DESC, null, false, false, fallbackOnFailedSORT, imapConfig, session).msgIds;
                 }
                 if (null == flaggedSeqNums) {
-                    SearchTerm<?> seenSearchterm = createFlagsSearchTermFor(sortField, true);
+                    SearchTerm<?> seenSearchterm = createFlagsSearchTermFor(sortField, sortByUnseen ? true : false);
                     flaggedSeqNums = IMAPSort.sortMessages(imapFolder, seenSearchterm, MailSortField.RECEIVED_DATE, OrderDirection.DESC, null, false, false, fallbackOnFailedSORT, imapConfig, session).msgIds;
                 }
 

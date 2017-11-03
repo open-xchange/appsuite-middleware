@@ -110,6 +110,7 @@ public class GetModuleAccess extends ContextAbstraction {
         datarow.add(String.valueOf(access.getTasks()));
         datarow.add(String.valueOf(access.getVcard()));
         datarow.add(String.valueOf(access.getWebdav()));
+        datarow.add(String.valueOf(access.getWebdavXml()));
         datarow.add(String.valueOf(access.getWebmail()));
         datarow.add(String.valueOf(access.getEditGroup()));
         datarow.add(String.valueOf(access.getEditResource()));
@@ -141,6 +142,8 @@ public class GetModuleAccess extends ContextAbstraction {
         columnnames.add(UserAbstraction.OPT_ACCESS_TASKS);
         columnnames.add(UserAbstraction.OPT_ACCESS_VCARD);
         columnnames.add(UserAbstraction.OPT_ACCESS_WEBDAV);
+        columnnames.add(UserAbstraction.OPT_ACCESS_WEBDAV_XML);
+        columnnames.add(UserAbstraction.OPT_ACCESS_WEBMAIL);
         columnnames.add(UserAbstraction.OPT_ACCESS_EDIT_GROUP);
         columnnames.add(UserAbstraction.OPT_ACCESS_EDIT_RESOURCE);
         columnnames.add(UserAbstraction.OPT_ACCESS_EDIT_PASSWORD);

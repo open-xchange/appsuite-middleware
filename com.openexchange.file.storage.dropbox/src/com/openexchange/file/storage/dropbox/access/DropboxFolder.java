@@ -70,7 +70,7 @@ public class DropboxFolder extends DefaultFileStorageFolder implements TypeAware
 
     /**
      * Initialises a new {@link DropboxFolder}.
-     * 
+     *
      * @param metadata The {@link FolderMetadata} representing a Dropbox folder
      * @param userId the user identifier
      * @param accountDisplayName The display name of the Dropbox account
@@ -84,7 +84,7 @@ public class DropboxFolder extends DefaultFileStorageFolder implements TypeAware
 
     /**
      * Initialises a new {@link DropboxFolder}.
-     * 
+     *
      * @param userId the user identifier
      */
     public DropboxFolder(int userId) {
@@ -107,7 +107,7 @@ public class DropboxFolder extends DefaultFileStorageFolder implements TypeAware
 
     /**
      * Parses the specified {@link FolderMetadata}
-     * 
+     *
      * @param metadata The {@link FolderMetadata} to parse
      * @param accountDisplayName The account's display name
      */
@@ -118,7 +118,7 @@ public class DropboxFolder extends DefaultFileStorageFolder implements TypeAware
         String path = metadata.getPathDisplay();
         id = path;
 
-        if ("".equals(path)) {
+        if ("/".equals(path)) {
             rootFolder = true;
             id = FileStorageFolder.ROOT_FULLNAME;
             setParentId(null);
@@ -134,7 +134,7 @@ public class DropboxFolder extends DefaultFileStorageFolder implements TypeAware
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.file.storage.TypeAware#getType()
      */
     @Override
@@ -155,7 +155,7 @@ public class DropboxFolder extends DefaultFileStorageFolder implements TypeAware
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see java.lang.Object#toString()
      */
     @Override

@@ -52,12 +52,13 @@ package com.openexchange.imageconverter.api;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * {@link MetadataImage}
  *
  * @author <a href="mailto:kai.ahrens@open-xchange.com">Kai Ahrens</a>
- * @since v7.8.4
+ * @since v7.10
  */
 public class MetadataImage implements Closeable {
 
@@ -73,6 +74,11 @@ public class MetadataImage implements Closeable {
     /**
      * Initializes a new {@link MetadataImage}.
      */
+    /**
+     * Initializes a new {@link MetadataImage}.
+     * @param imageStm The image {@link InputStream} or null.
+     * @param metadata The image {@link IMetadata} interface or null.
+     */
     public MetadataImage(final InputStream imageStm, final IMetadata metadata) {
         super();
 
@@ -87,7 +93,7 @@ public class MetadataImage implements Closeable {
      */
     @Override
     public void close() throws IOException {
-        if (null != m_imageStm) {
+        if (m_isCloseableOwner.get() && (null != m_imageStm)) {
             m_imageStm.close();
         }
     }
@@ -95,18 +101,32 @@ public class MetadataImage implements Closeable {
     // - API  ------------------------------------------------------------------
 
     /**
-     * Gets the m_imageStm
+     * Gets the image {@link InputStream}. The ownership of the {@link InputStream} is still held by this instance.
      *
-     * @return The m_imageStm
+     * @return The image {@link InputStream} or null, if no such data is available.
      */
     public InputStream getImageInputStream() {
         return m_imageStm;
     }
 
     /**
-     * Gets the m_metadata
+     * Gets the image {@link InputStream}. The ownership of the returned {@link InputStream} is transferred to the caller of this method,
+     *  if the given parameter is set to <code>true</code>. In this case the caller is responsible for correctly closing the returned
+     *  {@link InputStream}.
+
+     * @param transferCloseableOwnership The ownership of the returned {@link InputStream} is transferred to the caller of this method,
+     *  if the given parameter is set to <code>true</code>.
+     * @return The image {@link InputStream} or null, if no such data is available.
+     */
+    public InputStream getImageInputStream(boolean transferCloseableOwnership) {
+        m_isCloseableOwner.compareAndSet(m_isCloseableOwner.get() && transferCloseableOwnership, false);
+        return m_imageStm;
+    }
+
+    /**
+     * Gets the {@link IMetadata} interface.
      *
-     * @return The m_metadata
+     * @return The image {@link IMetadata} interface or null, if no such data is available.
      */
     public IMetadata getMetadata() {
         return m_metadata;
@@ -117,4 +137,6 @@ public class MetadataImage implements Closeable {
     private final InputStream m_imageStm;
 
     private final IMetadata m_metadata;
+
+    private AtomicBoolean m_isCloseableOwner = new AtomicBoolean(true);
 }

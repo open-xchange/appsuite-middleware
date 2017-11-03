@@ -67,6 +67,7 @@ import javax.mail.FetchProfile;
 import javax.mail.Header;
 import javax.mail.MessagingException;
 import javax.mail.internet.InternetHeaders;
+import com.google.common.collect.ImmutableMap;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
@@ -253,7 +254,7 @@ public final class Threadables {
                 threadable.inReplyTo = MimeMessageUtility.decodeMultiEncodedHeader(hdr.getValue());
             }
         });
-        HANDLERS = Collections.unmodifiableMap(m);
+        HANDLERS = ImmutableMap.copyOf(m);
     }
 
     /**

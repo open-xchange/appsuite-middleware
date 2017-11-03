@@ -139,8 +139,8 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.templating.impl"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.admin.reseller.rmi"/>
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/stax2-api-3.1.4.jar"/>
-	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/httpclient-osgi-4.5.2.jar"/>
-	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/httpcore-osgi-4.4.5.jar"/>
+	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/httpclient-osgi-4.5.3.jar"/>
+	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/httpcore-osgi-4.4.7.jar"/>
 	<classpathentry kind="lib" path="lib/socket.io-client-0.8.1.jar" sourcepath="lib/source/socket.io-client-0.8.1-sources.jar"/>
 	<classpathentry kind="lib" path="lib/engine.io-client-0.8.1.jar" sourcepath="lib/source/engine.io-client-0.8.1-sources.jar"/>
 	<classpathentry kind="lib" path="lib/okhttp-3.4.1.jar" sourcepath="lib/source/okhttp-3.4.1-sources.jar"/>
@@ -149,7 +149,6 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.net.ssl.config"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.net.ssl.config.impl"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.mail.autoconfig"/>
-	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/javax.servlet_3.1.0.v201410161800.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.http.grizzly"/>
 	<classpathentry kind="lib" path="lib/tempus-fugit-1.2-20140129.191141-5.jar" sourcepath="lib/source/tempus-fugit-1.2-20140129.191141-5-sources.jar"/>
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/jcl-over-slf4j-1.7.25.jar" sourcepath="/com.openexchange.bundles/source/jcl-over-slf4j-1.7.25-sources.jar"/>
@@ -183,5 +182,6 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.passwordchange.history"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.admin.rest.passwordchange.history"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.cluster.timer.impl"/>
+	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/javax.servlet-api-4.0.0.jar"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>

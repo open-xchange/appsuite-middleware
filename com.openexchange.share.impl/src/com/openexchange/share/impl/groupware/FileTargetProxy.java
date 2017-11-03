@@ -63,6 +63,7 @@ import com.openexchange.groupware.container.ObjectPermission;
 import com.openexchange.java.Strings;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.ShareTargetPath;
+import com.openexchange.share.core.groupware.AbstractTargetProxy;
 import com.openexchange.share.groupware.TargetPermission;
 import com.openexchange.share.groupware.TargetProxyType;
 

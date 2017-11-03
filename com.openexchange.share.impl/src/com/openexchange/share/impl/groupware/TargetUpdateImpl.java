@@ -74,6 +74,9 @@ import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareTarget;
+import com.openexchange.share.core.HandlerParameters;
+import com.openexchange.share.core.ModuleHandler;
+import com.openexchange.share.core.groupware.FolderTargetProxy;
 import com.openexchange.share.groupware.TargetProxy;
 import com.openexchange.user.UserService;
 
@@ -87,7 +90,7 @@ public class TargetUpdateImpl extends AbstractTargetUpdate {
 
     private final HandlerParameters parameters;
 
-    public TargetUpdateImpl(Session session, Connection writeCon, ServiceLookup services, ModuleHandlerRegistry handlers) throws OXException {
+    public TargetUpdateImpl(Session session, Connection writeCon, ServiceLookup services, ModuleExtensionRegistry<ModuleHandler> handlers) throws OXException {
         super(services, handlers);
         parameters = new HandlerParameters();
         parameters.setSession(session);

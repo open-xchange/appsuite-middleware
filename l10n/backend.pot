@@ -778,7 +778,9 @@ msgid "The resource %1$s is no longer reserved for the appointment"
 msgstr ""
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:267
-msgid "The appointment was rescheduled. Original date: %1$s. New date: %2$s"
+msgid ""
+"The appointment was rescheduled. Original date/time: %1$s. New date/time: "
+"%2$s"
 msgstr ""
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:269
@@ -1939,6 +1941,7 @@ msgstr ""
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.webdav/src/com/openexchange/file/storage/webdav/FormStrings.java:61
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.crawler/src/com/openexchange/subscribe/crawler/internal/FormStrings.java:61
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.dav/src/com/openexchange/subscribe/dav/FormStrings.java:61
 msgid "Login"
 msgstr ""
 
@@ -1946,6 +1949,7 @@ msgstr ""
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.webdav/src/com/openexchange/file/storage/webdav/FormStrings.java:63
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider.impl/src/com/openexchange/oauth/provider/impl/servlets/OAuthProviderStrings.java:87
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.crawler/src/com/openexchange/subscribe/crawler/internal/FormStrings.java:63
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.dav/src/com/openexchange/subscribe/dav/FormStrings.java:63
 msgid "Password"
 msgstr ""
 
@@ -1966,9 +1970,11 @@ msgid "The file version you requested does not exist."
 msgstr ""
 
 #. A folder named "%1$s" already exists below the parent folder "%2$s".
+#. A folder named "%1$s" already exists.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:74
-msgid ""
-"A folder named \"%1$s\" already exists below the parent folder \"%2$s\"."
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:74
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:128
+msgid "A folder named \"%1$s\" already exists."
 msgstr ""
 
 #. You do not have the appropriate permissions to create a subfolder below the folder "%1$s".
@@ -3637,6 +3643,12 @@ msgstr ""
 msgid "Managing mail filter rules is not available for your account."
 msgstr ""
 
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.mail.filter/src/com/openexchange/mailfilter/exceptions/MailFilterExceptionMessages.java:70
+msgid ""
+"The maximum amount of redirect rules is reached. Please delete or deactivate "
+"another redirect rule first."
+msgstr ""
+
 #. Maximum number of messages already stored for client %1$s
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.message.timeline/src/com/openexchange/message/timeline/MessageTimelineExceptionMessages.java:63
 msgid "Maximum number of messages already stored for client %1$s"
@@ -3730,28 +3742,26 @@ msgid ""
 "context '%3$s'"
 msgstr ""
 
-#. The certificate for domain "%1$s" is untrusted.
+#. The certificate for domain '%2$s' is untrusted.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.net.ssl/src/com/openexchange/net/ssl/exception/SSLExceptionMessages.java:64
-msgid "The certificate for domain \"%1$s\" is untrusted."
+msgid "The certificate for domain '%2$s' is untrusted."
 msgstr ""
 
-#. The certificate for domain "%1$s" is untrusted. You can change your general trust level in the settings.
+#. The certificate for domain '%2$s' is untrusted. You can change your general trust level in the settings.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.net.ssl/src/com/openexchange/net/ssl/exception/SSLExceptionMessages.java:67
 msgid ""
-"The certificate for domain \"%1$s\" is untrusted. You can change your "
-"general trust level in the settings."
+"The certificate for domain '%2$s' is untrusted. You can change your general "
+"trust level in the settings."
 msgstr ""
 
-#. The certificate '%1$s' is not trusted by the user '%2$s' in context '%3$s'
+#. The certificate is not trusted by the user.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.net.ssl/src/com/openexchange/net/ssl/exception/SSLExceptionMessages.java:70
-msgid ""
-"The certificate with fingerprint '%1$s' is not trusted by the user '%2$s' in "
-"context '%3$s'"
+msgid "The certificate with is not trusted by the user."
 msgstr ""
 
-#. The root certificate issued by '%1$s' is not trusted
+#. The root certificate issued by '%2$s' is not trusted
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.net.ssl/src/com/openexchange/net/ssl/exception/SSLExceptionMessages.java:73
-msgid "The root certificate issued by '%1$s' is not trusted"
+msgid "The root certificate issued by '%2$s' is not trusted"
 msgstr ""
 
 #. The certificate is self-signed
@@ -3769,6 +3779,23 @@ msgstr ""
 #. The common name for the certificate is invalid
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.net.ssl/src/com/openexchange/net/ssl/exception/SSLExceptionMessages.java:82
 msgid "The common name for the certificate is invalid"
+msgstr ""
+
+#. The root authority for the certificate is untrusted
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.net.ssl/src/com/openexchange/net/ssl/exception/SSLExceptionMessages.java:85
+msgid "The root authority for the certificate is untrusted"
+msgstr ""
+
+#. The certificate is using a weak algorithm
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.net.ssl/src/com/openexchange/net/ssl/exception/SSLExceptionMessages.java:88
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.net.ssl/src/com/openexchange/net/ssl/internal/FailureReasonMessage.java:81
+msgid "The certificate is using a weak algorithm"
+msgstr ""
+
+#. The certificate was revoked
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.net.ssl/src/com/openexchange/net/ssl/exception/SSLExceptionMessages.java:91
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.net.ssl/src/com/openexchange/net/ssl/internal/FailureReasonMessage.java:84
+msgid "The certificate was revoked"
 msgstr ""
 
 #. The certificate was signed by an untrusted issuer
@@ -4750,6 +4777,21 @@ msgstr ""
 msgid "Please add a value for %1$s"
 msgstr ""
 
+#. No user-associated job found
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/ajax/requesthandler/jobqueue/JobQueueMessages.java:63
+msgid "No such job %1$s"
+msgstr ""
+
+#. A long-running operation is being executed
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/ajax/requesthandler/jobqueue/JobQueueMessages.java:66
+msgid "A long-running operation is being executed"
+msgstr ""
+
+#. Such a long-running operation is already in progress
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/ajax/requesthandler/jobqueue/JobQueueMessages.java:69
+msgid "Such a long-running operation is already in progress"
+msgstr ""
+
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/authorization/AuthorizationExceptionMessages.java:60
 msgid "User is deactivated"
 msgstr ""
@@ -4867,12 +4909,6 @@ msgstr ""
 #. You do not have appropriate permissions to move the folder.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:71
 msgid "You do not have appropriate permissions to move the folder."
-msgstr ""
-
-#. A folder named "%1$s" already exists.
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:74
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:128
-msgid "A folder named \"%1$s\" already exists."
 msgstr ""
 
 #. You do not have the appropriate permissions to delete the folder.
@@ -7391,6 +7427,18 @@ msgstr ""
 msgid "Read timed out. Waited too long for incoming data from client."
 msgstr ""
 
+#. Image upload denied. Its size exceeds maximum allowed value of %2$s
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/upload/impl/UploadExceptionMessage.java:123
+msgid "Image upload denied. Its size exceeds maximum allowed value of %2$s."
+msgstr ""
+
+#. Image upload denied. Its resolution exceeds maximum allowed value of %2$s pixels.
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/upload/impl/UploadExceptionMessage.java:126
+msgid ""
+"Image upload denied. Its resolution exceeds maximum allowed value of %2$s "
+"pixels."
+msgstr ""
+
 #. *
 #. * Configuration for user %1$s could not be found in context %2$d
 #.
@@ -8155,6 +8203,11 @@ msgstr ""
 #. The message advertising that affected account is currently in setup phase and does not yet reflect up-to-date information
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/KnownStatusMessage.java:83
 msgid "Account is currently being set-up."
+msgstr ""
+
+#. The message advertising that the affected account is facing an SSL problem
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/KnownStatusMessage.java:86
+msgid "There was an SSL problem."
 msgstr ""
 
 #. Cannot find mail account for user "%2$s".

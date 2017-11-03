@@ -1,19 +1,19 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2014 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2014-2017 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
  * and Distribution License("CDDL") (collectively, the "License").  You
  * may not use this file except in compliance with the License.  You can
  * obtain a copy of the License at
- * https://glassfish.dev.java.net/public/CDDL+GPL_1_1.html
- * or packager/legal/LICENSE.txt.  See the License for the specific
+ * https://oss.oracle.com/licenses/CDDL+GPL-1.1
+ * or LICENSE.txt.  See the License for the specific
  * language governing permissions and limitations under the License.
  *
  * When distributing the software, include this License Header Notice in each
- * file and include the License file at packager/legal/LICENSE.txt.
+ * file and include the License file at LICENSE.txt.
  *
  * GPL Classpath Exception:
  * Oracle designates this particular file as subject to the "Classpath"
@@ -69,17 +69,17 @@ public class OAuth2SaslClient implements SaslClient {
 	this.cbh = cbh;
     }
 
-    //@Override
+    @Override
     public String getMechanismName() {
 	return "XOAUTH2";
     }
 
-    //@Override
+    @Override
     public boolean hasInitialResponse() {
 	return true;
     }
 
-    //@Override
+    @Override
     public byte[] evaluateChallenge(byte[] challenge) throws SaslException {
 	if (complete)
 	    return new byte[0];
@@ -114,31 +114,31 @@ public class OAuth2SaslClient implements SaslClient {
 	return response;
     }
 
-    //@Override
+    @Override
     public boolean isComplete() {
 	return complete;
     }
 
-    //@Override
+    @Override
     public byte[] unwrap(byte[] incoming, int offset, int len)
 				throws SaslException {
 	throw new IllegalStateException("OAUTH2 unwrap not supported");
     }
 
-    //@Override
+    @Override
     public byte[] wrap(byte[] outgoing, int offset, int len)
 				throws SaslException {
 	throw new IllegalStateException("OAUTH2 wrap not supported");
     }
 
-    //@Override
+    @Override
     public Object getNegotiatedProperty(String propName) {
 	if (!complete)
 	    throw new IllegalStateException("OAUTH2 getNegotiatedProperty");
 	return null;
     }
 
-    //@Override
+    @Override
     public void dispose() throws SaslException {
     }
 }

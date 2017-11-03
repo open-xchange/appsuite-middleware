@@ -301,15 +301,15 @@ public final class MailMessageComparator implements Comparator<MailMessage> {
                     if (msg2.isAnswered()) {
                         return compareByReceivedDate(msg1, msg2, false);
                     }
-                    return 1;
+                    return -1;
                 }
                 if (msg2.isAnswered()) {
-                    return -1;
+                    return 1;
                 }
                 return compareByReceivedDate(msg1, msg2, false);
             }
         });
-        COMPARERS.put(MailSortField.FLAG_ANSWERED, new FieldComparer() {
+        COMPARERS.put(MailSortField.FLAG_FORWARDED, new FieldComparer() {
 
             @Override
             public int compareFields(final MailMessage msg1, final MailMessage msg2) throws MessagingException {
@@ -317,10 +317,10 @@ public final class MailMessageComparator implements Comparator<MailMessage> {
                     if (msg2.isForwarded()) {
                         return compareByReceivedDate(msg1, msg2, false);
                     }
-                    return 1;
+                    return -1;
                 }
                 if (msg2.isForwarded()) {
-                    return -1;
+                    return 1;
                 }
                 return compareByReceivedDate(msg1, msg2, false);
             }
@@ -333,10 +333,10 @@ public final class MailMessageComparator implements Comparator<MailMessage> {
                     if (msg2.isDraft()) {
                         return compareByReceivedDate(msg1, msg2, false);
                     }
-                    return 1;
+                    return -1;
                 }
                 if (msg2.isDraft()) {
-                    return -1;
+                    return 1;
                 }
                 return compareByReceivedDate(msg1, msg2, false);
             }
@@ -349,10 +349,10 @@ public final class MailMessageComparator implements Comparator<MailMessage> {
                     if (msg2.isFlagged()) {
                         return compareByReceivedDate(msg1, msg2, false);
                     }
-                    return 1;
+                    return -1;
                 }
                 if (msg2.isFlagged()) {
-                    return -1;
+                    return 1;
                 }
                 return compareByReceivedDate(msg1, msg2, false);
             }

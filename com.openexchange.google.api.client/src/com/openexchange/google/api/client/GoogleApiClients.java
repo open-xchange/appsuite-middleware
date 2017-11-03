@@ -51,6 +51,8 @@
 package com.openexchange.google.api.client;
 
 import java.security.GeneralSecurityException;
+import java.util.ArrayList;
+import java.util.List;
 import javax.net.ssl.SSLHandshakeException;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -309,7 +311,10 @@ public class GoogleApiClients {
 
     static OXException handleScribeOAuthException(OAuthException e, OAuthAccount googleAccount, Session session) {
         if (ExceptionUtils.isEitherOf(e, SSLHandshakeException.class)) {
-            return SSLExceptionCode.UNTRUSTED_CERTIFICATE.create(e, "www.googleapis.com");
+            List<Object> displayArgs = new ArrayList<>(2);
+            displayArgs.add(SSLExceptionCode.extractArgument(e, "fingerprint"));
+            displayArgs.add("www.googleapis.com");
+            return SSLExceptionCode.UNTRUSTED_CERTIFICATE.create(e, displayArgs.toArray(new Object[] {}));
         }
 
         String exMessage = e.getMessage();

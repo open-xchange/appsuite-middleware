@@ -86,6 +86,8 @@ import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileDelta;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountAccess;
+import com.openexchange.file.storage.FileStorageAutoRenameFoldersAccess;
+import com.openexchange.file.storage.FileStorageCaseInsensitiveAccess;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFolder;
@@ -115,9 +117,10 @@ import com.openexchange.tools.iterator.SearchIteratorAdapter;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implements ThumbnailAware, FileStorageSequenceNumberProvider {
+public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implements ThumbnailAware, FileStorageSequenceNumberProvider, FileStorageCaseInsensitiveAccess, FileStorageAutoRenameFoldersAccess {
 
     private final OneDriveAccountAccess accountAccess;
+    private final OneDriveFolderAccess folderAccess;
     final int userId;
 
     /**
@@ -128,10 +131,21 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
      * @param session The session The account access
      * @param accountAccess The account access
      */
-    public OneDriveFileAccess(OneDriveOAuthAccess oneDriveAccess, FileStorageAccount account, Session session, OneDriveAccountAccess accountAccess) {
+    public OneDriveFileAccess(OneDriveOAuthAccess oneDriveAccess, FileStorageAccount account, Session session, OneDriveAccountAccess accountAccess, OneDriveFolderAccess folderAccess) {
         super(oneDriveAccess, account, session);
         this.accountAccess = accountAccess;
+        this.folderAccess = folderAccess;
         this.userId = session.getUserId();
+    }
+
+    @Override
+    public String createFolder(FileStorageFolder toCreate, boolean autoRename) throws OXException {
+        return folderAccess.createFolder(toCreate, autoRename);
+    }
+
+    @Override
+    public String moveFolder(String folderId, String newParentId, String newName, boolean autoRename) throws OXException {
+        return folderAccess.moveFolder(folderId, newParentId, newName, autoRename);
     }
 
     @Override

@@ -50,11 +50,11 @@
 package com.openexchange.mail.search.service;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import javax.mail.internet.InternetAddress;
+import com.google.common.collect.ImmutableMap;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.MailJSONField;
@@ -474,7 +474,7 @@ public final class MailAttributeFetcher implements SearchAttributeFetcher<MailMe
 
         });
 
-        GETTERS = Collections.unmodifiableMap(m);
+        GETTERS = ImmutableMap.copyOf(m);
     }
 
     private static final MailAttributeFetcher instance = new MailAttributeFetcher();

@@ -55,28 +55,40 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.dropbox.core.DbxException;
+import com.dropbox.core.v2.files.CreateFolderError;
 import com.dropbox.core.v2.files.CreateFolderErrorException;
 import com.dropbox.core.v2.files.DeleteErrorException;
 import com.dropbox.core.v2.files.FolderMetadata;
 import com.dropbox.core.v2.files.GetMetadataErrorException;
 import com.dropbox.core.v2.files.ListFolderContinueErrorException;
 import com.dropbox.core.v2.files.ListFolderErrorException;
+import com.dropbox.core.v2.files.ListFolderResult;
 import com.dropbox.core.v2.files.LookupError;
 import com.dropbox.core.v2.files.Metadata;
+import com.dropbox.core.v2.files.RelocationError;
 import com.dropbox.core.v2.files.RelocationErrorException;
+import com.dropbox.core.v2.files.WriteError;
 import com.dropbox.core.v2.users.IndividualSpaceAllocation;
 import com.dropbox.core.v2.users.SpaceAllocation;
 import com.dropbox.core.v2.users.SpaceUsage;
 import com.dropbox.core.v2.users.TeamSpaceAllocation;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.config.cascade.ConfigViews;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
+import com.openexchange.file.storage.FileStorageAutoRenameFoldersAccess;
+import com.openexchange.file.storage.FileStorageCaseInsensitiveAccess;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageFolderAccess;
+import com.openexchange.file.storage.NameBuilder;
+import com.openexchange.file.storage.PathKnowingFileStorageFolderAccess;
 import com.openexchange.file.storage.Quota;
 import com.openexchange.file.storage.Quota.Type;
-import com.openexchange.file.storage.dropbox.DropboxConstants;
+import com.openexchange.file.storage.dropbox.DropboxServices;
 import com.openexchange.oauth.access.AbstractOAuthAccess;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
 
 /**
@@ -85,12 +97,13 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class DropboxFolderAccess extends AbstractDropboxAccess implements FileStorageFolderAccess {
+public class DropboxFolderAccess extends AbstractDropboxAccess implements FileStorageFolderAccess, FileStorageCaseInsensitiveAccess, FileStorageAutoRenameFoldersAccess, PathKnowingFileStorageFolderAccess {
 
     private static final Logger LOG = LoggerFactory.getLogger(DropboxFolderAccess.class);
 
     private final int userId;
     private final String accountDisplayName;
+    private final boolean useOptimisticSubfolderDetection;
 
     /**
      * Initialises a new {@link DropboxFolderAccess}.
@@ -101,6 +114,12 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
         super(dropboxOAuthAccess, account, session);
         userId = session.getUserId();
         accountDisplayName = account.getDisplayName();
+        ConfigViewFactory viewFactory = DropboxServices.getOptionalService(ConfigViewFactory.class);
+        if (viewFactory == null) {
+            throw ServiceExceptionCode.absentService(ConfigViewFactory.class);
+        }
+        ConfigView view = viewFactory.getView(session.getUserId(), session.getContextId());
+        useOptimisticSubfolderDetection = ConfigViews.getDefinedBoolPropertyFrom("com.openexchange.file.storage.dropbox.useOptimisticSubfolderDetection", true, view);
     }
 
     /*
@@ -139,13 +158,14 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
             if (isRoot(folderId)) {
                 return getRootFolder();
             }
+
             FolderMetadata metadata = getFolderMetadata(folderId);
             // The '/get_metadata' Dropbox V2 API call does not return a hint to indicate if a folder has sub-folders,
             // thus we have to initiate an extra 'listFolder' call and check for sub folders.
             // More information: https://www.dropbox.com/developers/documentation/http/documentation#files-get_metadata
-            boolean hasSubFolders = hasSubFolders(folderId);
+            boolean hasSubfolders = hasSubFolders(folderId);
             // Parse metadata
-            return new DropboxFolder(metadata, userId, accountDisplayName, hasSubFolders);
+            return new DropboxFolder(metadata, userId, accountDisplayName, hasSubfolders);
         } catch (ListFolderErrorException e) {
             throw DropboxExceptionHandler.handleListFolderErrorException(e, folderId);
         } catch (GetMetadataErrorException e) {
@@ -193,13 +213,9 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
     @Override
     public FileStorageFolder[] getSubfolders(String parentIdentifier, boolean all) throws OXException {
         try {
-            if (!exists(parentIdentifier)) {
-                throw FileStorageExceptionCodes.NOT_FOUND.create(DropboxConstants.ID, parentIdentifier);
-            }
-
             List<Metadata> entries = listFolder(parentIdentifier);
-            List<FileStorageFolder> folders = new LinkedList<FileStorageFolder>();
 
+            List<FileStorageFolder> folders = new ArrayList<>(entries.size());
             for (Metadata entry : entries) {
                 if (entry instanceof FolderMetadata) {
                     FolderMetadata folderMetadata = (FolderMetadata) entry;
@@ -207,7 +223,7 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
                 }
             }
 
-            return folders.toArray(new FileStorageFolder[0]);
+            return folders.toArray(new FileStorageFolder[folders.size()]);
         } catch (ListFolderContinueErrorException e) {
             throw DropboxExceptionHandler.handleListFolderContinueErrorException(e, parentIdentifier);
         } catch (ListFolderErrorException e) {
@@ -244,21 +260,61 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
         return rootFolder;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.file.storage.FileStorageFolderAccess#createFolder(com.openexchange.file.storage.FileStorageFolder)
-     */
     @Override
     public String createFolder(FileStorageFolder toCreate) throws OXException {
-        String fullpath = constructPath(toCreate.getParentId(), toCreate.getName());
-        try {
-            FolderMetadata folderMetadata = client.files().createFolder(fullpath);
-            return folderMetadata.getPathDisplay();
-        } catch (CreateFolderErrorException e) {
-            throw DropboxExceptionHandler.handleCreateFolderErrorException(e, fullpath);
-        } catch (DbxException e) {
-            throw DropboxExceptionHandler.handle(e, session, dropboxOAuthAccess.getOAuthAccount());
+        return createFolder(toCreate, true);
+    }
+
+    @Override
+    public String createFolder(FileStorageFolder toCreate, boolean autoRename) throws OXException {
+        String parentId = toCreate.getParentId();
+
+        if (false == autoRename) {
+            String fullpath = constructPath(parentId, toCreate.getName());
+            try {
+                FolderMetadata folderMetadata = client.files().createFolder(fullpath);
+                return folderMetadata.getPathDisplay();
+            } catch (CreateFolderErrorException e) {
+                CreateFolderError error = e.errorValue;
+                if (CreateFolderError.Tag.PATH == error.tag()) {
+                    if (WriteError.Tag.CONFLICT == error.getPathValue().tag()) {
+                        String parentName = "/".equals(parentId) ? accountDisplayName : parentId.substring(parentId.lastIndexOf('/') + 1);
+                        throw FileStorageExceptionCodes.DUPLICATE_FOLDER.create(e, toCreate.getName(), parentName);
+                    }
+                }
+
+                throw DropboxExceptionHandler.handleCreateFolderErrorException(e, fullpath, accountDisplayName);
+            } catch (DbxException e) {
+                throw DropboxExceptionHandler.handle(e, session, dropboxOAuthAccess.getOAuthAccount());
+            }
+        }
+
+        String baseName = toCreate.getName();
+        String fullpath = constructPath(parentId, baseName);
+
+        NameBuilder name = null;
+        while (true) {
+            try {
+                FolderMetadata folderMetadata = client.files().createFolder(fullpath);
+                return folderMetadata.getPathDisplay();
+            } catch (CreateFolderErrorException e) {
+                CreateFolderError error = e.errorValue;
+                if (CreateFolderError.Tag.PATH != error.tag()) {
+                    throw DropboxExceptionHandler.handleCreateFolderErrorException(e, fullpath, accountDisplayName);
+                }
+
+                if (WriteError.Tag.CONFLICT != error.getPathValue().tag()) {
+                    throw DropboxExceptionHandler.handleCreateFolderErrorException(e, fullpath, accountDisplayName);
+                }
+
+                // Compile a new name and retry...
+                if (null == name) {
+                    name = new NameBuilder(baseName);
+                }
+                fullpath = constructPath(parentId, name.advance().toString());
+            } catch (DbxException e) {
+                throw DropboxExceptionHandler.handle(e, session, dropboxOAuthAccess.getOAuthAccount());
+            }
         }
     }
 
@@ -282,25 +338,62 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
         return moveFolder(folderId, newParentId, null);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.file.storage.FileStorageFolderAccess#moveFolder(java.lang.String, java.lang.String, java.lang.String)
-     */
     @Override
     public String moveFolder(String folderId, String newParentId, String newName) throws OXException {
-        try {
-            if (newName == null) {
-                int lastIndex = folderId.lastIndexOf('/');
-                newName = folderId.substring(lastIndex);
-                newParentId += newName;
+        return moveFolder(folderId, newParentId, newName, true);
+    }
+
+    @Override
+    public String moveFolder(String folderId, String newParentId, String newName, boolean autoRename) throws OXException {
+        if (newName == null) {
+            int lastIndex = folderId.lastIndexOf('/');
+            newName = folderId.substring(lastIndex);
+        }
+
+        if (false == autoRename) {
+            try {
+                Metadata metadata = client.files().move(folderId, newParentId);
+                return metadata.getPathDisplay();
+            } catch (RelocationErrorException e) {
+                RelocationError relocationError = e.errorValue;
+                if (RelocationError.Tag.TO == relocationError.tag()) {
+                    WriteError error = relocationError.getToValue();
+                    if (WriteError.Tag.CONFLICT == error.tag()) {
+                        String parentName = "/".equals(newParentId) ? accountDisplayName : newParentId.substring(newParentId.lastIndexOf('/') + 1);
+                        throw FileStorageExceptionCodes.DUPLICATE_FOLDER.create(e, newName, parentName);
+                    }
+                }
+
+                throw DropboxExceptionHandler.handleRelocationErrorException(e, folderId, "", accountDisplayName);
+            } catch (DbxException e) {
+                throw DropboxExceptionHandler.handle(e, session, dropboxOAuthAccess.getOAuthAccount());
             }
-            Metadata metadata = client.files().move(folderId, newParentId);
-            return metadata.getPathDisplay();
-        } catch (RelocationErrorException e) {
-            throw DropboxExceptionHandler.handleRelocationErrorException(e, folderId, "");
-        } catch (DbxException e) {
-            throw DropboxExceptionHandler.handle(e, session, dropboxOAuthAccess.getOAuthAccount());
+        }
+
+
+        String baseName = newName;
+        NameBuilder name = new NameBuilder(baseName);
+        while (true) {
+            try {
+                String toPath = newParentId + name.toString();
+                Metadata metadata = client.files().move(folderId, toPath);
+                return metadata.getPathDisplay();
+            } catch (RelocationErrorException e) {
+                RelocationError relocationError = e.errorValue;
+                if (RelocationError.Tag.TO != relocationError.tag()) {
+                    throw DropboxExceptionHandler.handleRelocationErrorException(e, folderId, "", accountDisplayName);
+                }
+
+                WriteError error = relocationError.getToValue();
+                if (WriteError.Tag.CONFLICT != error.tag()) {
+                    throw DropboxExceptionHandler.handleRelocationErrorException(e, folderId, "", accountDisplayName);
+                }
+
+                // Compile a new name and retry...
+                name.advance();
+            } catch (DbxException e) {
+                throw DropboxExceptionHandler.handle(e, session, dropboxOAuthAccess.getOAuthAccount());
+            }
         }
     }
 
@@ -311,14 +404,23 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
      */
     @Override
     public String renameFolder(String folderId, String newName) throws OXException {
+        int lastIndex = folderId.lastIndexOf('/');
+        String parentId = folderId.substring(0, lastIndex + 1);
         try {
-            int lastIndex = folderId.lastIndexOf('/');
-            String newPath = folderId.substring(0, lastIndex + 1);
-            newPath += newName;
+            String newPath = parentId + newName;
             Metadata metadata = client.files().move(folderId, newPath);
             return metadata.getPathDisplay();
         } catch (RelocationErrorException e) {
-            throw DropboxExceptionHandler.handleRelocationErrorException(e, folderId, "");
+            RelocationError relocationError = e.errorValue;
+            if (RelocationError.Tag.TO == relocationError.tag()) {
+                WriteError error = relocationError.getToValue();
+                if (WriteError.Tag.CONFLICT == error.tag()) {
+                    String parentName = "/".equals(parentId) ? accountDisplayName : parentId.substring(parentId.lastIndexOf('/') + 1);
+                    throw FileStorageExceptionCodes.DUPLICATE_FOLDER.create(e, newName, parentName);
+                }
+            }
+
+            throw DropboxExceptionHandler.handleRelocationErrorException(e, folderId, "", accountDisplayName);
         } catch (DbxException e) {
             throw DropboxExceptionHandler.handle(e, session, dropboxOAuthAccess.getOAuthAccount());
         }
@@ -335,7 +437,7 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
             Metadata metadata = client.files().delete(folderId);
             return metadata.getName();
         } catch (DeleteErrorException e) {
-            throw DropboxExceptionHandler.handleDeleteErrorException(e, folderId, "");
+            throw DropboxExceptionHandler.handleDeleteErrorException(e, folderId, "", accountDisplayName);
         } catch (DbxException e) {
             throw DropboxExceptionHandler.handle(e, session, dropboxOAuthAccess.getOAuthAccount());
         }
@@ -403,6 +505,18 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
         } while ((parentId = folder.getParentId()) != null);
 
         return folders.toArray(new FileStorageFolder[folders.size()]);
+    }
+
+    @Override
+    public String[] getPathIds2DefaultFolder(String folderId) throws OXException {
+        List<String> path = new LinkedList<>();
+        String parentId = folderId;
+        path.add(parentId);
+        for (int index; (index = parentId.lastIndexOf('/')) >= 0;) {
+            parentId = parentId.substring(0, index);
+            path.add(parentId);
+        }
+        return path.toArray(new String[path.size()]);
     }
 
     /*
@@ -478,12 +592,27 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
      * @throws DbxException if a generic Dropbox error is occurred
      */
     private boolean hasSubFolders(String folderId) throws ListFolderErrorException, DbxException {
-        List<Metadata> entries = listFolder(folderId);
-        for (Metadata entry : entries) {
-            if (entry instanceof FolderMetadata) {
-                return true;
-            }
+        if (useOptimisticSubfolderDetection) {
+            return true;
         }
+
+        ListFolderResult listResult = client.files().listFolder(folderId);
+        boolean hasMore;
+        do {
+            hasMore = listResult.getHasMore();
+
+            List<Metadata> entries = listResult.getEntries();
+            for (Metadata metadata : entries) {
+                if (metadata instanceof FolderMetadata) {
+                    return true;
+                }
+            }
+
+            if (hasMore) {
+                String cursor = listResult.getCursor();
+                listResult = client.files().listFolderContinue(cursor);
+            }
+        } while (hasMore);
         return false;
     }
 

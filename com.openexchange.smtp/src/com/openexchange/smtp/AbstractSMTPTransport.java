@@ -61,8 +61,10 @@ import java.net.UnknownHostException;
 import java.nio.charset.UnsupportedCharsetException;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Queue;
@@ -726,7 +728,10 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
             throw MimeMailExceptionCode.TRANSPORT_INVALID_CREDENTIALS.create(e, smtpConfig.getServer(), e.getMessage());
         } catch (MessagingException e) {
             if (MimeMailException.isSSLHandshakeException(e)) {
-                throw SSLExceptionCode.UNTRUSTED_CERTIFICATE.create(e.getCause(), server);
+                List<Object> displayArgs = new ArrayList<>(2);
+                displayArgs.add(SSLExceptionCode.extractArgument(e, "fingerprint"));
+                displayArgs.add(server);
+                throw SSLExceptionCode.UNTRUSTED_CERTIFICATE.create(e.getCause(), displayArgs.toArray(new Object[] {}));
             }
             throw handleMessagingException(e, smtpConfig);
         }

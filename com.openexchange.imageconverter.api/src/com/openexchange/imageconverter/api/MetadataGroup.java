@@ -62,6 +62,7 @@ public enum MetadataGroup {
     EXIF("Exif"),
     FILE("File"),
     GPS("GPS"),
+    HEADER("Header"),
     THUMBNAIL("Thumbnail");
 
     /**
@@ -100,6 +101,11 @@ public enum MetadataGroup {
 
                 case ("gps"): {
                     ret = MetadataGroup.GPS;
+                    break;
+                }
+
+                case ("header"): {
+                    ret = MetadataGroup.HEADER;
                     break;
                 }
 

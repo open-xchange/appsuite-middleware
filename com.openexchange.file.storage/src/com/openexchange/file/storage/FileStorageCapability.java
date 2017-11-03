@@ -158,5 +158,15 @@ public enum FileStorageCapability {
      */
     COUNT_TOTAL,
 
+    /**
+     * Signals that file names and folder names are treated case insensitive; e.g. a file named <code>"abc.txt"</code> is considered equal to <code>"ABC.txt"</code> and will cause a conflict.
+     */
+    CASE_INSENSITIVE,
+
+    /**
+     * Signals that folder names are automatically renamed in case a conflict occurs; e.g. a conflicting folder named <code>"abc"</code> will be changed to <code>"abc (1)"</code>.
+     */
+    AUTO_RENAME_FOLDERS,
+
     ;
 }

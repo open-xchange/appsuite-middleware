@@ -15,7 +15,7 @@ BuildRequires: java-1_8_0-openjdk-devel
 BuildRequires: java-1.8.0-openjdk-devel
 %endif
 Version:       @OXVERSION@
-%define        ox_release 3
+%define        ox_release 0
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -115,12 +115,6 @@ if [ ${1:-0} -eq 2 ]; then
     # SoftwareChange_Request-3556
     ox_add_property com.openexchange.oauth.yahoo.redirectUrl REPLACE_WITH_REDIRECT_URL /opt/open-xchange/etc/yahoooauth.properties
     ox_add_property com.openexchange.oauth.yahoo.productName REPLACE_WITH_YOUR_REGISTERED_YAHOO_APP /opt/open-xchange/etc/yahoooauth.properties
-
-    # SoftwareChange_Request-4196
-    VALUE=$(ox_read_property com.openexchange.oauth.twitter /opt/open-xchange/etc/twitteroauth.properties)
-    if [ "true" == "$VALUE" ]; then
-        ox_set_property com.openexchange.oauth.twitter false /opt/open-xchange/etc/twitteroauth.properties
-    fi
 fi
 
 %clean
@@ -147,6 +141,8 @@ fi
 %config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/settings/tumblroauth.properties
 
 %changelog
+* Thu Oct 12 2017 Steffen Templin <marcus.klein@open-xchange.com>
+prepare for 7.10.0 release
 * Fri May 19 2017 Steffen Templin <marcus.klein@open-xchange.com>
 First candidate for 7.8.4 release
 * Thu May 04 2017 Steffen Templin <marcus.klein@open-xchange.com>

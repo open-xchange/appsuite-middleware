@@ -71,13 +71,9 @@ public class DisplayItems {
         String displayName = extractDisplayName(contact);
         String primaryAddress = extractPrimaryMailAddress(contact);
         if (Strings.isEmpty(displayName)) {
-            if (Strings.isEmpty(primaryAddress)) {
-                displayName = "";
-            } else {
-                displayName = primaryAddress;
-            }
+            displayName = Strings.isEmpty(primaryAddress) ? "" : primaryAddress;
         }
-
+        
         ComplexDisplayItem item = new ComplexDisplayItem(displayName, primaryAddress);
         Pair<ImageDataSource, ImageLocation> imageData = ContactUtil.prepareImageData(contact);
         if (imageData != null) {

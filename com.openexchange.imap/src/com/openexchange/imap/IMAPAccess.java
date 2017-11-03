@@ -54,10 +54,12 @@ import java.io.IOException;
 import java.nio.charset.UnsupportedCharsetException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
@@ -438,7 +440,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                 LOG.error("Error while closing IMAP message storage: {}", e.getMessage()).toString(), e));
             } finally {
                 messageStorage = null;
-
+        
             }
         }
         if (logicTools != null) {
@@ -668,7 +670,10 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                 throw MimeMailException.handleMessagingException(e, config, session);
             } catch (final MessagingException e) {
                 if (MimeMailException.isSSLHandshakeException(e)) {
-                    OXException oxe = SSLExceptionCode.UNTRUSTED_CERTIFICATE.create(e.getCause(), config.getServer());
+                    List<Object> displayArgs = new ArrayList<>(2);
+                    displayArgs.add(SSLExceptionCode.extractArgument(e, "fingerprint"));
+                    displayArgs.add(config.getServer());
+                    OXException oxe = SSLExceptionCode.UNTRUSTED_CERTIFICATE.create(e.getCause(), displayArgs.toArray(new Object[] {}));
                     warnings.add(oxe);
                     throw oxe;
                 }
@@ -842,7 +847,10 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                     }
                 }
                 if (MimeMailException.isSSLHandshakeException(e)) {
-                    throw SSLExceptionCode.UNTRUSTED_CERTIFICATE.create(e.getCause(), server);
+                    List<Object> displayArgs = new ArrayList<>(2);
+                    displayArgs.add(SSLExceptionCode.extractArgument(e, "fingerprint"));
+                    displayArgs.add(server);
+                    throw SSLExceptionCode.UNTRUSTED_CERTIFICATE.create(e.getCause(), displayArgs.toArray(new Object[] {}));
                 }
                 {
                     Exception next = e.getNextException();

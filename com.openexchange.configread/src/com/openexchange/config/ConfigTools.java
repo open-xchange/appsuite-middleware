@@ -50,6 +50,7 @@
 package com.openexchange.config;
 
 import java.util.Arrays;
+import com.openexchange.java.Strings;
 import com.openexchange.tools.strings.TimeSpanParser;
 
 /**
@@ -169,7 +170,7 @@ public class ConfigTools {
         }
         double number = Double.parseDouble(numberBuilder.toString());
         if (0 < unitbuilder.length()) {
-            String unit = unitbuilder.toString().toUpperCase();
+            String unit = Strings.toUpperCase(unitbuilder.toString());
             int exp = Arrays.asList("B", "KB", "MB", "GB", "TB").indexOf(unit);
             if (0 <= exp) {
                 number *= Math.pow(1024, exp);

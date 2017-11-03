@@ -836,7 +836,10 @@ public class DefaultShareService implements ShareService {
         User sharingUser = utils.getUser(session);
         Context context = services.getService(ContextService.class).getContext(connectionHelper.getContextID());
         ModuleSupport moduleSupport = services.getService(ModuleSupport.class);
-        ShareInfo shareInfo;
+        /*
+         * pre-adjust share target to ensure having the current session user's point of view
+         */
+        target = moduleSupport.adjustTarget(target, session, session.getUserId());
         if (RecipientType.GROUP.equals(recipient.getType())) {
             /*
              * prepare pseudo share infos for group recipient
@@ -849,22 +852,19 @@ public class DefaultShareService implements ShareService {
             } else {
                 dstTarget = moduleSupport.adjustTarget(target, session, members[0]);
             }
-            shareInfo = new InternalGroupShareInfo(context.getContextId(), group, target, dstTarget);
-        } else {
-            /*
-             * prepare guest or internal user shares for other recipient types
-             */
-            int permissionBits = utils.getRequiredPermissionBits(recipient, target);
-            User targetUser = getGuestUser(connectionHelper.getConnection(), context, sharingUser, permissionBits, recipient, target);
-            ShareTarget dstTarget = moduleSupport.adjustTarget(target, session, targetUser.getId());
-            if (false == targetUser.isGuest()) {
-                shareInfo = new InternalUserShareInfo(context.getContextId(), targetUser, target, dstTarget);
-            } else {
-                ShareTargetPath targetPath = moduleSupport.getPath(target, session);
-                shareInfo = new DefaultShareInfo(services, context.getContextId(), targetUser, target, dstTarget, targetPath);
-            }
+            return new InternalGroupShareInfo(context.getContextId(), group, target, dstTarget);
         }
-        return shareInfo;
+        /*
+         * prepare guest or internal user shares for other recipient types
+         */
+        int permissionBits = utils.getRequiredPermissionBits(recipient, target);
+        User targetUser = getGuestUser(connectionHelper.getConnection(), context, sharingUser, permissionBits, recipient, target);
+        ShareTarget dstTarget = moduleSupport.adjustTarget(target, session, targetUser.getId());
+        if (false == targetUser.isGuest()) {
+            return new InternalUserShareInfo(context.getContextId(), targetUser, target, dstTarget);
+        }
+        ShareTargetPath targetPath = moduleSupport.getPath(target, session);
+        return new DefaultShareInfo(services, context.getContextId(), targetUser, target, dstTarget, targetPath);
     }
 
     /**

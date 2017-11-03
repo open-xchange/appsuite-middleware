@@ -65,6 +65,7 @@ import com.openexchange.push.imapidle.ImapIdleDeleteListener;
 import com.openexchange.push.imapidle.ImapIdleMailAccountDeleteListener;
 import com.openexchange.push.imapidle.ImapIdlePushManagerService;
 import com.openexchange.push.imapidle.locking.ImapIdleClusterLock;
+import com.openexchange.session.ObfuscatorService;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessionstorage.SessionStorageService;
 import com.openexchange.threadpool.ThreadPoolService;
@@ -112,6 +113,7 @@ public class ImapIdleActivator extends HousekeepingActivator {
         trackService(PushNotificationService.class);
         trackService(SessionStorageService.class);
         trackService(LockService.class);
+        trackService(ObfuscatorService.class);
         openTrackers();
 
         registerService(MailAccountDeleteListener.class, new ImapIdleMailAccountDeleteListener());

@@ -50,11 +50,9 @@
 package com.openexchange.groupware.infostore.database.impl;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import com.google.common.collect.ImmutableSet;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.utils.Metadata;
@@ -103,16 +101,14 @@ public class InfostoreQueryCatalog {
         Metadata.CREATION_DATE_LITERAL, Metadata.LAST_MODIFIED_LITERAL, Metadata.CREATED_BY_LITERAL, Metadata.MODIFIED_BY_LITERAL,
         Metadata.LAST_MODIFIED_UTC_LITERAL };
 
-    public static final Set<Metadata> INFOSTORE_FIELDS_SET = Collections.unmodifiableSet(new HashSet<Metadata>(
-        Arrays.asList(INFOSTORE_FIELDS)));
+    public static final Set<Metadata> INFOSTORE_FIELDS_SET = ImmutableSet.copyOf(INFOSTORE_FIELDS);
 
     public static final Metadata[] DEL_INFOSTORE_FIELDS = new Metadata[] {
         Metadata.ID_LITERAL, Metadata.FOLDER_ID_LITERAL, Metadata.VERSION_LITERAL,
         Metadata.CREATION_DATE_LITERAL, Metadata.LAST_MODIFIED_LITERAL, Metadata.CREATED_BY_LITERAL, Metadata.MODIFIED_BY_LITERAL,
         Metadata.LAST_MODIFIED_UTC_LITERAL, Metadata.COLOR_LABEL_LITERAL };
 
-    public static final Set<Metadata> DEL_INFOSTORE_FIELDS_SET = Collections.unmodifiableSet(new HashSet<Metadata>(
-        Arrays.asList(DEL_INFOSTORE_FIELDS)));
+    public static final Set<Metadata> DEL_INFOSTORE_FIELDS_SET = ImmutableSet.copyOf(DEL_INFOSTORE_FIELDS);
 
     public static final Metadata[] INFOSTORE_DOCUMENT_FIELDS = new Metadata[] {
         Metadata.ID_LITERAL, Metadata.VERSION_LITERAL, Metadata.CREATION_DATE_LITERAL, Metadata.LAST_MODIFIED_LITERAL,
@@ -121,19 +117,16 @@ public class InfostoreQueryCatalog {
         Metadata.FILE_MIMETYPE_LITERAL, Metadata.FILE_MD5SUM_LITERAL, Metadata.VERSION_COMMENT_LITERAL,
         Metadata.FILESTORE_LOCATION_LITERAL, Metadata.LAST_MODIFIED_UTC_LITERAL, Metadata.META_LITERAL };
 
-    public static final Set<Metadata> INFOSTORE_DOCUMENT_FIELDS_SET = Collections.unmodifiableSet(new HashSet<Metadata>(
-        Arrays.asList(INFOSTORE_DOCUMENT_FIELDS)));
+    public static final Set<Metadata> INFOSTORE_DOCUMENT_FIELDS_SET = ImmutableSet.copyOf(INFOSTORE_DOCUMENT_FIELDS);
 
     public static final Metadata[] DEL_INFOSTORE_DOCUMENT_FIELDS = new Metadata[] {
         Metadata.ID_LITERAL, Metadata.VERSION_LITERAL, Metadata.CREATION_DATE_LITERAL, Metadata.LAST_MODIFIED_LITERAL,
         Metadata.CREATED_BY_LITERAL, Metadata.MODIFIED_BY_LITERAL
     };
 
-    public static final Set<Metadata> DEL_INFOSTORE_DOCUMENT_FIELDS_SET = Collections.unmodifiableSet(new HashSet<Metadata>(
-        Arrays.asList(DEL_INFOSTORE_DOCUMENT_FIELDS)));
+    public static final Set<Metadata> DEL_INFOSTORE_DOCUMENT_FIELDS_SET = ImmutableSet.copyOf(DEL_INFOSTORE_DOCUMENT_FIELDS);
 
-    public static final Set<Metadata> IGNORE_ON_WRITE = Collections.unmodifiableSet(new HashSet<Metadata>(
-        Arrays.asList(Metadata.LAST_MODIFIED_UTC_LITERAL)));
+    public static final Set<Metadata> IGNORE_ON_WRITE = ImmutableSet.of(Metadata.LAST_MODIFIED_UTC_LITERAL);
 
     public Metadata[] filterWritable(final Metadata[] fields) {
         boolean mustRemove = false;

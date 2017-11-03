@@ -76,4 +76,10 @@ public class FailureReasonMessage implements LocalizableStrings {
 
     // The certificate is untrusted
     public static final String UNTRUSTED_CERTIFICATE = "The certificate is untrusted";
+
+    // The certificate is using a weak algorithm
+    public static final String ALGORITHM_CONSTRAINED = "The certificate is using a weak algorithm";
+
+    // The certificate was revoked
+    public static final String REVOKED = "The certificate was revoked";
 }

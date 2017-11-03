@@ -62,6 +62,7 @@ import com.openexchange.find.basic.Services;
 import com.openexchange.find.basic.calendar.BasicCalendarDriver;
 import com.openexchange.find.basic.contacts.AutocompleteFields;
 import com.openexchange.find.basic.contacts.BasicContactsDriver;
+import com.openexchange.find.basic.contacts.ShowDepartmentJSlobEntry;
 import com.openexchange.find.basic.drive.BasicDriveDriver;
 import com.openexchange.find.basic.mail.BasicMailDriver;
 import com.openexchange.find.basic.tasks.BasicTasksDriver;
@@ -71,6 +72,7 @@ import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.infostore.InfostoreSearchEngine;
 import com.openexchange.groupware.settings.PreferencesItemService;
+import com.openexchange.jslob.JSlobEntry;
 import com.openexchange.mail.service.MailService;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.UnifiedInboxManagement;
@@ -88,11 +90,7 @@ public class FindBasicActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ContactService.class, FolderService.class, MailService.class,
-            MailAccountStorageService.class, IDBasedFileAccessFactory.class, UnifiedInboxManagement.class,
-            AppointmentSqlFactoryService.class, CalendarCollectionService.class, ThreadPoolService.class,
-            IDBasedFolderAccessFactory.class, ResourceService.class, ConfigurationService.class, InfostoreSearchEngine.class,
-            FileStorageServiceRegistry.class, ConfigViewFactory.class };
+        return new Class<?>[] { ContactService.class, FolderService.class, MailService.class, MailAccountStorageService.class, IDBasedFileAccessFactory.class, UnifiedInboxManagement.class, AppointmentSqlFactoryService.class, CalendarCollectionService.class, ThreadPoolService.class, IDBasedFolderAccessFactory.class, ResourceService.class, ConfigurationService.class, InfostoreSearchEngine.class, FileStorageServiceRegistry.class, ConfigViewFactory.class };
     }
 
     @Override
@@ -106,6 +104,9 @@ public class FindBasicActivator extends HousekeepingActivator {
         registerService(ModuleSearchDriver.class, new BasicCalendarDriver(), defaultProperties());
         registerService(ModuleSearchDriver.class, new BasicTasksDriver(), defaultProperties());
         registerService(PreferencesItemService.class, AutocompleteFields.class.newInstance());
+
+        // Register the 'showDepartment' jslob
+        registerService(JSlobEntry.class, new ShowDepartmentJSlobEntry());
     }
 
     private Dictionary<String, Object> defaultProperties() {

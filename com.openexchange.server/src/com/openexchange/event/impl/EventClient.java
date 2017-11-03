@@ -229,6 +229,7 @@ public class EventClient {
     }
 
     public void modify(final Appointment oldAppointment, final Appointment newAppointment, final FolderObject folderObj) throws OXException {
+        appendInformation(oldAppointment, newAppointment);
         final Map<Integer, Set<Integer>> affectedUsers = getAffectedUsers(new CalendarObject[] { oldAppointment, newAppointment }, new FolderObject[] { folderObj });
         final CommonEvent genericEvent = new CommonEventImpl(contextId, userId, unmodifyable(affectedUsers), CommonEvent.UPDATE, Types.APPOINTMENT, newAppointment, oldAppointment, folderObj, null, session);
 
@@ -240,6 +241,32 @@ public class EventClient {
 
         final EventObject eventObject = new EventObject(newAppointment, CHANGED, session);
         EventQueue.add(eventObject);
+    }
+
+    /**
+     * This adds necessary information to the updated appointment if not present.
+     * Mostly a workaround for Bug #53169
+     *
+     * @param oldAppointment
+     * @param newAppointment
+     */
+    private void appendInformation(Appointment oldAppointment, Appointment newAppointment) {
+        if (null == oldAppointment) {
+            // Nothing can be done...
+            return;
+        }
+
+        if (!newAppointment.containsRecurrenceID() && oldAppointment.containsRecurrenceID()) {
+            newAppointment.setRecurrenceID(oldAppointment.getRecurrenceID());
+        }
+
+        if (!newAppointment.containsOrganizer() && oldAppointment.containsOrganizer()) {
+            newAppointment.setOrganizer(oldAppointment.getOrganizer());
+
+            if (!newAppointment.containsOrganizerId() && oldAppointment.containsOrganizerId()) {
+                newAppointment.setOrganizerId(oldAppointment.getOrganizerId());
+            }
+        }
     }
 
     public void accepted(final Appointment appointment) throws OXException {

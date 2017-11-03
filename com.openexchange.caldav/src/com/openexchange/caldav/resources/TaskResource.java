@@ -81,6 +81,7 @@ public class TaskResource extends CalDAVResource<Task> {
      * All task fields that may be set in iCal files
      */
     private static final int[] CALDAV_FIELDS = {
+        Task.START_DATE, // DTSTART
         Task.END_DATE, // DUE
         Task.TITLE, // SUMMARY
         Task.PRIORITY, // PRIORITY

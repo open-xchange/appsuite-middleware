@@ -602,12 +602,23 @@ public final class ThresholdFileHolder implements IFileHolder {
 
     @Override
     public InputStream getStream() throws OXException {
+        return new ThresholdFileHolderInputStream(this);
+    }
+
+    /**
+     * Gets the effective input stream from this file holder; either array- or file-backed.
+     *
+     * @param sizeKnowing <code>true</code> to return a size-knowing input stream; otherwise <code>false</code>
+     * @return The effective input stream
+     * @throws OXException If input stream cannot be returned due to an I/O error
+     */
+    InputStream getInnerStream(boolean sizeKnowing) throws OXException {
         if (count <= 0) {
             return Streams.EMPTY_INPUT_STREAM;
         }
         ByteArrayOutputStream buf = this.buf;
         if (null != buf) {
-            return new SizeKnowingInputStream(Streams.asInputStream(buf), buf.size());
+            return sizeKnowing ? new SizeKnowingInputStream(Streams.asInputStream(buf), buf.size()) : Streams.asInputStream(buf);
         }
         File tempFile = this.tempFile;
         if (null == tempFile) {
@@ -617,7 +628,7 @@ public final class ThresholdFileHolder implements IFileHolder {
         FileInputStream fis = null;
         try {
             fis = new FileInputStream(tempFile);
-            SizeKnowingInputStream retval = new SizeKnowingInputStream(fis, tempFile.length());
+            InputStream retval = sizeKnowing ? new SizeKnowingInputStream(fis, tempFile.length()) : fis;
             fis = null; // Avoid premature closing
             return retval;
         } catch (IOException e) {
@@ -823,16 +834,13 @@ public final class ThresholdFileHolder implements IFileHolder {
         }
     } // End of class TransferringOutStream
 
-    private static final class ClosingInputStream extends SizeKnowingInputStream {
-
-        private final ThresholdFileHolder fileHolder;
+    private static final class ClosingInputStream extends ThresholdFileHolderInputStream {
 
         /**
          * Initializes a new {@link ClosingInputStream}.
          */
         protected ClosingInputStream(final ThresholdFileHolder fileHolder) throws OXException {
-            super(fileHolder.getStream(), fileHolder.getLength());
-            this.fileHolder = fileHolder;
+            super(fileHolder);
         }
 
         @Override
@@ -842,6 +850,32 @@ public final class ThresholdFileHolder implements IFileHolder {
             } finally {
                 fileHolder.close();
             }
+        }
+    }
+
+    /**
+     * The input stream backed by <code>ThresholdFileHolder</code> instance.
+     */
+    public static class ThresholdFileHolderInputStream extends SizeKnowingInputStream {
+
+        /** The <code>ThresholdFileHolder</code> instance */
+        protected final ThresholdFileHolder fileHolder;
+
+        /**
+         * Initializes a new {@link ClosingInputStream}.
+         */
+        ThresholdFileHolderInputStream(final ThresholdFileHolder fileHolder) throws OXException {
+            super(fileHolder.getInnerStream(false), fileHolder.getLength());
+            this.fileHolder = fileHolder;
+        }
+
+        /**
+         * Gets the file holder
+         *
+         * @return The file holder
+         */
+        public ThresholdFileHolder getFileHolder() {
+            return fileHolder;
         }
     }
 

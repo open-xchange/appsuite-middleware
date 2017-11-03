@@ -95,11 +95,14 @@ import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileDelta;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountAccess;
+import com.openexchange.file.storage.FileStorageAutoRenameFoldersAccess;
+import com.openexchange.file.storage.FileStorageCaseInsensitiveAccess;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess;
+import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageSequenceNumberProvider;
-import com.openexchange.file.storage.FileStorageUtility;
 import com.openexchange.file.storage.FileTimedResult;
+import com.openexchange.file.storage.NameBuilder;
 import com.openexchange.file.storage.ThumbnailAware;
 import com.openexchange.file.storage.dropbox.DropboxConstants;
 import com.openexchange.groupware.results.Delta;
@@ -118,12 +121,14 @@ import com.openexchange.tools.iterator.SearchIteratorAdapter;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class DropboxFileAccess extends AbstractDropboxAccess implements ThumbnailAware, FileStorageSequenceNumberProvider {
+public class DropboxFileAccess extends AbstractDropboxAccess implements ThumbnailAware, FileStorageSequenceNumberProvider, FileStorageCaseInsensitiveAccess, FileStorageAutoRenameFoldersAccess {
 
     private static final Logger LOG = LoggerFactory.getLogger(DropboxFileAccess.class);
 
     private final DropboxAccountAccess accountAccess;
+    private final DropboxFolderAccess folderAccess;
     private final int userId;
+    private final String accountDisplayName;
 
     // 8 MB chunks
     private static final int CHUNK_SIZE = 8 * (int) Math.pow(1024, 2);
@@ -135,10 +140,22 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
      *
      * @throws OXException
      */
-    public DropboxFileAccess(final AbstractOAuthAccess dropboxOAuthAccess, final FileStorageAccount account, final Session session, final DropboxAccountAccess accountAccess) throws OXException {
+    public DropboxFileAccess(final AbstractOAuthAccess dropboxOAuthAccess, final FileStorageAccount account, final Session session, final DropboxAccountAccess accountAccess, DropboxFolderAccess folderAccess) throws OXException {
         super(dropboxOAuthAccess, account, session);
         this.accountAccess = accountAccess;
+        this.folderAccess = folderAccess;
+        accountDisplayName = account.getDisplayName();
         userId = session.getUserId();
+    }
+
+    @Override
+    public String createFolder(FileStorageFolder toCreate, boolean autoRename) throws OXException {
+        return folderAccess.createFolder(toCreate, autoRename);
+    }
+
+    @Override
+    public String moveFolder(String folderId, String newParentId, String newName, boolean autoRename) throws OXException {
+        return folderAccess.moveFolder(folderId, newParentId, newName, autoRename);
     }
 
     /*
@@ -243,7 +260,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
                     file.copyFrom(dbxFile, copyFields);
                     return dbxFile.getIDTuple();
                 } catch (RelocationErrorException e) {
-                    throw DropboxExceptionHandler.handleRelocationErrorException(e, file.getFolderId(), file.getId());
+                    throw DropboxExceptionHandler.handleRelocationErrorException(e, file.getFolderId(), file.getId(), accountDisplayName);
                 } catch (DbxException e) {
                     throw DropboxExceptionHandler.handle(e, session, dropboxOAuthAccess.getOAuthAccount());
                 }
@@ -266,15 +283,15 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
         }
         checkFolderExistence(destFolder);
         String path = toPath(source.getFolder(), source.getId());
-        String destName = null != update && null != modifiedFields && modifiedFields.contains(Field.FILENAME) ? update.getFileName() : source.getId();
+        NameBuilder destName = NameBuilder.nameBuilderFor(null != update && null != modifiedFields && modifiedFields.contains(Field.FILENAME) ? update.getFileName() : source.getId());
 
         // Ensure filename uniqueness in target folder
-        for (int i = 1; exists(destFolder, destName, CURRENT_VERSION); i++) {
-            destName = FileStorageUtility.enhance(destName, i);
+        while (exists(destFolder, destName.toString(), CURRENT_VERSION)) {
+            destName.advance();
         }
 
         try {
-            String destPath = toPath(destFolder, destName);
+            String destPath = toPath(destFolder, destName.toString());
 
             // Copy
             Metadata metadata = client.files().copy(path, destPath);
@@ -287,7 +304,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
             }
             return dbxFile.getIDTuple();
         } catch (RelocationErrorException e) {
-            throw DropboxExceptionHandler.handleRelocationErrorException(e, source.getFolder(), source.getId());
+            throw DropboxExceptionHandler.handleRelocationErrorException(e, source.getFolder(), source.getId(), accountDisplayName);
         } catch (DbxException e) {
             throw DropboxExceptionHandler.handle(e, session, dropboxOAuthAccess.getOAuthAccount());
         }
@@ -316,7 +333,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
             }
             return dbxFile.getIDTuple();
         } catch (RelocationErrorException e) {
-            throw DropboxExceptionHandler.handleRelocationErrorException(e, source.getFolder(), source.getId());
+            throw DropboxExceptionHandler.handleRelocationErrorException(e, source.getFolder(), source.getId(), accountDisplayName);
         } catch (DbxException e) {
             throw DropboxExceptionHandler.handle(e, session, dropboxOAuthAccess.getOAuthAccount());
         }
@@ -865,7 +882,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
             FileMetadata metadata = builder.uploadAndFinish(data);
             return new DropboxFile(metadata, userId);
         } catch (UploadErrorException e) {
-            throw DropboxExceptionHandler.handleUploadErrorException(e, path);
+            throw DropboxExceptionHandler.handleUploadErrorException(e, path, accountDisplayName);
         } catch (DbxException e) {
             throw DropboxExceptionHandler.handle(e, session, dropboxOAuthAccess.getOAuthAccount());
         } catch (IOException e) {

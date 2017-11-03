@@ -64,6 +64,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.oxfolder.OXFolderAdminHelper;
 import com.openexchange.userconf.UserPermissionService;
 
+
 /**
  * {@link UserPermissionServiceImpl}
  *
@@ -168,6 +169,7 @@ public class UserPermissionServiceImpl implements UserPermissionService {
             acc.setTasks(user.hasPermission(UserConfiguration.TASKS));
             acc.setVcard(user.hasPermission(UserConfiguration.VCARD));
             acc.setWebdav(user.hasPermission(UserConfiguration.WEBDAV));
+            acc.setWebdavXml(user.hasPermission(UserConfiguration.WEBDAV_XML));
             acc.setWebmail(user.hasPermission(UserConfiguration.WEBMAIL));
             acc.setDelegateTask(user.hasPermission(UserConfiguration.DELEGATE_TASKS));
             acc.setEditGroup(user.hasPermission(UserConfiguration.EDIT_GROUP));

@@ -49,13 +49,8 @@
 
 package com.openexchange.calendar;
 
-import static com.openexchange.sql.grammar.Constant.ASTERISK;
-import static com.openexchange.sql.grammar.Constant.PLACEHOLDER;
-import static com.openexchange.tools.sql.DBUtils.autocommit;
-import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
-import static com.openexchange.tools.sql.DBUtils.forSQLCommand;
-import static com.openexchange.tools.sql.DBUtils.getIN;
-import static com.openexchange.tools.sql.DBUtils.rollback;
+import static com.openexchange.sql.grammar.Constant.*;
+import static com.openexchange.tools.sql.DBUtils.*;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DataTruncation;
@@ -4955,25 +4950,16 @@ public class CalendarMySQL implements CalendarSqlImp {
         checkNotReadOnly(so);
         boolean modified = false;
 
+        CalendarOperation co = new CalendarOperation();
         while (rs.next()) {
-            final int oid = rs.getInt(1);
-            final int owner = rs.getInt(2);
-            deleteSingleAppointment(
-                so.getContextId(),
-                oid,
-                so.getUserId(),
-                owner,
-                fid,
-                readcon,
-                writecon,
-                foldertype,
-                so,
-                ctx,
-                CalendarCollectionService.RECURRING_NO_ACTION,
-                null,
-                null,
-                null,
-                false);
+            int oid = rs.getInt(1);
+            int owner = rs.getInt(2);
+
+            PreparedStatement prep = getPreparedStatement(readcon, loadAppointment(oid, ctx));
+            CalendarDataObject edao = co.loadAppointment(getResultSet(prep), oid, fid, this, readcon, so, ctx, CalendarOperation.DELETE, fid, true);
+
+            deleteSingleAppointment(so.getContextId(), oid, so.getUserId(), owner, fid, readcon, writecon, foldertype, so, ctx, CalendarCollectionService.RECURRING_NO_ACTION, null, edao, null, false);
+
             modified = true;
         }
         return modified;
@@ -5029,7 +5015,7 @@ public class CalendarMySQL implements CalendarSqlImp {
      * @throws OXException
      */
     private void deleteSingleAppointment(final int cid, int oid, int uid, final int owner, final int fid, Connection readcon, final Connection writecon, final int foldertype, final Session so, final Context ctx, final int recurring_action, final CalendarDataObject cdao, final CalendarDataObject edao, final Date clientLastModified, boolean backup) throws SQLException, OXException {
-        if (!writecon.getAutoCommit()) {
+         if (!writecon.getAutoCommit()) {
             IDGenerator.getId(cid, Types.APPOINTMENT, writecon);
         }
         int folderOwner = new OXFolderAccess(ctx).getFolderOwner(fid);

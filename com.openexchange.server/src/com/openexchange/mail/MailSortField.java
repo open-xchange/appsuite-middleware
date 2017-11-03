@@ -93,6 +93,8 @@ public enum MailSortField {
     COLOR_LABEL(MailListField.COLOR_LABEL),
     /**
      * Flag \SEEN
+     * <p>
+     * Rather to be read as "sort by unseen/unread" since seen mails are sorted to the end while unread ones come first.
      */
     FLAG_SEEN(MailListField.FLAG_SEEN),
     /**

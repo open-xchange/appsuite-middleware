@@ -64,13 +64,15 @@ import com.openexchange.folderstorage.cache.service.FolderCacheInvalidationServi
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.modules.Module;
-import com.openexchange.osgi.ServiceListing;
 import com.openexchange.osgi.Tools;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareTarget;
+import com.openexchange.share.core.HandlerParameters;
+import com.openexchange.share.core.ModuleHandler;
+import com.openexchange.share.core.groupware.AdministrativeFolderTargetProxy;
 import com.openexchange.share.groupware.TargetProxy;
 import com.openexchange.share.groupware.spi.FolderHandlerModuleExtension;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
@@ -90,9 +92,9 @@ public class AdministrativeTargetUpdateImpl extends AbstractTargetUpdate {
     private final Connection connection;
     private final HandlerParameters parameters;
     private final OXFolderAccess folderAccess;
-	private final ServiceListing<FolderHandlerModuleExtension> folderExtensions;
+	private final ModuleExtensionRegistry<FolderHandlerModuleExtension> folderExtensions;
 
-    public AdministrativeTargetUpdateImpl(ServiceLookup services, int contextID, Connection writeCon, ModuleHandlerRegistry handlers, ServiceListing<FolderHandlerModuleExtension> folderExtensions) throws OXException {
+    public AdministrativeTargetUpdateImpl(ServiceLookup services, int contextID, Connection writeCon, ModuleExtensionRegistry<ModuleHandler> handlers, ModuleExtensionRegistry<FolderHandlerModuleExtension> folderExtensions) throws OXException {
         super(services, handlers);
         this.contextID = contextID;
         this.connection = writeCon;
@@ -222,12 +224,11 @@ public class AdministrativeTargetUpdateImpl extends AbstractTargetUpdate {
     }
 
     private TargetProxy optExtendedProxy(ShareTarget folderTarget) throws OXException {
-        for (FolderHandlerModuleExtension folderExtension : folderExtensions) {
-            if (folderExtension.isApplicableFor(folderTarget.getFolder())) {
-                TargetProxy proxy = folderExtension.resolveTarget(folderTarget);
-                if (null != proxy) {
-                    return proxy;
-                }
+        FolderHandlerModuleExtension folderHandler = folderExtensions.opt(folderTarget.getModule());
+        if (null != folderHandler && folderHandler.isApplicableFor(contextID, folderTarget.getFolder())) {
+            TargetProxy proxy = folderHandler.resolveTarget(folderTarget, contextID);
+            if (null != proxy) {
+                return proxy;
             }
         }
         return null;

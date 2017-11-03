@@ -55,6 +55,7 @@ import java.util.Collection;
 import java.util.LinkedHashSet;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
+import com.openexchange.database.Heartbeat;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.AfterReadAwareFolderStorage.Mode;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
@@ -183,6 +184,9 @@ public class TransactionManager {
         if (connectionMode == null && !initConnectionViaDecorator()) {
             dbService = FolderStorageServices.requireService(DatabaseService.class);
             connection = dbService.getWritable(storageParameters.getContext());
+            if (connection instanceof Heartbeat) {
+                ((Heartbeat) connection).startHeartbeat();
+            }
             connectionMode = new ConnectionMode(new ResilientConnection(connection), Mode.WRITE);
             storageParameters.putParameter(DatabaseFolderType.getInstance(), DatabaseParameterConstants.PARAM_CONNECTION, connectionMode);
             ownsConnection = true;
@@ -246,6 +250,9 @@ public class TransactionManager {
             if (ownsConnection && connection != null) {
                 Databases.rollback(connection);
                 Databases.autocommit(connection);
+                if (connection instanceof Heartbeat) {
+                    ((Heartbeat) connection).stopHeartbeat();
+                }
                 dbService.backWritableAfterReading(storageParameters.getContext(), connection);
             }
 

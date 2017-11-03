@@ -72,7 +72,7 @@ import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStoragePermission;
-import com.openexchange.file.storage.FileStorageUtility;
+import com.openexchange.file.storage.NameBuilder;
 import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.file.storage.composition.FilenameValidationUtils;
 import com.openexchange.file.storage.composition.FilenameValidationUtils.ValidityResult;
@@ -492,14 +492,17 @@ public class DefaultAttachmentStorage implements AttachmentStorage {
         // Create folder, pre-shared to an anonymous recipient, for this message
         DefaultFileStorageFolder folder = prepareFolder(source, parentFolderID, password, expiry, autoDelete, session, locale);
         IDBasedFolderAccess folderAccess = storageContext.folderAccess;
-        int counter = 1;
+        NameBuilder name = null;
         do {
             try {
                 return new Item(folderAccess.createFolder(folder), folder.getName());
             } catch (OXException e) {
                 if (e.equalsCode(1014, "FLD") || e.equalsCode(12, "FLD")) {
                     // A duplicate folder exists
-                    folder.setName(FileStorageUtility.enhance(folder.getName(), counter++));
+                    if (null == name) {
+                        name = new NameBuilder(folder.getName());
+                    }
+                    folder.setName(name.advance().toString());
                     continue;
                 }
                 throw e;

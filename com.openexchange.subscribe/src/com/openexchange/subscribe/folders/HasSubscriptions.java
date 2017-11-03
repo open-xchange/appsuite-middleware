@@ -56,6 +56,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import com.google.common.collect.ImmutableSet;
 import com.openexchange.ajax.customizer.folder.AdditionalFolderField;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.exception.OXException;
@@ -73,17 +74,16 @@ public class HasSubscriptions implements AdditionalFolderField {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(HasSubscriptions.class);
 
-    private static final Set<String> ID_BLACKLIST = new HashSet<String>(){{
-        add(String.valueOf(FolderObject.SYSTEM_GLOBAL_FOLDER_ID));
-        add(String.valueOf(FolderObject.SYSTEM_LDAP_FOLDER_ID));
-        add(String.valueOf(FolderObject.SYSTEM_PRIVATE_FOLDER_ID));
-        add(String.valueOf(FolderObject.SYSTEM_PUBLIC_FOLDER_ID));
-        add(String.valueOf(FolderObject.SYSTEM_SHARED_FOLDER_ID));
-        add(String.valueOf(FolderObject.SYSTEM_INFOSTORE_FOLDER_ID));
-        add(String.valueOf(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID));
-        add(String.valueOf(FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID));
-        add(String.valueOf(FolderObject.SYSTEM_ROOT_FOLDER_ID));
-    }};
+    private static final Set<String> ID_BLACKLIST = ImmutableSet.of(
+        String.valueOf(FolderObject.SYSTEM_GLOBAL_FOLDER_ID),
+        String.valueOf(FolderObject.SYSTEM_LDAP_FOLDER_ID),
+        String.valueOf(FolderObject.SYSTEM_PRIVATE_FOLDER_ID),
+        String.valueOf(FolderObject.SYSTEM_PUBLIC_FOLDER_ID),
+        String.valueOf(FolderObject.SYSTEM_SHARED_FOLDER_ID),
+        String.valueOf(FolderObject.SYSTEM_INFOSTORE_FOLDER_ID),
+        String.valueOf(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID),
+        String.valueOf(FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID),
+        String.valueOf(FolderObject.SYSTEM_ROOT_FOLDER_ID));
 
 
     @Override

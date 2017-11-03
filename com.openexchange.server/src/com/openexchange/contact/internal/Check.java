@@ -206,6 +206,14 @@ public final class Check {
 	        if (false == OXFolderProperties.isEnableInternalUsersEdit()) {
 	            throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(update.getObjectID(), session.getContextId());
 	        }
+	        /*
+             * further checks for mandatory properties
+             */
+            if (update.containsSurName() && Tools.isEmpty(update.getSurName())) {
+                throw ContactExceptionCodes.LAST_NAME_MANDATORY.create();
+            } else if (update.containsGivenName() && Tools.isEmpty(update.getGivenName())) {
+                throw ContactExceptionCodes.FIRST_NAME_MANDATORY.create();
+            }
 			/*
 			 * check display name
 			 */
@@ -235,14 +243,6 @@ public final class Check {
     				}
 				}
 			}
-			/*
-			 * further checks for mandatory properties
-			 */
-	        if (update.containsSurName() && Tools.isEmpty(update.getSurName())) {
-	        	throw ContactExceptionCodes.LAST_NAME_MANDATORY.create();
-	        } else if (update.containsGivenName() && Tools.isEmpty(update.getGivenName())) {
-	        	throw ContactExceptionCodes.FIRST_NAME_MANDATORY.create();
-	        }
 	        /*
 	         * check primary mail address
 	         */
