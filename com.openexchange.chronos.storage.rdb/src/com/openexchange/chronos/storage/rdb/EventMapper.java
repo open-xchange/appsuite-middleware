@@ -87,7 +87,6 @@ import com.openexchange.groupware.tools.mappings.database.DefaultDbMultiMapping;
 import com.openexchange.groupware.tools.mappings.database.IntegerMapping;
 import com.openexchange.groupware.tools.mappings.database.PointMapping;
 import com.openexchange.groupware.tools.mappings.database.VarCharMapping;
-import com.openexchange.java.Enums;
 import com.openexchange.java.Strings;
 
 /**
@@ -704,7 +703,7 @@ public class EventMapper extends DefaultDbMapper<Event, EventField> {
 
             @Override
             public void set(Event event, String value) {
-                event.setStatus(Enums.parse(EventStatus.class, value));
+                event.setStatus(new EventStatus(value));
             }
 
             @Override
@@ -715,7 +714,7 @@ public class EventMapper extends DefaultDbMapper<Event, EventField> {
             @Override
             public String get(Event event) {
                 EventStatus value = event.getStatus();
-                return null == value ? null : value.name();
+                return null == value ? null : value.getValue();
             }
 
             @Override

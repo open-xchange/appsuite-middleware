@@ -782,13 +782,13 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
 
             @Override
             public void set(Event object, String value) throws OXException {
-                object.setStatus(Enums.parse(EventStatus.class, value));
+                object.setStatus(null == value ? null : new EventStatus(value));
             }
 
             @Override
             public String get(Event object) {
                 EventStatus status = object.getStatus();
-                return null == status ? null : status.name();
+                return null == status ? null : status.getValue();
             }
 
             @Override

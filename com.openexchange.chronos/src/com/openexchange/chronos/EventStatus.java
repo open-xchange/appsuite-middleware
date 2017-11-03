@@ -56,22 +56,35 @@ package com.openexchange.chronos;
  * @since v7.10.0
  * @see <a href="https://tools.ietf.org/html/rfc5545#section-3.8.1.11">RFC 5545, section 3.8.1.11</a>
  */
-public enum EventStatus {
+public class EventStatus extends EnumeratedProperty {
 
     /**
      * Indicates event is tentative.
      */
-    TENTATIVE,
+    public static final EventStatus TENTATIVE = new EventStatus("TENTATIVE");
 
     /**
      * Indicates event is definite.
      */
-    CONFIRMED,
+    public static final EventStatus CONFIRMED = new EventStatus("CONFIRMED");
 
     /**
      * Indicates event was cancelled.
      */
-    CANCELLED,
+    public static final EventStatus CANCELLED = new EventStatus("CANCELLED");
 
-    ;
+    /**
+     * Initializes a new {@link EventStatus}.
+     *
+     * @param value The action value
+     */
+    public EventStatus(String value) {
+        super(value);
+    }
+
+    @Override
+    protected String[] getStandardValues() {
+        return getValues(TENTATIVE, CONFIRMED, CANCELLED);
+    }
+
 }
