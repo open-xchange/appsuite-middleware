@@ -93,8 +93,8 @@ import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStoragePersistentIDs;
 import com.openexchange.file.storage.FileStorageSequenceNumberProvider;
-import com.openexchange.file.storage.FileStorageUtility;
 import com.openexchange.file.storage.FileTimedResult;
+import com.openexchange.file.storage.NameBuilder;
 import com.openexchange.file.storage.ThumbnailAware;
 import com.openexchange.file.storage.googledrive.access.GoogleDriveOAuthAccess;
 import com.openexchange.groupware.results.Delta;
@@ -239,23 +239,21 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
                     String fileNameToUse = null;
                     {
                         List<Field> fields = Arrays.asList(Field.ID, Field.FILENAME);
-                        String name = file.getFileName();
-                        String fileName = name;
-                        int count = 0;
-
+                        NameBuilder fileName = NameBuilder.nameBuilderFor(file.getFileName());
                         while (null == fileNameToUse) {
-                            List<File> hits = searchByFileNamePattern(fileName, file.getFolderId(), false, fields, null, null, 0);
+                            String fileNameToTest = fileName.toString();
+                            List<File> hits = searchByFileNamePattern(fileNameToTest, file.getFolderId(), false, fields, null, null, 0);
                             boolean found = false;
                             for (Iterator<File> it = hits.iterator(); !found && it.hasNext();) {
-                                if (it.next().getFileName().equals(fileName)) {
+                                if (it.next().getFileName().equals(fileNameToTest)) {
                                     found = true;
                                 }
                             }
 
                             if (found) {
-                                fileName = FileStorageUtility.enhance(name, ++count);
+                                fileName.advance();
                             } else {
-                                fileNameToUse = fileName;
+                                fileNameToUse = fileNameToTest;
                             }
                         }
                     }
@@ -606,23 +604,21 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
                     String fileNameToUse = null;
                     {
                         List<Field> fields = Arrays.asList(Field.ID, Field.FILENAME);
-                        String name = file.getFileName();
-                        String fileName = name;
-                        int count = 0;
-
+                        NameBuilder fileName = NameBuilder.nameBuilderFor(file.getFileName());
                         while (null == fileNameToUse) {
-                            List<File> hits = searchByFileNamePattern(fileName, file.getFolderId(), false, fields, null, null, 0);
+                            String fileNameToTest = fileName.toString();
+                            List<File> hits = searchByFileNamePattern(fileNameToTest, file.getFolderId(), false, fields, null, null, 0);
                             boolean found = false;
                             for (Iterator<File> it = hits.iterator(); !found && it.hasNext();) {
-                                if (it.next().getFileName().equals(fileName)) {
+                                if (it.next().getFileName().equals(fileNameToTest)) {
                                     found = true;
                                 }
                             }
 
                             if (found) {
-                                fileName = FileStorageUtility.enhance(name, ++count);
+                                fileName.advance();
                             } else {
-                                fileNameToUse = fileName;
+                                fileNameToUse = fileNameToTest;
                             }
                         }
                     }

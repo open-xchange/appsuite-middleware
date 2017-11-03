@@ -101,8 +101,8 @@ import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageSequenceNumberProvider;
-import com.openexchange.file.storage.FileStorageUtility;
 import com.openexchange.file.storage.FileTimedResult;
+import com.openexchange.file.storage.NameBuilder;
 import com.openexchange.file.storage.ThumbnailAware;
 import com.openexchange.file.storage.dropbox.DropboxConstants;
 import com.openexchange.groupware.results.Delta;
@@ -283,15 +283,15 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
         }
         checkFolderExistence(destFolder);
         String path = toPath(source.getFolder(), source.getId());
-        String destName = null != update && null != modifiedFields && modifiedFields.contains(Field.FILENAME) ? update.getFileName() : source.getId();
+        NameBuilder destName = NameBuilder.nameBuilderFor(null != update && null != modifiedFields && modifiedFields.contains(Field.FILENAME) ? update.getFileName() : source.getId());
 
         // Ensure filename uniqueness in target folder
-        for (int i = 1; exists(destFolder, destName, CURRENT_VERSION); i++) {
-            destName = FileStorageUtility.enhance(destName, i);
+        while (exists(destFolder, destName.toString(), CURRENT_VERSION)) {
+            destName.advance();
         }
 
         try {
-            String destPath = toPath(destFolder, destName);
+            String destPath = toPath(destFolder, destName.toString());
 
             // Copy
             Metadata metadata = client.files().copy(path, destPath);
