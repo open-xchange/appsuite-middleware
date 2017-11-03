@@ -101,7 +101,7 @@ public class AllAction implements AJAXActionService {
         JSONArray oxapps = new JSONArray();
         JSONArray syncapps = new JSONArray();
         JSONArray others = new JSONArray();
-        JSONArray result = new JSONArray(sessions.size());
+        JSONArray result = new JSONArray();
         try {
             for (ManagedSession s : sessions) {
                 JSONObject json = new JSONObject(7);
@@ -135,21 +135,19 @@ public class AllAction implements AJAXActionService {
                             others.add(0, json);
                             break;
                     }
-                } else {
-                    others.add(0, json);
                 }
             }
             for (int i = 0; i < browsers.length(); i++) {
-                result.add(result.length() + i, browsers.get(i));
+                result.add(result.length(), browsers.get(i));
             }
             for (int i = 0; i < oxapps.length(); i++) {
-                result.add(result.length() + i, oxapps.get(i));
+                result.add(result.length(), oxapps.get(i));
             }
             for (int i = 0; i < syncapps.length(); i++) {
-                result.add(result.length() + i, syncapps.get(i));
+                result.add(result.length(), syncapps.get(i));
             }
             for (int i = 0; i < others.length(); i++) {
-                result.add(result.length() + i, others.get(i));
+                result.add(result.length(), others.get(i));
             }
         } catch (JSONException e) {
             // should not happen

@@ -72,6 +72,9 @@ public class DriveClientInfoStrings implements LocalizableStrings {
     // Drive Client %1$s
     public static final String DRIVE_CLIENT_INFO_WITH_VERSION = "Drive Client %1$s";
 
+    // Drive Client
+    public static final String DRIVE_CLIENT = "Drive Client";
+
     private DriveClientInfoStrings() {
         super();
     }

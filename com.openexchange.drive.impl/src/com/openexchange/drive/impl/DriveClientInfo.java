@@ -115,6 +115,9 @@ public class DriveClientInfo implements ClientInfo {
         if (Strings.isNotEmpty(appVersion) && Strings.isEmpty(platform)) {
             return String.format(helper.getString(DriveClientInfoStrings.DRIVE_CLIENT_INFO_WITH_VERSION), appVersion);
         }
+        if (Strings.isEmpty(platform)) {
+            return String.format(helper.getString(DriveClientInfoStrings.DRIVE_CLIENT));
+        }
         return app;
     }
 

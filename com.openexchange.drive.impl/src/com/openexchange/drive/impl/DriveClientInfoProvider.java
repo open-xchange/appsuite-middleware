@@ -86,6 +86,9 @@ public class DriveClientInfoProvider implements ClientInfoProvider {
                 case WINDOWS:
                     return new DriveClientInfo("Windows", null, null);
                 default:
+                    if ("OXDrive".equals(clientId)) {
+                        return new DriveClientInfo(null, null, null);
+                    }
                     return null;
             }
         }
