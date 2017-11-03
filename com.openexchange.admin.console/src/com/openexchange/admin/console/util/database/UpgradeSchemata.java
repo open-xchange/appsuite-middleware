@@ -238,11 +238,29 @@ public class UpgradeSchemata extends UtilAbstraction {
         Arrays.sort(databases, comparator);
         int position = Arrays.binarySearch(databases, new Database(-1, startFromSchema), comparator);
         if (position < 0) {
-            return databases;
+            return filterSchemata(databases, comparator);
         }
 
         System.out.println("Skipping to schema '" + startFromSchema + "'");
-        return Arrays.copyOfRange(databases, position + 1, databases.length);
+        return filterSchemata(Arrays.copyOfRange(databases, position + 1, databases.length), comparator);
+    }
+
+    /**
+     * Filters the specified database schemata and removes those that are present in the 'skippedSchemata'
+     * 
+     * @param databases The database schemata array
+     * @param comparator The comparator to be used to perform the search
+     * @return The filtered schemata
+     */
+    private Database[] filterSchemata(Database[] databases, Comparator<Database> comparator) {
+        List<Database> databasesList = Arrays.asList(databases);
+        for (String schema : skippedSchemata) {
+            int position = Arrays.binarySearch(databases, new Database(-1, schema), comparator);
+            if (position > 0) {
+                databasesList.remove(position);
+            }
+        }
+        return databasesList.toArray(new Database[databasesList.size()]);
     }
 
     /**
