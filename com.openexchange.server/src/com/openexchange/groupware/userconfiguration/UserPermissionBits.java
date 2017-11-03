@@ -49,6 +49,8 @@
 
 package com.openexchange.groupware.userconfiguration;
 
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Set;
@@ -61,8 +63,7 @@ import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
-import gnu.trove.list.TIntList;
-import gnu.trove.list.array.TIntArrayList;
+
 
 /**
  * {@link UserPermissionBits}
@@ -112,6 +113,12 @@ public class UserPermissionBits implements Serializable, Cloneable {
      * @Obsolete This permission is not used. Permission bit should stay here to prevent confusion.
      */
     public static final int PINBOARD_WRITE_ACCESS = 1 << 7;
+
+    /**
+     * The permission bit for WebDAV/XML access.
+     * @deprecated
+     */
+    public static final int WEBDAV_XML = 1 << 8;
 
     /**
      * The permission bit for WebDAV access.
@@ -420,6 +427,26 @@ public class UserPermissionBits implements Serializable, Cloneable {
     }
 
     /**
+     * Detects if user configuration allows WebDAV XML.
+     *
+     * @return <code>true</code> if enabled; otherwise <code>false</code>
+     * @deprecated
+     */
+    public boolean hasWebDAVXML() {
+        return hasPermission(WEBDAV_XML);
+    }
+
+    /**
+     * Enables/Disables WebDAV XML access in user configuration.
+     *
+     * @param enableWebDAVXML
+     * @deprecated
+     */
+    public void setWebDAVXML(final boolean enableWebDAVXML) {
+        setPermission(enableWebDAVXML, WEBDAV_XML);
+    }
+
+    /**
      * Detects if user configuration allows WebDAV.
      *
      * @return <code>true</code> if enabled; otherwise <code>false</code>
@@ -567,8 +594,7 @@ public class UserPermissionBits implements Serializable, Cloneable {
      * holds module access to a certain module (or invoke <code>{@link UserConfiguration#hasModuleAccess(int)}</code>).
      * <p>
      * The <code>int</code> values matches the constants <code>{@link FolderObject#TASK}</code>, <code>{@link FolderObject#CALENDAR}</code>,
-     * <code>{@link FolderObject#CONTACT}</code>, <code>{@link FolderObject#UNBOUND}</code>, <code>{@link FolderObject#SYSTEM_MODULE}</code>, <code>{@link FolderObject#PROJECT}</code>, <code>{@link FolderObject#MAIL}</code>,
-     * <code>{@link FolderObject#INFOSTORE}</code>
+     * <code>{@link FolderObject#CONTACT}</code>, <code>{@link FolderObject#UNBOUND}</code>, <code>{@link FolderObject#SYSTEM_MODULE}</code>, <code>{@link FolderObject#PROJECT}</code>, <code>{@link FolderObject#MAIL}</code>, <code>{@link FolderObject#INFOSTORE}</code>
      *
      * @return A sorted array of <code>int</code> carrying accessible module integer constants
      */

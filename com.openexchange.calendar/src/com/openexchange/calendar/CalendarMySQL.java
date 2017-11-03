@@ -49,13 +49,8 @@
 
 package com.openexchange.calendar;
 
-import static com.openexchange.sql.grammar.Constant.ASTERISK;
-import static com.openexchange.sql.grammar.Constant.PLACEHOLDER;
-import static com.openexchange.tools.sql.DBUtils.autocommit;
-import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
-import static com.openexchange.tools.sql.DBUtils.forSQLCommand;
-import static com.openexchange.tools.sql.DBUtils.getIN;
-import static com.openexchange.tools.sql.DBUtils.rollback;
+import static com.openexchange.sql.grammar.Constant.*;
+import static com.openexchange.tools.sql.DBUtils.*;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DataTruncation;
@@ -5952,7 +5947,7 @@ public class CalendarMySQL implements CalendarSqlImp {
     private void checkNotReadOnly(Session session) throws OXException {
         UpdateStatus updateStatus = Updater.getInstance().getStatus(session.getContextId());
         if (updateStatus.isExecutedSuccessfully("com.openexchange.chronos.storage.rdb.migration.ChronosStorageMigrationTask")) {
-            //throw OXCalendarExceptionCodes.CALENDAR_MAINTENANCE.create();
+            throw OXCalendarExceptionCodes.CALENDAR_MAINTENANCE.create();
         }
     }
 

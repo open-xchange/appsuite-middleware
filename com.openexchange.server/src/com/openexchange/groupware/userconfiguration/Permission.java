@@ -72,6 +72,8 @@ public enum Permission {
     CONTACTS(UserConfiguration.CONTACTS, "Contacts"),
     TASKS(UserConfiguration.TASKS, "Tasks"),
     INFOSTORE(UserConfiguration.INFOSTORE, "Infostore"),
+    /** @deprecated */
+    WEBDAV_XML(UserConfiguration.WEBDAV_XML, "WebDAVXML"),
     WEBDAV(UserConfiguration.WEBDAV, "WebDAV"),
     ICAL(UserConfiguration.ICAL, "ICal"),
     VCARD(UserConfiguration.VCARD, "VCard"),

@@ -159,6 +159,7 @@ public class ChangeModuleAccessGlobal extends UserAbstraction {
         this.accessTasksOption = setLongOpt(admp, OPT_ACCESS_TASKS,"on/off","Tasks access (Default is off)", true, required, extended);
         this.accessVcardOption = setLongOpt(admp, OPT_ACCESS_VCARD,"on/off","Vcard access (Default is off)", true, required, extended);
         this.accessWebdavOption = setLongOpt(admp, OPT_ACCESS_WEBDAV,"on/off","Webdav access (Default is off)", true, required, extended);
+        this.accessWebdavXmlOption = setLongOpt(admp, OPT_ACCESS_WEBDAV_XML,"on/off","Webdav-Xml access (Default is off) [DEPRECATED]", true, required, extended);
         this.accessWebmailOption = setLongOpt(admp, OPT_ACCESS_WEBMAIL,"on/off","Webmail access (Default is on)", true, required, extended);
         this.accessEditGroupOption = setLongOpt(admp, OPT_ACCESS_EDIT_GROUP,"on/off","Edit Group access (Default is off)", true, required, extended);
         this.accessEditResourceOption = setLongOpt(admp, OPT_ACCESS_EDIT_RESOURCE,"on/off","Edit Resource access (Default is off)", true, required, extended);
@@ -280,6 +281,13 @@ public class ChangeModuleAccessGlobal extends UserAbstraction {
                 addAccess.setWebdav(true);
             } else {
                 removeAccess.setWebdav(true);
+            }
+        }
+        if (parser.getOptionValue(accessWebdavXmlOption) != null) {
+            if (accessOption2Boolean(parser, accessWebdavXmlOption)) {
+                addAccess.setWebdavXml(true);
+            } else {
+                removeAccess.setWebdavXml(true);
             }
         }
         if (parser.getOptionValue(accessWebmailOption) != null) {

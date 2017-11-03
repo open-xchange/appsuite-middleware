@@ -1054,6 +1054,19 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
         return null != supportedCapabilities && supportedCapabilities.contains(CAPABILITY_CASE_INSENSITIVE);
     }
 
+    private static final String CAPABILITY_AUTO_RENAME_FOLDERS = Strings.asciiLowerCase(FileStorageCapability.AUTO_RENAME_FOLDERS.name());
+
+    /**
+     * Checks of specified folder supports the {@link FileStorageCapability#AUTO_RENAME_FOLDERS AUTO_RENAME_FOLDERS} capability.
+     *
+     * @param folder The folder to check
+     * @return <code>true</code> if specified folder supports that capability; otherwise <code>false</code>
+     */
+    protected static boolean supportsAutoRename(Folder folder) {
+        Set<String> supportedCapabilities = null == folder ? null : folder.getSupportedCapabilities();
+        return null != supportedCapabilities && supportedCapabilities.contains(CAPABILITY_AUTO_RENAME_FOLDERS);
+    }
+
     // -----------------------------------------------------------------------------------------------
 
     /** Options for performing name-based folder checks */

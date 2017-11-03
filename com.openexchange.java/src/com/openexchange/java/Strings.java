@@ -448,7 +448,7 @@ public class Strings {
         return splitByDelimNotInQuotes(str, ',');
     }
 
-    private static final Pattern P_SPLIT_COMMA = Pattern.compile("\\s*,\\s*");
+    // private static final Pattern P_SPLIT_COMMA = Pattern.compile("\\s*,\\s*");
 
     /**
      * Splits given string by comma separator.
@@ -457,13 +457,10 @@ public class Strings {
      * @return The split string
      */
     public static String[] splitByComma(final String s) {
-        if (null == s) {
-            return null;
-        }
-        return P_SPLIT_COMMA.split(s, 0);
+        return splitBy(s, ',', true);
     }
 
-    private static final Pattern P_SPLIT_COLON = Pattern.compile("\\s*\\:\\s*");
+   // private static final Pattern P_SPLIT_COLON = Pattern.compile("\\s*\\:\\s*");
 
     /**
      * Splits given string by colon separator.
@@ -472,13 +469,10 @@ public class Strings {
      * @return The split string
      */
     public static String[] splitByColon(final String s) {
-        if (null == s) {
-            return null;
-        }
-        return P_SPLIT_COLON.split(s, 0);
+        return splitBy(s, ':', true);
     }
 
-    private static final Pattern P_SPLIT_DOT = Pattern.compile("\\s*\\.\\s*");
+    // private static final Pattern P_SPLIT_DOT = Pattern.compile("\\s*\\.\\s*");
 
     /**
      * Splits given string by dots.
@@ -487,13 +481,37 @@ public class Strings {
      * @return The split string
      */
     public static String[] splitByDots(final String s) {
+        return splitBy(s, '.', true);
+    }
+
+    private static String[] splitBy(String s, char delim, boolean trimMatches) {
         if (null == s) {
             return null;
         }
-        return P_SPLIT_DOT.split(s, 0);
+        int length = s.length();
+        if (length == 0) {
+            return new String[] { trimMatches ? s.trim() : s };
+        }
+
+        int pos = s.indexOf(delim, 0);
+        if (pos < 0) {
+            return new String[] { trimMatches ? s.trim() : s };
+        }
+
+        List<String> matchList = new ArrayList<>();
+        int prevPos = 0;
+        do {
+            matchList.add(trimMatches ? s.substring(prevPos, pos).trim() : s.substring(prevPos, pos));
+            prevPos = pos + 1;
+            pos = prevPos < length ? s.indexOf(delim, prevPos) : -1;
+        } while (pos >= 0);
+        if (prevPos <= length) {
+            matchList.add(trimMatches ? s.substring(prevPos).trim() : s.substring(prevPos));
+        }
+        return matchList.toArray(new String[matchList.size()]);
     }
 
-    private static final Pattern P_SPLIT_AMP = Pattern.compile("&");
+    // private static final Pattern P_SPLIT_AMP = Pattern.compile("&");
 
     /**
      * Splits given string by ampersands <code>'&'</code>.
@@ -502,10 +520,7 @@ public class Strings {
      * @return The split string
      */
     public static String[] splitByAmps(final String s) {
-        if (null == s) {
-            return null;
-        }
-        return P_SPLIT_AMP.split(s, 0);
+        return splitBy(s, '&', false);
     }
 
     private static final Pattern P_SPLIT_CRLF = Pattern.compile("\r?\n");

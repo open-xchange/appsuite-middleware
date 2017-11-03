@@ -143,13 +143,13 @@ public class CountTablesCustomTaskChange implements CustomTaskChange, CustomTask
 
             logger.info("Count tables for ConfigDB successfully initialized");
         } catch (SQLException e) {
-            logger.info("Failed to initialize count tables for ConfigDB", e);
+            logger.error("Failed to initialize count tables for ConfigDB", e);
             throw new CustomChangeException("SQL error", e);
         } catch (CustomChangeException e) {
-            logger.info("Failed to initialize count tables for ConfigDB", e);
+            logger.error("Failed to initialize count tables for ConfigDB", e);
             throw e;
         } catch (RuntimeException e) {
-            logger.info("Failed to initialize count tables for ConfigDB", e);
+            logger.error("Failed to initialize count tables for ConfigDB", e);
             throw new CustomChangeException("Runtime error", e);
         } finally {
             if (rollback) {

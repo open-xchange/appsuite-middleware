@@ -42,6 +42,8 @@ FolderBodyNotification:
   $ref: ./folders/FolderBodyNotification.yaml
 FolderBody:
   $ref: ./folders/FolderBody.yaml
+NewFolderBody:
+  $ref: ./folders/NewFolderBody.yaml
 FolderUpdateResponse:
   $ref: ./folders/FolderUpdateResponse.yaml
 FoldersCleanUpResponse:
