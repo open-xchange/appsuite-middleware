@@ -88,6 +88,11 @@ public final class ContextServiceImpl implements ContextService {
     }
 
     @Override
+    public Map<PoolAndSchema, List<Integer>> getSchemaAssociations() throws OXException {
+        return ContextStorage.getInstance().getSchemaAssociations();
+    }
+
+    @Override
     public Map<PoolAndSchema, List<Integer>> getSchemaAssociationsFor(List<Integer> contextIds) throws OXException {
         return ContextStorage.getInstance().getSchemaAssociationsFor(contextIds);
     }

@@ -86,6 +86,11 @@ public final class OSGiContextService extends AbstractOSGiDelegateService<Contex
     }
 
     @Override
+    public Map<PoolAndSchema, List<Integer>> getSchemaAssociations() throws OXException {
+        return getService().getSchemaAssociations();
+    }
+
+    @Override
     public Map<PoolAndSchema, List<Integer>> getSchemaAssociationsFor(List<Integer> contextIds) throws OXException {
         return getService().getSchemaAssociationsFor(contextIds);
     }

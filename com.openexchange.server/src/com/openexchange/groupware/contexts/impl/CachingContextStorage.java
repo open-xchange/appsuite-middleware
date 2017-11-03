@@ -140,6 +140,11 @@ public class CachingContextStorage extends ContextStorage {
     }
 
     @Override
+    public Map<PoolAndSchema, List<Integer>> getSchemaAssociations() throws OXException {
+        return persistantImpl.getSchemaAssociations();
+    }
+
+    @Override
     public Map<PoolAndSchema, List<Integer>> getSchemaAssociationsFor(List<Integer> contextIds) throws OXException {
         return persistantImpl.getSchemaAssociationsFor(contextIds);
     }
