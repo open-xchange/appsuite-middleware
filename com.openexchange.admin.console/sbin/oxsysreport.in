@@ -296,7 +296,7 @@ readerengine_cache_overview() {
 
 collect_logs() {
    local _log_dir=${1}
-   local _name=$(basename $(find ${_log_dir} -maxdepth 0 -type d | head -n 1))
+   local _name=$(basename $(find ${_log_dir} -maxdepth 0 | head -n 1))
    local _bname=$(echo ${_name} | sed 's/\(^.\)/\U\1/' | sed 's|-xchange|-Xchange|g')
    local _logs_archive=$(normalize_path \
        ${TMP}/${LOGDIR}/${_name}-logs.tar)
@@ -862,6 +862,65 @@ read -p "Press ENTER to continue or [ctrl+c] to cancel..."
 echo
 }
 
+check_and_warn_on_log_path(){
+   if [ -z "$(find "${OX_LOG_DIR}/" -mtime 0 -type f)" ]; then
+      local _logback_xml='/opt/open-xchange/etc/logback.xml'
+      if [ -f "${_logback_xml}" ]; then
+            local _logback_file_settings=$(grep -h '<file>' ${_logback_xml} | \
+                sed 's|[[:blank:]]*||g' | \
+                sort -u | \
+                sed 's|<file>||g' | \
+                sed 's|</file>||g')
+            local _changed_path=$(for setting in ${_logback_file_settings}; do
+                local _dirname=$(dirname ${setting})
+                if [ "${OX_LOG_DIR}" != "${_dirname}" ]; then
+                    echo ${_dirname}
+                fi
+            done | sort -u)
+            local _changed_path=$(echo ${_changed_path})
+            if [ -n "${_changed_path}" ]; then
+                warn_on_log_path
+            fi
+        fi
+    fi
+}
+
+warn_on_log_path(){
+cat << EOF
+###############################################################################
+                                  WARNING
+The default log directory contain no files which are modified within the last
+24 hours, this is a strong indicator that a different log path is configured
+and as a result, mandatory support information will be missing in the tarball.
+
+Default Log Dir: ${OX_LOG_DIR}
+Configured Log Dir: ${_changed_path}
+Configuration File: ${_logback_xml}
+
+If you configured a different log path on purpose, you can solve this issue by
+creating a symbolic link from our default to your configured directory.
+
+Please note, this support tool will potentially include all content within the
+default log dir and with this link, this will also apply to your configured log
+directory. Hence you have to check in advance what your configured log dir
+contains. When e.g other services are writing into the same folder, you need
+to separated this first!
+
+   # backup and remove default log directory.
+   mv ${OX_LOG_DIR} /var/log/open-xchange_backup
+
+   # create symbolic link to configured location.
+   ln -s <global_path_to_configured_log_directory> ${OX_LOG_DIR}
+
+   # fix permissions to allow the open-xchange service the creation of e.g
+   # console and osgi logs.
+   chown open-xchange:open-xchange ${OX_LOG_DIR}
+
+EOF
+read -p "Press ENTER to continue or [ctrl+c] to cancel..."
+echo
+}
+
 ###############################################################################
 #                              Runtime Checks                                 #
 ###############################################################################
@@ -1089,6 +1148,7 @@ if [ 'true' == "${CREATE_HEAP_DUMP}" ]; then
 fi
 if [ "all" != "${EXCLUDE_OLDER_LOGS_THAN}" ]; then
     collect_logs ${OX_LOG_DIR}
+    check_and_warn_on_log_path
     if [ -n "${UNIVENTION_LOG_DIR}" ]; then
         collect_logs ${UNIVENTION_LOG_DIR}
     fi
