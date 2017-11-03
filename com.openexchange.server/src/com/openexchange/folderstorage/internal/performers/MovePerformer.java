@@ -179,7 +179,6 @@ final class MovePerformer extends AbstractPerformer {
 
     private List<Permission> adjustPermission(Folder newFolder, Folder originalFolder, FolderStorage newRealParentStorage) throws OXException {
         Permission[] permissions = originalFolder.getPermissions();
-
         List<Permission> addParentLinkPermission = addParentLinkPermission(newFolder, newRealParentStorage);
         List<Permission> cleanedPermissions = new ArrayList<>(permissions.length);
         for(Permission perm : permissions){
@@ -188,7 +187,7 @@ final class MovePerformer extends AbstractPerformer {
                 cleanedPermissions.add(perm);
             }
         }
-        cleanedPermissions.addAll(addParentLinkPermission); // TODO eventually check for duplicate
+        cleanedPermissions.addAll(addParentLinkPermission);
         return cleanedPermissions;
     }
 
