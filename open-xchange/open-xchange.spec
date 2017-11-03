@@ -135,7 +135,6 @@ systemctl daemon-reload &> /dev/null || :
 %doc docs/%{dropin_example}
 %endif
 
-
 %changelog
 * Thu Oct 12 2017 Marcus Klein <marcus.klein@open-xchange.com>
 prepare for 7.10.0 release
