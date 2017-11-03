@@ -119,7 +119,7 @@ import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.FileStorageUtility;
+import com.openexchange.file.storage.NameBuilder;
 import com.openexchange.filestore.FileStorages;
 import com.openexchange.filestore.Info;
 import com.openexchange.filestore.QuotaFileStorage;
@@ -3787,9 +3787,12 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 if (needTranslation) {
                     int parent = rs.getInt(3);
                     translatedName = helper.getString(name);
-                    int i = 1;
+                    NameBuilder nb = null;
                     while (existsFolder(contextId, parent, folderId, translatedName, con)) {
-                        translatedName = FileStorageUtility.enhance(translatedName, i++);
+                        if (null == nb) {
+                            nb = new NameBuilder(translatedName);
+                        }
+                        translatedName = nb.advance().toString();
                     }
                 }
                 result.add(new Pair<Integer, String>(folderId, translatedName));
