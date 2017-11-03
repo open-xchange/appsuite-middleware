@@ -520,7 +520,7 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
         for (Permission perm : origPerms) {
             if (perm.getType() == FolderPermissionType.LEGATOR || perm.getType() == FolderPermissionType.INHERITED) {
                 for (Permission newPerm : newPerms) {
-                    if (perm.getEntity() == newPerm.getEntity() && perm.isGroup() == newPerm.isGroup()) {
+                    if (newPerm.getType() == FolderPermissionType.NORMAL && newPerm.getSystem() == 0 && perm.getEntity() == newPerm.getEntity() && perm.isGroup() == newPerm.isGroup()) {
                         newPerm.setType(perm.getType());
                         break;
                     }
