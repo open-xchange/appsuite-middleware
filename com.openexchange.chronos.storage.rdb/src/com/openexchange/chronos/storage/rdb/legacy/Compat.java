@@ -100,7 +100,6 @@ public class Compat {
         super();
     }
 
-
     /**
      * Adjusts certain properties of an event after loading it from the database.
      * <p/>
@@ -135,6 +134,7 @@ public class Compat {
              */
             event.removeSeriesId();
             event.removeRecurrenceId();
+            event.removeChangeExceptionDates();
             event.removeDeleteExceptionDates();
         }
         /*
@@ -255,15 +255,12 @@ public class Compat {
              */
             if (eventData.containsRecurrenceId() && null != eventData.getRecurrenceId()) {
                 int recurrencePosition;
-                Date recurrenceDatePosition;
                 if (PositionAwareRecurrenceId.class.isInstance(eventData.getRecurrenceId())) {
                     recurrencePosition = ((PositionAwareRecurrenceId) eventData.getRecurrenceId()).getRecurrencePosition();
-                    recurrenceDatePosition = ((PositionAwareRecurrenceId) eventData.getRecurrenceId()).getRecurrenceDatePosition();
                 } else {
                     recurrencePosition = Event2Appointment.getRecurrencePosition(Services.getService(RecurrenceService.class), recurrenceData, eventData.getRecurrenceId());
-                    recurrenceDatePosition = Event2Appointment.getRecurrenceDatePosition(eventData.getRecurrenceId());
                 }
-                eventData.setRecurrenceId(new StoredRecurrenceId(recurrencePosition, recurrenceDatePosition.getTime()));
+                eventData.setRecurrenceId(new StoredRecurrenceId(recurrencePosition));
             }
         }
         /*
@@ -276,6 +273,9 @@ public class Compat {
         }
         if (eventData.containsDeleteExceptionDates()) {
             eventData.setDeleteExceptionDates(getRecurrenceIds(Event2Appointment.getRecurrenceDatePositions(eventData.getDeleteExceptionDates())));
+        }
+        if (eventData.containsChangeExceptionDates()) {
+            eventData.setChangeExceptionDates(getRecurrenceIds(Event2Appointment.getRecurrenceDatePositions(eventData.getChangeExceptionDates())));
         }
         return eventData;
     }
@@ -319,6 +319,9 @@ public class Compat {
             if (event.containsDeleteExceptionDates() && null != event.getDeleteExceptionDates()) {
                 event.setDeleteExceptionDates(getRecurrenceIDs(eventStorage, event.getId(), recurrenceData, getDates(event.getDeleteExceptionDates()), EventField.DELETE_EXCEPTION_DATES));
             }
+            if (event.containsChangeExceptionDates() && null != event.getChangeExceptionDates()) {
+                event.setChangeExceptionDates(getRecurrenceIDs(eventStorage, event.getId(), recurrenceData, getDates(event.getChangeExceptionDates()), EventField.CHANGE_EXCEPTION_DATES));
+            }
         } else {
             /*
              * ensure to remove recurrence remnants for malformed recurrence data, or events that used to be a series, but are no longer
@@ -326,6 +329,7 @@ public class Compat {
             event.removeRecurrenceRule();
             event.removeSeriesId();
             event.removeRecurrenceId();
+            event.removeChangeExceptionDates();
             event.removeDeleteExceptionDates();
         }
         return event;
@@ -367,6 +371,15 @@ public class Compat {
                  */
                 event.removeSeriesId();
                 event.removeRecurrenceId();
+                event.removeChangeExceptionDates();
+            }
+        }
+        if (event.containsChangeExceptionDates() && null != event.getChangeExceptionDates()) {
+            RecurrenceData recurrenceData = eventStorage.selectRecurrenceData(connection, asInt(event.getSeriesId()), false);
+            if (null != recurrenceData) {
+                event.setChangeExceptionDates(getRecurrenceIDs(eventStorage, event.getId(), recurrenceData, getDates(event.getChangeExceptionDates()), EventField.CHANGE_EXCEPTION_DATES));
+            } else {
+                event.removeChangeExceptionDates();
             }
         }
         return event;

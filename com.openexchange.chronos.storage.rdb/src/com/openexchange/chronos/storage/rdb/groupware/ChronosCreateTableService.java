@@ -62,7 +62,7 @@ import com.openexchange.database.AbstractCreateTableImpl;
  * @since v7.10.0
  */
 public class ChronosCreateTableService extends AbstractCreateTableImpl {
-    
+
     // Table names
     /**
      * The CALENDAR_ACCOUNT table name
@@ -177,6 +177,7 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
                 "allDay BOOLEAN DEFAULT NULL," +
                 "rrule VARCHAR(255) DEFAULT NULL," +
                 "exDate TEXT DEFAULT NULL," +
+                "overriddenDate TEXT DEFAULT NULL," +
                 "recurrence VARCHAR(32) DEFAULT NULL," +
                 "sequence INT4 UNSIGNED DEFAULT NULL," +
                 "transp INT4 UNSIGNED DEFAULT NULL," +
@@ -225,6 +226,7 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
                 "allDay BOOLEAN DEFAULT NULL," +
                 "rrule VARCHAR(255) DEFAULT NULL," +
                 "exDate TEXT DEFAULT NULL," +
+                "overriddenDate TEXT DEFAULT NULL," +
                 "recurrence VARCHAR(32) DEFAULT NULL," +
                 "sequence INT4 UNSIGNED DEFAULT NULL," +
                 "transp INT4 UNSIGNED DEFAULT NULL," +
@@ -264,6 +266,7 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
                 "cuType VARCHAR(255) DEFAULT NULL," +
                 "role VARCHAR(255) DEFAULT NULL," +
                 "partStat VARCHAR(255) DEFAULT NULL," +
+                "rsvp BOOLEAN DEFAULT NULL," +
                 "comment TEXT DEFAULT NULL," +
                 "member VARCHAR(1024) DEFAULT NULL," +
                 "PRIMARY KEY (cid,account,event,entity)," +
@@ -283,6 +286,7 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
                 "cuType VARCHAR(255) DEFAULT NULL," +
                 "role VARCHAR(255) DEFAULT NULL," +
                 "partStat VARCHAR(255) DEFAULT NULL," +
+                "rsvp BOOLEAN DEFAULT NULL," +
                 "comment TEXT DEFAULT NULL," +
                 "member VARCHAR(1024) DEFAULT NULL," +
                 "PRIMARY KEY (cid,account,event,entity)," +

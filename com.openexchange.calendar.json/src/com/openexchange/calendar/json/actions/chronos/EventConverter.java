@@ -223,6 +223,8 @@ public abstract class EventConverter {
             case Appointment.RECURRENCE_START:
             case CalendarObject.RECURRENCE_CALCULATOR:
                 return EventField.RECURRENCE_RULE;
+            case CalendarObject.CHANGE_EXCEPTIONS:
+                return EventField.CHANGE_EXCEPTION_DATES;
             case CalendarObject.DELETE_EXCEPTIONS:
                 return EventField.DELETE_EXCEPTION_DATES;
             case Appointment.TIMEZONE:
@@ -501,6 +503,14 @@ public abstract class EventConverter {
                 event.setRecurrenceRule(null != recurrenceData ? recurrenceData.getRecurrenceRule() : null);
             }
         }
+        if (appointment.containsChangeExceptions()) {
+            if (null == appointment.getChangeException()) {
+                event.setChangeExceptionDates(null);
+            } else {
+                RecurrenceData recurrenceData = originalEventHolder.getRecurrenceData();
+                event.setChangeExceptionDates(Appointment2Event.getRecurrenceIDs(getRecurrenceService(), recurrenceData, Arrays.asList(appointment.getChangeException())));
+            }
+        }
         if (appointment.containsDeleteExceptions()) {
             if (null == appointment.getDeleteException()) {
                 event.setDeleteExceptionDates(null);
@@ -727,9 +737,9 @@ public abstract class EventConverter {
                 appointment.setOccurrence(pattern.getOccurrences());
             }
         }
-        //        if (null != event.getChangeExceptionDates()) {
-        //            appointment.setChangeExceptions(Event2Appointment.getRecurrenceDatePositions(event.getChangeExceptionDates()));
-        //        }
+        if (null != event.getChangeExceptionDates()) {
+            appointment.setChangeExceptions(Event2Appointment.getRecurrenceDatePositions(event.getChangeExceptionDates()));
+        }
         if (null != event.getDeleteExceptionDates()) {
             appointment.setDeleteExceptions(Event2Appointment.getRecurrenceDatePositions(event.getDeleteExceptionDates()));
         }

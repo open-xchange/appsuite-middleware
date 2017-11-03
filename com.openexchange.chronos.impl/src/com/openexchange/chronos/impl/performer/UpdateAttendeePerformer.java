@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.impl.performer;
 
+import static com.openexchange.chronos.common.CalendarUtils.contains;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesException;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.chronos.common.CalendarUtils.matches;
@@ -217,11 +218,11 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
     private void updateAttendee(Event originalEvent, Attendee originalAttendee, Attendee attendee, RecurrenceId recurrenceId) throws OXException {
         if (isSeriesMaster(originalEvent)) {
             recurrenceId = Check.recurrenceIdExists(session.getRecurrenceService(), originalEvent, recurrenceId);
-            Event originalExceptionEvent = optExceptionData(originalEvent.getSeriesId(), recurrenceId);
-            if (null != originalExceptionEvent) {
+            if (contains(originalEvent.getChangeExceptionDates(), recurrenceId)) {
                 /*
                  * update for existing change exception
                  */
+                Event originalExceptionEvent = optExceptionData(originalEvent.getId(), recurrenceId);
                 Attendee originalExceptionAttendee = Check.attendeeExists(originalExceptionEvent, attendee);
                 updateAttendee(originalExceptionEvent, originalExceptionAttendee, attendee);
             } else {
@@ -243,13 +244,13 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
                     insertAlarms(exceptionEvent, entry.getKey().intValue(), entry.getValue(), true);
                 }
                 /*
-                 * perform the attendee update & touch parent series
+                 * perform the attendee update & add new change exception date to series master event
                  */
                 Attendee attendeeUpdate = prepareAttendeeUpdate(exceptionEvent, originalAttendee, attendee);
                 if (null != attendeeUpdate) {
                     storage.getAttendeeStorage().updateAttendee(exceptionEvent.getId(), attendeeUpdate);
                 }
-                touch(originalEvent.getSeriesId());
+                addChangeExceptionDate(originalEvent, recurrenceId);
                 /*
                  * track results
                  */

@@ -391,7 +391,7 @@ public class AlarmUtils extends CalendarUtils {
         }
         if (null != trigger.getDateTime()) {
             if (CalendarUtils.isSeriesMaster(event)) {
-                Iterator<Event> iterator = recurrenceService.iterateEventOccurrences(new DefaultRecurrenceData(event, exceptions), event, trigger.getDateTime(), null);
+                Iterator<Event> iterator = recurrenceService.iterateEventOccurrences(event, trigger.getDateTime(), null);
                 if (iterator.hasNext()) {
                     return getTriggerDuration(trigger, iterator.next());
                 }
@@ -443,7 +443,7 @@ public class AlarmUtils extends CalendarUtils {
         if (null == startDate) {
             startDate = null != alarm.getAcknowledged() ? alarm.getAcknowledged() : new Date();
         }
-        Iterator<Event> iterator = recurrenceService.iterateEventOccurrences(new DefaultRecurrenceData(seriesMaster, exceptions), seriesMaster, startDate, null);
+        Iterator<Event> iterator = recurrenceService.iterateEventOccurrences(seriesMaster, startDate, null);
         while (iterator.hasNext()) {
             Event occurrence = iterator.next();
             if (occurrence.getStartDate().getTimestamp() < startDate.getTime()) {

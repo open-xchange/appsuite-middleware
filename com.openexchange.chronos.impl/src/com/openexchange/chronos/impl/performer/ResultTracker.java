@@ -233,7 +233,7 @@ public class ResultTracker {
     }
 
     private List<Event> resolveOccurrences(Event master) throws OXException {
-        Iterator<Event> iterator = Utils.resolveOccurrences(storage, session, master);
+        Iterator<Event> iterator = Utils.resolveOccurrences(session, master);
 
         List<Event> list = new ArrayList<Event>();
         while (iterator.hasNext()) {
@@ -252,7 +252,7 @@ public class ResultTracker {
                 @Override
                 protected List<Event> execute(CalendarSession session, CalendarStorage storage) throws OXException {
                     Event userizedMasterEvent = Utils.userize(session, storage, masterEvent, getCalendarUserId(folder));
-                    return Utils.asList(Utils.resolveOccurrences(storage, session, userizedMasterEvent));
+                    return Utils.asList(Utils.resolveOccurrences(session, userizedMasterEvent));
                 }
             }.executeQuery();
         } finally {

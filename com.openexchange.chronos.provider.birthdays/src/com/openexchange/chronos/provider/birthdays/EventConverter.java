@@ -75,7 +75,6 @@ import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.TimeTransparency;
 import com.openexchange.chronos.common.CalendarUtils;
-import com.openexchange.chronos.common.DefaultRecurrenceData;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.service.RecurrenceIterator;
 import com.openexchange.chronos.service.RecurrenceService;
@@ -155,8 +154,7 @@ public class EventConverter {
     public List<Event> getOccurrences(Contact contact, Date from, Date until) throws OXException {
         List<Event> occurrences = new ArrayList<Event>();
         Event seriesEvent = getSeriesMaster(contact);
-        RecurrenceIterator<Event> iterator = services.getService(RecurrenceService.class).iterateEventOccurrences(
-            new DefaultRecurrenceData(seriesEvent, null), seriesEvent, from, until);
+        RecurrenceIterator<Event> iterator = services.getService(RecurrenceService.class).iterateEventOccurrences(seriesEvent, from, until);
         while (iterator.hasNext()) {
             occurrences.add(nextOccurrence(iterator, contact));
         }
@@ -176,8 +174,7 @@ public class EventConverter {
 
     public Event getOccurrence(Contact contact, RecurrenceId recurrenceId) throws OXException {
         Event seriesEvent = getSeriesMaster(contact);
-        RecurrenceIterator<Event> iterator = services.getService(RecurrenceService.class).iterateEventOccurrences(
-            new DefaultRecurrenceData(seriesEvent, null), seriesEvent, new Date(recurrenceId.getValue().getTimestamp()), null);
+        RecurrenceIterator<Event> iterator = services.getService(RecurrenceService.class).iterateEventOccurrences(seriesEvent, new Date(recurrenceId.getValue().getTimestamp()), null);
         if (false == iterator.hasNext()) {
             throw CalendarExceptionCodes.EVENT_RECURRENCE_NOT_FOUND.create(seriesEvent.getSeriesId(), recurrenceId);
         }

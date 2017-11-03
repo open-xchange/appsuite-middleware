@@ -141,6 +141,8 @@ public class Recurrence {
         SeriesPattern pattern = new SeriesPattern();
         pattern.setInterval(I(rrule.getInterval()));
         pattern.setSeriesStart(L(seriesStartCalendar.getTimeInMillis()));
+        //TODO series start as truncated UTC date or not? com.openexchange.ajax.appointment.UpdateTest.testShiftRecurrenceAppointment() with timezone America/New_York
+        //pattern.setSeriesStart(L(initCalendar(TimeZones.UTC, seriesStartCalendar.get(Calendar.YEAR), seriesStartCalendar.get(Calendar.MONTH), seriesStartCalendar.get(Calendar.DAY_OF_MONTH)).getTimeInMillis()));
         if (null != rrule.getCount()) {
             pattern.setOccurrences(rrule.getCount());
             pattern.setSeriesEnd(L(getUntilForUnlimited(recurrenceService, recurrenceData).getTime()));

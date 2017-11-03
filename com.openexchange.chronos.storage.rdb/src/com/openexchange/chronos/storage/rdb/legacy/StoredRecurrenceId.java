@@ -63,18 +63,15 @@ import com.openexchange.chronos.storage.CalendarStorage;
 public class StoredRecurrenceId implements RecurrenceId {
 
     private final int recurrencePosition;
-    private final long recurrenceDatePosition;
 
     /**
      * Initializes a new {@link StoredRecurrenceId}.
      *
      * @param recurrencePosition The legacy, 1-based recurrence position
-     * @param recurrenceDatePosition The legacy recurrence date position
      */
-    public StoredRecurrenceId(int recurrencePosition, long recurrenceDatePosition) {
+    public StoredRecurrenceId(int recurrencePosition) {
         super();
         this.recurrencePosition = recurrencePosition;
-        this.recurrenceDatePosition = recurrenceDatePosition;
     }
 
     @Override
@@ -89,15 +86,6 @@ public class StoredRecurrenceId implements RecurrenceId {
      */
     public int getRecurrencePosition() {
         return recurrencePosition;
-    }
-
-    /**
-     * Gets the legacy recurrence date position
-     *
-     * @return The recurrence date position
-     */
-    public long getRecurrenceDatePosition() {
-        return recurrenceDatePosition;
     }
 
     @Override

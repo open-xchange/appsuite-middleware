@@ -63,7 +63,6 @@ import java.util.Set;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.RecurrenceId;
-import com.openexchange.chronos.common.DefaultRecurrenceData;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.Utils;
 import com.openexchange.chronos.service.CalendarSession;
@@ -136,8 +135,7 @@ public class ListPerformer extends AbstractQueryPerformer {
                     if (null != storage.getEventStorage().loadException(event.getId(), recurrenceId, new EventField[] { EventField.ID })) {
                         throw CalendarExceptionCodes.EVENT_RECURRENCE_NOT_FOUND.create(eventID.getObjectID(), recurrenceId);
                     }
-                    Iterator<Event> iterator = session.getRecurrenceService().iterateEventOccurrences(
-                        new DefaultRecurrenceData(event, null), event, new Date(recurrenceId.getValue().getTimestamp()), null);
+                    Iterator<Event> iterator = session.getRecurrenceService().iterateEventOccurrences(event, new Date(recurrenceId.getValue().getTimestamp()), null);
                     if (false == iterator.hasNext()) {
                         throw CalendarExceptionCodes.EVENT_RECURRENCE_NOT_FOUND.create(eventID.getObjectID(), recurrenceId);
                     }

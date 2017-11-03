@@ -271,6 +271,9 @@ public abstract class AbstractRecurrenceIterator<T> implements RecurrenceIterato
      */
     private static long[] getExceptionDates(Event seriesMaster) {
         SortedSet<RecurrenceId> exceptionDates = new TreeSet<RecurrenceId>();
+        if (null != seriesMaster.getChangeExceptionDates()) {
+            exceptionDates.addAll(seriesMaster.getChangeExceptionDates());
+        }
         if (null != seriesMaster.getDeleteExceptionDates()) {
             exceptionDates.addAll(seriesMaster.getDeleteExceptionDates());
         }

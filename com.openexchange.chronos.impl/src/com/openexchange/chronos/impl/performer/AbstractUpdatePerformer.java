@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.impl.performer;
 
+import static com.openexchange.chronos.common.CalendarUtils.combine;
 import static com.openexchange.chronos.common.CalendarUtils.find;
 import static com.openexchange.chronos.common.CalendarUtils.getAlarmIDs;
 import static com.openexchange.chronos.common.CalendarUtils.getFolderView;
@@ -60,7 +61,6 @@ import static com.openexchange.chronos.common.CalendarUtils.matches;
 import static com.openexchange.chronos.impl.Check.classificationAllowsUpdate;
 import static com.openexchange.chronos.impl.Check.requireCalendarPermission;
 import static com.openexchange.chronos.impl.Utils.getCalendarUser;
-import static com.openexchange.chronos.impl.Utils.getChangeExceptionDates;
 import static com.openexchange.chronos.impl.Utils.getSearchTerm;
 import static com.openexchange.folderstorage.Permission.DELETE_ALL_OBJECTS;
 import static com.openexchange.folderstorage.Permission.DELETE_OWN_OBJECTS;
@@ -73,6 +73,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.UUID;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmField;
@@ -150,6 +152,7 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
         exceptionEvent.setId(storage.getEventStorage().nextId());
         exceptionEvent.setRecurrenceId(recurrenceID);
         exceptionEvent.setDeleteExceptionDates(null);
+        exceptionEvent.setChangeExceptionDates(new TreeSet<RecurrenceId>(Collections.singleton(recurrenceID)));
         exceptionEvent.setStartDate(CalendarUtils.calculateStart(originalMasterEvent, recurrenceID));
         exceptionEvent.setEndDate(CalendarUtils.calculateEnd(originalMasterEvent, recurrenceID));
         Consistency.setCreated(timestamp, exceptionEvent, originalMasterEvent.getCreatedBy());
@@ -166,6 +169,28 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
     protected void touch(String id) throws OXException {
         Event eventUpdate = new Event();
         eventUpdate.setId(id);
+        Consistency.setModified(session, timestamp, eventUpdate, session.getUserId());
+        storage.getEventStorage().updateEvent(eventUpdate);
+    }
+
+    /**
+     * Adds a specific recurrence identifier to the series master's change exception array and updates the series master event in the
+     * storage.
+     *
+     * @param originalMasterEvent The original series master event
+     * @param recurrenceID The recurrence identifier of the occurrence to add
+     */
+    protected void addChangeExceptionDate(Event originalMasterEvent, RecurrenceId recurrenceID) throws OXException {
+        SortedSet<RecurrenceId> changeExceptionDates = new TreeSet<RecurrenceId>();
+        if (null != originalMasterEvent.getChangeExceptionDates()) {
+            changeExceptionDates.addAll(originalMasterEvent.getChangeExceptionDates());
+        }
+        if (false == changeExceptionDates.add(recurrenceID)) {
+            // TODO throw/log?
+        }
+        Event eventUpdate = new Event();
+        eventUpdate.setId(originalMasterEvent.getId());
+        eventUpdate.setChangeExceptionDates(changeExceptionDates);
         Consistency.setModified(session, timestamp, eventUpdate, session.getUserId());
         storage.getEventStorage().updateEvent(eventUpdate);
     }
@@ -239,7 +264,7 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
          */
         int userId = originalAttendee.getEntity();
         if (isSeriesMaster(originalEvent)) {
-            deleteExceptions(originalEvent.getSeriesId(), getChangeExceptionDates(storage, originalEvent.getSeriesId()), userId);
+            deleteExceptions(originalEvent.getSeriesId(), originalEvent.getChangeExceptionDates(), userId);
         }
         /*
          * delete event data from storage for this attendee
@@ -251,7 +276,6 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
         storage.getAttendeeStorage().insertAttendeeTombstones(id, originalEvent.getAttendees());
         storage.getAttendeeStorage().deleteAttendees(id, Collections.singletonList(originalAttendee));
         storage.getAlarmStorage().deleteAlarms(id, userId);
-
         /*
          * 'touch' event & track calendar results
          */
@@ -263,10 +287,7 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
         storage.getAlarmTriggerStorage().deleteTriggers(updatedEvent.getId());
         Set<RecurrenceId> exceptions = null;
         if (isSeriesMaster(originalEvent)) {
-            exceptions = getChangeExceptionDates(storage, originalEvent.getSeriesId());
-            if (originalEvent.getDeleteExceptionDates() != null) {
-                exceptions.addAll(originalEvent.getDeleteExceptionDates());
-            }
+            exceptions = combine(originalEvent.getDeleteExceptionDates(), originalEvent.getChangeExceptionDates());
         }
         storage.getAlarmTriggerStorage().insertTriggers(updatedEvent, exceptions);
     }
@@ -343,9 +364,9 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
          */
         storage.getAttachmentStorage().insertAttachments(session.getSession(), folder.getID(), exceptionEvent.getId(), originalMasterEvent.getAttachments());
         /*
-         * touch series master event
+         * add new change exception date in master
          */
-        touch(originalMasterEvent.getId());
+        addChangeExceptionDate(originalMasterEvent, recurrenceId);
         /*
          * track results
          */
@@ -361,10 +382,7 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
         storage.getAlarmTriggerStorage().insertTriggers(createdException, null);
 
 
-        Set<RecurrenceId> exceptions = getChangeExceptionDates(storage, updatedMasterEvent.getSeriesId());
-        if (updatedMasterEvent.getDeleteExceptionDates() != null) {
-            exceptions.addAll(updatedMasterEvent.getDeleteExceptionDates());
-        }
+        Set<RecurrenceId> exceptions = combine(updatedMasterEvent.getDeleteExceptionDates(), updatedMasterEvent.getChangeExceptionDates());
         storage.getAlarmTriggerStorage().deleteTriggers(updatedMasterEvent.getId());
         storage.getAlarmTriggerStorage().insertTriggers(updatedMasterEvent, exceptions);
     }
@@ -471,10 +489,7 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
         storage.getAlarmTriggerStorage().deleteTriggers(event.getId());
         Set<RecurrenceId> exceptions = null;
         if (isSeriesMaster(event)) {
-            exceptions = getChangeExceptionDates(storage, event.getSeriesId());
-            if (event.getDeleteExceptionDates() != null) {
-                exceptions.addAll(event.getDeleteExceptionDates());
-            }
+            exceptions = combine(event.getDeleteExceptionDates(), event.getChangeExceptionDates());
         }
         storage.getAlarmTriggerStorage().insertTriggers(event, exceptions);
 

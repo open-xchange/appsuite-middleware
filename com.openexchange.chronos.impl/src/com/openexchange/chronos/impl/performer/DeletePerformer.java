@@ -49,11 +49,12 @@
 
 package com.openexchange.chronos.impl.performer;
 
+import static com.openexchange.chronos.common.CalendarUtils.combine;
+import static com.openexchange.chronos.common.CalendarUtils.contains;
 import static com.openexchange.chronos.common.CalendarUtils.find;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesException;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.chronos.impl.Check.requireUpToDateTimestamp;
-import static com.openexchange.chronos.impl.Utils.getChangeExceptionDates;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -167,8 +168,7 @@ public class DeletePerformer extends AbstractUpdatePerformer {
              */
             if (isSeriesMaster(originalEvent)) {
                 recurrenceId = Check.recurrenceIdExists(session.getRecurrenceService(), originalEvent, recurrenceId);
-                Event originalExceptionEvent = optExceptionData(originalEvent.getSeriesId(), recurrenceId);
-                if (null != originalExceptionEvent) {
+                if (contains(originalEvent.getChangeExceptionDates(), recurrenceId)) {
                     /*
                      * deletion of existing change exception
                      */
@@ -203,8 +203,7 @@ public class DeletePerformer extends AbstractUpdatePerformer {
              */
             if (isSeriesMaster(originalEvent)) {
                 recurrenceId = Check.recurrenceIdExists(session.getRecurrenceService(), originalEvent, recurrenceId);
-                Event originalExceptionEvent = optExceptionData(originalEvent.getSeriesId(), recurrenceId);
-                if (null != originalExceptionEvent) {
+                if (contains(originalEvent.getChangeExceptionDates(), recurrenceId)) {
                     /*
                      * deletion of existing change exception
                      */
@@ -270,10 +269,17 @@ public class DeletePerformer extends AbstractUpdatePerformer {
             Event eventUpdate = new Event();
             eventUpdate.setId(originalMasterEvent.getId());
             eventUpdate.setDeleteExceptionDates(deleteExceptionDates);
+            SortedSet<RecurrenceId> changeExceptionDates = new TreeSet<RecurrenceId>();
+            if (null != originalMasterEvent.getChangeExceptionDates()) {
+                changeExceptionDates.addAll(originalMasterEvent.getChangeExceptionDates());
+            }
+            if (changeExceptionDates.remove(recurrenceId)) {
+                eventUpdate.setChangeExceptionDates(changeExceptionDates);
+            }
             Consistency.setModified(session, timestamp, eventUpdate, calendarUserId);
             storage.getEventStorage().updateEvent(eventUpdate);
             Event updatedMasterEvent = loadEventData(originalMasterEvent.getId());
-            updateAlarmTrigger(originalMasterEvent, updatedMasterEvent, deleteExceptionDates);
+            updateAlarmTrigger(originalMasterEvent, updatedMasterEvent);
             /*
              * track update of master in result
              */
@@ -286,10 +292,8 @@ public class DeletePerformer extends AbstractUpdatePerformer {
         }
     }
 
-    private void updateAlarmTrigger(Event originalMasterEvent, Event updatedMasterEvent, Set<RecurrenceId> deleteExceptionDates) throws OXException {
-        SortedSet<RecurrenceId> changeExceptionDates = getChangeExceptionDates(storage, updatedMasterEvent.getSeriesId());
-        Set<RecurrenceId> exceptions = new TreeSet<>(deleteExceptionDates);
-        exceptions.addAll(changeExceptionDates);
+    private void updateAlarmTrigger(Event originalMasterEvent, Event updatedMasterEvent) throws OXException {
+        Set<RecurrenceId> exceptions = combine(updatedMasterEvent.getDeleteExceptionDates(), updatedMasterEvent.getChangeExceptionDates());
         storage.getAlarmTriggerStorage().deleteTriggers(originalMasterEvent.getId());
         storage.getAlarmTriggerStorage().insertTriggers(updatedMasterEvent, exceptions);
     }

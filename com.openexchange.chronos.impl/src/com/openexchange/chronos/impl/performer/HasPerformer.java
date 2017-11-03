@@ -69,7 +69,6 @@ import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.Period;
 import com.openexchange.chronos.RecurrenceId;
-import com.openexchange.chronos.common.SelfProtectionFactory;
 import com.openexchange.chronos.impl.Utils;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.SearchOptions;
@@ -144,7 +143,7 @@ public class HasPerformer extends AbstractFreeBusyPerformer {
                 }
                 if (isSeriesMaster(event)) {
                     long duration = event.getEndDate().getTimestamp() - event.getStartDate().getTimestamp();
-                    Iterator<RecurrenceId> iterator = Utils.getRecurrenceIterator(storage, session, event, minimumEndTime, maximumStartTime);
+                    Iterator<RecurrenceId> iterator = Utils.getRecurrenceIterator(session, event, minimumEndTime, maximumStartTime);
                     while (iterator.hasNext() && false == hasEvents) {
                         RecurrenceId recurrenceId = iterator.next();
                         Period occurence = new Period(new Date(recurrenceId.getValue().getTimestamp()), new Date(recurrenceId.getValue().getTimestamp() + duration), event.getStartDate().isAllDay());

@@ -122,6 +122,7 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
         this.mappedFields = mappings.keySet().toArray(newArray(mappings.keySet().size()));
     }
 
+    @Override
     public EventField[] getMappedFields() {
         return mappedFields;
     }
@@ -684,6 +685,49 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
             @Override
             public void remove(Event object) {
                 object.removeRecurrenceId();
+            }
+        });
+        mappings.put(EventField.CHANGE_EXCEPTION_DATES, new ListMapping<String, Event>(ChronosJsonFields.CHANGE_EXCEPTION_DATES, ColumnIDs.CHANGE_EXCEPTION_DATES) {
+
+            @Override
+            public boolean isSet(Event object) {
+                return object.containsChangeExceptionDates();
+            }
+
+            @Override
+            public void set(Event object, List<String> value) throws OXException {
+                if (null == value) {
+                    object.setChangeExceptionDates(null);
+                } else {
+                    SortedSet<RecurrenceId> recurrenceIds = new TreeSet<RecurrenceId>();
+                    for (String dateTimeString : value) {
+                        recurrenceIds.add(new DefaultRecurrenceId(dateTimeString));
+                    }
+                    object.setChangeExceptionDates(recurrenceIds);
+                }
+            }
+
+            @Override
+            public List<String> get(Event object) {
+                SortedSet<RecurrenceId> recurrenceIds = object.getChangeExceptionDates();
+                if (null == recurrenceIds) {
+                    return null;
+                }
+                List<String> value = new ArrayList<String>(recurrenceIds.size());
+                for (RecurrenceId recurrenceId : recurrenceIds) {
+                    value.add(recurrenceId.getValue().toString());
+                }
+                return value;
+            }
+
+            @Override
+            public void remove(Event object) {
+                object.removeChangeExceptionDates();
+            }
+
+            @Override
+            protected String deserialize(JSONArray array, int index, TimeZone timeZone) throws JSONException, OXException {
+                return array.getString(index);
             }
         });
         mappings.put(EventField.DELETE_EXCEPTION_DATES, new ListMapping<String, Event>(ChronosJsonFields.DELETE_EXCEPTION_DATES, ColumnIDs.DELETE_EXCEPTION_DATES) {

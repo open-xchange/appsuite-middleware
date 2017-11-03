@@ -60,12 +60,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import org.json.JSONObject;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.ResourceId;
 import com.openexchange.chronos.provider.caching.CachingCalendarAccess;
 import com.openexchange.chronos.provider.caching.ExternalCalendarResult;
@@ -196,6 +199,7 @@ public abstract class AbstractHandler implements CachingHandler {
         }
 
         if (1 < events.size()) {
+            SortedSet<RecurrenceId> changeExceptionDates = new TreeSet<RecurrenceId>();
             for (int i = 1; i < events.size(); i++) {
                 Event importedChangeException = applyDefaults(folderId, events.get(i), now);
                 importedChangeException.setSeriesId(id);
@@ -211,7 +215,12 @@ public abstract class AbstractHandler implements CachingHandler {
                     }
                     calendarStorage.getAlarmStorage().insertAlarms(importedChangeException, this.cachedCalendarAccess.getSession().getUserId(), importedChangeException.getAlarms());
                 }
+                changeExceptionDates.add(importedChangeException.getRecurrenceId());
             }
+            Event eventUpdate = new Event();
+            eventUpdate.setId(id);
+            eventUpdate.setChangeExceptionDates(changeExceptionDates);
+            calendarStorage.getEventStorage().updateEvent(eventUpdate);
         }
     }
 

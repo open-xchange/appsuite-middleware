@@ -158,6 +158,10 @@ public enum EventField {
      */
     RECURRENCE_ID,
     /**
+     * The change exception dates of the event.
+     */
+    CHANGE_EXCEPTION_DATES,
+    /**
      * The delete exception dates of the event.
      */
     DELETE_EXCEPTION_DATES,

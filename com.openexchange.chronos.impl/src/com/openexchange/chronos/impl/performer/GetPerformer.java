@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.impl.performer;
 
+import static com.openexchange.chronos.common.CalendarUtils.contains;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.chronos.common.CalendarUtils.matches;
 import static com.openexchange.chronos.impl.Check.requireCalendarPermission;
@@ -65,7 +66,6 @@ import java.util.Iterator;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.RecurrenceId;
-import com.openexchange.chronos.common.DefaultRecurrenceData;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.Check;
 import com.openexchange.chronos.service.CalendarSession;
@@ -123,14 +123,15 @@ public class GetPerformer extends AbstractQueryPerformer {
          */
         if (null != recurrenceId) {
             if (isSeriesMaster(event)) {
-                Event exceptionEvent = storage.getEventStorage().loadException(eventId, recurrenceId, fields);
-                if (null != exceptionEvent) {
-                    exceptionEvent = storage.getUtilities().loadAdditionalEventData(getCalendarUserId(folder), exceptionEvent, fields);
-                    exceptionEvent.setFolderId(Check.eventIsInFolder(exceptionEvent, folder));
-                    event = exceptionEvent;
+                if (contains(event.getChangeExceptionDates(), recurrenceId)) {
+                    Event exceptionEvent = storage.getEventStorage().loadException(eventId, recurrenceId, fields);
+                    if (null != exceptionEvent) {
+                        exceptionEvent = storage.getUtilities().loadAdditionalEventData(getCalendarUserId(folder), exceptionEvent, fields);
+                        exceptionEvent.setFolderId(Check.eventIsInFolder(exceptionEvent, folder));
+                        event = exceptionEvent;
+                    }
                 } else {
-                    Iterator<Event> iterator = session.getRecurrenceService().iterateEventOccurrences(
-                        new DefaultRecurrenceData(event, null), event, new Date(recurrenceId.getValue().getTimestamp()), null);
+                    Iterator<Event> iterator = session.getRecurrenceService().iterateEventOccurrences(event, new Date(recurrenceId.getValue().getTimestamp()), null);
                     event = iterator.hasNext() ? iterator.next() : null;
                 }
             }

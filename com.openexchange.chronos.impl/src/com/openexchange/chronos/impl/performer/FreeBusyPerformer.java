@@ -162,7 +162,7 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
             eventsPerAttendee.put(attendee, new ArrayList<Event>());
         }
         SearchOptions searchOptions = new SearchOptions(session).setRange(from, until);
-        EventField[] fields = getFields(FREEBUSY_FIELDS, EventField.ORGANIZER, EventField.DELETE_EXCEPTION_DATES, EventField.RECURRENCE_ID);
+        EventField[] fields = getFields(FREEBUSY_FIELDS, EventField.ORGANIZER, EventField.DELETE_EXCEPTION_DATES, EventField.CHANGE_EXCEPTION_DATES, EventField.RECURRENCE_ID);
         List<Event> eventsInPeriod = storage.getEventStorage().searchOverlappingEvents(attendees, true, searchOptions, fields);
         if (0 == eventsInPeriod.size()) {
             return eventsPerAttendee;
@@ -196,7 +196,7 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
                     folderID = eventInPeriod.getFolderId();
                 }
                 if (isSeriesMaster(eventInPeriod)) {
-                    Iterator<RecurrenceId> iterator = getRecurrenceIterator(storage, session, eventInPeriod, from, until);
+                    Iterator<RecurrenceId> iterator = getRecurrenceIterator(session, eventInPeriod, from, until);
                     while (iterator.hasNext()) {
                         put(eventsPerAttendee, attendee, getResultingOccurrence(eventInPeriod, iterator.next(), folderID));
                         getSelfProtection().checkEventCollection(eventsPerAttendee.get(attendee));

@@ -140,13 +140,6 @@ public class RecurrenceServiceImpl implements RecurrenceService {
     }
 
     @Override
-    public com.openexchange.chronos.service.RecurrenceIterator<Event> iterateEventOccurrences(RecurrenceData recurrenceData, Event seriesMaster, Date from, Date until) throws OXException {
-        Calendar fromCalendar = null != from ? initCalendar(TimeZones.UTC, from) : null;
-        Calendar untilCalendar = null != until ? initCalendar(TimeZones.UTC, until) : null;
-        return new RecurrenceIterator(recurrenceData, seriesMaster, true, fromCalendar, untilCalendar, null);
-    }
-
-    @Override
     public com.openexchange.chronos.service.RecurrenceIterator<RecurrenceId> iterateRecurrenceIds(RecurrenceData recurrenceData) throws OXException {
         return new RecurrenceIdIterator(recurrenceData, true, null, null, null, null);
     }

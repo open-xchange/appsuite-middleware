@@ -55,7 +55,6 @@ import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
-import com.openexchange.chronos.service.RecurrenceData;
 import com.openexchange.exception.OXException;
 
 /**
@@ -137,15 +136,6 @@ public interface CalendarStorageUtilities {
      * @throws OXException In case of an error
      */
     List<Event> loadAdditionalEventTombstoneData(List<Event> events, EventField[] fields) throws OXException;
-
-    /**
-     * Loads all necessary data for a recurrence data wrapper for a specific event series. Especially, this includes looking up any
-     * overridden instances as well as the delete exception dates for filling {@link RecurrenceData#getExceptionDates()} appropriately.
-     *
-     * @param seriesMaster The series master event to get the recurrence data for
-     * @return The recurrence data, ready to be used by the recurrence service
-     */
-    RecurrenceData loadRecurrenceData(Event seriesMaster) throws OXException;
 
     /**
      * Removes all persisted data (events, alarms, attendees, ...) associated with the given account

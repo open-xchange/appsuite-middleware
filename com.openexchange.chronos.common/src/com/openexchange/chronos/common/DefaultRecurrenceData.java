@@ -50,10 +50,8 @@
 package com.openexchange.chronos.common;
 
 import static com.openexchange.chronos.common.CalendarUtils.combine;
-import java.util.Set;
 import org.dmfs.rfc5545.DateTime;
 import com.openexchange.chronos.Event;
-import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.service.RecurrenceData;
 
 /**
@@ -67,7 +65,6 @@ public class DefaultRecurrenceData implements RecurrenceData {
     private final String rrule;
     private final DateTime seriesStart;
     private final long[] exceptionDates;
-
 
     /**
      * Initializes a new {@link DefaultRecurrenceData}.
@@ -84,15 +81,16 @@ public class DefaultRecurrenceData implements RecurrenceData {
     }
 
     /**
-     * Initializes a new {@link DefaultRecurrenceData} based on a series master event and an additional set of recurrence ids for the
-     * overridden instances (<i>change exceptions</i>) of the series, which are combined with the delete exception dates in the passed
-     * series master event.
+     * Initializes a new {@link DefaultRecurrenceData} based on a series master event.
+     * <p/>
+     * The exception dates are derived the exception dates of the recurrence master event (as per {@link Event#getDeleteExceptionDates()})
+     * and overridden instances (as per {@link Event#getChangeExceptionDates()}).
      *
      * @param seriesMaster The series master event
      * @param changeExceptionDates The recurrence identifiers of the overridden occurrences, or <code>null</code> if there are none
      */
-    public DefaultRecurrenceData(Event seriesMaster, Set<RecurrenceId> changeExceptionDates) {
-        this(seriesMaster.getRecurrenceRule(), seriesMaster.getStartDate(), CalendarUtils.getExceptionDates(combine(seriesMaster.getDeleteExceptionDates(), changeExceptionDates)));
+    public DefaultRecurrenceData(Event seriesMaster) {
+        this(seriesMaster.getRecurrenceRule(), seriesMaster.getStartDate(), CalendarUtils.getExceptionDates(combine(seriesMaster.getDeleteExceptionDates(), seriesMaster.getChangeExceptionDates())));
     }
 
     @Override

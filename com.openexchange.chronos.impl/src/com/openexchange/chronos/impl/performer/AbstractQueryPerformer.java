@@ -267,7 +267,7 @@ public abstract class AbstractQueryPerformer {
     }
 
     protected List<Event> resolveOccurrences(Event master) throws OXException {
-        Iterator<Event> itrerator = Utils.resolveOccurrences(storage, session, master);
+        Iterator<Event> itrerator = Utils.resolveOccurrences(session, master);
         List<Event> list = new ArrayList<Event>();
         while (itrerator.hasNext()) {
             list.add(itrerator.next());

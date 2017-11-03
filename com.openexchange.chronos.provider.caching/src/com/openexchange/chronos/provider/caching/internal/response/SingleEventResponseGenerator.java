@@ -55,7 +55,6 @@ import java.util.Iterator;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.RecurrenceId;
-import com.openexchange.chronos.common.DefaultRecurrenceData;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.caching.CachingCalendarAccess;
 import com.openexchange.chronos.provider.caching.internal.Services;
@@ -104,8 +103,7 @@ public class SingleEventResponseGenerator extends ResponseGenerator {
                             exceptionEvent.setFolderId(folderId);
                             event = exceptionEvent;
                         } else {
-                            Iterator<Event> iterator = Services.getService(RecurrenceService.class).iterateEventOccurrences(
-                                new DefaultRecurrenceData(event, null), event, new Date(recurrenceId.getValue().getTimestamp()), null);
+                            Iterator<Event> iterator = Services.getService(RecurrenceService.class).iterateEventOccurrences(event, new Date(recurrenceId.getValue().getTimestamp()), null);
                             event = iterator.hasNext() ? iterator.next() : null;
                         }
                     }

@@ -59,6 +59,7 @@ import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.ParticipantRole;
 import com.openexchange.chronos.ParticipationStatus;
+import com.openexchange.groupware.tools.mappings.database.BooleanMapping;
 import com.openexchange.groupware.tools.mappings.database.DbMapping;
 import com.openexchange.groupware.tools.mappings.database.DefaultDbMapper;
 import com.openexchange.groupware.tools.mappings.database.IntegerMapping;
@@ -260,6 +261,28 @@ public class AttendeeMapper extends DefaultDbMapper<Attendee, AttendeeField> {
             @Override
             public void remove(Attendee attendee) {
                 attendee.removePartStat();
+            }
+        });
+        mappings.put(AttendeeField.RSVP, new BooleanMapping<Attendee>("rsvp", "RSVP") {
+
+            @Override
+            public void set(Attendee attendee, Boolean value) {
+                attendee.setRsvp(value);
+            }
+
+            @Override
+            public boolean isSet(Attendee attendee) {
+                return attendee.containsRsvp();
+            }
+
+            @Override
+            public Boolean get(Attendee attendee) {
+                return attendee.getRsvp();
+            }
+
+            @Override
+            public void remove(Attendee attendee) {
+                attendee.removeRsvp();
             }
         });
         mappings.put(AttendeeField.COMMENT, new VarCharMapping<Attendee>("comment", "Comment") {
