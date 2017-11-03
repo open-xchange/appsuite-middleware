@@ -90,7 +90,7 @@ public class GeoMapping extends AbstractICalMapping<VEvent, Event> {
             value[1] = property.getLongitude().floatValue();
             object.setGeo(value);
         } else if (false == isIgnoreUnsetProperties(parameters)) {
-            object.setDeleteExceptionDates(null);
+            object.setGeo(null);
         }
     }
 
