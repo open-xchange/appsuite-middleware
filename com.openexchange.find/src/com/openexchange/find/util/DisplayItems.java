@@ -110,16 +110,16 @@ public class DisplayItems {
 
         String lastName = contact.getSurName();
         String firstName = contact.getGivenName();
-        String department = contact.getDepartment();
+        String department = Strings.isEmpty(contact.getDepartment()) ? "" : contact.getDepartment();
         if (Strings.isEmpty(lastName)) {
             if (!Strings.isEmpty(firstName)) {
-                return String.format(Locale.ENGLISH, template, firstName, "", Strings.isEmpty(department) ? "" : department);
+                return String.format(Locale.ENGLISH, template, firstName, "", department);
             }
         } else {
             if (Strings.isEmpty(firstName)) {
-                return String.format(Locale.ENGLISH, template, "", lastName, Strings.isEmpty(department) ? "" : department);
+                return String.format(Locale.ENGLISH, template, "", lastName, department);
             } else {
-                return String.format(Locale.ENGLISH, template, firstName, lastName, Strings.isEmpty(department) ? "" : department);
+                return String.format(Locale.ENGLISH, template, firstName, lastName, department);
             }
         }
 
