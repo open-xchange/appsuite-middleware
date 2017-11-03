@@ -145,6 +145,26 @@ public abstract class DelegatingEvent extends Event {
     }
 
     @Override
+    public RelatedTo getRelatedTo() {
+        return delegate.getRelatedTo();
+    }
+
+    @Override
+    public void setRelatedTo(RelatedTo value) {
+        delegate.setRelatedTo(value);
+    }
+
+    @Override
+    public void removeRelatedTo() {
+        delegate.removeRelatedTo();
+    }
+
+    @Override
+    public boolean containsRelatedTo() {
+        return delegate.containsRelatedTo();
+    }
+
+    @Override
     public int getSequence() {
         return delegate.getSequence();
     }

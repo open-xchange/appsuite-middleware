@@ -70,6 +70,10 @@ public enum EventField {
      */
     UID,
     /**
+     * The relationship between this and other events.
+     */
+    RELATED_TO,
+    /**
      * The filename of the event.
      */
     FILENAME,

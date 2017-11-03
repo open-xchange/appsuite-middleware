@@ -68,6 +68,7 @@ public class Event {
     private String folderId;
     private CalendarUser calendarUser;
     private String uid;
+    private RelatedTo relatedTo;
     private String filename;
     private long timestamp;
 
@@ -249,6 +250,42 @@ public class Event {
      */
     public boolean containsUid() {
         return setFields.contains(EventField.UID);
+    }
+
+    /**
+     * Gets the related-to of the event.
+     *
+     * @return The related-to
+     */
+    public RelatedTo getRelatedTo() {
+        return relatedTo;
+    }
+
+    /**
+     * Sets the related-to of the event.
+     *
+     * @param value The related-to to set
+     */
+    public void setRelatedTo(RelatedTo value) {
+        relatedTo = value;
+        setFields.add(EventField.RELATED_TO);
+    }
+
+    /**
+     * Removes the related-to of the event.
+     */
+    public void removeRelatedTo() {
+        relatedTo = null;
+        setFields.remove(EventField.RELATED_TO);
+    }
+
+    /**
+     * Gets a value indicating whether the related-to of the event has been set or not.
+     *
+     * @return <code>true</code> if the related-to is set, <code>false</code>, otherwise
+     */
+    public boolean containsRelatedTo() {
+        return setFields.contains(EventField.RELATED_TO);
     }
 
     /**

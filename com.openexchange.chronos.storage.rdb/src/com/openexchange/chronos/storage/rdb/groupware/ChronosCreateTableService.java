@@ -165,6 +165,7 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
                 "folder VARCHAR(255) DEFAULT NULL," +
                 "series INT4 UNSIGNED DEFAULT NULL," +
                 "uid VARCHAR(1024) DEFAULT NULL," +
+                "relatedTo VARCHAR(767) DEFAULT NULL," +
                 "timestamp BIGINT(20) NOT NULL," +
                 "created BIGINT(20)," +
                 "createdBy INT4 UNSIGNED," +
@@ -214,6 +215,7 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
                 "folder VARCHAR(255) DEFAULT NULL," +
                 "series INT4 UNSIGNED DEFAULT NULL," +
                 "uid VARCHAR(1024) DEFAULT NULL," +
+                "relatedTo VARCHAR(767) DEFAULT NULL," +
                 "timestamp BIGINT(20) NOT NULL," +
                 "created BIGINT(20)," +
                 "createdBy INT4 UNSIGNED," +

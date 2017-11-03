@@ -73,6 +73,7 @@ import com.openexchange.chronos.EventStatus;
 import com.openexchange.chronos.ExtendedProperties;
 import com.openexchange.chronos.Organizer;
 import com.openexchange.chronos.RecurrenceId;
+import com.openexchange.chronos.RelatedTo;
 import com.openexchange.chronos.TimeTransparency;
 import com.openexchange.chronos.Transp;
 import com.openexchange.chronos.common.CalendarUtils;
@@ -87,6 +88,7 @@ import com.openexchange.groupware.tools.mappings.database.IntegerMapping;
 import com.openexchange.groupware.tools.mappings.database.PointMapping;
 import com.openexchange.groupware.tools.mappings.database.VarCharMapping;
 import com.openexchange.java.Enums;
+import com.openexchange.java.Strings;
 
 /**
  * {@link EventMapper}
@@ -250,6 +252,40 @@ public class EventMapper extends DefaultDbMapper<Event, EventField> {
             @Override
             public void remove(Event event) {
                 event.removeUid();
+            }
+        });
+        mappings.put(EventField.RELATED_TO, new VarCharMapping<Event>("relatedTo", "Related-To") {
+
+            @Override
+            public void set(Event event, String value) {
+                if (null == value) {
+                    event.setRelatedTo(null);
+                } else {
+                    String[] splitted = Strings.splitByColon(value);
+                    event.setRelatedTo(new RelatedTo(splitted[0], splitted[1]));
+                }
+            }
+
+            @Override
+            public boolean isSet(Event event) {
+                return event.containsRelatedTo();
+            }
+
+            @Override
+            public String get(Event event) {
+                RelatedTo value = event.getRelatedTo();
+                if (null == value) {
+                    return null;
+                }
+                if (null == value.getRelType()) {
+                    return ':' + value.getValue();
+                }
+                return value.getRelType() + ':' + value.getValue();
+            }
+
+            @Override
+            public void remove(Event event) {
+                event.removeRelatedTo();
             }
         });
         mappings.put(EventField.RECURRENCE_RULE, new VarCharMapping<Event>("rrule", "Recurrence Rule") {

@@ -87,6 +87,7 @@ public class EventMappings {
 		new LocationMapping(),
 		new OrganizerMapping(),
         new RecurrenceIdMapping(),
+        new RelatedToMapping(),
         new RRuleMapping(),
 		new SequenceMapping(),
 		new StatusMapping(),
@@ -99,8 +100,9 @@ public class EventMappings {
         new ExtendedPropertiesMapping(
             Property.ATTACH, Property.ATTENDEE, Property.CATEGORIES, Property.CLASS, Property.CREATED, Property.DESCRIPTION,
             Property.DTEND, Property.DTSTAMP, Property.DTSTART, Property.DURATION, Property.EXDATE, Property.GEO, Property.LAST_MODIFIED,
-            Property.LOCATION, Property.ORGANIZER, Property.RECURRENCE_ID, Property.RRULE, Property.SEQUENCE, Property.STATUS,
-            Property.SUMMARY, Property.TRANSP, Property.UID, Property.URL, AllDayEvent.PROPERTY_NAME, BusyStatus.PROPERTY_NAME)
+            Property.LOCATION, Property.ORGANIZER, Property.RECURRENCE_ID, Property.RELATED_TO, Property.RRULE, Property.SEQUENCE, 
+            Property.STATUS, Property.SUMMARY, Property.TRANSP, Property.UID, Property.URL, AllDayEvent.PROPERTY_NAME, 
+            BusyStatus.PROPERTY_NAME)
 	));
 
     /**

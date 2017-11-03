@@ -102,6 +102,16 @@ public class UnmodifiableEvent extends DelegatingEvent {
     }
 
     @Override
+    public void setRelatedTo(RelatedTo value) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void removeRelatedTo() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public void setSequence(int value) {
         throw new UnsupportedOperationException();
     }

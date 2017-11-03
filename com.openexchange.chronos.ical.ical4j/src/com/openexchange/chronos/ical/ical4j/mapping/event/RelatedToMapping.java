@@ -47,84 +47,50 @@
  *
  */
 
-package com.openexchange.chronos;
+package com.openexchange.chronos.ical.ical4j.mapping.event;
+
+import java.util.List;
+import com.openexchange.chronos.Event;
+import com.openexchange.chronos.RelatedTo;
+import com.openexchange.chronos.ical.ICalParameters;
+import com.openexchange.chronos.ical.ical4j.mapping.AbstractICalMapping;
+import com.openexchange.exception.OXException;
+import net.fortuna.ical4j.model.Parameter;
+import net.fortuna.ical4j.model.Property;
+import net.fortuna.ical4j.model.component.VEvent;
+import net.fortuna.ical4j.model.parameter.RelType;
 
 /**
- * {@link RelatedTo}
+ * {@link RelatedToMapping}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
- * @see <a href="https://tools.ietf.org/html/rfc5545#section-3.8.4.5">RFC 5545, section 3.8.4.5</a>
  */
-public class RelatedTo {
+public class RelatedToMapping extends AbstractICalMapping<VEvent, Event> {
 
-    private final String relType;
-    private final String value;
-
-    /**
-     * Initializes a new {@link RelatedTo}.
-     *
-     * @param relType The relationship type, or <code>null</code> for the default <code>PARENT</code> relationship
-     * @param value The value, i.e. the unique identifier of the referenced component
-     */
-    public RelatedTo(String relType, String value) {
-        super();
-        this.relType = relType;
-        this.value = value;
-    }
-
-    /**
-     * Gets the relType
-     *
-     * @return The relType
-     */
-    public String getRelType() {
-        return relType;
-    }
-
-    /**
-     * Gets the value
-     *
-     * @return The value
-     */
-    public String getValue() {
-        return value;
+    @Override
+    public void export(Event object, VEvent component, ICalParameters parameters, List<OXException> warnings) {
+        RelatedTo value = object.getRelatedTo();
+        if (null == value) {
+            removeProperties(component, Property.RELATED_TO);
+        } else {
+            removeProperties(component, Property.RELATED_TO);
+            net.fortuna.ical4j.model.property.RelatedTo property = new net.fortuna.ical4j.model.property.RelatedTo(value.getValue());
+            if (null != value.getRelType()) {
+                property.getParameters().add(new RelType(value.getRelType()));
+            }
+            component.getProperties().add(property);
+        }
     }
 
     @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((relType == null) ? 0 : relType.hashCode());
-        result = prime * result + ((value == null) ? 0 : value.hashCode());
-        return result;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        RelatedTo other = (RelatedTo) obj;
-        if (relType == null) {
-            if (other.relType != null)
-                return false;
-        } else if (!relType.equals(other.relType))
-            return false;
-        if (value == null) {
-            if (other.value != null)
-                return false;
-        } else if (!value.equals(other.value))
-            return false;
-        return true;
-    }
-
-    @Override
-    public String toString() {
-        return "RelatedTo [relType=" + relType + ", value=" + value + "]";
+    public void importICal(VEvent component, Event object, ICalParameters parameters, List<OXException> warnings) {
+        Property property = component.getProperty(Property.RELATED_TO);
+        if (null != property) {
+            object.setRelatedTo(new RelatedTo(optParameterValue(property, Parameter.RELTYPE), property.getValue()));
+        } else if (false == isIgnoreUnsetProperties(parameters)) {
+            object.setDeleteExceptionDates(null);
+        }
     }
 
 }

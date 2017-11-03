@@ -77,6 +77,7 @@ import com.openexchange.chronos.EventStatus;
 import com.openexchange.chronos.ExtendedProperties;
 import com.openexchange.chronos.Organizer;
 import com.openexchange.chronos.RecurrenceId;
+import com.openexchange.chronos.RelatedTo;
 import com.openexchange.chronos.Transp;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.exception.OXException;
@@ -283,6 +284,34 @@ public class EventMapper extends DefaultMapper<Event, EventField> {
             @Override
             public void remove(Event object) {
                 object.removeUid();
+            }
+        });
+        mappings.put(EventField.RELATED_TO, new DefaultMapping<RelatedTo, Event>() {
+
+            @Override
+            public void copy(Event from, Event to) throws OXException {
+                RelatedTo value = get(from);
+                set(to, null == value ? null : new RelatedTo(value.getRelType(), value.getValue()));
+            }
+
+            @Override
+            public boolean isSet(Event object) {
+                return object.containsRelatedTo();
+            }
+
+            @Override
+            public void set(Event object, RelatedTo value) throws OXException {
+                object.setRelatedTo(value);
+            }
+
+            @Override
+            public RelatedTo get(Event object) {
+                return object.getRelatedTo();
+            }
+
+            @Override
+            public void remove(Event object) {
+                object.removeRelatedTo();
             }
         });
         mappings.put(EventField.FILENAME, new DefaultMapping<String, Event>() {
