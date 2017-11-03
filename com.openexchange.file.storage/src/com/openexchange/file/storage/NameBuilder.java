@@ -49,6 +49,8 @@
 
 package com.openexchange.file.storage;
 
+import org.apache.commons.io.FilenameUtils;
+import com.openexchange.java.Strings;
 
 /**
  * {@link NameBuilder} - Utility class to determine a non-conflicting name through trial & error.
@@ -57,15 +59,55 @@ package com.openexchange.file.storage;
  */
 public class NameBuilder {
 
+    /**
+     * Gets the appropriate {@code NameBuilder} instance for specified name.
+     * <p>
+     * Provided name is either considered be a folder or a file name dependent on occurrence of extension separator character, which is a dot.
+     * If contained, the name is considered be a file name; otherwise a folder name.
+     *
+     * @param name The name; either a folder or a file name
+     * @return The appropriate {@code NameBuilder} instance
+     */
+    public static NameBuilder nameBuilderFor(String name) {
+        if (Strings.isEmpty(name)) {
+            return null;
+        }
+
+        int index = FilenameUtils.indexOfExtension(name);
+        if (index < 0) {
+            return new NameBuilder(name);
+        }
+
+        String baseName = name.substring(0, index);
+        String extension = name.substring(index);
+        return new NameBuilder(baseName, extension);
+    }
+
+    // --------------------------------------------------------------------------
+
     private final String baseName;
+    private final String extension;
     private int count;
 
     /**
      * Initializes a new {@link NameBuilder}.
+     *
+     * @param baseName The base name; e.g. <code>"myfolder"</code>
      */
     public NameBuilder(String baseName) {
+        this(baseName, null);
+    }
+
+    /**
+     * Initializes a new {@link NameBuilder}.
+     *
+     * @param baseName The base name; e.g. <code>"myfile"</code>
+     * @param extension The optional extension; e.g. <code>".txt"</code>
+     */
+    public NameBuilder(String baseName, String extension) {
         super();
         this.baseName = baseName;
+        this.extension = Strings.isEmpty(extension) ? null : (extension.startsWith(".") ? extension : "." + extension);
         count = 0;
     }
 
@@ -81,7 +123,15 @@ public class NameBuilder {
 
     @Override
     public String toString() {
-        return count == 0 ? baseName : new StringBuilder(baseName).append(" (").append(count).append(')').toString();
+        if (null == extension) {
+            return count == 0 ? baseName : new StringBuilder(baseName).append(" (").append(count).append(')').toString();
+        }
+
+        StringBuilder sb = new StringBuilder(baseName);
+        if (count > 0) {
+            sb.append(" (").append(count).append(')');
+        }
+        return sb.append(extension).toString();
     }
 
 }
