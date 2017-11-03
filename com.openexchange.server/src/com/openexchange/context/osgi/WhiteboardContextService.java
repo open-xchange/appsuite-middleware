@@ -111,6 +111,11 @@ public class WhiteboardContextService implements ServiceTrackerCustomizer<Contex
     }
 
     @Override
+    public Map<PoolAndSchema, List<Integer>> getSchemaAssociations() throws OXException {
+        return getDelegate().getSchemaAssociations();
+    }
+
+    @Override
     public Map<PoolAndSchema, List<Integer>> getSchemaAssociationsFor(List<Integer> contextIds) throws OXException {
         return getDelegate().getSchemaAssociationsFor(contextIds);
     }

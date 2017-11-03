@@ -80,6 +80,14 @@ public class SimContextService implements ContextService{
     }
 
     /* (non-Javadoc)
+     * @see com.openexchange.context.ContextService#getSchemaAssociations()
+     */
+    @Override
+    public Map<PoolAndSchema, List<Integer>> getSchemaAssociations() throws OXException {
+        return null;
+    }
+
+    /* (non-Javadoc)
      * @see com.openexchange.context.ContextService#getSchemaAssociationsFor(java.util.Collection)
      */
     @Override

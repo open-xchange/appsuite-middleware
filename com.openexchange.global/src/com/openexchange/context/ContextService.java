@@ -156,10 +156,18 @@ public interface ContextService {
     List<Integer> getDistinctContextsPerSchema() throws OXException;
 
     /**
+     * Groups all context identifiers by their schema associations.
+     *
+     * @return A mapping of a schema to contexts residing in that schema
+     * @throws OXException If the mapping cannot be returned
+     */
+    Map<PoolAndSchema, List<Integer>> getSchemaAssociations() throws OXException;
+
+    /**
      * Groups specified context identifiers by their schema associations.
      *
      * @param contextIds The context identifiers to group by schema association
-     * @return A mapping of a representative schema-associated context identifier to other contexts residing in that schema taken from specified context identifiers
+     * @return A mapping of a schema to contexts residing in that schema taken from specified context identifiers
      * @throws OXException If the mapping cannot be returned
      */
     Map<PoolAndSchema, List<Integer>> getSchemaAssociationsFor(List<Integer> contextIds) throws OXException;

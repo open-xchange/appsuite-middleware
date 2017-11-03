@@ -389,6 +389,53 @@ public class RdbContextStorage extends ContextStorage {
     }
 
     @Override
+    public Map<PoolAndSchema, List<Integer>> getSchemaAssociations() throws OXException {
+        Connection con = DBPool.pickup();
+        PreparedStatement stmt = null;
+        ResultSet result = null;
+        try {
+            stmt = con.prepareStatement("SELECT DISTINCT write_db_pool_id, db_schema FROM context_server2db_pool");
+            result = stmt.executeQuery();
+            if (!result.next()) {
+                return Collections.emptyMap();
+            }
+
+            List<PoolAndSchema> schemas = new LinkedList<>();
+            do {
+                schemas.add(new PoolAndSchema(result.getInt(2)/*write_db_pool_id*/, result.getString(3)/*db_schema*/));
+            } while (result.next());
+            closeSQLStuff(result, stmt);
+            result = null;
+            stmt = null;
+
+            // Use a map to group by database schema association
+            Map<PoolAndSchema, List<Integer>> map = new LinkedHashMap<>(256, 0.9F);
+            for (PoolAndSchema schema : schemas) {
+                stmt = con.prepareStatement("SELECT cid FROM context_server2db_pool WHERE db_schema=? AND write_db_pool_id=?");
+                result = stmt.executeQuery();
+                if (result.next()) {
+                    List<Integer> contextIds = new LinkedList<>();
+                    do {
+                        contextIds.add(Integer.valueOf(result.getInt(1)));
+                    } while (result.next());
+                    map.put(schema, contextIds);
+                }
+                closeSQLStuff(result, stmt);
+                result = null;
+                stmt = null;
+            }
+            return map;
+        } catch (final SQLException e) {
+            throw ContextExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            closeSQLStuff(result, stmt);
+            if (null != con) {
+                DBPool.closeReaderSilent(con);
+            }
+        }
+    }
+
+    @Override
     public Map<PoolAndSchema, List<Integer>> getSchemaAssociationsFor(List<Integer> contextIds) throws OXException {
         if (null == contextIds || contextIds.isEmpty()) {
             return Collections.emptyMap();
