@@ -51,6 +51,7 @@ package com.openexchange.find.osgi;
 
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.find.SearchService;
 import com.openexchange.find.internal.AvailableModules;
@@ -83,12 +84,13 @@ public class FindActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigViewFactory.class };
+        return new Class<?>[] { ConfigViewFactory.class, ConfigurationService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
         LOG.info("Starting bundle: com.openexchange.find");
+        Services.setServiceLookup(this);
         try {
             final SearchDriverManager driverManager = new SearchDriverManager(context, getService(ConfigViewFactory.class));
             track(ModuleSearchDriver.class, driverManager);

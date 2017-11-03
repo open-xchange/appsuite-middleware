@@ -49,8 +49,13 @@
 
 package com.openexchange.find.util;
 
+import java.util.Locale;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.exception.OXException;
+import com.openexchange.find.contacts.ContactDisplayNameFormat;
 import com.openexchange.find.facet.ComplexDisplayItem;
 import com.openexchange.find.facet.DisplayItem;
+import com.openexchange.find.osgi.Services;
 import com.openexchange.groupware.contact.ContactUtil;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.image.ImageDataSource;
@@ -58,54 +63,75 @@ import com.openexchange.image.ImageLocation;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.Pair;
 
-
 /**
  * A helper class to create {@link DisplayItem}s for common cases.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.6.1
  */
 public class DisplayItems {
 
-    public static ComplexDisplayItem convert(Contact contact) {
-        String displayName = extractDisplayName(contact);
+    /**
+     * Converts the specified {@link Contact} result into a {@link ComplexDisplayItem}
+     * 
+     * @param contact the {@link Contact} to convert
+     * @return The {@link ComplexDisplayItem}
+     * @throws OXException
+     */
+    public static ComplexDisplayItem convert(Contact contact) throws OXException {
+        String displayName = formatDisplayName(contact);
         String primaryAddress = extractPrimaryMailAddress(contact);
         if (Strings.isEmpty(displayName)) {
             displayName = Strings.isEmpty(primaryAddress) ? "" : primaryAddress;
         }
-        
+
         ComplexDisplayItem item = new ComplexDisplayItem(displayName, primaryAddress);
         Pair<ImageDataSource, ImageLocation> imageData = ContactUtil.prepareImageData(contact);
         if (imageData != null) {
             item.setImageData(imageData.getFirst(), imageData.getSecond());
         }
+
         return item;
     }
 
-    private static String extractDisplayName(Contact contact) {
-        StringBuilder sb = new StringBuilder(64);
-        String displayName = contact.getDisplayName();
-        if (Strings.isEmpty(displayName)) {
-            String surName = contact.getSurName();
-            String givenName = contact.getGivenName();
-            if (Strings.isEmpty(surName)) {
-                if (!Strings.isEmpty(givenName)) {
-                    sb.append(givenName);
-                }
-            } else {
-                if (Strings.isEmpty(givenName)) {
-                    sb.append(surName);
-                } else {
-                    sb.append(surName).append(", ").append(givenName);
-                }
+    /**
+     * Formats the display name of the {@link ComplexDisplayItem}
+     * 
+     * @param contact The {@link Contact}
+     * @return the display name
+     * @throws OXException
+     */
+    private static String formatDisplayName(Contact contact) throws OXException {
+        ConfigurationService configService = Services.getConfigurationService();
+        // TODO: Maybe use lean configuration
+        boolean showDepartment = configService.getBoolProperty("com.openexchange.contact.showDepartments", false);
+        String template = (showDepartment) ? ContactDisplayNameFormat.DISPLAY_NAME_FORMAT_WITH_DEPARTMENT : ContactDisplayNameFormat.DISPLAY_NAME_FORMAT_WITHOUT_DEPARTMENT;
+
+        String lastName = contact.getSurName();
+        String firstName = contact.getGivenName();
+        String department = contact.getDepartment();
+        if (Strings.isEmpty(lastName)) {
+            if (!Strings.isEmpty(firstName)) {
+                return String.format(Locale.ENGLISH, template, firstName, "", Strings.isEmpty(department) ? "" : department);
             }
         } else {
-            sb.append(displayName);
+            if (Strings.isEmpty(firstName)) {
+                return String.format(Locale.ENGLISH, template, "", lastName, Strings.isEmpty(department) ? "" : department);
+            } else {
+                return String.format(Locale.ENGLISH, template, firstName, lastName, Strings.isEmpty(department) ? "" : department);
+            }
         }
 
-        return sb.toString();
+        return contact.getDisplayName();
     }
 
+    /**
+     * Extracts the primary e-mail address of the specified {@link Contact}.
+     * 
+     * @param contact The {@link Contact} to extract the e-mail address from
+     * @return The primary e-mail address
+     */
     private static String extractPrimaryMailAddress(Contact contact) {
         String address = contact.getEmail1();
         if (Strings.isEmpty(address)) {
