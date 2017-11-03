@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.writer.filter;
 
+import static com.openexchange.java.Strings.unquote;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -82,28 +83,35 @@ public class StackTraceBlacklist {
         ImmutableSet.Builder<String> prefixes = ImmutableSet.builder();
         ImmutableSet.Builder<String> codes = ImmutableSet.builder();
 
-        // Read data
-        if (Strings.isEmpty(blacklist)) {
+
+        if (null == blacklist) {
             LOGGER.debug("There are no exceptions configured to be blacklisted. Using default instead.");
             prefixes.add("SES");
         } else {
-            // Prepare pattern
-            Pattern patternCode = Pattern.compile("[A-Z]*-[0-9]*");
-            Pattern patternPrefix = Pattern.compile("([A-Z]*)(-|-\\*|\\*)?");
+            String toParse = unquote(blacklist);
 
-            // Parse
-            Matcher m;
-            for (String entry : Strings.splitByComma(blacklist)) {
-                entry = unquote(entry);
-                if ((m = patternCode.matcher(entry)).matches()) {
-                    // Complete error code like 'SES-200'
-                    codes.add(entry);
-                } else if ((m = patternPrefix.matcher(entry)).matches()) {
-                    // Prefix like 'SES', 'SES*' or 'SES-*'
-                    prefixes.add(m.group(1));
-                } else {
-                    // Not supported
-                    LOGGER.warn("{} does not match any known format for exception prefix or exception code. Therefore it won't be part of the blacklist.", entry);
+            // Read data
+            if (Strings.isEmpty(toParse)) {
+                LOGGER.debug("There are no exceptions configured to be blacklisted. Using default instead.");
+                prefixes.add("SES");
+            } else {
+                // Prepare pattern
+                Pattern patternCode = Pattern.compile("[A-Z]+-[0-9]+");
+                Pattern patternPrefix = Pattern.compile("([A-Z]+)(-|-\\*|\\*)?");
+
+                // Parse
+                Matcher m;
+                for (String entry : Strings.splitByComma(toParse)) {
+                    if ((m = patternCode.matcher(entry)).matches()) {
+                        // Complete error code like 'SES-200'
+                        codes.add(entry);
+                    } else if ((m = patternPrefix.matcher(entry)).matches()) {
+                        // Prefix like 'SES', 'SES*' or 'SES-*'
+                        prefixes.add(m.group(1));
+                    } else {
+                        // Not supported
+                        LOGGER.warn("\"{}\" does neither match any known format for an exception prefix nor exception code. Therefore it won't be part of the blacklist.", entry);
+                    }
                 }
             }
         }
@@ -132,13 +140,4 @@ public class StackTraceBlacklist {
         return true;
     }
 
-    /**
-     * Removes single or double quotes from a string if its quoted.
-     */
-    private String unquote(final String s) {
-        if (false == Strings.isEmpty(s) && ((s.startsWith("\"") && s.endsWith("\"")) || (s.startsWith("'") && s.endsWith("'")))) {
-            return s.substring(1, s.length() - 1);
-        }
-        return s;
-    }
 }
