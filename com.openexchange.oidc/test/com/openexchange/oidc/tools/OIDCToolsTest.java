@@ -90,7 +90,7 @@ import com.openexchange.tools.servlet.http.Cookies;
  * @since v7.10.0
  */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({ SessionUtility.class, Cookies.class, LoginConfiguration.class, LoginServlet.class })
+@PrepareForTest({ SessionUtility.class, Cookies.class, LoginConfiguration.class, LoginServlet.class, OIDCTools.class })
 public class OIDCToolsTest {
 
     private static final String HTTPS_REDIRECT_URI = "https://redirectURI";

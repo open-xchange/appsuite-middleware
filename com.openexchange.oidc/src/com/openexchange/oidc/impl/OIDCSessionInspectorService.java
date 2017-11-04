@@ -52,14 +52,14 @@ public class OIDCSessionInspectorService implements SessionInspectorService{
 
     private OIDCBackend loadBackendForSession(Session session) throws OXException{
         SortedMap<ServiceReference<OIDCBackend>,OIDCBackend> tracked = this.oidcBackends.getTracked();
-        Object object = session.getParameter(OIDCTools.BACKEND_PATH);
-        if (null == object) {
+        String backendPath = (String) session.getParameter(OIDCTools.BACKEND_PATH);
+        if (null == backendPath) {
             return null;
         }
-        String sessionBackendPath = (String) object;
+        String sessionBackendPath = backendPath;
         for (Entry<ServiceReference<OIDCBackend>, OIDCBackend> entry : tracked.entrySet()) {
             OIDCBackend backend = this.context.getService(entry.getKey());
-            if (sessionBackendPath != null && backend.getPath().equals(sessionBackendPath)) {
+            if (backend.getPath().equals(sessionBackendPath)) {
                 return backend;
             }
         }

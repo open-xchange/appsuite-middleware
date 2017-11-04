@@ -354,7 +354,7 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
     public String getLogoutRedirectRequest(HttpServletRequest request, HttpServletResponse response) throws OXException {
         LOG.trace("getLogoutRedirectRequest(HttpServletRequest request: {}, HttpServletResponse response)", request.getRequestURI());
         Session session = this.extractSessionFromRequest(request);
-        String logoutRequest = this.backend.getBackendConfig().getRedirectURILogout();
+        String logoutRequest = "";
         if (this.backend.getBackendConfig().isSSOLogout()) {
             logoutRequest = this.backend.getLogoutFromIDPRequest(session);
             this.stateManagement.addLogoutRequest(new DefaultLogoutRequestInfo(new State().getValue(), OIDCTools.getDomainName(request, services.getOptionalService(HostnameService.class)), session.getSessionID()));
@@ -391,17 +391,17 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
         //Check state
         String state = request.getParameter(OIDCTools.STATE);
         if (state == null) {
-            throw OIDCExceptionCode.INVALID_LOGOUT_REQUEST.create("missing state parameter in response from the OP");
+            throw OIDCExceptionCode.INVALID_LOGOUT_REQUEST.create("missing state parameter in response from the OP.");
         }
         //load state
         LogoutRequestInfo logoutRequestInfo = this.stateManagement.getAndRemoveLogoutRequestInfo(state);
         if (logoutRequestInfo == null) {
-            throw OIDCExceptionCode.INVALID_LOGOUT_REQUEST.create("wrong state in response from the OP");
+            throw OIDCExceptionCode.INVALID_LOGOUT_REQUEST.create("wrong state in response from the OP.");
         }
         String sessionId = logoutRequestInfo.getSessionId();
         LOG.trace("Try to logout user, via OP with state: {} and sessionId: {}", state, sessionId);
         //logout user
-        return this.getRedirectForLogoutFromOXServer(getSessionFromId(sessionId), request, response, logoutRequestInfo);
+        return this.getRedirectForLogoutFromOXServer(this.getSessionFromId(sessionId), request, response, logoutRequestInfo);
     }
 
     private String getRedirectForLogoutFromOXServer(Session session, HttpServletRequest request, HttpServletResponse response, LogoutRequestInfo logoutRequestInfo) throws OXException {

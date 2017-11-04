@@ -67,7 +67,6 @@ import com.nimbusds.jwt.JWT;
 import com.nimbusds.oauth2.sdk.ErrorObject;
 import com.nimbusds.oauth2.sdk.TokenErrorResponse;
 import com.nimbusds.oauth2.sdk.TokenRequest;
-import com.nimbusds.oauth2.sdk.TokenResponse;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 import com.nimbusds.oauth2.sdk.id.State;
@@ -87,7 +86,9 @@ import com.openexchange.oidc.osgi.Services;
 import com.openexchange.oidc.spi.OIDCBackend;
 import com.openexchange.oidc.state.AuthenticationRequestInfo;
 import com.openexchange.oidc.state.DefaultLogoutRequestInfo;
+import com.openexchange.oidc.state.LogoutRequestInfo;
 import com.openexchange.oidc.state.StateManagement;
+import com.openexchange.oidc.tools.OIDCTools;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.session.reservation.SessionReservationService;
@@ -131,6 +132,9 @@ public class OIDCWebSSoProviderImplTest {
 
     @Mock
     private TokenRequest mockedTokenRequest;
+
+    @Mock
+    private Session mockedSession;
 
     private OIDCWebSSOProviderImpl provider;
 
@@ -287,7 +291,6 @@ public class OIDCWebSSoProviderImplTest {
             return;
         }
         fail("No error was thrown, but expected");
-
     }
 
     @Test
@@ -309,11 +312,11 @@ public class OIDCWebSSoProviderImplTest {
         }, new RefreshToken()));
 
         PowerMockito.doReturn(mockedTokenResponse).when(this.provider, PowerMockito.method(OIDCWebSSOProviderImpl.class, "getTokenResponse", TokenRequest.class)).withArguments(mockedTokenRequest);
-        
+
         IDTokenClaimsSet mockedClaimSet = Mockito.mock(IDTokenClaimsSet.class);
         Mockito.when(this.mockedBackend.validateIdToken(Matchers.any(JWT.class), Matchers.anyString())).thenReturn(mockedClaimSet);
         Mockito.when(mockedAuthRequestInfo.getDomainName()).thenReturn("domainname");
-        
+
         PowerMockito.doNothing().when(this.provider, PowerMockito.method(OIDCWebSSOProviderImpl.class, "sendLoginRequestToServer", HttpServletRequest.class, HttpServletResponse.class, OIDCTokenResponse.class, String.class)).withArguments(Matchers.any(HttpServletRequest.class), Matchers.any(HttpServletResponse.class), Matchers.any(OIDCTokenResponse.class), Matchers.anyString());
 
         try {
@@ -334,38 +337,88 @@ public class OIDCWebSSoProviderImplTest {
         String backendLogout = "backendLogoutRequest";
         Mockito.when(mockedBackend.getLogoutFromIDPRequest(mockedSession)).thenReturn(backendLogout);
         PowerMockito.doNothing().when(mockedStateManagement).addLogoutRequest(Matchers.any(DefaultLogoutRequestInfo.class));
-        
+
         String result = provider.getLogoutRedirectRequest(mockedRequest, mockedResponse);
         assertTrue("Wrong request as result", result.equals(backendLogout));
     }
 
     @Test
-    public void getLogoutRedirectRequest_NoSSOLogoutTest() {
+    public void getLogoutRedirectRequest_NoSSOLogoutTest() throws Exception {
+        String logoutRequest = "correctLogoutRequest";
+        Mockito.when(mockedBackendConfig.isSSOLogout()).thenReturn(false);
+        PowerMockito.doReturn(mockedSession).when(this.provider, PowerMockito.method(OIDCWebSSOProviderImpl.class, "extractSessionFromRequest", HttpServletRequest.class)).withArguments(Matchers.any(HttpServletRequest.class));
+        PowerMockito.doReturn(logoutRequest).when(this.provider, PowerMockito.method(OIDCWebSSOProviderImpl.class, "getRedirectForLogoutFromOXServer", Session.class, HttpServletRequest.class, HttpServletResponse.class, LogoutRequestInfo.class)).withArguments(Matchers.any(HttpServletRequest.class), Matchers.any(HttpServletRequest.class), Matchers.any(HttpServletResponse.class), Matchers.any(LogoutRequestInfo.class));
+        String result = provider.getLogoutRedirectRequest(mockedRequest, mockedResponse);
 
-    }
-
-    @Test
-    public void getLogoutRedirectRequest_NoSessionFailTest() {
-
+        assertTrue("Wrong request as result", result.equals(logoutRequest));
     }
 
     @Test
     public void getLogoutRedirectRequest_NoSessionIDFailTest() {
+        Mockito.when(mockedRequest.getParameter("session")).thenReturn(null);
+        try {
+            this.provider.getLogoutRedirectRequest(mockedRequest, mockedResponse);
+        } catch (OXException e) {
+            assertTrue("Wrong error message thrown. With wrong message", e.getExceptionCode() == OIDCExceptionCode.INVALID_LOGOUT_REQUEST && e.getMessage().contains("No session parameter set."));
+            return;
+        }
+        fail("No error was thrown, but expected");
+    }
 
+    @Test
+    public void getLogoutRedirectRequest_NoSessionFailTest() throws Exception {
+        Mockito.when(mockedRequest.getParameter("session")).thenReturn("sessionID");
+        PowerMockito.doReturn(null).when(this.provider, PowerMockito.method(OIDCWebSSOProviderImpl.class, "getSessionFromId", String.class)).withArguments(Matchers.anyString());
+
+        try {
+            this.provider.getLogoutRedirectRequest(mockedRequest, mockedResponse);
+        } catch (OXException e) {
+            assertTrue("Wrong error message thrown. With wrong message", e.getExceptionCode() == OIDCExceptionCode.INVALID_LOGOUT_REQUEST && e.getMessage().contains("Invalid session parameter, no session found."));
+            return;
+        }
+        fail("No error was thrown, but expected");
     }
 
     @Test
     public void logoutSSOUser_NoStateFailTest() {
-
+        Mockito.when(mockedRequest.getParameter(OIDCTools.STATE)).thenReturn(null);
+        try {
+            this.provider.logoutSSOUser(mockedRequest, mockedResponse);
+        } catch (OXException e) {
+            assertTrue("Wrong error message thrown. With wrong message", e.getExceptionCode() == OIDCExceptionCode.INVALID_LOGOUT_REQUEST && e.getMessage().contains("missing state parameter in response from the OP."));
+            return;
+        }
+        fail("No error was thrown, but expected");
     }
 
     @Test
     public void logoutSSOUser_NoStoredStateFailTest() {
-
+        String state = "state";
+        Mockito.when(mockedRequest.getParameter(OIDCTools.STATE)).thenReturn(state);
+        Mockito.when(this.mockedStateManagement.getAndRemoveLogoutRequestInfo(state)).thenReturn(null);
+        try {
+            this.provider.logoutSSOUser(mockedRequest, mockedResponse);
+        } catch (OXException e) {
+            assertTrue("Wrong error message thrown. With wrong message", e.getExceptionCode() == OIDCExceptionCode.INVALID_LOGOUT_REQUEST && e.getMessage().contains("wrong state in response from the OP."));
+            return;
+        }
+        fail("No error was thrown, but expected");
     }
 
     @Test
-    public void logoutSSOUser_SuccessTest() {
-
+    public void logoutSSOUser_SuccessTest() throws Exception {
+        String state = "state";
+        Mockito.when(mockedRequest.getParameter(OIDCTools.STATE)).thenReturn(state);
+        LogoutRequestInfo logoutRequestInfo = Mockito.mock(LogoutRequestInfo.class);
+        Mockito.when(this.mockedStateManagement.getAndRemoveLogoutRequestInfo(state)).thenReturn(logoutRequestInfo);
+        String sessionID = "sessionId";
+        Mockito.when(logoutRequestInfo.getSessionId()).thenReturn(sessionID);
+        PowerMockito.doReturn(mockedSession).when(this.provider, PowerMockito.method(OIDCWebSSOProviderImpl.class, "getSessionFromId", String.class)).withArguments(sessionID);
+        String logoutRequest = "logoutRequest";
+        PowerMockito.doReturn(logoutRequest).when(this.provider, PowerMockito.method(OIDCWebSSOProviderImpl.class, "getRedirectForLogoutFromOXServer", Session.class, HttpServletRequest.class, HttpServletResponse.class, LogoutRequestInfo.class)).withArguments(Matchers.any(HttpServletRequest.class), Matchers.any(HttpServletRequest.class), Matchers.any(HttpServletResponse.class), Matchers.any(LogoutRequestInfo.class));
+        
+        String result = this.provider.logoutSSOUser(mockedRequest, mockedResponse);
+        assertTrue("Wrong request as result", result.equals(logoutRequest));
     }
+    
 }
