@@ -50,13 +50,12 @@
 package com.openexchange.find.osgi;
 
 import java.util.concurrent.atomic.AtomicReference;
-import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 
 /**
- * 
+ *
  * {@link Services}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
@@ -73,18 +72,8 @@ public class Services {
     }
 
     /**
-     * Retrieves the {@link ConfigurationService}
-     * 
-     * @return the {@link ConfigurationService}
-     * @throws OXException
-     */
-    public static ConfigurationService getConfigurationService() throws OXException {
-        return requireService(ConfigurationService.class);
-    }
-
-    /**
      * Sets the service lookup instance
-     * 
+     *
      * @param lookup the {@link ServiceLookup} instance
      */
     public static void setServiceLookup(ServiceLookup lookup) {
@@ -93,7 +82,7 @@ public class Services {
 
     /**
      * Looks up a required service
-     * 
+     *
      * @param clazz The class of the service
      * @return The service
      * @throws OXException if the service is absent
@@ -107,8 +96,18 @@ public class Services {
     }
 
     /**
+     * Looks up an optional service
+     *
+     * @param clazz The class of the service
+     * @return The service or <code>null</code> if absent
+     */
+    public static <T> T optService(Class<T> clazz) {
+        return getServiceLookup().getService(clazz);
+    }
+
+    /**
      * Gets the {@link ServiceLookup} instance
-     * 
+     *
      * @return the {@link ServiceLookup} instance
      */
     private static ServiceLookup getServiceLookup() {

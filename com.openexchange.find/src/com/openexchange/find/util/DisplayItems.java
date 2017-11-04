@@ -51,7 +51,6 @@ package com.openexchange.find.util;
 
 import java.util.Locale;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.exception.OXException;
 import com.openexchange.find.contacts.ContactDisplayNameFormat;
 import com.openexchange.find.facet.ComplexDisplayItem;
 import com.openexchange.find.facet.DisplayItem;
@@ -72,14 +71,15 @@ import com.openexchange.java.util.Pair;
  */
 public class DisplayItems {
 
+    private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(DisplayItems.class);
+
     /**
      * Converts the specified {@link Contact} result into a {@link ComplexDisplayItem}
-     * 
+     *
      * @param contact the {@link Contact} to convert
      * @return The {@link ComplexDisplayItem}
-     * @throws OXException
      */
-    public static ComplexDisplayItem convert(Contact contact) throws OXException {
+    public static ComplexDisplayItem convert(Contact contact) {
         String displayName = formatDisplayName(contact);
         String primaryAddress = extractPrimaryMailAddress(contact);
         if (Strings.isEmpty(displayName)) {
@@ -97,17 +97,12 @@ public class DisplayItems {
 
     /**
      * Formats the display name of the {@link ComplexDisplayItem}
-     * 
+     *
      * @param contact The {@link Contact}
      * @return the display name
-     * @throws OXException
      */
-    private static String formatDisplayName(Contact contact) throws OXException {
-        ConfigurationService configService = Services.getConfigurationService();
-        // TODO: Maybe use lean configuration
-        boolean showDepartment = configService.getBoolProperty("com.openexchange.contact.showDepartments", false);
-        String template = (showDepartment) ? ContactDisplayNameFormat.DISPLAY_NAME_FORMAT_WITH_DEPARTMENT : ContactDisplayNameFormat.DISPLAY_NAME_FORMAT_WITHOUT_DEPARTMENT;
-
+    private static String formatDisplayName(Contact contact) {
+        String template = getTemplateToUse();
         String lastName = contact.getSurName();
         String firstName = contact.getGivenName();
         String department = Strings.isEmpty(contact.getDepartment()) ? "" : contact.getDepartment();
@@ -117,18 +112,34 @@ public class DisplayItems {
             }
         } else {
             if (Strings.isEmpty(firstName)) {
-                return String.format(Locale.ENGLISH, template, "", lastName, department);
-            } else {
-                return String.format(Locale.ENGLISH, template, firstName, lastName, department);
+                firstName = "";
             }
+            return String.format(Locale.ENGLISH, template, firstName, lastName, department);
         }
 
         return contact.getDisplayName();
     }
 
+    private static String getTemplateToUse() {
+        // TODO: Maybe use lean configuration
+        String propName = "com.openexchange.contact.showDepartments";
+        boolean defaultValue = false;
+
+        boolean showDepartment;
+        ConfigurationService configService = Services.optService(ConfigurationService.class);
+        if (null == configService) {
+            LOGGER.warn("No such service: {}. Assuming defaul value of '{}' for property \"{}\"", ConfigurationService.class.getName(), defaultValue, propName);
+            showDepartment = defaultValue;
+        } else {
+            showDepartment = configService.getBoolProperty(propName, defaultValue);
+        }
+
+        return showDepartment ? ContactDisplayNameFormat.DISPLAY_NAME_FORMAT_WITH_DEPARTMENT : ContactDisplayNameFormat.DISPLAY_NAME_FORMAT_WITHOUT_DEPARTMENT;
+    }
+
     /**
      * Extracts the primary e-mail address of the specified {@link Contact}.
-     * 
+     *
      * @param contact The {@link Contact} to extract the e-mail address from
      * @return The primary e-mail address
      */
