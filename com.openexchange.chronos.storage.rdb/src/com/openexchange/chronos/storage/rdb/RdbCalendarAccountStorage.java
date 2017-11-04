@@ -223,6 +223,19 @@ public class RdbCalendarAccountStorage extends RdbStorage implements CalendarAcc
     }
 
     @Override
+    public CalendarAccount loadAccount(int userId, String providerId) throws OXException {
+        Connection connection = null;
+        try {
+            connection = dbProvider.getReadConnection(context);
+            return selectAccount(connection, context.getContextId(), userId, providerId);
+        } catch (SQLException e) {
+            throw asOXException(e);
+        } finally {
+            dbProvider.releaseReadConnection(context, connection);
+        }
+    }
+
+    @Override
     public void invalidateAccount(int userId, int id) throws OXException {
         // no
     }
@@ -339,6 +352,18 @@ public class RdbCalendarAccountStorage extends RdbStorage implements CalendarAcc
             stmt.setInt(1, cid);
             stmt.setInt(2, id);
             stmt.setInt(3, user);
+            try (ResultSet resultSet = logExecuteQuery(stmt)) {
+                return resultSet.next() ? readAccount(resultSet) : null;
+            }
+        }
+    }
+
+    private static CalendarAccount selectAccount(Connection connection, int cid, int user, String provider) throws SQLException, OXException {
+        String sql = "SELECT id,user,provider,enabled,modified,internalConfig,userConfig FROM calendar_account WHERE cid=? AND user=? AND provider=?;";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, cid);
+            stmt.setInt(2, user);
+            stmt.setString(3, provider);
             try (ResultSet resultSet = logExecuteQuery(stmt)) {
                 return resultSet.next() ? readAccount(resultSet) : null;
             }

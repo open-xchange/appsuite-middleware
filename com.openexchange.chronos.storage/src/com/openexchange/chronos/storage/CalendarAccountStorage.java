@@ -112,14 +112,22 @@ public interface CalendarAccountStorage {
     List<CalendarAccount> loadAccounts(int userId) throws OXException;
 
     /**
-     * Gets a list of all stored accounts of certain users for a specific calendar provider.
+     * Loads a list of all stored accounts of certain users for a specific calendar provider.
      *
      * @param userIds The identifiers of the users to get the accounts from
      * @param providerId The identifier of the provider to get the accounts from
-     *
      * @return The accounts, or an empty list if there are none
      */
     List<CalendarAccount> loadAccounts(int[] userIds, String providerId) throws OXException;
+
+    /**
+     * Loads the (first) account stored for a specific user of a specific calendar provider.
+     *
+     * @param userId The identifier of the user to get the account for
+     * @param providerId The identifier of the provider to get the account from
+     * @return The account, or <code>null</code> if there is none
+     */
+    CalendarAccount loadAccount(int userId, String providerId) throws OXException;
 
     /**
      * Invalidates any cached references of a specific calendar account.

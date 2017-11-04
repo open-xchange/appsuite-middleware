@@ -89,6 +89,18 @@ public interface AdministrativeCalendarAccountService {
     List<CalendarAccount> getAccounts(int contextId, int[] userIds, String providerId) throws OXException;
 
     /**
+     * Gets the (first) account of a certain user in a context for a specific calendar provider.
+     * <p/>
+     * Not yet existing accounts from registered auto-provisioning providers won't be created implicitly.
+     *
+     * @param contextId The context identifier
+     * @param userIds The identifier of the users to get the account from
+     * @param providerId The identifier of the provider to get the account from
+     * @return The account, or <code>null</code> if there is none
+     */
+    CalendarAccount getAccount(int contextId, int userId, String providerId) throws OXException;
+
+    /**
      * Updates the configuration data of a specific calendar account.
      *
      * @param contextId The context identifier

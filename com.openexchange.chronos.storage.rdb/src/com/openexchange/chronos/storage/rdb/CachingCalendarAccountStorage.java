@@ -177,6 +177,12 @@ public class CachingCalendarAccountStorage implements CalendarAccountStorage {
     }
 
     @Override
+    public CalendarAccount loadAccount(int userId, String providerId) throws OXException {
+        //TODO: from cache / put result in cache?
+        return delegate.loadAccount(userId, providerId);
+    }
+
+    @Override
     public void invalidateAccount(int userId, int accountId) throws OXException {
         if (-1 == accountId) {
             cache.remove(getAccountIdsKey(userId));

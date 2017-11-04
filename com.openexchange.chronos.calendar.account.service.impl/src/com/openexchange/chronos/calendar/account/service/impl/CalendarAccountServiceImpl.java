@@ -305,6 +305,20 @@ public class CalendarAccountServiceImpl implements CalendarAccountService, Admin
     }
 
     @Override
+    public CalendarAccount getAccount(int contextId, int userId, String providerId) throws OXException {
+        return new OSGiCalendarStorageOperation<CalendarAccount>(services, contextId, -1) {
+
+            @Override
+            protected CalendarAccount call(CalendarStorage storage) throws OXException {
+                if (CalendarAccount.DEFAULT_ACCOUNT.getProviderId().equals(providerId)) {
+                    return storage.getAccountStorage().loadAccount(userId, CalendarAccount.DEFAULT_ACCOUNT.getAccountId());
+                }
+                return storage.getAccountStorage().loadAccount(userId, providerId);
+            }
+        }.executeQuery();
+    }
+
+    @Override
     public CalendarAccount updateAccount(int contextId, int userId, int accountId, Boolean enabled, JSONObject internalConfig, JSONObject userConfig, long clientTimestamp) throws OXException {
         CalendarAccount account = new OSGiCalendarStorageOperation<CalendarAccount>(services, contextId, -1) {
 
@@ -320,10 +334,10 @@ public class CalendarAccountServiceImpl implements CalendarAccountService, Admin
                 Date now = new Date();
                 CalendarAccount accountUpdate = new DefaultCalendarAccount(account.getProviderId(), account.getAccountId(), account.getUserId(),
                     null != enabled ? enabled.booleanValue() : account.isEnabled(), internalConfig, userConfig, now);
-                storage.getAccountStorage().updateAccount(accountUpdate);                
+                storage.getAccountStorage().updateAccount(accountUpdate);
                 return new DefaultCalendarAccount(account.getProviderId(), account.getAccountId(), account.getUserId(),
-                    null != enabled ? enabled.booleanValue() : account.isEnabled(), 
-                    null != internalConfig ? internalConfig : account.getInternalConfiguration(), 
+                    null != enabled ? enabled.booleanValue() : account.isEnabled(),
+                    null != internalConfig ? internalConfig : account.getInternalConfiguration(),
                     null != userConfig ? userConfig : account.getUserConfiguration(), now);
             }
         }.executeUpdate();
