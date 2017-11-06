@@ -82,6 +82,7 @@ import com.openexchange.find.facet.Option;
 import com.openexchange.find.facet.SimpleFacet;
 import com.openexchange.session.Session;
 import com.openexchange.test.FolderTestManager;
+import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
@@ -97,7 +98,7 @@ public abstract class AbstractFindTest extends AbstractAJAXSession {
 
     protected FolderTestManager folderManager2;
 
-    protected Session session;
+    protected ServerSession session;
 
     /**
      * Default constructor.
