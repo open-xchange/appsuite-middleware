@@ -108,7 +108,7 @@ public class DisplayItems {
      * @return the display name
      */
     private static String formatDisplayName(Contact contact, Locale locale) {
-        String template = getTemplateToUse(locale, contact.containsDepartment() && !Strings.isEmpty(contact.getDepartment()));
+        String template = getTemplate(locale, contact.containsDepartment() && !Strings.isEmpty(contact.getDepartment()));
         String lastName = contact.getSurName();
         String firstName = contact.getGivenName();
         String department = Strings.isEmpty(contact.getDepartment()) ? "" : contact.getDepartment();
@@ -129,9 +129,11 @@ public class DisplayItems {
     /**
      * Get the display name template to use
      * 
+     * @param locale The locale to use for the translation of the template
+     * @param hasDepartment Whether the contact has the department field set
      * @return The display name template
      */
-    private static String getTemplateToUse(Locale locale, boolean hasDepartment) {
+    private static String getTemplate(Locale locale, boolean hasDepartment) {
         String toLocalise = showDepartments() && hasDepartment ? ContactDisplayNameFormat.DISPLAY_NAME_FORMAT_WITH_DEPARTMENT : ContactDisplayNameFormat.DISPLAY_NAME_FORMAT_WITHOUT_DEPARTMENT;
         I18nServiceRegistry registry = Services.optService(I18nServiceRegistry.class);
         if (registry == null) {
