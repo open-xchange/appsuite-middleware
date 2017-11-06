@@ -117,6 +117,7 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
     private static final String CAPABILITY_STORE_SEEN = "STORE_SEEN";
     private static final String CAPABILITY_FOLDER_VALIDITY = "FOLDER_VALIDITY";
     private static final String CAPABILITY_FILENAME_SEARCH = "FILENAME_SEARCH";
+    private static final String CAPABILITY_TEXT_PREVIEW = "TEXT_PREVIEW";
 
     /**
      * The mail folder content type.
@@ -321,6 +322,9 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
         }
         if (mailConfig.getCapabilities().hasFolderValidity()) {
             addSupportedCapabilities(CAPABILITY_FOLDER_VALIDITY);
+        }
+        if (mailConfig.getCapabilities().hasTextPreview()) {
+            addSupportedCapabilities(CAPABILITY_TEXT_PREVIEW);
         }
         if (!mailFolder.isHoldsFolders() && mp.canCreateSubfolders()) {
             // Cannot contain subfolders; therefore deny subfolder creation
