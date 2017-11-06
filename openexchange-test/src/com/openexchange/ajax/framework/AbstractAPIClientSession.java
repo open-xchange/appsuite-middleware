@@ -57,7 +57,6 @@ import org.junit.Before;
 import org.junit.runner.RunWith;
 import com.google.code.tempusfugit.concurrency.ConcurrentTestRunner;
 import com.google.code.tempusfugit.concurrency.annotations.Concurrent;
-import com.openexchange.ajax.chronos.EnhancedApiClient;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.test.pool.TestContext;
@@ -243,7 +242,7 @@ public abstract class AbstractAPIClientSession {
         return newClient;
     }
 
-    private void setBasePath(ApiClient newClient) {
+    protected void setBasePath(ApiClient newClient) {
         String hostname = AJAXConfig.getProperty(AJAXConfig.Property.HOSTNAME);
         if (hostname == null) {
             hostname = "localhost";
@@ -255,29 +254,4 @@ public abstract class AbstractAPIClientSession {
         newClient.setBasePath(protocol + "://" + hostname + "/ajax");
     }
 
-    /**
-     * Generates a new {@link EnhancedApiClient} for the {@link TestUser}.
-     * Generated client needs a <b>logout in tearDown()</b>
-     *
-     * @param client The client identifier to use when performing a login
-     * @param user The {@link TestUser} to create a client for
-     * @return The new {@link EnhancedApiClient}
-     * @throws OXException In case no client could be created
-     */
-    protected final EnhancedApiClient generateEnhancedClient(TestUser user) throws OXException {
-        if (null == user) {
-            LOG.error("Can only create a client for an valid user");
-            throw new OXException();
-        }
-        EnhancedApiClient newClient;
-        try {
-            newClient = new EnhancedApiClient();
-            setBasePath(newClient);
-            newClient.setUserAgent("ox-test-client");
-        } catch (Exception e) {
-            LOG.error("Could not generate new client for user {} in context {} ", user.getUser(), user.getContext());
-            throw new OXException();
-        }
-        return newClient;
-    }
 }
