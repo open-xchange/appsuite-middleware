@@ -47,60 +47,31 @@
  *
  */
 
-package com.openexchange.session.management.json.actions;
+package com.openexchange.clientinfo;
 
-import java.util.Collection;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceExceptionCode;
-import com.openexchange.session.management.ManagedSession;
-import com.openexchange.session.management.SessionManagementService;
-import com.openexchange.session.management.json.osgi.Services;
-import com.openexchange.tools.session.ServerSession;
+import com.openexchange.i18n.LocalizableStrings;
+
 
 /**
- * {@link GetSessionsAction}
+ * {@link ClientInfoStrings}
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since v7.10.0
  */
-public class GetSessionsAction implements AJAXActionService {
+public class ClientInfoStrings implements LocalizableStrings {
 
+    // %1$s, %2$s %3$s on %4$s %5$s
+    // E.g. Appsuite UI, Chrome 61 on Windows 10
+    public final static String DEFAULT_CLIENT_INFO_MESSAGE = "%1$s, %2$s %3$s on %4$s %5$s";
 
-    public GetSessionsAction() {
-        super();
-    }
+    // %1$s on %2$s %3$s
+    // E.g. Appsuite UI on Windows 10
+    public final static String CLIENT_BROWSER_INFO_MESSAGE = "%1$s on %2$s %3$s";
 
-    @Override
-    public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
-        SessionManagementService service = Services.getService(SessionManagementService.class);
-        if (null == service) {
-            throw ServiceExceptionCode.absentService(SessionManagementService.class);
-        }
-        Collection<ManagedSession> sessions = service.getSessionsForUser(session);
-        JSONArray result = new JSONArray(sessions.size());
-        try {
-            for (ManagedSession s : sessions) {
-                JSONObject json = new JSONObject(8);
-                json.put("sessionId", s.getSessionId());
-                json.put("ipAddress", s.getIpAddress());
-                json.put("client", s.getClient());
-                json.put("userAgent", s.getUserAgent());
-                json.put("ctxId", s.getContextId());
-                json.put("userId", s.getUserId());
-                json.put("location", s.getLocation());
-                json.put("loginTime", s.getLoginTime());
-                result.add(0, json);
-            }
-        } catch (JSONException e) {
-            // should not happen
-        }
-        return new AJAXRequestResult(result, "json");
-    }
+    // %1$s
+    // E.g. Appsuite UI
+    public final static String CLIENT_INFO_MESSAGE = "%1$s";
+
+    private ClientInfoStrings() {}
 
 }

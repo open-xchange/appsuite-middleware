@@ -47,48 +47,82 @@
  *
  */
 
-package com.openexchange.session.management.json.actions;
+package com.openexchange.ajax.sessionmanagement.actions;
 
+import java.io.IOException;
 import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.exception.OXException;
-import com.openexchange.session.management.SessionManagementService;
-import com.openexchange.session.management.json.osgi.Services;
-import com.openexchange.tools.servlet.AjaxExceptionCodes;
-import com.openexchange.tools.session.ServerSession;
+import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AJAXRequest;
+import com.openexchange.ajax.framework.AbstractAJAXParser;
+import com.openexchange.ajax.framework.Header;
+import com.openexchange.ajax.framework.Params;
+import com.openexchange.ajax.sessionmanagement.AbstractSessionManagementTest;
 
 
 /**
- * {@link RemoveSessionAction}
+ * {@link AllRequest}
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since v7.10.0
  */
-public class RemoveSessionAction implements AJAXActionService {
+public class AllRequest implements AJAXRequest<AllResponse> {
 
+    private boolean failOnError;
 
-    public RemoveSessionAction() {
-        super();
+    public AllRequest(boolean failOnError) {
+        this.failOnError = failOnError;
+    }
+
+    public AllRequest() {
+        this(true);
     }
 
     @Override
-    public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
-        Object data = requestData.getData();
-        if ((data == null) || (false == JSONObject.class.isInstance(data))) {
-            throw AjaxExceptionCodes.MISSING_REQUEST_BODY.create();
+    public com.openexchange.ajax.framework.AJAXRequest.Method getMethod() {
+        return Method.GET;
+    }
+
+    @Override
+    public String getServletPath() {
+        return AbstractSessionManagementTest.SERVLET_PATH;
+    }
+
+    @Override
+    public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() throws IOException, JSONException {
+        return new Params(AJAXServlet.PARAMETER_ACTION, "all").toArray();
+    }
+
+    @Override
+    public AbstractAJAXParser<? extends AllResponse> getParser() {
+        return new Parser(failOnError);
+    }
+
+    @Override
+    public Object getBody() throws IOException, JSONException {
+        return null;
+    }
+
+    @Override
+    public Header[] getHeaders() {
+        return NO_HEADER;
+    }
+
+    public void setFailOnError(boolean failOnError) {
+        this.failOnError = failOnError;
+    }
+
+    private static final class Parser extends AbstractAJAXParser<AllResponse> {
+
+        protected Parser(boolean failOnError) {
+            super(failOnError);
         }
-        JSONObject dataObject = (JSONObject) data;
-        try {
-            String sessionIdToRemove = dataObject.getString("sessionIdToRemove");
-            SessionManagementService service = Services.getService(SessionManagementService.class);
-            service.removeSession(session, sessionIdToRemove);
-        } catch (JSONException e) {
-            throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());
+
+        @Override
+        protected AllResponse createResponse(Response response) throws JSONException {
+            return new AllResponse(response);
         }
-        return new AJAXRequestResult();
+
     }
 
 }

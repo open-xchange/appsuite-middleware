@@ -185,12 +185,21 @@ public enum MailField {
      * @since v7.8.0
      */
     ORIGINAL_FOLDER_ID(MailListField.ORIGINAL_FOLDER_ID),
-
     /**
      * The attachment name.
      * @since v7.8.2
      */
-    ATTACHMENT_NAME(null)
+    ATTACHMENT_NAME(null),
+    /**
+     * The message's text preview only if immediately available
+     * @since v7.10.0
+     */
+    TEXT_PREVIEW_IF_AVAILABLE(MailListField.TEXT_PREVIEW_IF_AVAILABLE),
+    /**
+     * The message's text preview; generate it if absent (may be slow)
+     * @since v7.10.0
+     */
+    TEXT_PREVIEW(MailListField.TEXT_PREVIEW)
 
     ;
 

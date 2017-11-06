@@ -1,0 +1,8 @@
+type: object
+properties:
+  info:
+    type: string
+    description: Localized string describing the device which is associated with this session
+  type:
+    type: string
+    description: Describing the device type which is associated with this session, possible values are "browser", "oxapp", "sync" and "other"

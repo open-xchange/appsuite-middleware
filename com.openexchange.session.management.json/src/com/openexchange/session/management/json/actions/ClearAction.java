@@ -47,86 +47,54 @@
  *
  */
 
-package com.openexchange.ajax.sessionmanagement.actions;
+package com.openexchange.session.management.json.actions;
 
-import java.io.IOException;
-import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.framework.AJAXRequest;
-import com.openexchange.ajax.framework.AbstractAJAXParser;
-import com.openexchange.ajax.framework.Header;
-import com.openexchange.ajax.framework.Params;
-import com.openexchange.ajax.sessionmanagement.AbstractSessionManagementTest;
+import java.util.Collection;
+import com.openexchange.ajax.requesthandler.AJAXActionService;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.exception.OXException;
+import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.session.management.ManagedSession;
+import com.openexchange.session.management.SessionManagementService;
+import com.openexchange.session.management.json.osgi.Services;
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link RemoveAllOtherSessionsRequest}
+ * {@link ClearAction}
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.0
  */
-public class RemoveAllOtherSessionsRequest implements AJAXRequest<RemoveAllOtherSessionsResponse> {
+public class ClearAction implements AJAXActionService {
 
-    private final String sessionIdToRKeep;
-    private boolean failOnError;
-
-    public RemoveAllOtherSessionsRequest(String sessionIdToKeep) {
-        this(sessionIdToKeep, true);
-    }
-
-    public RemoveAllOtherSessionsRequest(String sessionIdToKeep, boolean failOnError) {
+    /**
+     * Initializes a new {@link ClearAction}.
+     */
+    public ClearAction() {
         super();
-        this.sessionIdToRKeep = sessionIdToKeep;
-        this.failOnError = failOnError;
+
     }
 
     @Override
-    public com.openexchange.ajax.framework.AJAXRequest.Method getMethod() {
-        return Method.PUT;
-    }
-
-    @Override
-    public String getServletPath() {
-        return AbstractSessionManagementTest.SERVLET_PATH;
-    }
-
-    @Override
-    public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() throws IOException, JSONException {
-        return new Params(AJAXServlet.PARAMETER_ACTION, "removeAllOtherSessions").toArray();
-    }
-
-    @Override
-    public AbstractAJAXParser<? extends RemoveAllOtherSessionsResponse> getParser() {
-        return new Parser(failOnError);
-    }
-
-    @Override
-    public Object getBody() throws IOException, JSONException {
-        JSONObject body = new JSONObject();
-        body.put("sessionIdToKeep", sessionIdToRKeep);
-        return body;
-    }
-
-    @Override
-    public Header[] getHeaders() {
-        return NO_HEADER;
-    }
-
-    public void setFailOnError(boolean failOnError) {
-        this.failOnError = failOnError;
-    }
-
-    private static final class Parser extends AbstractAJAXParser<RemoveAllOtherSessionsResponse> {
-
-        protected Parser(boolean failOnError) {
-            super(failOnError);
+    public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
+        // Get the service
+        SessionManagementService service = Services.getService(SessionManagementService.class);
+        if (null == service) {
+            throw ServiceExceptionCode.absentService(SessionManagementService.class);
         }
 
-        @Override
-        protected RemoveAllOtherSessionsResponse createResponse(Response response) throws JSONException {
-            return new RemoveAllOtherSessionsResponse(response);
-        }
+        // Get the data
+        String sessionIdToKeep = session.getSessionID();
+        Collection<ManagedSession> userSessions = service.getSessionsForUser(session);
 
+        // Remove all sessions except blacklisted and transmitted to keep
+        for (ManagedSession mSession : userSessions) {
+            String mSessionId = mSession.getSessionId();
+            if (false == sessionIdToKeep.equals(mSessionId)) {
+                service.removeSession(session, mSessionId);
+            }
+        }
+        return new AJAXRequestResult();
     }
 }

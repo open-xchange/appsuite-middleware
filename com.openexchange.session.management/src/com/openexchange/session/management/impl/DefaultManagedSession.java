@@ -86,9 +86,9 @@ public class DefaultManagedSession implements ManagedSession {
         private String client;
         private String userAgent;
         private long loginTime;
-        private int ctxId;
-        private int userId;
+        private long    lastActive;
         private String location;
+        private Session session;
 
         Builder() {
             super();
@@ -101,9 +101,9 @@ public class DefaultManagedSession implements ManagedSession {
             this.client = session.getClient();
             this.userAgent = (String) session.getParameter(Session.PARAM_USER_AGENT);
             this.loginTime = parseLoginTime(session);
-            this.ctxId = session.getContextId();
-            this.userId = session.getUserId();
+            this.lastActive = parseLastActive(session);
             location = SessionManagementStrings.UNKNOWN_LOCATION;
+            this.session = session;
         }
 
         private static long parseLoginTime(Session session) {
@@ -118,6 +118,24 @@ public class DefaultManagedSession implements ManagedSession {
 
             try {
                 return Long.parseLong(oLoginTime.toString());
+            } catch (NumberFormatException e) {
+                // Cannot be parsed to a long value
+                return 0L;
+            }
+        }
+
+        private static long parseLastActive(Session session) {
+            Object oLastActive = session.getParameter(Session.PARAM_LAST_ACTIVE);
+            if (null == oLastActive) {
+                return 0L;
+            }
+
+            if (oLastActive instanceof Number) {
+                return ((Number) oLastActive).longValue();
+            }
+
+            try {
+                return Long.parseLong(oLastActive.toString());
             } catch (NumberFormatException e) {
                 // Cannot be parsed to a long value
                 return 0L;
@@ -149,13 +167,8 @@ public class DefaultManagedSession implements ManagedSession {
             return this;
         }
 
-        public Builder setCtxId(int ctxId) {
-            this.ctxId = ctxId;
-            return this;
-        }
-
-        public Builder setUserId(int userId) {
-            this.userId = userId;
+        public Builder setLastActive(long lastActive) {
+            this.lastActive = lastActive;
             return this;
         }
 
@@ -164,8 +177,13 @@ public class DefaultManagedSession implements ManagedSession {
             return this;
         }
 
+        public Builder setSession(Session session) {
+            this.session = session;
+            return this;
+        }
+
         public DefaultManagedSession build() {
-            return new DefaultManagedSession(sessionId, ipAddress, client, userAgent, loginTime, ctxId, userId, location);
+            return new DefaultManagedSession(sessionId, ipAddress, client, userAgent, loginTime, lastActive, location, session);
         }
     }
 
@@ -176,20 +194,20 @@ public class DefaultManagedSession implements ManagedSession {
     private final String client;
     private final String userAgent;
     private final long loginTime;
-    private final int ctxId;
-    private final int userId;
+    private final long    lastActive;
     private final String location;
+    private final Session session;
 
-    DefaultManagedSession(String sessionId, String ipAddress, String client, String userAgent, long loginTime, int ctxId, int userId, String location) {
+    DefaultManagedSession(String sessionId, String ipAddress, String client, String userAgent, long loginTime, long lastActive, String location, Session session) {
         super();
         this.sessionId = sessionId;
         this.ipAddress = ipAddress;
         this.client = client;
         this.userAgent = userAgent;
         this.loginTime = loginTime;
-        this.ctxId = ctxId;
-        this.userId = userId;
+        this.lastActive = lastActive;
         this.location = location;
+        this.session = session;
     }
 
     @Override
@@ -218,18 +236,18 @@ public class DefaultManagedSession implements ManagedSession {
     }
 
     @Override
-    public int getContextId() {
-        return ctxId;
-    }
-
-    @Override
-    public int getUserId() {
-        return userId;
+    public long getLastActive() {
+        return lastActive;
     }
 
     @Override
     public String getLocation() {
         return location;
+    }
+
+    @Override
+    public Session getSession() {
+        return session;
     }
 
 }

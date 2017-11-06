@@ -58,10 +58,10 @@ import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.sessionmanagement.AbstractSessionManagementTest;
-import com.openexchange.ajax.sessionmanagement.actions.GetSessionsRequest;
-import com.openexchange.ajax.sessionmanagement.actions.GetSessionsResponse;
-import com.openexchange.ajax.sessionmanagement.actions.RemoveAllOtherSessionsRequest;
-import com.openexchange.ajax.sessionmanagement.actions.RemoveAllOtherSessionsResponse;
+import com.openexchange.ajax.sessionmanagement.actions.AllRequest;
+import com.openexchange.ajax.sessionmanagement.actions.AllResponse;
+import com.openexchange.ajax.sessionmanagement.actions.ClearRequest;
+import com.openexchange.ajax.sessionmanagement.actions.ClearResponse;
 import com.openexchange.exception.OXException;
 import com.openexchange.session.management.ManagedSession;
 import static org.hamcrest.Matchers.is;
@@ -97,13 +97,13 @@ public class RemoveAllOtherSessionsTest extends AbstractSessionManagementTest {
     @Test
     public void testRemoveAllOtherSessions() throws Exception {
         String sessionId = testClient2.getSession().getId();
-        RemoveAllOtherSessionsRequest request = new RemoveAllOtherSessionsRequest(sessionId);
-        RemoveAllOtherSessionsResponse response = testClient2.execute(request);
+        ClearRequest request = new ClearRequest();
+        ClearResponse response = testClient2.execute(request);
 
         Assert.assertFalse(response.hasError());
 
-        GetSessionsRequest getRequest = new GetSessionsRequest();
-        GetSessionsResponse getResponse = testClient2.execute(getRequest);
+        AllRequest getRequest = new AllRequest();
+        AllResponse getResponse = testClient2.execute(getRequest);
         Assert.assertFalse(getResponse.hasError());
         Collection<ManagedSession> sessions = getResponse.getSessions();
         Assert.assertThat("Not all clients has been removed", 1, is(sessions.size()));
@@ -121,13 +121,13 @@ public class RemoveAllOtherSessionsTest extends AbstractSessionManagementTest {
             blackListed = new AJAXClient(testUser2, BLACKLISTED_CLIENT);
 
             String sessionId = testClient2.getSession().getId();
-            RemoveAllOtherSessionsRequest request = new RemoveAllOtherSessionsRequest(sessionId);
-            RemoveAllOtherSessionsResponse response = testClient2.execute(request);
+            ClearRequest request = new ClearRequest();
+            ClearResponse response = testClient2.execute(request);
 
             Assert.assertFalse(response.hasError());
 
-            GetSessionsRequest getRequest = new GetSessionsRequest();
-            GetSessionsResponse getResponse = testClient2.execute(getRequest);
+            AllRequest getRequest = new AllRequest();
+            AllResponse getResponse = testClient2.execute(getRequest);
             Assert.assertFalse(getResponse.hasError());
             Collection<ManagedSession> sessions = getResponse.getSessions();
             

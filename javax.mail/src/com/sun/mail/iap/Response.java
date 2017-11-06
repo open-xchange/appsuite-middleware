@@ -478,11 +478,35 @@ public class Response {
     }
 
     /**
+     * Extract an ASTRING, starting at the current position
+     * and return as a String. An ASTRING can be a QuotedString, a
+     * Literal or an Atom (plus ']').
+     *
+     * Any errors in parsing returns null
+     *
+     * ASTRING := QuotedString | Literal | 1*ASTRING_CHAR
+     *
+     * @return a String
+     */
+    public String readUtf8AtomString() {
+    return (String)parseString(true, true, true);
+    }
+
+    /**
      * Generic parsing routine that can parse out a Quoted-String,
      * Literal or Atom and return the parsed token as a String
      * or a ByteArray. Errors or NIL data will return null.
      */
     private Object parseString(boolean parseAtoms, boolean returnString) {
+        return parseString(parseAtoms, returnString, false);
+    }
+
+    /**
+     * Generic parsing routine that can parse out a Quoted-String,
+     * Literal or Atom and return the parsed token as a String
+     * or a ByteArray. Errors or NIL data will return null.
+     */
+    private Object parseString(boolean parseAtoms, boolean returnString, boolean forceUtf8) {
 	byte b;
 
 	// Skip leading spaces
@@ -514,7 +538,7 @@ public class Response {
 		index++; // skip past the terminating quote
 
 	    if (returnString) 
-		return toString(buffer, start, copyto);
+		return toString(buffer, start, copyto, forceUtf8);
 	    else
 		return new ByteArray(buffer, start, copyto-start);
 	} else if (b == '{') { // Literal
@@ -535,7 +559,7 @@ public class Response {
 	    index = start + count; // position index to beyond the literal
 
 	    if (returnString) // return as String
-		return toString(buffer, start, start + count);
+		return toString(buffer, start, start + count, forceUtf8);
 	    else
 	    	return new ByteArray(buffer, start, count);
 	} else if (parseAtoms) { // parse as ASTRING-CHARs
@@ -554,6 +578,11 @@ public class Response {
     }
 
     private String toString(byte[] buffer, int start, int end) {
+        return toString(buffer, start, end, false);
+    }
+
+    private String toString(byte[] buffer, int start, int end, boolean forceUtf8) {
+    boolean utf8 = forceUtf8 || this.utf8;
 	return utf8 ?
 		new String(buffer, start, end - start, StandardCharsets.UTF_8) :
 		ASCIIUtility.toString(buffer, start, end);

@@ -49,54 +49,80 @@
 
 package com.openexchange.ajax.sessionmanagement.actions;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import org.json.JSONArray;
+import java.io.IOException;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.framework.AbstractAJAXResponse;
-import com.openexchange.exception.OXException;
-import com.openexchange.session.management.ManagedSession;
-import com.openexchange.session.management.impl.DefaultManagedSession;
-import com.openexchange.tools.servlet.AjaxExceptionCodes;
-import edu.emory.mathcs.backport.java.util.Collections;
+import com.openexchange.ajax.framework.AJAXRequest;
+import com.openexchange.ajax.framework.AbstractAJAXParser;
+import com.openexchange.ajax.framework.Header;
+import com.openexchange.ajax.framework.Params;
+import com.openexchange.ajax.sessionmanagement.AbstractSessionManagementTest;
 
 /**
- * {@link GetSessionsResponse}
+ * {@link ClearRequest}
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.0
  */
-public class GetSessionsResponse extends AbstractAJAXResponse {
+public class ClearRequest implements AJAXRequest<ClearResponse> {
 
-    protected GetSessionsResponse(Response response) {
-        super(response);
+    private boolean failOnError;
+
+    public ClearRequest() {
+        this(true);
     }
 
-    public Collection<ManagedSession> getSessions() throws OXException {
-        try {
-            JSONArray array = (JSONArray) getData();
-            ArrayList<ManagedSession> sessions = new ArrayList<>(array.length());
-            for (int i = 0; i < array.length(); i++) {
-                sessions.add(parseSession(array.getJSONObject(i)));
-            }
-            return Collections.unmodifiableList(sessions);
-        } catch (JSONException e) {
-            throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+    public ClearRequest(boolean failOnError) {
+        super();
+        this.failOnError = failOnError;
+    }
+
+    @Override
+    public com.openexchange.ajax.framework.AJAXRequest.Method getMethod() {
+        return Method.PUT;
+    }
+
+    @Override
+    public String getServletPath() {
+        return AbstractSessionManagementTest.SERVLET_PATH;
+    }
+
+    @Override
+    public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() throws IOException, JSONException {
+        return new Params(AJAXServlet.PARAMETER_ACTION, "clear").toArray();
+    }
+
+    @Override
+    public AbstractAJAXParser<? extends ClearResponse> getParser() {
+        return new Parser(failOnError);
+    }
+
+    @Override
+    public Object getBody() throws IOException, JSONException {
+        return new JSONObject();
+    }
+
+    @Override
+    public Header[] getHeaders() {
+        return NO_HEADER;
+    }
+
+    public void setFailOnError(boolean failOnError) {
+        this.failOnError = failOnError;
+    }
+
+    private static final class Parser extends AbstractAJAXParser<ClearResponse> {
+
+        protected Parser(boolean failOnError) {
+            super(failOnError);
         }
-    }
 
-    private ManagedSession parseSession(JSONObject obj) throws JSONException {
-        String sessionId = obj.getString("sessionId");
-        String ipAddress = obj.getString("ipAddress");
-        String client = obj.getString("client");
-        String userAgent = obj.getString("userAgent");
-        long loginTime = obj.getLong("loginTime");
-        int ctxId = obj.getInt("ctxId");
-        int userId = obj.getInt("userId");
-        DefaultManagedSession session = DefaultManagedSession.builder().setClient(client).setCtxId(ctxId).setIpAddress(ipAddress).setLocation("").setLoginTime(loginTime).setSessionId(sessionId).setUserAgent(userAgent).setUserId(userId).build();
-        return session;
-    }
+        @Override
+        protected ClearResponse createResponse(Response response) throws JSONException {
+            return new ClearResponse(response);
+        }
 
+    }
 }
