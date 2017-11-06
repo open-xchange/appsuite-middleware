@@ -470,14 +470,14 @@ public interface Folder extends Serializable, Cloneable {
     Map<String, Object> getMeta();
 
     /**
-     * Gets a list of supported capabilities.
+     * Gets an optional set of supported capabilities.
      *
-     * @return The supported capabilities
+     * @return The supported capabilities or <code>null</code>
      */
     Set<String> getSupportedCapabilities();
 
     /**
-     * Sets the list of supported capabilities.
+     * Sets the set of supported capabilities.
      *
      * @param capabilitites The capabilities to set
      */

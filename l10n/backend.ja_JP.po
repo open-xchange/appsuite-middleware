@@ -14,7 +14,7 @@ msgstr ""
 "Project-Id-Version: errors.ja_JP\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2017-05-16 09:19+0200\n"
+"PO-Revision-Date: 2017-10-19 14:34+0200\n"
 "Last-Translator: \n"
 "Language-Team: ja@li.org\n"
 "Language: ja_JP\n"
@@ -7989,8 +7989,7 @@ msgid ""
 "Request rejected because its size (%1$s) exceeds the maximum configured size "
 "of %2$s."
 msgstr ""
-"構成された最大サイズ %2$s をサイズ (%1$s) が超えたため、リクエストは拒否され"
-"ました。"
+"送信しようとしたメールサイズ：%1$s。%2$s を超えるメールは送信できません。"
 
 #. Missing parameter %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/upload/impl/UploadExceptionMessage.java:85

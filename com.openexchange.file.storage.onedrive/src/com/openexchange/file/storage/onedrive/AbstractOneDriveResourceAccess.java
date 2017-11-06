@@ -147,15 +147,16 @@ public abstract class AbstractOneDriveResourceAccess {
          *
          * @param httpResponse The HTTP response
          * @throws OXException If an Open-Xchange error is yielded from status
+         * @throws ClientProtocolException To singal a client error
          */
-        void handleStatusCode(HttpResponse httpResponse) throws OXException;
+        void handleStatusCode(HttpResponse httpResponse) throws OXException, ClientProtocolException;
     }
 
     /** The default status code policy; accepting greater than/equal to <code>200</code> and lower than <code>300</code> */
     public static final StatusCodePolicy STATUS_CODE_POLICY_DEFAULT = new StatusCodePolicy() {
 
         @Override
-        public void handleStatusCode(HttpResponse httpResponse) throws OXException {
+        public void handleStatusCode(HttpResponse httpResponse) throws OXException, ClientProtocolException {
             StatusLine statusLine = httpResponse.getStatusLine();
             int statusCode = statusLine.getStatusCode();
             if (statusCode < 200 || statusCode >= 300) {
@@ -164,8 +165,15 @@ public abstract class AbstractOneDriveResourceAccess {
                 }
                 String reason;
                 try {
-                    JSONObject jsonObject = new JSONObject(new InputStreamReader(httpResponse.getEntity().getContent(), Charsets.UTF_8));
-                    reason = jsonObject.getJSONObject("error").getString("message");
+                    JSONObject jResponse = new JSONObject(new InputStreamReader(httpResponse.getEntity().getContent(), Charsets.UTF_8));
+                    JSONObject jError = jResponse.getJSONObject("error");
+                    String code = jError.getString("code");
+                    if ("resource_already_exists".equals(code)) {
+                        throw new DuplicateResourceException(jError.getString("message"));
+                    }
+                    reason = jError.getString("message");
+                } catch (DuplicateResourceException e) {
+                    throw e;
                 } catch (Exception e) {
                     reason = statusLine.getReasonPhrase();
                 }
@@ -178,14 +186,21 @@ public abstract class AbstractOneDriveResourceAccess {
     public static final StatusCodePolicy STATUS_CODE_POLICY_IGNORE_NOT_FOUND = new StatusCodePolicy() {
 
         @Override
-        public void handleStatusCode(HttpResponse httpResponse) throws OXException {
+        public void handleStatusCode(HttpResponse httpResponse) throws OXException, ClientProtocolException {
             StatusLine statusLine = httpResponse.getStatusLine();
             int statusCode = statusLine.getStatusCode();
             if ((statusCode < 200 || statusCode >= 300) && statusCode != 404) {
                 String reason;
                 try {
-                    JSONObject jsonObject = new JSONObject(new InputStreamReader(httpResponse.getEntity().getContent(), Charsets.UTF_8));
-                    reason = jsonObject.getJSONObject("error").getString("message");
+                    JSONObject jResponse = new JSONObject(new InputStreamReader(httpResponse.getEntity().getContent(), Charsets.UTF_8));
+                    JSONObject jError = jResponse.getJSONObject("error");
+                    String code = jError.getString("code");
+                    if ("resource_already_exists".equals(code)) {
+                        throw new DuplicateResourceException(jError.getString("message"));
+                    }
+                    reason = jError.getString("message");
+                } catch (DuplicateResourceException e) {
+                    throw e;
                 } catch (Exception e) {
                     reason = statusLine.getReasonPhrase();
                 }

@@ -281,9 +281,14 @@ public final class GoogleDriveFolderAccess extends AbstractGoogleDriveAccess imp
 
             Drive.Children.List list = drive.children().list(parentId);
             list.setQ("title='" + toCreate.getName() + "' and " + GoogleDriveConstants.QUERY_STRING_DIRECTORIES_ONLY_EXCLUDING_TRASH);
-            if (!list.execute().getItems().isEmpty()) {
-                // Already such a folder
-                throw FileStorageExceptionCodes.DUPLICATE_FOLDER.create(toCreate.getName(), drive.files().get(parentId).execute().getTitle());
+            List<ChildReference> existingFolders = list.execute().getItems();
+            if (!existingFolders.isEmpty()) {
+                // Check if there is already such a folder
+                for (ChildReference childReference : existingFolders) {
+                    if (drive.files().get(childReference.getId()).execute().getTitle().equals(toCreate.getName())) {
+                        throw FileStorageExceptionCodes.DUPLICATE_FOLDER.create(toCreate.getName(), drive.files().get(parentId).execute().getTitle());
+                    }
+                }
             }
 
             File driveDir = new File();
@@ -343,9 +348,14 @@ public final class GoogleDriveFolderAccess extends AbstractGoogleDriveAccess imp
 
             Drive.Children.List list = drive.children().list(nfid);
             list.setQ("title='" + title + "' and " + GoogleDriveConstants.QUERY_STRING_DIRECTORIES_ONLY_EXCLUDING_TRASH);
-            if (!list.execute().getItems().isEmpty()) {
-                // Already such a folder
-                throw FileStorageExceptionCodes.DUPLICATE_FOLDER.create(title, drive.files().get(nfid).execute().getTitle());
+            List<ChildReference> existingFolders = list.execute().getItems();
+            if (!existingFolders.isEmpty()) {
+                // Check if there is already such a folder
+                for (ChildReference childReference : existingFolders) {
+                    if (drive.files().get(childReference.getId()).execute().getTitle().equals(title)) {
+                        throw FileStorageExceptionCodes.DUPLICATE_FOLDER.create(title, drive.files().get(nfid).execute().getTitle());
+                    }
+                }
             }
 
             File driveDir = new File();
@@ -404,8 +414,14 @@ public final class GoogleDriveFolderAccess extends AbstractGoogleDriveAccess imp
             for (ParentReference parentReference : parentReferences) {
                 Drive.Children.List list = drive.children().list(parentReference.getId());
                 list.setQ("title='" + newName + "' and " + GoogleDriveConstants.QUERY_STRING_DIRECTORIES_ONLY_EXCLUDING_TRASH);
-                if (false == list.execute().getItems().isEmpty()) {
-                    throw FileStorageExceptionCodes.DUPLICATE_FOLDER.create(newName, drive.files().get(parentReference.getId()).execute().getTitle());
+                List<ChildReference> existingFolders = list.execute().getItems();
+                if (!existingFolders.isEmpty()) {
+                    // Check if there is already such a folder
+                    for (ChildReference childReference : existingFolders) {
+                        if (drive.files().get(childReference.getId()).execute().getTitle().equals(newName)) {
+                            throw FileStorageExceptionCodes.DUPLICATE_FOLDER.create(newName, drive.files().get(parentReference.getId()).execute().getTitle());
+                        }
+                    }
                 }
             }
             /*

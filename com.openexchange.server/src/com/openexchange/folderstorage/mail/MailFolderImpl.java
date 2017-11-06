@@ -111,6 +111,7 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
 
     private static final String PROTOCOL_UNIFIED_INBOX = UnifiedInboxManagement.PROTOCOL_UNIFIED_INBOX;
     private static final String CAPABILITY_COUNT_TOTAL = Strings.asciiLowerCase(FileStorageCapability.COUNT_TOTAL.name());
+    private static final String CAPABILITY_CASE_INSENSITIVE = Strings.asciiLowerCase(FileStorageCapability.CASE_INSENSITIVE.name());
     private static final String CAPABILITY_STORE_SEEN = "STORE_SEEN";
     private static final String CAPABILITY_FOLDER_VALIDITY = "FOLDER_VALIDITY";
     private static final String CAPABILITY_FILENAME_SEARCH = "FILENAME_SEARCH";
@@ -318,6 +319,7 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
                 mp.setReadObjectPermission(OCLPermission.NO_PERMISSIONS);
             }
         }
+        addSupportedCapabilities(CAPABILITY_CASE_INSENSITIVE);
 
         final int canStoreSeenFlag = mp.canStoreSeenFlag();
         if (canStoreSeenFlag > 0 || ((canStoreSeenFlag < 0) && (mp.getReadPermission() > MailPermission.NO_PERMISSIONS))) {

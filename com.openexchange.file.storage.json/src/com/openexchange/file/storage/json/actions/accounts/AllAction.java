@@ -200,6 +200,11 @@ public class AllAction extends AbstractFileStorageAccountAction {
             caps.add(FileStorageCapability.COUNT_TOTAL.name());
         }
 
+        supported = capabilityAware.supports(FileStorageCapability.CASE_INSENSITIVE);
+        if (null != supported && supported.booleanValue()) {
+            caps.add(FileStorageCapability.CASE_INSENSITIVE.name());
+        }
+
         return caps;
     }
 

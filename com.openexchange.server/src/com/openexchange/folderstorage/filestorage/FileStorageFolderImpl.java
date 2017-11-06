@@ -100,6 +100,7 @@ public final class FileStorageFolderImpl extends AbstractFolder {
     private static final String CAPABILITY_FILE_VERSIONS = Strings.asciiLowerCase(FileStorageCapability.FILE_VERSIONS.name());
     private static final String CAPABILITY_EXTENDED_METADATA = Strings.asciiLowerCase(FileStorageCapability.EXTENDED_METADATA.name());
     private static final String CAPABILITY_COUNT_TOTAL = Strings.asciiLowerCase(FileStorageCapability.COUNT_TOTAL.name());
+    private static final String CAPABILITY_CASE_INSENSITIVE = Strings.asciiLowerCase(FileStorageCapability.CASE_INSENSITIVE.name());
 
     /**
      * <code>"9"</code>
@@ -308,6 +309,14 @@ public final class FileStorageFolderImpl extends AbstractFolder {
                 supportedCapabilities = new LinkedHashSet<>(supportedCapabilities);
             }
             supportedCapabilities.add(CAPABILITY_COUNT_TOTAL);
+        }
+        if (optCheckCapability(fsFolder.getId(), FileStorageCapability.CASE_INSENSITIVE, folderAccess)) {
+            if (null == supportedCapabilities) {
+                supportedCapabilities = new LinkedHashSet<>(4);
+            } else {
+                supportedCapabilities = new LinkedHashSet<>(supportedCapabilities);
+            }
+            supportedCapabilities.add(CAPABILITY_CASE_INSENSITIVE);
         }
         this.supportedCapabilities = supportedCapabilities;
         lastModified = fsFolder.getLastModifiedDate();
