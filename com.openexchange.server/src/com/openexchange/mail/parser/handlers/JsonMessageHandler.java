@@ -159,6 +159,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
     private static final String ORIGINAL_FOLDER_ID = MailJSONField.ORIGINAL_FOLDER_ID.getKey();
     private static final String SECURITY = MailJSONField.SECURITY.getKey();
     private static final String SECURITY_INFO = MailJSONField.SECURITY_INFO.getKey();
+    private static final String TEXT_PREVIEW = MailJSONField.TEXT_PREVIEW.getKey();
 
     private static final String TRUNCATED = MailJSONField.TRUNCATED.getKey();
     private static final String SANITIZED = "sanitized";
@@ -420,6 +421,9 @@ public final class JsonMessageHandler implements MailMessageHandler {
                 jsonObject.put(ACCOUNT_NAME, mail.getAccountName());
                 jsonObject.put(ACCOUNT_ID, mail.getAccountId());
                 jsonObject.put(MALICIOUS, usm.isSuppressLinks());
+                if (mail.containsTextPreview()) {
+                    jsonObject.put(TEXT_PREVIEW, mail.getTextPreview());
+                }
                 // Guard info
                 if (mail.containsSecurityInfo()) {
                     jsonObject.put(SECURITY_INFO, securityInfoToJSON(mail.getSecurityInfo()));

@@ -62,6 +62,8 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.dataobjects.MailPart;
+import com.openexchange.mail.dataobjects.SecurityInfo;
+import com.openexchange.mail.dataobjects.SecurityResult;
 import com.openexchange.mail.dataobjects.SecuritySettings;
 import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
@@ -1205,6 +1207,76 @@ public class DelegatingComposedMailMessage extends ComposedMailMessage {
     @Override
     public void setSecuritySettings(SecuritySettings securitySettings) {
         delegate.setSecuritySettings(securitySettings);
+    }
+
+    @Override
+    public boolean isSubjectDecoded() {
+        return delegate.isSubjectDecoded();
+    }
+
+    @Override
+    public String getTextPreview() {
+        return delegate.getTextPreview();
+    }
+
+    @Override
+    public boolean containsTextPreview() {
+        return delegate.containsTextPreview();
+    }
+
+    @Override
+    public void removeTextPreview() {
+        delegate.removeTextPreview();
+    }
+
+    @Override
+    public void setTextPreview(String textPreview) {
+        delegate.setTextPreview(textPreview);
+    }
+
+    @Override
+    public void setSecurityInfo(SecurityInfo securityInfo) {
+        delegate.setSecurityInfo(securityInfo);
+    }
+
+    @Override
+    public SecurityInfo getSecurityInfo() {
+        return delegate.getSecurityInfo();
+    }
+
+    @Override
+    public boolean containsSecurityInfo() {
+        return delegate.containsSecurityInfo();
+    }
+
+    @Override
+    public void removeSecurityInfo() {
+        delegate.removeSecurityInfo();
+    }
+
+    @Override
+    public void setSecurityResult(SecurityResult result) {
+        delegate.setSecurityResult(result);
+    }
+
+    @Override
+    public SecurityResult getSecurityResult() {
+        return delegate.getSecurityResult();
+    }
+
+    @Override
+    public boolean hasSecurityResult() {
+        return delegate.hasSecurityResult();
+    }
+
+    @Override
+    public boolean containsSecurityResult() {
+        return delegate.containsSecurityResult();
+    }
+
+    @Override
+    public void removeSecurityResult() {
+        delegate.removeSecurityResult();
     }
 
 }
