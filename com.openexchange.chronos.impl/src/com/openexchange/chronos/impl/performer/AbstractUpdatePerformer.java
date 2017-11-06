@@ -378,10 +378,7 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
     }
 
     private void removeAlarmTrigger(Event createdException, Event updatedMasterEvent) throws OXException {
-
         storage.getAlarmTriggerStorage().insertTriggers(createdException, null);
-
-
         Set<RecurrenceId> exceptions = combine(updatedMasterEvent.getDeleteExceptionDates(), updatedMasterEvent.getChangeExceptionDates());
         storage.getAlarmTriggerStorage().deleteTriggers(updatedMasterEvent.getId());
         storage.getAlarmTriggerStorage().insertTriggers(updatedMasterEvent, exceptions);
