@@ -18,11 +18,11 @@ properties:
   loginTime:
     type: integer
     format: int64
-    description: Time of login
+    description: Time of login in UTC
   lastActive:
     type: integer
     format: int64
-    description: Time of last activity
+    description: Time of last activity in UTC
   location:
     type: string
     description: Guessed location based on IP address
