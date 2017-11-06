@@ -58,7 +58,7 @@ import java.util.TimeZone;
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.0
  */
-public class AlarmTrigger {
+public class AlarmTrigger implements Comparable<AlarmTrigger> {
 
     private String action;
     private Integer alarm;
@@ -454,6 +454,15 @@ public class AlarmTrigger {
     public void removeRelatedTime(){
         this.relatedTime = null;
         this.isRelatedTimeSet = false;
+    }
+
+    @Override
+    public int compareTo(AlarmTrigger o) {
+        if (this.getTime() == o.getTime()) {
+            return 0;
+        }
+
+        return this.getTime() > o.getTime() ? 1 : 0;
     }
 
 }

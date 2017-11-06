@@ -460,6 +460,9 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
             }
             result.addAll(alarmTriggers);
         }
+        if (result.size() > 1) {
+            Collections.sort(result);
+        }
         return result;
     }
 
