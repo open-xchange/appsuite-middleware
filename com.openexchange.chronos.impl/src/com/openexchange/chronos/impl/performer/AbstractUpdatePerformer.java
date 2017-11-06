@@ -378,7 +378,9 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
     }
 
     private void removeAlarmTrigger(Event createdException, Event updatedMasterEvent) throws OXException {
+
         storage.getAlarmTriggerStorage().insertTriggers(createdException, null);
+
         Set<RecurrenceId> exceptions = combine(updatedMasterEvent.getDeleteExceptionDates(), updatedMasterEvent.getChangeExceptionDates());
         storage.getAlarmTriggerStorage().deleteTriggers(updatedMasterEvent.getId());
         storage.getAlarmTriggerStorage().insertTriggers(updatedMasterEvent, exceptions);
@@ -393,10 +395,11 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
      * @param userId The identifier of the user the alarms should be inserted for
      * @param alarms The alarms to insert
      * @param forceNewUids <code>true</code> if new UIDs should be assigned even if already set in the supplied alarms, <code>false</code>, otherwise
+     * @return The inserted alarms
      */
-    protected void insertAlarms(Event event, int userId, List<Alarm> alarms, boolean forceNewUids) throws OXException {
+    protected List<Alarm> insertAlarms(Event event, int userId, List<Alarm> alarms, boolean forceNewUids) throws OXException {
         if (null == alarms || 0 == alarms.size()) {
-            return;
+            return Collections.emptyList();
         }
         List<Alarm> newAlarms = new ArrayList<Alarm>(alarms.size());
         for (Alarm alarm : alarms) {
@@ -423,6 +426,7 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
             };
         }
         storage.getAlarmStorage().insertAlarms(event, userId, newAlarms);
+        return newAlarms;
     }
 
     /**
@@ -609,16 +613,6 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
             changeException = storage.getUtilities().loadAdditionalEventData(-1, changeException, null);
         }
         return changeException;
-    }
-
-    /**
-     * Gets the identifier of a specific user's default personal calendar folder.
-     *
-     * @param userID The identifier of the user to retrieve the default calendar identifier for
-     * @return The default calendar folder identifier
-     */
-    protected String getDefaultCalendarID(int userID) throws OXException {
-        return session.getConfig().getDefaultFolderID(userID);
     }
 
     /**

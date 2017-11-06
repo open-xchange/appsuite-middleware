@@ -50,10 +50,9 @@
 package com.openexchange.chronos.impl.session;
 
 import static com.openexchange.java.Autoboxing.I;
-import java.sql.Connection;
+import com.openexchange.chronos.Alarm;
+import com.openexchange.chronos.Available;
 import com.openexchange.chronos.ParticipationStatus;
-import com.openexchange.chronos.compat.Appointment2Event;
-import com.openexchange.chronos.impl.AbstractStorageOperation;
 import com.openexchange.chronos.impl.osgi.Services;
 import com.openexchange.chronos.service.CalendarConfig;
 import com.openexchange.chronos.service.CalendarSession;
@@ -61,11 +60,7 @@ import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.preferences.ServerUserSetting;
-import com.openexchange.tools.oxfolder.OXFolderAccess;
-import com.openexchange.tools.session.ServerSessionAdapter;
+import com.openexchange.server.ServiceLookup;
 
 /**
  * {@link CalendarConfigImpl}
@@ -77,42 +72,65 @@ public class CalendarConfigImpl implements CalendarConfig {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CalendarConfigImpl.class);
 
-    private final CalendarSession session;
+    private final CalendarSession optSession;
+    private final ServiceLookup services;
+    private final int contextId;
 
     /**
      * Initializes a new {@link CalendarConfigImpl}.
      *
      * @param session The underlying calendar session
+     * @param services A service lookup reference
      */
-    public CalendarConfigImpl(CalendarSession session) {
+    public CalendarConfigImpl(CalendarSession session, ServiceLookup services) {
+        this(session, session.getContextId(), services);
+    }
+
+    /**
+     * Initializes a new {@link CalendarConfigImpl}.
+     *
+     * @param contextId The context identifier
+     * @param services A service lookup reference
+     */
+    public CalendarConfigImpl(int contextId, ServiceLookup services) {
+        this(null, contextId, services);
+    }
+
+    private CalendarConfigImpl(CalendarSession session, int contextId, ServiceLookup services) {
         super();
-        this.session = session;
+        this.contextId = contextId;
+        this.services = services;
+        this.optSession = session;
+    }
+
+    @Override
+    public String getDefaultFolderId(int userId) throws OXException {
+        return getUserSettings(userId).getDefaultFolderId();
+    }
+
+    @Override
+    public ParticipationStatus getInitialPartStat(int userId, boolean inPublicFolder) {
+        return getUserSettings(userId).getInitialPartStat(inPublicFolder);
+    }
+
+    @Override
+    public Alarm getDefaultAlarmDate(int userId) throws OXException {
+        return getUserSettings(userId).getDefaultAlarmDate();
+    }
+
+    @Override
+    public Alarm getDefaultAlarmDateTime(int userId) throws OXException {
+        return getUserSettings(userId).getDefaultAlarmDateTime();
+    }
+
+    @Override
+    public Available[] getAvailability(int userId) throws OXException {
+        return getUserSettings(userId).getAvailability();
     }
 
     @Override
     public boolean isResolveGroupAttendees() {
         return getConfigValue("com.openexchange.chronos.resolveGroupAttendees", Boolean.class, Boolean.FALSE).booleanValue();
-    }
-
-    @Override
-    public String getDefaultFolderID(int userID) throws OXException {
-        return String.valueOf(getFolderAccess().getDefaultFolderID(userID, FolderObject.CALENDAR));
-    }
-
-    @Override
-    public ParticipationStatus getInitialPartStat(int userID, boolean inPublicFolder) {
-        Integer defaultStatus = null;
-        try {
-            if (inPublicFolder) {
-                defaultStatus = getUserSettings().getDefaultStatusPublic(session.getContextId(), userID);
-            } else {
-                defaultStatus = getUserSettings().getDefaultStatusPrivate(session.getContextId(), userID);
-            }
-        } catch (OXException e) {
-            LOG.warn("Error getting default participation status for user {}, falling back to \"{}\"",
-                I(userID), ParticipationStatus.NEEDS_ACTION);
-        }
-        return null != defaultStatus ? Appointment2Event.getParticipationStatus(defaultStatus.intValue()) : ParticipationStatus.NEEDS_ACTION;
     }
 
     @Override
@@ -155,24 +173,17 @@ public class CalendarConfigImpl implements CalendarConfig {
         return getConfigValue("com.openexchange.chronos.restrictAllowedAttendeeChanges", Boolean.class, Boolean.FALSE).booleanValue();
     }
 
-    private OXFolderAccess getFolderAccess() throws OXException {
-        Connection connection = optConnection();
-        Context context = ServerSessionAdapter.valueOf(session.getSession()).getContext();
-        return null != connection ? new OXFolderAccess(connection, context) : new OXFolderAccess(context);
-    }
-
-    private ServerUserSetting getUserSettings() {
-        Connection connection = optConnection();
-        return null != connection ? ServerUserSetting.getInstance(connection) : ServerUserSetting.getInstance();
-    }
-
-    private Connection optConnection() {
-        return session.get(AbstractStorageOperation.PARAM_CONNECTION, Connection.class, null);
+    private CalendarUserSettings getUserSettings(int userId) {
+        if (null != optSession) {
+            return new CalendarUserSettings(optSession, userId, services);
+        }
+        return new CalendarUserSettings(contextId, userId, services);
     }
 
     private <T> T getConfigValue(String property, Class<T> coerceTo, T defaultValue) {
+        int userId = null == optSession ? -1 : optSession.getUserId();
         try {
-            ConfigView configView = Services.getService(ConfigViewFactory.class, true).getView(session.getUserId(), session.getContextId());
+            ConfigView configView = Services.getService(ConfigViewFactory.class, true).getView(userId, contextId);
             return configView.opt(property, coerceTo, defaultValue);
         } catch (OXException e) {
             LOG.warn("Error getting \"{}\", falling back to \"{}\"", property, defaultValue);

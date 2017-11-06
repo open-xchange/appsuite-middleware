@@ -96,7 +96,9 @@ public abstract class AbstractQueryPerformer {
 
     protected final CalendarSession session;
     protected final CalendarStorage storage;
+
     private SelfProtection selfProtection;
+
     /**
      * Initializes a new {@link AbstractQueryPerformer}.
      *

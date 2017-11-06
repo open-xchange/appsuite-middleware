@@ -185,7 +185,7 @@ public class MovePerformer extends AbstractUpdatePerformer {
         Map<Integer, List<Alarm>> originalAlarms = storage.getAlarmStorage().loadAlarms(originalEvent);
         CalendarUser targetCalendarUser = getCalendarUser(session, targetFolder);
         for (Attendee originalAttendee : filter(originalEvent.getAttendees(), Boolean.TRUE, CalendarUserType.INDIVIDUAL)) {
-            String folderId = matches(targetCalendarUser, originalAttendee) ? targetFolder.getID() : getDefaultCalendarID(originalAttendee.getEntity());
+            String folderId = matches(targetCalendarUser, originalAttendee) ? targetFolder.getID() : getDefaultCalendarId(originalAttendee.getEntity());
             updateAttendeeFolderId(originalEvent.getId(), originalAttendee, folderId);
             updateAttendeeAlarms(originalEvent, originalAlarms.get(I(originalAttendee.getEntity())), originalAttendee.getEntity(), folderId);
         }
@@ -259,7 +259,7 @@ public class MovePerformer extends AbstractUpdatePerformer {
                         storage.getAttendeeStorage().deleteAttendees(originalEvent.getId(), Collections.singletonList(originalAttendee));
                         storage.getAlarmStorage().deleteAlarms(originalEvent.getId(), originalAttendee.getEntity());
                     } else {
-                        String folderId = matches(targetCalendarUser, originalAttendee) ? targetFolder.getID() : getDefaultCalendarID(originalAttendee.getEntity());
+                        String folderId = matches(targetCalendarUser, originalAttendee) ? targetFolder.getID() : getDefaultCalendarId(originalAttendee.getEntity());
                         updateAttendeeFolderId(originalEvent.getId(), originalAttendee, folderId);
                         updateAttendeeAlarms(originalEvent, originalAlarms.get(I(originalAttendee.getEntity())), originalAttendee.getEntity(), folderId);
                     }
@@ -282,7 +282,7 @@ public class MovePerformer extends AbstractUpdatePerformer {
                  * take over target folder for new default attendee and reset personal calendar folders of further user attendees
                  */
                 for (Attendee originalAttendee : filter(originalEvent.getAttendees(), Boolean.TRUE, CalendarUserType.INDIVIDUAL)) {
-                    String folderId = matches(targetCalendarUser, originalAttendee) ? targetFolder.getID() : getDefaultCalendarID(originalAttendee.getEntity());
+                    String folderId = matches(targetCalendarUser, originalAttendee) ? targetFolder.getID() : getDefaultCalendarId(originalAttendee.getEntity());
                     updateAttendeeFolderId(originalEvent.getId(), originalAttendee, folderId);
                     updateAttendeeAlarms(originalEvent, originalAlarms.get(I(originalAttendee.getEntity())), originalAttendee.getEntity(), folderId);
                 }
@@ -296,7 +296,7 @@ public class MovePerformer extends AbstractUpdatePerformer {
                  */
                 List<Attendee> attendees = new ArrayList<Attendee>(2);
                 Attendee previousDefaultAttendee = AttendeeHelper.getDefaultAttendee(session, folder, null);
-                previousDefaultAttendee.setFolderId(getDefaultCalendarID(previousDefaultAttendee.getEntity()));
+                previousDefaultAttendee.setFolderId(getDefaultCalendarId(previousDefaultAttendee.getEntity()));
                 attendees.add(previousDefaultAttendee);
                 attendees.add(AttendeeHelper.getDefaultAttendee(session, targetFolder, null));
                 storage.getAttendeeStorage().insertAttendees(originalEvent.getId(), attendees);
@@ -364,6 +364,16 @@ public class MovePerformer extends AbstractUpdatePerformer {
             };
             storage.getAlarmStorage().updateAlarms(userizedEvent, userId, originalAlarms);
         }
+    }
+
+    /**
+     * Gets the identifier of a specific user's default personal calendar folder.
+     *
+     * @param userId The identifier of the user to retrieve the default calendar identifier for
+     * @return The default calendar folder identifier
+     */
+    private String getDefaultCalendarId(int userId) throws OXException {
+        return session.getConfig().getDefaultFolderId(userId);
     }
 
 }

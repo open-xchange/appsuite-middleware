@@ -144,8 +144,11 @@ import com.openexchange.user.UserService;
  */
 public class Utils {
 
-    /** The fixed identifier for the internal calendar provider */
+    /** The fixed identifier for an account of the internal calendar provider */
     public static final int ACCOUNT_ID = CalendarAccount.DEFAULT_ACCOUNT.getAccountId();
+
+    /** The fixed identifier for the internal calendar provider */
+    public static final String PROVIDER_ID = CalendarAccount.DEFAULT_ACCOUNT.getProviderId();
 
     /** A collection of fields that are always included when querying events from the storage */
     public static final List<EventField> DEFAULT_FIELDS = Arrays.asList(

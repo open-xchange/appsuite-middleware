@@ -49,6 +49,8 @@
 
 package com.openexchange.chronos.service;
 
+import com.openexchange.chronos.Alarm;
+import com.openexchange.chronos.Available;
 import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.exception.OXException;
 
@@ -61,29 +63,53 @@ import com.openexchange.exception.OXException;
 public interface CalendarConfig {
 
     /**
+     * Gets the identifier of a specific user's default personal calendar folder.
+     *
+     * @param userId The identifier of the user to retrieve the default calendar identifier for
+     * @return The default calendar folder identifier
+     */
+    String getDefaultFolderId(int userId) throws OXException;
+
+    /**
+     * Gets the initial participation status to use for new events in a specific folder.
+     *
+     * @param userId The identifier of the user to get the participation status for
+     * @param inPublicFolder <code>true</code> if the event is located in a <i>public</i> folder, <code>false</code>, otherwise
+     * @return The initial participation status, or {@link ParticipationStatus#NEEDS_ACTION} if not defined
+     */
+    ParticipationStatus getInitialPartStat(int userId, boolean inPublicFolder);
+
+    /**
+     * Gets the default alarm to be applied to events whose start-date is of type <i>date</i> from the underlying user configuration.
+     *
+     * @param userId The identifier of the user to get the default alarm for
+     * @return The default alarm, or <code>null</code> if not defined
+     */
+    Alarm getDefaultAlarmDate(int userId) throws OXException;
+
+    /**
+     * Gets the default alarm to be applied to events whose start-date is of type <i>date-time</i> from the underlying user configuration.
+     *
+     * @param userId The identifier of the user to get the default alarm for
+     * @return The default alarm, or <code>null</code> if not defined
+     */
+    Alarm getDefaultAlarmDateTime(int userId) throws OXException;
+
+    /**
+     * Gets the defined availability (in form of one or more available definitions) from the underlying user configuration.
+     *
+     * @param userId The identifier of the user to get the availability for
+     * @return The availability, or <code>null</code> if not defined
+     */
+    Available[] getAvailability(int userId) throws OXException;
+
+    /**
      * Gets a value indicating whether newly added group attendees should be resolved to their individual members, without preserving the
      * group reference, or not.
      *
      * @return <code>true</code> if group attendees should be resolved, <code>false</code>, otherwise
      */
     boolean isResolveGroupAttendees();
-
-    /**
-     * Gets the identifier of a specific user's default personal calendar folder.
-     *
-     * @param userID The identifier of the user to retrieve the default calendar identifier for
-     * @return The default calendar folder identifier
-     */
-    String getDefaultFolderID(int userID) throws OXException;
-
-    /**
-     * Gets the initial participation status to use for new events in a specific folder.
-     *
-     * @param userID The identifier of the user to get the participation status for
-     * @param inPublicFolder <code>true</code> if the event is located in a <i>public</i> folder, <code>false</code>, otherwise
-     * @return The initial participation status, or {@link ParticipationStatus#NEEDS_ACTION} if not defined
-     */
-    ParticipationStatus getInitialPartStat(int userID, boolean inPublicFolder);
 
     /**
      * Gets the configured minimum search pattern length.

@@ -59,6 +59,7 @@ import com.openexchange.chronos.impl.groupware.ChronosDeleteListener;
 import com.openexchange.chronos.impl.groupware.ChronosDowngradeListener;
 import com.openexchange.chronos.impl.osgi.event.EventAdminServiceTracker;
 import com.openexchange.chronos.impl.session.DefaultCalendarUtilities;
+import com.openexchange.chronos.provider.account.AdministrativeCalendarAccountService;
 import com.openexchange.chronos.service.CalendarAvailabilityService;
 import com.openexchange.chronos.service.CalendarHandler;
 import com.openexchange.chronos.service.CalendarService;
@@ -72,6 +73,7 @@ import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.contactcollector.ContactCollectorService;
 import com.openexchange.context.ContextService;
+import com.openexchange.conversion.ConversionService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.group.GroupService;
@@ -107,7 +109,7 @@ public class ChronosActivator extends HousekeepingActivator {
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] { ConfigurationService.class, ConfigViewFactory.class, CalendarStorageFactory.class, CalendarAvailabilityStorageFactory.class,
             FolderService.class, ContextService.class, UserService.class, GroupService.class, ResourceService.class, DatabaseService.class, RecurrenceService.class,
-            ThreadPoolService.class, QuotaService.class, LeanConfigurationService.class };
+            ThreadPoolService.class, QuotaService.class, LeanConfigurationService.class, AdministrativeCalendarAccountService.class, ConversionService.class };
     }
     //@formatter:on
 

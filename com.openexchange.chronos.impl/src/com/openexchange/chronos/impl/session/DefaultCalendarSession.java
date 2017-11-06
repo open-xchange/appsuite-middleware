@@ -109,7 +109,7 @@ public class DefaultCalendarSession implements CalendarSession {
         RequestContext requestContext = RequestContextHolder.get();
         this.hostData = null != requestContext ? requestContext.getHostData() : null;
         this.warnings = new ArrayList<OXException>();
-        this.config = new CalendarConfigImpl(this);
+        this.config = new CalendarConfigImpl(this, Services.getServiceLookup());
         if (isDebugEnabled()) {
             debug("New DefaultCalendarSession created. User: " + session.getUserId() + ", Context: " + session.getContextId());
         }

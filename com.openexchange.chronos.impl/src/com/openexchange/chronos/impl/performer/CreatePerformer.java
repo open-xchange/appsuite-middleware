@@ -49,12 +49,18 @@
 
 package com.openexchange.chronos.impl.performer;
 
+import static com.openexchange.chronos.common.CalendarUtils.getUserIDs;
+import static com.openexchange.chronos.common.CalendarUtils.isAllDay;
 import static com.openexchange.chronos.impl.Check.requireCalendarPermission;
 import static com.openexchange.folderstorage.Permission.CREATE_OBJECTS_IN_FOLDER;
 import static com.openexchange.folderstorage.Permission.NO_PERMISSIONS;
 import static com.openexchange.folderstorage.Permission.WRITE_OWN_OBJECTS;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Classification;
 import com.openexchange.chronos.Event;
@@ -70,6 +76,7 @@ import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.type.PublicType;
+import com.openexchange.java.Autoboxing;
 import com.openexchange.java.Strings;
 
 /**
@@ -127,25 +134,39 @@ public class CreatePerformer extends AbstractUpdatePerformer {
         Check.quotaNotExceeded(storage, session);
         Check.noConflicts(storage, session, newEvent, newAttendees);
         /*
-         * insert event, attendees, attachments & alarms of user
+         * insert event, attendees & attachments
          */
         storage.getEventStorage().insertEvent(newEvent);
         if (null != newAttendees && 0 < newAttendees.size()) {
             storage.getAttendeeStorage().insertAttendees(newEvent.getId(), newAttendees);
         }
-        if (null != event.getAlarms() && 0 < event.getAlarms().size()) {
-            newEvent.setFolderId(folder.getID());
-            insertAlarms(newEvent, calendarUserId, Check.alarmsAreValid(event.getAlarms()), false);
-        }
         if (null != event.getAttachments() && 0 < event.getAttachments().size()) {
             storage.getAttachmentStorage().insertAttachments(session.getSession(), folder.getID(), newEvent.getId(), event.getAttachments());
         }
         /*
-         * track creation, insert alarm triggers & return result
+         * reload created event for further processing
          */
         Event createdEvent = loadEventData(newEvent.getId());
+        /*
+         * insert passed alarms for calendar user, apply default alarms for other internal user attendees & setup corresponding alarm triggers
+         */
+        Map<Integer, List<Alarm>> alarmsPerAttendee = new HashMap<Integer, List<Alarm>>();
+        for (int userId : getUserIDs(createdEvent.getAttendees())) {
+            if (calendarUserId == userId && event.containsAlarms()) {
+                alarmsPerAttendee.put(Autoboxing.I(userId), insertAlarms(createdEvent, userId, Check.alarmsAreValid(event.getAlarms()), false));
+            } else {
+                Alarm defaultAlarm = isAllDay(createdEvent) ? session.getConfig().getDefaultAlarmDate(userId) : session.getConfig().getDefaultAlarmDateTime(userId);
+                if (null != defaultAlarm) {
+                    alarmsPerAttendee.put(Autoboxing.I(userId), insertAlarms(createdEvent, userId, Collections.singletonList(defaultAlarm), true));
+                }
+            }
+        }
+        //TODO: expose sth like storage.getAlarmTriggerStorage().insertTriggers(createdEvent, alarmsPerAttendee);
+        storage.getAlarmTriggerStorage().insertTriggers(createdEvent, createdEvent.getDeleteExceptionDates());
+        /*
+         * track creation & return result
+         */
         resultTracker.trackCreation(createdEvent);
-        storage.getAlarmTriggerStorage().insertTriggers(newEvent, newEvent.getDeleteExceptionDates());
         return resultTracker.getResult();
     }
 
@@ -202,8 +223,8 @@ public class CreatePerformer extends AbstractUpdatePerformer {
         /*
          * copy over further (unchecked) event fields
          */
-        return EventMapper.getInstance().copy(eventData, event, 
-            EventField.SUMMARY, EventField.LOCATION, EventField.DESCRIPTION, EventField.CATEGORIES, EventField.FILENAME, EventField.URL, 
+        return EventMapper.getInstance().copy(eventData, event,
+            EventField.SUMMARY, EventField.LOCATION, EventField.DESCRIPTION, EventField.CATEGORIES, EventField.FILENAME, EventField.URL,
             EventField.RELATED_TO, EventField.STATUS, EventField.EXTENDED_PROPERTIES
         );
     }

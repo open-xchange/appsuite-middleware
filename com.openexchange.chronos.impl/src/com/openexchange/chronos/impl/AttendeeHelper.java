@@ -158,6 +158,7 @@ public class AttendeeHelper {
      * @param originalAttendees The original attendees of the event, or <code>null</code> for new event creations
      */
     private AttendeeHelper(CalendarSession session, UserizedFolder folder, List<Attendee> originalAttendees) throws OXException {
+        super();
         this.session = session;
         this.folder = folder;
         this.originalAttendees = emptyForNull(originalAttendees);
@@ -330,7 +331,7 @@ public class AttendeeHelper {
                 continue;
             }
             userAttendee = session.getEntityResolver().applyEntityData(userAttendee, AttendeeField.ROLE, AttendeeField.RSVP);
-            userAttendee.setFolderId(inPublicFolder ? null : session.getConfig().getDefaultFolderID(userAttendee.getEntity()));
+            userAttendee.setFolderId(inPublicFolder ? null : session.getConfig().getDefaultFolderId(userAttendee.getEntity()));
             if (false == userAttendee.containsPartStat() || null == userAttendee.getPartStat()) {
                 userAttendee.setPartStat(session.getConfig().getInitialPartStat(userAttendee.getEntity(), inPublicFolder));
             }
@@ -357,7 +358,7 @@ public class AttendeeHelper {
                     continue;
                 }
                 Attendee memberAttendee = session.getEntityResolver().prepareUserAttendee(memberID);
-                memberAttendee.setFolderId(PublicType.getInstance().equals(folder.getType()) ? null : session.getConfig().getDefaultFolderID(memberID));
+                memberAttendee.setFolderId(PublicType.getInstance().equals(folder.getType()) ? null : session.getConfig().getDefaultFolderId(memberID));
                 memberAttendee.setPartStat(session.getConfig().getInitialPartStat(memberID, inPublicFolder));
                 if (false == resolveGroupAttendees) {
                     memberAttendee.setMember(Collections.singletonList(groupAttendee.getUri()));
