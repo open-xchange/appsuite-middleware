@@ -51,16 +51,21 @@ package com.openexchange.find.util;
 
 import java.util.Locale;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.exception.OXException;
 import com.openexchange.find.contacts.ContactDisplayNameFormat;
 import com.openexchange.find.facet.ComplexDisplayItem;
 import com.openexchange.find.facet.DisplayItem;
 import com.openexchange.find.osgi.Services;
 import com.openexchange.groupware.contact.ContactUtil;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.i18n.I18nService;
+import com.openexchange.i18n.I18nServiceRegistry;
 import com.openexchange.image.ImageDataSource;
 import com.openexchange.image.ImageLocation;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.Pair;
+import com.openexchange.session.Session;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * A helper class to create {@link DisplayItem}s for common cases.
@@ -77,10 +82,11 @@ public class DisplayItems {
      * Converts the specified {@link Contact} result into a {@link ComplexDisplayItem}
      *
      * @param contact the {@link Contact} to convert
+     * @param session the groupware {@link Session}
      * @return The {@link ComplexDisplayItem}
      */
-    public static ComplexDisplayItem convert(Contact contact) {
-        String displayName = formatDisplayName(contact);
+    public static ComplexDisplayItem convert(Contact contact, ServerSession session) {
+        String displayName = formatDisplayName(contact, session.getUser().getLocale());
         String primaryAddress = extractPrimaryMailAddress(contact);
         if (Strings.isEmpty(displayName)) {
             displayName = Strings.isEmpty(primaryAddress) ? "" : primaryAddress;
@@ -101,26 +107,31 @@ public class DisplayItems {
      * @param contact The {@link Contact}
      * @return the display name
      */
-    private static String formatDisplayName(Contact contact) {
-        String template = getTemplateToUse();
+    private static String formatDisplayName(Contact contact, Locale locale) {
+        String template = getTemplateToUse(locale);
         String lastName = contact.getSurName();
         String firstName = contact.getGivenName();
         String department = Strings.isEmpty(contact.getDepartment()) ? "" : contact.getDepartment();
         if (Strings.isEmpty(lastName)) {
             if (!Strings.isEmpty(firstName)) {
-                return String.format(Locale.ENGLISH, template, firstName, "", department);
+                return String.format(locale, template, firstName, "", department);
             }
         } else {
             if (Strings.isEmpty(firstName)) {
                 firstName = "";
             }
-            return String.format(Locale.ENGLISH, template, firstName, lastName, department);
+            return String.format(locale, template, firstName, lastName, department);
         }
 
         return contact.getDisplayName();
     }
 
-    private static String getTemplateToUse() {
+    /**
+     * Get the display name template to use
+     * 
+     * @return The display name template
+     */
+    private static String getTemplateToUse(Locale locale) {
         // TODO: Maybe use lean configuration
         String propName = "com.openexchange.contact.showDepartments";
         boolean defaultValue = false;
@@ -128,13 +139,31 @@ public class DisplayItems {
         boolean showDepartment;
         ConfigurationService configService = Services.optService(ConfigurationService.class);
         if (null == configService) {
-            LOGGER.warn("No such service: {}. Assuming defaul value of '{}' for property \"{}\"", ConfigurationService.class.getName(), defaultValue, propName);
+            LOGGER.warn("No such service: {}. Assuming default value of '{}' for property '{}'", ConfigurationService.class.getName(), defaultValue, propName);
             showDepartment = defaultValue;
         } else {
             showDepartment = configService.getBoolProperty(propName, defaultValue);
         }
 
-        return showDepartment ? ContactDisplayNameFormat.DISPLAY_NAME_FORMAT_WITH_DEPARTMENT : ContactDisplayNameFormat.DISPLAY_NAME_FORMAT_WITHOUT_DEPARTMENT;
+        String toLocalise = showDepartment ? ContactDisplayNameFormat.DISPLAY_NAME_FORMAT_WITH_DEPARTMENT : ContactDisplayNameFormat.DISPLAY_NAME_FORMAT_WITHOUT_DEPARTMENT;
+        I18nServiceRegistry registry = Services.optService(I18nServiceRegistry.class);
+        if (registry == null) {
+            // FIXME: better log
+            LOGGER.warn("No such service: {}. Returning default template for display name format", I18nServiceRegistry.class);
+            return toLocalise;
+        }
+        try {
+            I18nService i18nService = registry.getI18nService(locale);
+            if (i18nService == null) {
+                LOGGER.warn("No i18n service for locale {}.", locale);
+                return toLocalise;
+            }
+            return i18nService.getLocalized(toLocalise);
+        } catch (OXException e) {
+            LOGGER.debug("An error occurred while translating the template '{}' using the locale '{}': {}", toLocalise, locale, e.getMessage(), e);
+        }
+        return toLocalise;
+
     }
 
     /**

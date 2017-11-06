@@ -61,6 +61,7 @@ import com.openexchange.find.internal.SearchDriverManager;
 import com.openexchange.find.internal.SearchServiceImpl;
 import com.openexchange.find.spi.ModuleSearchDriver;
 import com.openexchange.groupware.settings.PreferencesItemService;
+import com.openexchange.i18n.I18nServiceRegistry;
 import com.openexchange.jslob.ConfigTreeEquivalent;
 import com.openexchange.osgi.HousekeepingActivator;
 
@@ -84,7 +85,7 @@ public class FindActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigViewFactory.class, ConfigurationService.class };
+        return new Class<?>[] { ConfigViewFactory.class, ConfigurationService.class, I18nServiceRegistry.class };
     }
 
     @Override
