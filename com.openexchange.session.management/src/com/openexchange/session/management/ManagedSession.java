@@ -95,6 +95,13 @@ public interface ManagedSession {
     long getLoginTime();
 
     /**
+     * The time stamp of last activity with this session, which is the number of milliseconds since January 1, 1970, 00:00:00 GMT
+     *
+     * @return The time stamp
+     */
+    long getLastActive();
+
+    /**
      * Gets the (optional) location
      *
      * @return The location or {@link SessionManagementStrings#UNKNOWN_LOCATION}
@@ -103,7 +110,7 @@ public interface ManagedSession {
 
     /**
      * Get the session object associated with spawned session
-     * 
+     *
      * @return The session
      */
     Session getSession();

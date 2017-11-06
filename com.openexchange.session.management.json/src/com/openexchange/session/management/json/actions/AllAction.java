@@ -117,9 +117,17 @@ public class AllAction implements AJAXActionService {
                 if (0 < loginTime) {
                     json.put("loginTime", loginTime);
                 }
+                long lastActive = s.getLastActive();
+                if (0 < lastActive) {
+                    if (lastActive > loginTime) {
+                        json.put("lastActive", lastActive);
+                    } else {
+                        json.put("lastActive", loginTime);
+                    }
+                }
                 JSONObject deviceInfo = getDeviceInfo(s, locale, extendedInfo);
                 if (null != deviceInfo) {
-                    json.put("deviceInfo", deviceInfo);
+                    json.put("device", deviceInfo);
                     String type = deviceInfo.getString("type");
                     switch (type) {
                         case "browser":

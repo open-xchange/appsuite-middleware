@@ -93,9 +93,10 @@ public class AllResponse extends AbstractAJAXResponse {
         String client = obj.getString("client");
         String userAgent = obj.getString("userAgent");
         long loginTime = obj.optLong("loginTime");
+        long lastActive = obj.optLong("lastActive");
         String location = obj.optString("location");
-        JSONObject deviceInfo = obj.optJSONObject("deviceInfo");
-        DefaultManagedSession session = DefaultManagedSession.builder().setClient(client).setIpAddress(ipAddress).setLocation("").setLoginTime(loginTime).setSessionId(sessionId).setUserAgent(userAgent).build();
+        JSONObject deviceInfo = obj.optJSONObject("device");
+        DefaultManagedSession session = DefaultManagedSession.builder().setClient(client).setIpAddress(ipAddress).setLocation("").setLoginTime(loginTime).setLastActive(lastActive).setSessionId(sessionId).setUserAgent(userAgent).build();
         return session;
     }
 
