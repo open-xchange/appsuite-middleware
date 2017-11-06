@@ -157,7 +157,7 @@ public enum SchedJoulesResponseParser {
         }
         throw SchedJoulesAPIExceptionCodes.NO_STREAM_PARSER.create(contentType);
     }
-
+    
     /**
      * Parses the {@link InputStream} from the specified {@link SchedJoulesResponse}
      * 

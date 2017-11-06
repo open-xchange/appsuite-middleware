@@ -62,6 +62,7 @@ public class SchedJoulesResponse {
     private final int statusCode;
     private String contentType;
     private String eTag;
+    private Object responseBody;
 
     /**
      * Initialises a new {@link SchedJoulesResponse}.
@@ -132,5 +133,23 @@ public class SchedJoulesResponse {
      */
     public void setETag(String eTag) {
         this.eTag = eTag;
+    }
+
+    /**
+     * Gets the responseBody
+     *
+     * @return The responseBody
+     */
+    public Object getResponseBody() {
+        return responseBody;
+    }
+
+    /**
+     * Sets the responseBody
+     *
+     * @param responseBody The responseBody to set
+     */
+    public void setResponseBody(Object responseBody) {
+        this.responseBody = responseBody;
     }
 }

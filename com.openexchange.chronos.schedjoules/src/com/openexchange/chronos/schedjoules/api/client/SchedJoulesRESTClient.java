@@ -59,11 +59,16 @@ import org.apache.http.HttpEntity;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpHead;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.util.EntityUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import com.openexchange.chronos.schedjoules.api.auxiliary.SchedJoulesResponseParser;
 import com.openexchange.chronos.schedjoules.exception.SchedJoulesAPIExceptionCodes;
 import com.openexchange.chronos.schedjoules.impl.SchedJoulesProperty;
 import com.openexchange.chronos.schedjoules.osgi.Services;
@@ -79,6 +84,8 @@ import com.openexchange.rest.client.httpclient.HttpClients.ClientConfig;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class SchedJoulesRESTClient {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(SchedJoulesRESTClient.class);
 
     private static final String SCHEME = "https";
     private static final String BASE_URL = "api.schedjoules.com";
@@ -184,7 +191,7 @@ public class SchedJoulesRESTClient {
      * @return an {@link HttpUriRequest}
      * @throws OXException if an unknown HTTP method is defined in the request
      */
-    private HttpUriRequest prepareRequest(SchedJoulesRequest request) throws OXException {
+    private HttpRequestBase prepareRequest(SchedJoulesRequest request) throws OXException {
         // Prepare the query
         String query = prepareQuery(request.getQueryParameters());
 
@@ -225,7 +232,7 @@ public class SchedJoulesRESTClient {
      * @throws OXException if an unknown HTTP method is provided
      * @throws URISyntaxException If an invalid URL is provided
      */
-    private HttpUriRequest prepareRequest(URL url, HttpMethod httpMethod, String eTag) throws OXException {
+    private HttpRequestBase prepareRequest(URL url, HttpMethod httpMethod, String eTag) throws OXException {
         HttpRequestBase httpRequest = createRequest(httpMethod);
         prepareRequest(httpRequest, url.getProtocol(), url.getHost(), url.getPath(), url.getQuery(), eTag);
         return httpRequest;
@@ -290,10 +297,11 @@ public class SchedJoulesRESTClient {
      * @return The {@link SchedJoulesResponse}
      * @throws OXException if an error is occurred
      */
-    private SchedJoulesResponse executeRequest(HttpUriRequest httpRequest) throws OXException {
+    private SchedJoulesResponse executeRequest(HttpRequestBase httpRequest) throws OXException {
+        CloseableHttpResponse httpResponse = null;
         try {
             // Execute the request
-            HttpResponse httpResponse = httpClient.execute(httpRequest);
+            httpResponse = httpClient.execute(httpRequest);
 
             // Get the response code and assert
             int statusCode = assertStatusCode(httpResponse);
@@ -308,6 +316,46 @@ public class SchedJoulesRESTClient {
             throw SchedJoulesAPIExceptionCodes.CLIENT_PROTOCOL_ERROR.create(e.getMessage(), e);
         } catch (IOException e) {
             throw SchedJoulesAPIExceptionCodes.IO_ERROR.create(e.getMessage(), e);
+        } finally {
+            consume(httpResponse);
+            reset(httpRequest);
+
+        }
+    }
+
+    /**
+     * Consumes the specified {@link HttpResponse}
+     * 
+     * @param response the {@link HttpResponse} to consume
+     */
+    private void consume(HttpResponse response) {
+        if (null == response) {
+            return;
+        }
+        HttpEntity entity = response.getEntity();
+        if (null == entity) {
+            return;
+        }
+        try {
+            EntityUtils.consume(entity);
+        } catch (Throwable e) {
+            LOGGER.debug("Error while consuming the entity of the HTTP response {}", e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Resets the specified {@link HttpRequestBase}
+     * 
+     * @param httpRequest
+     */
+    private void reset(HttpRequestBase httpRequest) {
+        if (httpRequest == null) {
+            return;
+        }
+        try {
+            httpRequest.reset();
+        } catch (final Throwable e) {
+            LOGGER.debug("Error while resetting the HTTP request {}", e.getMessage(), e);
         }
     }
 
@@ -328,8 +376,8 @@ public class SchedJoulesRESTClient {
         if (entity == null) {
             return response;
         }
-
         response.setStream(entity.getContent());
+        response.setResponseBody(SchedJoulesResponseParser.parse(response));
         return response;
     }
 
