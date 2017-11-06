@@ -19,6 +19,15 @@ properties:
     type: integer
     format: int64
     description: Time of login
+  lastActive:
+    type: integer
+    format: int64
+    description: Time of last activity
   location:
     type: string
     description: Guessed location based on IP address
+  device:
+    type: string
+    format: json
+    schema:
+      $ref: "#/definitions/DeviceInfo"
