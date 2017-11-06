@@ -51,8 +51,8 @@ package com.openexchange.find.osgi;
 
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
-import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.find.SearchService;
 import com.openexchange.find.internal.AvailableModules;
 import com.openexchange.find.internal.MandatoryAccounts;
@@ -85,7 +85,7 @@ public class FindActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigViewFactory.class, ConfigurationService.class, I18nServiceRegistry.class };
+        return new Class<?>[] { ConfigViewFactory.class, LeanConfigurationService.class, I18nServiceRegistry.class };
     }
 
     @Override

@@ -50,7 +50,6 @@
 package com.openexchange.find.util;
 
 import java.util.Locale;
-import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.contact.ContactProperty;
 import com.openexchange.exception.OXException;
@@ -151,8 +150,7 @@ public class DisplayItems {
         String toLocalise = showDepartments() && hasDepartment ? ContactDisplayNameFormat.DISPLAY_NAME_FORMAT_WITH_DEPARTMENT : ContactDisplayNameFormat.DISPLAY_NAME_FORMAT_WITHOUT_DEPARTMENT;
         I18nServiceRegistry registry = Services.optService(I18nServiceRegistry.class);
         if (registry == null) {
-            // FIXME: better log
-            LOGGER.warn("No such service: {}. Returning default template for display name format", I18nServiceRegistry.class);
+            LOGGER.warn("No such service: {}. Returning default template '{}' for display name format", toLocalise, I18nServiceRegistry.class);
             return toLocalise;
         }
         try {
@@ -177,7 +175,7 @@ public class DisplayItems {
         LeanConfigurationService configService = Services.optService(LeanConfigurationService.class);
         if (null == configService) {
             boolean defaultValue = false;
-            LOGGER.warn("No such service: {}. Assuming default value of '{}' for property '{}'", ConfigurationService.class.getName(), defaultValue, ContactProperty.showDepartments);
+            LOGGER.warn("No such service: {}. Assuming default value of '{}' for property '{}'", LeanConfigurationService.class.getName(), defaultValue, ContactProperty.showDepartments);
             return defaultValue;
         }
         return configService.getBooleanProperty(ContactProperty.showDepartments);
