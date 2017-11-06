@@ -108,7 +108,7 @@ public class DisplayItems {
      * @return the display name
      */
     private static String formatDisplayName(Contact contact, Locale locale) {
-        String template = getTemplateToUse(locale);
+        String template = getTemplateToUse(locale, contact.containsDepartment() && !Strings.isEmpty(contact.getDepartment()));
         String lastName = contact.getSurName();
         String firstName = contact.getGivenName();
         String department = Strings.isEmpty(contact.getDepartment()) ? "" : contact.getDepartment();
@@ -131,21 +131,8 @@ public class DisplayItems {
      * 
      * @return The display name template
      */
-    private static String getTemplateToUse(Locale locale) {
-        // TODO: Maybe use lean configuration
-        String propName = "com.openexchange.contact.showDepartments";
-        boolean defaultValue = false;
-
-        boolean showDepartment;
-        ConfigurationService configService = Services.optService(ConfigurationService.class);
-        if (null == configService) {
-            LOGGER.warn("No such service: {}. Assuming default value of '{}' for property '{}'", ConfigurationService.class.getName(), defaultValue, propName);
-            showDepartment = defaultValue;
-        } else {
-            showDepartment = configService.getBoolProperty(propName, defaultValue);
-        }
-
-        String toLocalise = showDepartment ? ContactDisplayNameFormat.DISPLAY_NAME_FORMAT_WITH_DEPARTMENT : ContactDisplayNameFormat.DISPLAY_NAME_FORMAT_WITHOUT_DEPARTMENT;
+    private static String getTemplateToUse(Locale locale, boolean hasDepartment) {
+        String toLocalise = showDepartments() && hasDepartment ? ContactDisplayNameFormat.DISPLAY_NAME_FORMAT_WITH_DEPARTMENT : ContactDisplayNameFormat.DISPLAY_NAME_FORMAT_WITHOUT_DEPARTMENT;
         I18nServiceRegistry registry = Services.optService(I18nServiceRegistry.class);
         if (registry == null) {
             // FIXME: better log
@@ -163,7 +150,23 @@ public class DisplayItems {
             LOGGER.debug("An error occurred while translating the template '{}' using the locale '{}': {}", toLocalise, locale, e.getMessage(), e);
         }
         return toLocalise;
+    }
 
+    /**
+     * Look-up the property
+     * 
+     * @return <code>true</code> to show departments, <code>false</code> otherwise
+     */
+    private static boolean showDepartments() {
+        // TODO: Maybe use lean configuration
+        String propName = "com.openexchange.contact.showDepartments";
+        boolean defaultValue = false;
+        ConfigurationService configService = Services.optService(ConfigurationService.class);
+        if (null == configService) {
+            LOGGER.warn("No such service: {}. Assuming default value of '{}' for property '{}'", ConfigurationService.class.getName(), defaultValue, propName);
+            return defaultValue;
+        }
+        return configService.getBoolProperty(propName, defaultValue);
     }
 
     /**
