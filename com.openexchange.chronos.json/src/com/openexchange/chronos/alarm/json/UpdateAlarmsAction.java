@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.chronos.json.action;
+package com.openexchange.chronos.alarm.json;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -59,6 +59,7 @@ import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.chronos.Alarm;
+import com.openexchange.chronos.json.action.ChronosAction;
 import com.openexchange.chronos.json.converter.CalendarResultConverter;
 import com.openexchange.chronos.json.converter.mapper.AlarmMapper;
 import com.openexchange.chronos.json.fields.ChronosJsonFields;

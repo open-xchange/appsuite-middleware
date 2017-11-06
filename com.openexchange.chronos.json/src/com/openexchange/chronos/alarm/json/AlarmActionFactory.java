@@ -76,6 +76,7 @@ public class AlarmActionFactory implements AJAXActionServiceFactory {
         actions.put("pending", new PendingAction(services));
         actions.put("ack", new AcknowledgeAction(services));
         actions.put("snooze", new SnoozeAction(services));
+        actions.put("updateAlarms", new UpdateAlarmsAction(services));
         this.actions = actions.build();
     }
 
