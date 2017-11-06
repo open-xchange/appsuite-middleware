@@ -989,6 +989,24 @@ msgstr ""
 msgid "Your device configuration"
 msgstr ""
 
+#. %1$s, %2$s %3$s on %4$s %5$s
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.clientinfo/src/com/openexchange/clientinfo/ClientInfoStrings.java:64
+msgid "%1$s, %2$s %3$s on %4$s %5$s"
+msgstr ""
+
+#. %1$s on %2$s %3$s
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.clientinfo/src/com/openexchange/clientinfo/ClientInfoStrings.java:67
+msgid "%1$s on %2$s %3$s"
+msgstr ""
+
+#. %1$s
+#. This simple message does not need to be translated. It is used to transport data to the frontend. Just put the same value in it for
+#. all translations or remove it from the PO file.
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.clientinfo/src/com/openexchange/clientinfo/ClientInfoStrings.java:70
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/authentication/LoginExceptionMessages.java:94
+msgid "%1$s"
+msgstr ""
+
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.cluster.lock/src/com/openexchange/cluster/lock/internal/ClusterLockExceptionMessages.java:61
 msgid "Another node is currently performing the same task. Try again later."
 msgstr ""
@@ -1677,6 +1695,31 @@ msgstr ""
 msgid ""
 "Download denied because download limits have been exceeded. Please try again "
 "later."
+msgstr ""
+
+#. Drive Client %1$s on %2$s %3$s
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.drive.impl/src/com/openexchange/drive/impl/DriveClientInfoStrings.java:64
+msgid "Drive Client %1$s on %2$s %3$s"
+msgstr ""
+
+#. Drive Client %1$s on %2$s
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.drive.impl/src/com/openexchange/drive/impl/DriveClientInfoStrings.java:67
+msgid "Drive Client %1$s on %2$s"
+msgstr ""
+
+#. Drive Client on %1$s
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.drive.impl/src/com/openexchange/drive/impl/DriveClientInfoStrings.java:70
+msgid "Drive Client on %1$s"
+msgstr ""
+
+#. Drive Client %1$s
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.drive.impl/src/com/openexchange/drive/impl/DriveClientInfoStrings.java:73
+msgid "Drive Client %1$s"
+msgstr ""
+
+#. Drive Client
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.drive.impl/src/com/openexchange/drive/impl/DriveClientInfoStrings.java:76
+msgid "Drive Client"
 msgstr ""
 
 #. * e.g. "Uploaded with OX Drive (Ottos Laptop)"
@@ -2586,6 +2629,21 @@ msgstr ""
 msgid "last year"
 msgstr ""
 
+#. The default display name format for contacts with department: <firstname> <lastname> (department)
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/contacts/ContactDisplayNameFormat.java:62
+msgid "%1$s %2$s (%3$s)"
+msgstr ""
+
+#. The default display name format for contacts without department: <firstname> <lastname>
+#.
+#. * The display of a users given and sur name name in e.g. notification mails (Hello John Doe, ...).
+#. * The placeholders mean $givenname $surname.
+#.
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/contacts/ContactDisplayNameFormat.java:65
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.notification/src/com/openexchange/notification/NotificationStrings.java:67
+msgid "%1$s %2$s"
+msgstr ""
+
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/contacts/ContactsStrings.java:64
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/contacts/ContactsStrings.java:96
 msgid "Contact"
@@ -2883,12 +2941,6 @@ msgstr ""
 #. Missing client capabilities.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/authentication/LoginExceptionMessages.java:90
 msgid "Missing client capabilities."
-msgstr ""
-
-#. This simple message does not need to be translated. It is used to transport data to the frontend. Just put the same value in it for
-#. all translations or remove it from the PO file.
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/authentication/LoginExceptionMessages.java:94
-msgid "%1$s"
 msgstr ""
 
 #. Thrown when an AuthenticationService implementation does not support the auto login method.
@@ -3816,14 +3868,6 @@ msgstr ""
 #. The certificate is untrusted
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.net.ssl/src/com/openexchange/net/ssl/internal/FailureReasonMessage.java:78
 msgid "The certificate is untrusted"
-msgstr ""
-
-#.
-#. * The display of a users given and sur name name in e.g. notification mails (Hello John Doe, ...).
-#. * The placeholders mean $givenname $surname.
-#.
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.notification/src/com/openexchange/notification/NotificationStrings.java:67
-msgid "%1$s %2$s"
 msgstr ""
 
 #. Successfully connected ExampleApp with your account
