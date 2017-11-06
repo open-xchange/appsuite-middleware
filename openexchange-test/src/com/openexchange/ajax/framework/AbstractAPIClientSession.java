@@ -85,8 +85,6 @@ public abstract class AbstractAPIClientSession {
     protected TestUser testUser2;
     protected LoginApi loginApi;
     protected ApiClient apiClient;
-    private EnhancedApiClient enhancedApiClient;
-
     private Set<ApiClient> apiClients;
 
     /**
@@ -122,10 +120,6 @@ public abstract class AbstractAPIClientSession {
         admin = testContext.getAdmin();
         apiClient = generateClient(testUser);
         rememberClient(apiClient);
-
-        enhancedApiClient = generateEnhancedClient(testUser);
-        rememberClient(enhancedApiClient);
-
     }
 
     protected void rememberClient(ApiClient client) {
@@ -285,23 +279,5 @@ public abstract class AbstractAPIClientSession {
             throw new OXException();
         }
         return newClient;
-    }
-
-    /**
-     * Gets the enhancedApiClient
-     *
-     * @return The enhancedApiClient
-     */
-    public EnhancedApiClient getEnhancedApiClient() {
-        return enhancedApiClient;
-    }
-
-    /**
-     * Sets the enhancedApiClient
-     *
-     * @param enhancedApiClient The enhancedApiClient to set
-     */
-    public void setEnhancedApiClient(EnhancedApiClient enhancedApiClient) {
-        this.enhancedApiClient = enhancedApiClient;
     }
 }

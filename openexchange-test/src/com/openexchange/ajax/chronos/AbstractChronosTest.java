@@ -60,7 +60,6 @@ import java.util.TimeZone;
 import com.openexchange.ajax.chronos.manager.CalendarAccountManager;
 import com.openexchange.ajax.chronos.manager.EventManager;
 import com.openexchange.ajax.chronos.manager.ICalImportExportManager;
-import com.openexchange.ajax.framework.AbstractAPIClientSession;
 import com.openexchange.configuration.asset.AssetManager;
 import com.openexchange.exception.OXException;
 import com.openexchange.testing.httpclient.invoker.ApiClient;
@@ -84,7 +83,7 @@ import com.openexchange.testing.httpclient.modules.ImportApi;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.0
  */
-public class AbstractChronosTest extends AbstractAPIClientSession {
+public class AbstractChronosTest extends AbstractEnhancedApiClientSession {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractChronosTest.class);
 
