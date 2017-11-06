@@ -59,6 +59,7 @@ import java.util.Map;
 import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.DeleteResultImpl;
@@ -130,24 +131,35 @@ class SimpleResultTracker {
      * @param event The {@link Event} to delete
      * @param timestamp The timestamp of the deletion
      */
-    public void addDelete(List<String> folderIds, Event event, long timestamp) {
-        affectedFolders.addAll(folderIds);
+    public void addDelete(Event event, long timestamp) {
+        addFolders(event);
         DeleteResult newResult = new DeleteResultImpl(timestamp, CalendarUtils.getEventID(event));
         deleteResults.add(newResult);
     }
 
     /**
-     * Add an updated event as appropriated OSGi event.
+     * Add an updated event as appropriated {@link CalendarEvent}.
      * 
-     * @param folderIds A {@link List} containing all folders that belongs to the event
      * @param originalEvent The original {@link Event}
      * @param updatedEvent The updated {@link Event}
      * @throws OXException See {@link UpdateResultImpl#UpdateResultImpl(Event, Event)}
      */
-    public void addUpdate(List<String> folderIds, Event originalEvent, Event updatedEvent) throws OXException {
-        affectedFolders.addAll(folderIds);
+    public void addUpdate(Event originalEvent, Event updatedEvent) throws OXException {
+        addFolders(updatedEvent);
         UpdateResult newResult = new UpdateResultImpl(originalEvent, updatedEvent);
         updateResults.add(newResult);
+    }
+
+    /**
+     * Track the affected folders.
+     * 
+     * @param event The {@link Event}
+     */
+    private void addFolders(Event event) {
+        affectedFolders.addAll(Utils.getPersonalFolderIds(event.getAttendees()));
+        if (null != event.getFolderId()) {
+            affectedFolders.add(event.getFolderId());
+        }
     }
 
     /**

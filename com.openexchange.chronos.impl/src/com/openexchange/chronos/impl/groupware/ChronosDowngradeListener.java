@@ -49,9 +49,7 @@
 
 package com.openexchange.chronos.impl.groupware;
 
-import static com.openexchange.chronos.impl.groupware.ListenerUtils.equalsFieldUserTerm;
-import static com.openexchange.chronos.impl.groupware.ListenerUtils.getAttendeeFolders;
-import static com.openexchange.chronos.impl.groupware.ListenerUtils.getUser;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import com.openexchange.chronos.Attendee;
@@ -73,6 +71,8 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.downgrade.DowngradeEvent;
 import com.openexchange.groupware.downgrade.DowngradeListener;
 import com.openexchange.osgi.ServiceSet;
+import com.openexchange.search.SingleSearchTerm.SingleOperation;
+import com.openexchange.search.internal.operands.ConstantOperand;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
@@ -117,7 +117,7 @@ public class ChronosDowngradeListener extends DowngradeListener {
         SimpleResultTracker tracker = new SimpleResultTracker(calendarHandlers);
 
         EventField[] fields = new EventField[] { EventField.ID, EventField.FOLDER_ID };
-        List<Event> events = storage.getEventStorage().searchEvents(equalsFieldUserTerm(AttendeeField.ENTITY, userId), null, fields);
+        List<Event> events = storage.getEventStorage().searchEvents(CalendarUtils.getSearchTerm(AttendeeField.ENTITY, SingleOperation.EQUALS, new ConstantOperand<Integer>(Integer.valueOf(userId))), null, fields);
 
         ServerSession serverSession = ServerSessionAdapter.valueOf(userId, context.getContextId());
         Date date = new Date();
@@ -134,18 +134,18 @@ public class ChronosDowngradeListener extends DowngradeListener {
                 storage.getAttachmentStorage().deleteAttachments(serverSession, CalendarUtils.getFolderView(event, userId), eventId);
                 storage.getAttendeeStorage().deleteAttendees(eventId);
                 storage.getEventStorage().deleteEvent(eventId);
-                tracker.addDelete(getAttendeeFolders(attendees), event, date.getTime());
+                tracker.addDelete(event, date.getTime());
 
             } else {
                 // Remove user from event
-                storage.getAttendeeStorage().deleteAttendees(eventId, getUser(userId, attendees));
-                Event originalEvent = calendarUtilities.copyEvent(event, null);
+                storage.getAttendeeStorage().deleteAttendees(eventId, Collections.singletonList(CalendarUtils.find(attendees, userId)));
+                Event updatedEvent = calendarUtilities.copyEvent(event, null);
                 CalendarUser admin = entityResolver.prepareUserAttendee(context.getMailadmin());
-                event.setLastModified(date);
-                event.setModifiedBy(admin);
-                event.setTimestamp(date.getTime());
+                updatedEvent.setLastModified(date);
+                updatedEvent.setModifiedBy(admin);
+                updatedEvent.setTimestamp(date.getTime());
                 storage.getEventStorage().updateEvent(event);
-                tracker.addUpdate(getAttendeeFolders(attendees), originalEvent, event);
+                tracker.addUpdate(event, updatedEvent);
             }
         }
     }
