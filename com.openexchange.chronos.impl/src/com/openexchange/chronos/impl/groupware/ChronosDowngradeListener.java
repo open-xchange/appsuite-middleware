@@ -83,7 +83,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.0
  */
-public class ChronosDowngradeListener extends DowngradeListener {
+public class ChronosDowngradeListener implements DowngradeListener {
 
     private CalendarStorageFactory      factory;
     private CalendarUtilities           calendarUtilities;

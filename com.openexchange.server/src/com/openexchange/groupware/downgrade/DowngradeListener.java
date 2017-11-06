@@ -57,7 +57,7 @@ import com.openexchange.exception.OXException;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  *
  */
-public abstract class DowngradeListener {
+public interface DowngradeListener {
 
 	/**
 	 * Performs removal of unused data related to a former user downgrade.
@@ -67,7 +67,7 @@ public abstract class DowngradeListener {
 	 * @throws OXException
 	 *             If removal of unused data fails
 	 */
-	public abstract void downgradePerformed(DowngradeEvent event) throws OXException;
+	void downgradePerformed(DowngradeEvent event) throws OXException;
 
 	/**
 	 * Gets the listener's order.
@@ -78,6 +78,6 @@ public abstract class DowngradeListener {
 	 *
 	 * @return The listener's order
 	 */
-	public abstract int getOrder();
+	int getOrder();
 
 }

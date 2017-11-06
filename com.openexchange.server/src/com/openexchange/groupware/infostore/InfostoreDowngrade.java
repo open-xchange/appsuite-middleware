@@ -63,7 +63,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
-public class InfostoreDowngrade extends DowngradeListener {
+public class InfostoreDowngrade implements DowngradeListener {
     @Override
 	public void downgradePerformed(final DowngradeEvent event) throws OXException {
         final UserConfiguration newUserConfiguration = event.getNewUserConfiguration();

@@ -70,7 +70,7 @@ import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
  * functionalities of the tasks module.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class TasksDowngrade extends DowngradeListener {
+public class TasksDowngrade implements DowngradeListener {
 
     /**
      * Logger.
