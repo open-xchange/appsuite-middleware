@@ -1424,8 +1424,9 @@ public final class SessionHandler {
             sessionControl = optSessionFromSessionStorage(sessionId, sessionData);
         }
 
-        Date now = new Date();
-        sessionControl.getSession().setParameter(Session.PARAM_LAST_ACTIVE, now.getTime());
+        if (null != sessionControl) {
+            sessionControl.getSession().setParameter(Session.PARAM_LAST_ACTIVE, Long.valueOf(System.currentTimeMillis()));
+        }
 
         return sessionControl;
     }
