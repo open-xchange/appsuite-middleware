@@ -155,7 +155,7 @@ public class DisplayItems {
         try {
             I18nService i18nService = registry.getI18nService(locale);
             if (i18nService == null) {
-                LOGGER.warn("No i18n service for locale {}.", locale);
+                LOGGER.debug("No i18n service for locale {}.", locale);
                 return toLocalise;
             }
             return i18nService.getLocalized(toLocalise);
