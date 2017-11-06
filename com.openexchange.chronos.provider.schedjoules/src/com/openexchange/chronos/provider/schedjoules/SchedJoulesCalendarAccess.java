@@ -170,11 +170,7 @@ public class SchedJoulesCalendarAccess extends CachingCalendarAccess {
             }
 
             JSONObject folderJson = findFolderInInternalConfiguration(folderId);
-
             folderJson.put(SchedJoulesFields.COLOR, extendedProperties.get(CalendarFolderProperty.COLOR_LITERAL));
-            folderJson.put(SchedJoulesFields.USED_FOR_SYNC, extendedProperties.get(CalendarFolderProperty.USED_FOR_SYNC_LITERAL));
-            folderJson.put(SchedJoulesFields.SCHEDULE_TRANSP, extendedProperties.get(CalendarFolderProperty.SCHEDULE_TRANSP_LITERAL));
-
             updateInternalConfigurationData(getAccount().getInternalConfiguration());
 
             return folderId;
