@@ -47,49 +47,50 @@
  *
  */
 
-package com.openexchange.ajax.sessionmanagement.tests;
+package com.openexchange.session.management.json.actions;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import java.util.Collection;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import com.openexchange.ajax.sessionmanagement.AbstractSessionManagementTest;
-import com.openexchange.ajax.sessionmanagement.actions.AllRequest;
-import com.openexchange.ajax.sessionmanagement.actions.AllResponse;
-import com.openexchange.session.management.ManagedSession;
+import org.json.JSONArray;
+import org.json.JSONException;
+import com.openexchange.ajax.requesthandler.AJAXActionService;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.exception.OXException;
+import com.openexchange.session.management.SessionManagementService;
+import com.openexchange.session.management.json.osgi.Services;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import com.openexchange.tools.session.ServerSession;
+
 
 /**
- * {@link GetSessionsTest}
+ * {@link DeleteAction}
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since v7.10.0
  */
-public class GetSessionsTest extends AbstractSessionManagementTest {
+public class DeleteAction implements AJAXActionService {
 
-    @Override
-    @Before
-    public void setUp() throws Exception {
-        super.setUp();
+
+    public DeleteAction() {
+        super();
     }
 
     @Override
-    @After
-    public void tearDown() throws Exception {
-        super.tearDown();
-    }
-
-    @Test
-    public void testGetSessions() throws Exception {
-        AllRequest req = new AllRequest();
-        AllResponse resp = testClient1.execute(req);
-        Collection<ManagedSession> sessions = resp.getSessions();
-        assertEquals(2, sessions.size());
-        for (ManagedSession session : sessions) {
-            String sessionId = session.getSessionId();
-            assertTrue(sessionId.equals(testClient1.getSession().getId()) || sessionId.equals(testClient2.getSession().getId()));
+    public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
+        Object data = requestData.getData();
+        if ((data == null) || (false == JSONArray.class.isInstance(data))) {
+            throw AjaxExceptionCodes.MISSING_REQUEST_BODY.create();
         }
+        JSONArray dataObject = (JSONArray) data;
+        try {
+            SessionManagementService service = Services.getService(SessionManagementService.class);
+            for (int i = 0; i < dataObject.length(); i++) {
+                String sessionId = dataObject.getString(i);
+                service.removeSession(session, sessionId);
+            }
+        } catch (JSONException e) {
+            throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());
+        }
+        return new AJAXRequestResult();
     }
 
 }

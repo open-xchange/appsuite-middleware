@@ -47,49 +47,98 @@
  *
  */
 
-package com.openexchange.ajax.sessionmanagement.tests;
+package com.openexchange.ajax.sessionmanagement.actions;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import java.util.Collection;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import java.io.IOException;
+import org.json.JSONArray;
+import org.json.JSONException;
+import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AJAXRequest;
+import com.openexchange.ajax.framework.AbstractAJAXParser;
+import com.openexchange.ajax.framework.Header;
+import com.openexchange.ajax.framework.Params;
 import com.openexchange.ajax.sessionmanagement.AbstractSessionManagementTest;
-import com.openexchange.ajax.sessionmanagement.actions.AllRequest;
-import com.openexchange.ajax.sessionmanagement.actions.AllResponse;
-import com.openexchange.session.management.ManagedSession;
+
 
 /**
- * {@link GetSessionsTest}
+ * {@link DeleteRequest}
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since v7.10.0
  */
-public class GetSessionsTest extends AbstractSessionManagementTest {
+public class DeleteRequest implements AJAXRequest<DeleteResponse> {
 
-    @Override
-    @Before
-    public void setUp() throws Exception {
-        super.setUp();
+    private final String[] sessionIdsToDelete;
+    private boolean failOnError;
+
+    public DeleteRequest(String sessionIdToDelete) {
+        this(new String[] { sessionIdToDelete }, true);
+    }
+
+    public DeleteRequest(String[] sessionIdsToDelete) {
+        this(sessionIdsToDelete, true);
+    }
+
+    public DeleteRequest(String[] sessionIdsToDelete, boolean failOnError) {
+        super();
+        this.sessionIdsToDelete = sessionIdsToDelete;
+        this.failOnError = failOnError;
+    }
+
+    public DeleteRequest(String sessionIdToDelete, boolean failOnError) {
+        this(new String[] { sessionIdToDelete }, failOnError);
     }
 
     @Override
-    @After
-    public void tearDown() throws Exception {
-        super.tearDown();
+    public com.openexchange.ajax.framework.AJAXRequest.Method getMethod() {
+        return Method.PUT;
     }
 
-    @Test
-    public void testGetSessions() throws Exception {
-        AllRequest req = new AllRequest();
-        AllResponse resp = testClient1.execute(req);
-        Collection<ManagedSession> sessions = resp.getSessions();
-        assertEquals(2, sessions.size());
-        for (ManagedSession session : sessions) {
-            String sessionId = session.getSessionId();
-            assertTrue(sessionId.equals(testClient1.getSession().getId()) || sessionId.equals(testClient2.getSession().getId()));
+    @Override
+    public String getServletPath() {
+        return AbstractSessionManagementTest.SERVLET_PATH;
+    }
+
+    @Override
+    public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() throws IOException, JSONException {
+        return new Params(AJAXServlet.PARAMETER_ACTION, "delete").toArray();
+    }
+
+    @Override
+    public AbstractAJAXParser<? extends DeleteResponse> getParser() {
+        return new Parser(failOnError);
+    }
+
+    @Override
+    public Object getBody() throws IOException, JSONException {
+        JSONArray body = new JSONArray();
+        for (String session : sessionIdsToDelete) {
+            body.add(0, session);
         }
+        return body;
+    }
+
+    @Override
+    public Header[] getHeaders() {
+        return NO_HEADER;
+    }
+
+    public void setFailOnError(boolean failOnError) {
+        this.failOnError = failOnError;
+    }
+
+    private static final class Parser extends AbstractAJAXParser<DeleteResponse> {
+
+        protected Parser(boolean failOnError) {
+            super(failOnError);
+        }
+
+        @Override
+        protected DeleteResponse createResponse(Response response) throws JSONException {
+            return new DeleteResponse(response);
+        }
+
     }
 
 }

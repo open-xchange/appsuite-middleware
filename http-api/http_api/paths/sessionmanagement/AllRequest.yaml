@@ -1,6 +1,6 @@
-/sessionmanagement?action=getSessions:
+/sessionmanagement?action=all:
   get:
-    operationId: getSessions
+    operationId: all
     tags:
       - sessionmanagement
     summary: Get all user's sessions
@@ -12,4 +12,4 @@
           A JSON object containing the sessions that were found. In case of errors the responsible fields in the response are
           filled (see [Error handling](#error-handling)).
         schema:
-          $ref: "#/definitions/GetSessionsResponse"
+          $ref: "#/definitions/AllSessionsResponse"

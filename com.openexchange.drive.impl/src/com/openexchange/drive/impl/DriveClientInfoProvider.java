@@ -47,60 +47,52 @@
  *
  */
 
-package com.openexchange.session.management.json.actions;
+package com.openexchange.drive.impl;
 
-import java.util.Collection;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceExceptionCode;
-import com.openexchange.session.management.ManagedSession;
-import com.openexchange.session.management.SessionManagementService;
-import com.openexchange.session.management.json.osgi.Services;
-import com.openexchange.tools.session.ServerSession;
+import com.openexchange.clientinfo.ClientInfo;
+import com.openexchange.clientinfo.ClientInfoProvider;
+import com.openexchange.drive.DriveClientType;
+import com.openexchange.java.Strings;
+import com.openexchange.session.Session;
+
 
 /**
- * {@link GetSessionsAction}
+ * {@link DriveClientInfoProvider}
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since v7.10.0
  */
-public class GetSessionsAction implements AJAXActionService {
+public class DriveClientInfoProvider implements ClientInfoProvider {
 
-
-    public GetSessionsAction() {
-        super();
+    @Override
+    public ClientInfo getClientInfo(Session session) {
+        if (null != session) {
+            return getClientInfo(session.getClient());
+        }
+        return null;
     }
 
     @Override
-    public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
-        SessionManagementService service = Services.getService(SessionManagementService.class);
-        if (null == service) {
-            throw ServiceExceptionCode.absentService(SessionManagementService.class);
-        }
-        Collection<ManagedSession> sessions = service.getSessionsForUser(session);
-        JSONArray result = new JSONArray(sessions.size());
-        try {
-            for (ManagedSession s : sessions) {
-                JSONObject json = new JSONObject(8);
-                json.put("sessionId", s.getSessionId());
-                json.put("ipAddress", s.getIpAddress());
-                json.put("client", s.getClient());
-                json.put("userAgent", s.getUserAgent());
-                json.put("ctxId", s.getContextId());
-                json.put("userId", s.getUserId());
-                json.put("location", s.getLocation());
-                json.put("loginTime", s.getLoginTime());
-                result.add(0, json);
+    public ClientInfo getClientInfo(String clientId) {
+        if (Strings.isNotEmpty(clientId)) {
+            DriveClientType type = DriveClientType.parse(clientId);
+            switch (type) {
+                case ANDROID:
+                    return new DriveClientInfo("Android", null, null);
+                case IOS:
+                    return new DriveClientInfo("iOS", null, null);
+                case MAC_OS:
+                    return new DriveClientInfo("Mac OS", null, null);
+                case WINDOWS:
+                    return new DriveClientInfo("Windows", null, null);
+                default:
+                    if ("OXDrive".equals(clientId)) {
+                        return new DriveClientInfo(null, null, null);
+                    }
+                    return null;
             }
-        } catch (JSONException e) {
-            // should not happen
         }
-        return new AJAXRequestResult(result, "json");
+        return null;
     }
 
 }

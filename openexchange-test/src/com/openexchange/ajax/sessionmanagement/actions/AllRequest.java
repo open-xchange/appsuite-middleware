@@ -47,54 +47,82 @@
  *
  */
 
-package com.openexchange.session.management.json.actions;
+package com.openexchange.ajax.sessionmanagement.actions;
 
-import java.util.Collection;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceExceptionCode;
-import com.openexchange.session.management.ManagedSession;
-import com.openexchange.session.management.SessionManagementService;
-import com.openexchange.session.management.json.osgi.Services;
-import com.openexchange.tools.session.ServerSession;
+import java.io.IOException;
+import org.json.JSONException;
+import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AJAXRequest;
+import com.openexchange.ajax.framework.AbstractAJAXParser;
+import com.openexchange.ajax.framework.Header;
+import com.openexchange.ajax.framework.Params;
+import com.openexchange.ajax.sessionmanagement.AbstractSessionManagementTest;
+
 
 /**
- * {@link RemoveAllOtherSessionsAction}
+ * {@link AllRequest}
  *
- * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
+ * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since v7.10.0
  */
-public class RemoveAllOtherSessionsAction implements AJAXActionService {
+public class AllRequest implements AJAXRequest<AllResponse> {
 
-    /**
-     * Initializes a new {@link RemoveAllOtherSessionsAction}.
-     */
-    public RemoveAllOtherSessionsAction() {
-        super();
+    private boolean failOnError;
 
+    public AllRequest(boolean failOnError) {
+        this.failOnError = failOnError;
+    }
+
+    public AllRequest() {
+        this(true);
     }
 
     @Override
-    public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
-        // Get the service
-        SessionManagementService service = Services.getService(SessionManagementService.class);
-        if (null == service) {
-            throw ServiceExceptionCode.absentService(SessionManagementService.class);
-        }
-
-        // Get the data
-        String sessionIdToKeep = session.getSessionID();
-        Collection<ManagedSession> userSessions = service.getSessionsForUser(session);
-
-        // Remove all sessions except blacklisted and transmitted to keep
-        for (ManagedSession mSession : userSessions) {
-            String mSessionId = mSession.getSessionId();
-            if (false == sessionIdToKeep.equals(mSessionId)) {
-                service.removeSession(session, mSessionId);
-            }
-        }
-        return new AJAXRequestResult();
+    public com.openexchange.ajax.framework.AJAXRequest.Method getMethod() {
+        return Method.GET;
     }
+
+    @Override
+    public String getServletPath() {
+        return AbstractSessionManagementTest.SERVLET_PATH;
+    }
+
+    @Override
+    public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() throws IOException, JSONException {
+        return new Params(AJAXServlet.PARAMETER_ACTION, "all").toArray();
+    }
+
+    @Override
+    public AbstractAJAXParser<? extends AllResponse> getParser() {
+        return new Parser(failOnError);
+    }
+
+    @Override
+    public Object getBody() throws IOException, JSONException {
+        return null;
+    }
+
+    @Override
+    public Header[] getHeaders() {
+        return NO_HEADER;
+    }
+
+    public void setFailOnError(boolean failOnError) {
+        this.failOnError = failOnError;
+    }
+
+    private static final class Parser extends AbstractAJAXParser<AllResponse> {
+
+        protected Parser(boolean failOnError) {
+            super(failOnError);
+        }
+
+        @Override
+        protected AllResponse createResponse(Response response) throws JSONException {
+            return new AllResponse(response);
+        }
+
+    }
+
 }

@@ -70,6 +70,8 @@ public enum DAVUserAgent {
     DAVDROID("DAVdroid on Android (CalDAV/CardDAV)"),
     WINDOWS_PHONE("Windows Phone Contacts and Calendar (CalDAV/CardDAV)"),
     WINDOWS("Windows Contacts and Calendar (CalDAV/CardDAV)"),
+    GENERIC_CALDAV("Sync Client (CalDAV)"),
+    GENERIC_CARDDAV("Sync Client (CardDAV)"),
     UNKNOWN("CalDAV/CardDAV")
     ;
 

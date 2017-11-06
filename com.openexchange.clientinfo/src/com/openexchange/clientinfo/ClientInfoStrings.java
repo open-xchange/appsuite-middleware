@@ -47,82 +47,28 @@
  *
  */
 
-package com.openexchange.ajax.sessionmanagement.actions;
+package com.openexchange.clientinfo;
 
-import java.io.IOException;
-import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.framework.AJAXRequest;
-import com.openexchange.ajax.framework.AbstractAJAXParser;
-import com.openexchange.ajax.framework.Header;
-import com.openexchange.ajax.framework.Params;
-import com.openexchange.ajax.sessionmanagement.AbstractSessionManagementTest;
+import com.openexchange.i18n.LocalizableStrings;
+
 
 /**
- * {@link RemoveAllOtherSessionsRequest}
+ * {@link ClientInfoStrings}
  *
- * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
+ * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since v7.10.0
  */
-public class RemoveAllOtherSessionsRequest implements AJAXRequest<RemoveAllOtherSessionsResponse> {
+public class ClientInfoStrings implements LocalizableStrings {
 
-    private boolean failOnError;
+    // %1$s, %2$s %3$s on %4$s %5$s
+    public final static String DEFAULT_CLIENT_INFO_MESSAGE = "%1$s, %2$s %3$s on %4$s %5$s";
 
-    public RemoveAllOtherSessionsRequest() {
-        this(true);
-    }
+    // %1$s on %2$s %3$s
+    public final static String CLIENT_BROWSER_INFO_MESSAGE = "%1$s on %2$s %3$s";
 
-    public RemoveAllOtherSessionsRequest(boolean failOnError) {
-        super();
-        this.failOnError = failOnError;
-    }
+    // %1$s
+    public final static String CLIENT_INFO_MESSAGE = "%1$s";
 
-    @Override
-    public com.openexchange.ajax.framework.AJAXRequest.Method getMethod() {
-        return Method.PUT;
-    }
+    private ClientInfoStrings() {}
 
-    @Override
-    public String getServletPath() {
-        return AbstractSessionManagementTest.SERVLET_PATH;
-    }
-
-    @Override
-    public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() throws IOException, JSONException {
-        return new Params(AJAXServlet.PARAMETER_ACTION, "removeAllOtherSessions").toArray();
-    }
-
-    @Override
-    public AbstractAJAXParser<? extends RemoveAllOtherSessionsResponse> getParser() {
-        return new Parser(failOnError);
-    }
-
-    @Override
-    public Object getBody() throws IOException, JSONException {
-        return new JSONObject();
-    }
-
-    @Override
-    public Header[] getHeaders() {
-        return NO_HEADER;
-    }
-
-    public void setFailOnError(boolean failOnError) {
-        this.failOnError = failOnError;
-    }
-
-    private static final class Parser extends AbstractAJAXParser<RemoveAllOtherSessionsResponse> {
-
-        protected Parser(boolean failOnError) {
-            super(failOnError);
-        }
-
-        @Override
-        protected RemoveAllOtherSessionsResponse createResponse(Response response) throws JSONException {
-            return new RemoveAllOtherSessionsResponse(response);
-        }
-
-    }
 }

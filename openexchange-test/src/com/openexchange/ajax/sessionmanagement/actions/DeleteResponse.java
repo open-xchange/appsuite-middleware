@@ -49,54 +49,20 @@
 
 package com.openexchange.ajax.sessionmanagement.actions;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
-import com.openexchange.exception.OXException;
-import com.openexchange.session.management.ManagedSession;
-import com.openexchange.session.management.impl.DefaultManagedSession;
-import com.openexchange.tools.servlet.AjaxExceptionCodes;
-import edu.emory.mathcs.backport.java.util.Collections;
+
 
 /**
- * {@link GetSessionsResponse}
+ * {@link DeleteResponse}
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since v7.10.0
  */
-public class GetSessionsResponse extends AbstractAJAXResponse {
+public class DeleteResponse extends AbstractAJAXResponse {
 
-    protected GetSessionsResponse(Response response) {
+    protected DeleteResponse(Response response) {
         super(response);
-    }
-
-    public Collection<ManagedSession> getSessions() throws OXException {
-        try {
-            JSONArray array = (JSONArray) getData();
-            ArrayList<ManagedSession> sessions = new ArrayList<>(array.length());
-            for (int i = 0; i < array.length(); i++) {
-                sessions.add(parseSession(array.getJSONObject(i)));
-            }
-            return Collections.unmodifiableList(sessions);
-        } catch (JSONException e) {
-            throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
-        }
-    }
-
-    private ManagedSession parseSession(JSONObject obj) throws JSONException {
-        String sessionId = obj.getString("sessionId");
-        String ipAddress = obj.getString("ipAddress");
-        String client = obj.getString("client");
-        String userAgent = obj.getString("userAgent");
-        long loginTime = obj.getLong("loginTime");
-        int ctxId = obj.getInt("ctxId");
-        int userId = obj.getInt("userId");
-        DefaultManagedSession session = DefaultManagedSession.builder().setClient(client).setCtxId(ctxId).setIpAddress(ipAddress).setLocation("").setLoginTime(loginTime).setSessionId(sessionId).setUserAgent(userAgent).setUserId(userId).build();
-        return session;
     }
 
 }

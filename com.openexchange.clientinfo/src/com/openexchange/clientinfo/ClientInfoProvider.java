@@ -47,49 +47,32 @@
  *
  */
 
-package com.openexchange.ajax.sessionmanagement.tests;
+package com.openexchange.clientinfo;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import java.util.Collection;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import com.openexchange.ajax.sessionmanagement.AbstractSessionManagementTest;
-import com.openexchange.ajax.sessionmanagement.actions.AllRequest;
-import com.openexchange.ajax.sessionmanagement.actions.AllResponse;
-import com.openexchange.session.management.ManagedSession;
+import com.openexchange.session.Session;
 
 /**
- * {@link GetSessionsTest}
+ * {@link ClientInfoProvider}
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since v7.10.0
  */
-public class GetSessionsTest extends AbstractSessionManagementTest {
+public interface ClientInfoProvider {
 
-    @Override
-    @Before
-    public void setUp() throws Exception {
-        super.setUp();
-    }
+    /**
+     * Get client info for given session
+     * 
+     * @param session The session
+     * @return Client info
+     */
+    ClientInfo getClientInfo(Session session);
 
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        super.tearDown();
-    }
-
-    @Test
-    public void testGetSessions() throws Exception {
-        AllRequest req = new AllRequest();
-        AllResponse resp = testClient1.execute(req);
-        Collection<ManagedSession> sessions = resp.getSessions();
-        assertEquals(2, sessions.size());
-        for (ManagedSession session : sessions) {
-            String sessionId = session.getSessionId();
-            assertTrue(sessionId.equals(testClient1.getSession().getId()) || sessionId.equals(testClient2.getSession().getId()));
-        }
-    }
+    /**
+     * Get client info for given client identifier
+     * 
+     * @param clientId The client identifier
+     * @return Client info
+     */
+    ClientInfo getClientInfo(String clientId);
 
 }

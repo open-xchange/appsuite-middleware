@@ -47,22 +47,34 @@
  *
  */
 
-package com.openexchange.ajax.sessionmanagement.actions;
-
-import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.framework.AbstractAJAXResponse;
+package com.openexchange.clientinfo;
 
 
 /**
- * {@link RemoveSessionResponse}
+ * {@link ClientInfoType}
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since v7.10.0
  */
-public class RemoveSessionResponse extends AbstractAJAXResponse {
+public enum ClientInfoType {
 
-    protected RemoveSessionResponse(Response response) {
-        super(response);
+    BROWSER("browser"),
+
+    OXAPP("oxapp"),
+
+    SYNC("sync"),
+
+    OTHER("other"),
+    ;
+
+    private final String name;
+
+    private ClientInfoType(String name) {
+        this.name = name;
+    }
+
+    public String getName() {
+        return name;
     }
 
 }

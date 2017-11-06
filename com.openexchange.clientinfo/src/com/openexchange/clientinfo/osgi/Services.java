@@ -47,48 +47,72 @@
  *
  */
 
-package com.openexchange.ajax.sessionmanagement.tests;
+package com.openexchange.clientinfo.osgi;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import java.util.Collection;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import com.openexchange.ajax.sessionmanagement.AbstractSessionManagementTest;
-import com.openexchange.ajax.sessionmanagement.actions.AllRequest;
-import com.openexchange.ajax.sessionmanagement.actions.AllResponse;
-import com.openexchange.session.management.ManagedSession;
+import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.osgi.HousekeepingActivator;
 
 /**
- * {@link GetSessionsTest}
+ * {@link Services}
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since v7.10.0
  */
-public class GetSessionsTest extends AbstractSessionManagementTest {
+public class Services {
 
-    @Override
-    @Before
-    public void setUp() throws Exception {
-        super.setUp();
+    /**
+     * Initializes a new {@link Services}.
+     */
+    private Services() {
+        super();
     }
 
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        super.tearDown();
+    private static final AtomicReference<ClientInfoActivator> REF = new AtomicReference<>();
+
+    /**
+     * Sets the service lookup.
+     *
+     * @param serviceLookup The service lookup or <code>null</code>
+     */
+    public static void setServiceLookup(final ClientInfoActivator serviceLookup) {
+        REF.set(serviceLookup);
     }
 
-    @Test
-    public void testGetSessions() throws Exception {
-        AllRequest req = new AllRequest();
-        AllResponse resp = testClient1.execute(req);
-        Collection<ManagedSession> sessions = resp.getSessions();
-        assertEquals(2, sessions.size());
-        for (ManagedSession session : sessions) {
-            String sessionId = session.getSessionId();
-            assertTrue(sessionId.equals(testClient1.getSession().getId()) || sessionId.equals(testClient2.getSession().getId()));
+    /**
+     * Gets the service lookup.
+     *
+     * @return The service lookup or <code>null</code>
+     */
+    public static HousekeepingActivator getServiceLookup() {
+        return REF.get();
+    }
+
+    /**
+     * Gets the service of specified type
+     *
+     * @param clazz The service's class
+     * @return The service
+     * @throws IllegalStateException If an error occurs while returning the demanded service
+     */
+    public static <S extends Object> S getService(final Class<? extends S> clazz) {
+        final com.openexchange.server.ServiceLookup serviceLookup = REF.get();
+        if (null == serviceLookup) {
+            throw new IllegalStateException("Missing ServiceLookup instance. Bundle \"com.openexchange.session.management.json\" not started?");
+        }
+        return serviceLookup.getService(clazz);
+    }
+
+    /**
+     * (Optionally) Gets the service of specified type
+     *
+     * @param clazz The service's class
+     * @return The service or <code>null</code> if absent
+     */
+    public static <S extends Object> S optService(final Class<? extends S> clazz) {
+        try {
+            return getService(clazz);
+        } catch (final IllegalStateException e) {
+            return null;
         }
     }
 

@@ -47,48 +47,66 @@
  *
  */
 
-package com.openexchange.session.management.json.actions;
+package com.openexchange.dav;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.exception.OXException;
-import com.openexchange.session.management.SessionManagementService;
-import com.openexchange.session.management.json.osgi.Services;
-import com.openexchange.tools.servlet.AjaxExceptionCodes;
-import com.openexchange.tools.session.ServerSession;
+import java.util.Locale;
+import com.openexchange.clientinfo.ClientInfo;
+import com.openexchange.clientinfo.ClientInfoType;
 
 
 /**
- * {@link RemoveSessionAction}
+ * {@link DAVClientInfo}
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since v7.10.0
  */
-public class RemoveSessionAction implements AJAXActionService {
+public class DAVClientInfo implements ClientInfo {
 
+    private final String platform;
+    private final String platformVersion;
+    private final String app;
+    private final String appVersion;
 
-    public RemoveSessionAction() {
+    public DAVClientInfo(String platform, String platformVersion, String app, String appVersion) {
         super();
+        this.platform = platform;
+        this.platformVersion = platformVersion;
+        this.app = app;
+        this.appVersion = appVersion;
+    }
+
+    public DAVClientInfo(String app) {
+        this(null, null, app, null);
     }
 
     @Override
-    public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
-        Object data = requestData.getData();
-        if ((data == null) || (false == JSONObject.class.isInstance(data))) {
-            throw AjaxExceptionCodes.MISSING_REQUEST_BODY.create();
-        }
-        JSONObject dataObject = (JSONObject) data;
-        try {
-            String sessionIdToRemove = dataObject.getString("sessionIdToRemove");
-            SessionManagementService service = Services.getService(SessionManagementService.class);
-            service.removeSession(session, sessionIdToRemove);
-        } catch (JSONException e) {
-            throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());
-        }
-        return new AJAXRequestResult();
+    public ClientInfoType getType() {
+        return ClientInfoType.SYNC;
+    }
+
+    @Override
+    public String getPlatform() {
+        return platform;
+    }
+
+    @Override
+    public String getPlatformVersion() {
+        return platformVersion;
+    }
+
+    @Override
+    public String getApp() {
+        return app;
+    }
+
+    @Override
+    public String getAppVersion() {
+        return appVersion;
+    }
+
+    @Override
+    public String toString(Locale locale) {
+        return app;
     }
 
 }

@@ -47,49 +47,40 @@
  *
  */
 
-package com.openexchange.ajax.sessionmanagement.tests;
+package com.openexchange.clientinfo.osgi;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import java.util.Collection;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import com.openexchange.ajax.sessionmanagement.AbstractSessionManagementTest;
-import com.openexchange.ajax.sessionmanagement.actions.AllRequest;
-import com.openexchange.ajax.sessionmanagement.actions.AllResponse;
-import com.openexchange.session.management.ManagedSession;
+import com.openexchange.clientinfo.ClientInfoProvider;
+import com.openexchange.clientinfo.ClientInfoService;
+import com.openexchange.clientinfo.impl.ClientInfoServiceImpl;
+import com.openexchange.clientinfo.impl.WebClientInfoProvider;
+import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.osgi.ServiceSet;
+import com.openexchange.sessiond.SessiondService;
+import com.openexchange.uadetector.UserAgentParser;
+
 
 /**
- * {@link GetSessionsTest}
+ * {@link ClientInfoActivator}
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since v7.10.0
  */
-public class GetSessionsTest extends AbstractSessionManagementTest {
+public class ClientInfoActivator extends HousekeepingActivator {
 
     @Override
-    @Before
-    public void setUp() throws Exception {
-        super.setUp();
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[] { UserAgentParser.class, SessiondService.class };
     }
 
     @Override
-    @After
-    public void tearDown() throws Exception {
-        super.tearDown();
-    }
-
-    @Test
-    public void testGetSessions() throws Exception {
-        AllRequest req = new AllRequest();
-        AllResponse resp = testClient1.execute(req);
-        Collection<ManagedSession> sessions = resp.getSessions();
-        assertEquals(2, sessions.size());
-        for (ManagedSession session : sessions) {
-            String sessionId = session.getSessionId();
-            assertTrue(sessionId.equals(testClient1.getSession().getId()) || sessionId.equals(testClient2.getSession().getId()));
-        }
+    protected void startBundle() throws Exception {
+        Services.setServiceLookup(this);
+        ServiceSet<ClientInfoProvider> set = new ServiceSet<>();
+        ClientInfoService service = new ClientInfoServiceImpl(set);
+        track(ClientInfoProvider.class, set);
+        registerService(ClientInfoService.class, service);
+        registerService(ClientInfoProvider.class, new WebClientInfoProvider(), 20);
+        openTrackers();
     }
 
 }

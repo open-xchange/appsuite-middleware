@@ -47,26 +47,54 @@
  *
  */
 
-package com.openexchange.ajax.sessionmanagement.actions;
+package com.openexchange.session.management.json.actions;
 
-import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import java.util.Collection;
+import com.openexchange.ajax.requesthandler.AJAXActionService;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.exception.OXException;
+import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.session.management.ManagedSession;
+import com.openexchange.session.management.SessionManagementService;
+import com.openexchange.session.management.json.osgi.Services;
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link RemoveAllOtherSessionsResponse}
+ * {@link ClearAction}
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.0
  */
-public class RemoveAllOtherSessionsResponse extends AbstractAJAXResponse {
+public class ClearAction implements AJAXActionService {
 
     /**
-     * Initializes a new {@link RemoveAllOtherSessionsResponse}.
-     * 
-     * @param response
+     * Initializes a new {@link ClearAction}.
      */
-    protected RemoveAllOtherSessionsResponse(Response response) {
-        super(response);
+    public ClearAction() {
+        super();
+
     }
 
+    @Override
+    public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
+        // Get the service
+        SessionManagementService service = Services.getService(SessionManagementService.class);
+        if (null == service) {
+            throw ServiceExceptionCode.absentService(SessionManagementService.class);
+        }
+
+        // Get the data
+        String sessionIdToKeep = session.getSessionID();
+        Collection<ManagedSession> userSessions = service.getSessionsForUser(session);
+
+        // Remove all sessions except blacklisted and transmitted to keep
+        for (ManagedSession mSession : userSessions) {
+            String mSessionId = mSession.getSessionId();
+            if (false == sessionIdToKeep.equals(mSessionId)) {
+                service.removeSession(session, mSessionId);
+            }
+        }
+        return new AJAXRequestResult();
+    }
 }

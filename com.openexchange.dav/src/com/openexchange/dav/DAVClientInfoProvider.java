@@ -47,49 +47,62 @@
  *
  */
 
-package com.openexchange.ajax.sessionmanagement.tests;
+package com.openexchange.dav;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import java.util.Collection;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import com.openexchange.ajax.sessionmanagement.AbstractSessionManagementTest;
-import com.openexchange.ajax.sessionmanagement.actions.AllRequest;
-import com.openexchange.ajax.sessionmanagement.actions.AllResponse;
-import com.openexchange.session.management.ManagedSession;
+import com.openexchange.ajax.Client;
+import com.openexchange.clientinfo.ClientInfo;
+import com.openexchange.clientinfo.ClientInfoProvider;
+import com.openexchange.java.Strings;
+import com.openexchange.session.Session;
 
 /**
- * {@link GetSessionsTest}
+ * {@link DAVClientInfoProvider}
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class GetSessionsTest extends AbstractSessionManagementTest {
+public class DAVClientInfoProvider implements ClientInfoProvider {
 
-    @Override
-    @Before
-    public void setUp() throws Exception {
-        super.setUp();
+    /**
+     * Initializes a new {@link DAVClientInfoProvider}.
+     */
+    public DAVClientInfoProvider() {
+        super();
     }
 
     @Override
-    @After
-    public void tearDown() throws Exception {
-        super.tearDown();
-    }
-
-    @Test
-    public void testGetSessions() throws Exception {
-        AllRequest req = new AllRequest();
-        AllResponse resp = testClient1.execute(req);
-        Collection<ManagedSession> sessions = resp.getSessions();
-        assertEquals(2, sessions.size());
-        for (ManagedSession session : sessions) {
-            String sessionId = session.getSessionId();
-            assertTrue(sessionId.equals(testClient1.getSession().getId()) || sessionId.equals(testClient2.getSession().getId()));
+    public ClientInfo getClientInfo(Session session) {
+        if (null == session) {
+            return null;
         }
+        DAVUserAgent userAgent = getDAVUserAgent(session);
+        if (DAVUserAgent.UNKNOWN.equals(userAgent)) {
+            return getClientInfo(session.getClient());
+        }
+        return new DAVClientInfo(userAgent.getReadableName());
+    }
+
+    @Override
+    public ClientInfo getClientInfo(String clientId) {
+        if (Strings.isEmpty(clientId)) {
+            return null;
+        }
+        Client client = Client.getClientByID(clientId);
+        if (Client.CALDAV.equals(client)) {
+            return new DAVClientInfo(DAVUserAgent.GENERIC_CALDAV.getReadableName());
+        }
+        if (Client.CARDDAV.equals(client)) {
+            return new DAVClientInfo(DAVUserAgent.GENERIC_CARDDAV.getReadableName());
+        }
+        return null;
+    }
+
+    private static DAVUserAgent getDAVUserAgent(Session session) {
+        Object userAgentParameter = session.getParameter(Session.PARAM_USER_AGENT);
+        if (null != userAgentParameter && String.class.isInstance(userAgentParameter)) {
+            return DAVUserAgent.parse((String) userAgentParameter);
+        }
+        return DAVUserAgent.UNKNOWN;
     }
 
 }

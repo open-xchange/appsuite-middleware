@@ -47,49 +47,65 @@
  *
  */
 
-package com.openexchange.ajax.sessionmanagement.tests;
+package com.openexchange.clientinfo.impl;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import java.util.Collection;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import com.openexchange.ajax.sessionmanagement.AbstractSessionManagementTest;
-import com.openexchange.ajax.sessionmanagement.actions.AllRequest;
-import com.openexchange.ajax.sessionmanagement.actions.AllResponse;
-import com.openexchange.session.management.ManagedSession;
+import com.openexchange.ajax.Client;
+import com.openexchange.clientinfo.ClientInfo;
+import com.openexchange.clientinfo.ClientInfoProvider;
+import com.openexchange.clientinfo.osgi.Services;
+import com.openexchange.java.Strings;
+import com.openexchange.session.Session;
+import com.openexchange.uadetector.UserAgentParser;
+import net.sf.uadetector.OperatingSystem;
+import net.sf.uadetector.ReadableUserAgent;
+
 
 /**
- * {@link GetSessionsTest}
+ * {@link WebClientInfoProvider}
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since v7.10.0
  */
-public class GetSessionsTest extends AbstractSessionManagementTest {
+public class WebClientInfoProvider implements ClientInfoProvider {
 
     @Override
-    @Before
-    public void setUp() throws Exception {
-        super.setUp();
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        super.tearDown();
-    }
-
-    @Test
-    public void testGetSessions() throws Exception {
-        AllRequest req = new AllRequest();
-        AllResponse resp = testClient1.execute(req);
-        Collection<ManagedSession> sessions = resp.getSessions();
-        assertEquals(2, sessions.size());
-        for (ManagedSession session : sessions) {
-            String sessionId = session.getSessionId();
-            assertTrue(sessionId.equals(testClient1.getSession().getId()) || sessionId.equals(testClient2.getSession().getId()));
+    public ClientInfo getClientInfo(Session session) {
+        if (null != session) {
+            UserAgentParser parser = Services.getService(UserAgentParser.class);
+            String userAgent = (String) session.getParameter(Session.PARAM_USER_AGENT);
+            if (null != parser && Strings.isNotEmpty(userAgent)) {
+                ReadableUserAgent info = parser.parse(userAgent);
+                OperatingSystem operatingSystem = info.getOperatingSystem();
+                String os = null;
+                String osVersion = null;
+                if (null != operatingSystem) {
+                    os = operatingSystem.getName();
+                    osVersion = operatingSystem.getVersionNumber().getMajor();
+                }
+                String browser = info.getName();
+                String browserVersion = info.getVersionNumber().getMajor();
+                String client = "";
+                if (Client.APPSUITE_UI.getClientId().equals(session.getClient())) {
+                    client = "Appsuite UI";
+                } else if (Client.OX6_UI.getClientId().equals(session.getClient())) {
+                    client = "OX6 UI";
+                }
+                return new WebClientInfo(client, os, osVersion, browser, browserVersion);
+            }
         }
+
+        return null;
+    }
+
+    @Override
+    public ClientInfo getClientInfo(String clientId) {
+        String client = "";
+        if (Client.APPSUITE_UI.getClientId().equals(clientId)) {
+            client = "Appsuite UI";
+        } else if (Client.OX6_UI.getClientId().equals(clientId)) {
+            client = "OX6 UI";
+        }
+        return new WebClientInfo(client, null, null, null, null);
     }
 
 }

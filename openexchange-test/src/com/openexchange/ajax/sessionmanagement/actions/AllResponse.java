@@ -47,49 +47,57 @@
  *
  */
 
-package com.openexchange.ajax.sessionmanagement.tests;
+package com.openexchange.ajax.sessionmanagement.actions;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import java.util.ArrayList;
 import java.util.Collection;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import com.openexchange.ajax.sessionmanagement.AbstractSessionManagementTest;
-import com.openexchange.ajax.sessionmanagement.actions.AllRequest;
-import com.openexchange.ajax.sessionmanagement.actions.AllResponse;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import com.openexchange.exception.OXException;
 import com.openexchange.session.management.ManagedSession;
+import com.openexchange.session.management.impl.DefaultManagedSession;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import edu.emory.mathcs.backport.java.util.Collections;
 
 /**
- * {@link GetSessionsTest}
+ * {@link AllResponse}
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since v7.10.0
  */
-public class GetSessionsTest extends AbstractSessionManagementTest {
+public class AllResponse extends AbstractAJAXResponse {
 
-    @Override
-    @Before
-    public void setUp() throws Exception {
-        super.setUp();
+    protected AllResponse(Response response) {
+        super(response);
     }
 
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        super.tearDown();
-    }
-
-    @Test
-    public void testGetSessions() throws Exception {
-        AllRequest req = new AllRequest();
-        AllResponse resp = testClient1.execute(req);
-        Collection<ManagedSession> sessions = resp.getSessions();
-        assertEquals(2, sessions.size());
-        for (ManagedSession session : sessions) {
-            String sessionId = session.getSessionId();
-            assertTrue(sessionId.equals(testClient1.getSession().getId()) || sessionId.equals(testClient2.getSession().getId()));
+    public Collection<ManagedSession> getSessions() throws OXException {
+        try {
+            JSONArray array = (JSONArray) getData();
+            ArrayList<ManagedSession> sessions = new ArrayList<>(array.length());
+            for (int i = 0; i < array.length(); i++) {
+                sessions.add(parseSession(array.getJSONObject(i)));
+            }
+            return Collections.unmodifiableList(sessions);
+        } catch (JSONException e) {
+            throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
+    }
+
+    private ManagedSession parseSession(JSONObject obj) throws JSONException {
+        String sessionId = obj.getString("sessionId");
+        String ipAddress = obj.getString("ipAddress");
+        String client = obj.getString("client");
+        String userAgent = obj.getString("userAgent");
+        long loginTime = obj.optLong("loginTime");
+        long lastActive = obj.optLong("lastActive");
+        String location = obj.optString("location");
+        JSONObject deviceInfo = obj.optJSONObject("device");
+        DefaultManagedSession session = DefaultManagedSession.builder().setClient(client).setIpAddress(ipAddress).setLocation("").setLoginTime(loginTime).setLastActive(lastActive).setSessionId(sessionId).setUserAgent(userAgent).build();
+        return session;
     }
 
 }
