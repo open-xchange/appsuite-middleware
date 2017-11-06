@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.schedjoules.api.client;
 
+import java.io.Closeable;
 import java.io.InputStream;
 
 /**
@@ -56,7 +57,7 @@ import java.io.InputStream;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class SchedJoulesResponse {
+public class SchedJoulesResponse implements Closeable {
 
     private InputStream stream;
     private final int statusCode;

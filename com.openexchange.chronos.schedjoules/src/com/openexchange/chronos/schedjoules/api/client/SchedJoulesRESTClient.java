@@ -298,7 +298,7 @@ public class SchedJoulesRESTClient {
             // Get the response code and assert
             int statusCode = assertStatusCode(httpResponse);
             if (statusCode == 304) {
-                // Ok, nothing was modified, no response body, return as is
+                // OK, nothing was modified, no response body, return as is
                 return new SchedJoulesResponse(statusCode);
             }
 
@@ -321,16 +321,9 @@ public class SchedJoulesRESTClient {
      */
     private SchedJoulesResponse prepareResponse(HttpResponse httpResponse) throws IOException, OXException {
         SchedJoulesResponse response = new SchedJoulesResponse(httpResponse.getStatusLine().getStatusCode());
-        Header ctHeader = httpResponse.getFirstHeader(HttpHeaders.CONTENT_TYPE);
-        if (ctHeader != null) {
-            String ct = ctHeader.getValue();
-            String contentType = ct.substring(0, ct.indexOf(';'));
-            response.setContentType(contentType);
-        }
-        Header eTagHeader = httpResponse.getFirstHeader(HttpHeaders.ETAG);
-        if (eTagHeader != null) {
-            response.setETag(eTagHeader.getValue());
-        }
+        setContentType(httpResponse, response);
+        setETag(httpResponse, response);
+
         HttpEntity entity = httpResponse.getEntity();
         if (entity == null) {
             return response;
@@ -338,6 +331,39 @@ public class SchedJoulesRESTClient {
 
         response.setStream(entity.getContent());
         return response;
+    }
+
+    /**
+     * Sets the content type of the {@link SchedJoulesResponse}
+     * 
+     * @param httpResponse the {@link HttpResponse}
+     * @param schedjoulesResponse the {@link SchedJoulesResponse}
+     */
+    private void setContentType(HttpResponse httpResponse, SchedJoulesResponse schedjoulesResponse) {
+        Header ctHeader = httpResponse.getFirstHeader(HttpHeaders.CONTENT_TYPE);
+        if (ctHeader == null) {
+            return;
+        }
+        String value = ctHeader.getValue();
+        if (Strings.isEmpty(value)) {
+            return;
+        }
+        int indexOf = value.indexOf(';');
+        schedjoulesResponse.setContentType(indexOf < 0 ? value : value.substring(0, indexOf));
+    }
+
+    /**
+     * Set the ETag to the specified {@link SchedJoulesResponse}
+     * 
+     * @param httpResponse the {@link HttpResponse}
+     * @param schedjoulesResponse the {@link SchedJoulesResponse}
+     */
+    private void setETag(HttpResponse httpResponse, SchedJoulesResponse response) {
+        Header eTagHeader = httpResponse.getFirstHeader(HttpHeaders.ETAG);
+        if (eTagHeader == null) {
+            return;
+        }
+        response.setETag(eTagHeader.getValue());
     }
 
     /**
