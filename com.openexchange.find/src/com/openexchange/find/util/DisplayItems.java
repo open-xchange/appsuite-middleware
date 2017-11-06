@@ -124,7 +124,7 @@ public class DisplayItems {
             return String.format(locale, template, firstName, lastName, department);
         }
 
-        return contact.getDisplayName();
+        return String.format(locale, template, contact.getDisplayName(), "", department);
     }
 
     /**
