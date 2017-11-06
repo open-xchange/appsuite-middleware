@@ -55,8 +55,6 @@ import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_ORDE
 import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_ORDER_BY;
 import static com.openexchange.tools.arrays.Collections.unmodifiableSet;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
@@ -68,10 +66,10 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.SelfProtectionFactory;
 import com.openexchange.chronos.common.SelfProtectionFactory.SelfProtection;
 import com.openexchange.chronos.json.converter.EventResultConverter;
-import com.openexchange.chronos.json.converter.mapper.EventMapper;
 import com.openexchange.chronos.json.oauth.ChronosOAuthScope;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
 import com.openexchange.chronos.service.CalendarParameters;
@@ -140,22 +138,7 @@ public class AllAction extends ChronosAction {
                 EventField orderBy = calendarAccess.get(CalendarParameters.PARAMETER_ORDER_BY, EventField.class);
                 Order order = calendarAccess.get(CalendarParameters.PARAMETER_ORDER, SortOrder.Order.class, SortOrder.Order.ASC);
                 if (orderBy != null) {
-                    Collections.sort(result, new Comparator<Event>() {
-
-                        @Override
-                        public int compare(Event o1, Event o2) {
-                            try {
-                                if(order.equals(SortOrder.Order.ASC)){
-                                    return EventMapper.getInstance().get(orderBy).compare(o1, o2);
-                                } else {
-                                    return -1 * EventMapper.getInstance().get(orderBy).compare(o1, o2);
-                                }
-                            } catch (OXException e) {
-                                // Unexpected error
-                                return 0;
-                            }
-                        }
-                    });
+                    result = CalendarUtils.sortEvents(result, new SortOrder[] { SortOrder.getSortOrder(orderBy, order) }, getTimeZone(calendarAccess.getSession(), requestData));
                 }
 
                 for (Event event : result) {
