@@ -58,6 +58,7 @@ import com.openexchange.find.facet.DisplayItem;
 import com.openexchange.find.osgi.Services;
 import com.openexchange.groupware.contact.ContactUtil;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.i18n.I18nService;
 import com.openexchange.i18n.I18nServiceRegistry;
 import com.openexchange.image.ImageDataSource;
@@ -108,7 +109,7 @@ public class DisplayItems {
      * @return the display name
      */
     private static String formatDisplayName(Contact contact, Locale locale) {
-        String template = getTemplate(locale, contact.containsDepartment() && !Strings.isEmpty(contact.getDepartment()));
+        String template = getTemplate(locale, hasDepartment(contact));
         String lastName = contact.getSurName();
         String firstName = contact.getGivenName();
         String department = Strings.isEmpty(contact.getDepartment()) ? "" : contact.getDepartment();
@@ -124,6 +125,16 @@ public class DisplayItems {
         }
 
         return contact.getDisplayName();
+    }
+
+    /**
+     * Determines whether the specified {@link Contact} has the department set and is an entry in the GAB (Global Address Book)
+     * 
+     * @param contact The {@link Contact}
+     * @return <code>true</code> if it has the department set and is an entry in the GAB, <code>false</code> otherwise
+     */
+    private static boolean hasDepartment(Contact contact) {
+        return contact.containsDepartment() && !Strings.isEmpty(contact.getDepartment()) && contact.getParentFolderID() == FolderObject.SYSTEM_LDAP_FOLDER_ID;
     }
 
     /**
