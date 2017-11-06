@@ -43,10 +43,8 @@ package com.sun.mail.imap;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Vector;
 import java.util.Hashtable;
 import java.util.NoSuchElementException;
 import java.util.logging.Level;
@@ -1252,7 +1250,7 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 	    fitems = protocol.getFetchItems();
 	}
 
-	StringBuffer command = new StringBuffer();
+    StringBuilder command = new StringBuilder();
 	boolean first = true;
 	boolean allHeaders = false;
 
@@ -1480,12 +1478,12 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
      * requested headers.
      */
     private String createHeaderCommand(String[] hdrs, boolean isRev1) {
-	StringBuffer sb;
+    StringBuilder sb;
 
 	if (isRev1)
-	    sb = new StringBuffer("BODY.PEEK[HEADER.FIELDS (");
+	    sb = new StringBuilder("BODY.PEEK[HEADER.FIELDS (");
 	else
-	    sb = new StringBuffer("RFC822.HEADER.LINES (");
+	    sb = new StringBuilder("RFC822.HEADER.LINES (");
 
 	for (int i = 0; i < hdrs.length; i++) {
 	    if (i > 0)

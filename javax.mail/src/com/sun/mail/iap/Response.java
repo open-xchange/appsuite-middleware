@@ -107,6 +107,8 @@ public class Response {
     /**
      * Constructor for testing.
      *
+     * @param   s   the response string
+     * @param   supportsUtf8    allow UTF-8 in response?
      * @since	JavaMail 1.6.0
      */
     public Response(String s, boolean supportsUtf8) {
@@ -172,6 +174,7 @@ public class Response {
     /**
      * Does the server support UTF-8?
      *
+     * @return      true if the server supports UTF-8
      * @since	JavaMail 1.6.0
      */
     public boolean supportsUtf8() {
@@ -244,6 +247,9 @@ public class Response {
      * Skip past any spaces.  If the next non-space character is c,
      * consume it and return true.  Otherwise stop at that point
      * and return false.
+     *
+     * @param   c   the character to look for
+     * @return      true if the character is found
      */
     public boolean isNextNonSpace(char c) {
 	skipSpaces();

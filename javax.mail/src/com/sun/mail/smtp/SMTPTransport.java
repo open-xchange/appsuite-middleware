@@ -246,7 +246,7 @@ public class SMTPTransport extends Transport {
 	    new OAuth2Authenticator(),
 	    new OAuthBearerAuthenticator()
 	};
-	StringBuffer sb = new StringBuffer();
+	StringBuilder sb = new StringBuilder();
 	for (int i = 0; i < a.length; i++) {
 	    authenticators.put(a[i].getMechanism(), a[i]);
 	    sb.append(a[i].getMechanism()).append(' ');
@@ -2223,7 +2223,7 @@ public class SMTPTransport extends Transport {
 		if (logger.isLoggable(Level.FINE))
 		    logger.fine("could not connect to host \"" +
 				    host + "\", port: " + port +
-				    ", response: " + r + "\n");
+				    ", response: " + r);
 		throw new MessagingException(
 			"Could not connect to SMTP host: " + host +
 				    ", port: " + port +
@@ -2231,7 +2231,7 @@ public class SMTPTransport extends Transport {
 	    } else {
 		if (logger.isLoggable(Level.FINE))
 		    logger.fine("connected to host \"" +
-				       host + "\", port: " + port + "\n");
+				       host + "\", port: " + port);
 	    }
 	} catch (UnknownHostException uhex) {
 	    throw new MessagingException("Unknown SMTP host: " + host, uhex);
@@ -2270,7 +2270,7 @@ public class SMTPTransport extends Transport {
 		if (logger.isLoggable(Level.FINE))
 		    logger.fine("got bad greeting from host \"" +
 				    host + "\", port: " + port +
-				    ", response: " + r + "\n");
+				    ", response: " + r);
 		throw new MessagingException(
 			"Got bad greeting from SMTP host: " + host +
 				    ", port: " + port +
@@ -2278,7 +2278,7 @@ public class SMTPTransport extends Transport {
 	    } else {
 		if (logger.isLoggable(Level.FINE))
 		    logger.fine("protocol started to host \"" +
-				       host + "\", port: " + port + "\n");
+				       host + "\", port: " + port);
 	    }
 	} catch (IOException ioe) {
 	    throw new MessagingException(
@@ -2460,7 +2460,7 @@ public class SMTPTransport extends Transport {
 	assert Thread.holdsLock(this);
         String serverResponse = "";
         int returnCode = 0;
-	StringBuffer buf = new StringBuffer(100);
+	StringBuilder buf = new StringBuilder(100);
 
 	// read the server response line(s) and add them to the buffer
 	// that stores the response
@@ -2655,7 +2655,7 @@ public class SMTPTransport extends Transport {
      * @since JavaMail 1.6.0
      */
     protected static String xtext(String s, boolean utf8) {
-	StringBuffer sb = null;
+	StringBuilder sb = null;
 	byte[] bytes;
 	if (utf8)
 	    bytes = s.getBytes(StandardCharsets.UTF_8);
@@ -2669,7 +2669,7 @@ public class SMTPTransport extends Transport {
 	    if (c < '!' || c > '~' || c == '+' || c == '=') {
 		// not printable ASCII
 		if (sb == null) {
-		    sb = new StringBuffer(s.length() + 4);
+		    sb = new StringBuilder(s.length() + 4);
 		    sb.append(s.substring(0, i));
 		}
 		sb.append('+');
