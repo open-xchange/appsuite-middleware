@@ -58,6 +58,7 @@ import com.box.sdk.BoxFolder.Info;
 import com.box.sdk.BoxItem;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
+import com.openexchange.file.storage.FileStorageCaseInsensitiveAccess;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageFolderAccess;
@@ -73,7 +74,7 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public final class BoxFolderAccess extends AbstractBoxResourceAccess implements FileStorageFolderAccess {
+public final class BoxFolderAccess extends AbstractBoxResourceAccess implements FileStorageFolderAccess, FileStorageCaseInsensitiveAccess {
 
     private final int userId;
     private final String accountDisplayName;
@@ -210,8 +211,16 @@ public final class BoxFolderAccess extends AbstractBoxResourceAccess implements 
                 BoxAPIConnection apiConnection = getAPIConnection();
                 com.box.sdk.BoxFolder parentBoxFolder = new com.box.sdk.BoxFolder(apiConnection, toBoxFolderId(toCreate.getParentId()));
 
-                Info createdChildFolder = parentBoxFolder.createFolder(toCreate.getName());
-                return toFileStorageFolderId(createdChildFolder.getID());
+                try {
+                    Info createdChildFolder = parentBoxFolder.createFolder(toCreate.getName());
+                    return toFileStorageFolderId(createdChildFolder.getID());
+                } catch (BoxAPIException e) {
+                    if (SC_CONFLICT != e.getResponseCode()) {
+                        throw e;
+                    }
+
+                    throw FileStorageExceptionCodes.DUPLICATE_FOLDER.create(e, toCreate.getName(), parentBoxFolder.getInfo().getName());
+                }
             }
         });
     }
@@ -239,12 +248,28 @@ public final class BoxFolderAccess extends AbstractBoxResourceAccess implements 
                 // Rename & Move has to be done with two subsequent requests
                 // Rename
                 if (!Strings.isEmpty(newName)) {
-                    boxFolder.rename(newName);
+                    try {
+                        boxFolder.rename(newName);
+                    } catch (BoxAPIException e) {
+                        if (SC_CONFLICT != e.getResponseCode()) {
+                            throw e;
+                        }
+
+                        throw FileStorageExceptionCodes.DUPLICATE_FOLDER.create(e, newName, boxFolder.getInfo().getParent().getName());
+                    }
                 }
                 // Move
                 if (!Strings.isEmpty(newParentId)) {
                     com.box.sdk.BoxFolder destinationBoxFolder = new com.box.sdk.BoxFolder(apiConnection, toBoxFolderId(newParentId));
-                    boxFolder.move(destinationBoxFolder);
+                    try {
+                        boxFolder.move(destinationBoxFolder);
+                    } catch (BoxAPIException e) {
+                        if (SC_CONFLICT != e.getResponseCode()) {
+                            throw e;
+                        }
+
+                        throw FileStorageExceptionCodes.DUPLICATE_FOLDER.create(e, boxFolder.getInfo().getName(), destinationBoxFolder.getInfo().getName());
+                    }
                 }
 
                 return toFileStorageFolderId(boxFolder.getID());
@@ -261,7 +286,15 @@ public final class BoxFolderAccess extends AbstractBoxResourceAccess implements 
                 BoxAPIConnection apiConnection = getAPIConnection();
                 com.box.sdk.BoxFolder boxFolder = new com.box.sdk.BoxFolder(apiConnection, toBoxFolderId(folderId));
                 if (!Strings.isEmpty(newName)) {
-                    boxFolder.rename(newName);
+                    try {
+                        boxFolder.rename(newName);
+                    } catch (BoxAPIException e) {
+                        if (SC_CONFLICT != e.getResponseCode()) {
+                            throw e;
+                        }
+
+                        throw FileStorageExceptionCodes.DUPLICATE_FOLDER.create(e, newName, boxFolder.getInfo().getParent().getName());
+                    }
                 }
 
                 return toFileStorageFolderId(boxFolder.getID());

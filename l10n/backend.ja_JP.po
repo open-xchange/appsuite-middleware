@@ -14,7 +14,7 @@ msgstr ""
 "Project-Id-Version: errors.ja_JP\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2017-09-08 09:43+0200\n"
+"PO-Revision-Date: 2017-10-19 13:00+0200\n"
 "Last-Translator: \n"
 "Language-Team: ja@li.org\n"
 "Language: ja_JP\n"
@@ -22,7 +22,7 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=0;\n"
-"X-Generator: Poedit 2.0.3\n"
+"X-Generator: Poedit 1.8.9\n"
 "Plural-Forms: nplurals=2; plural=0;\n"
 
 #. The verb "accepted", like "User A has accepted an appointment."
@@ -7397,7 +7397,7 @@ msgstr "ヘッダ \"コンテンツタイプ\" はマルチパートコンテン
 #. Request rejected because its size (%1$s) exceeds the maximum configured size of %2$s
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/upload/impl/UploadExceptionMessage.java:82
 msgid "Request rejected because its size (%1$s) exceeds the maximum configured size of %2$s."
-msgstr "構成された最大サイズ %2$s をサイズ (%1$s) が超えたため、リクエストは拒否されました。"
+msgstr "送信しようとしたメールサイズ：%1$s。%2$s を超えるメールは送信できません。"
 
 #. Missing parameter %1$s
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/upload/impl/UploadExceptionMessage.java:85
