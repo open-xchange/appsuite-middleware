@@ -16,6 +16,7 @@ import com.openexchange.test.CalendarTestManager;
 
 public class ConflictTest extends AppointmentTest {
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -28,7 +29,6 @@ public class ConflictTest extends AppointmentTest {
         c.set(Calendar.MILLISECOND, 0);
 
         startTime = c.getTimeInMillis();
-        startTime += timeZone.getOffset(startTime);
         endTime = startTime + 7200000;
     }
 
