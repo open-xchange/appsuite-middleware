@@ -51,6 +51,8 @@ package com.openexchange.find.util;
 
 import java.util.Locale;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.lean.LeanConfigurationService;
+import com.openexchange.contact.ContactProperty;
 import com.openexchange.exception.OXException;
 import com.openexchange.find.contacts.ContactDisplayNameFormat;
 import com.openexchange.find.facet.ComplexDisplayItem;
@@ -106,6 +108,7 @@ public class DisplayItems {
      * Formats the display name of the {@link ComplexDisplayItem}
      *
      * @param contact The {@link Contact}
+     * @param locale The locale to use when formating the display name
      * @return the display name
      */
     private static String formatDisplayName(Contact contact, Locale locale) {
@@ -171,15 +174,13 @@ public class DisplayItems {
      * @return <code>true</code> to show departments, <code>false</code> otherwise
      */
     private static boolean showDepartments() {
-        // TODO: Maybe use lean configuration
-        String propName = "com.openexchange.contact.showDepartments";
-        boolean defaultValue = false;
-        ConfigurationService configService = Services.optService(ConfigurationService.class);
+        LeanConfigurationService configService = Services.optService(LeanConfigurationService.class);
         if (null == configService) {
-            LOGGER.warn("No such service: {}. Assuming default value of '{}' for property '{}'", ConfigurationService.class.getName(), defaultValue, propName);
+            boolean defaultValue = false;
+            LOGGER.warn("No such service: {}. Assuming default value of '{}' for property '{}'", ConfigurationService.class.getName(), defaultValue, ContactProperty.showDepartments);
             return defaultValue;
         }
-        return configService.getBoolProperty(propName, defaultValue);
+        return configService.getBooleanProperty(ContactProperty.showDepartments);
     }
 
     /**

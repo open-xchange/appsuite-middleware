@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2017-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,92 +47,51 @@
  *
  */
 
-package com.openexchange.find.basic.contacts;
+package com.openexchange.contact;
 
-import java.util.Map;
-import com.openexchange.config.lean.LeanConfigurationService;
-import com.openexchange.contact.ContactProperty;
-import com.openexchange.exception.OXException;
-import com.openexchange.find.basic.Services;
-import com.openexchange.jslob.JSlobEntry;
-import com.openexchange.jslob.JSlobKeys;
-import com.openexchange.session.Session;
+import com.openexchange.config.lean.Property;
 
 /**
- * {@link ShowDepartmentJSlobEntry}
+ * {@link ContactProperty} - Defines the contact properties.
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class ShowDepartmentJSlobEntry implements JSlobEntry {
+// TODO: to be completed...
+public enum ContactProperty implements Property {
+    /**
+     * Defines whether the departments will be shown upon an autocomplete search.
+     * The department will only be shown for entries that are in the Global Address Book.
+     * Default: <code>false</code>
+     */
+    showDepartments(false);
 
-    private static final String NAME = "showDepartment";
+    private static final String PREFIX = "com.openexchange.contact.";
+    private Object defaultValue;
 
     /**
-     * Initialises a new {@link ShowDepartmentJSlobEntry}.
+     * Initialises a new {@link ContactProperty}.
      */
-    public ShowDepartmentJSlobEntry() {
-        super();
+    private ContactProperty(Object defaultValue) {
+        this.defaultValue = defaultValue;
     }
 
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.jslob.JSlobEntry#getKey()
+     * @see com.openexchange.config.lean.Property#getFQPropertyName()
      */
     @Override
-    public String getKey() {
-        return JSlobKeys.CONTACTS;
+    public String getFQPropertyName() {
+        return PREFIX + name();
     }
 
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.jslob.JSlobEntry#getPath()
+     * @see com.openexchange.config.lean.Property#getDefaultValue()
      */
     @Override
-    public String getPath() {
-        return NAME;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.jslob.JSlobEntry#isWritable(com.openexchange.session.Session)
-     */
-    @Override
-    public boolean isWritable(Session session) throws OXException {
-        return false;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.jslob.JSlobEntry#getValue(com.openexchange.session.Session)
-     */
-    @Override
-    public Object getValue(Session session) throws OXException {
-        LeanConfigurationService configService = Services.getLeanConfigurationService();
-        return configService.getBooleanProperty(ContactProperty.showDepartments);
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.jslob.JSlobEntry#setValue(java.lang.Object, com.openexchange.session.Session)
-     */
-    @Override
-    public void setValue(Object value, Session session) throws OXException {
-        // not writable
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.jslob.JSlobEntry#metadata(com.openexchange.session.Session)
-     */
-    @Override
-    public Map<String, Object> metadata(Session session) throws OXException {
-        // nope
-        return null;
+    public Object getDefaultValue() {
+        return defaultValue;
     }
 }
