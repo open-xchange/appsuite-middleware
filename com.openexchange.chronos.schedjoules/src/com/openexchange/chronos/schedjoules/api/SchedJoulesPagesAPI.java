@@ -52,7 +52,6 @@ package com.openexchange.chronos.schedjoules.api;
 import org.json.JSONObject;
 import com.openexchange.chronos.schedjoules.api.auxiliary.SchedJoulesCategory;
 import com.openexchange.chronos.schedjoules.api.auxiliary.SchedJoulesCommonParameter;
-import com.openexchange.chronos.schedjoules.api.auxiliary.SchedJoulesResponseParser;
 import com.openexchange.chronos.schedjoules.api.auxiliary.SchedJoulesSearchParameter;
 import com.openexchange.chronos.schedjoules.api.client.SchedJoulesRESTBindPoint;
 import com.openexchange.chronos.schedjoules.api.client.SchedJoulesRESTClient;
@@ -165,7 +164,8 @@ public class SchedJoulesPagesAPI extends AbstractSchedJoulesAPI {
             request.setQueryParameter(SchedJoulesSearchParameter.category_id.name(), Integer.toString(SchedJoulesCategory.values()[categoryId - 1].getId()));
         }
         request.setQueryParameter(SchedJoulesSearchParameter.nr_results.name(), Integer.toString(maxRows <= 0 ? MAX_ROWS : maxRows));
-        return (JSONObject) SchedJoulesResponseParser.parse(client.executeRequest(request));
+        SchedJoulesResponse response = client.executeRequest(request);
+        return (JSONObject) response.getResponseBody();
     }
 
     /**
@@ -177,6 +177,6 @@ public class SchedJoulesPagesAPI extends AbstractSchedJoulesAPI {
      */
     private JSONObject executeRequest(SchedJoulesRequest request) throws OXException {
         SchedJoulesResponse response = client.executeRequest(request);
-        return (JSONObject) SchedJoulesResponseParser.parse(response);
+        return (JSONObject) response.getResponseBody();
     }
 }

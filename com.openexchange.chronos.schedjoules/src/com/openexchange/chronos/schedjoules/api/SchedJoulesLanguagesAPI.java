@@ -50,10 +50,10 @@
 package com.openexchange.chronos.schedjoules.api;
 
 import org.json.JSONArray;
-import com.openexchange.chronos.schedjoules.api.auxiliary.SchedJoulesResponseParser;
 import com.openexchange.chronos.schedjoules.api.client.SchedJoulesRESTBindPoint;
 import com.openexchange.chronos.schedjoules.api.client.SchedJoulesRESTClient;
 import com.openexchange.chronos.schedjoules.api.client.SchedJoulesRequest;
+import com.openexchange.chronos.schedjoules.api.client.SchedJoulesResponse;
 import com.openexchange.exception.OXException;
 
 /**
@@ -78,6 +78,7 @@ public class SchedJoulesLanguagesAPI extends AbstractSchedJoulesAPI {
      */
     public JSONArray listLanguages() throws OXException {
         SchedJoulesRequest request = new SchedJoulesRequest(SchedJoulesRESTBindPoint.languages);
-        return (JSONArray) SchedJoulesResponseParser.parse(client.executeRequest(request));
+        SchedJoulesResponse response = client.executeRequest(request);
+        return (JSONArray) response.getResponseBody();
     }
 }

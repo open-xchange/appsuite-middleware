@@ -22,6 +22,7 @@ Import-Package: com.openexchange.chronos,
  org.apache.http.client.methods,
  org.apache.http.impl.client,
  org.apache.http.message,
+ org.apache.http.util;version="4.4.7",
  org.json,
  org.osgi.framework,
  org.slf4j;version="1.7.25"
