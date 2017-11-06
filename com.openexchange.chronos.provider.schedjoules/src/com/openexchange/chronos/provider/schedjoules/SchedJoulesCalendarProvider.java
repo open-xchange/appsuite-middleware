@@ -68,9 +68,10 @@ import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.Strings;
-import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
+import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.user.UserService;
 
 /**
@@ -386,11 +387,8 @@ public class SchedJoulesCalendarProvider extends CachingCalendarProvider {
      * @throws OXException if the {@link UserService} is missing or if the user does not exist.
      */
     private String generateUserKey(Session session) throws OXException {
-        UserService userService = services.getService(UserService.class);
-        if (userService == null) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(UserService.class.getSimpleName());
-        }
-        User user = userService.getUser(session.getUserId(), session.getContextId());
+        ServerSession serverSession = ServerSessionAdapter.valueOf(session);
+        User user = serverSession.getUser();
         return DigestUtils.sha256Hex(user.getMail());
     }
 }
