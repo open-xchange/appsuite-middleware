@@ -49,16 +49,10 @@
 
 package com.openexchange.chronos.provider.internal;
 
-import static com.openexchange.chronos.common.DataHandlers.ALARM2JSON;
-import static com.openexchange.chronos.common.DataHandlers.AVAILABLE2JSON;
-import static com.openexchange.chronos.common.DataHandlers.JSON2ALARM;
-import static com.openexchange.chronos.common.DataHandlers.JSON2AVAILABLE;
 import static com.openexchange.chronos.provider.internal.Constants.CONTENT_TYPE;
 import static com.openexchange.chronos.provider.internal.Constants.TREE_ID;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.osgi.Tools.requireService;
-import java.util.List;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.chronos.Alarm;
@@ -67,12 +61,10 @@ import com.openexchange.chronos.Available;
 import com.openexchange.chronos.Trigger;
 import com.openexchange.chronos.common.AlarmUtils;
 import com.openexchange.chronos.common.Check;
+import com.openexchange.chronos.common.UserConfigWrapper;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
-import com.openexchange.conversion.ConversionResult;
+import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.conversion.ConversionService;
-import com.openexchange.conversion.DataArguments;
-import com.openexchange.conversion.DataHandler;
-import com.openexchange.conversion.SimpleData;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.UserizedFolder;
@@ -109,7 +101,7 @@ public class UserConfigHelper {
     }
 
     /**
-     * Checks the user configuration as passed by the client during prior applying it.
+     * Checks the user configuration as passed by the client prior applying it.
      *
      * @param session The session
      * @param userConfig The user configuration to check for validity
@@ -118,15 +110,29 @@ public class UserConfigHelper {
         if (null == userConfig) {
             throw CalendarExceptionCodes.INVALID_CONFIGURATION.create("null");
         }
-        /*
-         * check default alarms
-         */
-        checkAlarm(session, userConfig.optJSONObject("defaultAlarmDate"));
-        checkAlarm(session, userConfig.optJSONObject("defaultAlarmDateTime"));
-        /*
-         * check availability
-         */
-        checkAvailability(session, userConfig.optJSONArray("availability"));
+        UserConfigWrapper configWrapper = new UserConfigWrapper(requireService(ConversionService.class, services), userConfig);
+        try {
+            /*
+             * check default alarms
+             */
+            Alarm defaultAlarmDate = configWrapper.getDefaultAlarmDate();
+            if (null != defaultAlarmDate) {
+                Check.alarmIsValid(defaultAlarmDate);
+            }
+            Alarm defaultAlarmDateTime = configWrapper.getDefaultAlarmDateTime();
+            if (null != defaultAlarmDateTime) {
+                Check.alarmIsValid(defaultAlarmDateTime);
+            }
+            /*
+             * check availability
+             */
+            Available[] availability = configWrapper.getAvailability();
+            if (null != availability) {
+                Check.availabilityIsValid(requireService(RecurrenceService.class, services), availability);
+            }
+        } catch (OXException e) {
+            throw CalendarExceptionCodes.INVALID_CONFIGURATION.create(e, e.getMessage());
+        }
     }
 
     /**
@@ -135,20 +141,19 @@ public class UserConfigHelper {
      * @param session The session
      * @param userConfig The user configuration to apply the legacy settings in
      */
-    public void applyLegacyConfig(ServerSession session, JSONObject userConfig) {
+    public void applyLegacyConfig(ServerSession session, JSONObject userConfig) throws OXException {
+        UserConfigWrapper configWrapper = new UserConfigWrapper(requireService(ConversionService.class, services), userConfig);
         try {
             /*
-             * default alarm
+             * default alarms, availability
              */
-            userConfig.putOpt("defaultAlarmDateTime", optDefaultAlarm(session));
+            configWrapper.setDefaultAlarmDateTime(optLegacyDefaultAlarm(session));
+            configWrapper.setDefaultAlarmDate(null);
+            configWrapper.setAvailability(optLegacyAvailability(session));
             /*
              * default folder id
              */
-            userConfig.putOpt("defaultFolderId", optDefaultFolderId(session));
-            /*
-             * availability
-             */
-            userConfig.putOpt("availability", optAvailability(session));
+            userConfig.putOpt("defaultFolderId", optLegacyDefaultFolderId(session));
             /*
              * notification settings
              */
@@ -163,7 +168,7 @@ public class UserConfigHelper {
         }
     }
 
-    private String optDefaultFolderId(ServerSession session) {
+    private String optLegacyDefaultFolderId(ServerSession session) {
         try {
             UserizedFolder defaultFolder = requireService(FolderService.class, services).getDefaultFolder(session.getUser(), TREE_ID, CONTENT_TYPE, PrivateType.getInstance(), session, null);
             return defaultFolder.getID();
@@ -173,7 +178,7 @@ public class UserConfigHelper {
         return null;
     }
 
-    private JSONArray optAvailability(ServerSession session) {
+    private Available[] optLegacyAvailability(ServerSession session) {
         boolean INSERT_DEFAULT_AVAILABILITY = false;
         if (false == INSERT_DEFAULT_AVAILABILITY) {
             return null;
@@ -226,7 +231,7 @@ public class UserConfigHelper {
         return null;
     }
 
-    private JSONObject optDefaultAlarm(ServerSession session) {
+    private Alarm optLegacyDefaultAlarm(ServerSession session) {
         JSlob jsLob = optJSlob(session, "io.ox/calendar");
         if (null != jsLob) {
             if (jsLob.getJsonObject().hasAndNotNull("defaultReminder")) {
@@ -238,8 +243,8 @@ public class UserConfigHelper {
                     String duration = AlarmUtils.getDuration(true, 0, 0, 0, reminderMinutes, 0);
                     Alarm alarm = new Alarm(new Trigger(duration), AlarmAction.DISPLAY);
                     alarm.setDescription("Reminder");
-                    return serializeAlarm(session, alarm);
-                } catch (JSONException | OXException e) {
+                    return alarm;
+                } catch (JSONException e) {
                     LOG.warn("Error converting default alarm from JSlob for user {} in context {}", I(session.getUserId()), I(session.getContextId()), e);
                 }
             }
@@ -258,47 +263,6 @@ public class UserConfigHelper {
             LOG.warn("Error getting JSlob {} for user {} in context {}", id, I(session.getUserId()), I(session.getContextId()), e);
         }
         return null;
-    }
-
-    private JSONArray checkAvailability(ServerSession session, JSONArray availabilityJsonArray) throws OXException {
-        if (null == availabilityJsonArray || JSONObject.NULL.equals(availabilityJsonArray)) {
-            return null;
-        }
-        ConversionService conversionService = requireService(ConversionService.class, services);
-        DataHandler dataHandler = conversionService.getDataHandler(JSON2AVAILABLE);
-        ConversionResult result = dataHandler.processData(new SimpleData<JSONArray>(availabilityJsonArray), new DataArguments(), session);
-        if (null == result || null == result.getData() || false == List.class.isInstance(result.getData())) {
-            throw CalendarExceptionCodes.INVALID_CONFIGURATION.create(String.valueOf(availabilityJsonArray));
-        }
-        List<Available> availability = (List<Available>) result.getData();
-        return serializeAvailability(session, availability);
-    }
-
-    private JSONObject checkAlarm(ServerSession session, JSONObject alarmJsonObject) throws OXException {
-        if (null == alarmJsonObject || JSONObject.NULL.equals(alarmJsonObject)) {
-            return null;
-        }
-        ConversionService conversionService = requireService(ConversionService.class, services);
-        DataHandler dataHandler = conversionService.getDataHandler(JSON2ALARM);
-        ConversionResult result = dataHandler.processData(new SimpleData<JSONObject>(alarmJsonObject), new DataArguments(), session);
-        if (null == result || null == result.getData() || false == Alarm.class.isInstance(result.getData())) {
-            throw CalendarExceptionCodes.INVALID_CONFIGURATION.create(String.valueOf(alarmJsonObject));
-        }
-        return serializeAlarm(session, Check.alarmIsValid((Alarm) result.getData()));
-    }
-
-    private JSONObject serializeAlarm(ServerSession session, Alarm alarm) throws OXException {
-        ConversionService conversionService = requireService(ConversionService.class, services);
-        DataHandler dataHandler = conversionService.getDataHandler(ALARM2JSON);
-        ConversionResult result = dataHandler.processData(new SimpleData<Alarm>(alarm), new DataArguments(), session);
-        return (JSONObject) result.getData();
-    }
-
-    private JSONArray serializeAvailability(ServerSession session, List<Available> availability) throws OXException {
-        ConversionService conversionService = requireService(ConversionService.class, services);
-        DataHandler dataHandler = conversionService.getDataHandler(AVAILABLE2JSON);
-        ConversionResult result = dataHandler.processData(new SimpleData<List<Available>>(availability), new DataArguments(), session);
-        return (JSONArray) result.getData();
     }
 
 }

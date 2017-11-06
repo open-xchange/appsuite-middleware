@@ -62,6 +62,7 @@ import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmAction;
 import com.openexchange.chronos.AlarmField;
 import com.openexchange.chronos.Attendee;
+import com.openexchange.chronos.Available;
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
@@ -229,6 +230,36 @@ public class Check {
             }
         }
         return alarm;
+    }
+
+    /**
+     * Checks that the supplied availability is valid, i.e. its available definitions contain all mandatory properties.
+     *
+     * @param recurrenceService A reference to the recurrence service
+     * @param availability The availability to check
+     * @return The passed availability, after it was checked for validity
+     * @throws OXException {@link CalendarExceptionCodes#INVALID_RRULE}
+     */
+    public static Available[] availabilityIsValid(RecurrenceService recurrenceService, Available[] availability) throws OXException {
+        if (null != availability) {
+            for (Available available : availability) {
+                Check.availableIsValid(recurrenceService, available);
+            }
+        }
+        return availability;
+    }
+
+    /**
+     * Checks that the supplied available definition is valid, i.e. it contains all mandatory properties.
+     *
+     * @param recurrenceService A reference to the recurrence service
+     * @param available The available to check
+     * @return The passed available, after it was checked for validity
+     * @throws OXException {@link CalendarExceptionCodes#INVALID_RRULE}
+     */
+    private static Available availableIsValid(RecurrenceService recurrenceService, Available available) throws OXException {
+        //TODO
+        return available;
     }
 
     /**
