@@ -43,18 +43,6 @@ Authors:
 export NO_BRP_CHECK_BYTECODE_VERSION=true
 ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} -f build/build.xml clean build
 
-%post
-. /opt/open-xchange/lib/oxfunctions.sh
-ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc spamexperts.properties
-ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc settings/spamexperts-ui.properties
-
-# SoftwareChange_Request-1844
-ox_add_property com.openexchange.custom.spamexperts.imapurl "" /opt/open-xchange/etc/spamexperts.properties
-ox_add_property com.openexchange.custom.spamexperts.imapuser "" /opt/open-xchange/etc/spamexperts.properties
-ox_add_property com.openexchange.custom.spamexperts.imappassword "" /opt/open-xchange/etc/spamexperts.properties
-ox_add_property com.openexchange.custom.spamexperts.trainspamfolder Spam /opt/open-xchange/etc/spamexperts.properties
-ox_add_property com.openexchange.custom.spamexperts.trainhamfolder "Not Spam" /opt/open-xchange/etc/spamexperts.properties
-
 %clean
 %{__rm} -rf %{buildroot}
 

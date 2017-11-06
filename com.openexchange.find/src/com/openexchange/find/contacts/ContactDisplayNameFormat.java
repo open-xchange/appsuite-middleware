@@ -47,25 +47,20 @@
  *
  */
 
-package com.openexchange.report.appsuite;
+package com.openexchange.find.contacts;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.report.appsuite.serialization.Report;
+import com.openexchange.i18n.LocalizableStrings;
 
 /**
- * The {@link ReportFinishingTouches} run after all analyzers and cumulators and can be used to reformat the report.
+ * {@link ContactDisplayNameFormat}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public interface ReportFinishingTouches {
-    /**
-     * Declare whether to run as part of this reportType
-     */
-    boolean appliesTo(String reportType);
+public class ContactDisplayNameFormat implements LocalizableStrings {
 
-    /**
-     * Modify the report, as needed
-     * @throws OXException 
-     */
-    void finish(Report report) throws OXException;
+    // The default display name format for contacts with department: <firstname> <lastname> (department)
+    public static final String DISPLAY_NAME_FORMAT_WITH_DEPARTMENT = "%1$s %2$s (%3$s)";
+
+    // The default display name format for contacts without department: <firstname> <lastname>
+    public static final String DISPLAY_NAME_FORMAT_WITHOUT_DEPARTMENT = "%1$s %2$s";
 }

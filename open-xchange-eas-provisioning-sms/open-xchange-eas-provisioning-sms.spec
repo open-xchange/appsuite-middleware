@@ -47,7 +47,6 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 
 %post
 . /opt/open-xchange/lib/oxfunctions.sh
-ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc mobile_configuration_action_sms.properties eas-provisioning-sms.properties
 ox_update_permissions /opt/open-xchange/etc/eas-provisioning-sms.properties root:open-xchange 640
 
 %clean

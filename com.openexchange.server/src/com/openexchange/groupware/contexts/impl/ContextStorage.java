@@ -194,6 +194,14 @@ public abstract class ContextStorage {
     public abstract List<Integer> getDistinctContextsPerSchema() throws OXException;
 
     /**
+     * Groups all context identifiers by their schema associations.
+     *
+     * @return A mapping of a representative schema-associated context identifier to other contexts residing in that schema taken from specified context identifiers
+     * @throws OXException If the mapping cannot be returned
+     */
+    public abstract Map<PoolAndSchema, List<Integer>> getSchemaAssociations() throws OXException;
+
+    /**
      * Groups specified context identifiers by their schema associations.
      *
      * @param contextIds The context identifiers to group by schema association

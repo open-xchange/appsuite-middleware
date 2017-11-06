@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2017-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,25 +47,51 @@
  *
  */
 
-package com.openexchange.report.appsuite;
+package com.openexchange.contact;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.report.appsuite.serialization.Report;
+import com.openexchange.config.lean.Property;
 
 /**
- * The {@link ReportFinishingTouches} run after all analyzers and cumulators and can be used to reformat the report.
+ * {@link ContactProperty} - Defines the contact properties.
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public interface ReportFinishingTouches {
+// TODO: to be completed...
+public enum ContactProperty implements Property {
     /**
-     * Declare whether to run as part of this reportType
+     * Defines whether the departments will be shown upon an autocomplete search.
+     * The department will only be shown for entries that are in the Global Address Book.
+     * Default: <code>false</code>
      */
-    boolean appliesTo(String reportType);
+    showDepartments(false);
+
+    private static final String PREFIX = "com.openexchange.contact.";
+    private Object defaultValue;
 
     /**
-     * Modify the report, as needed
-     * @throws OXException 
+     * Initialises a new {@link ContactProperty}.
      */
-    void finish(Report report) throws OXException;
+    private ContactProperty(Object defaultValue) {
+        this.defaultValue = defaultValue;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.config.lean.Property#getFQPropertyName()
+     */
+    @Override
+    public String getFQPropertyName() {
+        return PREFIX + name();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.config.lean.Property#getDefaultValue()
+     */
+    @Override
+    public Object getDefaultValue() {
+        return defaultValue;
+    }
 }

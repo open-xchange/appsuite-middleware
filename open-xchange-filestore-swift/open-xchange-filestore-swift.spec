@@ -44,13 +44,6 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %post
 . /opt/open-xchange/lib/oxfunctions.sh
 ox_update_permissions /opt/open-xchange/etc/filestore-swift.properties root:open-xchange 640
-if [ ${1:-0} -eq 2 ]; then
-    # only when updating
-    # prevent bash from expanding, see bug 13316
-    GLOBIGNORE='*'
-    PFILE=/opt/open-xchange/etc/filestore-swift.properties
-
-fi
 
 %clean
 %{__rm} -rf %{buildroot}

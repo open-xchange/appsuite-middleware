@@ -413,7 +413,7 @@ public class BasicCalendarDriver extends AbstractContactFacetingModuleSearchDriv
             }
             if (null != filter) {
                 String valueId = prepareFacetValueId("contact", session.getContextId(), Integer.toString(contact.getObjectID()));
-                contactFacets.add(FacetValue.newBuilder(valueId).withDisplayItem(DisplayItems.convert(contact)).withFilter(filter).build());
+                contactFacets.add(FacetValue.newBuilder(valueId).withDisplayItem(DisplayItems.convert(contact, session)).withFilter(filter).build());
             }
         }
         return contactFacets;

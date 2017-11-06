@@ -47,84 +47,92 @@
  *
  */
 
-package com.openexchange.context.internal;
+package com.openexchange.find.basic.contacts;
 
-import java.util.List;
 import java.util.Map;
-import com.openexchange.context.ContextService;
-import com.openexchange.context.PoolAndSchema;
+import com.openexchange.config.lean.LeanConfigurationService;
+import com.openexchange.contact.ContactProperty;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextStorage;
+import com.openexchange.find.basic.Services;
+import com.openexchange.jslob.JSlobEntry;
+import com.openexchange.jslob.JSlobKeys;
+import com.openexchange.session.Session;
 
 /**
- * {@link ContextServiceImpl}
+ * {@link ShowDepartmentJSlobEntry}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- *
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public final class ContextServiceImpl implements ContextService {
+public class ShowDepartmentJSlobEntry implements JSlobEntry {
+
+    private static final String NAME = "showDepartment";
 
     /**
-     * Initializes a new {@link ContextServiceImpl}
+     * Initialises a new {@link ShowDepartmentJSlobEntry}.
      */
-    public ContextServiceImpl() {
+    public ShowDepartmentJSlobEntry() {
         super();
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.jslob.JSlobEntry#getKey()
+     */
     @Override
-    public void setAttribute(String name, String value, int contextId) throws OXException {
-        ContextStorage.getInstance().setAttribute(name, value, contextId);
+    public String getKey() {
+        return JSlobKeys.CONTACTS;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.jslob.JSlobEntry#getPath()
+     */
     @Override
-    public List<Integer> getAllContextIds() throws OXException {
-        return ContextStorage.getInstance().getAllContextIds();
+    public String getPath() {
+        return NAME;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.jslob.JSlobEntry#isWritable(com.openexchange.session.Session)
+     */
     @Override
-    public List<Integer> getDistinctContextsPerSchema() throws OXException {
-        return ContextStorage.getInstance().getDistinctContextsPerSchema();
+    public boolean isWritable(Session session) throws OXException {
+        return false;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.jslob.JSlobEntry#getValue(com.openexchange.session.Session)
+     */
     @Override
-    public Map<PoolAndSchema, List<Integer>> getSchemaAssociations() throws OXException {
-        return ContextStorage.getInstance().getSchemaAssociations();
+    public Object getValue(Session session) throws OXException {
+        LeanConfigurationService configService = Services.getLeanConfigurationService();
+        return configService.getBooleanProperty(ContactProperty.showDepartments);
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.jslob.JSlobEntry#setValue(java.lang.Object, com.openexchange.session.Session)
+     */
     @Override
-    public Map<PoolAndSchema, List<Integer>> getSchemaAssociationsFor(List<Integer> contextIds) throws OXException {
-        return ContextStorage.getInstance().getSchemaAssociationsFor(contextIds);
+    public void setValue(Object value, Session session) throws OXException {
+        // not writable
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.jslob.JSlobEntry#metadata(com.openexchange.session.Session)
+     */
     @Override
-    public Context getContext(final int contextId) throws OXException {
-        return ContextStorage.getInstance().getContext(contextId);
+    public Map<String, Object> metadata(Session session) throws OXException {
+        // nope
+        return null;
     }
-
-    @Override
-    public Context loadContext(int contextId) throws OXException {
-        return ContextStorage.getInstance().loadContext(contextId);
-    }
-
-    @Override
-    public int getContextId(final String loginContextInfo) throws OXException {
-        return ContextStorage.getInstance().getContextId(loginContextInfo);
-    }
-
-    @Override
-    public void invalidateContext(final int contextId) throws OXException {
-        ContextStorage.getInstance().invalidateContext(contextId);
-    }
-
-    @Override
-    public void invalidateContexts(int[] contextIDs) throws OXException {
-        ContextStorage.getInstance().invalidateContexts(contextIDs);
-    }
-
-    @Override
-    public void invalidateLoginInfo(final String loginContextInfo) throws OXException {
-        ContextStorage.getInstance().invalidateLoginInfo(loginContextInfo);
-    }
-
 }

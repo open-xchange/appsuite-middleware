@@ -60,9 +60,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.lang.ArrayUtils;
+import com.openexchange.context.PoolAndSchema;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.impl.ContextExceptionCodes;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserExceptionCode;
 import com.openexchange.groupware.ldap.UserImpl;
@@ -72,6 +74,10 @@ import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 
 public class Tools {
+
+    public static Map<PoolAndSchema, List<Integer>> getSchemaAssociations() throws OXException {
+        return ContextStorage.getInstance().getSchemaAssociations();
+    }
 
     public static List<Integer> getContextInSameSchema(int contextId) throws OXException {
         final DatabaseService dbService = ServerServiceRegistry.getInstance().getService(DatabaseService.class);

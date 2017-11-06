@@ -49,24 +49,6 @@ if [ ${1:-0} -eq 2 ]; then
     # prevent bash from expanding, see bug 13316
     GLOBIGNORE='*'
 
-    ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc pop3.properties
-
-    PFILE=/opt/open-xchange/etc/pop3.properties
-
-    # SoftwareChange_Request-1229
-    if ! ox_exists_property com.openexchange.pop3.allowPing $PFILE; then
-        ox_set_property com.openexchange.pop3.allowPing false $PFILE
-    fi
-    if ! ox_exists_property com.openexchange.pop3.logDeniedPing $PFILE; then
-        ox_set_property com.openexchange.pop3.logDeniedPing true $PFILE
-    fi
-
-    # SoftwareChange_Request-1931
-    ox_add_property com.openexchange.pop3.ssl.protocols "" $PFILE
-
-    # SoftwareChange_Request-2016
-    ox_add_property com.openexchange.pop3.ssl.ciphersuites "" $PFILE
-
     # SoftwareChange_Request-3636
     VALUE=$(ox_read_property com.openexchange.pop3.ssl.protocols $PFILE)
     if [ "SSLv3 TLSv1" = "$VALUE" ]; then

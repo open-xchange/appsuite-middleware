@@ -47,25 +47,74 @@
  *
  */
 
-package com.openexchange.report.appsuite;
+package com.openexchange.find.basic.conf;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.report.appsuite.serialization.Report;
+import com.openexchange.config.lean.Property;
 
 /**
- * The {@link ReportFinishingTouches} run after all analyzers and cumulators and can be used to reformat the report.
+ * {@link FindBasicProperty}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public interface ReportFinishingTouches {
-    /**
-     * Declare whether to run as part of this reportType
-     */
-    boolean appliesTo(String reportType);
+public enum FindBasicProperty implements Property {
 
     /**
-     * Modify the report, as needed
-     * @throws OXException 
+     * Some mail backends provide a virtual folder that contains all messages of
+     * a user to enable cross-folder mail search. Open-Xchange can make use of
+     * this feature to improve the search experience.
+     * 
+     * Set the value to the name of the virtual mail folder containing all messages.
+     * Leave blank if no such folder exists.
      */
-    void finish(Report report) throws OXException;
+    allMessageFolder,
+
+    /**
+     * Denotes if mail search queries should be matched against mail bodies.
+     * This improves the search experience within the mail module, if your mail
+     * backend supports fast full text search. Otherwise it can slow down the
+     * search requests significantly.
+     * 
+     * Change the value to 'true', if fast full text search is supported. Default
+     * is 'false'.
+     */
+    searchmailbody(false);
+
+    private final Object defaultValue;
+
+    private static final String EMPTY = "";
+    private static final String PREFIX = "com.openexchange.find.basic.mail.";
+
+    /**
+     * Initialises a new {@link MailFilterProperty}.
+     */
+    private FindBasicProperty() {
+        this(EMPTY);
+    }
+
+    /**
+     * Initializes a new {@link FindBasicProperty}.
+     */
+    private FindBasicProperty(Object defaultValue) {
+        this.defaultValue = defaultValue;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.config.lean.Property#getFQPropertyName()
+     */
+    @Override
+    public String getFQPropertyName() {
+        return PREFIX + name();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.config.lean.Property#getDefaultValue()
+     */
+    @Override
+    public Object getDefaultValue() {
+        return defaultValue;
+    }
 }

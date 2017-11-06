@@ -47,86 +47,75 @@
  *
  */
 
-package com.openexchange.oauth.impl.osgi;
+package com.openexchange.find.osgi;
 
-import java.util.List;
-import java.util.Map;
-import com.openexchange.context.ContextService;
-import com.openexchange.context.PoolAndSchema;
+import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
+import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link OSGiContextService}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * {@link Services}
+ *
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public final class OSGiContextService extends AbstractOSGiDelegateService<ContextService> implements ContextService {
+public class Services {
+
+    private static final AtomicReference<ServiceLookup> LOOKUP = new AtomicReference<ServiceLookup>();
 
     /**
-     * Initializes a new {@link OSGiContextService}.
+     * Initialises a new {@link Services}.
      */
-    public OSGiContextService() {
-        super(ContextService.class);
+    private Services() {
+        super();
     }
 
-    @Override
-    public void setAttribute(String name, String value, int contextId) throws OXException {
-        getService().setAttribute(name, value, contextId);
+    /**
+     * Sets the service lookup instance
+     *
+     * @param lookup the {@link ServiceLookup} instance
+     */
+    public static void setServiceLookup(ServiceLookup lookup) {
+        LOOKUP.set(lookup);
     }
 
-    @Override
-    public List<Integer> getAllContextIds() throws OXException {
-        return getService().getAllContextIds();
-    }
-
-    @Override
-    public List<Integer> getDistinctContextsPerSchema() throws OXException {
-        return getService().getDistinctContextsPerSchema();
-    }
-
-    @Override
-    public Map<PoolAndSchema, List<Integer>> getSchemaAssociations() throws OXException {
-        return getService().getSchemaAssociations();
-    }
-
-    @Override
-    public Map<PoolAndSchema, List<Integer>> getSchemaAssociationsFor(List<Integer> contextIds) throws OXException {
-        return getService().getSchemaAssociationsFor(contextIds);
-    }
-
-    @Override
-    public Context getContext(int contextId) throws OXException {
-        return getService().getContext(contextId);
-    }
-
-    @Override
-    public int getContextId(final String loginContextInfo) throws OXException {
-        return getService().getContextId(loginContextInfo);
-    }
-
-    @Override
-    public void invalidateContext(final int contextId) throws OXException {
-        getService().invalidateContext(contextId);
-    }
-
-    @Override
-    public void invalidateContexts(int[] contextIDs) throws OXException {
-        try {
-            getService().invalidateContexts(contextIDs);
-        } catch (final OXException e) {
-            throw e;
+    /**
+     * Looks up a required service
+     *
+     * @param clazz The class of the service
+     * @return The service
+     * @throws OXException if the service is absent
+     */
+    public static <T> T requireService(Class<T> clazz) throws OXException {
+        T service = getServiceLookup().getService(clazz);
+        if (null == service) {
+            throw ServiceExceptionCode.absentService(clazz);
         }
+        return service;
     }
 
-    @Override
-    public void invalidateLoginInfo(final String loginContextInfo) throws OXException {
-        getService().invalidateLoginInfo(loginContextInfo);
+    /**
+     * Looks up an optional service
+     *
+     * @param clazz The class of the service
+     * @return The service or <code>null</code> if absent
+     */
+    public static <T> T optService(Class<T> clazz) {
+        return getServiceLookup().getService(clazz);
     }
 
-    @Override
-    public Context loadContext(final int contextId) throws OXException {
-        return getService().loadContext(contextId);
-    }
+    /**
+     * Gets the {@link ServiceLookup} instance
+     *
+     * @return the {@link ServiceLookup} instance
+     */
+    private static ServiceLookup getServiceLookup() {
+        ServiceLookup serviceLookup = LOOKUP.get();
+        if (serviceLookup == null) {
+            throw new IllegalStateException("ServiceLookup was null!");
+        }
 
+        return serviceLookup;
+    }
 }
