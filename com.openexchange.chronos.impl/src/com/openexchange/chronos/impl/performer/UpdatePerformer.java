@@ -60,6 +60,7 @@ import static com.openexchange.chronos.common.CalendarUtils.getFolderView;
 import static com.openexchange.chronos.common.CalendarUtils.getUserIDs;
 import static com.openexchange.chronos.common.CalendarUtils.hasExternalOrganizer;
 import static com.openexchange.chronos.common.CalendarUtils.initCalendar;
+import static com.openexchange.chronos.common.CalendarUtils.isAllDay;
 import static com.openexchange.chronos.common.CalendarUtils.isAttendeeSchedulingResource;
 import static com.openexchange.chronos.common.CalendarUtils.isGroupScheduled;
 import static com.openexchange.chronos.common.CalendarUtils.isOrganizer;
@@ -80,6 +81,7 @@ import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.tools.arrays.Collections.isNullOrEmpty;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -312,6 +314,12 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
             wasUpdated |= true;
         }
         /*
+         * process any attachment updates
+         */
+        if (eventData.containsAttachments()) {
+            wasUpdated |= updateAttachments(originalEvent, originalEvent.getAttachments(), eventData.getAttachments());
+        }
+        /*
          * process any attendee updates
          */
         if (eventData.containsAttendees()) {
@@ -320,22 +328,21 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
             wasUpdated |= resetParticipationStatus(originalEvent.getId(), originalEvent.getAttendees());
         }
         /*
-         * process any attachment updates
+         * update passed alarms for calendar user, apply default alarms for newly added internal user attendees
          */
-        if (eventData.containsAttachments()) {
-            wasUpdated |= updateAttachments(originalEvent, originalEvent.getAttachments(), eventData.getAttachments());
+        Event changedEvent = EventMapper.getInstance().copy(originalEvent, new Event(), (EventField[]) null);
+        changedEvent.setAttendees(attendeeHelper.previewChanges());
+        if (null != eventUpdate) {
+            changedEvent = EventMapper.getInstance().copy(eventUpdate.getUpdate(), changedEvent, (EventField[]) null);
         }
-        /*
-         * process any alarm updates for the calendar user
-         */
         if (eventData.containsAlarms()) {
-            Event changedEvent = EventMapper.getInstance().copy(originalEvent, new Event(), (EventField[]) null);
-            if (null != eventUpdate) {
-                changedEvent = EventMapper.getInstance().copy(eventUpdate.getUpdate(), changedEvent, (EventField[]) null);
+            wasUpdated |= updateAlarms(changedEvent, calendarUserId, storage.getAlarmStorage().loadAlarms(originalEvent, calendarUserId), eventData.getAlarms());
+        }
+        for (int userId : getUserIDs(attendeeHelper.getAttendeesToInsert())) {
+            Alarm defaultAlarm = isAllDay(changedEvent) ? session.getConfig().getDefaultAlarmDate(userId) : session.getConfig().getDefaultAlarmDateTime(userId);
+            if (null != defaultAlarm) {
+                insertAlarms(changedEvent, userId, Collections.singletonList(defaultAlarm), true);
             }
-            changedEvent.setFolderId(folder.getID());
-            List<Alarm> originalAlarms = storage.getAlarmStorage().loadAlarms(changedEvent, calendarUserId);
-            wasUpdated |= updateAlarms(changedEvent, calendarUserId, originalAlarms, eventData.getAlarms());
         }
         /*
          * update any stored alarm triggers of all users if required
@@ -343,8 +350,6 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
         if (null != eventUpdate && needsAlarmTriggerUpdate(eventUpdate)) {
             Map<Integer, List<Alarm>> alarmsByUserID = storage.getAlarmStorage().loadAlarms(originalEvent);
             if (null != alarmsByUserID && 0 < alarmsByUserID.size()) {
-                Event changedEvent = EventMapper.getInstance().copy(originalEvent, new Event(), (EventField[]) null);
-                changedEvent = EventMapper.getInstance().copy(eventUpdate.getUpdate(), changedEvent, (EventField[]) null);
                 if (isGroupScheduled(originalEvent)) {
                     for (Attendee attendee : filter(originalEvent.getAttendees(), Boolean.TRUE, CalendarUserType.INDIVIDUAL)) {
                         List<Alarm> alarms = alarmsByUserID.get(I(attendee.getEntity()));
@@ -786,28 +791,13 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
                     }
                     throw CalendarExceptionCodes.FORBIDDEN_CHANGE.create(originalEvent.getId(), field);
                 case CREATED:
-                    // ignore implicitly
-                    eventUpdate.removeCreated();
-                    break;
                 case CREATED_BY:
-                    // ignore implicitly
-                    eventUpdate.removeCreatedBy();
-                    break;
                 case LAST_MODIFIED:
-                    // ignore implicitly
-                    eventUpdate.removeLastModified();
-                    break;
                 case TIMESTAMP:
-                    // ignore implicitly
-                    eventUpdate.removeTimestamp();
-                    break;
                 case MODIFIED_BY:
-                    // ignore implicitly
-                    eventUpdate.removeModifiedBy();
-                    break;
                 case SEQUENCE:
-                    // ignore implicitly
-                    eventUpdate.removeSequence();
+                    // ignore meta-fields implicitly
+                    EventMapper.getInstance().get(field).remove(eventUpdate);
                     break;
                 case FOLDER_ID:
                     if (getFolderView(originalEvent, calendarUserId).equals(eventUpdate.getFolderId())) {
