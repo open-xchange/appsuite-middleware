@@ -118,9 +118,11 @@ class SimpleResultTracker {
      */
     public void throwCalendarEvent(Connection connection, Context context, Session session, EntityResolver entityResolver) {
         Map<Integer, List<String>> affectedFoldersPerUser = getAffectedFoldersPerUser(context, connection, entityResolver);
-        DefaultCalendarEvent calendarEvent = new DefaultCalendarEvent(context.getContextId(), CalendarAccount.DEFAULT_ACCOUNT.getAccountId(), session, affectedFoldersPerUser, Collections.emptyList(), updateResults, deleteResults);
-        for (CalendarHandler handler : calendarHandlers) {
-            handler.handle(calendarEvent);
+        if (false == affectedFoldersPerUser.isEmpty()) {
+            DefaultCalendarEvent calendarEvent = new DefaultCalendarEvent(context.getContextId(), CalendarAccount.DEFAULT_ACCOUNT.getAccountId(), session, affectedFoldersPerUser, Collections.emptyList(), updateResults, deleteResults);
+            for (CalendarHandler handler : calendarHandlers) {
+                handler.handle(calendarEvent);
+            }
         }
     }
 

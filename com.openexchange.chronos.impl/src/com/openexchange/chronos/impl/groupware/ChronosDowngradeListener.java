@@ -49,33 +49,16 @@
 
 package com.openexchange.chronos.impl.groupware;
 
-import java.util.Collections;
 import java.util.Date;
-import java.util.List;
-import com.openexchange.chronos.Attendee;
-import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.CalendarUser;
-import com.openexchange.chronos.Event;
-import com.openexchange.chronos.EventField;
-import com.openexchange.chronos.common.CalendarUtils;
-import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.service.CalendarHandler;
 import com.openexchange.chronos.service.CalendarUtilities;
-import com.openexchange.chronos.service.EntityResolver;
-import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.chronos.storage.CalendarStorageFactory;
-import com.openexchange.database.provider.DBTransactionPolicy;
 import com.openexchange.database.provider.SimpleDBProvider;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.downgrade.DowngradeEvent;
 import com.openexchange.groupware.downgrade.DowngradeListener;
 import com.openexchange.osgi.ServiceSet;
-import com.openexchange.search.SingleSearchTerm.SingleOperation;
-import com.openexchange.search.internal.operands.ConstantOperand;
-import com.openexchange.session.Session;
-import com.openexchange.tools.session.ServerSession;
-import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  * {@link ChronosDowngradeListener} - {@link DowngradeListener} for calendar data
@@ -83,11 +66,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.0
  */
-public class ChronosDowngradeListener implements DowngradeListener {
-
-    private CalendarStorageFactory      factory;
-    private CalendarUtilities           calendarUtilities;
-    private ServiceSet<CalendarHandler> calendarHandlers;
+public class ChronosDowngradeListener extends ChronosAbstractListener implements DowngradeListener {
 
     /**
      * Initializes a new {@link ChronosDeleteListener}.
@@ -97,65 +76,17 @@ public class ChronosDowngradeListener implements DowngradeListener {
      * @param calendarHandlers The {@link CalendarHandler}s to notify
      */
     public ChronosDowngradeListener(CalendarStorageFactory factory, CalendarUtilities calendarUtilities, ServiceSet<CalendarHandler> calendarHandlers) {
-        super();
-        this.factory = factory;
-        this.calendarUtilities = calendarUtilities;
-        this.calendarHandlers = calendarHandlers;
+        super(factory, calendarUtilities, calendarHandlers);
     }
 
     @Override
     public void downgradePerformed(DowngradeEvent event) throws OXException {
         if (false == event.getNewUserConfiguration().hasCalendar()) {
             // Delete data
-            purgeData(new SimpleDBProvider(event.getReadCon(), event.getWriteCon()), event.getContext(), event.getNewUserConfiguration().getUserId(), event.getSession());
+            init(event.getContext(), new SimpleDBProvider(event.getReadCon(), event.getWriteCon()));
+            CalendarUser admin = getEntityResolver().prepareUserAttendee(event.getContext().getMailadmin());
+            manageEvents(event.getContext(), event.getNewUserConfiguration().getUserId(), admin, new Date(), true, true);
         }
-    }
-
-    private void purgeData(SimpleDBProvider dbProvider, Context context, int userId, Session adminSession) throws OXException {
-        EntityResolver entityResolver = calendarUtilities.getEntityResolver(context.getContextId());
-        CalendarStorage storage = factory.create(context, CalendarAccount.DEFAULT_ACCOUNT.getAccountId(), entityResolver, dbProvider, DBTransactionPolicy.NO_TRANSACTIONS);
-        SimpleResultTracker tracker = new SimpleResultTracker(calendarHandlers);
-
-        EventField[] fields = new EventField[] { EventField.ID, EventField.FOLDER_ID };
-        List<Event> events = storage.getEventStorage().searchEvents(CalendarUtils.getSearchTerm(AttendeeField.ENTITY, SingleOperation.EQUALS, new ConstantOperand<Integer>(Integer.valueOf(userId))), null, fields);
-
-        ServerSession serverSession = ServerSessionAdapter.valueOf(userId, context.getContextId());
-        Date date = new Date();
-
-        for (Event event : events) {
-            String eventId = event.getId();
-            List<Attendee> attendees = storage.getAttendeeStorage().loadAttendees(eventId);
-            event.setAttendees(attendees);
-
-            if (isPrivate(event) || CalendarUtils.isLastUserAttendee(attendees, userId)) {
-                // Private or user is last attendee, so delete
-                storage.getAlarmStorage().deleteAlarms(eventId);
-                storage.getAlarmTriggerStorage().deleteTriggers(eventId);
-                storage.getAttachmentStorage().deleteAttachments(serverSession, CalendarUtils.getFolderView(event, userId), eventId);
-                storage.getAttendeeStorage().deleteAttendees(eventId);
-                storage.getEventStorage().deleteEvent(eventId);
-                tracker.addDelete(event, date.getTime());
-
-            } else {
-                // Remove user from event
-                storage.getAttendeeStorage().deleteAttendees(eventId, Collections.singletonList(CalendarUtils.find(attendees, userId)));
-                Event updatedEvent = calendarUtilities.copyEvent(event, null);
-                CalendarUser admin = entityResolver.prepareUserAttendee(context.getMailadmin());
-                updatedEvent.setLastModified(date);
-                updatedEvent.setModifiedBy(admin);
-                updatedEvent.setTimestamp(date.getTime());
-                storage.getEventStorage().updateEvent(event);
-                tracker.addUpdate(event, updatedEvent);
-            }
-        }
-    }
-
-    private boolean isPrivate(Event event) {
-        if (null != event.getFolderId()) {
-            // Only public and not group-sheduled events have folder ID in event
-            return false;
-        }
-        return true;
     }
 
     @Override
