@@ -53,6 +53,8 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Map;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
@@ -86,6 +88,8 @@ import com.openexchange.rest.client.httpclient.HttpClients.ClientConfig;
 public class SchedJoulesRESTClient {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SchedJoulesRESTClient.class);
+
+    private static final SimpleDateFormat DATE_FORMATTER = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z");
 
     private static final String SCHEME = "https";
     private static final String BASE_URL = "api.schedjoules.com";
@@ -371,6 +375,7 @@ public class SchedJoulesRESTClient {
         SchedJoulesResponse response = new SchedJoulesResponse(httpResponse.getStatusLine().getStatusCode());
         setContentType(httpResponse, response);
         setETag(httpResponse, response);
+        setLastModified(httpResponse, response);
 
         HttpEntity entity = httpResponse.getEntity();
         if (entity == null) {
@@ -412,6 +417,28 @@ public class SchedJoulesRESTClient {
             return;
         }
         response.setETag(eTagHeader.getValue());
+    }
+
+    /**
+     * Set the Last-Modified timestamp to the specified {@link SchedJoulesResponse}
+     * 
+     * @param httpResponse the {@link HttpResponse}
+     * @param schedjoulesResponse the {@link SchedJoulesResponse}
+     */
+    private void setLastModified(HttpResponse httpResponse, SchedJoulesResponse response) {
+        Header header = httpResponse.getFirstHeader(HttpHeaders.LAST_MODIFIED);
+        if (header == null) {
+            return;
+        }
+        String value = header.getValue();
+        if (Strings.isEmpty(value)) {
+            return;
+        }
+        try {
+            response.setLastModified(DATE_FORMATTER.parse(value).getTime());
+        } catch (ParseException e) {
+            LOGGER.debug("Could not parse the value of the 'Last-Modified' header '{}'", value, e);
+        }
     }
 
     /**

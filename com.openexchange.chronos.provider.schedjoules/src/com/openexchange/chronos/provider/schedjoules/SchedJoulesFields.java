@@ -56,15 +56,12 @@ package com.openexchange.chronos.provider.schedjoules;
  */
 final class SchedJoulesFields {
 
-    /**
-     * The user configuration's key for all available/visible folders
-     */
-    static final String FOLDERS = "folders";
+    ////////////////////// EXTERNAL ATTRIBUTES ////////////////////
 
     /**
-     * The user configuration's key for the feed's URL
+     * The itemId that maps to a SchedJoules itemId
      */
-    static final String URL = "url";
+    static final String ITEM_ID = "itemId";
 
     /**
      * The user configuration's key for the folder's name
@@ -72,14 +69,21 @@ final class SchedJoulesFields {
     static final String NAME = "name";
 
     /**
+     * The user configuration's key for all available/visible folders
+     */
+    static final String FOLDERS = "folders";
+
+    ////////////////////// INTERNAL ATTRIBUTES ////////////////////
+
+    /**
+     * The user configuration's key for the feed's URL
+     */
+    static final String URL = "url";
+
+    /**
      * The refreshInterval for a folder.
      */
     static final String REFRESH_INTERVAL = "refreshInterval";
-
-    /**
-     * The itemId that maps to a SchedJoules itemId
-     */
-    static final String ITEM_ID = "itemId";
 
     /**
      * The optional locale for the item
@@ -112,8 +116,14 @@ final class SchedJoulesFields {
     static final String USER_KEY = "userKey";
 
     /**
-     * The etag of a folder/calendar
+     * The etag of a calendar
      */
     static final String ETAG = "etag";
 
+    /**
+     * The lastModified of a calendar. The timestamp represents
+     * the last time the events were modified and not the attributes
+     * of the calendar folder, e.g. color or name.
+     */
+    static final String LAST_MODIFIED = "lastModified";
 }

@@ -242,6 +242,7 @@ public class SchedJoulesCalendarAccess extends CachingCalendarAccess {
             }
 
             folder.put(SchedJoulesFields.ETAG, calendar.getETag());
+            folder.put(SchedJoulesFields.LAST_MODIFIED, calendar.getLastModified());
             updateConfigurationData(getAccount().getInternalConfiguration(), getAccount().getUserConfiguration());
 
             return new ExternalCalendarResult(calendar.getEvents());

@@ -94,7 +94,7 @@ public class SchedJoulesCalendarAPI extends AbstractSchedJoulesAPI {
     public SchedJoulesCalendar getCalendar(URL url, String eTag) throws OXException {
         SchedJoulesResponse response = client.executeRequest(url, HttpMethod.HEAD, eTag);
         if (response.getStatusCode() == 304) {
-            return new SchedJoulesCalendar(null, Collections.emptyList(), eTag); // Nothing modified
+            return new SchedJoulesCalendar(null, Collections.emptyList(), eTag, -1); // Nothing modified
         }
         return getCalendar(url);
     }

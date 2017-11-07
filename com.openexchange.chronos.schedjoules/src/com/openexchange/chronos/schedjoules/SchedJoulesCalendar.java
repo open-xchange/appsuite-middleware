@@ -62,15 +62,17 @@ public class SchedJoulesCalendar {
     private final List<Event> events;
     private final String eTag;
     private final String name;
+    private final long lastModified;
 
     /**
      * Initialises a new {@link SchedJoulesCalendar}.
      */
-    public SchedJoulesCalendar(String name, List<Event> events, String eTag) {
+    public SchedJoulesCalendar(String name, List<Event> events, String eTag, long lastModified) {
         super();
         this.name = name;
         this.events = events;
         this.eTag = eTag;
+        this.lastModified = lastModified;
     }
 
     /**
@@ -98,5 +100,14 @@ public class SchedJoulesCalendar {
      */
     public String getName() {
         return name;
+    }
+
+    /**
+     * Gets the lastModified
+     *
+     * @return The lastModified
+     */
+    public long getLastModified() {
+        return lastModified;
     }
 }

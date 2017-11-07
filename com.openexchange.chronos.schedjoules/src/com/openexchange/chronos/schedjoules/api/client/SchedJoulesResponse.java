@@ -62,6 +62,7 @@ public class SchedJoulesResponse {
     private final int statusCode;
     private String contentType;
     private String eTag;
+    private long lastModified;
     private Object responseBody;
 
     /**
@@ -151,5 +152,23 @@ public class SchedJoulesResponse {
      */
     public void setResponseBody(Object responseBody) {
         this.responseBody = responseBody;
+    }
+
+    /**
+     * Gets the lastModified
+     *
+     * @return The lastModified
+     */
+    public long getLastModified() {
+        return lastModified;
+    }
+
+    /**
+     * Sets the lastModified
+     *
+     * @param lastModified The lastModified to set
+     */
+    public void setLastModified(long lastModified) {
+        this.lastModified = lastModified;
     }
 }
