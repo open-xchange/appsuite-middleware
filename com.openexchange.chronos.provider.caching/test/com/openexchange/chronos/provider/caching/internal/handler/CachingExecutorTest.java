@@ -50,12 +50,16 @@
 package com.openexchange.chronos.provider.caching.internal.handler;
 
 import static org.junit.Assert.assertFalse;
+import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import org.apache.http.HttpStatus;
+import org.dmfs.rfc5545.DateTime;
+import org.json.JSONObject;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Matchers;
@@ -66,9 +70,18 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import com.openexchange.chronos.Event;
-import com.openexchange.chronos.provider.caching.CachingCalendarAccessTest;
+import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.caching.ExternalCalendarResult;
+import com.openexchange.chronos.provider.caching.impl.TestCachingCalendarAccessImpl;
+import com.openexchange.chronos.provider.caching.internal.Services;
+import com.openexchange.chronos.service.CalendarParameters;
+import com.openexchange.chronos.storage.CalendarStorageFactory;
+import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.session.Session;
+import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  * {@link CachingExecutorTest}
@@ -77,8 +90,10 @@ import com.openexchange.exception.OXException;
  * @since v7.10.0
  */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({ CachingHandlerFactory.class })
-public class CachingExecutorTest extends CachingCalendarAccessTest {
+@PrepareForTest({ CachingHandlerFactory.class, ServerSessionAdapter.class, Services.class })
+public class CachingExecutorTest {
+
+    protected TestCachingCalendarAccessImpl cachingCalendarAccess;
 
     private CachingExecutor executor;
 
@@ -87,6 +102,27 @@ public class CachingExecutorTest extends CachingCalendarAccessTest {
 
     @Mock
     private CachingHandlerFactory factory;
+
+    @Mock
+    protected Session session;
+
+    @Mock
+    private ServerSession serverSession;
+
+    @Mock
+    protected CalendarAccount account;
+
+    @Mock
+    protected CalendarParameters parameters;
+
+    @Mock
+    private CalendarStorageFactory calendarStorageFactory;
+
+    @Mock
+    private DatabaseService databaseService;
+
+    @Mock
+    private Connection connection;
 
     private List<Event> existingEvents = new ArrayList<>();
 
@@ -97,17 +133,28 @@ public class CachingExecutorTest extends CachingCalendarAccessTest {
 
     private List<OXException> warnings = new ArrayList<>();
 
-    @Override
+    @Before
     public void setUp() throws Exception {
-        super.setUp();
         MockitoAnnotations.initMocks(this);
 
         PowerMockito.mockStatic(CachingHandlerFactory.class);
         Mockito.when(CachingHandlerFactory.getInstance()).thenReturn(factory);
         Mockito.when(factory.get(Matchers.any(), Matchers.any())).thenReturn(handler);
+        
+        PowerMockito.mockStatic(ServerSessionAdapter.class);
+        PowerMockito.when(ServerSessionAdapter.valueOf((com.openexchange.session.Session) Matchers.any())).thenReturn(serverSession);
+
+        PowerMockito.mockStatic(Services.class);
+        PowerMockito.when(Services.getService(CalendarStorageFactory.class)).thenReturn(calendarStorageFactory);
+        PowerMockito.when(Services.getService(DatabaseService.class)).thenReturn(databaseService);
+        PowerMockito.when(databaseService.getWritable((Context) Matchers.any())).thenReturn(connection);
+
 
         Mockito.when(handler.getExistingEvents(Matchers.anyString())).thenReturn(existingEvents);
         Mockito.when(handler.getExternalEvents(Matchers.anyString())).thenReturn(externalCalendarResult);
+
+        Mockito.when(account.getInternalConfiguration()).thenReturn(new JSONObject());
+        cachingCalendarAccess = new TestCachingCalendarAccessImpl(session, account, parameters);
 
         lastFolderStates.add(new FolderUpdateState("myFolderId", new Long(System.currentTimeMillis()), 1, FolderProcessingType.UPDATE));
     }
@@ -149,8 +196,11 @@ public class CachingExecutorTest extends CachingCalendarAccessTest {
 
         Event e = new Event();
         e.setUid("available");
+        e.setStartDate(new DateTime(System.currentTimeMillis()));
+        e.setTimestamp(System.currentTimeMillis());
         externalEvents.add(e);
-        externalCalendarResult = new ExternalCalendarResult(Collections.singletonList(e), HttpStatus.SC_OK);
+        externalCalendarResult = new ExternalCalendarResult(externalEvents, HttpStatus.SC_MOVED_PERMANENTLY);
+        Mockito.when(handler.getExternalEvents(Matchers.anyString())).thenReturn(externalCalendarResult);
 
         executor.cache(warnings);
 
@@ -164,12 +214,15 @@ public class CachingExecutorTest extends CachingCalendarAccessTest {
 
         Event e = new Event();
         e.setUid("available");
+        e.setStartDate(new DateTime(System.currentTimeMillis()));
+        e.setTimestamp(System.currentTimeMillis());
         existingEvents.add(e);
+        Mockito.when(handler.getExistingEvents(Matchers.anyString())).thenReturn(existingEvents);
 
         executor.cache(warnings);
 
         Mockito.verify(factory, Mockito.times(1)).get(Matchers.any(), Matchers.any());
-        Mockito.verify(handler, Mockito.never()).persist(Matchers.anyString(), Matchers.any());
+        Mockito.verify(handler, Mockito.times(1)).persist(Matchers.anyString(), Matchers.any());
     }
 
 }

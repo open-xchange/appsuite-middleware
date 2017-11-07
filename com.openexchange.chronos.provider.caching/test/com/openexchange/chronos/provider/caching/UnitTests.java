@@ -64,7 +64,8 @@ import com.openexchange.chronos.provider.caching.internal.handler.CachingExecuto
 @RunWith(Suite.class)
 @SuiteClasses({
     //@formatter:off
-    CachingExecutorTest.class
+    CachingExecutorTest.class,
+    CachingCalendarAccessTest.class
     //@formatter:on
 })
 public class UnitTests {
