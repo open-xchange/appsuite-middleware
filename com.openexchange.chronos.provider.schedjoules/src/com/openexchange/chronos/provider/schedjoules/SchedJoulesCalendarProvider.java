@@ -80,7 +80,7 @@ import com.openexchange.user.UserService;
  */
 public class SchedJoulesCalendarProvider extends CachingCalendarProvider {
 
-    private static final String PROVIDER_ID = "schedjoules";
+    public static final String PROVIDER_ID = "schedjoules";
     private static final String DISPLAY_NAME = "SchedJoules";
 
     /**
