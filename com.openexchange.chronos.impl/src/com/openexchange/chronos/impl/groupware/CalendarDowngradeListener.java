@@ -50,7 +50,13 @@
 package com.openexchange.chronos.impl.groupware;
 
 import java.util.Date;
-import com.openexchange.chronos.CalendarUser;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.stream.Collectors;
+import com.openexchange.chronos.AttendeeField;
+import com.openexchange.chronos.Event;
+import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.service.CalendarHandler;
 import com.openexchange.chronos.service.CalendarUtilities;
 import com.openexchange.chronos.storage.CalendarStorageFactory;
@@ -59,33 +65,70 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.downgrade.DowngradeEvent;
 import com.openexchange.groupware.downgrade.DowngradeListener;
 import com.openexchange.osgi.ServiceSet;
+import com.openexchange.search.CompositeSearchTerm;
+import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
+import com.openexchange.search.SingleSearchTerm.SingleOperation;
+import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
- * {@link ChronosDowngradeListener} - {@link DowngradeListener} for calendar data
+ * {@link CalendarDowngradeListener} - {@link DowngradeListener} for calendar data
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.0
  */
-public class ChronosDowngradeListener extends ChronosAbstractListener implements DowngradeListener {
+public class CalendarDowngradeListener implements DowngradeListener {
+
+    private final CalendarStorageFactory      factory;
+    private final CalendarUtilities           calendarUtilities;
+    private final ServiceSet<CalendarHandler> calendarHandlers;
 
     /**
-     * Initializes a new {@link ChronosDeleteListener}.
+     * Initializes a new {@link CalendarDeleteListener}.
      * 
      * @param factory The {@link CalendarStorageFactory}
      * @param calendarUtilities The {@link CalendarUtilities}
      * @param calendarHandlers The {@link CalendarHandler}s to notify
      */
-    public ChronosDowngradeListener(CalendarStorageFactory factory, CalendarUtilities calendarUtilities, ServiceSet<CalendarHandler> calendarHandlers) {
-        super(factory, calendarUtilities, calendarHandlers);
+    public CalendarDowngradeListener(CalendarStorageFactory factory, CalendarUtilities calendarUtilities, ServiceSet<CalendarHandler> calendarHandlers) {
+        super();
+        this.factory = factory;
+        this.calendarUtilities = calendarUtilities;
+        this.calendarHandlers = calendarHandlers;
     }
 
     @Override
     public void downgradePerformed(DowngradeEvent event) throws OXException {
         if (false == event.getNewUserConfiguration().hasCalendar()) {
-            // Delete data
-            init(event.getContext(), new SimpleDBProvider(event.getReadCon(), event.getWriteCon()));
-            CalendarUser admin = getEntityResolver().prepareUserAttendee(event.getContext().getMailadmin());
-            manageEvents(event.getContext(), event.getNewUserConfiguration().getUserId(), admin, new Date(), true, true);
+            int userId = event.getNewUserConfiguration().getUserId();
+            StorageUpdater updater = new StorageUpdater(event.getContext(), userId, null, calendarUtilities, factory, new SimpleDBProvider(event.getReadCon(), event.getWriteCon()), calendarHandlers);
+
+            // Get all events which the user attends and that are *NOT* located in his private folders.
+            CompositeSearchTerm term = new CompositeSearchTerm(CompositeOperation.AND)
+                .addSearchTerm(CalendarUtils.getSearchTerm(AttendeeField.ENTITY, SingleOperation.EQUALS, Integer.valueOf(userId)))
+                .addSearchTerm(CalendarUtils.getSearchTerm(AttendeeField.FOLDER_ID, SingleOperation.ISNULL));
+            List<String> publicEvents = updater.searchEvents(term, new EventField[] { EventField.ID }).stream().map(Event::getId).collect(Collectors.toList());
+
+            // Get all events the user attends
+            List<Event> events = updater.searchEvents();
+
+            ServerSession serverSession = ServerSessionAdapter.valueOf(userId, event.getContext().getContextId());
+            Date date = new Date();
+
+            List<Event> eventsToRemoveTheAttendee = new LinkedList<>();
+            for (final Event e : events) {
+                if (publicEvents.contains(e.getId()) && false == CalendarUtils.isLastUserAttendee(e.getAttendees(), userId)) {
+                    // Don't delete public events where other user still attend
+                    eventsToRemoveTheAttendee.add(e);
+                }
+            }
+            updater.removeAttendeeFrom(eventsToRemoveTheAttendee, date);
+            events.removeAll(eventsToRemoveTheAttendee);
+            // Delete all other events
+            updater.deleteEvent(events, serverSession, date);
+
+            // Trigger calendar events
+            updater.notifyCalendarHandlers(event.getSession());
         }
     }
 

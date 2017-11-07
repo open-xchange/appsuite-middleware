@@ -51,15 +51,13 @@ package com.openexchange.chronos.impl.groupware;
 
 import java.sql.Connection;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
-import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
-import com.openexchange.chronos.Organizer;
 import com.openexchange.chronos.ResourceId;
 import com.openexchange.chronos.common.CalendarUtils;
-import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.service.CalendarHandler;
 import com.openexchange.chronos.service.CalendarUtilities;
 import com.openexchange.chronos.storage.CalendarStorageFactory;
@@ -72,16 +70,17 @@ import com.openexchange.groupware.delete.DeleteFailedExceptionCodes;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.osgi.ServiceSet;
 import com.openexchange.search.SingleSearchTerm.SingleOperation;
-import com.openexchange.search.internal.operands.ConstantOperand;
 import com.openexchange.session.Session;
+import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
- * {@link ChronosDeleteListener} - Cleans up calendar data on deletion of types
+ * {@link CalendarDeleteListener} - Cleans up calendar data on deletion of types
  * <li>{@link DeleteEvent#TYPE_USER}</li>
  * <li>{@link DeleteEvent#TYPE_GROUP}</li>
  * <li>{@link DeleteEvent#TYPE_RESOURCE} </li>
  * 
- * Type {@link DeleteEvent#TYPE_CONTEXT} is handled by {@link com.openexchange.admin.storage.mysqlStorage.OXContextMySQLStorage#deleteTablesData}
+ * Type {@link DeleteEvent#TYPE_CONTEXT} is handled by com.openexchange.admin.storage.mysqlStorage.OXContextMySQLStorage#deleteTablesData.
  * Type {@link DeleteEvent#TYPE_RESOURCE_GROUP} will thrown an appropriated error.
  * 
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
@@ -89,17 +88,24 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.0
  */
-public final class ChronosDeleteListener extends ChronosAbstractListener implements DeleteListener {
+public final class CalendarDeleteListener implements DeleteListener {
+
+    private final CalendarStorageFactory      factory;
+    private final CalendarUtilities           calendarUtilities;
+    private final ServiceSet<CalendarHandler> calendarHandlers;
 
     /**
-     * Initializes a new {@link ChronosDeleteListener}.
+     * Initializes a new {@link CalendarDeleteListener}.
      * 
      * @param factory The {@link CalendarStorageFactory}
      * @param calendarUtilities The {@link CalendarUtilities}
      * @param calendarHandlers The {@link CalendarHandler}s to notify
      */
-    public ChronosDeleteListener(CalendarStorageFactory factory, CalendarUtilities calendarUtilities, ServiceSet<CalendarHandler> calendarHandlers) {
-        super(factory, calendarUtilities, calendarHandlers);
+    public CalendarDeleteListener(CalendarStorageFactory factory, CalendarUtilities calendarUtilities, ServiceSet<CalendarHandler> calendarHandlers) {
+        super();
+        this.factory = factory;
+        this.calendarUtilities = calendarUtilities;
+        this.calendarHandlers = calendarHandlers;
     }
 
     @Override
@@ -138,52 +144,58 @@ public final class ChronosDeleteListener extends ChronosAbstractListener impleme
      * @throws OXException In case service is unavailable or SQL error
      */
     private void purgeUserData(DBProvider dbProvider, Context context, int userId, Integer destinationUserId, Session adminSession) throws OXException {
-        init(context, dbProvider);
-        /*
-         * Delete alarms for the user
-         */
-        getStorage().getAlarmStorage().deleteAlarms(userId);
-        getStorage().getAlarmTriggerStorage().deleteTriggers(userId);
+        StorageUpdater updater = new StorageUpdater(context, userId, destinationUserId, calendarUtilities, factory, dbProvider, calendarHandlers);
 
         /*
          * Update events where the user is attendee, delete where he is the last internal user
          */
-        CalendarUser replacement = getEntityResolver().prepareUserAttendee(null == destinationUserId ? context.getMailadmin() : destinationUserId.intValue());
         Date date = new Date();
-        manageEvents(context, userId, replacement, date, false, false);
+        List<Event> events = updater.searchEvents();
+        List<Event> eventsToDelete = new LinkedList<>();
+        ServerSession serverSession = ServerSessionAdapter.valueOf(userId, context.getContextId());
+        for (final Event event : events) {
+            if (CalendarUtils.isLastUserAttendee(event.getAttendees(), userId)) {
+                // The attendee is the only one left, delete event
+                eventsToDelete.add(event);
+            }
+        }
+        updater.deleteEvent(eventsToDelete, serverSession, date);
+        events.removeAll(eventsToDelete);
+        updater.removeAttendeeFrom(events, date);
 
         /*
          * Update event fields where the user might be referenced
          */
-        // Adjust fields
         EventField[] fields = new EventField[] { EventField.ID, EventField.CREATED_BY, EventField.MODIFIED_BY, EventField.CALENDAR_USER, EventField.ORGANIZER };
 
         // Update events which the user created
-        List<Event> events = getStorage().getEventStorage().searchEvents(CalendarUtils.getSearchTerm(EventField.CREATED_BY, SingleOperation.EQUALS, new ConstantOperand<Integer>(Integer.valueOf(userId))), null, fields);
-        replaceUserEntity(userId, events, date, replacement);
+        events = updater.searchEvents(CalendarUtils.getSearchTerm(EventField.CREATED_BY, SingleOperation.EQUALS, Integer.valueOf(userId)), fields);
+        updater.replaceAttendeeIn(events, date);
 
         // Update events where the user is the modifier
-        events = getStorage().getEventStorage().searchEvents(CalendarUtils.getSearchTerm(EventField.MODIFIED_BY, SingleOperation.EQUALS, new ConstantOperand<Integer>(Integer.valueOf(userId))), null, fields);
-        replaceUserEntity(userId, events, date, replacement);
+        events = updater.searchEvents(CalendarUtils.getSearchTerm(EventField.MODIFIED_BY, SingleOperation.EQUALS, Integer.valueOf(userId)), fields);
+        updater.replaceAttendeeIn(events, date);
 
         // Update events where the user is the calendar user
-        events = getStorage().getEventStorage().searchEvents(CalendarUtils.getSearchTerm(EventField.CALENDAR_USER, SingleOperation.EQUALS, new ConstantOperand<Integer>(Integer.valueOf(userId))), null, fields);
-        replaceUserEntity(userId, events, date, replacement);
+        events = updater.searchEvents(CalendarUtils.getSearchTerm(EventField.CALENDAR_USER, SingleOperation.EQUALS, Integer.valueOf(userId)), fields);
+        updater.replaceAttendeeIn(events, date);
 
         // Update events where the user is the organizer
-        events = getStorage().getEventStorage().searchEvents(CalendarUtils.getSearchTerm(EventField.ORGANIZER, SingleOperation.EQUALS, new ConstantOperand<String>(ResourceId.forUser(context.getContextId(), userId))), null, fields);
-        replaceUserEntity(userId, events, date, replacement);
-
-        getTracker().throwCalendarEvent(dbProvider.getWriteConnection(context), context, adminSession, getEntityResolver());
+        events = updater.searchEvents(CalendarUtils.getSearchTerm(EventField.ORGANIZER, SingleOperation.EQUALS, ResourceId.forUser(context.getContextId(), userId)), fields);
+        updater.replaceAttendeeIn(events, date);
 
         /*
          * Delete account
          */
-        getStorage().getAccountStorage().deleteAccount(userId, CalendarAccount.DEFAULT_ACCOUNT.getAccountId());
+        updater.deleteAccount();
+
+        // Trigger calendar events
+        updater.notifyCalendarHandlers(adminSession);
     }
 
     /**
-     * Removes the given attendee from every event it attends and set the modification date in the event accordingly
+     * Removes the given attendee from every event it attends, set the modification date in the event accordingly
+     * and finally deletes the attendee.
      * 
      * @param dbProvider The {@link DBProvider}
      * @param context The {@link Context}
@@ -192,40 +204,9 @@ public final class ChronosDeleteListener extends ChronosAbstractListener impleme
      * @throws OXException In case service is unavailable or SQL error
      */
     private void deleteAttendee(DBProvider dbProvider, Context context, int attendeeId, Session adminSession) throws OXException {
-        init(context, dbProvider);
-        CalendarUser replacement = getEntityResolver().prepareUserAttendee(context.getMailadmin());
-        manageEvents(context, attendeeId, replacement, new Date(), false, false);
-        getTracker().throwCalendarEvent(dbProvider.getWriteConnection(context), context, adminSession, getEntityResolver());
-    }
-
-    /**
-     * Check event fields where the given user could be referenced in and updated those fields
-     * 
-     * @param userId The identifier of the user to check
-     * @param events The {@link Event}s to update
-     * @param date The new {@link Date} to set in the event
-     * @param replacement The {@link CalendarUser} to replace the given user
-     * @throws OXException Various
-     */
-    private void replaceUserEntity(int userId, List<Event> events, Date date, CalendarUser replacement) throws OXException {
-        for (Event event : events) {
-            Event updatedEvent = copyEvent(event);
-            if (CalendarUtils.matches(event.getCreatedBy(), userId)) {
-                updatedEvent.setCreatedBy(replacement);
-            }
-            if (CalendarUtils.matches(event.getModifiedBy(), userId)) {
-                updatedEvent.setModifiedBy(replacement);
-            }
-            if (CalendarUtils.matches(event.getCalendarUser(), userId)) {
-                updatedEvent.setCalendarUser(replacement);
-            }
-            if (CalendarUtils.matches(event.getOrganizer(), userId)) {
-                updatedEvent.setOrganizer(getEntityResolver().applyEntityData(new Organizer(), replacement.getEntity()));
-            }
-            updatedEvent.setLastModified(date);
-            updatedEvent.setTimestamp(date.getTime());
-            getStorage().getEventStorage().updateEvent(updatedEvent);
-            getTracker().addUpdate(event, updatedEvent);
-        }
+        StorageUpdater updater = new StorageUpdater(context, attendeeId, null, calendarUtilities, factory, dbProvider, calendarHandlers);
+        Date date = new Date();
+        updater.removeAttendeeFrom(updater.searchEvents(), date);
+        updater.notifyCalendarHandlers(adminSession);
     }
 }

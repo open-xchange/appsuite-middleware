@@ -59,7 +59,6 @@ import java.util.Map;
 import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.DeleteResultImpl;
@@ -81,7 +80,7 @@ import com.openexchange.tools.oxfolder.OXFolderAccess;
 
 /**
  * {@link SimpleResultTracker} - Tracks update and delete operations on calendar events. This tracker
- * is only meant to be used by the {@link ChronosDeleteListener}. For other purposes use {@link com.openexchange.chronos.impl.performer.ResultTracker}.
+ * is only meant to be used by the {@link CalendarDeleteListener}. For other purposes use {@link com.openexchange.chronos.impl.performer.ResultTracker}.
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.0
@@ -109,14 +108,14 @@ class SimpleResultTracker {
     }
 
     /**
-     * Throws the {@link CalendarEvent}
+     * Creates a new {@link CalendarEvent} and calls {@link CalendarHandler#handle(CalendarEvent)}
      * 
      * @param connection The {@link Connection}
      * @param context The {@link Context}
      * @param session The {@link Session} of the context admin
      * @param entityResolver The {@link EntityResolver}
      */
-    public void throwCalendarEvent(Connection connection, Context context, Session session, EntityResolver entityResolver) {
+    public void notifyCalenderHandlers(Connection connection, Context context, Session session, EntityResolver entityResolver) {
         Map<Integer, List<String>> affectedFoldersPerUser = getAffectedFoldersPerUser(context, connection, entityResolver);
         if (false == affectedFoldersPerUser.isEmpty()) {
             DefaultCalendarEvent calendarEvent = new DefaultCalendarEvent(context.getContextId(), CalendarAccount.DEFAULT_ACCOUNT.getAccountId(), session, affectedFoldersPerUser, Collections.emptyList(), updateResults, deleteResults);
@@ -129,7 +128,6 @@ class SimpleResultTracker {
     /**
      * Add a deleted event as appropriated {@link CalendarEvent}.
      * 
-     * @param folderIds A {@link List} containing all folders that belongs to the event
      * @param event The {@link Event} to delete
      * @param timestamp The timestamp of the deletion
      */
@@ -188,8 +186,6 @@ class SimpleResultTracker {
                 LOGGER.debug("Could not get folder with id {}", e, folderId);
             }
         }
-
         return affectedFoldersPerUser;
     }
-
 }
