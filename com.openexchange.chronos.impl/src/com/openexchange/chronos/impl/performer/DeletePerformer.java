@@ -49,13 +49,11 @@
 
 package com.openexchange.chronos.impl.performer;
 
-import static com.openexchange.chronos.common.CalendarUtils.combine;
 import static com.openexchange.chronos.common.CalendarUtils.contains;
 import static com.openexchange.chronos.common.CalendarUtils.find;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesException;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.chronos.impl.Check.requireUpToDateTimestamp;
-import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import com.openexchange.chronos.Attendee;
@@ -293,9 +291,8 @@ public class DeletePerformer extends AbstractUpdatePerformer {
     }
 
     private void updateAlarmTrigger(Event originalMasterEvent, Event updatedMasterEvent) throws OXException {
-        Set<RecurrenceId> exceptions = combine(updatedMasterEvent.getDeleteExceptionDates(), updatedMasterEvent.getChangeExceptionDates());
         storage.getAlarmTriggerStorage().deleteTriggers(originalMasterEvent.getId());
-        storage.getAlarmTriggerStorage().insertTriggers(updatedMasterEvent, exceptions);
+        storage.getAlarmTriggerStorage().insertTriggers(updatedMasterEvent);
     }
 
     /**

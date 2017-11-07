@@ -261,7 +261,7 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
     }
 
     @Override
-    public void insertTriggers(Event event, Set<RecurrenceId> exceptions) throws OXException {
+    public void insertTriggers(Event event) throws OXException {
         Map<Integer, List<Alarm>> alarmsPerAttendee = alarmStorage.loadAlarms(event);
         insertTriggers(event, alarmsPerAttendee);
     }
@@ -273,7 +273,8 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
      * @param alarmsPerAttendee A map of alarms per attendee
      * @throws OXException
      */
-    private void insertTriggers(Event event, Map<Integer, List<Alarm>> alarmsPerAttendee) throws OXException {
+    @Override
+    public void insertTriggers(Event event, Map<Integer, List<Alarm>> alarmsPerAttendee) throws OXException {
         RecurrenceId recurrenceId = null;
         if (event.containsRecurrenceRule() && event.getRecurrenceRule() != null && event.getRecurrenceId() == null && event.getId().equals(event.getSeriesId())) {
 

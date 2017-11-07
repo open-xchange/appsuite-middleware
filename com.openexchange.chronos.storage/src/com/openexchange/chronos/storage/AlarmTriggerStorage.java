@@ -68,13 +68,20 @@ import com.openexchange.exception.OXException;
 public interface AlarmTriggerStorage {
 
     /**
+     * Calculates and inserts any pending triggers for the alarms of multiple users of a specific event.
+     *
+     * @param event The event to insert triggers for
+     * @param alarmsPerUserId The alarms associated with the event, mapped to the corresponding entity identifiers of attending users
+     */
+    void insertTriggers(Event event, Map<Integer, List<Alarm>> alarmsPerUserId) throws OXException;
+
+    /**
      * Inserts all necessary triggers for the given event. In case of an update remove all existing triggers first.
      *
      * @param event The event to insert triggers for
-     * @param exceptions The exceptions of the event
      * @throws OXException
      */
-    void insertTriggers(Event event, Set<RecurrenceId> exceptions) throws OXException;
+    void insertTriggers(Event event) throws OXException;
 
     /**
      * Inserts all necessary triggers for the given alarm objects.
@@ -120,7 +127,7 @@ public interface AlarmTriggerStorage {
 
     /**
      * Deletes all existing alarm triggers for an account.
-     * 
+     *
      * @throws OXException
      */
     void deleteAllTriggers() throws OXException;

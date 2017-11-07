@@ -49,7 +49,6 @@
 
 package com.openexchange.chronos.impl.performer;
 
-import static com.openexchange.chronos.common.CalendarUtils.combine;
 import static com.openexchange.chronos.common.CalendarUtils.find;
 import static com.openexchange.chronos.common.CalendarUtils.getAlarmIDs;
 import static com.openexchange.chronos.common.CalendarUtils.getFolderView;
@@ -72,7 +71,6 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.UUID;
@@ -285,11 +283,7 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
 
         // Update alarm trigger
         storage.getAlarmTriggerStorage().deleteTriggers(updatedEvent.getId());
-        Set<RecurrenceId> exceptions = null;
-        if (isSeriesMaster(originalEvent)) {
-            exceptions = combine(originalEvent.getDeleteExceptionDates(), originalEvent.getChangeExceptionDates());
-        }
-        storage.getAlarmTriggerStorage().insertTriggers(updatedEvent, exceptions);
+        storage.getAlarmTriggerStorage().insertTriggers(updatedEvent);
     }
 
     /**
@@ -378,12 +372,9 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
     }
 
     private void removeAlarmTrigger(Event createdException, Event updatedMasterEvent) throws OXException {
-
-        storage.getAlarmTriggerStorage().insertTriggers(createdException, null);
-
-        Set<RecurrenceId> exceptions = combine(updatedMasterEvent.getDeleteExceptionDates(), updatedMasterEvent.getChangeExceptionDates());
+        storage.getAlarmTriggerStorage().insertTriggers(createdException);
         storage.getAlarmTriggerStorage().deleteTriggers(updatedMasterEvent.getId());
-        storage.getAlarmTriggerStorage().insertTriggers(updatedMasterEvent, exceptions);
+        storage.getAlarmTriggerStorage().insertTriggers(updatedMasterEvent);
     }
 
     /**
@@ -488,11 +479,7 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
          */
         insertAlarms(event, userId, alarmUpdates.getAddedItems(), false);
         storage.getAlarmTriggerStorage().deleteTriggers(event.getId());
-        Set<RecurrenceId> exceptions = null;
-        if (isSeriesMaster(event)) {
-            exceptions = combine(event.getDeleteExceptionDates(), event.getChangeExceptionDates());
-        }
-        storage.getAlarmTriggerStorage().insertTriggers(event, exceptions);
+        storage.getAlarmTriggerStorage().insertTriggers(event);
 
         return true;
     }

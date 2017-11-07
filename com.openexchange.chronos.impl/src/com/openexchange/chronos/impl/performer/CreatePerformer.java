@@ -150,19 +150,18 @@ public class CreatePerformer extends AbstractUpdatePerformer {
         /*
          * insert passed alarms for calendar user, apply default alarms for other internal user attendees & setup corresponding alarm triggers
          */
-        Map<Integer, List<Alarm>> alarmsPerAttendee = new HashMap<Integer, List<Alarm>>();
+        Map<Integer, List<Alarm>> alarmsPerUserId = new HashMap<Integer, List<Alarm>>();
         for (int userId : getUserIDs(createdEvent.getAttendees())) {
             if (calendarUserId == userId && event.containsAlarms()) {
-                alarmsPerAttendee.put(Autoboxing.I(userId), insertAlarms(createdEvent, userId, Check.alarmsAreValid(event.getAlarms()), false));
+                alarmsPerUserId.put(Autoboxing.I(userId), insertAlarms(createdEvent, userId, Check.alarmsAreValid(event.getAlarms()), false));
             } else {
                 Alarm defaultAlarm = isAllDay(createdEvent) ? session.getConfig().getDefaultAlarmDate(userId) : session.getConfig().getDefaultAlarmDateTime(userId);
                 if (null != defaultAlarm) {
-                    alarmsPerAttendee.put(Autoboxing.I(userId), insertAlarms(createdEvent, userId, Collections.singletonList(defaultAlarm), true));
+                    alarmsPerUserId.put(Autoboxing.I(userId), insertAlarms(createdEvent, userId, Collections.singletonList(defaultAlarm), true));
                 }
             }
         }
-        //TODO: expose sth like storage.getAlarmTriggerStorage().insertTriggers(createdEvent, alarmsPerAttendee);
-        storage.getAlarmTriggerStorage().insertTriggers(createdEvent, createdEvent.getDeleteExceptionDates());
+        storage.getAlarmTriggerStorage().insertTriggers(createdEvent, alarmsPerUserId);
         /*
          * track creation & return result
          */
