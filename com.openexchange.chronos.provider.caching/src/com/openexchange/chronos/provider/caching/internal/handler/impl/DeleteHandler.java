@@ -58,6 +58,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.SortedSet;
+import org.apache.http.HttpStatus;
 import org.json.JSONObject;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
@@ -150,9 +151,7 @@ public class DeleteHandler extends AbstractHandler {
 
     @Override
     public ExternalCalendarResult getExternalEvents(String folderId) throws OXException {
-        ExternalCalendarResult externalCalendarResult = new ExternalCalendarResult();
-        externalCalendarResult.addEvents(Collections.emptyList());
-        return externalCalendarResult;
+        return new ExternalCalendarResult(Collections.emptyList(), HttpStatus.SC_NOT_FOUND);
     }
 
     @Override
@@ -198,7 +197,7 @@ public class DeleteHandler extends AbstractHandler {
     @Override
     public void updateLastUpdated(String folderId, long timestamp) {
         JSONObject configuration = this.cachedCalendarAccess.getAccount().getInternalConfiguration();
-        JSONObject lastUpdates = configuration.optJSONObject(CachingCalendarAccess.CACHING);
+        JSONObject lastUpdates = configuration.optJSONObject(CACHING);
         if (null != lastUpdates) {
             lastUpdates.remove(folderId);
         }

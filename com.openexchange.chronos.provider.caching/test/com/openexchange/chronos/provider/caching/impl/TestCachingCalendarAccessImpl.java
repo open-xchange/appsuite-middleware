@@ -49,8 +49,9 @@
 
 package com.openexchange.chronos.provider.caching.impl;
 
+import java.util.Collections;
 import java.util.List;
-import com.openexchange.chronos.Event;
+import org.apache.http.HttpStatus;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.CalendarFolder;
 import com.openexchange.chronos.provider.caching.CachingCalendarAccess;
@@ -109,17 +110,6 @@ public class TestCachingCalendarAccessImpl extends CachingCalendarAccess {
     /*
      * (non-Javadoc)
      *
-     * @see com.openexchange.chronos.provider.CalendarAccess#getChangeExceptions(java.lang.String, java.lang.String)
-     */
-    @Override
-    public List<Event> getChangeExceptions(String folderId, String seriesId) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    /*
-     * (non-Javadoc)
-     *
      * @see com.openexchange.chronos.provider.caching.CachingCalendarAccess#getRefreshInterval()
      */
     @Override
@@ -134,7 +124,7 @@ public class TestCachingCalendarAccessImpl extends CachingCalendarAccess {
      */
     @Override
     public ExternalCalendarResult getAllEvents(String folderId) throws OXException {
-        return new ExternalCalendarResult();
+        return new ExternalCalendarResult(Collections.emptyList(), HttpStatus.SC_NOT_MODIFIED);
     }
 
     @Override
@@ -147,7 +137,7 @@ public class TestCachingCalendarAccessImpl extends CachingCalendarAccess {
     }
 
     @Override
-    public long getExternalRequestTimeout() {
+    public long getRetryAfterErrorInterval() {
         return 1;
     }
 

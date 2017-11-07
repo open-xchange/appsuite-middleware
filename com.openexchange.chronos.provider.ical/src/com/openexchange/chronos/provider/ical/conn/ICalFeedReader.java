@@ -51,20 +51,35 @@ package com.openexchange.chronos.provider.ical.conn;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.Charset;
+import java.util.Date;
+import org.apache.commons.codec.binary.Base64;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHeaders;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.client.utils.DateUtils;
+import org.apache.http.util.EntityUtils;
+import com.openexchange.auth.info.AuthType;
+import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.ical.ICalParameters;
 import com.openexchange.chronos.ical.ICalService;
 import com.openexchange.chronos.ical.ImportedCalendar;
-import com.openexchange.chronos.provider.ical.ICalFeedConfig;
+import com.openexchange.chronos.provider.ical.ICalCalendarFeedConfig;
+import com.openexchange.chronos.provider.ical.auth.AdvancedAuthInfo;
 import com.openexchange.chronos.provider.ical.exception.ICalProviderExceptionCodes;
-import com.openexchange.chronos.provider.ical.internal.Services;
-import com.openexchange.chronos.provider.ical.internal.utils.ICalProviderUtils;
+import com.openexchange.chronos.provider.ical.osgi.Services;
+import com.openexchange.chronos.provider.ical.properties.ICalCalendarProviderProperties;
 import com.openexchange.chronos.provider.ical.result.GetResult;
+import com.openexchange.chronos.provider.ical.utils.ICalProviderUtils;
+import com.openexchange.config.ConfigTools;
+import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
+import com.openexchange.java.Strings;
 import com.openexchange.session.Session;
 
 /**
@@ -74,19 +89,33 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.10.0
  */
-public class ICalFeedReader extends ICalFeedConnector {
+public class ICalFeedReader {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ICalFeedReader.class);
 
-    public ICalFeedReader(Session session, ICalFeedConfig iCalFeedConfig) {
-        super(session, iCalFeedConfig);
+    protected final ICalCalendarFeedConfig iCalFeedConfig;
+    protected final Session session;
+    protected final long allowedFeedSize;
+
+    public ICalFeedReader(Session session, ICalCalendarFeedConfig iCalFeedConfig) {
+        this.session = session;
+        this.iCalFeedConfig = iCalFeedConfig;
+        String maxFileSize = Services.getService(LeanConfigurationService.class).getProperty(ICalCalendarProviderProperties.maxFileSize);
+        this.allowedFeedSize = ConfigTools.parseBytes(maxFileSize);
     }
 
     private HttpGet prepareGet() {
         HttpGet getMethod = new HttpGet(iCalFeedConfig.getFeedUrl());
         getMethod.addHeader(HttpHeaders.ACCEPT, "text/calendar");
+        if (Strings.isNotEmpty(iCalFeedConfig.getEtag())) {
+            getMethod.addHeader(HttpHeaders.IF_NONE_MATCH, iCalFeedConfig.getEtag());
+        }
+        String ifModifiedSince = DateUtils.formatDate(new Date(iCalFeedConfig.getLastUpdated()));
+        if (Strings.isNotEmpty(ifModifiedSince)) {
+            getMethod.setHeader(HttpHeaders.IF_MODIFIED_SINCE, ifModifiedSince);
+        }
+
         handleAuth(getMethod);
-        addCustomHeader(getMethod);
         return getMethod;
     }
 
@@ -119,25 +148,110 @@ public class ICalFeedReader extends ICalFeedConnector {
             response = ICalFeedHttpClient.getInstance().execute(getMethod);
             GetResult result = new GetResult(response.getStatusLine(), response.getAllHeaders());
 
-            if (result.getStatusCode() >= 200 && result.getStatusCode() < 300) {
+            int statusCode = result.getStatusCode();
+            if (statusCode >= 200 && statusCode < 300) {
                 HttpEntity httpEntity = response.getEntity();
                 if (null == httpEntity) {
                     return null;
                 }
                 long contentLength = httpEntity.getContentLength();
-                if (contentLength > this.allowedFeedSize) {
+                String contentLength2 = result.getContentLength();
+                if (contentLength > this.allowedFeedSize || (Strings.isNotEmpty(contentLength2) && Long.parseLong(contentLength2) > this.allowedFeedSize)) {
                     throw ICalProviderExceptionCodes.FEED_SIZE_EXCEEDED.create(iCalFeedConfig.getFeedUrl(), contentLength, this.allowedFeedSize);
                 }
                 result.setCalendar(importCalendar(httpEntity));
                 return result;
             }
-            throw ICalProviderExceptionCodes.UNEXPECTED_FEED_ERROR.create(iCalFeedConfig.getFeedUrl(), "Unknown server response.");
+            if (statusCode == HttpStatus.SC_UNAUTHORIZED) {
+                throw CalendarExceptionCodes.AUTH_FAILED.create(iCalFeedConfig.getFeedUrl());
+            }
+            if (statusCode == HttpStatus.SC_NOT_FOUND) {
+                throw ICalProviderExceptionCodes.NO_FEED.create(iCalFeedConfig.getFeedUrl());
+            }
+            throw ICalProviderExceptionCodes.UNEXPECTED_FEED_ERROR.create(iCalFeedConfig.getFeedUrl(), "Unknown server response. Status code {}.", statusCode);
         } catch (IOException e) {
             LOG.error("Error while processing the retrieved information:{}.", e.getMessage(), e);
             throw ICalProviderExceptionCodes.UNEXPECTED_FEED_ERROR.create(iCalFeedConfig.getFeedUrl(), e.getMessage());
         } finally {
             close(getMethod, response);
             Streams.close(response);
+        }
+    }
+
+    protected void handleAuth(HttpRequestBase method) {
+        AdvancedAuthInfo authInfo = this.iCalFeedConfig.getAuthInfo();
+        AuthType authType = authInfo.getAuthType();
+        switch (authType) {
+            case BASIC: {
+                StringBuilder auth = new StringBuilder();
+                String login = authInfo.getLogin();
+                if (Strings.isNotEmpty(login)) {
+                    auth.append(login).append(":");
+                }
+                String password = authInfo.getPassword();
+                if (Strings.isNotEmpty(password)) {
+                    auth.append(password);
+                }
+
+                byte[] encodedAuth = Base64.encodeBase64(auth.toString().getBytes(Charset.forName("ISO-8859-1")));
+                String authHeader = "Basic " + new String(encodedAuth);
+
+                method.addHeader(HttpHeaders.AUTHORIZATION, authHeader);
+            }
+                break;
+            case TOKEN: {
+                String token = authInfo.getToken();
+                String authHeader = "Token token=" + token;
+                method.addHeader(HttpHeaders.AUTHORIZATION, authHeader);
+            }
+                break;
+            case NONE:
+            default:
+                break;
+        }
+    }
+
+    /**
+     * Closes the supplied HTTP request & response resources silently.
+     *
+     * @param request The HTTP request to reset
+     * @param response The HTTP response to consume and close
+     */
+    protected static void close(HttpRequestBase request, HttpResponse response) {
+        consume(response);
+        reset(request);
+    }
+
+    /**
+     * Resets given HTTP request
+     *
+     * @param request The HTTP request
+     */
+    protected static void reset(HttpRequestBase request) {
+        if (null != request) {
+            try {
+                request.reset();
+            } catch (final Exception e) {
+                // Ignore
+            }
+        }
+    }
+
+    /**
+     * Ensures that the entity content is fully consumed and the content stream, if exists, is closed silently.
+     *
+     * @param response The HTTP response to consume and close
+     */
+    protected static void consume(HttpResponse response) {
+        if (null != response) {
+            HttpEntity entity = response.getEntity();
+            if (null != entity) {
+                try {
+                    EntityUtils.consume(entity);
+                } catch (Exception e) {
+                    // Ignore
+                }
+            }
         }
     }
 }

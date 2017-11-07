@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.chronos.provider.ical.internal;
+package com.openexchange.chronos.provider.ical.osgi;
 
 import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.server.ServiceLookup;

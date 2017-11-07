@@ -5,7 +5,8 @@ Bundle-SymbolicName: com.openexchange.chronos.provider.ical
 Bundle-Version: 7.10.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Import-Package: com.openexchange.auth.info,
+Import-Package: com.fasterxml.jackson.annotation,
+ com.openexchange.auth.info,
  com.openexchange.chronos,
  com.openexchange.chronos.common,
  com.openexchange.chronos.exception,
@@ -15,6 +16,7 @@ Import-Package: com.openexchange.auth.info,
  com.openexchange.chronos.service,
  com.openexchange.config,
  com.openexchange.config.lean,
+ com.openexchange.conversion,
  com.openexchange.crypto,
  com.openexchange.exception,
  com.openexchange.i18n,

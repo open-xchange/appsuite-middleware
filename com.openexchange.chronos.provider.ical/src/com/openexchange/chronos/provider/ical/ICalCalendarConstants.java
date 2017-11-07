@@ -47,44 +47,26 @@
  *
  */
 
-package com.openexchange.chronos.provider.ical.internal;
-
-import com.openexchange.chronos.provider.ical.conn.ICalFeedHttpClient;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.DefaultInterests;
-import com.openexchange.config.Interests;
-import com.openexchange.config.Reloadable;
+package com.openexchange.chronos.provider.ical;
 
 
 /**
- * {@link ICalCalendarProviderReloadable}
+ * {@link ICalCalendarConstants}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.10.0
  */
-public class ICalCalendarProviderReloadable implements Reloadable {
+public class ICalCalendarConstants {
 
-    @Override
-    public void reloadConfiguration(ConfigurationService configService) {
-        ICalFeedHttpClient.reset();
-        ICalCalendarProviderProperties.reset();
-    }
+    public static final String PROVIDER_ID = "ical";
 
-    private static final String[] PROPERTIES = new String[] {
-        ICalCalendarProviderProperties.refreshInterval.getFQPropertyName(), // reloadable via LeanConfigurationService
-        ICalCalendarProviderProperties.maxFileSize.getFQPropertyName(), // reloadable via LeanConfigurationService
+    public static final String URI = "uri";
+    public static final String ETAG = "etag";
+    public static final String LAST_UPDATE = "lastUpdate";
+    public static final String NAME = "name";
+    public static final String DESCRIPTION = "description";
 
-        ICalCalendarProviderProperties.connectionTimeout.getFQPropertyName(),
-        ICalCalendarProviderProperties.maxConnections.getFQPropertyName(),
-        ICalCalendarProviderProperties.maxConnectionsPerRoute.getFQPropertyName(),
-        ICalCalendarProviderProperties.socketReadTimeout.getFQPropertyName(),
-        
-        ICalCalendarProviderProperties.blacklistedHosts.getFQPropertyName(),
-        ICalCalendarProviderProperties.schemes.getFQPropertyName(),
-    };
-
-    @Override
-    public Interests getInterests() {
-        return DefaultInterests.builder().propertiesOfInterest(PROPERTIES).build();
+    private ICalCalendarConstants() {
+        // prevent instantiation
     }
 }

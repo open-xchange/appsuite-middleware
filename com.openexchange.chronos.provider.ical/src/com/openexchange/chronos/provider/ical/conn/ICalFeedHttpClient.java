@@ -50,8 +50,8 @@
 package com.openexchange.chronos.provider.ical.conn;
 
 import org.apache.http.impl.client.CloseableHttpClient;
-import com.openexchange.chronos.provider.ical.internal.ICalCalendarProviderProperties;
-import com.openexchange.chronos.provider.ical.internal.Services;
+import com.openexchange.chronos.provider.ical.osgi.Services;
+import com.openexchange.chronos.provider.ical.properties.ICalCalendarProviderProperties;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.net.ssl.config.SSLConfigurationService;
@@ -70,13 +70,12 @@ public class ICalFeedHttpClient {
 
     public static CloseableHttpClient getInstance() {
         if (httpClient == null) {
-            synchronized (ICalFeedConnector.class) {
+            synchronized (ICalFeedHttpClient.class) {
                 if (httpClient == null) {
                     ClientConfig config = ClientConfig.newInstance();
                     config.setUserAgent("Open-Xchange Calendar Feed Client");
                     init(config);
                     httpClient = HttpClients.getHttpClient(config, Services.getService(SSLSocketFactoryProvider.class), Services.getService(SSLConfigurationService.class));
-
                 }
             }
         }

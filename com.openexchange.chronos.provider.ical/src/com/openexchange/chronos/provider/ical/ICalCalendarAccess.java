@@ -49,23 +49,37 @@
 
 package com.openexchange.chronos.provider.ical;
 
+import static com.openexchange.chronos.provider.CalendarFolderProperty.COLOR;
+import static com.openexchange.chronos.provider.CalendarFolderProperty.COLOR_LITERAL;
+import static com.openexchange.chronos.provider.CalendarFolderProperty.DESCRIPTION;
+import static com.openexchange.chronos.provider.CalendarFolderProperty.SCHEDULE_TRANSP;
+import static com.openexchange.chronos.provider.CalendarFolderProperty.USED_FOR_SYNC;
+import java.util.Collections;
 import java.util.concurrent.TimeUnit;
 import org.apache.http.HttpStatus;
 import org.dmfs.rfc5545.Duration;
+import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.chronos.ExtendedProperties;
+import com.openexchange.chronos.TimeTransparency;
+import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.CalendarAccount;
+import com.openexchange.chronos.provider.CalendarCapability;
 import com.openexchange.chronos.provider.CalendarFolder;
+import com.openexchange.chronos.provider.CalendarPermission;
+import com.openexchange.chronos.provider.DefaultCalendarFolder;
+import com.openexchange.chronos.provider.DefaultCalendarPermission;
+import com.openexchange.chronos.provider.SingleFolderCalendarAccessUtils;
 import com.openexchange.chronos.provider.caching.ExternalCalendarResult;
 import com.openexchange.chronos.provider.caching.SingleFolderCachingCalendarAccess;
 import com.openexchange.chronos.provider.ical.conn.ICalFeedReader;
 import com.openexchange.chronos.provider.ical.exception.ICalProviderExceptionCodes;
-import com.openexchange.chronos.provider.ical.internal.ICalCalendarProviderProperties;
-import com.openexchange.chronos.provider.ical.internal.Services;
-import com.openexchange.chronos.provider.ical.internal.auth.ICalAuthParser;
+import com.openexchange.chronos.provider.ical.osgi.Services;
+import com.openexchange.chronos.provider.ical.properties.ICalCalendarProviderProperties;
 import com.openexchange.chronos.provider.ical.result.GetResult;
-import com.openexchange.chronos.provider.ical.result.HeadResult;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.config.lean.LeanConfigurationService;
+import com.openexchange.conversion.ConversionService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.session.Session;
@@ -82,7 +96,7 @@ public class ICalCalendarAccess extends SingleFolderCachingCalendarAccess {
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ICalCalendarAccess.class);
 
     private final ICalFeedReader reader;
-    private final ICalFeedConfig iCalFeedConfig;
+    private final ICalCalendarFeedConfig iCalFeedConfig;
 
     /**
      * Initializes a new {@link ICalCalendarAccess}.
@@ -93,10 +107,9 @@ public class ICalCalendarAccess extends SingleFolderCachingCalendarAccess {
      * @param parameters The calendar parameters
      */
     public ICalCalendarAccess(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
-        super(session, account, parameters);
+        super(session, account, parameters, prepareFolder(account));
         JSONObject userConfiguration = new JSONObject(account.getUserConfiguration());
-        ICalAuthParser.decrypt(userConfiguration, session.getPassword());
-        this.iCalFeedConfig = new ICalFeedConfig.Builder(session, userConfiguration, getFolderConfiguration(), false).build();
+        this.iCalFeedConfig = new ICalCalendarFeedConfig.DecryptedBuilder(session, userConfiguration, getICalConfiguration()).build();
         this.reader = new ICalFeedReader(session, iCalFeedConfig);
     }
 
@@ -104,83 +117,145 @@ public class ICalCalendarAccess extends SingleFolderCachingCalendarAccess {
     public void close() {}
 
     @Override
-    public long getRefreshInterval(String folderId) {
-        long refreshInterval = getFolderConfiguration().optLong(REFRESH_INTERVAL, 0);
+    public long getRefreshInterval() {
+        long refreshInterval = getICalConfiguration().optLong(REFRESH_INTERVAL, 0);
         if (refreshInterval > 0) {
             return refreshInterval;
         }
         return Services.getService(LeanConfigurationService.class).getLongProperty(getSession().getUserId(), getSession().getContextId(), ICalCalendarProviderProperties.refreshInterval);
     }
 
+    protected JSONObject getICalConfiguration() {
+        JSONObject internalConfig = this.getAccount().getInternalConfiguration();
+        return getICalConfigurationFromJSON(internalConfig);
+    }
+
+    private static JSONObject getICalConfigurationFromJSON(JSONObject internalConfig) {
+        JSONObject icalConfig = internalConfig.optJSONObject(ICalCalendarConstants.PROVIDER_ID);
+        if (icalConfig == null) {
+            icalConfig = new JSONObject();
+            internalConfig.putSafe(ICalCalendarConstants.PROVIDER_ID, icalConfig);
+        }
+        return icalConfig;
+    }
+
     @Override
     public ExternalCalendarResult getAllEvents() throws OXException {
-        HeadResult headResult = reader.head();
+        GetResult getResult = reader.get();
         String etag = iCalFeedConfig.getEtag();
-        if (headResult.getStatusCode() == HttpStatus.SC_NOT_MODIFIED || // response says not modified
-            ((etag != null) && (headResult.getETag().equals(etag)))) { // same etag
-            return new ExternalCalendarResult();
+        if (getResult == null) {
+            throw ICalProviderExceptionCodes.UNEXPECTED_FEED_ERROR.create(iCalFeedConfig.getFeedUrl(), "Response HttpEntity is empty.");
         }
-        return getAndHandleFeed();
-    }
-
-    @Override
-    public String updateFolder(String folderId, CalendarFolder folder, long clientTimestamp) throws OXException {
-        // nothing changed, return origin folder id
-        return folderId;
-    }
-
-    private ExternalCalendarResult getAndHandleFeed() throws OXException {
-        ExternalCalendarResult externalCalendarResult = new ExternalCalendarResult();
-        GetResult importResult = reader.get();
-        if (importResult == null || importResult.getCalendar() == null) {
+        if (getResult.getStatusCode() == HttpStatus.SC_NOT_MODIFIED || // response says not modified
+            ((etag != null) && (getResult.getETag().equals(etag)))) { // same etag
+            return new ExternalCalendarResult(Collections.emptyList(), getResult.getStatusCode());
+        }
+        if (getResult.getCalendar() == null) {
             LOG.debug("Unable to retrieve data from feed URI {}.", iCalFeedConfig.getFeedUrl());
             throw ICalProviderExceptionCodes.NO_FEED.create(iCalFeedConfig.getFeedUrl());
         }
-
-        updateFolderConfiguration(importResult);
-        externalCalendarResult.addEvents(importResult.getCalendar().getEvents());
-        externalCalendarResult.addWarnings(importResult.getWarnings());
+        ExternalCalendarResult externalCalendarResult = new ExternalCalendarResult(getResult.getCalendar().getEvents(), getResult.getStatusCode());
+        updateICalConfiguration(getResult);
+        externalCalendarResult.addWarnings(getResult.getWarnings());
 
         return externalCalendarResult;
     }
 
-    private void updateFolderConfiguration(GetResult importResult) {
-        JSONObject folderConfig = getFolderConfiguration();
-        setRefreshInterval(importResult, folderConfig);
-        setETag(importResult, folderConfig);
+    @Override
+    public String updateFolder(CalendarFolder folder, long clientTimestamp) throws OXException {
+        ExtendedProperties originalProperties = this.folder.getExtendedProperties();
+        ExtendedProperties updatedProperties = SingleFolderCalendarAccessUtils.merge(originalProperties, folder.getExtendedProperties());
+        if (!originalProperties.equals(updatedProperties)) {
+            JSONObject internalConfig;
+            try {
+                internalConfig = null == getAccount().getInternalConfiguration() ? new JSONObject() : new JSONObject(getAccount().getInternalConfiguration().toString());
+                internalConfig.put("extendedProperties", SingleFolderCalendarAccessUtils.writeExtendedProperties(Services.getService(ConversionService.class), updatedProperties));
+            } catch (JSONException e) {
+                throw CalendarExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            }
+        }
+        return folder.getId();
     }
 
-    private void setETag(GetResult importResult, JSONObject folderConfig) {
+    private void updateICalConfiguration(GetResult importResult) {
+        JSONObject iCalConfig = getICalConfiguration();
+        setLastUpdate(iCalConfig);
+        setRefreshInterval(importResult, iCalConfig);
+        setETag(importResult, iCalConfig);
+    }
+
+    private void setLastUpdate(JSONObject iCalConfig) {
+        iCalConfig.putSafe(ICalCalendarConstants.LAST_UPDATE, System.currentTimeMillis());
+    }
+
+    private void setETag(GetResult importResult, JSONObject iCalConfig) {
         String etag = importResult.getETag();
         if (Strings.isNotEmpty(etag)) {
-            folderConfig.putSafe(ICalFeedConfig.ETAG, etag);
+            iCalConfig.putSafe(ICalCalendarConstants.ETAG, etag);
         } else { // maybe deleted from ics in the meantime
-            folderConfig.remove(ICalFeedConfig.ETAG);
+            iCalConfig.remove(ICalCalendarConstants.ETAG);
         }
     }
 
-    private void setRefreshInterval(GetResult importResult, JSONObject folderConfig) {
-        long persistedInterval = folderConfig.optLong(REFRESH_INTERVAL, 0);
+    private void setRefreshInterval(GetResult importResult, JSONObject iCalConfig) {
+        long persistedInterval = iCalConfig.optLong(REFRESH_INTERVAL, 0);
         String refreshInterval = importResult.getRefreshInterval();
 
         if (Strings.isNotEmpty(refreshInterval)) {
-            Duration duration = org.dmfs.rfc5545.Duration.parse(refreshInterval);
-            long refreshIntervalFromFeed = TimeUnit.MILLISECONDS.toMinutes(duration.toMillis());
-            if (0 == persistedInterval || persistedInterval != refreshIntervalFromFeed) {
-                folderConfig.putSafe(REFRESH_INTERVAL, refreshIntervalFromFeed);
+            try {
+                Duration duration = org.dmfs.rfc5545.Duration.parse(refreshInterval);
+                long refreshIntervalFromFeed = TimeUnit.MILLISECONDS.toMinutes(duration.toMillis());
+                if (0 == persistedInterval || persistedInterval != refreshIntervalFromFeed) {
+                    iCalConfig.putSafe(REFRESH_INTERVAL, refreshIntervalFromFeed);
+                }
+            } catch (IllegalArgumentException e) {
+                LOG.error("Unable to parse and persist calendars refresh interval {}.", refreshInterval, e);
             }
         } else if (persistedInterval != 0) { // maybe deleted from ics in the meantime
-            folderConfig.remove(REFRESH_INTERVAL);
+            iCalConfig.remove(REFRESH_INTERVAL);
         }
     }
 
     @Override
-    public long getExternalRequestTimeout() {
+    public long getRetryAfterErrorInterval() {
         return TimeUnit.MINUTES.toMinutes(60);
     }
 
     @Override
-    public void handleExceptions(String calendarFolderId, OXException e) {
+    public void handleExceptions(OXException e) {
+        //nothing to handle
+    }
 
+    private static DefaultCalendarFolder prepareFolder(CalendarAccount account) throws OXException {
+        ExtendedProperties extendedProperties = SingleFolderCalendarAccessUtils.parseExtendedProperties(Services.getService(ConversionService.class), account.getInternalConfiguration().optJSONObject("extendedProperties"));
+        if (null == extendedProperties) {
+            extendedProperties = new ExtendedProperties();
+        }
+
+        JSONObject iCalConfigurationFromJSON = getICalConfigurationFromJSON(account.getInternalConfiguration());
+
+        DefaultCalendarFolder folder = new DefaultCalendarFolder(FOLDER_ID, iCalConfigurationFromJSON.optString(ICalCalendarConstants.NAME));
+        folder.setSupportedCapabilites(CalendarCapability.getCapabilities(ICalCalendarAccess.class));
+        folder.setLastModified(account.getLastModified());
+        /*
+         * always apply or overwrite protected defaults
+         */
+        extendedProperties.replace(SCHEDULE_TRANSP(TimeTransparency.TRANSPARENT, false));
+        extendedProperties.replace(USED_FOR_SYNC(Boolean.FALSE, false));
+        extendedProperties.replace(DESCRIPTION(iCalConfigurationFromJSON.optString(ICalCalendarConstants.DESCRIPTION), false));
+        /*
+         * insert further defaults if missing
+         */
+        if (!extendedProperties.contains(COLOR_LITERAL)) {
+            extendedProperties.add(COLOR(null, false));
+        }
+        folder.setExtendedProperties(extendedProperties);
+        /*
+         *
+         */
+        CalendarPermission permission = new DefaultCalendarPermission(account.getUserId(), CalendarPermission.READ_FOLDER, CalendarPermission.READ_ALL_OBJECTS, CalendarPermission.WRITE_ALL_OBJECTS, CalendarPermission.NO_PERMISSIONS, false, false, CalendarPermission.NO_PERMISSIONS);
+        folder.setPermissions(Collections.singletonList(permission));
+
+        return folder;
     }
 }

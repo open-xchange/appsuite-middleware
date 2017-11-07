@@ -49,16 +49,11 @@
 
 package com.openexchange.chronos.provider.caching;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import org.json.JSONObject;
 import com.openexchange.chronos.Event;
-import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.CalendarFolder;
-import com.openexchange.chronos.provider.DefaultCalendarFolder;
-import com.openexchange.chronos.provider.DefaultCalendarPermission;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
@@ -72,7 +67,8 @@ import com.openexchange.session.Session;
  */
 public abstract class SingleFolderCachingCalendarAccess extends CachingCalendarAccess {
 
-    private static final String FOLDER_ID = "0";
+    /** The constant folder identifier for cached single folder calendar accesses */
+    public static final String FOLDER_ID = "0";
 
     protected final CalendarFolder folder;
 
@@ -84,13 +80,13 @@ public abstract class SingleFolderCachingCalendarAccess extends CachingCalendarA
      * @param parameters The calendar parameters (for the given request)
      * @throws OXException
      */
-    protected SingleFolderCachingCalendarAccess(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
+    protected SingleFolderCachingCalendarAccess(Session session, CalendarAccount account, CalendarParameters parameters, CalendarFolder folder) throws OXException {
         super(session, account, parameters);
-        this.folder = prepareFolder(account);
+        this.folder = folder;
     }
 
     @Override
-    public CalendarFolder getFolder(String folderId) throws OXException {
+    public final CalendarFolder getFolder(String folderId) throws OXException {
         checkFolderId(folderId);
         return folder;
     }
@@ -100,9 +96,33 @@ public abstract class SingleFolderCachingCalendarAccess extends CachingCalendarA
         return Collections.singletonList(folder);
     }
 
-    protected JSONObject getFolderConfiguration() {
-        return getFolderCachingConfiguration(folder.getId());
+    @Override
+    protected final long getRefreshInterval(String folderId) throws OXException {
+        checkFolderId(folderId);
+        return getRefreshInterval();
     }
+
+    protected abstract long getRefreshInterval() throws OXException;
+
+    @Override
+    public final String updateFolder(String folderId, CalendarFolder folder, long clientTimestamp) throws OXException {
+        checkFolderId(folderId);
+        return updateFolder(folder, clientTimestamp);
+    }
+
+    protected abstract String updateFolder(CalendarFolder folder, long clientTimestamp) throws OXException;
+
+    @Override
+    public void handleExceptions(String folderId, OXException e) {
+        try {
+            checkFolderId(folderId);
+        } catch (OXException e1) {
+            return;
+        }
+        handleExceptions(e);
+    }
+
+    public abstract void handleExceptions(OXException e);
 
     /**
      * Returns a list of {@link Event}s by querying the underlying calendar and some meta information encapsulated within an {@link ExternalCalendarResult}
@@ -125,44 +145,11 @@ public abstract class SingleFolderCachingCalendarAccess extends CachingCalendarA
         return externalCalendarResult;
     }
 
-    @Override
-    public List<Event> getChangeExceptions(String folderId, String seriesId) throws OXException {
-        checkFolderId(folderId);
-        List<Event> events = new ArrayList<Event>();
-        ExternalCalendarResult externalCalendarResult = getAllEvents();
-        if (externalCalendarResult.isUpToDate()) {
-            return externalCalendarResult.getEvents();
-        }
-        for (Event event : externalCalendarResult.getEvents()) {
-            if (CalendarUtils.isSeriesException(event) && seriesId.equals(event.getSeriesId())) {
-                event.setFolderId(folderId);
-                events.add(event);
-            }
-        }
-        return events;
-    }
-
+    
     protected String checkFolderId(String folderId) throws OXException {
         if (false == folder.getId().equals(folderId)) {
             throw OXException.notFound(folderId);
         }
         return folderId;
-    }
-
-    private CalendarFolder prepareFolder(CalendarAccount account) {
-        DefaultCalendarFolder folder = new DefaultCalendarFolder();
-        folder.setId(FOLDER_ID);
-        folder.setPermissions(Collections.singletonList(DefaultCalendarPermission.readOnlyPermissionsFor(account.getUserId())));
-        folder.setLastModified(account.getLastModified());
-        JSONObject userConfig = account.getUserConfiguration();
-        if (null != userConfig) {
-            folder.setName(userConfig.optString("name", FOLDER_ID));
-            //TODO: set extended properties
-            //            folder.setColor(userConfig.optString("color", null));
-            //            folder.setDescription(userConfig.optString("description", null));
-            //            folder.setUsedForSync(userConfig.optBoolean("usedForSync", false));
-            //            folder.setScheduleTransparency(Enums.parse(TimeTransparency.class, userConfig.optString("scheduleTransp", null), TimeTransparency.OPAQUE));
-        }
-        return folder;
     }
 }

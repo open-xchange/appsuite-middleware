@@ -51,44 +51,35 @@ package com.openexchange.chronos.provider.ical;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.TreeMap;
 import org.apache.commons.lang3.Validate;
 import org.apache.http.client.utils.URIBuilder;
 import org.json.JSONObject;
-import com.openexchange.auth.info.AuthInfo;
-import com.openexchange.auth.info.AuthType;
-import com.openexchange.chronos.provider.caching.CachingCalendarAccess;
-import com.openexchange.chronos.provider.ical.internal.ICalCalendarProviderProperties;
-import com.openexchange.chronos.provider.ical.internal.auth.ICalAuthParser;
+import com.openexchange.chronos.provider.ical.auth.AdvancedAuthInfo;
+import com.openexchange.chronos.provider.ical.auth.ICalAuthParser;
+import com.openexchange.chronos.provider.ical.properties.ICalCalendarProviderProperties;
 import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
 
 /**
  *
- * {@link ICalFeedConfig}
+ * {@link ICalCalendarFeedConfig}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.10.0
  */
-public class ICalFeedConfig {
-
-    public static final String ETAG = "etag";
+public class ICalCalendarFeedConfig {
 
     private final String feedUrl;
     private final String etag;
     private final long lastUpdated;
-    private final AuthInfo authInfo;
-    private final Map<String, String> customHeaders;
+    private final AdvancedAuthInfo authInfo;
 
-    private ICalFeedConfig(String feedUrl, String etag, long lastUpdated, AuthInfo authInfo, Map<String, String> customHeaders) {
+    private ICalCalendarFeedConfig(String feedUrl, String etag, long lastUpdated, AdvancedAuthInfo authInfo) {
         super();
         this.feedUrl = feedUrl;
         this.etag = etag;
         this.lastUpdated = lastUpdated;
         this.authInfo = authInfo;
-        this.customHeaders = customHeaders;
     }
 
     public String getFeedUrl() {
@@ -103,54 +94,27 @@ public class ICalFeedConfig {
         return lastUpdated;
     }
 
-    public AuthInfo getAuthInfo() {
+    public AdvancedAuthInfo getAuthInfo() {
         return authInfo;
     }
 
-    public Map<String, String> getCustomHeaders() {
-        return customHeaders;
-    }
+    private static class Builder {
 
-    public static class Builder {
+        private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ICalCalendarFeedConfig.Builder.class);
 
-        private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ICalFeedConfig.Builder.class);
+        protected final String etag;
+        protected final long lastUpdated;
+        protected String feedUrl;
 
-        private final String etag;
-        private final long lastUpdated;
-        private String feedUrl;
-        private final Map<String, String> customHeaders;
-        private AuthInfo authInfo;
+        Builder(JSONObject userConfiguration, JSONObject icalConfig) {
+            JSONObject userConfig = new JSONObject(userConfiguration);
 
-        /**
-         * Initializes a new {@link Builder}.
-         * 
-         * @param userConfiguration
-         * @param folderConfig
-         * @param encrypt - defines if the (possibly available) password has to be encrypted with the session password
-         * @throws OXException
-         */
-        Builder(Session session, JSONObject userConfiguration, JSONObject folderConfig, boolean encrypt) throws OXException {
-            JSONObject newUserConfiguration = new JSONObject(userConfiguration);
-
-            this.feedUrl = newUserConfiguration.optString("uri", null);
+            this.feedUrl = userConfig.optString(ICalCalendarConstants.URI, null);
             Validate.notNull(this.feedUrl, "Feed URL might not be null!");
             adaptScheme();
 
-            this.authInfo = ICalAuthParser.getInstance().getAuthInfoFromUnstructured(newUserConfiguration);
-            if (encrypt) {
-                encrypt(session, newUserConfiguration);
-                this.authInfo = ICalAuthParser.getInstance().getAuthInfoFromUnstructured(newUserConfiguration);
-            }
-            this.etag = folderConfig.optString(ETAG, null);
-            this.lastUpdated = folderConfig.optLong(CachingCalendarAccess.LAST_UPDATE, -1L);
-
-            JSONObject headerObj = userConfiguration.optJSONObject("header");
-            customHeaders = new TreeMap<String, String>();
-            if (headerObj != null) {
-                for (Entry<String, Object> entry : headerObj.entrySet()) {
-                    customHeaders.put(entry.getKey(), String.valueOf(entry.getValue()));
-                }
-            }
+            this.etag = icalConfig.optString(ICalCalendarConstants.ETAG, null);
+            this.lastUpdated = icalConfig.optLong(ICalCalendarConstants.LAST_UPDATE, -1L);
         }
 
         private void adaptScheme() {
@@ -164,29 +128,45 @@ public class ICalFeedConfig {
                 LOG.error("Unable to verify and adapt scheme for URL {}.", this.feedUrl);
             }
         }
+    }
 
-        Builder(Session session, JSONObject userConfiguration, JSONObject folderConfig) throws OXException {
-            this(session, userConfiguration, folderConfig, true);
+    public static class EncryptedBuilder extends Builder {
+
+        private AdvancedAuthInfo authInfo;
+
+        EncryptedBuilder(Session session, JSONObject userConfiguration, JSONObject icalConfig) throws OXException {
+            super(userConfiguration, icalConfig);
+
+            this.authInfo = ICalAuthParser.getInstance().getEncryptedFromDecrypted(session, userConfiguration);
         }
 
-        public void encrypt(Session session, JSONObject newUserConfiguration) throws OXException {
-            if (this.authInfo.getAuthType().equals(AuthType.BASIC)) {
-                ICalAuthParser.encrypt(newUserConfiguration, session.getPassword()); // encrypt password for persisting
-            }
+        public ICalCalendarFeedConfig build() {
+            return new ICalCalendarFeedConfig(feedUrl, etag, lastUpdated, authInfo);
+        }
+    }
+
+    public static class DecryptedBuilder extends Builder {
+
+        private AdvancedAuthInfo authInfo;
+
+        DecryptedBuilder(Session session, JSONObject userConfiguration, JSONObject icalConfig) throws OXException {
+            super(userConfiguration, icalConfig);
+
+            this.authInfo = ICalAuthParser.getInstance().getDecryptedFromEncyrpted(session, userConfiguration);
         }
 
-        public ICalFeedConfig build() {
-            return new ICalFeedConfig(feedUrl, etag, lastUpdated, authInfo, customHeaders);
+        public ICalCalendarFeedConfig build() {
+            return new ICalCalendarFeedConfig(feedUrl, etag, lastUpdated, authInfo);
         }
     }
 
     /**
-     * Returns whether the provided {@link ICalFeedConfig} differs in a way (endpoint, auth, ....) the whole feed has to be reloaded
+     * Returns whether the provided {@link ICalCalendarFeedConfig} differs in a way (endpoint, auth, ....) the whole feed has to be reloaded
      * 
-     * @param configToCompare the new {@link ICalFeedConfig}
+     * @param configToCompare the new {@link ICalCalendarFeedConfig}
      * @return <code>true</code> if the configuration is different in a way we have to update the previously persisted data; otherwise <code>false</code>
      */
-    public boolean mandatoryChanges(ICalFeedConfig configToCompare) {
+    public boolean mandatoryChanges(ICalCalendarFeedConfig configToCompare) {
         return !this.getAuthInfo().equals(configToCompare.getAuthInfo());
     }
 }

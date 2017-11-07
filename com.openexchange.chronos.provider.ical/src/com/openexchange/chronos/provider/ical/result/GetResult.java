@@ -52,11 +52,13 @@ package com.openexchange.chronos.provider.ical.result;
 import java.util.Collections;
 import java.util.List;
 import org.apache.http.Header;
+import org.apache.http.HttpHeaders;
 import org.apache.http.StatusLine;
 import com.openexchange.chronos.ExtendedProperty;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.ical.ImportedCalendar;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 
 /**
  * 
@@ -65,12 +67,16 @@ import com.openexchange.exception.OXException;
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.10.0
  */
-public class GetResult extends HeadResult {
+public class GetResult {
 
     private ImportedCalendar importedCalendar;
 
+    private final StatusLine statusLine;
+    private final Header[] headers;
+
     public GetResult(StatusLine statusLine, Header[] headers) {
-        super(statusLine, headers);
+        this.statusLine = statusLine;
+        this.headers = headers;
     }
 
     public void setCalendar(ImportedCalendar calendar) {
@@ -86,11 +92,65 @@ public class GetResult extends HeadResult {
     }
 
     public String getRefreshInterval() {
-        ExtendedProperty extendedProperty = CalendarUtils.optExtendedProperty(this.importedCalendar, "REFRESH-INTERVAL");
+        return getProperty("REFRESH-INTERVAL");
+    }
+
+    public String getFeedName() {
+        String property = getProperty("X-WR-CALNAME");
+        if (Strings.isNotEmpty(property)) {
+            return property;
+        }
+        return importedCalendar.getName();
+    }
+
+    public String getFeedDescription() {
+        String property = getProperty("X-WR-CALDESC");
+        if (Strings.isNotEmpty(property)) {
+            return property;
+        }
+        return getProperty("DESCRIPTION");
+    }
+
+    public int getStatusCode() {
+        return statusLine.getStatusCode();
+    }
+
+    public StatusLine getStatusLine() {
+        return statusLine;
+    }
+
+    public String getETag() {
+        return getHeader(HttpHeaders.ETAG);
+    }
+
+    public String getLastModified() {
+        return getHeader(HttpHeaders.LAST_MODIFIED);
+    }
+
+    public String getDate() {
+        return getHeader(HttpHeaders.DATE);
+    }
+
+    public String getContentLength() {
+        return getHeader(HttpHeaders.CONTENT_LENGTH);
+    }
+
+    private String getHeader(String name) {
+        if (null != headers && 0 < headers.length) {
+            for (Header header : headers) {
+                if (name.equalsIgnoreCase(header.getName())) {
+                    return header.getValue();
+                }
+            }
+        }
+        return null;
+    }
+
+    private String getProperty(String property) {
+        ExtendedProperty extendedProperty = CalendarUtils.optExtendedProperty(this.importedCalendar, property);
         if (extendedProperty == null) {
             return null;
         }
         return extendedProperty.getValue();
     }
-
 }

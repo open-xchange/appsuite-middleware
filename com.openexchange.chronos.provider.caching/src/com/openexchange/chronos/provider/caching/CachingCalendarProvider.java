@@ -119,7 +119,7 @@ public abstract class CachingCalendarProvider implements CalendarProvider {
     @Override
     public final JSONObject reconfigureAccount(Session session, CalendarAccount calendarAccount, JSONObject userConfig, CalendarParameters parameters) throws OXException {
         JSONObject internalConfiguration = calendarAccount.getInternalConfiguration();
-        if (invalidateCache(session, calendarAccount.getUserConfiguration(), userConfig)) {
+        if (triggerCacheInvalidation(session, calendarAccount.getUserConfiguration(), userConfig)) {
             if (internalConfiguration.hasAndNotNull(CachingCalendarAccess.CACHING)) {
                 internalConfiguration.remove(CachingCalendarAccess.CACHING);
             }
@@ -141,7 +141,7 @@ public abstract class CachingCalendarProvider implements CalendarProvider {
      * @return <code>true</code> if the cached data should be recreated; otherwise <code>false</code>
      * @see CachingCalendarProvider#reconfigureAccount(Session, CalendarAccount, JSONObject, CalendarParameters)
      */
-    public abstract boolean invalidateCache(Session session, JSONObject originUserConfiguration, JSONObject newUserConfiguration) throws OXException;
+    public abstract boolean triggerCacheInvalidation(Session session, JSONObject originUserConfiguration, JSONObject newUserConfiguration) throws OXException;
 
     /**
      * Invalidates the cache for given {@link CalendarAccount} folder id so that the next request will update the data persisted for given folder

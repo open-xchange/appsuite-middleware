@@ -53,10 +53,10 @@ import static org.slf4j.LoggerFactory.getLogger;
 import com.openexchange.chronos.ical.ICalService;
 import com.openexchange.chronos.provider.CalendarProvider;
 import com.openexchange.chronos.provider.ical.ICalCalendarProvider;
-import com.openexchange.chronos.provider.ical.internal.ICalCalendarProviderReloadable;
-import com.openexchange.chronos.provider.ical.internal.Services;
+import com.openexchange.chronos.provider.ical.properties.ICalCalendarProviderReloadable;
 import com.openexchange.config.Reloadable;
 import com.openexchange.config.lean.LeanConfigurationService;
+import com.openexchange.conversion.ConversionService;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.net.ssl.config.SSLConfigurationService;
@@ -80,7 +80,7 @@ public class ICalCalendarProviderActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ICalService.class, LeanConfigurationService.class, SSLSocketFactoryProvider.class, SSLConfigurationService.class, CryptoService.class };
+        return new Class<?>[] { ICalService.class, LeanConfigurationService.class, SSLSocketFactoryProvider.class, SSLConfigurationService.class, CryptoService.class, ConversionService.class };
     }
 
     @Override

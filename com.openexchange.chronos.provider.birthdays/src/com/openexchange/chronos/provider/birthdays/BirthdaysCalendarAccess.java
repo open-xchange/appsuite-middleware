@@ -84,6 +84,7 @@ import com.openexchange.chronos.provider.CalendarPermission;
 import com.openexchange.chronos.provider.DefaultCalendarFolder;
 import com.openexchange.chronos.provider.DefaultCalendarPermission;
 import com.openexchange.chronos.provider.SingleFolderCalendarAccess;
+import com.openexchange.chronos.provider.SingleFolderCalendarAccessUtils;
 import com.openexchange.chronos.provider.account.AdministrativeCalendarAccountService;
 import com.openexchange.chronos.provider.account.CalendarAccountService;
 import com.openexchange.chronos.provider.extensions.PersonalAlarmAware;
@@ -194,12 +195,12 @@ public class BirthdaysCalendarAccess extends SingleFolderCalendarAccess implemen
     @Override
     public String updateFolder(String folderId, CalendarFolder folder, long clientTimestamp) throws OXException {
         ExtendedProperties originalProperties = this.folder.getExtendedProperties();
-        ExtendedProperties updatedProperties = merge(originalProperties, folder.getExtendedProperties());
+        ExtendedProperties updatedProperties = SingleFolderCalendarAccessUtils.merge(originalProperties, folder.getExtendedProperties());
         if (false == originalProperties.equals(updatedProperties)) {
             JSONObject internalConfig;
             try {
                 internalConfig = null == account.getInternalConfiguration() ? new JSONObject() : new JSONObject(account.getInternalConfiguration().toString());
-                internalConfig.put("extendedProperties", writeExtendedProperties(requireService(ConversionService.class, services), updatedProperties));
+                internalConfig.put("extendedProperties", SingleFolderCalendarAccessUtils.writeExtendedProperties(requireService(ConversionService.class, services), updatedProperties));
             } catch (JSONException e) {
                 throw CalendarExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
             }
@@ -363,7 +364,7 @@ public class BirthdaysCalendarAccess extends SingleFolderCalendarAccess implemen
         return parameters.get(CalendarParameters.PARAMETER_FIELDS, EventField[].class, EventField.values());
     }
 
-    private TimeZone getTimeZone() throws OXException {
+    private TimeZone getTimeZone() {
         TimeZone timeZone = null != parameters ? parameters.get(CalendarParameters.PARAMETER_TIMEZONE, TimeZone.class) : null;
         return null != timeZone ? timeZone : optTimeZone(session.getUser().getTimeZone(), TimeZones.UTC);
     }
@@ -373,7 +374,7 @@ public class BirthdaysCalendarAccess extends SingleFolderCalendarAccess implemen
         DefaultCalendarFolder folder = new DefaultCalendarFolder(FOLDER_ID, stringHelper.getString(BirthdaysCalendarStrings.CALENDAR_NAME));
         folder.setSupportedCapabilites(CalendarCapability.getCapabilities(BirthdaysCalendarAccess.class));
         folder.setLastModified(account.getLastModified());
-        ExtendedProperties extendedProperties = parseExtendedProperties(conversionService, account.getInternalConfiguration().optJSONObject("extendedProperties"));
+        ExtendedProperties extendedProperties = SingleFolderCalendarAccessUtils.parseExtendedProperties(conversionService, account.getInternalConfiguration().optJSONObject("extendedProperties"));
         if (null == extendedProperties) {
             extendedProperties = new ExtendedProperties();
         }

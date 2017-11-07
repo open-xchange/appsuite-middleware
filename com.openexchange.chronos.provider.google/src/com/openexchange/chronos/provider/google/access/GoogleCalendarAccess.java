@@ -71,6 +71,7 @@ import com.google.api.services.calendar.model.CalendarList;
 import com.google.api.services.calendar.model.CalendarListEntry;
 import com.google.api.services.calendar.model.EventReminder;
 import com.google.api.services.calendar.model.Events;
+import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.ExtendedProperties;
@@ -91,7 +92,6 @@ import com.openexchange.chronos.provider.google.config.GoogleCalendarConfig;
 import com.openexchange.chronos.provider.google.converter.GoogleEventConverter;
 import com.openexchange.chronos.provider.google.converter.GoogleEventConverter.GoogleItemMapping;
 import com.openexchange.chronos.provider.google.osgi.Services;
-import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.conversion.ConversionResult;
 import com.openexchange.conversion.ConversionService;
@@ -361,12 +361,6 @@ public class GoogleCalendarAccess extends CachingCalendarAccess{
         return GoogleEventConverter.getInstance().convertToEvent(event);
     }
 
-    @Override
-    public List<Event> getChangeExceptions(String folderId, String seriesId) throws OXException {
-        // TODO can be deleted?
-        return Collections.emptyList();
-    }
-
     GoogleEventsPage getEventsInFolder(String folderId, String token, boolean isSyncToken) throws OXException {
         try {
             Calendar googleCal = (Calendar) oauthAccess.getClient().getClient();
@@ -405,7 +399,7 @@ public class GoogleCalendarAccess extends CachingCalendarAccess{
     }
 
     @Override
-    public long getExternalRequestTimeout() {
+    public long getRetryAfterErrorInterval() {
         return requestTimeout;
     }
 
@@ -470,5 +464,4 @@ public class GoogleCalendarAccess extends CachingCalendarAccess{
         }
         return null;
     }
-
 }

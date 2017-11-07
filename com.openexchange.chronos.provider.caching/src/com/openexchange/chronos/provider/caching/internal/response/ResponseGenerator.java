@@ -70,7 +70,7 @@ public class ResponseGenerator {
 
     private static final List<EventField> IGNORED_FIELDS = Arrays.asList(EventField.ATTACHMENTS);
 
-    protected CachingCalendarAccess cachedCalendarAccess;
+    protected final CachingCalendarAccess cachedCalendarAccess;
 
     public ResponseGenerator(CachingCalendarAccess cachedCalendarAccess) {
         this.cachedCalendarAccess = cachedCalendarAccess;

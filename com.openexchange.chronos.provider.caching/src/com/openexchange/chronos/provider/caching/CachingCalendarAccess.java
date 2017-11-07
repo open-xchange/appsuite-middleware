@@ -71,6 +71,7 @@ import com.openexchange.chronos.provider.caching.internal.handler.CachingExecuto
 import com.openexchange.chronos.provider.caching.internal.handler.FolderProcessingType;
 import com.openexchange.chronos.provider.caching.internal.handler.FolderUpdateState;
 import com.openexchange.chronos.provider.caching.internal.handler.utils.HandlerHelper;
+import com.openexchange.chronos.provider.caching.internal.response.ChangeExceptionsResponseGenerator;
 import com.openexchange.chronos.provider.caching.internal.response.DedicatedEventsResponseGenerator;
 import com.openexchange.chronos.provider.caching.internal.response.FolderEventsResponseGenerator;
 import com.openexchange.chronos.provider.caching.internal.response.SingleEventResponseGenerator;
@@ -97,17 +98,17 @@ public abstract class CachingCalendarAccess implements WarningsAware {
     /**
      * The general key for persisting the caching information
      */
-    public static final String CACHING = "folderCaching";
+    protected static final String CACHING = "folderCaching";
 
     /**
      * The key for persisting the folders last update information
      */
-    public static final String LAST_UPDATE = "lastUpdate";
+    protected static final String LAST_UPDATE = "lastUpdate";
 
     /**
      * The key for persisting the used refresh interval (if provided by the external folder). The interval should be persisted in minutes
      */
-    public static final String REFRESH_INTERVAL = "refreshInterval";
+    protected static final String REFRESH_INTERVAL = "refreshInterval";
 
     private final ServerSession session;
     private final CalendarParameters parameters;
@@ -139,15 +140,16 @@ public abstract class CachingCalendarAccess implements WarningsAware {
      * If the value is <=0 the default of one day will be used.
      *
      * @return The interval that defines the expire of the caching in {@link TimeUnit#MINUTES}
+     * @throws OXException
      */
-    protected abstract long getRefreshInterval(String folderId);
+    protected abstract long getRefreshInterval(String folderId) throws OXException;
 
     /**
      * Defines how long should be wait for the next request to the external calendar provider in case an error occurred.
      *
      * @return The time in {@link TimeUnit#MINUTES} that should be wait for contacting the external calendar provider for updates.
      */
-    public abstract long getExternalRequestTimeout();
+    public abstract long getRetryAfterErrorInterval();
 
     /**
      * Returns an {@link ExternalCalendarResult} containing all external {@link Event}s by querying the underlying calendar for the given folder id and additional information.<b>
@@ -165,7 +167,7 @@ public abstract class CachingCalendarAccess implements WarningsAware {
      * @param folderId The identifier of the folder the error occurred for
      * @param e The {@link OXException} occurred
      */
-    public abstract void handleExceptions(String calendarFolderId, OXException e);
+    public abstract void handleExceptions(String folderId, OXException e);
 
     @Override
     public final Event getEvent(String folderId, String eventId, RecurrenceId recurrenceId) throws OXException {
@@ -196,6 +198,16 @@ public abstract class CachingCalendarAccess implements WarningsAware {
         saveConfig();
 
         return new FolderEventsResponseGenerator(this, folderId).generate();
+    }
+    
+    @Override
+    public final List<Event> getChangeExceptions(String folderId, String seriesId) throws OXException {
+        Set<FolderUpdateState> executionList = generateExecutionList(folderId);
+
+        new CachingExecutor(this, executionList).cache(this.warnings);
+        saveConfig();
+
+        return new ChangeExceptionsResponseGenerator(this, folderId, seriesId).generate();
     }
 
     private Set<FolderUpdateState> generateExecutionList(String... folderIds) throws OXException {
@@ -326,9 +338,13 @@ public abstract class CachingCalendarAccess implements WarningsAware {
                 return calendarProviderInterval.longValue();
             }
         }
-        long providerRefreshInterval = getRefreshInterval(folderId);
-        if (providerRefreshInterval > TimeUnit.DAYS.toMinutes(1L)) {
-            return providerRefreshInterval;
+        try {
+            long providerRefreshInterval = getRefreshInterval(folderId);
+            if (providerRefreshInterval > TimeUnit.DAYS.toMinutes(1L)) {
+                return providerRefreshInterval;
+            }
+        } catch (OXException e) {
+            LOG.warn("Unable to retrieve refresh interval from implementation. Will use one day as default.", e);
         }
         return TimeUnit.DAYS.toMinutes(1L);
     }
@@ -351,21 +367,6 @@ public abstract class CachingCalendarAccess implements WarningsAware {
     @Override
     public List<OXException> getWarnings() {
         return warnings;
-    }
-
-    public JSONObject getFolderCachingConfiguration(String folderId) {
-        JSONObject internalConfig = getAccount().getInternalConfiguration();
-        JSONObject caching = internalConfig.optJSONObject(CACHING);
-        if (caching == null) {
-            caching = new JSONObject();
-            internalConfig.putSafe(CACHING, caching);
-        }
-        JSONObject folderConfig = caching.optJSONObject(folderId);
-        if (folderConfig == null) {
-            folderConfig = new JSONObject();
-            caching.putSafe(folderId, folderConfig);
-        }
-        return folderConfig;
     }
 
     /**

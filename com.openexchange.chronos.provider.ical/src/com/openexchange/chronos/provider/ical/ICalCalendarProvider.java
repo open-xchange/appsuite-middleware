@@ -51,16 +51,19 @@ package com.openexchange.chronos.provider.ical;
 
 import java.util.EnumSet;
 import java.util.Locale;
+import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.auth.info.AuthType;
 import com.openexchange.chronos.provider.CalendarAccess;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.CalendarCapability;
 import com.openexchange.chronos.provider.caching.CachingCalendarProvider;
-import com.openexchange.chronos.provider.ical.conn.ICalFeedConnector;
-import com.openexchange.chronos.provider.ical.internal.auth.ICalAuthParser;
+import com.openexchange.chronos.provider.ical.auth.ICalAuthParser;
+import com.openexchange.chronos.provider.ical.conn.ICalFeedReader;
+import com.openexchange.chronos.provider.ical.result.GetResult;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.session.Session;
 
 /**
@@ -72,9 +75,11 @@ import com.openexchange.session.Session;
  */
 public class ICalCalendarProvider extends CachingCalendarProvider {
 
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ICalCalendarProvider.class);
+
     @Override
     public String getId() {
-        return "ical";
+        return ICalCalendarConstants.PROVIDER_ID;
     }
 
     @Override
@@ -94,23 +99,48 @@ public class ICalCalendarProvider extends CachingCalendarProvider {
 
     @Override
     protected JSONObject configureAccountOpt(Session session, JSONObject userConfig, CalendarParameters parameters) throws OXException {
-        ICalFeedConfig iCalFeedConfig = new ICalFeedConfig.Builder(session, new JSONObject(userConfig), new JSONObject(), false).build();
+        ICalCalendarFeedConfig iCalFeedConfig = new ICalCalendarFeedConfig.EncryptedBuilder(session, new JSONObject(userConfig), new JSONObject()).build();
+        ICalFeedReader iCalFeedConnector = new ICalFeedReader(session, iCalFeedConfig);
+        GetResult getResult = iCalFeedConnector.get(); // check connections and authorization
 
         if (iCalFeedConfig.getAuthInfo().getAuthType().equals(AuthType.BASIC)) {
-            ICalAuthParser.encrypt(userConfig, session.getPassword()); // encrypt password for persisting
+            ICalAuthParser.encrypt(userConfig, session.getPassword()); // encrypt password for persisting in user config column
         }
-        ICalFeedConnector iCalFeedConnector = new ICalFeedConnector(session, iCalFeedConfig);
-        iCalFeedConnector.head(); // check connections and authorization
-        return new JSONObject();
+        return adaptInternalConfig(getResult);
+    }
+
+    private JSONObject adaptInternalConfig(GetResult getResult) {
+        JSONObject internalConfig = new JSONObject();
+        if (getResult == null) {
+            return internalConfig;
+        }
+        JSONObject icalConfig = new JSONObject();
+        try {
+            internalConfig.put(ICalCalendarConstants.PROVIDER_ID, icalConfig);
+            String feedName = getResult.getFeedName();
+            if (Strings.isNotEmpty(feedName)) {
+                icalConfig.put("name", feedName);
+            }
+            String feedDesc = getResult.getFeedDescription();
+            if (Strings.isNotEmpty(feedDesc)) {
+                icalConfig.put("description", feedDesc);
+            }
+        } catch (JSONException e) {
+            LOG.warn("Unable to create internal config as desired.", e);
+        }
+        return internalConfig;
     }
 
     @Override
     protected JSONObject reconfigureAccountOpt(Session session, CalendarAccount calendarAccount, JSONObject userConfig, CalendarParameters parameters) throws OXException {
-        ICalFeedConfig iCalFeedConfig = new ICalFeedConfig.Builder(session, new JSONObject(userConfig), new JSONObject(), false).build();
-        ICalFeedConnector iCalFeedConnector = new ICalFeedConnector(session, iCalFeedConfig);
-        iCalFeedConnector.head(); // check connections and authorization
+        ICalCalendarFeedConfig iCalFeedConfig = new ICalCalendarFeedConfig.EncryptedBuilder(session, new JSONObject(userConfig), calendarAccount.getInternalConfiguration().optJSONObject(ICalCalendarConstants.PROVIDER_ID)).build();
+        ICalFeedReader iCalFeedConnector = new ICalFeedReader(session, iCalFeedConfig);
+        GetResult getResult = iCalFeedConnector.get(); // check connections and authorization
 
-        return null; //everything required to adapt already done within ICalCalendarProvider.invalidateCache(Session, JSONObject, JSONObject)
+        if (iCalFeedConfig.getAuthInfo().getAuthType().equals(AuthType.BASIC)) {
+            ICalAuthParser.encrypt(userConfig, session.getPassword()); // encrypt password for persisting in user config column
+        }
+        return adaptInternalConfig(getResult);
     }
 
     @Override
@@ -129,13 +159,10 @@ public class ICalCalendarProvider extends CachingCalendarProvider {
     }
 
     @Override
-    public boolean invalidateCache(Session session, JSONObject originUserConfiguration, JSONObject newUserConfiguration) throws OXException {
-        ICalFeedConfig oldFeedConfig = new ICalFeedConfig.Builder(session, new JSONObject(originUserConfiguration), new JSONObject(), false).build();
+    public boolean triggerCacheInvalidation(Session session, JSONObject originUserConfiguration, JSONObject newUserConfiguration) throws OXException {
+        ICalCalendarFeedConfig oldFeedConfig = new ICalCalendarFeedConfig.DecryptedBuilder(session, new JSONObject(originUserConfiguration), new JSONObject()).build();
         JSONObject newUserConfigurationCopy = new JSONObject(newUserConfiguration);
-        ICalFeedConfig newFeedConfig = new ICalFeedConfig.Builder(session, newUserConfigurationCopy, new JSONObject()).build();
-        if (newFeedConfig.getAuthInfo().getAuthType().equals(AuthType.BASIC)) {
-            ICalAuthParser.encrypt(newUserConfigurationCopy, session.getPassword()); // encrypt password for persisting
-        }
+        ICalCalendarFeedConfig newFeedConfig = new ICalCalendarFeedConfig.EncryptedBuilder(session, newUserConfigurationCopy, new JSONObject()).build();
         return oldFeedConfig.mandatoryChanges(newFeedConfig);
     }
 }

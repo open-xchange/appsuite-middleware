@@ -51,13 +51,13 @@ package com.openexchange.chronos.provider.google.access;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import org.apache.http.HttpStatus;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.EventStatus;
@@ -82,7 +82,6 @@ import com.openexchange.exception.OXException;
  */
 public class GoogleCalendarResult extends ExternalCalendarResult implements DiffAwareExternalCalendarResult{
 
-    private static final Logger LOG = LoggerFactory.getLogger(GoogleCalendarResult.class);
     private final GoogleCalendarAccess access;
     private final GoogleEventsPage currentResult;
 
@@ -94,7 +93,7 @@ public class GoogleCalendarResult extends ExternalCalendarResult implements Diff
      * @throws JSONException
      */
     public GoogleCalendarResult(GoogleCalendarAccess googleCalendarAccess, String folderId) throws OXException {
-        super();
+        super(Collections.emptyList(), HttpStatus.SC_OK);
         access = googleCalendarAccess;
         JSONObject internalConfiguration = access.getAccount().getInternalConfiguration();
         String token = null;
@@ -391,11 +390,6 @@ public class GoogleCalendarResult extends ExternalCalendarResult implements Diff
      */
     private boolean isDeleteException(Event updated){
         return updated.getRecurrenceId() != null && updated.getStatus().equals(EventStatus.CANCELLED);
-    }
-
-    @Override
-    public void addEvents(List<Event> events) {
-        // nothing to do
     }
 
     @Override

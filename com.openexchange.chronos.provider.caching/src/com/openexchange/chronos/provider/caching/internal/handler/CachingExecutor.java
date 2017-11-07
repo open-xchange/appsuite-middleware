@@ -104,7 +104,6 @@ public class CachingExecutor {
                     if (externalCalendarResult instanceof DiffAwareExternalCalendarResult) {
                         diff = ((DiffAwareExternalCalendarResult) externalCalendarResult).calculateDiff(existingEvents);
                     } else {
-
                         List<Event> externalEvents = externalCalendarResult.getEvents();
                         cleanupEvents(externalEvents);
 
@@ -148,7 +147,7 @@ public class CachingExecutor {
         if (e.getExceptionCode() == null || e.getExceptionCode().equals(CalendarExceptionCodes.AUTH_FAILED.create(""))) {
             return;
         }
-        long timeoutInMillis = TimeUnit.MINUTES.toMillis(this.cachingCalendarAccess.getExternalRequestTimeout());
+        long timeoutInMillis = TimeUnit.MINUTES.toMillis(this.cachingCalendarAccess.getRetryAfterErrorInterval());
         long nextProcessingAfter = System.currentTimeMillis() + timeoutInMillis;
         cachingHandler.updateLastUpdated(calendarFolderId, nextProcessingAfter);
     }

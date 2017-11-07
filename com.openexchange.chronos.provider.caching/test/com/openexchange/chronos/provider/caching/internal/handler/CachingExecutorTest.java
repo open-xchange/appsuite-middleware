@@ -55,6 +55,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import org.apache.http.HttpStatus;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Matchers;
@@ -89,7 +90,7 @@ public class CachingExecutorTest extends CachingCalendarAccessTest {
 
     private List<Event> existingEvents = new ArrayList<>();
 
-    private ExternalCalendarResult externalCalendarResult = new ExternalCalendarResult();
+    private ExternalCalendarResult externalCalendarResult = new ExternalCalendarResult(Collections.emptyList(), HttpStatus.SC_OK);
     private List<Event> externalEvents = new ArrayList<>();
 
     private Set<FolderUpdateState> lastFolderStates = new HashSet<>();
@@ -112,7 +113,7 @@ public class CachingExecutorTest extends CachingCalendarAccessTest {
     }
 
     @Test
-    public void testCache_executionSetNotAvailable_nothingTodo() throws OXException {
+    public void testCache_executionSetNotAvailable_nothingTodo() {
         executor = new CachingExecutor(cachingCalendarAccess, null);
 
         executor.cache(warnings);
@@ -122,7 +123,7 @@ public class CachingExecutorTest extends CachingCalendarAccessTest {
     }
 
     @Test
-    public void testCache_emptyExecutionSet_nothingTodo() throws OXException {
+    public void testCache_emptyExecutionSet_nothingTodo() {
         executor = new CachingExecutor(cachingCalendarAccess, Collections.<FolderUpdateState> emptySet());
 
         executor.cache(warnings);
@@ -149,7 +150,7 @@ public class CachingExecutorTest extends CachingCalendarAccessTest {
         Event e = new Event();
         e.setUid("available");
         externalEvents.add(e);
-        externalCalendarResult.addEvents(externalEvents);
+        externalCalendarResult = new ExternalCalendarResult(Collections.singletonList(e), HttpStatus.SC_OK);
 
         executor.cache(warnings);
 

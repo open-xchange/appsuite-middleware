@@ -55,12 +55,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import org.apache.http.HttpStatus;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.openexchange.chronos.Event;
 import com.openexchange.chronos.ExtendedProperties;
 import com.openexchange.chronos.TimeTransparency;
 import com.openexchange.chronos.provider.CalendarAccount;
@@ -186,16 +186,6 @@ public class SchedJoulesCalendarAccess extends CachingCalendarAccess {
     /*
      * (non-Javadoc)
      *
-     * @see com.openexchange.chronos.provider.CalendarAccess#getChangeExceptions(java.lang.String, java.lang.String)
-     */
-    @Override
-    public List<Event> getChangeExceptions(String folderId, String seriesId) throws OXException {
-        return Collections.emptyList();
-    }
-
-    /*
-     * (non-Javadoc)
-     *
      * @see com.openexchange.chronos.provider.caching.CachingCalendarAccess#getRefreshInterval()
      */
     @Override
@@ -220,7 +210,7 @@ public class SchedJoulesCalendarAccess extends CachingCalendarAccess {
      * @see com.openexchange.chronos.provider.caching.CachingCalendarAccess#getExternalRequestTimeout()
      */
     @Override
-    public long getExternalRequestTimeout() {
+    public long getRetryAfterErrorInterval() {
         return TimeUnit.MINUTES.toMinutes(EXTERNAL_REQUEST_TIMEOUT);
     }
 
@@ -239,13 +229,13 @@ public class SchedJoulesCalendarAccess extends CachingCalendarAccess {
             SchedJoulesAPI api = SchedJoulesAPI.getInstance();
             SchedJoulesCalendar calendar = api.calendar().getCalendar(url, eTag);
             if (eTag.equals(calendar.getETag())) {
-                return new ExternalCalendarResult();
+                return new ExternalCalendarResult(Collections.emptyList(), HttpStatus.SC_NOT_MODIFIED);
             }
             if (NO_ACCESS.equals(calendar.getName())) {
                 throw SchedJoulesProviderExceptionCodes.NO_ACCESS.create(folderId);
             }
 
-            return new ExternalCalendarResult(calendar.getEvents());
+            return new ExternalCalendarResult(calendar.getEvents(), HttpStatus.SC_OK);
         } catch (JSONException e) {
             throw SchedJoulesProviderExceptionCodes.JSON_ERROR.create(e.getMessage(), e);
         } catch (MalformedURLException e) {

@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.chronos.provider.ical.internal.auth;
+package com.openexchange.chronos.provider.ical.auth;
 
 import java.security.InvalidKeyException;
 import java.security.Key;

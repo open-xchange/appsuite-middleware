@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,19 +47,20 @@
  *
  */
 
-package com.openexchange.auth.info;
+package com.openexchange.chronos.provider.ical.auth;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.openexchange.auth.info.AuthInfo;
+import com.openexchange.auth.info.AuthType;
 
 /**
- * 
- * {@link AuthInfo} - Provides authentication information; such as login, password and authentication type.
+ * {@link AdvancedAuthInfo}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.10.0
  */
-public class AuthInfo {
+public class AdvancedAuthInfo extends AuthInfo {
 
     /**
      * Creates a new builder instance.
@@ -70,65 +71,63 @@ public class AuthInfo {
         return new Builder();
     }
 
-    public static class Builder {
+    public static class Builder extends AuthInfo.Builder {
 
-        protected String login;
-        protected String password;
-        protected AuthType authType;
-        protected Integer oauthAccountId;
-        protected String token;
+        private String encyrptedPassword;
 
-        protected Builder() {
+        Builder() {
             super();
         }
 
+        public Builder setEncryptedPassword(String encyrptedPassword) {
+            this.encyrptedPassword = encyrptedPassword;
+            return this;
+        }
+
+        @Override
         public Builder setLogin(String login) {
             this.login = login;
             return this;
         }
 
+        @Override
         public Builder setPassword(String password) {
             this.password = password;
             return this;
         }
 
+        @Override
         public Builder setOauthAccountId(Integer oauthAccountId) {
             this.oauthAccountId = oauthAccountId;
             return this;
         }
 
+        @Override
         public Builder setToken(String token) {
             this.token = token;
             return this;
         }
 
+        @Override
         public Builder setAuthType(AuthType authType) {
             this.authType = authType;
             return this;
         }
 
-        public AuthInfo build() {
-            return new AuthInfo(login, password, oauthAccountId, token, authType);
+        @Override
+        public AdvancedAuthInfo build() {
+            return new AdvancedAuthInfo(login, password, encyrptedPassword, oauthAccountId, token, authType);
         }
     }
 
     // ----------------------------------------------------------------
 
-    @JsonProperty("login")
-    private final String login;
-    @JsonProperty("password")
-    private final String password;
-    @JsonProperty("authType")
-    private final AuthType authType;
-    @JsonProperty("oauthAccountId")
-    private final Integer oauthAccountId;
-    @JsonProperty("token")
-    private final String token;
+    private final String encryptedPassword;
 
-    public static AuthInfo NONE = new AuthInfo(null, null, null, null, AuthType.NONE);
+    public static AdvancedAuthInfo NONE_ADVANCED = new AdvancedAuthInfo(null, null, null, null, null, AuthType.NONE);
 
     /**
-     * Initializes a new {@link AuthInfo}.
+     * Initializes a new {@link AdvancedAuthInfo}.
      *
      * @param login The login string
      * @param password The password or OAuth token
@@ -136,99 +135,30 @@ public class AuthInfo {
      * @param oauthAccountId The optional identifier of the associated OAuth account
      */
     @JsonCreator
-    public AuthInfo(@JsonProperty("login") String login, @JsonProperty("password") String password, @JsonProperty("oauthAccountId") Integer oauthAccountId, @JsonProperty("token") String token, @JsonProperty("authType") AuthType authType) {
-        super();
-        this.login = login;
-        this.password = password;
-        this.token = token;
-        this.authType = null == authType ? AuthType.NONE : authType;
-        this.oauthAccountId = oauthAccountId;
+    public AdvancedAuthInfo(@JsonProperty("login") String login, @JsonProperty("password") String password, String encryptedPassword, @JsonProperty("oauthAccountId") Integer oauthAccountId, @JsonProperty("token") String token, @JsonProperty("authType") AuthType authType) {
+        super(login, password, oauthAccountId, token, authType);
+        this.encryptedPassword = encryptedPassword;
     }
 
-    /**
-     * Gets the login
-     *
-     * @return The login
-     */
-    public String getLogin() {
-        return login;
-    }
-
-    /**
-     * Gets the password
-     *
-     * @return The password
-     */
-    public String getPassword() {
-        return password;
-    }
-
-    /**
-     * Gets the authentication type
-     *
-     * @return The authentication type
-     */
-    public AuthType getAuthType() {
-        return authType;
-    }
-
-    /**
-     * Gets the optional identifier of the associated OAuth account
-     *
-     * @return The identifier of the associated OAuth account or <code>-1</code>
-     */
-    public Integer getOauthAccountId() {
-        return oauthAccountId;
-    }
-
-    public String getToken() {
-        return token;
+    public String getEncryptedPassword() {
+        return encryptedPassword;
     }
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null) {
+        boolean equals = super.equals(obj);
+        if (!equals) {
             return false;
         }
-        if (!AuthInfo.class.isInstance(obj)) {
+        if (!AdvancedAuthInfo.class.isInstance(obj)) {
             return false;
         }
-        AuthInfo other = (AuthInfo) obj;
-        if (authType != other.authType) {
-            return false;
-        }
-        if (login == null) {
-            if (other.login != null) {
+        AdvancedAuthInfo other = (AdvancedAuthInfo) obj;
+        if (this.encryptedPassword == null) {
+            if (other.encryptedPassword != null) {
                 return false;
             }
-        } else if (!login.equals(other.login)) {
-            return false;
-        }
-
-        if (password == null) {
-            if (other.password != null) {
-                return false;
-            }
-        } else if (!password.equals(other.password)) {
-            return false;
-        }
-
-        if (oauthAccountId == null) {
-            if (other.oauthAccountId != null) {
-                return false;
-            }
-        } else if (!oauthAccountId.equals(other.oauthAccountId)) {
-            return false;
-        }
-
-        if (token == null) {
-            if (other.token != null) {
-                return false;
-            }
-        } else if (!token.equals(other.token)) {
+        } else if (!encryptedPassword.equals(other.encryptedPassword)) {
             return false;
         }
         return true;
@@ -236,13 +166,11 @@ public class AuthInfo {
 
     @Override
     public int hashCode() {
+        int result = super.hashCode();
+
         final int prime = 31;
-        int result = 1;
-        result = prime * result + ((login == null) ? 0 : login.hashCode());
-        result = prime * result + ((password == null) ? 0 : password.hashCode());
-        result = prime * result + ((authType == null) ? 0 : authType.hashCode());
-        result = prime * result + ((oauthAccountId == null) ? 0 : oauthAccountId.hashCode());
-        result = prime * result + ((token == null) ? 0 : token.hashCode());
+        result = prime * result + ((getEncryptedPassword() == null) ? 0 : getEncryptedPassword().hashCode());
         return result;
     }
+
 }

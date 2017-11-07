@@ -47,13 +47,14 @@
  *
  */
 
-package com.openexchange.chronos.provider.ical.internal;
+package com.openexchange.chronos.provider.ical.properties;
 
 import java.net.URI;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+import com.openexchange.chronos.provider.ical.osgi.Services;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.config.lean.Property;
 import com.openexchange.java.Strings;

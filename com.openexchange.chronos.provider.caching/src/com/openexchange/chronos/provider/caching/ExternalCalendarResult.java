@@ -51,6 +51,7 @@ package com.openexchange.chronos.provider.caching;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.http.HttpStatus;
 import com.openexchange.chronos.Event;
 import com.openexchange.exception.OXException;
 
@@ -64,41 +65,16 @@ public class ExternalCalendarResult {
 
     private final List<Event> events;
 
-    private List<OXException> warnings = new ArrayList<>();
+    private final List<OXException> warnings = new ArrayList<>();
 
-    private boolean isUpToDate = true;
+    private final int httpStatus;
 
-    /**
-     * Initializes a new {@link ExternalCalendarResult}.
-     */
-    public ExternalCalendarResult() {
-        this(new ArrayList<>());
-    }
-
-    /**
-     * Initializes a new {@link ExternalCalendarResult}.
-     */
-    public ExternalCalendarResult(List<Event> events) {
+    public ExternalCalendarResult(List<Event> events, int httpStatus) {
         super();
         this.events = events;
-        this.isUpToDate = false;
+        this.httpStatus = httpStatus;
     }
 
-    /**
-     * Adds the specified events to the result
-     * 
-     * @param events The events to add
-     */
-    public void addEvents(List<Event> events) {
-        this.events.addAll(events);
-        this.isUpToDate = false;
-    }
-
-    /**
-     * Returns the events of the result
-     * 
-     * @return the events of the result
-     */
     public List<Event> getEvents() {
         return this.events;
     }
@@ -111,12 +87,16 @@ public class ExternalCalendarResult {
         return warnings;
     }
 
+    public int getHttpStatus() {
+        return httpStatus;
+    }
+
     /**
-     * Returns whether the events are up-to-date
+     * Indicates whether the resource is up to date or not. The resource is up to date if the server returns {@link HttpStatus#SC_NOT_MODIFIED}.
      * 
-     * @return <code>true<code> if the events are up-to-date, <code>false</code> otherwise
+     * @return <true> if {@link HttpStatus#SC_NOT_MODIFIED} was returned; otherwise <code>false</code>
      */
     public boolean isUpToDate() {
-        return this.isUpToDate;
+        return this.httpStatus == HttpStatus.SC_NOT_MODIFIED;
     }
 }
