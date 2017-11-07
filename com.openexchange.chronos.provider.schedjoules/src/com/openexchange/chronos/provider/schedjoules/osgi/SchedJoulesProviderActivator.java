@@ -85,7 +85,7 @@ public class SchedJoulesProviderActivator extends HousekeepingActivator {
      */
     @Override
     protected void startBundle() throws Exception {
-        registerService(CalendarProvider.class, new SchedJoulesCalendarProvider(this));
+        registerService(CalendarProvider.class, new SchedJoulesCalendarProvider());
     }
 
     /*

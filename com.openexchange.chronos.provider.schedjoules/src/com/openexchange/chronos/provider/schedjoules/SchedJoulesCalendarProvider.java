@@ -68,7 +68,6 @@ import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.Strings;
-import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
@@ -88,16 +87,12 @@ public class SchedJoulesCalendarProvider extends CachingCalendarProvider {
      * The minumum value for the refreshInterval in minutes (1 day)
      */
     private static final int MINIMUM_REFRESH_INTERVAL = 1440;
-    private ServiceLookup services;
 
     /**
      * Initialises a new {@link SchedJoulesCalendarProvider}.
-     *
-     * @param services The ServiceLookup instance
      */
-    public SchedJoulesCalendarProvider(ServiceLookup services) {
+    public SchedJoulesCalendarProvider() {
         super();
-        this.services = services;
     }
 
     @Override
@@ -267,6 +262,7 @@ public class SchedJoulesCalendarProvider extends CachingCalendarProvider {
     /**
      * Converts and adds the user configuration folders to internal configuration folders
      *
+     * @param locale The fall-back {@link Locale} if none present in the request payload
      * @param folders The array of the user configuration folders
      * @param internalConfigFolders The internal configuration folders
      * @throws OXException If an error is occurred
@@ -285,6 +281,7 @@ public class SchedJoulesCalendarProvider extends CachingCalendarProvider {
      * stores the URL
      *
      * @param folder The JSONObject that denotes a subscription candidate
+     * @param fallbackLocale The fall-back {@link Locale} if none present in the request payload
      * @return The internal item
      * @throws JSONException if a JSON error is occurred
      * @throws OXException if an error is occurred
@@ -340,6 +337,7 @@ public class SchedJoulesCalendarProvider extends CachingCalendarProvider {
     /**
      * Handles the additions.
      *
+     * @param locale The fall-back {@link Locale} if none present in the request payload
      * @param userConfigFolders The user configuration for 'folders'
      * @param internalItemIds The internal items
      * @param additions The target 'additions' object
@@ -352,7 +350,7 @@ public class SchedJoulesCalendarProvider extends CachingCalendarProvider {
             JSONObject folder = userConfigFolders.getJSONObject(index);
             String itemId = folder.optString(SchedJoulesFields.ITEM_ID);
             if (!internalItemIds.containsKey(itemId)) {
-                additions.put(prepareFolder(folder, fallbackLocale));
+                additions.put(prepareFolder(folder, locale));
             }
             internalItemIds.remove(itemId);
         }
