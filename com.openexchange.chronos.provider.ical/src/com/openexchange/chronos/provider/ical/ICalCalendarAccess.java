@@ -234,7 +234,7 @@ public class ICalCalendarAccess extends SingleFolderCachingCalendarAccess {
 
         JSONObject iCalConfigurationFromJSON = getICalConfigurationFromJSON(account.getInternalConfiguration());
 
-        DefaultCalendarFolder folder = new DefaultCalendarFolder(FOLDER_ID, iCalConfigurationFromJSON.optString(ICalCalendarConstants.NAME));
+        DefaultCalendarFolder folder = new DefaultCalendarFolder(FOLDER_ID, iCalConfigurationFromJSON.optString(ICalCalendarConstants.NAME, account.getUserConfiguration().optString(ICalCalendarConstants.URI)));
         folder.setSupportedCapabilites(CalendarCapability.getCapabilities(ICalCalendarAccess.class));
         folder.setLastModified(account.getLastModified());
         /*
@@ -242,7 +242,7 @@ public class ICalCalendarAccess extends SingleFolderCachingCalendarAccess {
          */
         extendedProperties.replace(SCHEDULE_TRANSP(TimeTransparency.TRANSPARENT, false));
         extendedProperties.replace(USED_FOR_SYNC(Boolean.FALSE, false));
-        extendedProperties.replace(DESCRIPTION(iCalConfigurationFromJSON.optString(ICalCalendarConstants.DESCRIPTION), false));
+        extendedProperties.replace(DESCRIPTION(iCalConfigurationFromJSON.optString(ICalCalendarConstants.DESCRIPTION, null), false));
         /*
          * insert further defaults if missing
          */
