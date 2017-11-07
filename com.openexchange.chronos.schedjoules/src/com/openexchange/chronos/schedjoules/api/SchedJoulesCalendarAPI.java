@@ -52,7 +52,6 @@ package com.openexchange.chronos.schedjoules.api;
 import java.net.URL;
 import java.util.Collections;
 import com.openexchange.chronos.schedjoules.SchedJoulesCalendar;
-import com.openexchange.chronos.schedjoules.api.auxiliary.SchedJoulesResponseParser;
 import com.openexchange.chronos.schedjoules.api.client.HttpMethod;
 import com.openexchange.chronos.schedjoules.api.client.SchedJoulesRESTClient;
 import com.openexchange.chronos.schedjoules.api.client.SchedJoulesResponse;
@@ -81,7 +80,7 @@ public class SchedJoulesCalendarAPI extends AbstractSchedJoulesAPI {
      */
     public SchedJoulesCalendar getCalendar(URL url) throws OXException {
         SchedJoulesResponse response = client.executeRequest(url);
-        return (SchedJoulesCalendar) SchedJoulesResponseParser.parse(response);
+        return (SchedJoulesCalendar) response.getResponseBody();
     }
 
     /**
@@ -89,13 +88,14 @@ public class SchedJoulesCalendarAPI extends AbstractSchedJoulesAPI {
      * 
      * @param url The {@link URL} for the iCal
      * @param eTag The last known etag
+     * @param lastModified The last modified to use
      * @return The iCal parsed as a {@link SchedJoulesCalendar}
      * @throws OXException if an error is occurred
      */
-    public SchedJoulesCalendar getCalendar(URL url, String eTag) throws OXException {
-        SchedJoulesResponse response = client.executeRequest(url, HttpMethod.HEAD, eTag);
+    public SchedJoulesCalendar getCalendar(URL url, String eTag, long lastModified) throws OXException {
+        SchedJoulesResponse response = client.executeRequest(url, HttpMethod.HEAD, eTag, lastModified);
         if (response.getStatusCode() == 304) {
-            return new SchedJoulesCalendar(null, Collections.emptyList(), eTag); // Nothing modified
+            return new SchedJoulesCalendar(null, Collections.emptyList(), eTag, lastModified); // Nothing modified
         }
         return getCalendar(url);
     }

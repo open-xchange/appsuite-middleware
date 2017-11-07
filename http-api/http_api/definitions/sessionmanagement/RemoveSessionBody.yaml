@@ -1,5 +1,0 @@
-type: object
-properties:
-  sessionIdToRemove:
-    type: string
-    description: Session identifier to remove.

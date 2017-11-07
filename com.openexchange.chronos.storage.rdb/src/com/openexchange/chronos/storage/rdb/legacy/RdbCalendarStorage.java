@@ -184,7 +184,7 @@ public class RdbCalendarStorage implements CalendarStorage {
             }
 
             @Override
-            public void insertTriggers(Event event, Set<RecurrenceId> exceptions) throws OXException {
+            public void insertTriggers(Event event) throws OXException {
                 // Do nothing
             }
 
@@ -210,6 +210,11 @@ public class RdbCalendarStorage implements CalendarStorage {
 
             @Override
             public void deleteAllTriggers() throws OXException {
+                // Do nothing
+            }
+
+            @Override
+            public void insertTriggers(Event event, Map<Integer, List<Alarm>> alarmsPerUserId) throws OXException {
                 // Do nothing
             }
         };

@@ -56,9 +56,9 @@ import java.util.Map;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.exception.OXException;
-import com.openexchange.session.management.json.actions.GetSessionsAction;
-import com.openexchange.session.management.json.actions.RemoveAllOtherSessionsAction;
-import com.openexchange.session.management.json.actions.RemoveSessionAction;
+import com.openexchange.session.management.json.actions.AllAction;
+import com.openexchange.session.management.json.actions.ClearAction;
+import com.openexchange.session.management.json.actions.DeleteAction;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
@@ -74,9 +74,9 @@ public class SessionManagementActionFactory implements AJAXActionServiceFactory 
     public SessionManagementActionFactory() {
         super();
         actions = new HashMap<>();
-        actions.put("getSessions", new GetSessionsAction());
-        actions.put("removeSession", new RemoveSessionAction());
-        actions.put("removeAllOtherSessions", new RemoveAllOtherSessionsAction());
+        actions.put("all", new AllAction());
+        actions.put("delete", new DeleteAction());
+        actions.put("clear", new ClearAction());
     }
 
     @Override

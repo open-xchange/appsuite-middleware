@@ -53,6 +53,7 @@ import java.io.IOException;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import com.openexchange.ajax.Client;
 import com.openexchange.ajax.requesthandler.oauth.OAuthConstants;
 import com.openexchange.exception.OXException;
 import com.openexchange.framework.request.RequestContextHolder;
@@ -105,14 +106,18 @@ public class DAVServlet extends OXServlet {
     protected LoginRequest parseLoginRequest(Credentials credentials, HttpServletRequest request) {
         String userAgent = request.getHeader("user-agent");
         DAVUserAgent davUserAgent = DAVUserAgent.parse(userAgent);
-        LoginRequest loginRequest = new LoginRequestImpl(
-            request, credentials.getLogin(), credentials.getPassword(), getInterface(davUserAgent), davUserAgent.getReadableName(), null, userAgent);
+        Interface iface = getInterface(davUserAgent);
+        LoginRequest loginRequest = new LoginRequestImpl(request, credentials.getLogin(), credentials.getPassword(), getInterface(davUserAgent), davUserAgent.getReadableName(), null, userAgent);
         return ALLOW_ASTERISK_LOGIN_CUSTOMIZER.modifyLogin(loginRequest);
     }
 
     @Override
     protected Interface getInterface() {
         return interfaze;
+    }
+
+    private com.openexchange.ajax.Client getClient(Interface iface) {
+        return Interface.CARDDAV.equals(iface) ? Client.CARDDAV : Client.CALDAV;
     }
 
     private Interface getInterface(DAVUserAgent userAgent) {

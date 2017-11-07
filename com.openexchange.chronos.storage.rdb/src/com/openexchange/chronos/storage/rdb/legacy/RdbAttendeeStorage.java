@@ -73,6 +73,7 @@ import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.ResourceId;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.compat.Appointment2Event;
@@ -219,6 +220,18 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
     @Override
     public Map<String, List<Attendee>> loadAttendees(String[] eventIds, Boolean internal) throws OXException {
         return loadAttendees(eventIds, internal, false);
+    }
+
+    @Override
+    public Map<String, ParticipationStatus> loadPartStats(String[] eventIds, Attendee attendee) throws OXException {
+        Map<String, ParticipationStatus> statusPerEventId = new HashMap<String, ParticipationStatus>(eventIds.length);
+        for (Entry<String, List<Attendee>> entry : loadAttendees(eventIds, null).entrySet()) {
+            Attendee matchingAttendee = find(entry.getValue(), attendee);
+            if (null != matchingAttendee) {
+                statusPerEventId.put(entry.getKey(), matchingAttendee.getPartStat());
+            }
+        }
+        return statusPerEventId;
     }
 
     @Override

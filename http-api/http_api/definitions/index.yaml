@@ -680,10 +680,11 @@ GuardSignatureResult:
   $ref: ./guard/GuardSignatureResult.yaml
 GuardSendSecurity:
   $ref: ./guard/GuardSendSecurity.yaml
-GetSessionsResponse:
-  $ref: ./sessionmanagement/GetSessionsResponse.yaml
-RemoveSessionBody:
-  $ref: ./sessionmanagement/RemoveSessionBody.yaml
+# Module: Sessionmanagement
+AllSessionsResponse:
+  $ref: ./sessionmanagement/AllSessionsResponse.yaml
+DeviceInfo:
+  $ref: ./sessionmanagement/DeviceInfo.yaml
 # Module: Export
 InfoItemExport:
   $ref: ./export/InfoItemExport.yaml

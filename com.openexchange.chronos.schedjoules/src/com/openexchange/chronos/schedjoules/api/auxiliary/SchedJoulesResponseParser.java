@@ -109,7 +109,7 @@ public enum SchedJoulesResponseParser {
 
             try (InputStream inputStream = Streams.bufferedInputStreamFor(response.getStream())) {
                 Calendar calendar = iCalService.importICal(inputStream, parameters);
-                return new SchedJoulesCalendar(calendar.getName(), calendar.getEvents(), response.getETag());
+                return new SchedJoulesCalendar(calendar.getName(), calendar.getEvents(), response.getETag(), response.getLastModified());
             } catch (IOException e) {
                 throw SchedJoulesAPIExceptionCodes.IO_ERROR.create(e.getMessage(), e);
             }

@@ -252,7 +252,13 @@ public enum MailJSONField {
     /**
      * If the E-Mail contains encryption or signatures
      */
-    SECURITY_INFO("security_info")
+    SECURITY_INFO("security_info"),
+    /**
+     * A message's text preview
+     * @since v7.10.0
+     */
+    TEXT_PREVIEW("text_preview")
+
     ;
 
 

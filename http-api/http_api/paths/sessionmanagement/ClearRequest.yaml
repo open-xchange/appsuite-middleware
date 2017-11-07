@@ -1,6 +1,6 @@
-/sessionmanagement?action=removeAllOtherSessions:
+/sessionmanagement?action=clear:
   get:
-    operationId: removeAllOtherSessions
+    operationId: clear
     tags:
       - sessionmanagement
     summary: Removes all user's session expect given and blacklisted

@@ -68,7 +68,6 @@ import com.openexchange.chronos.AlarmTrigger;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.ExtendedProperties;
 import com.openexchange.chronos.ExtendedProperty;
-import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.Trigger;
 import com.openexchange.chronos.Trigger.Related;
 import com.openexchange.chronos.common.mapping.AbstractCollectionUpdate;
@@ -379,10 +378,9 @@ public class AlarmUtils extends CalendarUtils {
      * @param trigger The trigger to get the effective trigger time for
      * @param event The event the trigger's alarm is associated with
      * @param recurrenceService A reference to the recurrence service
-     * @param exceptions the recurrence identifiers to skip when iterating occurrences of a series event
      * @return The relative trigger duration, or <code>null</code> if not specified in supplied trigger
      */
-    public static String getTriggerDuration(Trigger trigger, Event event, RecurrenceService recurrenceService, Set<RecurrenceId> exceptions) throws OXException {
+    public static String getTriggerDuration(Trigger trigger, Event event, RecurrenceService recurrenceService) throws OXException {
         if (null == trigger) {
             return null;
         }
@@ -403,7 +401,7 @@ public class AlarmUtils extends CalendarUtils {
     }
 
     /**
-     * Calculates the actual relative duration of an alarm trigger associated with an event.
+     * Calculates the actual relative duration of an alarm trigger associated with a non-series event.
      *
      * @param trigger The trigger to get the effective trigger time for
      * @param event The event the trigger's alarm is associated with
@@ -436,10 +434,9 @@ public class AlarmUtils extends CalendarUtils {
      *            to select automatically
      * @param timeZone The timezone to consider if the event has <i>floating</i> dates
      * @param recurrenceService A reference to the recurrence service
-     * @param exceptions A list of {@link RecurrenceId} exceptions which should be skipped.
      * @return The next trigger time, or <code>null</code> if there is none
      */
-    public static Date getNextTriggerTime(Event seriesMaster, Alarm alarm, Date startDate, TimeZone timeZone, RecurrenceService recurrenceService, Set<RecurrenceId> exceptions) throws OXException {
+    public static Date getNextTriggerTime(Event seriesMaster, Alarm alarm, Date startDate, TimeZone timeZone, RecurrenceService recurrenceService) throws OXException {
         if (null == startDate) {
             startDate = null != alarm.getAcknowledged() ? alarm.getAcknowledged() : new Date();
         }
@@ -447,9 +444,6 @@ public class AlarmUtils extends CalendarUtils {
         while (iterator.hasNext()) {
             Event occurrence = iterator.next();
             if (occurrence.getStartDate().getTimestamp() < startDate.getTime()) {
-                continue;
-            }
-            if(exceptions!=null && exceptions.contains(occurrence.getRecurrenceId())){
                 continue;
             }
             Date triggerTime = getTriggerTime(alarm.getTrigger(), occurrence, timeZone);

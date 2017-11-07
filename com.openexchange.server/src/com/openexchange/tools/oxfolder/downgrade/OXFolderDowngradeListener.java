@@ -91,7 +91,7 @@ import gnu.trove.set.hash.TIntHashSet;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class OXFolderDowngradeListener extends DowngradeListener {
+public final class OXFolderDowngradeListener implements DowngradeListener {
 
     private static final String TABLE_FOLDER_WORKING = "oxfolder_tree";
 

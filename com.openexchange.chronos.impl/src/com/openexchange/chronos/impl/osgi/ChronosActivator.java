@@ -55,8 +55,8 @@ import org.slf4j.LoggerFactory;
 import com.openexchange.chronos.impl.CalendarServiceImpl;
 import com.openexchange.chronos.impl.FreeBusyServiceImpl;
 import com.openexchange.chronos.impl.availability.CalendarAvailabilityServiceImpl;
-import com.openexchange.chronos.impl.groupware.ChronosDeleteListener;
-import com.openexchange.chronos.impl.groupware.ChronosDowngradeListener;
+import com.openexchange.chronos.impl.groupware.CalendarDeleteListener;
+import com.openexchange.chronos.impl.groupware.CalendarDowngradeListener;
 import com.openexchange.chronos.impl.osgi.event.EventAdminServiceTracker;
 import com.openexchange.chronos.impl.session.DefaultCalendarUtilities;
 import com.openexchange.chronos.provider.account.AdministrativeCalendarAccountService;
@@ -140,8 +140,8 @@ public class ChronosActivator extends HousekeepingActivator {
             registerService(FreeBusyService.class, new FreeBusyServiceImpl());
             registerService(CalendarUtilities.class, calendarUtilities);
             registerService(CalendarAvailabilityService.class, new CalendarAvailabilityServiceImpl());
-            registerService(DeleteListener.class, new ChronosDeleteListener(factory, calendarUtilities, calendarHandlers));
-            DowngradeRegistry.getInstance().registerDowngradeListener(new ChronosDowngradeListener(factory, calendarUtilities, calendarHandlers));
+            registerService(DeleteListener.class, new CalendarDeleteListener(factory, calendarUtilities, calendarHandlers));
+            DowngradeRegistry.getInstance().registerDowngradeListener(new CalendarDowngradeListener(factory, calendarUtilities, calendarHandlers));
             /*
              * register calendar handler to propagate OSGi events
              */

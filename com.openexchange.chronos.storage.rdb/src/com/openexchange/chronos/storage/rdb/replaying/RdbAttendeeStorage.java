@@ -52,6 +52,7 @@ package com.openexchange.chronos.storage.rdb.replaying;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.chronos.Attendee;
+import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.storage.AttendeeStorage;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
@@ -92,6 +93,11 @@ public class RdbAttendeeStorage implements AttendeeStorage {
     @Override
     public Map<String, List<Attendee>> loadAttendees(String[] eventIds, Boolean internal) throws OXException {
         return delegate.loadAttendees(eventIds, internal);
+    }
+
+    @Override
+    public Map<String, ParticipationStatus> loadPartStats(String[] eventIds, Attendee attendee) throws OXException {
+        return delegate.loadPartStats(eventIds, attendee);
     }
 
     @Override

@@ -47,82 +47,77 @@
  *
  */
 
-package com.openexchange.ajax.sessionmanagement.actions;
+package com.openexchange.clientinfo.impl;
 
-import java.io.IOException;
-import org.json.JSONException;
-import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.framework.AJAXRequest;
-import com.openexchange.ajax.framework.AbstractAJAXParser;
-import com.openexchange.ajax.framework.Header;
-import com.openexchange.ajax.framework.Params;
-import com.openexchange.ajax.sessionmanagement.AbstractSessionManagementTest;
+import java.util.Locale;
+import com.openexchange.clientinfo.ClientInfo;
+import com.openexchange.clientinfo.ClientInfoStrings;
+import com.openexchange.clientinfo.ClientInfoType;
+import com.openexchange.i18n.tools.StringHelper;
+import com.openexchange.java.Strings;
 
 
 /**
- * {@link GetSessionsRequest}
+ * {@link WebClientInfo}
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since v7.10.0
  */
-public class GetSessionsRequest implements AJAXRequest<GetSessionsResponse> {
+public class WebClientInfo implements ClientInfo {
 
-    private boolean failOnError;
+    private final String client;
+    private final String platform;
+    private final String platformVersion;
+    private final String browser;
+    private final String browserVersion;
 
-    public GetSessionsRequest(boolean failOnError) {
-        this.failOnError = failOnError;
-    }
-
-    public GetSessionsRequest() {
-        this(true);
-    }
-
-    @Override
-    public com.openexchange.ajax.framework.AJAXRequest.Method getMethod() {
-        return Method.GET;
-    }
-
-    @Override
-    public String getServletPath() {
-        return AbstractSessionManagementTest.SERVLET_PATH;
+    public WebClientInfo(String client, String platform, String platformVersion, String browser, String browserVersion) {
+        this.client = client;
+        this.platform = platform;
+        this.platformVersion = platformVersion;
+        this.browser = browser;
+        this.browserVersion = browserVersion;
     }
 
     @Override
-    public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() throws IOException, JSONException {
-        return new Params(AJAXServlet.PARAMETER_ACTION, "getSessions").toArray();
-    }
-
-    @Override
-    public AbstractAJAXParser<? extends GetSessionsResponse> getParser() {
-        return new Parser(failOnError);
-    }
-
-    @Override
-    public Object getBody() throws IOException, JSONException {
-        return null;
-    }
-
-    @Override
-    public Header[] getHeaders() {
-        return NO_HEADER;
-    }
-
-    public void setFailOnError(boolean failOnError) {
-        this.failOnError = failOnError;
-    }
-
-    private static final class Parser extends AbstractAJAXParser<GetSessionsResponse> {
-
-        protected Parser(boolean failOnError) {
-            super(failOnError);
+    public String toString(Locale locale) {
+        StringHelper helper = StringHelper.valueOf(locale);
+        String out;
+        if (Strings.isNotEmpty(platform) && Strings.isNotEmpty(platformVersion)) {
+            out = helper.getString(ClientInfoStrings.DEFAULT_CLIENT_INFO_MESSAGE);
+            return String.format(out, client, platform, platformVersion, browser, browserVersion);
+        } else if (Strings.isNotEmpty(browser) && Strings.isNotEmpty(browserVersion)) {
+            out = helper.getString(ClientInfoStrings.CLIENT_BROWSER_INFO_MESSAGE);
+            return String.format(out, client, browser, browserVersion);
+        } else {
+            out = helper.getString(ClientInfoStrings.CLIENT_INFO_MESSAGE);
+            return String.format(out, client);
         }
+    }
 
-        @Override
-        protected GetSessionsResponse createResponse(Response response) throws JSONException {
-            return new GetSessionsResponse(response);
-        }
+    @Override
+    public ClientInfoType getType() {
+        return ClientInfoType.BROWSER;
+    }
 
+    @Override
+    public String getPlatform() {
+        return platform;
+    }
+
+    @Override
+    public String getPlatformVersion() {
+        return platformVersion;
+    }
+
+    @Override
+    public String getApp() {
+        return browser;
+    }
+
+    @Override
+    public String getAppVersion() {
+        return browserVersion;
     }
 
 }

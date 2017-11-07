@@ -68,9 +68,9 @@ import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.Strings;
-import com.openexchange.server.ServiceExceptionCode;
-import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
+import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.user.UserService;
 
 /**
@@ -80,23 +80,19 @@ import com.openexchange.user.UserService;
  */
 public class SchedJoulesCalendarProvider extends CachingCalendarProvider {
 
-    private static final String PROVIDER_ID = "schedjoules";
+    public static final String PROVIDER_ID = "schedjoules";
     private static final String DISPLAY_NAME = "SchedJoules";
 
     /**
      * The minumum value for the refreshInterval in minutes (1 day)
      */
     private static final int MINIMUM_REFRESH_INTERVAL = 1440;
-    private ServiceLookup services;
 
     /**
      * Initialises a new {@link SchedJoulesCalendarProvider}.
-     *
-     * @param services The ServiceLookup instance
      */
-    public SchedJoulesCalendarProvider(ServiceLookup services) {
+    public SchedJoulesCalendarProvider() {
         super();
-        this.services = services;
     }
 
     @Override
@@ -152,7 +148,7 @@ public class SchedJoulesCalendarProvider extends CachingCalendarProvider {
         try {
             JSONObject internalConfig = new JSONObject();
             JSONArray internalConfigItems = new JSONArray();
-            addFolders(folders, internalConfigItems);
+            addFolders(getUserLocale(session), folders, internalConfigItems);
             internalConfig.put(SchedJoulesFields.FOLDERS, internalConfigItems);
             internalConfig.put(SchedJoulesFields.USER_KEY, generateUserKey(session));
             return internalConfig;
@@ -181,7 +177,7 @@ public class SchedJoulesCalendarProvider extends CachingCalendarProvider {
             // Add all user configuration folders
             try {
                 internalConfigFolders = new JSONArray();
-                addFolders(userConfigFolders, internalConfigFolders);
+                addFolders(getUserLocale(session), userConfigFolders, internalConfigFolders);
                 internalConfig.put(SchedJoulesFields.FOLDERS, internalConfigFolders);
                 return internalConfig;
             } catch (JSONException e) {
@@ -199,7 +195,7 @@ public class SchedJoulesCalendarProvider extends CachingCalendarProvider {
             }
 
             JSONArray additions = new JSONArray();
-            boolean added = handleAdditions(userConfigFolders, internalItemIds, additions);
+            boolean added = handleAdditions(getUserLocale(session), userConfigFolders, internalItemIds, additions);
             boolean deleted = handleDeletions(internalConfigFolders, internalItemIds);
             addToInternalConfiguration(internalConfigFolders, additions);
 
@@ -252,17 +248,30 @@ public class SchedJoulesCalendarProvider extends CachingCalendarProvider {
     ///////////////////////////////////////////// HELPERS ///////////////////////////////////////////
 
     /**
+     * Returns the user's {@link Locale}
+     * 
+     * @param session The groupware {@link Session}
+     * @return The user's {@link Locale}
+     * @throws OXException if the locale cannot be returned
+     */
+    private Locale getUserLocale(Session session) throws OXException {
+        ServerSession serverSession = ServerSessionAdapter.valueOf(session);
+        return serverSession.getUser().getLocale();
+    }
+
+    /**
      * Converts and adds the user configuration folders to internal configuration folders
      *
+     * @param locale The fall-back {@link Locale} if none present in the request payload
      * @param folders The array of the user configuration folders
      * @param internalConfigFolders The internal configuration folders
      * @throws OXException If an error is occurred
      * @throws JSONException if a JSON error is occurred
      */
-    private void addFolders(JSONArray folders, JSONArray internalConfigFolders) throws OXException, JSONException {
+    private void addFolders(Locale locale, JSONArray folders, JSONArray internalConfigFolders) throws OXException, JSONException {
         for (int index = 0; index < folders.length(); index++) {
             JSONObject folder = folders.getJSONObject(index);
-            JSONObject internalItem = prepareFolder(folder);
+            JSONObject internalItem = prepareFolder(folder, locale);
             internalConfigFolders.put(internalItem);
         }
     }
@@ -272,13 +281,14 @@ public class SchedJoulesCalendarProvider extends CachingCalendarProvider {
      * stores the URL
      *
      * @param folder The JSONObject that denotes a subscription candidate
+     * @param fallbackLocale The fall-back {@link Locale} if none present in the request payload
      * @return The internal item
      * @throws JSONException if a JSON error is occurred
      * @throws OXException if an error is occurred
      */
-    private JSONObject prepareFolder(JSONObject folder) throws JSONException, OXException {
+    private JSONObject prepareFolder(JSONObject folder, Locale fallbackLocale) throws JSONException, OXException {
         int itemId = folder.getInt(SchedJoulesFields.ITEM_ID);
-        String locale = folder.optString(SchedJoulesFields.LOCALE);
+        String locale = folder.optString(SchedJoulesFields.LOCALE, fallbackLocale.getLanguage());
         int refreshInterval = folder.optInt(SchedJoulesFields.REFRESH_INTERVAL, MINIMUM_REFRESH_INTERVAL);
         if (refreshInterval < MINIMUM_REFRESH_INTERVAL) {
             refreshInterval = MINIMUM_REFRESH_INTERVAL;
@@ -297,7 +307,7 @@ public class SchedJoulesCalendarProvider extends CachingCalendarProvider {
         internalItem.put(SchedJoulesFields.URL, page.getString(SchedJoulesFields.URL));
         internalItem.put(SchedJoulesFields.ITEM_ID, itemId);
         internalItem.put(SchedJoulesFields.NAME, name);
-        internalItem.put(SchedJoulesFields.ETAG, page.optString(SchedJoulesFields.ETAG));
+        internalItem.put(SchedJoulesFields.LOCALE, locale);
         return internalItem;
     }
 
@@ -327,6 +337,7 @@ public class SchedJoulesCalendarProvider extends CachingCalendarProvider {
     /**
      * Handles the additions.
      *
+     * @param locale The fall-back {@link Locale} if none present in the request payload
      * @param userConfigFolders The user configuration for 'folders'
      * @param internalItemIds The internal items
      * @param additions The target 'additions' object
@@ -334,12 +345,12 @@ public class SchedJoulesCalendarProvider extends CachingCalendarProvider {
      * @throws JSONException if a JSON error occurs
      * @throws OXException if any other error occurs
      */
-    private boolean handleAdditions(JSONArray userConfigFolders, Map<String, Integer> internalItemIds, JSONArray additions) throws JSONException, OXException {
+    private boolean handleAdditions(Locale locale, JSONArray userConfigFolders, Map<String, Integer> internalItemIds, JSONArray additions) throws JSONException, OXException {
         for (int index = 0; index < userConfigFolders.length(); index++) {
             JSONObject folder = userConfigFolders.getJSONObject(index);
             String itemId = folder.optString(SchedJoulesFields.ITEM_ID);
             if (!internalItemIds.containsKey(itemId)) {
-                additions.put(prepareFolder(folder));
+                additions.put(prepareFolder(folder, locale));
             }
             internalItemIds.remove(itemId);
         }
@@ -386,11 +397,8 @@ public class SchedJoulesCalendarProvider extends CachingCalendarProvider {
      * @throws OXException if the {@link UserService} is missing or if the user does not exist.
      */
     private String generateUserKey(Session session) throws OXException {
-        UserService userService = services.getService(UserService.class);
-        if (userService == null) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(UserService.class.getSimpleName());
-        }
-        User user = userService.getUser(session.getUserId(), session.getContextId());
+        ServerSession serverSession = ServerSessionAdapter.valueOf(session);
+        User user = serverSession.getUser();
         return DigestUtils.sha256Hex(user.getMail());
     }
 }

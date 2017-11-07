@@ -1,6 +1,6 @@
-/sessionmanagement?action=removeSession:
+/sessionmanagement?action=delete:
   put:
-    operationId: removeSession
+    operationId: delete
     tags:
       - sessionmanagement
     summary: Remove user's session
@@ -10,10 +10,11 @@
       - $ref: "#/parameters/gblQueryParamSession"
       - in: body
         name: body
-        description: A JSON object describing the session
+        description: A JSON array containing all session Ids to delete
         required: true
         schema:
-          $ref: "#/definitions/RemoveSessionBody"
+          type: array
+          items: Session Ids to delete
     responses:
       200:
         description: |

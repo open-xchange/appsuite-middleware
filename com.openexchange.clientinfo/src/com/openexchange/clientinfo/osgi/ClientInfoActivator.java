@@ -47,85 +47,40 @@
  *
  */
 
-package com.openexchange.chronos;
+package com.openexchange.clientinfo.osgi;
 
-import java.util.Set;
-import com.openexchange.chronos.Event;
-import com.openexchange.chronos.RecurrenceId;
+import com.openexchange.clientinfo.ClientInfoProvider;
+import com.openexchange.clientinfo.ClientInfoService;
+import com.openexchange.clientinfo.impl.ClientInfoServiceImpl;
+import com.openexchange.clientinfo.impl.WebClientInfoProvider;
+import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.osgi.ServiceSet;
+import com.openexchange.sessiond.SessiondService;
+import com.openexchange.uadetector.UserAgentParser;
+
 
 /**
- * {@link EventExceptionWrapper} wraps an event and its exceptions.
+ * {@link ClientInfoActivator}
  *
- * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since v7.10.0
  */
-public class EventExceptionWrapper {
+public class ClientInfoActivator extends HousekeepingActivator {
 
-    private Event event;
-    private Set<RecurrenceId> exceptions;
-
-    /**
-     * Initializes a new {@link EventExceptionWrapper}.
-     * 
-     * @param event The event
-     * @param exceptions A set if exceptions
-     */
-    public EventExceptionWrapper(Event event, Set<RecurrenceId> exceptions) {
-        super();
-        this.event = event;
-        this.exceptions = exceptions;
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[] { UserAgentParser.class, SessiondService.class };
     }
 
-    /**
-     * Initializes a new {@link EventExceptionWrapper} without exceptions.
-     *
-     * @param event The event
-     */
-    public EventExceptionWrapper(Event event) {
-        super();
-        this.event = event;
-        this.exceptions = null;
+    @Override
+    protected void startBundle() throws Exception {
+        Services.setServiceLookup(this);
+        ServiceSet<ClientInfoProvider> set = new ServiceSet<>();
+        ClientInfoService service = new ClientInfoServiceImpl(set);
+        track(ClientInfoProvider.class, set);
+        registerService(ClientInfoService.class, service);
+        registerService(ClientInfoProvider.class, new WebClientInfoProvider(), 20);
+        openTrackers();
     }
-
-    /**
-     * Gets the event
-     *
-     * @return The event
-     */
-    public Event getEvent() {
-        return event;
-    }
-
-
-    /**
-     * Sets the event
-     *
-     * @param event The event to set
-     */
-    public void setEvent(Event event) {
-        this.event = event;
-    }
-
-
-    /**
-     * Gets the exceptions
-     *
-     * @return The exceptions
-     */
-    public Set<RecurrenceId> getExceptions() {
-        return exceptions;
-    }
-
-
-    /**
-     * Sets the exceptions
-     *
-     * @param exceptions The exceptions to set
-     */
-    public void setExceptions(Set<RecurrenceId> exceptions) {
-        this.exceptions = exceptions;
-    }
-
-
 
 }

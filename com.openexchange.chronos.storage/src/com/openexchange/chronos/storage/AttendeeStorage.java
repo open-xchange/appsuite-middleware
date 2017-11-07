@@ -52,6 +52,7 @@ package com.openexchange.chronos.storage;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.chronos.Attendee;
+import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.exception.OXException;
 
 /**
@@ -89,6 +90,15 @@ public interface AttendeeStorage {
     Map<String, List<Attendee>> loadAttendees(String[] eventIds, Boolean internal) throws OXException;
 
     /**
+     * Loads an attendee's participation statuses for specific events.
+     *
+     * @param eventIds The identifiers of the events to load the participation statuses for
+     * @param attendee The attendee to load the participation statuses for
+     * @return The participation statuses, mapped to the identifiers of the corresponding events
+     */
+    Map<String, ParticipationStatus> loadPartStats(String[] eventIds, Attendee attendee) throws OXException;
+
+    /**
      * Deletes all attendees for a specific event.
      *
      * @param eventId The identifier of the event to delete the attendees for
@@ -112,7 +122,7 @@ public interface AttendeeStorage {
 
     /**
      * Deletes all existing attendees for an account.
-     * 
+     *
      * @throws OXException
      */
     void deleteAllAttendees() throws OXException;

@@ -47,88 +47,66 @@
  *
  */
 
-package com.openexchange.ajax.sessionmanagement.actions;
+package com.openexchange.dav;
 
-import java.io.IOException;
-import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.framework.AJAXRequest;
-import com.openexchange.ajax.framework.AbstractAJAXParser;
-import com.openexchange.ajax.framework.Header;
-import com.openexchange.ajax.framework.Params;
-import com.openexchange.ajax.sessionmanagement.AbstractSessionManagementTest;
+import java.util.Locale;
+import com.openexchange.clientinfo.ClientInfo;
+import com.openexchange.clientinfo.ClientInfoType;
 
 
 /**
- * {@link RemoveSessionRequest}
+ * {@link DAVClientInfo}
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since v7.10.0
  */
-public class RemoveSessionRequest implements AJAXRequest<RemoveSessionResponse> {
+public class DAVClientInfo implements ClientInfo {
 
-    private final String sessionIdToRemove;
-    private boolean failOnError;
+    private final String platform;
+    private final String platformVersion;
+    private final String app;
+    private final String appVersion;
 
-    public RemoveSessionRequest(String sessionIdToRemove) {
-        this(sessionIdToRemove, true);
-    }
-
-    public RemoveSessionRequest(String sessionIdToRemove, boolean failOnError) {
+    public DAVClientInfo(String platform, String platformVersion, String app, String appVersion) {
         super();
-        this.sessionIdToRemove = sessionIdToRemove;
-        this.failOnError = failOnError;
+        this.platform = platform;
+        this.platformVersion = platformVersion;
+        this.app = app;
+        this.appVersion = appVersion;
+    }
+
+    public DAVClientInfo(String app) {
+        this(null, null, app, null);
     }
 
     @Override
-    public com.openexchange.ajax.framework.AJAXRequest.Method getMethod() {
-        return Method.PUT;
+    public ClientInfoType getType() {
+        return ClientInfoType.SYNC;
     }
 
     @Override
-    public String getServletPath() {
-        return AbstractSessionManagementTest.SERVLET_PATH;
+    public String getPlatform() {
+        return platform;
     }
 
     @Override
-    public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() throws IOException, JSONException {
-        return new Params(AJAXServlet.PARAMETER_ACTION, "removeSession").toArray();
+    public String getPlatformVersion() {
+        return platformVersion;
     }
 
     @Override
-    public AbstractAJAXParser<? extends RemoveSessionResponse> getParser() {
-        return new Parser(failOnError);
+    public String getApp() {
+        return app;
     }
 
     @Override
-    public Object getBody() throws IOException, JSONException {
-        JSONObject body = new JSONObject();
-        body.put("sessionIdToRemove", sessionIdToRemove);
-        return body;
+    public String getAppVersion() {
+        return appVersion;
     }
 
     @Override
-    public Header[] getHeaders() {
-        return NO_HEADER;
-    }
-
-    public void setFailOnError(boolean failOnError) {
-        this.failOnError = failOnError;
-    }
-
-    private static final class Parser extends AbstractAJAXParser<RemoveSessionResponse> {
-
-        protected Parser(boolean failOnError) {
-            super(failOnError);
-        }
-
-        @Override
-        protected RemoveSessionResponse createResponse(Response response) throws JSONException {
-            return new RemoveSessionResponse(response);
-        }
-
+    public String toString(Locale locale) {
+        return app;
     }
 
 }

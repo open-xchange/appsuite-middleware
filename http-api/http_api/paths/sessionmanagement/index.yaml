@@ -1,4 +1,4 @@
 requests:
-  - GetSessionsRequest.yaml
-  - RemoveSessionRequest.yaml
-  - RemoveAllOtherSessionsRequest.yaml
+  - AllRequest.yaml
+  - DeleteRequest.yaml
+  - ClearRequest.yaml

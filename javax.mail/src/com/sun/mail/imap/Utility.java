@@ -235,4 +235,41 @@ public final class Utility {
     public static interface Condition {
 	public boolean test(IMAPMessage message);
     }
+
+    /** ASCII-wise to upper-case */
+    public static String toUpperCase(final CharSequence chars) {
+        if (null == chars) {
+            return null;
+        }
+
+        int length = chars.length();
+        StringBuilder builder = null;
+        for (int i = 0; i < length; i++) {
+            char c = chars.charAt(i);
+            if (null == builder) {
+                if ((c >= 'a') && (c <= 'z')) {
+                    builder = new StringBuilder(length);
+                    if (i > 0) {
+                        builder.append(chars, 0, i);
+                    }
+                    builder.append((char) (c & 0x5f));
+                }
+            } else {
+                builder.append((c >= 'a') && (c <= 'z') ? (char) (c & 0x5f) : c);
+            }
+        }
+        return null == builder ? chars.toString() : builder.toString();
+    }
+    
+    /** To upper-case */
+    public static char toUpperCase(final char c) {
+        if ((c >= 'A') && (c <= 'Z')) {
+            return c;
+        }
+        if ((c >= 'a') && (c <= 'z')) {
+            return (char) (c & 0x5f);
+        }
+        return Character.toUpperCase(c);
+    }
+
 }

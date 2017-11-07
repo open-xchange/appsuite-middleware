@@ -220,6 +220,16 @@ public enum MailListField {
      * <p>
      */
     DATE(661, MailJSONField.DATE.getKey()),
+    /**
+     * A message's text preview only if immediately available
+     * @since v7.10.0
+     */
+    TEXT_PREVIEW_IF_AVAILABLE(662, MailJSONField.TEXT_PREVIEW.getKey()),
+    /**
+     * A message's text preview; generate it if absent (which may be slow)
+     * @since v7.10.0
+     */
+    TEXT_PREVIEW(663, MailJSONField.TEXT_PREVIEW.getKey())
     ;
 
     private final int field;

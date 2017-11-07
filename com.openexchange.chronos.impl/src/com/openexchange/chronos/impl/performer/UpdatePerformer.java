@@ -86,7 +86,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import com.openexchange.chronos.Alarm;
@@ -231,9 +230,8 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
                 resultTracker.trackUpdate(originalEvent, updatedMasterEvent);
                 resultTracker.trackCreation(loadEventData(newExceptionEvent.getId()));
 
-                Set<RecurrenceId> exceptions = combine(updatedMasterEvent.getDeleteExceptionDates(), updatedMasterEvent.getChangeExceptionDates());
                 storage.getAlarmTriggerStorage().deleteTriggers(originalEvent.getId());
-                storage.getAlarmTriggerStorage().insertTriggers(updatedMasterEvent, exceptions);
+                storage.getAlarmTriggerStorage().insertTriggers(updatedMasterEvent);
             }
         } else if (isSeriesException(originalEvent)) {
             /*
@@ -374,9 +372,8 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
                 touch(originalEvent.getId());
             }
             Event alarmTriggerEvent = loadEventData(originalEvent.getId());
-            Set<RecurrenceId> exceptions = combine(alarmTriggerEvent.getDeleteExceptionDates(), alarmTriggerEvent.getChangeExceptionDates());
             storage.getAlarmTriggerStorage().deleteTriggers(originalEvent.getId());
-            storage.getAlarmTriggerStorage().insertTriggers(alarmTriggerEvent, exceptions);
+            storage.getAlarmTriggerStorage().insertTriggers(alarmTriggerEvent);
         }
         return wasUpdated;
     }

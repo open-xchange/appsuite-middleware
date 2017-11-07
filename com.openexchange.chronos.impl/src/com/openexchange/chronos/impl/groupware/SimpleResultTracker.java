@@ -80,7 +80,7 @@ import com.openexchange.tools.oxfolder.OXFolderAccess;
 
 /**
  * {@link SimpleResultTracker} - Tracks update and delete operations on calendar events. This tracker
- * is only meant to be used by the {@link ChronosDeleteListener}. For other purposes use {@link com.openexchange.chronos.impl.performer.ResultTracker}.
+ * is only meant to be used by the {@link CalendarDeleteListener}. For other purposes use {@link com.openexchange.chronos.impl.performer.ResultTracker}.
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.0
@@ -108,46 +108,58 @@ class SimpleResultTracker {
     }
 
     /**
-     * Throws the {@link CalendarEvent}
+     * Creates a new {@link CalendarEvent} and calls {@link CalendarHandler#handle(CalendarEvent)}
      * 
      * @param connection The {@link Connection}
      * @param context The {@link Context}
      * @param session The {@link Session} of the context admin
      * @param entityResolver The {@link EntityResolver}
      */
-    public void throwCalendarEvent(Connection connection, Context context, Session session, EntityResolver entityResolver) {
+    public void notifyCalenderHandlers(Connection connection, Context context, Session session, EntityResolver entityResolver) {
         Map<Integer, List<String>> affectedFoldersPerUser = getAffectedFoldersPerUser(context, connection, entityResolver);
-        DefaultCalendarEvent calendarEvent = new DefaultCalendarEvent(context.getContextId(), CalendarAccount.DEFAULT_ACCOUNT.getAccountId(), session, affectedFoldersPerUser, Collections.emptyList(), updateResults, deleteResults);
-        for (CalendarHandler handler : calendarHandlers) {
-            handler.handle(calendarEvent);
+        if (false == affectedFoldersPerUser.isEmpty()) {
+            DefaultCalendarEvent calendarEvent = new DefaultCalendarEvent(context.getContextId(), CalendarAccount.DEFAULT_ACCOUNT.getAccountId(), session, affectedFoldersPerUser, Collections.emptyList(), updateResults, deleteResults);
+            for (CalendarHandler handler : calendarHandlers) {
+                handler.handle(calendarEvent);
+            }
         }
     }
 
     /**
      * Add a deleted event as appropriated {@link CalendarEvent}.
      * 
-     * @param folderIds A {@link List} containing all folders that belongs to the event
      * @param event The {@link Event} to delete
      * @param timestamp The timestamp of the deletion
      */
-    public void addDelete(List<String> folderIds, Event event, long timestamp) {
-        affectedFolders.addAll(folderIds);
+    public void addDelete(Event event, long timestamp) {
+        addFolders(event);
         DeleteResult newResult = new DeleteResultImpl(timestamp, CalendarUtils.getEventID(event));
         deleteResults.add(newResult);
     }
 
     /**
-     * Add an updated event as appropriated OSGi event.
+     * Add an updated event as appropriated {@link CalendarEvent}.
      * 
-     * @param folderIds A {@link List} containing all folders that belongs to the event
      * @param originalEvent The original {@link Event}
      * @param updatedEvent The updated {@link Event}
      * @throws OXException See {@link UpdateResultImpl#UpdateResultImpl(Event, Event)}
      */
-    public void addUpdate(List<String> folderIds, Event originalEvent, Event updatedEvent) throws OXException {
-        affectedFolders.addAll(folderIds);
+    public void addUpdate(Event originalEvent, Event updatedEvent) throws OXException {
+        addFolders(updatedEvent);
         UpdateResult newResult = new UpdateResultImpl(originalEvent, updatedEvent);
         updateResults.add(newResult);
+    }
+
+    /**
+     * Track the affected folders.
+     * 
+     * @param event The {@link Event}
+     */
+    private void addFolders(Event event) {
+        affectedFolders.addAll(Utils.getPersonalFolderIds(event.getAttendees()));
+        if (null != event.getFolderId()) {
+            affectedFolders.add(event.getFolderId());
+        }
     }
 
     /**
@@ -174,8 +186,6 @@ class SimpleResultTracker {
                 LOGGER.debug("Could not get folder with id {}", e, folderId);
             }
         }
-
         return affectedFoldersPerUser;
     }
-
 }

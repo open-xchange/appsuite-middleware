@@ -77,6 +77,7 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.InternetHeaders;
 import javax.mail.internet.MailDateFormat;
 import javax.mail.internet.ParameterList;
+import com.google.common.collect.ImmutableMap;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.IMAPServerInfo;
 import com.openexchange.java.Strings;
@@ -103,6 +104,7 @@ import com.sun.mail.imap.protocol.INTERNALDATE;
 import com.sun.mail.imap.protocol.Item;
 import com.sun.mail.imap.protocol.RFC822DATA;
 import com.sun.mail.imap.protocol.RFC822SIZE;
+import com.sun.mail.imap.protocol.SNIPPET;
 import com.sun.mail.imap.protocol.UID;
 import com.sun.mail.imap.protocol.X_REAL_UID;
 
@@ -575,6 +577,8 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
             return X_REAL_UID_ITEM_HANDLER;
         } else if (item instanceof com.sun.mail.imap.protocol.X_MAILBOX) {
             return X_MAILBOX_ITEM_HANDLER;
+        } else if (item instanceof SNIPPET) {
+            return SNIPPET_ITEM_HANDLER;
         } else {
             return null;
         }
@@ -1178,18 +1182,33 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
         }
     };
 
+    private static final FetchItemHandler SNIPPET_ITEM_HANDLER = new FetchItemHandler() {
+
+        @Override
+        public void handleItem(final Item item, final IDMailMessage msg, final org.slf4j.Logger logger) {
+            String textPreview = ((SNIPPET) item).getText();
+            msg.setTextPreview(textPreview);
+        }
+
+        @Override
+        public void handleMessage(final Message message, final IDMailMessage msg, final org.slf4j.Logger logger) throws MessagingException {
+            // Nothing
+        }
+    };
+
     private static final Map<Class<? extends Item>, FetchItemHandler> MAP;
 
     static {
-        MAP = new HashMap<Class<? extends Item>, FetchItemHandler>(8);
-        MAP.put(UID.class, UID_ITEM_HANDLER);
-        MAP.put(X_REAL_UID.class, X_REAL_UID_ITEM_HANDLER);
-        MAP.put(com.sun.mail.imap.protocol.X_MAILBOX.class, X_MAILBOX_ITEM_HANDLER);
-        MAP.put(INTERNALDATE.class, INTERNALDATE_ITEM_HANDLER);
-        MAP.put(FLAGS.class, FLAGS_ITEM_HANDLER);
-        MAP.put(ENVELOPE.class, ENVELOPE_ITEM_HANDLER);
-        MAP.put(RFC822SIZE.class, SIZE_ITEM_HANDLER);
-        MAP.put(INTERNALDATE.class, INTERNALDATE_ITEM_HANDLER);
+        ImmutableMap.Builder<Class<? extends Item>, FetchItemHandler> builder = ImmutableMap.builder();
+        builder.put(UID.class, UID_ITEM_HANDLER);
+        builder.put(X_REAL_UID.class, X_REAL_UID_ITEM_HANDLER);
+        builder.put(com.sun.mail.imap.protocol.X_MAILBOX.class, X_MAILBOX_ITEM_HANDLER);
+        builder.put(SNIPPET.class, SNIPPET_ITEM_HANDLER);
+        builder.put(INTERNALDATE.class, INTERNALDATE_ITEM_HANDLER);
+        builder.put(FLAGS.class, FLAGS_ITEM_HANDLER);
+        builder.put(ENVELOPE.class, ENVELOPE_ITEM_HANDLER);
+        builder.put(RFC822SIZE.class, SIZE_ITEM_HANDLER);
+        MAP = builder.build();
     }
 
     /*-
@@ -1265,9 +1284,11 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
             command.append(" UID");
         }
 
+        Map<String, String> capabilities = null == serverInfo ? null : serverInfo.getCapabilities();
+
         // Decide per IMAP server
         if (fp.contains(ORIGINAL_MAILBOX)) {
-            if (null != serverInfo && serverInfo.getCapabilities().containsKey("XDOVECOT")) {
+            if (null != capabilities && capabilities.containsKey("XDOVECOT")) {
                 command.append(" X-MAILBOX");
             } else if (!uidIncluded) {
                 command.append(" UID");
@@ -1276,8 +1297,18 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
 
         // Decide per IMAP server
         if (fp.contains(ORIGINAL_UID)) {
-            if (null != serverInfo && serverInfo.getCapabilities().containsKey("XDOVECOT")) {
+            if (null != capabilities && capabilities.containsKey("XDOVECOT")) {
                 command.append(" X-REAL-UID");
+            }
+        }
+
+        if (fp.contains(IMAPFolder.SnippetFetchProfileItem.SNIPPETS_LAZY)) {
+            if (null != capabilities && capabilities.containsKey("SNIPPET=FUZZY")) {
+                command.append(" SNIPPET (LAZY=FUZZY)");
+            }
+        } else if (fp.contains(IMAPFolder.SnippetFetchProfileItem.SNIPPETS)) {
+            if (null != capabilities && capabilities.containsKey("SNIPPET=FUZZY")) {
+                command.append(" SNIPPET (FUZZY)");
             }
         }
 

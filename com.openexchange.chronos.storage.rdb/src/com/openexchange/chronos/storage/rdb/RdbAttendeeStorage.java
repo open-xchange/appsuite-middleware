@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.storage.rdb;
 
+import static com.openexchange.chronos.common.CalendarUtils.isInternal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -63,6 +64,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
+import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.service.EntityResolver;
 import com.openexchange.chronos.storage.AttendeeStorage;
 import com.openexchange.database.provider.DBProvider;
@@ -117,6 +119,19 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
         try {
             connection = dbProvider.getReadConnection(context);
             return selectAttendees(connection, eventIds, internal, false, null);
+        } catch (SQLException e) {
+            throw asOXException(e);
+        } finally {
+            dbProvider.releaseReadConnection(context, connection);
+        }
+    }
+
+    @Override
+    public Map<String, ParticipationStatus> loadPartStats(String[] eventIds, Attendee attendee) throws OXException {
+        Connection connection = null;
+        try {
+            connection = dbProvider.getReadConnection(context);
+            return selectPartStats(connection, eventIds, attendee);
         } catch (SQLException e) {
             throw asOXException(e);
         } finally {
@@ -190,7 +205,7 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
             release(connection, updated);
         }
     }
-    
+
     @Override
     public void deleteAllAttendees() throws OXException {
         int updated = 0;
@@ -207,7 +222,7 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
             release(connection, updated);
         }
     }
-    
+
     private int deleteAttendees(Connection connection) throws SQLException {
         int updated = 0;
         try (PreparedStatement stmt = connection.prepareStatement("DELETE FROM calendar_attendee WHERE cid=? AND account=?;")) {
@@ -217,7 +232,7 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
         }
         return updated;
     }
-    
+
     private int deleteAttendeesTombstones(Connection connection) throws SQLException {
         int updated = 0;
         try (PreparedStatement stmt = connection.prepareStatement("DELETE FROM calendar_attendee_tombstone WHERE cid=? AND account=?;")) {
@@ -433,6 +448,36 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
             }
         }
         return attendeesByEventId;
+    }
+
+    private Map<String, ParticipationStatus> selectPartStats(Connection connection, String[] eventIds, Attendee attendee) throws SQLException, OXException {
+        StringBuilder stringBuilder = new StringBuilder()
+            .append("SELECT event,partStat FROM calendar_attendee WHERE cid=? AND account=? AND ")
+            .append(isInternal(attendee) ? "entity" : "uri").append("=?")
+            .append(" AND event").append(getPlaceholders(eventIds.length)).append(';')
+        ;
+        Map<String, ParticipationStatus> statusByEventId = new HashMap<String, ParticipationStatus>(eventIds.length);
+        try (PreparedStatement stmt = connection.prepareStatement(stringBuilder.toString())) {
+            int parameterIndex = 1;
+            stmt.setInt(parameterIndex++, context.getContextId());
+            stmt.setInt(parameterIndex++, accountId);
+            if (isInternal(attendee)) {
+                stmt.setInt(parameterIndex++, attendee.getEntity());
+            } else {
+                stmt.setString(parameterIndex++, attendee.getUri());
+            }
+            for (String eventId : eventIds) {
+                stmt.setInt(parameterIndex++, Integer.parseInt(eventId));
+            }
+            try (ResultSet resultSet = logExecuteQuery(stmt)) {
+                while (resultSet.next()) {
+                    String eventId = resultSet.getString(1);
+                    String value = resultSet.getString(2);
+                    statusByEventId.put(eventId, null == value ? null : new ParticipationStatus(value));
+                }
+            }
+        }
+        return statusByEventId;
     }
 
     private Attendee readAttendee(ResultSet resultSet, AttendeeField[] fields) throws SQLException, OXException {

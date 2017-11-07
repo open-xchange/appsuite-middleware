@@ -62,6 +62,7 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.chronos.ExtendedProperties;
+import com.openexchange.chronos.ExtendedProperty;
 import com.openexchange.chronos.TimeTransparency;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.CalendarFolder;
@@ -170,11 +171,8 @@ public class SchedJoulesCalendarAccess extends CachingCalendarAccess {
             }
 
             JSONObject folderJson = findFolderInInternalConfiguration(folderId);
-
-            folderJson.put(SchedJoulesFields.COLOR, extendedProperties.get(CalendarFolderProperty.COLOR_LITERAL));
-            folderJson.put(SchedJoulesFields.USED_FOR_SYNC, extendedProperties.get(CalendarFolderProperty.USED_FOR_SYNC_LITERAL));
-            folderJson.put(SchedJoulesFields.SCHEDULE_TRANSP, extendedProperties.get(CalendarFolderProperty.SCHEDULE_TRANSP_LITERAL));
-
+            ExtendedProperty extendedProperty = extendedProperties.get(CalendarFolderProperty.COLOR_LITERAL);
+            folderJson.put(SchedJoulesFields.COLOR, null != extendedProperty ? extendedProperty.getValue() : null);
             updateInternalConfigurationData(getAccount().getInternalConfiguration());
 
             return folderId;
@@ -224,16 +222,21 @@ public class SchedJoulesCalendarAccess extends CachingCalendarAccess {
         try {
             JSONObject folder = findFolderInInternalConfiguration(folderId);
             String eTag = folder.optString(SchedJoulesFields.ETAG);
+            long lastModified = folder.optLong(SchedJoulesFields.LAST_MODIFIED, -1);
             URL url = getFeedURL(folder);
 
             SchedJoulesAPI api = SchedJoulesAPI.getInstance();
-            SchedJoulesCalendar calendar = api.calendar().getCalendar(url, eTag);
+            SchedJoulesCalendar calendar = api.calendar().getCalendar(url, eTag, lastModified);
             if (eTag.equals(calendar.getETag())) {
                 return new ExternalCalendarResult(Collections.emptyList(), HttpStatus.SC_NOT_MODIFIED);
             }
             if (NO_ACCESS.equals(calendar.getName())) {
                 throw SchedJoulesProviderExceptionCodes.NO_ACCESS.create(folderId);
             }
+
+            folder.put(SchedJoulesFields.ETAG, calendar.getETag());
+            folder.put(SchedJoulesFields.LAST_MODIFIED, calendar.getLastModified());
+            updateConfigurationData(getAccount().getInternalConfiguration(), getAccount().getUserConfiguration());
 
             return new ExternalCalendarResult(calendar.getEvents(), HttpStatus.SC_OK);
         } catch (JSONException e) {
@@ -272,7 +275,7 @@ public class SchedJoulesCalendarAccess extends CachingCalendarAccess {
 
     /**
      * Appends the specified user key to the specified URL
-     * 
+     *
      * @param url The URL
      * @param userKey The user key to append
      * @return The generated URL
@@ -305,7 +308,7 @@ public class SchedJoulesCalendarAccess extends CachingCalendarAccess {
 
     /**
      * Finds the folder with the specified identifier in the internal configuration
-     * 
+     *
      * @param folderId The folder identifier
      * @return The found folder as a {@link JSONObject}
      * @throws OXException if no internal configuration exists or no folder metadata is found for the specified folder
@@ -363,7 +366,7 @@ public class SchedJoulesCalendarAccess extends CachingCalendarAccess {
 
     /**
      * Applies the configuration to the folder with the specified identifier
-     * 
+     *
      * @param folder The {@link DefaultCalendarFolder} to apply the configuration to
      * @param folderId The folder identifier
      * @throws OXException if no such folder exists
@@ -375,7 +378,7 @@ public class SchedJoulesCalendarAccess extends CachingCalendarAccess {
 
     /**
      * Applies the user configuration
-     * 
+     *
      * @param folder The {@link DefaultCalendarFolder} to apply the configuration to
      * @param folderId The folder identifier
      * @throws OXException if no such folder exists in the user configuration
@@ -393,7 +396,7 @@ public class SchedJoulesCalendarAccess extends CachingCalendarAccess {
 
     /**
      * Applies the internal configuration
-     * 
+     *
      * @param folder The {@link DefaultCalendarFolder} to apply the configuration to
      * @param folderId The folder identifier
      * @throws OXException if no such folder exists in the internal configuration

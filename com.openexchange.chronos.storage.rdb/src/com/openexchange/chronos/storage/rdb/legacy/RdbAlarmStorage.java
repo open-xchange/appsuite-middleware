@@ -51,7 +51,6 @@ package com.openexchange.chronos.storage.rdb.legacy;
 
 import static com.openexchange.chronos.common.AlarmUtils.filter;
 import static com.openexchange.chronos.common.AlarmUtils.findAlarm;
-import static com.openexchange.chronos.common.CalendarUtils.combine;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.groupware.tools.mappings.database.DefaultDbMapper.getParameters;
 import static com.openexchange.java.Autoboxing.I;
@@ -70,7 +69,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.TimeZone;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -78,7 +76,6 @@ import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmAction;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
-import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.RelatedTo;
 import com.openexchange.chronos.Trigger;
 import com.openexchange.chronos.common.AlarmUtils;
@@ -470,8 +467,7 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
     }
 
     private int getReminderMinutes(Trigger trigger, Event event, TimeZone timeZone) throws OXException {
-        Set<RecurrenceId> exceptions = combine(event.getDeleteExceptionDates(), event.getChangeExceptionDates());
-        String duration = AlarmUtils.getTriggerDuration(trigger, event, Services.getService(RecurrenceService.class), exceptions);
+        String duration = AlarmUtils.getTriggerDuration(trigger, event, Services.getService(RecurrenceService.class));
         return null == duration ? 0 : -1 * (int) TimeUnit.MILLISECONDS.toMinutes(AlarmUtils.getTriggerDuration(duration));
     }
 
@@ -771,8 +767,7 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
             return AlarmUtils.getTriggerTime(alarm.getTrigger(), event, timeZone);
         }
         try {
-            Set<RecurrenceId> exceptions = combine(event.getDeleteExceptionDates(), event.getChangeExceptionDates());
-            return AlarmUtils.getNextTriggerTime(event, alarm, startDate, timeZone, Services.getService(RecurrenceService.class), exceptions);
+            return AlarmUtils.getNextTriggerTime(event, alarm, startDate, timeZone, Services.getService(RecurrenceService.class));
         } catch (OXException e) {
             LOG.warn("Error determining next trigger time for alarm", e);
         }
