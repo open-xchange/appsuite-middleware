@@ -406,7 +406,7 @@ public class SchedJoulesRESTClient {
     /**
      * Resets the specified {@link HttpRequestBase}
      * 
-     * @param httpRequest
+     * @param httpRequest The {@link HttpRequestBase} to reset
      */
     private void reset(HttpRequestBase httpRequest) {
         if (httpRequest == null) {
