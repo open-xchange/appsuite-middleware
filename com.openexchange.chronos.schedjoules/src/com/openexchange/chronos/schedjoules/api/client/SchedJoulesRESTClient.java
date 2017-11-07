@@ -56,6 +56,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.BiConsumer;
@@ -92,7 +93,7 @@ public class SchedJoulesRESTClient implements Closeable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SchedJoulesRESTClient.class);
 
-    private static final SimpleDateFormat DATE_FORMATTER = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z");
+    private static final SimpleDateFormat DATE_FORMATTER = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss 'GMT'");
 
     private static final String SCHEME = "https";
     private static final String BASE_URL = "api.schedjoules.com";
@@ -233,8 +234,8 @@ public class SchedJoulesRESTClient implements Closeable {
      * @param query The optional query string
      * @throws OXException if the path is not valid
      */
-    private void prepareAuthorizedRequest(HttpRequestBase request, String scheme, String baseUrl, String path, String query, String eTag) throws OXException {
-        prepareRequest(request, scheme, baseUrl, path, query, eTag);
+    private void prepareAuthorizedRequest(HttpRequestBase request, String scheme, String baseUrl, String path, String query) throws OXException {
+        prepareRequest(request, scheme, baseUrl, path, query, null, -1);
         request.addHeader(HttpHeaders.AUTHORIZATION, authorizationHeader);
     }
 
@@ -248,12 +249,15 @@ public class SchedJoulesRESTClient implements Closeable {
      * @param query The optional query string
      * @throws OXException if the path is not valid
      */
-    private void prepareRequest(HttpRequestBase request, String scheme, String baseUrl, String path, String query, String eTag) throws OXException {
+    private void prepareRequest(HttpRequestBase request, String scheme, String baseUrl, String path, String query, String eTag, long lastModified) throws OXException {
         try {
             request.setURI(new URI(scheme, baseUrl, path, query, null));
             request.addHeader(HttpHeaders.ACCEPT, acceptHeader);
             if (!Strings.isEmpty(eTag)) {
                 request.addHeader(HttpHeaders.IF_NONE_MATCH, eTag);
+            }
+            if (lastModified > 0) {
+                request.addHeader(HttpHeaders.IF_MODIFIED_SINCE, DATE_FORMATTER.format(new Date(lastModified)));
             }
         } catch (URISyntaxException e) {
             throw SchedJoulesAPIExceptionCodes.INVALID_URI_PATH.create(path, e);
@@ -273,7 +277,7 @@ public class SchedJoulesRESTClient implements Closeable {
 
         // Prepare the request
         HttpRequestBase httpRequest = createRequest(request.getMethod());
-        prepareAuthorizedRequest(httpRequest, SCHEME, BASE_URL, request.getPath(), query, request.getETag());
+        prepareAuthorizedRequest(httpRequest, SCHEME, BASE_URL, request.getPath(), query);
         return httpRequest;
     }
 
@@ -304,13 +308,15 @@ public class SchedJoulesRESTClient implements Closeable {
      * 
      * @param url The {@link URL} to use
      * @param httpMethod The {@link HttpMethod}
+     * @param eTag the optional etag
+     * @param lastModified The optional last modified timestamp to use
      * @return The new {@link HttpUriRequest}
      * @throws OXException if an unknown HTTP method is provided
      * @throws URISyntaxException If an invalid URL is provided
      */
-    private HttpRequestBase prepareRequest(URL url, HttpMethod httpMethod, String eTag) throws OXException {
+    private HttpRequestBase prepareRequest(URL url, HttpMethod httpMethod, String eTag, long lastModified) throws OXException {
         HttpRequestBase httpRequest = createRequest(httpMethod);
-        prepareRequest(httpRequest, url.getProtocol(), url.getHost(), url.getPath(), url.getQuery(), eTag);
+        prepareRequest(httpRequest, url.getProtocol(), url.getHost(), url.getPath(), url.getQuery(), eTag, lastModified);
         return httpRequest;
     }
 
@@ -351,7 +357,7 @@ public class SchedJoulesRESTClient implements Closeable {
      * @throws OXException if an error is occurred
      */
     public SchedJoulesResponse executeRequest(URL url) throws OXException {
-        return executeRequest(url, HttpMethod.GET, null);
+        return executeRequest(url, HttpMethod.GET, null, -1);
     }
 
     /**
@@ -359,11 +365,13 @@ public class SchedJoulesRESTClient implements Closeable {
      * 
      * @param url The {@link URL}
      * @param httpMethod the {@link HttpMethod} to use
+     * @param eTag The optional etag to use
+     * @param lastModified The optional last modified timestamp to use
      * @return The {@link SchedJoulesResponse}
      * @throws OXException if an error is occurred
      */
-    public SchedJoulesResponse executeRequest(URL url, HttpMethod httpMethod, String eTag) throws OXException {
-        return executeRequest(prepareRequest(url, httpMethod, eTag));
+    public SchedJoulesResponse executeRequest(URL url, HttpMethod httpMethod, String eTag, long lastModified) throws OXException {
+        return executeRequest(prepareRequest(url, httpMethod, eTag, lastModified));
     }
 
     /**

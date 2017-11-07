@@ -230,10 +230,11 @@ public class SchedJoulesCalendarAccess extends CachingCalendarAccess {
         try {
             JSONObject folder = findFolderInInternalConfiguration(folderId);
             String eTag = folder.optString(SchedJoulesFields.ETAG);
+            long lastModified = folder.optLong(SchedJoulesFields.LAST_MODIFIED, -1);
             URL url = getFeedURL(folder);
 
             SchedJoulesAPI api = SchedJoulesAPI.getInstance();
-            SchedJoulesCalendar calendar = api.calendar().getCalendar(url, eTag);
+            SchedJoulesCalendar calendar = api.calendar().getCalendar(url, eTag, lastModified);
             if (eTag.equals(calendar.getETag())) {
                 return new ExternalCalendarResult();
             }

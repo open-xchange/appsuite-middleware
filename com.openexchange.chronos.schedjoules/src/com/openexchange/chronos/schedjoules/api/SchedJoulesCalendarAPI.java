@@ -88,13 +88,14 @@ public class SchedJoulesCalendarAPI extends AbstractSchedJoulesAPI {
      * 
      * @param url The {@link URL} for the iCal
      * @param eTag The last known etag
+     * @param lastModified The last modified to use
      * @return The iCal parsed as a {@link SchedJoulesCalendar}
      * @throws OXException if an error is occurred
      */
-    public SchedJoulesCalendar getCalendar(URL url, String eTag) throws OXException {
-        SchedJoulesResponse response = client.executeRequest(url, HttpMethod.HEAD, eTag);
+    public SchedJoulesCalendar getCalendar(URL url, String eTag, long lastModified) throws OXException {
+        SchedJoulesResponse response = client.executeRequest(url, HttpMethod.HEAD, eTag, lastModified);
         if (response.getStatusCode() == 304) {
-            return new SchedJoulesCalendar(null, Collections.emptyList(), eTag, -1); // Nothing modified
+            return new SchedJoulesCalendar(null, Collections.emptyList(), eTag, lastModified); // Nothing modified
         }
         return getCalendar(url);
     }
