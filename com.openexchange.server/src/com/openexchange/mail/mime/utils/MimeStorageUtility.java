@@ -96,6 +96,7 @@ public final class MimeStorageUtility {
         CACHE_FETCH_PROFILE.add(FetchProfile.Item.SIZE);
         CACHE_FETCH_PROFILE.add(MessageHeaders.HDR_IMPORTANCE);
         CACHE_FETCH_PROFILE.add(MessageHeaders.HDR_X_PRIORITY);
+        CACHE_FETCH_PROFILE.add(IMAPFolder.SnippetFetchProfileItem.SNIPPETS_LAZY);
         // CACHE_FETCH_PROFILE.add(IMAPFolder.FetchProfileItem.HEADERS);
 
         // Cache fields
@@ -203,6 +204,12 @@ public final class MimeStorageUtility {
         }
         if (fetchProfile.contains(UIDFolder.FetchProfileItem.UID)) {
             set.add(MailField.ID);
+        }
+        if (fetchProfile.contains(IMAPFolder.SnippetFetchProfileItem.SNIPPETS_LAZY)) {
+            set.add(MailField.TEXT_PREVIEW_IF_AVAILABLE);
+        }
+        if (fetchProfile.contains(IMAPFolder.SnippetFetchProfileItem.SNIPPETS)) {
+            set.add(MailField.TEXT_PREVIEW);
         }
         if (fetchProfile.contains(FetchProfile.Item.CONTENT_INFO)) {
             set.add(MailField.CONTENT_TYPE);
@@ -517,6 +524,8 @@ public final class MimeStorageUtility {
         field2item.put(MailField.COLOR_LABEL, FetchProfile.Item.FLAGS);
         field2item.put(MailField.ORIGINAL_ID, ORIGINAL_MAILBOX);
         field2item.put(MailField.ORIGINAL_FOLDER_ID, ORIGINAL_UID);
+        field2item.put(MailField.TEXT_PREVIEW_IF_AVAILABLE, IMAPFolder.SnippetFetchProfileItem.SNIPPETS_LAZY);
+        field2item.put(MailField.TEXT_PREVIEW, IMAPFolder.SnippetFetchProfileItem.SNIPPETS);
         FIELD2ITEM = field2item;
         /*
          * String map

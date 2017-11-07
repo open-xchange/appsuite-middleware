@@ -50,39 +50,7 @@ if [ ${1:-0} -eq 2 ]; then
     # prevent bash from expanding, see bug 13316
     GLOBIGNORE='*'
 
-    ox_move_config_file /opt/open-xchange/etc /opt/open-xchange/etc/hazelcast sessionstorage_hazelcast.properties sessions.properties
-
     PFILE=/opt/open-xchange/etc/hazelcast/sessions.properties
-
-    # SoftwareChange_Request-1291
-    if ox_exists_property com.openexchange.hazelcast.configuration.map.indexes.attributes $PFILE; then
-       ox_remove_property com.openexchange.hazelcast.configuration.map.indexes.attributes $PFILE
-    fi
-
-    # SoftwareChange_Request-1286
-    pfile=/opt/open-xchange/etc/hazelcast/sessions.properties
-    if ox_exists_property com.openexchange.sessionstorage.hazelcast.map.backupcount $PFILE; then
-       oval=$(ox_read_property com.openexchange.sessionstorage.hazelcast.map.backupcount $PFILE)
-       ox_set_property com.openexchange.hazelcast.configuration.map.backupCount $oval $PFILE
-       ox_remove_property com.openexchange.sessionstorage.hazelcast.map.backupcount $PFILE
-    fi
-    if ox_exists_property com.openexchange.sessionstorage.hazelcast.map.asyncbackup $PFILE; then
-       oval=$(ox_read_property com.openexchange.sessionstorage.hazelcast.map.asyncbackup $PFILE)
-       ox_set_property com.openexchange.hazelcast.configuration.map.asyncBackupCount $oval $PFILE
-       ox_remove_property com.openexchange.sessionstorage.hazelcast.map.asyncbackup $PFILE
-    fi
-    if ox_exists_property com.openexchange.sessionstorage.hazelcast.enabled $PFILE; then
-       ox_remove_property com.openexchange.sessionstorage.hazelcast.enabled $PFILE
-    fi
-    if ! ox_exists_property com.openexchange.hazelcast.configuration.map.readBackupData $PFILE; then
-       ox_set_property com.openexchange.hazelcast.configuration.map.readBackupData "true" $PFILE
-    fi
-    if ! ox_exists_property com.openexchange.hazelcast.configuration.map.name $PFILE; then
-       ox_set_property com.openexchange.hazelcast.configuration.map.name "sessions-2" $PFILE
-    fi
-
-    # SoftwareChange_Request-2576
-    ox_add_property com.openexchange.hazelcast.configuration.map.indexes.attributes altId $PFILE
 
     # SCR-4041
     ox_set_property com.openexchange.hazelcast.configuration.map.name "sessions-7" $PFILE

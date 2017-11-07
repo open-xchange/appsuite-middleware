@@ -58,10 +58,10 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.sessionmanagement.AbstractSessionManagementTest;
-import com.openexchange.ajax.sessionmanagement.actions.GetSessionsRequest;
-import com.openexchange.ajax.sessionmanagement.actions.GetSessionsResponse;
-import com.openexchange.ajax.sessionmanagement.actions.RemoveSessionRequest;
-import com.openexchange.ajax.sessionmanagement.actions.RemoveSessionResponse;
+import com.openexchange.ajax.sessionmanagement.actions.AllRequest;
+import com.openexchange.ajax.sessionmanagement.actions.AllResponse;
+import com.openexchange.ajax.sessionmanagement.actions.DeleteRequest;
+import com.openexchange.ajax.sessionmanagement.actions.DeleteResponse;
 import com.openexchange.session.management.ManagedSession;
 
 
@@ -88,12 +88,12 @@ public class RemoveSessionTest extends AbstractSessionManagementTest {
     @Test
     public void testRemoveSession() throws Exception {
         String sessionId = testClient2.getSession().getId();
-        RemoveSessionRequest req = new RemoveSessionRequest(sessionId);
-        RemoveSessionResponse resp = testClient1.execute(req);
+        DeleteRequest req = new DeleteRequest(sessionId);
+        DeleteResponse resp = testClient1.execute(req);
         assertFalse(resp.hasError());
 
-        GetSessionsRequest getReq = new GetSessionsRequest();
-        GetSessionsResponse getResp = testClient1.execute(getReq);
+        AllRequest getReq = new AllRequest();
+        AllResponse getResp = testClient1.execute(getReq);
         assertFalse(getResp.hasError());
         Collection<ManagedSession> sessions = getResp.getSessions();
         assertEquals(1, sessions.size());
@@ -105,11 +105,11 @@ public class RemoveSessionTest extends AbstractSessionManagementTest {
 
     @Test
     public void testRemoveSession_WrongSessionId() throws Exception {
-        RemoveSessionRequest req = new RemoveSessionRequest("thisWillFail", false);
+        DeleteRequest req = new DeleteRequest("thisWillFail", false);
         testClient1.execute(req);
 
-        GetSessionsRequest getReq = new GetSessionsRequest();
-        GetSessionsResponse getResp = testClient1.execute(getReq);
+        AllRequest getReq = new AllRequest();
+        AllResponse getResp = testClient1.execute(getReq);
         assertFalse(getResp.hasError());
         Collection<ManagedSession> sessions = getResp.getSessions();
         assertEquals(2, sessions.size());

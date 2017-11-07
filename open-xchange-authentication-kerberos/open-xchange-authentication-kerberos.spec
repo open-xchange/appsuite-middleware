@@ -51,16 +51,6 @@ Authors:
 export NO_BRP_CHECK_BYTECODE_VERSION=true
 ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} -f build/build.xml clean build
 
-%post
-. /opt/open-xchange/lib/oxfunctions.sh
-CONFFILES="kerberos.properties kerberosLogin.conf krb5.conf"
-for FILE in $CONFFILES; do
-    ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc ${FILE}
-done
-
-ox_set_property sun.security.krb5.debug false /opt/open-xchange/etc/kerberos.properties
-sed -i 's/debug=true/debug=false/g' /opt/open-xchange/etc/kerberosLogin.conf
-
 %clean
 %{__rm} -rf %{buildroot}
 

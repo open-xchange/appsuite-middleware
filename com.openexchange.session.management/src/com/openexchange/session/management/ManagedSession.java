@@ -49,6 +49,8 @@
 
 package com.openexchange.session.management;
 
+import com.openexchange.session.Session;
+
 /**
  * {@link ManagedSession} - Represents a managed session providing login and session information.
  *
@@ -93,18 +95,11 @@ public interface ManagedSession {
     long getLoginTime();
 
     /**
-     * Gets the context identifier
+     * The time stamp of last activity with this session, which is the number of milliseconds since January 1, 1970, 00:00:00 GMT
      *
-     * @return The context identifier
+     * @return The time stamp
      */
-    int getContextId();
-
-    /**
-     * Gets the user identifier
-     *
-     * @return The user identifier
-     */
-    int getUserId();
+    long getLastActive();
 
     /**
      * Gets the (optional) location
@@ -112,5 +107,12 @@ public interface ManagedSession {
      * @return The location or {@link SessionManagementStrings#UNKNOWN_LOCATION}
      */
     String getLocation();
+
+    /**
+     * Get the session object associated with spawned session
+     *
+     * @return The session
+     */
+    Session getSession();
 
 }

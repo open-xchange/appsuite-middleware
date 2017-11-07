@@ -106,10 +106,8 @@ systemctl try-restart munin-node >/dev/null 2>&1 || :
 %endif
 exit 0
 
-
 %clean
 %{__rm} -rf %{buildroot}
-
 
 %files
 %defattr(-,root,root)

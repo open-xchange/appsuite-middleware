@@ -172,6 +172,9 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
                 // jsonObject.put(MailJSONField.THREAD_LEVEL.getKey(), mail.getThreadLevel());
                 jsonObject.put(MailJSONField.ACCOUNT_NAME.getKey(), mail.getAccountName());
                 jsonObject.put(MailJSONField.ACCOUNT_ID.getKey(), mail.getAccountId());
+                if (mail.containsTextPreview()) {
+                    jsonObject.put(MailJSONField.TEXT_PREVIEW.getKey(), mail.getTextPreview());
+                }
                 if (mail.containsOriginalId()) {
                     String originalId = mail.getOriginalId();
                     if (null != originalId) {

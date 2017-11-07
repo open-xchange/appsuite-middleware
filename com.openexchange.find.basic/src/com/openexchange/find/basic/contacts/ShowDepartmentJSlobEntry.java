@@ -50,7 +50,8 @@
 package com.openexchange.find.basic.contacts;
 
 import java.util.Map;
-import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.lean.LeanConfigurationService;
+import com.openexchange.contact.ContactProperty;
 import com.openexchange.exception.OXException;
 import com.openexchange.find.basic.Services;
 import com.openexchange.jslob.JSlobEntry;
@@ -64,7 +65,6 @@ import com.openexchange.session.Session;
  */
 public class ShowDepartmentJSlobEntry implements JSlobEntry {
 
-    private static final String PROPERTY_NAME = "com.openexchange.contact.showDepartments";
     private static final String NAME = "showDepartment";
 
     /**
@@ -111,9 +111,8 @@ public class ShowDepartmentJSlobEntry implements JSlobEntry {
      */
     @Override
     public Object getValue(Session session) throws OXException {
-        // TODO: Maybe introduce lean configuration to contacts?
-        ConfigurationService configService = Services.getConfigurationService();
-        return configService.getBoolProperty(PROPERTY_NAME, false);
+        LeanConfigurationService configService = Services.getLeanConfigurationService();
+        return configService.getBooleanProperty(ContactProperty.showDepartments);
     }
 
     /*
@@ -136,5 +135,4 @@ public class ShowDepartmentJSlobEntry implements JSlobEntry {
         // nope
         return null;
     }
-
 }

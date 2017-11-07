@@ -52,42 +52,7 @@ if [ ${1:-0} -eq 2 ]; then
     # prevent bash from expanding, see bug 13316
     GLOBIGNORE='*'
 
-    ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc imap.properties
-
     PFILE=/opt/open-xchange/etc/imap.properties
-
-    # SoftwareChange_Request-1142
-    ox_add_property com.openexchange.imap.umlautFilterThreshold 50 $PFILE
-
-    # SoftwareChange_Request-1215
-    ox_add_property com.openexchange.imap.maxMailboxNameLength 60 $PFILE
-
-    # SoftwareChange_Request-1470
-    if ox_exists_property com.openexchange.imap.maxIMAPConnectionIdleTime $PFILE; then
-        ox_remove_property com.openexchange.imap.maxIMAPConnectionIdleTime $PFILE
-    fi
-
-    # SoftwareChange_Request-1566
-    ox_add_property com.openexchange.imap.invalidMailboxNameCharacters "" $PFILE
-
-    # SoftwareChange_Request-1586
-    ox_add_property com.openexchange.imap.allowFolderCaches true $PFILE
-
-    # SoftwareChange_Request-1668
-    ox_add_property com.openexchange.imap.storeContainerType boundary-aware $PFILE
-
-    # SoftwareChange_Request-1931
-    ox_add_property com.openexchange.imap.ssl.protocols "" $PFILE
-
-    # SoftwareChange_Request-1953
-    VALUE=$(ox_read_property com.openexchange.imap.imapSearch $PFILE)
-    ox_set_property com.openexchange.imap.imapSearch "$VALUE" $PFILE
-
-    # SoftwareChange_Request-2016
-    ox_add_property com.openexchange.imap.ssl.ciphersuites "" $PFILE
-
-    # SoftwareChange_Request-2093
-    ox_add_property com.openexchange.imap.namespacePerUser "true" $PFILE
 
     # SoftwareChange_Request-2820
     ox_add_property com.openexchange.imap.allowSORTDISPLAY false $PFILE

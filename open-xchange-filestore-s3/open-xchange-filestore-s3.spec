@@ -50,10 +50,6 @@ if [ ${1:-0} -eq 2 ]; then
     GLOBIGNORE='*'
     PFILE=/opt/open-xchange/etc/filestore-s3.properties
 
-    # SoftwareChange_Request-2061
-    ox_add_property com.openexchange.filestore.s3.[filestoreID].bucketName "" $PFILE
-    ox_add_property com.openexchange.filestore.s3.[filestoreID].pathStyleAccess true $PFILE
-
     # SoftwareChange_Request-2581
     ox_add_property com.openexchange.filestore.s3.[filestoreID].signerOverride S3SignerType $PFILE
 

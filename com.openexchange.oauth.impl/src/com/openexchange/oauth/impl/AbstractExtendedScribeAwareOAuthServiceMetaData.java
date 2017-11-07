@@ -66,6 +66,7 @@ import com.openexchange.java.Strings;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.oauth.DefaultAPI;
 import com.openexchange.oauth.DefaultOAuthToken;
+import com.openexchange.oauth.HostInfo;
 import com.openexchange.oauth.API;
 import com.openexchange.oauth.OAuthConstants;
 import com.openexchange.oauth.OAuthExceptionCodes;
@@ -211,19 +212,19 @@ public abstract class AbstractExtendedScribeAwareOAuthServiceMetaData extends Ab
      * @see com.openexchange.oauth.AbstractOAuthServiceMetaData#modifyCallbackURL(java.lang.String, java.lang.String, com.openexchange.session.Session)
      */
     @Override
-    public String modifyCallbackURL(final String callbackUrl, final String currentHost, final Session session) {
+    public String modifyCallbackURL(final String callbackUrl, final HostInfo currentHost, final Session session) {
         if (null == callbackUrl) {
             return super.modifyCallbackURL(callbackUrl, currentHost, session);
         }
 
         final DeferringURLService deferrer = services.getService(DeferringURLService.class);
         if (null != deferrer && deferrer.isDeferrerURLAvailable(session.getUserId(), session.getContextId())) {
-            final String retval = deferrer.getDeferredURL(callbackUrl, session.getUserId(), session.getContextId());
+            final String retval = injectRoute(deferrer.getDeferredURL(callbackUrl, session.getUserId(), session.getContextId()), currentHost.getRoute());
             LOGGER.debug("Initializing {} OAuth account for user {} in context {} with call-back URL: {}", getDisplayName(), session.getUserId(), session.getContextId(), retval);
             return retval;
         }
 
-        final String retval = deferredURLUsing(callbackUrl, new StringBuilder(extractProtocol(callbackUrl)).append("://").append(currentHost).toString());
+        final String retval = injectRoute(deferredURLUsing(callbackUrl, new StringBuilder(extractProtocol(callbackUrl)).append("://").append(currentHost.getHost()).toString()), currentHost.getRoute());
         LOGGER.debug("Initializing {} OAuth account for user {} in context {} with call-back URL: {}", getDisplayName(), session.getUserId(), session.getContextId(), retval);
         return retval;
     }
@@ -268,6 +269,17 @@ public abstract class AbstractExtendedScribeAwareOAuthServiceMetaData extends Ab
      */
     private String extractProtocol(final String url) {
         return Strings.toLowerCase(url).startsWith("https") ? "https" : "http";
+    }
+
+    /**
+     * Injects specified JVM route into given URL.
+     *
+     * @param url The URL to inject to
+     * @param route The JVM route to inject
+     * @return The URL with JVM route injected
+     */
+    protected String injectRoute(String url, String route) {
+        return HostInfo.injectRouteIntoUrl(url, route);
     }
 
     /**

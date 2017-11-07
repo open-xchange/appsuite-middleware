@@ -43,10 +43,8 @@ package com.sun.mail.imap;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Vector;
 import java.util.Hashtable;
 import java.util.NoSuchElementException;
 import java.util.logging.Level;
@@ -382,7 +380,64 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 	 */ 
 	public static final FetchProfileItem INTERNALDATE = 
 		new FetchProfileItem("INTERNALDATE");
-    }
+
+    } // End of class FetchProfileItem
+
+    /**
+     * A fetch profile item for fetching snippets (aka text previews).
+     * <p>
+     * This inner class extends the <code>FetchProfile.Item</code>
+     * class to add new FetchProfile item types, specific to IMAPFolders.
+     *
+     * @see FetchProfile
+     */
+    public static class SnippetFetchProfileItem extends FetchProfile.Item {
+
+        /**
+         * This is the fuzzy Snippets item for a message's text preview.
+         */
+        public static final SnippetFetchProfileItem SNIPPETS = new SnippetFetchProfileItem("FUZZY");
+        
+        /**
+         * This is the lazy fuzzy Snippets item for a message's text preview.
+         */
+        public static final SnippetFetchProfileItem SNIPPETS_LAZY = new SnippetFetchProfileItem("LAZY=FUZZY");
+
+        private final String algorithmName;
+
+        /**
+         * Initializes a new {@link SnippetFetchProfileItem}.
+         * 
+         * @param algorithName The algorithm name; e.g. <code>"FUZZY"</code>
+         */
+        protected SnippetFetchProfileItem(String algorithmName) {
+            super("SNIPPETS");
+            checkAlgorithmName(algorithmName);
+            this.algorithmName = Utility.toUpperCase(algorithmName);
+        }
+
+        /**
+         * Checks specified algorithm name
+         *
+         * @param algoritmhName The algorithm name to check
+         * @throws IllegalArgumentException If algorithm name is invalid
+         */
+        protected void checkAlgorithmName(String algorithmName) {
+            if (null == algorithmName) {
+                throw new IllegalArgumentException("The algorithm name must not be null.");
+            }
+        }
+
+        /**
+         * Gets the algorithm name; e.g. <code>"FUZZY"</code> or <code>"LAZY=FUZZY"</code>
+         *
+         * @return The algorithm name
+         */
+        public String getAlgoritmhName() {
+            return algorithmName;
+        }
+
+    } // End of class SnippetFetchProfileItem
 
     /**
      * Constructor used to create a possibly non-existent folder.
@@ -1252,7 +1307,7 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 	    fitems = protocol.getFetchItems();
 	}
 
-	StringBuffer command = new StringBuffer();
+    StringBuilder command = new StringBuilder();
 	boolean first = true;
 	boolean allHeaders = false;
 
@@ -1300,7 +1355,9 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 	}
 
     // Special fetch items
-    boolean xdovecot = protocol.getCapabilities().containsKey("XDOVECOT");
+    Map<String, String> capabilities = protocol.getCapabilities();
+    boolean xdovecot = capabilities.containsKey("XDOVECOT");
+    boolean hasSnippets = capabilities.containsKey("SNIPPET=FUZZY");
     for (FetchProfile.Item item : fp.getItems()) {
         if ("ORIGINAL-MAILBOX".equals(item.name())) {
             if (xdovecot) {
@@ -1315,6 +1372,12 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
         } else if ("ORIGINAL-UID".equals(item.name())) {
             if (xdovecot) {
                 command.append(first ? "X-REAL-UID" : " X-REAL-UID");
+                first = false;
+            }
+        } else if (item instanceof SnippetFetchProfileItem) {
+            if (hasSnippets) {
+                SnippetFetchProfileItem snippetItem = (SnippetFetchProfileItem) item;
+                command.append(first ? "SNIPPET" : " SNIPPET").append(" (").append(snippetItem.getAlgoritmhName()).append(')');
                 first = false;
             }
         }
@@ -1480,12 +1543,12 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
      * requested headers.
      */
     private String createHeaderCommand(String[] hdrs, boolean isRev1) {
-	StringBuffer sb;
+    StringBuilder sb;
 
 	if (isRev1)
-	    sb = new StringBuffer("BODY.PEEK[HEADER.FIELDS (");
+	    sb = new StringBuilder("BODY.PEEK[HEADER.FIELDS (");
 	else
-	    sb = new StringBuffer("RFC822.HEADER.LINES (");
+	    sb = new StringBuilder("RFC822.HEADER.LINES (");
 
 	for (int i = 0; i < hdrs.length; i++) {
 	    if (i > 0)

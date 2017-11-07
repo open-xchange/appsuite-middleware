@@ -1096,7 +1096,7 @@ public final class SessionHandler {
                 LOG.error("", e);
             }
         }
-        */
+         */
     }
 
     /**
@@ -1424,6 +1424,10 @@ public final class SessionHandler {
             sessionControl = optSessionFromSessionStorage(sessionId, sessionData);
         }
 
+        if (null != sessionControl) {
+            sessionControl.getSession().setParameter(Session.PARAM_LAST_ACTIVE, Long.valueOf(System.currentTimeMillis()));
+        }
+
         return sessionControl;
     }
 
@@ -1518,6 +1522,9 @@ public final class SessionHandler {
                     LOG.error("", e);
                 }
             }
+        }
+        if (null != sessionControl) {
+            sessionControl.getSession().setParameter(Session.PARAM_LAST_ACTIVE, Long.valueOf(System.currentTimeMillis()));
         }
         return sessionControl;
     }
