@@ -176,7 +176,7 @@ public class SchedJoulesRESTClient implements Closeable {
      *         the value of the header is <code>null</code>.
      */
     private String getHeaderValue(HttpResponse httpResponse, String headerName) {
-        Header ctHeader = httpResponse.getFirstHeader(HttpHeaders.CONTENT_TYPE);
+        Header ctHeader = httpResponse.getFirstHeader(headerName);
         if (ctHeader == null) {
             return null;
         }
