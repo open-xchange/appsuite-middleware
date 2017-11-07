@@ -99,6 +99,13 @@ public final class SchedJoulesAPI {
     }
 
     /**
+     * Shuts down the API
+     */
+    public void shutDown() {
+        client.close();
+    }
+
+    /**
      * Gets the pages API
      *
      * @return The pages

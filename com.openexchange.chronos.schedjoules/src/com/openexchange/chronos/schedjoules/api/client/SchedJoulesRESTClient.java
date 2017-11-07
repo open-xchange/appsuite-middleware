@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.schedjoules.api.client;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -87,7 +88,7 @@ import com.openexchange.rest.client.httpclient.HttpClients.ClientConfig;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class SchedJoulesRESTClient {
+public class SchedJoulesRESTClient implements Closeable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SchedJoulesRESTClient.class);
 
@@ -148,6 +149,21 @@ public class SchedJoulesRESTClient {
             int indexOf = value.indexOf(';');
             schedjoulesResponse.setContentType(indexOf < 0 ? value : value.substring(0, indexOf));
         });
+    }
+
+    /**
+     * Shuts down the REST client.
+     */
+    @Override
+    public void close() {
+        if (httpClient == null) {
+            return;
+        }
+        try {
+            httpClient.close();
+        } catch (IOException e) {
+            LOGGER.debug("Error closing the http client: {}", e.getMessage(), e);
+        }
     }
 
     /**
