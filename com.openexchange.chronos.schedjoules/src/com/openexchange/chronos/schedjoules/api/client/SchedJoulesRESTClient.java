@@ -122,11 +122,7 @@ public class SchedJoulesRESTClient {
 
         // Last-Modified header parser
         headerParsers.put(HttpHeaders.LAST_MODIFIED, (schedjoulesResponse, httpResponse) -> {
-            Header header = httpResponse.getFirstHeader(HttpHeaders.LAST_MODIFIED);
-            if (header == null) {
-                return;
-            }
-            String value = header.getValue();
+            String value = getHeaderValue(httpResponse, HttpHeaders.LAST_MODIFIED);
             if (Strings.isEmpty(value)) {
                 return;
             }
@@ -139,26 +135,40 @@ public class SchedJoulesRESTClient {
 
         // ETag header parser
         headerParsers.put(HttpHeaders.ETAG, (schedjoulesResponse, httpResponse) -> {
-            Header eTagHeader = httpResponse.getFirstHeader(HttpHeaders.ETAG);
-            if (eTagHeader == null) {
-                return;
-            }
-            schedjoulesResponse.setETag(eTagHeader.getValue());
+            String value = getHeaderValue(httpResponse, HttpHeaders.ETAG);
+            schedjoulesResponse.setETag(value);
         });
 
         // Content-Type header parser
         headerParsers.put(HttpHeaders.CONTENT_TYPE, (schedjoulesResponse, httpResponse) -> {
-            Header ctHeader = httpResponse.getFirstHeader(HttpHeaders.CONTENT_TYPE);
-            if (ctHeader == null) {
-                return;
-            }
-            String value = ctHeader.getValue();
+            String value = getHeaderValue(httpResponse, HttpHeaders.CONTENT_TYPE);
             if (Strings.isEmpty(value)) {
                 return;
             }
             int indexOf = value.indexOf(';');
             schedjoulesResponse.setContentType(indexOf < 0 ? value : value.substring(0, indexOf));
         });
+    }
+
+    /**
+     * Retrieves the value of the specified header, or <code>null</code> if no such header exists
+     * or the value of the header is <code>null</code>
+     * 
+     * @param httpResponse The {@link HttpResponse}
+     * @param headerName The header's name
+     * @return the value of the specified header, or <code>null</code> if no such header exists or
+     *         the value of the header is <code>null</code>.
+     */
+    private String getHeaderValue(HttpResponse httpResponse, String headerName) {
+        Header ctHeader = httpResponse.getFirstHeader(HttpHeaders.CONTENT_TYPE);
+        if (ctHeader == null) {
+            return null;
+        }
+        String value = ctHeader.getValue();
+        if (Strings.isEmpty(value)) {
+            return null;
+        }
+        return value;
     }
 
     /**
