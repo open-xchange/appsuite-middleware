@@ -300,6 +300,7 @@ final class MovePerformer extends AbstractPerformer {
             if(!permissionsToUpdate.isEmpty()){
                 folder.setPermissions(permissionsToUpdate.toArray(new Permission[permissionsToUpdate.size()]));
                 storageParameters.getDecorator().put("permissions", "inherit");
+                storageParameters.setTimeStamp(folder.getLastModified());
                 virtualStorage.updateFolder(folder, storageParameters);
             }
 
