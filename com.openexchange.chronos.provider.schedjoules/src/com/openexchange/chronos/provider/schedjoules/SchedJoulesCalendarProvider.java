@@ -153,7 +153,7 @@ public class SchedJoulesCalendarProvider extends CachingCalendarProvider {
         try {
             JSONObject internalConfig = new JSONObject();
             JSONArray internalConfigItems = new JSONArray();
-            addFolders(folders, internalConfigItems);
+            addFolders(getUserLocale(session), folders, internalConfigItems);
             internalConfig.put(SchedJoulesFields.FOLDERS, internalConfigItems);
             internalConfig.put(SchedJoulesFields.USER_KEY, generateUserKey(session));
             return internalConfig;
@@ -182,7 +182,7 @@ public class SchedJoulesCalendarProvider extends CachingCalendarProvider {
             // Add all user configuration folders
             try {
                 internalConfigFolders = new JSONArray();
-                addFolders(userConfigFolders, internalConfigFolders);
+                addFolders(getUserLocale(session), userConfigFolders, internalConfigFolders);
                 internalConfig.put(SchedJoulesFields.FOLDERS, internalConfigFolders);
                 return internalConfig;
             } catch (JSONException e) {
@@ -200,7 +200,7 @@ public class SchedJoulesCalendarProvider extends CachingCalendarProvider {
             }
 
             JSONArray additions = new JSONArray();
-            boolean added = handleAdditions(userConfigFolders, internalItemIds, additions);
+            boolean added = handleAdditions(getUserLocale(session), userConfigFolders, internalItemIds, additions);
             boolean deleted = handleDeletions(internalConfigFolders, internalItemIds);
             addToInternalConfiguration(internalConfigFolders, additions);
 
@@ -253,6 +253,18 @@ public class SchedJoulesCalendarProvider extends CachingCalendarProvider {
     ///////////////////////////////////////////// HELPERS ///////////////////////////////////////////
 
     /**
+     * Returns the user's {@link Locale}
+     * 
+     * @param session The groupware {@link Session}
+     * @return The user's {@link Locale}
+     * @throws OXException if the locale cannot be returned
+     */
+    private Locale getUserLocale(Session session) throws OXException {
+        ServerSession serverSession = ServerSessionAdapter.valueOf(session);
+        return serverSession.getUser().getLocale();
+    }
+
+    /**
      * Converts and adds the user configuration folders to internal configuration folders
      *
      * @param folders The array of the user configuration folders
@@ -260,10 +272,10 @@ public class SchedJoulesCalendarProvider extends CachingCalendarProvider {
      * @throws OXException If an error is occurred
      * @throws JSONException if a JSON error is occurred
      */
-    private void addFolders(JSONArray folders, JSONArray internalConfigFolders) throws OXException, JSONException {
+    private void addFolders(Locale locale, JSONArray folders, JSONArray internalConfigFolders) throws OXException, JSONException {
         for (int index = 0; index < folders.length(); index++) {
             JSONObject folder = folders.getJSONObject(index);
-            JSONObject internalItem = prepareFolder(folder);
+            JSONObject internalItem = prepareFolder(folder, locale);
             internalConfigFolders.put(internalItem);
         }
     }
@@ -277,9 +289,9 @@ public class SchedJoulesCalendarProvider extends CachingCalendarProvider {
      * @throws JSONException if a JSON error is occurred
      * @throws OXException if an error is occurred
      */
-    private JSONObject prepareFolder(JSONObject folder) throws JSONException, OXException {
+    private JSONObject prepareFolder(JSONObject folder, Locale fallbackLocale) throws JSONException, OXException {
         int itemId = folder.getInt(SchedJoulesFields.ITEM_ID);
-        String locale = folder.optString(SchedJoulesFields.LOCALE);
+        String locale = folder.optString(SchedJoulesFields.LOCALE, fallbackLocale.getLanguage());
         int refreshInterval = folder.optInt(SchedJoulesFields.REFRESH_INTERVAL, MINIMUM_REFRESH_INTERVAL);
         if (refreshInterval < MINIMUM_REFRESH_INTERVAL) {
             refreshInterval = MINIMUM_REFRESH_INTERVAL;
@@ -298,6 +310,7 @@ public class SchedJoulesCalendarProvider extends CachingCalendarProvider {
         internalItem.put(SchedJoulesFields.URL, page.getString(SchedJoulesFields.URL));
         internalItem.put(SchedJoulesFields.ITEM_ID, itemId);
         internalItem.put(SchedJoulesFields.NAME, name);
+        internalItem.put(SchedJoulesFields.LOCALE, locale);
         return internalItem;
     }
 
@@ -334,12 +347,12 @@ public class SchedJoulesCalendarProvider extends CachingCalendarProvider {
      * @throws JSONException if a JSON error occurs
      * @throws OXException if any other error occurs
      */
-    private boolean handleAdditions(JSONArray userConfigFolders, Map<String, Integer> internalItemIds, JSONArray additions) throws JSONException, OXException {
+    private boolean handleAdditions(Locale locale, JSONArray userConfigFolders, Map<String, Integer> internalItemIds, JSONArray additions) throws JSONException, OXException {
         for (int index = 0; index < userConfigFolders.length(); index++) {
             JSONObject folder = userConfigFolders.getJSONObject(index);
             String itemId = folder.optString(SchedJoulesFields.ITEM_ID);
             if (!internalItemIds.containsKey(itemId)) {
-                additions.put(prepareFolder(folder));
+                additions.put(prepareFolder(folder, fallbackLocale));
             }
             internalItemIds.remove(itemId);
         }
