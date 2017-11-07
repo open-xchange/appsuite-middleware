@@ -108,6 +108,11 @@ public final class OAuthConstants {
     public static final String ARGUMENT_CURRENT_HOST = "current_host";
 
     /**
+     * The argument name for JVM route. <code>java.lang.String</code>
+     */
+    public static final String ARGUMENT_ROUTE = "route";
+
+    /**
      * The argument name for authorization URL. <code>java.lang.String</code>
      */
     public static final String ARGUMENT_AUTH_URL = "auth_url";
