@@ -62,6 +62,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.ExtendedProperties;
+import com.openexchange.chronos.ExtendedProperty;
 import com.openexchange.chronos.TimeTransparency;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.CalendarFolder;
@@ -170,7 +171,8 @@ public class SchedJoulesCalendarAccess extends CachingCalendarAccess {
             }
 
             JSONObject folderJson = findFolderInInternalConfiguration(folderId);
-            folderJson.put(SchedJoulesFields.COLOR, extendedProperties.get(CalendarFolderProperty.COLOR_LITERAL));
+            ExtendedProperty extendedProperty = extendedProperties.get(CalendarFolderProperty.COLOR_LITERAL);
+            folderJson.put(SchedJoulesFields.COLOR, extendedProperties.get(null != extendedProperty ? extendedProperty.getValue() : null));
             updateInternalConfigurationData(getAccount().getInternalConfiguration());
 
             return folderId;
@@ -283,7 +285,7 @@ public class SchedJoulesCalendarAccess extends CachingCalendarAccess {
 
     /**
      * Appends the specified user key to the specified URL
-     * 
+     *
      * @param url The URL
      * @param userKey The user key to append
      * @return The generated URL
@@ -316,7 +318,7 @@ public class SchedJoulesCalendarAccess extends CachingCalendarAccess {
 
     /**
      * Finds the folder with the specified identifier in the internal configuration
-     * 
+     *
      * @param folderId The folder identifier
      * @return The found folder as a {@link JSONObject}
      * @throws OXException if no internal configuration exists or no folder metadata is found for the specified folder
@@ -374,7 +376,7 @@ public class SchedJoulesCalendarAccess extends CachingCalendarAccess {
 
     /**
      * Applies the configuration to the folder with the specified identifier
-     * 
+     *
      * @param folder The {@link DefaultCalendarFolder} to apply the configuration to
      * @param folderId The folder identifier
      * @throws OXException if no such folder exists
@@ -386,7 +388,7 @@ public class SchedJoulesCalendarAccess extends CachingCalendarAccess {
 
     /**
      * Applies the user configuration
-     * 
+     *
      * @param folder The {@link DefaultCalendarFolder} to apply the configuration to
      * @param folderId The folder identifier
      * @throws OXException if no such folder exists in the user configuration
@@ -404,7 +406,7 @@ public class SchedJoulesCalendarAccess extends CachingCalendarAccess {
 
     /**
      * Applies the internal configuration
-     * 
+     *
      * @param folder The {@link DefaultCalendarFolder} to apply the configuration to
      * @param folderId The folder identifier
      * @throws OXException if no such folder exists in the internal configuration
