@@ -77,6 +77,7 @@ import com.openexchange.folderstorage.internal.CalculatePermission;
 import com.openexchange.folderstorage.mail.contentType.MailContentType;
 import com.openexchange.folderstorage.osgi.FolderStorageServices;
 import com.openexchange.folderstorage.tx.TransactionManager;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.Strings;
@@ -314,7 +315,7 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                     MovePerformer movePerformer = newMovePerformer();
                     movePerformer.setStorageParameters(storageParameters);
                     if (FolderStorage.REAL_TREE_ID.equals(folder.getTreeID())) {
-                        movePerformer.doMoveReal(folder, storage, realParentStorage, newRealParentStorage);
+                        movePerformer.doMoveReal(folder, storage, realParentStorage, newRealParentStorage, storageFolder);
                     } else {
                         movePerformer.doMoveVirtual(folder, storage, realStorage, realParentStorage, newRealParentStorage, storageFolder, openedStorages);
                     }
@@ -360,8 +361,10 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                     /*
                      * Properly inherit permissions
                      */
-                    addMissingType(folder.getPermissions(), storageFolder.getPermissions());
-                    addParentLinkPermission(folder, oldParentId, storage);
+                    if ((storageFolder.getContentType().getModule() == FolderObject.INFOSTORE && folder.getContentType() == null) || (folder.getContentType() != null && folder.getContentType().getModule() == FolderObject.INFOSTORE)) {
+                        addMissingType(folder.getPermissions(), storageFolder.getPermissions());
+                        addParentLinkPermission(folder, oldParentId, storage);
+                    }
 
                     /*
                      * Change permissions either in real or in virtual storage

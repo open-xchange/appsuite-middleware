@@ -85,9 +85,9 @@ public class FolderManager {
         this.lastTimestamp = 0l;
     }
 
-    public String createFolder(String parent, String name) throws ApiException {
+    public String createFolder(String parent, String name, String module) throws ApiException {
         NewFolderBody body = new NewFolderBody();
-        body.setFolder(FolderFactory.getSimpleInfostoreFolder(name));
+        body.setFolder(FolderFactory.getSimpleFolder(name, module));
         FolderUpdateResponse createFolder = folderApi.getFoldersApi().createFolder(parent, getSession(), body, tree, null);
         checkResponse(createFolder.getError(), createFolder.getErrorDesc(), createFolder.getData());
         rememberFolder(createFolder.getData());

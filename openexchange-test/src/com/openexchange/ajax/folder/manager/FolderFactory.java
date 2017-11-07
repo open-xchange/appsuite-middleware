@@ -59,10 +59,10 @@ import com.openexchange.testing.httpclient.models.NewFolderBodyFolder;
  */
 public class FolderFactory {
 
-    public static NewFolderBodyFolder getSimpleInfostoreFolder(String name) {
+    public static NewFolderBodyFolder getSimpleFolder(String name, String module) {
         NewFolderBodyFolder result = new NewFolderBodyFolder();
         result.setTitle(name);
-        result.setModule("infostore");
+        result.setModule(module);
         result.setSubscribed(true);
         result.setPermissions(null);
         return result;

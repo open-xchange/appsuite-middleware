@@ -70,6 +70,7 @@ import com.openexchange.folderstorage.StorageParameters;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.internal.CalculatePermission;
 import com.openexchange.folderstorage.mail.contentType.MailContentType;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.mail.dataobjects.MailFolder;
@@ -167,10 +168,14 @@ final class MovePerformer extends AbstractPerformer {
         super(user, context, folderStorageDiscoverer);
     }
 
-    void doMoveReal(final Folder folder, final FolderStorage folderStorage, final FolderStorage realParentStorage, final FolderStorage newRealParentStorage) throws OXException {
-        List<Permission> permissionsToUpdate = adjustPermission(folder, folder, newRealParentStorage);
+    void doMoveReal(final Folder folder, final FolderStorage folderStorage, final FolderStorage realParentStorage, final FolderStorage newRealParentStorage, final Folder storageFolder) throws OXException {
+        List<Permission> permissionsToUpdate = null;
+        if ((storageFolder.getContentType().getModule() == FolderObject.INFOSTORE && folder.getContentType() == null) || (folder.getContentType() != null && folder.getContentType().getModule() == FolderObject.INFOSTORE)) {
+            permissionsToUpdate = adjustPermission(folder, folder, newRealParentStorage);
+        }
+
         folderStorage.updateFolder(folder, storageParameters);
-        if(!permissionsToUpdate.isEmpty()){
+        if (permissionsToUpdate != null && !permissionsToUpdate.isEmpty()) {
             folder.setPermissions(permissionsToUpdate.toArray(new Permission[permissionsToUpdate.size()]));
             storageParameters.getDecorator().put("permissions", "inherit");
             folderStorage.updateFolder(folder, storageParameters);
@@ -295,9 +300,12 @@ final class MovePerformer extends AbstractPerformer {
          */
         final String oldParent = storageFolder.getParentID();
         if (virtualStorage.equals(realStorage)) {
-            List<Permission> permissionsToUpdate = adjustPermission(folder, storageFolder, newRealParentStorage);
+            List<Permission> permissionsToUpdate = null;
+            if ((storageFolder.getContentType().getModule() == FolderObject.INFOSTORE && folder.getContentType() == null) || (folder.getContentType() != null && folder.getContentType().getModule() == FolderObject.INFOSTORE)) {
+                permissionsToUpdate = adjustPermission(folder, storageFolder, newRealParentStorage);
+            }
             virtualStorage.updateFolder(folder, storageParameters);
-            if(!permissionsToUpdate.isEmpty()){
+            if (permissionsToUpdate != null && !permissionsToUpdate.isEmpty()) {
                 folder.setPermissions(permissionsToUpdate.toArray(new Permission[permissionsToUpdate.size()]));
                 storageParameters.getDecorator().put("permissions", "inherit");
                 storageParameters.setTimeStamp(folder.getLastModified());

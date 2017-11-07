@@ -133,13 +133,14 @@ public class AdministrativeTargetUpdateImpl extends AbstractTargetUpdate {
             FolderObject folder = folderTargetProxy.getFolder();
             folderManager.updateFolder(folder, false, System.currentTimeMillis());
 
-            // Add system permission to sub folders
-            List<Integer> subfolderIds = folder.getSubfolderIds();
-            List<FolderObject> folderObjects = folderAccess.getFolderObjects(subfolderIds);
-            List<OCLPermission> appliedPermissions = folderTargetProxy.getAppliedPermissions();
-            for(FolderObject fol: folderObjects){
-                prepareInheritedPermissions(fol, appliedPermissions);
-                folderManager.updateFolder(fol, true, true, System.currentTimeMillis());
+            if (folder.getModule() == FolderObject.INFOSTORE) {
+                List<Integer> subfolderIds = folder.getSubfolderIds();
+                List<FolderObject> folderObjects = folderAccess.getFolderObjects(subfolderIds);
+                List<OCLPermission> appliedPermissions = folderTargetProxy.getAppliedPermissions();
+                for (FolderObject fol : folderObjects) {
+                    prepareInheritedPermissions(fol, appliedPermissions);
+                    folderManager.updateFolder(fol, true, true, System.currentTimeMillis());
+                }
             }
 
             /*

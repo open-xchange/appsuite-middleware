@@ -58,6 +58,7 @@ import com.openexchange.folderstorage.FolderPermissionType;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.Permissions;
 import com.openexchange.folderstorage.UserizedFolder;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.ShareTargetPath;
 import com.openexchange.share.groupware.DriveTargetProxyType;
@@ -78,11 +79,17 @@ public class FolderTargetProxy extends AbstractTargetProxy {
     private final ShareTargetPath targetPath;
     private List<Permission> appliedPermissions;
     private List<Permission> removedPermissions;
+    private final PermissionConverter<Permission> converter;
 
 
     public FolderTargetProxy(int module, UserizedFolder folder) {
         super();
         this.folder = folder;
+        if (folder.getContentType().getModule() == FolderObject.INFOSTORE) {
+            converter = CONVERTER_INFOSTORE;
+        } else {
+            converter = CONVERTER;
+        }
         target = new ShareTarget(module, folder.getID(), null);
         targetPath = new ShareTargetPath(module, folder.getID(), null);
         appliedPermissions = new ArrayList<>();
@@ -133,7 +140,7 @@ public class FolderTargetProxy extends AbstractTargetProxy {
             if (permission.getType() == FolderPermissionType.INHERITED) {
                 continue;
             }
-            targetPermissions.add(CONVERTER.convert(permission));
+            targetPermissions.add(converter.convert(permission));
         }
         return targetPermissions;
     }
@@ -147,8 +154,8 @@ public class FolderTargetProxy extends AbstractTargetProxy {
 
         List<Permission> origPermissions = new ArrayList<Permission>(origPermissionArray.length);
         Collections.addAll(origPermissions, origPermissionArray);
-        List<Permission> newPermissions = mergePermissions(origPermissions, permissions, CONVERTER);
-        appliedPermissions = mergePermissions(appliedPermissions, permissions, CONVERTER);
+        List<Permission> newPermissions = mergePermissions(origPermissions, permissions, converter);
+        appliedPermissions = mergePermissions(appliedPermissions, permissions, converter);
         folder.setPermissions(newPermissions.toArray(new Permission[newPermissions.size()]));
         setModified();
     }
@@ -162,8 +169,8 @@ public class FolderTargetProxy extends AbstractTargetProxy {
 
         List<Permission> origPermissions = new ArrayList<Permission>(origPermissionArray.length);
         Collections.addAll(origPermissions, origPermissionArray);
-        List<Permission> newPermissions = removePermissions(origPermissions, permissions, CONVERTER);
-        removedPermissions = mergePermissions(removedPermissions, permissions, CONVERTER);
+        List<Permission> newPermissions = removePermissions(origPermissions, permissions, converter);
+        removedPermissions = mergePermissions(removedPermissions, permissions, converter);
         folder.setPermissions(newPermissions.toArray(new Permission[newPermissions.size()]));
         setModified();
     }
@@ -188,6 +195,39 @@ public class FolderTargetProxy extends AbstractTargetProxy {
     }
 
     private static PermissionConverter<Permission> CONVERTER = new PermissionConverter<Permission>() {
+        @Override
+        public int getEntity(Permission permission) {
+            return permission.getEntity();
+        }
+
+        @Override
+        public boolean isGroup(Permission permission) {
+            return permission.isGroup();
+        }
+
+        @Override
+        public boolean isSystem(Permission permission) {
+            return permission.getSystem() > 0;
+        }
+
+        @Override
+        public int getBits(Permission permission) {
+            return Permissions.createPermissionBits(permission);
+        }
+
+        @Override
+        public Permission convert(TargetPermission permission) {
+            return new DefaultPermission(permission.getEntity(), permission.isGroup(), permission.getBits());
+        }
+
+        @Override
+        public TargetPermission convert(Permission permission) {
+            return new TargetPermission(permission.getEntity(), permission.isGroup(), getBits(permission));
+        }
+    };
+
+    private static PermissionConverter<Permission> CONVERTER_INFOSTORE = new PermissionConverter<Permission>() {
+
         @Override
         public int getEntity(Permission permission) {
             return permission.getEntity();

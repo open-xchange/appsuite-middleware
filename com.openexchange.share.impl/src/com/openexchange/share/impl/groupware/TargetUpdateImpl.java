@@ -67,6 +67,7 @@ import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.UserizedFolder;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.modules.Module;
 import com.openexchange.osgi.Tools;
@@ -137,22 +138,24 @@ public class TargetUpdateImpl extends AbstractTargetUpdate {
             toUpdate.setID(folder.getID());
             folderService.updateFolder(toUpdate, folder.getLastModifiedUTC(), parameters.getSession(), parameters.getFolderServiceDecorator());
 
-            // Add system permission to sub folders
-            FolderResponse<UserizedFolder[]> folderObjects = folderService.getSubfolders(folder.getTreeID(), folder.getID(), true, parameters.getSession(), parameters.getFolderServiceDecorator());
+            if (folder.getContentType().getModule() == FolderObject.INFOSTORE) {
+                // Add permission to sub folders
+                FolderResponse<UserizedFolder[]> folderObjects = folderService.getSubfolders(folder.getTreeID(), folder.getID(), true, parameters.getSession(), parameters.getFolderServiceDecorator());
 
-            List<Permission> appliedPermissions = folderTargetProxy.getAppliedPermissions();
-            List<Permission> removedPermissions = folderTargetProxy.getRemovedPermissions();
-            FolderServiceDecorator folderServiceDecorator;
-            try {
-                folderServiceDecorator = parameters.getFolderServiceDecorator().clone();
-            } catch (CloneNotSupportedException e) {
-                // should never occur
-                folderServiceDecorator = parameters.getFolderServiceDecorator();
-            }
-            folderServiceDecorator.put("permissions", "inherit");
-            for(UserizedFolder fol: folderObjects.getResponse()){
-                prepareInheritedPermissions(fol, appliedPermissions, removedPermissions);
-                folderService.updateFolder(fol, fol.getLastModifiedUTC(), parameters.getSession(), folderServiceDecorator);
+                List<Permission> appliedPermissions = folderTargetProxy.getAppliedPermissions();
+                List<Permission> removedPermissions = folderTargetProxy.getRemovedPermissions();
+                FolderServiceDecorator folderServiceDecorator;
+                try {
+                    folderServiceDecorator = parameters.getFolderServiceDecorator().clone();
+                } catch (CloneNotSupportedException e) {
+                    // should never occur
+                    folderServiceDecorator = parameters.getFolderServiceDecorator();
+                }
+                folderServiceDecorator.put("permissions", "inherit");
+                for (UserizedFolder fol : folderObjects.getResponse()) {
+                    prepareInheritedPermissions(fol, appliedPermissions, removedPermissions);
+                    folderService.updateFolder(fol, fol.getLastModifiedUTC(), parameters.getSession(), folderServiceDecorator);
+                }
             }
         }
     }

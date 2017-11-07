@@ -68,17 +68,17 @@ import com.openexchange.testing.httpclient.models.ShareTargetData;
 import com.openexchange.testing.httpclient.modules.ShareManagementApi;
 
 /**
- * {@link GetLinkInheritanceTest}
+ * {@link GetLinkInheritanceWrongModuleTest} tests if the inheritance of getlink permissions are not passed down for other modules
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.0
  */
-public class GetLinkInheritanceTest extends AbstractAPIClientSession {
+public class GetLinkInheritanceWrongModuleTest extends AbstractAPIClientSession {
 
     private FolderManager folderManager;
     private ShareManagementApi shareManagementApi;
     private String infostoreRoot;
-    private final String MODULE = "infostore";
+    private final String MODULE = "calendar";
 
     private String A, B, C, D, E;
 
@@ -89,7 +89,7 @@ public class GetLinkInheritanceTest extends AbstractAPIClientSession {
         rememberClient(client);
         folderManager = new FolderManager(new FolderApi(client, testUser), "1");
         shareManagementApi = new ShareManagementApi(client);
-        infostoreRoot = findInfostoreRoot();
+        infostoreRoot = findCalendarRoot();
 
         /*
          * Create the following folder structure:
@@ -117,71 +117,25 @@ public class GetLinkInheritanceTest extends AbstractAPIClientSession {
 
     @Test
     public void testCreate() throws ApiException {
-        Integer guestId = createShareLink(A);
+        createShareLink(A);
 
         // Check sub-folder
-        checkFolderPermissions(B, 1, 2, guestId);
+        checkFolderPermissions(B, 1, 1);
         // Check subsub-folder
-        checkFolderPermissions(C, 1, 2, guestId);
+        checkFolderPermissions(C, 1, 1);
         // Check no-link folder
         checkFolderPermissions(D, 1, 1);
     }
 
-    @Test
-    public void testMultipleLinks() throws ApiException {
-        Integer guestId = createShareLink(A);
-        Integer guestId2 = createShareLink(B);
-
-        // Check sub-folder
-        checkFolderPermissions(B, 2, 3, guestId);
-        // Check subsub-folder
-        checkFolderPermissions(C, 1, 3, guestId, guestId2);
-        // Check no-link folder
-        checkFolderPermissions(D, 1, 1);
-    }
-
-    @Test
-    public void testMultipleLinksAndMove() throws ApiException {
-        Integer guestId = createShareLink(A);
-        Integer guestId2 = createShareLink(B);
-
-        // Check sub-folder
-        checkFolderPermissions(B, 2, 3, guestId);
-        // Check subsub-folder
-        checkFolderPermissions(C, 1, 3, guestId, guestId2);
-        // Check no-link folder
-        checkFolderPermissions(D, 1, 1);
-
-        // Move sub-folder to no-link folder
-        folderManager.moveFolder(B, D);
-
-        // Check sub-folder
-        checkFolderPermissions(B, 2, 2);
-        // Check subsub-folder
-        checkFolderPermissions(C, 1, 2, guestId2);
-        // Check no-link folder
-        checkFolderPermissions(D, 1, 1);
-
-        // Move sub-folder back to parent folder
-        folderManager.moveFolder(B, A);
-
-        // Check sub-folder
-        checkFolderPermissions(B, 2, 3, guestId);
-        // Check subsub-folder
-        checkFolderPermissions(C, 1, 3, guestId, guestId2);
-        // Check no-link folder
-        checkFolderPermissions(D, 1, 1);
-
-    }
 
     @Test
     public void testMoveAway() throws ApiException {
-        Integer guestId = createShareLink(A);
+        createShareLink(A);
 
         // Check sub-folder
-        checkFolderPermissions(B, 1, 2, guestId);
+        checkFolderPermissions(B, 1, 1);
         // Check subsub-folder
-        checkFolderPermissions(C, 1, 2, guestId);
+        checkFolderPermissions(C, 1, 1);
         // Check no-link folder
         checkFolderPermissions(D, 1, 1);
 
@@ -198,12 +152,12 @@ public class GetLinkInheritanceTest extends AbstractAPIClientSession {
 
     @Test
     public void testMoveInto() throws ApiException {
-        Integer guestId = createShareLink(A);
+        createShareLink(A);
 
         // Check sub-folder
-        checkFolderPermissions(B, 1, 2, guestId);
+        checkFolderPermissions(B, 1, 1);
         // Check subsub-folder
-        checkFolderPermissions(C, 1, 2, guestId);
+        checkFolderPermissions(C, 1, 1);
         // Check no-link folder
         checkFolderPermissions(D, 1, 1);
         // Check no-link sub-folder
@@ -213,13 +167,13 @@ public class GetLinkInheritanceTest extends AbstractAPIClientSession {
         folderManager.moveFolder(D, A);
 
         // Check sub-folder
-        checkFolderPermissions(B, 1, 2, guestId);
+        checkFolderPermissions(B, 1, 1);
         // Check subsub-folder
-        checkFolderPermissions(C, 1, 2, guestId);
+        checkFolderPermissions(C, 1, 1);
         // Check no-link folder
-        checkFolderPermissions(D, 1, 2, guestId);
+        checkFolderPermissions(D, 1, 1);
         // Check no-link sub-folder
-        checkFolderPermissions(E, 1, 2, guestId);
+        checkFolderPermissions(E, 1, 1);
     }
 
     /*
@@ -273,7 +227,7 @@ public class GetLinkInheritanceTest extends AbstractAPIClientSession {
     private Integer createShareLink(String folder) throws ApiException {
         ShareTargetData data = new ShareTargetData();
         data.setFolder(folder);
-        data.setModule("infostore");
+        data.setModule("calendar");
         ShareLinkResponse shareLink = shareManagementApi.getShareLink(folderManager.getSession(), data);
         checkResponse(shareLink.getError(), shareLink.getErrorDesc(), shareLink.getData());
         folderManager.setLastTimestamp(shareLink.getTimestamp());
@@ -281,20 +235,20 @@ public class GetLinkInheritanceTest extends AbstractAPIClientSession {
     }
 
     /**
-     * Finds the infostore root folder
+     * Finds the calendar root folder
      *
-     * @return The folder id of the infostore root
+     * @return The folder id of the calendar root
      * @throws ApiException
      */
-    private String findInfostoreRoot() throws ApiException {
-        FoldersVisibilityData allFolders = folderManager.getAllFolders("infostore", "1,20,300,301,302");
-        Object folders = allFolders.getPublic();
+    private String findCalendarRoot() throws ApiException {
+        FoldersVisibilityData allFolders = folderManager.getAllFolders("calendar", "1,20,300,301,302");
+        Object folders = allFolders.getPrivate();
         assertNotNull(folders);
         @SuppressWarnings("unchecked") List<List<?>> folderArray = (List<List<?>>) folders;
         // find parent
         String parent = null;
         for (List<?> o : folderArray) {
-            if (o.get(1).equals("10")) {
+            if (o.get(1).equals("1")) {
                 parent = (String) o.get(0);
                 break;
             }
