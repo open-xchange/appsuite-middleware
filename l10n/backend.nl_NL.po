@@ -6,7 +6,7 @@ msgstr ""
 "Project-Id-Version: backend\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2017-05-16 09:19+0200\n"
+"PO-Revision-Date: 2017-11-07 14:43+0100\n"
 "Last-Translator: Ivar Snaaijer <Ivar@bureau-cornavin.com>\n"
 "Language-Team: Dutch <kde-i18n-nl@kde.org>\n"
 "Language: nl_NL\n"
@@ -3545,7 +3545,7 @@ msgstr "Het abonnement op standaardmap %1$s kan niet worden gestopt."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:162
 msgid "IMAP server refuses to import one or more E-Mails."
-msgstr "IMAP server weigerd één of meerdere e-mailbreichten te importeren."
+msgstr "IMAP server weigert één of meerdere e-mailberichten te importeren."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:164
 msgid ""
