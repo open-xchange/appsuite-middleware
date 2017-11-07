@@ -55,7 +55,9 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.function.BiConsumer;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHeaders;
@@ -103,6 +105,8 @@ public class SchedJoulesRESTClient {
     private final String authorizationHeader;
     private final String acceptHeader;
 
+    private final Map<String, BiConsumer<SchedJoulesResponse, HttpResponse>> headerParsers;
+
     /**
      * Initialises a new {@link SchedJoulesRESTClient}.
      * 
@@ -113,6 +117,48 @@ public class SchedJoulesRESTClient {
         authorizationHeader = prepareAuthorizationHeader();
         acceptHeader = prepareAcceptHeader();
         httpClient = initializeHttpClient();
+
+        headerParsers = new HashMap<>();
+
+        // Last-Modified header parser
+        headerParsers.put(HttpHeaders.LAST_MODIFIED, (schedjoulesResponse, httpResponse) -> {
+            Header header = httpResponse.getFirstHeader(HttpHeaders.LAST_MODIFIED);
+            if (header == null) {
+                return;
+            }
+            String value = header.getValue();
+            if (Strings.isEmpty(value)) {
+                return;
+            }
+            try {
+                schedjoulesResponse.setLastModified(DATE_FORMATTER.parse(value).getTime());
+            } catch (ParseException e) {
+                LOGGER.debug("Could not parse the value of the 'Last-Modified' header '{}'", value, e);
+            }
+        });
+
+        // ETag header parser
+        headerParsers.put(HttpHeaders.ETAG, (schedjoulesResponse, httpResponse) -> {
+            Header eTagHeader = httpResponse.getFirstHeader(HttpHeaders.ETAG);
+            if (eTagHeader == null) {
+                return;
+            }
+            schedjoulesResponse.setETag(eTagHeader.getValue());
+        });
+
+        // Content-Type header parser
+        headerParsers.put(HttpHeaders.CONTENT_TYPE, (schedjoulesResponse, httpResponse) -> {
+            Header ctHeader = httpResponse.getFirstHeader(HttpHeaders.CONTENT_TYPE);
+            if (ctHeader == null) {
+                return;
+            }
+            String value = ctHeader.getValue();
+            if (Strings.isEmpty(value)) {
+                return;
+            }
+            int indexOf = value.indexOf(';');
+            schedjoulesResponse.setContentType(indexOf < 0 ? value : value.substring(0, indexOf));
+        });
     }
 
     /**
@@ -373,9 +419,7 @@ public class SchedJoulesRESTClient {
      */
     private SchedJoulesResponse prepareResponse(HttpResponse httpResponse) throws IOException, OXException {
         SchedJoulesResponse response = new SchedJoulesResponse(httpResponse.getStatusLine().getStatusCode());
-        setContentType(httpResponse, response);
-        setETag(httpResponse, response);
-        setLastModified(httpResponse, response);
+        parseHeaders(httpResponse, response);
 
         HttpEntity entity = httpResponse.getEntity();
         if (entity == null) {
@@ -387,57 +431,15 @@ public class SchedJoulesRESTClient {
     }
 
     /**
-     * Sets the content type of the {@link SchedJoulesResponse}
+     * Parses from the specified {@link HttpResponse} the headers that are defined in the {@link #headerParsers}
+     * and sets them to the specified {@link SchedJoulesResponse}
      * 
-     * @param httpResponse the {@link HttpResponse}
-     * @param schedjoulesResponse the {@link SchedJoulesResponse}
+     * @param httpResponse The {@link HttpResponse}
+     * @param schedjoulesResponse The {@link SchedJoulesResponse}
      */
-    private void setContentType(HttpResponse httpResponse, SchedJoulesResponse schedjoulesResponse) {
-        Header ctHeader = httpResponse.getFirstHeader(HttpHeaders.CONTENT_TYPE);
-        if (ctHeader == null) {
-            return;
-        }
-        String value = ctHeader.getValue();
-        if (Strings.isEmpty(value)) {
-            return;
-        }
-        int indexOf = value.indexOf(';');
-        schedjoulesResponse.setContentType(indexOf < 0 ? value : value.substring(0, indexOf));
-    }
-
-    /**
-     * Set the ETag to the specified {@link SchedJoulesResponse}
-     * 
-     * @param httpResponse the {@link HttpResponse}
-     * @param schedjoulesResponse the {@link SchedJoulesResponse}
-     */
-    private void setETag(HttpResponse httpResponse, SchedJoulesResponse response) {
-        Header eTagHeader = httpResponse.getFirstHeader(HttpHeaders.ETAG);
-        if (eTagHeader == null) {
-            return;
-        }
-        response.setETag(eTagHeader.getValue());
-    }
-
-    /**
-     * Set the Last-Modified timestamp to the specified {@link SchedJoulesResponse}
-     * 
-     * @param httpResponse the {@link HttpResponse}
-     * @param schedjoulesResponse the {@link SchedJoulesResponse}
-     */
-    private void setLastModified(HttpResponse httpResponse, SchedJoulesResponse response) {
-        Header header = httpResponse.getFirstHeader(HttpHeaders.LAST_MODIFIED);
-        if (header == null) {
-            return;
-        }
-        String value = header.getValue();
-        if (Strings.isEmpty(value)) {
-            return;
-        }
-        try {
-            response.setLastModified(DATE_FORMATTER.parse(value).getTime());
-        } catch (ParseException e) {
-            LOGGER.debug("Could not parse the value of the 'Last-Modified' header '{}'", value, e);
+    private void parseHeaders(HttpResponse httpResponse, SchedJoulesResponse schedjoulesResponse) {
+        for (String key : headerParsers.keySet()) {
+            headerParsers.get(key).accept(schedjoulesResponse, httpResponse);
         }
     }
 
