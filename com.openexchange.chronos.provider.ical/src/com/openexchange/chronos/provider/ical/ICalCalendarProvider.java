@@ -133,7 +133,7 @@ public class ICalCalendarProvider extends CachingCalendarProvider {
 
     @Override
     protected JSONObject reconfigureAccountOpt(Session session, CalendarAccount calendarAccount, JSONObject userConfig, CalendarParameters parameters) throws OXException {
-        ICalCalendarFeedConfig iCalFeedConfig = new ICalCalendarFeedConfig.EncryptedBuilder(session, new JSONObject(userConfig), calendarAccount.getInternalConfiguration().optJSONObject(ICalCalendarConstants.PROVIDER_ID)).build();
+        ICalCalendarFeedConfig iCalFeedConfig = new ICalCalendarFeedConfig.EncryptedBuilder(session, new JSONObject(userConfig), new JSONObject()).build();
         ICalFeedReader iCalFeedConnector = new ICalFeedReader(session, iCalFeedConfig);
         GetResult getResult = iCalFeedConnector.get(); // check connections and authorization
 
