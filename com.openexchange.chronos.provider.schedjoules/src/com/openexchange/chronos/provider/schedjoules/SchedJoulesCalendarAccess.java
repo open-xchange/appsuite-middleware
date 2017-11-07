@@ -241,6 +241,9 @@ public class SchedJoulesCalendarAccess extends CachingCalendarAccess {
                 throw SchedJoulesProviderExceptionCodes.NO_ACCESS.create(folderId);
             }
 
+            folder.put(SchedJoulesFields.ETAG, calendar.getETag());
+            updateConfigurationData(getAccount().getInternalConfiguration(), getAccount().getUserConfiguration());
+
             return new ExternalCalendarResult(calendar.getEvents());
         } catch (JSONException e) {
             throw SchedJoulesProviderExceptionCodes.JSON_ERROR.create(e.getMessage(), e);
