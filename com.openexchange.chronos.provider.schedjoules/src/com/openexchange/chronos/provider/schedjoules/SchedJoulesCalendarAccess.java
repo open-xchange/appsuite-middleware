@@ -138,7 +138,12 @@ public class SchedJoulesCalendarAccess extends CachingCalendarAccess {
      */
     @Override
     public List<CalendarFolder> getVisibleFolders() throws OXException {
-        JSONArray foldersArray = getAccount().getUserConfiguration().optJSONArray(SchedJoulesFields.FOLDERS);
+        JSONObject userConfiguration = getAccount().getUserConfiguration();
+        if (userConfiguration == null || userConfiguration.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        JSONArray foldersArray = userConfiguration.optJSONArray(SchedJoulesFields.FOLDERS);
         if (foldersArray == null || foldersArray.isEmpty()) {
             return Collections.emptyList();
         }
