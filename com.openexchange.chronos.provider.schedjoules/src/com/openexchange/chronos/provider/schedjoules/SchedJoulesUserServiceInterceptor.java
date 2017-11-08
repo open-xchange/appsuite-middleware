@@ -129,7 +129,8 @@ public class SchedJoulesUserServiceInterceptor extends AbstractUserServiceInterc
                     String url = folder.getString(SchedJoulesFields.URL);
                     folder.put(SchedJoulesFields.URL, replaceLocale(url, language));
                     folder.put(SchedJoulesFields.LOCALE, language);
-                    folderCaching.remove(folder.getString(SchedJoulesFields.ITEM_ID));
+                    
+                    // TODO: Invalidate caching information and/or events
                 } catch (JSONException e) {
                     LOGGER.warn("Invalid/Malformed configuration detected in SchedJoules account '{}' for user '{}' in context '{}'", account.getAccountId(), user.getId(), context.getContextId(), e);
                 }
