@@ -58,10 +58,12 @@ import org.apache.http.HttpEntity;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
+import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.utils.DateUtils;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.util.EntityUtils;
 import com.openexchange.auth.info.AuthType;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
@@ -73,31 +75,35 @@ import com.openexchange.chronos.provider.ical.auth.AdvancedAuthInfo;
 import com.openexchange.chronos.provider.ical.exception.ICalProviderExceptionCodes;
 import com.openexchange.chronos.provider.ical.osgi.Services;
 import com.openexchange.chronos.provider.ical.properties.ICalCalendarProviderProperties;
-import com.openexchange.chronos.provider.ical.result.GetResult;
+import com.openexchange.chronos.provider.ical.result.GetResponse;
 import com.openexchange.chronos.provider.ical.utils.ICalProviderUtils;
 import com.openexchange.config.ConfigTools;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
+import com.openexchange.net.ssl.SSLSocketFactoryProvider;
+import com.openexchange.net.ssl.config.SSLConfigurationService;
+import com.openexchange.rest.client.httpclient.HttpClients;
+import com.openexchange.rest.client.httpclient.HttpClients.ClientConfig;
 import com.openexchange.session.Session;
 
 /**
  *
- * {@link ICalFeedReader}
+ * {@link ICalFeedClient}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.10.0
  */
-public class ICalFeedReader {
+public class ICalFeedClient {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ICalFeedReader.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ICalFeedClient.class);
 
     protected final ICalCalendarFeedConfig iCalFeedConfig;
     protected final Session session;
     protected final long allowedFeedSize;
 
-    public ICalFeedReader(Session session, ICalCalendarFeedConfig iCalFeedConfig) {
+    public ICalFeedClient(Session session, ICalCalendarFeedConfig iCalFeedConfig) {
         this.session = session;
         this.iCalFeedConfig = iCalFeedConfig;
         String maxFileSize = Services.getService(LeanConfigurationService.class).getProperty(ICalCalendarProviderProperties.maxFileSize);
@@ -107,6 +113,7 @@ public class ICalFeedReader {
     private HttpGet prepareGet() {
         HttpGet getMethod = new HttpGet(iCalFeedConfig.getFeedUrl());
         getMethod.addHeader(HttpHeaders.ACCEPT, "text/calendar");
+        getMethod.addHeader(HttpHeaders.ACCEPT_ENCODING, "gzip");
         if (Strings.isNotEmpty(iCalFeedConfig.getEtag())) {
             getMethod.addHeader(HttpHeaders.IF_NONE_MATCH, iCalFeedConfig.getEtag());
         }
@@ -117,65 +124,6 @@ public class ICalFeedReader {
 
         handleAuth(getMethod);
         return getMethod;
-    }
-
-    private ImportedCalendar importCalendar(HttpEntity httpEntity) throws OXException {
-        if (null == httpEntity) {
-            return null;
-        }
-        ICalService iCalService = Services.getService(ICalService.class);
-        ICalParameters parameters = iCalService.initParameters();
-        parameters.set(ICalParameters.IGNORE_UNSET_PROPERTIES, Boolean.TRUE);
-        InputStream inputStream = null;
-        try {
-            inputStream = Streams.bufferedInputStreamFor(httpEntity.getContent());
-            return iCalService.importICal(inputStream, parameters);
-        } catch (UnsupportedOperationException | IOException e) {
-            LOG.error("Error while processing the retrieved information:{}.", e.getMessage(), e);
-            throw ICalProviderExceptionCodes.UNEXPECTED_FEED_ERROR.create(iCalFeedConfig.getFeedUrl(), e.getMessage());
-        } finally {
-            Streams.close(inputStream);
-        }
-    }
-
-    public GetResult get() throws OXException {
-        ICalProviderUtils.verifyURI(this.iCalFeedConfig.getFeedUrl());
-
-        HttpGet getMethod = null;
-        CloseableHttpResponse response = null;
-        try {
-            getMethod = prepareGet();
-            response = ICalFeedHttpClient.getInstance().execute(getMethod);
-            GetResult result = new GetResult(response.getStatusLine(), response.getAllHeaders());
-
-            int statusCode = result.getStatusCode();
-            if (statusCode >= 200 && statusCode < 300) {
-                HttpEntity httpEntity = response.getEntity();
-                if (null == httpEntity) {
-                    return null;
-                }
-                long contentLength = httpEntity.getContentLength();
-                String contentLength2 = result.getContentLength();
-                if (contentLength > this.allowedFeedSize || (Strings.isNotEmpty(contentLength2) && Long.parseLong(contentLength2) > this.allowedFeedSize)) {
-                    throw ICalProviderExceptionCodes.FEED_SIZE_EXCEEDED.create(iCalFeedConfig.getFeedUrl(), contentLength, this.allowedFeedSize);
-                }
-                result.setCalendar(importCalendar(httpEntity));
-                return result;
-            }
-            if (statusCode == HttpStatus.SC_UNAUTHORIZED) {
-                throw CalendarExceptionCodes.AUTH_FAILED.create(iCalFeedConfig.getFeedUrl());
-            }
-            if (statusCode == HttpStatus.SC_NOT_FOUND) {
-                throw ICalProviderExceptionCodes.NO_FEED.create(iCalFeedConfig.getFeedUrl());
-            }
-            throw ICalProviderExceptionCodes.UNEXPECTED_FEED_ERROR.create(iCalFeedConfig.getFeedUrl(), "Unknown server response. Status code {}.", statusCode);
-        } catch (IOException e) {
-            LOG.error("Error while processing the retrieved information:{}.", e.getMessage(), e);
-            throw ICalProviderExceptionCodes.UNEXPECTED_FEED_ERROR.create(iCalFeedConfig.getFeedUrl(), e.getMessage());
-        } finally {
-            close(getMethod, response);
-            Streams.close(response);
-        }
     }
 
     protected void handleAuth(HttpRequestBase method) {
@@ -209,6 +157,107 @@ public class ICalFeedReader {
             default:
                 break;
         }
+    }
+
+    private ImportedCalendar importCalendar(HttpEntity httpEntity) throws OXException {
+        if (null == httpEntity) {
+            return null;
+        }
+        ICalService iCalService = Services.getService(ICalService.class);
+        ICalParameters parameters = iCalService.initParameters();
+        parameters.set(ICalParameters.IGNORE_UNSET_PROPERTIES, Boolean.TRUE);
+        InputStream inputStream = null;
+        try {
+            inputStream = Streams.bufferedInputStreamFor(httpEntity.getContent());
+            return iCalService.importICal(inputStream, parameters);
+        } catch (UnsupportedOperationException | IOException e) {
+            LOG.error("Error while processing the retrieved information:{}.", e.getMessage(), e);
+            throw ICalProviderExceptionCodes.UNEXPECTED_FEED_ERROR.create(iCalFeedConfig.getFeedUrl(), e.getMessage());
+        } finally {
+            Streams.close(inputStream);
+        }
+    }
+
+    /**
+     * Returns the calendar behind the given feed URL if available. If there is no update (based on etag and last modification header) the contained calendar will be <code>null</code>.
+     * 
+     * @return GetResponse containing the feed content
+     */
+    public GetResponse executeRequest() throws OXException {
+        ICalProviderUtils.verifyURI(this.iCalFeedConfig.getFeedUrl());
+        HttpGet request = prepareGet();
+
+        CloseableHttpResponse response = null;
+        try {
+            response = ICalFeedHttpClient.getInstance().execute(request);
+
+            int statusCode = assertStatusCode(response);
+            if (statusCode == HttpStatus.SC_NOT_MODIFIED) {
+                // OK, nothing was modified, no response body, return as is
+                return new GetResponse(response.getStatusLine(), response.getAllHeaders());
+            }
+
+            // Prepare the response
+            return prepareResponse(response);
+        } catch (ClientProtocolException e) {
+            LOG.error("Error while processing the retrieved information:{}.", e.getMessage(), e);
+            throw ICalProviderExceptionCodes.CLIENT_PROTOCOL_ERROR.create(e.getMessage(), e);
+        } catch (IOException e) {
+            LOG.error("Error while processing the retrieved information:{}.", e.getMessage(), e);
+            throw ICalProviderExceptionCodes.IO_ERROR.create(e.getMessage(), e);
+        } finally {
+            close(request, response);
+            Streams.close(response);
+        }
+    }
+
+    private GetResponse prepareResponse(HttpResponse httpResponse) throws IOException, OXException {
+        GetResponse response = new GetResponse(httpResponse.getStatusLine(), httpResponse.getAllHeaders());
+
+        HttpEntity entity = httpResponse.getEntity();
+        if (entity == null) {
+            return response;
+        }
+        long contentLength = httpResponse.getEntity().getContentLength();
+        String contentLength2 = response.getContentLength();
+        if (contentLength > this.allowedFeedSize || (Strings.isNotEmpty(contentLength2) && Long.parseLong(contentLength2) > this.allowedFeedSize)) {
+            throw ICalProviderExceptionCodes.FEED_SIZE_EXCEEDED.create(iCalFeedConfig.getFeedUrl(), contentLength2 != null ? contentLength2 : contentLength, this.allowedFeedSize);
+        }
+        response.setCalendar(importCalendar(entity));
+        return response;
+    }
+
+    /**
+     * Asserts the status code for any errors
+     * 
+     * @param httpResponse The {@link HttpResponse}'s status code to assert
+     * @return The status code
+     * @throws OXException if an HTTP error is occurred (4xx or 5xx)
+     */
+    private int assertStatusCode(HttpResponse httpResponse) throws OXException {
+        int statusCode = httpResponse.getStatusLine().getStatusCode();
+        // Assert the 4xx codes
+        switch (statusCode) {
+            case HttpStatus.SC_UNAUTHORIZED:
+                throw CalendarExceptionCodes.AUTH_FAILED.create(iCalFeedConfig.getFeedUrl());
+            case HttpStatus.SC_NOT_FOUND:
+                throw ICalProviderExceptionCodes.NO_FEED.create(iCalFeedConfig.getFeedUrl());
+        }
+        if (statusCode >= 400 && statusCode <= 499) {
+            throw ICalProviderExceptionCodes.UNEXPECTED_FEED_ERROR.create(iCalFeedConfig.getFeedUrl(), "Unknown server response. Status code {}.", statusCode);
+        }
+
+        // Assert the 5xx codes
+        switch (statusCode) {
+            case 500:
+                throw ICalProviderExceptionCodes.REMOTE_INTERNAL_SERVER_ERROR.create(httpResponse.getStatusLine().getReasonPhrase());
+            case 503:
+                throw ICalProviderExceptionCodes.REMOTE_SERVICE_UNAVAILABLE.create(httpResponse.getStatusLine().getReasonPhrase());
+        }
+        if (statusCode >= 500 && statusCode <= 599) {
+            throw ICalProviderExceptionCodes.REMOTE_SERVER_ERROR.create(httpResponse.getStatusLine());
+        }
+        return statusCode;
     }
 
     /**
@@ -252,6 +301,48 @@ public class ICalFeedReader {
                     // Ignore
                 }
             }
+        }
+    }
+
+    public static void reset() {
+        ICalFeedHttpClient.reset();
+    }
+
+    private static class ICalFeedHttpClient {
+
+        private static CloseableHttpClient httpClient;
+
+        static CloseableHttpClient getInstance() {
+            if (httpClient == null) {
+                synchronized (ICalFeedHttpClient.class) {
+                    if (httpClient == null) {
+                        ClientConfig config = ClientConfig.newInstance();
+                        config.setUserAgent("Open-Xchange Calendar Feed Client");
+                        init(config);
+                        httpClient = HttpClients.getHttpClient(config, Services.getService(SSLSocketFactoryProvider.class), Services.getService(SSLConfigurationService.class));
+                    }
+                }
+            }
+            return httpClient;
+        }
+
+        static void init(ClientConfig config) {
+            LeanConfigurationService leanConfigurationService = Services.getService(LeanConfigurationService.class);
+            int maxConnections = leanConfigurationService.getIntProperty(ICalCalendarProviderProperties.maxConnections);
+            config.setMaxTotalConnections(maxConnections);
+
+            int maxConnectionsPerRoute = leanConfigurationService.getIntProperty(ICalCalendarProviderProperties.maxConnectionsPerRoute);
+            config.setMaxConnectionsPerRoute(maxConnectionsPerRoute);
+
+            int connectionTimeout = leanConfigurationService.getIntProperty(ICalCalendarProviderProperties.connectionTimeout);
+            config.setConnectionTimeout(connectionTimeout);
+
+            int socketReadTimeout = leanConfigurationService.getIntProperty(ICalCalendarProviderProperties.socketReadTimeout);
+            config.setSocketReadTimeout(socketReadTimeout);
+        }
+
+        static void reset() {
+            httpClient = null;
         }
     }
 }

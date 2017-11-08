@@ -167,6 +167,9 @@ public class ICalCalendarFeedConfig {
      * @return <code>true</code> if the configuration is different in a way we have to update the previously persisted data; otherwise <code>false</code>
      */
     public boolean mandatoryChanges(ICalCalendarFeedConfig configToCompare) {
+        if (!this.feedUrl.equals(configToCompare.feedUrl)) {
+            return true;
+        }
         return !this.getAuthInfo().equals(configToCompare.getAuthInfo());
     }
 }

@@ -75,36 +75,57 @@ public enum ICalProviderExceptionCodes implements DisplayableOXExceptionCode {
      * <li>The feed URI for account %1$s in context %2$s is missing</li>
      */
     MISSING_FEED_URI("The feed URI is missing.", MISSING_FEED_URI_MSG, Category.CATEGORY_USER_INPUT, 4040),
-
     /**
      * <li>The feed URI does not match the standard.</li>
      * <li>The requested feed with URI %1$s does not match the standard.</li>
      */
     BAD_FEED_URI("The requested feed with URI %1$s does not match the standard.", BAD_FEED_URI_MSG, Category.CATEGORY_USER_INPUT, 4041),
-
     /**
      * <li>Cannot connect to feed with URL: %1$s. Please change URL and try again.</li>
      * <li>The feed URI %1$s is not allowed due to configuration</li>
      */
     FEED_URI_NOT_ALLOWED("The feed URI %1$s is not allowed due to configuration.", FEED_URI_NOT_ALLOWED_MSG, Category.CATEGORY_USER_INPUT, 4042),
-
     /**
      * <li>Cannot connect to feed with URL: %1$s. Please change URL and try again.</li>
      * <li>The provided URI %1$s does not contain an ICal feed</li>
      */
     NO_FEED("The provided URI %1$s does not contain an ICal feed.", NO_FEED_MSG, Category.CATEGORY_USER_INPUT, 4043),
-
     /**
      * <li>Unfortunately your requested feed cannot be used due to size limitations.</li>
      * <li>The requested feed with URI %1$s does exceed the configured maximum size. Allowed %2$s but was %3$s.</li>
      */
-    FEED_SIZE_EXCEEDED("The requested feed with URI %1$s does exceed the configured maximum size. Allowed %2$s but was %3$s.", FEED_SIZE_EXCEEDED_MSG, Category.CATEGORY_USER_INPUT, 4001),
-
+    FEED_SIZE_EXCEEDED("The requested feed with URI %1$s does exceed the configured maximum size. Allowed %2$s but was %3$s.", FEED_SIZE_EXCEEDED_MSG, Category.CATEGORY_CONFIGURATION, 4001),
     /**
      * <li>Unfortunately the given feed URL cannot be processed as expected.</li>
      * <li>An error occurred while retrieving the desired feed URI '%1$s': %2$s</li>
      */
-    UNEXPECTED_FEED_ERROR("An error occurred while retrieving the desired feed URI '%1$s': %2$s", UNEXPECTED_FEED_ERROR_MSG, Category.CATEGORY_USER_INPUT, 4001),
+    UNEXPECTED_FEED_ERROR("An error occurred while retrieving the desired feed URI '%1$s': %2$s", UNEXPECTED_FEED_ERROR_MSG, Category.CATEGORY_ERROR, 5001),
+    /**
+     * <li>An error occurred inside the server which prevented it from fulfilling the request.</li>
+     * <li>An HTTP client protocol error occurred: %1$s</li>
+     */
+    CLIENT_PROTOCOL_ERROR("An HTTP client protocol error occurred: %1$s", CATEGORY_ERROR, 5002),
+    /**
+     * <li>An error occurred inside the server which prevented it from fulfilling the request.</li>
+     * <li>An I/O error occurred: %1$s</li>
+     */
+    IO_ERROR("An I/O error occurred: %1$s", CATEGORY_ERROR, 5003),
+    /**
+     * <li>The remote service is unavailable at the moment. There is nothing we can do about it. Please try again later.</li>
+     * <li>The remote service is unavailable at the moment: %1$s. Please try again later.</li>
+     */
+    REMOTE_SERVICE_UNAVAILABLE("The remote service is unavailable at the moment: %1$s. Please try again later.", ICalProviderExceptionMessages.REMOTE_SERVICE_UNAVAILABLE_MSG, CATEGORY_SERVICE_DOWN, 5031),
+    /**
+     * <li>An internal server error occurred on the feed provider side. There is nothing we can do about it.</li>
+     * <li>A remote internal server error occurred: %1$s</li>
+     */
+    REMOTE_INTERNAL_SERVER_ERROR("A remote internal server error occurred: %1$s", ICalProviderExceptionMessages.REMOTE_INTERNAL_SERVER_ERROR_MSG, CATEGORY_SERVICE_DOWN, 5032),
+    /**
+     * <li>A remote server error occurred on the feed provider side. There is nothing we can do about it.</li>
+     * <li>A remote server error occurred: %1$s</li>
+     */
+    REMOTE_SERVER_ERROR("A remote server error occurred: %1$s", ICalProviderExceptionMessages.REMOTE_SERVER_ERROR_MSG, CATEGORY_ERROR, 5033),
+
 
     ;
 
@@ -114,6 +135,10 @@ public enum ICalProviderExceptionCodes implements DisplayableOXExceptionCode {
     private String displayMessage;
     private Category category;
     private int number;
+
+    private ICalProviderExceptionCodes(String message, Category category, int number) {
+        this(message, null, category, number);
+    }
 
     private ICalProviderExceptionCodes(String message, String displayMessage, Category category, int number) {
         this.message = message;

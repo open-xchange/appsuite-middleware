@@ -56,7 +56,6 @@ import static com.openexchange.chronos.provider.CalendarFolderProperty.SCHEDULE_
 import static com.openexchange.chronos.provider.CalendarFolderProperty.USED_FOR_SYNC;
 import java.util.Collections;
 import java.util.concurrent.TimeUnit;
-import org.apache.http.HttpStatus;
 import org.dmfs.rfc5545.Duration;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -72,11 +71,10 @@ import com.openexchange.chronos.provider.DefaultCalendarPermission;
 import com.openexchange.chronos.provider.SingleFolderCalendarAccessUtils;
 import com.openexchange.chronos.provider.caching.ExternalCalendarResult;
 import com.openexchange.chronos.provider.caching.SingleFolderCachingCalendarAccess;
-import com.openexchange.chronos.provider.ical.conn.ICalFeedReader;
-import com.openexchange.chronos.provider.ical.exception.ICalProviderExceptionCodes;
+import com.openexchange.chronos.provider.ical.conn.ICalFeedClient;
 import com.openexchange.chronos.provider.ical.osgi.Services;
 import com.openexchange.chronos.provider.ical.properties.ICalCalendarProviderProperties;
-import com.openexchange.chronos.provider.ical.result.GetResult;
+import com.openexchange.chronos.provider.ical.result.GetResponse;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.conversion.ConversionService;
@@ -95,7 +93,7 @@ public class ICalCalendarAccess extends SingleFolderCachingCalendarAccess {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ICalCalendarAccess.class);
 
-    private final ICalFeedReader reader;
+    private final ICalFeedClient reader;
     private final ICalCalendarFeedConfig iCalFeedConfig;
 
     /**
@@ -110,7 +108,7 @@ public class ICalCalendarAccess extends SingleFolderCachingCalendarAccess {
         super(session, account, parameters, prepareFolder(account));
         JSONObject userConfiguration = new JSONObject(account.getUserConfiguration());
         this.iCalFeedConfig = new ICalCalendarFeedConfig.DecryptedBuilder(session, userConfiguration, getICalConfiguration()).build();
-        this.reader = new ICalFeedReader(session, iCalFeedConfig);
+        this.reader = new ICalFeedClient(session, iCalFeedConfig);
     }
 
     @Override
@@ -141,18 +139,12 @@ public class ICalCalendarAccess extends SingleFolderCachingCalendarAccess {
 
     @Override
     public ExternalCalendarResult getAllEvents() throws OXException {
-        GetResult getResult = reader.get();
+        GetResponse getResult = reader.executeRequest();
         String etag = iCalFeedConfig.getEtag();
-        if (getResult == null) {
-            throw ICalProviderExceptionCodes.UNEXPECTED_FEED_ERROR.create(iCalFeedConfig.getFeedUrl(), "Response HttpEntity is empty.");
-        }
-        if (getResult.getStatusCode() == HttpStatus.SC_NOT_MODIFIED || // response says not modified
+        
+        if (getResult.getCalendar() == null || // response says not modified
             ((etag != null) && (getResult.getETag().equals(etag)))) { // same etag
             return new ExternalCalendarResult(Collections.emptyList(), getResult.getStatusCode());
-        }
-        if (getResult.getCalendar() == null) {
-            LOG.debug("Unable to retrieve data from feed URI {}.", iCalFeedConfig.getFeedUrl());
-            throw ICalProviderExceptionCodes.NO_FEED.create(iCalFeedConfig.getFeedUrl());
         }
         ExternalCalendarResult externalCalendarResult = new ExternalCalendarResult(getResult.getCalendar().getEvents(), getResult.getStatusCode());
         updateICalConfiguration(getResult);
@@ -177,7 +169,7 @@ public class ICalCalendarAccess extends SingleFolderCachingCalendarAccess {
         return folder.getId();
     }
 
-    private void updateICalConfiguration(GetResult importResult) {
+    private void updateICalConfiguration(GetResponse importResult) {
         JSONObject iCalConfig = getICalConfiguration();
         setLastUpdate(iCalConfig);
         setRefreshInterval(importResult, iCalConfig);
@@ -188,7 +180,7 @@ public class ICalCalendarAccess extends SingleFolderCachingCalendarAccess {
         iCalConfig.putSafe(ICalCalendarConstants.LAST_UPDATE, System.currentTimeMillis());
     }
 
-    private void setETag(GetResult importResult, JSONObject iCalConfig) {
+    private void setETag(GetResponse importResult, JSONObject iCalConfig) {
         String etag = importResult.getETag();
         if (Strings.isNotEmpty(etag)) {
             iCalConfig.putSafe(ICalCalendarConstants.ETAG, etag);
@@ -197,7 +189,7 @@ public class ICalCalendarAccess extends SingleFolderCachingCalendarAccess {
         }
     }
 
-    private void setRefreshInterval(GetResult importResult, JSONObject iCalConfig) {
+    private void setRefreshInterval(GetResponse importResult, JSONObject iCalConfig) {
         long persistedInterval = iCalConfig.optLong(REFRESH_INTERVAL, 0);
         String refreshInterval = importResult.getRefreshInterval();
 

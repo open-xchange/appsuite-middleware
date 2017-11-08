@@ -120,7 +120,12 @@ public abstract class CachingCalendarProvider implements CalendarProvider {
         JSONObject internalConfiguration = calendarAccount.getInternalConfiguration();
         if (triggerCacheInvalidation(session, calendarAccount.getUserConfiguration(), userConfig)) {
             if (internalConfiguration.hasAndNotNull(CachingCalendarAccess.CACHING)) {
-                internalConfiguration.remove(CachingCalendarAccess.CACHING);
+                JSONObject folders = internalConfiguration.optJSONObject(CachingCalendarAccess.CACHING);
+                for (String folderId : folders.keySet()) {
+                    JSONObject lastUpdate = new JSONObject();
+                    lastUpdate.putSafe(CachingCalendarAccess.LAST_UPDATE, 0);
+                    folders.putSafe(folderId, lastUpdate);
+                }
             }
         }
 

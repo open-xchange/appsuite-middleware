@@ -64,13 +64,19 @@ public class ICalProviderExceptionMessages implements LocalizableStrings {
 
     public static final String BAD_FEED_URI_MSG = "The feed URI does not match the standard.";
 
-    public static final String FEED_URI_NOT_ALLOWED_MSG = "Cannot connect to feed with URL: %1$s. Please change URL and try again.";
+    public static final String FEED_URI_NOT_ALLOWED_MSG = "Cannot connect to feed with URL: %1$s. Please change the URL and try again.";
 
-    public static final String NO_FEED_MSG = "The provided URL %1$s does not contain an ICal feed. Please change URL and try again.";
+    public static final String NO_FEED_MSG = "The provided URL %1$s does not contain content as expected. Please change the URL and try again.";
 
     public static final String FEED_SIZE_EXCEEDED_MSG = "Unfortunately your requested feed cannot be subscribed due to size limitations.";
 
     public static final String UNEXPECTED_FEED_ERROR_MSG = "Unfortunately the given feed URL cannot be processed as expected.";
+
+    public static final String REMOTE_SERVICE_UNAVAILABLE_MSG = "The remote service is unavailable at the moment. There is nothing we can do about it. Please try again later.";
+
+    public static final String REMOTE_INTERNAL_SERVER_ERROR_MSG = "An internal server error occurred on the feed provider side. There is nothing we can do about it.";
+
+    public static final String REMOTE_SERVER_ERROR_MSG = "A remote server error occurred on the feed provider side. There is nothing we can do about it.";
 
     /**
      * Initializes a new {@link ICalProviderExceptionMessages}.

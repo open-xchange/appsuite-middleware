@@ -54,6 +54,7 @@ import java.util.List;
 import org.apache.http.Header;
 import org.apache.http.HttpHeaders;
 import org.apache.http.StatusLine;
+import com.openexchange.chronos.Event;
 import com.openexchange.chronos.ExtendedProperty;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.ical.ImportedCalendar;
@@ -62,19 +63,19 @@ import com.openexchange.java.Strings;
 
 /**
  * 
- * {@link GetResult}
+ * {@link GetResponse}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.10.0
  */
-public class GetResult {
+public class GetResponse {
 
     private ImportedCalendar importedCalendar;
 
     private final StatusLine statusLine;
     private final Header[] headers;
 
-    public GetResult(StatusLine statusLine, Header[] headers) {
+    public GetResponse(StatusLine statusLine, Header[] headers) {
         this.statusLine = statusLine;
         this.headers = headers;
     }
@@ -83,6 +84,11 @@ public class GetResult {
         this.importedCalendar = calendar;
     }
 
+    /**
+     * Returns the imported calendar if there have been updates. Otherwise <code>null</code> will be returned.
+     * 
+     * @return {@link ImportedCalendar} with the available {@link Event}s or <code>null</code> if there haven't been updates.
+     */
     public ImportedCalendar getCalendar() {
         return importedCalendar;
     }
