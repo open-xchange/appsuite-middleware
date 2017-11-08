@@ -79,6 +79,7 @@ import com.openexchange.test.concurrent.ParallelSuite;
     //com.openexchange.ajax.find.calendar.AutocompleteTest.class,
     com.openexchange.ajax.find.contacts.QueryTest.class,
     com.openexchange.ajax.find.contacts.AutoCompleteTest.class,
+    com.openexchange.ajax.find.contacts.AutoCompleteShowDepartmentsTest.class,
     BasicMailTest.class,
     BasicDriveTest.class,
     FindTasksTestsFilterCombinations.class,
