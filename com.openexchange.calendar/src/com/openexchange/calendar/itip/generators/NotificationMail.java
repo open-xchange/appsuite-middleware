@@ -50,15 +50,14 @@
 package com.openexchange.calendar.itip.generators;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import com.google.common.collect.ImmutableSet;
 import com.openexchange.ajax.fields.AppointmentFields;
 import com.openexchange.ajax.fields.CalendarFields;
 import com.openexchange.calendar.AppointmentDiff;
@@ -598,7 +597,7 @@ public class NotificationMail {
     }
 
 
-    private static final Set<String> FIELDS_TO_REPORT = new HashSet<String>(Arrays.asList(
+    private static final Set<String> FIELDS_TO_REPORT = ImmutableSet.of(
             AppointmentFields.LOCATION,
             AppointmentFields.FULL_TIME,
             AppointmentFields.RECURRENCE_START,
@@ -618,7 +617,7 @@ public class NotificationMail {
             AppointmentFields.PARTICIPANTS,
             AppointmentFields.USERS,
             AppointmentFields.CONFIRMATIONS
-        ));
+        );
 
     private boolean anInterestingFieldChanged() {
         if (getDiff() == null) {

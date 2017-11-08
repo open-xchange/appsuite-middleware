@@ -77,7 +77,7 @@ public final class Capabilities {
 
     private ArrayList<String> sasl = null;
 
-    private Map<String, Object> extendedProperties = null;
+    private final Map<String, Object> extendedProperties = new HashMap<>();;
 
     public List<String> getSasl() {
         return sasl;
@@ -130,9 +130,6 @@ public final class Capabilities {
     }
 
     public void addExtendedProperty(String key, Object value){
-        if(extendedProperties == null){
-            extendedProperties = new HashMap<>();
-        }
         extendedProperties.put(key, value);
     }
 

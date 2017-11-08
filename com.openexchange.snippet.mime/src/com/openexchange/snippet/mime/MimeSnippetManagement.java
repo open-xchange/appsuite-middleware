@@ -52,6 +52,7 @@ package com.openexchange.snippet.mime;
 import static com.openexchange.mail.mime.MimeDefaultSession.getDefaultSession;
 import static com.openexchange.snippet.mime.Services.getService;
 import static com.openexchange.snippet.utils.SnippetUtils.sanitizeContent;
+import com.google.common.collect.ImmutableSet;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -541,14 +542,14 @@ public final class MimeSnippetManagement implements SnippetManagement {
         final ContentType contentType = isEmpty(header) ? ContentType.DEFAULT_CONTENT_TYPE : new ContentType(header);
         snippet.setContent(MessageUtility.readMimePart(part, contentType));
         // Read message's headers
-        @SuppressWarnings("unchecked") final Enumeration<Header> others = mimeMessage.getAllHeaders();
+        Enumeration<Header> others = mimeMessage.getAllHeaders();
         while (others.hasMoreElements()) {
             final Header hdr = others.nextElement();
             snippet.put(hdr.getName(), MimeMessageUtility.decodeMultiEncodedHeader(hdr.getValue()));
         }
     }
 
-    private static final Set<String> IGNORABLES = new HashSet<String>(Arrays.asList(Snippet.PROP_MISC));
+    private static final Set<String> IGNORABLES = ImmutableSet.of(Snippet.PROP_MISC);
 
     private static String encode(String value) {
         try {
@@ -829,7 +830,7 @@ public final class MimeSnippetManagement implements SnippetManagement {
                 }
 
                 // Copy remaining to updateMessage; this action includes unnamed properties
-                @SuppressWarnings("unchecked") final Enumeration<Header> nonMatchingHeaders = storageMessage.getNonMatchingHeaders(propNames.toArray(new String[0]));
+                Enumeration<Header> nonMatchingHeaders = storageMessage.getNonMatchingHeaders(propNames.toArray(new String[0]));
                 final Set<String> propertyNames = Property.getPropertyNames();
                 while (nonMatchingHeaders.hasMoreElements()) {
                     final Header hdr = nonMatchingHeaders.nextElement();

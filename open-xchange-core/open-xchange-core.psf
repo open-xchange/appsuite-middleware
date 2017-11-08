@@ -4,6 +4,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,com.ctc.wstx"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,com.google.android.gcm"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,com.google.guava"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,com.clevertap.apns.apns_http2"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,com.hazelcast"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,com.openexchange.annotation"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,com.openexchange.authentication.driver.basic"/>
@@ -218,6 +219,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,com.openexchange.websockets.cap"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,com.openexchange.websockets.monitoring"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,com.openexchange.xml"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,com.squareup.okhttp3"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,javapns.notification.management"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,javax.annotation.concurrent"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,javax.mail"/>

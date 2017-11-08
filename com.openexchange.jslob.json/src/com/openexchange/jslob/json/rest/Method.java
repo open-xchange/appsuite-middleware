@@ -49,11 +49,11 @@
 
 package com.openexchange.jslob.json.rest;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
+import com.google.common.collect.ImmutableMap;
 
 /**
  * An enumeration for HTTP methods.
@@ -71,7 +71,7 @@ public enum Method {
         for (final Method method : values) {
             m.put(method.name(), method);
         }
-        MAP = Collections.unmodifiableMap(m);
+        MAP = ImmutableMap.copyOf(m);
     }
 
     /**

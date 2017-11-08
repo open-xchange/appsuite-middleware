@@ -49,11 +49,11 @@
 
 package com.openexchange.file.storage;
 
+import com.google.common.collect.ImmutableSet;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
-import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -67,7 +67,7 @@ public interface File {
     /**
      * The default search fields: {@link Field#TITLE}, {@link Field#FILENAME}, {@link Field#DESCRIPTION}, {@link Field#URL}, {@link Field#CATEGORIES}, {@link Field#VERSION_COMMENT}
      */
-    public static final Set<Field> DEFAULT_SEARCH_FIELDS = Collections.unmodifiableSet(EnumSet.of(Field.TITLE, Field.FILENAME, Field.DESCRIPTION, Field.URL, Field.CATEGORIES, Field.VERSION_COMMENT));
+    public static final Set<Field> DEFAULT_SEARCH_FIELDS = ImmutableSet.of(Field.TITLE, Field.FILENAME, Field.DESCRIPTION, Field.URL, Field.CATEGORIES, Field.VERSION_COMMENT);
 
     String getProperty(String key);
 

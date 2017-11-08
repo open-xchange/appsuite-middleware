@@ -49,7 +49,6 @@
 
 package com.openexchange.mail.filter.json.v2.json.mapper.parser.test.simplified;
 
-import java.util.List;
 import org.apache.jsieve.SieveException;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -61,6 +60,7 @@ import com.openexchange.mail.filter.json.v2.json.fields.GeneralField;
 import com.openexchange.mail.filter.json.v2.json.fields.HeaderTestField;
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.test.AbstractTestCommandParser;
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.test.HeaderTestCommandParser;
+import com.openexchange.mail.filter.json.v2.json.mapper.parser.test.TestCommandUtil;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 
@@ -101,7 +101,7 @@ public class SimplifiedHeaderTestParser extends AbstractTestCommandParser {
     public TestCommand parse(JSONObject jsonObject, ServerSession session) throws JSONException, SieveException, OXException {
         String id = jsonObject.getString("id");
         if (Commands.HEADER.getCommandName().equals(id)) {
-            // Fall back to default behavior
+            // Fall back to default behaviour
             return headerParser.parse(jsonObject, session);
         }
         SimplifiedHeaderTest test = SimplifiedHeaderTest.getTestByName(id);
@@ -139,23 +139,10 @@ public class SimplifiedHeaderTestParser extends AbstractTestCommandParser {
         headerParser.parse(jsonObject, command, transformToNotMatcher);
 
         JSONArray headers = jsonObject.getJSONArray(HeaderTestField.headers.name());
-
         for (SimplifiedHeaderTest test : SimplifiedHeaderTest.values()) {
-            List<String> simplifiedHeaders = test.getHeaderNames();
-            if (simplifiedHeaders.size() != headers.length()) {
-                continue;
+            if (TestCommandUtil.isSimplified(test, headers)) {
+                simplify(test.getCommandName(), jsonObject);
             }
-            boolean isEqual = true;
-            for (Object header : headers) {
-                if (!simplifiedHeaders.contains(header)) {
-                    isEqual = false;
-                    break;
-                }
-            }
-            if (!isEqual) {
-                continue;
-            }
-            simplify(test.getCommandName(), jsonObject);
         }
     }
 

@@ -134,7 +134,7 @@ public abstract class AbstractShareComposeSetting<V> implements PreferencesItemS
 
             @Override
             public boolean isAvailable(UserConfiguration userConfig) {
-                return true;
+                return userConfig.hasWebMail();
             }
 
         };

@@ -1,5 +1,5 @@
 ---
-Title: Overview: capabilities and configurations
+title: Overview of capabilities and configurations
 ---
 
 The OX middleware provides multiple command-line tool's to list capabilities and configurations. This page provides an overview over those tools.

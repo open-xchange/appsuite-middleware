@@ -178,3 +178,24 @@ properties:
     file: login.properties
     packageName: open-xchange-core
     tags: ["Login"] 
+  - key: com.openexchange.ajax.login.rampup.debugThresholdMillis
+    description: |
+      Specify the execution time threshold in milliseconds since when individual calls issued by rampup request are logged
+      along-side with execution time in milliseconds.
+  
+      Note: This property requires DEBUG logging to be effective for class 'com.openexchange.login.DefaultAppSuiteLoginRampUp'.
+      E.g. Enhance 'logback.xml' file by the following logger statement:
+      <pre>  
+      &lt;logger name="com.openexchange.login.DefaultAppSuiteLoginRampUp" level="DEBUG"/&gt;
+      </pre>
+
+      If this property is not specified, every individual call will be logged. If a negative value is specified, logging is
+      disabled. In case a positive value is specified, a call will only be logged if its execution time exceeds that threshold.
+    defaultValue: 0
+    version: 
+    reloadable: true
+    configcascadeAware: true
+    related: 
+    file: login.properties
+    packageName: open-xchange-core
+    tags: ["Login"] 

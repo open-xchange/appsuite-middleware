@@ -151,6 +151,11 @@ public final class AutosaveAction extends AbstractMailAction {
             return result;
         } catch (final RuntimeException e) {
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } catch (final OXException e){
+            if (MailExceptionCode.COPY_TO_SENT_FOLDER_FAILED_QUOTA.equals(e)) {
+                throw MailExceptionCode.UNABLE_TO_SAVE_DRAFT_QUOTA.create();
+            }
+            throw e;
         }
     }
 

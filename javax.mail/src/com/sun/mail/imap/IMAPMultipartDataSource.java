@@ -1,19 +1,19 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2010 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2017 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
  * and Distribution License("CDDL") (collectively, the "License").  You
  * may not use this file except in compliance with the License.  You can
  * obtain a copy of the License at
- * https://glassfish.dev.java.net/public/CDDL+GPL_1_1.html
- * or packager/legal/LICENSE.txt.  See the License for the specific
+ * https://oss.oracle.com/licenses/CDDL+GPL-1.1
+ * or LICENSE.txt.  See the License for the specific
  * language governing permissions and limitations under the License.
  *
  * When distributing the software, include this License Header Notice in each
- * file and include the License file at packager/legal/LICENSE.txt.
+ * file and include the License file at LICENSE.txt.
  *
  * GPL Classpath Exception:
  * Oracle designates this particular file as subject to the "Classpath"
@@ -62,7 +62,7 @@ public class IMAPMultipartDataSource extends MimePartDataSource
 				      String sectionId, IMAPMessage msg) {
 	super(part);
 
-	parts = new ArrayList<IMAPBodyPart>(bs.length);
+	parts = new ArrayList<>(bs.length);
 	for (int i = 0; i < bs.length; i++)
 	    parts.add(
 		new IMAPBodyPart(bs[i], 
@@ -73,10 +73,12 @@ public class IMAPMultipartDataSource extends MimePartDataSource
 	    );
     }
 
+    @Override
     public int getCount() {
 	return parts.size();
     }
 
+    @Override
     public BodyPart getBodyPart(int index) throws MessagingException {
 	return parts.get(index);
     }

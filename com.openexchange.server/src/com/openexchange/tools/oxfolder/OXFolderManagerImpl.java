@@ -77,6 +77,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import com.google.common.collect.ImmutableMap;
 import com.openexchange.ajax.fields.FolderChildFields;
 import com.openexchange.ajax.fields.FolderFields;
 import com.openexchange.api2.AppointmentSQLInterface;
@@ -2250,7 +2251,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
         fieldMapping.put("created_from", Integer.valueOf(DataObject.CREATED_BY));
         fieldMapping.put("changing_date", Integer.valueOf(DataObject.LAST_MODIFIED));
         fieldMapping.put("changed_from", Integer.valueOf(DataObject.MODIFIED_BY));
-        OXFolderManagerImpl.fieldMapping = Collections.unmodifiableMap(fieldMapping);
+        OXFolderManagerImpl.fieldMapping = ImmutableMap.copyOf(fieldMapping);
     }
 
     private static User getUser(Session session) throws OXException {

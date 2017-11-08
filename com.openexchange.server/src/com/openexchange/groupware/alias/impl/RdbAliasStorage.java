@@ -62,6 +62,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ImmutableSet.Builder;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.alias.UserAliasStorage;
@@ -69,6 +71,7 @@ import com.openexchange.groupware.alias.UserAliasStorageExceptionCodes;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.tools.arrays.Arrays;
 import com.openexchange.tools.sql.DBUtils;
+import gnu.trove.iterator.TIntObjectIterator;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 
@@ -94,7 +97,7 @@ public class RdbAliasStorage implements UserAliasStorage {
     }
 
     @Override
-    public Set<String> getAliases(int contextId) throws OXException {
+    public ImmutableSet<String> getAliases(int contextId) throws OXException {
         Connection con = Database.get(contextId, false);
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -103,14 +106,14 @@ public class RdbAliasStorage implements UserAliasStorage {
             stmt.setInt(1, contextId);
             rs = stmt.executeQuery();
             if (false == rs.next()) {
-                return Collections.emptySet();
+                return ImmutableSet.<String> builder().build();
             }
 
-            List<String> l = new LinkedList<String>();
+            ImmutableSet.Builder<String> aliases = ImmutableSet.builder();
             do {
-                l.add(rs.getString(1));
+                aliases.add(rs.getString(1));
             } while (rs.next());
-            return new HashSet<String>(l);
+            return aliases.build();
         } catch (SQLException e) {
             throw UserAliasStorageExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
@@ -120,7 +123,7 @@ public class RdbAliasStorage implements UserAliasStorage {
     }
 
     @Override
-    public HashSet<String> getAliases(int contextId, int userId) throws OXException {
+    public ImmutableSet<String> getAliases(int contextId, int userId) throws OXException {
         Connection con = Database.get(contextId, false);
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -130,11 +133,15 @@ public class RdbAliasStorage implements UserAliasStorage {
             stmt.setInt(++index, contextId);
             stmt.setInt(++index, userId);
             rs = stmt.executeQuery();
-            HashSet<String> aliases = new HashSet<String>(6, 0.9F);
-            while (rs.next()) {
-                aliases.add(rs.getString(1));
+            if (false == rs.next()) {
+                return ImmutableSet.<String> builder().build();
             }
-            return aliases;
+
+            ImmutableSet.Builder<String> aliases = ImmutableSet.builder();
+            do {
+                aliases.add(rs.getString(1));
+            } while (rs.next());
+            return aliases.build();
         } catch (SQLException e) {
             throw UserAliasStorageExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
@@ -158,7 +165,7 @@ public class RdbAliasStorage implements UserAliasStorage {
             return Collections.<Set<String>> singletonList(getAliases(contextId, userIds[0]));
         }
 
-        TIntObjectMap<Set<String>> map = getAliasesMapping(contextId, userIds);
+        TIntObjectMap<ImmutableSet<String>> map = getAliasesMapping(contextId, userIds);
         List<Set<String>> list = new ArrayList<>(length);
         for (int userId : userIds) {
             list.add(map.get(userId));
@@ -174,11 +181,11 @@ public class RdbAliasStorage implements UserAliasStorage {
      * @return The alias mapping
      * @throws OXException If alias mapping cannot be returned
      */
-    TIntObjectMap<Set<String>> getAliasesMapping(int contextId, int[] userIds) throws OXException {
+    TIntObjectMap<ImmutableSet<String>> getAliasesMapping(int contextId, int[] userIds) throws OXException {
         Connection con = Database.get(contextId, false);
         try {
             int length = userIds.length;
-            TIntObjectMap<Set<String>> map = new TIntObjectHashMap<>(length);
+            TIntObjectMap<ImmutableSet.Builder<String>> map = new TIntObjectHashMap<>(length);
 
             for (int i = 0; i < length; i += IN_LIMIT) {
                 PreparedStatement stmt = null;
@@ -191,12 +198,12 @@ public class RdbAliasStorage implements UserAliasStorage {
                     for (int j = 0; j < clen; j++) {
                         int userId = userIds[i+j];
                         stmt.setInt(pos++, userId);
-                        map.put(userId, new HashSet<String>(6, 0.9F));
+                        map.put(userId, ImmutableSet.<String> builder());
                     }
                     rs = stmt.executeQuery();
                     while (rs.next()) {
                         int userId = rs.getInt(1);
-                        Set<String> aliases = map.get(userId);
+                        Builder<String> aliases = map.get(userId);
                         aliases.add(rs.getString(2));
                     }
                 } catch (SQLException e) {
@@ -206,7 +213,13 @@ public class RdbAliasStorage implements UserAliasStorage {
                 }
             }
 
-            return map;
+            TIntObjectMap<ImmutableSet<String>> retval = new TIntObjectHashMap<>(length);
+            TIntObjectIterator<Builder<String>> iterator = map.iterator();
+            for (int i = map.size(); i-- > 0;) {
+                iterator.advance();
+                retval.put(iterator.key(), iterator.value().build());
+            }
+            return retval;
         } finally {
             Database.back(contextId, false, con);
         }

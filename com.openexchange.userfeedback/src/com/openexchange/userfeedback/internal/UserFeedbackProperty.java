@@ -98,6 +98,7 @@ public enum UserFeedbackProperty implements Property{
      *
      * @return the fully qualified name of the property
      */
+    @Override
     public String getFQPropertyName() {
         return fqn + name();
     }
@@ -107,11 +108,9 @@ public enum UserFeedbackProperty implements Property{
      *
      * @return the default value of this property
      */
-    public <T extends Object> T getDefaultValue(Class<T> cls) {
-        if (defaultValue.getClass().isAssignableFrom(cls)) {
-            return cls.cast(defaultValue);
-        }
-        throw new IllegalArgumentException("The object cannot be converted to the specified type '" + cls.getCanonicalName() + "'");
+    @Override
+    public Object getDefaultValue() {
+        return defaultValue;
     }
 
 }

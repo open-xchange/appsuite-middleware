@@ -80,6 +80,7 @@ import javax.mail.internet.ParameterList;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.IMAPServerInfo;
 import com.openexchange.java.Strings;
+import com.openexchange.log.LogProperties;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.dataobjects.IDMailMessage;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -548,6 +549,10 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
                 m.setHasAttachment(new ContentType(cts).startsWith("multipart/mixed"));
             }
         }
+
+        // Drop possible set "com.openexchange.mail.mailId" log property
+        LogProperties.remove(LogProperties.Name.MAIL_MAIL_ID);
+
         return m;
     }
 
@@ -747,8 +752,8 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
 
         @Override
         public void handleMessage(final Message message, final IDMailMessage msg, final org.slf4j.Logger logger) throws MessagingException, OXException {
-            for (final Enumeration<?> e = message.getAllHeaders(); e.hasMoreElements();) {
-                final Header hdr = (Header) e.nextElement();
+            for (final Enumeration<Header> e = message.getAllHeaders(); e.hasMoreElements();) {
+                final Header hdr = e.nextElement();
                 final String name = hdr.getName();
                 {
                     final HeaderHandler headerHandler = hh.get(name);
@@ -929,11 +934,13 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
             int length = addresses.length;
             InternetAddress[] ret = new InternetAddress[length];
             for (int i = length; i-- > 0;) {
+                String sAddress = addresses[i].toString();
                 try {
-                    ret[i] = new QuotedInternetAddress(addresses[i].toString(), false);
+                    ret[i] = new QuotedInternetAddress(sAddress, false);
                 } catch (AddressException e) {
                     // Use as-is
-                    ret[i] = new PlainTextAddress(e.getRef());
+                    String parsed = e.getRef();
+                    ret[i] = new PlainTextAddress(null == parsed ? sAddress : parsed);
                 }
             }
             return ret;
@@ -1129,8 +1136,10 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
         @Override
         public void handleItem(final Item item, final IDMailMessage msg, final org.slf4j.Logger logger) {
             long id = ((UID) item).uid;
-            msg.setMailId(Long.toString(id));
+            String sUid = Long.toString(id);
+            msg.setMailId(sUid);
             msg.setUid(id);
+            LogProperties.put(LogProperties.Name.MAIL_MAIL_ID, sUid);
         }
 
         @Override

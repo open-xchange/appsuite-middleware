@@ -20,7 +20,8 @@
         description: |
           JSON object with "folder" object containing the modified fields and optional "notification"
           object to let added permission entities be notified about newly shared folders for all modules
-          except mail. (Example: {"folder":{"title":"test123"}} or {"folder":{"permissions":[{"bits":403710016,"entity":84,"group":false}]},"notification":{"transport":"mail","message":"The message"}})
+          except mail. (Example: {"folder":{"module":"infostore","subscribed":true,"title":"Test123"}} or 
+          {"folder":{"module":"infostore","subscribed":true,"title":"Test123","permissions":[{"bits":403710016,"entity":84,"group":false}]},"notification":{"transport":"mail","message":"The message"}})
         required: true
         schema:
           $ref: "#/definitions/FolderBody"

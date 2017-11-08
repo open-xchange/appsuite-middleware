@@ -1,19 +1,19 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2015 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2017 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
  * and Distribution License("CDDL") (collectively, the "License").  You
  * may not use this file except in compliance with the License.  You can
  * obtain a copy of the License at
- * https://glassfish.dev.java.net/public/CDDL+GPL_1_1.html
- * or packager/legal/LICENSE.txt.  See the License for the specific
+ * https://oss.oracle.com/licenses/CDDL+GPL-1.1
+ * or LICENSE.txt.  See the License for the specific
  * language governing permissions and limitations under the License.
  *
  * When distributing the software, include this License Header Notice in each
- * file and include the License file at packager/legal/LICENSE.txt.
+ * file and include the License file at LICENSE.txt.
  *
  * GPL Classpath Exception:
  * Oracle designates this particular file as subject to the "Classpath"
@@ -45,6 +45,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
 import java.io.*;
+import java.lang.reflect.Field;
 import java.nio.channels.SocketChannel;
 import java.net.*;
 import java.util.logging.Level;
@@ -56,6 +57,7 @@ import com.sun.mail.imap.IMAPStore;
 import com.sun.mail.imap.ProtocolListener;
 import com.sun.mail.imap.ResponseEvent;
 import com.sun.mail.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * General protocol handling code for IMAP-like protocols. <p>
@@ -92,7 +94,7 @@ public class Protocol {
     private String localHostName;
 
     private final List<ResponseHandler> handlers
-	    = new java.util.concurrent.CopyOnWriteArrayList<ResponseHandler>();
+	    = new CopyOnWriteArrayList<>();
 
     private volatile long timestamp;
 
@@ -522,21 +524,6 @@ public class Protocol {
      */
     public synchronized void startCompression(String cmd)
 				throws IOException, ProtocolException {
-	/*
-	 * The Deflator.SYNC_FLUSH support requires JDK 1.7 so use
-	 * reflection to allow compiling on 1.5 but running on 1.7.
-	 */
-	Class<java.util.zip.DeflaterOutputStream> dc = java.util.zip.DeflaterOutputStream.class;
-	java.lang.reflect.Constructor<java.util.zip.DeflaterOutputStream> cons = null;
-	try {
-	    cons = dc.getConstructor(
-			    OutputStream.class, java.util.zip.Deflater.class, boolean.class);
-	} catch (NoSuchMethodException ex) {
-	    logger.fine("Ignoring COMPRESS; " +
-			"missing JDK 1.7 DeflaterOutputStream constructor");
-	    return;	// ignore request, just as if server doesn't support it
-	}
-
 	// XXX - check whether compression is already enabled?
 	simpleCommand(cmd, null);
 
@@ -568,16 +555,10 @@ public class Protocol {
 	} catch (IllegalArgumentException ex) {
 	    logger.log(Level.FINE, "Ignoring bad compression strategy", ex);
 	}
-	//traceOutput = new TraceOutputStream(new DeflaterOutputStream(
-	//		    socket.getOutputStream(), def, true), traceLogger);
-	try {
-	    traceOutput = new TraceOutputStream(cons.newInstance(
-			    socket.getOutputStream(), def, true), traceLogger);
-	} catch (Exception ex) {
-	    throw new ProtocolException("can't create deflater", ex);
-	}
-	traceOutput.setQuote(quote);
-	output = new DataOutputStream(new BufferedOutputStream(traceOutput));
+    traceOutput = new TraceOutputStream(new java.util.zip.DeflaterOutputStream(
+                socket.getOutputStream(), def, true), traceLogger);
+    traceOutput.setQuote(quote);
+    output = new DataOutputStream(new BufferedOutputStream(traceOutput));
     }
 
     /**
@@ -607,7 +588,34 @@ public class Protocol {
      * @since	JavaMail 1.5.2
      */
     public SocketChannel getChannel() {
-	return socket.getChannel();
+	SocketChannel ret = socket.getChannel();
+	if (ret != null)
+	    return ret;
+
+	// XXX - Android is broken and SSL wrapped sockets don't delegate
+	// the getChannel method to the wrapped Socket
+	if (socket instanceof SSLSocket) {
+	    try {
+		Field f = socket.getClass().getDeclaredField("socket");
+		f.setAccessible(true);
+		Socket s = (Socket)f.get(socket);
+		ret = s.getChannel();
+	    } catch (Exception ex) {
+		// ignore anything that might go wrong
+	    }
+	}
+	return ret;
+    }
+
+    /**
+     * Does the server support UTF-8?
+     * This implementation returns false.
+     * Subclasses should override as appropriate.
+     *
+     * @since JavaMail 1.6.0
+     */
+    public boolean supportsUtf8() {
+	return false;
     }
 
     /**
@@ -700,6 +708,7 @@ public class Protocol {
     /**
      * Finalizer.
      */
+    @Override
     protected void finalize() throws Throwable {
 	try {
 	    disconnect();
