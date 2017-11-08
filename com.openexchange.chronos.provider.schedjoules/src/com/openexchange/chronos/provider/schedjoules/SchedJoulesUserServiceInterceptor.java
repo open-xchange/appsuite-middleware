@@ -80,8 +80,6 @@ public class SchedJoulesUserServiceInterceptor extends AbstractUserServiceInterc
      */
     private static final String LOCALE_PARAMETER = "l";
 
-    private static final String FOLDER_CACHING = "folderCaching";
-
     private ServiceLookup services;
 
     /**
@@ -114,10 +112,6 @@ public class SchedJoulesUserServiceInterceptor extends AbstractUserServiceInterc
             if (folders == null) {
                 continue;
             }
-            JSONObject folderCaching = internalConfig.optJSONObject(FOLDER_CACHING);
-            if (folderCaching == null) {
-                folderCaching = new JSONObject();
-            }
             for (int index = 0; index < folders.length(); index++) {
                 try {
                     JSONObject folder = folders.getJSONObject(index);
@@ -129,7 +123,7 @@ public class SchedJoulesUserServiceInterceptor extends AbstractUserServiceInterc
                     String url = folder.getString(SchedJoulesFields.URL);
                     folder.put(SchedJoulesFields.URL, replaceLocale(url, language));
                     folder.put(SchedJoulesFields.LOCALE, language);
-                    
+
                     // TODO: Invalidate caching information and/or events
                 } catch (JSONException e) {
                     LOGGER.warn("Invalid/Malformed configuration detected in SchedJoules account '{}' for user '{}' in context '{}'", account.getAccountId(), user.getId(), context.getContextId(), e);
