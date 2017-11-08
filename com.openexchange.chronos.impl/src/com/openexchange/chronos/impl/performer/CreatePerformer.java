@@ -55,6 +55,8 @@ import static com.openexchange.chronos.impl.Check.requireCalendarPermission;
 import static com.openexchange.folderstorage.Permission.CREATE_OBJECTS_IN_FOLDER;
 import static com.openexchange.folderstorage.Permission.NO_PERMISSIONS;
 import static com.openexchange.folderstorage.Permission.WRITE_OWN_OBJECTS;
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.tools.arrays.Collections.isNullOrEmpty;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -76,7 +78,6 @@ import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.type.PublicType;
-import com.openexchange.java.Autoboxing;
 import com.openexchange.java.Strings;
 
 /**
@@ -105,7 +106,6 @@ public class CreatePerformer extends AbstractUpdatePerformer {
      * @return The result
      */
     public InternalCalendarResult perform(Event event) throws OXException {
-        getSelfProtection().checkEvent(event);
         /*
          * check current session user's permissions
          */
@@ -114,33 +114,33 @@ public class CreatePerformer extends AbstractUpdatePerformer {
          * prepare event & attendee data for insert, assign parent folder
          */
         Event newEvent = prepareEvent(event);
-        List<Attendee> newAttendees = prepareAttendees(event.getAttendees());
-        getSelfProtection().checkAttendeeCollection(newAttendees);
-        if (null == newAttendees || 0 == newAttendees.size()) {
+        newEvent.setAttendees(Check.maxAttendees(getSelfProtection(), prepareAttendees(event.getAttendees())));
+        if (isNullOrEmpty(newEvent.getAttendees())) {
             /*
              * not group-scheduled event (only on a single user's calendar), apply parent folder identifier
              */
             newEvent.setFolderId(folder.getID());
         } else {
             /*
-             * group-scheduled event, assign organizer and dynamic parent-folder identifier (for non-public folders)
+             * group-scheduled event, assign organizer, sequence number and dynamic parent-folder identifier (for non-public folders)
              */
             newEvent.setOrganizer(prepareOrganizer(event.getOrganizer()));
+            newEvent.setSequence(event.containsSequence() ? event.getSequence() : 0);
             newEvent.setFolderId(PublicType.getInstance().equals(folder.getType()) ? folder.getID() : null);
         }
         /*
          * check for conflicts & quota restrictions
          */
         Check.quotaNotExceeded(storage, session);
-        Check.noConflicts(storage, session, newEvent, newAttendees);
+        Check.noConflicts(storage, session, newEvent, newEvent.getAttendees());
         /*
          * insert event, attendees & attachments
          */
         storage.getEventStorage().insertEvent(newEvent);
-        if (null != newAttendees && 0 < newAttendees.size()) {
-            storage.getAttendeeStorage().insertAttendees(newEvent.getId(), newAttendees);
+        if (false == isNullOrEmpty(newEvent.getAttendees())) {
+            storage.getAttendeeStorage().insertAttendees(newEvent.getId(), newEvent.getAttendees());
         }
-        if (null != event.getAttachments() && 0 < event.getAttachments().size()) {
+        if (false == isNullOrEmpty(event.getAttachments())) {
             storage.getAttachmentStorage().insertAttachments(session.getSession(), folder.getID(), newEvent.getId(), event.getAttachments());
         }
         /*
@@ -153,11 +153,12 @@ public class CreatePerformer extends AbstractUpdatePerformer {
         Map<Integer, List<Alarm>> alarmsPerUserId = new HashMap<Integer, List<Alarm>>();
         for (int userId : getUserIDs(createdEvent.getAttendees())) {
             if (calendarUserId == userId && event.containsAlarms()) {
-                alarmsPerUserId.put(Autoboxing.I(userId), insertAlarms(createdEvent, userId, Check.alarmsAreValid(event.getAlarms()), false));
+                List<Alarm> alarms = Check.maxAlarms(getSelfProtection(), Check.alarmsAreValid(event.getAlarms()));
+                alarmsPerUserId.put(I(userId), insertAlarms(createdEvent, userId, alarms, false));
             } else {
                 Alarm defaultAlarm = isAllDay(createdEvent) ? session.getConfig().getDefaultAlarmDate(userId) : session.getConfig().getDefaultAlarmDateTime(userId);
                 if (null != defaultAlarm) {
-                    alarmsPerUserId.put(Autoboxing.I(userId), insertAlarms(createdEvent, userId, Collections.singletonList(defaultAlarm), true));
+                    alarmsPerUserId.put(I(userId), insertAlarms(createdEvent, userId, Collections.singletonList(defaultAlarm), true));
                 }
             }
         }
@@ -179,7 +180,6 @@ public class CreatePerformer extends AbstractUpdatePerformer {
          * identifiers
          */
         event.setId(storage.getEventStorage().nextId());
-        event.setSequence(0);
         if (false == eventData.containsUid() || Strings.isEmpty(eventData.getUid())) {
             event.setUid(UUID.randomUUID().toString());
         } else {

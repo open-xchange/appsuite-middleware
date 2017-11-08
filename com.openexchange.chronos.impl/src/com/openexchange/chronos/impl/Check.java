@@ -56,10 +56,12 @@ import static com.openexchange.chronos.impl.Utils.getCalendarUserId;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.L;
 import java.util.List;
+import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Classification;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.common.SelfProtectionFactory.SelfProtection;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.performer.ConflictCheckPerformer;
 import com.openexchange.chronos.impl.performer.ResolveUidPerformer;
@@ -312,6 +314,39 @@ public class Check extends com.openexchange.chronos.common.Check {
         if (null != quota && quota.isExceeded()) {
             throw QuotaExceptionCodes.QUOTA_EXCEEDED_CALENDAR.create(String.valueOf(quota.getUsage()), String.valueOf(quota.getLimit()));
         }
+    }
+
+    /**
+     * Checks that the maximum number of attendees is not exceeded prior inserting or updating the attendee collection of an event.
+     *
+     * @param selfProtection A reference to the self-protection helper
+     * @param attendees The attendees to check
+     * @return The passed attendees, after they were checked
+     * @throws OXException {@link CalendarExceptionCodes#TOO_MANY_ATTENDEES}
+     * @see <a href="https://tools.ietf.org/html/rfc4791#section-5.2.9">RFC 4791, section 5.2.9</a>
+     */
+    public static List<Attendee> maxAttendees(SelfProtection selfProtection, List<Attendee> attendees) throws OXException {
+        if (null != attendees) {
+            selfProtection.checkAttendeeCollection(attendees);
+        }
+        return attendees;
+    }
+
+    /**
+     * Checks that the maximum number of alarms is not exceeded prior inserting or updating the alarm collection of an event for a user.
+     *
+     * @param selfProtection A reference to the self-protection helper
+     * @param alarms The alarms to check
+     * @return The passed alarms, after they were checked
+     * @throws OXException {@link CalendarExceptionCodes#TOO_MANY_ALARMS}
+     */
+    public static List<Alarm> maxAlarms(SelfProtection selfProtection, List<Alarm> alarms) throws OXException {
+        if (null != alarms) {
+            Event event = new Event();
+            event.setAlarms(alarms);
+            selfProtection.checkEvent(event);
+        }
+        return alarms;
     }
 
     /**
