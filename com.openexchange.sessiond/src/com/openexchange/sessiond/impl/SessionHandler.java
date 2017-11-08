@@ -1523,8 +1523,10 @@ public final class SessionHandler {
                 }
             }
         }
-        Date now = new Date();
-        sessionControl.getSession().setParameter(Session.PARAM_LAST_ACTIVE, now.getTime());
+        if (null != sessionControl) {
+            Date now = new Date();
+            sessionControl.getSession().setParameter(Session.PARAM_LAST_ACTIVE, now.getTime());
+        }
         return sessionControl;
     }
 
