@@ -72,6 +72,9 @@ import com.openexchange.testing.httpclient.modules.UserApi;
  */
 public class AutoCompleteShowDepartmentsTest extends AbstractAPIClientSession {
 
+    private static final int LIMIT = 6;
+    private static final String CONTACTS_MODULE = "contacts";
+
     private ApiClient apiClient2;
     private UserApi userApi;
     private UserApi userApi2;
@@ -85,52 +88,43 @@ public class AutoCompleteShowDepartmentsTest extends AbstractAPIClientSession {
 
     /**
      * Set up users
-     * 
-     * @throws Exception
      */
     @Override
     public void setUp() throws Exception {
         super.setUp();
 
+        // Login clients
         apiClient.login(testUser.getLogin(), testUser.getPassword());
-
-        UserData updateBody = new UserData();
-        updateBody.setDepartment("Department A");
-        updateBody.setDistributionList(null);
-        updateBody.setGroups(null);
-        updateBody.setAliases(null);
-
-        userApi = new UserApi(apiClient);
-        userApi.updateUser(apiClient.getSession(), Integer.toString(apiClient.getUserId()), System.currentTimeMillis(), updateBody);
-
-        updateBody = new UserData();
-        updateBody.setDepartment("Department B");
-        updateBody.setDistributionList(null);
-        updateBody.setGroups(null);
-        updateBody.setAliases(null);
 
         apiClient2 = generateClient(testUser2);
         apiClient2.login(testUser2.getLogin(), testUser2.getPassword());
         rememberClient(apiClient2);
 
+        // Prepare users
+        userApi = new UserApi(apiClient);
+        userApi.updateUser(apiClient.getSession(), Integer.toString(apiClient.getUserId()), System.currentTimeMillis(), createUpdateBody("Department A"));
+
         userApi2 = new UserApi(apiClient2);
-        userApi2.updateUser(apiClient2.getSession(), Integer.toString(apiClient2.getUserId()), System.currentTimeMillis(), updateBody);
+        userApi2.updateUser(apiClient2.getSession(), Integer.toString(apiClient2.getUserId()), System.currentTimeMillis(), createUpdateBody("Department B"));
     }
 
+    /**
+     * Resets the users
+     */
     @Override
     public void tearDown() throws Exception {
-        UserData updateBody = new UserData();
-        updateBody.setDepartment("");
-        updateBody.setDistributionList(null);
-        updateBody.setGroups(null);
-        updateBody.setAliases(null);
-
-        userApi.updateUser(apiClient.getSession(), Integer.toString(apiClient.getUserId()), System.currentTimeMillis(), updateBody);
-        userApi2.updateUser(apiClient2.getSession(), Integer.toString(apiClient2.getUserId()), System.currentTimeMillis(), updateBody);
+        // Reset users
+        userApi.updateUser(apiClient.getSession(), Integer.toString(apiClient.getUserId()), System.currentTimeMillis(), createUpdateBody(""));
+        userApi2.updateUser(apiClient2.getSession(), Integer.toString(apiClient2.getUserId()), System.currentTimeMillis(), createUpdateBody(""));
 
         super.tearDown();
     }
 
+    /**
+     * Performs a simple auto-complete request and asserts the results.
+     * On server side, the property <code>com.openexchange.contact.showDepartments</code>
+     * must be set to <code>true</code>.
+     */
     @Test
     public void testAutoCompleteShowDepartment() throws Exception {
         FindApi findApi = new FindApi(apiClient);
@@ -142,7 +136,8 @@ public class AutoCompleteShowDepartmentsTest extends AbstractAPIClientSession {
         FindAutoCompleteBody body = new FindAutoCompleteBody();
         body.setPrefix(apiClient.getUser());
         body.setOptions(options);
-        FindAutoCompleteResponse response = findApi.doAutoComplete(apiClient.getSession(), "contacts", body, 6);
+
+        FindAutoCompleteResponse response = findApi.doAutoComplete(apiClient.getSession(), CONTACTS_MODULE, body, LIMIT);
         FindAutoCompleteData data = response.getData();
         List<FindFacetValue> values = null;
         for (FindFacetData findFacetData : data.getFacets()) {
@@ -151,12 +146,33 @@ public class AutoCompleteShowDepartmentsTest extends AbstractAPIClientSession {
                 break;
             }
         }
-        
-        assertNotNull(values);
-        
+        assertNotNull("No contact results were found.", values);
+
         for (FindFacetValue value : values) {
             String itemName = value.getItem().getName();
-            assertTrue(itemName.contains("Department"));
+            assertTrue("The item is missing the 'department' part from the display name", itemName.contains("Department"));
         }
+    }
+
+    /**
+     * Creates the update body with the specified department string
+     * 
+     * @param department The department string
+     * @return The {@link UserData}
+     */
+    private UserData createUpdateBody(String department) {
+        UserData updateBody = new UserData();
+        updateBody.setDepartment(department);
+
+        // The swagger client sets the following to empty lists
+        // and results in a transformation of a user to a distribution list.
+        //
+        // Therefore we set those to 'null' to avoid sending over the empty
+        // lists via the HTTP API.
+        updateBody.setDistributionList(null);
+        updateBody.setGroups(null);
+        updateBody.setAliases(null);
+
+        return updateBody;
     }
 }
