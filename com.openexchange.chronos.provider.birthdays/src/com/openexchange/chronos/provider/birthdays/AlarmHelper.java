@@ -51,6 +51,7 @@ package com.openexchange.chronos.provider.birthdays;
 
 import static com.openexchange.chronos.common.CalendarUtils.getAlarmIDs;
 import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.osgi.Tools.requireService;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -59,7 +60,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import org.json.JSONObject;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmField;
 import com.openexchange.chronos.AlarmTrigger;
@@ -67,8 +67,8 @@ import com.openexchange.chronos.DelegatingEvent;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.ExtendedProperty;
 import com.openexchange.chronos.common.AlarmUtils;
-import com.openexchange.chronos.common.DataHandlers;
 import com.openexchange.chronos.common.UpdateResultImpl;
+import com.openexchange.chronos.common.UserConfigWrapper;
 import com.openexchange.chronos.common.mapping.AlarmMapper;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.service.CollectionUpdate;
@@ -76,11 +76,7 @@ import com.openexchange.chronos.service.ItemUpdate;
 import com.openexchange.chronos.service.UpdateResult;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.chronos.storage.operation.OSGiCalendarStorageOperation;
-import com.openexchange.conversion.ConversionResult;
 import com.openexchange.conversion.ConversionService;
-import com.openexchange.conversion.DataArguments;
-import com.openexchange.conversion.DataHandler;
-import com.openexchange.conversion.SimpleData;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.java.Strings;
@@ -212,20 +208,14 @@ public class AlarmHelper {
      * @return The default alarms, or <code>null</code> if none are defined
      */
     public List<Alarm> getDefaultAlarms() {
-        JSONObject defaultAlarmObject = account.getUserConfiguration().optJSONObject("defaultAlarmDate");
-        if (null == defaultAlarmObject) {
+        try {
+            UserConfigWrapper configWrapper = new UserConfigWrapper(requireService(ConversionService.class, services), account.getUserConfiguration());
+            Alarm defaultAlarm = configWrapper.getDefaultAlarmDate();
+            return null != defaultAlarm ? Collections.singletonList(defaultAlarm) : null;
+        } catch (Exception e) {
+            LOG.warn("Error getting default alarm from user configuration \"{}\": {}", account.getUserConfiguration(), e.getMessage(), e);
             return null;
         }
-        DataHandler dataHandler = services.getService(ConversionService.class).getDataHandler(DataHandlers.JSON2ALARM);
-        try {
-            ConversionResult result = dataHandler.processData(new SimpleData<JSONObject>(defaultAlarmObject), new DataArguments(), null);
-            if (null != result && null != result.getData()) {
-                return Collections.singletonList((Alarm) result.getData());
-            }
-        } catch (Exception e) {
-            LOG.warn("Error parsing default alarm \"{}\": {}", defaultAlarmObject, e.getMessage(), e);
-        }
-        return null;
     }
 
     /**

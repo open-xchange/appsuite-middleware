@@ -65,6 +65,7 @@ import com.openexchange.chronos.ExtendedProperties;
 import com.openexchange.chronos.TimeTransparency;
 import com.openexchange.chronos.common.Check;
 import com.openexchange.chronos.common.DataHandlers;
+import com.openexchange.chronos.common.UserConfigWrapper;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.AutoProvisioningCalendarProvider;
 import com.openexchange.chronos.provider.CalendarAccess;
@@ -214,18 +215,19 @@ public class BirthdaysCalendarProvider implements AutoProvisioningCalendarProvid
                     }
                 }
             }
-            /*
-             * check default alarm
-             */
-            JSONObject defaultAlarmJSONObject = userConfig.optJSONObject("defaultAlarmDate");
-            if (null != defaultAlarmJSONObject) {
-                DataHandler dataHandler = services.getService(ConversionService.class).getDataHandler(DataHandlers.JSON2ALARM);
-                ConversionResult result = dataHandler.processData(new SimpleData<JSONObject>(defaultAlarmJSONObject), new DataArguments(), session);
-                if (null != result && null != result.getData() && Alarm.class.isInstance(result.getData())) {
-                    Check.alarmIsValid((Alarm) result.getData());
-                }
-            }
         } catch (JSONException e) {
+            throw CalendarExceptionCodes.INVALID_CONFIGURATION.create(e, String.valueOf(userConfig));
+        }
+        /*
+         * check default alarm
+         */
+        try {
+            UserConfigWrapper configWrapper = new UserConfigWrapper(requireService(ConversionService.class, services), userConfig);
+            Alarm defaultAlarm = configWrapper.getDefaultAlarmDate();
+            if (null != defaultAlarm) {
+                Check.alarmIsValid(defaultAlarm);
+            }
+        } catch (OXException e) {
             throw CalendarExceptionCodes.INVALID_CONFIGURATION.create(e, String.valueOf(userConfig));
         }
     }
