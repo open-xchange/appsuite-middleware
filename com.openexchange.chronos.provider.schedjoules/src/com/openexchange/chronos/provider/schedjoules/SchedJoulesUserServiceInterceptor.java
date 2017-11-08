@@ -59,7 +59,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.account.AdministrativeCalendarAccountService;
-import com.openexchange.chronos.provider.caching.CachingCalendarAccess;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.contexts.Context;
@@ -80,6 +79,8 @@ public class SchedJoulesUserServiceInterceptor extends AbstractUserServiceInterc
      * The URL parameter name that defines the language of the SchedJoules calendar
      */
     private static final String LOCALE_PARAMETER = "l";
+
+    private static final String FOLDER_CACHING = "folderCaching";
 
     private ServiceLookup services;
 
@@ -113,7 +114,7 @@ public class SchedJoulesUserServiceInterceptor extends AbstractUserServiceInterc
             if (folders == null) {
                 continue;
             }
-            JSONObject folderCaching = internalConfig.optJSONObject(CachingCalendarAccess.CACHING);
+            JSONObject folderCaching = internalConfig.optJSONObject(FOLDER_CACHING);
             if (folderCaching == null) {
                 folderCaching = new JSONObject();
             }
