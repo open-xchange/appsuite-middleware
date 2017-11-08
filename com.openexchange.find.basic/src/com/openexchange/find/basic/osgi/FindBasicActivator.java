@@ -54,6 +54,7 @@ import java.util.Hashtable;
 import org.osgi.framework.Constants;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.contact.ContactService;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.file.storage.composition.IDBasedFolderAccessFactory;
@@ -88,10 +89,14 @@ import com.openexchange.threadpool.ThreadPoolService;
  */
 public class FindBasicActivator extends HousekeepingActivator {
 
+    //@formatter: off
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ContactService.class, FolderService.class, MailService.class, MailAccountStorageService.class, IDBasedFileAccessFactory.class, UnifiedInboxManagement.class, AppointmentSqlFactoryService.class, CalendarCollectionService.class, ThreadPoolService.class, IDBasedFolderAccessFactory.class, ResourceService.class, ConfigurationService.class, InfostoreSearchEngine.class, FileStorageServiceRegistry.class, ConfigViewFactory.class };
+        return new Class<?>[] { ContactService.class, FolderService.class, MailService.class, MailAccountStorageService.class, IDBasedFileAccessFactory.class, UnifiedInboxManagement.class, 
+            AppointmentSqlFactoryService.class, CalendarCollectionService.class, ThreadPoolService.class, IDBasedFolderAccessFactory.class, ResourceService.class, ConfigurationService.class, 
+            LeanConfigurationService.class, InfostoreSearchEngine.class, FileStorageServiceRegistry.class, ConfigViewFactory.class };
     }
+    //@formatter: on
 
     @Override
     protected void startBundle() throws Exception {
