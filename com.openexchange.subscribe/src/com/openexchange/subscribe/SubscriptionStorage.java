@@ -61,29 +61,126 @@ import com.openexchange.secret.SecretEncryptionStrategy;
  */
 public interface SubscriptionStorage extends SecretEncryptionStrategy<EncryptedField> {
 
+    /**
+     * Remembers a {@link Subscription}
+     *
+     * @param subscription The {@link Subscription} to remember
+     * @throws OXException
+     */
     public void rememberSubscription(Subscription subscription) throws OXException;
 
+    /**
+     * Forgets a {@link Subscription}
+     *
+     * @param subscription The {@link Subscription} to forget
+     * @throws OXException
+     */
     public void forgetSubscription(Subscription subscription) throws OXException;
 
+    /**
+     * Gets all {@link Subscription}s within a given folder
+     *
+     * @param ctx The {@link Context}
+     * @param folderId The folder id
+     * @return A list of {@link Subscription}s
+     * @throws OXException
+     */
     public List<Subscription> getSubscriptions(Context ctx, String folderId) throws OXException;
 
+    /**
+     * Gets a {@link Subscription}
+     *
+     * @param ctx The {@link Context}
+     * @param id The id of the {@link Subscription}
+     * @return The {@link Subscription}
+     * @throws OXException
+     */
     public Subscription getSubscription(Context ctx, int id) throws OXException;
 
+    /**
+     * Gets all {@link Subscription}s for a given user
+     *
+     * @param ctx The {@link Context}
+     * @param userId The user id
+     * @return A list of {@link Subscription}s
+     * @throws OXException
+     */
     public List<Subscription> getSubscriptionsOfUser(Context ctx, int userId) throws OXException;
 
+    /**
+     * Gets all {@link Subscription}s of a given source for a given user
+     *
+     * @param ctx The {@link Context}
+     * @param userId The user id
+     * @param sourceId The source id
+     * @return A list of {@link Subscription}s
+     * @throws OXException
+     */
     public List<Subscription> getSubscriptionsOfUser(Context ctx, int userId, String sourceId) throws OXException;
 
+    /**
+     * Updates a {@link Subscription}
+     *
+     * @param subscription The {@link Subscription} to update
+     * @throws OXException
+     */
     public void updateSubscription(Subscription subscription) throws OXException;
 
+    /**
+     * Deletes all {@link Subscription}s for a given user
+     * 
+     * @param userId The user id
+     * @param ctx The {@link Context}
+     * @throws OXException
+     */
     public void deleteAllSubscriptionsForUser(int userId, Context ctx) throws OXException;
 
+    /**
+     * Deletes all {@link Subscription}s for a given context
+     * 
+     * @param contextId The context id
+     * @param ctx The {@link Context}
+     * @throws OXException
+     */
     public void deleteAllSubscriptionsInContext(int contextId, Context ctx) throws OXException;
 
+    /**
+     * Deletes all {@link Subscription}s which match a given config
+     *
+     * @param query The config
+     * @param sourceId The source id
+     * @param ctx The {@link Context}
+     * @throws OXException
+     */
     public void deleteAllSubscriptionsWhereConfigMatches(Map<String, Object> query, String sourceId, Context ctx) throws OXException;
 
+    /**
+     * Checks if the given folders contain {@link Subscription}s or not
+     * 
+     * @param ctx The context
+     * @param folderIds A list of folder ids
+     * @return A map with a folder id to boolean mapping.
+     * @throws OXException
+     */
     public Map<String, Boolean> hasSubscriptions(Context ctx, List<String> folderIds) throws OXException;
 
+    /**
+     * Checks if the given user has subscriptions or not.
+     *
+     * @param ctx The {@link Context}
+     * @param user The {@link User}
+     * @return true if the user has a {@link Subscription}, false otherwise
+     * @throws OXException
+     */
     public boolean hasSubscriptions(Context ctx, User user) throws OXException;
 
+    /**
+     * Touches a subscription
+     *
+     * @param ctx The {@link Context}
+     * @param subscriptionId The subscription id
+     * @param currentTimeMillis The current time in milliseconds
+     * @throws OXException
+     */
     public void touch(Context ctx, int subscriptionId, long currentTimeMillis) throws OXException;
 }
