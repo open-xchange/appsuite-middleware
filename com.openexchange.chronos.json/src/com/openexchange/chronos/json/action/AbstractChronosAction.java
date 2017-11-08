@@ -53,12 +53,12 @@ import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_EXPA
 import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_FIELDS;
 import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_IGNORE_CONFLICTS;
 import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_INCLUDE_PRIVATE;
+import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_MASK_ID;
 import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_NOTIFICATION;
 import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_ORDER;
 import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_ORDER_BY;
 import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_RANGE_END;
 import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_RANGE_START;
-import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_MASK_ID;
 import java.util.AbstractMap;
 import java.util.Collections;
 import java.util.Date;
@@ -69,7 +69,6 @@ import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.chronos.EventField;
-import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.DefaultRecurrenceId;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.json.converter.mapper.EventMapper;
@@ -155,21 +154,37 @@ public abstract class AbstractChronosAction implements AJAXActionService {
         return com.openexchange.osgi.Tools.requireService(clazz, services);
     }
 
-    protected EventID getEventID(String folderId, String objectId, String optRecurrenceId) {
-        RecurrenceId recurrenceId = null != optRecurrenceId ? new DefaultRecurrenceId(optRecurrenceId) : null;
-        return new EventID(folderId, objectId, recurrenceId);
+    /**
+     * Constructs a full event identifier from the supplied folder-, object- and recurrence-id values.
+     *
+     * @param folderId The folder identifier
+     * @param objectId The object identifier
+     * @param optRecurrenceId The recurrence identifier value, or <code>null</code> if not set
+     * @return The full event identifier
+     */
+    protected EventID getEventID(String folderId, String objectId, String optRecurrenceId) throws OXException {
+        if (null == optRecurrenceId) {
+            return new EventID(folderId, objectId);
+        }
+        try {
+            return new EventID(folderId, objectId, new DefaultRecurrenceId(optRecurrenceId));
+        } catch (IllegalArgumentException e) {
+            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(CalendarParameters.PARAMETER_RECURRENCE_ID, optRecurrenceId);
+        }
     }
 
+    /**
+     * Parses a full event identifier based on the request parameters {@link AJAXServlet#PARAMETER_ID},
+     * {@link AJAXServlet#PARAMETER_FOLDERID} and {@link CalendarParameters#PARAMETER_RECURRENCE_ID}.
+     *
+     * @param requestData The request data to parse the event identifier from
+     * @return The parsed full event identifier
+     */
     protected EventID parseIdParameter(AJAXRequestData requestData) throws OXException {
         String objectId = requestData.requireParameter(AJAXServlet.PARAMETER_ID);
         String folderId = requestData.requireParameter(AJAXServlet.PARAMETER_FOLDERID);
         String optRecurrenceId = requestData.getParameter(CalendarParameters.PARAMETER_RECURRENCE_ID);
         return getEventID(folderId, objectId, optRecurrenceId);
-    }
-
-    protected RecurrenceId parseRecurrenceIdParameter(AJAXRequestData requestData) {
-        String value = requestData.getParameter(CalendarParameters.PARAMETER_RECURRENCE_ID);
-        return null != value ? new DefaultRecurrenceId(value) : null;
     }
 
     protected long parseClientTimestamp(AJAXRequestData requestData) throws OXException {
