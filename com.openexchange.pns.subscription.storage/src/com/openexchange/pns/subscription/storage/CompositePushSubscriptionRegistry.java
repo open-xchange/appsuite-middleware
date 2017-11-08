@@ -175,7 +175,7 @@ public class CompositePushSubscriptionRegistry implements PushSubscriptionRegist
                     LOG.info("Listener {} denied registration of subscription with topics '{}' for user {} in context {}", listener.getClass().getSimpleName(), subscription.getTopics(), I(subscription.getUserId()), I(subscription.getContextId()));
                 }
             } catch (Exception e) {
-                LOG.info("Listener {} failed handling registration of subscription with topics '{}' for user {} in context {}", listener.getClass().getSimpleName(), subscription.getTopics(), I(subscription.getUserId()), I(subscription.getContextId()), e);
+                LOG.error("Listener {} failed handling registration of subscription with topics '{}' for user {} in context {}", listener.getClass().getSimpleName(), subscription.getTopics(), I(subscription.getUserId()), I(subscription.getContextId()), e);
             }
         }
 
@@ -185,7 +185,7 @@ public class CompositePushSubscriptionRegistry implements PushSubscriptionRegist
             try {
                 listener.addedSubscription(subscription);
             } catch (Exception e) {
-                LOG.info("Listener {} failed handling performed registration of subscription with topics '{}' for user {} in context {}", listener.getClass().getSimpleName(), subscription.getTopics(), I(subscription.getUserId()), I(subscription.getContextId()), e);
+                LOG.error("Listener {} failed handling performed registration of subscription with topics '{}' for user {} in context {}", listener.getClass().getSimpleName(), subscription.getTopics(), I(subscription.getUserId()), I(subscription.getContextId()), e);
             }
         }
     }
@@ -201,7 +201,7 @@ public class CompositePushSubscriptionRegistry implements PushSubscriptionRegist
                 try {
                     listener.removedSubscription(subscriptionToUse);
                 } catch (Exception e) {
-                    LOG.info("Listener {} failed handling performed unregistration of subscription with topics '{}' for user {} in context {}", listener.getClass().getSimpleName(), subscriptionToUse.getTopics(), I(subscriptionToUse.getUserId()), I(subscriptionToUse.getContextId()), e);
+                    LOG.error("Listener {} failed handling performed unregistration of subscription with topics '{}' for user {} in context {}", listener.getClass().getSimpleName(), subscriptionToUse.getTopics(), I(subscriptionToUse.getUserId()), I(subscriptionToUse.getContextId()), e);
                 }
             }
         }

@@ -14,7 +14,10 @@
         required: true
         schema:
           type: array
-          items: Session Ids to delete
+          description: Session Ids to delete
+          items: 
+            type: string
+            description: A session id
     responses:
       200:
         description: |
