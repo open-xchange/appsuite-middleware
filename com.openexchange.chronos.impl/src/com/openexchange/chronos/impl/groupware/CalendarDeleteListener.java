@@ -50,9 +50,9 @@
 package com.openexchange.chronos.impl.groupware;
 
 import java.sql.Connection;
-import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
@@ -68,10 +68,10 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteFailedExceptionCodes;
 import com.openexchange.groupware.delete.DeleteListener;
-import com.openexchange.osgi.ServiceSet;
+import com.openexchange.search.CompositeSearchTerm;
+import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
 import com.openexchange.search.SingleSearchTerm.SingleOperation;
 import com.openexchange.session.Session;
-import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
@@ -90,9 +90,9 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  */
 public final class CalendarDeleteListener implements DeleteListener {
 
-    private final CalendarStorageFactory      factory;
-    private final CalendarUtilities           calendarUtilities;
-    private final ServiceSet<CalendarHandler> calendarHandlers;
+    private final CalendarStorageFactory factory;
+    private final CalendarUtilities      calendarUtilities;
+    private final Set<CalendarHandler>   calendarHandlers;
 
     /**
      * Initializes a new {@link CalendarDeleteListener}.
@@ -101,7 +101,7 @@ public final class CalendarDeleteListener implements DeleteListener {
      * @param calendarUtilities The {@link CalendarUtilities}
      * @param calendarHandlers The {@link CalendarHandler}s to notify
      */
-    public CalendarDeleteListener(CalendarStorageFactory factory, CalendarUtilities calendarUtilities, ServiceSet<CalendarHandler> calendarHandlers) {
+    public CalendarDeleteListener(CalendarStorageFactory factory, CalendarUtilities calendarUtilities, Set<CalendarHandler> calendarHandlers) {
         super();
         this.factory = factory;
         this.calendarUtilities = calendarUtilities;
@@ -149,40 +149,30 @@ public final class CalendarDeleteListener implements DeleteListener {
         /*
          * Update events where the user is attendee, delete where he is the last internal user
          */
-        Date date = new Date();
         List<Event> events = updater.searchEvents();
         List<Event> eventsToDelete = new LinkedList<>();
-        ServerSession serverSession = ServerSessionAdapter.valueOf(userId, context.getContextId());
         for (final Event event : events) {
             if (CalendarUtils.isLastUserAttendee(event.getAttendees(), userId)) {
                 // The attendee is the only one left, delete event
                 eventsToDelete.add(event);
             }
         }
-        updater.deleteEvent(eventsToDelete, serverSession, date);
+        updater.deleteEvent(eventsToDelete, ServerSessionAdapter.valueOf(userId, context.getContextId()));
         events.removeAll(eventsToDelete);
-        updater.removeAttendeeFrom(events, date);
+        updater.removeAttendeeFrom(events);
+        updater.replaceAttendeeIn(events);
 
         /*
          * Update event fields where the user might be referenced
          */
-        EventField[] fields = new EventField[] { EventField.ID, EventField.CREATED_BY, EventField.MODIFIED_BY, EventField.CALENDAR_USER, EventField.ORGANIZER };
+        CompositeSearchTerm references = new CompositeSearchTerm(CompositeOperation.OR);
+        references.addSearchTerm(CalendarUtils.getSearchTerm(EventField.CREATED_BY, SingleOperation.EQUALS, Integer.valueOf(userId)));
+        references.addSearchTerm(CalendarUtils.getSearchTerm(EventField.MODIFIED_BY, SingleOperation.EQUALS, Integer.valueOf(userId)));
+        references.addSearchTerm(CalendarUtils.getSearchTerm(EventField.CALENDAR_USER, SingleOperation.EQUALS, Integer.valueOf(userId)));
+        references.addSearchTerm(CalendarUtils.getSearchTerm(EventField.ORGANIZER, SingleOperation.EQUALS, ResourceId.forUser(context.getContextId(), userId)));
 
-        // Update events which the user created
-        events = updater.searchEvents(CalendarUtils.getSearchTerm(EventField.CREATED_BY, SingleOperation.EQUALS, Integer.valueOf(userId)), fields);
-        updater.replaceAttendeeIn(events, date);
-
-        // Update events where the user is the modifier
-        events = updater.searchEvents(CalendarUtils.getSearchTerm(EventField.MODIFIED_BY, SingleOperation.EQUALS, Integer.valueOf(userId)), fields);
-        updater.replaceAttendeeIn(events, date);
-
-        // Update events where the user is the calendar user
-        events = updater.searchEvents(CalendarUtils.getSearchTerm(EventField.CALENDAR_USER, SingleOperation.EQUALS, Integer.valueOf(userId)), fields);
-        updater.replaceAttendeeIn(events, date);
-
-        // Update events where the user is the organizer
-        events = updater.searchEvents(CalendarUtils.getSearchTerm(EventField.ORGANIZER, SingleOperation.EQUALS, ResourceId.forUser(context.getContextId(), userId)), fields);
-        updater.replaceAttendeeIn(events, date);
+        events = updater.searchEvents(references);
+        updater.replaceAttendeeIn(events);
 
         /*
          * Delete account
@@ -205,8 +195,7 @@ public final class CalendarDeleteListener implements DeleteListener {
      */
     private void deleteAttendee(DBProvider dbProvider, Context context, int attendeeId, Session adminSession) throws OXException {
         StorageUpdater updater = new StorageUpdater(context, attendeeId, null, calendarUtilities, factory, dbProvider, calendarHandlers);
-        Date date = new Date();
-        updater.removeAttendeeFrom(updater.searchEvents(), date);
+        updater.removeAttendeeFrom(updater.searchEvents());
         updater.notifyCalendarHandlers(adminSession);
     }
 }

@@ -74,7 +74,6 @@ import com.openexchange.chronos.service.UpdateResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.osgi.ServiceSet;
 import com.openexchange.session.Session;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 
@@ -92,14 +91,14 @@ class SimpleResultTracker {
     private List<UpdateResult>          updateResults;
     private List<DeleteResult>          deleteResults;
     private Set<String>                 affectedFolders;
-    private ServiceSet<CalendarHandler> calendarHandlers;
+    private Set<CalendarHandler> calendarHandlers;
 
     /**
      * Initializes a new {@link SimpleResultTracker}.
      * 
      * @param calendarHandlers The {@link CalendarHandler}s to notify
      */
-    public SimpleResultTracker(ServiceSet<CalendarHandler> calendarHandlers) {
+    public SimpleResultTracker(Set<CalendarHandler> calendarHandlers) {
         super();
         this.updateResults = new LinkedList<>();
         this.deleteResults = new LinkedList<>();

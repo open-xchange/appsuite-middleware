@@ -49,13 +49,12 @@
 
 package com.openexchange.chronos.impl.groupware;
 
-import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.Event;
-import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.service.CalendarHandler;
 import com.openexchange.chronos.service.CalendarUtilities;
@@ -64,11 +63,9 @@ import com.openexchange.database.provider.SimpleDBProvider;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.downgrade.DowngradeEvent;
 import com.openexchange.groupware.downgrade.DowngradeListener;
-import com.openexchange.osgi.ServiceSet;
 import com.openexchange.search.CompositeSearchTerm;
 import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
 import com.openexchange.search.SingleSearchTerm.SingleOperation;
-import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
@@ -79,9 +76,9 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  */
 public class CalendarDowngradeListener implements DowngradeListener {
 
-    private final CalendarStorageFactory      factory;
-    private final CalendarUtilities           calendarUtilities;
-    private final ServiceSet<CalendarHandler> calendarHandlers;
+    private final CalendarStorageFactory factory;
+    private final CalendarUtilities      calendarUtilities;
+    private final Set<CalendarHandler>   calendarHandlers;
 
     /**
      * Initializes a new {@link CalendarDeleteListener}.
@@ -90,7 +87,7 @@ public class CalendarDowngradeListener implements DowngradeListener {
      * @param calendarUtilities The {@link CalendarUtilities}
      * @param calendarHandlers The {@link CalendarHandler}s to notify
      */
-    public CalendarDowngradeListener(CalendarStorageFactory factory, CalendarUtilities calendarUtilities, ServiceSet<CalendarHandler> calendarHandlers) {
+    public CalendarDowngradeListener(CalendarStorageFactory factory, CalendarUtilities calendarUtilities, Set<CalendarHandler> calendarHandlers) {
         super();
         this.factory = factory;
         this.calendarUtilities = calendarUtilities;
@@ -107,14 +104,10 @@ public class CalendarDowngradeListener implements DowngradeListener {
             CompositeSearchTerm term = new CompositeSearchTerm(CompositeOperation.AND)
                 .addSearchTerm(CalendarUtils.getSearchTerm(AttendeeField.ENTITY, SingleOperation.EQUALS, Integer.valueOf(userId)))
                 .addSearchTerm(CalendarUtils.getSearchTerm(AttendeeField.FOLDER_ID, SingleOperation.ISNULL));
-            List<String> publicEvents = updater.searchEvents(term, new EventField[] { EventField.ID }).stream().map(Event::getId).collect(Collectors.toList());
+            List<String> publicEvents = updater.searchEvents(term).stream().map(Event::getId).collect(Collectors.toList());
 
             // Get all events the user attends
             List<Event> events = updater.searchEvents();
-
-            ServerSession serverSession = ServerSessionAdapter.valueOf(userId, event.getContext().getContextId());
-            Date date = new Date();
-
             List<Event> eventsToRemoveTheAttendee = new LinkedList<>();
             for (final Event e : events) {
                 if (publicEvents.contains(e.getId()) && false == CalendarUtils.isLastUserAttendee(e.getAttendees(), userId)) {
@@ -122,10 +115,11 @@ public class CalendarDowngradeListener implements DowngradeListener {
                     eventsToRemoveTheAttendee.add(e);
                 }
             }
-            updater.removeAttendeeFrom(eventsToRemoveTheAttendee, date);
+            updater.removeAttendeeFrom(eventsToRemoveTheAttendee);
             events.removeAll(eventsToRemoveTheAttendee);
+            
             // Delete all other events
-            updater.deleteEvent(events, serverSession, date);
+            updater.deleteEvent(events, ServerSessionAdapter.valueOf(userId, event.getContext().getContextId()));
 
             // Trigger calendar events
             updater.notifyCalendarHandlers(event.getSession());

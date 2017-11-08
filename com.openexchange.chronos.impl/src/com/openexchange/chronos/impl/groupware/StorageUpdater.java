@@ -53,6 +53,7 @@ import java.sql.Connection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.Event;
@@ -69,9 +70,7 @@ import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.provider.DBTransactionPolicy;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.osgi.ServiceSet;
 import com.openexchange.search.SearchTerm;
-import com.openexchange.search.SingleSearchTerm;
 import com.openexchange.search.SingleSearchTerm.SingleOperation;
 import com.openexchange.session.Session;
 
@@ -83,9 +82,13 @@ import com.openexchange.session.Session;
  */
 class StorageUpdater {
 
+    private static final EventField[] SEARCH_FIELDS = { EventField.ID, EventField.SERIES_ID, EventField.RECURRENCE_ID, EventField.FOLDER_ID, EventField.CREATED_BY, EventField.MODIFIED_BY,
+        EventField.CALENDAR_USER, EventField.ORGANIZER, EventField.ATTENDEES };
+
     private final Context             context;
     private final int                 attendeeId;
     private final CalendarUser        replacement;
+    private final Date                date;
     private final EntityResolver      entityResolver;
     private final CalendarStorage     storage;
     private final SimpleResultTracker tracker;
@@ -104,7 +107,7 @@ class StorageUpdater {
      * @param calendarHandlers The {@link CalendarHandler}
      * @throws OXException In case {@link EntityResolver} or {@link CalendarStorage} can't be created
      */
-    StorageUpdater(Context context, int attendeeId, Integer destinationUserId, CalendarUtilities calendarUtilities, CalendarStorageFactory factory, DBProvider dbProvider, ServiceSet<CalendarHandler> calendarHandlers) throws OXException {
+    StorageUpdater(Context context, int attendeeId, Integer destinationUserId, CalendarUtilities calendarUtilities, CalendarStorageFactory factory, DBProvider dbProvider, Set<CalendarHandler> calendarHandlers) throws OXException {
         super();
         this.context = context;
         this.attendeeId = attendeeId;
@@ -114,22 +117,22 @@ class StorageUpdater {
         this.tracker = new SimpleResultTracker(calendarHandlers);
         this.calendarUtilities = calendarUtilities;
         this.dbProvider = dbProvider;
+        this.date = new Date();
     }
 
     /**
      * Removes the attendee from the event and updates it
      * 
      * @param event The event to remove the attendee from
-     * @param date The time of the change
      * @throws OXException Various
      */
-    void removeAttendeeFrom(Event event, Date date) throws OXException {
+    void removeAttendeeFrom(Event event) throws OXException {
         Event updatedEvent = calendarUtilities.copyEvent(event, null);
         updatedEvent.setModifiedBy(replacement);
         updatedEvent.setLastModified(date);
         updatedEvent.setTimestamp(date.getTime());
-        storage.getAlarmStorage().deleteAlarms(event.getId());
-        storage.getAlarmTriggerStorage().deleteTriggers(event.getId());
+        storage.getAlarmStorage().deleteAlarms(event.getId(), attendeeId);
+        storage.getAlarmTriggerStorage().deleteTriggers(Collections.singletonList(event.getId()), attendeeId);
         storage.getAttendeeStorage().deleteAttendees(event.getId(), Collections.singletonList(CalendarUtils.find(event.getAttendees(), attendeeId)));
         storage.getEventStorage().updateEvent(updatedEvent);
         tracker.addUpdate(event, updatedEvent);
@@ -139,12 +142,11 @@ class StorageUpdater {
      * Removes the attendee from the events and update them
      * 
      * @param events The events to remove the attendee from
-     * @param date The time of the change
      * @throws OXException Various
      */
-    void removeAttendeeFrom(List<Event> events, Date date) throws OXException {
-        for (Event event : events) {
-            removeAttendeeFrom(event, date);
+    void removeAttendeeFrom(List<Event> events) throws OXException {
+        for (final Event event : events) {
+            removeAttendeeFrom(event);
         }
     }
 
@@ -153,10 +155,9 @@ class StorageUpdater {
      * 
      * @param event The event to delete
      * @param session The {@link Session}. Is used to remove the attachments for an event.
-     * @param date The {@link Date} to set {@link Event#setLastModified(Date)} and {@link Event#setTimestamp(long)} to
      * @throws OXException Various
      */
-    void deleteEvent(Event event, Session session, Date date) throws OXException {
+    void deleteEvent(Event event, Session session) throws OXException {
         storage.getAlarmStorage().deleteAlarms(event.getId());
         storage.getAlarmTriggerStorage().deleteTriggers(event.getId());
         storage.getAttachmentStorage().deleteAttachments(session, CalendarUtils.getFolderView(event, attendeeId), event.getId());
@@ -170,12 +171,11 @@ class StorageUpdater {
      * 
      * @param events The events to delete
      * @param session The {@link Session}. Is used to remove the attachments for an event.
-     * @param date The {@link Date} to set {@link Event#setLastModified(Date)} and {@link Event#setTimestamp(long)} to
      * @throws OXException Various
      */
-    void deleteEvent(List<Event> events, Session session, Date date) throws OXException {
-        for (Event event : events) {
-            deleteEvent(event, session, date);
+    void deleteEvent(List<Event> events, Session session) throws OXException {
+        for (final Event event : events) {
+            deleteEvent(event, session);
         }
     }
 
@@ -183,10 +183,9 @@ class StorageUpdater {
      * Check event fields where the attendee could be referenced in and replaces the attendee
      * 
      * @param event The {@link Event} to update
-     * @param date The {@link Date} to set {@link Event#setLastModified(Date)} and {@link Event#setTimestamp(long)} to
      * @throws OXException Various
      */
-    void replaceAttendeeIn(Event event, Date date) throws OXException {
+    void replaceAttendeeIn(Event event) throws OXException {
         Event updatedEvent = calendarUtilities.copyEvent(event, null);
         if (CalendarUtils.matches(event.getCreatedBy(), attendeeId)) {
             updatedEvent.setCreatedBy(replacement);
@@ -210,12 +209,11 @@ class StorageUpdater {
      * Check event fields where the attendee could be referenced in and replaces the attendee
      * 
      * @param events The {@link Event}s to update
-     * @param date The new {@link Date} to set in the event
      * @throws OXException Various
      */
-    void replaceAttendeeIn(List<Event> events, Date date) throws OXException {
-        for (Event event : events) {
-            replaceAttendeeIn(event, date);
+    void replaceAttendeeIn(List<Event> events) throws OXException {
+        for (final Event event : events) {
+            replaceAttendeeIn(event);
         }
     }
 
@@ -226,21 +224,19 @@ class StorageUpdater {
      * @throws OXException If events can't be loaded
      */
     List<Event> searchEvents() throws OXException {
-        SingleSearchTerm searchTerm = CalendarUtils.getSearchTerm(AttendeeField.ENTITY, SingleOperation.EQUALS, Integer.valueOf(attendeeId));
-        List<Event> events = storage.getEventStorage().searchEvents(searchTerm, null, new EventField[] { EventField.ID, EventField.FOLDER_ID, EventField.RECURRENCE_ID });
-        return storage.getUtilities().loadAdditionalEventData(attendeeId, events, new EventField[] { EventField.ATTENDEES });
+        return searchEvents(CalendarUtils.getSearchTerm(AttendeeField.ENTITY, SingleOperation.EQUALS, Integer.valueOf(attendeeId)));
     }
 
     /**
      * Searches for events with the given {@link SearchTerm}
      * 
      * @param searchTerm The {@link SearchTerm}
-     * @param fields Additional data to load
      * @return A {@link List} of {@link Event}s
      * @throws OXException If events can't be loaded
      */
-    List<Event> searchEvents(SearchTerm<?> searchTerm, EventField[] fields) throws OXException {
-        return storage.getEventStorage().searchEvents(searchTerm, null, fields);
+    List<Event> searchEvents(SearchTerm<?> searchTerm) throws OXException {
+        List<Event> events = storage.getEventStorage().searchEvents(searchTerm, null, SEARCH_FIELDS);
+        return storage.getUtilities().loadAdditionalEventData(attendeeId, events, new EventField[] { EventField.ATTENDEES });
     }
 
     /**
