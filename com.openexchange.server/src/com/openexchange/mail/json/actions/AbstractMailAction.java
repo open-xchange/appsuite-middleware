@@ -328,12 +328,17 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
         final ContactCollectorService ccs = ServerServiceRegistry.getInstance().getService(ContactCollectorService.class);
         if (null != ccs) {
             Set<InternetAddress> addrs = null;
+            Set<InternetAddress> aliases = null;
             for (MailMessage mail : mails) {
                 if (null != mail) {
+                    if (null == aliases) {
+                        aliases = AddressUtility.getAliases(session);
+                    }
+
                     if (null == addrs) {
-                        addrs = AddressUtility.getAddresses(mail, session);
+                        addrs = AddressUtility.getFilteredAddresses(mail, aliases);
                     } else {
-                        addrs.addAll(AddressUtility.getAddresses(mail, session));
+                        addrs.addAll(AddressUtility.getFilteredAddresses(mail, aliases));
                     }
                 }
             }
