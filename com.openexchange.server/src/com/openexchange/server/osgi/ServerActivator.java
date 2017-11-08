@@ -92,6 +92,7 @@ import com.openexchange.caching.CacheService;
 import com.openexchange.caching.events.CacheEventService;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.charset.CustomCharsetProvider;
+import com.openexchange.chronos.ical.ICalService;
 import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
@@ -675,6 +676,7 @@ public final class ServerActivator extends HousekeepingActivator {
 
         track(ObjectUseCountService.class, new ObjectUseCountServiceTracker(context));
         track(CalendarService.class, new RegistryCustomizer<CalendarService>(context, CalendarService.class));
+        track(ICalService.class, new RegistryCustomizer<ICalService>(context, ICalService.class));
 
         // Start up server the usual way
         starter.start();
@@ -697,7 +699,7 @@ public final class ServerActivator extends HousekeepingActivator {
         registerService(ResourceService.class, ServerServiceRegistry.getInstance().getService(ResourceService.class, true));
         ServerServiceRegistry.getInstance().addService(UserConfigurationService.class, new UserConfigurationServiceImpl());
         registerService(UserConfigurationService.class, ServerServiceRegistry.getInstance().getService(UserConfigurationService.class, true));
-      
+
         ServerServiceRegistry.getInstance().addService(UserPermissionService.class, new UserPermissionServiceImpl());
         registerService(UserPermissionService.class, ServerServiceRegistry.getInstance().getService(UserPermissionService.class, true));
 
