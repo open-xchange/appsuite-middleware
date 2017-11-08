@@ -78,7 +78,7 @@ import com.openexchange.test.concurrent.ParallelSuite;
     //disable AutoCompleteTest for now
     //com.openexchange.ajax.find.calendar.AutocompleteTest.class,
     com.openexchange.ajax.find.contacts.QueryTest.class,
-    com.openexchange.ajax.find.contacts.AutocompleteTest.class,
+    com.openexchange.ajax.find.contacts.AutoCompleteTest.class,
     BasicMailTest.class,
     BasicDriveTest.class,
     FindTasksTestsFilterCombinations.class,
