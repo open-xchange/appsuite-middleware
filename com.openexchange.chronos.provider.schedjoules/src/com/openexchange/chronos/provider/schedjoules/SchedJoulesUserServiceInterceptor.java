@@ -59,6 +59,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.account.AdministrativeCalendarAccountService;
+import com.openexchange.chronos.provider.caching.CachingCalendarUtils;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.contexts.Context;
@@ -124,7 +125,7 @@ public class SchedJoulesUserServiceInterceptor extends AbstractUserServiceInterc
                     folder.put(SchedJoulesFields.URL, replaceLocale(url, language));
                     folder.put(SchedJoulesFields.LOCALE, language);
 
-                    // TODO: Invalidate caching information and/or events
+                    CachingCalendarUtils.invalidateFolderCache(account, folder.getString(SchedJoulesFields.ITEM_ID));
                 } catch (JSONException e) {
                     LOGGER.warn("Invalid/Malformed configuration detected in SchedJoules account '{}' for user '{}' in context '{}'", account.getAccountId(), user.getId(), context.getContextId(), e);
                 }

@@ -51,7 +51,6 @@ package com.openexchange.chronos.provider.caching;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.CalendarAccount;
@@ -142,26 +141,6 @@ public abstract class CachingCalendarProvider implements CalendarProvider {
      * @see CachingCalendarProvider#reconfigureAccount(Session, CalendarAccount, JSONObject, CalendarParameters)
      */
     public abstract boolean triggerCacheInvalidation(Session session, JSONObject originUserConfiguration, JSONObject newUserConfiguration) throws OXException;
-
-    /**
-     * Invalidates the cache for given {@link CalendarAccount} folder id so that the next request will update the data persisted for given folder
-     * 
-     * @param calendarAccount The calendar account to invalidate the cache should be invalidated
-     * @param folderId The id of the folder to invalidate the cache for
-     */
-    protected void invalidateFolderCache(CalendarAccount calendarAccount, String folderId) {
-        JSONObject internalConfiguration = calendarAccount.getInternalConfiguration();
-        if (internalConfiguration.hasAndNotNull(CachingCalendarAccess.CACHING)) {
-            try {
-                JSONObject caching = internalConfiguration.getJSONObject(CachingCalendarAccess.CACHING);
-                if (caching.hasAndNotNull(folderId)) {
-                    caching.remove(folderId);
-                }
-            } catch (JSONException e) {
-                LOG.error("Unable to retrieve caching information for calendar account {} with provider {}: {}", calendarAccount.getAccountId(), calendarAccount.getProviderId(), e.getMessage(), e);
-            }
-        }
-    }
 
     /**
      * Re-initializes the configuration prior updating an existing calendar account and after the {@link CachingCalendarProvider} has executed desired preparations/cleanups.

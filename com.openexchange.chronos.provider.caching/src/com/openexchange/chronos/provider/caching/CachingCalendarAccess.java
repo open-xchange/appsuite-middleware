@@ -199,7 +199,7 @@ public abstract class CachingCalendarAccess implements WarningsAware {
 
         return new FolderEventsResponseGenerator(this, folderId).generate();
     }
-    
+
     @Override
     public final List<Event> getChangeExceptions(String folderId, String seriesId) throws OXException {
         Set<FolderUpdateState> executionList = generateExecutionList(folderId);
@@ -316,7 +316,7 @@ public abstract class CachingCalendarAccess implements WarningsAware {
             Number lastFolderUpdate = (Number) folderConfig.get(LAST_UPDATE);
             long refreshInterval = getCascadedRefreshInterval(folderId, folderConfig);
 
-            if (lastFolderUpdate == null || lastFolderUpdate.longValue() <= 0) {
+            if (lastFolderUpdate == null || lastFolderUpdate.longValue() < 0) {
                 currentStates.add(new FolderUpdateState(folderId, 0, refreshInterval, FolderProcessingType.INITIAL_INSERT));
                 continue;
             }
