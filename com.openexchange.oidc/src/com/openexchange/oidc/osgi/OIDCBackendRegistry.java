@@ -67,7 +67,6 @@ import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.login.LoginConfiguration;
 import com.openexchange.ajax.login.LoginRequestHandler;
-import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.ConcurrentList;
 import com.openexchange.java.Strings;
@@ -136,8 +135,8 @@ public class OIDCBackendRegistry extends ServiceTracker<OIDCBackend, OIDCBackend
                 this.registerServlet(servlets, httpService, OIDCTools.getPrefix(oidcBackend), new InitService(ssoProvider, exceptionHandler), "init");
                 this.registerServlet(servlets, httpService, OIDCTools.getPrefix(oidcBackend), new AuthenticationService(ssoProvider, exceptionHandler), "auth");
                 this.registerServlet(servlets, httpService, OIDCTools.getPrefix(oidcBackend), new LogoutService(ssoProvider, exceptionHandler), "logout");
-                this.registerRequestHandler(oidcBackend, serviceRegistrations, OIDCTools.OIDC_LOGIN, new OIDCLoginRequestHandler(this.loginConfiguration, oidcBackend, this.services));
-                this.registerRequestHandler(oidcBackend, serviceRegistrations, OIDCTools.OIDC_LOGOUT, new OIDCLogoutRequestHandler(this.loginConfiguration, oidcBackend));
+                this.registerRequestHandler(oidcBackend, serviceRegistrations, OIDCTools.OIDC_LOGIN, new OIDCLoginRequestHandler(oidcBackend));
+                this.registerRequestHandler(oidcBackend, serviceRegistrations, OIDCTools.OIDC_LOGOUT, new OIDCLogoutRequestHandler(oidcBackend));
 
                 return oidcBackend;
             } catch (OXException | ServletException | NamespaceException e) {
@@ -231,7 +230,7 @@ public class OIDCBackendRegistry extends ServiceTracker<OIDCBackend, OIDCBackend
                 }
             }
         } catch (Exception e) {
-            LOG.error("Error while removing path for SAML Backend");
+            LOG.error("Error while removing path for SAML Backend", e);
         }
         Stack<ServiceRegistration<?>> registrations = backendServiceRegistrations.remove(samlBackend);
         try {
@@ -241,7 +240,7 @@ public class OIDCBackendRegistry extends ServiceTracker<OIDCBackend, OIDCBackend
                 }
             }
         } catch (Exception e) {
-            LOG.error("Error while removing path for SAML Backend");
+            LOG.error("Error while removing path for SAML Backend", e);
         }
         context.ungetService(reference);
     }

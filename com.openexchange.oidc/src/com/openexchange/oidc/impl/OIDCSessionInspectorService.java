@@ -44,7 +44,7 @@ public class OIDCSessionInspectorService implements SessionInspectorService{
         }
         if (backend.getBackendConfig().isStoreOAuthTokensEnabled() && backend.isTokenExpired(session)) {
             if(!backend.updateOauthTokens(session)) {
-                backend.logoutCurrentUser(session, request, response, null);
+                backend.logoutCurrentUser(session, request, response);
             }
         }
         return Reply.NEUTRAL;

@@ -225,8 +225,7 @@ public class AbstractOIDCBackendTest {
         
         HttpServletRequest mockedRequest = Mockito.mock(HttpServletRequest.class);
         HttpServletResponse mockedResponse = Mockito.mock(HttpServletResponse.class);
-        LoginConfiguration mockedLoginConfig = Mockito.mock(LoginConfiguration.class);
-        this.testBackend.logoutCurrentUser(mockedSession, mockedRequest, mockedResponse, mockedLoginConfig);
+        this.testBackend.logoutCurrentUser(mockedSession, mockedRequest, mockedResponse);
         
     }
 }

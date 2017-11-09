@@ -70,4 +70,8 @@ public static AtomicReference<ServiceLookup> services = new AtomicReference<Serv
     public static <T> T getService(Class<T> klass) {
         return services.get().getService(klass);
     }
+    
+    public static <T> T getOptionalService(Class<T> klass) {
+        return services.get().getOptionalService(klass);
+    }
 }

@@ -53,6 +53,7 @@ import java.io.IOException;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.json.JSONException;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jwt.JWT;
 import com.nimbusds.oauth2.sdk.AuthorizationRequest;
@@ -257,8 +258,22 @@ public interface OIDCBackend {
      * @param session The {@link Session} that should be terminated.
      * @param request The {@link HttpServletRequest}
      * @param response The {@link HttpServletResponse}
-     * @param loginConfiguration The {@link LoginConfiguration}
      * @throws OXException
      */
-    void logoutCurrentUser(Session session, HttpServletRequest request, HttpServletResponse response, LoginConfiguration loginConfiguration) throws OXException;
+    void logoutCurrentUser(Session session, HttpServletRequest request, HttpServletResponse response) throws OXException;
+
+    /**
+     * Perform an Appsuite login. If autologin is enabled, the user will be logged in into his session. The
+     * autologin mechanism will check if a valid OIDCCookie is available with all needed information. The 
+     * method will redirect the user to the Appsuite UI afterwards. If <code>respondWithJson</code> is set true,
+     * the redirect location will be wrapped into a JSON Object.
+     * 
+     * @param request The {@link HttpServletRequest}
+     * @param response The {@link HttpServletResponse}
+     * @param respondWithJson Should the UI location should be wrapped into a JSON Object or not
+     * @throws IOException
+     * @throws OXException
+     * @throws JSONException
+     */
+    void performLogin(HttpServletRequest request, HttpServletResponse response, boolean respondWithJson) throws IOException, OXException, JSONException;
 }

@@ -55,7 +55,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.LoginServlet;
-import com.openexchange.ajax.login.LoginConfiguration;
 import com.openexchange.ajax.login.LoginRequestHandler;
 import com.openexchange.exception.OXException;
 import com.openexchange.login.internal.LoginPerformer;
@@ -74,11 +73,9 @@ public class OIDCLogoutRequestHandler implements LoginRequestHandler {
 
     private static final Logger LOG = LoggerFactory.getLogger(OIDCLogoutRequestHandler.class);
     private final OIDCBackend backend;
-    private final LoginConfiguration loginConfiguration;
 
-    public OIDCLogoutRequestHandler(LoginConfiguration loginConfiguration, OIDCBackend oidcBackend) {
+    public OIDCLogoutRequestHandler(OIDCBackend oidcBackend) {
         this.backend = oidcBackend;
-        this.loginConfiguration = loginConfiguration;
     }
 
     @Override
@@ -91,7 +88,7 @@ public class OIDCLogoutRequestHandler implements LoginRequestHandler {
                 LOG.debug("Received logout request for session {}", sessionId);
                 Session session = LoginPerformer.getInstance().lookupSession(sessionId);
                 if (session != null) {
-                    this.backend.logoutCurrentUser(session, request, response, this.loginConfiguration);
+                    this.backend.logoutCurrentUser(session, request, response);
                 } else {
                     LOG.info("Received logout request for a session that does not exist, session id: {}", sessionId);
                 }

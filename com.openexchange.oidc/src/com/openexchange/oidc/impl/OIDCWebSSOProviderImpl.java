@@ -434,6 +434,6 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
     public void logoutInCaseOfError(String sessionId, HttpServletRequest request, HttpServletResponse response) throws OXException{
         LOG.trace("logoutInCaseOfError(String sessionId: {}, HttpServletRequest request: {}, HttpServletResponse response)", sessionId, request.getRequestURI() );
         Session session = LoginPerformer.getInstance().lookupSession(sessionId);
-        this.backend.logoutCurrentUser(session, request, response, this.loginConfiguration);
+        this.backend.logoutCurrentUser(session, request, response);
     }
 }

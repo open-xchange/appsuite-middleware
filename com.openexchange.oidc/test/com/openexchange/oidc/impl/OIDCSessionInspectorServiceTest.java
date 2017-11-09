@@ -169,7 +169,7 @@ public class OIDCSessionInspectorServiceTest {
         
         Reply result = this.inspector.onSessionHit(this.mockedSession, this.mockedRequest, this.mockedResponse);
         
-        Mockito.verify(mockedBackend, Mockito.times(1)).logoutCurrentUser(mockedSession, mockedRequest, mockedResponse, null);
+        Mockito.verify(mockedBackend, Mockito.times(1)).logoutCurrentUser(mockedSession, mockedRequest, mockedResponse);
         assertTrue("Wrong reply", result == Reply.NEUTRAL);
     }
 
@@ -182,7 +182,7 @@ public class OIDCSessionInspectorServiceTest {
         
         Reply result = this.inspector.onSessionHit(this.mockedSession, this.mockedRequest, this.mockedResponse);
         
-        Mockito.verify(mockedBackend, Mockito.times(0)).logoutCurrentUser(mockedSession, mockedRequest, mockedResponse, null);
+        Mockito.verify(mockedBackend, Mockito.times(0)).logoutCurrentUser(mockedSession, mockedRequest, mockedResponse);
         assertTrue("Wrong reply", result == Reply.NEUTRAL);
     }
 }
