@@ -51,6 +51,8 @@ package com.openexchange.ajax.find.contacts;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -97,6 +99,10 @@ public class AutoCompleteShowDepartmentsTest extends AbstractAPIClientSession {
     @Override
     public void setUp() throws Exception {
         super.setUp();
+
+        testUsers = new HashMap<>();
+        clients = new HashMap<>();
+        randomUsers = new HashSet<>();
 
         // Login clients
         apiClient.login(testUser.getLogin(), testUser.getPassword());
