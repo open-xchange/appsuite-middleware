@@ -62,6 +62,7 @@ import java.util.Set;
 import java.util.UUID;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSet.Builder;
+import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.database.Databases;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
@@ -113,7 +114,7 @@ public class RdbAliasStorage implements UserAliasStorage {
             } while (rs.next());
             return aliases.build();
         } catch (SQLException e) {
-            throw UserAliasStorageExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+            throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(rs, stmt);
             Database.back(contextId, false, con);
@@ -141,7 +142,7 @@ public class RdbAliasStorage implements UserAliasStorage {
             } while (rs.next());
             return aliases.build();
         } catch (SQLException e) {
-            throw UserAliasStorageExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+            throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(rs, stmt);
             Database.back(contextId, false, con);
@@ -205,7 +206,7 @@ public class RdbAliasStorage implements UserAliasStorage {
                         aliases.add(rs.getString(2));
                     }
                 } catch (SQLException e) {
-                    throw UserAliasStorageExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+                    throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
                 } finally {
                     Databases.closeSQLStuff(rs, stmt);
                 }
@@ -242,7 +243,7 @@ public class RdbAliasStorage implements UserAliasStorage {
             }
             return -1;
         } catch (SQLException e) {
-            throw UserAliasStorageExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+            throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(rs, stmt);
             Database.back(contextId, false, con);
@@ -275,11 +276,11 @@ public class RdbAliasStorage implements UserAliasStorage {
 
             return stmt.executeUpdate() == 1;
         } catch (SQLException e) {
-            if (com.mysql.jdbc.exceptions.jdbc4.MySQLIntegrityConstraintViolationException.class.isAssignableFrom(e.getClass())) {
+            if (Databases.isPrimaryKeyConflictInMySQL(e)) {
                 // Hide original exception, don't add to stack trace. See bug 50225
                 throw UserAliasStorageExceptionCodes.DUPLICATE_ALIAS.create(alias);
             }
-            throw UserAliasStorageExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+            throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(stmt);
         }
@@ -310,7 +311,7 @@ public class RdbAliasStorage implements UserAliasStorage {
             stmt.setString(++index, oldAlias);
             return stmt.executeUpdate() == 1;
         } catch (SQLException e) {
-            throw UserAliasStorageExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+            throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(stmt);
         }
@@ -340,7 +341,7 @@ public class RdbAliasStorage implements UserAliasStorage {
             stmt.setString(++index, alias);
             return stmt.executeUpdate() == 1;
         } catch (SQLException e) {
-            throw UserAliasStorageExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+            throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(stmt);
         }
@@ -369,7 +370,7 @@ public class RdbAliasStorage implements UserAliasStorage {
             stmt.setInt(++index, userId);
             return stmt.executeUpdate() != 0;
         } catch (SQLException e) {
-            throw UserAliasStorageExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+            throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(stmt);
         }
@@ -397,13 +398,10 @@ public class RdbAliasStorage implements UserAliasStorage {
             } while (rs.next());
             return retval;
         } catch (SQLException e) {
-            throw UserAliasStorageExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-        } catch (RuntimeException e) {
-            throw UserAliasStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(rs, stmt);
             Database.back(contextId, false, con);
         }
     }
-
 }
