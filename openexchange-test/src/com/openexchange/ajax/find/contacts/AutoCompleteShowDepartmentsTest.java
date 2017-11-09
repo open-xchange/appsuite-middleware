@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.find.contacts;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import java.util.HashMap;
@@ -78,7 +79,9 @@ import com.openexchange.testing.httpclient.modules.UserApi;
  */
 public class AutoCompleteShowDepartmentsTest extends AbstractAPIClientSession {
 
-    private static final int AMOUNT_OF_TEST_USERS = 5;
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AutoCompleteShowDepartmentsTest.class);
+
+    private static final int AMOUNT_OF_TEST_USERS = 3;
     private static final int RESULTS_LIMIT = 6;
     private static final String CONTACTS_MODULE = "contacts";
 
@@ -109,11 +112,17 @@ public class AutoCompleteShowDepartmentsTest extends AbstractAPIClientSession {
 
         for (int i = 0; i < AMOUNT_OF_TEST_USERS; i++) {
             TestUser testUser = testContext.acquireUser();
+            if (testUser == null) {
+                LOG.debug("Could not acquire user");
+                continue;
+            }
+            LOG.info("Acquired user '{}'", testUser);
+
             ApiClient client = generateClient(testUser);
             client.login(testUser.getLogin(), testUser.getPassword());
             rememberClient(client);
-            testUsers.put(testUser.getLogin(), testUser);
-            clients.put(testUser.getLogin(), client);
+            testUsers.put(testUser.getUser(), testUser);
+            clients.put(testUser.getUser(), client);
         }
 
         // Prepare users
@@ -134,6 +143,7 @@ public class AutoCompleteShowDepartmentsTest extends AbstractAPIClientSession {
         } while (randomUsers.contains(key));
 
         randomUsers.add(key);
+        LOG.info("Picked random user '{}'", key);
         return testUsers.get(key);
     }
 
@@ -144,7 +154,7 @@ public class AutoCompleteShowDepartmentsTest extends AbstractAPIClientSession {
      * @param department The department to set
      */
     private void prepareUser(TestUser testUser, String department) throws ApiException {
-        ApiClient client = clients.get(testUser.getLogin());
+        ApiClient client = clients.get(testUser.getUser());
         UserApi userApi = new UserApi(client);
         userApi.updateUser(client.getSession(), Integer.toString(client.getUserId()), System.currentTimeMillis(), createUpdateBody(department));
     }
@@ -177,7 +187,7 @@ public class AutoCompleteShowDepartmentsTest extends AbstractAPIClientSession {
         options.setTimezone("UTC");
 
         FindAutoCompleteBody body = new FindAutoCompleteBody();
-        body.setPrefix(apiClient.getUser());
+        body.setPrefix("*"); // Check all users
         body.setOptions(options);
 
         FindAutoCompleteResponse response = findApi.doAutoComplete(apiClient.getSession(), CONTACTS_MODULE, body, RESULTS_LIMIT);
@@ -193,8 +203,27 @@ public class AutoCompleteShowDepartmentsTest extends AbstractAPIClientSession {
 
         for (FindFacetValue value : values) {
             String itemName = value.getItem().getName();
-            assertTrue("The item is missing the 'department' part from the display name", itemName.contains("Department"));
+            if (isRandomUser(itemName)) {
+                assertTrue("The item '" + itemName + "' is missing the 'department' part from the display name", itemName.contains("Department"));
+            } else {
+                assertFalse("The item '" + itemName + "' contains the 'department' part in the display name", itemName.contains("Department"));
+            }
         }
+    }
+
+    /**
+     * Checks if the specified item name is contained within the randomUsers set
+     * 
+     * @param itemName The item name to check
+     * @return <code>true</code> if it is contained, <code>false</code> otherwise
+     */
+    private boolean isRandomUser(String itemName) {
+        for (String user : randomUsers) {
+            if (itemName.toLowerCase().contains(user)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
