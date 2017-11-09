@@ -49,28 +49,26 @@
 
 package com.openexchange.groupware.alias.impl;
 
-import static com.openexchange.tools.sql.DBUtils.IN_LIMIT;
-import static com.openexchange.tools.sql.DBUtils.getIN;
+import static com.openexchange.database.Databases.IN_LIMIT;
+import static com.openexchange.database.Databases.getIN;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSet.Builder;
+import com.openexchange.database.Databases;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.alias.UserAliasStorage;
 import com.openexchange.groupware.alias.UserAliasStorageExceptionCodes;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.tools.arrays.Arrays;
-import com.openexchange.tools.sql.DBUtils;
 import gnu.trove.iterator.TIntObjectIterator;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
@@ -117,7 +115,7 @@ public class RdbAliasStorage implements UserAliasStorage {
         } catch (SQLException e) {
             throw UserAliasStorageExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
             Database.back(contextId, false, con);
         }
     }
@@ -145,7 +143,7 @@ public class RdbAliasStorage implements UserAliasStorage {
         } catch (SQLException e) {
             throw UserAliasStorageExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
             Database.back(contextId, false, con);
         }
     }
@@ -196,7 +194,7 @@ public class RdbAliasStorage implements UserAliasStorage {
                     int pos = 1;
                     stmt.setInt(pos++, contextId);
                     for (int j = 0; j < clen; j++) {
-                        int userId = userIds[i+j];
+                        int userId = userIds[i + j];
                         stmt.setInt(pos++, userId);
                         map.put(userId, ImmutableSet.<String> builder());
                     }
@@ -209,7 +207,7 @@ public class RdbAliasStorage implements UserAliasStorage {
                 } catch (SQLException e) {
                     throw UserAliasStorageExceptionCodes.SQL_ERROR.create(e, e.getMessage());
                 } finally {
-                    DBUtils.closeSQLStuff(rs, stmt);
+                    Databases.closeSQLStuff(rs, stmt);
                 }
             }
 
@@ -233,7 +231,7 @@ public class RdbAliasStorage implements UserAliasStorage {
         try {
             int index = 0;
             /*
-             *  Use utf8_bin to match umlauts. But that also makes it case sensitive, so use LOWER to be case insesitive.
+             * Use utf8_bin to match umlauts. But that also makes it case sensitive, so use LOWER to be case insesitive.
              */
             stmt = con.prepareStatement("SELECT user FROM user_alias WHERE cid=? AND LOWER(alias) LIKE LOWER(?) COLLATE utf8_bin");
             stmt.setInt(++index, contextId);
@@ -246,7 +244,7 @@ public class RdbAliasStorage implements UserAliasStorage {
         } catch (SQLException e) {
             throw UserAliasStorageExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
             Database.back(contextId, false, con);
         }
     }
@@ -277,13 +275,13 @@ public class RdbAliasStorage implements UserAliasStorage {
 
             return stmt.executeUpdate() == 1;
         } catch (SQLException e) {
-            if(com.mysql.jdbc.exceptions.jdbc4.MySQLIntegrityConstraintViolationException.class.isAssignableFrom(e.getClass())) {
+            if (com.mysql.jdbc.exceptions.jdbc4.MySQLIntegrityConstraintViolationException.class.isAssignableFrom(e.getClass())) {
                 // Hide original exception, don't add to stack trace. See bug 50225
                 throw UserAliasStorageExceptionCodes.DUPLICATE_ALIAS.create(alias);
             }
             throw UserAliasStorageExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
     }
 
@@ -314,7 +312,7 @@ public class RdbAliasStorage implements UserAliasStorage {
         } catch (SQLException e) {
             throw UserAliasStorageExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
     }
 
@@ -344,7 +342,7 @@ public class RdbAliasStorage implements UserAliasStorage {
         } catch (SQLException e) {
             throw UserAliasStorageExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
     }
 
@@ -373,7 +371,7 @@ public class RdbAliasStorage implements UserAliasStorage {
         } catch (SQLException e) {
             throw UserAliasStorageExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
     }
 
@@ -403,7 +401,7 @@ public class RdbAliasStorage implements UserAliasStorage {
         } catch (RuntimeException e) {
             throw UserAliasStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
             Database.back(contextId, false, con);
         }
     }
