@@ -58,6 +58,7 @@ import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.ldap.UserExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
@@ -94,6 +95,12 @@ public final class GetAttributeAction extends AbstractUserAction {
              * Parse parameters
              */
             final int id = checkIntParameter(AJAXServlet.PARAMETER_ID, request);
+            /*
+             * Only allow for session-associated user
+             */
+            if (id != session.getUserId() && id != session.getContext().getMailadmin()) {
+                throw UserExceptionCode.PERMISSION_ACCESS.create(Integer.valueOf(session.getContextId()));
+            }
             final String name = checkStringParameter("name", request);
             /*
              * Get user service
