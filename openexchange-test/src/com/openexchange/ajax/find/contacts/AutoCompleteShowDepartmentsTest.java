@@ -52,9 +52,13 @@ package com.openexchange.ajax.find.contacts;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AbstractAPIClientSession;
+import com.openexchange.test.pool.TestUser;
 import com.openexchange.testing.httpclient.invoker.ApiClient;
+import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.FindAutoCompleteBody;
 import com.openexchange.testing.httpclient.models.FindAutoCompleteData;
 import com.openexchange.testing.httpclient.models.FindAutoCompleteResponse;
@@ -72,12 +76,13 @@ import com.openexchange.testing.httpclient.modules.UserApi;
  */
 public class AutoCompleteShowDepartmentsTest extends AbstractAPIClientSession {
 
-    private static final int LIMIT = 6;
+    private static final int AMOUNT_OF_TEST_USERS = 5;
+    private static final int RESULTS_LIMIT = 6;
     private static final String CONTACTS_MODULE = "contacts";
 
-    private ApiClient apiClient2;
-    private UserApi userApi;
-    private UserApi userApi2;
+    private Map<String, TestUser> testUsers;
+    private Map<String, ApiClient> clients;
+    private Set<String> randomUsers;
 
     /**
      * Initialises a new {@link AutoCompleteShowDepartmentsTest}.
@@ -96,16 +101,46 @@ public class AutoCompleteShowDepartmentsTest extends AbstractAPIClientSession {
         // Login clients
         apiClient.login(testUser.getLogin(), testUser.getPassword());
 
-        apiClient2 = generateClient(testUser2);
-        apiClient2.login(testUser2.getLogin(), testUser2.getPassword());
-        rememberClient(apiClient2);
+        for (int i = 0; i < AMOUNT_OF_TEST_USERS; i++) {
+            TestUser testUser = testContext.acquireUser();
+            ApiClient client = generateClient(testUser);
+            client.login(testUser.getLogin(), testUser.getPassword());
+            rememberClient(client);
+            testUsers.put(testUser.getLogin(), testUser);
+            clients.put(testUser.getLogin(), client);
+        }
 
         // Prepare users
-        userApi = new UserApi(apiClient);
-        userApi.updateUser(apiClient.getSession(), Integer.toString(apiClient.getUserId()), System.currentTimeMillis(), createUpdateBody("Department A"));
+        prepareUser(pickRandomUser(), "Department A");
+        prepareUser(pickRandomUser(), "Department B");
+    }
 
-        userApi2 = new UserApi(apiClient2);
-        userApi2.updateUser(apiClient2.getSession(), Integer.toString(apiClient2.getUserId()), System.currentTimeMillis(), createUpdateBody("Department B"));
+    /**
+     * Picks a random user from the registry
+     * 
+     * @return The random {@link TestUser}
+     */
+    private TestUser pickRandomUser() {
+        String[] keys = testUsers.keySet().toArray(new String[AMOUNT_OF_TEST_USERS]);
+        String key;
+        do {
+            key = keys[(int) (Math.random() * AMOUNT_OF_TEST_USERS)];
+        } while (randomUsers.contains(key));
+
+        randomUsers.add(key);
+        return testUsers.get(key);
+    }
+
+    /**
+     * Prepares the specified {@link TestUser}
+     * 
+     * @param testUser The {@link TestUser} to prepare
+     * @param department The department to set
+     */
+    private void prepareUser(TestUser testUser, String department) throws ApiException {
+        ApiClient client = clients.get(testUser.getLogin());
+        UserApi userApi = new UserApi(client);
+        userApi.updateUser(client.getSession(), Integer.toString(client.getUserId()), System.currentTimeMillis(), createUpdateBody(department));
     }
 
     /**
@@ -114,9 +149,11 @@ public class AutoCompleteShowDepartmentsTest extends AbstractAPIClientSession {
     @Override
     public void tearDown() throws Exception {
         // Reset users
-        userApi.updateUser(apiClient.getSession(), Integer.toString(apiClient.getUserId()), System.currentTimeMillis(), createUpdateBody(""));
-        userApi2.updateUser(apiClient2.getSession(), Integer.toString(apiClient2.getUserId()), System.currentTimeMillis(), createUpdateBody(""));
-
+        for (String key : randomUsers) {
+            ApiClient client = clients.get(key);
+            UserApi userApi = new UserApi(client);
+            userApi.updateUser(client.getSession(), Integer.toString(client.getUserId()), System.currentTimeMillis(), createUpdateBody(""));
+        }
         super.tearDown();
     }
 
@@ -137,7 +174,7 @@ public class AutoCompleteShowDepartmentsTest extends AbstractAPIClientSession {
         body.setPrefix(apiClient.getUser());
         body.setOptions(options);
 
-        FindAutoCompleteResponse response = findApi.doAutoComplete(apiClient.getSession(), CONTACTS_MODULE, body, LIMIT);
+        FindAutoCompleteResponse response = findApi.doAutoComplete(apiClient.getSession(), CONTACTS_MODULE, body, RESULTS_LIMIT);
         FindAutoCompleteData data = response.getData();
         List<FindFacetValue> values = null;
         for (FindFacetData findFacetData : data.getFacets()) {
