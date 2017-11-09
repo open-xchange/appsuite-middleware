@@ -52,7 +52,11 @@ package com.openexchange.ajax.helper;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Iterator;
 import java.util.concurrent.atomic.AtomicReference;
+import javax.imageio.ImageIO;
+import javax.imageio.ImageReader;
+import javax.imageio.stream.ImageInputStream;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 
@@ -68,6 +72,57 @@ public class ImageUtils {
      */
     private ImageUtils() {
         super();
+    }
+
+    private static final boolean CHECK_IMAGE_BY_READER = true;
+
+    /**
+     * Checks if specified bytes contains valid image data
+     *
+     * @param inputData The bytes to check for valid image data
+     * @return <code>true</code> if specified bytes contains valid image data; otherwise <code>false</code>
+     */
+    public static boolean isValidImage(byte[] bytes) {
+        return isValidImage(Streams.newByteArrayInputStream(bytes));
+    }
+
+    /**
+     * Checks if specified input stream contains valid image data
+     *
+     * @param inputStream The input stream to check for valid image data
+     * @return <code>true</code> if specified input stream contains valid image data; otherwise <code>false</code>
+     */
+    public static boolean isValidImage(InputStream inputStream) {
+        return CHECK_IMAGE_BY_READER ? isValidImageByImageReader(inputStream) : isValidImageByBufferedImage(inputStream);
+    }
+
+    private static boolean isValidImageByBufferedImage(InputStream inputStream) {
+        try {
+            final java.awt.image.BufferedImage bimg = javax.imageio.ImageIO.read(inputStream);
+            return (bimg != null && bimg.getHeight() > 0 && bimg.getWidth() > 0);
+        } catch (final Exception e) {
+            return false;
+        }
+    }
+
+    private static boolean isValidImageByImageReader(InputStream inputStream) {
+        ImageInputStream imageInputStream = null;
+        try {
+            imageInputStream = ImageIO.createImageInputStream(inputStream);
+            return isValidImageInputStream(imageInputStream);
+        } catch (final Exception e) {
+            return false;
+        } finally {
+            Streams.close(imageInputStream, inputStream);
+        }
+    }
+
+    private static boolean isValidImageInputStream(ImageInputStream imageInputStream) {
+        if (null == imageInputStream) {
+            return false;
+        }
+        Iterator<ImageReader> readers = ImageIO.getImageReaders(imageInputStream);
+        return null != readers && readers.hasNext();
     }
 
     /**
