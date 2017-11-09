@@ -70,6 +70,10 @@ public enum UserAliasStorageExceptionCodes implements DisplayableOXExceptionCode
      * A SQL error occurred: %1$s.
      */
     SQL_ERROR(UserAliasStorageExceptionCodes.SQL_ERROR_MSG, CATEGORY_ERROR, 2, OXExceptionStrings.SQL_ERROR_MSG),
+    /**
+     * {@value #DUPLICATE_ALIAS_MSG}
+     */
+    DUPLICATE_ALIAS(UserAliasStorageExceptionCodes.DUPLICATE_ALIAS_MSG, CATEGORY_ERROR, 3)
 
     ;
 
@@ -78,6 +82,8 @@ public enum UserAliasStorageExceptionCodes implements DisplayableOXExceptionCode
     private static final String UNEXPECTED_ERROR_MSG = "Unexpected error: %1$s.";
 
     private static final String SQL_ERROR_MSG = "A SQL error occurred: %1$s.";
+
+    private static final String DUPLICATE_ALIAS_MSG = "The alias %1$s already exists. Please note that the alias is case insensitive!";
 
     /**
      * Checks if specified {@code OXException}'s prefix is equal to this {@code OXExceptionCode} enumeration.
@@ -115,9 +121,9 @@ public enum UserAliasStorageExceptionCodes implements DisplayableOXExceptionCode
     /**
      * Default constructor.
      *
-     * @param message message.
-     * @param category category.
-     * @param number number.
+     * @param message The message
+     * @param category The {@link Category} 
+     * @param number The unique number
      */
     private UserAliasStorageExceptionCodes(final String message, final Category category, final int number) {
         this(message, category, number, null);
@@ -126,10 +132,10 @@ public enum UserAliasStorageExceptionCodes implements DisplayableOXExceptionCode
     /**
      * Default constructor.
      *
-     * @param message
-     * @param category
-     * @param number
-     * @param displayMessage
+     * @param message The message
+     * @param category The {@link Category} 
+     * @param number The unique number
+     * @param displayMessage The display message
      */
     private UserAliasStorageExceptionCodes(final String message, final Category category, final int number, final String displayMessage) {
         this.message = message;

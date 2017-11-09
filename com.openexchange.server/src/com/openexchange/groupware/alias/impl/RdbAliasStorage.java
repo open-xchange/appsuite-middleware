@@ -277,6 +277,10 @@ public class RdbAliasStorage implements UserAliasStorage {
 
             return stmt.executeUpdate() == 1;
         } catch (SQLException e) {
+            if(com.mysql.jdbc.exceptions.jdbc4.MySQLIntegrityConstraintViolationException.class.isAssignableFrom(e.getClass())) {
+                // Hide original exception, don't add to stack trace. See bug 50225
+                throw UserAliasStorageExceptionCodes.DUPLICATE_ALIAS.create(alias);
+            }
             throw UserAliasStorageExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             DBUtils.closeSQLStuff(stmt);
