@@ -73,7 +73,7 @@ import com.openexchange.session.Session;
  */
 public class GoogleCalendarProvider implements CalendarProvider{
 
-    private static final String PROVIDER_ID = "google";
+    public static final String PROVIDER_ID = "google";
     private static final String DISPLAY_NAME = "Google";
 
     @Override

@@ -61,6 +61,10 @@ public class GoogleCalendarConfigField {
     public static final String OAUTH_ID = "oauthId";
     public static final String FOLDERS = "folders";
     public static final String SYNC_TOKEN = "syncToken";
+    /**
+     * A boolean field indicating that the account was migrated and config must be updated.
+     */
+    public static final String MIGRATED = "migrated";
 
     public static class Folders {
 

@@ -85,6 +85,7 @@ import com.openexchange.chronos.provider.CalendarFolderProperty;
 import com.openexchange.chronos.provider.DefaultCalendarFolder;
 import com.openexchange.chronos.provider.DefaultCalendarPermission;
 import com.openexchange.chronos.provider.account.AdministrativeCalendarAccountService;
+import com.openexchange.chronos.provider.account.CalendarAccountService;
 import com.openexchange.chronos.provider.caching.CachingCalendarAccess;
 import com.openexchange.chronos.provider.caching.ExternalCalendarResult;
 import com.openexchange.chronos.provider.google.GoogleCalendarConfigField;
@@ -139,6 +140,11 @@ public class GoogleCalendarAccess extends CachingCalendarAccess{
         oauthAccess = new GoogleOAuthAccess(account, session);
         oauthAccess.initialize();
         if(checkConfig){
+            if (account.getUserConfiguration().has(GoogleCalendarConfigField.MIGRATED)) {
+                account.getUserConfiguration().remove(GoogleCalendarConfigField.MIGRATED);
+                CalendarAccountService calendarAccountService = Services.getService(CalendarAccountService.class);
+                this.account = calendarAccountService.updateAccount(session, account.getAccountId(), account.isEnabled(), account.getUserConfiguration(), System.currentTimeMillis(), parameters);
+            }
             initCalendarFolder(false);
         }
     }
@@ -154,11 +160,20 @@ public class GoogleCalendarAccess extends CachingCalendarAccess{
             Calendar googleCal = (Calendar) oauthAccess.getClient().getClient();
             CalendarList calendars = googleCal.calendarList().list().execute();
             JSONObject internalConfiguration = account.getInternalConfiguration();
+
             if(internalConfiguration == null){
                 internalConfiguration = new JSONObject();
             }
 
             JSONObject userConfiguration = account.getUserConfiguration();
+
+            boolean migrated = false;
+            if (internalConfiguration.has(GoogleCalendarConfigField.MIGRATED)) {
+                internalConfiguration.remove(GoogleCalendarConfigField.MIGRATED);
+                userConfiguration.remove(GoogleCalendarConfigField.MIGRATED);
+                migrated = true;
+            }
+
             boolean changed = false;
             JSONObject newConfig = new JSONObject();
             for(CalendarListEntry entry: calendars.getItems()){
@@ -175,8 +190,8 @@ public class GoogleCalendarAccess extends CachingCalendarAccess{
                     }
                 } else if (userCheck==null && internalCheck != null && internalCheck) {
                     addEntry(entry, true, newConfig);
-                } else if(subscribePrimary && entry.isPrimary()){
-                    addEntry(entry, false, newConfig);
+                } else if ((subscribePrimary || migrated) && entry.isPrimary()) {
+                    addEntry(entry, true, newConfig);
                     changed = true;
                 } else {
                     addEntry(entry, false, newConfig);
