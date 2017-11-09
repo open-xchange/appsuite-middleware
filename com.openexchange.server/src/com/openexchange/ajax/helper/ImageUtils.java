@@ -77,14 +77,40 @@ public class ImageUtils {
      * @return <code>true</code> if SVG data; otherwise <code>false</code>
      */
     public static boolean isSvg(byte[] bytes) {
-        byte[] pattern = new byte[] { '<', 's', 'v', 'g' };
-        int pos = indexOf(bytes, pattern, 0, bytes.length);
-        if (pos < 0) {
-            return false;
+        byte[][] sequences = new byte[][] {new byte[] { '<', 's' }, new byte[] { '<', 'S' }};
+        for (int i = indexOfAny(bytes, 0, sequences); i >= 0; i = indexOfAny(bytes, i, sequences)) {
+            int pos = i + 2;
+            if (pos < bytes.length && characterContainedIn((char) (bytes[pos] & 0xff), 'v', 'V')) {
+                pos += 1;
+                if (pos < bytes.length && characterContainedIn((char) (bytes[pos] & 0xff), 'g', 'G')) {
+                    pos += 1;
+                    if (pos < bytes.length && Strings.isWhitespace((char) (bytes[pos] & 0xff))) {
+                        return true;
+                    }
+                }
+            }
         }
+        return false;
+    }
 
-        pos += 4;
-        return pos < bytes.length && Strings.isWhitespace((char) (bytes[pos] & 0xff));
+    private static int indexOfAny(byte[] bytes, int beginIndex, byte[]... sequences) {
+        for (int i = sequences.length; i-- > 0;) {
+            int pos = indexOf(bytes, sequences[i], beginIndex, bytes.length);
+            if (pos >= 0) {
+                return pos;
+            }
+        }
+        return -1;
+    }
+
+    private static boolean characterContainedIn(char charToTest, char... chars) {
+        for (int i = chars.length; i-- > 0;) {
+            if (chars[i] == charToTest) {
+                return true;
+            }
+        }
+        // Not contained
+        return false;
     }
 
     /**
