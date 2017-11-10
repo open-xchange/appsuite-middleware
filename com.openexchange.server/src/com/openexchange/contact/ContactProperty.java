@@ -56,7 +56,7 @@ import com.openexchange.config.lean.Property;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-// TODO: to be completed...
+// TODO: Make all 'contact.properties' lean configuration aware
 public enum ContactProperty implements Property {
     /**
      * Defines whether the departments will be shown upon an autocomplete search.
