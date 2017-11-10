@@ -175,10 +175,10 @@ public class DisplayItems {
         LeanConfigurationService configService = Services.optService(LeanConfigurationService.class);
         if (null == configService) {
             boolean defaultValue = false;
-            LOGGER.warn("No such service: {}. Assuming default value of '{}' for property '{}'", LeanConfigurationService.class.getName(), defaultValue, ContactProperty.showDepartments);
+            LOGGER.warn("No such service: {}. Assuming default value of '{}' for property '{}'", LeanConfigurationService.class.getName(), defaultValue, ContactProperty.showDepartment);
             return defaultValue;
         }
-        return configService.getBooleanProperty(ContactProperty.showDepartments);
+        return configService.getBooleanProperty(ContactProperty.showDepartment);
     }
 
     /**
