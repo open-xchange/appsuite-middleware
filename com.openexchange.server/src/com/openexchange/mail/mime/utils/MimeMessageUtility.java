@@ -140,6 +140,7 @@ import com.openexchange.mail.config.MailReloadable;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
+import com.openexchange.mail.mime.EmptyStringMimeMultipart;
 import com.openexchange.mail.mime.HeaderName;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.MimeDefaultSession;
@@ -2926,9 +2927,14 @@ public final class MimeMessageUtility {
                 return getMultipartContentFrom((Message) content);
             }
             if (content instanceof String) {
-                return new MimeMultipart(new MessageDataSource(Streams.newByteArrayInputStream(((String) content).getBytes(Charsets.ISO_8859_1)), null == contentType ? getHeader("Content-Type", null, part) : contentType));
+                String stringContent = (String) content;
+                if (Strings.isEmpty(stringContent)) {
+                    return new EmptyStringMimeMultipart(new MessageDataSource(Streams.newByteArrayInputStream(stringContent.getBytes(Charsets.ISO_8859_1)), null == contentType ? getHeader("Content-Type", null, part) : contentType));
+                }
+                return new MimeMultipart(new MessageDataSource(Streams.newByteArrayInputStream(stringContent.getBytes(Charsets.ISO_8859_1)), null == contentType ? getHeader("Content-Type", null, part) : contentType));
             }
-            LOG.warn("Unable to retrieve multipart content fromt part with Content-Type={}. Content signals to be {}.", null == contentType ? getHeader("Content-Type", null, part) : contentType, null == content ? "null" : content.getClass().getName());
+
+            LOG.warn("Unable to retrieve multipart content from part with Content-Type={}. Content signals to be {}.", null == contentType ? getHeader("Content-Type", null, part) : contentType, null == content ? "null" : content.getClass().getName());
             return null;
         } catch (MessageRemovedIOException e) {
             String message = e.getMessage();
