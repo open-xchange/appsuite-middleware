@@ -66,6 +66,11 @@ public class GoogleCalendarConfigField {
      */
     public static final String MIGRATED = "migrated";
 
+    /**
+     * In case the account was migrated. This field contains the folder of the former subscription
+     */
+    public static final String OLD_FOLDER = "oldSubscriptionFolder";
+
     public static class Folders {
 
         public static final String ENABLED = "enabled";
