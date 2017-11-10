@@ -1047,12 +1047,6 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             }
         }
         doIMAPConnect(imapSession, imapStore, server, port, login, pw, accountId, session, knownExternal);
-
-        String sessionInformation = imapStore.getClientParameter(IMAPClientParameters.SESSION_ID.getParamName());
-        if (null != sessionInformation) {
-            LogProperties.put(LogProperties.Name.MAIL_SESSION, sessionInformation);
-        }
-
         return imapStore;
     }
 
@@ -1088,6 +1082,15 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         if (null != auditLogService) {
             String eventId = knownExternal ? "imap.external.login" : (MailAccount.DEFAULT_ID == accountId ? "imap.primary.login" : "imap.external.login");
             auditLogService.log(eventId, DefaultAttribute.valueFor(Name.LOGIN, session.getLoginName()), DefaultAttribute.valueFor(Name.IP_ADDRESS, session.getLocalIp()), DefaultAttribute.timestampFor(new Date()), DefaultAttribute.arbitraryFor("imap.login", login), DefaultAttribute.arbitraryFor("imap.server", server), DefaultAttribute.arbitraryFor("imap.port", Integer.toString(port)));
+        }
+        
+        String sessionInformation = imapStore.getClientParameter(IMAPClientParameters.SESSION_ID.getParamName());
+        if (null != sessionInformation) {
+            LogProperties.put(LogProperties.Name.MAIL_SESSION, sessionInformation);
+        }
+        java.net.InetAddress remoteAddress = imapStore.getRemoteAddress();
+        if (null != remoteAddress) {            
+            LogProperties.put(LogProperties.Name.MAIL_HOST_REMOTE_ADDRESS, remoteAddress.getHostAddress());
         }
     }
 
