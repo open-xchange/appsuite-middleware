@@ -149,7 +149,8 @@ public class ICalCalendarProvider extends CachingCalendarProvider {
             return internalConfig;
         }
         try {
-            JSONObject icalConfig = internalConfig.getJSONObject(ICalCalendarConstants.PROVIDER_ID);
+            internalConfig.remove(ICalCalendarConstants.PROVIDER_ID);
+            JSONObject icalConfig = new JSONObject();
             String feedName = getResponse.getFeedName();
             if (Strings.isNotEmpty(feedName)) {
                 icalConfig.put(ICalCalendarConstants.NAME, feedName);
@@ -158,8 +159,7 @@ public class ICalCalendarProvider extends CachingCalendarProvider {
             if (Strings.isNotEmpty(feedDesc)) {
                 icalConfig.put(ICalCalendarConstants.DESCRIPTION, feedDesc);
             }
-            icalConfig.remove(ICalCalendarConstants.ETAG);
-            icalConfig.remove(ICalCalendarConstants.LAST_UPDATE);
+            internalConfig.put(ICalCalendarConstants.PROVIDER_ID, icalConfig);
         } catch (JSONException e) {
             LOG.warn("Unable to create internal config as desired.", e);
         }
