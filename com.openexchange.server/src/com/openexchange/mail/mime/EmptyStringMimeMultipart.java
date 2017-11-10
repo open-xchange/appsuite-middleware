@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,64 +47,29 @@
  *
  */
 
-package com.openexchange.mail.mime.dataobjects;
+package com.openexchange.mail.mime;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import javax.activation.DataSource;
+import javax.mail.MessagingException;
+import javax.mail.internet.MimeMultipart;
 
 
 /**
- * {@link InputStreamDataSource}
+ * {@link EmptyStringMimeMultipart} - The multipart created from an empty string.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.10.0
  */
-public final class InputStreamDataSource implements DataSource {
-
-    private final InputStream inStream;
-
-    private String type;
+public class EmptyStringMimeMultipart extends MimeMultipart {
 
     /**
-     * Initializes a new {@link InputStreamDataSource}.
+     * Initializes a new {@link EmptyStringMimeMultipart}.
      *
-     * @param inputStream The input stream
+     * @param ds The data source
+     * @throws MessagingException If initialization fails
      */
-    public InputStreamDataSource(final InputStream inputStream) {
-        super();
-        this.inStream = inputStream;
-    }
-
-    /**
-     * Sets the MIME type
-     *
-     * @param type The MIME type
-     * @return Theis reference
-     */
-    public InputStreamDataSource setType(final String type) {
-        this.type = type;
-        return this;
-    }
-
-    @Override
-    public String getContentType() {
-        return type == null ? "application/octet-stream" : type;
-    }
-
-    @Override
-    public InputStream getInputStream() throws IOException {
-        return inStream;
-    }
-
-    @Override
-    public String getName() {
-        return "InputStreamDataSource";
-    }
-
-    @Override
-    public OutputStream getOutputStream() throws IOException {
-        throw new IOException("Not Supported");
+    public EmptyStringMimeMultipart(DataSource ds) throws MessagingException {
+        super(ds);
     }
 
 }
