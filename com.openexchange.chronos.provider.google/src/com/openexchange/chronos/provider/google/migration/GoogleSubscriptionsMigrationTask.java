@@ -155,7 +155,13 @@ public class GoogleSubscriptionsMigrationTask extends UpdateTaskAdapter {
                 Subscription sub = iterator.next();
                 try {
                     JSONObject config = new JSONObject();
-                    config.put(GoogleCalendarConfigField.OAUTH_ID, sub.getConfiguration().get("account"));
+                    Object oauthAccount = sub.getConfiguration().get("account");
+                    if (oauthAccount == null) {
+                        // Skip bad configured subscriptions
+                        iterator.remove();
+                        continue;
+                    }
+                    config.put(GoogleCalendarConfigField.OAUTH_ID, oauthAccount);
                     config.put(GoogleCalendarConfigField.MIGRATED, true);
                     config.put(GoogleCalendarConfigField.OLD_FOLDER, sub.getFolderId());
                     int id = IDGenerator.getId(sub.getContext(), Types.SUBSCRIPTION, writeCon);
