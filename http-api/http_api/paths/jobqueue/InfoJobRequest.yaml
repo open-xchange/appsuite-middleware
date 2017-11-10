@@ -2,7 +2,7 @@
   get:
     operationId: infoJob
     tags:
-      - jobqueue
+      - Jobqueue
     summary: Gets the informartion about a certain job held in job queue
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"
