@@ -1923,6 +1923,24 @@ public class IMAPStore extends Store
     }
 
     /**
+     * Gets the remote IP address of the end-point this instance is connected to, or <code>null</code> if it is unconnected.
+     * 
+     * @return The remote IP address, or <code>null</code> if it is unconnected.
+     */
+    public synchronized java.net.InetAddress getRemoteAddress()
+        throws MessagingException {
+    IMAPProtocol p = null;
+    try {
+    p = getStoreProtocol();
+        return p.getRemoteAddress();
+    } catch (ProtocolException pex) {
+    throw new MessagingException(pex.getMessage(), pex);
+    } finally {
+        releaseStoreProtocol(p);
+    }
+    }
+
+    /**
      * Check whether this store is connected. Override superclass
      * method, to actually ping our server connection.
      */

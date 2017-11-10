@@ -731,6 +731,16 @@ public class Protocol {
     public int getPort() {
         return port;
     }
+
+    /**
+     * Gets the remote IP address of the end-point this instance is connected to, or <code>null</code> if it is unconnected.
+     * 
+     * @return The remote IP address, or <code>null</code> if it is unconnected.
+     */
+    public java.net.InetAddress getRemoteAddress() {
+    Socket socket = this.socket;
+    return null == socket ? null : socket.getInetAddress();
+    }
     
     /**
      * Sets the specified read timeout and returns the previously applicable SO_TIMEOUT value.
