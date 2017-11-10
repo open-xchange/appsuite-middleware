@@ -49,16 +49,21 @@
 
 package com.openexchange.ajax.find.contacts;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AbstractAPIClientSession;
+import com.openexchange.ajax.tools.JSONCoercion;
 import com.openexchange.test.pool.TestUser;
 import com.openexchange.testing.httpclient.invoker.ApiClient;
 import com.openexchange.testing.httpclient.invoker.ApiException;
@@ -68,8 +73,11 @@ import com.openexchange.testing.httpclient.models.FindAutoCompleteResponse;
 import com.openexchange.testing.httpclient.models.FindFacetData;
 import com.openexchange.testing.httpclient.models.FindFacetValue;
 import com.openexchange.testing.httpclient.models.FindOptionsData;
+import com.openexchange.testing.httpclient.models.JSlobData;
+import com.openexchange.testing.httpclient.models.JSlobsResponse;
 import com.openexchange.testing.httpclient.models.UserData;
 import com.openexchange.testing.httpclient.modules.FindApi;
+import com.openexchange.testing.httpclient.modules.JSlobApi;
 import com.openexchange.testing.httpclient.modules.UserApi;
 
 /**
@@ -83,6 +91,8 @@ public class AutoCompleteShowDepartmentsTest extends AbstractAPIClientSession {
 
     private static final int AMOUNT_OF_TEST_USERS = 3;
     private static final int RESULTS_LIMIT = 6;
+    private static final String CONTACTS_JSLOB = "io.ox/contacts";
+    private static final String SHOW_DEPARTMENT_JSLOB = "showDepartment";
     private static final String CONTACTS_MODULE = "contacts";
 
     private Map<String, TestUser> testUsers;
@@ -209,6 +219,24 @@ public class AutoCompleteShowDepartmentsTest extends AbstractAPIClientSession {
                 assertFalse("The item '" + itemName + "' contains the 'department' part in the display name", itemName.contains("Department"));
             }
         }
+    }
+
+    /**
+     * Checks if the 'showDepartment' jslob is correctly registered
+     */
+    @Test
+    public void testJslob() throws ApiException, JSONException {
+        JSlobApi slobApi = new JSlobApi(apiClient);
+
+        JSlobsResponse response = slobApi.getJSlobList(apiClient.getSession(), Collections.singletonList(CONTACTS_JSLOB), null);
+        List<JSlobData> data = response.getData();
+        assertEquals("Expected 1 jslob data object for '" + CONTACTS_JSLOB + "'", 1, data.size());
+
+        Object obj = data.get(0).getTree();
+        assertTrue("The jslob's tree is not a Map", obj instanceof Map);
+
+        JSONObject tree = (JSONObject) JSONCoercion.coerceToJSON(obj);
+        assertTrue("The '" + SHOW_DEPARTMENT_JSLOB + "' slob is missing from the tree", tree.hasAndNotNull(SHOW_DEPARTMENT_JSLOB));
     }
 
     /**
