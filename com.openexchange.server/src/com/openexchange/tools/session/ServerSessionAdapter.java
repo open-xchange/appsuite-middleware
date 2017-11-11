@@ -448,7 +448,7 @@ public class ServerSessionAdapter implements ServerSession, PutIfAbsent {
             return null;
         }
 
-        if (getUser().isGuest()) {
+        if (getUser().isGuest() && !getUser().isMailEnabled()) {
             return null;
         }
 

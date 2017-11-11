@@ -835,7 +835,11 @@ public abstract class MailConfig {
                 } else {
                     String sessionPassword = session.getPassword();
                     if (null == sessionPassword) {
-                        throw MailExceptionCode.MISSING_CONNECT_PARAM.create("Session password not set. Either an invalid session or master authentication is not enabled (property \"com.openexchange.mail.passwordSource\" is not set to \"global\")");
+                        if (Boolean.TRUE.equals(session.getParameter(Session.PARAM_GUEST))) {
+                            sessionPassword = "";
+                        } else {
+                            throw MailExceptionCode.MISSING_CONNECT_PARAM.create("Session password not set. Either an invalid session or master authentication is not enabled (property \"com.openexchange.mail.passwordSource\" is not set to \"global\")");
+                        }
                     }
                     mailConfig.password = sessionPassword;
                 }
