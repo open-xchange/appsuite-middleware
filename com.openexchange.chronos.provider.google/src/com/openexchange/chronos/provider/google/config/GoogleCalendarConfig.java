@@ -67,20 +67,20 @@ public class GoogleCalendarConfig {
 
     private static final Property REQUEST_TIMEOUT_PROP = DefaultProperty.valueOf("com.openexchange.chronos.provider.google.requestTimeout", new Long(30));
 
-    public static long getResfrehInterval(Session session){
+    public static long getResfrehInterval(Session session) {
 
         LeanConfigurationService service = Services.getService(LeanConfigurationService.class);
-        if(service == null){
+        if (service == null) {
             return (int) REFRESH_INTERVAL_PROP.getDefaultValue();
         }
         return service.getLongProperty(session.getUserId(), session.getContextId(), REFRESH_INTERVAL_PROP);
 
     }
 
-    public static long getRequestTimeout(Session session){
+    public static long getRequestTimeout(Session session) {
 
         LeanConfigurationService service = Services.getService(LeanConfigurationService.class);
-        if(service == null){
+        if (service == null) {
             return (int) REQUEST_TIMEOUT_PROP.getDefaultValue();
         }
         return service.getLongProperty(session.getUserId(), session.getContextId(), REQUEST_TIMEOUT_PROP);

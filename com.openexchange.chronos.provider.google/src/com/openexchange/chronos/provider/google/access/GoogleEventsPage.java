@@ -72,11 +72,11 @@ public class GoogleEventsPage {
         this.token = token;
     }
 
-    public List<Event> getEvents(){
+    public List<Event> getEvents() {
         return events;
     }
 
-    public String getToken(){
+    public String getToken() {
         return token;
     }
 

@@ -98,7 +98,6 @@ public class GoogleEventConverter {
         return INSTANCE;
     }
 
-
     /**
      * Initializes a new {@link GoogleEventConverter}.
      */
@@ -109,23 +108,23 @@ public class GoogleEventConverter {
 
     public Event convertToEvent(com.google.api.services.calendar.model.Event from, EventField... fields) throws OXException {
         Event to = new Event();
-        if(fields == null || fields.length == 0){
+        if (fields == null || fields.length == 0) {
             fields = EventField.values();
         }
-        for(EventField field: fields){
+        for (EventField field : fields) {
             GoogleMapping mapping = mappings.get(field);
-            if(mapping!=null){
+            if (mapping != null) {
                 mapping.serialize(to, from);
             }
         }
         return to;
     }
 
-    public GoogleMapping getMapping(EventField field){
+    public GoogleMapping getMapping(EventField field) {
         return mappings.get(field);
     }
 
-    private Map<EventField, GoogleMapping> createMappings(){
+    private Map<EventField, GoogleMapping> createMappings() {
         Map<EventField, GoogleMapping> result = new HashMap<>();
 
         result.put(EventField.ID, new GoogleMapping() {
@@ -140,7 +139,7 @@ public class GoogleEventConverter {
 
             @Override
             public void serialize(Event to, com.google.api.services.calendar.model.Event from) throws OXException {
-                if(from.getStart() != null){
+                if (from.getStart() != null) {
                     to.setStartDate(convert(from.getStart()));
                 }
             }
@@ -150,7 +149,7 @@ public class GoogleEventConverter {
 
             @Override
             public void serialize(Event to, com.google.api.services.calendar.model.Event from) throws OXException {
-                if(from.getEnd() != null){
+                if (from.getEnd() != null) {
                     to.setEndDate(convert(from.getEnd()));
                 }
             }
@@ -167,7 +166,7 @@ public class GoogleEventConverter {
                     if (reminders.getUseDefault()) {
                         return;
                     }
-                    if(reminders.getOverrides() != null){
+                    if (reminders.getOverrides() != null) {
                         for (EventReminder rem : reminders.getOverrides()) {
                             alarms.add(convert(rem));
                         }
@@ -241,6 +240,7 @@ public class GoogleEventConverter {
 
         });
         result.put(EventField.CALENDAR_USER, new GoogleMapping() {
+
             @Override
             public void serialize(Event to, com.google.api.services.calendar.model.Event from) throws OXException {
                 if (from.getAttendees() != null) {
@@ -302,7 +302,7 @@ public class GoogleEventConverter {
 
             @Override
             public void serialize(Event to, com.google.api.services.calendar.model.Event from) throws OXException {
-                if(from.getCreated()!=null){
+                if (from.getCreated() != null) {
                     to.setCreated(new Date(from.getCreated().getValue()));
                 }
             }
@@ -313,7 +313,7 @@ public class GoogleEventConverter {
             @Override
             public void serialize(Event to, com.google.api.services.calendar.model.Event from) throws OXException {
                 Creator creator = from.getCreator();
-                if(creator!=null){
+                if (creator != null) {
                     CalendarUser result = new CalendarUser();
                     result.setCn(creator.getDisplayName());
                     result.setEMail(creator.getEmail());
@@ -430,13 +430,13 @@ public class GoogleEventConverter {
                     String dateTimeStr = from.getId().substring(from.getRecurringEventId().length() + 1);
                     RecurrenceId recId = new DefaultRecurrenceId(dateTimeStr);
                     to.setRecurrenceId(recId);
-                } else if (from.getId().indexOf("_")>0){
+                } else if (from.getId().indexOf("_") > 0) {
                     /*
                      * Additional check in case recurringEventId isn't set (null)
                      * This check expects that google ids of occurences to be in the following format: [masterId]_[recurrenceid]
                      * E.g.: 4qebqgd7o0nrqdlnqhberc4d3l_20171025T173000Z
                      */
-                    String dateTimeStr = from.getId().substring(from.getId().indexOf("_")+1);
+                    String dateTimeStr = from.getId().substring(from.getId().indexOf("_") + 1);
                     RecurrenceId recId = new DefaultRecurrenceId(dateTimeStr);
                     to.setRecurrenceId(recId);
                 }
@@ -448,14 +448,14 @@ public class GoogleEventConverter {
             @Override
             public void serialize(Event to, com.google.api.services.calendar.model.Event from) throws OXException {
                 if (from.getRecurrence() != null) {
-                    for(String recurrence: from.getRecurrence()){
-                        if(recurrence.startsWith("RRULE:")){
+                    for (String recurrence : from.getRecurrence()) {
+                        if (recurrence.startsWith("RRULE:")) {
                             to.setRecurrenceRule(recurrence.substring("RRULE:".length()));
                             continue;
                         }
-                        if(recurrence.startsWith("EXDATE:")){
+                        if (recurrence.startsWith("EXDATE:")) {
                             SortedSet<RecurrenceId> deleteExceptionDates = to.getDeleteExceptionDates();
-                            if(deleteExceptionDates == null){
+                            if (deleteExceptionDates == null) {
                                 deleteExceptionDates = new TreeSet<>();
                                 to.setDeleteExceptionDates(deleteExceptionDates);
                             }
@@ -472,7 +472,7 @@ public class GoogleEventConverter {
             @Override
             public void serialize(Event to, com.google.api.services.calendar.model.Event from) throws OXException {
                 if (from.getSequence() != null) {
-                   to.setSequence(from.getSequence());
+                    to.setSequence(from.getSequence());
                 }
             }
         });
@@ -481,7 +481,7 @@ public class GoogleEventConverter {
 
             @Override
             public void serialize(Event to, com.google.api.services.calendar.model.Event from) throws OXException {
-                if(from.getRecurringEventId() != null){
+                if (from.getRecurringEventId() != null) {
                     // Add google id to identify delete exceptions
                     to.setSeriesId(from.getRecurringEventId());
                 }
@@ -528,7 +528,6 @@ public class GoogleEventConverter {
             }
         });
 
-
         result.put(EventField.UID, new GoogleMapping() {
 
             @Override
@@ -552,7 +551,7 @@ public class GoogleEventConverter {
         return result;
     }
 
-    public abstract class GoogleItemMapping<T,S> extends GoogleMapping {
+    public abstract class GoogleItemMapping<T, S> extends GoogleMapping {
 
         /**
          * Initializes a new {@link GoogleItemMapping}.
@@ -584,7 +583,7 @@ public class GoogleEventConverter {
         }
 
         public DateTime convert(EventDateTime from) {
-            if(from.getDateTime() == null){
+            if (from.getDateTime() == null) {
                 return new DateTime(from.getDate().getValue());
             }
             return new DateTime(from.getDateTime().getValue());
