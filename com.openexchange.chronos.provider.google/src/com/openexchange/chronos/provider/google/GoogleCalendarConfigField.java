@@ -49,7 +49,6 @@
 
 package com.openexchange.chronos.provider.google;
 
-
 /**
  * {@link GoogleCalendarConfigField}
  *

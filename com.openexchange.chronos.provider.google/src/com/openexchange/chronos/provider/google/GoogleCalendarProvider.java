@@ -71,7 +71,7 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.0
  */
-public class GoogleCalendarProvider implements CalendarProvider{
+public class GoogleCalendarProvider implements CalendarProvider {
 
     public static final String PROVIDER_ID = "google";
     private static final String DISPLAY_NAME = "Google";
@@ -97,7 +97,7 @@ public class GoogleCalendarProvider implements CalendarProvider{
         DefaultCalendarAccount account = new DefaultCalendarAccount(getId(), -1, session.getUserId(), true, null, userConfig, new Date());
         GoogleCalendarAccess access = new GoogleCalendarAccess(session, account, parameters, false);
         JSONObject internalConfig = access.initCalendarFolder(true);
-        if(internalConfig == null){
+        if (internalConfig == null) {
             internalConfig = new JSONObject();
         }
         try {
@@ -113,7 +113,7 @@ public class GoogleCalendarProvider implements CalendarProvider{
         DefaultCalendarAccount account = new DefaultCalendarAccount(getId(), -1, session.getUserId(), true, calendarAccount.getInternalConfiguration(), userConfig, new Date());
         GoogleCalendarAccess access = new GoogleCalendarAccess(session, account, parameters, false);
         JSONObject resultConfig = access.initCalendarFolder(false);
-        if(resultConfig == null){
+        if (resultConfig == null) {
             resultConfig = calendarAccount.getInternalConfiguration();
         }
         try {
