@@ -125,6 +125,8 @@ public class ImageUtils {
         return null != readers && readers.hasNext();
     }
 
+    private static final PatternAndFailure[] PATTERNS_SVG_START = new PatternAndFailure[] {new PatternAndFailure(new byte[] { '<', 's' }), new PatternAndFailure(new byte[] { '<', 'S' })};
+
     /**
      * Checks if specified image data indicate an SVG image.
      *
@@ -132,25 +134,31 @@ public class ImageUtils {
      * @return <code>true</code> if SVG data; otherwise <code>false</code>
      */
     public static boolean isSvg(byte[] bytes) {
-        byte[][] sequences = new byte[][] {new byte[] { '<', 's' }, new byte[] { '<', 'S' }};
-        for (int i = indexOfAny(bytes, 0, sequences); i >= 0; i = indexOfAny(bytes, i, sequences)) {
+        PatternAndFailure[] sequences = PATTERNS_SVG_START;
+        int i = indexOfAny(bytes, 0, sequences);
+        while (i >= 0) {
             int pos = i + 2;
-            if (pos < bytes.length && characterContainedIn((char) (bytes[pos] & 0xff), 'v', 'V')) {
-                pos += 1;
-                if (pos < bytes.length && characterContainedIn((char) (bytes[pos] & 0xff), 'g', 'G')) {
+            if (pos < bytes.length) {
+                if (characterContainedIn((char) (bytes[pos] & 0xff), 'v', 'V')) {
                     pos += 1;
-                    if (pos < bytes.length && Strings.isWhitespace((char) (bytes[pos] & 0xff))) {
-                        return true;
+                    if (pos < bytes.length && characterContainedIn((char) (bytes[pos] & 0xff), 'g', 'G')) {
+                        pos += 1;
+                        if (pos < bytes.length && Strings.isWhitespace((char) (bytes[pos] & 0xff))) {
+                            return true;
+                        }
                     }
                 }
+                i = indexOfAny(bytes, i + 2, sequences);
+            } else {
+                i = -1;
             }
         }
         return false;
     }
 
-    private static int indexOfAny(byte[] bytes, int beginIndex, byte[]... sequences) {
+    private static int indexOfAny(byte[] bytes, int beginIndex, PatternAndFailure... sequences) {
         for (int i = sequences.length; i-- > 0;) {
-            int pos = indexOf(bytes, sequences[i], beginIndex, bytes.length);
+            int pos = indexOf(bytes, sequences[i].pattern, beginIndex, bytes.length, sequences[i].failure);
             if (pos >= 0) {
                 return pos;
             }
@@ -241,12 +249,12 @@ public class ImageUtils {
                     checkStartsWithMagic23 = false;
                 }
                 // Check for further frames
-                int pos = indexOf(buf, frameStart, start, read);
+                int pos = indexOf(buf, frameStart, start, read, null);
                 if (pos >= 0) {
                     frames++;
                     // Check for more frames in byte range
                     do {
-                        pos = indexOf(buf, frameStart, pos + 1, read);
+                        pos = indexOf(buf, frameStart, pos + 1, read, null);
                         if (pos >= 0) {
                             if (null != newStreamRef && null != sink) {
                                 newStreamRef.set(new CombinedInputStream(sink.toByteArray(), in));
@@ -282,12 +290,13 @@ public class ImageUtils {
      * @param pattern The byte pattern to search for
      * @param beginIndex The beginning index, inclusive.
      * @param endIndex The ending index, exclusive.
+     * @param optFailure The optional pre-computed failure pattern
      * @return The index of the first occurrence of the pattern in the byte array starting from given index or <code>-1</code> if none
      *         found.
      * @throws IndexOutOfBoundsException If <code>beginIndex</code> and/or <code>endIndex</code> is invalid
      * @throws IllegalArgumentException If given pattern is <code>null</code>
      */
-    private static int indexOf(final byte[] data, final byte[] pattern, final int beginIndex, final int endIndex) {
+    private static int indexOf(byte[] data, byte[] pattern, int beginIndex, int endIndex, int[] optFailure) {
         if ((beginIndex < 0) || (beginIndex > data.length)) {
             throw new IndexOutOfBoundsException(String.valueOf(beginIndex));
         }
@@ -298,7 +307,7 @@ public class ImageUtils {
             throw new IndexOutOfBoundsException(String.valueOf(endIndex - beginIndex));
         }
 
-        final int[] failure = computeFailure(pattern);
+        int[] failure = null == optFailure ? computeFailure(pattern) : optFailure;
         if (failure == null) {
             throw new IllegalArgumentException("pattern is null");
         }
@@ -345,6 +354,18 @@ public class ImageUtils {
             failure[i] = j;
         }
         return failure;
+    }
+
+    private static final class PatternAndFailure {
+
+        final byte[] pattern;
+        final int[] failure;
+
+        PatternAndFailure(byte[] pattern) {
+            super();
+            this.pattern = pattern;
+            this.failure = computeFailure(pattern);
+        }
     }
 
 }
