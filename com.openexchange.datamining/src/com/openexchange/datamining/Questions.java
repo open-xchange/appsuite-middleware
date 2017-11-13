@@ -193,17 +193,17 @@ public class Questions {
     protected static void reportNumberOfUsersWithEventsInPrivateCalendar() {
         try {
             Datamining.allTheQuestions.add(NUMBER_OF_USERS_WITH_EVENTS_IN_PRIVATE_CALENDAR);
-            String sql = "select count(distinct created_from, cid) from prg_dates";
+            String sql = "SELECT COUNT(DISTINCT cid, createdBy) FROM calendar_event";
             BigInteger numberOfUsers = Datamining.countOverAllSchemata(sql);
             Datamining.report(NUMBER_OF_USERS_WITH_EVENTS_IN_PRIVATE_CALENDAR, numberOfUsers.toString());
         } catch (Exception e) {
         }
     }
 
-    protected static void reportNumberOfUsersWithEventsInPrivateCalendarThatAreInTheFutureAndAreNotYearlySeries() {
+    protected static void reportNumberOfUsersWithEventsInPrivateCalendarThatAreInTheFutureAndAreNotYearlySeries() { 
         try {
             Datamining.allTheQuestions.add(NUMBER_OF_USERS_WITH_EVENTS_IN_PRIVATE_CALENDAR_THAT_ARE_IN_THE_FUTURE_AND_ARE_NOT_YEARLY_SERIES);
-            String sql = "SELECT count(distinct created_from, cid) FROM prg_dates WHERE timestampfield02 > now() AND ((field06 NOT LIKE \"t|4%\" AND field06 NOT LIKE \"t|6%\") OR field06 IS NULL);";
+            String sql = "SELECT COUNT(DISTINCT cid, createdBy) FROM calendar_event WHERE start > NOW() AND folder IS NULL);";
             BigInteger numberOfUsers = Datamining.countOverAllSchemata(sql);
             Datamining.report(
                 NUMBER_OF_USERS_WITH_EVENTS_IN_PRIVATE_CALENDAR_THAT_ARE_IN_THE_FUTURE_AND_ARE_NOT_YEARLY_SERIES,
@@ -215,7 +215,7 @@ public class Questions {
     protected static void reportNumberOfUsersWhoChangedTheirCalendarInTheLast30Days() {
         try {
             Datamining.allTheQuestions.add(NUMBER_OF_USERS_WHO_CHANGED_THEIR_CALENDAR_IN_THE_LAST30_DAYS);
-            String sql = "SELECT count(DISTINCT created_from, cid) FROM prg_dates WHERE DATE(FROM_UNIXTIME(SUBSTRING(CAST(changing_date AS CHAR) FROM 1 FOR 10))) BETWEEN (NOW() - INTERVAL 30 DAY) AND NOW()";
+            String sql = "SELECT count(DISTINCT cid, createdBy) FROM calendar_event WHERE DATE(FROM_UNIXTIME(SUBSTRING(CAST(timestamp AS CHAR) FROM 1 FOR 10))) BETWEEN (NOW() - INTERVAL 30 DAY) AND NOW()";
             BigInteger numberOfUsers = Datamining.countOverAllSchemata(sql);
             Datamining.report(NUMBER_OF_USERS_WHO_CHANGED_THEIR_CALENDAR_IN_THE_LAST30_DAYS, numberOfUsers.toString());
         } catch (Exception e) {
@@ -275,7 +275,7 @@ public class Questions {
     protected static void reportNumberOfAppointments() {
         try {
             Datamining.allTheQuestions.add(NUMBER_OF_APPOINTMENTS);
-            String sql = "SELECT count(*) FROM prg_dates;";
+            String sql = "SELECT count(*) FROM calendar_event;";
             BigInteger numberOfAppointments = Datamining.countOverAllSchemata(sql);
             Datamining.report(NUMBER_OF_APPOINTMENTS, numberOfAppointments.toString());
         } catch (Exception e) {
@@ -332,10 +332,10 @@ public class Questions {
         }
     }
 
-    protected static void reportMaximumNumberOfCreatedAppointmentsForOneUser() {
+    protected static void reportMaximumNumberOfCreatedAppointmentsForOneUser() { 
         try {
             Datamining.allTheQuestions.add(MAXIMUM_NUMBER_OF_CREATED_APPOINTMENTS_FOR_ONE_USER);
-            String sql = "SELECT MAX(count) FROM (SELECT cid, created_from, count(*) AS count FROM prg_dates) AS x;";
+            String sql = "SELECT MAX(count) FROM (SELECT COUNT(*) AS count FROM calendar_event GROUP BY createdBy) AS x;";
             BigInteger numberOfInfostoreObjects = Datamining.maximumForAllSchemata(sql);
             Datamining.report(MAXIMUM_NUMBER_OF_CREATED_APPOINTMENTS_FOR_ONE_USER, numberOfInfostoreObjects.toString());
         } catch (Exception e) {
@@ -374,8 +374,8 @@ public class Questions {
 
     protected static void reportNumberOfUsersWhoCreatedAppointments() {
         try {
-            Datamining.allTheQuestions.add(NUMBER_OF_USERS_WHO_CREATED_APPOINTMENTS);
-            String sql = "SELECT count(DISTINCT created_from, cid) FROM prg_dates;";
+            Datamining.allTheQuestions.add(NUMBER_OF_USERS_WHO_CREATED_APPOINTMENTS); 
+            String sql = "SELECT COUNT(DISTINCT cid, createdBy) FROM calendar_event";
             BigInteger numberOfInfostoreObjects = Datamining.countOverAllSchemata(sql);
             Datamining.report(NUMBER_OF_USERS_WHO_CREATED_APPOINTMENTS, numberOfInfostoreObjects.toString());
         } catch (Exception e) {
