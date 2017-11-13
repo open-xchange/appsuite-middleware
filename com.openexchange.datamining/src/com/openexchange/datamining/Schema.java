@@ -54,7 +54,9 @@ package com.openexchange.datamining;
  * {@link Schema}
  *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
+ * @deprecated with 7.10.0
  */
+@Deprecated
 public class Schema {
 
     private final String schemaname;

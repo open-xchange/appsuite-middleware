@@ -60,7 +60,9 @@ import org.junit.Before;
  * {@link Test}
  *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
+ * @deprecated with 7.10.0
  */
+@Deprecated
 public class Test {
     PrintStream out;
 
