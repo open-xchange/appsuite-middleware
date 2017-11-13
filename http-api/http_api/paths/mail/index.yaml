@@ -1,6 +1,7 @@
 requests:
   - CountRequest.yaml
   - AllRequest.yaml
+  - AutoSaveRequest.yaml
   - ThreadedAllRequest.yaml
   - SearchRequest.yaml
   - ListRequest.yaml
