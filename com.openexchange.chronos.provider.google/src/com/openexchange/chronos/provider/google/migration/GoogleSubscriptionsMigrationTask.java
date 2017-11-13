@@ -114,6 +114,11 @@ public class GoogleSubscriptionsMigrationTask extends UpdateTaskAdapter {
             throw ServiceExceptionCode.absentService(GenericConfigurationStorageService.class);
         }
 
+        SubscriptionStorage subscriptionStorage = AbstractSubscribeService.STORAGE.get();
+        if (subscriptionStorage == null) {
+            throw ServiceExceptionCode.absentService(SubscriptionStorage.class);
+        }
+
         /*
          * Step 1: Load existing subscriptions
          */
@@ -189,10 +194,6 @@ public class GoogleSubscriptionsMigrationTask extends UpdateTaskAdapter {
         /*
          * Step 3: Remove old subscriptions
          */
-        SubscriptionStorage subscriptionStorage = AbstractSubscribeService.STORAGE.get();
-        if (subscriptionStorage == null) {
-            throw ServiceExceptionCode.absentService(SubscriptionStorage.class);
-        }
         for (Subscription sub : subscriptions) {
             subscriptionStorage.forgetSubscription(sub);
         }
