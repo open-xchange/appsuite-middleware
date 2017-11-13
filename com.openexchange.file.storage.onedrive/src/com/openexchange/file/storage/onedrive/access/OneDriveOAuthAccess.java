@@ -231,23 +231,29 @@ public class OneDriveOAuthAccess extends AbstractOAuthAccess {
             Session session = getSession();
             OAuthAccount cachedAccount = getCachedAccount();
 
+            String refreshToken = cachedAccount.getSecret();
+            if (Strings.isEmpty(refreshToken)) {
+                // Impossible request a new access token without a refresh token. Manual reauthorization is required.
+                throw OAuthExceptionCodes.OAUTH_ACCESS_TOKEN_INVALID.create(cachedAccount.getDisplayName(), cachedAccount.getId(), session.getUserId(), session.getContextId());
+            }
+
             final ServiceBuilder serviceBuilder = new ServiceBuilder().provider(MsLiveConnectApi.class);
             serviceBuilder.apiKey(cachedAccount.getMetaData().getAPIKey(session)).apiSecret(cachedAccount.getMetaData().getAPISecret(session));
             MsLiveConnectApi.MsLiveConnectService scribeOAuthService = (MsLiveConnectApi.MsLiveConnectService) serviceBuilder.build();
 
             try {
-                Token accessToken = scribeOAuthService.getAccessToken(new Token(cachedAccount.getToken(), cachedAccount.getSecret()), null);
+                Token accessToken = scribeOAuthService.getAccessToken(new Token(cachedAccount.getToken(), refreshToken), null);
                 if (Strings.isEmpty(accessToken.getSecret())) {
                     LOGGER.warn("Received invalid request_token from Live Connect: {}. Response:{}{}", null == accessToken.getSecret() ? "null" : accessToken.getSecret(), Strings.getLineSeparator(), accessToken.getRawResponse());
                 }
                 return accessToken;
             } catch (org.scribe.exceptions.OAuthException e) {
-                throw OAuthExceptionCodes.INVALID_ACCOUNT_EXTENDED.create(e, cachedAccount.getDisplayName(), Integer.valueOf(cachedAccount.getId()));
+                throw handleScribeOAuthException(e, cachedAccount, session);
             }
         }
     }
 
-    static OXException handleScribeOAuthException(org.scribe.exceptions.OAuthException e, OAuthAccount googleAccount, Session session) {
+    static OXException handleScribeOAuthException(org.scribe.exceptions.OAuthException e, OAuthAccount oauthAccount, Session session) {
         if (ExceptionUtils.isEitherOf(e, SSLHandshakeException.class)) {
             List<Object> displayArgs = new ArrayList<>(2);
             displayArgs.add(SSLExceptionCode.extractArgument(e, "fingerprint"));
@@ -261,8 +267,8 @@ public class OneDriveOAuthAccess extends AbstractOAuthAccess {
             return OAuthExceptionCodes.OAUTH_ERROR.create(e, exMessage);
         }
         if (exMessage.contains("invalid_grant") || exMessage.contains("invalid_request")) {
-            if (null != googleAccount) {
-                return OAuthExceptionCodes.OAUTH_ACCESS_TOKEN_INVALID.create(e, googleAccount.getDisplayName(), googleAccount.getId(), session.getUserId(), session.getContextId());
+            if (null != oauthAccount) {
+                return OAuthExceptionCodes.OAUTH_ACCESS_TOKEN_INVALID.create(e, oauthAccount.getDisplayName(), oauthAccount.getId(), session.getUserId(), session.getContextId());
             }
             return OAuthExceptionCodes.INVALID_ACCOUNT.create(e, new Object[0]);
         }
