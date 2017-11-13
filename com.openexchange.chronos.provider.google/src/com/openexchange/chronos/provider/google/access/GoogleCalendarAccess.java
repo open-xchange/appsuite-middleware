@@ -434,7 +434,7 @@ public class GoogleCalendarAccess extends CachingCalendarAccess {
         folder.setLastModified(account.getLastModified());
         folder.setName(summary);
 
-        JSONObject folderConfig = account.getInternalConfiguration().optJSONObject(folderId);
+        JSONObject folderConfig = account.getInternalConfiguration()!=null ? account.getInternalConfiguration().optJSONObject(folderId) : null;
 
         ExtendedProperties extendedProperties = null;
         if (folderConfig != null) {
