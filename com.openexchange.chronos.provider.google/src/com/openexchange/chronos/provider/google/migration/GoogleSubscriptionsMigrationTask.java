@@ -107,7 +107,6 @@ public class GoogleSubscriptionsMigrationTask extends UpdateTaskAdapter {
 
     @Override
     public void perform(PerformParameters params) throws OXException {
-        int ctxId = params.optContextId();
 
         GenericConfigurationStorageService storageService = Services.getService(GenericConfigurationStorageService.class);
         if (storageService == null) {
@@ -119,83 +118,88 @@ public class GoogleSubscriptionsMigrationTask extends UpdateTaskAdapter {
             throw ServiceExceptionCode.absentService(SubscriptionStorage.class);
         }
 
-        /*
-         * Step 1: Load existing subscriptions
-         */
         Connection writeCon = params.getConnection();
-        ResultSet rs = null;
-        PreparedStatement stmt = null;
-        final List<Subscription> subscriptions = new LinkedList<Subscription>();
-        Context ctx = new ContextImpl(ctxId);
-        try {
-            stmt = writeCon.prepareStatement(SQL_READ);
-            stmt.setInt(1, ctxId);
-            rs = stmt.executeQuery();
-            while (rs.next()) {
-                final Subscription subscription = new Subscription();
-                subscription.setFolderId(rs.getString("folder_id"));
-                subscription.setId(rs.getInt("id"));
-                subscription.setUserId(rs.getInt("user_id"));
-                subscription.setEnabled(rs.getBoolean("enabled"));
-                subscription.setContext(ctx);
-                final Map<String, Object> content = new HashMap<String, Object>();
-                storageService.fill(writeCon, subscription.getContext(), rs.getInt("configuration_id"), content);
-                subscription.setConfiguration(content);
-                subscriptions.add(subscription);
-            }
-        } catch (SQLException e) {
-            throw UpdateExceptionCodes.SQL_PROBLEM.create(e.getMessage());
-        } finally {
-            Databases.closeSQLStuff(rs, stmt);
-        }
+        int[] contextsInSameSchema = params.getContextsInSameSchema();
 
-        /*
-         * Step 2: Create accounts for the existing subscriptions
-         */
-        Iterator<Subscription> iterator = subscriptions.iterator();
-        try {
-            writeCon.setAutoCommit(false);
-            CalendarStorage calendarStorage = Services.getService(CalendarStorageFactory.class).create(ctx, -1, null);
-            while (iterator.hasNext()) {
-                Subscription sub = iterator.next();
-                try {
-                    JSONObject config = new JSONObject();
-                    Object oauthAccount = sub.getConfiguration().get("account");
-                    if (oauthAccount == null) {
-                        // Skip bad configured subscriptions
+        for (int ctxId : contextsInSameSchema) {
+
+            /*
+             * Step 1: Load existing subscriptions
+             */
+            ResultSet rs = null;
+            PreparedStatement stmt = null;
+            final List<Subscription> subscriptions = new LinkedList<Subscription>();
+            Context ctx = new ContextImpl(ctxId);
+            try {
+                stmt = writeCon.prepareStatement(SQL_READ);
+                stmt.setInt(1, ctxId);
+                rs = stmt.executeQuery();
+                while (rs.next()) {
+                    final Subscription subscription = new Subscription();
+                    subscription.setFolderId(rs.getString("folder_id"));
+                    subscription.setId(rs.getInt("id"));
+                    subscription.setUserId(rs.getInt("user_id"));
+                    subscription.setEnabled(rs.getBoolean("enabled"));
+                    subscription.setContext(ctx);
+                    final Map<String, Object> content = new HashMap<String, Object>();
+                    storageService.fill(writeCon, subscription.getContext(), rs.getInt("configuration_id"), content);
+                    subscription.setConfiguration(content);
+                    subscriptions.add(subscription);
+                }
+            } catch (SQLException e) {
+                throw UpdateExceptionCodes.SQL_PROBLEM.create(e.getMessage());
+            } finally {
+                Databases.closeSQLStuff(rs, stmt);
+            }
+
+            /*
+             * Step 2: Create accounts for the existing subscriptions
+             */
+            Iterator<Subscription> iterator = subscriptions.iterator();
+            try {
+                writeCon.setAutoCommit(false);
+                CalendarStorage calendarStorage = Services.getService(CalendarStorageFactory.class).create(ctx, -1, null);
+                while (iterator.hasNext()) {
+                    Subscription sub = iterator.next();
+                    try {
+                        JSONObject config = new JSONObject();
+                        Object oauthAccount = sub.getConfiguration().get("account");
+                        if (oauthAccount == null) {
+                            // Skip bad configured subscriptions
+                            iterator.remove();
+                            continue;
+                        }
+                        config.put(GoogleCalendarConfigField.OAUTH_ID, oauthAccount);
+                        config.put(GoogleCalendarConfigField.MIGRATED, true);
+                        config.put(GoogleCalendarConfigField.OLD_FOLDER, sub.getFolderId());
+                        int id = IDGenerator.getId(sub.getContext(), Types.SUBSCRIPTION, writeCon);
+                        insertAccount(writeCon, ctxId, new DefaultCalendarAccount(GoogleCalendarProvider.PROVIDER_ID, id, sub.getUserId(), sub.isEnabled(), config, config, new Date()));
+                        calendarStorage.getAccountStorage().invalidateAccount(sub.getUserId(), -1);
+                    } catch (JSONException | SQLException e) {
+                        LOG.error("Error during migration of google subscriptions. Subscription with id " + sub.getId() + " in context " + ctxId + " could not be migrated to a calendar account because of: " + e.getMessage());
+                        // remove the subscription so it does not get deleted
                         iterator.remove();
-                        continue;
+                    } catch (OXException e) {
+                        LOG.warn("Problem during migration of google subscriptions. Cache could not be invalidated for user with id " + sub.getUserId());
                     }
-                    config.put(GoogleCalendarConfigField.OAUTH_ID, oauthAccount);
-                    config.put(GoogleCalendarConfigField.MIGRATED, true);
-                    config.put(GoogleCalendarConfigField.OLD_FOLDER, sub.getFolderId());
-                    int id = IDGenerator.getId(sub.getContext(), Types.SUBSCRIPTION, writeCon);
-                    insertAccount(writeCon, ctxId, new DefaultCalendarAccount(GoogleCalendarProvider.PROVIDER_ID, id, sub.getUserId(), sub.isEnabled(), config, config, new Date()));
-                    calendarStorage.getAccountStorage().invalidateAccount(sub.getUserId(), -1);
-                } catch (JSONException | SQLException e) {
-                    LOG.error("Error during migration of google subscriptions. Subscription with id " + sub.getId() + " in context " + ctxId + " could not be migrated to a calendar account because of: " + e.getMessage());
-                    // remove the subscription so it does not get deleted
-                    iterator.remove();
-                } catch (OXException e) {
-                    LOG.warn("Problem during migration of google subscriptions. Cache could not be invalidated for user with id " + sub.getUserId());
+                }
+                writeCon.commit();
+            } catch (SQLException e) {
+                throw UpdateExceptionCodes.SQL_PROBLEM.create(e.getMessage());
+            } finally {
+                try {
+                    writeCon.setAutoCommit(true);
+                } catch (SQLException e) {
+                    // ignore
                 }
             }
-            writeCon.commit();
-        } catch (SQLException e) {
-            throw UpdateExceptionCodes.SQL_PROBLEM.create(e.getMessage());
-        } finally {
-            try {
-                writeCon.setAutoCommit(true);
-            } catch (SQLException e) {
-                // ignore
-            }
-        }
 
-        /*
-         * Step 3: Remove old subscriptions
-         */
-        for (Subscription sub : subscriptions) {
-            subscriptionStorage.forgetSubscription(sub);
+            /*
+             * Step 3: Remove old subscriptions
+             */
+            for (Subscription sub : subscriptions) {
+                subscriptionStorage.forgetSubscription(sub);
+            }
         }
     }
 
@@ -242,7 +246,7 @@ public class GoogleSubscriptionsMigrationTask extends UpdateTaskAdapter {
 
     @Override
     public TaskAttributes getAttributes() {
-        return new Attributes(UpdateConcurrency.BLOCKING, WorkingLevel.CONTEXT);
+        return new Attributes(UpdateConcurrency.BLOCKING, WorkingLevel.SCHEMA);
     }
 
 }
