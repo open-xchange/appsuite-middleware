@@ -328,7 +328,6 @@ public class GoogleCalendarAccess extends CachingCalendarAccess {
      * @return The merged properties
      */
     protected static ExtendedProperties merge(ExtendedProperties originalProperties, ExtendedProperties updatedProperties) throws OXException {
-        //TODO: improve
         ExtendedProperties mergedProperties = new ExtendedProperties(originalProperties);
         if (null != updatedProperties && 0 < updatedProperties.size()) {
             for (ExtendedProperty updatedProperty : updatedProperties) {

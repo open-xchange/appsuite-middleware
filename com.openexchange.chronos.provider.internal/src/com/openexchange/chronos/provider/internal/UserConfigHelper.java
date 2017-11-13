@@ -131,7 +131,7 @@ public class UserConfigHelper {
                 Check.availabilityIsValid(requireService(RecurrenceService.class, services), availability);
             }
         } catch (OXException e) {
-            throw CalendarExceptionCodes.INVALID_CONFIGURATION.create(e, e.getMessage());
+            throw CalendarExceptionCodes.INVALID_CONFIGURATION.create(e, String.valueOf(userConfig));
         }
     }
 

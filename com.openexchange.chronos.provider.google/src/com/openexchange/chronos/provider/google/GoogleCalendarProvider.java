@@ -95,6 +95,7 @@ public class GoogleCalendarProvider implements CalendarProvider {
     @Override
     public JSONObject configureAccount(Session session, JSONObject userConfig, CalendarParameters parameters) throws OXException {
         DefaultCalendarAccount account = new DefaultCalendarAccount(getId(), -1, session.getUserId(), true, null, userConfig, new Date());
+        checkConfig(account);
         GoogleCalendarAccess access = new GoogleCalendarAccess(session, account, parameters, false);
         JSONObject internalConfig = access.initCalendarFolder(true);
         if (internalConfig == null) {
@@ -111,6 +112,7 @@ public class GoogleCalendarProvider implements CalendarProvider {
     @Override
     public JSONObject reconfigureAccount(Session session, CalendarAccount calendarAccount, JSONObject userConfig, CalendarParameters parameters) throws OXException {
         DefaultCalendarAccount account = new DefaultCalendarAccount(getId(), -1, session.getUserId(), true, calendarAccount.getInternalConfiguration(), userConfig, new Date());
+        checkConfig(account);
         GoogleCalendarAccess access = new GoogleCalendarAccess(session, account, parameters, false);
         JSONObject resultConfig = access.initCalendarFolder(false);
         if (resultConfig == null) {
@@ -122,6 +124,13 @@ public class GoogleCalendarProvider implements CalendarProvider {
             throw CalendarExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
         return resultConfig;
+    }
+
+    private void checkConfig(CalendarAccount account) throws OXException{
+        JSONObject userConfig = account.getUserConfiguration();
+        if(!userConfig.hasAndNotNull(GoogleCalendarConfigField.OAUTH_ID)){
+            throw CalendarExceptionCodes.INVALID_CONFIGURATION.create(account.getUserConfiguration());
+        }
     }
 
     @Override
