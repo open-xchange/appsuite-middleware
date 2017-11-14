@@ -1078,7 +1078,7 @@ public class EventMapper extends DefaultMapper<Event, EventField> {
 
             @Override
             public void remove(Event object) {
-                object.removeStatus();
+                object.removeExtendedProperties();
             }
         });
         return mappings;
