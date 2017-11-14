@@ -3,6 +3,32 @@
 
 This chapter describes the configuration of different calendar accounts.
 
+## ICal feeds
+
+Various ICal feeds can be subscribed by the given URI and optional basic authentication.
+
+For example:
+
+```json
+{
+  "configuration":{
+    "uri":"http://example.org/feed/theExampleFeed.ics"
+  }
+}
+```
+
+If basic authentication is required the body should contain 'login', 'password' or both as desired by the endpoint, for instance:
+
+```json
+{
+  "configuration":{
+    "uri":"http://example.org/feed/theSecureExampleFeed.ics"
+    "login":"johnDoe",
+    "password":"myPassword"
+  }
+}
+```
+
 ## Google
 
 The google calendar account basically only needs the id of a valid google oauth account with the `calendar_ro` scope.
