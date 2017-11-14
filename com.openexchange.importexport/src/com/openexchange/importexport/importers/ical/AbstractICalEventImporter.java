@@ -133,17 +133,16 @@ public abstract class AbstractICalEventImporter extends AbstractICalImporter{
             calendarImport = iCalService.importICal(is, iCalParameters);
             return initImporter(userizedFolder, calendarImport.getEvents(), optionalParams, list);
         } catch (OXException e) {
+            TruncationInfo trunc = new TruncationInfo(list.size(), 0);
             if ("ICAL-0003".equals(e.getErrorCode())) {
                 // "No calendar data found", silently ignore, as expected by com.openexchange.ajax.importexport.Bug9209Test.test9209ICal()
                 list = Collections.emptyList();
-                //TODO: change return value
-                return new TruncationInfo(0, 0);
+                return trunc;
             }
             ImportResult result = new ImportResult();
             result.setException(e);
             list = Collections.singletonList(result);
-            //TODO: change return value
-            return new TruncationInfo(0, 0);
+            return trunc;
         }
     }
 
@@ -191,11 +190,14 @@ public abstract class AbstractICalEventImporter extends AbstractICalImporter{
             try {
                 CalendarResult result = null == masterEventID ? createEvent(folder, importedEvent) : createEventException(masterEventID, importedEvent);
                 importResult.setDate(new Date(result.getTimestamp()));
-                if (result.getCreations().isEmpty()) {
-                    importResult.setException(ImportExportExceptionCodes.COULD_NOT_CREATE.create(importedEvent));
-                } else {
+                if (result.getCreations().isEmpty() && !result.getUpdates().isEmpty()) {
+                    importResult.setFolder(result.getUpdates().get(0).getUpdate().getFolderId());
+                    importResult.setObjectId(result.getUpdates().get(0).getUpdate().getId());
+                } else if (!result.getCreations().isEmpty() && result.getUpdates().isEmpty()) {
                     importResult.setFolder(result.getCreations().get(0).getCreatedEvent().getFolderId());
                     importResult.setObjectId(result.getCreations().get(0).getCreatedEvent().getId());
+                } else {
+                    importResult.setException(ImportExportExceptionCodes.COULD_NOT_CREATE.create(importedEvent));
                 }
             } catch (OXException e) {
                 if (retryCount < MAX_RETRIES && handle(e, importedEvent)) {

@@ -90,7 +90,7 @@ public class ICalSeriesTests extends ManagedAppointmentTest {
         CommonAllResponse response2 = client.execute(allRequest);
 
         Object[][] data = response2.getArray();
-        assertEquals(0, data.length);
+        assertEquals(1, data.length);
     }
 
     @Test
@@ -99,16 +99,16 @@ public class ICalSeriesTests extends ManagedAppointmentTest {
         String title = "Change to exceptional meeting #3: One hour later";
         String ical = "BEGIN:VCALENDAR\n" + "VERSION:2.0\n" +
 
-            "BEGIN:VEVENT\n" + "DTSTART;TZID=Europe/Rome:20100204T113000\n" + "DTEND;TZID=Europe/Rome:20100204T130000\n" + "DTSTAMP:20110105T174810Z\n" + "SUMMARY:" + title + "\n" + "UID:" + uid + "\n" + "END:VEVENT\n" +
+            "BEGIN:VEVENT\n" + "DTSTART;TZID=Europe/Rome:20171009T080000\n" + "DTEND;TZID=Europe/Rome:20171009T090000\n" + "DTSTAMP:20171012T140049Z\n" + "SUMMARY:" + title + "\n" +"RECURRENCE-ID:20171010T060000Z" + "\n" + "UID:" + uid + "\n" + "END:VEVENT\n" +
 
-            "BEGIN:VEVENT\n" + "DTSTART;TZID=Europe/Rome:20100202T103000\n" + "DTEND;TZID=Europe/Rome:20100202T120000\n" + "RRULE:FREQ=DAILY;UNTIL=20100228T215959Z\n" + "DTSTAMP:20110105T174810Z\n" + "SUMMARY:Exceptional meeting #3\n" + "UID:" + uid + "\n" + "END:VEVENT\n";
+            "BEGIN:VEVENT\n" + "DTSTART;TZID=Europe/Rome:20171009T080000\n" + "DTEND;TZID=Europe/Rome:20171009T090000\n" + "RRULE:FREQ=DAILY;UNTIL=20171013T215959Z\n" + "DTSTAMP:20110105T174810Z\n" + "SUMMARY:Exceptional meeting #3\n" + "UID:" + uid + "\n" + "END:VEVENT\n";
 
         TimeZone tz = TimeZone.getTimeZone("GMT");
 
-        Date start = D("2010-02-04 00:00", tz);
-        Date end = D("2010-02-05 00:00", tz);
+        Date start = D("2017-10-09 08:00", tz);
+        Date end = D("2017-10-09 09:00", tz);
 
-        testChangeException(ical, title, start, end);
+        testChangeException(ical, title, start, end, 2);
     }
 
     @Test
@@ -126,10 +126,10 @@ public class ICalSeriesTests extends ManagedAppointmentTest {
         Date start = D("2010-02-04 00:00", tz);
         Date end = D("2010-02-05 00:00", tz);
 
-        testChangeException(ical, title, start, end);
+        testChangeException(ical, title, start, end, 1);
     }
 
-    protected void testChangeException(String ical, String expectedTitle, Date start, Date end) throws Exception {
+    protected void testChangeException(String ical, String expectedTitle, Date start, Date end, int expectedLength) throws Exception {
         AJAXClient client = getClient();
         int fid = folder.getObjectID();
         TimeZone tz = client.getValues().getTimeZone();
@@ -141,9 +141,9 @@ public class ICalSeriesTests extends ManagedAppointmentTest {
         CommonAllResponse response2 = client.execute(allRequest);
 
         Object[][] data = response2.getArray();
-        assertEquals(1, data.length);
+        assertEquals(expectedLength, data.length);
 
-        int oid = (Integer) data[0][response2.getColumnPos(ContactField.OBJECT_ID.getNumber())];
+        int oid = (Integer) data[expectedLength-1][response2.getColumnPos(ContactField.OBJECT_ID.getNumber())];
         GetRequest getRequest = new GetRequest(fid, oid);
         GetResponse getResponse = client.execute(getRequest);
 
