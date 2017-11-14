@@ -1641,9 +1641,15 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                 prep = null;
 
                 prep = con.prepareStatement("UPDATE db_cluster SET read_db_pool_id=? WHERE cluster_id=?;");
-
                 prep.setInt(1, databaseId);
                 prep.setInt(2, cluster_id);
+                prep.executeUpdate();
+                prep.close();
+                prep = null;
+                
+                prep = con.prepareStatement("UPDATE context_server2db_pool SET read_db_pool_id = ? WHERE write_db_pool_id = ?");
+                prep.setInt(1, databaseId);
+                prep.setInt(2, db.getMasterId().intValue());
                 prep.executeUpdate();
                 prep.close();
                 prep = null;
@@ -2648,7 +2654,13 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                     stmt = null;
                 }
             } else {
-                stmt = con.prepareStatement("UPDATE db_cluster SET read_db_pool_id=0 WHERE read_db_pool_id=?");
+                stmt = con.prepareStatement("UPDATE context_server2db_pool SET read_db_pool_id = write_db_pool_id  WHERE read_db_pool_id = ?");
+                stmt.setInt(1, dbId);
+                stmt.executeUpdate();
+                closeSQLStuff(stmt);
+                stmt = null;
+
+                stmt = con.prepareStatement("UPDATE db_cluster SET read_db_pool_id = write_db_pool_id WHERE read_db_pool_id=?");
                 stmt.setInt(1, dbId);
                 stmt.executeUpdate();
                 closeSQLStuff(stmt);
@@ -4074,10 +4086,6 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
         return tryUpdateDBPoolCounter(true, db, con);
     }
 
-    private boolean tryDecrementDBPoolCounter(DatabaseHandle db, Connection con) throws SQLException {
-        return tryUpdateDBPoolCounter(false, db, con);
-    }
-
     private boolean tryUpdateDBPoolCounter(boolean increment, DatabaseHandle db, Connection con) throws SQLException {
         PreparedStatement stmt = null;
         try {
@@ -4109,6 +4117,32 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             stmt.setInt(1, db.getId().intValue());
             stmt.executeUpdate();
             return true;
+        } finally {
+            closeSQLStuff(stmt);
+        }
+    }
+
+    private void updateDBPoolCounter(boolean increment, DatabaseHandle db, Connection con) throws SQLException {
+        PreparedStatement stmt = null;
+        try {
+            // Try to update counter
+            String schema = db.getScheme();
+            if (null == schema) {
+                stmt = con.prepareStatement("UPDATE contexts_per_dbpool SET count=count" + (increment ? "+" : "-") + "1 WHERE db_pool_id=?");
+                stmt.setInt(1, i(db.getId()));
+                return;
+            }
+
+            stmt = con.prepareStatement("UPDATE contexts_per_dbschema SET count=count" + (increment ? "+" : "-") + "1 WHERE db_pool_id=? AND schemaname=?");
+            stmt.setInt(1, i(db.getId()));
+            stmt.setString(2, schema);
+            stmt.executeUpdate();
+            closeSQLStuff(stmt);
+            stmt = null;
+
+            stmt = con.prepareStatement("UPDATE contexts_per_dbpool SET count=count" + (increment ? "+" : "-") + "1 WHERE db_pool_id=?");
+            stmt.setInt(1, db.getId().intValue());
+            stmt.executeUpdate();
         } finally {
             closeSQLStuff(stmt);
         }
@@ -4195,14 +4229,20 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                             if (selectDatabase) {
                                 dbsWithoutSchema = null;
                                 if (tryIncrementDBPoolCounter(db, con)) {
+                                    boolean decrement = true;
                                     try {
                                         int dbPoolId = i(db.getId());
                                         final Connection dbCon = cache.getWRITEConnectionForPoolId(dbPoolId, null);
                                         cache.pushWRITEConnectionForPoolId(dbPoolId, dbCon);
+                                        decrement = false;
                                         return db;
                                     } catch (final PoolException e) {
                                         LOG.error("Failed to connect to database {}", db.getId(), e);
                                         checkNext = true;
+                                    } finally {
+                                        if (decrement) {
+                                            updateDBPoolCounter(false, db, con);
+                                        }
                                     }
                                 }
                             } else {
@@ -4220,14 +4260,20 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                             DatabaseHandle dbWithoutSchema = it.next();
                             checkNext = false;
                             if (tryIncrementDBPoolCounter(dbWithoutSchema, con)) {
+                                boolean decrement = true;
                                 try {
                                     int dbPoolId = i(dbWithoutSchema.getId());
                                     final Connection dbCon = cache.getWRITEConnectionForPoolId(dbPoolId, null);
                                     cache.pushWRITEConnectionForPoolId(dbPoolId, dbCon);
+                                    decrement = false;
                                     return dbWithoutSchema;
                                 } catch (final PoolException e) {
                                     LOG.error("Failed to connect to database {}", dbWithoutSchema.getId(), e);
                                     checkNext = true;
+                                } finally {
+                                    if (decrement) {
+                                        updateDBPoolCounter(false, dbWithoutSchema, con);
+                                    }
                                 }
                             }
                         } while (checkNext && it.hasNext());
@@ -4499,7 +4545,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
 
             // Check if all contexts that reside with in the specified schema are disabled.
             for (List<Integer> partition : Lists.partition(contextIds, Databases.IN_LIMIT)) {
-                stmt = connection.prepareStatement(Databases.getIN("SELECT cid WHERE enabled = 1 AND cid IN (", partition.size()));
+                stmt = connection.prepareStatement(Databases.getIN("SELECT cid FROM context WHERE enabled = 1 AND cid IN (", partition.size()));
                 int index = 1;
                 for (Integer contextId : partition) {
                     stmt.setInt(index++, contextId.intValue());

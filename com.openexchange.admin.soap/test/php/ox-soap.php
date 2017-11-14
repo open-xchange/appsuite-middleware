@@ -205,6 +205,7 @@ class UserModuleAccess{
     var $tasks;
     var $vcard;
     var $webdav;
+    var $webdavXml;
     var $webmail;
 }
 

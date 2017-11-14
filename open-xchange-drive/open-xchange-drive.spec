@@ -52,9 +52,6 @@ GLOBIGNORE='*'
 
 PFILE=/opt/open-xchange/etc/drive.properties
 
-# SoftwareChange_Request-1992
-ox_set_property com.openexchange.capability.drive false $PFILE
-
 # SoftwareChange_Request-2850
 ox_add_property com.openexchange.drive.maxDirectories 65535 $PFILE
 ox_add_property com.openexchange.drive.maxFilesPerDirectory 65535 $PFILE

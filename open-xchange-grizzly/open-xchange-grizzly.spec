@@ -57,9 +57,6 @@ if [ ${1:-0} -eq 2 ]; then
     # SoftwareChange_Request-2289
     ox_remove_property com.openexchange.http.grizzly.hasAJPEnabled $PFILE
 
-    # SoftwareChange_Request-2492
-    ox_add_property com.openexchange.http.grizzly.maxHttpHeaderSize 8192 $PFILE
-
     # SoftwareChange_Request-2864
     ox_add_property com.openexchange.http.grizzly.keepAlive true $PFILE
     ox_add_property com.openexchange.http.grizzly.tcpNoDelay true $PFILE

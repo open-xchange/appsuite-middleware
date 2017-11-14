@@ -40,6 +40,7 @@
 
 package com.sun.mail.imap.protocol;
 
+import static com.sun.mail.imap.Utility.toUpperCase;
 import java.io.*;
 import java.util.*;
 import com.sun.mail.util.*;
@@ -343,6 +344,10 @@ public class FetchResponse extends IMAPResponse {
 	    if (match(MODSEQ.name))
 		return new MODSEQ(this);
 	    break;
+	case 'S': case 's':
+	    if (match(SNIPPET.name))
+	    return new SNIPPET(this);
+        break;
 	default: 
 	    break;
 	}
@@ -397,7 +402,7 @@ public class FetchResponse extends IMAPResponse {
 	for (int i = 0, j = index; i < len;)
 	    // IMAP tokens are case-insensitive. We store itemNames in
 	    // uppercase, so convert operand to uppercase before comparing.
-	    if (Character.toUpperCase((char)buffer[j++]) !=
+	    if (toUpperCase((char)buffer[j++]) !=
 		    itemName.charAt(i++))
 		return false;
 	index += len;

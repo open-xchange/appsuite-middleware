@@ -63,6 +63,7 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.hazelcast.config.Config;
+import com.hazelcast.config.JoinConfig;
 import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.HazelcastInstanceNotActiveException;
@@ -291,11 +292,11 @@ public class HazelcastActivator implements BundleActivator {
         Config config = configService.getConfig();
         {
             LOG.info("{}Hazelcast:{}    Creating new hazelcast instance...{}", lf, lf, lf);
-            if (config.getNetworkConfig().getJoin().getMulticastConfig().isEnabled()) {
-                LOG.info("{}Hazelcast:{}    Using network join: {}{}", lf, lf, config.getNetworkConfig().getJoin().getMulticastConfig(), lf);
-            }
-            if (config.getNetworkConfig().getJoin().getTcpIpConfig().isEnabled()) {
-                LOG.info("{}Hazelcast:{}    Using network join: {}{}", lf, lf, config.getNetworkConfig().getJoin().getTcpIpConfig(), lf);
+            JoinConfig networkJoin = config.getNetworkConfig().getJoin();
+            if (networkJoin.getMulticastConfig().isEnabled()) {
+                LOG.info("{}Hazelcast:{}    Using network join: {}{}", lf, lf, networkJoin.getMulticastConfig(), lf);
+            } else if (networkJoin.getTcpIpConfig().isEnabled()) {
+                LOG.info("{}Hazelcast:{}    Using network join: {}{}", lf, lf, networkJoin.getTcpIpConfig(), lf);
             }
         }
 

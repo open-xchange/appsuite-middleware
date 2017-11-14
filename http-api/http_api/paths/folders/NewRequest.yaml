@@ -24,7 +24,7 @@
           {"folder":{"module":"infostore","subscribed":true,"title":"Test123","permissions":[{"bits":403710016,"entity":84,"group":false}]},"notification":{"transport":"mail","message":"The message"}})
         required: true
         schema:
-          $ref: "#/definitions/FolderBody"
+          $ref: "#/definitions/NewFolderBody"
     responses:
       200:
         description: A JSON object with the object ID of the folder. In case of errors the responsible fields in the response are filled (see [Error handling](#error-handling)).

@@ -520,6 +520,12 @@ public abstract class MailMessage extends MailPart {
     private boolean b_securityResult;
 
     /**
+     * The text preview
+     */
+    private String textPreview;
+    private boolean b_textPreview;
+
+    /**
      * Default constructor
      */
     protected MailMessage() {
@@ -1613,6 +1619,40 @@ public abstract class MailMessage extends MailPart {
     public void setOriginalFolder(final FullnameArgument originalFolder) {
         this.originalFolder = originalFolder;
         b_originalFolder = true;
+    }
+
+    /**
+     * Gets the text preview
+     *
+     * @return the text preview
+     */
+    public String getTextPreview() {
+        return textPreview;
+    }
+
+    /**
+     * @return <code>true</code> if text preview is set; otherwise <code>false</code>
+     */
+    public boolean containsTextPreview() {
+        return b_textPreview;
+    }
+
+    /**
+     * Removes the text preview
+     */
+    public void removeTextPreview() {
+        textPreview = null;
+        b_textPreview = false;
+    }
+
+    /**
+     * Sets the text preview
+     *
+     * @param textPreview the text preview to set
+     */
+    public void setTextPreview(final String textPreview) {
+        this.textPreview = textPreview;
+        b_textPreview = true;
     }
 
     /**

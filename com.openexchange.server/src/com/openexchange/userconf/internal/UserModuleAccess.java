@@ -92,6 +92,9 @@ public class UserModuleAccess implements Serializable, Cloneable {
 
     private boolean Webdav = true;
 
+    /** @deprecated */
+    private boolean WebdavXml = true;
+
     private boolean Webmail = true;
 
     private boolean EditGroup = true;
@@ -151,6 +154,7 @@ public class UserModuleAccess implements Serializable, Cloneable {
         this.Tasks = true;
         this.Vcard = true;
         this.Webdav = true;
+        this.WebdavXml = true;
         this.Webmail = true;
         this.EditGroup = true;
         this.EditResource = true;
@@ -181,6 +185,7 @@ public class UserModuleAccess implements Serializable, Cloneable {
         this.Tasks = false;
         this.Vcard = false;
         this.Webdav = false;
+        this.WebdavXml = false;
         this.Webmail = false;
         this.EditGroup = false;
         this.EditResource = false;
@@ -420,6 +425,16 @@ public class UserModuleAccess implements Serializable, Cloneable {
         this.Webdav = val;
     }
 
+    /** @deprecated */
+    public boolean getWebdavXml() {
+        return WebdavXml;
+    }
+
+    /** @deprecated */
+    public void setWebdavXml(final boolean val) {
+        this.WebdavXml = val;
+    }
+
     public boolean getWebmail() {
         return Webmail;
     }
@@ -521,6 +536,7 @@ public class UserModuleAccess implements Serializable, Cloneable {
         result = prime * result + (USM ? 1231 : 1237);
         result = prime * result + (Vcard ? 1231 : 1237);
         result = prime * result + (Webdav ? 1231 : 1237);
+        result = prime * result + (WebdavXml ? 1231 : 1237);
         result = prime * result + (Webmail ? 1231 : 1237);
         result = prime * result + (calendar ? 1231 : 1237);
         result = prime * result + (contacts ? 1231 : 1237);
@@ -591,6 +607,9 @@ public class UserModuleAccess implements Serializable, Cloneable {
             return false;
         }
         if (Webdav != other.Webdav) {
+            return false;
+        }
+        if (WebdavXml != other.WebdavXml) {
             return false;
         }
         if (Webmail != other.Webmail) {
@@ -772,6 +791,12 @@ public class UserModuleAccess implements Serializable, Cloneable {
             enabled.setWebdav(true);
         } else {
             disabled.setWebdav(true);
+        }
+
+        if (WebdavXml) {
+            enabled.setWebdavXml(true);
+        } else {
+            disabled.setWebdavXml(true);
         }
 
         if (Webmail) {

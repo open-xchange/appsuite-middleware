@@ -70,12 +70,13 @@ public class UserConfigurationAnalyzerTest {
         permissionBits.setActiveSync(true);
         permissionBits.setEditPassword(true);
         permissionBits.setInfostore(true);
+        permissionBits.setWebDAVXML(true);
 
         UserConfigurationAnalyzer analyzer = new UserConfigurationAnalyzer();
 
         Set<String> tags = analyzer.getTags(permissionBits);
 
-        for (String tag : Arrays.asList("ucActiveSync", "ucEditPassword", "ucInfostore")) {
+        for (String tag : Arrays.asList("ucActiveSync", "ucEditPassword", "ucInfostore", "ucWebDAVXML")) {
             assertTrue(tags.toString() + " did not contain " + tag, tags.remove(tag));
         }
 

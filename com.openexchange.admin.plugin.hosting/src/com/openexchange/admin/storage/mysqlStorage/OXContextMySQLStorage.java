@@ -582,7 +582,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             for (List<Integer> partition : Lists.partition(contextIds, Databases.IN_LIMIT)) {
                 stmt = con.prepareStatement(Databases.getIN("UPDATE context SET enabled = 0, reason_id = ? WHERE enabled = 1 AND cid IN (", partition.size()));
                 stmt.setInt(1, reason.getId().intValue());
-                int pos = 1;
+                int pos = 2;
                 for (Integer contextId : partition) {
                     stmt.setInt(pos++, contextId.intValue());
                 }

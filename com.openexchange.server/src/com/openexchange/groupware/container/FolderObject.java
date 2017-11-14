@@ -260,8 +260,6 @@ public class FolderObject extends FolderChildObject implements Cloneable {
 
     public static final int FILE = 14;
 
-    public static final int GUARD_GUEST = 15;
-
     // Types
     public static final int PRIVATE = 1;
 

@@ -42,6 +42,8 @@ FolderBodyNotification:
   $ref: ./folders/FolderBodyNotification.yaml
 FolderBody:
   $ref: ./folders/FolderBody.yaml
+NewFolderBody:
+  $ref: ./folders/NewFolderBody.yaml
 FolderUpdateResponse:
   $ref: ./folders/FolderUpdateResponse.yaml
 FoldersCleanUpResponse:
@@ -602,10 +604,11 @@ GuardSignatureResult:
   $ref: ./guard/GuardSignatureResult.yaml
 GuardSendSecurity:
   $ref: ./guard/GuardSendSecurity.yaml
-GetSessionsResponse:
-  $ref: ./sessionmanagement/GetSessionsResponse.yaml
-RemoveSessionBody:
-  $ref: ./sessionmanagement/RemoveSessionBody.yaml
+# Module: Sessionmanagement
+AllSessionsResponse:
+  $ref: ./sessionmanagement/AllSessionsResponse.yaml
+DeviceInfo:
+  $ref: ./sessionmanagement/DeviceInfo.yaml
 # Module: Export
 InfoItemExport:
   $ref: ./export/InfoItemExport.yaml

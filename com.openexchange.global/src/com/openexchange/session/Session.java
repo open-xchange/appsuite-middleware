@@ -236,6 +236,11 @@ public interface Session {
     public static final String PARAM_LOGIN_TIME = "__session.logintime".intern();
 
     /**
+     * The parameter for optional last active time associated with a session
+     */
+    public static final String PARAM_LAST_ACTIVE = "__session.lastactive".intern();
+
+    /**
      * @return the context identifier.
      */
     public int getContextId();

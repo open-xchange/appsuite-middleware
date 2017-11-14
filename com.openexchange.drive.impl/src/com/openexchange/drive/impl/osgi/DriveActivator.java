@@ -57,6 +57,7 @@ import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.capabilities.CapabilityService;
+import com.openexchange.clientinfo.ClientInfoProvider;
 import com.openexchange.cluster.timer.ClusterTimerService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigViewFactory;
@@ -70,6 +71,7 @@ import com.openexchange.drive.DriveService;
 import com.openexchange.drive.checksum.rdb.DriveCreateTableService;
 import com.openexchange.drive.checksum.rdb.DriveDeleteListener;
 import com.openexchange.drive.checksum.rdb.SQL;
+import com.openexchange.drive.impl.DriveClientInfoProvider;
 import com.openexchange.drive.impl.checksum.PeriodicChecksumCleaner;
 import com.openexchange.drive.impl.checksum.events.DelayedChecksumEventListener;
 import com.openexchange.drive.impl.internal.DriveServiceImpl;
@@ -128,6 +130,10 @@ public class DriveActivator extends HousekeepingActivator {
         DriveServiceLookup.set(this);
         DriveConfig.getInstance().start();
         BucketInputStream.setTokenBucket(new DriveTokenBucket());
+        /*
+         * register Drive client info
+         */
+        registerService(ClientInfoProvider.class, new DriveClientInfoProvider(), 10);
         /*
          * register services
          */

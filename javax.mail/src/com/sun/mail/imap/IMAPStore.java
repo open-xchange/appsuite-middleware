@@ -70,6 +70,7 @@ import com.sun.mail.iap.CommandFailedException;
 import com.sun.mail.iap.ConnectionException;
 import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.iap.Response;
+import com.sun.mail.iap.ResponseCode;
 import com.sun.mail.iap.ResponseHandler;
 import com.sun.mail.imap.protocol.IMAPProtocol;
 import com.sun.mail.imap.protocol.ListInfo;
@@ -903,6 +904,21 @@ public class IMAPStore extends Store
             protocol.disconnect();
         }
 	    protocol = null;
+
+	    // Check for possibly available response code
+	    ResponseCode responseCode = cex.getKnownResponseCode();
+	    if (null != responseCode) {
+	        // Verify login really failed due to an authentication/authorization issue
+            switch (responseCode) {
+                case AUTHENTICATIONFAILED: /* fall-through */
+                case AUTHORIZATIONFAILED:
+                    throw new AuthenticationFailedException(cex.getResponse().getRest(), cex);
+                default:
+                    throw new MessagingException(cex.getMessage(), cex);
+            }
+        }
+
+	    // No response code given... Assume an authentication/authorization issue
 	    throw new AuthenticationFailedException(
 					cex.getResponse().getRest(), cex);
 	} catch (ProtocolException pex) { // any other exception
@@ -1904,6 +1920,24 @@ public class IMAPStore extends Store
     try {
     p = getStoreProtocol();
         return p.getGreeting();
+    } catch (ProtocolException pex) {
+    throw new MessagingException(pex.getMessage(), pex);
+    } finally {
+        releaseStoreProtocol(p);
+    }
+    }
+
+    /**
+     * Gets the remote IP address of the end-point this instance is connected to, or <code>null</code> if it is unconnected.
+     * 
+     * @return The remote IP address, or <code>null</code> if it is unconnected.
+     */
+    public synchronized java.net.InetAddress getRemoteAddress()
+        throws MessagingException {
+    IMAPProtocol p = null;
+    try {
+    p = getStoreProtocol();
+        return p.getRemoteAddress();
     } catch (ProtocolException pex) {
     throw new MessagingException(pex.getMessage(), pex);
     } finally {

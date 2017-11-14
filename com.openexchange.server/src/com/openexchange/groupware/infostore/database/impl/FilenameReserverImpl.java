@@ -67,7 +67,7 @@ import com.openexchange.database.Databases;
 import com.openexchange.database.IncorrectStringSQLException;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.FileStorageUtility;
+import com.openexchange.file.storage.NameBuilder;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
@@ -172,9 +172,9 @@ public class FilenameReserverImpl implements FilenameReserver {
                             throw InfostoreExceptionCodes.FILENAME_NOT_UNIQUE.create(fileName, documentMetadata.getFolderId(), documentMetadata.getId());
                         }
                         adjusted = true;
-                        int count = 0;
+                        NameBuilder nb = NameBuilder.nameBuilderFor(fileName);
                         do {
-                            fileName = FileStorageUtility.enhance(fileName, ++count);
+                            fileName = nb.advance().toString();
                         } while (usedNames.keySet().contains(fileName));
                     }
                     boolean sameTitle = null != document.getTitle() && document.getTitle().equals(document.getFileName());

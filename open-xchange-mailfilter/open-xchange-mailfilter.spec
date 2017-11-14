@@ -54,10 +54,6 @@ if [ ${1:-0} -eq 2 ]; then
 
     PFILE=/opt/open-xchange/etc/mailfilter.properties
 
-    # SoftwareChange_Request-1954
-    VALUE=$(ox_read_property com.openexchange.mail.filter.useUTF7FolderEncoding $PFILE)
-    ox_set_property com.openexchange.mail.filter.useUTF7FolderEncoding "$VALUE" $PFILE
-
     # SoftwareChange_Request-3843
     prefer_gssapi=$(ox_read_property com.openexchange.mail.filter.preferGSSAPI ${PFILE})
     ox_remove_property com.openexchange.mail.filter.preferGSSAPI $PFILE

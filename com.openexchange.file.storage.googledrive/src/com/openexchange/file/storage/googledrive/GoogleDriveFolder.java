@@ -124,10 +124,11 @@ public final class GoogleDriveFolder extends DefaultFileStorageFolder implements
      * @param dir The Google Drive directory
      * @param rootFolderId The identifier of the root folder
      * @param accountDisplayName The account's display name
+     * @param useOptimisticSubfolderDetection Whether to use optimistic sub-folder detection
      * @param drive The Drive reference
      * @throws OXException If parsing Google Drive directory fails
      */
-    public GoogleDriveFolder parseDirEntry(File dir, String rootFolderId, String accountDisplayName, Drive drive) throws OXException, IOException {
+    public GoogleDriveFolder parseDirEntry(File dir, String rootFolderId, String accountDisplayName, boolean useOptimisticSubfolderDetection, Drive drive) throws OXException, IOException {
         if (null != dir) {
             try {
                 id = dir.getId();
@@ -152,7 +153,7 @@ public final class GoogleDriveFolder extends DefaultFileStorageFolder implements
                 }
 
                 {
-                    final boolean hasSubfolders = hasSubfolder(dir.getId(), drive);
+                    final boolean hasSubfolders = useOptimisticSubfolderDetection ? true : hasSubfolder(dir.getId(), drive);
                     setSubfolders(hasSubfolders);
                     setSubscribedSubfolders(hasSubfolders);
                 }

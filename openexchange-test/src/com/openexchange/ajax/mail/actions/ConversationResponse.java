@@ -161,6 +161,9 @@ public class ConversationResponse extends AbstractAJAXResponse {
                     case ORIGINAL_ID:
                         message.setOriginalId(strValue);
                         break;
+                    case TEXT_PREVIEW_IF_AVAILABLE: case TEXT_PREVIEW:
+                        message.setTextPreview(strValue);
+                        break;
                     case PRIORITY:
                         message.setPriority((int) messageMap.get(key));
                         break;

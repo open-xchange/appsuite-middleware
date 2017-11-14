@@ -49,6 +49,7 @@
 
 package com.openexchange.report.appsuite;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.report.appsuite.serialization.Report;
 
 /**
@@ -64,6 +65,7 @@ public interface ReportFinishingTouches {
 
     /**
      * Modify the report, as needed
+     * @throws OXException 
      */
-    void finish(Report report);
+    void finish(Report report) throws OXException;
 }

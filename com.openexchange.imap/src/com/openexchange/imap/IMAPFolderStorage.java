@@ -2077,7 +2077,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                     try {
                         boolean subscribe = toUpdate.isSubscribed();
                         setSubscribed(subscribe, updateMe, true);
-                        changed = true;                        
+                        changed = true;
                     } catch (final MessagingException me) {
                         Exception cause = me.getNextException();
                         if (cause instanceof CommandFailedException) {
@@ -2122,10 +2122,11 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
 
                 @Override
                 public Object doCommand(IMAPProtocol p) throws ProtocolException {
-                    if (subscribe)
+                    if (subscribe) {
                         p.subscribe(fullName);
-                    else
+                    } else {
                         p.unsubscribe(fullName);
+                    }
                     return null;
                 }
             });
@@ -2856,7 +2857,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                     return com.openexchange.mail.Quota.getUnlimitedQuotas(types);
                 }
                 final Quota.Resource[] resources = folderQuota[0].resources;
-                if (resources.length == 0) {
+                if (resources == null || resources.length == 0) {
                     return com.openexchange.mail.Quota.getUnlimitedQuotas(types);
                 }
                 final com.openexchange.mail.Quota[] quotas = new com.openexchange.mail.Quota[types.length];

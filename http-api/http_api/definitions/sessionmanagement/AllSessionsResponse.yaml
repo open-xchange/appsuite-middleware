@@ -1,0 +1,30 @@
+type: object
+properties:
+  sessionId:
+    type: string
+    description: The session identifier
+  ipAddress:
+    type: string
+    description: The IP address associated with the session
+  client:
+    type: string
+    description: The client associated with the session
+  ctxId:
+    type: integer
+    description: The context identifier
+  userId:
+    type: integer
+    description: The user identifier
+  loginTime:
+    type: integer
+    format: int64
+    description: Time of login in UTC
+  lastActive:
+    type: integer
+    format: int64
+    description: Time of last activity in UTC
+  location:
+    type: string
+    description: Guessed location based on IP address
+  device:
+    $ref: "#/definitions/DeviceInfo"

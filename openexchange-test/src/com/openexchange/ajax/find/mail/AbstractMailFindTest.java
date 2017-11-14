@@ -92,7 +92,7 @@ public abstract class AbstractMailFindTest extends AbstractFindTest {
     }
 
     protected FacetValue detectContact(Contact contact, List<Facet> facets) throws OXException, IOException, JSONException {
-        FacetValue found = findByDisplayName(facets, DisplayItems.convert(contact).getDisplayName());
+        FacetValue found = findByDisplayName(facets, DisplayItems.convert(contact, session).getDisplayName());
         return found;
     }
 
@@ -100,7 +100,7 @@ public abstract class AbstractMailFindTest extends AbstractFindTest {
         GetRequest getRequest = new GetRequest(getClient().getValues().getUserId(), getClient().getValues().getTimeZone());
         GetResponse getResponse = getClient().execute(getRequest);
         Contact contact = getResponse.getContact();
-        FacetValue found = findByDisplayName(facets, DisplayItems.convert(contact).getDisplayName());
+        FacetValue found = findByDisplayName(facets, DisplayItems.convert(contact, session).getDisplayName());
         return found;
     }
 
@@ -134,7 +134,7 @@ public abstract class AbstractMailFindTest extends AbstractFindTest {
     protected void findContactsInValues(List<Contact> contacts, List<FacetValue> values) {
         for (Contact contact : contacts) {
             boolean found = false;
-            String contactDN = DisplayItems.convert(contact).getDisplayName();
+            String contactDN = DisplayItems.convert(contact, session).getDisplayName();
             for (FacetValue value : values) {
                 String valueDN = value.getDisplayItem().getDisplayName();
                 if (contactDN.equals(valueDN)) {

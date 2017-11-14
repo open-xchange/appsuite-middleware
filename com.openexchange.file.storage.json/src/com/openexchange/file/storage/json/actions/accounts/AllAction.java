@@ -208,6 +208,11 @@ public class AllAction extends AbstractFileStorageAccountAction {
             caps.add(FileStorageCapability.CASE_INSENSITIVE.name());
         }
 
+        supported = capabilityAware.supports(FileStorageCapability.AUTO_RENAME_FOLDERS);
+        if (null != supported && supported.booleanValue()) {
+            caps.add(FileStorageCapability.AUTO_RENAME_FOLDERS.name());
+        }
+
         return caps;
     }
 

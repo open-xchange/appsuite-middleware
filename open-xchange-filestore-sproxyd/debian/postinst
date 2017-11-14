@@ -23,22 +23,9 @@ setConfigFilePermissions() {
     ox_update_permissions /opt/open-xchange/etc/filestore-sproxyd.properties root:open-xchange 640
 }
 
-postFix() {
-    local version=${1%-*}
-    version=${version//[-.]/}
-    # prevent bash from expanding, see bug 13316
-    GLOBIGNORE='*'
-    PFILE=/opt/open-xchange/etc/filestore-sproxyd.properties
-
-}
-
 case "$1" in
     configure)
         setConfigFilePermissions
-        test -n "$2" && {
-            # we are in update mode, run postFix to apply fixes
-            postFix "$2"
-        }
     ;;
 
     abort-upgrade|abort-remove|abort-deconfigure)

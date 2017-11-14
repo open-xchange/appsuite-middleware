@@ -61,7 +61,10 @@ import com.openexchange.tools.net.URIParser;
  *
  */
 
-@javax.jws.WebService(serviceName = "OXContextService", portName = "OXContextServiceHttpsEndpoint", targetNamespace = "http://soap.admin.openexchange.com",
+@javax.jws.WebService(
+    serviceName = "OXContextService",
+    portName = "OXContextServiceHttpsEndpoint",
+    targetNamespace = "http://soap.admin.openexchange.com",
     // wsdlLocation = "null",
     endpointInterface = "com.openexchange.admin.soap.context.soap.OXContextServicePortType")
 public class OXContextServicePortTypeImpl implements OXContextServicePortType {
@@ -2344,6 +2347,11 @@ public class OXContextServicePortTypeImpl implements OXContextServicePortType {
             moduleAccess.setWebdav(booleanValue(tmp));
         }
 
+        tmp = soapModuleAccess.isWebdavXml();
+        if (tmp != null) {
+            moduleAccess.setWebdavXml(booleanValue(tmp));
+        }
+
         tmp = soapModuleAccess.isWebmail();
         if (tmp != null) {
             moduleAccess.setWebmail(booleanValue(tmp));
@@ -2384,6 +2392,7 @@ public class OXContextServicePortTypeImpl implements OXContextServicePortType {
         soapModuleAccess.setUSM(Boolean.valueOf(moduleAccess.isUSM()));
         soapModuleAccess.setVcard(Boolean.valueOf(moduleAccess.getVcard()));
         soapModuleAccess.setWebdav(Boolean.valueOf(moduleAccess.getWebdav()));
+        soapModuleAccess.setWebdavXml(Boolean.valueOf(moduleAccess.getWebdavXml()));
         soapModuleAccess.setWebmail(Boolean.valueOf(moduleAccess.getWebmail()));
         return soapModuleAccess;
     }

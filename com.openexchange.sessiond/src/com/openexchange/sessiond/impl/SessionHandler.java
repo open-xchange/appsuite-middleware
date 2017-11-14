@@ -54,7 +54,6 @@ import static com.openexchange.sessiond.impl.TimeoutTaskWrapper.submit;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -818,7 +817,7 @@ public final class SessionHandler {
         if (Strings.isNotEmpty(userAgent)) {
             newSession.setParameter(Session.PARAM_USER_AGENT, userAgent);
         }
-        newSession.setParameter(Session.PARAM_LOGIN_TIME, String.valueOf(new Date().getTime()));
+        newSession.setParameter(Session.PARAM_LOGIN_TIME, Long.valueOf(System.currentTimeMillis()));
 
         // Either add session or yield short-time token for it
         SessionImpl addedSession;
@@ -1096,7 +1095,7 @@ public final class SessionHandler {
                 LOG.error("", e);
             }
         }
-        */
+         */
     }
 
     /**
@@ -1424,6 +1423,10 @@ public final class SessionHandler {
             sessionControl = optSessionFromSessionStorage(sessionId, sessionData);
         }
 
+        if (null != sessionControl) {
+            sessionControl.getSession().setParameter(Session.PARAM_LAST_ACTIVE, Long.valueOf(System.currentTimeMillis()));
+        }
+
         return sessionControl;
     }
 
@@ -1518,6 +1521,9 @@ public final class SessionHandler {
                     LOG.error("", e);
                 }
             }
+        }
+        if (null != sessionControl) {
+            sessionControl.getSession().setParameter(Session.PARAM_LAST_ACTIVE, Long.valueOf(System.currentTimeMillis()));
         }
         return sessionControl;
     }

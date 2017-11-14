@@ -119,7 +119,7 @@ import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.FileStorageUtility;
+import com.openexchange.file.storage.NameBuilder;
 import com.openexchange.filestore.FileStorages;
 import com.openexchange.filestore.Info;
 import com.openexchange.filestore.QuotaFileStorage;
@@ -3370,6 +3370,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             acc.setTasks(user.hasPermission(UserConfiguration.TASKS));
             acc.setVcard(user.hasPermission(UserConfiguration.VCARD));
             acc.setWebdav(user.hasPermission(UserConfiguration.WEBDAV));
+            acc.setWebdavXml(user.hasPermission(UserConfiguration.WEBDAV_XML));
             acc.setWebmail(user.hasPermission(UserConfiguration.WEBMAIL));
             acc.setDelegateTask(user.hasPermission(UserConfiguration.DELEGATE_TASKS));
             acc.setEditGroup(user.hasPermission(UserConfiguration.EDIT_GROUP));
@@ -3588,6 +3589,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             user.setTask(access.getTasks());
             user.setVCard(access.getVcard());
             user.setWebDAV(access.getWebdav());
+            user.setWebDAVXML(access.getWebdavXml());
             user.setWebMail(access.getWebmail());
             user.setDelegateTasks(access.getDelegateTask());
             user.setEditGroup(access.getEditGroup());
@@ -3625,6 +3627,9 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 throw new StorageException("Global address book can not be disabled for non-PIM users.");
             }
             if (access.getReadCreateSharedFolders()) {
+                throw new StorageException("Global address book can not be disabled for non-PIM users.");
+            }
+            if (access.getWebdavXml()) {
                 throw new StorageException("Global address book can not be disabled for non-PIM users.");
             }
             if (access.getDelegateTask()) {
@@ -3733,12 +3738,12 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         try {
             FolderCacheManager cache = FolderCacheManager.getInstance();
             List<Pair<Integer, String>> folderIds = prepareFolders(contextId, userId, con);
-            Date now = new Date();
+            long now = System.currentTimeMillis();
             StringBuilder sb = new StringBuilder("UPDATE oxfolder_tree SET default_flag = 0, type = 2, fname = ?, changing_date = ? WHERE cid = ? AND fuid = ?");
             stmt = con.prepareStatement(sb.toString());
             for (Pair<Integer, String> pair : folderIds) {
                 stmt.setString(1, pair.getSecond());
-                stmt.setLong(2, now.getTime());
+                stmt.setLong(2, now);
                 stmt.setInt(3, contextId);
                 stmt.setInt(4, pair.getFirst());
                 stmt.addBatch();
@@ -3782,9 +3787,12 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 if (needTranslation) {
                     int parent = rs.getInt(3);
                     translatedName = helper.getString(name);
-                    int i = 1;
+                    NameBuilder nb = null;
                     while (existsFolder(contextId, parent, folderId, translatedName, con)) {
-                        translatedName = FileStorageUtility.enhance(translatedName, i++);
+                        if (null == nb) {
+                            nb = new NameBuilder(translatedName);
+                        }
+                        translatedName = nb.advance().toString();
                     }
                 }
                 result.add(new Pair<Integer, String>(folderId, translatedName));

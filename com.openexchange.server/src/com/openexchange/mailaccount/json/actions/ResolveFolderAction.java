@@ -60,10 +60,12 @@ import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountExceptionCodes;
+import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.mailaccount.json.ActiveProviderDetector;
 import com.openexchange.mailaccount.json.MailAccountFields;
 import com.openexchange.mailaccount.json.MailAccountOAuthConstants;
 import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -91,7 +93,10 @@ public final class ResolveFolderAction extends AbstractValidateMailAccountAction
             FullnameArgument fa = MailFolderUtility.prepareMailFolderParam(folderId);
 
             if (!session.getUserPermissionBits().isMultipleMailAccounts() && MailAccount.DEFAULT_ID != fa.getAccountId()) {
-                throw MailAccountExceptionCodes.NOT_ENABLED.create(Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()));
+                UnifiedInboxManagement unifiedInboxManagement = ServerServiceRegistry.getInstance().getService(UnifiedInboxManagement.class);
+                if ((null == unifiedInboxManagement) || (fa.getAccountId() != unifiedInboxManagement.getUnifiedINBOXAccountID(session))) {
+                    throw MailAccountExceptionCodes.NOT_ENABLED.create(Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()));
+                }
             }
 
             return new AJAXRequestResult(new JSONObject(2).put("from", JSONObject.NULL), "json");

@@ -527,6 +527,26 @@ public final class MessageWriter {
                 }
             }
         });
+        {
+            MailFieldWriter writer = new MailFieldWriter() {
+
+                @Override
+                public void writeField(JSONValue jsonContainer, MailMessage mail, int level, boolean withKey, int accountId, int user, int cid, TimeZone optTimeZone) throws OXException {
+                    try {
+                        if (withKey) {
+                            // Only base type in case of JSON object
+                            jsonContainer.toObject().put(MailJSONField.TEXT_PREVIEW.getKey(), mail.getTextPreview());
+                        } else {
+                            jsonContainer.toArray().put(mail.getTextPreview());
+                        }
+                    } catch (JSONException e) {
+                        throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
+                    }
+                }
+            };
+            writers.put(MailListField.TEXT_PREVIEW_IF_AVAILABLE, writer);
+            writers.put(MailListField.TEXT_PREVIEW, writer);
+        }
         writers.put(MailListField.ATTACHMENT, new MailFieldWriter() {
 
             @Override

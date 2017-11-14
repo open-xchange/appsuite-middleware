@@ -72,8 +72,7 @@ public enum Module {
     MAIL("mail", FolderObject.MAIL, Permission.WEBMAIL),
     INFOSTORE("infostore", FolderObject.INFOSTORE, Permission.INFOSTORE),
     FILES("files", FolderObject.INFOSTORE, Permission.INFOSTORE),
-    SYSTEM("system", FolderObject.SYSTEM_MODULE, null),
-    GUARD("guard", FolderObject.GUARD_GUEST, Permission.WEBMAIL);
+    SYSTEM("system", FolderObject.SYSTEM_MODULE, null);
 
     private final String name;
     private final int folderConstant;

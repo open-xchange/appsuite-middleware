@@ -260,6 +260,10 @@ public class ParameterList {
 		// tolerate trailing semicolon, even though it violates the spec
 		if (tk.getType() == HeaderTokenizer.Token.EOF)
 		    break;
+		if (null != tk.getValue() && ";".equals(tk.getValue().trim())) {
+		    prevValue = ";";
+            continue;
+        }
 		// parameter name must be a MIME Atom
 		if (tk.getType() != HeaderTokenizer.Token.ATOM)
 		    throw new ParseException("In parameter list <" + s + ">" +
@@ -742,7 +746,7 @@ public class ParameterList {
      */
     private static class ToStringBuffer {
 	private int used;	// keep track of how much used on current line
-	private StringBuffer sb = new StringBuffer();
+	private StringBuilder sb = new StringBuilder();
 
 	public ToStringBuffer(int used) {
 	    this.used = used;

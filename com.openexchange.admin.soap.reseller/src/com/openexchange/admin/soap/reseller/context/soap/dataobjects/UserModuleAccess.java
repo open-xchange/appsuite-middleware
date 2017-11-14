@@ -6,6 +6,7 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 
+
 /**
  * <p>Java-Klasse f\u00fcr UserModuleAccess complex type.
  *
@@ -13,44 +14,71 @@ import javax.xml.bind.annotation.XmlType;
  *
  * <pre>
  * &lt;complexType name="UserModuleAccess">
- * &lt;complexContent>
- * &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
- * &lt;sequence>
- * &lt;element name="OLOX20" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
- * &lt;element name="USM" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
- * &lt;element name="activeSync" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
- * &lt;element name="calendar" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
- * &lt;element name="collectEmailAddresses" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
- * &lt;element name="contacts" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
- * &lt;element name="delegateTask" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
- * &lt;element name="deniedPortal" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
- * &lt;element name="editGroup" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
- * &lt;element name="editPassword" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
- * &lt;element name="editPublicFolders" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
- * &lt;element name="editResource" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
- * &lt;element name="globalAddressBookDisabled" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
- * &lt;element name="ical" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
- * &lt;element name="infostore" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
- * &lt;element name="multipleMailAccounts" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
- * &lt;element name="publicFolderEditable" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
- * &lt;element name="publication" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
- * &lt;element name="readCreateSharedFolders" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
- * &lt;element name="subscription" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
- * &lt;element name="syncml" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
- * &lt;element name="tasks" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
- * &lt;element name="vcard" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
- * &lt;element name="webdav" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
- * &lt;element name="webmail" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
- * &lt;/sequence>
- * &lt;/restriction>
- * &lt;/complexContent>
+ *   &lt;complexContent>
+ *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
+ *       &lt;sequence>
+ *         &lt;element name="OLOX20" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
+ *         &lt;element name="USM" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
+ *         &lt;element name="activeSync" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
+ *         &lt;element name="calendar" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
+ *         &lt;element name="collectEmailAddresses" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
+ *         &lt;element name="contacts" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
+ *         &lt;element name="delegateTask" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
+ *         &lt;element name="deniedPortal" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
+ *         &lt;element name="editGroup" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
+ *         &lt;element name="editPassword" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
+ *         &lt;element name="editPublicFolders" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
+ *         &lt;element name="editResource" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
+ *         &lt;element name="globalAddressBookDisabled" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
+ *         &lt;element name="ical" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
+ *         &lt;element name="infostore" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
+ *         &lt;element name="multipleMailAccounts" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
+ *         &lt;element name="publicFolderEditable" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
+ *         &lt;element name="publication" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
+ *         &lt;element name="readCreateSharedFolders" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
+ *         &lt;element name="subscription" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
+ *         &lt;element name="syncml" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
+ *         &lt;element name="tasks" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
+ *         &lt;element name="vcard" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
+ *         &lt;element name="webdav" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
+ *         &lt;element name="webdavXml" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
+ *         &lt;element name="webmail" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
+ *       &lt;/sequence>
+ *     &lt;/restriction>
+ *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
  *
  *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "UserModuleAccess", propOrder = { "olox20", "usm", "activeSync", "calendar", "collectEmailAddresses", "contacts", "delegateTask", "deniedPortal", "editGroup", "editPassword", "editPublicFolders", "editResource", "globalAddressBookDisabled", "ical", "infostore", "multipleMailAccounts", "publicFolderEditable", "publication", "readCreateSharedFolders", "subscription", "syncml", "tasks", "vcard", "webdav", "webmail"
+@XmlType(name = "UserModuleAccess", propOrder = {
+    "olox20",
+    "usm",
+    "activeSync",
+    "calendar",
+    "collectEmailAddresses",
+    "contacts",
+    "delegateTask",
+    "deniedPortal",
+    "editGroup",
+    "editPassword",
+    "editPublicFolders",
+    "editResource",
+    "globalAddressBookDisabled",
+    "ical",
+    "infostore",
+    "multipleMailAccounts",
+    "publicFolderEditable",
+    "publication",
+    "readCreateSharedFolders",
+    "subscription",
+    "syncml",
+    "tasks",
+    "vcard",
+    "webdav",
+    "webdavXml",
+    "webmail"
 })
 public class UserModuleAccess {
 
@@ -103,14 +131,16 @@ public class UserModuleAccess {
     @XmlElement(nillable = true)
     protected Boolean webdav;
     @XmlElement(nillable = true)
+    protected Boolean webdavXml;
+    @XmlElement(nillable = true)
     protected Boolean webmail;
 
     /**
      * Ruft den Wert der olox20-Eigenschaft ab.
      *
      * @return
-     *         possible object is
-     *         {@link Boolean }
+     *     possible object is
+     *     {@link Boolean }
      *
      */
     public Boolean isOLOX20() {
@@ -121,8 +151,8 @@ public class UserModuleAccess {
      * Legt den Wert der olox20-Eigenschaft fest.
      *
      * @param value
-     *            allowed object is
-     *            {@link Boolean }
+     *     allowed object is
+     *     {@link Boolean }
      *
      */
     public void setOLOX20(Boolean value) {
@@ -133,8 +163,8 @@ public class UserModuleAccess {
      * Ruft den Wert der usm-Eigenschaft ab.
      *
      * @return
-     *         possible object is
-     *         {@link Boolean }
+     *     possible object is
+     *     {@link Boolean }
      *
      */
     public Boolean isUSM() {
@@ -145,8 +175,8 @@ public class UserModuleAccess {
      * Legt den Wert der usm-Eigenschaft fest.
      *
      * @param value
-     *            allowed object is
-     *            {@link Boolean }
+     *     allowed object is
+     *     {@link Boolean }
      *
      */
     public void setUSM(Boolean value) {
@@ -157,8 +187,8 @@ public class UserModuleAccess {
      * Ruft den Wert der activeSync-Eigenschaft ab.
      *
      * @return
-     *         possible object is
-     *         {@link Boolean }
+     *     possible object is
+     *     {@link Boolean }
      *
      */
     public Boolean isActiveSync() {
@@ -169,8 +199,8 @@ public class UserModuleAccess {
      * Legt den Wert der activeSync-Eigenschaft fest.
      *
      * @param value
-     *            allowed object is
-     *            {@link Boolean }
+     *     allowed object is
+     *     {@link Boolean }
      *
      */
     public void setActiveSync(Boolean value) {
@@ -181,8 +211,8 @@ public class UserModuleAccess {
      * Ruft den Wert der calendar-Eigenschaft ab.
      *
      * @return
-     *         possible object is
-     *         {@link Boolean }
+     *     possible object is
+     *     {@link Boolean }
      *
      */
     public Boolean isCalendar() {
@@ -193,8 +223,8 @@ public class UserModuleAccess {
      * Legt den Wert der calendar-Eigenschaft fest.
      *
      * @param value
-     *            allowed object is
-     *            {@link Boolean }
+     *     allowed object is
+     *     {@link Boolean }
      *
      */
     public void setCalendar(Boolean value) {
@@ -205,8 +235,8 @@ public class UserModuleAccess {
      * Ruft den Wert der collectEmailAddresses-Eigenschaft ab.
      *
      * @return
-     *         possible object is
-     *         {@link Boolean }
+     *     possible object is
+     *     {@link Boolean }
      *
      */
     public Boolean isCollectEmailAddresses() {
@@ -217,8 +247,8 @@ public class UserModuleAccess {
      * Legt den Wert der collectEmailAddresses-Eigenschaft fest.
      *
      * @param value
-     *            allowed object is
-     *            {@link Boolean }
+     *     allowed object is
+     *     {@link Boolean }
      *
      */
     public void setCollectEmailAddresses(Boolean value) {
@@ -229,8 +259,8 @@ public class UserModuleAccess {
      * Ruft den Wert der contacts-Eigenschaft ab.
      *
      * @return
-     *         possible object is
-     *         {@link Boolean }
+     *     possible object is
+     *     {@link Boolean }
      *
      */
     public Boolean isContacts() {
@@ -241,8 +271,8 @@ public class UserModuleAccess {
      * Legt den Wert der contacts-Eigenschaft fest.
      *
      * @param value
-     *            allowed object is
-     *            {@link Boolean }
+     *     allowed object is
+     *     {@link Boolean }
      *
      */
     public void setContacts(Boolean value) {
@@ -253,8 +283,8 @@ public class UserModuleAccess {
      * Ruft den Wert der delegateTask-Eigenschaft ab.
      *
      * @return
-     *         possible object is
-     *         {@link Boolean }
+     *     possible object is
+     *     {@link Boolean }
      *
      */
     public Boolean isDelegateTask() {
@@ -265,8 +295,8 @@ public class UserModuleAccess {
      * Legt den Wert der delegateTask-Eigenschaft fest.
      *
      * @param value
-     *            allowed object is
-     *            {@link Boolean }
+     *     allowed object is
+     *     {@link Boolean }
      *
      */
     public void setDelegateTask(Boolean value) {
@@ -277,8 +307,8 @@ public class UserModuleAccess {
      * Ruft den Wert der deniedPortal-Eigenschaft ab.
      *
      * @return
-     *         possible object is
-     *         {@link Boolean }
+     *     possible object is
+     *     {@link Boolean }
      *
      */
     public Boolean isDeniedPortal() {
@@ -289,8 +319,8 @@ public class UserModuleAccess {
      * Legt den Wert der deniedPortal-Eigenschaft fest.
      *
      * @param value
-     *            allowed object is
-     *            {@link Boolean }
+     *     allowed object is
+     *     {@link Boolean }
      *
      */
     public void setDeniedPortal(Boolean value) {
@@ -301,8 +331,8 @@ public class UserModuleAccess {
      * Ruft den Wert der editGroup-Eigenschaft ab.
      *
      * @return
-     *         possible object is
-     *         {@link Boolean }
+     *     possible object is
+     *     {@link Boolean }
      *
      */
     public Boolean isEditGroup() {
@@ -313,8 +343,8 @@ public class UserModuleAccess {
      * Legt den Wert der editGroup-Eigenschaft fest.
      *
      * @param value
-     *            allowed object is
-     *            {@link Boolean }
+     *     allowed object is
+     *     {@link Boolean }
      *
      */
     public void setEditGroup(Boolean value) {
@@ -325,8 +355,8 @@ public class UserModuleAccess {
      * Ruft den Wert der editPassword-Eigenschaft ab.
      *
      * @return
-     *         possible object is
-     *         {@link Boolean }
+     *     possible object is
+     *     {@link Boolean }
      *
      */
     public Boolean isEditPassword() {
@@ -337,8 +367,8 @@ public class UserModuleAccess {
      * Legt den Wert der editPassword-Eigenschaft fest.
      *
      * @param value
-     *            allowed object is
-     *            {@link Boolean }
+     *     allowed object is
+     *     {@link Boolean }
      *
      */
     public void setEditPassword(Boolean value) {
@@ -349,8 +379,8 @@ public class UserModuleAccess {
      * Ruft den Wert der editPublicFolders-Eigenschaft ab.
      *
      * @return
-     *         possible object is
-     *         {@link Boolean }
+     *     possible object is
+     *     {@link Boolean }
      *
      */
     public Boolean isEditPublicFolders() {
@@ -361,8 +391,8 @@ public class UserModuleAccess {
      * Legt den Wert der editPublicFolders-Eigenschaft fest.
      *
      * @param value
-     *            allowed object is
-     *            {@link Boolean }
+     *     allowed object is
+     *     {@link Boolean }
      *
      */
     public void setEditPublicFolders(Boolean value) {
@@ -373,8 +403,8 @@ public class UserModuleAccess {
      * Ruft den Wert der editResource-Eigenschaft ab.
      *
      * @return
-     *         possible object is
-     *         {@link Boolean }
+     *     possible object is
+     *     {@link Boolean }
      *
      */
     public Boolean isEditResource() {
@@ -385,8 +415,8 @@ public class UserModuleAccess {
      * Legt den Wert der editResource-Eigenschaft fest.
      *
      * @param value
-     *            allowed object is
-     *            {@link Boolean }
+     *     allowed object is
+     *     {@link Boolean }
      *
      */
     public void setEditResource(Boolean value) {
@@ -397,8 +427,8 @@ public class UserModuleAccess {
      * Ruft den Wert der globalAddressBookDisabled-Eigenschaft ab.
      *
      * @return
-     *         possible object is
-     *         {@link Boolean }
+     *     possible object is
+     *     {@link Boolean }
      *
      */
     public Boolean isGlobalAddressBookDisabled() {
@@ -409,8 +439,8 @@ public class UserModuleAccess {
      * Legt den Wert der globalAddressBookDisabled-Eigenschaft fest.
      *
      * @param value
-     *            allowed object is
-     *            {@link Boolean }
+     *     allowed object is
+     *     {@link Boolean }
      *
      */
     public void setGlobalAddressBookDisabled(Boolean value) {
@@ -421,8 +451,8 @@ public class UserModuleAccess {
      * Ruft den Wert der ical-Eigenschaft ab.
      *
      * @return
-     *         possible object is
-     *         {@link Boolean }
+     *     possible object is
+     *     {@link Boolean }
      *
      */
     public Boolean isIcal() {
@@ -433,8 +463,8 @@ public class UserModuleAccess {
      * Legt den Wert der ical-Eigenschaft fest.
      *
      * @param value
-     *            allowed object is
-     *            {@link Boolean }
+     *     allowed object is
+     *     {@link Boolean }
      *
      */
     public void setIcal(Boolean value) {
@@ -445,8 +475,8 @@ public class UserModuleAccess {
      * Ruft den Wert der infostore-Eigenschaft ab.
      *
      * @return
-     *         possible object is
-     *         {@link Boolean }
+     *     possible object is
+     *     {@link Boolean }
      *
      */
     public Boolean isInfostore() {
@@ -457,8 +487,8 @@ public class UserModuleAccess {
      * Legt den Wert der infostore-Eigenschaft fest.
      *
      * @param value
-     *            allowed object is
-     *            {@link Boolean }
+     *     allowed object is
+     *     {@link Boolean }
      *
      */
     public void setInfostore(Boolean value) {
@@ -469,8 +499,8 @@ public class UserModuleAccess {
      * Ruft den Wert der multipleMailAccounts-Eigenschaft ab.
      *
      * @return
-     *         possible object is
-     *         {@link Boolean }
+     *     possible object is
+     *     {@link Boolean }
      *
      */
     public Boolean isMultipleMailAccounts() {
@@ -481,8 +511,8 @@ public class UserModuleAccess {
      * Legt den Wert der multipleMailAccounts-Eigenschaft fest.
      *
      * @param value
-     *            allowed object is
-     *            {@link Boolean }
+     *     allowed object is
+     *     {@link Boolean }
      *
      */
     public void setMultipleMailAccounts(Boolean value) {
@@ -493,8 +523,8 @@ public class UserModuleAccess {
      * Ruft den Wert der publicFolderEditable-Eigenschaft ab.
      *
      * @return
-     *         possible object is
-     *         {@link Boolean }
+     *     possible object is
+     *     {@link Boolean }
      *
      */
     public Boolean isPublicFolderEditable() {
@@ -505,8 +535,8 @@ public class UserModuleAccess {
      * Legt den Wert der publicFolderEditable-Eigenschaft fest.
      *
      * @param value
-     *            allowed object is
-     *            {@link Boolean }
+     *     allowed object is
+     *     {@link Boolean }
      *
      */
     public void setPublicFolderEditable(Boolean value) {
@@ -517,8 +547,8 @@ public class UserModuleAccess {
      * Ruft den Wert der publication-Eigenschaft ab.
      *
      * @return
-     *         possible object is
-     *         {@link Boolean }
+     *     possible object is
+     *     {@link Boolean }
      *
      */
     public Boolean isPublication() {
@@ -529,8 +559,8 @@ public class UserModuleAccess {
      * Legt den Wert der publication-Eigenschaft fest.
      *
      * @param value
-     *            allowed object is
-     *            {@link Boolean }
+     *     allowed object is
+     *     {@link Boolean }
      *
      */
     public void setPublication(Boolean value) {
@@ -541,8 +571,8 @@ public class UserModuleAccess {
      * Ruft den Wert der readCreateSharedFolders-Eigenschaft ab.
      *
      * @return
-     *         possible object is
-     *         {@link Boolean }
+     *     possible object is
+     *     {@link Boolean }
      *
      */
     public Boolean isReadCreateSharedFolders() {
@@ -553,8 +583,8 @@ public class UserModuleAccess {
      * Legt den Wert der readCreateSharedFolders-Eigenschaft fest.
      *
      * @param value
-     *            allowed object is
-     *            {@link Boolean }
+     *     allowed object is
+     *     {@link Boolean }
      *
      */
     public void setReadCreateSharedFolders(Boolean value) {
@@ -565,8 +595,8 @@ public class UserModuleAccess {
      * Ruft den Wert der subscription-Eigenschaft ab.
      *
      * @return
-     *         possible object is
-     *         {@link Boolean }
+     *     possible object is
+     *     {@link Boolean }
      *
      */
     public Boolean isSubscription() {
@@ -577,8 +607,8 @@ public class UserModuleAccess {
      * Legt den Wert der subscription-Eigenschaft fest.
      *
      * @param value
-     *            allowed object is
-     *            {@link Boolean }
+     *     allowed object is
+     *     {@link Boolean }
      *
      */
     public void setSubscription(Boolean value) {
@@ -589,8 +619,8 @@ public class UserModuleAccess {
      * Ruft den Wert der syncml-Eigenschaft ab.
      *
      * @return
-     *         possible object is
-     *         {@link Boolean }
+     *     possible object is
+     *     {@link Boolean }
      *
      */
     public Boolean isSyncml() {
@@ -601,8 +631,8 @@ public class UserModuleAccess {
      * Legt den Wert der syncml-Eigenschaft fest.
      *
      * @param value
-     *            allowed object is
-     *            {@link Boolean }
+     *     allowed object is
+     *     {@link Boolean }
      *
      */
     public void setSyncml(Boolean value) {
@@ -613,8 +643,8 @@ public class UserModuleAccess {
      * Ruft den Wert der tasks-Eigenschaft ab.
      *
      * @return
-     *         possible object is
-     *         {@link Boolean }
+     *     possible object is
+     *     {@link Boolean }
      *
      */
     public Boolean isTasks() {
@@ -625,8 +655,8 @@ public class UserModuleAccess {
      * Legt den Wert der tasks-Eigenschaft fest.
      *
      * @param value
-     *            allowed object is
-     *            {@link Boolean }
+     *     allowed object is
+     *     {@link Boolean }
      *
      */
     public void setTasks(Boolean value) {
@@ -637,8 +667,8 @@ public class UserModuleAccess {
      * Ruft den Wert der vcard-Eigenschaft ab.
      *
      * @return
-     *         possible object is
-     *         {@link Boolean }
+     *     possible object is
+     *     {@link Boolean }
      *
      */
     public Boolean isVcard() {
@@ -649,8 +679,8 @@ public class UserModuleAccess {
      * Legt den Wert der vcard-Eigenschaft fest.
      *
      * @param value
-     *            allowed object is
-     *            {@link Boolean }
+     *     allowed object is
+     *     {@link Boolean }
      *
      */
     public void setVcard(Boolean value) {
@@ -661,8 +691,8 @@ public class UserModuleAccess {
      * Ruft den Wert der webdav-Eigenschaft ab.
      *
      * @return
-     *         possible object is
-     *         {@link Boolean }
+     *     possible object is
+     *     {@link Boolean }
      *
      */
     public Boolean isWebdav() {
@@ -673,8 +703,8 @@ public class UserModuleAccess {
      * Legt den Wert der webdav-Eigenschaft fest.
      *
      * @param value
-     *            allowed object is
-     *            {@link Boolean }
+     *     allowed object is
+     *     {@link Boolean }
      *
      */
     public void setWebdav(Boolean value) {
@@ -682,11 +712,35 @@ public class UserModuleAccess {
     }
 
     /**
+     * Ruft den Wert der webdavXml-Eigenschaft ab.
+     *
+     * @return
+     *     possible object is
+     *     {@link Boolean }
+     *
+     */
+    public Boolean isWebdavXml() {
+        return webdavXml;
+    }
+
+    /**
+     * Legt den Wert der webdavXml-Eigenschaft fest.
+     *
+     * @param value
+     *     allowed object is
+     *     {@link Boolean }
+     *
+     */
+    public void setWebdavXml(Boolean value) {
+        this.webdavXml = value;
+    }
+
+    /**
      * Ruft den Wert der webmail-Eigenschaft ab.
      *
      * @return
-     *         possible object is
-     *         {@link Boolean }
+     *     possible object is
+     *     {@link Boolean }
      *
      */
     public Boolean isWebmail() {
@@ -697,8 +751,8 @@ public class UserModuleAccess {
      * Legt den Wert der webmail-Eigenschaft fest.
      *
      * @param value
-     *            allowed object is
-     *            {@link Boolean }
+     *     allowed object is
+     *     {@link Boolean }
      *
      */
     public void setWebmail(Boolean value) {

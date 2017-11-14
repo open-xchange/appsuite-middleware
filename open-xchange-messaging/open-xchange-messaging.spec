@@ -63,34 +63,6 @@ find %{buildroot}/opt/open-xchange/etc \
 perl -pi -e 's;%{buildroot};;' %{configfiles}
 perl -pi -e 's;(^.*?)\s+(.*/(twitter)\.properties)$;$1 %%%attr(640,root,open-xchange) $2;' %{configfiles}
 
-%post
-if [ ${1:-0} -eq 2 ]; then
-    # only when updating
-    . /opt/open-xchange/lib/oxfunctions.sh
-
-    # prevent bash from expanding, see bug 13316
-    GLOBIGNORE='*'
-
-    CONFFILES="rssmessaging.properties twittermessaging.properties twitter.properties"
-    for FILE in ${CONFFILES}; do
-        ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc $FILE
-    done
-    ox_update_permissions "/opt/open-xchange/etc/twitter.properties" root:open-xchange 640
-
-    # SoftwareChange_Request-1903
-    PFILE=/opt/open-xchange/etc/twitter.properties
-    if ox_exists_property com.openexchange.twitter.http.useSSL $PFILE; then
-        ox_remove_property com.openexchange.twitter.http.useSSL $PFILE
-    fi
-
-    # SoftwareChange_Request-3255
-    ox_add_property com.openexchange.messaging.rss.feed.size 4194304 /opt/open-xchange/etc/rssmessaging.properties
-
-    # SoftwareChange_Request-3260
-    ox_add_property com.openexchange.messaging.rss.feed.blacklist "127.0.0.1-127.255.255.255, localhost"  /opt/open-xchange/etc/rssmessaging.properties
-    ox_add_property com.openexchange.messaging.rss.feed.whitelist.ports "80,443"  /opt/open-xchange/etc/rssmessaging.properties
-fi
-
 %clean
 %{__rm} -rf %{buildroot}
 

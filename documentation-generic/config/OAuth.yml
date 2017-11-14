@@ -1,7 +1,7 @@
 feature_name: OAuth
 feature_description: |
   See [[https://documentation.open-xchange.com/{{version}}/middleware/components/oauth.html]] and
-  [[https://documentation.open-xchange.com/{{version}}/middleware/components/oauth_provider.html]] for mor informations.
+  [[https://documentation.open-xchange.com/{{version}}/middleware/components/oauth_provider.html]] for more informations.
 properties:
     - key: com.openexchange.oauth.modules.enabled.[oauth_provider]
       description: |
@@ -44,7 +44,7 @@ properties:
             <tr>
               <td>drive</td>
               <td>Allows access to files/documents API of the OAuth provider</td>
-              <td>boxcom, dropbox, google, msliveconnect, </td>
+              <td>boxcom, dropbox, google, msliveconnect </td>
             </tr>
             <tr>
               <td>feeds</td>

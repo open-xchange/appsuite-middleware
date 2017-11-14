@@ -280,20 +280,20 @@ displayed after the report has been sent to activation.open-xchange.com.
 ## Report performance and storage
 With version 7.8.3 new properties are introduced.
 
-* [com.openexchange.report.appsuite.fileStorage](http://documentation.open-xchange.com/components/middleware/config/{{version}}/index.html#com.openexchange.report.appsuite.fileStorage)
+* [com.openexchange.report.appsuite.fileStorage](/components/middleware/config{{ site.baseurl }}/index.html#com.openexchange.report.appsuite.fileStorage)
  
  Describes the storage path for all report relevant data. Saving a report will place a JSON-Version of the report in that folder.
 
-* [com.openexchange.report.appsuite.maxChunkSize](http://documentation.open-xchange.com/components/middleware/config/{{version}}/index.html#com.openexchange.report.appsuite.maxChunkSize=200)
+* [com.openexchange.report.appsuite.maxChunkSize](/components/middleware/config{{ site.baseurl }}/index.html#com.openexchange.report.appsuite.maxChunkSize=200)
 	
  This property enables the client to store parts of the report on hard drive to keep memory usage small. A chunk is a CapabilitySet.
  The stored parts are combined into a single .report file and then deleted when the report is finished. The .report file is not deleted automatically.
 
-* [com.openexchange.report.appsuite.maxThreadPoolSize](http://documentation.open-xchange.com/components/middleware/config/{{version}}/index.html#com.openexchange.report.appsuite.maxThreadPoolSize)
+* [com.openexchange.report.appsuite.maxThreadPoolSize](/components/middleware/config{{ site.baseurl }}/index.html#com.openexchange.report.appsuite.maxThreadPoolSize)
 	
  The report will use multithreading for faster processing. Therefore the user can edit the threadpoolsize by editing this property value. Each thread is processing the needed values from a schema. If the threadpool is smaller then the schemas in the database, the threads are queued.
 
-* [com.openexchange.report.appsuite.threadPriority](http://documentation.open-xchange.com/components/middleware/config/{{version}}/index.html#com.openexchange.report.appsuite.threadPriority)
+* [com.openexchange.report.appsuite.threadPriority](/components/middleware/config{{ site.baseurl }}/index.html#com.openexchange.report.appsuite.threadPriority)
 	
  This property determines the used threads priotity. It can range from 1 (lowest) to 10 (highest).
 
@@ -397,7 +397,7 @@ Report was finished: Tue Jun 07 11:31:30 CEST 2016
         "OpenXchange.HTTPClient.OXAddIn" : 2,
         "com.openexchange.mobileapp" : 3
       },
-      "capabilities" : [ "active_sync", "autologin", "boxcom", "caldav", "calendar", "carddav", "client-onboarding", "collect_email_addresses", "conflict_handling", "contacts", "delegate_tasks", "dev", "document_preview", "drive", "edit_group", "edit_public_folders", "edit_resource", "emclient", "filestore", "freebusy", "gab", "google", "groupware", "guard", "guard-drive", "guard-mail", "ical", "infostore", "invite_guests", "messenger", "messenger-group", "mobility", "msliveconnect", "multiple_mail_accounts", "oauth", "olox20", "participants_dialog", "pim", "pop3", "portal", "presenter", "publication", "read_create_shared_folders", "remote_presenter", "rt", "search", "share_links", "share_mail_attachments", "spreadsheet", "subscription", "tasks", "testoauthservice", "text", "twitter", "unified-mailbox", "usm", "vcard", "webdav", "webmail" ],
+      "capabilities" : [ "active_sync", "autologin", "boxcom", "caldav", "calendar", "carddav", "client-onboarding", "collect_email_addresses", "conflict_handling", "contacts", "delegate_tasks", "dev", "document_preview", "drive", "edit_group", "edit_public_folders", "edit_resource", "emclient", "filestore", "freebusy", "gab", "google", "groupware", "guard", "guard-drive", "guard-mail", "ical", "infostore", "invite_guests", "messenger", "messenger-group", "mobility", "msliveconnect", "multiple_mail_accounts", "oauth", "olox20", "participants_dialog", "pim", "pop3", "portal", "presenter", "publication", "read_create_shared_folders", "remote_presenter", "rt", "search", "share_links", "share_mail_attachments", "spreadsheet", "subscription", "tasks", "testoauthservice", "text", "twitter", "unified-mailbox", "usm", "vcard", "webdav", "webdav_xml", "webmail" ],
       "admin" : 0,
       "contexts" : 6,
       "total" : 11,
@@ -413,7 +413,7 @@ Report was finished: Tue Jun 07 11:31:30 CEST 2016
         "open-xchange-appsuite" : 2
       },
       "total" : 7,
-      "capabilities" : [ "active_sync", "autologin", "boxcom", "caldav", "calendar", "carddav", "client-onboarding", "collect_email_addresses", "conflict_handling", "contacts", "delegate_tasks", "dev", "document_preview", "drive", "edit_group", "edit_public_folders", "edit_resource", "emclient", "filestore", "freebusy", "gab", "google", "groupware", "guard", "guard-drive", "guard-mail", "ical", "infostore", "invite_guests", "messenger", "messenger-group", "mobility", "msliveconnect", "multiple_mail_accounts", "oauth", "olox20", "participants_dialog", "pim", "pop3", "portal", "presenter", "publication", "read_create_shared_folders", "remote_presenter", "rt", "search", "share_links", "share_mail_attachments", "spreadsheet", "subscription", "tasks", "testoauthservice", "text", "twitter", "unified-mailbox", "usm", "vcard", "webdav" ],
+      "capabilities" : [ "active_sync", "autologin", "boxcom", "caldav", "calendar", "carddav", "client-onboarding", "collect_email_addresses", "conflict_handling", "contacts", "delegate_tasks", "dev", "document_preview", "drive", "edit_group", "edit_public_folders", "edit_resource", "emclient", "filestore", "freebusy", "gab", "google", "groupware", "guard", "guard-drive", "guard-mail", "ical", "infostore", "invite_guests", "messenger", "messenger-group", "mobility", "msliveconnect", "multiple_mail_accounts", "oauth", "olox20", "participants_dialog", "pim", "pop3", "portal", "presenter", "publication", "read_create_shared_folders", "remote_presenter", "rt", "search", "share_links", "share_mail_attachments", "spreadsheet", "subscription", "tasks", "testoauthservice", "text", "twitter", "unified-mailbox", "usm", "vcard", "webdav", "webdav_xml" ],
       "Context-users-max" : 1,
       "quota" : 1048576,
       "guests" : 0,
@@ -606,7 +606,7 @@ Report was finished: Tue Jun 07 11:46:05 CEST 2016
         "OpenXchange.HTTPClient.OXAddIn" : 2,
         "com.openexchange.mobileapp" : 3
       },
-      "capabilities" : [ "active_sync", "autologin", "boxcom", "caldav", "calendar", "carddav", "client-onboarding", "collect_email_addresses", "conflict_handling", "contacts", "delegate_tasks", "dev", "document_preview", "drive", "edit_group", "edit_public_folders", "edit_resource", "emclient", "filestore", "freebusy", "gab", "google", "groupware", "guard", "guard-drive", "guard-mail", "ical", "infostore", "invite_guests", "messenger", "messenger-group", "mobility", "msliveconnect", "multiple_mail_accounts", "oauth", "olox20", "participants_dialog", "pim", "pop3", "portal", "presenter", "publication", "read_create_shared_folders", "remote_presenter", "rt", "search", "share_links", "share_mail_attachments", "spreadsheet", "subscription", "tasks", "testoauthservice", "text", "twitter", "unified-mailbox", "usm", "vcard", "webdav", "webmail" ],
+      "capabilities" : [ "active_sync", "autologin", "boxcom", "caldav", "calendar", "carddav", "client-onboarding", "collect_email_addresses", "conflict_handling", "contacts", "delegate_tasks", "dev", "document_preview", "drive", "edit_group", "edit_public_folders", "edit_resource", "emclient", "filestore", "freebusy", "gab", "google", "groupware", "guard", "guard-drive", "guard-mail", "ical", "infostore", "invite_guests", "messenger", "messenger-group", "mobility", "msliveconnect", "multiple_mail_accounts", "oauth", "olox20", "participants_dialog", "pim", "pop3", "portal", "presenter", "publication", "read_create_shared_folders", "remote_presenter", "rt", "search", "share_links", "share_mail_attachments", "spreadsheet", "subscription", "tasks", "testoauthservice", "text", "twitter", "unified-mailbox", "usm", "vcard", "webdav", "webdav_xml", "webmail" ],
       "admin" : 0,
       "contexts" : 6,
       "drive-overall" : {
@@ -655,7 +655,7 @@ Report was finished: Tue Jun 07 11:46:05 CEST 2016
       "client-list" : {
         "open-xchange-appsuite" : 2
       },
-      "capabilities" : [ "active_sync", "autologin", "boxcom", "caldav", "calendar", "carddav", "client-onboarding", "collect_email_addresses", "conflict_handling", "contacts", "delegate_tasks", "dev", "document_preview", "drive", "edit_group", "edit_public_folders", "edit_resource", "emclient", "filestore", "freebusy", "gab", "google", "groupware", "guard", "guard-drive", "guard-mail", "ical", "infostore", "invite_guests", "messenger", "messenger-group", "mobility", "msliveconnect", "multiple_mail_accounts", "oauth", "olox20", "participants_dialog", "pim", "pop3", "portal", "presenter", "publication", "read_create_shared_folders", "remote_presenter", "rt", "search", "share_links", "share_mail_attachments", "spreadsheet", "subscription", "tasks", "testoauthservice", "text", "twitter", "unified-mailbox", "usm", "vcard", "webdav" ],
+      "capabilities" : [ "active_sync", "autologin", "boxcom", "caldav", "calendar", "carddav", "client-onboarding", "collect_email_addresses", "conflict_handling", "contacts", "delegate_tasks", "dev", "document_preview", "drive", "edit_group", "edit_public_folders", "edit_resource", "emclient", "filestore", "freebusy", "gab", "google", "groupware", "guard", "guard-drive", "guard-mail", "ical", "infostore", "invite_guests", "messenger", "messenger-group", "mobility", "msliveconnect", "multiple_mail_accounts", "oauth", "olox20", "participants_dialog", "pim", "pop3", "portal", "presenter", "publication", "read_create_shared_folders", "remote_presenter", "rt", "search", "share_links", "share_mail_attachments", "spreadsheet", "subscription", "tasks", "testoauthservice", "text", "twitter", "unified-mailbox", "usm", "vcard", "webdav", "webdav_xml" ],
       "admin" : 7,
       "contexts" : 7,
       "drive-overall" : {

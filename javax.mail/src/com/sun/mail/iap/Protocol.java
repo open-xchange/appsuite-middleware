@@ -58,6 +58,7 @@ import com.sun.mail.imap.ProtocolListener;
 import com.sun.mail.imap.ResponseEvent;
 import com.sun.mail.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * General protocol handling code for IMAP-like protocols. <p>
@@ -90,6 +91,7 @@ public class Protocol {
     private volatile DataOutputStream output;
 
     private int tagCounter = 0;
+    private final String tagPrefix;
 
     private String localHostName;
 
@@ -97,6 +99,9 @@ public class Protocol {
 	    = new CopyOnWriteArrayList<>();
 
     private volatile long timestamp;
+
+    // package private, to allow testing
+    static final AtomicInteger tagNum = new AtomicInteger();
 
     private static final byte[] CRLF = { (byte)'\r', (byte)'\n'};
  
@@ -119,6 +124,7 @@ public class Protocol {
 		    boolean isSSL, MailLogger logger)
 		    throws IOException, ProtocolException {
 	boolean connected = false;		// did constructor succeed?
+	tagPrefix = computePrefix(props, prefix);
 	try {
 	    this.auditLogEnabled = null == props ? false : PropUtil.getBooleanProperty(props, prefix + ".auditLog.enabled", false);
 	    this.host = host;
@@ -176,6 +182,35 @@ public class Protocol {
     }
 
     /**
+     * Compute the tag prefix to be used for this connection.
+     * Start with "A" - "Z", then "AA" - "ZZ", and finally "AAA" - "ZZZ".
+     * Wrap around after that.
+     */
+    private String computePrefix(Properties props, String prefix) {
+    // XXX - in case someone depends on the tag prefix
+    if (PropUtil.getBooleanProperty(props,
+                    prefix + ".reusetagprefix", false))
+        return "A";
+    // tag prefix, wrap around after three letters
+    int n = tagNum.getAndIncrement() % (26*26*26 + 26*26 + 26);
+    String tagPrefix;
+    if (n < 26)
+        tagPrefix = new String(new char[] { (char)('A' + n) });
+    else if (n < (26*26 + 26)) {
+        n -= 26;
+        tagPrefix = new String(new char[] {
+                (char)('A' + n/26), (char)('A' + n%26) });
+    } else {
+        n -= (26*26 + 26);
+        tagPrefix = new String(new char[] {
+        (char)('A' + n/(26*26)),
+        (char)('A' + (n%(26*26))/26),
+        (char)('A' + n%26) });
+    }
+    return tagPrefix;
+    }
+
+    /**
      * Constructor for debugging.
      *
      * @param in	the InputStream to read from
@@ -192,6 +227,7 @@ public class Protocol {
 	this.user = null;
 	this.props = props;
 	this.quote = false;
+	tagPrefix = computePrefix(props, "mail.imap");
 	logger = new MailLogger(this.getClass(), "DEBUG", debug, System.out);
 	traceLogger = logger.getSubLogger("protocol", null);
 
@@ -612,6 +648,7 @@ public class Protocol {
      * This implementation returns false.
      * Subclasses should override as appropriate.
      *
+     * @return   true if the server supports UTF-8
      * @since JavaMail 1.6.0
      */
     public boolean supportsUtf8() {
@@ -739,6 +776,16 @@ public class Protocol {
      */
     public int getPort() {
         return port;
+    }
+
+    /**
+     * Gets the remote IP address of the end-point this instance is connected to, or <code>null</code> if it is unconnected.
+     * 
+     * @return The remote IP address, or <code>null</code> if it is unconnected.
+     */
+    public java.net.InetAddress getRemoteAddress() {
+    Socket socket = this.socket;
+    return null == socket ? null : socket.getInetAddress();
     }
     
     /**

@@ -239,6 +239,8 @@ public class IMAPProtocol extends Protocol {
     /**
      * Handle any untagged CAPABILITY response in the Response array.
      *
+     * @param   r   the responses
+     * @param   reparse <code>true</code> to reparse capabilities (previous ones are dropped); otherwise <code>false</code> to simply add new ones
      * @return <code>true</code> if response contained <code>"[CAPABILITY"</code>; otherwise <code>false</code>
      */
     public boolean handleCapabilityResponse(Response[] r, boolean reparse) {
@@ -2546,7 +2548,7 @@ public class IMAPProtocol extends Protocol {
      * @since   JavaMail 1.5.3
      */
     public void fetchSequenceNumbers(long[] uids) throws ProtocolException {
-    StringBuffer sb = new StringBuffer();
+    StringBuilder sb = new StringBuilder();
     for (int i = 0; i < uids.length; i++) {
         if (i > 0)
         sb.append(",");
@@ -2892,14 +2894,13 @@ public class IMAPProtocol extends Protocol {
      * @since	JavaMail 1.5.4
      */
     protected String createFlagList(final Flags flags) {
-	final StringBuilder sb = new StringBuilder();
-	sb.append("("); // start of flag_list
+	StringBuilder sb = new StringBuilder().append("("); // start of flag_list
 
-	final Flags.Flag[] sf = flags.getSystemFlags(); // get the system flags
+	Flags.Flag[] sf = flags.getSystemFlags(); // get the system flags
 	boolean first = true;
 	for (int i = 0; i < sf.length; i++) {
 	    String s;
-	    final Flags.Flag f = sf[i];
+	    Flags.Flag f = sf[i];
 	    if (f == Flags.Flag.ANSWERED) {
             s = "\\Answered";
         } else if (f == Flags.Flag.DELETED) {
@@ -2924,7 +2925,7 @@ public class IMAPProtocol extends Protocol {
 	    sb.append(s);
 	}
 
-	final String[] uf = flags.getUserFlags(); // get the user flag strings
+	String[] uf = flags.getUserFlags(); // get the user flag strings
 	for (int i = 0; i < uf.length; i++) {
 	    if (first) {
             first = false;

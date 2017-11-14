@@ -51,11 +51,14 @@ package com.openexchange.mail.parser;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
@@ -75,6 +78,7 @@ import net.freeutils.tnef.Attr;
 import net.freeutils.tnef.CompressedRTFInputStream;
 import net.freeutils.tnef.MAPIProp;
 import net.freeutils.tnef.MAPIProps;
+import net.freeutils.tnef.MAPIValue;
 import net.freeutils.tnef.RawInputStream;
 import net.freeutils.tnef.TNEFInputStream;
 import net.freeutils.tnef.TNEFUtils;
@@ -88,7 +92,8 @@ import org.bouncycastle.mail.smime.SMIMESigned;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.exception.OXException;
 import com.openexchange.i18n.LocaleTools;
-import com.openexchange.java.CountingOutputStream;
+import com.openexchange.java.CharsetDetector;
+import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.MailExceptionCode;
@@ -346,7 +351,18 @@ public final class MailMessageParser {
             if (contentType.startsWith("multipart/related") && ("application/smil".equals(Strings.asciiLowerCase(contentType.getParameter("type"))))) {
                 parseMailContent(MimeSmilFixer.getInstance().process(mail), handler, prefix, 1);
             } else {
-                parseMailContent(mail, handler, prefix, 1);
+                try {
+                    parseMailContent(mail, handler, prefix, 1);
+                } catch (InvalidMultipartException x) {
+                    final String mailId = mail.getMailId();
+                    final String folder = mail.getFolder();
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug("Invalid multipart detected ''{}'' ({}-{}-{}):{}{}", x.getMessage(),  null == mailId ? "" : mailId, null == folder ? "" : folder, mail.getAccountId(), System.getProperty("line.separator"), mail.getSource());
+                    }
+                    MimeMessage mimeMessage = cloneMessage(mail, mail.getReceivedDate());
+                    MailMessage reparsedMail = MimeMessageConverter.convertMessage(mimeMessage, false);
+                    parseMailContent(reparsedMail, handler, prefix, 1);
+                }
             }
         } catch (MaxBytesExceededIOException e) {
             final String mailId = mail.getMailId();
@@ -416,6 +432,10 @@ public final class MailMessageParser {
                 if (count == -1) {
                     throw MailExceptionCode.INVALID_MULTIPART_CONTENT.create();
                 }
+                if ((mailPart instanceof MimeMailPart) && ((MimeMailPart) mailPart).isEmptyStringMultipart()) {
+                    // Need to reparse...
+                    throw new InvalidMultipartException("Multipart initialized from an empty string");
+                }
                 final String mpId = null == prefix && !multipartDetected ? "" : getSequenceId(prefix, partCount);
                 if (!mailPart.containsSequenceId()) {
                     mailPart.setSequenceId(mpId);
@@ -439,6 +459,8 @@ public final class MailMessageParser {
                     stop = true;
                     return;
                 }
+            } catch (InvalidMultipartException impe) {
+                throw impe;
             } catch (final RuntimeException rte) {
                 /*
                  * Parsing of multipart mail failed fatally; treat as empty plain-text mail
@@ -776,7 +798,7 @@ public final class MailMessageParser {
                             /*
                              * Translate TNEF attributes to MIME
                              */
-                            final String attachFilename = attachment.getFilename();
+                            final String attachFilename = getFileNameFromTnefAttachment(attachment);
                             String contentTypeStr = null;
                             if (attachment.getMAPIProps() != null) {
                                 contentTypeStr = (String) attachment.getMAPIProps().getPropValue(MAPIProp.PR_ATTACH_MIME_TAG);
@@ -784,7 +806,7 @@ public final class MailMessageParser {
                             if (null != contentTypeStr) {
                                 final String tmp = contentTypeStr.toLowerCase(Locale.US);
                                 if (tmp.startsWith("multipart/") && tmp.indexOf("boundary=") < 0) {
-                                    final MimeMessage nested = new MimeMessage(MimeDefaultSession.getDefaultSession(), attachment.getRawData());
+                                    MimeMessage nested = new MimeMessage(MimeDefaultSession.getDefaultSession(), attachment.getRawData());
                                     parseMailContent(MimeMessageConverter.convertMessage(nested, false), handler, prefix, partCount++);
                                     // Proceed with next attachment in list
                                     continue Next;
@@ -796,33 +818,22 @@ public final class MailMessageParser {
                             if (contentTypeStr == null) {
                                 contentTypeStr = MimeTypes.MIME_APPL_OCTET;
                             }
-                            final DataSource ds = new RawDataSource(attachment.getRawData(), contentTypeStr);
-                            bodyPart.setDataHandler(new DataHandler(ds));
-                            bodyPart.setHeader(
-                                HDR_CONTENT_TYPE,
-                                ContentType.prepareContentTypeString(contentTypeStr, attachFilename));
+
+                            RawInputStream ris = attachment.getRawData();
+                            bodyPart.setSize((int) ris.getLength());
+                            bodyPart.setDataHandler(new DataHandler(new RawDataSource(ris, contentTypeStr)));
+                            bodyPart.setHeader(HDR_CONTENT_TYPE, ContentType.prepareContentTypeString(contentTypeStr, attachFilename));
                             if (attachFilename != null) {
-                                final ContentDisposition cd = new ContentDisposition(Part.ATTACHMENT);
+                                ContentDisposition cd = new ContentDisposition(Part.ATTACHMENT);
                                 cd.setFilenameParameter(attachFilename);
-                                bodyPart.setHeader(
-                                    HDR_CONTENT_DISPOSITION,
-                                    MimeMessageUtility.foldContentDisposition(cd.toString()));
-                            }
-                            CountingOutputStream counter = null;
-                            try {
-                                counter = new CountingOutputStream();
-                                attachment.writeTo(counter);
-                                bodyPart.setSize((int) counter.getCount());
-                            } finally {
-                                Streams.close(counter);
+                                bodyPart.setHeader(HDR_CONTENT_DISPOSITION, MimeMessageUtility.foldContentDisposition(cd.toString()));
                             }
                             parseMailContent(MimeMessageConverter.convertPart(bodyPart), handler, prefix, partCount++);
                         } else {
                             /*
                              * Nested message
                              */
-                            final MimeMessage nestedMessage =
-                                TNEFMime.convert(MimeDefaultSession.getDefaultSession(), attachment.getNestedMessage());
+                            MimeMessage nestedMessage = TNEFMime.convert(MimeDefaultSession.getDefaultSession(), attachment.getNestedMessage());
                             os.reset();
                             nestedMessage.writeTo(os);
                             bodyPart.setDataHandler(new DataHandler(new MessageDataSource(os.toByteArray(), MimeTypes.MIME_MESSAGE_RFC822)));
@@ -847,7 +858,7 @@ public final class MailMessageParser {
                             return;
                         }
                     } else {
-                        final TNEFBodyPart bodyPart = new TNEFBodyPart();
+                        TNEFBodyPart bodyPart = new TNEFBodyPart();
                         /*
                          * Add TNEF attributes
                          */
@@ -855,18 +866,14 @@ public final class MailMessageParser {
                         /*
                          * Translate TNEF attributes to MIME
                          */
-                        final String attachFilename = fileName;
-                        final DataSource ds = new RawDataSource(messageClass.getRawData(), MimeTypes.MIME_APPL_OCTET);
+                        String attachFilename = fileName;
+                        DataSource ds = new RawDataSource(messageClass.getRawData(), MimeTypes.MIME_APPL_OCTET);
                         bodyPart.setDataHandler(new DataHandler(ds));
-                        bodyPart.setHeader(
-                            HDR_CONTENT_TYPE,
-                            ContentType.prepareContentTypeString(MimeTypes.MIME_APPL_OCTET, attachFilename));
+                        bodyPart.setHeader(HDR_CONTENT_TYPE, ContentType.prepareContentTypeString(MimeTypes.MIME_APPL_OCTET, attachFilename));
                         if (attachFilename != null) {
-                            final ContentDisposition cd = new ContentDisposition(Part.ATTACHMENT);
+                            ContentDisposition cd = new ContentDisposition(Part.ATTACHMENT);
                             cd.setFilenameParameter(attachFilename);
-                            bodyPart.setHeader(
-                                HDR_CONTENT_DISPOSITION,
-                                MimeMessageUtility.foldContentDisposition(cd.toString()));
+                            bodyPart.setHeader(HDR_CONTENT_DISPOSITION, MimeMessageUtility.foldContentDisposition(cd.toString()));
                         }
                         bodyPart.setSize(messageClass.getLength());
                         parseMailContent(MimeMessageConverter.convertPart(bodyPart), handler, prefix, partCount++);
@@ -914,6 +921,98 @@ public final class MailMessageParser {
                 stop = true;
                 return;
             }
+        }
+    }
+
+    private String getFileNameFromTnefAttachment(final Attachment attachment) {
+        String filename = null;
+        try {
+            int codePage = 0;
+            {
+                Attr oemCodePage = attachment.getAttribute(Attr.attOemCodepage);
+                if (null != oemCodePage) {
+                    Object value = oemCodePage.getValue();
+                    if (value instanceof Number) {
+                        codePage = ((Number) value).intValue();
+                    }
+                }
+            }
+
+            MAPIProps mapiProps = attachment.getMAPIProps();
+            if (mapiProps != null) {
+                // long filename
+                filename = readPropStringValue(MAPIProp.PR_ATTACH_LONG_FILENAME, mapiProps, codePage);
+                // or short filename
+                if (filename == null) {
+                    filename = readPropStringValue(MAPIProp.PR_ATTACH_FILENAME, mapiProps, codePage);
+                }
+            }
+
+            // or transport filename
+            if (filename == null) {
+                Attr attr = attachment.getAttribute(Attr.attAttachTransportFilename);
+                if (attr != null) {
+                    filename = (String)attr.getValue();
+                }
+            }
+
+            // or title (filename)
+            if (filename == null) {
+                Attr attr = attachment.getAttribute(Attr.attAttachTitle);
+                if (attr != null) {
+                    filename = (String)attr.getValue();
+                }
+            }
+        } catch (IOException ioe) {
+            filename = null;
+        }
+        return filename;
+    }
+
+    private String readPropStringValue(int id, MAPIProps mapiProps, int codePage) throws IOException {
+        MAPIProp prop = mapiProps.getProp(id);
+        if (null == prop) {
+            return null;
+        }
+
+        MAPIValue[] values = prop.getValues();
+        if (null == values || values.length == 0) {
+            return null;
+        }
+
+        MAPIValue value = values[0];
+        if (value.getType() != MAPIProp.PT_STRING) {
+            // Not a string
+            return null;
+        }
+
+        RawInputStream ris = new RawInputStream(value.getRawData()); // a copy
+        try {
+            int length = (int) ris.getLength();
+            byte[] bytes = ris.readBytes(length);
+
+            Charset charset;
+            if (codePage > 0) {
+                charset = Charsets.forCodePage(codePage);
+            } else {
+                String charsetName = CharsetDetector.detectCharset(bytes);
+                if (null == charsetName) {
+                    // Don't know better...
+                    return TNEFUtils.createString(bytes, 0, length);
+                }
+                charset = Charsets.forName(charsetName);
+            }
+
+            String nullTerminatedString;
+            if (MessageUtility.isSpecialCharset(charset.displayName())) {
+                nullTerminatedString = MessageUtility.readBytes(bytes, charset.displayName());
+            } else {
+                nullTerminatedString = new String(bytes, 0, length, charset);
+            }
+
+            return TNEFUtils.removeTerminatingNulls(nullTerminatedString);
+        } finally {
+            Streams.close(ris);
         }
     }
 
@@ -1283,4 +1382,49 @@ public final class MailMessageParser {
         }
     }
 
+    private static MimeMessage cloneMessage(MailMessage original, final Date optReceivedDate) throws OXException {
+        ThresholdFileHolder sink = new ThresholdFileHolder();
+        boolean closeSink = true;
+        try {
+            original.writeTo(sink.asOutputStream());
+
+            File tempFile = sink.getTempFile();
+            MimeMessage tmp;
+            if (null == tempFile) {
+                tmp = new MimeMessage(MimeDefaultSession.getDefaultSession(), sink.getStream()) {
+
+                    @Override
+                    public Date getReceivedDate() throws MessagingException {
+                        return null == optReceivedDate ? super.getReceivedDate() : optReceivedDate;
+                    }
+                };
+            } else {
+                tmp = new FileBackedMimeMessage(MimeDefaultSession.getDefaultSession(), tempFile, optReceivedDate);
+            }
+            closeSink = false;
+            return tmp;
+        } catch (MessagingException e) {
+            throw MimeMailException.handleMessagingException(e);
+        } catch (IOException e) {
+            throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
+        } catch (RuntimeException e) {
+            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } finally {
+            if (closeSink) {
+                sink.close();
+            }
+        }
+    }
+
+    private static final class InvalidMultipartException extends RuntimeException {
+
+        private static final long serialVersionUID = 5137217089059034971L;
+
+        /**
+         * Initializes a new {@link MailMessageParser.InvalidMultipartException}.
+         */
+        InvalidMultipartException(String message) {
+            super(message);
+        }
+    }
 }

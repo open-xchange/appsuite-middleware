@@ -51,18 +51,6 @@ if [ ${1:-0} -eq 2 ]; then
 
     PFILE=/opt/open-xchange/etc/smtp.properties
 
-    # SoftwareChange_Request-1795
-    ox_add_property com.openexchange.smtp.logTransport false /opt/open-xchange/etc/smtp.properties
-
-    # SoftwareChange_Request-1931
-    ox_add_property com.openexchange.smtp.ssl.protocols "" $PFILE
-
-    # SoftwareChange_Request-2016
-    ox_add_property com.openexchange.smtp.ssl.ciphersuites "" $PFILE
-
-    # SoftwareChange_Request-2553
-    ox_add_property com.openexchange.smtp.sendPartial false $PFILE
-
     ox_update_permissions /opt/open-xchange/etc/noreply.properties root:open-xchange 640
 
     # SoftwareChange_Request-3636

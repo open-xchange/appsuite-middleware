@@ -49,7 +49,6 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 
 %post
 . /opt/open-xchange/lib/oxfunctions.sh
-ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc imapauth.properties
 if [ ${1:-0} -eq 2 ]; then
     # only when updating
 

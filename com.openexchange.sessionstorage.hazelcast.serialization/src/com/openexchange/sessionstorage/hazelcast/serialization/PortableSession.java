@@ -169,6 +169,7 @@ public class PortableSession extends StoredSession implements CustomPortable {
         remoteParameterNames.add(PARAM_OAUTH_ACCESS_TOKEN);
         remoteParameterNames.add(PARAM_USER_AGENT);
         remoteParameterNames.add(PARAM_LOGIN_TIME);
+        remoteParameterNames.add(PARAM_LAST_ACTIVE);
         // Add configured remote parameters
         remoteParameterNames.addAll(configuredRemoteParameterNames);
         this.remoteParameterNames = remoteParameterNames;
@@ -355,8 +356,8 @@ public class PortableSession extends StoredSession implements CustomPortable {
         } catch (Exception e) {
             // Ignore...
         }
-        *
-        */
+         *
+         */
 
         return value;
     }

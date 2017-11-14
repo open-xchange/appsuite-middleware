@@ -1,0 +1,13 @@
+/sessionmanagement?action=clear:
+  get:
+    operationId: clear
+    tags:
+      - sessionmanagement
+    summary: Removes all user's session expect given and blacklisted
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+    responses:
+      200:
+        description: |
+          A JSON object signaling success. In case of errors the responsible fields in the response are
+          filled (see [Error handling](#error-handling)).
