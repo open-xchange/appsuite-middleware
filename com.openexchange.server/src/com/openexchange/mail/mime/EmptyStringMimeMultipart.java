@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2017-2020 OX Software GmbH
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,51 +47,29 @@
  *
  */
 
-package com.openexchange.contact;
+package com.openexchange.mail.mime;
 
-import com.openexchange.config.lean.Property;
+import javax.activation.DataSource;
+import javax.mail.MessagingException;
+import javax.mail.internet.MimeMultipart;
+
 
 /**
- * {@link ContactProperty} - Defines the contact properties.
+ * {@link EmptyStringMimeMultipart} - The multipart created from an empty string.
  *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.10.0
  */
-// TODO: Make all 'contact.properties' lean configuration aware
-public enum ContactProperty implements Property {
-    /**
-     * Defines whether the departments will be shown upon an autocomplete search.
-     * The department will only be shown for entries that are in the Global Address Book.
-     * Default: <code>false</code>
-     */
-    showDepartment(false);
-
-    private static final String PREFIX = "com.openexchange.contact.";
-    private Object defaultValue;
+public class EmptyStringMimeMultipart extends MimeMultipart {
 
     /**
-     * Initialises a new {@link ContactProperty}.
+     * Initializes a new {@link EmptyStringMimeMultipart}.
+     *
+     * @param ds The data source
+     * @throws MessagingException If initialization fails
      */
-    private ContactProperty(Object defaultValue) {
-        this.defaultValue = defaultValue;
+    public EmptyStringMimeMultipart(DataSource ds) throws MessagingException {
+        super(ds);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.config.lean.Property#getFQPropertyName()
-     */
-    @Override
-    public String getFQPropertyName() {
-        return PREFIX + name();
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.config.lean.Property#getDefaultValue()
-     */
-    @Override
-    public Object getDefaultValue() {
-        return defaultValue;
-    }
 }

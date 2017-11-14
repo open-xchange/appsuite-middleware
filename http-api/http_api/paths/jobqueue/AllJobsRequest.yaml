@@ -2,7 +2,7 @@
   get:
     operationId: allJobs
     tags:
-      - jobqueue
+      - Jobqueue
     summary: Get all user's jobs
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"
