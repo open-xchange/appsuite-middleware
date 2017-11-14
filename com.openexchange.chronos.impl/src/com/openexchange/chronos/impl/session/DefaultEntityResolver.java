@@ -87,6 +87,7 @@ import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.group.Group;
 import com.openexchange.group.GroupService;
+import com.openexchange.groupware.alias.UserAliasUtility;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
@@ -678,7 +679,7 @@ public class DefaultEntityResolver implements EntityResolver {
          */
         String mail = extractEMailAddress(uri);
         for (User knownUser : knownUsers.values()) {
-            if (mail.equals(knownUser.getMail()) || mail.equals(getEMail(knownUser)) || considerAliases && Arrays.contains(knownUser.getAliases(), mail)) {
+            if (mail.equals(getEMail(knownUser)) || considerAliases && UserAliasUtility.isAlias(mail, knownUser)) {
                 return new ResourceId(context.getContextId(), knownUser.getId(), CalendarUserType.INDIVIDUAL);
             }
         }
