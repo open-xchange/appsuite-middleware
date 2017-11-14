@@ -20,7 +20,7 @@ BuildRequires: java-devel >= 1.7.0
 %endif
 %endif
 Version:       @OXVERSION@
-%define        ox_release 16
+%define        ox_release 17
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -66,6 +66,8 @@ ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc malpol
 %config(noreplace) /opt/open-xchange/etc/*
 
 %changelog
+* Tue Nov 14 2017 Carsten Hoeger <choeger@open-xchange.com>
+Build for patch 2017-11-15 (4448)
 * Wed Oct 25 2017 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2017-10-30 (4415)
 * Mon Oct 23 2017 Carsten Hoeger <choeger@open-xchange.com>
