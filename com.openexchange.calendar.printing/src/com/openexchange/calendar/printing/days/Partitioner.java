@@ -55,12 +55,12 @@ import java.util.Date;
 import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.concurrent.TimeUnit;
 import org.dmfs.rfc5545.DateTime;
-import com.openexchange.calendar.printing.CPEvent;
 import com.openexchange.calendar.printing.CPCalendar;
+import com.openexchange.calendar.printing.CPEvent;
 import com.openexchange.calendar.printing.CPParameters;
 import com.openexchange.calendar.printing.CPTool;
-import com.openexchange.calendar.printing.Constants;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.groupware.contexts.Context;
@@ -120,7 +120,7 @@ public class Partitioner {
         firstDay = CalendarTools.getDayStart(cal, params.getStart());
         // omit the last millisecond of the end, because this must be exclusive and we calculate always inclusive.
         lastDay = CalendarTools.getDayStart(cal, new Date(params.getEnd().getTime() - 1));
-        final long days = (lastDay.getTime() - firstDay.getTime()) / Constants.MILLI_DAY;
+        final long days = TimeUnit.MILLISECONDS.toDays(lastDay.getTime() - firstDay.getTime());
         if (days >= 27 && days <= 31) {
             makeMonthBlock(firstDay, lastDay);
         } else {

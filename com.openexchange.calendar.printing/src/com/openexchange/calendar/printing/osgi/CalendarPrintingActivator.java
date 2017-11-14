@@ -82,7 +82,6 @@ public class CalendarPrintingActivator extends AbstractSessionServletActivator {
     @Override
     protected void startBundle() {
         track(I18nService.class, new I18nCustomizer(context));
-        track(UserService.class);
         track(GroupService.class);
         track(ConfigViewFactory.class);
         openTrackers();
@@ -92,11 +91,6 @@ public class CalendarPrintingActivator extends AbstractSessionServletActivator {
 
         final CapabilityService capabilityService = getService(CapabilityService.class);
         capabilityService.declareCapability("calendar-printing");
-    }
-
-    @Override
-    protected void stopBundle() throws Exception {
-        super.stopBundle();
     }
 
     private void register() {

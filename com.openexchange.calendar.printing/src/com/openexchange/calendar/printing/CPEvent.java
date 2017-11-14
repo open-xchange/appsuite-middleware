@@ -52,6 +52,7 @@ package com.openexchange.calendar.printing;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import org.apache.commons.lang.StringEscapeUtils;
 import com.openexchange.calendar.printing.days.CalendarTools;
 import com.openexchange.chronos.Attendee;
@@ -136,7 +137,7 @@ public class CPEvent {
     }
 
     public long getStartMinutes() {
-        return (startDate.getTime() - CalendarTools.getDayStart(cal, startDate).getTime()) / Constants.MILLI_MINUTE;
+        return TimeUnit.MILLISECONDS.toMinutes(startDate.getTime() - CalendarTools.getDayStart(cal, startDate).getTime());
     }
 
     public Date getEndDate() {
@@ -144,7 +145,7 @@ public class CPEvent {
     }
 
     public long getDurationInMinutes() {
-        return (endDate.getTime() - startDate.getTime()) / Constants.MILLI_MINUTE;
+        return TimeUnit.MILLISECONDS.toMinutes(endDate.getTime() - startDate.getTime());
     }
 
     public void setTitle(final String title) {
