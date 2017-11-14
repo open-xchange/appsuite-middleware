@@ -356,7 +356,7 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
         }
     }
 
-    private int insertAlarm(Connection connection, int cid, int account, String eventId, int userId, Alarm alarm) throws SQLException, OXException {
+    private int insertAlarm(Connection connection, int cid, int account, String eventId, int userId, Alarm alarm) throws OXException {
         AlarmField[] mappedFields = MAPPER.getMappedFields();
         String sql = new StringBuilder()
             .append("INSERT INTO calendar_alarm (cid,account,event,user,")
@@ -509,8 +509,7 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
                         alarmsByUser = new HashMap<Integer, List<Alarm>>();
                         alarmsByUserById.put(eventID, alarmsByUser);
                     }
-                    int userId = I(resultSet.getInt(2));
-                    com.openexchange.tools.arrays.Collections.put(alarmsByUser, I(userId), readAlarm(eventID, resultSet, mappedFields));
+                    com.openexchange.tools.arrays.Collections.put(alarmsByUser, I(resultSet.getInt(2)), readAlarm(eventID, resultSet, mappedFields));
                 }
             }
         }
@@ -524,7 +523,6 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
         StringBuilder stringBuilder = new StringBuilder()
             .append("DELETE FROM calendar_alarm WHERE cid=? AND account=? AND event")
             .append(getPlaceholders(eventIds.size())).append(';');
-        ;
         try (PreparedStatement stmt = connection.prepareStatement(stringBuilder.toString())) {
             int parameterIndex = 1;
             stmt.setInt(parameterIndex++, cid);
@@ -563,8 +561,8 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
             stmt.setInt(parameterIndex++, cid);
             stmt.setInt(parameterIndex++, account);
             stmt.setString(parameterIndex++, eventId);
-            for (Integer userId : userIds) {
-                stmt.setInt(parameterIndex++, i(userId));
+            for (int userId : userIds) {
+                stmt.setInt(parameterIndex++, userId);
             }
             return logExecuteUpdate(stmt);
         }
@@ -596,11 +594,11 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
     /**
      * Adjusts certain properties of an alarm after loading it from the database.
      *
-     * @param The identifier of the associated event
+     * @param eventId The identifier of the associated event
      * @param alarm The alarm to adjust
      * @return The (possibly adjusted) alarm reference
      */
-    private Alarm adjustAfterLoad(String eventId, Alarm alarm) throws OXException {
+    private Alarm adjustAfterLoad(String eventId, Alarm alarm) {
         ExtendedProperties extendedProperties = alarm.getExtendedProperties();
         if (null == extendedProperties) {
             return alarm;
@@ -642,7 +640,7 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
      * @param alarm The alarm to adjust
      * @return The (possibly adjusted) alarm reference
      */
-    private Alarm adjustPriorSave(String eventId, Alarm alarm) throws OXException {
+    private Alarm adjustPriorSave(String eventId, Alarm alarm) {
         /*
          * get or initialize new extended properties container
          */
@@ -672,7 +670,7 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
     /**
      * Decodes a list of extended properties into a valid list of attendees.
      *
-     * @param The identifier of the associated event
+     * @param eventId The identifier of the associated event
      * @param attendeeProperties The extended attendee properties to decode
      * @return The decoded attendees, or an empty list if there are none
      */
@@ -698,7 +696,7 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
     /**
      * Decodes a list of extended properties into a valid list of attachments.
      *
-     * @param The identifier of the associated event
+     * @param eventId The identifier of the associated event
      * @param attachmentProperties The extended attachment properties to decode
      * @return The decoded attendees, or an empty list if there are none
      */
@@ -743,7 +741,7 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
      * Encodes a list of attachments into the supplied extended properties container. Any previously stored <code>ATTACHMENT</code>
      * property is overwritten implicitly.
      *
-     * @param The identifier of the associated event
+     * @param eventId The identifier of the associated event
      * @param extendedProperties The extended properties to use
      * @param attachments The attachments to encode, or <code>null</code> to just remove any possibly existing properties
      * @return <code>true</code> if the extended properties container was modified, <code>false</code>, otherwise
@@ -788,7 +786,7 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
      * Encodes a list of attendees into the supplied extended properties container. Any previously stored <code>ATTENDEE</code>
      * property is overwritten implicitly.
      *
-     * @param The identifier of the associated event
+     * @param eventId The identifier of the associated event
      * @param extendedProperties The extended properties to use
      * @param attendees The attendees to encode, or <code>null</code> to just remove any possibly existing properties
      * @return <code>true</code> if the extended properties container was modified, <code>false</code>, otherwise
