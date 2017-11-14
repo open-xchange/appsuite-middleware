@@ -123,6 +123,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
             boolean fallbackOnFailedSORT;
             boolean useMultipleAddresses;
             boolean useMultipleAddressesUserHash;
+            boolean ignoreDeletedMailsForFolderCount;
 
             Params() {
                 super();
@@ -142,6 +143,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
         final boolean fallbackOnFailedSORT;
         final boolean useMultipleAddresses;
         final boolean useMultipleAddressesUserHash;
+        final boolean ignoreDeletedMailsForFolderCount;
 
         PrimaryIMAPProperties(Params params) {
             super();
@@ -156,6 +158,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
             this.fallbackOnFailedSORT = params.fallbackOnFailedSORT;
             this.useMultipleAddresses = params.useMultipleAddresses;
             this.useMultipleAddressesUserHash = params.useMultipleAddressesUserHash;
+            this.ignoreDeletedMailsForFolderCount = params.ignoreDeletedMailsForFolderCount;
         }
     }
 
@@ -324,6 +327,14 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
 
             logMessageBuilder.append("  Use User Hash for Multiple IP addresses: {}{}");
             args.add(Autoboxing.valueOf(params.useMultipleAddressesUserHash));
+            args.add(Strings.getLineSeparator());
+        }
+
+        {
+            params.ignoreDeletedMailsForFolderCount = ConfigViews.getDefinedBoolPropertyFrom("com.openexchange.imap.ignoreDeletedMailsForFolderCount", false, view);
+
+            logMessageBuilder.append("  Ignore deleted mails for folder count: {}{}");
+            args.add(Autoboxing.valueOf(params.ignoreDeletedMailsForFolderCount));
             args.add(Strings.getLineSeparator());
         }
 
@@ -795,6 +806,23 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
             return primaryIMAPProps.useMultipleAddressesUserHash;
         } catch (Exception e) {
             LOG.error("Failed to get host name expression for user {} in context {}. Using default default {} instead.", I(userId), I(contextId), "false", e);
+            return false;
+        }
+    }
+
+    /**
+     * Checks whether deleted mails should be ignored for folder counts.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return <code>true</code> to use multiple IP addresses; otherwise <code>false</code>
+     */
+    public boolean isIgnoreDeletedMailsForFolderCount(int userId, int contextId) {
+        try {
+            PrimaryIMAPProperties primaryIMAPProps = getPrimaryIMAPProps(userId, contextId);
+            return primaryIMAPProps.ignoreDeletedMailsForFolderCount;
+        } catch (Exception e) {
+            LOG.error("Failed to get ignoreDeletedMailsForFolderCount for user {} in context {}. Using default default {} instead.", I(userId), I(contextId), "false", e);
             return false;
         }
     }

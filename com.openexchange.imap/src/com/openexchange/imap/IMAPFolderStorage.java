@@ -644,11 +644,11 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
         }
         try {
             IMAPFolderWorker.checkFailFast(imapStore, fullName);
-
+            boolean ignoreDeletedMailsForFolderCount = IMAPProperties.getInstance().isIgnoreDeletedMailsForFolderCount(this.session.getUserId(), this.session.getContextId());
             ListLsubEntry listEntry = ListLsubCache.tryCachedLISTEntry(fullName, accountId, session);
             if (null != listEntry && listEntry.exists()) {
                 try {
-                    return listEntry.canOpen() ? IMAPCommandsCollection.getTotalAndUnread(imapStore, fullName) : new int[] { 0, 0 };
+                    return listEntry.canOpen() ? IMAPCommandsCollection.getTotalAndUnread(imapStore, fullName, ignoreDeletedMailsForFolderCount) : new int[] { 0, 0 };
                 } catch (MessagingException e) {
                     return new int[] { 0, 0 };
                 }
@@ -664,7 +664,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
             }
 
             try {
-                return listInfo.canOpen ? IMAPCommandsCollection.getTotalAndUnread(imapStore, fullName) : new int[] { 0, 0 };
+                return listInfo.canOpen ? IMAPCommandsCollection.getTotalAndUnread(imapStore, fullName, ignoreDeletedMailsForFolderCount) : new int[] { 0, 0 };
             } catch (MessagingException e) {
                 return new int[] { 0, 0 };
             }
@@ -682,11 +682,12 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
         }
         try {
             IMAPFolderWorker.checkFailFast(imapStore, fullName);
+            boolean ignoreDeletedMailsForFolderCount = IMAPProperties.getInstance().isIgnoreDeletedMailsForFolderCount(this.session.getUserId(), this.session.getContextId());
 
             ListLsubEntry listEntry = ListLsubCache.tryCachedLISTEntry(fullName, accountId, session);
             if (null != listEntry && listEntry.exists()) {
                 try {
-                    return listEntry.canOpen() ? IMAPCommandsCollection.getTotalAndUnread(imapStore, fullName)[1] : 0;
+                    return listEntry.canOpen() ? IMAPCommandsCollection.getTotalAndUnread(imapStore, fullName, ignoreDeletedMailsForFolderCount)[1] : 0;
                 } catch (MessagingException e) {
                     return 0;
                 }
@@ -702,7 +703,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
             }
 
             try {
-                return listInfo.canOpen ? IMAPCommandsCollection.getTotalAndUnread(imapStore, fullName)[1] : 0;
+                return listInfo.canOpen ? IMAPCommandsCollection.getTotalAndUnread(imapStore, fullName, ignoreDeletedMailsForFolderCount)[1] : 0;
             } catch (MessagingException e) {
                 return 0;
             }
@@ -758,11 +759,10 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
         }
         try {
             IMAPFolderWorker.checkFailFast(imapStore, fullName);
-
             ListLsubEntry listEntry = ListLsubCache.tryCachedLISTEntry(fullName, accountId, session);
             if (null != listEntry && listEntry.exists()) {
                 try {
-                    return listEntry.canOpen() ? IMAPCommandsCollection.getTotalAndUnread(imapStore, fullName)[0] : 0;
+                    return listEntry.canOpen() ? IMAPCommandsCollection.getTotalAndUnread(imapStore, fullName, false)[0] : 0;
                 } catch (MessagingException e) {
                     return 0;
                 }
@@ -778,7 +778,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
             }
 
             try {
-                return listInfo.canOpen ? IMAPCommandsCollection.getTotalAndUnread(imapStore, fullName)[0] : 0;
+                return listInfo.canOpen ? IMAPCommandsCollection.getTotalAndUnread(imapStore, fullName, false)[0] : 0;
             } catch (MessagingException e) {
                 return 0;
             }
