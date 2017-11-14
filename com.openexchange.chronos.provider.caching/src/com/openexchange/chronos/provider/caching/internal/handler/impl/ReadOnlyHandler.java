@@ -51,7 +51,6 @@ package com.openexchange.chronos.provider.caching.internal.handler.impl;
 
 import java.util.Collections;
 import java.util.List;
-import org.apache.http.HttpStatus;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.provider.caching.CachingCalendarAccess;
 import com.openexchange.chronos.provider.caching.ExternalCalendarResult;
@@ -72,7 +71,7 @@ public class ReadOnlyHandler extends AbstractHandler {
 
     @Override
     public ExternalCalendarResult getExternalEvents(String folderId) throws OXException {
-        return new ExternalCalendarResult(Collections.emptyList(), HttpStatus.SC_NOT_MODIFIED);
+        return new ExternalCalendarResult(false, Collections.emptyList());
     }
 
     @Override

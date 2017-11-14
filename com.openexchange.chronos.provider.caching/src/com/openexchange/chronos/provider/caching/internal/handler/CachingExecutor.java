@@ -97,7 +97,7 @@ public class CachingExecutor {
 
             try {
                 ExternalCalendarResult externalCalendarResult = cachingHandler.getExternalEvents(calendarFolderId);
-                if (!externalCalendarResult.isUpToDate()) {
+                if (externalCalendarResult.isUpdated()) {
                     List<Event> existingEvents = cachingHandler.getExistingEvents(calendarFolderId);
                     EventUpdates diff = null;
 

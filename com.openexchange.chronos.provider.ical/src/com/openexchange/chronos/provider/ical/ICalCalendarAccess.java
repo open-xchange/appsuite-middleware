@@ -145,9 +145,9 @@ public class ICalCalendarAccess extends SingleFolderCachingCalendarAccess {
 
         if (getResult.getCalendar() == null || // response says not modified
             ((etag != null) && (getResult.getETag().equals(etag)))) { // same etag
-            return new ExternalCalendarResult(Collections.emptyList(), getResult.getStatusCode());
+            return new ExternalCalendarResult(false, Collections.emptyList());
         }
-        ExternalCalendarResult externalCalendarResult = new ExternalCalendarResult(getResult.getCalendar().getEvents(), getResult.getStatusCode());
+        ExternalCalendarResult externalCalendarResult = new ExternalCalendarResult(true, getResult.getCalendar().getEvents());
         updateICalConfiguration(getResult);
         externalCalendarResult.addWarnings(getResult.getWarnings());
 

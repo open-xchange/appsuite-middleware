@@ -51,7 +51,6 @@ package com.openexchange.chronos.provider.caching.impl;
 
 import java.util.Collections;
 import java.util.List;
-import org.apache.http.HttpStatus;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.CalendarFolder;
 import com.openexchange.chronos.provider.caching.CachingCalendarAccess;
@@ -124,7 +123,7 @@ public class TestCachingCalendarAccessImpl extends CachingCalendarAccess {
      */
     @Override
     public ExternalCalendarResult getAllEvents(String folderId) throws OXException {
-        return new ExternalCalendarResult(Collections.emptyList(), HttpStatus.SC_NOT_MODIFIED);
+        return new ExternalCalendarResult(false, Collections.emptyList());
     }
 
     @Override

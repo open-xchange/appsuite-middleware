@@ -58,7 +58,6 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.SortedSet;
-import org.apache.http.HttpStatus;
 import org.json.JSONObject;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
@@ -151,7 +150,7 @@ public class DeleteHandler extends AbstractHandler {
 
     @Override
     public ExternalCalendarResult getExternalEvents(String folderId) throws OXException {
-        return new ExternalCalendarResult(Collections.emptyList(), HttpStatus.SC_NOT_FOUND);
+        return new ExternalCalendarResult(true, Collections.emptyList());
     }
 
     @Override

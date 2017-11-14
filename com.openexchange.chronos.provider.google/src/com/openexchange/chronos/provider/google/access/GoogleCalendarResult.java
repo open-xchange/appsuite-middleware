@@ -55,7 +55,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
-import org.apache.http.HttpStatus;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.chronos.Event;
@@ -94,7 +93,7 @@ public class GoogleCalendarResult extends ExternalCalendarResult implements Diff
      * @throws JSONException
      */
     public GoogleCalendarResult(GoogleCalendarAccess googleCalendarAccess, String folderId) throws OXException {
-        super(Collections.emptyList(), HttpStatus.SC_OK);
+        super(true, Collections.emptyList()); // overwritten by implementation... does not contain correct update state
         access = googleCalendarAccess;
         JSONObject internalConfiguration = access.getAccount().getInternalConfiguration();
         String token = null;
@@ -404,7 +403,7 @@ public class GoogleCalendarResult extends ExternalCalendarResult implements Diff
     }
 
     @Override
-    public boolean isUpToDate() {
+    public boolean isUpdated() {
         return currentResult.getEvents().isEmpty();
     }
 

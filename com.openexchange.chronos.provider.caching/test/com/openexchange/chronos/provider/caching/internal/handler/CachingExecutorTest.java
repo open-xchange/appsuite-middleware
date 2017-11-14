@@ -56,7 +56,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import org.apache.http.HttpStatus;
 import org.dmfs.rfc5545.DateTime;
 import org.json.JSONObject;
 import org.junit.Before;
@@ -126,7 +125,7 @@ public class CachingExecutorTest {
 
     private List<Event> existingEvents = new ArrayList<>();
 
-    private ExternalCalendarResult externalCalendarResult = new ExternalCalendarResult(Collections.emptyList(), HttpStatus.SC_OK);
+    private ExternalCalendarResult externalCalendarResult = new ExternalCalendarResult(true, Collections.emptyList());
     private List<Event> externalEvents = new ArrayList<>();
 
     private Set<FolderUpdateState> lastFolderStates = new HashSet<>();
@@ -199,7 +198,7 @@ public class CachingExecutorTest {
         e.setStartDate(new DateTime(System.currentTimeMillis()));
         e.setTimestamp(System.currentTimeMillis());
         externalEvents.add(e);
-        externalCalendarResult = new ExternalCalendarResult(externalEvents, HttpStatus.SC_MOVED_PERMANENTLY);
+        externalCalendarResult = new ExternalCalendarResult(true, externalEvents);
         Mockito.when(handler.getExternalEvents(Matchers.anyString())).thenReturn(externalCalendarResult);
 
         executor.cache(warnings);

@@ -51,7 +51,6 @@ package com.openexchange.chronos.provider.caching;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.http.HttpStatus;
 import com.openexchange.chronos.Event;
 import com.openexchange.exception.OXException;
 
@@ -67,12 +66,19 @@ public class ExternalCalendarResult {
 
     private final List<OXException> warnings = new ArrayList<>();
 
-    private final int httpStatus;
+    private final boolean updated;
 
-    public ExternalCalendarResult(List<Event> events, int httpStatus) {
+    /**
+     * 
+     * Initializes a new {@link ExternalCalendarResult}.
+     * 
+     * @param updated Indicates if the resource content has changed. <code>true</code> if changed; otherwise <code>false</code>
+     * @param events The {@link Event}s of the external calendar if upToDate parameter is false
+     */
+    public ExternalCalendarResult(boolean updated, List<Event> events) {
         super();
+        this.updated = updated;
         this.events = events;
-        this.httpStatus = httpStatus;
     }
 
     public List<Event> getEvents() {
@@ -87,16 +93,10 @@ public class ExternalCalendarResult {
         return warnings;
     }
 
-    public int getHttpStatus() {
-        return httpStatus;
-    }
-
     /**
-     * Indicates whether the resource is up to date or not. The resource is up to date if the server returns {@link HttpStatus#SC_NOT_MODIFIED}.
-     * 
-     * @return <true> if {@link HttpStatus#SC_NOT_MODIFIED} was returned; otherwise <code>false</code>
+     * Indicates whether the resource is up to date or not. If the result is already up-to-date the events field can (and should!) be ignored.
      */
-    public boolean isUpToDate() {
-        return this.httpStatus == HttpStatus.SC_NOT_MODIFIED;
+    public boolean isUpdated() {
+        return updated;
     }
 }

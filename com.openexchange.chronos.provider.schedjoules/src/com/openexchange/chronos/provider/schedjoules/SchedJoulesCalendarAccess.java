@@ -55,7 +55,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import org.apache.http.HttpStatus;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -233,7 +232,7 @@ public class SchedJoulesCalendarAccess extends CachingCalendarAccess {
             SchedJoulesAPI api = SchedJoulesAPI.getInstance();
             SchedJoulesCalendar calendar = api.calendar().getCalendar(url, eTag, lastModified);
             if (eTag.equals(calendar.getETag())) {
-                return new ExternalCalendarResult(Collections.emptyList(), HttpStatus.SC_NOT_MODIFIED);
+                return new ExternalCalendarResult(false, Collections.emptyList());
             }
             if (NO_ACCESS.equals(calendar.getName())) {
                 throw SchedJoulesProviderExceptionCodes.NO_ACCESS.create(folderId);
@@ -243,7 +242,7 @@ public class SchedJoulesCalendarAccess extends CachingCalendarAccess {
             folder.put(SchedJoulesFields.LAST_MODIFIED, calendar.getLastModified());
             updateConfigurationData(getAccount().getInternalConfiguration(), getAccount().getUserConfiguration());
 
-            return new ExternalCalendarResult(calendar.getEvents(), HttpStatus.SC_OK);
+            return new ExternalCalendarResult(true, calendar.getEvents());
         } catch (JSONException e) {
             throw SchedJoulesProviderExceptionCodes.JSON_ERROR.create(e.getMessage(), e);
         } catch (MalformedURLException e) {
