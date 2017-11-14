@@ -451,7 +451,7 @@ public class DefaultEntityResolver implements EntityResolver {
     }
 
     private Group getGroup(int entity) throws OXException {
-        int id = I(entity);
+        Integer id = I(entity);
         Group group = knownGroups.get(id);
         if (null == group) {
             group = loadGroup(entity);
@@ -461,7 +461,7 @@ public class DefaultEntityResolver implements EntityResolver {
     }
 
     private Group optGroup(int entity) throws OXException {
-        int id = I(entity);
+        Integer id = I(entity);
         Group group = knownGroups.get(id);
         if (null == group) {
             try {
@@ -478,7 +478,7 @@ public class DefaultEntityResolver implements EntityResolver {
     }
 
     private User getUser(int entity) throws OXException {
-        int id = I(entity);
+        Integer id = I(entity);
         User user = knownUsers.get(id);
         if (null == user) {
             user = loadUser(entity);
@@ -488,7 +488,7 @@ public class DefaultEntityResolver implements EntityResolver {
     }
 
     private User optUser(int entity) throws OXException {
-        int id = I(entity);
+        Integer id = I(entity);
         User user = knownUsers.get(id);
         if (null == user) {
             try {
@@ -505,7 +505,7 @@ public class DefaultEntityResolver implements EntityResolver {
     }
 
     private Resource getResource(int entity) throws OXException {
-        int id = I(entity);
+        Integer id = I(entity);
         Resource resource = knownResources.get(id);
         if (null == resource) {
             resource = loadResource(entity);
@@ -515,7 +515,7 @@ public class DefaultEntityResolver implements EntityResolver {
     }
 
     private Resource optResource(int entity) throws OXException {
-        int id = I(entity);
+        Integer id = I(entity);
         Resource resource = knownResources.get(id);
         if (null == resource) {
             try {
