@@ -530,11 +530,11 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
         return session;
     }
 
-    private String getRedirectLocationForSession(HttpServletRequest request, Session session, Reservation reservation) throws OXException {
+    private String getRedirectLocationForSession(HttpServletRequest request, Session session, Reservation reservation) throws OXException, IOException {
         LOG.trace("getRedirectLocationForSession(HttpServletRequest request: {}, Session session: {}, Reservation reservation: {})", request.getRequestURI(), session.getSessionID(), reservation.getToken());
         OIDCTools.validateSession(session, request);
         if (session.getContextId() != reservation.getContextId() && session.getUserId() != reservation.getUserId()) {
-            throw LoginExceptionCodes.LOGIN_DENIED.create();
+            this.handleException(null, true, LoginExceptionCodes.LOGIN_DENIED.create(), 0);
         }
         return OIDCTools.buildFrontendRedirectLocation(session, OIDCTools.getUIWebPath(this.loginConfiguration, this.getBackendConfig()));
     }
