@@ -68,6 +68,8 @@ public class Attendee extends CalendarUser {
     private Boolean rsvp;
     private String folderId;
     private List<String> member;
+    
+    private ExtendedProperties extendedProperties;
 
     private final EnumSet<AttendeeField> setFields;
 
@@ -538,6 +540,42 @@ public class Attendee extends CalendarUser {
      */
     public boolean containsEMail() {
         return isSet(AttendeeField.EMAIL);
+    }
+    
+    /**
+     * Gets the extended properties of the event.
+     *
+     * @return The extended properties
+     */
+    public ExtendedProperties getExtendedProperties() {
+        return extendedProperties;
+    }
+
+    /**
+     * Sets the extended properties of the event.
+     *
+     * @param value The extended properties to set
+     */
+    public void setExtendedProperties(ExtendedProperties value) {
+        extendedProperties = value;
+        setFields.add(AttendeeField.EXTENDED_PROPERTIES);
+    }
+
+    /**
+     * Removes the extended properties of the event.
+     */
+    public void removeExtendedProperties() {
+        extendedProperties = null;
+        setFields.remove(AttendeeField.EXTENDED_PROPERTIES);
+    }
+
+    /**
+     * Gets a value indicating whether extended properties of the event have been set or not.
+     *
+     * @return <code>true</code> if extended properties are set, <code>false</code>, otherwise
+     */
+    public boolean containsExtendedProperties() {
+        return setFields.contains(AttendeeField.EXTENDED_PROPERTIES);
     }
 
     @Override

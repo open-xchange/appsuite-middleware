@@ -58,6 +58,7 @@ import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.CalendarUserType;
+import com.openexchange.chronos.ExtendedProperties;
 import com.openexchange.chronos.ParticipantRole;
 import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.exception.OXException;
@@ -372,6 +373,28 @@ public class AttendeeMapper extends DefaultMapper<Attendee, AttendeeField> {
             @Override
             public void remove(Attendee object) {
                 object.removeEMail();
+            }
+        });
+        mappings.put(AttendeeField.EXTENDED_PROPERTIES, new DefaultMapping<ExtendedProperties, Attendee>() {
+
+            @Override
+            public boolean isSet(Attendee object) {
+                return object.containsExtendedProperties();
+            }
+
+            @Override
+            public void set(Attendee object, ExtendedProperties value) throws OXException {
+                object.setExtendedProperties(value);
+            }
+
+            @Override
+            public ExtendedProperties get(Attendee object) {
+                return object.getExtendedProperties();
+            }
+
+            @Override
+            public void remove(Attendee object) {
+                object.removeExtendedProperties();
             }
         });
         return mappings;

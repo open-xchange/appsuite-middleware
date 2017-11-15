@@ -392,7 +392,7 @@ public class AttendeeHelper {
 
     /**
      * Gets the <i>default</i> attendee that is always added to a newly inserted event, based on the target folder type.<p/>
-     * For <i>public</i> folders, this is an attendee for the current session's user, otherwise (<i>private</i> or <i>shared</i>, an
+     * For <i>public</i> folders, this is an attendee for the current session's user, otherwise (<i>private</i> or <i>shared</i>) an
      * attendee for the folder owner (i.e. the calendar user) is prepared.
      *
      * @param session The calendar session
@@ -417,7 +417,7 @@ public class AttendeeHelper {
         Attendee requestedAttendee = find(requestedAttendees, defaultAttendee);
         if (null != requestedAttendee) {
             AttendeeMapper.getInstance().copy(requestedAttendee, defaultAttendee,
-                AttendeeField.RSVP, AttendeeField.COMMENT, AttendeeField.PARTSTAT, AttendeeField.ROLE, AttendeeField.PARTSTAT);
+                AttendeeField.RSVP, AttendeeField.COMMENT, AttendeeField.PARTSTAT, AttendeeField.ROLE, AttendeeField.PARTSTAT, AttendeeField.EXTENDED_PROPERTIES);
         }
         return defaultAttendee;
     }

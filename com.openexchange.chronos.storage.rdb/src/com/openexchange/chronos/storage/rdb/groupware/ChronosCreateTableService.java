@@ -271,6 +271,7 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
                 "rsvp BOOLEAN DEFAULT NULL," +
                 "comment TEXT DEFAULT NULL," +
                 "member VARCHAR(1024) DEFAULT NULL," +
+                "extendedProperties BLOB DEFAULT NULL," +
                 "PRIMARY KEY (cid,account,event,entity)," +
                 "KEY uri (cid,account,event,uri(191))," +
                 "KEY folder (cid,account,entity,folder(191))" +
@@ -291,6 +292,7 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
                 "rsvp BOOLEAN DEFAULT NULL," +
                 "comment TEXT DEFAULT NULL," +
                 "member VARCHAR(1024) DEFAULT NULL," +
+                "extendedProperties BLOB DEFAULT NULL," +
                 "PRIMARY KEY (cid,account,event,entity)," +
                 "KEY uri (cid,account,event,uri(191))," +
                 "KEY folder (cid,account,entity,folder(191))" +
