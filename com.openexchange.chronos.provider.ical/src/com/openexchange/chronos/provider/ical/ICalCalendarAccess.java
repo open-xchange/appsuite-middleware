@@ -55,6 +55,7 @@ import static com.openexchange.chronos.provider.CalendarFolderProperty.DESCRIPTI
 import static com.openexchange.chronos.provider.CalendarFolderProperty.SCHEDULE_TRANSP;
 import static com.openexchange.chronos.provider.CalendarFolderProperty.USED_FOR_SYNC;
 import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import org.dmfs.rfc5545.Duration;
 import org.json.JSONException;
@@ -76,6 +77,7 @@ import com.openexchange.chronos.provider.ical.conn.ICalFeedClient;
 import com.openexchange.chronos.provider.ical.osgi.Services;
 import com.openexchange.chronos.provider.ical.properties.ICalCalendarProviderProperties;
 import com.openexchange.chronos.provider.ical.result.GetResponse;
+import com.openexchange.chronos.provider.ical.result.GetResponseState;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.conversion.ConversionService;
@@ -94,13 +96,13 @@ public class ICalCalendarAccess extends SingleFolderCachingCalendarAccess {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ICalCalendarAccess.class);
 
-    private final ICalFeedClient reader;
+    private final ICalFeedClient feedClient;
     private final ICalCalendarFeedConfig iCalFeedConfig;
 
     /**
      * Initializes a new {@link ICalCalendarAccess}.
      *
-     * @param reader The underlying feed reader
+     * @param feedClient The underlying feed reader
      * @param session The calendar session
      * @param account The calendar account
      * @param parameters The calendar parameters
@@ -109,7 +111,7 @@ public class ICalCalendarAccess extends SingleFolderCachingCalendarAccess {
         super(session, account, parameters, prepareFolder(account));
         JSONObject userConfiguration = new JSONObject(account.getUserConfiguration());
         this.iCalFeedConfig = new ICalCalendarFeedConfig.DecryptedBuilder(session, userConfiguration, getICalConfiguration()).build();
-        this.reader = new ICalFeedClient(session, iCalFeedConfig);
+        this.feedClient = new ICalFeedClient(session, iCalFeedConfig);
     }
 
     @Override
@@ -122,6 +124,14 @@ public class ICalCalendarAccess extends SingleFolderCachingCalendarAccess {
             return refreshInterval;
         }
         return Services.getService(LeanConfigurationService.class).getLongProperty(getSession().getUserId(), getSession().getContextId(), ICalCalendarProviderProperties.refreshInterval);
+    }
+
+    @Override
+    public List<CalendarFolder> getVisibleFolders() throws OXException {
+        if (this.feedClient.isFeedAvailable()) {
+            return Collections.singletonList(folder);
+        }
+        return Collections.emptyList();
     }
 
     protected JSONObject getICalConfiguration() {
@@ -140,12 +150,13 @@ public class ICalCalendarAccess extends SingleFolderCachingCalendarAccess {
 
     @Override
     public ExternalCalendarResult getAllEvents() throws OXException {
-        GetResponse getResult = reader.executeRequest();
+        GetResponse getResult = feedClient.executeRequest();
         String etag = iCalFeedConfig.getEtag();
 
-        if (getResult.getCalendar() == null || // response says not modified
-            ((etag != null) && (getResult.getETag().equals(etag)))) { // same etag
+        if (getResult.getState() == GetResponseState.NOT_MODIFIED || ((etag != null) && (etag.equals(getResult.getETag())))) {
             return new ExternalCalendarResult(false, Collections.emptyList());
+        } else if (getResult.getState() == GetResponseState.REMOVED) {
+            return new ExternalCalendarResult(true, Collections.emptyList());
         }
         ExternalCalendarResult externalCalendarResult = new ExternalCalendarResult(true, getResult.getCalendar().getEvents());
         updateICalConfiguration(getResult);

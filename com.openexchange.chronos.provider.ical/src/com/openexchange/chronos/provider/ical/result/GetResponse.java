@@ -53,7 +53,6 @@ import java.util.Collections;
 import java.util.List;
 import org.apache.http.Header;
 import org.apache.http.HttpHeaders;
-import org.apache.http.StatusLine;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.ExtendedProperty;
 import com.openexchange.chronos.common.CalendarUtils;
@@ -72,12 +71,13 @@ public class GetResponse {
 
     private ImportedCalendar importedCalendar;
 
-    private final StatusLine statusLine;
     private final Header[] headers;
 
-    public GetResponse(StatusLine statusLine, Header[] headers) {
-        this.statusLine = statusLine;
+    private final GetResponseState state;
+
+    public GetResponse(GetResponseState state, Header[] headers) {
         this.headers = headers;
+        this.state = state;
     }
 
     public void setCalendar(ImportedCalendar calendar) {
@@ -117,14 +117,6 @@ public class GetResponse {
         return getProperty("DESCRIPTION");
     }
 
-    public int getStatusCode() {
-        return statusLine.getStatusCode();
-    }
-
-    public StatusLine getStatusLine() {
-        return statusLine;
-    }
-
     public String getETag() {
         return getHeader(HttpHeaders.ETAG);
     }
@@ -158,5 +150,9 @@ public class GetResponse {
             return null;
         }
         return extendedProperty.getValue();
+    }
+
+    public GetResponseState getState() {
+        return state;
     }
 }

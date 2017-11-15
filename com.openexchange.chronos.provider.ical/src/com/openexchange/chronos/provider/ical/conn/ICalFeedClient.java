@@ -61,6 +61,7 @@ import org.apache.http.HttpStatus;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpHead;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.utils.DateUtils;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -76,6 +77,7 @@ import com.openexchange.chronos.provider.ical.exception.ICalProviderExceptionCod
 import com.openexchange.chronos.provider.ical.osgi.Services;
 import com.openexchange.chronos.provider.ical.properties.ICalCalendarProviderProperties;
 import com.openexchange.chronos.provider.ical.result.GetResponse;
+import com.openexchange.chronos.provider.ical.result.GetResponseState;
 import com.openexchange.chronos.provider.ical.utils.ICalProviderUtils;
 import com.openexchange.config.ConfigTools;
 import com.openexchange.config.lean.LeanConfigurationService;
@@ -178,6 +180,31 @@ public class ICalFeedClient {
         }
     }
 
+    public boolean isFeedAvailable() throws OXException {
+        HttpHead request = new HttpHead(iCalFeedConfig.getFeedUrl());
+
+        CloseableHttpResponse response = null;
+        try {
+            response = ICalFeedHttpClient.getInstance().execute(request);
+
+            int statusCode = response.getStatusLine().getStatusCode();
+            if (statusCode == HttpStatus.SC_SERVICE_UNAVAILABLE || 
+                statusCode == HttpStatus.SC_NOT_FOUND) {
+                return false;
+            }
+        } catch (ClientProtocolException e) {
+            LOG.error("Error while processing the retrieved information:{}.", e.getMessage(), e);
+            throw ICalProviderExceptionCodes.CLIENT_PROTOCOL_ERROR.create(e.getMessage(), e);
+        } catch (IOException e) {
+            LOG.error("Error while processing the retrieved information:{}.", e.getMessage(), e);
+            throw ICalProviderExceptionCodes.IO_ERROR.create(e.getMessage(), e);
+        } finally {
+            close(request, response);
+            Streams.close(response);
+        }
+        return true;
+    }
+
     /**
      * Returns the calendar behind the given feed URL if available. If there is no update (based on etag and last modification header) the contained calendar will be <code>null</code>.
      * 
@@ -194,9 +221,10 @@ public class ICalFeedClient {
             int statusCode = assertStatusCode(response);
             if (statusCode == HttpStatus.SC_NOT_MODIFIED) {
                 // OK, nothing was modified, no response body, return as is
-                return new GetResponse(response.getStatusLine(), response.getAllHeaders());
+                return new GetResponse(GetResponseState.NOT_MODIFIED, response.getAllHeaders());
+            } else if (statusCode == HttpStatus.SC_SERVICE_UNAVAILABLE) {
+                return new GetResponse(GetResponseState.REMOVED, response.getAllHeaders());
             }
-
             // Prepare the response
             return prepareResponse(response);
         } catch (ClientProtocolException e) {
@@ -211,8 +239,8 @@ public class ICalFeedClient {
         }
     }
 
-    private GetResponse prepareResponse(HttpResponse httpResponse) throws IOException, OXException {
-        GetResponse response = new GetResponse(httpResponse.getStatusLine(), httpResponse.getAllHeaders());
+    private GetResponse prepareResponse(HttpResponse httpResponse) throws OXException {
+        GetResponse response = new GetResponse(GetResponseState.MODIFIED, httpResponse.getAllHeaders());
 
         HttpEntity entity = httpResponse.getEntity();
         if (entity == null) {
@@ -252,7 +280,8 @@ public class ICalFeedClient {
             case 500:
                 throw ICalProviderExceptionCodes.REMOTE_INTERNAL_SERVER_ERROR.create(httpResponse.getStatusLine().getReasonPhrase());
             case 503:
-                throw ICalProviderExceptionCodes.REMOTE_SERVICE_UNAVAILABLE.create(httpResponse.getStatusLine().getReasonPhrase());
+                LOG.info("The previously existing feed '{}' seems to be removed.", iCalFeedConfig.getFeedUrl());
+                return statusCode;
         }
         if (statusCode >= 500 && statusCode <= 599) {
             throw ICalProviderExceptionCodes.REMOTE_SERVER_ERROR.create(httpResponse.getStatusLine());
