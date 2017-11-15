@@ -335,20 +335,6 @@ public class CachingCalendarAccessTest {
     }
 
     @Test
-    public void testGetLatestUpdateStates_folderConfigNullAndProviderIntervalTooSmall_useDefaultOneDay() {
-        long cascadedRefreshInterval = cachingCalendarAccess.getCascadedRefreshInterval("0", null);
-
-        assertEquals(TimeUnit.DAYS.toMinutes(1L), cascadedRefreshInterval);
-    }
-
-    @Test
-    public void testGetLatestUpdateStates_folderConfigEmptyAndProviderIntervalTooSmall_useDefaultOneDay() {
-        long cascadedRefreshInterval = cachingCalendarAccess.getCascadedRefreshInterval("0", cachingConfigMap);
-
-        assertEquals(TimeUnit.DAYS.toMinutes(1L), cascadedRefreshInterval);
-    }
-
-    @Test
     public void testGetLatestUpdateStates_folderConfigNullAndProviderIntervalBiggerThanOneDay_useFromProvider() throws OXException {
         final long refreshInterval = 600000;
         cachingCalendarAccess = new TestCachingCalendarAccessImpl(session, account, parameters) {
@@ -358,7 +344,7 @@ public class CachingCalendarAccessTest {
                 return refreshInterval;
             }
         };
-        long cascadedRefreshInterval = cachingCalendarAccess.getCascadedRefreshInterval("0", null);
+        long cascadedRefreshInterval = cachingCalendarAccess.getCascadedRefreshInterval("0");
 
         assertEquals(refreshInterval, cascadedRefreshInterval);
     }
@@ -373,20 +359,8 @@ public class CachingCalendarAccessTest {
                 return refreshInterval;
             }
         };
-        long cascadedRefreshInterval = cachingCalendarAccess.getCascadedRefreshInterval("0", cachingConfigMap);
+        long cascadedRefreshInterval = cachingCalendarAccess.getCascadedRefreshInterval("0");
 
         assertEquals(refreshInterval, cascadedRefreshInterval);
     }
-
-    @Test
-    public void testGetLatestUpdateStates_folderConfigWithRefreshAvailable_useFromFolderConfig() {
-        Map<String, Object> folderConfig = new HashMap<>();
-        long refreshIntervalFromFeed = 10L;
-        folderConfig.put(CachingCalendarAccess.REFRESH_INTERVAL, refreshIntervalFromFeed);
-
-        long cascadedRefreshInterval = cachingCalendarAccess.getCascadedRefreshInterval("0", folderConfig);
-
-        assertEquals(refreshIntervalFromFeed, cascadedRefreshInterval);
-    }
-
 }

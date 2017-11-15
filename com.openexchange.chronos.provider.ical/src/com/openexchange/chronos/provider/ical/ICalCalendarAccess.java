@@ -119,9 +119,13 @@ public class ICalCalendarAccess extends SingleFolderCachingCalendarAccess {
 
     @Override
     public long getRefreshInterval() {
-        long refreshInterval = getICalConfiguration().optLong(REFRESH_INTERVAL, 0);
-        if (refreshInterval > 0) {
-            return refreshInterval;
+        JSONObject iCalConfiguration = getICalConfiguration();
+        
+        if (iCalConfiguration != null && !iCalConfiguration.isEmpty()) {
+            Number calendarProviderInterval = (Number) iCalConfiguration.opt(ICalCalendarConstants.REFRESH_INTERVAL);
+            if (calendarProviderInterval != null && calendarProviderInterval.longValue() > 0) {
+                return calendarProviderInterval.longValue();
+            }
         }
         return Services.getService(LeanConfigurationService.class).getLongProperty(getSession().getUserId(), getSession().getContextId(), ICalCalendarProviderProperties.refreshInterval);
     }
@@ -209,7 +213,7 @@ public class ICalCalendarAccess extends SingleFolderCachingCalendarAccess {
     }
 
     private void setRefreshInterval(GetResponse importResult, JSONObject iCalConfig) {
-        long persistedInterval = iCalConfig.optLong(REFRESH_INTERVAL, 0);
+        long persistedInterval = iCalConfig.optLong(ICalCalendarConstants.REFRESH_INTERVAL, 0);
         String refreshInterval = importResult.getRefreshInterval();
 
         if (Strings.isNotEmpty(refreshInterval)) {
@@ -217,13 +221,13 @@ public class ICalCalendarAccess extends SingleFolderCachingCalendarAccess {
                 Duration duration = org.dmfs.rfc5545.Duration.parse(refreshInterval);
                 long refreshIntervalFromFeed = TimeUnit.MILLISECONDS.toMinutes(duration.toMillis());
                 if (0 == persistedInterval || persistedInterval != refreshIntervalFromFeed) {
-                    iCalConfig.putSafe(REFRESH_INTERVAL, refreshIntervalFromFeed);
+                    iCalConfig.putSafe(ICalCalendarConstants.REFRESH_INTERVAL, refreshIntervalFromFeed);
                 }
             } catch (IllegalArgumentException e) {
                 LOG.error("Unable to parse and persist calendars refresh interval {}.", refreshInterval, e);
             }
         } else if (persistedInterval != 0) { // maybe deleted from ics in the meantime
-            iCalConfig.remove(REFRESH_INTERVAL);
+            iCalConfig.remove(ICalCalendarConstants.REFRESH_INTERVAL);
         }
     }
 

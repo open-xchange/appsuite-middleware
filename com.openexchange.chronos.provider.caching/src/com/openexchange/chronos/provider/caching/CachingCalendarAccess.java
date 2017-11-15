@@ -105,11 +105,6 @@ public abstract class CachingCalendarAccess implements WarningsAware {
      */
     protected static final String LAST_UPDATE = "lastUpdate";
 
-    /**
-     * The key for persisting the used refresh interval (if provided by the external folder). The interval should be persisted in minutes
-     */
-    protected static final String REFRESH_INTERVAL = "refreshInterval";
-
     private final ServerSession session;
     private final CalendarParameters parameters;
     private CalendarAccount account;
@@ -314,7 +309,7 @@ public abstract class CachingCalendarAccess implements WarningsAware {
             String folderId = folderUpdateState.getKey();
             Map<String, Object> folderConfig = (Map<String, Object>) folderUpdateState.getValue();
             Number lastFolderUpdate = (Number) folderConfig.get(LAST_UPDATE);
-            long refreshInterval = getCascadedRefreshInterval(folderId, folderConfig);
+            long refreshInterval = getCascadedRefreshInterval(folderId);
 
             if (lastFolderUpdate == null || lastFolderUpdate.longValue() < 0) {
                 currentStates.add(new FolderUpdateState(folderId, 0, refreshInterval, FolderProcessingType.INITIAL_INSERT));
@@ -331,16 +326,10 @@ public abstract class CachingCalendarAccess implements WarningsAware {
         return currentStates;
     }
 
-    protected long getCascadedRefreshInterval(String folderId, Map<String, Object> folderConfig) {
-        if (folderConfig != null && !folderConfig.isEmpty()) {
-            Number calendarProviderInterval = (Number) folderConfig.get(REFRESH_INTERVAL);
-            if (calendarProviderInterval != null) {
-                return calendarProviderInterval.longValue();
-            }
-        }
+    protected long getCascadedRefreshInterval(String folderId) {
         try {
             long providerRefreshInterval = getRefreshInterval(folderId);
-            if (providerRefreshInterval > TimeUnit.DAYS.toMinutes(1L)) {
+            if (providerRefreshInterval > 0) {
                 return providerRefreshInterval;
             }
         } catch (OXException e) {
