@@ -174,7 +174,7 @@ public class DefaultNotificationParticipantResolver implements NotificationParti
         for (final User u : participantUsers) {
             final int id = u.getId();
             Attendee userParticipant = userIds.get(I(id));
-            final String mail = CalendarUtils.getResponseMail(userParticipant, u.getMail());
+            final String mail = CalendarUtils.getResponseMail(userParticipant, u);
 
             final Set<ITipRole> roles = EnumSet.noneOf(ITipRole.class);
 

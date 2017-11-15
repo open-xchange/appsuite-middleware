@@ -105,6 +105,8 @@ import com.openexchange.chronos.service.SortOrder;
 import com.openexchange.chronos.service.TimestampedResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXException.ProblematicAttribute;
+import com.openexchange.groupware.alias.UserAliasUtility;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.tools.mappings.Mapping;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.TimeZones;
@@ -1602,10 +1604,10 @@ public class CalendarUtils {
      * 
      * @param attendee The attendee to get the mail address from
      * @param defaultMail A default mail address if the address can't be received by the attendee data
-     * @return The mail address as {@link String}
+     * @return The mail address to response to as {@link String}
      */
     public static String getResponseMail(Attendee attendee, String defaultMail) {
-        if (null == attendee) {
+        if (null == attendee || false == isInternal(attendee)) {
             // Nothing to do ..
             return defaultMail;
         }
@@ -1625,5 +1627,20 @@ public class CalendarUtils {
         }
         return attendee.containsEMail() ? attendee.getEMail() : defaultMail;
     }
-
+    
+    /**
+     * Get the mail address of an attendee. If the attendee was invited with an alias the alias is returned, otherwise the mail address
+     * stored in the attendee or the mail address of the user is returned.
+     * 
+     * @param attendee The attendee to get the mail address from
+     * @param user The user to get the aliases from
+     * @return The mail address to response to as {@link String}
+     */
+    public static String getResponseMail(Attendee attendee, User user) {
+        String alias = getResponseMail(attendee, user.getMail());
+        if (UserAliasUtility.isAlias(alias, user)) {
+            return alias;
+        }
+        return attendee.containsEMail() ? attendee.getEMail() : user.getMail();
+    }
 }

@@ -51,6 +51,7 @@ package com.openexchange.groupware.alias;
 
 import java.util.Collection;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.java.Strings;
 
 /**
  * {@link UserAliasUtility} - Utility class to handle alias specific checks. Checks are done <b>case insensitive</b>
@@ -73,9 +74,10 @@ public final class UserAliasUtility {
      * @see <a href="https://tools.ietf.org/html/rfc5321#section-2.4">RFC 5321</a>
      */
     public static boolean isAlias(String possibleAlias, User user) {
-        String[] aliases = user.getAliases();
-        for (int i = 0; i < aliases.length; i++) {
-            String alias = aliases[i];
+        if (Strings.isEmpty(possibleAlias)) {
+            return false;
+        }
+        for (String alias : user.getAliases()) {
             if (alias.equalsIgnoreCase(possibleAlias)) {
                 return true;
             }
