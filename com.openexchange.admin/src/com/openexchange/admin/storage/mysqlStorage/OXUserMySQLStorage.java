@@ -3738,12 +3738,12 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         try {
             FolderCacheManager cache = FolderCacheManager.getInstance();
             List<Pair<Integer, String>> folderIds = prepareFolders(contextId, userId, con);
-            Date now = new Date();
+            long now = System.currentTimeMillis();
             StringBuilder sb = new StringBuilder("UPDATE oxfolder_tree SET default_flag = 0, type = 2, fname = ?, changing_date = ? WHERE cid = ? AND fuid = ?");
             stmt = con.prepareStatement(sb.toString());
             for (Pair<Integer, String> pair : folderIds) {
                 stmt.setString(1, pair.getSecond());
-                stmt.setLong(2, now.getTime());
+                stmt.setLong(2, now);
                 stmt.setInt(3, contextId);
                 stmt.setInt(4, pair.getFirst());
                 stmt.addBatch();

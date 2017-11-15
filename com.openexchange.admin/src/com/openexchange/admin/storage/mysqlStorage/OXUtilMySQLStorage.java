@@ -1641,9 +1641,15 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                 prep = null;
 
                 prep = con.prepareStatement("UPDATE db_cluster SET read_db_pool_id=? WHERE cluster_id=?;");
-
                 prep.setInt(1, databaseId);
                 prep.setInt(2, cluster_id);
+                prep.executeUpdate();
+                prep.close();
+                prep = null;
+                
+                prep = con.prepareStatement("UPDATE context_server2db_pool SET read_db_pool_id = ? WHERE write_db_pool_id = ?");
+                prep.setInt(1, databaseId);
+                prep.setInt(2, db.getMasterId().intValue());
                 prep.executeUpdate();
                 prep.close();
                 prep = null;
@@ -2648,7 +2654,13 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                     stmt = null;
                 }
             } else {
-                stmt = con.prepareStatement("UPDATE db_cluster SET read_db_pool_id=0 WHERE read_db_pool_id=?");
+                stmt = con.prepareStatement("UPDATE context_server2db_pool SET read_db_pool_id = write_db_pool_id  WHERE read_db_pool_id = ?");
+                stmt.setInt(1, dbId);
+                stmt.executeUpdate();
+                closeSQLStuff(stmt);
+                stmt = null;
+
+                stmt = con.prepareStatement("UPDATE db_cluster SET read_db_pool_id = write_db_pool_id WHERE read_db_pool_id=?");
                 stmt.setInt(1, dbId);
                 stmt.executeUpdate();
                 closeSQLStuff(stmt);

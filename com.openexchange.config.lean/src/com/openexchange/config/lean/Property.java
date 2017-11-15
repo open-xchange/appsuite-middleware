@@ -81,7 +81,7 @@ public interface Property {
     default String getFQPropertyName(Map<String, String> optionals) {
         String fqn = getFQPropertyName();
 
-        if (null == optionals || !optionals.isEmpty() || !fqn.contains("[")) {
+        if (null == optionals || optionals.isEmpty() || !fqn.contains("[")) {
             // No need to change anything
             return fqn;
         }

@@ -51,12 +51,14 @@ package com.openexchange.mail.parser;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
@@ -349,7 +351,18 @@ public final class MailMessageParser {
             if (contentType.startsWith("multipart/related") && ("application/smil".equals(Strings.asciiLowerCase(contentType.getParameter("type"))))) {
                 parseMailContent(MimeSmilFixer.getInstance().process(mail), handler, prefix, 1);
             } else {
-                parseMailContent(mail, handler, prefix, 1);
+                try {
+                    parseMailContent(mail, handler, prefix, 1);
+                } catch (InvalidMultipartException x) {
+                    final String mailId = mail.getMailId();
+                    final String folder = mail.getFolder();
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug("Invalid multipart detected ''{}'' ({}-{}-{}):{}{}", x.getMessage(),  null == mailId ? "" : mailId, null == folder ? "" : folder, mail.getAccountId(), System.getProperty("line.separator"), mail.getSource());
+                    }
+                    MimeMessage mimeMessage = cloneMessage(mail, mail.getReceivedDate());
+                    MailMessage reparsedMail = MimeMessageConverter.convertMessage(mimeMessage, false);
+                    parseMailContent(reparsedMail, handler, prefix, 1);
+                }
             }
         } catch (MaxBytesExceededIOException e) {
             final String mailId = mail.getMailId();
@@ -419,6 +432,10 @@ public final class MailMessageParser {
                 if (count == -1) {
                     throw MailExceptionCode.INVALID_MULTIPART_CONTENT.create();
                 }
+                if ((mailPart instanceof MimeMailPart) && ((MimeMailPart) mailPart).isEmptyStringMultipart()) {
+                    // Need to reparse...
+                    throw new InvalidMultipartException("Multipart initialized from an empty string");
+                }
                 final String mpId = null == prefix && !multipartDetected ? "" : getSequenceId(prefix, partCount);
                 if (!mailPart.containsSequenceId()) {
                     mailPart.setSequenceId(mpId);
@@ -442,6 +459,8 @@ public final class MailMessageParser {
                     stop = true;
                     return;
                 }
+            } catch (InvalidMultipartException impe) {
+                throw impe;
             } catch (final RuntimeException rte) {
                 /*
                  * Parsing of multipart mail failed fatally; treat as empty plain-text mail
@@ -1363,4 +1382,49 @@ public final class MailMessageParser {
         }
     }
 
+    private static MimeMessage cloneMessage(MailMessage original, final Date optReceivedDate) throws OXException {
+        ThresholdFileHolder sink = new ThresholdFileHolder();
+        boolean closeSink = true;
+        try {
+            original.writeTo(sink.asOutputStream());
+
+            File tempFile = sink.getTempFile();
+            MimeMessage tmp;
+            if (null == tempFile) {
+                tmp = new MimeMessage(MimeDefaultSession.getDefaultSession(), sink.getStream()) {
+
+                    @Override
+                    public Date getReceivedDate() throws MessagingException {
+                        return null == optReceivedDate ? super.getReceivedDate() : optReceivedDate;
+                    }
+                };
+            } else {
+                tmp = new FileBackedMimeMessage(MimeDefaultSession.getDefaultSession(), tempFile, optReceivedDate);
+            }
+            closeSink = false;
+            return tmp;
+        } catch (MessagingException e) {
+            throw MimeMailException.handleMessagingException(e);
+        } catch (IOException e) {
+            throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
+        } catch (RuntimeException e) {
+            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } finally {
+            if (closeSink) {
+                sink.close();
+            }
+        }
+    }
+
+    private static final class InvalidMultipartException extends RuntimeException {
+
+        private static final long serialVersionUID = 5137217089059034971L;
+
+        /**
+         * Initializes a new {@link MailMessageParser.InvalidMultipartException}.
+         */
+        InvalidMultipartException(String message) {
+            super(message);
+        }
+    }
 }

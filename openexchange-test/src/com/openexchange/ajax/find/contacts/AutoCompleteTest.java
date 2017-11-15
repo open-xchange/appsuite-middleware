@@ -62,11 +62,11 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.java.util.TimeZones;
 
 /**
- * {@link AutocompleteTest}
+ * {@link AutoCompleteTest}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class AutocompleteTest extends ContactsFindTest {
+public class AutoCompleteTest extends ContactsFindTest {
 
     @Test
     public void testAutocompleteCurrentUser() throws Exception {

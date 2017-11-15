@@ -248,11 +248,11 @@ This has been done to get less overhead and speak with the corresponding JMX-bea
 
 | Key   											| Default value                 | Comment																												|
 |:--------------------------------------------------|:------------------------------|:----------------------------------------------------------------------------------------------------------------------|
-| [com.openexchange.jolokia.start](http://documentation.open-xchange.com/components/middleware/config/{{version}}/index.html#com.openexchange.jolokia.start) | false | start switch for jolokia	|
-| [com.openexchange.jolokia.servlet.name](http://documentation.open-xchange.com/components/middleware/config/{{version}}/index.html#com.openexchange.jolokia.servlet.name) | /monitoring/jolokia | Under what servlet name jolokia will be published, please bear in mind that this should not be forwarded by apache and kept internal	|
-| [com.openexchange.jolokia.user](http://documentation.open-xchange.com/components/middleware/config/{{version}}/index.html#com.openexchange.jolokia.user)|| User used for authentication with HTTP Basic Authentication. If not given, Jolokia will not start!	|
-| [com.openexchange.jolokia.password](http://documentation.open-xchange.com/components/middleware/config/{{version}}/index.html#com.openexchange.jolokia.password) || Password used for authentification, if not set "secret" is used.|
-| [com.openexchange.jolokia.restrict.to.localhost](http://documentation.open-xchange.com/components/middleware/config/{{version}}/index.html#com.openexchange.jolokia.restrict.to.localhost) | true | This setting will restrict jolokia access to localhost. It is completly ignored when a jolokia-access.xml is present	|
+| [com.openexchange.jolokia.start](/components/middleware/config{{ site.baseurl }}/index.html#com.openexchange.jolokia.start) | false | start switch for jolokia	|
+| [com.openexchange.jolokia.servlet.name](/components/middleware/config{{ site.baseurl }}/index.html#com.openexchange.jolokia.servlet.name) | /monitoring/jolokia | Under what servlet name jolokia will be published, please bear in mind that this should not be forwarded by apache and kept internal	|
+| [com.openexchange.jolokia.user](/components/middleware/config{{ site.baseurl }}/index.html#com.openexchange.jolokia.user)|| User used for authentication with HTTP Basic Authentication. If not given, Jolokia will not start!	|
+| [com.openexchange.jolokia.password](/components/middleware/config{{ site.baseurl }}/index.html#com.openexchange.jolokia.password) || Password used for authentification, if not set "secret" is used.|
+| [com.openexchange.jolokia.restrict.to.localhost](/components/middleware/config{{ site.baseurl }}/index.html#com.openexchange.jolokia.restrict.to.localhost) | true | This setting will restrict jolokia access to localhost. It is completly ignored when a jolokia-access.xml is present	|
 
 
 Keep in mind that Jolokia will not start unless you set 

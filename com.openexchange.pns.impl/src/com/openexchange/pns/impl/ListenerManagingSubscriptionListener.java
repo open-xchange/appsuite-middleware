@@ -49,6 +49,7 @@
 
 package com.openexchange.pns.impl;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.Iterator;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
@@ -71,6 +72,8 @@ import com.openexchange.sessiond.SessiondService;
  * @since v7.8.3
  */
 public class ListenerManagingSubscriptionListener implements PushSubscriptionListener {
+
+    private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(ListenerManagingSubscriptionListener.class);
 
     private final PushListenerService pushListenerService;
     private final SessiondService sessiond;
@@ -95,8 +98,9 @@ public class ListenerManagingSubscriptionListener implements PushSubscriptionLis
     @Override
     public void addedSubscription(PushSubscription subscription) throws OXException {
         boolean interestedInNewMail = false;
+        String newMailTopic = KnownTopic.MAIL_NEW.getName();
         for (Iterator<Interest> interests = Interest.interestsFor(subscription.getTopics()).iterator(); !interestedInNewMail && interests.hasNext();) {
-            if (interests.next().isInterestedIn(KnownTopic.MAIL_NEW.getName())) {
+            if (interests.next().isInterestedIn(newMailTopic)) {
                 // Found interest for "ox:mail:new"
                 interestedInNewMail = true;
             }
@@ -116,7 +120,10 @@ public class ListenerManagingSubscriptionListener implements PushSubscriptionLis
                 return;
             }
 
-            pushListenerService.registerPermanentListenerFor(session, subscription.getClient());
+            boolean registered = pushListenerService.registerPermanentListenerFor(session, subscription.getClient());
+            if (registered) {
+                LOGGER.info("Successfully registered a permanent (mail) push listener for subscription interested in topic {} for client {} from user {} in context {}", newMailTopic, subscription.getClient(), I(session.getUserId()), I(session.getContextId()));
+            }
         }
     }
 

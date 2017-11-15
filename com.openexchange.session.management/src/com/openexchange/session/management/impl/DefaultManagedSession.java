@@ -107,35 +107,25 @@ public class DefaultManagedSession implements ManagedSession {
         }
 
         private static long parseLoginTime(Session session) {
-            Object oLoginTime = session.getParameter(Session.PARAM_LOGIN_TIME);
-            if (null == oLoginTime) {
-                return 0L;
-            }
-
-            if (oLoginTime instanceof Number) {
-                return ((Number) oLoginTime).longValue();
-            }
-
-            try {
-                return Long.parseLong(oLoginTime.toString());
-            } catch (NumberFormatException e) {
-                // Cannot be parsed to a long value
-                return 0L;
-            }
+            return parseLongNumber(Session.PARAM_LOGIN_TIME, session);
         }
 
         private static long parseLastActive(Session session) {
-            Object oLastActive = session.getParameter(Session.PARAM_LAST_ACTIVE);
-            if (null == oLastActive) {
+            return parseLongNumber(Session.PARAM_LAST_ACTIVE, session);
+        }
+
+        private static long parseLongNumber(String paramName, Session session) {
+            Object oNumber = session.getParameter(paramName);
+            if (null == oNumber) {
                 return 0L;
             }
 
-            if (oLastActive instanceof Number) {
-                return ((Number) oLastActive).longValue();
+            if (oNumber instanceof Number) {
+                return ((Number) oNumber).longValue();
             }
 
             try {
-                return Long.parseLong(oLastActive.toString());
+                return Long.parseLong(oNumber.toString());
             } catch (NumberFormatException e) {
                 // Cannot be parsed to a long value
                 return 0L;

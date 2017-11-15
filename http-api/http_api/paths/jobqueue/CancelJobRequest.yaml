@@ -2,7 +2,7 @@
   get:
     operationId: cancelJob
     tags:
-      - jobqueue
+      - Jobqueue
     summary: Cancels a certain job held in job queue
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"

@@ -143,6 +143,8 @@ Bundle-ClassPath: .,
  lib/commons-validator-1.4.0.jar
 Export-Package: com.googlecode.concurrentlinkedhashmap,
  com.mysql.jdbc;version="5.1.30",
+ com.mysql.jdbc.exceptions,
+ com.mysql.jdbc.exceptions.jdbc4,
  com.openexchange.l10n,
  com.planetj.math.rabinhash,
  com.steadystate.css.dom,

@@ -466,10 +466,7 @@ public class TransformImageAction implements IFileResponseRendererAction {
                             if (null != message) {
                                 if ("Unsupported Image Type".equals(message) || message.indexOf("No image reader available for format") >= 0) {
                                     resultFile = repetitiveFile;
-
-                                    if (LOG.isWarnEnabled()) {
-                                        LOG.warn("Unable to transform image from {}", repetitiveFile.getName());
-                                    }
+                                    return resultFile;
                                 }
                             }
 

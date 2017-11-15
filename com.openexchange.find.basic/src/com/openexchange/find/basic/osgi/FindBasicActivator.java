@@ -89,6 +89,7 @@ import com.openexchange.threadpool.ThreadPoolService;
  */
 public class FindBasicActivator extends HousekeepingActivator {
 
+    //@formatter:off
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] { ContactService.class, FolderService.class, MailService.class,
@@ -98,6 +99,7 @@ public class FindBasicActivator extends HousekeepingActivator {
             IDBasedCalendarAccessFactory.class, RecurrenceService.class, LeanConfigurationService.class
         };
     }
+    //@formatter:on
 
     @Override
     protected void startBundle() throws Exception {

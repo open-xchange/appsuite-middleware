@@ -50,7 +50,6 @@
 package com.openexchange.ajax.requesthandler.responseRenderers.actions;
 
 import static org.apache.commons.lang.StringUtils.isNotEmpty;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -207,16 +206,18 @@ public class TransformImageClientAction extends TransformImageAction {
                 if (null != srcImageStm) {
                     try (final InputStream resultImageStm = m_imageClient.cacheAndGetImage(cacheKey, xformParams.getFormatString(), srcImageStm, getContextIdString(session))) {
                         if (null != resultImageStm) {
+                            final ThresholdFileHolder imageData = new ThresholdFileHolder();
+                            imageData.write(resultImageStm);
+                            imageData.setContentType(xformParams.getImageMimeType());
+                            imageData.setName(cacheKey);
                             ret = new BasicTransformedImage() {
-
-                                final private byte[] imageData = IOUtils.toByteArray(resultImageStm);
 
                                 /**
                                  * @return
                                  */
                                 @Override
                                 public long getSize() {
-                                    return imageData.length;
+                                    return imageData.getLength();
                                 }
 
                                 /**
@@ -233,7 +234,7 @@ public class TransformImageClientAction extends TransformImageAction {
                                  */
                                 @Override
                                 public byte[] getImageData() throws OXException {
-                                    return imageData;
+                                    return imageData.toByteArray();
 
                                 }
 
@@ -243,7 +244,7 @@ public class TransformImageClientAction extends TransformImageAction {
                                  */
                                 @Override
                                 public InputStream getImageStream() throws OXException {
-                                    return new ByteArrayInputStream(imageData);
+                                    return imageData.getStream();
                                 }
 
                                 /**
@@ -251,7 +252,7 @@ public class TransformImageClientAction extends TransformImageAction {
                                  */
                                 @Override
                                 public IFileHolder getImageFile() {
-                                    return new FileHolder(new ByteArrayInputStream(imageData), getSize(), xformParams.getImageMimeType(), cacheKey);
+                                    return imageData;
                                 }
 
                                 /**
@@ -269,7 +270,7 @@ public class TransformImageClientAction extends TransformImageAction {
                                  */
                                 @Override
                                 public void close() {
-                                    // nothing to do here
+                                    imageData.close();
                                 }
                             };
                         }
@@ -291,5 +292,5 @@ public class TransformImageClientAction extends TransformImageAction {
 
     private IImageClient m_imageClient = null;
 
-    private AtomicBoolean m_clientStatusValid = new AtomicBoolean(false);
+    private final AtomicBoolean m_clientStatusValid = new AtomicBoolean(false);
 }

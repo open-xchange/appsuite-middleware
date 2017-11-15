@@ -253,5 +253,4 @@ public abstract class AbstractAPIClientSession {
         }
         newClient.setBasePath(protocol + "://" + hostname + "/ajax");
     }
-
 }
