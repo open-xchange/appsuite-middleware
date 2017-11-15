@@ -1128,37 +1128,38 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         if (null == sqlPattern || "%".equals(sqlPattern)) {
             cids = new ContextSearcher(cache, "SELECT cid FROM context ORDER BY cid", null).execute();
         } else {
+            ThreadPoolService threadPool;
+            try {
+                threadPool = AdminServiceRegistry.getInstance().getService(ThreadPoolService.class, true);
+            } catch (final OXException e) {
+                throw new StorageException(e.getMessage(), e);
+            }
+
+            List<ContextSearcher> searchers = new ArrayList<ContextSearcher>();
+            searchers.add(new ContextSearcher(cache, "SELECT cid FROM context WHERE name LIKE ?", sqlPattern));
+            searchers.add(new ContextSearcher(cache, "SELECT cid FROM login2context WHERE login_info LIKE ?", sqlPattern));
             try {
                 Integer.parseInt(sqlPattern);
-                cids = new ContextSearcher(cache, "SELECT cid FROM context WHERE cid = ?", sqlPattern).execute();
-            } catch (NumberFormatException nfe) {
+                searchers.add(new ContextSearcher(cache, "SELECT cid FROM context WHERE cid = ?", sqlPattern));
+            } catch (NumberFormatException e) {
                 // Ignore and do nothing, because we are not including that query to the searcher
                 // since the specified sqlPattern does not solely consists out of numbers.
-                ThreadPoolService threadPool;
-                try {
-                    threadPool = AdminServiceRegistry.getInstance().getService(ThreadPoolService.class, true);
-                } catch (final OXException e) {
-                    throw new StorageException(e.getMessage(), e);
-                }
-                List<ContextSearcher> searchers = new ArrayList<ContextSearcher>(4);
-                searchers.add(new ContextSearcher(cache, "SELECT cid FROM context WHERE name LIKE ?", sqlPattern));
-                searchers.add(new ContextSearcher(cache, "SELECT cid FROM login2context WHERE login_info LIKE ?", sqlPattern));
+            }
 
-                // Invoke & add into sorted set
-                CompletionFuture<Collection<Integer>> completion = threadPool.invoke(searchers);
-                cids = new TreeSet<Integer>();
-                try {
-                    for (int i = searchers.size(); i-- > 0;) {
-                        cids.addAll(completion.take().get());
-                    }
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                    throw new StorageException(e.getMessage(), e);
-                } catch (CancellationException e) {
-                    throw new StorageException(e.getMessage(), e);
-                } catch (ExecutionException e) {
-                    throw ThreadPools.launderThrowable(e, StorageException.class);
+            // Invoke & add into sorted set
+            CompletionFuture<Collection<Integer>> completion = threadPool.invoke(searchers);
+            cids = new TreeSet<Integer>();
+            try {
+                for (int i = searchers.size(); i-- > 0;) {
+                    cids.addAll(completion.take().get());
                 }
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw new StorageException(e.getMessage(), e);
+            } catch (CancellationException e) {
+                throw new StorageException(e.getMessage(), e);
+            } catch (ExecutionException e) {
+                throw ThreadPools.launderThrowable(e, StorageException.class);
             }
         }
 
