@@ -78,6 +78,7 @@ import com.openexchange.chronos.ExtendedProperty;
 import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.ResourceId;
 import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.common.mapping.AttendeeMapper;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.osgi.Services;
 import com.openexchange.chronos.service.CalendarResult;
@@ -93,6 +94,7 @@ import com.openexchange.groupware.alias.UserAliasUtility;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.tools.mappings.Mapping;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.TimeZones;
 import com.openexchange.objectusecount.BatchIncrementArguments;
@@ -542,27 +544,35 @@ public class DefaultEntityResolver implements EntityResolver {
             attendee.setCuType(CalendarUserType.INDIVIDUAL);
         }
         if (null == fields || Arrays.contains(fields, AttendeeField.CN)) {
-            if (attendee.containsCn()) {
-                extendedProperties.add(new ExtendedProperty(ExtendedProperty.CN, attendee.getCn()));
-            }
-            attendee.setCn(user.getDisplayName());
+            String displayName = user.getDisplayName();
+            addIfDifferent(AttendeeField.CN, attendee, displayName, extendedProperties, ExtendedProperty.CN);
+            attendee.setCn(displayName);
         }
         if (null == fields || Arrays.contains(fields, AttendeeField.URI)) {
-            if (attendee.containsUri()) {
-                extendedProperties.add(new ExtendedProperty(ExtendedProperty.URI, attendee.getUri()));
-            }
-            attendee.setUri(getCalAddress(user));
+            String uri = getCalAddress(user);
+            addIfDifferent(AttendeeField.URI, attendee, uri, extendedProperties, ExtendedProperty.URI);
+            attendee.setUri(uri);
         }
         if (null == fields || Arrays.contains(fields, AttendeeField.EMAIL)) {
-            if (attendee.containsEMail()) {
-                extendedProperties.add(new ExtendedProperty(ExtendedProperty.EMAIL, attendee.getEMail()));
-            }
-            attendee.setEMail(getEMail(user));
+            String mail = getEMail(user);
+            addIfDifferent(AttendeeField.EMAIL, attendee, mail, extendedProperties, ExtendedProperty.EMAIL);
+            attendee.setEMail(mail);
         }
         if (!extendedProperties.isEmpty()) {
             attendee.setExtendedProperties(extendedProperties);
         }
         return attendee;
+    }
+    
+    private void addIfDifferent(AttendeeField field, Attendee attendee, String compare, ExtendedProperties props, String propName) {
+        try {
+            Mapping<? extends Object, Attendee> mapping = AttendeeMapper.getInstance().get(field);
+            if (mapping.isSet(attendee) && false == compare.equals(mapping.get(attendee))) {
+                props.add(new ExtendedProperty(propName, (String) mapping.get(attendee)));
+            }
+        } catch (OXException e) {
+            LOG.debug("Couldn't get AttendeeField {}.", field.name(), e);
+        }
     }
 
     private Attendee applyEntityData(Attendee attendee, Group group, AttendeeField... fields) {

@@ -575,7 +575,7 @@ public class Attendee extends CalendarUser {
      * @return <code>true</code> if extended properties are set, <code>false</code>, otherwise
      */
     public boolean containsExtendedProperties() {
-        return setFields.contains(AttendeeField.EXTENDED_PROPERTIES);
+        return isSet(AttendeeField.EXTENDED_PROPERTIES);
     }
 
     @Override
