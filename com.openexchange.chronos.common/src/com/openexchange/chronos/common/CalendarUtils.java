@@ -1596,4 +1596,34 @@ public class CalendarUtils {
         return userAttendee.getFolderId();
     }
 
+    /**
+     * Get the mail address of an attendee. If the attendee was invited with an alias the alias is returned, otherwise the mail address
+     * stored in the attendee.
+     * 
+     * @param attendee The attendee to get the mail address from
+     * @param defaultMail A default mail address if the address can't be received by the attendee data
+     * @return The mail address as {@link String}
+     */
+    public static String getResponseMail(Attendee attendee, String defaultMail) {
+        if (null == attendee) {
+            // Nothing to do ..
+            return defaultMail;
+        }
+        if (attendee.containsExtendedProperties()) {
+            ExtendedProperties properties = attendee.getExtendedProperties();
+            if (properties.contains(ExtendedProperty.EMAIL)) {
+                // The mail address the attendee was invited by
+                return properties.get(ExtendedProperty.EMAIL).getValue();
+            }
+            if (properties.contains(ExtendedProperty.URI)) {
+                // Lookup if mail is encoded in URI
+                String value = properties.get(ExtendedProperty.URI).getValue();
+                if (value.startsWith("mailto:")) {
+                    return value.substring(7);
+                }
+            }
+        }
+        return attendee.containsEMail() ? attendee.getEMail() : defaultMail;
+    }
+
 }

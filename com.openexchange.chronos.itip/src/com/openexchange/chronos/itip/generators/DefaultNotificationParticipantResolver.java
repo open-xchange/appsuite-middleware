@@ -49,6 +49,8 @@
 
 package com.openexchange.chronos.itip.generators;
 
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.Coll2i;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumSet;
@@ -56,6 +58,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.TimeZone;
 import org.slf4j.Logger;
@@ -75,7 +78,6 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.java.Autoboxing;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.resource.Resource;
@@ -113,7 +115,7 @@ public class DefaultNotificationParticipantResolver implements NotificationParti
         final NotificationConfiguration defaultConfiguration = getDefaultConfiguration(user, ctx);
 
         final Map<Integer, Attendee> userIds = new HashMap<Integer, Attendee>();
-        final List<Attendee> externalParticipants = new ArrayList<>(appointment.getAttendees().size());
+        final List<Attendee> externalParticipants = new ArrayList<>();
         final Set<String> externalGuardian = new HashSet<String>();
 
         final Set<Integer> resourceIds = new HashSet<Integer>();
@@ -122,14 +124,14 @@ public class DefaultNotificationParticipantResolver implements NotificationParti
         if (participants != null) {
             for (final Attendee participant : participants) {
                 if (CalendarUtils.isInternalUser(participant)) {
-                    userIds.put(participant.getEntity(), participant);
+                    userIds.put(I(participant.getEntity()), participant);
                 } else if (CalendarUtils.isExternalUser(participant)) {
                     if (!externalGuardian.contains(participant.getEMail().toLowerCase())) {
                         externalParticipants.add(participant);
                         externalGuardian.add(participant.getEMail().toLowerCase());
                     }
                 } else if (participant.getCuType().equals(CalendarUserType.RESOURCE)) {
-                    resourceIds.add(participant.getEntity());
+                    resourceIds.add(I(participant.getEntity()));
                 }
             }
         }
@@ -140,8 +142,8 @@ public class DefaultNotificationParticipantResolver implements NotificationParti
             if (participants != null) {
                 for (Attendee participant : participants) {
                     if (CalendarUtils.isInternalUser(participant)) {
-                        if (!userIds.containsKey(participant.getEntity())) {
-                            userIds.put(participant.getEntity(), participant);
+                        if (!userIds.containsKey(I(participant.getEntity()))) {
+                            userIds.put(I(participant.getEntity()), participant);
                         }
                     } else if (CalendarUtils.isExternalUser(participant)) {
                         if (!externalGuardian.contains(participant.getEMail().toLowerCase())) {
@@ -153,7 +155,7 @@ public class DefaultNotificationParticipantResolver implements NotificationParti
             }
         }
 
-        final User[] participantUsers = userService.getUser(ctx, Autoboxing.Coll2i(userIds.keySet()));
+        final User[] participantUsers = userService.getUser(ctx, Coll2i(userIds.keySet()));
         String organizer = determineOrganizer(original, appointment, ctx);
         if (organizer.startsWith("mailto:")) {
             organizer = organizer.substring(7);
@@ -170,8 +172,9 @@ public class DefaultNotificationParticipantResolver implements NotificationParti
         CalendarUser principal = getPrincipal(session);
 
         for (final User u : participantUsers) {
-            final String mail = u.getMail();
             final int id = u.getId();
+            Attendee userParticipant = userIds.get(I(id));
+            final String mail = CalendarUtils.getResponseMail(userParticipant, u.getMail());
 
             final Set<ITipRole> roles = EnumSet.noneOf(ITipRole.class);
 
@@ -193,7 +196,6 @@ public class DefaultNotificationParticipantResolver implements NotificationParti
             participant.setDisplayName(u.getDisplayName());
             participant.setLocale(u.getLocale());
             participant.setTimezone(TimeZone.getTimeZone(u.getTimeZone()));
-            Attendee userParticipant = userIds.get(id);
             if (userParticipant != null) {
                 participant.setConfirmStatus(userParticipant.getPartStat());
                 participant.setComment(userParticipant.getComment());
@@ -428,16 +430,22 @@ public class DefaultNotificationParticipantResolver implements NotificationParti
     }
 
     private String determineOrganizer(Event original, Event appointment, final Context ctx) throws OXException {
-        Organizer organizer = appointment.getOrganizer();
-        if (organizer == null && original != null) {
+        final Organizer organizer;
+        if (appointment.getOrganizer() != null) {
+            organizer = appointment.getOrganizer();
+        } else {
             organizer = original.getOrganizer();
         }
         if (organizer == null) {
             final User owner = userService.getUser(appointment.getCreatedBy().getEntity(), ctx);
-            return organizer == null ? "unknown" : owner.getMail();
+            return owner == null ? "unknown" : owner.getMail();
         }
-
-        return organizer.getEMail().toLowerCase();
+        try {
+            return CalendarUtils.getResponseMail(appointment.getAttendees().stream().filter(a -> a.getEntity() == organizer.getEntity()).findFirst().get(), organizer.getEMail());
+        } catch (NoSuchElementException e) {
+            LOG.debug("Couldn't find the organizer in the attendees list.", e);
+        }
+        return organizer.getEMail();
     }
 
     @Override
