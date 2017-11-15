@@ -149,9 +149,10 @@ public class EntityProcessor {
         if (isInternal(attendee) && null != entityResolver) {
             Attendee savedAttendee = AttendeeMapper.getInstance().copy(attendee, null, (AttendeeField[]) null);
             savedAttendee.removeCn();
-            if (savedAttendee.containsUri()) {
-                ResourceId resourceId = new ResourceId(entityResolver.getContextID(), savedAttendee.getEntity(), savedAttendee.getCuType());
-                savedAttendee.setUri(resourceId.getURI());
+            ResourceId resourceId = new ResourceId(entityResolver.getContextID(), savedAttendee.getEntity(), savedAttendee.getCuType());
+            savedAttendee.setUri(resourceId.getURI());
+            if (attendee.containsExtendedProperties()) {
+                savedAttendee.setExtendedProperties(attendee.getExtendedProperties());
             }
             return savedAttendee;
         }

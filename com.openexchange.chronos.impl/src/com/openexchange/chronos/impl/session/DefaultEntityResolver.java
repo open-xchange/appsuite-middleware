@@ -73,6 +73,8 @@ import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.CalendarUserType;
+import com.openexchange.chronos.ExtendedProperties;
+import com.openexchange.chronos.ExtendedProperty;
 import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.ResourceId;
 import com.openexchange.chronos.common.CalendarUtils;
@@ -532,6 +534,7 @@ public class DefaultEntityResolver implements EntityResolver {
     }
 
     private Attendee applyEntityData(Attendee attendee, User user, AttendeeField... fields) {
+        ExtendedProperties extendedProperties = new ExtendedProperties();
         if (null == fields || Arrays.contains(fields, AttendeeField.ENTITY)) {
             attendee.setEntity(user.getId());
         }
@@ -539,13 +542,25 @@ public class DefaultEntityResolver implements EntityResolver {
             attendee.setCuType(CalendarUserType.INDIVIDUAL);
         }
         if (null == fields || Arrays.contains(fields, AttendeeField.CN)) {
+            if (attendee.containsCn()) {
+                extendedProperties.add(new ExtendedProperty(ExtendedProperty.CN, attendee.getCn()));
+            }
             attendee.setCn(user.getDisplayName());
         }
         if (null == fields || Arrays.contains(fields, AttendeeField.URI)) {
+            if (attendee.containsUri()) {
+                extendedProperties.add(new ExtendedProperty(ExtendedProperty.URI, attendee.getUri()));
+            }
             attendee.setUri(getCalAddress(user));
         }
         if (null == fields || Arrays.contains(fields, AttendeeField.EMAIL)) {
+            if (attendee.containsEMail()) {
+                extendedProperties.add(new ExtendedProperty(ExtendedProperty.EMAIL, attendee.getEMail()));
+            }
             attendee.setEMail(getEMail(user));
+        }
+        if (!extendedProperties.isEmpty()) {
+            attendee.setExtendedProperties(extendedProperties);
         }
         return attendee;
     }

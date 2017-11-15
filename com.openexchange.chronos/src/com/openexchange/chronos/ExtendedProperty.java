@@ -58,6 +58,10 @@ import java.util.List;
  * @since v7.10.0
  */
 public class ExtendedProperty {
+    
+    public final static String CN = "original_cn";
+    public final static String EMAIL = "original_email";
+    public final static String URI = "original_uri";
 
     private final String name;
     private final String value;
