@@ -126,9 +126,9 @@ public class DefaultNotificationParticipantResolver implements NotificationParti
                 if (CalendarUtils.isInternalUser(participant)) {
                     userIds.put(I(participant.getEntity()), participant);
                 } else if (CalendarUtils.isExternalUser(participant)) {
-                    if (!externalGuardian.contains(participant.getEMail().toLowerCase())) {
+                    if (!externalGuardian.contains(participant.getEMail())) {
                         externalParticipants.add(participant);
-                        externalGuardian.add(participant.getEMail().toLowerCase());
+                        externalGuardian.add(participant.getEMail());
                     }
                 } else if (participant.getCuType().equals(CalendarUserType.RESOURCE)) {
                     resourceIds.add(I(participant.getEntity()));
@@ -146,9 +146,9 @@ public class DefaultNotificationParticipantResolver implements NotificationParti
                             userIds.put(I(participant.getEntity()), participant);
                         }
                     } else if (CalendarUtils.isExternalUser(participant)) {
-                        if (!externalGuardian.contains(participant.getEMail().toLowerCase())) {
+                        if (!externalGuardian.contains(participant.getEMail())) {
                             externalParticipants.add(participant);
-                            externalGuardian.add(participant.getEMail().toLowerCase());
+                            externalGuardian.add(participant.getEMail());
                         }
                     }
                 }
