@@ -1164,13 +1164,14 @@ msgid "The feed URI does not match the standard."
 msgstr ""
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:67
-msgid "Cannot connect to feed with URL: %1$s. Please change URL and try again."
+msgid ""
+"Cannot connect to feed with URL: %1$s. Please change the URL and try again."
 msgstr ""
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:69
 msgid ""
-"The provided URL %1$s does not contain an ICal feed. Please change URL and "
-"try again."
+"The provided URL %1$s does not contain content as expected. Please change "
+"the URL and try again."
 msgstr ""
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:71
@@ -1181,6 +1182,24 @@ msgstr ""
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:73
 msgid "Unfortunately the given feed URL cannot be processed as expected."
+msgstr ""
+
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:75
+msgid ""
+"The remote service is unavailable at the moment. There is nothing we can do "
+"about it. Please try again later."
+msgstr ""
+
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:77
+msgid ""
+"An internal server error occurred on the feed provider side. There is "
+"nothing we can do about it."
+msgstr ""
+
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:79
+msgid ""
+"A remote server error occurred on the feed provider side. There is nothing "
+"we can do about it."
 msgstr ""
 
 #. *
