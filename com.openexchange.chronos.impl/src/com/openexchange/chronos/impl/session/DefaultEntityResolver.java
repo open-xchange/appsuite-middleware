@@ -90,10 +90,10 @@ import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.group.Group;
 import com.openexchange.group.GroupService;
-import com.openexchange.groupware.alias.UserAliasUtility;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.tools.alias.UserAliasUtility;
 import com.openexchange.groupware.tools.mappings.Mapping;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.TimeZones;
@@ -704,7 +704,7 @@ public class DefaultEntityResolver implements EntityResolver {
          */
         String mail = extractEMailAddress(uri);
         for (User knownUser : knownUsers.values()) {
-            if (mail.equals(getEMail(knownUser)) || considerAliases && UserAliasUtility.isAlias(mail, knownUser)) {
+            if (mail.equals(getEMail(knownUser)) || considerAliases && UserAliasUtility.isAlias(mail, knownUser.getAliases())) {
                 return new ResourceId(context.getContextId(), knownUser.getId(), CalendarUserType.INDIVIDUAL);
             }
         }
