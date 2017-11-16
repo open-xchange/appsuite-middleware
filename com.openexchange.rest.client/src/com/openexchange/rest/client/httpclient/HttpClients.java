@@ -90,6 +90,7 @@ import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.apache.http.params.HttpProtocolParams;
+import org.apache.http.pool.PoolStats;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
@@ -586,7 +587,8 @@ public final class HttpClients {
             try {
                 manager.closeExpiredConnections();
                 manager.closeIdleConnections(idleTimeoutSeconds, TimeUnit.SECONDS);
-                if (manager.getTotalStats().getLeased() == 0) {
+                PoolStats totalStats = manager.getTotalStats();
+                if (totalStats.getLeased() == 0 && totalStats.getPending() == 0  && totalStats.getAvailable() == 0) {
                     stop();
                 }
             } catch (final Exception e) {
