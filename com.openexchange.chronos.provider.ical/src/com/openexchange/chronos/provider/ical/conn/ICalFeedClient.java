@@ -79,7 +79,6 @@ import com.openexchange.chronos.provider.ical.properties.ICalCalendarProviderPro
 import com.openexchange.chronos.provider.ical.result.GetResponse;
 import com.openexchange.chronos.provider.ical.result.GetResponseState;
 import com.openexchange.chronos.provider.ical.utils.ICalProviderUtils;
-import com.openexchange.config.ConfigTools;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
@@ -103,13 +102,10 @@ public class ICalFeedClient {
 
     protected final ICalCalendarFeedConfig iCalFeedConfig;
     protected final Session session;
-    protected final long allowedFeedSize;
 
     public ICalFeedClient(Session session, ICalCalendarFeedConfig iCalFeedConfig) {
         this.session = session;
         this.iCalFeedConfig = iCalFeedConfig;
-        String maxFileSize = Services.getService(LeanConfigurationService.class).getProperty(ICalCalendarProviderProperties.maxFileSize);
-        this.allowedFeedSize = ConfigTools.parseBytes(maxFileSize);
     }
 
     private HttpGet prepareGet() {
@@ -188,8 +184,7 @@ public class ICalFeedClient {
             response = ICalFeedHttpClient.getInstance().execute(request);
 
             int statusCode = response.getStatusLine().getStatusCode();
-            if (statusCode == HttpStatus.SC_SERVICE_UNAVAILABLE || 
-                statusCode == HttpStatus.SC_NOT_FOUND) {
+            if (statusCode == HttpStatus.SC_SERVICE_UNAVAILABLE || statusCode == HttpStatus.SC_NOT_FOUND) {
                 return false;
             }
         } catch (ClientProtocolException e) {
@@ -248,8 +243,10 @@ public class ICalFeedClient {
         }
         long contentLength = httpResponse.getEntity().getContentLength();
         String contentLength2 = response.getContentLength();
-        if (contentLength > this.allowedFeedSize || (Strings.isNotEmpty(contentLength2) && Long.parseLong(contentLength2) > this.allowedFeedSize)) {
-            throw ICalProviderExceptionCodes.FEED_SIZE_EXCEEDED.create(iCalFeedConfig.getFeedUrl(), contentLength2 != null ? contentLength2 : contentLength, this.allowedFeedSize);
+
+        long allowedFeedSize = ICalCalendarProviderProperties.allowedFeedSize();
+        if (contentLength > allowedFeedSize || (Strings.isNotEmpty(contentLength2) && Long.parseLong(contentLength2) > allowedFeedSize)) {
+            throw ICalProviderExceptionCodes.FEED_SIZE_EXCEEDED.create(iCalFeedConfig.getFeedUrl(), contentLength2 != null ? contentLength2 : contentLength, allowedFeedSize);
         }
         response.setCalendar(importCalendar(entity));
         return response;

@@ -55,6 +55,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import com.openexchange.chronos.provider.ical.osgi.Services;
+import com.openexchange.config.ConfigTools;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.config.lean.Property;
 import com.openexchange.java.Strings;
@@ -163,6 +164,32 @@ public enum ICalCalendarProviderProperties implements Property {
         return defaultValue;
     }
 
+    private static volatile Long configuredAllowedFeedSize;
+
+    public static long allowedFeedSize() {
+        Long tmp = configuredAllowedFeedSize;
+        if (null == tmp) {
+            synchronized (ICalCalendarProviderProperties.class) {
+                tmp = configuredAllowedFeedSize;
+                if (null == tmp) {
+                    LeanConfigurationService service = Services.getService(LeanConfigurationService.class);
+                    String prop = service.getProperty(maxFileSize);
+                    if (Strings.isNotEmpty(prop)) {
+                        prop = prop.trim();
+                    }
+                    try {
+                        tmp = new Long(ConfigTools.parseBytes(prop));
+                    } catch (NumberFormatException e) {
+                        org.slf4j.LoggerFactory.getLogger(ICalCalendarProviderProperties.class).warn("Unable to parse value {} for property 'com.openexchange.chronos.provider.ical.maxFileSize'. Will use default 5MB.", e);
+                        tmp = new Long(ConfigTools.parseBytes("5MB"));
+                    }
+                    configuredAllowedFeedSize = tmp;
+                }
+            }
+        }
+        return tmp.longValue();
+    }
+
     private static volatile HostList configuredBlacklistedHosts;
 
     private static HostList blacklistedHosts() {
@@ -254,5 +281,6 @@ public enum ICalCalendarProviderProperties implements Property {
     protected static void reset() {
         configuredSchemes = null;
         configuredBlacklistedHosts = null;
+        configuredAllowedFeedSize = null;
     }
 }
