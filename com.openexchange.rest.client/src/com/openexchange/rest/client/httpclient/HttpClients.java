@@ -69,6 +69,7 @@ import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.AuthState;
 import org.apache.http.auth.Credentials;
 import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.CookieStore;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
@@ -265,6 +266,9 @@ public final class HttpClients {
         if (null != credentialsProvider) {
             clientBuilder.setDefaultCredentialsProvider(credentialsProvider);
         }
+        if (null != config.cookieStore) {
+            clientBuilder.setDefaultCookieStore(config.cookieStore);
+        }
         PublicSuffixMatcher publicSuffixMatcher = PublicSuffixMatcherLoader.getDefault();
         clientBuilder.setPublicSuffixMatcher(publicSuffixMatcher);
         {
@@ -322,6 +326,7 @@ public final class HttpClients {
         String proxyLogin;
         String proxyPassword;
         Credentials credentials;
+        CookieStore cookieStore;
 
         ClientConfig() {
             super();
@@ -332,6 +337,16 @@ public final class HttpClients {
          */
         public static ClientConfig newInstance() {
             return new ClientConfig();
+        }
+
+        /**
+         * Sets the cookie store
+         *
+         * @param cookieStore The cookie store to set
+         */
+        public ClientConfig setCookieStore(CookieStore cookieStore) {
+            this.cookieStore = cookieStore;
+            return this;
         }
 
         /**
