@@ -92,9 +92,9 @@ public enum ICalProviderExceptionCodes implements DisplayableOXExceptionCode {
     NO_FEED("The provided URI %1$s does not contain an ICal feed.", NO_FEED_MSG, Category.CATEGORY_USER_INPUT, 4043),
     /**
      * <li>Unfortunately your requested feed cannot be used due to size limitations.</li>
-     * <li>The requested feed with URI %1$s does exceed the configured maximum size. Allowed %2$s but was %3$s.</li>
+     * <li>The requested feed with URI %1$s does exceed the configured maximum size. Allowed %2$s bytes but was %3$s bytes.</li>
      */
-    FEED_SIZE_EXCEEDED("The requested feed with URI %1$s does exceed the configured maximum size. Allowed %2$s but was %3$s.", FEED_SIZE_EXCEEDED_MSG, Category.CATEGORY_CONFIGURATION, 4001),
+    FEED_SIZE_EXCEEDED("The requested feed with URI %1$s does exceed the configured maximum size. Allowed %2$s bytes but was %3$s bytes.", FEED_SIZE_EXCEEDED_MSG, Category.CATEGORY_CONFIGURATION, 4001),
     /**
      * <li>Unfortunately the given feed URL cannot be processed as expected.</li>
      * <li>An error occurred while retrieving the desired feed URI '%1$s': %2$s</li>

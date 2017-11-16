@@ -85,7 +85,7 @@ public enum ICalCalendarProviderProperties implements Property {
      */
     connectionTimeout(5000, ICalCalendarProviderProperties.PREFIX),
     /**
-     * Defines the connection timeout
+     * Defines the timeout on waiting to read data
      */
     socketReadTimeout(30000, ICalCalendarProviderProperties.PREFIX),
     /**
@@ -93,11 +93,11 @@ public enum ICalCalendarProviderProperties implements Property {
      */
     blacklistedHosts("127.0.0.1-127.255.255.255,localhost", ICalCalendarProviderProperties.PREFIX),
     /**
-     * Defines schemes that are allowed to access a feed. All given schemes have to support port 80 or 443.
+     * Defines schemes that are allowed to access a feed. All given schemes have to support port 80 or 443
      */
     schemes("http, https, webcal", ICalCalendarProviderProperties.PREFIX),
     /**
-     * Defines the maximum size of an ICal file that will be allowed for processing. Feeds that exceed this limit will be ignored
+     * Defines the maximum size of an ICal file that will be allowed for processing. Feeds that exceed this limit cannot be subscribed
      */
     maxFileSize("5MB", ICalCalendarProviderProperties.PREFIX),
 

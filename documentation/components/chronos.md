@@ -312,19 +312,28 @@ As always the errors will be handled per folder and the underlying implementatio
 
 As already mentioned Open-Xchange provides some default implementations for external accounts.
 
-#### ICal feeds
+#### ICal Calendar Provider
 
-TBD ....
+Using the ICal Calendar Provider allows to subscribe to various remote calendar feeds that meet the requirements defined by the administrator (size, schemes, ...). The user just has to give an URI and optional credentials to subscribe the feed. To optimize requests to external resources the ICal Calendar Provider implementation is based on the generic caching layer described above. This means the calendar provider has to define its own refresh interval.
 
-##### Configuration
+##### Refresh interval
 
-- max content length
+In general the administrator is able to configure a refresh interval (by using the well known ConfigCascade) that will be used for each subscribed feed. As feeds might also define a refresh interval (by having 'REFRESH-INTERVAL' set) this value will be used under the assumption that the feed does even better know which interval makes sense.
 
 ##### Cache invalidation
 
-Some user actions have to trigger an invalidation of the cache. In case of ICal feeds an account reconfiguration that contains changes for the endpoint (URI or auth) will trigger such a cache invalidation.
+As the caching layer isn't aware of changes that should result in a cache invalidation the implementation has to call back in such cases. For the ICal implementation some user actions have to trigger such an invalidation. These actions can be summarized as account reconfiguration which contains endpoint (URI or auth) changes that might result in a complete new ICal subscription with other events.
 
+##### Configuration
 
+The following configuration can be made by the administrator:
+
+- a maximal file size that is allowed for a feed: This ensures smooth processing of the feed by the Open-Xchange server and prevents undesired states. Each feed exceeding the limit will be denied. Per default the limit is set to 5MB.
+- a host blacklist: Due to security reasons the blacklist avoids connections to nodes of the entire network. Per default the blacklist contains 127.0.0.1-127.255.255.255 and localhost.
+- supported schemes: Due to security reasons (for instance avoid 'file') only a defined set of schemes should be supported. Per default these are http, https and webcal
+- various connection parameters: This contains timeouts and a maximum number of connections.
+
+Have a look at the property documentation page on http://documentation.open-xchange.com for more details.
 
 #### SchedJoules
 

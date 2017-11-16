@@ -3,9 +3,9 @@ properties:
     - key: com.openexchange.chronos.schedjoules.apiKey
       description: |
         Specifies the SchedJoules API key
-      defaultValue: false
-      version: 7.10
-      reloadable: false
+      defaultValue: <none>
+      version: 7.10.0
+      reloadable: true
       configcascadeAware: true
       related: 
       file: chronos.properties
