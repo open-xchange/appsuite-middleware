@@ -60,15 +60,20 @@ import org.apache.http.HeaderElementIterator;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpException;
 import org.apache.http.HttpHost;
+import org.apache.http.HttpRequest;
+import org.apache.http.HttpRequestInterceptor;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpResponseInterceptor;
+import org.apache.http.auth.AuthScheme;
 import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.AuthState;
 import org.apache.http.auth.Credentials;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.client.utils.DateUtils;
 import org.apache.http.config.Registry;
 import org.apache.http.config.RegistryBuilder;
@@ -95,6 +100,7 @@ import org.apache.http.message.BasicHeaderElementIterator;
 import org.apache.http.pool.PoolStats;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.protocol.HttpContext;
+import org.apache.http.protocol.HttpCoreContext;
 import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -118,7 +124,7 @@ import com.openexchange.timer.TimerService;
  */
 public final class HttpClients {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(HttpClients.class);
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(HttpClients.class);
 
     /**
      * Initializes a new {@link HttpClients}.
@@ -239,15 +245,25 @@ public final class HttpClients {
         if (null != config.userAgent) {
             clientBuilder.setUserAgent(config.userAgent);
         }
+        CredentialsProvider credentialsProvider = null;
+        if (null != config.credentials) {
+            credentialsProvider = new BasicCredentialsProvider();
+            credentialsProvider.setCredentials(AuthScope.ANY, config.credentials);
+            clientBuilder.addInterceptorFirst(new PreemptiveAuth());
+        }
         HttpHost proxy = config.proxy;
         if (null != proxy) {
             clientBuilder.setProxy(proxy);
             if (null != config.proxyLogin && null != config.proxyPassword) {
                 Credentials credentials = new UsernamePasswordCredentials(config.proxyLogin, config.proxyPassword);
-                CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
+                if (null == credentialsProvider) {
+                    credentialsProvider = new BasicCredentialsProvider();
+                }
                 credentialsProvider.setCredentials(new AuthScope(proxy.getHostName(), proxy.getPort()), credentials);
-                clientBuilder.setDefaultCredentialsProvider(credentialsProvider);
             }
+        }
+        if (null != credentialsProvider) {
+            clientBuilder.setDefaultCredentialsProvider(credentialsProvider);
         }
         PublicSuffixMatcher publicSuffixMatcher = PublicSuffixMatcherLoader.getDefault();
         clientBuilder.setPublicSuffixMatcher(publicSuffixMatcher);
@@ -305,6 +321,7 @@ public final class HttpClients {
         HttpHost proxy;
         String proxyLogin;
         String proxyPassword;
+        Credentials credentials;
 
         ClientConfig() {
             super();
@@ -315,6 +332,17 @@ public final class HttpClients {
          */
         public static ClientConfig newInstance() {
             return new ClientConfig();
+        }
+
+        /**
+         * Sets the credentials
+         *
+         * @param login The login to set
+         * @param password The password to set
+         */
+        public ClientConfig setCredentials(String login, String password) {
+            this.credentials = new UsernamePasswordCredentials(login, password);
+            return this;
         }
 
         /**
@@ -339,7 +367,7 @@ public final class HttpClients {
         public ClientConfig setProxy(HttpHost proxy, String proxyLogin, String proxyPassword) {
             this.proxy = proxy;
             this.proxyLogin = proxyLogin;
-            this.proxyPassword = proxyPassword;;
+            this.proxyPassword = proxyPassword;
             return this;
         }
 
@@ -743,6 +771,33 @@ public final class HttpClients {
         /** Initializes a new {@link LenientCookieSpec}. */
         LenientCookieSpec() {
             super(DEFAULT_DATE_PATTERNS, false);
+        }
+    }
+
+    private static class PreemptiveAuth implements HttpRequestInterceptor {
+
+        PreemptiveAuth() {
+            super();
+        }
+
+        @Override
+        public void process(HttpRequest request, HttpContext context) throws HttpException, IOException {
+            AuthState authState = (AuthState) context.getAttribute(HttpClientContext.TARGET_AUTH_STATE);
+
+            // If no auth scheme available yet, try to initialize it preemptively
+            if (authState.getAuthScheme() == null) {
+                AuthScheme authScheme = (AuthScheme) context.getAttribute("preemptive-auth");
+                CredentialsProvider credsProvider = (CredentialsProvider) context.getAttribute(HttpClientContext.CREDS_PROVIDER);
+                HttpHost targetHost = (HttpHost) context.getAttribute(HttpCoreContext.HTTP_TARGET_HOST);
+                if (authScheme != null) {
+                    Credentials creds = credsProvider.getCredentials(new AuthScope(targetHost.getHostName(), targetHost.getPort()));
+                    if (creds == null) {
+                        LOG.warn("No credentials for preemptive authentication against {}", targetHost);
+                    } else {
+                        authState.update(authScheme, creds);
+                    }
+                }
+            }
         }
     }
 
