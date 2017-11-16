@@ -53,6 +53,7 @@ import java.sql.Connection;
 import java.util.Map;
 import java.util.Set;
 import com.openexchange.exception.OXException;
+import com.openexchange.osgi.annotation.SingletonService;
 
 /**
  * {@link FolderUserPropertyStorage} - Storage to get user-specific properties per folder
@@ -60,6 +61,7 @@ import com.openexchange.exception.OXException;
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.0
  */
+@SingletonService
 public interface FolderUserPropertyStorage {
 
     /**
@@ -211,7 +213,6 @@ public interface FolderUserPropertyStorage {
      * @param folderId The ID of the folder to insert
      * @param userId The ID of the user the user-specific folder belongs to
      * @param properties The properties to save for the folder. Must be modifiable
-     * @return <code>true</code> if the insertion was successful, <code>false</code> otherwise
      * @throws OXException In case of missing service or no connection could be obtained
      */
     void insertFolderProperties(int contextId, int folderId, int userId, Map<String, String> properties) throws OXException;
@@ -224,7 +225,6 @@ public interface FolderUserPropertyStorage {
      * @param userId The ID of the user the user-specific folder belongs to
      * @param properties The properties to save for the folder. Must be modifiable
      * @param connection The {@link Connection} to to use for the transaction
-     * @return <code>true</code> if the insertion was successful, <code>false</code> otherwise
      * @throws OXException In case of missing service or no connection could be obtained
      */
     void insertFolderProperties(int contextId, int folderId, int userId, Map<String, String> properties, Connection connection) throws OXException;
@@ -237,7 +237,6 @@ public interface FolderUserPropertyStorage {
      * @param userId The ID of the user the user-specific folder belongs to
      * @param key The name of the property
      * @param value The value to of the property
-     * @return <code>true</code> if the insertion was successful, <code>false</code> otherwise
      * @throws OXException In case of missing service or no connection could be obtained
      */
     void insertFolderProperty(int contextId, int folderId, int userId, String key, String value) throws OXException;
@@ -251,7 +250,6 @@ public interface FolderUserPropertyStorage {
      * @param key The name of the property
      * @param value The value to of the property
      * @param connection The {@link Connection} to to use for the transaction
-     * @return <code>true</code> if the insertion was successful, <code>false</code> otherwise
      * @throws OXException In case of missing service or no connection could be obtained
      */
     void insertFolderProperty(int contextId, int folderId, int userId, String key, String value, Connection connection) throws OXException;
@@ -263,7 +261,6 @@ public interface FolderUserPropertyStorage {
      * @param folderId The ID of the folder to insert
      * @param userId The ID of the user the user-specific folder belongs to
      * @param properties The properties to add to the folder
-     * @return <code>true</code> if the insertion was successful, <code>false</code> otherwise
      * @throws OXException In case of missing service or no connection could be obtained
      */
     void setFolderProperties(int contextId, int folderId, int userId, Map<String, String> properties) throws OXException;
@@ -276,7 +273,6 @@ public interface FolderUserPropertyStorage {
      * @param userId The ID of the user the user-specific folder belongs to
      * @param properties The properties to add to the folder
      * @param connection The {@link Connection} to use for the transaction, or <code>null</code> to acquire the connection on demand
-     * @return <code>true</code> if the insertion was successful, <code>false</code> otherwise
      * @throws OXException In case of missing service or no connection could be obtained
      */
     void setFolderProperties(int contextId, int folderId, int userId, Map<String, String> properties, Connection connection) throws OXException;
@@ -312,7 +308,6 @@ public interface FolderUserPropertyStorage {
      * @param userId The ID of the user the user-specific folder belongs to
      * @param key The name of the property
      * @param value The value to update the property to
-     * @param connection The {@link Connection} to to use for the transaction
      * @throws OXException In case of missing service or no connection could be obtained
      */
     void updateFolderProperty(int contextId, int folderId, int userId, String key, String value) throws OXException;
