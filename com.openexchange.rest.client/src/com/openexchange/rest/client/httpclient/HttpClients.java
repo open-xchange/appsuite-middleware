@@ -51,52 +51,54 @@ package com.openexchange.rest.client.httpclient;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 import java.util.concurrent.TimeUnit;
 import java.util.zip.GZIPInputStream;
-import org.apache.http.ConnectionReuseStrategy;
 import org.apache.http.Header;
 import org.apache.http.HeaderElement;
 import org.apache.http.HeaderElementIterator;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpException;
+import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpResponseInterceptor;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.Credentials;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpRequestBase;
-import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.client.params.HttpClientParams;
 import org.apache.http.client.utils.DateUtils;
-import org.apache.http.conn.ClientConnectionRequest;
+import org.apache.http.config.Registry;
+import org.apache.http.config.RegistryBuilder;
+import org.apache.http.config.SocketConfig;
 import org.apache.http.conn.ConnectionKeepAliveStrategy;
+import org.apache.http.conn.ConnectionRequest;
 import org.apache.http.conn.routing.HttpRoute;
-import org.apache.http.conn.scheme.PlainSocketFactory;
-import org.apache.http.conn.scheme.Scheme;
-import org.apache.http.conn.scheme.SchemeRegistry;
-import org.apache.http.conn.ssl.SSLSocketFactory;
-import org.apache.http.conn.ssl.StrictHostnameVerifier;
-import org.apache.http.cookie.ClientCookie;
+import org.apache.http.conn.socket.ConnectionSocketFactory;
+import org.apache.http.conn.socket.PlainConnectionSocketFactory;
+import org.apache.http.conn.ssl.DefaultHostnameVerifier;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.conn.util.PublicSuffixMatcher;
+import org.apache.http.conn.util.PublicSuffixMatcherLoader;
 import org.apache.http.cookie.CookieSpec;
-import org.apache.http.cookie.CookieSpecFactory;
-import org.apache.http.cookie.MalformedCookieException;
-import org.apache.http.cookie.SetCookie;
+import org.apache.http.cookie.CookieSpecProvider;
 import org.apache.http.entity.HttpEntityWrapper;
-import org.apache.http.impl.DefaultConnectionReuseStrategy;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.impl.conn.PoolingClientConnectionManager;
-import org.apache.http.impl.cookie.BasicExpiresHandler;
-import org.apache.http.impl.cookie.BrowserCompatSpec;
+import org.apache.http.impl.client.BasicCredentialsProvider;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.CookieSpecRegistries;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+import org.apache.http.impl.cookie.DefaultCookieSpec;
 import org.apache.http.message.BasicHeaderElementIterator;
-import org.apache.http.params.BasicHttpParams;
-import org.apache.http.params.HttpConnectionParams;
-import org.apache.http.params.HttpParams;
-import org.apache.http.params.HttpProtocolParams;
 import org.apache.http.pool.PoolStats;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
-import org.apache.http.util.TextUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.openexchange.java.Streams;
 import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.net.ssl.config.SSLConfigurationService;
 import com.openexchange.rest.client.httpclient.internal.WrappedClientsRegistry;
@@ -115,6 +117,8 @@ import com.openexchange.timer.TimerService;
  * @since v7.6.1
  */
 public final class HttpClients {
+
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(HttpClients.class);
 
     /**
      * Initializes a new {@link HttpClients}.
@@ -147,7 +151,7 @@ public final class HttpClients {
      * @param userAgent The optional user agent identifier
      * @return A newly created {@link DefaultHttpClient} instance
      */
-    public static DefaultHttpClient getHttpClient(String userAgent) {
+    public static CloseableHttpClient getHttpClient(String userAgent) {
         return getHttpClient(new ClientConfig().setUserAgent(userAgent));
     }
 
@@ -157,7 +161,7 @@ public final class HttpClients {
      * @param config The configuration settings for the client
      * @return A newly created {@link DefaultHttpClient} instance
      */
-    public static DefaultHttpClient getHttpClient(final ClientConfig config) {
+    public static CloseableHttpClient getHttpClient(final ClientConfig config) {
         SSLSocketFactoryProvider factoryProvider = RestClientServices.getOptionalService(SSLSocketFactoryProvider.class);
         if (null != factoryProvider) {
             SSLConfigurationService sslConfig = RestClientServices.getOptionalService(SSLConfigurationService.class);
@@ -177,24 +181,12 @@ public final class HttpClients {
      * @param sslConfig The SSL configuration service to use
      * @return A newly created {@link DefaultHttpClient} instance
      */
-    public static DefaultHttpClient getHttpClient(ClientConfig config, SSLSocketFactoryProvider factoryProvider, SSLConfigurationService sslConfig) {
+    public static CloseableHttpClient getHttpClient(ClientConfig config, SSLSocketFactoryProvider factoryProvider, SSLConfigurationService sslConfig) {
         // Initialize ClientConnectionManager
         ClientConnectionManager ccm = initializeClientConnectionManagerUsing(config, factoryProvider, sslConfig);
 
         // Initialize DefaultHttpClient using the ClientConnectionManager and client configuration
         return initializeHttpClientUsing(config, ccm);
-    }
-
-    private static ClientConnectionManager initializeClientConnectionManagerUsing(ClientConfig config, SSLSocketFactoryProvider factoryProvider, SSLConfigurationService sslConfig) {
-        javax.net.ssl.SSLSocketFactory f = factoryProvider.getDefault();
-
-        final SchemeRegistry schemeRegistry = new SchemeRegistry();
-        schemeRegistry.register(new Scheme("http", 80, PlainSocketFactory.getSocketFactory()));
-        schemeRegistry.register(new Scheme("https", 443, new SSLSocketFactory(f, sslConfig.getSupportedProtocols(), sslConfig.getSupportedCipherSuites(), new StrictHostnameVerifier())));
-
-        ClientConnectionManager ccm = new ClientConnectionManager(schemeRegistry, config.maxConnectionsPerRoute, config.maxTotalConnections, config.keepAliveMonitorInterval);
-        ccm.setIdleConnectionCloser(new IdleConnectionCloser(ccm, config.keepAliveDuration));
-        return ccm;
     }
 
     /**
@@ -206,7 +198,7 @@ public final class HttpClients {
      * @param config The configuration settings for the client
      * @return A newly created {@link DefaultHttpClient} instance
      */
-    public static DefaultHttpClient getFallbackHttpClient(ClientConfig config) {
+    public static CloseableHttpClient getFallbackHttpClient(ClientConfig config) {
         // Initialize ClientConnectionManager
         ClientConnectionManager ccm = initializeFallbackClientConnectionManagerUsing(config);
 
@@ -214,67 +206,80 @@ public final class HttpClients {
         return initializeHttpClientUsing(config, ccm);
     }
 
-    private static ClientConnectionManager initializeFallbackClientConnectionManagerUsing(ClientConfig config) {
-        SchemeRegistry schemeRegistry = new SchemeRegistry();
-        schemeRegistry.register(new Scheme("http", 80, PlainSocketFactory.getSocketFactory()));
-        schemeRegistry.register(new Scheme("https", 443, EasySSLSocketFactory.getInstance()));
+    private static ClientConnectionManager initializeClientConnectionManagerUsing(ClientConfig config, SSLSocketFactoryProvider factoryProvider, SSLConfigurationService sslConfig) {
+        Registry<ConnectionSocketFactory> socketFactoryRegistry = RegistryBuilder.<ConnectionSocketFactory> create()
+            .register("http", PlainConnectionSocketFactory.getSocketFactory())
+            .register("https", new SSLConnectionSocketFactory(factoryProvider.getDefault(), sslConfig.getSupportedProtocols(), sslConfig.getSupportedCipherSuites(), new DefaultHostnameVerifier()))
+            .build();
+        return initializeClientConnectionManagerUsing(config, socketFactoryRegistry);
+    }
 
-        ClientConnectionManager ccm = new ClientConnectionManager(schemeRegistry, config.maxConnectionsPerRoute, config.maxTotalConnections, config.keepAliveMonitorInterval);
+    private static ClientConnectionManager initializeFallbackClientConnectionManagerUsing(ClientConfig config) {
+        Registry<ConnectionSocketFactory> socketFactoryRegistry = RegistryBuilder.<ConnectionSocketFactory> create()
+            .register("http", PlainConnectionSocketFactory.getSocketFactory())
+            .register("https", EasySSLSocketFactory.getInstance())
+            .build();
+        return initializeClientConnectionManagerUsing(config, socketFactoryRegistry);
+    }
+
+    private static ClientConnectionManager initializeClientConnectionManagerUsing(ClientConfig config, Registry<ConnectionSocketFactory> socketFactoryRegistry) {
+        ClientConnectionManager ccm = new ClientConnectionManager(socketFactoryRegistry, config.keepAliveMonitorInterval);
+        ccm.setDefaultMaxPerRoute(config.maxConnectionsPerRoute);
+        ccm.setMaxTotal(config.maxTotalConnections);
         ccm.setIdleConnectionCloser(new IdleConnectionCloser(ccm, config.keepAliveDuration));
+        ccm.setDefaultSocketConfig(SocketConfig.custom().setSoTimeout(config.socketReadTimeout).setRcvBufSize(config.socketBufferSize).setSndBufSize(config.socketBufferSize).build());
         return ccm;
     }
 
-    private static DefaultHttpClient initializeHttpClientUsing(final ClientConfig config, ClientConnectionManager ccm) {
-        HttpParams httpParams = new BasicHttpParams();
-        HttpConnectionParams.setConnectionTimeout(httpParams, config.connectionTimeout);
-        HttpConnectionParams.setSoTimeout(httpParams, config.socketReadTimeout);
-        HttpConnectionParams.setSocketBufferSize(httpParams, config.socketBufferSize);
+    private static CloseableHttpClient initializeHttpClientUsing(final ClientConfig config, ClientConnectionManager ccm) {
+        HttpClientBuilder clientBuilder = org.apache.http.impl.client.HttpClients.custom()
+            .setKeepAliveStrategy(new KeepAliveStrategy(config.keepAliveDuration))
+            .setConnectionManager(ccm)
+            .setDefaultRequestConfig(RequestConfig.custom().setConnectTimeout(config.connectionTimeout).setSocketTimeout(config.socketReadTimeout).setProxy(config.proxy).build());
         if (null != config.userAgent) {
-            HttpProtocolParams.setUserAgent(httpParams, config.userAgent);
+            clientBuilder.setUserAgent(config.userAgent);
         }
-
-        final DefaultHttpClient c = new DefaultHttpClient(ccm, httpParams) {
-
-            @Override
-            protected ConnectionKeepAliveStrategy createConnectionKeepAliveStrategy() {
-                return new KeepAliveStrategy(config.keepAliveDuration);
+        HttpHost proxy = config.proxy;
+        if (null != proxy) {
+            clientBuilder.setProxy(proxy);
+            if (null != config.proxyLogin && null != config.proxyPassword) {
+                Credentials credentials = new UsernamePasswordCredentials(config.proxyLogin, config.proxyPassword);
+                CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
+                credentialsProvider.setCredentials(new AuthScope(proxy.getHostName(), proxy.getPort()), credentials);
+                clientBuilder.setDefaultCredentialsProvider(credentialsProvider);
             }
+        }
+        PublicSuffixMatcher publicSuffixMatcher = PublicSuffixMatcherLoader.getDefault();
+        clientBuilder.setPublicSuffixMatcher(publicSuffixMatcher);
+        {
+            RegistryBuilder<CookieSpecProvider> builder = CookieSpecRegistries.createDefaultBuilder(publicSuffixMatcher);
+            builder.register("lenient", new LenientCookieSpecProvider());
+            clientBuilder.setDefaultCookieSpecRegistry(builder.build());
+        }
+        // Only apply manual content decompression if 'HttpClientBuilder.disableContentCompression()' was invoked
+        boolean contentCompressionDisabled = false;
+        if (contentCompressionDisabled) {
+            clientBuilder.addInterceptorLast(new HttpResponseInterceptor() {
 
-            @Override
-            protected ConnectionReuseStrategy createConnectionReuseStrategy() {
-                return new DefaultConnectionReuseStrategy();
-            }
-        };
-
-        c.getCookieSpecs().register("lenient", new CookieSpecFactory() {
-            @Override
-            public CookieSpec newInstance(HttpParams params) {
-                return new LenientCookieSpec();
-            }
-        });
-        HttpClientParams.setCookiePolicy(c.getParams(), "lenient");
-
-        c.addResponseInterceptor(new HttpResponseInterceptor() {
-
-            @Override
-            public void process(final HttpResponse response, final HttpContext context) throws HttpException, IOException {
-                final HttpEntity entity = response.getEntity();
-                if (entity != null) {
-                    final Header ceheader = entity.getContentEncoding();
-                    if (ceheader != null) {
-                        final HeaderElement[] codecs = ceheader.getElements();
-                        for (final HeaderElement codec : codecs) {
-                            if (codec.getName().equalsIgnoreCase("gzip")) {
-                                response.setEntity(new GzipDecompressingEntity(response.getEntity()));
-                                return;
+                @Override
+                public void process(HttpResponse response, HttpContext context) throws HttpException, IOException {
+                    HttpEntity entity = response.getEntity();
+                    if (entity != null) {
+                        final Header ceheader = entity.getContentEncoding();
+                        if (ceheader != null) {
+                            final HeaderElement[] codecs = ceheader.getElements();
+                            for (final HeaderElement codec : codecs) {
+                                if (codec.getName().equalsIgnoreCase("gzip")) {
+                                    response.setEntity(new GzipDecompressingEntity(response.getEntity()));
+                                    return;
+                                }
                             }
                         }
                     }
                 }
-            }
-        });
-
-        return c;
+            });
+        }
+        return clientBuilder.build();
     }
 
     /**
@@ -289,21 +294,17 @@ public final class HttpClients {
      */
     public static final class ClientConfig {
 
-        private int socketReadTimeout = DEFAULT_TIMEOUT_MILLIS;
-
-        private int connectionTimeout = DEFAULT_TIMEOUT_MILLIS;
-
-        private int maxTotalConnections = MAX_TOTAL_CONNECTIONS;
-
-        private int maxConnectionsPerRoute = MAX_CONNECTIONS_PER_ROUTE;
-
-        private int keepAliveDuration = KEEP_ALIVE_DURATION_SECS;
-
-        private int keepAliveMonitorInterval = KEEP_ALIVE_MONITOR_INTERVAL_SECS;
-
-        private int socketBufferSize = DEFAULT_SOCKET_BUFFER_SIZE;
-
-        private String userAgent;
+        int socketReadTimeout = DEFAULT_TIMEOUT_MILLIS;
+        int connectionTimeout = DEFAULT_TIMEOUT_MILLIS;
+        int maxTotalConnections = MAX_TOTAL_CONNECTIONS;
+        int maxConnectionsPerRoute = MAX_CONNECTIONS_PER_ROUTE;
+        int keepAliveDuration = KEEP_ALIVE_DURATION_SECS;
+        int keepAliveMonitorInterval = KEEP_ALIVE_MONITOR_INTERVAL_SECS;
+        int socketBufferSize = DEFAULT_SOCKET_BUFFER_SIZE;
+        String userAgent;
+        HttpHost proxy;
+        String proxyLogin;
+        String proxyPassword;
 
         ClientConfig() {
             super();
@@ -314,6 +315,32 @@ public final class HttpClients {
          */
         public static ClientConfig newInstance() {
             return new ClientConfig();
+        }
+
+        /**
+         * Sets the proxy information.
+         *
+         * @param proxy The proxy to set
+         */
+        public ClientConfig setProxy(URI proxyUrl, String proxyLogin, String proxyPassword) {
+            boolean isHttps = proxyUrl.getScheme().equalsIgnoreCase("https");
+            int prxyPort = proxyUrl.getPort();
+            if (prxyPort == -1) {
+                prxyPort = isHttps ? 443 : 80;
+            }
+            return setProxy(new HttpHost(proxyUrl.getHost(), prxyPort, proxyUrl.getScheme()), proxyLogin, proxyPassword);
+        }
+
+        /**
+         * Sets the proxy information.
+         *
+         * @param proxy The proxy to set
+         */
+        public ClientConfig setProxy(HttpHost proxy, String proxyLogin, String proxyPassword) {
+            this.proxy = proxy;
+            this.proxyLogin = proxyLogin;
+            this.proxyPassword = proxyPassword;;
+            return this;
         }
 
         /**
@@ -433,13 +460,11 @@ public final class HttpClients {
      *
      * @param request The HTTP request
      */
-    public static void setDefaultRequestTimeout(HttpUriRequest request) {
+    public static void setDefaultRequestTimeout(HttpRequestBase request) {
         if (null == request) {
             return;
         }
-        final HttpParams reqParams = request.getParams();
-        HttpConnectionParams.setSoTimeout(reqParams, DEFAULT_TIMEOUT_MILLIS);
-        HttpConnectionParams.setConnectionTimeout(reqParams, DEFAULT_TIMEOUT_MILLIS);
+        request.setConfig(RequestConfig.custom().setConnectTimeout(DEFAULT_TIMEOUT_MILLIS).setSocketTimeout(DEFAULT_TIMEOUT_MILLIS).build());
     }
 
     /**
@@ -448,13 +473,11 @@ public final class HttpClients {
      * @param timeoutMillis The timeout in milliseconds to apply
      * @param request The HTTP request
      */
-    public static void setRequestTimeout(int timeoutMillis, HttpUriRequest request) {
+    public static void setRequestTimeout(int timeoutMillis, HttpRequestBase request) {
         if (null == request || timeoutMillis <= 0) {
             return;
         }
-        final HttpParams reqParams = request.getParams();
-        HttpConnectionParams.setSoTimeout(reqParams, timeoutMillis);
-        HttpConnectionParams.setConnectionTimeout(reqParams, timeoutMillis);
+        request.setConfig(RequestConfig.custom().setConnectTimeout(timeoutMillis).setSocketTimeout(timeoutMillis).build());
     }
 
     /**
@@ -468,6 +491,9 @@ public final class HttpClients {
             // shut down the connection manager to ensure
             // immediate deallocation of all system resources
             httpclient.getConnectionManager().shutdown();
+            if (httpclient instanceof CloseableHttpClient) {
+                Streams.close((CloseableHttpClient) httpclient);
+            }
         }
     }
 
@@ -489,7 +515,7 @@ public final class HttpClients {
                 try {
                     EntityUtils.consumeQuietly(entity);
                 } catch (Exception e) {
-                    // Ignore...
+                    LOG.trace("Failed to ensure that the entity content is fully consumed and the content stream, if exists, is closed.", e);
                 }
             }
         }
@@ -497,22 +523,20 @@ public final class HttpClients {
             try {
                 request.reset();
             } catch (Exception e) {
-                // Ignore
+                LOG.trace("Failed to reset request for making it reusable.", e);
             }
         }
     }
 
     /*------------------------------------------------------ CLASSES ------------------------------------------------------*/
 
-    private static class ClientConnectionManager extends PoolingClientConnectionManager {
+    private static class ClientConnectionManager extends PoolingHttpClientConnectionManager {
 
         private volatile IdleConnectionCloser idleConnectionCloser;
         private final int keepAliveMonitorInterval;
 
-        ClientConnectionManager(SchemeRegistry registry, int maxPerRoute, int maxTotal, int keepAliveMonitorInterval) {
-            super(registry);
-            setMaxTotal(maxTotal);
-            setDefaultMaxPerRoute(maxPerRoute);
+        ClientConnectionManager(Registry<ConnectionSocketFactory> socketFactoryRegistry, int keepAliveMonitorInterval) {
+            super(socketFactoryRegistry);
             this.keepAliveMonitorInterval = keepAliveMonitorInterval;
         }
 
@@ -526,7 +550,7 @@ public final class HttpClients {
         }
 
         @Override
-        public ClientConnectionRequest requestConnection(HttpRoute route, Object state) {
+        public ConnectionRequest requestConnection(HttpRoute route, Object state) {
             IdleConnectionCloser idleConnectionClose = this.idleConnectionCloser;
             if (null != idleConnectionClose) {
                 idleConnectionClose.ensureRunning(keepAliveMonitorInterval);
@@ -680,7 +704,22 @@ public final class HttpClients {
         }
     }
 
-    private static class LenientCookieSpec extends BrowserCompatSpec {
+    private static class LenientCookieSpecProvider implements CookieSpecProvider {
+
+        private final CookieSpec cookieSpec;
+
+        LenientCookieSpecProvider() {
+            super();
+            this.cookieSpec = new LenientCookieSpec();
+        }
+
+        @Override
+        public CookieSpec create(HttpContext context) {
+            return cookieSpec;
+        }
+    }
+
+    private static class LenientCookieSpec extends DefaultCookieSpec {
 
         // See org.apache.http.impl.cookie.BrowserCompatSpec.DEFAULT_DATE_PATTERNS
         private static final String[] DEFAULT_DATE_PATTERNS = new String[] {
@@ -703,17 +742,7 @@ public final class HttpClients {
 
         /** Initializes a new {@link LenientCookieSpec}. */
         LenientCookieSpec() {
-            super();
-            registerAttribHandler(ClientCookie.EXPIRES_ATTR, new BasicExpiresHandler(DEFAULT_DATE_PATTERNS) {
-                @Override public void parse(SetCookie cookie, String value) throws MalformedCookieException {
-                    if (TextUtils.isEmpty(value)) {
-                        // You should set whatever you want in cookie
-                        cookie.setExpiryDate(null);
-                    } else {
-                        super.parse(cookie, value);
-                    }
-                }
-            });
+            super(DEFAULT_DATE_PATTERNS, false);
         }
     }
 

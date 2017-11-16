@@ -52,7 +52,8 @@ package com.openexchange.rest.client.httpclient.internal;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.WrappingCloseableHttpClient;
 import org.slf4j.Logger;
 import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.net.ssl.config.SSLConfigurationService;
@@ -101,15 +102,15 @@ public class WrappedClientsRegistry {
      * @param config The configuration with which the <code>DefaultHttpClient</code> instance has been initialized
      * @return The resulting <code>DefaultHttpClient</code> instance, which is either wrapped or not
      */
-    public DefaultHttpClient createWrapped(ClientConfig config) {
+    public CloseableHttpClient createWrapped(ClientConfig config) {
         SSLSocketFactoryProvider factoryProvider;
         SSLConfigurationService sslConfig;
         synchronized (wrappers) {
             factoryProvider = this.factoryProvider;
             sslConfig = this.sslConfig;
             if (null == factoryProvider) {
-                DefaultHttpClient fallbackHttpClient = HttpClients.getFallbackHttpClient(config);
-                WrappingDefaultHttpClient wrapper = new WrappingDefaultHttpClient(fallbackHttpClient);
+                CloseableHttpClient fallbackHttpClient = HttpClients.getFallbackHttpClient(config);
+                WrappingCloseableHttpClient wrapper = new WrappingCloseableHttpClient(fallbackHttpClient);
                 wrappers.add(new ClientAndConfig(wrapper, config));
                 return wrapper;
             }
@@ -134,7 +135,7 @@ public class WrappedClientsRegistry {
                 for (Iterator<ClientAndConfig> iter = wrappers.iterator(); iter.hasNext();) {
                     // Create unmanaged instance
                     ClientAndConfig clientEntry = iter.next();
-                    DefaultHttpClient newHttpClient = null;
+                    CloseableHttpClient newHttpClient = null;
                     try {
                         newHttpClient = HttpClients.getHttpClient(clientEntry.config, factoryProvider, sslConfig);
                         clientEntry.wrapper.replaceHttpClient(newHttpClient);
@@ -156,10 +157,10 @@ public class WrappedClientsRegistry {
 
     private static final class ClientAndConfig {
 
-        final WrappingDefaultHttpClient wrapper;
+        final WrappingCloseableHttpClient wrapper;
         final ClientConfig config;
 
-        ClientAndConfig(WrappingDefaultHttpClient client, ClientConfig config) {
+        ClientAndConfig(WrappingCloseableHttpClient client, ClientConfig config) {
             super();
             this.wrapper = client;
             this.config = config;
