@@ -266,6 +266,7 @@ Internally within the Chronos stack, all URIs are kept as (escaped) URI string, 
 When being converted back to a plain e-mail address string (as used for external participants in the legacy stack), such URIs are decoded implicitly; additionally, ASCII-encoded (punycode) addresses with international domain names (IDN) are converted back to their unicode representation, too. This is the case when converting to an external participant in the legacy HTTP API, as well as when storing such an attendee in the ``dateExternal`` table. 
 
 ### References / further reading
+
 - https://tools.ietf.org/html/rfc5545#section-3.3.3
 - com.openexchange.chronos.common.CalendarUtils.extractEMailAddress(String)
 - com.openexchange.chronos.impl.Check.requireValidEMail(T)
@@ -278,6 +279,61 @@ Besides the default, internal calendar, there may be further calendar sources th
 ### Calendar Providers and Accounts
 
 A calendar provider implements the functionality to access the calendar data of a specific calendar source. Calendar access is always bound to a specific account of a user within the calendar provider, i.e. each calendar provider provides a number of accounts for different users. A user may have a fixed number of accounts (e.g. exactly one) within a concrete provider, or there can be multiple accounts for the user. 
+
+Have a look at the chapter 'Default implementations' to get an overview over providers shipped by Open-Xchange.
+
+### External Calendar Account Caching
+
+The default calendar providers implemented by Open-Xchange (like ICal, SchedJoules, ...) use a generic caching approach to avoid expensive calls to external resources as much as possible. This means that events (and all related information like attendees and alarms) from the external resource gets persisted like events from the internal calendar after their first retrieval. All upcoming requests will be answered by the cache until a defined refresh interval is exceeded.
+
+The caching layer itself is able to handle information on a per-folder base. Cached folders that have been deleted on the remote site will be removed immediately from the cache while new folders on remote will be cached instantly. 
+
+In general the cache should be a blackbox for those implementations using it. Of course there are some utilities and hooks for the provider to be able to invalidate the folder cache as the cache doesn't know all possible cases.
+
+#### Refreshing cache
+
+Each Calendar Provider implementation can use its own refresh interval, again on a per-folder base. These value defines how long the cache should be used to answer requests for a dedicated folder of the underlying calendar. After the interval for the folder is exceeded the cache state will be updated by contacting the external calendar. New events will be added, removed ones will be deleted and changed events will be updated. 
+
+The refesh interval is defined in minutes. If the calendar provider implementation does provide a value bigger than 0 this will be taken into account. Otherwise the default of one day will be used.
+
+In cases where new folders have been added or previously existing folders have been removed on the external calendar site the caching layer will directly update its internal state which means changes on the folder structure will be instantly visible without considering the refresh interval!
+
+#### Error handling
+
+The caching allows to handle data that will normally fail to be executed. Among other things the following error cases will be handled by the generic caching layer:
+
+- data truncation: external data that is too big to be stored will be truncated so that no import will fail.
+- corrupt data: data that won't met the requirements to be stored will be handled as smooth as possible. For instance if start or timestamp of an event is missing the complete event will be ignored.
+- missing UID: if an event lacks on appropriate UID definitions it is not possible to generate a reproducible diff for already persisted and externally available events. Due to this fact the caching will delete all persisted events for the folder and re-import those from the calendar provider.
+
+As always the errors will be handled per folder and the underlying implementation has the opportunity to deal with it. In addition it can define an interval in which the external resource should not be requested after an error occurred. This prevents a continuous requests loop to the external provider which permanently will fail because of the same error. After the given interval time is exceeded the cache connects to the external provider again and hopefully the error is gone ...
+
+### Default implementations
+
+As already mentioned Open-Xchange provides some default implementations for external accounts.
+
+#### ICal feeds
+
+TBD ....
+
+##### Configuration
+
+- max content length
+
+##### Cache invalidation
+
+Some user actions have to trigger an invalidation of the cache. In case of ICal feeds an account reconfiguration that contains changes for the endpoint (URI or auth) will trigger such a cache invalidation.
+
+
+
+#### SchedJoules
+
+...
+
+#### Google Calendar
+
+...
+
 
 ### ...
 
