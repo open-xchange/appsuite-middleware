@@ -78,6 +78,10 @@ import com.openexchange.chronos.schedjoules.api.auxiliary.SchedJoulesResponsePar
 import com.openexchange.chronos.schedjoules.exception.SchedJoulesAPIExceptionCodes;
 import com.openexchange.chronos.schedjoules.impl.SchedJoulesProperty;
 import com.openexchange.chronos.schedjoules.osgi.Services;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.DefaultInterests;
+import com.openexchange.config.Interests;
+import com.openexchange.config.Reloadable;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
@@ -89,11 +93,30 @@ import com.openexchange.rest.client.httpclient.HttpClients.ClientConfig;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class SchedJoulesRESTClient implements Closeable {
+public class SchedJoulesRESTClient implements Closeable, Reloadable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SchedJoulesRESTClient.class);
 
     private static final SimpleDateFormat DATE_FORMATTER = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss 'GMT'");
+
+    private static SchedJoulesRESTClient INSTANCE;
+
+    /**
+     * Returns the instance of the {@link SchedJoulesRESTClient}
+     * 
+     * @return the instance of the {@link SchedJoulesRESTClient}
+     * @throws OXException if the instance cannot be returned
+     */
+    public static SchedJoulesRESTClient getInstance() throws OXException {
+        if (INSTANCE == null) {
+            synchronized (SchedJoulesRESTClient.class) {
+                if (INSTANCE == null) {
+                    INSTANCE = new SchedJoulesRESTClient();
+                }
+            }
+        }
+        return INSTANCE;
+    }
 
     private static final String SCHEME = "https";
     private static final String BASE_URL = "api.schedjoules.com";
@@ -104,7 +127,7 @@ public class SchedJoulesRESTClient implements Closeable {
     private static final String AUTHORIZATION_HEADER = "Token token=\"{{token}}\"";
 
     private final CloseableHttpClient httpClient;
-    private final String authorizationHeader;
+    private String authorizationHeader;
     private final String acceptHeader;
 
     private final Map<String, BiConsumer<SchedJoulesResponse, HttpResponse>> headerParsers;
@@ -372,6 +395,30 @@ public class SchedJoulesRESTClient implements Closeable {
      */
     public SchedJoulesResponse executeRequest(URL url, HttpMethod httpMethod, String eTag, long lastModified) throws OXException {
         return executeRequest(prepareRequest(url, httpMethod, eTag, lastModified));
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.config.Reloadable#reloadConfiguration(com.openexchange.config.ConfigurationService)
+     */
+    @Override
+    public void reloadConfiguration(ConfigurationService configService) {
+        try {
+            authorizationHeader = prepareAuthorizationHeader();
+        } catch (OXException e) {
+            LOGGER.error("Reload of property '{}' failed: {}", SchedJoulesProperty.apiKey.getFQPropertyName(), e.getMessage(), e);
+        }
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.config.Reloadable#getInterests()
+     */
+    @Override
+    public Interests getInterests() {
+        return DefaultInterests.builder().propertiesOfInterest(SchedJoulesProperty.apiKey.getFQPropertyName()).build();
     }
 
     /**

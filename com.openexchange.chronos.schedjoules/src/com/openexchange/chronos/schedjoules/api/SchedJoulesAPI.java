@@ -91,7 +91,7 @@ public final class SchedJoulesAPI {
      */
     private SchedJoulesAPI() throws OXException {
         super();
-        client = new SchedJoulesRESTClient();
+        client = SchedJoulesRESTClient.getInstance();
         pages = new SchedJoulesPagesAPI(client);
         calendar = new SchedJoulesCalendarAPI(client);
         countries = new SchedJoulesCountriesAPI(client);

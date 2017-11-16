@@ -61,8 +61,7 @@ abstract class AbstractSchedJoulesAPI {
     static final String DEFAULT_LOCALE = "en";
     static final String DEFAULT_LOCATION = "us";
 
-    final SchedJoulesRESTClient client;
-    
+    final SchedJoulesRESTClient client;    
     
     /**
      * Initialises a new {@link AbstractSchedJoulesAPI}.
