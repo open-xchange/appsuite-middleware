@@ -56,8 +56,8 @@ import java.util.List;
 import javax.net.ssl.SSLHandshakeException;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -110,7 +110,7 @@ public class OneDriveOAuthAccess extends AbstractOAuthAccess {
 
     @Override
     public void dispose() {
-        OAuthClient<DefaultHttpClient> oAuthClient = this.<DefaultHttpClient> getOAuthClient();
+        OAuthClient<HttpClient> oAuthClient = this.<HttpClient> getOAuthClient();
         if (null != oAuthClient) {
             HttpClients.shutDown(oAuthClient.client);
         }
@@ -143,7 +143,7 @@ public class OneDriveOAuthAccess extends AbstractOAuthAccess {
         OneDriveClosure<Boolean> closure = new OneDriveClosure<Boolean>() {
 
             @Override
-            protected Boolean doPerform(DefaultHttpClient httpClient) throws OXException, JSONException, IOException {
+            protected Boolean doPerform(HttpClient httpClient) throws OXException, JSONException, IOException {
                 HttpGet request = null;
                 try {
                     List<NameValuePair> qparams = new LinkedList<NameValuePair>();
@@ -162,7 +162,7 @@ public class OneDriveOAuthAccess extends AbstractOAuthAccess {
                 }
             }
         };
-        return closure.perform(null, this.<DefaultHttpClient> getClient().client, getSession()).booleanValue();
+        return closure.perform(null, this.<HttpClient> getClient().client, getSession()).booleanValue();
     }
 
     @Override

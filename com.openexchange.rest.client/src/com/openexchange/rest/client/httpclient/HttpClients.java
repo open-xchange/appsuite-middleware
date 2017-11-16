@@ -153,20 +153,20 @@ public final class HttpClients {
     private static final int DEFAULT_SOCKET_BUFFER_SIZE = 8192;
 
     /**
-     * Creates a {@link DefaultHttpClient} instance.
+     * Creates a {@link CloseableHttpClient} instance.
      *
      * @param userAgent The optional user agent identifier
-     * @return A newly created {@link DefaultHttpClient} instance
+     * @return A newly created {@link CloseableHttpClient} instance
      */
     public static CloseableHttpClient getHttpClient(String userAgent) {
         return getHttpClient(new ClientConfig().setUserAgent(userAgent));
     }
 
     /**
-     * Creates a {@link DefaultHttpClient} instance.
+     * Creates a {@link CloseableHttpClient} instance.
      *
      * @param config The configuration settings for the client
-     * @return A newly created {@link DefaultHttpClient} instance
+     * @return A newly created {@link CloseableHttpClient} instance
      */
     public static CloseableHttpClient getHttpClient(final ClientConfig config) {
         SSLSocketFactoryProvider factoryProvider = RestClientServices.getOptionalService(SSLSocketFactoryProvider.class);
@@ -181,35 +181,35 @@ public final class HttpClients {
     }
 
     /**
-     * Creates a {@link DefaultHttpClient} instance.
+     * Creates a {@link CloseableHttpClient} instance.
      *
      * @param config The configuration settings for the client
      * @param factoryProvider The provider for the appropriate <code>SSLSocketFactory</code> instance to use
      * @param sslConfig The SSL configuration service to use
-     * @return A newly created {@link DefaultHttpClient} instance
+     * @return A newly created {@link CloseableHttpClient} instance
      */
     public static CloseableHttpClient getHttpClient(ClientConfig config, SSLSocketFactoryProvider factoryProvider, SSLConfigurationService sslConfig) {
         // Initialize ClientConnectionManager
         ClientConnectionManager ccm = initializeClientConnectionManagerUsing(config, factoryProvider, sslConfig);
 
-        // Initialize DefaultHttpClient using the ClientConnectionManager and client configuration
+        // Initialize CloseableHttpClient using the ClientConnectionManager and client configuration
         return initializeHttpClientUsing(config, ccm);
     }
 
     /**
-     * Creates a fall-back {@link DefaultHttpClient} instance.
+     * Creates a fall-back {@link CloseableHttpClient} instance.
      * <p>
      * <div style="margin-left: 0.1in; margin-right: 0.5in; margin-bottom: 0.1in; background-color:#FFDDDD;">Exclusively invoked internally! Do not use!</div>
      * <p>
      *
      * @param config The configuration settings for the client
-     * @return A newly created {@link DefaultHttpClient} instance
+     * @return A newly created {@link CloseableHttpClient} instance
      */
     public static CloseableHttpClient getFallbackHttpClient(ClientConfig config) {
         // Initialize ClientConnectionManager
         ClientConnectionManager ccm = initializeFallbackClientConnectionManagerUsing(config);
 
-        // Initialize DefaultHttpClient using the ClientConnectionManager and client configuration
+        // Initialize CloseableHttpClient using the ClientConnectionManager and client configuration
         return initializeHttpClientUsing(config, ccm);
     }
 

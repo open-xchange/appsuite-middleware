@@ -53,7 +53,6 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.WrappingCloseableHttpClient;
 import org.slf4j.Logger;
 import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.net.ssl.config.SSLConfigurationService;
@@ -96,11 +95,11 @@ public class WrappedClientsRegistry {
     }
 
     /**
-     * Creates an appropriate <code>DefaultHttpClient</code> instance
+     * Creates an appropriate <code>CloseableHttpClient</code> instance
      *
      * @param httpClient The wrapping instance
-     * @param config The configuration with which the <code>DefaultHttpClient</code> instance has been initialized
-     * @return The resulting <code>DefaultHttpClient</code> instance, which is either wrapped or not
+     * @param config The configuration with which the <code>CloseableHttpClient</code> instance has been initialized
+     * @return The resulting <code>CloseableHttpClient</code> instance, which is either wrapped or not
      */
     public CloseableHttpClient createWrapped(ClientConfig config) {
         SSLSocketFactoryProvider factoryProvider;

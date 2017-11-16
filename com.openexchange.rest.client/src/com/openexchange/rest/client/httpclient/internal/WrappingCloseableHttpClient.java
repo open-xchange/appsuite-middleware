@@ -47,7 +47,7 @@
  *
  */
 
-package org.apache.http.impl.client;
+package com.openexchange.rest.client.httpclient.internal;
 
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicReference;
@@ -64,7 +64,7 @@ import org.apache.http.protocol.HttpContext;
 import com.openexchange.rest.client.httpclient.HttpClients;
 
 /**
- * {@link WrappingCloseableHttpClient} - A wrapper for a <code>DefaultHttpClient</code> instance, which can be exchanged.
+ * {@link WrappingCloseableHttpClient} - A wrapper for a <code>CloseableHttpClient</code> instance, which can be exchanged.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.4
@@ -87,9 +87,9 @@ public class WrappingCloseableHttpClient extends CloseableHttpClient {
     }
 
     /**
-     * Replaces the currently wrapped <code>DefaultHttpClient</code> instance with the given one.
+     * Replaces the currently wrapped <code>CloseableHttpClient</code> instance with the given one.
      *
-     * @param httpClient The new <code>DefaultHttpClient</code> instance to apply
+     * @param httpClient The new <code>CloseableHttpClient</code> instance to apply
      */
     public void replaceHttpClient(CloseableHttpClient httpClient) {
         CloseableHttpClient cur;
@@ -108,6 +108,11 @@ public class WrappingCloseableHttpClient extends CloseableHttpClient {
             throw new IllegalStateException("HttpClient is null.");
         }
         return httpClient;
+    }
+
+    @Override
+    protected CloseableHttpResponse doExecute(HttpHost target, HttpRequest request, HttpContext context) throws IOException, ClientProtocolException {
+        return null;
     }
 
     @Override
@@ -168,11 +173,6 @@ public class WrappingCloseableHttpClient extends CloseableHttpClient {
     @Override
     public String toString() {
         return getHttpClient().toString();
-    }
-
-    @Override
-    protected CloseableHttpResponse doExecute(HttpHost target, HttpRequest request, HttpContext context) throws IOException, ClientProtocolException {
-        return getHttpClient().doExecute(target, request, context);
     }
 
 }
