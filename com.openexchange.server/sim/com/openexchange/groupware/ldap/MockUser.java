@@ -170,6 +170,8 @@ public class MockUser implements User {
 
     private final Map<String, String> attributes = new HashMap<String, String>();
 
+    private String[] aliases;
+
     public MockUser(int id) {
         super();
         this.id = id;
@@ -366,7 +368,16 @@ public class MockUser implements User {
      */
     @Override
     public String[] getAliases() {
-        return new String[] { getMail() };
+        return null == aliases ? new String[] { getMail() } : aliases;
+    }
+
+    /**
+     * Set aliases
+     * 
+     * @param aliases The aliases to set
+     */
+    public void setAliases(String[] aliases) {
+        this.aliases = aliases;
     }
 
     @Override
@@ -652,5 +663,4 @@ public class MockUser implements User {
     public void setFileStorageOwner(int fileStorageOwner) {
         this.fileStorageOwner = fileStorageOwner;
     }
-
 }
