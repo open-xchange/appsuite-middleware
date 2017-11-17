@@ -73,7 +73,6 @@ import org.glassfish.jersey.client.ClientConfig;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.cli.AbstractRestCLI;
 import com.openexchange.java.AsciiReader;
 import com.openexchange.java.Strings;
 
@@ -83,21 +82,7 @@ import com.openexchange.java.Strings;
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since v7.8.4
  */
-public class SendUserFeedback extends AbstractRestCLI<Void> {
-
-    private static final String END_LONG = "end-time";
-    private static final String END_SHORT = "e";
-
-    private static final String START_LONG = "start-time";
-    private static final String START_SHORT = "s";
-
-    private static final String CONTEXT_GROUP_LONG = "context-group";
-    private static final String CONTEXT_GROUP_SHORT = "g";
-    private static final String CONTEXT_GROUP_DEFAULT = "default";
-
-    private static final String TYPE_LONG = "type";
-    private static final String TYPE_SHORT = "t";
-    private static final String TYPE_DEFAULT = "star-rating-v1";
+public class SendUserFeedback extends AbstractUserFeedback {
 
     private static final String SUBJECT_LONG = "subject";
     private static final String SUBJECT_SHORT = "S";
@@ -111,8 +96,7 @@ public class SendUserFeedback extends AbstractRestCLI<Void> {
     private static final String RECIPIENTS_SHORT = "r";
     private static final String RECIPIENT_LONG = "recipients";
 
-    private static final String ENDPOINT_LONG = "api-root";
-    private static final String ENDPOINT_DEFAULT = "http://localhost:8009/userfeedback/v1/send";
+    private static final String SEND_PATH = "send";
 
     public static void main(String[] args) {
         new SendUserFeedback().execute(args);
@@ -125,22 +109,21 @@ public class SendUserFeedback extends AbstractRestCLI<Void> {
 
     @Override
     protected void addOptions(Options options) {
-        options.addOption(TYPE_SHORT, TYPE_LONG, true, "The feedback type to send. Default: 'star-rating-v1'.");
-        options.addOption(CONTEXT_GROUP_SHORT, CONTEXT_GROUP_LONG, true, "The context group identifying the global DB where the feedback is stored. Default: 'default'.");
-        options.addOption(START_SHORT, START_LONG, true, "Start time in seconds since 1970-01-01 00:00:00 UTC. Only feedback given after this time is sent. If not set, all feedback up to -e is sent.");
-        options.addOption(END_SHORT, END_LONG, true, "End time in seconds since 1970-01-01 00:00:00 UTC. Only feedback given before this time is sent. If not set, all feedback since -s is sent.");
+        addGenericOptions(options);
+
+        options.addOption(null, ENDPOINT_LONG, true, " URL to an alternative HTTP API endpoint. Example: 'https://192.168.0.1:8443/userfeedback/v1/send/'");
         options.addOption(SUBJECT_SHORT, SUBJECT_LONG, true, " The mail subject. Default: \"User Feedback Report: [time range]\".");
         options.addOption(BODY_SHORT, BODY_LONG, true, "The mail body (plain text).");
         options.addOption(COMPRESS_SHORT, COMPRESS_LONG, false, "Use to gzip-compress exported feedback.");
         Option recipients = new Option(RECIPIENTS_SHORT, RECIPIENT_LONG, true, "Single Recipient's mail address like \"Displayname <email@example.com>\" or the local path to a CSV file containing all the recipients, starting with an '@' (@/tmp/file.csv). Where the address is followed by the display name, seperated by a comma.");
         recipients.setRequired(true);
         options.addOption(recipients);
-        options.addOption(null, ENDPOINT_LONG, true, " URL to an alternative HTTP API endpoint. Example: 'https://192.168.0.1:8443/userfeedback/v1'");
     }
 
     @Override
     protected WebTarget getEndpoint(CommandLine cmd) {
         String endpoint = cmd.getOptionValue(ENDPOINT_LONG, ENDPOINT_DEFAULT);
+        endpoint = addPathIfRequired(endpoint, SEND_PATH);
         try {
             URI uri = new URI(endpoint);
 
@@ -164,11 +147,6 @@ public class SendUserFeedback extends AbstractRestCLI<Void> {
             System.exit(1);
         }
         return null;
-    }
-
-    @Override
-    protected boolean requiresAdministrativePermission() {
-        return true;
     }
 
     @Override
@@ -339,12 +317,12 @@ public class SendUserFeedback extends AbstractRestCLI<Void> {
 
     @Override
     protected String getName() {
-        return "senduserfeedback [OPTIONS]";
+        return "senduserfeedback -U myUser:myPassword [OPTIONS]";
     }
 
     @Override
     protected String getHeader() {
-        return "senduserfeedback -s 1487348317 -r \"Displayname <email@example.com>\"";
+        return "senduserfeedback -U myUser:myPassword -s 1487348317 -r \"Displayname <email@example.com>\"";
     }
 
     private void exitWithError(String message) {

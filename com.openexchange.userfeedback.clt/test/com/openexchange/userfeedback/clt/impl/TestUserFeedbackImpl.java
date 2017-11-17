@@ -47,103 +47,84 @@
  *
  */
 
-package com.openexchange.userfeedback.clt;
+package com.openexchange.userfeedback.clt.impl;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Invocation.Builder;
 import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.MediaType;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
-import org.glassfish.jersey.client.ClientConfig;
-import org.json.JSONObject;
+import com.openexchange.userfeedback.clt.AbstractUserFeedback;
+
 
 /**
- * {@link DeleteUserFeedback}
+ * {@link TestUserFeedbackImpl}
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
- * @since v7.8.4
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since v7.10.0
  */
-public class DeleteUserFeedback extends AbstractUserFeedback {
+public class TestUserFeedbackImpl extends AbstractUserFeedback {
 
-    /**
-     * @param args
+    /* (non-Javadoc)
+     * @see com.openexchange.cli.AbstractRestCLI#checkArguments(org.apache.commons.cli.CommandLine)
      */
-    public static void main(String[] args) {
-        new DeleteUserFeedback().execute(args);
-    }
-
     @Override
     protected void checkArguments(CommandLine cmd) {
-        // nothing to do
+        // TODO Auto-generated method stub
+
     }
 
+    /* (non-Javadoc)
+     * @see com.openexchange.cli.AbstractRestCLI#addOptions(org.apache.commons.cli.Options)
+     */
     @Override
     protected void addOptions(Options options) {
-        addGenericOptions(options);
-        options.addOption(null, ENDPOINT_LONG, true, " URL to an alternative HTTP API endpoint. Example: 'https://192.168.0.1:8443/userfeedback/v1/'");
+        // TODO Auto-generated method stub
+
     }
 
+    /* (non-Javadoc)
+     * @see com.openexchange.cli.AbstractRestCLI#getEndpoint(org.apache.commons.cli.CommandLine)
+     */
     @Override
     protected WebTarget getEndpoint(CommandLine cmd) {
-        String endpoint = cmd.getOptionValue(ENDPOINT_LONG, ENDPOINT_DEFAULT);
-        try {
-            URI uri = new URI(endpoint);
-
-            ClientConfig config = new ClientConfig();
-            Client client = ClientBuilder.newClient(config);
-            WebTarget baseTarget = client.target(uri);
-
-            String contextGroup = cmd.getOptionValue(CONTEXT_GROUP_SHORT, CONTEXT_GROUP_DEFAULT);
-            String type = cmd.getOptionValue(TYPE_SHORT, TYPE_DEFAULT);
-            WebTarget target = baseTarget.path(contextGroup).path(type);
-
-            if (cmd.hasOption(START_SHORT)) {
-                target = target.queryParam("start", cmd.getOptionValue(START_SHORT).concat("000")); // convert seconds to ms
-            }
-            if (cmd.hasOption(END_SHORT)) {
-                target = target.queryParam("end", cmd.getOptionValue(END_SHORT).concat("000")); // convert seconds to ms
-            }
-            return target;
-        } catch (URISyntaxException e) {
-            System.err.print("Unable to return endpoint: " + e.getMessage());
-        }
+        // TODO Auto-generated method stub
         return null;
     }
 
+    /* (non-Javadoc)
+     * @see com.openexchange.cli.AbstractCLI#invoke(org.apache.commons.cli.Options, org.apache.commons.cli.CommandLine, java.lang.Object)
+     */
     @Override
     protected Void invoke(Options option, CommandLine cmd, Builder context) throws Exception {
-        context.accept(MediaType.APPLICATION_JSON_TYPE, MediaType.APPLICATION_OCTET_STREAM_TYPE, MediaType.TEXT_PLAIN_TYPE);
-        String response = context.delete(String.class);
-        JSONObject entity = new JSONObject(response);
-
-        if (entity.getBoolean("successful")) {
-            String result = "Feedback data deleted for type: " + entity.getString("type") + ", context group: " + entity.getString("contextGroup") + (entity.has("start") ? (", start time: " + entity.getLong("start") / 1000) : "") + (entity.has("end") ? (", end time: " + entity.getLong("end") / 1000) : "");
-            System.out.println(result);
-        }
+        // TODO Auto-generated method stub
         return null;
     }
 
+    /* (non-Javadoc)
+     * @see com.openexchange.cli.AbstractCLI#checkOptions(org.apache.commons.cli.CommandLine)
+     */
     @Override
     protected void checkOptions(CommandLine cmd) {
-        // nothing to do
+        // TODO Auto-generated method stub
+
     }
 
+    /* (non-Javadoc)
+     * @see com.openexchange.cli.AbstractCLI#getFooter()
+     */
     @Override
     protected String getFooter() {
-        return "Delete user feedback.";
+        // TODO Auto-generated method stub
+        return null;
     }
 
+    /* (non-Javadoc)
+     * @see com.openexchange.cli.AbstractCLI#getName()
+     */
     @Override
     protected String getName() {
-        return "deleteuserfeedback -U myUser:myPassword [OPTIONS]";
+        // TODO Auto-generated method stub
+        return null;
     }
 
-    @Override
-    protected String getHeader() {
-        return "deleteuserfeedback -U myUser:myPassword [-t type] [-g ctx_grp] [-s time] [-e time]\n" + "deleteuserfeedback -s 1487348317";
-    }
 }
