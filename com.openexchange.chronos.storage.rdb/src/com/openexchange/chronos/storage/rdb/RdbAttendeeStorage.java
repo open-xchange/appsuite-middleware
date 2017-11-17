@@ -306,11 +306,11 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
     private int updateAttendees(Connection connection, String eventId, List<Attendee> attendees) throws SQLException, OXException {
         int updated = 0;
         for (Attendee attendee : attendees) {
-            attendee = entityProcessor.adjustPriorSave(attendee);
             AttendeeField[] fields = MAPPER.getMappedFields(MAPPER.getAssignedFields(attendee));
             String sql = new StringBuilder()
                 .append("UPDATE calendar_attendee SET ").append(MAPPER.getAssignments(fields))
-                .append(" WHERE cid=? AND account=? AND event=? AND uri=?;")
+                .append(" WHERE cid=? AND account=? AND event=? AND ")
+                .append(isInternal(attendee) ? "entity" : "uri").append("=?;")
             .toString();
             try (PreparedStatement stmt = connection.prepareStatement(sql)) {
                 int parameterIndex = 1;
@@ -318,7 +318,11 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
                 stmt.setInt(parameterIndex++, context.getContextId());
                 stmt.setInt(parameterIndex++, accountId);
                 stmt.setInt(parameterIndex++, asInt(eventId));
-                stmt.setString(parameterIndex++, attendee.getUri());
+                if (isInternal(attendee)) {
+                    stmt.setInt(parameterIndex++, attendee.getEntity());
+                } else {
+                    stmt.setString(parameterIndex++, attendee.getUri());
+                }
                 updated += logExecuteUpdate(stmt);
             } catch (SQLException e) {
                 throw asOXException(e, MAPPER, attendee, connection, "calendar_attendee");
@@ -349,12 +353,19 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
     private int deleteAttendees(Connection connection, String eventId, List<Attendee> attendees) throws SQLException, OXException {
         int updated = 0;
         for (Attendee attendee : attendees) {
-            attendee = entityProcessor.adjustPriorSave(attendee);
-            try (PreparedStatement stmt = connection.prepareStatement("DELETE FROM calendar_attendee WHERE cid=? AND account=? AND event=? AND uri=?;")) {
+            String sql = new StringBuilder()
+                .append("DELETE FROM calendar_attendee WHERE cid=? AND account=? AND event=? AND ")
+                .append(isInternal(attendee) ? "entity" : "uri").append("=?;")
+            .toString();
+            try (PreparedStatement stmt = connection.prepareStatement(sql)) {
                 stmt.setInt(1, context.getContextId());
                 stmt.setInt(2, accountId);
                 stmt.setInt(3, asInt(eventId));
-                stmt.setString(4, attendee.getUri());
+                if (isInternal(attendee)) {
+                    stmt.setInt(4, attendee.getEntity());
+                } else {
+                    stmt.setString(4, attendee.getUri());
+                }
                 updated += logExecuteUpdate(stmt);
             }
         }
