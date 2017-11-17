@@ -49,47 +49,33 @@
 
 package com.openexchange.chronos.provider.google.migration;
 
-import java.io.InputStream;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import org.json.JSONException;
-import org.json.JSONInputStream;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.DefaultCalendarAccount;
 import com.openexchange.chronos.provider.google.GoogleCalendarConfigField;
 import com.openexchange.chronos.provider.google.GoogleCalendarProvider;
 import com.openexchange.chronos.provider.google.osgi.Services;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.chronos.storage.CalendarStorageFactory;
-import com.openexchange.database.Databases;
+import com.openexchange.context.ContextService;
 import com.openexchange.datatypes.genericonf.storage.GenericConfigurationStorageService;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.Types;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextImpl;
-import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.groupware.update.Attributes;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.TaskAttributes;
 import com.openexchange.groupware.update.UpdateConcurrency;
-import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.groupware.update.WorkingLevel;
-import com.openexchange.java.Charsets;
-import com.openexchange.java.Streams;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.subscribe.AbstractSubscribeService;
+import com.openexchange.subscribe.AdministrativeSubscriptionStorage;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionStorage;
 
@@ -102,8 +88,7 @@ import com.openexchange.subscribe.SubscriptionStorage;
 public class GoogleSubscriptionsMigrationTask extends UpdateTaskAdapter {
 
     private final static Logger LOG = LoggerFactory.getLogger(GoogleSubscriptionsMigrationTask.class);
-
-    private static final String SQL_READ = " SELECT id, user_id, configuration_id, source_id, folder_id, last_update, created, enabled FROM subscriptions WHERE cid=? AND source_id='com.openexchange.subscribe.google.calendar'";
+    private static final String SOURCE_ID = "com.openexchange.subscribe.google.calendar";
 
     @Override
     public void perform(PerformParameters params) throws OXException {
@@ -114,83 +99,58 @@ public class GoogleSubscriptionsMigrationTask extends UpdateTaskAdapter {
         }
 
         SubscriptionStorage subscriptionStorage = AbstractSubscribeService.STORAGE.get();
-        if (subscriptionStorage == null) {
-            throw ServiceExceptionCode.absentService(SubscriptionStorage.class);
+        if (subscriptionStorage == null || !(subscriptionStorage instanceof AdministrativeSubscriptionStorage)) {
+            throw ServiceExceptionCode.absentService(AdministrativeSubscriptionStorage.class);
+        }
+
+        ContextService contextService = Services.getService(ContextService.class);
+        if (contextService == null ) {
+            throw ServiceExceptionCode.absentService(ContextService.class);
         }
 
         Connection writeCon = params.getConnection();
         int[] contextsInSameSchema = params.getContextsInSameSchema();
 
         for (int ctxId : contextsInSameSchema) {
-
-            /*
-             * Step 1: Load existing subscriptions
-             */
-            ResultSet rs = null;
-            PreparedStatement stmt = null;
-            final List<Subscription> subscriptions = new LinkedList<Subscription>();
-            Context ctx = new ContextImpl(ctxId);
-            try {
-                stmt = writeCon.prepareStatement(SQL_READ);
-                stmt.setInt(1, ctxId);
-                rs = stmt.executeQuery();
-                while (rs.next()) {
-                    final Subscription subscription = new Subscription();
-                    subscription.setFolderId(rs.getString("folder_id"));
-                    subscription.setId(rs.getInt("id"));
-                    subscription.setUserId(rs.getInt("user_id"));
-                    subscription.setEnabled(rs.getBoolean("enabled"));
-                    subscription.setContext(ctx);
-                    final Map<String, Object> content = new HashMap<String, Object>();
-                    storageService.fill(writeCon, subscription.getContext(), rs.getInt("configuration_id"), content);
-                    subscription.setConfiguration(content);
-                    subscriptions.add(subscription);
-                }
-            } catch (SQLException e) {
-                throw UpdateExceptionCodes.SQL_PROBLEM.create(e.getMessage());
-            } finally {
-                Databases.closeSQLStuff(rs, stmt);
-            }
+            Context ctx = contextService.loadContext(ctxId);
+            final List<Subscription> subscriptions = ((AdministrativeSubscriptionStorage) subscriptionStorage).getSubscriptionsForContext(ctx, SOURCE_ID, writeCon);
 
             /*
              * Step 2: Create accounts for the existing subscriptions
              */
             Iterator<Subscription> iterator = subscriptions.iterator();
-            try {
-                writeCon.setAutoCommit(false);
-                CalendarStorage calendarStorage = Services.getService(CalendarStorageFactory.class).create(ctx, -1, null);
-                while (iterator.hasNext()) {
-                    Subscription sub = iterator.next();
-                    try {
-                        JSONObject config = new JSONObject();
-                        Object oauthAccount = sub.getConfiguration().get("account");
-                        if (oauthAccount == null) {
-                            // Skip bad configured subscriptions
-                            iterator.remove();
-                            continue;
-                        }
-                        config.put(GoogleCalendarConfigField.OAUTH_ID, oauthAccount);
-                        config.put(GoogleCalendarConfigField.MIGRATED, true);
-                        config.put(GoogleCalendarConfigField.OLD_FOLDER, sub.getFolderId());
-                        int id = IDGenerator.getId(sub.getContext(), Types.SUBSCRIPTION, writeCon);
-                        insertAccount(writeCon, ctxId, new DefaultCalendarAccount(GoogleCalendarProvider.PROVIDER_ID, id, sub.getUserId(), sub.isEnabled(), config, config, new Date()));
-                        calendarStorage.getAccountStorage().invalidateAccount(sub.getUserId(), -1);
-                    } catch (JSONException | SQLException e) {
+            CalendarStorage calendarStorage = Services.getService(CalendarStorageFactory.class).create(ctx, -1, null);
+            while (iterator.hasNext()) {
+                Subscription sub = iterator.next();
+                boolean inserted = false;
+                try {
+                    JSONObject config = new JSONObject();
+                    Object oauthAccount = sub.getConfiguration().get("account");
+                    if (oauthAccount == null) {
+                        // Skip bad configured subscriptions
+                        iterator.remove();
+                        continue;
+                    }
+                    config.put(GoogleCalendarConfigField.OAUTH_ID, oauthAccount);
+                    config.put(GoogleCalendarConfigField.MIGRATED, true);
+                    config.put(GoogleCalendarConfigField.OLD_FOLDER, sub.getFolderId());
+
+                    int id = calendarStorage.getAccountStorage().nextId();
+                    calendarStorage.getAccountStorage().insertAccount(new DefaultCalendarAccount(GoogleCalendarProvider.PROVIDER_ID, id, sub.getUserId(), sub.isEnabled(), config, config, new Date()));
+                    inserted = true;
+                    calendarStorage.getAccountStorage().invalidateAccount(sub.getUserId(), -1);
+                } catch (JSONException e) {
+                    LOG.error("Error during migration of google subscriptions. Subscription with id " + sub.getId() + " in context " + ctxId + " could not be migrated to a calendar account because of: " + e.getMessage());
+                    // remove the subscription so it does not get deleted
+                    iterator.remove();
+                } catch (OXException e) {
+                    if (inserted) {
+                        LOG.warn("Problem during migration of google subscriptions. Cache could not be invalidated for user with id " + sub.getUserId());
+                    } else {
                         LOG.error("Error during migration of google subscriptions. Subscription with id " + sub.getId() + " in context " + ctxId + " could not be migrated to a calendar account because of: " + e.getMessage());
                         // remove the subscription so it does not get deleted
                         iterator.remove();
-                    } catch (OXException e) {
-                        LOG.warn("Problem during migration of google subscriptions. Cache could not be invalidated for user with id " + sub.getUserId());
                     }
-                }
-                writeCon.commit();
-            } catch (SQLException e) {
-                throw UpdateExceptionCodes.SQL_PROBLEM.create(e.getMessage());
-            } finally {
-                try {
-                    writeCon.setAutoCommit(true);
-                } catch (SQLException e) {
-                    // ignore
                 }
             }
 
@@ -201,42 +161,6 @@ public class GoogleSubscriptionsMigrationTask extends UpdateTaskAdapter {
                 subscriptionStorage.forgetSubscription(sub);
             }
         }
-    }
-
-    private static int insertAccount(Connection connection, int cid, CalendarAccount account) throws SQLException {
-        String sql = "INSERT INTO calendar_account (cid,id,provider,user,enabled,modified,internalConfig,userConfig) VALUES (?,?,?,?,?,?,?,?);";
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-            InputStream internalConfigStream = null;
-            InputStream userConfigStream = null;
-            try {
-                internalConfigStream = serialize(account.getInternalConfiguration());
-                userConfigStream = serialize(account.getUserConfiguration());
-                stmt.setInt(1, cid);
-                stmt.setInt(2, account.getAccountId());
-                stmt.setString(3, account.getProviderId());
-                stmt.setInt(4, account.getUserId());
-                stmt.setBoolean(5, account.isEnabled());
-                stmt.setLong(6, account.getLastModified().getTime());
-                stmt.setBinaryStream(7, internalConfigStream);
-                stmt.setBinaryStream(8, userConfigStream);
-                return stmt.executeUpdate();
-            } finally {
-                Streams.close(internalConfigStream, userConfigStream);
-            }
-        }
-    }
-
-    /**
-     * Serializes a JSON object (as used in an account's configuration) to an input stream.
-     *
-     * @param data The JSON object serialize, or <code>null</code>
-     * @return The serialized JSON object, or <code>null</code> if the passed object was <code>null</code>
-     */
-    private static InputStream serialize(JSONObject data) {
-        if (null == data) {
-            return null;
-        }
-        return new JSONInputStream(data, Charsets.US_ASCII.name());
     }
 
     @Override

@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,41 +47,30 @@
  *
  */
 
-package com.openexchange.chronos.provider.google.osgi;
+package com.openexchange.subscribe;
 
-import com.openexchange.chronos.provider.CalendarProvider;
-import com.openexchange.chronos.provider.account.AdministrativeCalendarAccountService;
-import com.openexchange.chronos.provider.account.CalendarAccountService;
-import com.openexchange.chronos.provider.google.GoogleCalendarProvider;
-import com.openexchange.chronos.provider.google.migration.GoogleSubscriptionsMigrationTask;
-import com.openexchange.chronos.service.RecurrenceService;
-import com.openexchange.chronos.storage.CalendarStorageFactory;
-import com.openexchange.config.lean.LeanConfigurationService;
-import com.openexchange.context.ContextService;
-import com.openexchange.datatypes.genericonf.storage.GenericConfigurationStorageService;
-import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
-import com.openexchange.groupware.update.UpdateTaskProviderService;
-import com.openexchange.oauth.OAuthService;
-import com.openexchange.osgi.HousekeepingActivator;
+import java.sql.Connection;
+import java.util.List;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.Context;
 
-public class Activator extends HousekeepingActivator {
+/**
+ * {@link AdministrativeSubscriptionStorage}
+ *
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.10.0
+ */
+public interface AdministrativeSubscriptionStorage extends SubscriptionStorage {
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class[] { OAuthService.class, CalendarAccountService.class, AdministrativeCalendarAccountService.class, LeanConfigurationService.class, RecurrenceService.class };
-    }
-
-    @Override
-    protected Class<?>[] getOptionalServices() {
-        return new Class[] { GenericConfigurationStorageService.class, CalendarStorageFactory.class, ContextService.class };
-    }
-
-    @Override
-    protected void startBundle() throws Exception {
-        openTrackers();
-        Services.setServiceLookup(this);
-        registerService(CalendarProvider.class, new GoogleCalendarProvider());
-        registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new GoogleSubscriptionsMigrationTask()));
-    }
+    /**
+     * Gets all {@link Subscription}s of a given source for a given context
+     *
+     * @param ctx The {@link Context}
+     * @param sourceId The source id
+     * @param con The connection to use
+     * @return A list of {@link Subscription}s
+     * @throws OXException
+     */
+    public List<Subscription> getSubscriptionsForContext(Context ctx, String sourceId, Connection con) throws OXException;
 
 }
