@@ -63,6 +63,7 @@ import java.util.zip.InflaterInputStream;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.json.JSONValue;
 import com.github.mangstadt.vinnie.SyntaxStyle;
 import com.github.mangstadt.vinnie.VObjectParameters;
 import com.github.mangstadt.vinnie.VObjectProperty;
@@ -100,6 +101,16 @@ public class ExtendedPropertiesCodec {
     }
 
     /**
+     * Encodes the supplied extended property parameters prior passing it to the storage.
+     *
+     * @param parameters The extended property parameters to encode
+     * @return The encoded parameters, or <code>null</code> if passed are <code>null</code> or empty
+     */
+    public static byte[] encodeParameters(List<ExtendedPropertyParameter> parameters) throws IOException {
+        return encode(parameters, TYPE_VOBJECT);
+    }
+
+    /**
      * Decodes extended properties from the supplied input stream fetched from the storage.
      *
      * @param inputStream The input stream carrying the encoded extended properties
@@ -124,6 +135,30 @@ public class ExtendedPropertiesCodec {
         }
     }
 
+    /**
+     * Decodes extended property parameters from the supplied input stream fetched from the storage.
+     *
+     * @param inputStream The input stream carrying the encoded parameters
+     * @return The decoded parameters, or <code>null</code> if passed no data was read
+     */
+    public static List<ExtendedPropertyParameter> decodeParameters(InputStream inputStream) throws IOException {
+        if (null == inputStream) {
+            return null;
+        }
+        int type = inputStream.read();
+        if (-1 == type) {
+            return null; // eol
+        }
+        switch (type) {
+            case TYPE_JSON_DEFLATE:
+                return decodeDeflatedJsonParameters(inputStream);
+            case TYPE_VOBJECT:
+                return decodeVObjectParameters(inputStream);
+            default:
+                throw new IOException(new UnsupportedEncodingException(String.valueOf(type)));
+        }
+    }
+
     private static byte[] encode(ExtendedProperties extendedProperties, byte type) throws IOException {
         if (null == extendedProperties || extendedProperties.isEmpty()) {
             return null;
@@ -132,6 +167,20 @@ public class ExtendedPropertiesCodec {
         try {
             outputStream = Streams.newByteArrayOutputStream();
             encode(extendedProperties, type, outputStream);
+            return outputStream.toByteArray();
+        } finally {
+            Streams.close(outputStream);
+        }
+    }
+
+    private static byte[] encode(List<ExtendedPropertyParameter> parameters, byte type) throws IOException {
+        if (null == parameters || parameters.isEmpty()) {
+            return null;
+        }
+        ByteArrayOutputStream outputStream = null;
+        try {
+            outputStream = Streams.newByteArrayOutputStream();
+            encode(parameters, type, outputStream);
             return outputStream.toByteArray();
         } finally {
             Streams.close(outputStream);
@@ -151,21 +200,45 @@ public class ExtendedPropertiesCodec {
         }
     }
 
+    private static void encode(List<ExtendedPropertyParameter> parameters, byte type, ByteArrayOutputStream outputStream) throws IOException {
+        outputStream.write(type);
+        switch (type) {
+            case TYPE_JSON_DEFLATE:
+                encodeDeflatedJson(parameters, outputStream);
+            case TYPE_VOBJECT:
+                encodeVObjectParameters(parameters, outputStream);
+                break;
+            default:
+                throw new IOException(new UnsupportedEncodingException(String.valueOf(type)));
+        }
+    }
+
     private static void encodeDeflatedJson(ExtendedProperties extendedProperties, ByteArrayOutputStream outputStream) throws IOException {
         try {
-            JSONArray jsonProperties = encodeJsonProperties(extendedProperties);
-            byte[] jsonBytes = jsonProperties.toString().getBytes(Charsets.US_ASCII);
-            Deflater deflater = new Deflater();
-            deflater.setInput(jsonBytes);
-            deflater.finish();
-            byte[] buffer = new byte[4096];
-            do {
-                deflater.deflate(buffer);
-            } while (false == deflater.finished());
-            //            return new DeflaterInputStream(new JSONInputStream(encodeJsonProperties(extendedProperties), "US-ASCII"));
+            encodeDeflatedJson(encodeJsonProperties(extendedProperties), outputStream);
         } catch (JSONException e) {
             throw new IOException(e);
         }
+    }
+
+    private static void encodeDeflatedJson(List<ExtendedPropertyParameter> parameters, ByteArrayOutputStream outputStream) throws IOException {
+        try {
+            encodeDeflatedJson(encodeJsonParameters(parameters), outputStream);
+        } catch (JSONException e) {
+            throw new IOException(e);
+        }
+    }
+
+    private static void encodeDeflatedJson(JSONValue json, ByteArrayOutputStream outputStream) throws IOException {
+        byte[] jsonBytes = json.toString().getBytes(Charsets.US_ASCII);
+        Deflater deflater = new Deflater();
+        deflater.setInput(jsonBytes);
+        deflater.finish();
+        byte[] buffer = new byte[4096];
+        do {
+            deflater.deflate(buffer);
+        } while (false == deflater.finished());
+        //            return new DeflaterInputStream(new JSONInputStream(encodeJsonProperties(extendedProperties), "US-ASCII"));
     }
 
     private static JSONArray encodeJsonProperties(ExtendedProperties extendedProperties) throws JSONException {
@@ -189,17 +262,29 @@ public class ExtendedPropertiesCodec {
         }
     }
 
+    private static void encodeVObjectParameters(List<ExtendedPropertyParameter> parameters, ByteArrayOutputStream outputStream) throws IOException {
+        try (OutputStreamWriter writer = new OutputStreamWriter(outputStream, Charsets.UTF_8); VObjectWriter vObjectWriter = new VObjectWriter(writer, SyntaxStyle.NEW)) {
+            ExtendedProperty extendedProperty = new ExtendedProperty("X", null, parameters);
+            vObjectWriter.writeProperty(encodeVObjectProperty(extendedProperty));
+            vObjectWriter.flush();
+        }
+    }
+
     private static VObjectProperty encodeVObjectProperty(ExtendedProperty extendedProperty) throws IOException {
         VObjectProperty vObjectProperty = new VObjectProperty(extendedProperty.getName(), extendedProperty.getValue());
         List<ExtendedPropertyParameter> parameters = extendedProperty.getParameters();
         if (null != parameters) {
-            VObjectParameters vObjectParameters = new VObjectParameters();
-            for (ExtendedPropertyParameter parameter : parameters) {
-                vObjectParameters.put(parameter.getName(), parameter.getValue());
-            }
-            vObjectProperty.setParameters(vObjectParameters);
+            vObjectProperty.setParameters(encodeVObjectParameters(parameters));
         }
         return vObjectProperty;
+    }
+
+    private static VObjectParameters encodeVObjectParameters(List<ExtendedPropertyParameter> parameters) throws IOException {
+        VObjectParameters vObjectParameters = new VObjectParameters();
+        for (ExtendedPropertyParameter parameter : parameters) {
+            vObjectParameters.put(parameter.getName(), parameter.getValue());
+        }
+        return vObjectParameters;
     }
 
     private static JSONObject encodeJsonProperty(ExtendedProperty extendedProperty) throws JSONException {
@@ -210,19 +295,32 @@ public class ExtendedPropertiesCodec {
         if (null == parameters || parameters.isEmpty()) {
             return jsonExtendedProperty;
         }
+        jsonExtendedProperty.put("parameters", encodeJsonParameters(parameters));
+        return jsonExtendedProperty;
+    }
+
+    private static JSONArray encodeJsonParameters(List<ExtendedPropertyParameter> parameters) throws JSONException {
         JSONArray jsonParameters = new JSONArray(parameters.size());
         for (int i = 0; i < parameters.size(); i++) {
             ExtendedPropertyParameter parameter = parameters.get(i);
             jsonParameters.add(i, new JSONObject().putOpt("name", parameter.getName()).putOpt("value", parameter.getValue()));
         }
-        jsonExtendedProperty.put("parameters", jsonParameters);
-        return jsonExtendedProperty;
+        return jsonParameters;
     }
 
     private static ExtendedProperties decodeDeflatedJson(InputStream inputStream) throws IOException {
         try (InflaterInputStream inflaterStream = new InflaterInputStream(inputStream);
             AsciiReader reader = new AsciiReader(inflaterStream)) {
             return decodeJsonProperties(new JSONArray(reader));
+        } catch (JSONException e) {
+            throw new IOException(e);
+        }
+    }
+
+    private static List<ExtendedPropertyParameter> decodeDeflatedJsonParameters(InputStream inputStream) throws IOException {
+        try (InflaterInputStream inflaterStream = new InflaterInputStream(inputStream);
+            AsciiReader reader = new AsciiReader(inflaterStream)) {
+            return decodeJsonParameters(new JSONArray(reader));
         } catch (JSONException e) {
             throw new IOException(e);
         }
@@ -246,18 +344,30 @@ public class ExtendedPropertiesCodec {
         if (null == jsonParameters || jsonParameters.isEmpty()) {
             return new ExtendedProperty(name, value);
         }
+        return new ExtendedProperty(name, value, decodeJsonParameters(jsonParameters));
+    }
+
+    private static List<ExtendedPropertyParameter> decodeJsonParameters(JSONArray jsonParameters) throws JSONException {
         List<ExtendedPropertyParameter> parameters = new ArrayList<ExtendedPropertyParameter>(jsonParameters.length());
         for (int i = 0; i < jsonParameters.length(); i++) {
             JSONObject jsonParameter = jsonParameters.getJSONObject(i);
             parameters.add(new ExtendedPropertyParameter(jsonParameter.optString("name", null), jsonParameter.optString("value", null)));
         }
-        return new ExtendedProperty(name, value, parameters);
+        return parameters;
     }
 
     private static ExtendedProperties decodeVObjectProperties(InputStream inputStream) throws IOException {
         try (InputStreamReader reader = new InputStreamReader(inputStream, Charsets.UTF_8);
             VObjectReader vObjectReader = new VObjectReader(reader, SyntaxRules.iCalendar())) {
             return decodeVObjectProperties(vObjectReader);
+        }
+    }
+
+    private static List<ExtendedPropertyParameter> decodeVObjectParameters(InputStream inputStream) throws IOException {
+        try (InputStreamReader reader = new InputStreamReader(inputStream, Charsets.UTF_8);
+            VObjectReader vObjectReader = new VObjectReader(reader, SyntaxRules.iCalendar())) {
+            ExtendedProperties properties = decodeVObjectProperties(vObjectReader);
+            return null != properties && 0 < properties.size() ? properties.get(0).getParameters() : null;
         }
     }
 
@@ -283,13 +393,17 @@ public class ExtendedPropertiesCodec {
         if (null == vObjectParameters) {
             return new ExtendedProperty(name, value);
         }
+        return new ExtendedProperty(name, value, decodeVObjectParameters(vObjectParameters));
+    }
+
+    private static List<ExtendedPropertyParameter> decodeVObjectParameters(VObjectParameters vObjectParameters) {
         List<ExtendedPropertyParameter> parameters = new ArrayList<ExtendedPropertyParameter>();
         for (Entry<String, List<String>> entry : vObjectParameters) {
             for (String parameterValue : entry.getValue()) {
                 parameters.add(new ExtendedPropertyParameter(entry.getKey(), parameterValue));
             }
         }
-        return new ExtendedProperty(name, value, parameters);
+        return parameters;
     }
 
 }
