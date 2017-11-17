@@ -412,6 +412,8 @@ public class RdbContextStorage extends ContextStorage {
             Map<PoolAndSchema, List<Integer>> map = new LinkedHashMap<>(256, 0.9F);
             for (PoolAndSchema schema : schemas) {
                 stmt = con.prepareStatement("SELECT cid FROM context_server2db_pool WHERE db_schema=? AND write_db_pool_id=?");
+                stmt.setString(1, schema.getSchema());
+                stmt.setInt(2, schema.getPoolId());
                 result = stmt.executeQuery();
                 if (result.next()) {
                     List<Integer> contextIds = new LinkedList<>();
