@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2017-2020 OX Software GmbH
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,52 +47,48 @@
  *
  */
 
-package com.openexchange.mail.authentication;
+package com.openexchange.mail.authentication.result;
 
 /**
- * {@link DKIMResult} - The evaluation states of the DKIM signature
+ * {@link DMARCResult}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
- * @see <a href="https://tools.ietf.org/html/rfc6376#section-3.9">RFC 6376, Section 3.9</a>
  */
-public enum DKIMResult {
-
+public enum DMARCResult implements AuthenticationMechanismResult {
     /**
-     * A successful verification of the signature
+     * Passed the DMARC check
      */
-    SUCCESS("Success"),
+    PASS("Pass"),
     /**
-     * A permanent, non-recoverable error such as a signature verification failure
+     * Failed the DMARC check
      */
-    PERMFAIL("Permanent Failure"),
-    /**
-     * A temporary, recoverable error such as a DNS query timeout
-     */
-    TEMPFAIL("Temporary Failure");
+    FAIL("Fail");
 
     private final String displayName;
 
     /**
-     * Initialises a new {@link DKIMResult}.
+     * Initialises a new {@link DMARCResult}.
      */
-    private DKIMResult(String displayName) {
+    private DMARCResult(String displayName) {
         this.displayName = displayName;
     }
 
-    /**
-     * Gets the displayName
-     *
-     * @return The displayName
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.mail.authentication.AuthenticationMechanismResult#getDisplayName()
      */
+    @Override
     public String getDisplayName() {
         return displayName;
     }
 
-    /**
-     * Returns the technical name of the DKIM result
+    /*
+     * (non-Javadoc)
      * 
-     * @return the technical name of the DKIM result
+     * @see com.openexchange.mail.authentication.AuthenticationMechanismResult#getTechnicalName()
      */
+    @Override
     public String getTechnicalName() {
         return name().toLowerCase();
     }

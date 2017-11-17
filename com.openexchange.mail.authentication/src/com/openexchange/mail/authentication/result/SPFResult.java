@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.mail.authentication;
+package com.openexchange.mail.authentication.result;
 
 /**
  * {@link SPFResult} - Specifies the possible SPF results.
@@ -55,7 +55,7 @@ package com.openexchange.mail.authentication;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @see <a href="https://tools.ietf.org/html/rfc7208#section-8">RFC-7208, Section 8</a>
  */
-public enum SPFResult {
+public enum SPFResult implements AuthenticationMechanismResult {
 
     /**
      * The SPF verifier has no information at all about the authorisation
@@ -144,20 +144,22 @@ public enum SPFResult {
         this.displayName = displayName;
     }
 
-    /**
-     * Gets the displayName
-     *
-     * @return The displayName
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.mail.authentication.AuthenticationMechanismResult#getDisplayName()
      */
+    @Override
     public String getDisplayName() {
         return displayName;
     }
 
-    /**
-     * Returns the technical name of the SPF result
+    /*
+     * (non-Javadoc)
      * 
-     * @return the technical name of the SPF result
+     * @see com.openexchange.mail.authentication.AuthenticationMechanismResult#getTechnicalName()
      */
+    @Override
     public String getTechnicalName() {
         return name().toLowerCase();
     }
