@@ -238,6 +238,10 @@ public final class DownloadUtility {
                 // Treat all SVG content as harmful
                 harmful = true;
                 sContentDisposition = "attachment";
+            } else if (Strings.startsWithAny(toLowerCase(contentType.getSubType()), "xsl") || fileNameImpliesExcel(fileName)) {
+                // Treat all SVG content as harmful
+                harmful = true;
+                sContentDisposition = "attachment";
             } else if (Strings.startsWithAny(toLowerCase(contentType.getSubType()), "xml") || fileNameImpliesXml(fileName)) {
                 /*
                  * XML content requested for download...
@@ -538,6 +542,10 @@ public final class DownloadUtility {
 
     private static boolean fileNameImpliesSvg(final String fileName) {
         return null != fileName && MimeType2ExtMap.getContentType(fileName).indexOf("svg") >= 0;
+    }
+
+    private static boolean fileNameImpliesExcel(final String fileName) {
+        return null != fileName && MimeType2ExtMap.getContentType(fileName).indexOf("excel") >= 0;
     }
 
     private static boolean fileNameImpliesJavascript(final String fileName) {
