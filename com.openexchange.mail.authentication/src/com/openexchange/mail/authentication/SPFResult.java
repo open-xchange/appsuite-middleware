@@ -50,9 +50,10 @@
 package com.openexchange.mail.authentication;
 
 /**
- * {@link SPFResult}
+ * {@link SPFResult} - Specifies the possible SPF results.
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @see <a href="https://tools.ietf.org/html/rfc7208#section-8">RFC-7208, Section 8</a>
  */
 public enum SPFResult {
 
