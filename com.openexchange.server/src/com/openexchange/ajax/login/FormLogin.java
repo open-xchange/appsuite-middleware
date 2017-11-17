@@ -51,7 +51,6 @@ package com.openexchange.ajax.login;
 
 import static com.openexchange.ajax.AJAXServlet.CONTENTTYPE_HTML;
 import static com.openexchange.ajax.AJAXServlet.PARAMETER_SESSION;
-import static com.openexchange.ajax.AJAXServlet.PARAMETER_USER;
 import static com.openexchange.ajax.AJAXServlet.PARAMETER_USER_ID;
 import static com.openexchange.ajax.login.AutoLoginTools.reAuthenticate;
 import static com.openexchange.ajax.login.AutoLoginTools.tryAutologin;
@@ -139,12 +138,7 @@ public class FormLogin implements LoginRequestHandler {
         Tools.disableCaching(resp);
         LoginServlet.writeSecretCookie(req, resp, session, session.getHash(), req.isSecure(), req.getServerName(), conf);
         LoginServlet.addHeadersAndCookies(result, resp);
-        resp.sendRedirect(generateRedirectURL(
-            req.getParameter(LoginFields.UI_WEB_PATH_PARAM),
-            req.getParameter(LoginFields.AUTOLOGIN_PARAM),
-            session,
-            user.getPreferredLanguage(),
-            conf.getUiWebPath()));
+        resp.sendRedirect(generateRedirectURL(req.getParameter(LoginFields.UI_WEB_PATH_PARAM), req.getParameter(LoginFields.AUTOLOGIN_PARAM), session, user.getPreferredLanguage(), conf.getUiWebPath()));
     }
 
     private static String generateRedirectURL(String uiWebPathParam, String shouldStore, Session session, String language, String uiWebPath) {
@@ -156,7 +150,7 @@ public class FormLogin implements LoginRequestHandler {
         retval = retval.replaceAll("[\n\r]", "");
         retval = LoginTools.addFragmentParameter(retval, PARAMETER_SESSION, session.getSessionID());
         // App Suite UI requires some additional values.
-        retval = LoginTools.addFragmentParameter(retval, PARAMETER_USER, session.getLogin());
+        // retval = LoginTools.addFragmentParameter(retval, PARAMETER_USER, session.getLogin()); <--- Removed because login string might exposing sensitive user data; e.g. E-Mail address
         retval = LoginTools.addFragmentParameter(retval, PARAMETER_USER_ID, Integer.toString(session.getUserId()));
         retval = LoginTools.addFragmentParameter(retval, "context_id", String.valueOf(session.getContextId()));
         retval = LoginTools.addFragmentParameter(retval, "language", language);

@@ -60,6 +60,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.fields.LoginFields;
+import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.authentication.LoginExceptionCodes;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
@@ -113,7 +114,8 @@ public final class TokenLogin implements LoginRequestHandler {
         Tools.disableCaching(resp);
 
         String redirectURL = generateRedirectURL(LoginTools.encodeUrl(req.getParameter(LoginFields.UI_WEB_PATH_PARAM), true), LoginTools.encodeUrl(req.getParameter(LoginFields.AUTOLOGIN_PARAM), true), session, user.getPreferredLanguage(), conf.getUiWebPath(), request.getHttpSessionID(), serverToken);
-        if (req.getParameter("jsonResponse") != null && req.getParameter("jsonResponse").equalsIgnoreCase("true")) {
+        if (AJAXRequestDataTools.parseBoolParameter(req.getParameter("jsonResponse"))) {
+            // Client demands no redirect, but a JSON response
             JSONObject response = new JSONObject();
             try {
                 response.put("serverToken", serverToken);
@@ -140,7 +142,7 @@ public final class TokenLogin implements LoginRequestHandler {
         retval = LoginTools.addFragmentParameter(retval, "jsessionid", httpSessionId);
         retval = LoginTools.addFragmentParameter(retval, LoginFields.SERVER_TOKEN, serverToken);
         // App Suite UI requires some additional values.
-        retval = LoginTools.addFragmentParameter(retval, PARAMETER_USER, session.getLogin());
+        // retval = LoginTools.addFragmentParameter(retval, PARAMETER_USER, session.getLogin()); <--- Removed because login string might exposing sensitive user data; e.g. E-Mail address
         retval = LoginTools.addFragmentParameter(retval, PARAMETER_USER_ID, Integer.toString(session.getUserId()));
         retval = LoginTools.addFragmentParameter(retval, "language", language);
         // Pass through parameter
