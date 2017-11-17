@@ -235,7 +235,7 @@ public class DefaultNotificationParticipantResolver implements NotificationParti
 
             foundOrganizer = foundOrganizer || participant.hasRole(ITipRole.ORGANIZER);
             foundOnBehalfOf = foundOnBehalfOf || id == onBehalfOf.getId();
-            foundPrincipal = foundPrincipal || id == principal.getEntity();
+            foundPrincipal = foundPrincipal || (null != principal && id == principal.getEntity());
 
             participant.setDisplayName(user.getDisplayName());
             participant.setLocale(user.getLocale());
@@ -263,7 +263,7 @@ public class DefaultNotificationParticipantResolver implements NotificationParti
             if (id == onBehalfOf.getId()) {
                 roles.add(ITipRole.ON_BEHALF_OF);
             }
-            if (principal != null && principal.getEntity() == id) {
+            if (null != principal && principal.getEntity() == id) {
                 roles.add(ITipRole.PRINCIPAL);
             }
 
@@ -288,7 +288,7 @@ public class DefaultNotificationParticipantResolver implements NotificationParti
             retval.add(participant);
         }
 
-        if (!foundPrincipal && principal != null && principal.getEntity() > 0) {
+        if (!foundPrincipal && null != principal && principal.getEntity() > 0) {
             final User principalUser = userService.getUser(principal.getEntity(), ctx);
             final String mail = principalUser.getMail();
             final int id = principalUser.getId();
@@ -299,7 +299,7 @@ public class DefaultNotificationParticipantResolver implements NotificationParti
             if (id == principalUser.getId()) {
                 roles.add(ITipRole.ON_BEHALF_OF);
             }
-            if (principal != null && principal.getEntity() == id) {
+            if (principal.getEntity() == id) {
                 roles.add(ITipRole.PRINCIPAL);
             }
 
@@ -393,20 +393,13 @@ public class DefaultNotificationParticipantResolver implements NotificationParti
     }
 
     private CalendarUser getPrincipal(CalendarSession session) {
-        if (!session.contains(PRINCIPAL_ID) && !session.contains(PRINCIPAL_EMAIL)) {
-            return null;
-        }
-
-        CalendarUser principal = new CalendarUser();
+        // ID is the only value used, so we are fine only checking for this
         if (session.contains(PRINCIPAL_ID)) {
-            principal.setEntity(session.get(PRINCIPAL_ID, int.class));
+            CalendarUser principal = new CalendarUser();
+            principal.setEntity(session.get(PRINCIPAL_ID, Integer.class).intValue());
+            return principal;
         }
-        if (session.contains(PRINCIPAL_EMAIL)) {
-            principal.setEMail(session.get(PRINCIPAL_EMAIL, String.class));
-        }
-
-        return principal;
-
+        return null;
     }
 
     private User discoverOrganizer(final Event appointment, final Context ctx) throws OXException {
@@ -456,7 +449,7 @@ public class DefaultNotificationParticipantResolver implements NotificationParti
         if (users != null) {
             for (Attendee userParticipant : users) {
                 if (CalendarUtils.isInternalUser(userParticipant)) {
-                    userIds.add(userParticipant.getEntity());
+                    userIds.add(I(userParticipant.getEntity()));
                 } else if (CalendarUtils.isExternalUser(userParticipant)) {
                     externals.add(userParticipant.getEMail());
                 }
@@ -467,7 +460,7 @@ public class DefaultNotificationParticipantResolver implements NotificationParti
         for (final NotificationParticipant p : allRecipients) {
             if (p.isExternal() && externals.contains(p.getEmail().toLowerCase())) {
                 filtered.add(p);
-            } else if (!p.isExternal() && !p.isResource() && userIds.contains(p.getUser().getId())) {
+            } else if (!p.isExternal() && !p.isResource() && userIds.contains(I(p.getUser().getId()))) {
                 filtered.add(p);
             }
         }
@@ -478,7 +471,7 @@ public class DefaultNotificationParticipantResolver implements NotificationParti
 
     @Override
     public List<NotificationParticipant> getResources(final Event appointment, final Context ctx) throws OXException {
-        final List<Attendee> resources = CalendarUtils.filter(appointment.getAttendees(), true, CalendarUserType.RESOURCE);
+        final List<Attendee> resources = CalendarUtils.filter(appointment.getAttendees(), Boolean.TRUE, CalendarUserType.RESOURCE);
         if (resources == null) {
             return Collections.emptyList();
         }
