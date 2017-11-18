@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.mail.authentication.result;
+package com.openexchange.mail.authentication.mechanism.result;
 
 /**
  * {@link AuthenticationMechanismResult}

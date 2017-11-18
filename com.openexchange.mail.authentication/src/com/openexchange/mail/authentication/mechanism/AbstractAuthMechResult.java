@@ -49,8 +49,7 @@
 
 package com.openexchange.mail.authentication.mechanism;
 
-import com.openexchange.mail.authentication.MailAuthenticationMechanismResult;
-import com.openexchange.mail.authentication.result.AuthenticationMechanismResult;
+import com.openexchange.mail.authentication.mechanism.result.AuthenticationMechanismResult;
 
 /**
  * {@link AbstractAuthMechResult}

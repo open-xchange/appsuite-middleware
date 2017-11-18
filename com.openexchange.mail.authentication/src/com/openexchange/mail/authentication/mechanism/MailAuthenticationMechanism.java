@@ -47,37 +47,13 @@
  *
  */
 
-package com.openexchange.mail.authentication;
-
-import com.openexchange.mail.authentication.result.AuthenticationMechanismResult;
+package com.openexchange.mail.authentication.mechanism;
 
 /**
- * {@link MailAuthenticationMechanismResult} - Defines the methods of the mail authentication
- * mechanism result dataobject
+ * {@link MailAuthenticationMechanism}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public interface MailAuthenticationMechanismResult {
-
-    /**
-     * Returns the domain for which this mechanism was applied
-     * 
-     * @return the domain for which this mechanism was applied
-     */
-    String getDomain();
-
-    /**
-     * Returns the (optional) client IP which was used to send the e-mail
-     * 
-     * @return the (optional) client IP which was used to send the e-mail;
-     *         <code>null</code> if none available
-     */
-    String getClientIP();
-
-    /**
-     * Returns the result of the authentication mechanism
-     * 
-     * @return the result of the authentication mechanism
-     */
-    AuthenticationMechanismResult getResult();
+public enum MailAuthenticationMechanism {
+    DMARC, DKIM, SPF;
 }

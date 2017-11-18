@@ -49,7 +49,7 @@
 
 package com.openexchange.mail.authentication.mechanism;
 
-import com.openexchange.mail.authentication.result.DMARCResult;
+import com.openexchange.mail.authentication.mechanism.result.DMARCResult;
 
 /**
  * {@link DMARCAuthMechResult}

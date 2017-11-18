@@ -51,6 +51,7 @@ package com.openexchange.mail.authentication;
 
 import java.util.Collections;
 import java.util.Set;
+import com.openexchange.mail.authentication.mechanism.MailAuthenticationMechanism;
 
 /**
  * {@link MailAuthenticationResult} - The result of the overall mail authentication
