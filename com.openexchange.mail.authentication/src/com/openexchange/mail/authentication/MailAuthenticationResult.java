@@ -63,18 +63,15 @@ import com.openexchange.mail.authentication.mechanism.MailAuthenticationMechanis
 public class MailAuthenticationResult {
 
     private MailAuthenticationStatus status;
-    private final String domain;
+    private String domain;
     private final Set<MailAuthenticationMechanism> mailAuthenticationMechanisms;
     private final Set<MailAuthenticationMechanismResult> mailAuthenticationMechanismResults;
 
     /**
      * Initialises a new {@link MailAuthenticationResult}.
-     * 
-     * @param domain The domain for which this {@link MailAuthenticationResult}
      */
-    public MailAuthenticationResult(String domain) {
+    public MailAuthenticationResult() {
         super();
-        this.domain = domain;
         mailAuthenticationMechanismResults = new HashSet<>();
         mailAuthenticationMechanisms = new HashSet<>();
     }
@@ -88,6 +85,15 @@ public class MailAuthenticationResult {
     public void addResult(MailAuthenticationMechanismResult result) {
         mailAuthenticationMechanisms.add(result.getMechanism());
         getMailAuthenticationMechanismResults().add(result);
+    }
+
+    /**
+     * Sets the domain
+     *
+     * @param domain The domain to set
+     */
+    public void setDomain(String domain) {
+        this.domain = domain;
     }
 
     /**
