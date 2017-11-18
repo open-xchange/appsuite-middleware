@@ -49,50 +49,35 @@
 
 package com.openexchange.mail.authentication;
 
+import com.openexchange.mail.authentication.result.AuthenticationMechanismResult;
+
 /**
- * {@link AuthenticationStatus}
+ * {@link MailAuthenticationMechanismResult} - Defines the methods of the mail authentication
+ * mechanism result dataobject
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public enum AuthenticationStatus {
+public interface MailAuthenticationMechanismResult {
 
     /**
-     * Passed authentication status
-     */
-    PASS("Pass"),
-    /**
-     * Failed authentication status
-     */
-    FAIL("Fail"),
-    /**
-     * Cannot determine status, or temporary errors occurred
-     */
-    NEUTRAL("Neutral");
-
-    private final String displayName;
-
-    /**
-     * Initialises a new {@link AuthenticationStatus}.
-     */
-    private AuthenticationStatus(String displayName) {
-        this.displayName = displayName;
-    }
-
-    /**
-     * Gets the displayName
-     *
-     * @return The displayName
-     */
-    public String getDisplayName() {
-        return displayName;
-    }
-
-    /**
-     * Returns the technical name of the AuthenticationStatus
+     * Returns the domain for which this mechanism was applied
      * 
-     * @return the technical name of the AuthenticationStatus
+     * @return the domain for which this mechanism was applied
      */
-    public String getTechnicalName() {
-        return name().toLowerCase();
-    }
+    String getDomain();
+
+    /**
+     * Returns the (optional) client IP which was used to send the e-mail
+     * 
+     * @return the (optional) client IP which was used to send the e-mail;
+     *         <code>null</code> if none available
+     */
+    String getClientIP();
+
+    /**
+     * Returns the result of the authentication mechanism
+     * 
+     * @return the result of the authentication mechanism
+     */
+    AuthenticationMechanismResult getResult();
 }
