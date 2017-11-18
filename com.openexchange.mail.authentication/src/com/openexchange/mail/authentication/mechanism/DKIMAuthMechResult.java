@@ -78,4 +78,14 @@ public class DKIMAuthMechResult extends AbstractAuthMechResult {
     public DKIMAuthMechResult(String domain, String clientIP, DKIMResult result) {
         super(domain, clientIP, result);
     }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.mail.authentication.mechanism.MailAuthenticationMechanismResult#getMechanism()
+     */
+    @Override
+    public MailAuthenticationMechanism getMechanism() {
+        return MailAuthenticationMechanism.DKIM;
+    }
 }

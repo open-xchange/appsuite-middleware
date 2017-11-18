@@ -50,8 +50,10 @@
 package com.openexchange.mail.authentication;
 
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Set;
 import com.openexchange.mail.authentication.mechanism.MailAuthenticationMechanism;
+import com.openexchange.mail.authentication.mechanism.MailAuthenticationMechanismResult;
 
 /**
  * {@link MailAuthenticationResult} - The result of the overall mail authentication
@@ -62,7 +64,8 @@ public class MailAuthenticationResult {
 
     private MailAuthenticationStatus status;
     private final String domain;
-    private Set<MailAuthenticationMechanism> mailAuthenticationMechanisms;
+    private final Set<MailAuthenticationMechanism> mailAuthenticationMechanisms;
+    private final Set<MailAuthenticationMechanismResult> mailAuthenticationMechanismResults;
 
     /**
      * Initialises a new {@link MailAuthenticationResult}.
@@ -72,6 +75,19 @@ public class MailAuthenticationResult {
     public MailAuthenticationResult(String domain) {
         super();
         this.domain = domain;
+        mailAuthenticationMechanismResults = new HashSet<>();
+        mailAuthenticationMechanisms = new HashSet<>();
+    }
+
+    /**
+     * Adds the specified {@link MailAuthenticationMechanismResult} to the overall
+     * result {@link Set}
+     * 
+     * @param result The {@link MailAuthenticationMechanismResult} to add
+     */
+    public void addResult(MailAuthenticationMechanismResult result) {
+        mailAuthenticationMechanisms.add(result.getMechanism());
+        getMailAuthenticationMechanismResults().add(result);
     }
 
     /**
@@ -108,5 +124,14 @@ public class MailAuthenticationResult {
      */
     public Set<MailAuthenticationMechanism> getAuthenticationMechanisms() {
         return Collections.unmodifiableSet(mailAuthenticationMechanisms);
+    }
+
+    /**
+     * Returns an unmodifiable {@link Set} with the results of the used mail authentication mechanisms
+     *
+     * @return an unmodifiable {@link Set} with the results of the used mail authentication mechanisms
+     */
+    public Set<MailAuthenticationMechanismResult> getMailAuthenticationMechanismResults() {
+        return Collections.unmodifiableSet(mailAuthenticationMechanismResults);
     }
 }

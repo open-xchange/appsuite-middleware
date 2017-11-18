@@ -78,4 +78,14 @@ public class DMARCAuthMechResult extends AbstractAuthMechResult {
     public DMARCAuthMechResult(String domain, String clientIP, DMARCResult result) {
         super(domain, clientIP, result);
     }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.mail.authentication.mechanism.MailAuthenticationMechanismResult#getMechanism()
+     */
+    @Override
+    public MailAuthenticationMechanism getMechanism() {
+        return MailAuthenticationMechanism.DMARC;
+    }
 }

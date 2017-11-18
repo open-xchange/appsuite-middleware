@@ -78,4 +78,14 @@ public class SPFAuthMechResult extends AbstractAuthMechResult {
     public SPFAuthMechResult(String domain, String clientIP, SPFResult result) {
         super(domain, clientIP, result);
     }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.mail.authentication.mechanism.MailAuthenticationMechanismResult#getMechanism()
+     */
+    @Override
+    public MailAuthenticationMechanism getMechanism() {
+        return MailAuthenticationMechanism.SPF;
+    }
 }
