@@ -67,7 +67,11 @@ public enum MailAuthenticationStatus {
     /**
      * Cannot determine status, or temporary errors occurred
      */
-    NEUTRAL("Neutral");
+    NEUTRAL("Neutral"),
+    /**
+     * Nothing has been analysed
+     */
+    NOT_ANALYZED("Not Analyzed");
 
     private final String displayName;
 
