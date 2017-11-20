@@ -59,6 +59,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.regex.Pattern;
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.mail.authentication.MailAuthenticationHandler;
@@ -247,7 +249,18 @@ public class MailAuthenticationHandlerImpl implements MailAuthenticationHandler 
      * @return <code>true</code> if the string denotes a valid domain, <code>false</code> otherwise
      */
     private boolean isValidDomain(String domain) {
-        return DOMAIN_PATTERN.matcher(domain).matches();
+        StringBuilder sb = new StringBuilder("jane.doe");
+        if (!domain.startsWith("@")) {
+            sb.append('@');
+        }
+        sb.append(domain);
+        try {
+            InternetAddress.parse(domain, true);
+            return true;
+        } catch (AddressException e) {
+            LOGGER.debug("Unable to parse domain '{}'", domain, e);
+            return false;
+        }
     }
 
     ///////////////////////////////// HELPER CLASSES /////////////////////////////////
