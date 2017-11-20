@@ -47,26 +47,59 @@
  *
  */
 
-package com.openexchange.mail.authentication.mechanism.result;
+package com.openexchange.mail.authentication.mechanism.dkim;
+
+import com.openexchange.mail.authentication.mechanism.AbstractAuthMechResult;
+import com.openexchange.mail.authentication.mechanism.MailAuthenticationMechanism;
 
 /**
- * {@link AuthenticationMechanismResult}
+ * {@link DKIMAuthMechResult}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public interface AuthenticationMechanismResult {
+public class DKIMAuthMechResult extends AbstractAuthMechResult {
 
     /**
-     * Returns the display name of the mechanism's result
+     * Initialises a new {@link DKIMAuthMechResult}.
      * 
-     * @return the display name of the mechanism's result
+     * @param domain The domain for which this mail authentication mechanism was applied to
+     * @param result The {@link DKIMResult}
      */
-    String getDisplayName();
+    public DKIMAuthMechResult(String domain, DKIMResult result) {
+        super(domain, null, result);
+    }
 
     /**
-     * Returns the technical name of the mechanism's result
+     * Initialises a new {@link DKIMAuthMechResult}.
      * 
-     * @return the technical name of the mechanism's result
+     * @param domain The domain for which this mail authentication mechanism was applied to
+     * @param clientIP The optional client IP used to send the e-mail
+     * @param result The {@link DKIMResult}
      */
-    String getTechnicalName();
+    public DKIMAuthMechResult(String domain, String clientIP, DKIMResult result) {
+        super(domain, clientIP, result);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.mail.authentication.mechanism.MailAuthenticationMechanismResult#getMechanism()
+     */
+    @Override
+    public MailAuthenticationMechanism getMechanism() {
+        return MailAuthenticationMechanism.DKIM;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("DKIMAuthMechResult [getMechanism()=").append(getMechanism()).append(", getDomain()=").append(getDomain()).append(", getClientIP()=").append(getClientIP()).append(", getResult()=").append(getResult()).append("]");
+        return builder.toString();
+    }
+
 }

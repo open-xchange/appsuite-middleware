@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2017-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,58 +47,18 @@
  *
  */
 
-package com.openexchange.mail.authentication.mechanism;
+package com.openexchange.mail.authentication.mechanism.dkim;
 
-import com.openexchange.mail.authentication.mechanism.result.DKIMResult;
 
 /**
- * {@link DKIMAuthMechResult}
+ * {@link DKIMAttribute}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class DKIMAuthMechResult extends AbstractAuthMechResult {
+public final class DKIMAttribute {
 
-    /**
-     * Initialises a new {@link DKIMAuthMechResult}.
-     * 
-     * @param domain The domain for which this mail authentication mechanism was applied to
-     * @param result The {@link DKIMResult}
-     */
-    public DKIMAuthMechResult(String domain, DKIMResult result) {
-        super(domain, null, result);
-    }
-
-    /**
-     * Initialises a new {@link DKIMAuthMechResult}.
-     * 
-     * @param domain The domain for which this mail authentication mechanism was applied to
-     * @param clientIP The optional client IP used to send the e-mail
-     * @param result The {@link DKIMResult}
-     */
-    public DKIMAuthMechResult(String domain, String clientIP, DKIMResult result) {
-        super(domain, clientIP, result);
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.mail.authentication.mechanism.MailAuthenticationMechanismResult#getMechanism()
-     */
-    @Override
-    public MailAuthenticationMechanism getMechanism() {
-        return MailAuthenticationMechanism.DKIM;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.lang.Object#toString()
-     */
-    @Override
-    public String toString() {
-        StringBuilder builder = new StringBuilder();
-        builder.append("DKIMAuthMechResult [getMechanism()=").append(getMechanism()).append(", getDomain()=").append(getDomain()).append(", getClientIP()=").append(getClientIP()).append(", getResult()=").append(getResult()).append("]");
-        return builder.toString();
-    }
-
+    public static final String REASON = "reason";
+    
+    public static final String HEADER_I = "header.i";
+    
 }

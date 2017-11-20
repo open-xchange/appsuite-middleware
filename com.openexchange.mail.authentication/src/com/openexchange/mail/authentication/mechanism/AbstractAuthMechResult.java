@@ -49,14 +49,14 @@
 
 package com.openexchange.mail.authentication.mechanism;
 
-import com.openexchange.mail.authentication.mechanism.result.AuthenticationMechanismResult;
+import com.openexchange.mail.authentication.mechanism.dmarc.DMARCAuthMechResult;
 
 /**
  * {@link AbstractAuthMechResult}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-abstract class AbstractAuthMechResult implements MailAuthenticationMechanismResult {
+public abstract class AbstractAuthMechResult implements MailAuthenticationMechanismResult {
 
     private String domain;
     private String clientIP;

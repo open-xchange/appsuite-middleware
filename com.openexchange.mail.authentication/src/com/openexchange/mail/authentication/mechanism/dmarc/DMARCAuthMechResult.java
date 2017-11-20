@@ -47,9 +47,10 @@
  *
  */
 
-package com.openexchange.mail.authentication.mechanism;
+package com.openexchange.mail.authentication.mechanism.dmarc;
 
-import com.openexchange.mail.authentication.mechanism.result.DMARCResult;
+import com.openexchange.mail.authentication.mechanism.AbstractAuthMechResult;
+import com.openexchange.mail.authentication.mechanism.MailAuthenticationMechanism;
 
 /**
  * {@link DMARCAuthMechResult}

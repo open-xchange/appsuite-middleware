@@ -47,7 +47,9 @@
  *
  */
 
-package com.openexchange.mail.authentication.mechanism.result;
+package com.openexchange.mail.authentication.mechanism.spf;
+
+import com.openexchange.mail.authentication.mechanism.AuthenticationMechanismResult;
 
 /**
  * {@link SPFResult} - Specifies the possible SPF results.

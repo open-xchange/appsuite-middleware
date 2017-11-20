@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2017-2020 OX Software GmbH
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,84 +47,58 @@
  *
  */
 
-package com.openexchange.mail.authentication.mechanism.result;
+package com.openexchange.mail.authentication.mechanism.spf;
+
+import com.openexchange.mail.authentication.mechanism.AbstractAuthMechResult;
+import com.openexchange.mail.authentication.mechanism.MailAuthenticationMechanism;
 
 /**
- * {@link DKIMResult} - The evaluation states of the DKIM signature
+ * {@link SPFAuthMechResult}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
- * @see <a href="https://tools.ietf.org/html/rfc7601#section-2.7.1">RFC 7601, Section 2.7.1</a>
  */
-public enum DKIMResult implements AuthenticationMechanismResult {
+public class SPFAuthMechResult extends AbstractAuthMechResult {
 
     /**
-     * The message was not signed.
-     */
-    NONE("None"),
-    /**
-     * The message was signed, the signature or signatures were
-     * acceptable to the ADMD, and the signature(s) passed verification
-     * tests.
-     */
-    PASS("Pass"),
-    /**
-     * The message was signed and the signature or signatures were
-     * acceptable to the ADMD, but they failed the verification test(s).
-     */
-    FAIL("Fail"),
-    /**
-     * The message was signed, but some aspect of the signature or
-     * signatures was not acceptable to the ADMD.
-     */
-    POLICY("Policy"),
-    /**
-     * The message was signed, but the signature or signatures
-     * contained syntax errors or were not otherwise able to be
-     * processed. This result is also used for other failures not
-     * covered elsewhere in this list.
+     * Initialises a new {@link SPFAuthMechResult}.
      * 
+     * @param domain The domain for which this mail authentication mechanism was applied to
+     * @param result The {@link SPFResult}
      */
-    NEUTRAL("Neutral"),
-    /**
-     * The message could not be verified due to some error that
-     * is likely transient in nature, such as a temporary inability to
-     * retrieve a public key. A later attempt may produce a final
-     * result.
-     */
-    TEMPERROR("Temporary Error"),
-    /**
-     * The message could not be verified due to some error that
-     * is unrecoverable, such as a required header field being absent. A
-     * later attempt is unlikely to produce a final result.
-     */
-    PERMFAIL("Permanent Failure");
-
-    private final String displayName;
+    public SPFAuthMechResult(String domain, SPFResult result) {
+        super(domain, null, result);
+    }
 
     /**
-     * Initialises a new {@link DKIMResult}.
+     * Initialises a new {@link SPFAuthMechResult}.
+     * 
+     * @param domain The domain for which this mail authentication mechanism was applied to
+     * @param clientIP The optional client IP used to send the e-mail
+     * @param result The {@link SPFResult}
      */
-    private DKIMResult(String displayName) {
-        this.displayName = displayName;
+    public SPFAuthMechResult(String domain, String clientIP, SPFResult result) {
+        super(domain, clientIP, result);
     }
 
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.mail.authentication.AuthenticationMechanismResult#getDisplayName()
+     * @see com.openexchange.mail.authentication.mechanism.MailAuthenticationMechanismResult#getMechanism()
      */
     @Override
-    public String getDisplayName() {
-        return displayName;
+    public MailAuthenticationMechanism getMechanism() {
+        return MailAuthenticationMechanism.SPF;
     }
 
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.mail.authentication.AuthenticationMechanismResult#getTechnicalName()
+     * @see java.lang.Object#toString()
      */
     @Override
-    public String getTechnicalName() {
-        return name().toLowerCase();
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("SPFAuthMechResult [getMechanism()=").append(getMechanism()).append(", getDomain()=").append(getDomain()).append(", getClientIP()=").append(getClientIP()).append(", getResult()=").append(getResult()).append("]");
+        return builder.toString();
     }
 }
