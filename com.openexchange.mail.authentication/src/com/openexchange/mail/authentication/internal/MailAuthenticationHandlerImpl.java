@@ -68,10 +68,12 @@ import com.openexchange.mail.authentication.mechanism.MailAuthenticationMechanis
 import com.openexchange.mail.authentication.mechanism.MailAuthenticationMechanismResult;
 import com.openexchange.mail.authentication.mechanism.dkim.DKIMAuthMechResult;
 import com.openexchange.mail.authentication.mechanism.dkim.DKIMResult;
+import com.openexchange.mail.authentication.mechanism.dkim.DKIMResultHeader;
 import com.openexchange.mail.authentication.mechanism.dmarc.DMARCAuthMechResult;
 import com.openexchange.mail.authentication.mechanism.dmarc.DMARCResult;
 import com.openexchange.mail.authentication.mechanism.spf.SPFAuthMechResult;
 import com.openexchange.mail.authentication.mechanism.spf.SPFResult;
+import com.openexchange.mail.authentication.mechanism.spf.SPFResultHeader;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.HeaderCollection;
 
@@ -109,14 +111,14 @@ public class MailAuthenticationHandlerImpl implements MailAuthenticationHandler 
         });
         mechanismParsersRegitry.put(MailAuthenticationMechanism.DKIM, (line) -> {
             String value = line.get(MailAuthenticationMechanism.DKIM.name().toLowerCase());
-            DKIMResult dkimResult = DKIMResult.valueOf(value);
-            String domain = line.get("header.i");
+            DKIMResult dkimResult = DKIMResult.valueOf(value.toUpperCase());
+            String domain = line.get(DKIMResultHeader.HEADER_I);
             return new DKIMAuthMechResult(domain, dkimResult);
         });
         mechanismParsersRegitry.put(MailAuthenticationMechanism.SPF, (line) -> {
             String value = line.get(MailAuthenticationMechanism.SPF.name().toLowerCase());
-            SPFResult spfResult = SPFResult.valueOf(value);
-            String domain = line.get("header.i");
+            SPFResult spfResult = SPFResult.valueOf(value.toUpperCase());
+            String domain = line.get(SPFResultHeader.SMTP_MAILFROM);
             return new SPFAuthMechResult(domain, spfResult);
         });
     }
@@ -290,11 +292,11 @@ public class MailAuthenticationHandlerImpl implements MailAuthenticationHandler 
     }
 
     private Map<String, String> parseMechanismResult(String mechanismResult) {
-        String[] s = mechanismResult.split("; ");
+        String[] s = mechanismResult.split(" ");
         Map<String, String> resMap = new HashMap<>();
         for (String p : s) {
             String[] pair = p.split("=");
-            if (pair.length == 0) {
+            if (pair.length != 2) {
                 continue;
             }
             resMap.put(pair[0], pair[1]);

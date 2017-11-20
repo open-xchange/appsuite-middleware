@@ -47,18 +47,26 @@
  *
  */
 
-package com.openexchange.mail.authentication.mechanism.dkim;
-
+package com.openexchange.mail.authentication.mechanism.spf;
 
 /**
- * {@link DKIMAttribute}
+ * {@link SPFResultHeader}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public final class DKIMAttribute {
+public final class SPFResultHeader {
 
-    public static final String REASON = "reason";
-    
-    public static final String HEADER_I = "header.i";
-    
+    /**
+     * Refers to the send domain
+     * 
+     * @see <a href="https://tools.ietf.org/html/rfc7208#section-9.1">RFC 7208, Section 9.1</a>
+     * @see <a href="https://tools.ietf.org/html/rfc7601#section-2.7.2">RFC 7601, Section 2.7.2</a>
+     */
+    public static final String SMTP_MAILFROM = "smtp.mailfrom";
+
+    /**
+     * @see <a href="https://tools.ietf.org/html/rfc7208#section-9.1">RFC 7208, Section 9.1</a>
+     * @see <a href="https://tools.ietf.org/html/rfc7601#section-2.7.2">RFC 7601, Section 2.7.2</a>
+     */
+    public static final String SMTP_HELO = "smtp.helo";
 }
