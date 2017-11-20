@@ -124,7 +124,7 @@ public class MailAuthenticationHandlerImpl implements MailAuthenticationHandler 
     }
 
     public static void main(String[] args) {
-        String[] authHeaders = { "mx.google.com; dkim=pass header.i=@open-xchange.com header.s=201705 header.b=VvWVD9kg; dkim=pass header.i=@open-xchange.com header.s=201705 header.b=0WC5u+VZ; dkim=pass header.i=@open-xchange.com header.s=201705 header.b=doOaQjgp; spf=pass (google.com: domain of jane.doe@open-xchange.com designates 1.2.3.4 as permitted sender) smtp.mailfrom=jane.doe@open-xchange.com; dmarc=pass (p=NONE sp=NONE dis=NONE) header.from=open-xchange.com" };
+        String[] authHeaders = { "mx.xyz.com; dkim=pass header.i=@open-xchange.com header.s=201705 header.b=VvWVD9kg; dkim=pass header.i=@open-xchange.com header.s=201705 header.b=0WC5u+VZ; dkim=pass header.i=@open-xchange.com header.s=201705 header.b=doOaQjgp; spf=pass (xyz.com: domain of jane.doe@open-xchange.com designates 1.2.3.4 as permitted sender) smtp.mailfrom=jane.doe@open-xchange.com; dmarc=pass (p=NONE sp=NONE dis=NONE) header.from=open-xchange.com" };
         MailAuthenticationHandlerImpl m = new MailAuthenticationHandlerImpl();
         MailAuthenticationResult r = m.parseHeaders(authHeaders);
         System.err.println(r);
@@ -291,6 +291,12 @@ public class MailAuthenticationHandlerImpl implements MailAuthenticationHandler 
         }
     }
 
+    /**
+     * Parses the specified mechanism result line to a {@link Map}.
+     * 
+     * @param mechanismResult The mechanism result header line
+     * @return A {@link Map} with key/value pairs of the header line's attributes
+     */
     private Map<String, String> parseMechanismResult(String mechanismResult) {
         String[] s = mechanismResult.split(" ");
         Map<String, String> resMap = new HashMap<>();
@@ -299,6 +305,8 @@ public class MailAuthenticationHandlerImpl implements MailAuthenticationHandler 
             if (pair.length != 2) {
                 continue;
             }
+            // TODO: Include the possible 'key-less' reason included in a parentheses?
+            //       e.g. spf=pass (xyz.com: domain of jane.doe@open-xchange.com designates 1.2.3.4 as permitted sender)
             resMap.put(pair[0], pair[1]);
         }
         return resMap;
