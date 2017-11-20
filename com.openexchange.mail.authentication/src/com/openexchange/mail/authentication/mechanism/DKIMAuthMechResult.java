@@ -88,4 +88,17 @@ public class DKIMAuthMechResult extends AbstractAuthMechResult {
     public MailAuthenticationMechanism getMechanism() {
         return MailAuthenticationMechanism.DKIM;
     }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("DKIMAuthMechResult [getMechanism()=").append(getMechanism()).append(", getDomain()=").append(getDomain()).append(", getClientIP()=").append(getClientIP()).append(", getResult()=").append(getResult()).append("]");
+        return builder.toString();
+    }
+
 }
