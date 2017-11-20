@@ -102,16 +102,14 @@ public class MailAuthenticationHandlerImpl implements MailAuthenticationHandler 
 
         // There can only be one, if there are more only the first one is relevant
         String[] split = authHeaders[0].split(";");
-        // TODO: Check for possible version after the domain name
-        // checkVersion();
-        if (split == null || split.length == 0) {
+        if (split.length == 0) {
             // Huh? Invalid/Malformed authentication results header, set to 'neutral'
             result.setStatus(MailAuthenticationStatus.NEUTRAL);
             return result;
         }
 
         // The first property of the header MUST always be the domain
-        String domain = split[0];
+        String domain = cleanseVersion(split[0]);
         if (!isValidDomain(domain)) {
             // Not a valid domain, thus we return with 'neutral' status
             result.setStatus(MailAuthenticationStatus.NEUTRAL);
@@ -124,6 +122,18 @@ public class MailAuthenticationHandlerImpl implements MailAuthenticationHandler 
         }
 
         return result;
+    }
+
+    /**
+     * Removes the optional version (if present) from the specified domain.
+     * 
+     * @see <a href="https://tools.ietf.org/html/rfc7601#section-2.2">RFC 7601, Section 2.2</a>
+     * @param domain The domain
+     * @return The cleansed domain
+     */
+    private String cleanseVersion(String domain) {
+        String[] split = domain.split(" ");
+        return split.length == 0 ? domain : split[0];
     }
 
     /**
@@ -151,14 +161,14 @@ public class MailAuthenticationHandlerImpl implements MailAuthenticationHandler 
     private void parseMechanism(MailAuthenticationMechanism mechanism, String s, MailAuthenticationResult result) {
         // The mechanism tags are separated by a space
         String[] splitTags = s.split(" ");
-        if (splitTags == null || splitTags.length == 0) {
+        if (splitTags.length == 0) {
             // Ignore
             return;
         }
         // The first one is always the mechanism used
         String mech = splitTags[0];
         String[] mechUsed = mech.split("=");
-        if (mechUsed == null || mechUsed.length != 2) {
+        if (mechUsed.length != 2) {
             // Ignore
             return;
         }
