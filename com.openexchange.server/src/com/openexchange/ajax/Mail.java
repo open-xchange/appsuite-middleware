@@ -351,6 +351,8 @@ public class Mail extends PermissionServlet {
 
     public static final String PARAMETER_HEADERS = "headers";
 
+    public static final String PARAMETER_FORCE_HTML_IMAGES = "forceImages";
+
     private static final String VIEW_RAW = "raw";
 
     private static final String VIEW_TEXT = "text";
