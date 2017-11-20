@@ -58,7 +58,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
-import java.util.regex.Pattern;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import org.slf4j.Logger;
@@ -87,13 +86,6 @@ import com.openexchange.mail.mime.HeaderCollection;
 public class MailAuthenticationHandlerImpl implements MailAuthenticationHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MailAuthenticationHandlerImpl.class);
-
-    /**
-     * Regex for checking whether each part of the domain is not longer than 63 characters,
-     * and allow internationalised domain names using the punycode notation
-     */
-    //FIXME: Allow wildcards or regexes in the pattern
-    private static final Pattern DOMAIN_PATTERN = Pattern.compile("\\b((?=[a-z0-9-]{1,63}\\.)(xn--)?[a-z0-9]+(-[a-z0-9]+)*\\.)+[a-z]{2,63}\\b");
 
     private static final MailAuthenticationMechanismComparator MAIL_AUTH_COMPARATOR = new MailAuthenticationMechanismComparator();
 
