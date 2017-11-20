@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2017-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,26 +47,30 @@
  *
  */
 
-package com.openexchange.mail.authentication.mechanism.result;
+package com.openexchange.mail.authentication.mechanism.dmarc;
 
 /**
- * {@link AuthenticationMechanismResult}
+ * {@link DMARCResultHeader}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public interface AuthenticationMechanismResult {
+public final class DMARCResultHeader {
 
+    //@formatter: off
     /**
-     * Returns the display name of the mechanism's result
+     * Not an actual attribute in the header line, but instead
+     * a virtual one to assign to the keyless domain name,
+     * e.g.<br/></br>
      * 
-     * @return the display name of the mechanism's result
-     */
-    String getDisplayName();
-
-    /**
-     * Returns the technical name of the mechanism's result
+     * <pre>
+     * Authentication-Results: example.com;
+     *     auth=pass (cram-md5) smtp.auth=sender@example.net;
+     *     spf=pass smtp.mailfrom=example.net
+     * </pre>
      * 
-     * @return the technical name of the mechanism's result
+     * Then the 'example.com' will internally be assigned with the
+     * key 'domain'.
      */
-    String getTechnicalName();
+    //@formatter: on
+    public static final String DOMAIN = "domain";
 }

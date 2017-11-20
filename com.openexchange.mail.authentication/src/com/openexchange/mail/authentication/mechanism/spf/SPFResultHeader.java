@@ -47,55 +47,26 @@
  *
  */
 
-package com.openexchange.mail.authentication.mechanism.result;
+package com.openexchange.mail.authentication.mechanism.spf;
 
 /**
- * {@link DKIMResult} - The evaluation states of the DKIM signature
+ * {@link SPFResultHeader}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
- * @see <a href="https://tools.ietf.org/html/rfc6376#section-3.9">RFC 6376, Section 3.9</a>
  */
-public enum DKIMResult implements AuthenticationMechanismResult {
+public final class SPFResultHeader {
 
     /**
-     * A successful verification of the signature
-     */
-    SUCCESS("Success"),
-    /**
-     * A permanent, non-recoverable error such as a signature verification failure
-     */
-    PERMFAIL("Permanent Failure"),
-    /**
-     * A temporary, recoverable error such as a DNS query timeout
-     */
-    TEMPFAIL("Temporary Failure");
-
-    private final String displayName;
-
-    /**
-     * Initialises a new {@link DKIMResult}.
-     */
-    private DKIMResult(String displayName) {
-        this.displayName = displayName;
-    }
-
-    /*
-     * (non-Javadoc)
+     * Refers to the send domain
      * 
-     * @see com.openexchange.mail.authentication.AuthenticationMechanismResult#getDisplayName()
+     * @see <a href="https://tools.ietf.org/html/rfc7208#section-9.1">RFC 7208, Section 9.1</a>
+     * @see <a href="https://tools.ietf.org/html/rfc7601#section-2.7.2">RFC 7601, Section 2.7.2</a>
      */
-    @Override
-    public String getDisplayName() {
-        return displayName;
-    }
+    public static final String SMTP_MAILFROM = "smtp.mailfrom";
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.mail.authentication.AuthenticationMechanismResult#getTechnicalName()
+    /**
+     * @see <a href="https://tools.ietf.org/html/rfc7208#section-9.1">RFC 7208, Section 9.1</a>
+     * @see <a href="https://tools.ietf.org/html/rfc7601#section-2.7.2">RFC 7601, Section 2.7.2</a>
      */
-    @Override
-    public String getTechnicalName() {
-        return name().toLowerCase();
-    }
+    public static final String SMTP_HELO = "smtp.helo";
 }

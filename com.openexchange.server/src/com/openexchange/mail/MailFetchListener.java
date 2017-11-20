@@ -47,45 +47,19 @@
  *
  */
 
-package com.openexchange.mail.authentication.mechanism;
+package com.openexchange.mail;
 
-import com.openexchange.mail.authentication.mechanism.result.SPFResult;
+import com.openexchange.exception.OXException;
+import com.openexchange.mail.search.SearchTerm;
 
 /**
- * {@link SPFAuthMechResult}
+ * {@link MailFetchListener}
  *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.10.0
  */
-public class SPFAuthMechResult extends AbstractAuthMechResult {
+public interface MailFetchListener {
 
-    /**
-     * Initialises a new {@link SPFAuthMechResult}.
-     * 
-     * @param domain The domain for which this mail authentication mechanism was applied to
-     * @param result The {@link SPFResult}
-     */
-    public SPFAuthMechResult(String domain, SPFResult result) {
-        super(domain, null, result);
-    }
+    MailAttributation prepare(FullnameArgument argument, SearchTerm<?> searchTerm, MailSortField sortField, OrderDirection orderDir, int[] fields, String[] headerNames) throws OXException;
 
-    /**
-     * Initialises a new {@link SPFAuthMechResult}.
-     * 
-     * @param domain The domain for which this mail authentication mechanism was applied to
-     * @param clientIP The optional client IP used to send the e-mail
-     * @param result The {@link SPFResult}
-     */
-    public SPFAuthMechResult(String domain, String clientIP, SPFResult result) {
-        super(domain, clientIP, result);
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.mail.authentication.mechanism.MailAuthenticationMechanismResult#getMechanism()
-     */
-    @Override
-    public MailAuthenticationMechanism getMechanism() {
-        return MailAuthenticationMechanism.SPF;
-    }
 }

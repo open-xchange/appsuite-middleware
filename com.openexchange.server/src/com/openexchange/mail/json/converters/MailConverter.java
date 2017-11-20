@@ -703,6 +703,9 @@ public final class MailConverter implements ResultConverter, MailActionConstants
          * Overwrite settings with request's parameters
          */
         final DisplayMode displayMode = AbstractMailAction.detectDisplayMode(editDraft, view, usmNoSave);
+        if (DisplayMode.DOCUMENT.equals(displayMode) && AJAXRequestDataTools.parseBoolParameter(paramContainer.getStringParam(Mail.PARAMETER_FORCE_HTML_IMAGES))) {
+            usmNoSave.setAllowHTMLImages(true);
+        }
         final String folderPath = paramContainer.checkStringParam(AJAXServlet.PARAMETER_FOLDERID);
         /*
          * Check for malicious folder
@@ -855,6 +858,9 @@ public final class MailConverter implements ResultConverter, MailActionConstants
          * Overwrite settings with request's parameters
          */
         DisplayMode displayMode = AbstractMailAction.detectDisplayMode(true, view, usmNoSave);
+        if (DisplayMode.DOCUMENT.equals(displayMode) && AJAXRequestDataTools.parseBoolParameter(Mail.PARAMETER_FORCE_HTML_IMAGES, requestData)) {
+            usmNoSave.setAllowHTMLImages(true);
+        }
         int maxContentSize = AJAXRequestDataTools.parseIntParameter(requestData.getParameter(Mail.PARAMETER_MAX_SIZE), -1);
         /*
          * Check for malicious folder

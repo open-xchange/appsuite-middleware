@@ -47,35 +47,36 @@
  *
  */
 
-package com.openexchange.mail.authentication.mechanism;
+package com.openexchange.mail.authentication.mechanism.spf;
 
-import com.openexchange.mail.authentication.mechanism.result.DMARCResult;
+import com.openexchange.mail.authentication.mechanism.AbstractAuthMechResult;
+import com.openexchange.mail.authentication.mechanism.MailAuthenticationMechanism;
 
 /**
- * {@link DMARCAuthMechResult}
+ * {@link SPFAuthMechResult}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class DMARCAuthMechResult extends AbstractAuthMechResult {
+public class SPFAuthMechResult extends AbstractAuthMechResult {
 
     /**
-     * Initialises a new {@link DMARCAuthMechResult}.
+     * Initialises a new {@link SPFAuthMechResult}.
      * 
      * @param domain The domain for which this mail authentication mechanism was applied to
-     * @param result The {@link DMARCResult}
+     * @param result The {@link SPFResult}
      */
-    public DMARCAuthMechResult(String domain, DMARCResult result) {
+    public SPFAuthMechResult(String domain, SPFResult result) {
         super(domain, null, result);
     }
 
     /**
-     * Initialises a new {@link DMARCAuthMechResult}.
+     * Initialises a new {@link SPFAuthMechResult}.
      * 
      * @param domain The domain for which this mail authentication mechanism was applied to
      * @param clientIP The optional client IP used to send the e-mail
-     * @param result The {@link DMARCResult}
+     * @param result The {@link SPFResult}
      */
-    public DMARCAuthMechResult(String domain, String clientIP, DMARCResult result) {
+    public SPFAuthMechResult(String domain, String clientIP, SPFResult result) {
         super(domain, clientIP, result);
     }
 
@@ -86,6 +87,18 @@ public class DMARCAuthMechResult extends AbstractAuthMechResult {
      */
     @Override
     public MailAuthenticationMechanism getMechanism() {
-        return MailAuthenticationMechanism.DMARC;
+        return MailAuthenticationMechanism.SPF;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("SPFAuthMechResult [getMechanism()=").append(getMechanism()).append(", getDomain()=").append(getDomain()).append(", getClientIP()=").append(getClientIP()).append(", getResult()=").append(getResult()).append("]");
+        return builder.toString();
     }
 }

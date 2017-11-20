@@ -84,7 +84,7 @@ public class MailAuthenticationResult {
      */
     public void addResult(MailAuthenticationMechanismResult result) {
         mailAuthenticationMechanisms.add(result.getMechanism());
-        getMailAuthenticationMechanismResults().add(result);
+        mailAuthenticationMechanismResults.add(result);
     }
 
     /**
@@ -139,5 +139,18 @@ public class MailAuthenticationResult {
      */
     public Set<MailAuthenticationMechanismResult> getMailAuthenticationMechanismResults() {
         return Collections.unmodifiableSet(mailAuthenticationMechanismResults);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("MailAuthenticationResult [status=").append(status).append(", domain=").append(domain).append(", mailAuthenticationMechanisms=");
+        builder.append(mailAuthenticationMechanisms).append(", mailAuthenticationMechanismResults=").append(mailAuthenticationMechanismResults).append("]");
+        return builder.toString();
     }
 }

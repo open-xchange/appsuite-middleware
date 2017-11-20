@@ -47,7 +47,9 @@
  *
  */
 
-package com.openexchange.mail.authentication.mechanism.result;
+package com.openexchange.mail.authentication.mechanism.spf;
+
+import com.openexchange.mail.authentication.mechanism.AuthenticationMechanismResult;
 
 /**
  * {@link SPFResult} - Specifies the possible SPF results.
@@ -107,6 +109,15 @@ public enum SPFResult implements AuthenticationMechanismResult {
      * @see <a href="https://tools.ietf.org/html/rfc7208#section-8.5">RFC-7208, Section 8.5</a>
      */
     SOFTFAIL("Soft Fail"),
+
+    /**
+     * Indicates that some local policy mechanism was applied
+     * that augments or even replaces (i.e., overrides) the result returned
+     * by the authentication mechanism.
+     * 
+     * @see <a href="https://tools.ietf.org/html/rfc7601#section-2.4">RFC-7601, Section 2.4</a>
+     */
+    POLICY("Policy"),
 
     /**
      * The SPF verifier encountered a transient (generally DNS) error while performing the check.

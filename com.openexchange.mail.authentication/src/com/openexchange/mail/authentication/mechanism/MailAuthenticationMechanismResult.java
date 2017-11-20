@@ -49,8 +49,6 @@
 
 package com.openexchange.mail.authentication.mechanism;
 
-import com.openexchange.mail.authentication.mechanism.result.AuthenticationMechanismResult;
-
 /**
  * {@link MailAuthenticationMechanismResult} - Defines the methods of the mail authentication
  * mechanism result dataobject

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2017-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,37 +47,40 @@
  *
  */
 
-package com.openexchange.mail.authentication.mechanism;
-
-import com.openexchange.mail.authentication.mechanism.dkim.DKIMResult;
-import com.openexchange.mail.authentication.mechanism.dmarc.DMARCResult;
-import com.openexchange.mail.authentication.mechanism.spf.SPFResult;
+package com.openexchange.mail.authentication.mechanism.dkim;
 
 /**
- * {@link MailAuthenticationMechanism}
+ * {@link DKIMResultHeader}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public enum MailAuthenticationMechanism {
-    DMARC(DMARCResult.class),
-    DKIM(DKIMResult.class),
-    SPF(SPFResult.class);
-
-    private final Class<? extends AuthenticationMechanismResult> resultType;
+public final class DKIMResultHeader {
 
     /**
-     * Initialises a new {@link MailAuthenticationMechanism}.
+     * A free-form comment on the reason the given result was returned
+     * 
+     * @see <a href="https://tools.ietf.org/html/rfc7601#section-2.2">RFC 7601, Section 2.2</a>
      */
-    private MailAuthenticationMechanism(Class<? extends AuthenticationMechanismResult> resultType) {
-        this.resultType = resultType;
-    }
+    public static final String REASON = "reason";
 
     /**
-     * Gets the resultType
-     *
-     * @return The resultType
+     * Refers to the content of the agent or user identifier (AUID) on behalf of which the
+     * signing domain is taking responsibility.
+     * 
+     * @see <a href="https://tools.ietf.org/html/rfc6376#section-3.5">RFC 6376, Section 3.5</a>
      */
-    public Class<? extends AuthenticationMechanismResult> getResultType() {
-        return resultType;
-    }
+    public static final String HEADER_I = "header.i";
+
+    /**
+     * Refers to the content of the signing domain tag from within the signature header field, and
+     * not a distinct header field called "d".
+     * 
+     * @see <a href="https://tools.ietf.org/html/rfc6376#section-3.5">RFC 6376, Section 3.5</a>
+     */
+    public static final String HEADER_D = "header.d";
+
+    /**
+     * Refers to the DKIM signature data (base64)
+     */
+    public static final String HEADER_B = "header.b";
 }

@@ -47,37 +47,59 @@
  *
  */
 
-package com.openexchange.mail.authentication.mechanism;
+package com.openexchange.mail.authentication.mechanism.dkim;
 
-import com.openexchange.mail.authentication.mechanism.dkim.DKIMResult;
-import com.openexchange.mail.authentication.mechanism.dmarc.DMARCResult;
-import com.openexchange.mail.authentication.mechanism.spf.SPFResult;
+import com.openexchange.mail.authentication.mechanism.AbstractAuthMechResult;
+import com.openexchange.mail.authentication.mechanism.MailAuthenticationMechanism;
 
 /**
- * {@link MailAuthenticationMechanism}
+ * {@link DKIMAuthMechResult}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public enum MailAuthenticationMechanism {
-    DMARC(DMARCResult.class),
-    DKIM(DKIMResult.class),
-    SPF(SPFResult.class);
-
-    private final Class<? extends AuthenticationMechanismResult> resultType;
+public class DKIMAuthMechResult extends AbstractAuthMechResult {
 
     /**
-     * Initialises a new {@link MailAuthenticationMechanism}.
+     * Initialises a new {@link DKIMAuthMechResult}.
+     * 
+     * @param domain The domain for which this mail authentication mechanism was applied to
+     * @param result The {@link DKIMResult}
      */
-    private MailAuthenticationMechanism(Class<? extends AuthenticationMechanismResult> resultType) {
-        this.resultType = resultType;
+    public DKIMAuthMechResult(String domain, DKIMResult result) {
+        super(domain, null, result);
     }
 
     /**
-     * Gets the resultType
-     *
-     * @return The resultType
+     * Initialises a new {@link DKIMAuthMechResult}.
+     * 
+     * @param domain The domain for which this mail authentication mechanism was applied to
+     * @param clientIP The optional client IP used to send the e-mail
+     * @param result The {@link DKIMResult}
      */
-    public Class<? extends AuthenticationMechanismResult> getResultType() {
-        return resultType;
+    public DKIMAuthMechResult(String domain, String clientIP, DKIMResult result) {
+        super(domain, clientIP, result);
     }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.mail.authentication.mechanism.MailAuthenticationMechanismResult#getMechanism()
+     */
+    @Override
+    public MailAuthenticationMechanism getMechanism() {
+        return MailAuthenticationMechanism.DKIM;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("DKIMAuthMechResult [getMechanism()=").append(getMechanism()).append(", getDomain()=").append(getDomain()).append(", getClientIP()=").append(getClientIP()).append(", getResult()=").append(getResult()).append("]");
+        return builder.toString();
+    }
+
 }

@@ -47,37 +47,51 @@
  *
  */
 
-package com.openexchange.mail.authentication.mechanism;
+package com.openexchange.mail.authentication.mechanism.dmarc;
 
-import com.openexchange.mail.authentication.mechanism.dkim.DKIMResult;
-import com.openexchange.mail.authentication.mechanism.dmarc.DMARCResult;
-import com.openexchange.mail.authentication.mechanism.spf.SPFResult;
+import com.openexchange.mail.authentication.mechanism.AuthenticationMechanismResult;
 
 /**
- * {@link MailAuthenticationMechanism}
+ * {@link DMARCResult}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public enum MailAuthenticationMechanism {
-    DMARC(DMARCResult.class),
-    DKIM(DKIMResult.class),
-    SPF(SPFResult.class);
+public enum DMARCResult implements AuthenticationMechanismResult {
+    /**
+     * Passed the DMARC check
+     */
+    PASS("Pass"),
+    /**
+     * Failed the DMARC check
+     */
+    FAIL("Fail");
 
-    private final Class<? extends AuthenticationMechanismResult> resultType;
+    private final String displayName;
 
     /**
-     * Initialises a new {@link MailAuthenticationMechanism}.
+     * Initialises a new {@link DMARCResult}.
      */
-    private MailAuthenticationMechanism(Class<? extends AuthenticationMechanismResult> resultType) {
-        this.resultType = resultType;
+    private DMARCResult(String displayName) {
+        this.displayName = displayName;
     }
 
-    /**
-     * Gets the resultType
-     *
-     * @return The resultType
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.mail.authentication.AuthenticationMechanismResult#getDisplayName()
      */
-    public Class<? extends AuthenticationMechanismResult> getResultType() {
-        return resultType;
+    @Override
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.mail.authentication.AuthenticationMechanismResult#getTechnicalName()
+     */
+    @Override
+    public String getTechnicalName() {
+        return name().toLowerCase();
     }
 }

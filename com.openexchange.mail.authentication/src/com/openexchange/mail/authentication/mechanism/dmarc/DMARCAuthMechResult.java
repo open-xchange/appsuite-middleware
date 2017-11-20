@@ -47,35 +47,36 @@
  *
  */
 
-package com.openexchange.mail.authentication.mechanism;
+package com.openexchange.mail.authentication.mechanism.dmarc;
 
-import com.openexchange.mail.authentication.mechanism.result.DKIMResult;
+import com.openexchange.mail.authentication.mechanism.AbstractAuthMechResult;
+import com.openexchange.mail.authentication.mechanism.MailAuthenticationMechanism;
 
 /**
- * {@link DKIMAuthMechResult}
+ * {@link DMARCAuthMechResult}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class DKIMAuthMechResult extends AbstractAuthMechResult {
+public class DMARCAuthMechResult extends AbstractAuthMechResult {
 
     /**
-     * Initialises a new {@link DKIMAuthMechResult}.
+     * Initialises a new {@link DMARCAuthMechResult}.
      * 
      * @param domain The domain for which this mail authentication mechanism was applied to
-     * @param result The {@link DKIMResult}
+     * @param result The {@link DMARCResult}
      */
-    public DKIMAuthMechResult(String domain, DKIMResult result) {
+    public DMARCAuthMechResult(String domain, DMARCResult result) {
         super(domain, null, result);
     }
 
     /**
-     * Initialises a new {@link DKIMAuthMechResult}.
+     * Initialises a new {@link DMARCAuthMechResult}.
      * 
      * @param domain The domain for which this mail authentication mechanism was applied to
      * @param clientIP The optional client IP used to send the e-mail
-     * @param result The {@link DKIMResult}
+     * @param result The {@link DMARCResult}
      */
-    public DKIMAuthMechResult(String domain, String clientIP, DKIMResult result) {
+    public DMARCAuthMechResult(String domain, String clientIP, DMARCResult result) {
         super(domain, clientIP, result);
     }
 
@@ -86,6 +87,18 @@ public class DKIMAuthMechResult extends AbstractAuthMechResult {
      */
     @Override
     public MailAuthenticationMechanism getMechanism() {
-        return MailAuthenticationMechanism.DKIM;
+        return MailAuthenticationMechanism.DMARC;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("DMARCAuthMechResult [getMechanism()=").append(getMechanism()).append(", getDomain()=").append(getDomain()).append(", getClientIP()=").append(getClientIP()).append(", getResult()=").append(getResult()).append("]");
+        return builder.toString();
     }
 }

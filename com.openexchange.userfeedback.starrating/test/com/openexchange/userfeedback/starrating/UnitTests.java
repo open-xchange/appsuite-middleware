@@ -52,6 +52,7 @@ package com.openexchange.userfeedback.starrating;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
+import com.openexchange.userfeedback.starrating.v1.StarRatingV1ExportResultConverterTest;
 import com.openexchange.userfeedback.starrating.v1.StarRatingV1Test;
 
 /**
@@ -63,7 +64,8 @@ import com.openexchange.userfeedback.starrating.v1.StarRatingV1Test;
  */
 @RunWith(Suite.class)
 @SuiteClasses({
-    StarRatingV1Test.class
+    StarRatingV1Test.class,
+    StarRatingV1ExportResultConverterTest.class
 
 })
 public class UnitTests {
