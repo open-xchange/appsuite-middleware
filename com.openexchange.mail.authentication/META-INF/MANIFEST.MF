@@ -6,4 +6,5 @@ Bundle-Version: 7.10
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.openexchange.mail.dataobjects,
- com.openexchange.mail.mime
+ com.openexchange.mail.mime,
+ org.slf4j;version="1.7.25"

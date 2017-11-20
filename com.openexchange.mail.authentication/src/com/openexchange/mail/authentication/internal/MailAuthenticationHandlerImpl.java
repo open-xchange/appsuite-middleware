@@ -49,7 +49,15 @@
 
 package com.openexchange.mail.authentication.internal;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Iterator;
+import java.util.List;
 import java.util.regex.Pattern;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.mail.authentication.MailAuthenticationHandler;
 import com.openexchange.mail.authentication.MailAuthenticationResult;
 import com.openexchange.mail.authentication.MailAuthenticationStatus;
@@ -64,6 +72,8 @@ import com.openexchange.mail.mime.HeaderCollection;
  */
 public class MailAuthenticationHandlerImpl implements MailAuthenticationHandler {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(MailAuthenticationHandlerImpl.class);
+
     /**
      * Regex for checking whether each part of the domain is not longer than 63 characters,
      * and allow internationalized domain names using the punycode notation
@@ -71,11 +81,19 @@ public class MailAuthenticationHandlerImpl implements MailAuthenticationHandler 
     //FIXME: Allow wildcards or regexes in the pattern
     private static final Pattern DOMAIN_PATTERN = Pattern.compile("\\b((?=[a-z0-9-]{1,63}\\.)(xn--)?[a-z0-9]+(-[a-z0-9]+)*\\.)+[a-z]{2,63}\\b");
 
+    private static final MailAuthenticationMechanismComparator MAIL_AUTH_COMPARATOR = new MailAuthenticationMechanismComparator();
+
     /**
      * Initialises a new {@link MailAuthenticationHandlerImpl}.
      */
     public MailAuthenticationHandlerImpl() {
         super();
+    }
+
+    public static void main(String[] args) {
+        String[] authHeaders = { "mx.google.com; dkim=pass header.i=@open-xchange.com header.s=201705 header.b=VvWVD9kg; dkim=pass header.i=@open-xchange.com header.s=201705 header.b=0WC5u+VZ; dkim=pass header.i=@open-xchange.com header.s=201705 header.b=doOaQjgp; spf=pass (google.com: domain of jane.doe@open-xchange.com designates 1.2.3.4 as permitted sender) smtp.mailfrom=jane.doe@open-xchange.com; dmarc=pass (p=NONE sp=NONE dis=NONE) header.from=open-xchange.com" };
+        MailAuthenticationHandlerImpl m = new MailAuthenticationHandlerImpl();
+        m.parseHeaders(authHeaders);
     }
 
     /*
@@ -97,11 +115,23 @@ public class MailAuthenticationHandlerImpl implements MailAuthenticationHandler 
             return null;
         }
 
+        return parseHeaders(authHeaders);
+    }
+    
+    ///////////////////////////////////// HELPERS ///////////////////////////////////////
+
+    /**
+     * Parses the specified authentication headers
+     * 
+     * @param authHeaders
+     * @return
+     */
+    private MailAuthenticationResult parseHeaders(String[] authHeaders) {
         MailAuthenticationResult result = new MailAuthenticationResult();
         result.setStatus(MailAuthenticationStatus.NOT_ANALYZED);
 
         // There can only be one, if there are more only the first one is relevant
-        String[] split = authHeaders[0].split(";");
+        String[] split = authHeaders[0].split("; ");
         if (split.length == 0) {
             // Huh? Invalid/Malformed authentication results header, set to 'neutral'
             result.setStatus(MailAuthenticationStatus.NEUTRAL);
@@ -117,11 +147,40 @@ public class MailAuthenticationHandlerImpl implements MailAuthenticationHandler 
         }
         result.setDomain(domain);
 
-        for (MailAuthenticationMechanism mechanism : MailAuthenticationMechanism.values()) {
-            parseMechanism(mechanism, split, result);
-        }
+        List<String> extractedMechanismResults = extractMechanismResults(Arrays.asList(Arrays.copyOfRange(split, 1, split.length)));
+        parseMechanismResults(extractedMechanismResults, result);
 
         return result;
+    }
+
+    /**
+     * @param extractedMechanismResults
+     * @param result
+     */
+    private void parseMechanismResults(List<String> extractedMechanismResults, MailAuthenticationResult result) {
+        // Sort by ordinal
+        Collections.sort(extractedMechanismResults, MAIL_AUTH_COMPARATOR);
+    }
+
+    /**
+     * Extracts the supported mechanism results from the specified string array
+     * 
+     * @param authResults The authentication results
+     * @return An unmodifiable {@link List} with the supported mechanism results
+     */
+    private List<String> extractMechanismResults(List<String> authResults) {
+        List<String> list = new ArrayList<>();
+        Iterator<String> authResultsIterator = authResults.iterator();
+        while (authResultsIterator.hasNext()) {
+            String authResult = authResultsIterator.next();
+            for (MailAuthenticationMechanism mechanism : MailAuthenticationMechanism.values()) {
+                if (authResult.startsWith(mechanism.name().toLowerCase())) {
+                    list.add(authResult);
+                    break;
+                }
+            }
+        }
+        return list;
     }
 
     /**
@@ -134,21 +193,6 @@ public class MailAuthenticationHandlerImpl implements MailAuthenticationHandler 
     private String cleanseVersion(String domain) {
         String[] split = domain.split(" ");
         return split.length == 0 ? domain : split[0];
-    }
-
-    /**
-     * 
-     * @param mechanism
-     * @param split
-     * @param result
-     */
-    private void parseMechanism(MailAuthenticationMechanism mechanism, String[] split, MailAuthenticationResult result) {
-        for (String s : split) {
-            if (!s.startsWith(mechanism.name().toLowerCase())) {
-                continue;
-            }
-            parseMechanism(mechanism, s, result);
-        }
     }
 
     /**
@@ -184,5 +228,61 @@ public class MailAuthenticationHandlerImpl implements MailAuthenticationHandler 
      */
     private boolean isValidDomain(String domain) {
         return DOMAIN_PATTERN.matcher(domain).matches();
+    }
+    
+    ///////////////////////////////// HELPER CLASSES /////////////////////////////////
+
+    /**
+     * {@link MailAuthenticationMechanismComparator} - Compares the {@link MailAuthenticationMechanism}s
+     * according to their ordinal value
+     *
+     * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+     */
+    private static class MailAuthenticationMechanismComparator implements Comparator<String> {
+
+        /*
+         * (non-Javadoc)
+         * 
+         * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
+         */
+        @Override
+        public int compare(String o1, String o2) {
+            String[] s1 = o1.split("=");
+            String[] s2 = o2.split("=");
+            MailAuthenticationMechanism mam1 = null;
+            MailAuthenticationMechanism mam2 = null;
+            if (s1.length > 0) {
+                mam1 = convert(s1[0]);
+            }
+            if (s2.length > 0) {
+                mam2 = convert(s2[0]);
+            }
+            if (mam1 != null && mam2 != null) {
+                return mam1.compareTo(mam2);
+            }
+            if (mam1 == null && mam2 == null) {
+                return 0;
+            } else if (mam1 == null) {
+                return 1;
+            } else if (mam2 == null) {
+                return -1;
+            }
+            return 0;
+        }
+
+        /**
+         * Converts the specified string to a {@link MailAuthenticationMechanism}
+         * 
+         * @param s The string to convert
+         * @return the converted {@link MailAuthenticationMechanism}
+         */
+        private MailAuthenticationMechanism convert(String s) {
+            try {
+                return MailAuthenticationMechanism.valueOf(s.toUpperCase());
+            } catch (IllegalArgumentException e) {
+                LOGGER.debug("Unknown mail authentication mechanism '{}'", s);
+            }
+            return null;
+        }
     }
 }
