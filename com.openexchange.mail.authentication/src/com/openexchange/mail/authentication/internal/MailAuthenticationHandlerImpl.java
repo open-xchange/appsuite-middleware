@@ -305,7 +305,7 @@ public class MailAuthenticationHandlerImpl implements MailAuthenticationHandler 
             if (pair.length != 2) {
                 continue;
             }
-            // TODO: Include the possible 'key-less' reason included in a parentheses?
+            // TODO: Include the possible 'key-less' reason included in the parentheses?
             //       e.g. spf=pass (xyz.com: domain of jane.doe@open-xchange.com designates 1.2.3.4 as permitted sender)
             resMap.put(pair[0], pair[1]);
         }

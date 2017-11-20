@@ -79,4 +79,8 @@ public final class DKIMResultHeader {
      */
     public static final String HEADER_D = "header.d";
 
+    /**
+     * Refers to the DKIM signature data (base64)
+     */
+    public static final String HEADER_B = "header.b";
 }
