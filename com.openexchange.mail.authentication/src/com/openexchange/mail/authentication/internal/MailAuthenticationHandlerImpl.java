@@ -76,7 +76,7 @@ public class MailAuthenticationHandlerImpl implements MailAuthenticationHandler 
 
     /**
      * Regex for checking whether each part of the domain is not longer than 63 characters,
-     * and allow internationalized domain names using the punycode notation
+     * and allow internationalised domain names using the punycode notation
      */
     //FIXME: Allow wildcards or regexes in the pattern
     private static final Pattern DOMAIN_PATTERN = Pattern.compile("\\b((?=[a-z0-9-]{1,63}\\.)(xn--)?[a-z0-9]+(-[a-z0-9]+)*\\.)+[a-z]{2,63}\\b");
@@ -93,7 +93,8 @@ public class MailAuthenticationHandlerImpl implements MailAuthenticationHandler 
     public static void main(String[] args) {
         String[] authHeaders = { "mx.google.com; dkim=pass header.i=@open-xchange.com header.s=201705 header.b=VvWVD9kg; dkim=pass header.i=@open-xchange.com header.s=201705 header.b=0WC5u+VZ; dkim=pass header.i=@open-xchange.com header.s=201705 header.b=doOaQjgp; spf=pass (google.com: domain of jane.doe@open-xchange.com designates 1.2.3.4 as permitted sender) smtp.mailfrom=jane.doe@open-xchange.com; dmarc=pass (p=NONE sp=NONE dis=NONE) header.from=open-xchange.com" };
         MailAuthenticationHandlerImpl m = new MailAuthenticationHandlerImpl();
-        m.parseHeaders(authHeaders);
+        MailAuthenticationResult r = m.parseHeaders(authHeaders);
+        System.err.println(r);
     }
 
     /*
@@ -117,7 +118,7 @@ public class MailAuthenticationHandlerImpl implements MailAuthenticationHandler 
 
         return parseHeaders(authHeaders);
     }
-    
+
     ///////////////////////////////////// HELPERS ///////////////////////////////////////
 
     /**
@@ -160,6 +161,43 @@ public class MailAuthenticationHandlerImpl implements MailAuthenticationHandler 
     private void parseMechanismResults(List<String> extractedMechanismResults, MailAuthenticationResult result) {
         // Sort by ordinal
         Collections.sort(extractedMechanismResults, MAIL_AUTH_COMPARATOR);
+        for (String extractedMechanism : extractedMechanismResults) {
+            String[] s = extractedMechanism.split("=");
+            if (s.length == 0) {
+                continue;
+            }
+            MailAuthenticationMechanism mechanism = convert(s[0]);
+            if (mechanism == null) {
+                continue;
+            }
+            parseMechanism(mechanism, extractedMechanism, result);
+        }
+    }
+
+    /**
+     * Parses the specified mechanism
+     * 
+     * @param mechanism
+     * @param s
+     * @param result
+     */
+    private void parseMechanism(MailAuthenticationMechanism mechanism, String s, MailAuthenticationResult result) {
+        // The mechanism tags are separated by a space
+        String[] splitTags = s.split(" ");
+        if (splitTags.length == 0) {
+            // Ignore
+            return;
+        }
+        // The first one is always the mechanism used
+        String mech = splitTags[0];
+        String[] mechUsed = mech.split("=");
+        if (mechUsed.length != 2) {
+            // Ignore
+            return;
+        }
+        String mechStatus = mechUsed[1];
+        result.setStatus(MailAuthenticationStatus.valueOf(mechStatus.toUpperCase()));
+        // TODO: Retrieve the valid status from the mechStatus of the header and set it to the result
     }
 
     /**
@@ -196,31 +234,6 @@ public class MailAuthenticationHandlerImpl implements MailAuthenticationHandler 
     }
 
     /**
-     * Parses the specified mechanism
-     * 
-     * @param mechanism
-     * @param s
-     * @param result
-     */
-    private void parseMechanism(MailAuthenticationMechanism mechanism, String s, MailAuthenticationResult result) {
-        // The mechanism tags are separated by a space
-        String[] splitTags = s.split(" ");
-        if (splitTags.length == 0) {
-            // Ignore
-            return;
-        }
-        // The first one is always the mechanism used
-        String mech = splitTags[0];
-        String[] mechUsed = mech.split("=");
-        if (mechUsed.length != 2) {
-            // Ignore
-            return;
-        }
-        String mechStatus = mechUsed[1];
-        // TODO: Retrieve the valid status from the mechStatus of the header and set it to the result
-    }
-
-    /**
      * Determines whether the specified string denotes a valid domain name
      * 
      * @param domain Domain candidate
@@ -229,7 +242,7 @@ public class MailAuthenticationHandlerImpl implements MailAuthenticationHandler 
     private boolean isValidDomain(String domain) {
         return DOMAIN_PATTERN.matcher(domain).matches();
     }
-    
+
     ///////////////////////////////// HELPER CLASSES /////////////////////////////////
 
     /**
@@ -269,20 +282,20 @@ public class MailAuthenticationHandlerImpl implements MailAuthenticationHandler 
             }
             return 0;
         }
+    }
 
-        /**
-         * Converts the specified string to a {@link MailAuthenticationMechanism}
-         * 
-         * @param s The string to convert
-         * @return the converted {@link MailAuthenticationMechanism}
-         */
-        private MailAuthenticationMechanism convert(String s) {
-            try {
-                return MailAuthenticationMechanism.valueOf(s.toUpperCase());
-            } catch (IllegalArgumentException e) {
-                LOGGER.debug("Unknown mail authentication mechanism '{}'", s);
-            }
-            return null;
+    /**
+     * Converts the specified string to a {@link MailAuthenticationMechanism}
+     * 
+     * @param s The string to convert
+     * @return the converted {@link MailAuthenticationMechanism}
+     */
+    private static MailAuthenticationMechanism convert(String s) {
+        try {
+            return MailAuthenticationMechanism.valueOf(s.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            LOGGER.debug("Unknown mail authentication mechanism '{}'", s);
         }
+        return null;
     }
 }
