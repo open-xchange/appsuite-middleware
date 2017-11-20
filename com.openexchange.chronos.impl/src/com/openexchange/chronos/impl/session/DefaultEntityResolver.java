@@ -73,8 +73,6 @@ import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.CalendarUserType;
-import com.openexchange.chronos.ExtendedProperties;
-import com.openexchange.chronos.ExtendedProperty;
 import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.ResourceId;
 import com.openexchange.chronos.common.CalendarUtils;
@@ -536,7 +534,6 @@ public class DefaultEntityResolver implements EntityResolver {
     }
 
     private Attendee applyEntityData(Attendee attendee, User user, AttendeeField... fields) {
-        ExtendedProperties extendedProperties = new ExtendedProperties();
         if (null == fields || Arrays.contains(fields, AttendeeField.ENTITY)) {
             attendee.setEntity(user.getId());
         }
@@ -544,35 +541,30 @@ public class DefaultEntityResolver implements EntityResolver {
             attendee.setCuType(CalendarUserType.INDIVIDUAL);
         }
         if (null == fields || Arrays.contains(fields, AttendeeField.CN)) {
-            String displayName = user.getDisplayName();
-            addIfDifferent(AttendeeField.CN, attendee, displayName, extendedProperties, ExtendedProperty.CN);
-            attendee.setCn(displayName);
+            attendee.setCn(getField(AttendeeField.CN, attendee, user.getDisplayName()));
         }
         if (null == fields || Arrays.contains(fields, AttendeeField.URI)) {
-            String uri = getCalAddress(user);
-            addIfDifferent(AttendeeField.URI, attendee, uri, extendedProperties, ExtendedProperty.URI);
-            attendee.setUri(uri);
+            String address = getCalAddress(user);
+            String uri = getField(AttendeeField.URI, attendee, address);
+            attendee.setUri(UserAliasUtility.isAlias(extractEMailAddress(uri), user.getAliases()) ? uri : address);
         }
         if (null == fields || Arrays.contains(fields, AttendeeField.EMAIL)) {
-            String mail = getEMail(user);
-            addIfDifferent(AttendeeField.EMAIL, attendee, mail, extendedProperties, ExtendedProperty.EMAIL);
-            attendee.setEMail(mail);
-        }
-        if (!extendedProperties.isEmpty()) {
-            attendee.setExtendedProperties(extendedProperties);
+            attendee.setEMail(getEMail(user));
         }
         return attendee;
     }
-    
-    private void addIfDifferent(AttendeeField field, Attendee attendee, String compare, ExtendedProperties props, String propName) {
+
+    private String getField(AttendeeField field, Attendee attendee, String defaultValue) {
         try {
             Mapping<? extends Object, Attendee> mapping = AttendeeMapper.getInstance().get(field);
-            if (mapping.isSet(attendee) && false == compare.equals(mapping.get(attendee))) {
-                props.add(new ExtendedProperty(propName, (String) mapping.get(attendee)));
+            if (mapping.isSet(attendee)) {
+                String value = mapping.get(attendee).toString();
+                return defaultValue.equalsIgnoreCase(value) ? defaultValue : value;
             }
         } catch (OXException e) {
             LOG.debug("Couldn't get AttendeeField {}.", field.name(), e);
         }
+        return defaultValue;
     }
 
     private Attendee applyEntityData(Attendee attendee, Group group, AttendeeField... fields) {

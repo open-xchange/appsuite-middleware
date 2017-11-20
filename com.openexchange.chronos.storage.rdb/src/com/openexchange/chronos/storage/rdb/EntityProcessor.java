@@ -73,6 +73,7 @@ import com.openexchange.chronos.DelegatingEvent;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.Organizer;
 import com.openexchange.chronos.ResourceId;
+import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.service.EntityResolver;
 import com.openexchange.exception.OXException;
@@ -147,14 +148,13 @@ public class EntityProcessor {
      */
     public Attendee adjustPriorSave(Attendee attendee) throws OXException {
         if (isInternal(attendee) && null != entityResolver) {
-            Attendee savedAttendee = AttendeeMapper.getInstance().copy(attendee, null, (AttendeeField[]) null);
-            savedAttendee.removeCn();
-            ResourceId resourceId = new ResourceId(entityResolver.getContextID(), savedAttendee.getEntity(), savedAttendee.getCuType());
-            savedAttendee.setUri(resourceId.getURI());
-            if (attendee.containsExtendedProperties()) {
-                savedAttendee.setExtendedProperties(attendee.getExtendedProperties());
+            if (attendee.containsUri() && CalendarUtils.extractEMailAddress(attendee.getUri()).equals(attendee.getEMail())) {
+                Attendee savedAttendee = AttendeeMapper.getInstance().copy(attendee, null, (AttendeeField[]) null);
+                ResourceId resourceId = new ResourceId(entityResolver.getContextID(), savedAttendee.getEntity(), savedAttendee.getCuType());
+                savedAttendee.setUri(resourceId.getURI());
+                savedAttendee.removeCn();
+                return savedAttendee;
             }
-            return savedAttendee;
         }
         return attendee;
     }

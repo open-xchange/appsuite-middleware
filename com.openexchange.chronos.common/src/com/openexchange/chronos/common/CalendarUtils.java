@@ -1608,19 +1608,8 @@ public class CalendarUtils {
             // Nothing to do ..
             return defaultMail;
         }
-        if (attendee.containsExtendedProperties()) {
-            ExtendedProperties properties = attendee.getExtendedProperties();
-            if (properties.contains(ExtendedProperty.EMAIL)) {
-                // The mail address the attendee was invited by
-                return properties.get(ExtendedProperty.EMAIL).getValue();
-            }
-            if (properties.contains(ExtendedProperty.URI)) {
-                // Lookup if mail is encoded in URI
-                String value = properties.get(ExtendedProperty.URI).getValue();
-                if (value.startsWith("mailto:")) {
-                    return value.substring(7);
-                }
-            }
+        if (attendee.containsUri() && attendee.getUri().startsWith("mailto:")) {
+            return extractEMailAddress(attendee.getUri());
         }
         return attendee.containsEMail() ? attendee.getEMail() : defaultMail;
     }
