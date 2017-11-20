@@ -1401,7 +1401,7 @@ public class CalendarUtils {
             @Override
             protected boolean matches(RecurrenceId item1, RecurrenceId item2) {
                 if (null != item1 && null != item2) {
-                    return item1.equals(item2.getValue());
+                    return item1.equals(item2);
                 }
                 return false;
             }
