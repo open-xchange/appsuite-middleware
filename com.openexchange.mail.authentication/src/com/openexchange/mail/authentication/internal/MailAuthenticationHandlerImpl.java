@@ -72,6 +72,7 @@ import com.openexchange.mail.authentication.mechanism.dkim.DKIMResult;
 import com.openexchange.mail.authentication.mechanism.dkim.DKIMResultHeader;
 import com.openexchange.mail.authentication.mechanism.dmarc.DMARCAuthMechResult;
 import com.openexchange.mail.authentication.mechanism.dmarc.DMARCResult;
+import com.openexchange.mail.authentication.mechanism.dmarc.DMARCResultHeader;
 import com.openexchange.mail.authentication.mechanism.spf.SPFAuthMechResult;
 import com.openexchange.mail.authentication.mechanism.spf.SPFResult;
 import com.openexchange.mail.authentication.mechanism.spf.SPFResultHeader;
@@ -100,7 +101,7 @@ public class MailAuthenticationHandlerImpl implements MailAuthenticationHandler 
         mechanismParsersRegitry.put(MailAuthenticationMechanism.DMARC, (line) -> {
             String value = line.get(MailAuthenticationMechanism.DMARC.name().toLowerCase());
             DMARCResult dmarcResult = DMARCResult.valueOf(value.toUpperCase());
-            String domain = line.get("header.i");
+            String domain = line.get(DMARCResultHeader.DOMAIN);
             return new DMARCAuthMechResult(domain, dmarcResult);
         });
         mechanismParsersRegitry.put(MailAuthenticationMechanism.DKIM, (line) -> {
@@ -197,7 +198,14 @@ public class MailAuthenticationHandlerImpl implements MailAuthenticationHandler 
             if (mechanism == null) {
                 continue;
             }
-            result.addResult(mechanismParsersRegitry.get(mechanism).apply(parseMechanismResult(extractedMechanism)));
+            MailAuthenticationMechanismResult mailAuthMechResult = mechanismParsersRegitry.get(mechanism).apply(parseMechanismResult(extractedMechanism));
+            try {
+                result.setStatus(MailAuthenticationStatus.valueOf(mailAuthMechResult.getResult().getTechnicalName().toUpperCase()));
+            } catch (IllegalArgumentException e) {
+                LOGGER.debug("Unknown mail authentication status '{}'", mailAuthMechResult.getResult().getTechnicalName(), e);
+                result.setStatus(MailAuthenticationStatus.NEUTRAL);
+            }
+            result.addResult(mailAuthMechResult);
         }
     }
 
