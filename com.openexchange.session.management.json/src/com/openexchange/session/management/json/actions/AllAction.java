@@ -60,6 +60,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.clientinfo.ClientInfo;
 import com.openexchange.clientinfo.ClientInfoService;
 import com.openexchange.exception.OXException;
+import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.management.ManagedSession;
@@ -96,6 +97,11 @@ public class AllAction implements AJAXActionService {
         if ("true".equalsIgnoreCase(requestData.getParameter("extendedInfo"))) {
             extendedInfo = true;
         }
+        String unknownLocation = SessionManagementStrings.UNKNOWN_LOCATION;
+        StringHelper helper = StringHelper.valueOf(locale);
+        if (null != helper) {
+            unknownLocation = helper.getString(SessionManagementStrings.UNKNOWN_LOCATION);
+        }
         Collection<ManagedSession> sessions = service.getSessionsForUser(session);
         JSONArray browsers = new JSONArray();
         JSONArray oxapps = new JSONArray();
@@ -110,7 +116,7 @@ public class AllAction implements AJAXActionService {
                 json.put("client", s.getClient());
                 json.put("userAgent", s.getUserAgent());
                 String location = s.getLocation();
-                if (Strings.isNotEmpty(location) && !SessionManagementStrings.UNKNOWN_LOCATION.equals(location)) {
+                if (Strings.isNotEmpty(location) && !unknownLocation.equals(location)) {
                     json.put("location", s.getLocation());
                 }
                 long loginTime = s.getLoginTime();
