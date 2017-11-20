@@ -84,7 +84,7 @@ public class MailAuthenticationResult {
      */
     public void addResult(MailAuthenticationMechanismResult result) {
         mailAuthenticationMechanisms.add(result.getMechanism());
-        getMailAuthenticationMechanismResults().add(result);
+        mailAuthenticationMechanismResults.add(result);
     }
 
     /**
@@ -153,5 +153,4 @@ public class MailAuthenticationResult {
         builder.append(mailAuthenticationMechanisms).append(", mailAuthenticationMechanismResults=").append(mailAuthenticationMechanismResults).append("]");
         return builder.toString();
     }
-
 }

@@ -53,15 +53,25 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
 import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.mail.authentication.MailAuthenticationHandler;
 import com.openexchange.mail.authentication.MailAuthenticationResult;
 import com.openexchange.mail.authentication.MailAuthenticationStatus;
+import com.openexchange.mail.authentication.mechanism.DKIMAuthMechResult;
+import com.openexchange.mail.authentication.mechanism.DMARCAuthMechResult;
 import com.openexchange.mail.authentication.mechanism.MailAuthenticationMechanism;
+import com.openexchange.mail.authentication.mechanism.MailAuthenticationMechanismResult;
+import com.openexchange.mail.authentication.mechanism.SPFAuthMechResult;
+import com.openexchange.mail.authentication.mechanism.result.DKIMResult;
+import com.openexchange.mail.authentication.mechanism.result.DMARCResult;
+import com.openexchange.mail.authentication.mechanism.result.SPFResult;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.HeaderCollection;
 
@@ -83,11 +93,32 @@ public class MailAuthenticationHandlerImpl implements MailAuthenticationHandler 
 
     private static final MailAuthenticationMechanismComparator MAIL_AUTH_COMPARATOR = new MailAuthenticationMechanismComparator();
 
+    private final Map<MailAuthenticationMechanism, Function<Map<String, String>, MailAuthenticationMechanismResult>> mechanismParsersRegitry;
+
     /**
      * Initialises a new {@link MailAuthenticationHandlerImpl}.
      */
     public MailAuthenticationHandlerImpl() {
         super();
+        mechanismParsersRegitry = new HashMap<>(4);
+        mechanismParsersRegitry.put(MailAuthenticationMechanism.DMARC, (line) -> {
+            String value = line.get(MailAuthenticationMechanism.DMARC.name().toLowerCase());
+            DMARCResult dmarcResult = DMARCResult.valueOf(value.toUpperCase());
+            String domain = line.get("header.i");
+            return new DMARCAuthMechResult(domain, dmarcResult);
+        });
+        mechanismParsersRegitry.put(MailAuthenticationMechanism.DKIM, (line) -> {
+            String value = line.get(MailAuthenticationMechanism.DKIM.name().toLowerCase());
+            DKIMResult dkimResult = DKIMResult.valueOf(value);
+            String domain = line.get("header.i");
+            return new DKIMAuthMechResult(domain, dkimResult);
+        });
+        mechanismParsersRegitry.put(MailAuthenticationMechanism.SPF, (line) -> {
+            String value = line.get(MailAuthenticationMechanism.SPF.name().toLowerCase());
+            SPFResult spfResult = SPFResult.valueOf(value);
+            String domain = line.get("header.i");
+            return new SPFAuthMechResult(domain, spfResult);
+        });
     }
 
     public static void main(String[] args) {
@@ -170,34 +201,8 @@ public class MailAuthenticationHandlerImpl implements MailAuthenticationHandler 
             if (mechanism == null) {
                 continue;
             }
-            parseMechanism(mechanism, extractedMechanism, result);
+            result.addResult(mechanismParsersRegitry.get(mechanism).apply(parseMechanismResult(extractedMechanism)));
         }
-    }
-
-    /**
-     * Parses the specified mechanism
-     * 
-     * @param mechanism
-     * @param s
-     * @param result
-     */
-    private void parseMechanism(MailAuthenticationMechanism mechanism, String s, MailAuthenticationResult result) {
-        // The mechanism tags are separated by a space
-        String[] splitTags = s.split(" ");
-        if (splitTags.length == 0) {
-            // Ignore
-            return;
-        }
-        // The first one is always the mechanism used
-        String mech = splitTags[0];
-        String[] mechUsed = mech.split("=");
-        if (mechUsed.length != 2) {
-            // Ignore
-            return;
-        }
-        String mechStatus = mechUsed[1];
-        result.setStatus(MailAuthenticationStatus.valueOf(mechStatus.toUpperCase()));
-        // TODO: Retrieve the valid status from the mechStatus of the header and set it to the result
     }
 
     /**
@@ -282,6 +287,19 @@ public class MailAuthenticationHandlerImpl implements MailAuthenticationHandler 
             }
             return 0;
         }
+    }
+
+    private Map<String, String> parseMechanismResult(String mechanismResult) {
+        String[] s = mechanismResult.split("; ");
+        Map<String, String> resMap = new HashMap<>();
+        for (String p : s) {
+            String[] pair = p.split("=");
+            if (pair.length == 0) {
+                continue;
+            }
+            resMap.put(pair[0], pair[1]);
+        }
+        return resMap;
     }
 
     /**
