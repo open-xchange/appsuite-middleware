@@ -82,7 +82,7 @@ public class GetAction extends AbstractAccountAction implements CalendarAccountF
 
     @Override
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
-        int accountId = i(requestData.getParameter(AJAXServlet.PARAMETER_ID, Integer.class));
+        int accountId = i(getParameterSafe(requestData, AJAXServlet.PARAMETER_ID, Integer.class));
         CalendarAccount account = getAccountService().getAccount(session, accountId);
         return new AJAXRequestResult(serializeAccount(account), account.getLastModified(), "json");
     }

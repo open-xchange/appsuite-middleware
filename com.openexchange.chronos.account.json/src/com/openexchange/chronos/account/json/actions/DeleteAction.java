@@ -83,8 +83,8 @@ public class DeleteAction extends AbstractAccountAction implements CalendarAccou
 
     @Override
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
-        int accountId = i(requestData.getParameter(AJAXServlet.PARAMETER_ID, Integer.class));
-        long clientTimestamp = l(requestData.getParameter(AJAXServlet.PARAMETER_TIMESTAMP, Long.class));
+        int accountId = i(getParameterSafe(requestData, AJAXServlet.PARAMETER_ID, Integer.class));
+        long clientTimestamp = l(getParameterSafe(requestData, AJAXServlet.PARAMETER_TIMESTAMP, Long.class));
         getAccountService().deleteAccount(session, accountId, clientTimestamp, null);
         return new AJAXRequestResult(new JSONObject(), "json");
     }

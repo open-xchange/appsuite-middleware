@@ -85,8 +85,8 @@ public class UpdateAction extends AbstractAccountAction {
 
     @Override
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
-        int accountId = i(requestData.getParameter(AJAXServlet.PARAMETER_ID, Integer.class));
-        long clientTimestamp = l(requestData.getParameter(AJAXServlet.PARAMETER_TIMESTAMP, Long.class));
+        int accountId = i(getParameterSafe(requestData, AJAXServlet.PARAMETER_ID, Integer.class));
+        long clientTimestamp = l(getParameterSafe(requestData, AJAXServlet.PARAMETER_TIMESTAMP, Long.class));
         JSONObject data = requestData.getData(JSONObject.class);
         if (null == data) {
             throw AjaxExceptionCodes.MISSING_REQUEST_BODY.create();

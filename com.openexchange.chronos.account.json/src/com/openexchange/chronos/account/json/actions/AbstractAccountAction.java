@@ -58,6 +58,7 @@ import java.util.Locale;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.CalendarProvider;
 import com.openexchange.chronos.provider.account.CalendarAccountService;
@@ -134,6 +135,23 @@ abstract class AbstractAccountAction implements AJAXActionService {
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
+    }
+
+    /**
+     * Get the a parameter
+     * 
+     * @param requestData The {@link AJAXRequestData}
+     * @param parameter The parameter name
+     * @param coerceTo The type the parameter should be interpreted as
+     * @return The parameter
+     * @throws OXException If the parameter can't be found
+     */
+    protected <T> T getParameterSafe(AJAXRequestData requestData, String parameter, Class<T> coerceTo) throws OXException {
+        T param = requestData.getParameter(parameter, coerceTo);
+        if (null == param) {
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create(parameter);
+        }
+        return param;
     }
 
 }

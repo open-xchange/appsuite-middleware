@@ -57,6 +57,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.chronos.account.json.ChronosAccountActionFactory;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -84,7 +85,7 @@ public class NewAction extends AbstractAccountAction {
     @Override
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
         String provider = requestData.getParameter(PROVIDER);
-        if (null == provider) {
+        if (Strings.isEmpty(provider)) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create(PROVIDER);
         }
         JSONObject data = requestData.getData(JSONObject.class);
