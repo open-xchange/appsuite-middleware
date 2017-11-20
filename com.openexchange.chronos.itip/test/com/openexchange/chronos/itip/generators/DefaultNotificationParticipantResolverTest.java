@@ -66,7 +66,6 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.ChronosTestTools;
 import com.openexchange.chronos.Event;
-import com.openexchange.chronos.ExtendedProperty;
 import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.itip.ITipIntegrationUtility;
@@ -131,7 +130,6 @@ public class DefaultNotificationParticipantResolverTest {
 
         // Mock used service classes
         PowerMockito.when(Services.getService(UserService.class)).thenReturn(this.userService);
-
         PowerMockito.when(Services.getService(ResourceService.class)).thenReturn(this.resources);
         PowerMockito.when(Services.getService(ConfigurationService.class)).thenReturn(this.config);
 
@@ -157,7 +155,7 @@ public class DefaultNotificationParticipantResolverTest {
     }
 
     @Test
-    public void test() throws OXException {
+    public void testResolveAllRecipients_OnlyInternalAttendees_AllGood() throws OXException {
 
         // Setup test data
         Event updated = ChronosTestTools.createEvent(CONTEXT_ID, null);
@@ -170,8 +168,7 @@ public class DefaultNotificationParticipantResolverTest {
         Assert.assertFalse("No participants resolved", participants.isEmpty());
         for (NotificationParticipant participant : participants) {
             Attendee attendee = updated.getAttendees().stream().filter(a -> a.getEntity() == participant.getIdentifier()).findFirst().get();
-            Assert.assertThat("Participants mail should have been the alias", participant.getEmail(), not(attendee.getEMail()));
-            Assert.assertThat("Participants mail should have been the alias", attendee.getExtendedProperties().get(ExtendedProperty.EMAIL).getValue(), is(participant.getEmail()));
+            Assert.assertThat("Participants mail should have been the alias", participant.getEmail(), is(attendee.getEMail()));
             Assert.assertThat("Participants comment should have been the same as the attendees", participant.getComment(), is(attendee.getComment()));
             Assert.assertThat("Participants status should be 'accepted'", participant.getConfirmStatus(), is(ParticipationStatus.ACCEPTED));
         }

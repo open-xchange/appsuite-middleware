@@ -54,6 +54,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import org.dmfs.rfc5545.DateTime;
+import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.groupware.ldap.MockUser;
 import edu.emory.mathcs.backport.java.util.Arrays;
 
@@ -119,14 +120,6 @@ public final class ChronosTestTools {
         if (null == fields || containsField(fields, AttendeeField.EMAIL)) {
             attendee.setEMail("testAttendee" + userId + "@test.org");
         }
-        if (null == fields || containsField(fields, AttendeeField.EXTENDED_PROPERTIES)) {
-            ExtendedProperties props = new ExtendedProperties();
-            props.add(new ExtendedProperty(ExtendedProperty.CN, "Diffrent, CN"));
-            props.add(new ExtendedProperty(ExtendedProperty.EMAIL, "alias" + userId + "@test.org"));
-            props.add(new ExtendedProperty(ExtendedProperty.URI, "mailto:alias" + userId + "@test.org"));
-            attendee.setExtendedProperties(props);
-        }
-
         return attendee;
     }
 
@@ -251,15 +244,10 @@ public final class ChronosTestTools {
     public static MockUser convertToUser(Attendee attendee) {
         MockUser user = new MockUser(attendee.getEntity());
         user.setMail(attendee.getEMail());
-        if (attendee.containsExtendedProperties()) {
-            ExtendedProperties extendedProperties = attendee.getExtendedProperties();
-            ExtendedProperty property = extendedProperties.get(ExtendedProperty.EMAIL);
-            if (null != property) {
-                String[] aliases = new String[] { property.getValue() };
-                user.setAliases(aliases);
-            }
-            user.setTimeZone(new String());
+        if (attendee.containsUri() && attendee.getUri().toLowerCase().startsWith("mailto:")) {
+            user.setAliases(new String[] { CalendarUtils.extractEMailAddress(attendee.getUri()) });
         }
+        user.setTimeZone(new String());
         return user;
     }
 
