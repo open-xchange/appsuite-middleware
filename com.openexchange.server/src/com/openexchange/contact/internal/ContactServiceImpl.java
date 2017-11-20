@@ -74,6 +74,7 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.objectusecount.ObjectUseCountService;
 import com.openexchange.objectusecount.SetArguments;
@@ -1131,8 +1132,9 @@ public class ContactServiceImpl extends DefaultContactService {
     }
 
     private void afterUserUpdate(Context context, Contact userContact, List<UserServiceInterceptor> interceptors) throws OXException {
+    User user = ServerServiceRegistry.getServize(UserService.class, true).getUser(userContact.getInternalUserId(), context);
         for (UserServiceInterceptor interceptor : interceptors) {
-            interceptor.afterUpdate(context, null, userContact, UserServiceInterceptor.EMPTY_PROPS);
+            interceptor.afterUpdate(context, user, userContact, UserServiceInterceptor.EMPTY_PROPS);
         }
     }
 
