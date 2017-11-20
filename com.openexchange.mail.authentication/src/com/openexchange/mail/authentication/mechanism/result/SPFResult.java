@@ -109,6 +109,15 @@ public enum SPFResult implements AuthenticationMechanismResult {
     SOFTFAIL("Soft Fail"),
 
     /**
+     * Indicates that some local policy mechanism was applied
+     * that augments or even replaces (i.e., overrides) the result returned
+     * by the authentication mechanism.
+     * 
+     * @see <a href="https://tools.ietf.org/html/rfc7601#section-2.4">RFC-7601, Section 2.4</a>
+     */
+    POLICY("Policy"),
+
+    /**
      * The SPF verifier encountered a transient (generally DNS) error while performing the check.
      * Checking software can choose to accept or temporarily reject the message. If the message
      * is rejected during the SMTP transaction for this reason, the software SHOULD use an SMTP

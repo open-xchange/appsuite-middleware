@@ -53,22 +53,51 @@ package com.openexchange.mail.authentication.mechanism.result;
  * {@link DKIMResult} - The evaluation states of the DKIM signature
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
- * @see <a href="https://tools.ietf.org/html/rfc6376#section-3.9">RFC 6376, Section 3.9</a>
+ * @see <a href="https://tools.ietf.org/html/rfc7601#section-2.7.1">RFC 7601, Section 2.7.1</a>
  */
 public enum DKIMResult implements AuthenticationMechanismResult {
 
     /**
-     * A successful verification of the signature
+     * The message was not signed.
      */
-    SUCCESS("Success"),
+    NONE("None"),
     /**
-     * A permanent, non-recoverable error such as a signature verification failure
+     * The message was signed, the signature or signatures were
+     * acceptable to the ADMD, and the signature(s) passed verification
+     * tests.
      */
-    PERMFAIL("Permanent Failure"),
+    PASS("Pass"),
     /**
-     * A temporary, recoverable error such as a DNS query timeout
+     * The message was signed and the signature or signatures were
+     * acceptable to the ADMD, but they failed the verification test(s).
      */
-    TEMPFAIL("Temporary Failure");
+    FAIL("Fail"),
+    /**
+     * The message was signed, but some aspect of the signature or
+     * signatures was not acceptable to the ADMD.
+     */
+    POLICY("Policy"),
+    /**
+     * The message was signed, but the signature or signatures
+     * contained syntax errors or were not otherwise able to be
+     * processed. This result is also used for other failures not
+     * covered elsewhere in this list.
+     * 
+     */
+    NEUTRAL("Neutral"),
+    /**
+     * The message could not be verified due to some error that
+     * is likely transient in nature, such as a temporary inability to
+     * retrieve a public key. A later attempt may produce a final
+     * result.
+     */
+    TEMPERROR("Temporary Error"),
+    /**
+     * The message could not be verified due to some error that
+     * is unrecoverable, such as a required header field being absent. A
+     * later attempt is unlikely to produce a final result.
+     */
+    PERMFAIL("Permanent Failure");
 
     private final String displayName;
 
