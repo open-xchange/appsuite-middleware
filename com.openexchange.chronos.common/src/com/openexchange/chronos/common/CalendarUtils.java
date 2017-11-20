@@ -154,7 +154,6 @@ public class CalendarUtils {
      * @param recurrenceIds The recurrence id's to search
      * @param recurrenceId The recurrence id to lookup
      * @return <code>true</code> if a matching recurrence identifier is contained in the collection, <code>false</code>, otherwise
-     * @see CalendarUtils#matches(RecurrenceId, long)
      */
     public static boolean contains(Collection<RecurrenceId> recurrenceIds, RecurrenceId recurrenceId) {
         return null != recurrenceIds && recurrenceIds.contains(recurrenceId);
@@ -491,7 +490,6 @@ public class CalendarUtils {
      * {@link Calendar#MINUTE}, {@link Calendar#SECOND} and {@link Calendar#MILLISECOND} to <code>0</code>.
      *
      * @param calendar The calendar reference to truncate the time part in
-     * @param timeZone The timezone to consider
      * @return The calendar reference
      */
     public static Calendar truncateTime(Calendar calendar) {
@@ -543,10 +541,10 @@ public class CalendarUtils {
     /**
      * Adds or subtracts the specified amount of time of the given calendar field to the supplied date.
      *
-     * @param calendar The calendar to add or subtract the time to/from
+     * @param date The initial time to set, or <code>null</code> to intialize with the default time
      * @param field The calendar field
      * @param amount The amount of date or time to be added to the field
-     * @param The timezone to perform the add/substract operation in
+     * @param timeZone The timezone to perform the add/substract operation in
      * @return A new date derived from the calendar after adding the amount of time
      */
     public static Date add(Date date, int field, int amount, TimeZone timeZone) {
@@ -976,7 +974,6 @@ public class CalendarUtils {
      *
      * @param <E> The field type
      * @param operation The operation to use
-     * @param operand The value to use as constant operand
      * @return A single search term
      */
     public static <E extends Enum<?>> SingleSearchTerm getSearchTerm(E field, SingleOperation operation) {
@@ -1089,7 +1086,7 @@ public class CalendarUtils {
      *
      * @param emailAddress The e-mail address to get the URI for
      * @return The <code>mailto</code>-URI, or <code>null</code> if no address was passed
-     * @see {@link URI#toASCIIString()}
+     * @see{@link URI#toASCIIString()}
      */
     public static String getURI(String emailAddress) {
         if (Strings.isNotEmpty(emailAddress)) {
@@ -1242,7 +1239,8 @@ public class CalendarUtils {
      *
      * @param event The event to check
      * @return <code>true</code> if the event is group-scheduled, <code>false</code>, otherwise
-     * @see <a href="https://tools.ietf.org/html/rfc5545#section-3.8.4.1">RFC 5545, section 3.8.4.1</a> and
+     * @see <a href="https://tools.ietf.org/html/rfc5545#section-3.8.4.1">RFC 5545, section 3.8.4.1</a>
+     *      and
      *      <a href="https://tools.ietf.org/html/rfc5545#section-3.8.4.3">RFC 5545, section 3.8.4.3</a>
      */
     public static boolean isGroupScheduled(Event event) {
