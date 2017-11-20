@@ -64,6 +64,8 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserExceptionCode;
+import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.user.AbstractUserServiceInterceptor;
 
@@ -100,11 +102,10 @@ public class SchedJoulesUserServiceInterceptor extends AbstractUserServiceInterc
      */
     @Override
     public void afterUpdate(Context context, User user, Contact contactData, Map<String, Object> properties) throws OXException {
-        Locale locale = user.getLocale();
+        Locale locale = getUserLocale(context, user, contactData);
         if (locale == null) {
             return;
         }
-
         AdministrativeCalendarAccountService service = services.getService(AdministrativeCalendarAccountService.class);
         List<CalendarAccount> accounts = service.getAccounts(context.getContextId(), new int[] { user.getId() }, SchedJoulesCalendarProvider.PROVIDER_ID);
         for (CalendarAccount account : accounts) {
@@ -133,6 +134,37 @@ public class SchedJoulesUserServiceInterceptor extends AbstractUserServiceInterc
             service.updateAccount(context.getContextId(), user.getId(), account.getAccountId(), account.isEnabled(), account.getInternalConfiguration(), account.getUserConfiguration(), account.getLastModified().getTime());
         }
         super.afterUpdate(context, user, contactData, properties);
+    }
+
+    /**
+     * Get the user {@link Locale}, if the {@link User} is <code>null</code> then try to load
+     * the {@link User} from the {@link UserStorage} (if exists)
+     * 
+     * @param context The {@link Context}
+     * @param user The {@link User}
+     * @param contact The {@link Contact} data
+     * @return The {@link Locale}, or <code>null</code> if the user does not exist
+     * @throws OXException If an error is occurred
+     */
+    private Locale getUserLocale(Context context, User user, Contact contact) throws OXException {
+        Locale locale = null;
+        if (user != null) {
+            return user.getLocale();
+        }
+        int internalUserId = contact.getInternalUserId();
+        if (internalUserId <= 0) {
+            return locale;
+        }
+        UserStorage userStorage = services.getService(UserStorage.class);
+        try {
+            user = userStorage.getUser(internalUserId, context.getContextId());
+            return user.getLocale();
+        } catch (OXException e) {
+            if (!UserExceptionCode.USER_NOT_FOUND.equals(e)) {
+                throw e;
+            }
+            return null;
+        }
     }
 
     /**
