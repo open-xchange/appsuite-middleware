@@ -62,7 +62,8 @@ import com.openexchange.mail.authentication.mechanism.MailAuthenticationMechanis
  */
 public class MailAuthenticationResult {
 
-    private MailAuthenticationStatus status;
+    /** The default status is NEUTRAL */
+    private MailAuthenticationStatus status = MailAuthenticationStatus.NEUTRAL;
     private String domain;
     private final Set<MailAuthenticationMechanism> mailAuthenticationMechanisms;
     private final Set<MailAuthenticationMechanismResult> mailAuthenticationMechanismResults;

@@ -141,7 +141,7 @@ public class MailAuthenticationHandlerImpl implements MailAuthenticationHandler 
         String[] authHeaders = headerCollection.getHeader(MailAuthenticationHandler.AUTH_RESULTS_HEADER);
         if (authHeaders == null || authHeaders.length == 0) {
             // TODO: Pass on to custom handlers; return null for now
-            return null;
+            return new MailAuthenticationResult();
         }
 
         return parseHeaders(authHeaders);
@@ -157,13 +157,11 @@ public class MailAuthenticationHandlerImpl implements MailAuthenticationHandler 
      */
     private MailAuthenticationResult parseHeaders(String[] authHeaders) {
         MailAuthenticationResult result = new MailAuthenticationResult();
-        result.setStatus(MailAuthenticationStatus.NOT_ANALYZED);
 
         // There can only be one, if there are more only the first one is relevant
         String[] split = authHeaders[0].split("; ");
         if (split.length == 0) {
-            // Huh? Invalid/Malformed authentication results header, set to 'neutral'
-            result.setStatus(MailAuthenticationStatus.NEUTRAL);
+            // Huh? Invalid/Malformed authentication results header, return as is
             return result;
         }
 
@@ -171,7 +169,6 @@ public class MailAuthenticationHandlerImpl implements MailAuthenticationHandler 
         String domain = cleanseVersion(split[0]);
         if (!isValidDomain(domain)) {
             // Not a valid domain, thus we return with 'neutral' status
-            result.setStatus(MailAuthenticationStatus.NEUTRAL);
             return result;
         }
         result.setDomain(domain);
@@ -249,6 +246,8 @@ public class MailAuthenticationHandlerImpl implements MailAuthenticationHandler 
      * @return <code>true</code> if the string denotes a valid domain, <code>false</code> otherwise
      */
     private boolean isValidDomain(String domain) {
+        // TODO: Consider wildcards and regexes...
+        //       e.g. mx[0-9]?.open-xchnge.com
         StringBuilder sb = new StringBuilder("jane.doe");
         if (!domain.startsWith("@")) {
             sb.append('@');
