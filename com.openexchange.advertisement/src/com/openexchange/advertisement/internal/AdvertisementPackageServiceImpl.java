@@ -99,6 +99,9 @@ public class AdvertisementPackageServiceImpl implements AdvertisementPackageServ
 
     private Map<String, String> computeReseller2SchemeMapping(ConfigurationService configService) throws OXException {
         ImmutableMap.Builder<String, String> map = ImmutableMap.builder();
+        StringBuilder propNameBuilder = new StringBuilder(AdvertisementConfigService.CONFIG_PREFIX);
+        int reslen = propNameBuilder.length();
+        boolean containsDefault = false;
         for (ResellerAdmin res: resellerService.getAll()){
             String packageScheme = configService.getProperty(AdvertisementConfigService.CONFIG_PREFIX + res.getName() + CONFIG_SUFFIX);
             if (packageScheme == null) {
@@ -110,20 +113,24 @@ public class AdvertisementPackageServiceImpl implements AdvertisementPackageServ
                     packageScheme = DEFAULT_SCHEME_ID;
                 }
             }
-
+            if(res.getName().equals(DEFAULT_RESELLER)){
+                containsDefault=true;
+            }
             map.put(res.getName(), packageScheme);
         }
 
-        // Add 'default' as a default reseller
-        String oxall = DEFAULT_RESELLER;
+        if (!containsDefault) {
+            // Add 'default' as a default reseller
+            String oxall = DEFAULT_RESELLER;
 
-        String packageScheme = configService.getProperty(AdvertisementConfigService.CONFIG_PREFIX + oxall + CONFIG_SUFFIX);
-        if (packageScheme == null) {
-            //fallback to global
-            packageScheme = DEFAULT_SCHEME_ID;
+            propNameBuilder.setLength(reslen);
+            String packageScheme = configService.getProperty(propNameBuilder.append(oxall).append(CONFIG_SUFFIX).toString());
+            if (packageScheme == null) {
+                //fallback to global
+                packageScheme = DEFAULT_SCHEME_ID;
+            }
+            map.put(oxall, packageScheme);
         }
-
-        map.put(oxall, packageScheme);
         return map.build();
     }
 
