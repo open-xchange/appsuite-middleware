@@ -1630,4 +1630,22 @@ public class CalendarUtils {
         }
         return attendee.containsEMail() ? attendee.getEMail() : defaultMail;
     }
+
+    /**
+     * If the attendee was invited with an alias the common name might not be the same as the internal display name for the associated user.
+     * Therefore this method decides based on the common name of the attendee which the correct display name is.
+     * 
+     * @param attendee The attendee
+     * @param defaultDisplayName The display name for the associated user
+     * @return The display name to use for the attendee
+     */
+    public static String getDisplayName(Attendee attendee, String defaultDisplayName) {
+        if (null != attendee && isInternal(attendee) && attendee.containsCn()) {
+            String commonName = attendee.getCn();
+            if (Strings.isNotEmpty(commonName) && false == commonName.equalsIgnoreCase(defaultDisplayName)) {
+                return commonName;
+            }
+        }
+        return defaultDisplayName;
+    }
 }

@@ -193,7 +193,7 @@ public class DefaultNotificationParticipantResolver implements NotificationParti
             foundOnBehalfOf = foundOnBehalfOf || id == onBehalfOf.getId();
             foundPrincipal = foundPrincipal || roles.contains(ITipRole.PRINCIPAL);
 
-            participant.setDisplayName(u.getDisplayName());
+            participant.setDisplayName(CalendarUtils.getDisplayName(userParticipant, u.getDisplayName()));
             participant.setLocale(u.getLocale());
             participant.setTimezone(TimeZone.getTimeZone(u.getTimeZone()));
             if (userParticipant != null) {
