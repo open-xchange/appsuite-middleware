@@ -1,0 +1,15 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Mail Authentication
+Bundle-SymbolicName: com.openexchange.mail.authentication.trusted
+Bundle-Version: 7.10.0
+Bundle-Activator: com.openexchange.mail.authentication.osgi.Activator
+Bundle-Vendor: OX Software GmbH
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Import-Package: com.openexchange.config,
+ com.openexchange.exception,
+ com.openexchange.java,
+ com.openexchange.osgi,
+ com.openexchange.server,
+ org.osgi.framework
+Export-Package: com.openexchange.mail.authentication
