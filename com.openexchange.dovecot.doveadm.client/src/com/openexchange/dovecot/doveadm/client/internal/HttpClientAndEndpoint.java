@@ -49,7 +49,7 @@
 
 package com.openexchange.dovecot.doveadm.client.internal;
 
-import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.CloseableHttpClient;
 import com.openexchange.rest.client.endpointpool.Endpoint;
 
 /**
@@ -61,7 +61,7 @@ import com.openexchange.rest.client.endpointpool.Endpoint;
 public class HttpClientAndEndpoint {
 
     /** The HTTP client to use */
-    final DefaultHttpClient httpClient;
+    final CloseableHttpClient httpClient;
 
     /** The associated available end-point to call */
     final Endpoint endpoint;
@@ -69,7 +69,7 @@ public class HttpClientAndEndpoint {
     /**
      * Initializes a new {@link HttpClientAndEndpoint}.
      */
-    public HttpClientAndEndpoint(DefaultHttpClient httpClient, Endpoint endpoint) {
+    public HttpClientAndEndpoint(CloseableHttpClient httpClient, Endpoint endpoint) {
         super();
         this.httpClient = httpClient;
         this.endpoint = endpoint;

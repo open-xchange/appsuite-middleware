@@ -285,7 +285,7 @@ public class BasicContactsDriver extends AbstractContactFacetingModuleSearchDriv
                     String id = ContactsFacetType.CONTACT.getId();
                     Filter filter = Filter.of(id, String.valueOf(contact.getObjectID()));
                     String valueId = prepareFacetValueId(id, session.getContextId(), Integer.toString(contact.getObjectID()));
-                    builder.addValue(FacetValue.newBuilder(valueId).withDisplayItem(DisplayItems.convert(contact, session)).withFilter(filter).build());
+                    builder.addValue(FacetValue.newBuilder(valueId).withDisplayItem(DisplayItems.convert(contact, session.getUser().getLocale())).withFilter(filter).build());
                 }
                 facets.add(builder.build());
             }
