@@ -76,9 +76,6 @@ public class AbstractPasswordchangehistoryTest extends AbstractRestTest {
     protected Long                     limit = new Long(1);
     protected long                     send;
 
-    protected String ORDER_NEWEST = "newest";
-    protected String ORDER_OLDEST = "oldest";
-
     protected ApiClient pwdRestClient;
 
     protected final static String CLIENT_ID = "com.openexchange.ajax.framework.AJAXClient";
