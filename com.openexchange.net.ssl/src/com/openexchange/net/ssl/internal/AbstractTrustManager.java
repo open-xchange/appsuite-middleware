@@ -298,7 +298,7 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
 
     /**
      * Log the entire {@link X509Certificate} chain in the debug level
-     * 
+     *
      * @param chain The chain to log
      * @throws CertificateEncodingException if the fingerprint of a certificate cannot be generated
      */
@@ -331,7 +331,7 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
     /**
      * Performs a preliminary check on the specified {@link CertificateException}
      * to determine any common/known reasons of failure
-     * 
+     *
      * @param e The {@link CertificateException} to check
      * @throws CertificateException
      */
@@ -427,7 +427,7 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
 
     /**
      * Perform a check whether the Certificate Authority that issued the specified chain is trusted
-     * 
+     *
      * @param chain The {@link X509Certificate} chain
      * @return <code>true</code> if the certificate authority is trusted, <code>false</code> otherwise
      */
@@ -480,7 +480,7 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
         }
 
         logChain(chain);
-        
+
         String fingerprint = cacheCertificate(userId, contextId, chain[0], hostname, FailureReason.INVALID_COMMON_NAME);
         throw new CertificateException(SSLExceptionCode.INVALID_HOSTNAME.create(Collections.singletonMap(FINGERPRINT_NAME, fingerprint), fingerprint, hostname));
     }
@@ -562,7 +562,7 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
         if (bytes.length == 0) {
             throw new IllegalArgumentException("The specified byte array cannot be empty");
         }
-        char[] hexChars = new char[bytes.length * 2];
+        char[] hexChars = new char[bytes.length << 1];
         for (int j = 0; j < bytes.length; j++) {
             int v = bytes[j] & 0xFF;
             hexChars[j * 2] = hexArray[v >>> 4];
@@ -573,7 +573,7 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
 
     /**
      * Retrieves the context identifier from the {@link LogProperties}
-     * 
+     *
      * @return the context identifier from the LogProperties
      */
     private int getContextId() {
@@ -582,7 +582,7 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
 
     /**
      * Retrieves the user identifier from the {@link LogProperties}
-     * 
+     *
      * @return the user identifier from the {@link LogProperties}
      */
     private int getUseId() {
@@ -591,7 +591,7 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
 
     /**
      * Retrieves value of the specified property from the {@link LogProperties}
-     * 
+     *
      * @param name The log property's name
      * @return the property's value
      */
