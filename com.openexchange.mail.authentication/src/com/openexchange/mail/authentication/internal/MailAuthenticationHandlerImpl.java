@@ -62,6 +62,7 @@ import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.authentication.MailAuthenticationHandler;
 import com.openexchange.mail.authentication.MailAuthenticationResult;
 import com.openexchange.mail.authentication.MailAuthenticationStatus;
@@ -139,7 +140,7 @@ public class MailAuthenticationHandlerImpl implements MailAuthenticationHandler 
 
     /**
      * Parses the specified line to a {@link Map}.
-     * 
+     *
      * @param line The line to parse
      * @return A {@link Map} with the key/value pairs of the line
      */
@@ -179,7 +180,7 @@ public class MailAuthenticationHandlerImpl implements MailAuthenticationHandler 
                         //Remove the key from the value buffer
                         valueBuffer.setLength(valueBuffer.length() - backtrackIndex);
                         pairs.put(key, valueBuffer.toString().trim());
-                        // Retain the new key (and reverse if that key came from backtracking) 
+                        // Retain the new key (and reverse if that key came from backtracking)
                         key = backtracking ? keyBuffer.reverse().toString() : keyBuffer.toString();
                         // Reset counters
                         keyBuffer.setLength(0);
@@ -220,13 +221,13 @@ public class MailAuthenticationHandlerImpl implements MailAuthenticationHandler 
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.mail.authentication.MailAuthenticationHandler#handle(com.openexchange.mail.dataobjects.MailPart)
      */
     @Override
     public MailAuthenticationResult handle(MailPart mailPart) {
-        //TODO: Perform preliminary configuration checks, 
-        //      like whether the feature is enabled or 
+        //TODO: Perform preliminary configuration checks,
+        //      like whether the feature is enabled or
         //      the core engine shall be used.
         //      Maybe move those checks to a higher layer in the framework.
 
@@ -244,7 +245,7 @@ public class MailAuthenticationHandlerImpl implements MailAuthenticationHandler 
 
     /**
      * Parses the specified authentication headers
-     * 
+     *
      * @param authHeaders
      * @return
      */
@@ -252,7 +253,7 @@ public class MailAuthenticationHandlerImpl implements MailAuthenticationHandler 
         MailAuthenticationResult result = new MailAuthenticationResult();
 
         // There can only be one, if there are more only the first one is relevant
-        String[] split = authHeaders[0].split("; ");
+        String[] split = Strings.splitBySemiColon(authHeaders[0]);
         if (split.length == 0) {
             // Huh? Invalid/Malformed authentication results header, return as is
             return result;
@@ -303,7 +304,7 @@ public class MailAuthenticationHandlerImpl implements MailAuthenticationHandler 
 
     /**
      * Extracts the supported mechanism results from the specified string array
-     * 
+     *
      * @param authResults The authentication results
      * @return An unmodifiable {@link List} with the supported mechanism results
      */
@@ -324,7 +325,7 @@ public class MailAuthenticationHandlerImpl implements MailAuthenticationHandler 
 
     /**
      * Removes the optional version (if present) from the specified domain.
-     * 
+     *
      * @see <a href="https://tools.ietf.org/html/rfc7601#section-2.2">RFC 7601, Section 2.2</a>
      * @param domain The domain
      * @return The cleansed domain
@@ -336,7 +337,7 @@ public class MailAuthenticationHandlerImpl implements MailAuthenticationHandler 
 
     /**
      * Determines whether the specified string denotes a valid domain name
-     * 
+     *
      * @param domain Domain candidate
      * @return <code>true</code> if the string denotes a valid domain, <code>false</code> otherwise
      */
@@ -369,7 +370,7 @@ public class MailAuthenticationHandlerImpl implements MailAuthenticationHandler 
 
         /*
          * (non-Javadoc)
-         * 
+         *
          * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
          */
         @Override
@@ -400,7 +401,7 @@ public class MailAuthenticationHandlerImpl implements MailAuthenticationHandler 
 
     /**
      * Parses the specified mechanism result line to a {@link Map}.
-     * 
+     *
      * @param mechanismResult The mechanism result header line
      * @return A {@link Map} with key/value pairs of the header line's attributes
      */
@@ -421,7 +422,7 @@ public class MailAuthenticationHandlerImpl implements MailAuthenticationHandler 
 
     /**
      * Converts the specified string to a {@link MailAuthenticationMechanism}
-     * 
+     *
      * @param s The string to convert
      * @return the converted {@link MailAuthenticationMechanism}
      */
