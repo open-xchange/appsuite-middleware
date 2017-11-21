@@ -56,21 +56,8 @@ package com.openexchange.mail.authentication.mechanism.dmarc;
  */
 public final class DMARCResultHeader {
 
-    //@formatter: off
     /**
-     * Not an actual attribute in the header line, but instead
-     * a virtual one to assign to the keyless domain name,
-     * e.g.<br/></br>
-     * 
-     * <pre>
-     * Authentication-Results: example.com;
-     *     auth=pass (cram-md5) smtp.auth=sender@example.net;
-     *     spf=pass smtp.mailfrom=example.net
-     * </pre>
-     * 
-     * Then the 'example.com' will internally be assigned with the
-     * key 'domain'.
+     * Reflects the sender domain
      */
-    //@formatter: on
-    public static final String DOMAIN = "domain";
+    public static final String HEADER_FROM = "header.from";
 }

@@ -101,7 +101,7 @@ public class MailAuthenticationHandlerImpl implements MailAuthenticationHandler 
         mechanismParsersRegitry.put(MailAuthenticationMechanism.DMARC, (line) -> {
             String value = line.get(MailAuthenticationMechanism.DMARC.name().toLowerCase());
             DMARCResult dmarcResult = DMARCResult.valueOf(value.toUpperCase());
-            String domain = line.get(DMARCResultHeader.DOMAIN);
+            String domain = line.get(DMARCResultHeader.HEADER_FROM);
             return new DMARCAuthMechResult(domain, dmarcResult);
         });
         mechanismParsersRegitry.put(MailAuthenticationMechanism.DKIM, (line) -> {
@@ -150,7 +150,7 @@ public class MailAuthenticationHandlerImpl implements MailAuthenticationHandler 
             pairs.put(line, line);
             return pairs;
         }
-        
+
         StringBuilder keyBuffer = new StringBuilder(32);
         StringBuilder valueBuffer = new StringBuilder(64);
         String key = null;
@@ -257,8 +257,10 @@ public class MailAuthenticationHandlerImpl implements MailAuthenticationHandler 
             // Huh? Invalid/Malformed authentication results header, return as is
             return result;
         }
+        List<String> authResultLines = Arrays.asList(split);
 
-        // The first property of the header MUST always be the domain
+        // The first property of the header MUST always be the domain (i.e. the authserv-id)
+        // See https://tools.ietf.org/html/rfc7601 for the formal definition
         String domain = cleanseVersion(split[0]);
         if (!isValidDomain(domain)) {
             // Not a valid domain, thus we return with 'neutral' status
@@ -266,7 +268,7 @@ public class MailAuthenticationHandlerImpl implements MailAuthenticationHandler 
         }
         result.setDomain(domain);
 
-        List<String> extractedMechanismResults = extractMechanismResults(Arrays.asList(Arrays.copyOfRange(split, 1, split.length)));
+        List<String> extractedMechanismResults = extractMechanismResults(authResultLines);
         parseMechanismResults(extractedMechanismResults, result);
 
         return result;
