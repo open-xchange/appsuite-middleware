@@ -98,7 +98,7 @@ public class DMARCAuthMechResult extends AbstractAuthMechResult {
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        builder.append("DMARCAuthMechResult [getMechanism()=").append(getMechanism()).append(", getDomain()=").append(getDomain()).append(", getClientIP()=").append(getClientIP()).append(", getResult()=").append(getResult()).append("]");
+        builder.append("DMARCAuthMechResult [mechanism=").append(getMechanism()).append(", domain=").append(getDomain()).append(", clientIP=").append(getClientIP()).append(", result=").append(getResult()).append("]");
         return builder.toString();
     }
 }
