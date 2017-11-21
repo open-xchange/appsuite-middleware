@@ -64,7 +64,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.authentication.MailAuthenticationHandler;
-import com.openexchange.mail.authentication.MailAuthenticationResult;
 import com.openexchange.mail.authentication.MailAuthenticationStatus;
 import com.openexchange.mail.authentication.mechanism.MailAuthenticationMechanism;
 import com.openexchange.mail.authentication.mechanism.MailAuthenticationMechanismResult;
@@ -77,6 +76,7 @@ import com.openexchange.mail.authentication.mechanism.dmarc.DMARCResultHeader;
 import com.openexchange.mail.authentication.mechanism.spf.SPFAuthMechResult;
 import com.openexchange.mail.authentication.mechanism.spf.SPFResult;
 import com.openexchange.mail.authentication.mechanism.spf.SPFResultHeader;
+import com.openexchange.mail.dataobjects.MailAuthenticationResult;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.HeaderCollection;
 
@@ -165,10 +165,11 @@ public class MailAuthenticationHandlerImpl implements MailAuthenticationHandler 
         String[] authHeaders = headerCollection.getHeader(MailAuthenticationHandler.AUTH_RESULTS_HEADER);
         if (authHeaders == null || authHeaders.length == 0) {
             // TODO: Pass on to custom handlers; return neutral status for now
-            //return new MailAuthenticationResult();
+            mailMessage.setMailAuthenticationResult(new MailAuthenticationResult());
+            return;
         }
 
-        parseHeaders(authHeaders);
+        mailMessage.setMailAuthenticationResult(parseHeaders(authHeaders));
     }
 
     /*
