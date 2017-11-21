@@ -50,6 +50,7 @@
 package com.openexchange.mail.authentication.internal;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -61,6 +62,7 @@ import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.openexchange.mail.MailField;
 import com.openexchange.mail.authentication.MailAuthenticationHandler;
 import com.openexchange.mail.authentication.MailAuthenticationResult;
 import com.openexchange.mail.authentication.MailAuthenticationStatus;
@@ -76,7 +78,6 @@ import com.openexchange.mail.authentication.mechanism.spf.SPFAuthMechResult;
 import com.openexchange.mail.authentication.mechanism.spf.SPFResult;
 import com.openexchange.mail.authentication.mechanism.spf.SPFResultHeader;
 import com.openexchange.mail.dataobjects.MailMessage;
-import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.HeaderCollection;
 
 /**
@@ -91,6 +92,19 @@ public class MailAuthenticationHandlerImpl implements MailAuthenticationHandler 
     private static final MailAuthenticationMechanismComparator MAIL_AUTH_COMPARATOR = new MailAuthenticationMechanismComparator();
 
     private final Map<MailAuthenticationMechanism, Function<Map<String, String>, MailAuthenticationMechanismResult>> mechanismParsersRegitry;
+
+    /** The required mail fileds of this handler */
+    private static final Collection<MailField> REQUIRED_MAIL_FIELDS;
+    static {
+        Collection<MailField> m = new ArrayList<>();
+        for (MailField mf : MailField.FIELDS_WO_BODY) {
+            m.add(mf);
+        }
+        REQUIRED_MAIL_FIELDS = Collections.<MailField> unmodifiableCollection(m);
+    }
+
+    /** The required headers of this handler */
+    private static final Collection<String> REQUIRED_HEADERS = Collections.singletonList(MailAuthenticationHandler.AUTH_RESULTS_HEADER);
 
     /**
      * Initialises a new {@link MailAuthenticationHandlerImpl}.
@@ -157,6 +171,26 @@ public class MailAuthenticationHandlerImpl implements MailAuthenticationHandler 
         parseHeaders(authHeaders);
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.mail.authentication.MailAuthenticationHandler#getRequiredFields()
+     */
+    @Override
+    public Collection<MailField> getRequiredFields() {
+        return REQUIRED_MAIL_FIELDS;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.mail.authentication.MailAuthenticationHandler#getRequiredHeaders()
+     */
+    @Override
+    public Collection<String> getRequiredHeaders() {
+        return REQUIRED_HEADERS;
+    }
+
     ///////////////////////////////////// HELPERS ///////////////////////////////////////
 
     /**
@@ -192,7 +226,7 @@ public class MailAuthenticationHandlerImpl implements MailAuthenticationHandler 
         parseMechanismResults(extractedMechanismResults, result);
 
         //TODO: add the remaining attributes as is to the result
-        
+
         return result;
     }
 
@@ -471,5 +505,4 @@ public class MailAuthenticationHandlerImpl implements MailAuthenticationHandler 
         }
         return null;
     }
-
 }

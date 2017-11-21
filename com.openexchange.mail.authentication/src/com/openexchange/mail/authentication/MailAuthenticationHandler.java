@@ -49,6 +49,8 @@
 
 package com.openexchange.mail.authentication;
 
+import java.util.Collection;
+import com.openexchange.mail.MailField;
 import com.openexchange.mail.authentication.mechanism.MailAuthenticationMechanism;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
@@ -75,4 +77,18 @@ public interface MailAuthenticationHandler {
      * @return The {@link MailAuthenticationResult} with the collected results of the {@link MailAuthenticationMechanism}s
      */
     void handle(MailMessage mailMessage);
+
+    /**
+     * Returns an unmodifiable {@link Collection} with all required {@link MailField}s
+     * 
+     * @return an unmodifiable{@link Collection} with all required {@link MailField}s
+     */
+    Collection<MailField> getRequiredFields();
+
+    /**
+     * Returns an unmodifiable {@link Collection} with all required mail headers
+     * 
+     * @return an unmodifiable {@link Collection} with all required mail headers
+     */
+    Collection<String> getRequiredHeaders();
 }
