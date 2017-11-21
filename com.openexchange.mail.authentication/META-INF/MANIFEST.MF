@@ -7,6 +7,11 @@ Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.openexchange.java,
  com.openexchange.mail,
+ com.openexchange.mail.authentication,
+ com.openexchange.mail.authentication.mechanism,
+ com.openexchange.mail.authentication.mechanism.dkim,
+ com.openexchange.mail.authentication.mechanism.dmarc,
+ com.openexchange.mail.authentication.mechanism.spf,
  com.openexchange.mail.dataobjects,
  com.openexchange.mail.mime,
  javax.mail,
