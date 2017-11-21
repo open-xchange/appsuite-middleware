@@ -50,7 +50,7 @@
 package com.openexchange.chronos.itip.generators;
 
 import static org.hamcrest.core.Is.is;
-import static org.hamcrest.core.IsNot.not;
+import java.util.LinkedList;
 import java.util.List;
 import org.junit.Assert;
 import org.junit.Before;
@@ -172,6 +172,58 @@ public class DefaultNotificationParticipantResolverTest {
             Assert.assertThat("Participants comment should have been the same as the attendees", participant.getComment(), is(attendee.getComment()));
             Assert.assertThat("Participants status should be 'accepted'", participant.getConfirmStatus(), is(ParticipationStatus.ACCEPTED));
         }
+    }
+
+    @Test
+    public void testResolveAllRecipients_OnlyInternalAttendees_AliasAsParticipantMail() throws OXException {
+
+        // Setup test data
+        Event updated = ChronosTestTools.createEvent(CONTEXT_ID, null);
+        User user;
+        User onBehalfOf = user = ChronosTestTools.convertToUser(updated.getCreatedBy());
+
+        Attendee aliasAttendee = ChronosTestTools.createAttendee(CONTEXT_ID, null);
+        String aliasMail = "alias@example.org";
+        aliasAttendee.setUri(CalendarUtils.getURI(aliasMail));
+        aliasAttendee.setCn("AliasName, forUser");
+        List<Attendee> extenedAttendees = new LinkedList<>(updated.getAttendees());
+        extenedAttendees.add(aliasAttendee);
+        updated.setAttendees(extenedAttendees);
+
+        prepareServices(updated, onBehalfOf);
+
+        List<NotificationParticipant> participants = resolver.resolveAllRecipients(null, updated, user, onBehalfOf, context, session);
+        Assert.assertFalse("No participants resolved", participants.isEmpty());
+        NotificationParticipant participant = participants.stream().filter(p -> p.getIdentifier() == aliasAttendee.getEntity()).findFirst().get();
+        Assert.assertThat("The participants mail should have been the alias the user was invited by", participant.getEmail(), is(aliasMail));
+        Assert.assertThat("The common name should have been the name the user was invited by", participant.getDisplayName(), is(aliasAttendee.getCn()));
+    }
+
+    @Test
+    public void testResolveAllRecipients_WithExternallAttendees_AliasAsParticipantMail() throws OXException {
+
+        // Setup test data
+        Event updated = ChronosTestTools.createEvent(CONTEXT_ID, null);
+        User user;
+        User onBehalfOf = user = ChronosTestTools.convertToUser(updated.getCreatedBy());
+
+        Attendee external = ChronosTestTools.createExternalAttendee(CONTEXT_ID, null);
+        List<Attendee> extenedAttendees = new LinkedList<>(updated.getAttendees());
+        extenedAttendees.add(external);
+        updated.setAttendees(extenedAttendees);
+
+        prepareServices(updated, onBehalfOf);
+
+        List<NotificationParticipant> participants = resolver.resolveAllRecipients(null, updated, user, onBehalfOf, context, session);
+        Assert.assertFalse("No participants resolved", participants.isEmpty());
+        NotificationParticipant participant = participants.stream().filter(p -> p.getIdentifier() == external.getEntity()).findFirst().get();
+        Assert.assertThat("EMail souhld not differ!", participant.getEmail(), is(external.getEMail()));
+        // Do not send internal data
+        Assert.assertThat("Display name should be the same as the mail!", participant.getDisplayName(), is(external.getEMail()));
+        Assert.assertThat("TimeZone souhld not differ!", participant.getTimeZone(), is(updated.getStartDate().getTimeZone()));
+        Assert.assertThat("Locale souhld not differ!", participant.getLocale(), is(ChronosTestTools.convertToUser(external).getLocale()));
+        Assert.assertThat("Comment souhld not differ!", participant.getComment(), is(external.getComment()));
+        Assert.assertThat("Confirm status souhld not differ!", participant.getConfirmStatus(), is(external.getPartStat()));
     }
 
 }

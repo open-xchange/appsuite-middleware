@@ -76,7 +76,7 @@ public final class ChronosTestTools {
      * @return An {@link Attendee}
      */
     public static Attendee createAttendee(int contextId, AttendeeField... attendeeFields) {
-        List<Enum<?>> fields = null == attendeeFields ? null : Arrays.asList(attendeeFields);
+        List<Enum<?>> fields = null == attendeeFields || 0 == attendeeFields.length ? null : Arrays.asList(attendeeFields);
 
         int uid = randomInt();
         String userId = String.valueOf(uid);
@@ -144,6 +144,7 @@ public final class ChronosTestTools {
     public static Attendee createExternalAttendee(int contextId, AttendeeField... attendeeFields) {
         Attendee attendee = createAttendee(contextId, attendeeFields);
         attendee.setEntity(-1 * attendee.getEntity());
+        attendee.setUri(CalendarUtils.getURI(attendee.getEMail()));
         return attendee;
     }
 
@@ -164,7 +165,7 @@ public final class ChronosTestTools {
     }
 
     public static Event createEvent(int contextId, EventField... eventFields) {
-        List<Enum<?>> fields = null == eventFields ? null : Arrays.asList(eventFields);
+        List<Enum<?>> fields = null == eventFields || 0 == eventFields.length ? null : Arrays.asList(eventFields);
 
         long currentTimeMillis = System.currentTimeMillis();
         int uid = randomInt();
