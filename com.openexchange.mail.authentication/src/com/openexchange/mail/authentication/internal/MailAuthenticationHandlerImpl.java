@@ -123,6 +123,99 @@ public class MailAuthenticationHandlerImpl implements MailAuthenticationHandler 
         MailAuthenticationHandlerImpl m = new MailAuthenticationHandlerImpl();
         MailAuthenticationResult r = m.parseHeaders(authHeaders);
         System.err.println(r);
+
+        String b = "spf=pass (xyz.com: domain of jane.doe@open-xchange.com designates 1.2.3.4 as permitted sender) smtp.mailfrom=jane.doe@open-xchange.com";
+        String a = "dkim=temperror (no key for signature) header.i=@renurt.com header.s=e header.b=Sw4o2uM4";
+        String c = "blah";
+        String[] ss = a.split(" ");
+        for (int i = 0; i < ss.length; i++) {
+            System.out.println(ss[i]);
+        }
+        System.out.println(m.parseLine(a));
+        System.out.println(m.parseLine(b));
+        System.out.println(m.parseLine(c));
+        ;
+    }
+
+    /**
+     * Parses the specified line to a {@link Map}.
+     * 
+     * @param line The line to parse
+     * @return A {@link Map} with the key/value pairs of the line
+     */
+    private Map<String, String> parseLine(String line) {
+        Map<String, String> pairs = new HashMap<>();
+        // No pairs; return as a singleton Map with the line being both the key and the value
+        if (!line.contains("=")) {
+            pairs.put(line, line);
+            return pairs;
+        }
+        
+        StringBuilder keyBuffer = new StringBuilder(32);
+        StringBuilder valueBuffer = new StringBuilder(64);
+        String key = null;
+        boolean valueMode = false;
+        boolean backtracking = false;
+        int backtrackIndex = 0;
+        for (int index = 0; index < line.length();) {
+            char c = line.charAt(index);
+            switch (c) {
+                case '=':
+                    if (valueMode) {
+                        // A key found while in value mode, so we backtrack
+                        backtracking = true;
+                        valueMode = false;
+                        index--;
+                    } else {
+                        // Retain the key and switch to value mode
+                        key = keyBuffer.toString();
+                        keyBuffer.setLength(0);
+                        valueMode = true;
+                        index++;
+                    }
+                    break;
+                case ' ':
+                    if (!valueMode) {
+                        //Remove the key from the value buffer
+                        valueBuffer.setLength(valueBuffer.length() - backtrackIndex);
+                        pairs.put(key, valueBuffer.toString().trim());
+                        // Retain the new key (and reverse if that key came from backtracking) 
+                        key = backtracking ? keyBuffer.reverse().toString() : keyBuffer.toString();
+                        // Reset counters
+                        keyBuffer.setLength(0);
+                        valueBuffer.setLength(0);
+                        // Skip to the value of the retained new key (position after the '=' sign)
+                        index += backtrackIndex + 2;
+                        backtrackIndex = 0;
+                        backtracking = false;
+                        valueMode = true;
+                        break;
+                    }
+                    // while in value mode spaces are considered as literals, hence fall-through to 'default'
+                default:
+                    if (valueMode) {
+                        // While in value mode append all literals to the value buffer
+                        valueBuffer.append(c);
+                        index++;
+                    } else {
+                        // While in key mode append all key literals to the key buffer...
+                        keyBuffer.append(c);
+                        if (backtracking) {
+                            // ... and if we are backtracking, update the counters
+                            index--;
+                            backtrackIndex++;
+                        } else {
+                            // ... if we are not backtracking and we are in key mode, go forth
+                            index++;
+                        }
+                    }
+            }
+        }
+        // Add the last pair
+        if (valueBuffer.length() > 0) {
+            pairs.put(key, valueBuffer.toString());
+        }
+        return pairs;
     }
 
     /*
@@ -140,7 +233,7 @@ public class MailAuthenticationHandlerImpl implements MailAuthenticationHandler 
         HeaderCollection headerCollection = mailPart.getHeaders();
         String[] authHeaders = headerCollection.getHeader(MailAuthenticationHandler.AUTH_RESULTS_HEADER);
         if (authHeaders == null || authHeaders.length == 0) {
-            // TODO: Pass on to custom handlers; return null for now
+            // TODO: Pass on to custom handlers; return neutral status for now
             return new MailAuthenticationResult();
         }
 
