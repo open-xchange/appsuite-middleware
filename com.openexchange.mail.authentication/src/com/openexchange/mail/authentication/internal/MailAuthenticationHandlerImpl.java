@@ -125,7 +125,7 @@ public class MailAuthenticationHandlerImpl implements MailAuthenticationHandler 
         System.err.println(r);
 
         String b = "spf=pass (xyz.com: domain of jane.doe@open-xchange.com designates 1.2.3.4 as permitted sender) smtp.mailfrom=jane.doe@open-xchange.com";
-        String a = "dkim=temperror (no key for signature) header.i=@renurt.com header.s=e header.b=Sw4o2uM4";
+        String a = "dkim=temperror (no key for signature) header.i=@foo.com header.s=e header.b=Sw4o2uM4";
         String c = "blah";
         String[] ss = a.split(" ");
         for (int i = 0; i < ss.length; i++) {
