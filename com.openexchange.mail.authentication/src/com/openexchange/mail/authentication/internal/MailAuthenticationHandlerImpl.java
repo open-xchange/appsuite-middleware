@@ -75,6 +75,7 @@ import com.openexchange.mail.authentication.mechanism.dmarc.DMARCResultHeader;
 import com.openexchange.mail.authentication.mechanism.spf.SPFAuthMechResult;
 import com.openexchange.mail.authentication.mechanism.spf.SPFResult;
 import com.openexchange.mail.authentication.mechanism.spf.SPFResultHeader;
+import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.HeaderCollection;
 
@@ -140,20 +141,20 @@ public class MailAuthenticationHandlerImpl implements MailAuthenticationHandler 
      * @see com.openexchange.mail.authentication.MailAuthenticationHandler#handle(com.openexchange.mail.dataobjects.MailPart)
      */
     @Override
-    public MailAuthenticationResult handle(MailPart mailPart) {
+    public void handle(MailMessage mailMessage) {
         //TODO: Perform preliminary configuration checks,
         //      like whether the feature is enabled or
         //      the core engine shall be used.
         //      Maybe move those checks to a higher layer in the framework.
 
-        HeaderCollection headerCollection = mailPart.getHeaders();
+        HeaderCollection headerCollection = mailMessage.getHeaders();
         String[] authHeaders = headerCollection.getHeader(MailAuthenticationHandler.AUTH_RESULTS_HEADER);
         if (authHeaders == null || authHeaders.length == 0) {
             // TODO: Pass on to custom handlers; return neutral status for now
-            return new MailAuthenticationResult();
+            //return new MailAuthenticationResult();
         }
 
-        return parseHeaders(authHeaders);
+        parseHeaders(authHeaders);
     }
 
     ///////////////////////////////////// HELPERS ///////////////////////////////////////
@@ -190,6 +191,8 @@ public class MailAuthenticationHandlerImpl implements MailAuthenticationHandler 
         List<String> extractedMechanismResults = extractMechanismResults(authResultLines);
         parseMechanismResults(extractedMechanismResults, result);
 
+        //TODO: add the remaining attributes as is to the result
+        
         return result;
     }
 

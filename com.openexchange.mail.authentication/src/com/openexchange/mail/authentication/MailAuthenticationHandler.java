@@ -50,6 +50,7 @@
 package com.openexchange.mail.authentication;
 
 import com.openexchange.mail.authentication.mechanism.MailAuthenticationMechanism;
+import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 
 /**
@@ -73,5 +74,5 @@ public interface MailAuthenticationHandler {
      * @param mailPart The {@link MailPart} to handle
      * @return The {@link MailAuthenticationResult} with the collected results of the {@link MailAuthenticationMechanism}s
      */
-    MailAuthenticationResult handle(MailPart mailPart);
+    void handle(MailMessage mailMessage);
 }
