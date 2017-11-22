@@ -79,6 +79,7 @@ import com.openexchange.mail.authentication.mechanism.spf.SPFResultHeader;
 import com.openexchange.mail.dataobjects.MailAuthenticationResult;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.HeaderCollection;
+import com.openexchange.session.Session;
 
 /**
  * {@link MailAuthenticationHandlerImpl}
@@ -106,11 +107,24 @@ public class MailAuthenticationHandlerImpl implements MailAuthenticationHandler 
     /** The required headers of this handler */
     private static final Collection<String> REQUIRED_HEADERS = Collections.singletonList(MailAuthenticationHandler.AUTH_RESULTS_HEADER);
 
+    /** The ranking of this handler */
+    private final int ranking;
+
     /**
-     * Initialises a new {@link MailAuthenticationHandlerImpl}.
+     * Initialises a new {@link MailAuthenticationHandlerImpl} with priority 0.
      */
     public MailAuthenticationHandlerImpl() {
+        this(0);
+    }
+
+    /**
+     * Initialises a new {@link MailAuthenticationHandlerImpl}.
+     * 
+     * @param ranking The ranking of this handler; a higher value means higher priority;
+     */
+    public MailAuthenticationHandlerImpl(int ranking) {
         super();
+        this.ranking = ranking;
         mechanismParsersRegitry = new HashMap<>(4);
         mechanismParsersRegitry.put(MailAuthenticationMechanism.DMARC, (line) -> {
             String value = line.get(MailAuthenticationMechanism.DMARC.name().toLowerCase());
@@ -173,6 +187,27 @@ public class MailAuthenticationHandlerImpl implements MailAuthenticationHandler 
     @Override
     public Collection<String> getRequiredHeaders() {
         return REQUIRED_HEADERS;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.mail.authentication.MailAuthenticationHandler#isEnabled(com.openexchange.session.Session)
+     */
+    @Override
+    public boolean isEnabled(Session session) {
+        // TODO Implement
+        return true;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.mail.authentication.MailAuthenticationHandler#getRanking()
+     */
+    @Override
+    public int getRanking() {
+        return ranking;
     }
 
     ///////////////////////////////////// HELPERS ///////////////////////////////////////

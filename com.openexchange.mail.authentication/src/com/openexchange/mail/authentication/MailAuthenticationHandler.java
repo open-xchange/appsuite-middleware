@@ -102,4 +102,12 @@ public interface MailAuthenticationHandler {
      * @return <code>true</code> if the {@link MailAuthenticationHandler} is enabled; <code>false</code> otherwise
      */
     boolean isEnabled(Session session);
+
+    /**
+     * Returns the ranking of this {@link MailAuthenticationHandler}. A higher number in ranking
+     * means a higher priority.
+     * 
+     * @return The ranking of the {@link MailAuthenticationHandler}
+     */
+    int getRanking();
 }
