@@ -95,7 +95,7 @@ public class MailAuthenticationHandlerImpl implements MailAuthenticationHandler 
 
     private final Map<MailAuthenticationMechanism, Function<Map<String, String>, MailAuthenticationMechanismResult>> mechanismParsersRegitry;
 
-    /** The required mail fileds of this handler */
+    /** The required mail fields of this handler */
     private static final Collection<MailField> REQUIRED_MAIL_FIELDS;
     static {
         Collection<MailField> m = new ArrayList<>();
@@ -129,7 +129,7 @@ public class MailAuthenticationHandlerImpl implements MailAuthenticationHandler 
             String value = line.get(MailAuthenticationMechanism.DMARC.name().toLowerCase());
             DMARCResult dmarcResult = DMARCResult.valueOf(value.toUpperCase());
             String domain = line.get(DMARCResultHeader.HEADER_FROM);
-            return new DMARCAuthMechResult(cleanseAt(domain), dmarcResult);
+            return new DMARCAuthMechResult(cleanseDomain(domain), dmarcResult);
         });
         mechanismParsersRegitry.put(MailAuthenticationMechanism.DKIM, (line) -> {
             String value = line.get(MailAuthenticationMechanism.DKIM.name().toLowerCase());
@@ -138,7 +138,7 @@ public class MailAuthenticationHandlerImpl implements MailAuthenticationHandler 
             if (Strings.isEmpty(domain)) {
                 domain = line.get(DKIMResultHeader.HEADER_D);
             }
-            return new DKIMAuthMechResult(cleanseAt(domain), dkimResult);
+            return new DKIMAuthMechResult(cleanseDomain(domain), dkimResult);
         });
         mechanismParsersRegitry.put(MailAuthenticationMechanism.SPF, (line) -> {
             String value = line.get(MailAuthenticationMechanism.SPF.name().toLowerCase());
@@ -147,7 +147,7 @@ public class MailAuthenticationHandlerImpl implements MailAuthenticationHandler 
             if (Strings.isEmpty(domain)) {
                 domain = line.get(SPFResultHeader.SMTP_HELO);
             }
-            return new SPFAuthMechResult(cleanseAt(domain), spfResult);
+            return new SPFAuthMechResult(cleanseDomain(domain), spfResult);
         });
     }
 
@@ -220,8 +220,8 @@ public class MailAuthenticationHandlerImpl implements MailAuthenticationHandler 
     /**
      * Parses the specified authentication headers
      *
-     * @param authHeaders
-     * @return
+     * @param authHeaders The authentication headers to parse
+     * @return The {@link MailAuthenticationResult}
      */
     private MailAuthenticationResult parseHeaders(String[] authHeaders) {
         // There can only be one, if there are more only the first one is relevant
@@ -233,7 +233,7 @@ public class MailAuthenticationHandlerImpl implements MailAuthenticationHandler 
 
         // The first property of the header MUST always be the domain (i.e. the authserv-id)
         // See https://tools.ietf.org/html/rfc7601 for the formal definition
-        String domain = cleanseVersion(split.get(0));
+        String domain = cleanseDomain(split.get(0));
         if (!isValidDomain(domain)) {
             // Not a valid domain, thus we return with 'neutral' status
             return MailAuthenticationResult.NEUTRAL_RESULT;
@@ -270,7 +270,7 @@ public class MailAuthenticationHandlerImpl implements MailAuthenticationHandler 
             if (mechanism == null) {
                 continue;
             }
-            MailAuthenticationMechanismResult mailAuthMechResult = mechanismParsersRegitry.get(mechanism).apply(parseMechanismResult(extractedMechanism));
+            MailAuthenticationMechanismResult mailAuthMechResult = mechanismParsersRegitry.get(mechanism).apply(parseLine(extractedMechanism));
             try {
                 result.setStatus(MailAuthenticationStatus.valueOf(mailAuthMechResult.getResult().getTechnicalName().toUpperCase()));
             } catch (IllegalArgumentException e) {
@@ -304,24 +304,19 @@ public class MailAuthenticationHandlerImpl implements MailAuthenticationHandler 
     }
 
     /**
-     * Removes the optional version (if present) from the specified domain.
-     *
-     * @see <a href="https://tools.ietf.org/html/rfc7601#section-2.2">RFC 7601, Section 2.2</a>
-     * @param domain The domain
-     * @return The cleansed domain
-     */
-    private String cleanseVersion(String domain) {
-        String[] split = domain.split(" ");
-        return split.length == 0 ? domain : split[0];
-    }
-
-    /**
-     * Removes the preceding "at" symbol ('@') from the domain
+     * Removes the optional version (if present) from the specified domain
+     * and the preceding "at" symbol ('@') (if present) from the domain.
      * 
+     * @see <a href="https://tools.ietf.org/html/rfc7601#section-2.2">RFC 7601, Section 2.2</a>
      * @param domain The domain to cleanse
      * @return The cleansed domain
      */
-    private String cleanseAt(String domain) {
+    private String cleanseDomain(String domain) {
+        String[] split = domain.split(" ");
+        // Cleanse the optional version
+        domain = split.length == 0 ? domain : split[0];
+        // TODO: Consider wildcards and regexes...
+        //       e.g. mx[0-9]?.open-xchnge.com
         return domain.startsWith("@") ? domain.substring(1) : domain;
     }
 
@@ -332,13 +327,8 @@ public class MailAuthenticationHandlerImpl implements MailAuthenticationHandler 
      * @return <code>true</code> if the string denotes a valid domain, <code>false</code> otherwise
      */
     private boolean isValidDomain(String domain) {
-        // TODO: Consider wildcards and regexes...
-        //       e.g. mx[0-9]?.open-xchnge.com
         StringBuilder sb = new StringBuilder("jane.doe");
-        if (!domain.startsWith("@")) {
-            sb.append('@');
-        }
-        sb.append(domain);
+        sb.append("@").append(domain);
         try {
             InternetAddress.parse(domain, true);
             return true;
