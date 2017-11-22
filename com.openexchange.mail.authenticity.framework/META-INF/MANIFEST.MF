@@ -1,0 +1,25 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Mail Authentication Framework
+Bundle-SymbolicName: com.openexchange.mail.authenticity.framework
+Bundle-Version: 7.10.0
+Bundle-Vendor: OX Software GmbH
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Import-Package: com.openexchange.config.cascade,
+ com.openexchange.exception,
+ com.openexchange.mail,
+ com.openexchange.mail.api,
+ com.openexchange.mail.authenticity,
+ com.openexchange.mail.authenticity.common,
+ com.openexchange.mail.dataobjects,
+ com.openexchange.mail.search,
+ com.openexchange.osgi,
+ com.openexchange.osgi.annotation,
+ com.openexchange.osgi.console,
+ com.openexchange.osgi.util,
+ com.openexchange.server,
+ com.openexchange.session,
+ org.osgi.framework,
+ org.osgi.util.tracker,
+ org.slf4j
+Bundle-Activator: com.openexchange.mail.authentication.framework.osgi.MailAuthenticationFrameworkActivator

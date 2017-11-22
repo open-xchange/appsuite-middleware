@@ -76,6 +76,7 @@ import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.MailListField;
 import com.openexchange.mail.MailPath;
+import com.openexchange.mail.dataobjects.MailAuthenticationResult;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.json.writer.MessageWriter;
@@ -174,6 +175,12 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
                 jsonObject.put(MailJSONField.ACCOUNT_ID.getKey(), mail.getAccountId());
                 if (mail.containsTextPreview()) {
                     jsonObject.put(MailJSONField.TEXT_PREVIEW.getKey(), mail.getTextPreview());
+                }
+                if (mail.containsAuthenticationResult()) {
+                    MailAuthenticationResult authenticationResult = mail.getAuthenticationResult();
+                    if (null != authenticationResult) {
+                        jsonObject.put(MailJSONField.AUTHENTICATION_RESULTS.getKey(), JsonMessageHandler.authenticationResultToJson(authenticationResult));
+                    }
                 }
                 if (mail.containsOriginalId()) {
                     String originalId = mail.getOriginalId();

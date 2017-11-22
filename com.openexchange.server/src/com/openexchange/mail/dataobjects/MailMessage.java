@@ -520,6 +520,12 @@ public abstract class MailMessage extends MailPart {
     private boolean b_securityResult;
 
     /**
+     * Email authentication results
+     */
+    private MailAuthenticationResult authenticationResult;
+    private boolean b_authenticationResult;
+
+    /**
      * The text preview
      */
     private String textPreview;
@@ -2137,6 +2143,51 @@ public abstract class MailMessage extends MailPart {
     public void removeSecurityResult() {
         this.securityResult = null;
         b_securityResult = false;
+    }
+
+    /**
+     * Sets the given authentication result for this mail.
+     *
+     * @param result The authentication result to set
+     */
+    public void setAuthenticationResult(MailAuthenticationResult authenticationResult) {
+        this.authenticationResult = authenticationResult;
+        b_authenticationResult = true;
+    }
+
+    /**
+     * Gets the authentication result for this mail.
+     *
+     * @return The authentication result or <code>null</code> if not set
+     */
+    public MailAuthenticationResult getAuthenticationResult() {
+        return this.authenticationResult;
+    }
+
+    /**
+     * Checks if authentication result is available.
+     *
+     * @return <code>true</code> if available; otherwise <code>false</code>
+     */
+    public boolean hasAuthenticationResult() {
+        return authenticationResult != null;
+    }
+
+    /**
+     * Checks if authentication result has been set for this mail.
+     *
+     * @return <code>true</code> if set; otherwise <code>false</code>
+     */
+    public boolean containsAuthenticationResult() {
+        return b_authenticationResult;
+    }
+
+    /**
+     * Removes the authentication result from this mail.
+     */
+    public void removeAuthenticationResult() {
+        this.authenticationResult = null;
+        b_authenticationResult = false;
     }
 
     /**
