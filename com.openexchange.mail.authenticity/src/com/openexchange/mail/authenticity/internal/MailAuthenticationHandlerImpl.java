@@ -129,7 +129,7 @@ public class MailAuthenticationHandlerImpl implements MailAuthenticationHandler 
             String value = line.get(MailAuthenticationMechanism.DMARC.name().toLowerCase());
             DMARCResult dmarcResult = DMARCResult.valueOf(value.toUpperCase());
             String domain = line.get(DMARCResultHeader.HEADER_FROM);
-            return new DMARCAuthMechResult(domain, dmarcResult);
+            return new DMARCAuthMechResult(cleanseAt(domain), dmarcResult);
         });
         mechanismParsersRegitry.put(MailAuthenticationMechanism.DKIM, (line) -> {
             String value = line.get(MailAuthenticationMechanism.DKIM.name().toLowerCase());
@@ -138,7 +138,7 @@ public class MailAuthenticationHandlerImpl implements MailAuthenticationHandler 
             if (Strings.isEmpty(domain)) {
                 domain = line.get(DKIMResultHeader.HEADER_D);
             }
-            return new DKIMAuthMechResult(domain, dkimResult);
+            return new DKIMAuthMechResult(cleanseAt(domain), dkimResult);
         });
         mechanismParsersRegitry.put(MailAuthenticationMechanism.SPF, (line) -> {
             String value = line.get(MailAuthenticationMechanism.SPF.name().toLowerCase());
@@ -147,7 +147,7 @@ public class MailAuthenticationHandlerImpl implements MailAuthenticationHandler 
             if (Strings.isEmpty(domain)) {
                 domain = line.get(SPFResultHeader.SMTP_HELO);
             }
-            return new SPFAuthMechResult(domain, spfResult);
+            return new SPFAuthMechResult(cleanseAt(domain), spfResult);
         });
     }
 
@@ -313,6 +313,16 @@ public class MailAuthenticationHandlerImpl implements MailAuthenticationHandler 
     private String cleanseVersion(String domain) {
         String[] split = domain.split(" ");
         return split.length == 0 ? domain : split[0];
+    }
+
+    /**
+     * Removes the preceding "at" symbol ('@') from the domain
+     * 
+     * @param domain The domain to cleanse
+     * @return The cleansed domain
+     */
+    private String cleanseAt(String domain) {
+        return domain.startsWith("@") ? domain.substring(1) : domain;
     }
 
     /**
