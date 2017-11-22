@@ -219,4 +219,8 @@ public final class MessageHeaders {
 
     public static final HeaderName X_PART_ID = HeaderName.valueOf(HDR_X_PART_ID);
 
+    public static final String HDR_AUTHENTICATION_RESULTS = "Authentication-Results".intern();
+
+    public static final HeaderName AUTHENTICATION_RESULTS = HeaderName.valueOf(HDR_AUTHENTICATION_RESULTS);
+
 }

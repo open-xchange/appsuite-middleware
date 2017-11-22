@@ -58,13 +58,13 @@ import com.openexchange.mail.authenticity.common.mechanism.dmarc.DMARCAuthMechRe
  */
 public abstract class AbstractAuthMechResult implements MailAuthenticityMechanismResult {
 
-    private String domain;
-    private String clientIP;
-    private AuthenticityMechanismResult result;
+    private final String domain;
+    private final String clientIP;
+    private final AuthenticityMechanismResult result;
 
     /**
      * Initialises a new {@link DMARCAuthMechResult}.
-     * 
+     *
      * @param domain The domain for which this mail authentication mechanism was applied to
      * @param clientIP The optional client IP used to send the e-mail
      * @param result The {@link AuthenticityMechanismResult}
@@ -76,31 +76,16 @@ public abstract class AbstractAuthMechResult implements MailAuthenticityMechanis
         this.result = result;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.mail.authentication.MailAuthenticationMechanismResult#getDomain()
-     */
     @Override
     public String getDomain() {
         return domain;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.mail.authentication.MailAuthenticationMechanismResult#getClientIP()
-     */
     @Override
     public String getClientIP() {
         return clientIP;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.mail.authentication.MailAuthenticationMechanismResult#getResult()
-     */
     @Override
     public AuthenticityMechanismResult getResult() {
         return result;
