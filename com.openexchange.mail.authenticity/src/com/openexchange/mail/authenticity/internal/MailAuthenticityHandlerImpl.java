@@ -127,7 +127,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
         mechanismParsersRegitry = new HashMap<>(4);
         mechanismParsersRegitry.put(MailAuthenticityMechanism.DMARC, (line) -> {
             String value = line.get(MailAuthenticityMechanism.DMARC.name().toLowerCase());
-            DMARCResult dmarcResult = DMARCResult.valueOf(value.toUpperCase());
+            DMARCResult dmarcResult = DMARCResult.valueOf(extractOutcome(value.toUpperCase()));
             String domain = line.get(DMARCResultHeader.HEADER_FROM);
             DMARCAuthMechResult result = new DMARCAuthMechResult(cleanseDomain(domain), dmarcResult);
             result.setReason(extractComment(value));
@@ -135,7 +135,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
         });
         mechanismParsersRegitry.put(MailAuthenticityMechanism.DKIM, (line) -> {
             String value = line.get(MailAuthenticityMechanism.DKIM.name().toLowerCase());
-            DKIMResult dkimResult = DKIMResult.valueOf(value.toUpperCase());
+            DKIMResult dkimResult = DKIMResult.valueOf(extractOutcome(value.toUpperCase()));
             String domain = line.get(DKIMResultHeader.HEADER_I);
             if (Strings.isEmpty(domain)) {
                 domain = line.get(DKIMResultHeader.HEADER_D);
@@ -150,7 +150,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
         });
         mechanismParsersRegitry.put(MailAuthenticityMechanism.SPF, (line) -> {
             String value = line.get(MailAuthenticityMechanism.SPF.name().toLowerCase());
-            SPFResult spfResult = SPFResult.valueOf(value.toUpperCase());
+            SPFResult spfResult = SPFResult.valueOf(extractOutcome(value.toUpperCase()));
             String domain = line.get(SPFResultHeader.SMTP_MAILFROM);
             if (Strings.isEmpty(domain)) {
                 domain = line.get(SPFResultHeader.SMTP_HELO);
@@ -159,18 +159,6 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
             result.setReason(extractComment(value));
             return result;
         });
-    }
-
-    private String extractComment(String value) {
-        int beginIndex = value.indexOf('(');
-        if (beginIndex < 0) {
-            return null;
-        }
-        int endIndex = value.indexOf(')');
-        if (endIndex < 0) {
-            return null;
-        }
-        return value.substring(beginIndex, endIndex);
     }
 
     /*
@@ -475,6 +463,54 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
         return split;
     }
 
+    /**
+     * Converts the specified string to a {@link MailAuthenticityMechanism}
+     *
+     * @param s The string to convert
+     * @return the converted {@link MailAuthenticityMechanism}
+     */
+    private static MailAuthenticityMechanism convert(String s) {
+        int index = s.indexOf(' ');
+        if (index > 0) {
+            s.substring(0, index);
+        }
+        try {
+            return MailAuthenticityMechanism.valueOf(s.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            LOGGER.debug("Unknown mail authentication mechanism '{}'", s);
+        }
+        return null;
+    }
+
+    /**
+     * Extracts the outcome of the specified value.
+     * 
+     * @param value the value to extract the outcome from
+     * @return The extracted outcome
+     */
+    private String extractOutcome(String value) {
+        int index = value.indexOf(' ');
+        return (index < 0) ? value : value.substring(0, index);
+    }
+
+    /**
+     * Extracts an optional comment that may reside within parentheses
+     * 
+     * @param value The value to extract the comment form
+     * @return The optional extracted comment; <code>null</code> if no comment was found
+     */
+    private String extractComment(String value) {
+        int beginIndex = value.indexOf('(');
+        if (beginIndex < 0) {
+            return null;
+        }
+        int endIndex = value.indexOf(')');
+        if (endIndex < 0) {
+            return null;
+        }
+        return value.substring(beginIndex + 1, endIndex);
+    }
+
     ///////////////////////////////// HELPER CLASSES /////////////////////////////////
 
     /**
@@ -514,45 +550,5 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
             }
             return 0;
         }
-    }
-
-    /**
-     * Parses the specified mechanism result line to a {@link Map}.
-     *
-     * @param mechanismResult The mechanism result header line
-     * @return A {@link Map} with key/value pairs of the header line's attributes
-     */
-    private Map<String, String> parseMechanismResult(String mechanismResult) {
-        String[] s = mechanismResult.split(" ");
-        Map<String, String> resMap = new HashMap<>();
-        for (String p : s) {
-            String[] pair = p.split("=");
-            if (pair.length != 2) {
-                continue;
-            }
-            // TODO: Include the possible 'key-less' reason included in the parentheses?
-            //       e.g. spf=pass (xyz.com: domain of jane.doe@open-xchange.com designates 1.2.3.4 as permitted sender)
-            resMap.put(pair[0], pair[1]);
-        }
-        return resMap;
-    }
-
-    /**
-     * Converts the specified string to a {@link MailAuthenticityMechanism}
-     *
-     * @param s The string to convert
-     * @return the converted {@link MailAuthenticityMechanism}
-     */
-    private static MailAuthenticityMechanism convert(String s) {
-        int index = s.indexOf(' ');
-        if (index > 0) {
-            s.substring(0, index);
-        }
-        try {
-            return MailAuthenticityMechanism.valueOf(s.toUpperCase());
-        } catch (IllegalArgumentException e) {
-            LOGGER.debug("Unknown mail authentication mechanism '{}'", s);
-        }
-        return null;
     }
 }
