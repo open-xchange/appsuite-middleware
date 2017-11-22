@@ -60,13 +60,13 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.powermock.modules.junit4.PowerMockRunner;
-import com.openexchange.java.Strings;
 import com.openexchange.mail.authentication.MailAuthenticationHandler;
 import com.openexchange.mail.authentication.MailAuthenticationStatus;
 import com.openexchange.mail.authentication.internal.MailAuthenticationHandlerImpl;
 import com.openexchange.mail.authentication.mechanism.AuthenticationMechanismResult;
 import com.openexchange.mail.authentication.mechanism.MailAuthenticationMechanism;
 import com.openexchange.mail.authentication.mechanism.MailAuthenticationMechanismResult;
+import com.openexchange.mail.authentication.mechanism.dkim.DKIMResult;
 import com.openexchange.mail.authentication.mechanism.spf.SPFResult;
 import com.openexchange.mail.dataobjects.MailAuthenticationResult;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -122,6 +122,7 @@ public class TestMailAuthenticationHandler {
     @Test
     public void testNoHeaderPresent() {
         perform();
+
         assertEquals("The overall status does not match", MailAuthenticationStatus.NEUTRAL, result.getStatus());
         assertEquals("The domain does not match", null, result.getDomain());
         assertTrue("The mail authentication mechansisms should be empty", result.getAuthenticationMechanisms().isEmpty());
@@ -135,6 +136,7 @@ public class TestMailAuthenticationHandler {
     @Test
     public void testWithHeaderPresentButNoAuthenticationDone() {
         perform("example.org 1; none");
+
         assertEquals("The overall status does not match", MailAuthenticationStatus.NEUTRAL, result.getStatus());
         assertEquals("The domain does not match", "example.org", result.getDomain());
         assertTrue("The mail authentication mechansisms should be empty", result.getAuthenticationMechanisms().isEmpty());
@@ -148,6 +150,7 @@ public class TestMailAuthenticationHandler {
     @Test
     public void testSPFAuthentication() {
         perform("example.com; spf=pass smtp.mailfrom=example.net");
+
         assertEquals("The overall status does not match", MailAuthenticationStatus.PASS, result.getStatus());
         assertEquals("The domain does not match", "example.com", result.getDomain());
         assertEquals("The mail authentication mechanisms amount does not match", 1, result.getAuthenticationMechanisms().size());
@@ -163,12 +166,47 @@ public class TestMailAuthenticationHandler {
     }
 
     /**
-     * 
+     * Tests the case where the <code>Authentication-Results</code> header field is present
+     * and the message was authenticated by the MTA via unknown methods and the SPF method.
      */
     @Test
-    public void test() {
-        //perform("mx1.open-xchange.com; dkim=pass reason=\"1024-bit key; unprotected key\" header.d=ox.io header.i=@ox.io header.b=lolhN/LS; dkim-adsp=pass; dkim-atps=neutral");
+    public void testSeveralAuthenticationsWithUnknownMethodsAndSPF() {
+        perform("example.com; auth=pass (cram-md5) smtp.auth=sender@example.net; spf=pass smtp.mailfrom=example.net", "example.com; sender-id=pass header.from=example.net");
 
+        assertEquals("The overall status does not match", MailAuthenticationStatus.PASS, result.getStatus());
+        assertEquals("The domain does not match", "example.com", result.getDomain());
+        assertEquals("The mail authentication mechanisms amount does not match", 1, result.getAuthenticationMechanisms().size());
+        assertTrue("The mail authentication mechansism does not match", result.getAuthenticationMechanisms().contains(MailAuthenticationMechanism.SPF));
+        assertEquals("The mail authentication mechanism results amount does not match", 1, result.getMailAuthenticationMechanismResults().size());
+
+        MailAuthenticationMechanismResult mechanismResult = result.getMailAuthenticationMechanismResults().get(0);
+        assertEquals("The mechanism's domain does not match", "example.net", mechanismResult.getDomain());
+        assertNotNull("The mechanism's result is null", mechanismResult.getResult());
+
+        AuthenticationMechanismResult s = mechanismResult.getResult();
+        assertEquals("The mechanism's result does not match", SPFResult.PASS.getTechnicalName(), s.getTechnicalName());
+    }
+
+    /**
+     * Tests the case where the <code>Authentication-Results</code> header field is present
+     * and the message was authenticated by different MTAs via unknown methods and the DKIM and SPF methods.
+     */
+    @Test
+    public void testSeveralAuthenticationsDifferentMTAs() {
+        perform("example.com; sender-id=fail header.from=example.com; dkim=pass (good signature) header.d=example.com", "example.com; auth=pass (cram-md5) smtp.auth=sender@example.com; spf=fail smtp.mailfrom=example.com");
+
+        assertEquals("The overall status does not match", MailAuthenticationStatus.PASS, result.getStatus());
+        assertEquals("The domain does not match", "example.com", result.getDomain());
+        assertEquals("The mail authentication mechanisms amount does not match", 1, result.getAuthenticationMechanisms().size());
+        assertTrue("The mail authentication mechansism does not match", result.getAuthenticationMechanisms().contains(MailAuthenticationMechanism.DKIM));
+        assertEquals("The mail authentication mechanism results amount does not match", 1, result.getMailAuthenticationMechanismResults().size());
+
+        MailAuthenticationMechanismResult mechanismResult = result.getMailAuthenticationMechanismResults().get(0);
+        assertEquals("The mechanism's domain does not match", "example.com", mechanismResult.getDomain());
+        assertNotNull("The mechanism's result is null", mechanismResult.getResult());
+
+        AuthenticationMechanismResult s = mechanismResult.getResult();
+        assertEquals("The mechanism's result does not match", DKIMResult.PASS.getTechnicalName(), s.getTechnicalName());
     }
 
     ///////////////////////////// HELPERS //////////////////////////////
@@ -177,17 +215,17 @@ public class TestMailAuthenticationHandler {
      * Performs the mail authentication handling with no header
      */
     private void perform() {
-        perform(null);
+        perform(new String[] {});
     }
 
     /**
-     * Performs the mail authentication handling with the specified header and
+     * Performs the mail authentication handling with the specified headers and
      * captures the result via the {@link ArgumentCaptor} to the 'result' object
      * 
-     * @param header The 'Authentication-Results' header
+     * @param headers The 'Authentication-Results' headers to add
      */
-    private void perform(String header) {
-        if (!Strings.isEmpty(header)) {
+    private void perform(String... headers) {
+        for (String header : headers) {
             headerCollection.addHeader(MailAuthenticationHandler.AUTH_RESULTS_HEADER, header);
         }
         handler.handle(mailMessage);
