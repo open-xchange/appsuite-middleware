@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,49 +47,62 @@
  *
  */
 
-package com.openexchange.mail.authenticity.common.mechanism;
+package com.openexchange.mail.authenticity.internal;
 
-import com.openexchange.mail.authenticity.common.mechanism.dkim.DKIMResult;
-import com.openexchange.mail.authenticity.common.mechanism.dmarc.DMARCResult;
-import com.openexchange.mail.authenticity.common.mechanism.spf.SPFResult;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import com.openexchange.exception.OXException;
+import com.openexchange.mail.authenticity.MailAuthenticityHandler;
+import com.openexchange.mail.authenticity.MailAuthenticityHandlerRegistry;
+import com.openexchange.osgi.ServiceListing;
+import com.openexchange.session.Session;
+
 
 /**
- * {@link MailAuthenticationMechanism}
+ * {@link MailAuthenticityHandlerRegistryImpl}
  *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.10.0
  */
-public enum MailAuthenticationMechanism {
+public class MailAuthenticityHandlerRegistryImpl implements MailAuthenticityHandlerRegistry {
 
-    DMARC("DMARC", DMARCResult.class),
-    DKIM("DKIM", DKIMResult.class),
-    SPF("SPF", SPFResult.class);
-
-    private final Class<? extends AuthenticationMechanismResult> resultType;
-    private final String displayName;
+    private final ServiceListing<MailAuthenticityHandler> listing;
+    private final Comparator<MailAuthenticityHandler> comparator;
 
     /**
-     * Initializes a new {@link MailAuthenticationMechanism}.
+     * Initializes a new {@link MailAuthenticityHandlerRegistryImpl}.
      */
-    private MailAuthenticationMechanism(String displayName, Class<? extends AuthenticationMechanismResult> resultType) {
-        this.displayName = displayName;
-        this.resultType = resultType;
+    public MailAuthenticityHandlerRegistryImpl(ServiceListing<MailAuthenticityHandler> listing) {
+        super();
+        this.listing = listing;
+        comparator = new Comparator<MailAuthenticityHandler>() {
+
+            @Override
+            public int compare(MailAuthenticityHandler o1, MailAuthenticityHandler o2) {
+                int r1 = o1.getRanking();
+                int r2 = o2.getRanking();
+                return (r1 < r2) ? 1 : ((r1 == r2) ? 0 : -1);
+            }
+        };
     }
 
-    /**
-     * Gets the display name
-     *
-     * @return The display name
-     */
-    public String getDisplayName() {
-        return displayName;
+    @Override
+    public List<MailAuthenticityHandler> getSortedApplicableHandlersFor(Session session) throws OXException {
+        List<MailAuthenticityHandler> snapshot = listing.getServiceList();
+        if (snapshot == null || snapshot.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        List<MailAuthenticityHandler> applicableHandlers = new ArrayList<>(snapshot.size());
+        for (MailAuthenticityHandler handler : snapshot) {
+            if (handler.isEnabled(session)) {
+                applicableHandlers.add(handler);
+            }
+        }
+        Collections.sort(applicableHandlers, comparator);
+        return applicableHandlers;
     }
 
-    /**
-     * Gets the resultType
-     *
-     * @return The resultType
-     */
-    public Class<? extends AuthenticationMechanismResult> getResultType() {
-        return resultType;
-    }
 }

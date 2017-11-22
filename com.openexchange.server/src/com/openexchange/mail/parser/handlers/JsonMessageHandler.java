@@ -94,10 +94,10 @@ import com.openexchange.mail.MailPath;
 import com.openexchange.mail.attachment.AttachmentToken;
 import com.openexchange.mail.attachment.AttachmentTokenConstants;
 import com.openexchange.mail.attachment.AttachmentTokenService;
-import com.openexchange.mail.authenticity.common.mechanism.MailAuthenticationMechanismResult;
+import com.openexchange.mail.authenticity.common.mechanism.MailAuthenticityMechanismResult;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.conversion.InlineImageDataSource;
-import com.openexchange.mail.dataobjects.MailAuthenticationResult;
+import com.openexchange.mail.dataobjects.MailAuthenticityResult;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.SecurityInfo;
@@ -427,10 +427,10 @@ public final class JsonMessageHandler implements MailMessageHandler {
                 if (mail.containsTextPreview()) {
                     jsonObject.put(TEXT_PREVIEW, mail.getTextPreview());
                 }
-                if (mail.containsAuthenticationResult()) {
-                    MailAuthenticationResult mailAuthenticationResult = mail.getAuthenticationResult();
-                    if (null != mailAuthenticationResult) {
-                        jsonObject.put(AUTHENTICATION_RESULTS, mailAuthenticationResult);
+                if (mail.containsAuthenticityResult()) {
+                    MailAuthenticityResult mailAuthenticityResult = mail.getAuthenticityResult();
+                    if (null != mailAuthenticityResult) {
+                        jsonObject.put(AUTHENTICATION_RESULTS, mailAuthenticityResult);
                     }
                 }
                 // Guard info
@@ -523,7 +523,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
      * @return The JSON representation
      * @throws JSONException If JSON representation cannot be returned
      */
-    public static JSONObject authenticationResultToJson(MailAuthenticationResult authenticationResult) throws JSONException {
+    public static JSONObject authenticationResultToJson(MailAuthenticityResult authenticationResult) throws JSONException {
         if (null == authenticationResult) {
             return null;
         }
@@ -532,9 +532,9 @@ public final class JsonMessageHandler implements MailMessageHandler {
         jAuthenticationResult.put("status", authenticationResult.getStatus().getDisplayName());
         jAuthenticationResult.put("domain", authenticationResult.getDomain());
         {
-            List<MailAuthenticationMechanismResult> authenticationMechanismResults = authenticationResult.getMailAuthenticationMechanismResults();
+            List<MailAuthenticityMechanismResult> authenticationMechanismResults = authenticationResult.getMailAuthenticationMechanismResults();
             JSONArray jAuthenticationMechanismResults = new JSONArray(authenticationMechanismResults.size());
-            for (MailAuthenticationMechanismResult authenticationMechanismResult : authenticationMechanismResults) {
+            for (MailAuthenticityMechanismResult authenticationMechanismResult : authenticationMechanismResults) {
                 JSONObject jAuthenticationMechanismResult = new JSONObject(4);
                 jAuthenticationMechanismResult.put("mechanism", authenticationMechanismResult.getMechanism().getDisplayName());
                 jAuthenticationMechanismResult.put("client_ip", authenticationMechanismResult.getClientIP());

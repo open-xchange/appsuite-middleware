@@ -47,29 +47,44 @@
  *
  */
 
-package com.openexchange.mail.authenticity;
+package com.openexchange.mail.authenticity.osgi;
 
-import java.util.List;
-import com.openexchange.exception.OXException;
-import com.openexchange.osgi.annotation.SingletonService;
-import com.openexchange.session.Session;
+import com.openexchange.mail.authenticity.MailAuthenticityHandler;
+import com.openexchange.mail.authenticity.MailAuthenticityHandlerRegistry;
+import com.openexchange.mail.authenticity.internal.MailAuthenticityHandlerRegistryImpl;
+import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
+
 
 /**
- * {@link MailAuthenticationHandlerRegistry}
+ * {@link MailAuthenticityActivator}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.10.0
  */
-@SingletonService
-public interface MailAuthenticationHandlerRegistry {
+public class MailAuthenticityActivator extends HousekeepingActivator {
 
     /**
-     * Gets a sorted listing of applicable handlers
-     *
-     * @param session The user's session
-     * @return The sorted listing
-     * @throws OXException If sorted listing cannot be returned
+     * Initializes a new {@link MailAuthenticityActivator}.
      */
-    List<MailAuthenticationHandler> getSortedApplicableHandlersFor(Session session) throws OXException;
+    public MailAuthenticityActivator() {
+        super();
+    }
+
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[] {};
+    }
+
+    @Override
+    protected void startBundle() throws Exception {
+        RankingAwareNearRegistryServiceTracker<MailAuthenticityHandler> handlerTracker = new RankingAwareNearRegistryServiceTracker<>(context, MailAuthenticityHandler.class);
+        MailAuthenticityHandlerRegistryImpl registry = new MailAuthenticityHandlerRegistryImpl(handlerTracker);
+        rememberTracker(handlerTracker);
+
+        openTrackers();
+
+        registerService(MailAuthenticityHandlerRegistry.class, registry);
+    }
 
 }

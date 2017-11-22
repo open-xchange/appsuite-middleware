@@ -49,14 +49,14 @@
 
 package com.openexchange.mail.authenticity.common.mechanism.dmarc;
 
-import com.openexchange.mail.authenticity.common.mechanism.AuthenticationMechanismResult;
+import com.openexchange.mail.authenticity.common.mechanism.AuthenticityMechanismResult;
 
 /**
  * {@link DMARCResult}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public enum DMARCResult implements AuthenticationMechanismResult {
+public enum DMARCResult implements AuthenticityMechanismResult {
     /**
      * Passed the DMARC check
      */

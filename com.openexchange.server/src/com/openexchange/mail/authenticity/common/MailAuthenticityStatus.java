@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,62 +47,58 @@
  *
  */
 
-package com.openexchange.mail.authenticity.internal;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import com.openexchange.exception.OXException;
-import com.openexchange.mail.authenticity.MailAuthenticationHandler;
-import com.openexchange.mail.authenticity.MailAuthenticationHandlerRegistry;
-import com.openexchange.osgi.ServiceListing;
-import com.openexchange.session.Session;
-
+package com.openexchange.mail.authenticity.common;
 
 /**
- * {@link MailAuthenticationHandlerRegistryImpl}
+ * {@link MailAuthenticityStatus}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.10.0
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class MailAuthenticationHandlerRegistryImpl implements MailAuthenticationHandlerRegistry {
-
-    private final ServiceListing<MailAuthenticationHandler> listing;
-    private final Comparator<MailAuthenticationHandler> comparator;
+public enum MailAuthenticityStatus {
 
     /**
-     * Initializes a new {@link MailAuthenticationHandlerRegistryImpl}.
+     * Passed authentication status
      */
-    public MailAuthenticationHandlerRegistryImpl(ServiceListing<MailAuthenticationHandler> listing) {
-        super();
-        this.listing = listing;
-        comparator = new Comparator<MailAuthenticationHandler>() {
+    PASS("Pass", "pass"),
+    /**
+     * Failed authentication status
+     */
+    FAIL("Fail", "fail"),
+    /**
+     * Cannot determine status, or temporary errors occurred
+     */
+    NEUTRAL("Neutral", "neutral"),
+    /**
+     * Nothing has been analyzed
+     */
+    NOT_ANALYZED("Not Analyzed", "not_analyzed");
 
-            @Override
-            public int compare(MailAuthenticationHandler o1, MailAuthenticationHandler o2) {
-                int r1 = o1.getRanking();
-                int r2 = o2.getRanking();
-                return (r1 < r2) ? 1 : ((r1 == r2) ? 0 : -1);
-            }
-        };
+    private final String displayName;
+    private final String technicalName;
+
+    /**
+     * Initialises a new {@link MailAuthenticityStatus}.
+     */
+    private MailAuthenticityStatus(String displayName, String technicalName) {
+        this.displayName = displayName;
+        this.technicalName = technicalName;
     }
 
-    @Override
-    public List<MailAuthenticationHandler> getSortedApplicableHandlersFor(Session session) throws OXException {
-        List<MailAuthenticationHandler> snapshot = listing.getServiceList();
-        if (snapshot == null || snapshot.isEmpty()) {
-            return Collections.emptyList();
-        }
-
-        List<MailAuthenticationHandler> applicableHandlers = new ArrayList<>(snapshot.size());
-        for (MailAuthenticationHandler handler : snapshot) {
-            if (handler.isEnabled(session)) {
-                applicableHandlers.add(handler);
-            }
-        }
-        Collections.sort(applicableHandlers, comparator);
-        return applicableHandlers;
+    /**
+     * Gets the displayName
+     *
+     * @return The displayName
+     */
+    public String getDisplayName() {
+        return displayName;
     }
 
+    /**
+     * Returns the technical name of the AuthenticationStatus
+     *
+     * @return the technical name of the AuthenticationStatus
+     */
+    public String getTechnicalName() {
+        return technicalName;
+    }
 }

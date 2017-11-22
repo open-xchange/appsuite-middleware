@@ -71,7 +71,7 @@ import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.MailListField;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.dataobjects.Delegatized;
-import com.openexchange.mail.dataobjects.MailAuthenticationResult;
+import com.openexchange.mail.dataobjects.MailAuthenticityResult;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.MimeDefaultSession;
 import com.openexchange.mail.mime.MimeFilter;
@@ -552,8 +552,8 @@ public final class MessageWriter {
             @Override
             public void writeField(JSONValue jsonContainer, MailMessage mail, int level, boolean withKey, int accountId, int user, int cid, TimeZone optTimeZone) throws OXException {
                 try {
-                    MailAuthenticationResult mailAuthenticationResult = mail.getAuthenticationResult();
-                    Object value = null == mailAuthenticationResult ? JSONObject.NULL : JsonMessageHandler.authenticationResultToJson(mailAuthenticationResult);
+                    MailAuthenticityResult mailAuthenticityResult = mail.getAuthenticityResult();
+                    Object value = null == mailAuthenticityResult ? JSONObject.NULL : JsonMessageHandler.authenticationResultToJson(mailAuthenticityResult);
                     if (withKey) {
                         jsonContainer.toObject().put(MailJSONField.AUTHENTICATION_RESULTS.getKey(), value);
                     } else {

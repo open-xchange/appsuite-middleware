@@ -51,18 +51,18 @@ package com.openexchange.mail.authenticity;
 
 import java.util.Collection;
 import com.openexchange.mail.MailField;
-import com.openexchange.mail.authenticity.common.mechanism.MailAuthenticationMechanism;
-import com.openexchange.mail.dataobjects.MailAuthenticationResult;
+import com.openexchange.mail.authenticity.common.mechanism.MailAuthenticityMechanism;
+import com.openexchange.mail.dataobjects.MailAuthenticityResult;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.session.Session;
 
 /**
- * {@link MailAuthenticationHandler}
+ * {@link MailAuthenticityHandler}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public interface MailAuthenticationHandler {
+public interface MailAuthenticityHandler {
 
     /**
      * The name of the authentication results header
@@ -72,11 +72,11 @@ public interface MailAuthenticationHandler {
     /**
      * Handles the specified {@link MailPart}. Extracts the mail headers from the {@link MailPart}
      * and checks if the 'Authentication-Results' header is present. If it is, then parses that header
-     * and collects the results of the different {@link MailAuthenticationMechanism}s that might be present
-     * in a {@link MailAuthenticationResult} object and returns that
+     * and collects the results of the different {@link MailAuthenticityMechanism}s that might be present
+     * in a {@link MailAuthenticityResult} object and returns that
      * 
      * @param mailPart The {@link MailPart} to handle
-     * @return The {@link MailAuthenticationResult} with the collected results of the {@link MailAuthenticationMechanism}s
+     * @return The {@link MailAuthenticityResult} with the collected results of the {@link MailAuthenticityMechanism}s
      */
     void handle(MailMessage mailMessage);
 
@@ -95,19 +95,19 @@ public interface MailAuthenticationHandler {
     Collection<String> getRequiredHeaders();
 
     /**
-     * Determines whether the {@link MailAuthenticationHandler} is enabled for the user
+     * Determines whether the {@link MailAuthenticityHandler} is enabled for the user
      * that is denoted by the specified {@link Session}
      * 
      * @param session The groupware {@link Session}
-     * @return <code>true</code> if the {@link MailAuthenticationHandler} is enabled; <code>false</code> otherwise
+     * @return <code>true</code> if the {@link MailAuthenticityHandler} is enabled; <code>false</code> otherwise
      */
     boolean isEnabled(Session session);
 
     /**
-     * Returns the ranking of this {@link MailAuthenticationHandler}. A higher number in ranking
+     * Returns the ranking of this {@link MailAuthenticityHandler}. A higher number in ranking
      * means a higher priority.
      * 
-     * @return The ranking of the {@link MailAuthenticationHandler}
+     * @return The ranking of the {@link MailAuthenticityHandler}
      */
     int getRanking();
 }

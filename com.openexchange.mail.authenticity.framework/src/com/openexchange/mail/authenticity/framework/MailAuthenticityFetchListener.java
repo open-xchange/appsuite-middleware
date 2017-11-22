@@ -65,28 +65,28 @@ import com.openexchange.mail.MailFetchListener;
 import com.openexchange.mail.MailFetchListenerResult;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailFields;
-import com.openexchange.mail.authenticity.MailAuthenticationHandler;
-import com.openexchange.mail.authenticity.MailAuthenticationHandlerRegistry;
+import com.openexchange.mail.authenticity.MailAuthenticityHandler;
+import com.openexchange.mail.authenticity.MailAuthenticityHandlerRegistry;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.session.Session;
 
 /**
- * {@link MailAuthenticationFetchListener}
+ * {@link MailAuthenticityFetchListener}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.10.0
  */
-public class MailAuthenticationFetchListener implements MailFetchListener {
+public class MailAuthenticityFetchListener implements MailFetchListener {
 
     private static final String STATE_PARAM_HANDLERS = "mail.authenticity.handlers";
 
-    private final MailAuthenticationHandlerRegistry handlerRegistry;
+    private final MailAuthenticityHandlerRegistry handlerRegistry;
     private final ConfigViewFactory viewFactory;
 
     /**
-     * Initializes a new {@link MailAuthenticationFetchListener}.
+     * Initializes a new {@link MailAuthenticityFetchListener}.
      */
-    public MailAuthenticationFetchListener(MailAuthenticationHandlerRegistry handlerRegistry, ConfigViewFactory viewFactory) {
+    public MailAuthenticityFetchListener(MailAuthenticityHandlerRegistry handlerRegistry, ConfigViewFactory viewFactory) {
         super();
         this.handlerRegistry = handlerRegistry;
         this.viewFactory = viewFactory;
@@ -109,7 +109,7 @@ public class MailAuthenticationFetchListener implements MailFetchListener {
         }
 
         for (MailMessage mail : mailsFromCache) {
-            if (false == mail.hasAuthenticationResult()) {
+            if (false == mail.hasAuthenticityResult()) {
                 return false;
             }
         }
@@ -123,14 +123,14 @@ public class MailAuthenticationFetchListener implements MailFetchListener {
             return MailAttributation.NOT_APPLICABLE;
         }
 
-        List<MailAuthenticationHandler> handlers = handlerRegistry.getSortedApplicableHandlersFor(session);
+        List<MailAuthenticityHandler> handlers = handlerRegistry.getSortedApplicableHandlersFor(session);
         if (null == handlers || handlers.isEmpty()) {
             return MailAttributation.NOT_APPLICABLE;
         }
 
         MailFields fields = null == fetchArguments.getFields() ? new MailFields() : new MailFields(fetchArguments.getFields());
         Set<String> headerNames = null == fetchArguments.getHeaderNames() ? new LinkedHashSet<>() : new LinkedHashSet<>(Arrays.asList(fetchArguments.getHeaderNames()));
-        for (MailAuthenticationHandler handler : handlers) {
+        for (MailAuthenticityHandler handler : handlers) {
             Collection<MailField> requiredFields = handler.getRequiredFields();
             if (null != requiredFields && !requiredFields.isEmpty()) {
                 for (MailField requiredField : requiredFields) {
@@ -151,13 +151,13 @@ public class MailAuthenticationFetchListener implements MailFetchListener {
 
     @Override
     public MailFetchListenerResult onAfterFetch(MailMessage[] mails, boolean cacheable, Session session, Map<String, Object> state) throws OXException {
-        List<MailAuthenticationHandler> handlers = (List<MailAuthenticationHandler>) state.get(STATE_PARAM_HANDLERS);
+        List<MailAuthenticityHandler> handlers = (List<MailAuthenticityHandler>) state.get(STATE_PARAM_HANDLERS);
         if (null == handlers || handlers.isEmpty()) {
             return MailFetchListenerResult.neutral(mails, cacheable);
         }
 
         for (MailMessage mail : mails) {
-            for (MailAuthenticationHandler handler : handlers) {
+            for (MailAuthenticityHandler handler : handlers) {
                 handler.handle(mail);
             }
         }

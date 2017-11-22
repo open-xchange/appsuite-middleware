@@ -47,58 +47,49 @@
  *
  */
 
-package com.openexchange.mail.authenticity.common;
+package com.openexchange.mail.authenticity.common.mechanism;
+
+import com.openexchange.mail.authenticity.common.mechanism.dkim.DKIMResult;
+import com.openexchange.mail.authenticity.common.mechanism.dmarc.DMARCResult;
+import com.openexchange.mail.authenticity.common.mechanism.spf.SPFResult;
 
 /**
- * {@link MailAuthenticationStatus}
+ * {@link MailAuthenticityMechanism}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public enum MailAuthenticationStatus {
+public enum MailAuthenticityMechanism {
 
-    /**
-     * Passed authentication status
-     */
-    PASS("Pass", "pass"),
-    /**
-     * Failed authentication status
-     */
-    FAIL("Fail", "fail"),
-    /**
-     * Cannot determine status, or temporary errors occurred
-     */
-    NEUTRAL("Neutral", "neutral"),
-    /**
-     * Nothing has been analyzed
-     */
-    NOT_ANALYZED("Not Analyzed", "not_analyzed");
+    DMARC("DMARC", DMARCResult.class),
+    DKIM("DKIM", DKIMResult.class),
+    SPF("SPF", SPFResult.class);
 
+    private final Class<? extends AuthenticityMechanismResult> resultType;
     private final String displayName;
-    private final String technicalName;
 
     /**
-     * Initialises a new {@link MailAuthenticationStatus}.
+     * Initializes a new {@link MailAuthenticityMechanism}.
      */
-    private MailAuthenticationStatus(String displayName, String technicalName) {
+    private MailAuthenticityMechanism(String displayName, Class<? extends AuthenticityMechanismResult> resultType) {
         this.displayName = displayName;
-        this.technicalName = technicalName;
+        this.resultType = resultType;
     }
 
     /**
-     * Gets the displayName
+     * Gets the display name
      *
-     * @return The displayName
+     * @return The display name
      */
     public String getDisplayName() {
         return displayName;
     }
 
     /**
-     * Returns the technical name of the AuthenticationStatus
+     * Gets the resultType
      *
-     * @return the technical name of the AuthenticationStatus
+     * @return The resultType
      */
-    public String getTechnicalName() {
-        return technicalName;
+    public Class<? extends AuthenticityMechanismResult> getResultType() {
+        return resultType;
     }
 }

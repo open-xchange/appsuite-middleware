@@ -50,11 +50,11 @@
 package com.openexchange.mail.authenticity.common.mechanism;
 
 /**
- * {@link AuthenticationMechanismResult}
+ * {@link AuthenticityMechanismResult}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public interface AuthenticationMechanismResult {
+public interface AuthenticityMechanismResult {
 
     /**
      * Returns the display name of the mechanism's result

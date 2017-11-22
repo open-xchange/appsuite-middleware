@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,44 +47,42 @@
  *
  */
 
-package com.openexchange.mail.authenticity.osgi;
-
-import com.openexchange.mail.authenticity.MailAuthenticationHandler;
-import com.openexchange.mail.authenticity.MailAuthenticationHandlerRegistry;
-import com.openexchange.mail.authenticity.internal.MailAuthenticationHandlerRegistryImpl;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
-
+package com.openexchange.mail.authenticity.common.mechanism;
 
 /**
- * {@link MailAuthenticationActivator}
+ * {@link MailAuthenticityMechanismResult} - Defines the methods of the mail authentication
+ * mechanism result dataobject
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.10.0
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class MailAuthenticationActivator extends HousekeepingActivator {
+public interface MailAuthenticityMechanismResult {
 
     /**
-     * Initializes a new {@link MailAuthenticationActivator}.
+     * Returns the domain for which this mechanism was applied
+     * 
+     * @return the domain for which this mechanism was applied
      */
-    public MailAuthenticationActivator() {
-        super();
-    }
+    String getDomain();
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] {};
-    }
+    /**
+     * Returns the (optional) client IP which was used to send the e-mail
+     * 
+     * @return the (optional) client IP which was used to send the e-mail;
+     *         <code>null</code> if none available
+     */
+    String getClientIP();
 
-    @Override
-    protected void startBundle() throws Exception {
-        RankingAwareNearRegistryServiceTracker<MailAuthenticationHandler> handlerTracker = new RankingAwareNearRegistryServiceTracker<>(context, MailAuthenticationHandler.class);
-        MailAuthenticationHandlerRegistryImpl registry = new MailAuthenticationHandlerRegistryImpl(handlerTracker);
-        rememberTracker(handlerTracker);
+    /**
+     * Returns the {@link MailAuthenticityMechanism} used for this result
+     * 
+     * @return the {@link MailAuthenticityMechanism} used for this result
+     */
+    MailAuthenticityMechanism getMechanism();
 
-        openTrackers();
-
-        registerService(MailAuthenticationHandlerRegistry.class, registry);
-    }
-
+    /**
+     * Returns the result of the authentication mechanism
+     * 
+     * @return the result of the authentication mechanism
+     */
+    AuthenticityMechanismResult getResult();
 }

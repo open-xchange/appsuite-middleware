@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,42 +47,44 @@
  *
  */
 
-package com.openexchange.mail.authenticity.common.mechanism;
+package com.openexchange.mail.authenticity.framework.osgi;
+
+import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.mail.MailFetchListener;
+import com.openexchange.mail.authenticity.MailAuthenticityHandlerRegistry;
+import com.openexchange.mail.authenticity.framework.MailAuthenticityFetchListener;
+import com.openexchange.osgi.HousekeepingActivator;
+
 
 /**
- * {@link MailAuthenticationMechanismResult} - Defines the methods of the mail authentication
- * mechanism result dataobject
+ * {@link MailAuthenticityFrameworkActivator}
  *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.10.0
  */
-public interface MailAuthenticationMechanismResult {
+public class MailAuthenticityFrameworkActivator extends HousekeepingActivator {
 
     /**
-     * Returns the domain for which this mechanism was applied
-     * 
-     * @return the domain for which this mechanism was applied
+     * Initializes a new {@link MailAuthenticityFrameworkActivator}.
      */
-    String getDomain();
+    public MailAuthenticityFrameworkActivator() {
+        super();
+    }
 
-    /**
-     * Returns the (optional) client IP which was used to send the e-mail
-     * 
-     * @return the (optional) client IP which was used to send the e-mail;
-     *         <code>null</code> if none available
-     */
-    String getClientIP();
+    @Override
+    protected boolean stopOnServiceUnavailability() {
+        return true;
+    }
 
-    /**
-     * Returns the {@link MailAuthenticationMechanism} used for this result
-     * 
-     * @return the {@link MailAuthenticationMechanism} used for this result
-     */
-    MailAuthenticationMechanism getMechanism();
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[] { MailAuthenticityHandlerRegistry.class, ConfigViewFactory.class };
+    }
 
-    /**
-     * Returns the result of the authentication mechanism
-     * 
-     * @return the result of the authentication mechanism
-     */
-    AuthenticationMechanismResult getResult();
+    @Override
+    protected void startBundle() throws Exception {
+        MailAuthenticityFetchListener fetchListener = new MailAuthenticityFetchListener(getService(MailAuthenticityHandlerRegistry.class), getService(ConfigViewFactory.class));
+        registerService(MailFetchListener.class, fetchListener);
+    }
+
 }

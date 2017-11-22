@@ -47,44 +47,29 @@
  *
  */
 
-package com.openexchange.mail.authenticity.framework.osgi;
+package com.openexchange.mail.authenticity;
 
-import com.openexchange.config.cascade.ConfigViewFactory;
-import com.openexchange.mail.MailFetchListener;
-import com.openexchange.mail.authenticity.MailAuthenticationHandlerRegistry;
-import com.openexchange.mail.authenticity.framework.MailAuthenticationFetchListener;
-import com.openexchange.osgi.HousekeepingActivator;
-
+import java.util.List;
+import com.openexchange.exception.OXException;
+import com.openexchange.osgi.annotation.SingletonService;
+import com.openexchange.session.Session;
 
 /**
- * {@link MailAuthenticationFrameworkActivator}
+ * {@link MailAuthenticityHandlerRegistry}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.10.0
  */
-public class MailAuthenticationFrameworkActivator extends HousekeepingActivator {
+@SingletonService
+public interface MailAuthenticityHandlerRegistry {
 
     /**
-     * Initializes a new {@link MailAuthenticationFrameworkActivator}.
+     * Gets a sorted listing of applicable handlers
+     *
+     * @param session The user's session
+     * @return The sorted listing
+     * @throws OXException If sorted listing cannot be returned
      */
-    public MailAuthenticationFrameworkActivator() {
-        super();
-    }
-
-    @Override
-    protected boolean stopOnServiceUnavailability() {
-        return true;
-    }
-
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { MailAuthenticationHandlerRegistry.class, ConfigViewFactory.class };
-    }
-
-    @Override
-    protected void startBundle() throws Exception {
-        MailAuthenticationFetchListener fetchListener = new MailAuthenticationFetchListener(getService(MailAuthenticationHandlerRegistry.class), getService(ConfigViewFactory.class));
-        registerService(MailFetchListener.class, fetchListener);
-    }
+    List<MailAuthenticityHandler> getSortedApplicableHandlersFor(Session session) throws OXException;
 
 }

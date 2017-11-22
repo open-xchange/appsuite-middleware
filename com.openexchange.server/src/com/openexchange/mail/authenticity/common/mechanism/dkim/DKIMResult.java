@@ -49,7 +49,7 @@
 
 package com.openexchange.mail.authenticity.common.mechanism.dkim;
 
-import com.openexchange.mail.authenticity.common.mechanism.AuthenticationMechanismResult;
+import com.openexchange.mail.authenticity.common.mechanism.AuthenticityMechanismResult;
 
 /**
  * {@link DKIMResult} - The evaluation states of the DKIM signature
@@ -57,7 +57,7 @@ import com.openexchange.mail.authenticity.common.mechanism.AuthenticationMechani
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @see <a href="https://tools.ietf.org/html/rfc7601#section-2.7.1">RFC 7601, Section 2.7.1</a>
  */
-public enum DKIMResult implements AuthenticationMechanismResult {
+public enum DKIMResult implements AuthenticityMechanismResult {
 
     /**
      * The message was not signed.

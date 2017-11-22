@@ -50,7 +50,7 @@
 package com.openexchange.mail.authenticity.common.mechanism.spf;
 
 import com.openexchange.mail.authenticity.common.mechanism.AbstractAuthMechResult;
-import com.openexchange.mail.authenticity.common.mechanism.MailAuthenticationMechanism;
+import com.openexchange.mail.authenticity.common.mechanism.MailAuthenticityMechanism;
 
 /**
  * {@link SPFAuthMechResult}
@@ -86,8 +86,8 @@ public class SPFAuthMechResult extends AbstractAuthMechResult {
      * @see com.openexchange.mail.authentication.mechanism.MailAuthenticationMechanismResult#getMechanism()
      */
     @Override
-    public MailAuthenticationMechanism getMechanism() {
-        return MailAuthenticationMechanism.SPF;
+    public MailAuthenticityMechanism getMechanism() {
+        return MailAuthenticityMechanism.SPF;
     }
 
     /*

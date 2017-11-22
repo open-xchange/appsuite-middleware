@@ -49,7 +49,7 @@
 
 package com.openexchange.mail.authenticity.common.mechanism.spf;
 
-import com.openexchange.mail.authenticity.common.mechanism.AuthenticationMechanismResult;
+import com.openexchange.mail.authenticity.common.mechanism.AuthenticityMechanismResult;
 
 /**
  * {@link SPFResult} - Specifies the possible SPF results.
@@ -57,7 +57,7 @@ import com.openexchange.mail.authenticity.common.mechanism.AuthenticationMechani
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @see <a href="https://tools.ietf.org/html/rfc7208#section-8">RFC-7208, Section 8</a>
  */
-public enum SPFResult implements AuthenticationMechanismResult {
+public enum SPFResult implements AuthenticityMechanismResult {
 
     /**
      * The SPF verifier has no information at all about the authorisation

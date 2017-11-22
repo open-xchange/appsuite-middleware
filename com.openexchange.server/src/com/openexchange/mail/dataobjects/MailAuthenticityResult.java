@@ -53,19 +53,19 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import com.google.common.collect.ImmutableList;
-import com.openexchange.mail.authenticity.common.MailAuthenticationStatus;
-import com.openexchange.mail.authenticity.common.mechanism.MailAuthenticationMechanism;
-import com.openexchange.mail.authenticity.common.mechanism.MailAuthenticationMechanismResult;
+import com.openexchange.mail.authenticity.common.MailAuthenticityStatus;
+import com.openexchange.mail.authenticity.common.mechanism.MailAuthenticityMechanism;
+import com.openexchange.mail.authenticity.common.mechanism.MailAuthenticityMechanismResult;
 
 /**
- * {@link MailAuthenticationResult} - The result of the overall mail authentication
+ * {@link MailAuthenticityResult} - The result of the overall mail authenticity validation.
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class MailAuthenticationResult {
+public class MailAuthenticityResult {
 
     /** The empty neutral authentication result */
-    public static MailAuthenticationResult NEUTRAL_RESULT = builder().build();
+    public static MailAuthenticityResult NEUTRAL_RESULT = builder().build();
 
     /**
      * Creates a new builder instance.
@@ -79,32 +79,32 @@ public class MailAuthenticationResult {
     /** The builder or instance of <code>MailAuthenticationResult</code> */
     public static class Builder {
 
-        private MailAuthenticationStatus status;
+        private MailAuthenticityStatus status;
         private String domain;
-        private final List<MailAuthenticationMechanism> mailAuthenticationMechanisms;
-        private final List<MailAuthenticationMechanismResult> mailAuthenticationMechanismResults;
+        private final List<MailAuthenticityMechanism> mailAuthenticityMechanisms;
+        private final List<MailAuthenticityMechanismResult> mailAuthenticityMechanismResults;
 
         /**
          * Initializes a new {@link Builder}.
          */
         Builder() {
             super();
-            status = MailAuthenticationStatus.NEUTRAL;
-            mailAuthenticationMechanismResults = new ArrayList<>();
-            mailAuthenticationMechanisms = new ArrayList<>();
+            status = MailAuthenticityStatus.NEUTRAL;
+            mailAuthenticityMechanismResults = new ArrayList<>();
+            mailAuthenticityMechanisms = new ArrayList<>();
         }
 
         /**
-         * Adds the specified {@link MailAuthenticationMechanismResult} to the overall result {@link Set}
+         * Adds the specified {@link MailAuthenticityMechanismResult} to the overall result {@link Set}
          *
-         * @param result The {@link MailAuthenticationMechanismResult} to add
+         * @param result The {@link MailAuthenticityMechanismResult} to add
          * @return This builder
          */
-        public Builder addResult(MailAuthenticationMechanismResult result) {
-            if (!mailAuthenticationMechanisms.contains(result.getMechanism())) {
-                mailAuthenticationMechanisms.add(result.getMechanism());
+        public Builder addResult(MailAuthenticityMechanismResult result) {
+            if (!mailAuthenticityMechanisms.contains(result.getMechanism())) {
+                mailAuthenticityMechanisms.add(result.getMechanism());
             }
-            mailAuthenticationMechanismResults.add(result);
+            mailAuthenticityMechanismResults.add(result);
             return this;
         }
 
@@ -125,38 +125,38 @@ public class MailAuthenticationResult {
          * @param status The status to set
          * @return This builder
          */
-        public Builder setStatus(MailAuthenticationStatus status) {
+        public Builder setStatus(MailAuthenticityStatus status) {
             this.status = status;
             return this;
         }
 
         /**
-         * Builds the {@link MailAuthenticationResult}
-         * 
-         * @return the built {@link MailAuthenticationResult}
+         * Builds the {@link MailAuthenticityResult}
+         *
+         * @return the built {@link MailAuthenticityResult}
          */
-        public MailAuthenticationResult build() {
-            return new MailAuthenticationResult(status, domain, ImmutableList.copyOf(mailAuthenticationMechanisms), ImmutableList.copyOf(mailAuthenticationMechanismResults));
+        public MailAuthenticityResult build() {
+            return new MailAuthenticityResult(status, domain, ImmutableList.copyOf(mailAuthenticityMechanisms), ImmutableList.copyOf(mailAuthenticityMechanismResults));
         }
 
     }
 
     // ---------------------------------------------------------------------------------------------------------
 
-    private final MailAuthenticationStatus status;
+    private final MailAuthenticityStatus status;
     private final String domain;
-    private final List<MailAuthenticationMechanism> mailAuthenticationMechanisms;
-    private final List<MailAuthenticationMechanismResult> mailAuthenticationMechanismResults;
+    private final List<MailAuthenticityMechanism> mailAuthenticityMechanisms;
+    private final List<MailAuthenticityMechanismResult> mailAuthenticityMechanismResults;
 
     /**
-     * Initializes a new {@link MailAuthenticationResult}.
+     * Initializes a new {@link MailAuthenticityResult}.
      */
-    MailAuthenticationResult(MailAuthenticationStatus status, String domain, ImmutableList<MailAuthenticationMechanism> mailAuthenticationMechanisms, ImmutableList<MailAuthenticationMechanismResult> mailAuthenticationMechanismResults) {
+    MailAuthenticityResult(MailAuthenticityStatus status, String domain, ImmutableList<MailAuthenticityMechanism> mailAuthenticityMechanisms, ImmutableList<MailAuthenticityMechanismResult> mailAuthenticityMechanismResults) {
         super();
         this.status = status;
         this.domain = domain;
-        this.mailAuthenticationMechanisms = mailAuthenticationMechanisms;
-        this.mailAuthenticationMechanismResults = mailAuthenticationMechanismResults;
+        this.mailAuthenticityMechanisms = mailAuthenticityMechanisms;
+        this.mailAuthenticityMechanismResults = mailAuthenticityMechanismResults;
     }
 
     /**
@@ -173,7 +173,7 @@ public class MailAuthenticationResult {
      *
      * @return The status
      */
-    public MailAuthenticationStatus getStatus() {
+    public MailAuthenticityStatus getStatus() {
         return status;
     }
 
@@ -182,8 +182,8 @@ public class MailAuthenticationResult {
      *
      * @return an unmodifiable {@link List} with the used mail authentication mechanisms
      */
-    public List<MailAuthenticationMechanism> getAuthenticationMechanisms() {
-        return mailAuthenticationMechanisms;
+    public List<MailAuthenticityMechanism> getAuthenticationMechanisms() {
+        return mailAuthenticityMechanisms;
     }
 
     /**
@@ -191,20 +191,20 @@ public class MailAuthenticationResult {
      *
      * @return an unmodifiable {@link List} with the results of the used mail authentication mechanisms
      */
-    public List<MailAuthenticationMechanismResult> getMailAuthenticationMechanismResults() {
-        return mailAuthenticationMechanismResults;
+    public List<MailAuthenticityMechanismResult> getMailAuthenticationMechanismResults() {
+        return mailAuthenticityMechanismResults;
     }
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see java.lang.Object#toString()
      */
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
         builder.append("MailAuthenticationResult [status=").append(status).append(", domain=").append(domain).append(", mailAuthenticationMechanisms=");
-        builder.append(mailAuthenticationMechanisms).append(", mailAuthenticationMechanismResults=").append(mailAuthenticationMechanismResults).append("]");
+        builder.append(mailAuthenticityMechanisms).append(", mailAuthenticationMechanismResults=").append(mailAuthenticityMechanismResults).append("]");
         return builder.toString();
     }
 }
