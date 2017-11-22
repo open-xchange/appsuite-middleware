@@ -183,4 +183,9 @@ public class OIDCBackendConfigImpl implements OIDCBackendConfig{
     public String getUIWebpath() {
         return this.leanConfigurationService.getProperty(OIDCBackendProperty.uiWebPath);
     }
+    
+    @Override
+    public String getBackendPath() {
+        return this.leanConfigurationService.getProperty(OIDCBackendProperty.backendPath);
+    }
 }

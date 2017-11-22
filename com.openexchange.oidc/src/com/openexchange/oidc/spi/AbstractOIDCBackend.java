@@ -148,7 +148,7 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
     protected static final String AUTH_RESPONSE = "auth_response";
     private static final Logger LOG = LoggerFactory.getLogger(AbstractOIDCBackend.class);
     private LoginConfiguration loginConfiguration;
-
+    
     @Override
     public OIDCConfig getOIDCConfig() {
         return new OIDCConfigImpl(Services.getService(LeanConfigurationService.class));
@@ -166,7 +166,7 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
 
     @Override
     public String getPath() {
-        return "";
+        return this.getBackendConfig().getBackendPath();
     }
 
     @Override

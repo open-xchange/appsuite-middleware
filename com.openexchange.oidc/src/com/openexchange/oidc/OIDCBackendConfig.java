@@ -265,4 +265,11 @@ public interface OIDCBackendConfig {
      * @return the ui web path.
      */
     String getUIWebpath();
+    
+    /**
+     * Load this backends path, which is appended to the default /oidc/ path.
+     * 
+     * @return
+     */
+    String getBackendPath();
 }
