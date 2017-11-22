@@ -49,9 +49,10 @@
 
 package com.openexchange.mail.dataobjects;
 
-import java.util.LinkedHashSet;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
-import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ImmutableList;
 import com.openexchange.mail.authentication.MailAuthenticationStatus;
 import com.openexchange.mail.authentication.mechanism.MailAuthenticationMechanism;
 import com.openexchange.mail.authentication.mechanism.MailAuthenticationMechanismResult;
@@ -80,8 +81,8 @@ public class MailAuthenticationResult {
 
         private MailAuthenticationStatus status;
         private String domain;
-        private final Set<MailAuthenticationMechanism> mailAuthenticationMechanisms;
-        private final Set<MailAuthenticationMechanismResult> mailAuthenticationMechanismResults;
+        private final List<MailAuthenticationMechanism> mailAuthenticationMechanisms;
+        private final List<MailAuthenticationMechanismResult> mailAuthenticationMechanismResults;
 
         /**
          * Initializes a new {@link Builder}.
@@ -89,8 +90,8 @@ public class MailAuthenticationResult {
         Builder() {
             super();
             status = MailAuthenticationStatus.NEUTRAL;
-            mailAuthenticationMechanismResults = new LinkedHashSet<>();
-            mailAuthenticationMechanisms = new LinkedHashSet<>();
+            mailAuthenticationMechanismResults = new ArrayList<>();
+            mailAuthenticationMechanisms = new ArrayList<>();
         }
 
         /**
@@ -127,8 +128,13 @@ public class MailAuthenticationResult {
             return this;
         }
 
+        /**
+         * Builds the {@link MailAuthenticationResult}
+         * 
+         * @return the built {@link MailAuthenticationResult}
+         */
         public MailAuthenticationResult build() {
-            return new MailAuthenticationResult(status, domain, ImmutableSet.copyOf(mailAuthenticationMechanisms), ImmutableSet.copyOf(mailAuthenticationMechanismResults));
+            return new MailAuthenticationResult(status, domain, ImmutableList.copyOf(mailAuthenticationMechanisms), ImmutableList.copyOf(mailAuthenticationMechanismResults));
         }
 
     }
@@ -137,13 +143,13 @@ public class MailAuthenticationResult {
 
     private final MailAuthenticationStatus status;
     private final String domain;
-    private final Set<MailAuthenticationMechanism> mailAuthenticationMechanisms;
-    private final Set<MailAuthenticationMechanismResult> mailAuthenticationMechanismResults;
+    private final List<MailAuthenticationMechanism> mailAuthenticationMechanisms;
+    private final List<MailAuthenticationMechanismResult> mailAuthenticationMechanismResults;
 
     /**
      * Initializes a new {@link MailAuthenticationResult}.
      */
-    MailAuthenticationResult(MailAuthenticationStatus status, String domain, ImmutableSet<MailAuthenticationMechanism> mailAuthenticationMechanisms, ImmutableSet<MailAuthenticationMechanismResult> mailAuthenticationMechanismResults) {
+    MailAuthenticationResult(MailAuthenticationStatus status, String domain, ImmutableList<MailAuthenticationMechanism> mailAuthenticationMechanisms, ImmutableList<MailAuthenticationMechanismResult> mailAuthenticationMechanismResults) {
         super();
         this.status = status;
         this.domain = domain;
@@ -170,23 +176,28 @@ public class MailAuthenticationResult {
     }
 
     /**
-     * Returns an unmodifiable {@link Set} with the used mail authentication mechanisms
+     * Returns an unmodifiable {@link List} with the used mail authentication mechanisms
      *
-     * @return an unmodifiable {@link Set} with the used mail authentication mechanisms
+     * @return an unmodifiable {@link List} with the used mail authentication mechanisms
      */
-    public Set<MailAuthenticationMechanism> getAuthenticationMechanisms() {
+    public List<MailAuthenticationMechanism> getAuthenticationMechanisms() {
         return mailAuthenticationMechanisms;
     }
 
     /**
-     * Returns an unmodifiable {@link Set} with the results of the used mail authentication mechanisms
+     * Returns an unmodifiable {@link List} with the results of the used mail authentication mechanisms
      *
-     * @return an unmodifiable {@link Set} with the results of the used mail authentication mechanisms
+     * @return an unmodifiable {@link List} with the results of the used mail authentication mechanisms
      */
-    public Set<MailAuthenticationMechanismResult> getMailAuthenticationMechanismResults() {
+    public List<MailAuthenticationMechanismResult> getMailAuthenticationMechanismResults() {
         return mailAuthenticationMechanismResults;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.lang.Object#toString()
+     */
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
