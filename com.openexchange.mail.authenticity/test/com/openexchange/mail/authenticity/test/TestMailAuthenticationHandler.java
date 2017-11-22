@@ -209,6 +209,28 @@ public class TestMailAuthenticationHandler {
         assertEquals("The mechanism's result does not match", DKIMResult.PASS.getTechnicalName(), s.getTechnicalName());
     }
 
+    /**
+     * Tests the case where the <code>Authentication-Results</code> header field is present
+     * and the message was authenticated by different MTAs with a multi-tiered authentication.
+     */
+    @Test
+    public void testMultiTieredAuthenticationDifferentMTAs() {
+        perform("example.net; dkim=pass (good signature) header.i=@newyork.example.com", "example.com; dkim=pass reason=\"good signature\" header.i=@mail-router.example.net; dkim=fail reason=\"bad signature\" header.i=@newyork.example.com");
+
+        assertEquals("The overall status does not match", MailAuthenticationStatus.FAIL, result.getStatus());
+        assertEquals("The domain does not match", "example.com", result.getDomain());
+        assertEquals("The mail authentication mechanisms amount does not match", 1, result.getAuthenticationMechanisms().size());
+        assertTrue("The mail authentication mechansism does not match", result.getAuthenticationMechanisms().contains(MailAuthenticationMechanism.DKIM));
+        assertEquals("The mail authentication mechanism results amount does not match", 2, result.getMailAuthenticationMechanismResults().size());
+
+        MailAuthenticationMechanismResult mechanismResult = result.getMailAuthenticationMechanismResults().get(0);
+        assertEquals("The mechanism's domain does not match", "example.com", mechanismResult.getDomain());
+        assertNotNull("The mechanism's result is null", mechanismResult.getResult());
+
+        AuthenticationMechanismResult s = mechanismResult.getResult();
+        assertEquals("The mechanism's result does not match", DKIMResult.PASS.getTechnicalName(), s.getTechnicalName());
+    }
+
     ///////////////////////////// HELPERS //////////////////////////////
 
     /**
