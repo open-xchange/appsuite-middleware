@@ -179,7 +179,7 @@ public class TestMailAuthenticationHandler {
             headerCollection.addHeader(MailAuthenticationHandler.AUTH_RESULTS_HEADER, header);
         }
         handler.handle(mailMessage);
-        verify(mailMessage).setMailAuthenticationResult(argumentCaptor.capture());
+        verify(mailMessage).setAuthenticationResult(argumentCaptor.capture());
         result = argumentCaptor.getValue();
     }
 }
