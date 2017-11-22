@@ -53,9 +53,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import com.google.common.collect.ImmutableList;
-import com.openexchange.mail.authentication.MailAuthenticationStatus;
-import com.openexchange.mail.authentication.mechanism.MailAuthenticationMechanism;
-import com.openexchange.mail.authentication.mechanism.MailAuthenticationMechanismResult;
+import com.openexchange.mail.authenticity.common.MailAuthenticationStatus;
+import com.openexchange.mail.authenticity.common.mechanism.MailAuthenticationMechanism;
+import com.openexchange.mail.authenticity.common.mechanism.MailAuthenticationMechanismResult;
 
 /**
  * {@link MailAuthenticationResult} - The result of the overall mail authentication
