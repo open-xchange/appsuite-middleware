@@ -71,14 +71,16 @@ import com.openexchange.session.Session;
  */
 public class MailAuthenticationFetchListener implements MailFetchListener {
 
-    private final ServiceLookup services;
+    private final com.openexchange.mail.authentication.MailAuthenticationHandlerRegistry handlerRegistry;
+    private final ConfigViewFactory viewFactory;
 
     /**
      * Initializes a new {@link MailAuthenticationFetchListener}.
      */
-    public MailAuthenticationFetchListener(ServiceLookup services) {
+    public MailAuthenticationFetchListener(com.openexchange.mail.authentication.MailAuthenticationHandlerRegistry handlerRegistry, ConfigViewFactory viewFactory) {
         super();
-        this.services = services;
+        this.handlerRegistry = handlerRegistry;
+        this.viewFactory = viewFactory;
     }
 
     private boolean isNotEnabledFor(Session session) throws OXException {
@@ -86,13 +88,8 @@ public class MailAuthenticationFetchListener implements MailFetchListener {
     }
 
     private boolean isEnabledFor(Session session) throws OXException {
-        boolean def = false;
-        ConfigViewFactory viewFactory = services.getOptionalService(ConfigViewFactory.class);
-        if (null == viewFactory) {
-            return def;
-        }
-
         ConfigView view = viewFactory.getView(session.getUserId(), session.getContextId());
+        boolean def = false;
         return ConfigViews.getDefinedBoolPropertyFrom("com.openexchange.mail.authentication.enabled", def, view); // authenticity enabled?
     }
 
@@ -116,6 +113,8 @@ public class MailAuthenticationFetchListener implements MailFetchListener {
         if (isNotEnabledFor(session) || (false == new MailFields(fetchArguments.getFields()).contains(MailField.AUTHENTICATION_RESULTS))) {
             return MailAttributation.NOT_APPLICABLE;
         }
+
+
 
         return MailAttributation.builder(MailFields.addIfAbsent(fetchArguments.getFields(), MailField.AUTHENTICATION_RESULTS), fetchArguments.getHeaderNames()).build();
     }
