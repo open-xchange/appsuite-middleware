@@ -171,7 +171,7 @@ public class TestMailAuthenticationHandler {
      */
     @Test
     public void testSeveralAuthenticationsWithUnknownMethodsAndSPF() {
-        perform("example.com; auth=pass (cram-md5) smtp.auth=sender@example.net; spf=pass smtp.mailfrom=example.net", "example.com; sender-id=pass header.from=example.net");
+        perform("example.com; sender-id=pass header.from=example.net", "example.com; auth=pass (cram-md5) smtp.auth=sender@example.net; spf=pass smtp.mailfrom=example.net");
 
         assertEquals("The overall status does not match", MailAuthenticationStatus.PASS, result.getStatus());
         assertEquals("The domain does not match", "example.com", result.getDomain());
@@ -193,7 +193,7 @@ public class TestMailAuthenticationHandler {
      */
     @Test
     public void testSeveralAuthenticationsDifferentMTAs() {
-        perform("example.com; sender-id=fail header.from=example.com; dkim=pass (good signature) header.d=example.com", "example.com; auth=pass (cram-md5) smtp.auth=sender@example.com; spf=fail smtp.mailfrom=example.com");
+        perform("example.com; auth=pass (cram-md5) smtp.auth=sender@example.com; spf=fail smtp.mailfrom=example.com", "example.com; sender-id=fail header.from=example.com; dkim=pass (good signature) header.d=example.com");
 
         assertEquals("The overall status does not match", MailAuthenticationStatus.PASS, result.getStatus());
         assertEquals("The domain does not match", "example.com", result.getDomain());
