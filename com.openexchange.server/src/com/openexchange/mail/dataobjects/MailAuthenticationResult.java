@@ -101,7 +101,9 @@ public class MailAuthenticationResult {
          * @return This builder
          */
         public Builder addResult(MailAuthenticationMechanismResult result) {
-            mailAuthenticationMechanisms.add(result.getMechanism());
+            if (!mailAuthenticationMechanisms.contains(result.getMechanism())) {
+                mailAuthenticationMechanisms.add(result.getMechanism());
+            }
             mailAuthenticationMechanismResults.add(result);
             return this;
         }
