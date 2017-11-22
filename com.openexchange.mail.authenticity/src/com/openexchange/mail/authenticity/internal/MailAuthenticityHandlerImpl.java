@@ -64,7 +64,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.MailField;
-import com.openexchange.mail.authenticity.handler.MailAuthenticityHandler;
 import com.openexchange.mail.authenticity.common.MailAuthenticityStatus;
 import com.openexchange.mail.authenticity.common.mechanism.MailAuthenticityMechanism;
 import com.openexchange.mail.authenticity.common.mechanism.MailAuthenticityMechanismResult;
@@ -77,6 +76,7 @@ import com.openexchange.mail.authenticity.common.mechanism.dmarc.DMARCResultHead
 import com.openexchange.mail.authenticity.common.mechanism.spf.SPFAuthMechResult;
 import com.openexchange.mail.authenticity.common.mechanism.spf.SPFResult;
 import com.openexchange.mail.authenticity.common.mechanism.spf.SPFResultHeader;
+import com.openexchange.mail.authenticity.handler.MailAuthenticityHandler;
 import com.openexchange.mail.dataobjects.MailAuthenticityResult;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.HeaderCollection;
@@ -327,7 +327,8 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
         domain = split.length == 0 ? domain : split[0];
         // TODO: Consider wildcards and regexes...
         //       e.g. mx[0-9]?.open-xchnge.com
-        return domain.startsWith("@") ? domain.substring(1) : domain;
+        int index = domain.indexOf('@');
+        return index < 0 ? domain : domain.substring(index + 1);
     }
 
     /**
