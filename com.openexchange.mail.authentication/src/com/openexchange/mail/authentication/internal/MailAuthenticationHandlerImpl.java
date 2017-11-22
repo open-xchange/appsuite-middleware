@@ -62,6 +62,7 @@ import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.authentication.MailAuthenticationHandler;
 import com.openexchange.mail.authentication.MailAuthenticationStatus;
@@ -136,12 +137,18 @@ public class MailAuthenticationHandlerImpl implements MailAuthenticationHandler 
             String value = line.get(MailAuthenticationMechanism.DKIM.name().toLowerCase());
             DKIMResult dkimResult = DKIMResult.valueOf(value.toUpperCase());
             String domain = line.get(DKIMResultHeader.HEADER_I);
+            if (Strings.isEmpty(domain)) {
+                domain = line.get(DKIMResultHeader.HEADER_D);
+            }
             return new DKIMAuthMechResult(domain, dkimResult);
         });
         mechanismParsersRegitry.put(MailAuthenticationMechanism.SPF, (line) -> {
             String value = line.get(MailAuthenticationMechanism.SPF.name().toLowerCase());
             SPFResult spfResult = SPFResult.valueOf(value.toUpperCase());
             String domain = line.get(SPFResultHeader.SMTP_MAILFROM);
+            if (Strings.isEmpty(domain)) {
+                domain = line.get(SPFResultHeader.SMTP_HELO);
+            }
             return new SPFAuthMechResult(domain, spfResult);
         });
     }
