@@ -338,6 +338,29 @@ public class TestMailAuthenticationHandler {
         assertEquals("The mechanism's result does not match", SPFResult.PASS.getTechnicalName(), s.getTechnicalName());
     }
 
+    /**
+     * Tests the real world case where the <code>Authentication-Results</code> header field is present
+     * and the MTA passes the validation of DKIM and ignores all other unknown mechanisms
+     */
+    @Test
+    public void testDKIMPassUnknownMechanisms() {
+        perform("mx1.open-xchange.com; dkim=pass reason=\"1024-bit key; unprotected key\" header.d=ox.io header.i=@ox.io header.b=lolhN/LS; dkim-adsp=pass; dkim-atps=neutral");
+        
+        assertEquals("The overall status does not match", MailAuthenticityStatus.PASS, result.getStatus());
+        assertEquals("The domain does not match", "mx1.open-xchange.com", result.getDomain());
+        assertEquals("The mail authentication mechanisms amount does not match", 1, result.getAuthenticationMechanisms().size());
+        assertTrue("The mail authentication mechansism does not match", result.getAuthenticationMechanisms().contains(MailAuthenticityMechanism.DKIM));
+        assertEquals("The mail authentication mechanism results amount does not match", 1, result.getMailAuthenticationMechanismResults().size());
+
+        MailAuthenticityMechanismResult mechanismResult = result.getMailAuthenticationMechanismResults().get(0);
+        assertEquals("The mechanism's domain does not match", "ox.io", mechanismResult.getDomain());
+        assertNotNull("The mechanism's result is null", mechanismResult.getResult());
+        assertEquals("The mechanism's reason does not match", "\"1024-bit key; unprotected key\"", mechanismResult.getReason());
+
+        AuthenticityMechanismResult s = mechanismResult.getResult();
+        assertEquals("The mechanism's result does not match", DKIMResult.PASS.getTechnicalName(), s.getTechnicalName());
+    }
+
     ///////////////////////////// HELPERS //////////////////////////////
 
     /**
