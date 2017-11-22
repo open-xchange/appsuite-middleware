@@ -49,6 +49,9 @@
 
 package com.openexchange.mail.authenticity.internal;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.authenticity.MailAuthenticationHandler;
@@ -66,6 +69,7 @@ import com.openexchange.session.Session;
 public class MailAuthenticationHandlerRegistryImpl implements MailAuthenticationHandlerRegistry {
 
     private final ServiceListing<MailAuthenticationHandler> listing;
+    private final Comparator<MailAuthenticationHandler> comparator;
 
     /**
      * Initializes a new {@link MailAuthenticationHandlerRegistryImpl}.
@@ -73,15 +77,32 @@ public class MailAuthenticationHandlerRegistryImpl implements MailAuthentication
     public MailAuthenticationHandlerRegistryImpl(ServiceListing<MailAuthenticationHandler> listing) {
         super();
         this.listing = listing;
+        comparator = new Comparator<MailAuthenticationHandler>() {
+
+            @Override
+            public int compare(MailAuthenticationHandler o1, MailAuthenticationHandler o2) {
+                int r1 = o1.getRanking();
+                int r2 = o2.getRanking();
+                return (r1 < r2) ? 1 : ((r1 == r2) ? 0 : -1);
+            }
+        };
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.mail.authenticity.MailAuthenticationHandlerRegistry#getSortedApplicableHandlersFor(com.openexchange.session.Session)
-     */
     @Override
     public List<MailAuthenticationHandler> getSortedApplicableHandlersFor(Session session) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        List<MailAuthenticationHandler> snapshot = listing.getServiceList();
+        if (snapshot == null || snapshot.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        List<MailAuthenticationHandler> applicableHandlers = new ArrayList<>(snapshot.size());
+        for (MailAuthenticationHandler handler : snapshot) {
+            if (handler.isEnabled(session)) {
+                applicableHandlers.add(handler);
+            }
+        }
+        Collections.sort(applicableHandlers, comparator);
+        return applicableHandlers;
     }
 
 }
