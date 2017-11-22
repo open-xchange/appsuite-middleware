@@ -51,6 +51,7 @@ package com.openexchange.mail;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import com.google.common.collect.ImmutableList;
 import com.openexchange.exception.OXException;
 import com.openexchange.osgi.ServiceListing;
@@ -98,12 +99,13 @@ public class MailFetchListenerRegistry {
      *
      * @param fetchArguments The fetch arguments
      * @param session The user's session
+     * @param state The state, which lets individual listeners store stuff
      * @return The effective listener chain
      * @throws OXException If listener chain cannot be returned
      */
-    public static MailFetchListenerChain determineFetchListenerChainFor(MailFetchArguments fetchArguments, Session session) throws OXException {
+    public static MailFetchListenerChain determineFetchListenerChainFor(MailFetchArguments fetchArguments, Session session, Map<String, Object> state) throws OXException {
         MailFetchListenerRegistry registry = instance;
-        return null == registry ? MailFetchListenerChain.EMPTY_CHAIN : registry.getFetchListenerChainFor(fetchArguments, session);
+        return null == registry ? MailFetchListenerChain.EMPTY_CHAIN : registry.getFetchListenerChainFor(fetchArguments, session, state);
     }
 
     // -------------------------------------------------------------------------------------------------------------------------------
@@ -132,10 +134,11 @@ public class MailFetchListenerRegistry {
      *
      * @param fetchArguments The fetch arguments
      * @param session The user's session
+     * @param state The state, which lets individual listeners store stuff
      * @return The effective listener chain
      * @throws OXException If listener chain cannot be returned
      */
-    public MailFetchListenerChain getFetchListenerChainFor(MailFetchArguments fetchArguments, Session session) throws OXException {
+    public MailFetchListenerChain getFetchListenerChainFor(MailFetchArguments fetchArguments, Session session, Map<String, Object> state) throws OXException {
         Iterator<MailFetchListener> iterator = this.listeners.iterator();
         if (false == iterator.hasNext()) {
             return MailFetchListenerChain.EMPTY_CHAIN;
@@ -147,7 +150,7 @@ public class MailFetchListenerRegistry {
         boolean anyApplicable = false;
         do {
             MailFetchListener listener = iterator.next();
-            MailAttributation attributation = listener.onBeforeFetch(MailFetchArguments.copy(fetchArguments, fs, hns), session);
+            MailAttributation attributation = listener.onBeforeFetch(MailFetchArguments.copy(fetchArguments, fs, hns), session, state);
             if (attributation.isApplicable()) {
                 applicableListeners.add(listener);
                 fs = attributation.getFields();

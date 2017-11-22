@@ -49,6 +49,7 @@
 
 package com.openexchange.mail;
 
+import java.util.Map;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.cache.MailMessageCache;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -78,10 +79,11 @@ public interface MailFetchListener {
      *
      * @param fetchArguments The fetch arguments
      * @param session The user's session
+     * @param state The state, which lets individual listeners store stuff
      * @return The mail attributation
      * @throws OXException If attributation fails
      */
-    MailAttributation onBeforeFetch(MailFetchArguments fetchArguments, Session session) throws OXException;
+    MailAttributation onBeforeFetch(MailFetchArguments fetchArguments, Session session, Map<String, Object> state) throws OXException;
 
     /**
      * Invoked after mails are fetched and allows to modify and/or enhance them.
@@ -89,8 +91,9 @@ public interface MailFetchListener {
      * @param mails The fetched mails
      * @param cacheable Whether specified mails are supposed to be cached
      * @param session The user's session
+     * @param state The state, which lets individual listeners store stuff
      * @return The listener's result
      * @throws OXException If an aborting error occurs; acts in the same way as returning {@link MailFetchListenerResult#deny(OXException)}
      */
-    MailFetchListenerResult onAfterFetch(MailMessage[] mails, boolean cacheable, Session session) throws OXException;
+    MailFetchListenerResult onAfterFetch(MailMessage[] mails, boolean cacheable, Session session, Map<String, Object> state) throws OXException;
 }

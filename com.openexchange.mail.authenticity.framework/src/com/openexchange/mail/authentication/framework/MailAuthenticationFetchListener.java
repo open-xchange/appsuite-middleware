@@ -53,6 +53,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
@@ -76,6 +77,8 @@ import com.openexchange.session.Session;
  * @since v7.10.0
  */
 public class MailAuthenticationFetchListener implements MailFetchListener {
+
+    private static final String STATE_PARAM_HANDLERS = "mail.authenticity.handlers";
 
     private final MailAuthenticationHandlerRegistry handlerRegistry;
     private final ConfigViewFactory viewFactory;
@@ -115,7 +118,7 @@ public class MailAuthenticationFetchListener implements MailFetchListener {
     }
 
     @Override
-    public MailAttributation onBeforeFetch(MailFetchArguments fetchArguments, Session session) throws OXException {
+    public MailAttributation onBeforeFetch(MailFetchArguments fetchArguments, Session session, Map<String, Object> state) throws OXException {
         if (isNotEnabledFor(session) || (false == new MailFields(fetchArguments.getFields()).contains(MailField.AUTHENTICATION_RESULTS))) {
             return MailAttributation.NOT_APPLICABLE;
         }
@@ -142,12 +145,13 @@ public class MailAuthenticationFetchListener implements MailFetchListener {
             }
         }
 
+        state.put(STATE_PARAM_HANDLERS, handlers);
         return MailAttributation.builder(fields.isEmpty() ? null : fields.toArray(), headerNames.isEmpty() ? null : headerNames.toArray(new String[headerNames.size()])).build();
     }
 
     @Override
-    public MailFetchListenerResult onAfterFetch(MailMessage[] mails, boolean cacheable, Session session) throws OXException {
-        List<MailAuthenticationHandler> handlers = handlerRegistry.getSortedApplicableHandlersFor(session);
+    public MailFetchListenerResult onAfterFetch(MailMessage[] mails, boolean cacheable, Session session, Map<String, Object> state) throws OXException {
+        List<MailAuthenticationHandler> handlers = (List<MailAuthenticationHandler>) state.get(STATE_PARAM_HANDLERS);
         if (null == handlers || handlers.isEmpty()) {
             return MailFetchListenerResult.neutral(mails, cacheable);
         }
