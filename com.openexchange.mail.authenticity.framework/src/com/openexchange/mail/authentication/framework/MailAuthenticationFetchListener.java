@@ -49,6 +49,11 @@
 
 package com.openexchange.mail.authentication.framework;
 
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.config.cascade.ConfigViews;
@@ -59,6 +64,7 @@ import com.openexchange.mail.MailFetchListener;
 import com.openexchange.mail.MailFetchListenerResult;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailFields;
+import com.openexchange.mail.authenticity.MailAuthenticationHandler;
 import com.openexchange.mail.authenticity.MailAuthenticationHandlerRegistry;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.session.Session;
@@ -114,15 +120,42 @@ public class MailAuthenticationFetchListener implements MailFetchListener {
             return MailAttributation.NOT_APPLICABLE;
         }
 
+        List<MailAuthenticationHandler> handlers = handlerRegistry.getSortedApplicableHandlersFor(session);
+        if (null == handlers || handlers.isEmpty()) {
+            return MailAttributation.NOT_APPLICABLE;
+        }
 
+        MailFields fields = null == fetchArguments.getFields() ? new MailFields() : new MailFields(fetchArguments.getFields());
+        Set<String> headerNames = null == fetchArguments.getHeaderNames() ? new LinkedHashSet<>() : new LinkedHashSet<>(Arrays.asList(fetchArguments.getHeaderNames()));
+        for (MailAuthenticationHandler handler : handlers) {
+            Collection<MailField> requiredFields = handler.getRequiredFields();
+            if (null != requiredFields && !requiredFields.isEmpty()) {
+                for (MailField requiredField : requiredFields) {
+                    fields.add(requiredField);
+                }
+            }
+            Collection<String> requiredHeaders = handler.getRequiredHeaders();
+            if (null != requiredHeaders && !requiredHeaders.isEmpty()) {
+                for (String requiredHeader : requiredHeaders) {
+                    headerNames.add(requiredHeader);
+                }
+            }
+        }
 
-        return MailAttributation.builder(MailFields.addIfAbsent(fetchArguments.getFields(), MailField.AUTHENTICATION_RESULTS), fetchArguments.getHeaderNames()).build();
+        return MailAttributation.builder(fields.isEmpty() ? null : fields.toArray(), headerNames.isEmpty() ? null : headerNames.toArray(new String[headerNames.size()])).build();
     }
 
     @Override
     public MailFetchListenerResult onAfterFetch(MailMessage[] mails, boolean cacheable, Session session) throws OXException {
-        for (MailMessage mail : mails) {
+        List<MailAuthenticationHandler> handlers = handlerRegistry.getSortedApplicableHandlersFor(session);
+        if (null == handlers || handlers.isEmpty()) {
+            return MailFetchListenerResult.neutral(mails, cacheable);
+        }
 
+        for (MailMessage mail : mails) {
+            for (MailAuthenticationHandler handler : handlers) {
+                handler.handle(mail);
+            }
         }
         return MailFetchListenerResult.neutral(mails, cacheable);
     }
