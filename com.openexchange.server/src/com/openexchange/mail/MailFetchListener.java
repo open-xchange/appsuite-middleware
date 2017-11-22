@@ -52,7 +52,7 @@ package com.openexchange.mail;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.cache.MailMessageCache;
 import com.openexchange.mail.dataobjects.MailMessage;
-import com.openexchange.mail.search.SearchTerm;
+import com.openexchange.session.Session;
 
 /**
  * {@link MailFetchListener} - A listener invoked right before and after fetching mails allowing to modify and/or enhance mails.
@@ -66,35 +66,31 @@ public interface MailFetchListener {
      * Invoked when mails are fetched from {@link MailMessageCache} to test whether this listener is satisfied with the information already available in cached mails.
      *
      * @param mailsFromCache The mails fetched from cache
-     * @param folder The folder from which mails are fetched
-     * @param fields The requested fields
-     * @param headerNames The requested header names
+     * @param fetchArguments The fetch arguments
+     * @param session The user's session
      * @return <code>true</code> if satisfied; otherwise <code>false</code>
      * @throws OXException
      */
-    boolean accept(MailMessage[] mailsFromCache, FullnameArgument folder, MailField[] fields, String[] headerNames) throws OXException;
+    boolean accept(MailMessage[] mailsFromCache, MailFetchArguments fetchArguments, Session session) throws OXException;
 
     /**
      * Invoked prior to fetching mails from mail back-end and allows this listener to add its needed fields and/or header names (if any)
      *
-     * @param folder The folder from which mails are fetched
-     * @param optSearchTerm The filtering search term or <code>null</code>
-     * @param optSortField The field to sort by or <code>null</code>
-     * @param optOrderDir The order direction or <code>null</code>
-     * @param fields The originally requested fields
-     * @param headerNames The originally requested header names
+     * @param fetchArguments The fetch arguments
+     * @param session The user's session
      * @return The mail attributation
      * @throws OXException If attributation fails
      */
-    MailAttributation onBeforeFetch(FullnameArgument folder, SearchTerm<?> optSearchTerm, MailSortField optSortField, OrderDirection optOrderDir, MailField[] fields, String[] headerNames) throws OXException;
+    MailAttributation onBeforeFetch(MailFetchArguments fetchArguments, Session session) throws OXException;
 
     /**
      * Invoked after mails are fetched and allows to modify and/or enhance them.
      *
      * @param mails The fetched mails
      * @param cacheable Whether specified mails are supposed to be cached
+     * @param session The user's session
      * @return The listener's result
      * @throws OXException If an aborting error occurs; acts in the same way as returning {@link MailFetchListenerResult#deny(OXException)}
      */
-    MailFetchListenerResult onAfterFetch(MailMessage[] mails, boolean cacheable) throws OXException;
+    MailFetchListenerResult onAfterFetch(MailMessage[] mails, boolean cacheable, Session session) throws OXException;
 }

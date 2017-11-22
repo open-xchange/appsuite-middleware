@@ -49,16 +49,19 @@
 
 package com.openexchange.mail.authentication.framework;
 
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.config.cascade.ConfigViews;
 import com.openexchange.exception.OXException;
-import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailAttributation;
+import com.openexchange.mail.MailFetchArguments;
 import com.openexchange.mail.MailFetchListener;
 import com.openexchange.mail.MailFetchListenerResult;
 import com.openexchange.mail.MailField;
-import com.openexchange.mail.MailSortField;
-import com.openexchange.mail.OrderDirection;
+import com.openexchange.mail.MailFields;
 import com.openexchange.mail.dataobjects.MailMessage;
-import com.openexchange.mail.search.SearchTerm;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.session.Session;
 
 /**
  * {@link MailAuthenticationFetchListener}
@@ -68,40 +71,61 @@ import com.openexchange.mail.search.SearchTerm;
  */
 public class MailAuthenticationFetchListener implements MailFetchListener {
 
+    private final ServiceLookup services;
+
     /**
      * Initializes a new {@link MailAuthenticationFetchListener}.
      */
-    public MailAuthenticationFetchListener() {
+    public MailAuthenticationFetchListener(ServiceLookup services) {
         super();
-        // TODO Auto-generated constructor stub
-
+        this.services = services;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.mail.MailFetchListener#accept(com.openexchange.mail.dataobjects.MailMessage[], com.openexchange.mail.FullnameArgument, com.openexchange.mail.MailField[], java.lang.String[])
-     */
-    @Override
-    public boolean accept(MailMessage[] mailsFromCache, FullnameArgument folder, MailField[] fields, String[] headerNames) throws OXException {
-        // TODO Auto-generated method stub
-        return false;
+    private boolean isNotEnabledFor(Session session) throws OXException {
+        return false == isEnabledFor(session);
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.mail.MailFetchListener#onBeforeFetch(com.openexchange.mail.FullnameArgument, com.openexchange.mail.search.SearchTerm, com.openexchange.mail.MailSortField, com.openexchange.mail.OrderDirection, com.openexchange.mail.MailField[], java.lang.String[])
-     */
-    @Override
-    public MailAttributation onBeforeFetch(FullnameArgument folder, SearchTerm<?> optSearchTerm, MailSortField optSortField, OrderDirection optOrderDir, MailField[] fields, String[] headerNames) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+    private boolean isEnabledFor(Session session) throws OXException {
+        boolean def = false;
+        ConfigViewFactory viewFactory = services.getOptionalService(ConfigViewFactory.class);
+        if (null == viewFactory) {
+            return def;
+        }
+
+        ConfigView view = viewFactory.getView(session.getUserId(), session.getContextId());
+        return ConfigViews.getDefinedBoolPropertyFrom("com.openexchange.mail.authentication.enabled", def, view); // authenticity enabled?
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.mail.MailFetchListener#onAfterFetch(com.openexchange.mail.dataobjects.MailMessage[], boolean)
-     */
     @Override
-    public MailFetchListenerResult onAfterFetch(MailMessage[] mails, boolean cacheable) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+    public boolean accept(MailMessage[] mailsFromCache, MailFetchArguments fetchArguments, Session session) throws OXException {
+        if (isNotEnabledFor(session) || (false == new MailFields(fetchArguments.getFields()).contains(MailField.AUTHENTICATION_RESULTS))) {
+            return true;
+        }
+
+        for (MailMessage mail : mailsFromCache) {
+            if (false == mail.hasAuthenticationResult()) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    @Override
+    public MailAttributation onBeforeFetch(MailFetchArguments fetchArguments, Session session) throws OXException {
+        if (isNotEnabledFor(session) || (false == new MailFields(fetchArguments.getFields()).contains(MailField.AUTHENTICATION_RESULTS))) {
+            return MailAttributation.NOT_APPLICABLE;
+        }
+
+        return MailAttributation.builder(MailFields.addIfAbsent(fetchArguments.getFields(), MailField.AUTHENTICATION_RESULTS), fetchArguments.getHeaderNames()).build();
+    }
+
+    @Override
+    public MailFetchListenerResult onAfterFetch(MailMessage[] mails, boolean cacheable, Session session) throws OXException {
+        for (MailMessage mail : mails) {
+
+        }
+        return MailFetchListenerResult.neutral(mails, cacheable);
     }
 
 }

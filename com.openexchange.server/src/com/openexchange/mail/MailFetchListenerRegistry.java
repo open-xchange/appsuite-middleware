@@ -49,66 +49,99 @@
 
 package com.openexchange.mail;
 
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import com.google.common.collect.ImmutableList;
 import com.openexchange.exception.OXException;
-import com.openexchange.mail.MailFetchListenerResult.ListenerReply;
-import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.osgi.ServiceListing;
 import com.openexchange.session.Session;
 
 /**
- * {@link MailFetchListenerChain}
+ * {@link MailFetchListenerRegistry}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.10.0
  */
-public class MailFetchListenerChain implements MailFetchListener {
+public class MailFetchListenerRegistry {
 
-    /** The empty listener chain */
-    public static MailFetchListenerChain EMPTY_CHAIN = new MailFetchListenerChain(null, MailAttributation.NOT_APPLICABLE);
+    private static volatile MailFetchListenerRegistry instance;
+
+    /**
+     * Gets the instance
+     *
+     * @return The instance
+     */
+    public static MailFetchListenerRegistry getInstance() {
+        return instance;
+    }
+
+    /**
+     * Initializes the instance
+     *
+     * @param listing The associated service listing
+     */
+    public static synchronized void initInstance(ServiceListing<MailFetchListener> listing) {
+        if (null == instance) {
+            instance = new MailFetchListenerRegistry(listing);
+        }
+    }
+
+    /**
+     * Release the instance
+     */
+    public static synchronized void releaseInstance() {
+        instance = null;
+    }
+
+    /**
+     * Determines the effective listener chain for specified arguments.
+     *
+     * @param fetchArguments The fetch arguments
+     * @param session The user's session
+     * @return The effective listener chain
+     * @throws OXException If listener chain cannot be returned
+     */
+    public static MailFetchListenerChain determineFetchListenerChainFor(MailFetchArguments fetchArguments, Session session) throws OXException {
+        MailFetchListenerRegistry registry = instance;
+        return null == registry ? MailFetchListenerChain.EMPTY_CHAIN : registry.getFetchListenerChainFor(fetchArguments, session);
+    }
 
     // -------------------------------------------------------------------------------------------------------------------------------
 
-    private final List<MailFetchListener> listeners;
-    private final MailAttributation optPrecomputedAttributation;
+    private final ServiceListing<MailFetchListener> listeners;
 
     /**
-     * Initializes a new {@link MailFetchListenerChain}.
+     * Initializes a new {@link MailFetchListenerRegistry}.
      */
-    public MailFetchListenerChain(List<MailFetchListener> listeners, MailAttributation optPrecomputedAttributation) {
+    private MailFetchListenerRegistry(ServiceListing<MailFetchListener> listeners) {
         super();
-        this.optPrecomputedAttributation = optPrecomputedAttributation;
-        this.listeners = null == listeners ? Collections.<MailFetchListener> emptyList() : listeners;
+        this.listeners = listeners;
     }
 
-    @Override
-    public boolean accept(MailMessage[] mailsFromCache, MailFetchArguments fetchArguments, Session session) throws OXException {
-        Iterator<MailFetchListener> iterator = this.listeners.iterator();
-        if (false == iterator.hasNext()) {
-            return true;
-        }
-
-        boolean accepted = true;
-        do {
-            MailFetchListener listener = iterator.next();
-            accepted = listener.accept(mailsFromCache, fetchArguments, session);
-        } while (accepted && iterator.hasNext());
-
-        return accepted;
+    /**
+     * Gets all registered listeners
+     *
+     * @return The listeners
+     */
+    public List<MailFetchListener> getListeners() {
+        return listeners.getServiceList();
     }
 
-    @Override
-    public MailAttributation onBeforeFetch(MailFetchArguments fetchArguments, Session session) throws OXException {
-        if (null != optPrecomputedAttributation) {
-            return optPrecomputedAttributation;
-        }
-
+    /**
+     * Gets the effective listener chain for specified arguments.
+     *
+     * @param fetchArguments The fetch arguments
+     * @param session The user's session
+     * @return The effective listener chain
+     * @throws OXException If listener chain cannot be returned
+     */
+    public MailFetchListenerChain getFetchListenerChainFor(MailFetchArguments fetchArguments, Session session) throws OXException {
         Iterator<MailFetchListener> iterator = this.listeners.iterator();
         if (false == iterator.hasNext()) {
-            return MailAttributation.NOT_APPLICABLE;
+            return MailFetchListenerChain.EMPTY_CHAIN;
         }
 
+        ImmutableList.Builder<MailFetchListener> applicableListeners = ImmutableList.builder();
         MailField[] fs = fetchArguments.getFields();
         String[] hns = fetchArguments.getHeaderNames();
         boolean anyApplicable = false;
@@ -116,37 +149,14 @@ public class MailFetchListenerChain implements MailFetchListener {
             MailFetchListener listener = iterator.next();
             MailAttributation attributation = listener.onBeforeFetch(MailFetchArguments.copy(fetchArguments, fs, hns), session);
             if (attributation.isApplicable()) {
+                applicableListeners.add(listener);
                 fs = attributation.getFields();
                 hns = attributation.getHeaderNames();
                 anyApplicable = true;
             }
         } while (iterator.hasNext());
 
-        return anyApplicable ? MailAttributation.builder(fs, hns).build() : MailAttributation.NOT_APPLICABLE;
-    }
-
-    @Override
-    public MailFetchListenerResult onAfterFetch(MailMessage[] mails, boolean cacheable, Session session) throws OXException {
-        Iterator<MailFetchListener> iterator = this.listeners.iterator();
-        if (false == iterator.hasNext()) {
-            return MailFetchListenerResult.neutral(mails, true);
-        }
-
-        boolean wannaCache = cacheable;
-        MailMessage[] ms = mails;
-        do {
-            MailFetchListener listener = iterator.next();
-            MailFetchListenerResult result = listener.onAfterFetch(ms, wannaCache, session);
-            if (ListenerReply.NEUTRAL != result.getReply()) {
-                return MailFetchListenerResult.copy(result, wannaCache);
-            }
-            ms = result.getMails();
-            if (false == result.isCacheable()) {
-                wannaCache = false;
-            }
-        } while (iterator.hasNext());
-
-        return MailFetchListenerResult.neutral(ms, wannaCache);
+        return anyApplicable ? new MailFetchListenerChain(applicableListeners.build(), MailAttributation.builder(fs, hns).build()) : MailFetchListenerChain.EMPTY_CHAIN;
     }
 
 }

@@ -532,7 +532,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
         jAuthenticationResult.put("status", authenticationResult.getStatus().getDisplayName());
         jAuthenticationResult.put("domain", authenticationResult.getDomain());
         {
-            Set<MailAuthenticationMechanismResult> authenticationMechanismResults = authenticationResult.getMailAuthenticationMechanismResults();
+            List<MailAuthenticationMechanismResult> authenticationMechanismResults = authenticationResult.getMailAuthenticationMechanismResults();
             JSONArray jAuthenticationMechanismResults = new JSONArray(authenticationMechanismResults.size());
             for (MailAuthenticationMechanismResult authenticationMechanismResult : authenticationMechanismResults) {
                 JSONObject jAuthenticationMechanismResult = new JSONObject(4);

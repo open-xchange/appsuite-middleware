@@ -61,6 +61,9 @@ import java.util.Set;
  */
 public class MailAttributation {
 
+    /** The constant for a non-applicable mail attributation */
+    public static final MailAttributation NOT_APPLICABLE = new MailAttributation(false, null, null);
+
     /**
      * Creates a new builder instance.
      *
@@ -126,7 +129,7 @@ public class MailAttributation {
          * @return The resulting instance of {@code MailAttributation}
          */
         public MailAttributation build() {
-            return new MailAttributation(fields, headerNames);
+            return new MailAttributation(true, fields, headerNames);
         }
     }
 
@@ -134,12 +137,14 @@ public class MailAttributation {
 
     private final MailField[] fields;
     private final String[] headerNames;
+    private final boolean applicable;
 
     /**
      * Initializes a new {@link MailAttributation}.
      */
-    MailAttributation(Set<MailField> fields, Set<String> headerNames) {
+    MailAttributation(boolean applicable, Set<MailField> fields, Set<String> headerNames) {
         super();
+        this.applicable = applicable;
         if (null == fields || fields.isEmpty()) {
             this.fields = null;
         } else {
@@ -158,6 +163,15 @@ public class MailAttributation {
                 this.headerNames[i++] = headerName;
             }
         }
+    }
+
+    /**
+     * Checks if this mail attribution is applicable to specified arguments passed on {@link MailFetchListener#onBeforeFetch(FullnameArgument, com.openexchange.mail.search.SearchTerm, MailSortField, OrderDirection, MailField[], String[]) onBeforeFetch} call.
+     *
+     * @return <code>true</code> if applicable; otherwise <code>false</code>
+     */
+    public boolean isApplicable() {
+        return applicable;
     }
 
     /**
