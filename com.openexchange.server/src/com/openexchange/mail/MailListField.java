@@ -229,7 +229,11 @@ public enum MailListField {
      * A message's text preview; generate it if absent (which may be slow)
      * @since v7.10.0
      */
-    TEXT_PREVIEW(663, MailJSONField.TEXT_PREVIEW.getKey())
+    TEXT_PREVIEW(663, MailJSONField.TEXT_PREVIEW.getKey()),
+    /**
+     * The message's authentication results.
+     */
+    AUTHENTICATION_RESULTS(664, MailJSONField.AUTHENTICATION_RESULTS.getKey())
     ;
 
     private final int field;

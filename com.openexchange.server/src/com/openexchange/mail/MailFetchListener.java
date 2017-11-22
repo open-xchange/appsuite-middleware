@@ -50,16 +50,47 @@
 package com.openexchange.mail;
 
 import com.openexchange.exception.OXException;
-import com.openexchange.mail.search.SearchTerm;
+import com.openexchange.mail.cache.MailMessageCache;
+import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.session.Session;
 
 /**
- * {@link MailFetchListener}
+ * {@link MailFetchListener} - A listener invoked right before and after fetching mails allowing to modify and/or enhance mails.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.10.0
  */
 public interface MailFetchListener {
 
-    MailAttributation prepare(FullnameArgument argument, SearchTerm<?> searchTerm, MailSortField sortField, OrderDirection orderDir, int[] fields, String[] headerNames) throws OXException;
+    /**
+     * Invoked when mails are fetched from {@link MailMessageCache} to test whether this listener is satisfied with the information already available in cached mails.
+     *
+     * @param mailsFromCache The mails fetched from cache
+     * @param fetchArguments The fetch arguments
+     * @param session The user's session
+     * @return <code>true</code> if satisfied; otherwise <code>false</code>
+     * @throws OXException
+     */
+    boolean accept(MailMessage[] mailsFromCache, MailFetchArguments fetchArguments, Session session) throws OXException;
 
+    /**
+     * Invoked prior to fetching mails from mail back-end and allows this listener to add its needed fields and/or header names (if any)
+     *
+     * @param fetchArguments The fetch arguments
+     * @param session The user's session
+     * @return The mail attributation
+     * @throws OXException If attributation fails
+     */
+    MailAttributation onBeforeFetch(MailFetchArguments fetchArguments, Session session) throws OXException;
+
+    /**
+     * Invoked after mails are fetched and allows to modify and/or enhance them.
+     *
+     * @param mails The fetched mails
+     * @param cacheable Whether specified mails are supposed to be cached
+     * @param session The user's session
+     * @return The listener's result
+     * @throws OXException If an aborting error occurs; acts in the same way as returning {@link MailFetchListenerResult#deny(OXException)}
+     */
+    MailFetchListenerResult onAfterFetch(MailMessage[] mails, boolean cacheable, Session session) throws OXException;
 }

@@ -257,7 +257,11 @@ public enum MailJSONField {
      * A message's text preview
      * @since v7.10.0
      */
-    TEXT_PREVIEW("text_preview")
+    TEXT_PREVIEW("text_preview"),
+    /**
+     * The message's authentication results.
+     */
+    AUTHENTICATION_RESULTS("authentication_results")
 
     ;
 
