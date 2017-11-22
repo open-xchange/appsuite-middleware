@@ -8,6 +8,7 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.google.common.annotations,
  com.google.common.base,
  com.google.common.collect,
+ com.openexchange.exception,
  com.openexchange.java,
  com.openexchange.mail,
  com.openexchange.mail.authentication,
@@ -17,6 +18,10 @@ Import-Package: com.google.common.annotations,
  com.openexchange.mail.authentication.mechanism.spf,
  com.openexchange.mail.dataobjects,
  com.openexchange.mail.mime,
+ com.openexchange.osgi,
+ com.openexchange.osgi.annotation,
+ com.openexchange.session,
  javax.mail,
  javax.mail.internet,
  org.slf4j
+Export-Package: com.openexchange.mail.authentication

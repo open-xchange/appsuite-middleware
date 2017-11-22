@@ -99,14 +99,12 @@ public class MailAuthenticationHandlerImpl implements MailAuthenticationHandler 
     private static final Collection<MailField> REQUIRED_MAIL_FIELDS;
     static {
         Collection<MailField> m = new ArrayList<>();
-        for (MailField mf : MailField.FIELDS_WO_BODY) {
-            m.add(mf);
-        }
+        m.add(MailField.AUTHENTICATION_RESULTS);
         REQUIRED_MAIL_FIELDS = Collections.<MailField> unmodifiableCollection(m);
     }
 
     /** The required headers of this handler */
-    private static final Collection<String> REQUIRED_HEADERS = Collections.singletonList(MailAuthenticationHandler.AUTH_RESULTS_HEADER);
+    private static final Collection<String> REQUIRED_HEADERS = Collections.emptyList();
 
     /** The ranking of this handler */
     private final int ranking;
@@ -120,7 +118,7 @@ public class MailAuthenticationHandlerImpl implements MailAuthenticationHandler 
 
     /**
      * Initialises a new {@link MailAuthenticationHandlerImpl}.
-     * 
+     *
      * @param ranking The ranking of this handler; a higher value means higher priority;
      */
     public MailAuthenticationHandlerImpl(int ranking) {
@@ -198,7 +196,7 @@ public class MailAuthenticationHandlerImpl implements MailAuthenticationHandler 
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.mail.authentication.MailAuthenticationHandler#isEnabled(com.openexchange.session.Session)
      */
     @Override
@@ -209,7 +207,7 @@ public class MailAuthenticationHandlerImpl implements MailAuthenticationHandler 
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.mail.authentication.MailAuthenticationHandler#getRanking()
      */
     @Override
