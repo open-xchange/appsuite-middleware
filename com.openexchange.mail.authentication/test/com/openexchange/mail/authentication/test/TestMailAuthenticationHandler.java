@@ -50,6 +50,7 @@
 package com.openexchange.mail.authentication.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -63,7 +64,10 @@ import com.openexchange.java.Strings;
 import com.openexchange.mail.authentication.MailAuthenticationHandler;
 import com.openexchange.mail.authentication.MailAuthenticationStatus;
 import com.openexchange.mail.authentication.internal.MailAuthenticationHandlerImpl;
+import com.openexchange.mail.authentication.mechanism.AuthenticationMechanismResult;
 import com.openexchange.mail.authentication.mechanism.MailAuthenticationMechanism;
+import com.openexchange.mail.authentication.mechanism.MailAuthenticationMechanismResult;
+import com.openexchange.mail.authentication.mechanism.spf.SPFResult;
 import com.openexchange.mail.dataobjects.MailAuthenticationResult;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.HeaderCollection;
@@ -148,6 +152,14 @@ public class TestMailAuthenticationHandler {
         assertEquals("The domain does not match", "example.com", result.getDomain());
         assertEquals("The mail authentication mechanisms amount does not match", 1, result.getAuthenticationMechanisms().size());
         assertTrue("The mail authentication mechansism does not match", result.getAuthenticationMechanisms().contains(MailAuthenticationMechanism.SPF));
+        assertEquals("The mail authentication mechanism results amount does not match", 1, result.getMailAuthenticationMechanismResults().size());
+
+        MailAuthenticationMechanismResult mechanismResult = result.getMailAuthenticationMechanismResults().get(0);
+        assertEquals("The mechanism's domain does not match", "example.net", mechanismResult.getDomain());
+        assertNotNull("The mechanism's result is null", mechanismResult.getResult());
+
+        AuthenticationMechanismResult s = mechanismResult.getResult();
+        assertEquals("The mechanism's result does not match", SPFResult.PASS.getTechnicalName(), s.getTechnicalName());
     }
 
     /**
