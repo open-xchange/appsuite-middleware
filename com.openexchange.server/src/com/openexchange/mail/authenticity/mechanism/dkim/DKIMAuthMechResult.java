@@ -47,53 +47,59 @@
  *
  */
 
-package com.openexchange.mail;
+package com.openexchange.mail.authenticity.mechanism.dkim;
 
-import java.util.Map;
-import com.openexchange.exception.OXException;
-import com.openexchange.mail.cache.MailMessageCache;
-import com.openexchange.mail.dataobjects.MailMessage;
-import com.openexchange.session.Session;
+import com.openexchange.mail.authenticity.mechanism.AbstractAuthMechResult;
+import com.openexchange.mail.authenticity.mechanism.MailAuthenticityMechanism;
 
 /**
- * {@link MailFetchListener} - A listener invoked right before and after fetching mails allowing to modify and/or enhance mails.
+ * {@link DKIMAuthMechResult}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.10.0
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public interface MailFetchListener {
+public class DKIMAuthMechResult extends AbstractAuthMechResult {
 
     /**
-     * Invoked when mails are fetched from {@link MailMessageCache} to test whether this listener is satisfied with the information already available in cached mails.
-     *
-     * @param mailsFromCache The mails fetched from cache
-     * @param fetchArguments The fetch arguments
-     * @param session The user's session
-     * @return <code>true</code> if satisfied; otherwise <code>false</code>
-     * @throws OXException
+     * Initialises a new {@link DKIMAuthMechResult}.
+     * 
+     * @param domain The domain for which this mail authentication mechanism was applied to
+     * @param result The {@link DKIMResult}
      */
-    boolean accept(MailMessage[] mailsFromCache, MailFetchArguments fetchArguments, Session session) throws OXException;
+    public DKIMAuthMechResult(String domain, DKIMResult result) {
+        super(domain, null, result);
+    }
 
     /**
-     * Invoked prior to fetching mails from mail back-end and allows this listener to add its needed fields and/or header names (if any)
-     *
-     * @param fetchArguments The fetch arguments
-     * @param session The user's session
-     * @param state The state, which lets individual listeners store stuff
-     * @return The mail attributation
-     * @throws OXException If attributation fails
+     * Initialises a new {@link DKIMAuthMechResult}.
+     * 
+     * @param domain The domain for which this mail authentication mechanism was applied to
+     * @param clientIP The optional client IP used to send the e-mail
+     * @param result The {@link DKIMResult}
      */
-    MailAttributation onBeforeFetch(MailFetchArguments fetchArguments, Session session, Map<String, Object> state) throws OXException;
+    public DKIMAuthMechResult(String domain, String clientIP, DKIMResult result) {
+        super(domain, clientIP, result);
+    }
 
-    /**
-     * Invoked after mails are fetched and allows to modify and/or enhance them.
-     *
-     * @param mails The fetched mails
-     * @param cacheable Whether specified mails are supposed to be cached
-     * @param session The user's session
-     * @param state The state, which was passed to {@link #onBeforeFetch(MailFetchArguments, Session, Map) onBeforeFetch} invocation
-     * @return The listener's result
-     * @throws OXException If an aborting error occurs; acts in the same way as returning {@link MailFetchListenerResult#deny(OXException)}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.mail.authentication.mechanism.MailAuthenticationMechanismResult#getMechanism()
      */
-    MailFetchListenerResult onAfterFetch(MailMessage[] mails, boolean cacheable, Session session, Map<String, Object> state) throws OXException;
+    @Override
+    public MailAuthenticityMechanism getMechanism() {
+        return MailAuthenticityMechanism.DKIM;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("DKIMAuthMechResult [mechanism=").append(getMechanism()).append(", domain=").append(getDomain()).append(", clientIP=").append(getClientIP()).append(", result=").append(getResult()).append("]");
+        return builder.toString();
+    }
+
 }

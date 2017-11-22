@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,53 +47,56 @@
  *
  */
 
-package com.openexchange.mail;
+package com.openexchange.mail.authenticity.impl.osgi;
 
-import java.util.Map;
-import com.openexchange.exception.OXException;
-import com.openexchange.mail.cache.MailMessageCache;
-import com.openexchange.mail.dataobjects.MailMessage;
-import com.openexchange.session.Session;
+import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.mail.MailFetchListener;
+import com.openexchange.mail.authenticity.MailAuthenticityHandler;
+import com.openexchange.mail.authenticity.MailAuthenticityHandlerRegistry;
+import com.openexchange.mail.authenticity.impl.MailAuthenticityFetchListener;
+import com.openexchange.mail.authenticity.impl.MailAuthenticityHandlerRegistryImpl;
+import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
+
 
 /**
- * {@link MailFetchListener} - A listener invoked right before and after fetching mails allowing to modify and/or enhance mails.
+ * {@link MailAuthenticityActivator}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.10.0
  */
-public interface MailFetchListener {
+public class MailAuthenticityActivator extends HousekeepingActivator {
 
     /**
-     * Invoked when mails are fetched from {@link MailMessageCache} to test whether this listener is satisfied with the information already available in cached mails.
-     *
-     * @param mailsFromCache The mails fetched from cache
-     * @param fetchArguments The fetch arguments
-     * @param session The user's session
-     * @return <code>true</code> if satisfied; otherwise <code>false</code>
-     * @throws OXException
+     * Initializes a new {@link MailAuthenticityActivator}.
      */
-    boolean accept(MailMessage[] mailsFromCache, MailFetchArguments fetchArguments, Session session) throws OXException;
+    public MailAuthenticityActivator() {
+        super();
+    }
 
-    /**
-     * Invoked prior to fetching mails from mail back-end and allows this listener to add its needed fields and/or header names (if any)
-     *
-     * @param fetchArguments The fetch arguments
-     * @param session The user's session
-     * @param state The state, which lets individual listeners store stuff
-     * @return The mail attributation
-     * @throws OXException If attributation fails
-     */
-    MailAttributation onBeforeFetch(MailFetchArguments fetchArguments, Session session, Map<String, Object> state) throws OXException;
+    @Override
+    protected boolean stopOnServiceUnavailability() {
+        return true;
+    }
 
-    /**
-     * Invoked after mails are fetched and allows to modify and/or enhance them.
-     *
-     * @param mails The fetched mails
-     * @param cacheable Whether specified mails are supposed to be cached
-     * @param session The user's session
-     * @param state The state, which was passed to {@link #onBeforeFetch(MailFetchArguments, Session, Map) onBeforeFetch} invocation
-     * @return The listener's result
-     * @throws OXException If an aborting error occurs; acts in the same way as returning {@link MailFetchListenerResult#deny(OXException)}
-     */
-    MailFetchListenerResult onAfterFetch(MailMessage[] mails, boolean cacheable, Session session, Map<String, Object> state) throws OXException;
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[] { ConfigViewFactory.class };
+    }
+
+    @Override
+    protected void startBundle() throws Exception {
+        RankingAwareNearRegistryServiceTracker<MailAuthenticityHandler> handlerTracker = new RankingAwareNearRegistryServiceTracker<>(context, MailAuthenticityHandler.class);
+        rememberTracker(handlerTracker);
+
+        openTrackers();
+
+        MailAuthenticityHandlerRegistryImpl registry = new MailAuthenticityHandlerRegistryImpl(handlerTracker);
+        registerService(MailAuthenticityHandlerRegistry.class, registry);
+
+        // It is OK to pass service references since 'stopOnServiceUnavailability' returns 'true'
+        MailAuthenticityFetchListener fetchListener = new MailAuthenticityFetchListener(registry, getService(ConfigViewFactory.class));
+        registerService(MailFetchListener.class, fetchListener);
+    }
+
 }

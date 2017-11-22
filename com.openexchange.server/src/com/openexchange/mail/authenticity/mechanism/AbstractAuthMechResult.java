@@ -47,53 +47,67 @@
  *
  */
 
-package com.openexchange.mail;
+package com.openexchange.mail.authenticity.mechanism;
 
-import java.util.Map;
-import com.openexchange.exception.OXException;
-import com.openexchange.mail.cache.MailMessageCache;
-import com.openexchange.mail.dataobjects.MailMessage;
-import com.openexchange.session.Session;
+import com.openexchange.mail.authenticity.mechanism.dmarc.DMARCAuthMechResult;
 
 /**
- * {@link MailFetchListener} - A listener invoked right before and after fetching mails allowing to modify and/or enhance mails.
+ * {@link AbstractAuthMechResult}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.10.0
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public interface MailFetchListener {
+public abstract class AbstractAuthMechResult implements MailAuthenticityMechanismResult {
+
+    private final String domain;
+    private final String clientIP;
+    private final AuthenticityMechanismResult result;
+    private String reason;
 
     /**
-     * Invoked when mails are fetched from {@link MailMessageCache} to test whether this listener is satisfied with the information already available in cached mails.
+     * Initialises a new {@link DMARCAuthMechResult}.
      *
-     * @param mailsFromCache The mails fetched from cache
-     * @param fetchArguments The fetch arguments
-     * @param session The user's session
-     * @return <code>true</code> if satisfied; otherwise <code>false</code>
-     * @throws OXException
+     * @param domain The domain for which this mail authentication mechanism was applied to
+     * @param clientIP The optional client IP used to send the e-mail
+     * @param result The {@link AuthenticityMechanismResult}
      */
-    boolean accept(MailMessage[] mailsFromCache, MailFetchArguments fetchArguments, Session session) throws OXException;
+    public AbstractAuthMechResult(String domain, String clientIP, AuthenticityMechanismResult result) {
+        super();
+        this.domain = domain;
+        this.clientIP = clientIP;
+        this.result = result;
+    }
+
+    @Override
+    public String getDomain() {
+        return domain;
+    }
+
+    @Override
+    public String getClientIP() {
+        return clientIP;
+    }
+
+    @Override
+    public AuthenticityMechanismResult getResult() {
+        return result;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.mail.authenticity.common.mechanism.MailAuthenticityMechanismResult#getReason()
+     */
+    @Override
+    public String getReason() {
+        return reason;
+    }
 
     /**
-     * Invoked prior to fetching mails from mail back-end and allows this listener to add its needed fields and/or header names (if any)
-     *
-     * @param fetchArguments The fetch arguments
-     * @param session The user's session
-     * @param state The state, which lets individual listeners store stuff
-     * @return The mail attributation
-     * @throws OXException If attributation fails
+     * Sets the reason of the result
+     * 
+     * @param reason the reason to set
      */
-    MailAttributation onBeforeFetch(MailFetchArguments fetchArguments, Session session, Map<String, Object> state) throws OXException;
-
-    /**
-     * Invoked after mails are fetched and allows to modify and/or enhance them.
-     *
-     * @param mails The fetched mails
-     * @param cacheable Whether specified mails are supposed to be cached
-     * @param session The user's session
-     * @param state The state, which was passed to {@link #onBeforeFetch(MailFetchArguments, Session, Map) onBeforeFetch} invocation
-     * @return The listener's result
-     * @throws OXException If an aborting error occurs; acts in the same way as returning {@link MailFetchListenerResult#deny(OXException)}
-     */
-    MailFetchListenerResult onAfterFetch(MailMessage[] mails, boolean cacheable, Session session, Map<String, Object> state) throws OXException;
+    public void setReason(String reason) {
+        this.reason = reason;
+    }
 }

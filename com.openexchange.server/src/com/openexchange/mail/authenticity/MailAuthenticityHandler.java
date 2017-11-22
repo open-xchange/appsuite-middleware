@@ -47,53 +47,67 @@
  *
  */
 
-package com.openexchange.mail;
+package com.openexchange.mail.authenticity;
 
-import java.util.Map;
-import com.openexchange.exception.OXException;
-import com.openexchange.mail.cache.MailMessageCache;
+import java.util.Collection;
+import com.openexchange.mail.MailField;
+import com.openexchange.mail.authenticity.mechanism.MailAuthenticityMechanism;
+import com.openexchange.mail.dataobjects.MailAuthenticityResult;
 import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.session.Session;
 
 /**
- * {@link MailFetchListener} - A listener invoked right before and after fetching mails allowing to modify and/or enhance mails.
+ * {@link MailAuthenticityHandler}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.10.0
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public interface MailFetchListener {
+public interface MailAuthenticityHandler {
 
     /**
-     * Invoked when mails are fetched from {@link MailMessageCache} to test whether this listener is satisfied with the information already available in cached mails.
-     *
-     * @param mailsFromCache The mails fetched from cache
-     * @param fetchArguments The fetch arguments
-     * @param session The user's session
-     * @return <code>true</code> if satisfied; otherwise <code>false</code>
-     * @throws OXException
+     * The name of the authentication results header
      */
-    boolean accept(MailMessage[] mailsFromCache, MailFetchArguments fetchArguments, Session session) throws OXException;
+    static final String AUTH_RESULTS_HEADER = "Authentication-Results";
 
     /**
-     * Invoked prior to fetching mails from mail back-end and allows this listener to add its needed fields and/or header names (if any)
-     *
-     * @param fetchArguments The fetch arguments
-     * @param session The user's session
-     * @param state The state, which lets individual listeners store stuff
-     * @return The mail attributation
-     * @throws OXException If attributation fails
+     * Handles the specified {@link MailPart}. Extracts the mail headers from the {@link MailPart}
+     * and checks if the 'Authentication-Results' header is present. If it is, then parses that header
+     * and collects the results of the different {@link MailAuthenticityMechanism}s that might be present
+     * in a {@link MailAuthenticityResult} object and returns that
+     * 
+     * @param mailPart The {@link MailPart} to handle
+     * @return The {@link MailAuthenticityResult} with the collected results of the {@link MailAuthenticityMechanism}s
      */
-    MailAttributation onBeforeFetch(MailFetchArguments fetchArguments, Session session, Map<String, Object> state) throws OXException;
+    void handle(MailMessage mailMessage);
 
     /**
-     * Invoked after mails are fetched and allows to modify and/or enhance them.
-     *
-     * @param mails The fetched mails
-     * @param cacheable Whether specified mails are supposed to be cached
-     * @param session The user's session
-     * @param state The state, which was passed to {@link #onBeforeFetch(MailFetchArguments, Session, Map) onBeforeFetch} invocation
-     * @return The listener's result
-     * @throws OXException If an aborting error occurs; acts in the same way as returning {@link MailFetchListenerResult#deny(OXException)}
+     * Returns an unmodifiable {@link Collection} with all required {@link MailField}s
+     * 
+     * @return an unmodifiable{@link Collection} with all required {@link MailField}s
      */
-    MailFetchListenerResult onAfterFetch(MailMessage[] mails, boolean cacheable, Session session, Map<String, Object> state) throws OXException;
+    Collection<MailField> getRequiredFields();
+
+    /**
+     * Returns an unmodifiable {@link Collection} with all required mail headers
+     * 
+     * @return an unmodifiable {@link Collection} with all required mail headers
+     */
+    Collection<String> getRequiredHeaders();
+
+    /**
+     * Determines whether the {@link MailAuthenticityHandler} is enabled for the user
+     * that is denoted by the specified {@link Session}
+     * 
+     * @param session The groupware {@link Session}
+     * @return <code>true</code> if the {@link MailAuthenticityHandler} is enabled; <code>false</code> otherwise
+     */
+    boolean isEnabled(Session session);
+
+    /**
+     * Returns the ranking of this {@link MailAuthenticityHandler}. A higher number in ranking
+     * means a higher priority.
+     * 
+     * @return The ranking of the {@link MailAuthenticityHandler}
+     */
+    int getRanking();
 }

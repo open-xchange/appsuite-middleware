@@ -47,53 +47,58 @@
  *
  */
 
-package com.openexchange.mail;
-
-import java.util.Map;
-import com.openexchange.exception.OXException;
-import com.openexchange.mail.cache.MailMessageCache;
-import com.openexchange.mail.dataobjects.MailMessage;
-import com.openexchange.session.Session;
+package com.openexchange.mail.authenticity;
 
 /**
- * {@link MailFetchListener} - A listener invoked right before and after fetching mails allowing to modify and/or enhance mails.
+ * {@link MailAuthenticityStatus}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.10.0
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public interface MailFetchListener {
+public enum MailAuthenticityStatus {
 
     /**
-     * Invoked when mails are fetched from {@link MailMessageCache} to test whether this listener is satisfied with the information already available in cached mails.
-     *
-     * @param mailsFromCache The mails fetched from cache
-     * @param fetchArguments The fetch arguments
-     * @param session The user's session
-     * @return <code>true</code> if satisfied; otherwise <code>false</code>
-     * @throws OXException
+     * Passed authentication status
      */
-    boolean accept(MailMessage[] mailsFromCache, MailFetchArguments fetchArguments, Session session) throws OXException;
+    PASS("Pass", "pass"),
+    /**
+     * Failed authentication status
+     */
+    FAIL("Fail", "fail"),
+    /**
+     * Cannot determine status, or temporary errors occurred
+     */
+    NEUTRAL("Neutral", "neutral"),
+    /**
+     * Nothing has been analyzed
+     */
+    NOT_ANALYZED("Not Analyzed", "not_analyzed");
+
+    private final String displayName;
+    private final String technicalName;
 
     /**
-     * Invoked prior to fetching mails from mail back-end and allows this listener to add its needed fields and/or header names (if any)
-     *
-     * @param fetchArguments The fetch arguments
-     * @param session The user's session
-     * @param state The state, which lets individual listeners store stuff
-     * @return The mail attributation
-     * @throws OXException If attributation fails
+     * Initialises a new {@link MailAuthenticityStatus}.
      */
-    MailAttributation onBeforeFetch(MailFetchArguments fetchArguments, Session session, Map<String, Object> state) throws OXException;
+    private MailAuthenticityStatus(String displayName, String technicalName) {
+        this.displayName = displayName;
+        this.technicalName = technicalName;
+    }
 
     /**
-     * Invoked after mails are fetched and allows to modify and/or enhance them.
+     * Gets the displayName
      *
-     * @param mails The fetched mails
-     * @param cacheable Whether specified mails are supposed to be cached
-     * @param session The user's session
-     * @param state The state, which was passed to {@link #onBeforeFetch(MailFetchArguments, Session, Map) onBeforeFetch} invocation
-     * @return The listener's result
-     * @throws OXException If an aborting error occurs; acts in the same way as returning {@link MailFetchListenerResult#deny(OXException)}
+     * @return The displayName
      */
-    MailFetchListenerResult onAfterFetch(MailMessage[] mails, boolean cacheable, Session session, Map<String, Object> state) throws OXException;
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    /**
+     * Returns the technical name of the AuthenticationStatus
+     *
+     * @return the technical name of the AuthenticationStatus
+     */
+    public String getTechnicalName() {
+        return technicalName;
+    }
 }
