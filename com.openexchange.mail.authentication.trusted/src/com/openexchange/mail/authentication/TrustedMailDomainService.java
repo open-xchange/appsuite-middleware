@@ -58,12 +58,12 @@ package com.openexchange.mail.authentication;
 public interface TrustedMailDomainService {
 
     /**
-     * Returns the associated trusted domain for the given uri or null if the domain isn't trusted
+     * Checks if the given host is a trusted domain in the context of the given tenant. If true a {@link TrustedDomain} object is returned.
      *
      * @param tenant The tenant
      * @param host The host to check
-     * @return
+     * @return The {@link TrustedDomain} or null
      */
-    public TrustedDomain getTrustedDomain(String tenant, String host);
+    public TrustedDomain checkHost(String tenant, String host);
 
 }

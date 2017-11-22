@@ -87,7 +87,7 @@ public class TrustedMailDomainServiceImpl implements TrustedMailDomainService, R
     }
 
     @Override
-    public TrustedDomain getTrustedDomain(String tenant, String host) {
+    public TrustedDomain checkHost(String tenant, String host) {
         if(trustedDomains.containsKey(tenant)){
             List<TrustedDomain> domains = trustedDomains.get(tenant);
             for(TrustedDomain domain: domains){
@@ -107,7 +107,7 @@ public class TrustedMailDomainServiceImpl implements TrustedMailDomainService, R
             String commaSeparatedListOfDomains = configurationService.getProperty(PREFIX+tenant+DOMAINS, (String) null);
             if(Strings.isNotEmpty(commaSeparatedListOfDomains)){
                 String[] domains = Strings.splitByCommaNotInQuotes(commaSeparatedListOfDomains);
-                String image = configurationService.getProperty(PREFIX+tenant+DOMAINS, (String) null);
+                String image = configurationService.getProperty(PREFIX+tenant+IMAGE, (String) null);
                 List<TrustedDomain> domainList = new ArrayList<>();
                 for(String domain: domains){
                     domainList.add(new TrustedDomain(domain, image));
