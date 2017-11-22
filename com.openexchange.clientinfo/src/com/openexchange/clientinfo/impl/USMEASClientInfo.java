@@ -47,42 +47,50 @@
  *
  */
 
-package com.openexchange.clientinfo.osgi;
+package com.openexchange.clientinfo.impl;
 
-import com.openexchange.clientinfo.ClientInfoProvider;
-import com.openexchange.clientinfo.ClientInfoService;
-import com.openexchange.clientinfo.impl.ClientInfoServiceImpl;
-import com.openexchange.clientinfo.impl.USMEASClientInfoProvider;
-import com.openexchange.clientinfo.impl.WebClientInfoProvider;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.osgi.ServiceSet;
-import com.openexchange.sessiond.SessiondService;
-import com.openexchange.uadetector.UserAgentParser;
+import java.util.Locale;
+import com.openexchange.clientinfo.ClientInfo;
+import com.openexchange.clientinfo.ClientInfoStrings;
+import com.openexchange.clientinfo.ClientInfoType;
 
 
 /**
- * {@link ClientInfoActivator}
+ * {@link USMEASClientInfo}
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since v7.10.0
  */
-public class ClientInfoActivator extends HousekeepingActivator {
+public class USMEASClientInfo implements ClientInfo {
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { UserAgentParser.class, SessiondService.class };
+    public ClientInfoType getType() {
+        return ClientInfoType.SYNC;
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        Services.setServiceLookup(this);
-        ServiceSet<ClientInfoProvider> set = new ServiceSet<>();
-        ClientInfoService service = new ClientInfoServiceImpl(set);
-        track(ClientInfoProvider.class, set);
-        registerService(ClientInfoService.class, service);
-        registerService(ClientInfoProvider.class, new USMEASClientInfoProvider(), 15);
-        registerService(ClientInfoProvider.class, new WebClientInfoProvider(), 20);
-        openTrackers();
+    public String getPlatform() {
+        return null;
+    }
+
+    @Override
+    public String getPlatformVersion() {
+        return null;
+    }
+
+    @Override
+    public String getApp() {
+        return null;
+    }
+
+    @Override
+    public String getAppVersion() {
+        return null;
+    }
+
+    @Override
+    public String toString(Locale locale) {
+        return ClientInfoStrings.USM_EAS_CLIENT;
     }
 
 }

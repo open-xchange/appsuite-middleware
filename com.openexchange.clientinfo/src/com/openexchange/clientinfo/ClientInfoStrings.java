@@ -72,6 +72,9 @@ public class ClientInfoStrings implements LocalizableStrings {
     // E.g. Appsuite UI
     public final static String CLIENT_INFO_MESSAGE = "%1$s";
 
+    // Microsoft Exchange ActiveSync Client
+    public final static String USM_EAS_CLIENT = "Microsoft Exchange ActiveSync Client";
+
     private ClientInfoStrings() {}
 
 }
