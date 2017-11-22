@@ -53,6 +53,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.config.cascade.ConfigViews;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.authenticity.MailAuthenticityHandler;
 import com.openexchange.mail.authenticity.MailAuthenticityHandlerRegistry;
@@ -70,13 +73,15 @@ public class MailAuthenticityHandlerRegistryImpl implements MailAuthenticityHand
 
     private final ServiceListing<MailAuthenticityHandler> listing;
     private final Comparator<MailAuthenticityHandler> comparator;
+    private final ConfigViewFactory viewFactory;
 
     /**
      * Initializes a new {@link MailAuthenticityHandlerRegistryImpl}.
      */
-    public MailAuthenticityHandlerRegistryImpl(ServiceListing<MailAuthenticityHandler> listing) {
+    public MailAuthenticityHandlerRegistryImpl(ServiceListing<MailAuthenticityHandler> listing, ConfigViewFactory viewFactory) {
         super();
         this.listing = listing;
+        this.viewFactory = viewFactory;
         comparator = new Comparator<MailAuthenticityHandler>() {
 
             @Override
@@ -89,18 +94,50 @@ public class MailAuthenticityHandlerRegistryImpl implements MailAuthenticityHand
     }
 
     @Override
+    public boolean isNotEnabledFor(Session session) throws OXException {
+        return false == isEnabledFor(session);
+    }
+
+    @Override
+    public boolean isEnabledFor(Session session) throws OXException {
+        ConfigView view = viewFactory.getView(session.getUserId(), session.getContextId());
+        boolean def = false;
+        return ConfigViews.getDefinedBoolPropertyFrom("com.openexchange.mail.authenticity.enabled", def, view); // authenticity enabled?
+    }
+
+    @Override
+    public long getDateThreshold(Session session) throws OXException {
+        ConfigView view = viewFactory.getView(session.getUserId(), session.getContextId());
+        long def = 0L;
+        return ConfigViews.getDefinedLongPropertyFrom("com.openexchange.mail.authenticity.threshold", def, view);
+    }
+
+    @Override
     public List<MailAuthenticityHandler> getSortedApplicableHandlersFor(Session session) throws OXException {
-        List<MailAuthenticityHandler> snapshot = listing.getServiceList();
-        if (snapshot == null || snapshot.isEmpty()) {
+        if (isNotEnabledFor(session)) {
+            // Disabled per configuration
             return Collections.emptyList();
         }
 
+        List<MailAuthenticityHandler> snapshot = listing.getServiceList();
+        if (snapshot == null || snapshot.isEmpty()) {
+            // None registered
+            return Collections.emptyList();
+        }
+
+        long threshold = getDateThreshold(session);
         List<MailAuthenticityHandler> applicableHandlers = new ArrayList<>(snapshot.size());
         for (MailAuthenticityHandler handler : snapshot) {
             if (handler.isEnabled(session)) {
-                applicableHandlers.add(handler);
+                applicableHandlers.add(new ThresholdAwareAuthenticityHandler(handler, threshold));
             }
         }
+
+        if (applicableHandlers.isEmpty()) {
+            // No suitable handler found
+            return Collections.emptyList();
+        }
+
         Collections.sort(applicableHandlers, comparator);
         return applicableHandlers;
     }

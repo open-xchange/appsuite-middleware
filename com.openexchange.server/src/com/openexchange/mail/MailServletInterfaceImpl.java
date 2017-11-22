@@ -137,6 +137,8 @@ import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.api.crypto.CryptographicAwareMailAccessFactory;
 import com.openexchange.mail.api.unified.UnifiedFullName;
 import com.openexchange.mail.api.unified.UnifiedViewService;
+import com.openexchange.mail.authenticity.MailAuthenticityHandler;
+import com.openexchange.mail.authenticity.MailAuthenticityHandlerRegistry;
 import com.openexchange.mail.cache.MailMessageCache;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailFolder;
@@ -1518,6 +1520,18 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 }
             } catch (OXException e) {
                 LOG.error("", e);
+            }
+
+            {
+                MailAuthenticityHandlerRegistry authenticityHandlerRegistry = ServerServiceRegistry.getInstance().getService(MailAuthenticityHandlerRegistry.class);
+                if (null != authenticityHandlerRegistry) {
+                    List<MailAuthenticityHandler> handlers = authenticityHandlerRegistry.getSortedApplicableHandlersFor(session);
+                    if (null != handlers && !handlers.isEmpty()) {
+                        for (MailAuthenticityHandler handler : handlers) {
+                            handler.handle(mail);
+                        }
+                    }
+                }
             }
 
             /*

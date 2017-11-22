@@ -61,6 +61,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailPath;
+import com.openexchange.mail.dataobjects.MailAuthenticityResult;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.SecurityInfo;
 import com.openexchange.mail.dataobjects.SecurityResult;
@@ -1277,6 +1278,31 @@ public class DelegatingComposedMailMessage extends ComposedMailMessage {
     @Override
     public void removeSecurityResult() {
         delegate.removeSecurityResult();
+    }
+
+    @Override
+    public void setAuthenticityResult(MailAuthenticityResult authenticationResult) {
+        delegate.setAuthenticityResult(authenticationResult);
+    }
+
+    @Override
+    public MailAuthenticityResult getAuthenticityResult() {
+        return delegate.getAuthenticityResult();
+    }
+
+    @Override
+    public boolean hasAuthenticityResult() {
+        return delegate.hasAuthenticityResult();
+    }
+
+    @Override
+    public boolean containsAuthenticityResult() {
+        return delegate.containsAuthenticityResult();
+    }
+
+    @Override
+    public void removeAuthenticityResult() {
+        delegate.removeAuthenticityResult();
     }
 
 }

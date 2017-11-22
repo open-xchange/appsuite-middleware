@@ -64,6 +64,35 @@ import com.openexchange.session.Session;
 public interface MailAuthenticityHandlerRegistry {
 
     /**
+     * Tests if mail authenticity verification is <b>not</b> enabled for session-associated user
+     *
+     * @param session The user's session
+     * @return <code>true</code> if disabled; otherwise <code>false</code> if enabled
+     * @throws OXException If test fails
+     */
+    boolean isNotEnabledFor(Session session) throws OXException;
+
+    /**
+     * Tests if mail authenticity verification is enabled for session-associated user
+     *
+     * @param session The user's session
+     * @return <code>true</code> if enabled; otherwise <code>false</code> if disbaled
+     * @throws OXExceptionIf test fails
+     */
+    boolean isEnabledFor(Session session) throws OXException;
+
+    /**
+     * Gets the date threshold (the number of milliseconds since January 1, 1970, 00:00:00 GMT) that defines which messages to consider.
+     * <p>
+     * Only such messages shall be considered whose received date is equal to or greater than date threshold.
+     *
+     * @param session The user's session
+     * @return The date threshold or <code>0</code> (zero)
+     * @throws OXException
+     */
+    long getDateThreshold(Session session) throws OXException;
+
+    /**
      * Gets a sorted listing of applicable handlers
      *
      * @param session The user's session

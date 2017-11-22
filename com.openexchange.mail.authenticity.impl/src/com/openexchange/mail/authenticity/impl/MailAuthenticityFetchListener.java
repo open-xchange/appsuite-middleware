@@ -55,9 +55,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import com.openexchange.config.cascade.ConfigView;
-import com.openexchange.config.cascade.ConfigViewFactory;
-import com.openexchange.config.cascade.ConfigViews;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailAttributation;
 import com.openexchange.mail.MailFetchArguments;
@@ -81,40 +78,22 @@ public class MailAuthenticityFetchListener implements MailFetchListener {
     private static final String STATE_PARAM_HANDLERS = "mail.authenticity.handlers";
 
     private final MailAuthenticityHandlerRegistry handlerRegistry;
-    private final ConfigViewFactory viewFactory;
 
     /**
      * Initializes a new {@link MailAuthenticityFetchListener}.
      */
-    public MailAuthenticityFetchListener(MailAuthenticityHandlerRegistry handlerRegistry, ConfigViewFactory viewFactory) {
+    public MailAuthenticityFetchListener(MailAuthenticityHandlerRegistry handlerRegistry) {
         super();
         this.handlerRegistry = handlerRegistry;
-        this.viewFactory = viewFactory;
-    }
-
-    private boolean isNotEnabledFor(Session session) throws OXException {
-        return false == isEnabledFor(session);
-    }
-
-    private boolean isEnabledFor(Session session) throws OXException {
-        ConfigView view = viewFactory.getView(session.getUserId(), session.getContextId());
-        boolean def = false;
-        return ConfigViews.getDefinedBoolPropertyFrom("com.openexchange.mail.authenticity.enabled", def, view); // authenticity enabled?
-    }
-
-    private long getDateThreshold(Session session) throws OXException {
-        ConfigView view = viewFactory.getView(session.getUserId(), session.getContextId());
-        long def = 0L;
-        return ConfigViews.getDefinedLongPropertyFrom("com.openexchange.mail.authenticity.threshold", def, view);
     }
 
     @Override
     public boolean accept(MailMessage[] mailsFromCache, MailFetchArguments fetchArguments, Session session) throws OXException {
-        if (isNotEnabledFor(session) || (false == new MailFields(fetchArguments.getFields()).contains(MailField.AUTHENTICATION_RESULTS))) {
+        if (handlerRegistry.isNotEnabledFor(session) || (false == new MailFields(fetchArguments.getFields()).contains(MailField.AUTHENTICATION_RESULTS))) {
             return true;
         }
 
-        long threshold = getDateThreshold(session);
+        long threshold = handlerRegistry.getDateThreshold(session);
         for (MailMessage mail : mailsFromCache) {
             if (false == mail.hasAuthenticityResult() && (threshold <= 0 || mail.getReceivedDate().getTime() >= threshold)) {
                 return false;
@@ -126,7 +105,8 @@ public class MailAuthenticityFetchListener implements MailFetchListener {
 
     @Override
     public MailAttributation onBeforeFetch(MailFetchArguments fetchArguments, Session session, Map<String, Object> state) throws OXException {
-        if (isNotEnabledFor(session) || (false == new MailFields(fetchArguments.getFields()).contains(MailField.AUTHENTICATION_RESULTS))) {
+        if (false == new MailFields(fetchArguments.getFields()).contains(MailField.AUTHENTICATION_RESULTS)) {
+            // Special field not contained
             return MailAttributation.NOT_APPLICABLE;
         }
 
@@ -164,12 +144,9 @@ public class MailAuthenticityFetchListener implements MailFetchListener {
             return MailFetchListenerResult.neutral(mails, cacheable);
         }
 
-        long threshold = getDateThreshold(session);
         for (MailMessage mail : mails) {
-            if (null != mail && (threshold <= 0 || mail.getReceivedDate().getTime() >= threshold)) {
-                for (MailAuthenticityHandler handler : handlers) {
-                    handler.handle(mail);
-                }
+            for (MailAuthenticityHandler handler : handlers) {
+                handler.handle(mail);
             }
         }
         return MailFetchListenerResult.neutral(mails, cacheable);

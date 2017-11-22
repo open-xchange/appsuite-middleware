@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,56 +47,62 @@
  *
  */
 
-package com.openexchange.mail.authenticity.impl.osgi;
+package com.openexchange.mail.authenticity.impl;
 
-import com.openexchange.config.cascade.ConfigViewFactory;
-import com.openexchange.mail.MailFetchListener;
+import java.util.Collection;
+import com.openexchange.mail.MailField;
 import com.openexchange.mail.authenticity.MailAuthenticityHandler;
-import com.openexchange.mail.authenticity.MailAuthenticityHandlerRegistry;
-import com.openexchange.mail.authenticity.impl.MailAuthenticityFetchListener;
-import com.openexchange.mail.authenticity.impl.MailAuthenticityHandlerRegistryImpl;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
+import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.session.Session;
 
 
 /**
- * {@link MailAuthenticityActivator}
+ * {@link ThresholdAwareAuthenticityHandler} - A simple authenticity handler, which only delegates if date threshold is fulfilled.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.10.0
  */
-public class MailAuthenticityActivator extends HousekeepingActivator {
+public class ThresholdAwareAuthenticityHandler implements MailAuthenticityHandler {
+
+    private final MailAuthenticityHandler authenticityHandler;
+    private final long threshold;
 
     /**
-     * Initializes a new {@link MailAuthenticityActivator}.
+     * Initializes a new {@link ThresholdAwareAuthenticityHandler}.
      */
-    public MailAuthenticityActivator() {
+    public ThresholdAwareAuthenticityHandler(MailAuthenticityHandler authenticityHandler, long threshold) {
         super();
+        this.authenticityHandler = authenticityHandler;
+        this.threshold = threshold;
     }
 
     @Override
-    protected boolean stopOnServiceUnavailability() {
-        return true;
+    public void handle(MailMessage mailMessage) {
+       if (null == mailMessage || (threshold > 0 && mailMessage.getReceivedDate().getTime() < threshold)) {
+           return;
+       }
+
+       authenticityHandler.handle(mailMessage);
     }
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigViewFactory.class };
+    public Collection<MailField> getRequiredFields() {
+        return authenticityHandler.getRequiredFields();
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        RankingAwareNearRegistryServiceTracker<MailAuthenticityHandler> handlerTracker = new RankingAwareNearRegistryServiceTracker<>(context, MailAuthenticityHandler.class);
-        rememberTracker(handlerTracker);
+    public Collection<String> getRequiredHeaders() {
+        return authenticityHandler.getRequiredHeaders();
+    }
 
-        openTrackers();
+    @Override
+    public boolean isEnabled(Session session) {
+        return authenticityHandler.isEnabled(session);
+    }
 
-        MailAuthenticityHandlerRegistryImpl registry = new MailAuthenticityHandlerRegistryImpl(handlerTracker, getService(ConfigViewFactory.class));
-        registerService(MailAuthenticityHandlerRegistry.class, registry);
-
-        // It is OK to pass service references since 'stopOnServiceUnavailability' returns 'true'
-        MailAuthenticityFetchListener fetchListener = new MailAuthenticityFetchListener(registry);
-        registerService(MailFetchListener.class, fetchListener);
+    @Override
+    public int getRanking() {
+        return authenticityHandler.getRanking();
     }
 
 }
