@@ -22,4 +22,4 @@ Import-Package: com.openexchange.config.cascade,
  org.osgi.framework,
  org.osgi.util.tracker,
  org.slf4j
-Bundle-Activator: com.openexchange.mail.authentication.framework.osgi.MailAuthenticationFrameworkActivator
+Bundle-Activator: com.openexchange.mail.authenticity.framework.osgi.MailAuthenticationFrameworkActivator

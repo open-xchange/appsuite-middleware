@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.mail.authentication.framework;
+package com.openexchange.mail.authenticity.framework;
 
 import java.util.Arrays;
 import java.util.Collection;

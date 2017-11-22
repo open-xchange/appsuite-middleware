@@ -47,12 +47,12 @@
  *
  */
 
-package com.openexchange.mail.authentication.framework.osgi;
+package com.openexchange.mail.authenticity.framework.osgi;
 
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.mail.MailFetchListener;
-import com.openexchange.mail.authentication.framework.MailAuthenticationFetchListener;
 import com.openexchange.mail.authenticity.MailAuthenticationHandlerRegistry;
+import com.openexchange.mail.authenticity.framework.MailAuthenticationFetchListener;
 import com.openexchange.osgi.HousekeepingActivator;
 
 
