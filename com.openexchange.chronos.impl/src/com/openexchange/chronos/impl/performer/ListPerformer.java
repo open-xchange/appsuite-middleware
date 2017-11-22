@@ -107,6 +107,7 @@ public class ListPerformer extends AbstractQueryPerformer {
             Event event = find(eventsInFolder, eventID.getObjectID(), eventID.getRecurrenceID());
             if (null == event) {
                 org.slf4j.LoggerFactory.getLogger(ListPerformer.class).debug("Event with {} not found, skipping.", eventID);
+                continue;
             }
             orderedEvents.add(event);
         }
