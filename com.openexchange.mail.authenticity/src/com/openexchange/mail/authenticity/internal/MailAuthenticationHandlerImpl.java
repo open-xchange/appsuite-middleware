@@ -236,7 +236,7 @@ public class MailAuthenticationHandlerImpl implements MailAuthenticationHandler 
         String domain = cleanseDomain(split.get(0));
         if (!isValidDomain(domain)) {
             // Not a valid domain, thus we return with 'neutral' status
-            return MailAuthenticationResult.NEUTRAL_RESULT;
+            //return MailAuthenticationResult.NEUTRAL_RESULT;
         }
 
         MailAuthenticationResult.Builder result = MailAuthenticationResult.builder();
@@ -522,6 +522,10 @@ public class MailAuthenticationHandlerImpl implements MailAuthenticationHandler 
      * @return the converted {@link MailAuthenticationMechanism}
      */
     private static MailAuthenticationMechanism convert(String s) {
+        int index = s.indexOf(' ');
+        if (index > 0) {
+            s.substring(0, index);
+        }
         try {
             return MailAuthenticationMechanism.valueOf(s.toUpperCase());
         } catch (IllegalArgumentException e) {
