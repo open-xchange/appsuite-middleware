@@ -23,5 +23,8 @@ Import-Package: com.google.common.annotations,
  com.openexchange.session,
  javax.mail,
  javax.mail.internet,
+ org.osgi.framework,
+ org.osgi.util.tracker,
  org.slf4j
 Export-Package: com.openexchange.mail.authenticity
+Bundle-Activator: com.openexchange.mail.authenticity.osgi.MailAuthenticationActivator
