@@ -60,7 +60,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.powermock.modules.junit4.PowerMockRunner;
-import com.openexchange.mail.authenticity.MailAuthenticityHandler;
+import com.openexchange.mail.authenticity.handler.MailAuthenticityHandler;
 import com.openexchange.mail.authenticity.common.MailAuthenticityStatus;
 import com.openexchange.mail.authenticity.common.mechanism.AuthenticityMechanismResult;
 import com.openexchange.mail.authenticity.common.mechanism.MailAuthenticityMechanism;
@@ -253,7 +253,7 @@ public class TestMailAuthenticationHandler {
     /**
      * Performs the mail authentication handling with the specified headers and
      * captures the result via the {@link ArgumentCaptor} to the 'result' object
-     * 
+     *
      * @param headers The 'Authentication-Results' headers to add
      */
     private void perform(String... headers) {

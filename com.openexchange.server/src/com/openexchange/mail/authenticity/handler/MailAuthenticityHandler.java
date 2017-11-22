@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.mail.authenticity;
+package com.openexchange.mail.authenticity.handler;
 
 import java.util.Collection;
 import com.openexchange.mail.MailField;

@@ -49,8 +49,8 @@
 
 package com.openexchange.mail.authenticity.osgi;
 
-import com.openexchange.mail.authenticity.MailAuthenticityHandler;
-import com.openexchange.mail.authenticity.MailAuthenticityHandlerRegistry;
+import com.openexchange.mail.authenticity.handler.MailAuthenticityHandler;
+import com.openexchange.mail.authenticity.handler.MailAuthenticityHandlerRegistry;
 import com.openexchange.mail.authenticity.internal.MailAuthenticityHandlerRegistryImpl;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;

@@ -62,38 +62,44 @@ public enum ReceivedSPFHeaderFieldKey {
     /**
      * The IP address of the SMTP client
      */
-    CLIENT_IP,
+    CLIENT_IP("client-ip"),
     /**
      * The envelope sender mailbox
      */
-    ENVELOPE_FROM,
+    ENVELOPE_FROM("envelope-from"),
     /**
      * The host name given in the <code>HELO</code> or <code>EHLO</code> command
      */
-    HELO,
+    HELO("helo"),
     /**
      * The mechanism that matched (if no mechanisms matched, substitute the word "default")
      */
-    MECHANISM,
+    MECHANISM("mechanism"),
     /**
      * If an error was returned, details about the error
      */
-    PROBLEM,
+    PROBLEM("problem"),
     /**
      * The host name of the SPF verifier
      */
-    RECEIVER,
+    RECEIVER("receiver"),
     /**
      * The identity that was checked
      */
-    IDENTITY;
+    IDENTITY("identity");
+
+    private final String technicalName;
+
+    private ReceivedSPFHeaderFieldKey(String technicalName) {
+        this.technicalName = technicalName;
+    }
 
     /**
      * Returns the technical name of the header field
-     * 
+     *
      * @return the technical name of the header field
      */
     public String getTechnicalName() {
-        return name().toLowerCase().replaceAll("_", "-");
+        return technicalName;
     }
 }

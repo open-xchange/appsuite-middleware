@@ -65,8 +65,8 @@ import com.openexchange.mail.MailFetchListener;
 import com.openexchange.mail.MailFetchListenerResult;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailFields;
-import com.openexchange.mail.authenticity.MailAuthenticityHandler;
-import com.openexchange.mail.authenticity.MailAuthenticityHandlerRegistry;
+import com.openexchange.mail.authenticity.handler.MailAuthenticityHandler;
+import com.openexchange.mail.authenticity.handler.MailAuthenticityHandlerRegistry;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.session.Session;
 
@@ -99,7 +99,13 @@ public class MailAuthenticityFetchListener implements MailFetchListener {
     private boolean isEnabledFor(Session session) throws OXException {
         ConfigView view = viewFactory.getView(session.getUserId(), session.getContextId());
         boolean def = false;
-        return ConfigViews.getDefinedBoolPropertyFrom("com.openexchange.mail.authentication.enabled", def, view); // authenticity enabled?
+        return ConfigViews.getDefinedBoolPropertyFrom("com.openexchange.mail.authenticity.enabled", def, view); // authenticity enabled?
+    }
+
+    private long getDateThreshold(Session session) throws OXException {
+        ConfigView view = viewFactory.getView(session.getUserId(), session.getContextId());
+        long def = 0L;
+        return ConfigViews.getDefinedLongPropertyFrom("com.openexchange.mail.authenticity.threshold", def, view);
     }
 
     @Override
@@ -108,8 +114,9 @@ public class MailAuthenticityFetchListener implements MailFetchListener {
             return true;
         }
 
+        long threshold = getDateThreshold(session);
         for (MailMessage mail : mailsFromCache) {
-            if (false == mail.hasAuthenticityResult()) {
+            if (false == mail.hasAuthenticityResult() && (threshold <= 0 || mail.getReceivedDate().getTime() >= threshold)) {
                 return false;
             }
         }
@@ -129,6 +136,7 @@ public class MailAuthenticityFetchListener implements MailFetchListener {
         }
 
         MailFields fields = null == fetchArguments.getFields() ? new MailFields() : new MailFields(fetchArguments.getFields());
+        fields.add(MailField.RECEIVED_DATE);
         Set<String> headerNames = null == fetchArguments.getHeaderNames() ? new LinkedHashSet<>() : new LinkedHashSet<>(Arrays.asList(fetchArguments.getHeaderNames()));
         for (MailAuthenticityHandler handler : handlers) {
             Collection<MailField> requiredFields = handler.getRequiredFields();
@@ -156,9 +164,12 @@ public class MailAuthenticityFetchListener implements MailFetchListener {
             return MailFetchListenerResult.neutral(mails, cacheable);
         }
 
+        long threshold = getDateThreshold(session);
         for (MailMessage mail : mails) {
-            for (MailAuthenticityHandler handler : handlers) {
-                handler.handle(mail);
+            if (null != mail && (threshold <= 0 || mail.getReceivedDate().getTime() >= threshold)) {
+                for (MailAuthenticityHandler handler : handlers) {
+                    handler.handle(mail);
+                }
             }
         }
         return MailFetchListenerResult.neutral(mails, cacheable);

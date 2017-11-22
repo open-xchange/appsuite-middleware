@@ -51,8 +51,8 @@ package com.openexchange.mail.authenticity.framework.osgi;
 
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.mail.MailFetchListener;
-import com.openexchange.mail.authenticity.MailAuthenticityHandlerRegistry;
 import com.openexchange.mail.authenticity.framework.MailAuthenticityFetchListener;
+import com.openexchange.mail.authenticity.handler.MailAuthenticityHandlerRegistry;
 import com.openexchange.osgi.HousekeepingActivator;
 
 

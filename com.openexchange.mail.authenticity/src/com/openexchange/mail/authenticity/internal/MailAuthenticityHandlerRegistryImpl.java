@@ -54,8 +54,8 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import com.openexchange.exception.OXException;
-import com.openexchange.mail.authenticity.MailAuthenticityHandler;
-import com.openexchange.mail.authenticity.MailAuthenticityHandlerRegistry;
+import com.openexchange.mail.authenticity.handler.MailAuthenticityHandler;
+import com.openexchange.mail.authenticity.handler.MailAuthenticityHandlerRegistry;
 import com.openexchange.osgi.ServiceListing;
 import com.openexchange.session.Session;
 

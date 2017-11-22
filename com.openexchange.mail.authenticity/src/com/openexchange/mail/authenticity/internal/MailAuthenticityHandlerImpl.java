@@ -64,7 +64,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.MailField;
-import com.openexchange.mail.authenticity.MailAuthenticityHandler;
+import com.openexchange.mail.authenticity.handler.MailAuthenticityHandler;
 import com.openexchange.mail.authenticity.common.MailAuthenticityStatus;
 import com.openexchange.mail.authenticity.common.mechanism.MailAuthenticityMechanism;
 import com.openexchange.mail.authenticity.common.mechanism.MailAuthenticityMechanismResult;
@@ -328,7 +328,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
     /**
      * Removes the optional version (if present) from the specified domain
      * and the preceding "at" symbol ('@') (if present) from the domain.
-     * 
+     *
      * @see <a href="https://tools.ietf.org/html/rfc7601#section-2.2">RFC 7601, Section 2.2</a>
      * @param domain The domain to cleanse
      * @return The cleansed domain
