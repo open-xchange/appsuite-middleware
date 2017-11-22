@@ -204,6 +204,7 @@ public class TestMailAuthenticationHandler {
         MailAuthenticityMechanismResult mechanismResult = result.getMailAuthenticationMechanismResults().get(0);
         assertEquals("The mechanism's domain does not match", "example.com", mechanismResult.getDomain());
         assertNotNull("The mechanism's result is null", mechanismResult.getResult());
+        assertEquals("The mechanism's reason does not match", "good signature", mechanismResult.getReason());
 
         AuthenticityMechanismResult s = mechanismResult.getResult();
         assertEquals("The mechanism's result does not match", DKIMResult.PASS.getTechnicalName(), s.getTechnicalName());
@@ -226,6 +227,7 @@ public class TestMailAuthenticationHandler {
         MailAuthenticityMechanismResult mechanismResult = result.getMailAuthenticationMechanismResults().get(0);
         assertEquals("The mechanism's domain does not match", "mail-router.example.net", mechanismResult.getDomain());
         assertNotNull("The mechanism's result is null", mechanismResult.getResult());
+        assertEquals("The mechanism's reason does not match", "\"good signature\"", mechanismResult.getReason());
 
         AuthenticityMechanismResult s = mechanismResult.getResult();
         assertEquals("The mechanism's result does not match", DKIMResult.PASS.getTechnicalName(), s.getTechnicalName());
@@ -233,6 +235,7 @@ public class TestMailAuthenticationHandler {
         mechanismResult = result.getMailAuthenticationMechanismResults().get(1);
         assertEquals("The mechanism's domain does not match", "newyork.example.com", mechanismResult.getDomain());
         assertNotNull("The mechanism's result is null", mechanismResult.getResult());
+        assertEquals("The mechanism's reason does not match", "\"bad signature\"", mechanismResult.getReason());
 
         s = mechanismResult.getResult();
         assertEquals("The mechanism's result does not match", DKIMResult.FAIL.getTechnicalName(), s.getTechnicalName());

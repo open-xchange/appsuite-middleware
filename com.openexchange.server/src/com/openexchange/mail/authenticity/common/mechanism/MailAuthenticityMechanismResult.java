@@ -85,4 +85,11 @@ public interface MailAuthenticityMechanismResult {
      * @return the result of the authentication mechanism
      */
     AuthenticityMechanismResult getResult();
+
+    /**
+     * Returns the reason of the result
+     * 
+     * @return the reason of the result
+     */
+    String getReason();
 }

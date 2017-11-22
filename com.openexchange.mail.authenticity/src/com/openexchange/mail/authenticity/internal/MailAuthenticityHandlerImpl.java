@@ -129,7 +129,9 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
             String value = line.get(MailAuthenticityMechanism.DMARC.name().toLowerCase());
             DMARCResult dmarcResult = DMARCResult.valueOf(value.toUpperCase());
             String domain = line.get(DMARCResultHeader.HEADER_FROM);
-            return new DMARCAuthMechResult(cleanseDomain(domain), dmarcResult);
+            DMARCAuthMechResult result = new DMARCAuthMechResult(cleanseDomain(domain), dmarcResult);
+            result.setReason(extractComment(value));
+            return result;
         });
         mechanismParsersRegitry.put(MailAuthenticityMechanism.DKIM, (line) -> {
             String value = line.get(MailAuthenticityMechanism.DKIM.name().toLowerCase());
@@ -138,7 +140,13 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
             if (Strings.isEmpty(domain)) {
                 domain = line.get(DKIMResultHeader.HEADER_D);
             }
-            return new DKIMAuthMechResult(cleanseDomain(domain), dkimResult);
+            DKIMAuthMechResult result = new DKIMAuthMechResult(cleanseDomain(domain), dkimResult);
+            String reason = extractComment(value);
+            if (Strings.isEmpty(reason)) {
+                reason = line.get(DKIMResultHeader.REASON);
+            }
+            result.setReason(reason);
+            return result;
         });
         mechanismParsersRegitry.put(MailAuthenticityMechanism.SPF, (line) -> {
             String value = line.get(MailAuthenticityMechanism.SPF.name().toLowerCase());
@@ -147,8 +155,22 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
             if (Strings.isEmpty(domain)) {
                 domain = line.get(SPFResultHeader.SMTP_HELO);
             }
-            return new SPFAuthMechResult(cleanseDomain(domain), spfResult);
+            SPFAuthMechResult result = new SPFAuthMechResult(cleanseDomain(domain), spfResult);
+            result.setReason(extractComment(value));
+            return result;
         });
+    }
+
+    private String extractComment(String value) {
+        int beginIndex = value.indexOf('(');
+        if (beginIndex < 0) {
+            return null;
+        }
+        int endIndex = value.indexOf(')');
+        if (endIndex < 0) {
+            return null;
+        }
+        return value.substring(beginIndex, endIndex);
     }
 
     /*

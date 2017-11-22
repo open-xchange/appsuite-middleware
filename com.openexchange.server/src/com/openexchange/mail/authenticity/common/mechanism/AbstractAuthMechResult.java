@@ -61,6 +61,7 @@ public abstract class AbstractAuthMechResult implements MailAuthenticityMechanis
     private final String domain;
     private final String clientIP;
     private final AuthenticityMechanismResult result;
+    private String reason;
 
     /**
      * Initialises a new {@link DMARCAuthMechResult}.
@@ -89,5 +90,24 @@ public abstract class AbstractAuthMechResult implements MailAuthenticityMechanis
     @Override
     public AuthenticityMechanismResult getResult() {
         return result;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.mail.authenticity.common.mechanism.MailAuthenticityMechanismResult#getReason()
+     */
+    @Override
+    public String getReason() {
+        return reason;
+    }
+
+    /**
+     * Sets the reason of the result
+     * 
+     * @param reason the reason to set
+     */
+    public void setReason(String reason) {
+        this.reason = reason;
     }
 }
