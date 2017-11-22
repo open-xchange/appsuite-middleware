@@ -60,13 +60,13 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.powermock.modules.junit4.PowerMockRunner;
-import com.openexchange.mail.authenticity.handler.MailAuthenticityHandler;
 import com.openexchange.mail.authenticity.common.MailAuthenticityStatus;
 import com.openexchange.mail.authenticity.common.mechanism.AuthenticityMechanismResult;
 import com.openexchange.mail.authenticity.common.mechanism.MailAuthenticityMechanism;
 import com.openexchange.mail.authenticity.common.mechanism.MailAuthenticityMechanismResult;
 import com.openexchange.mail.authenticity.common.mechanism.dkim.DKIMResult;
 import com.openexchange.mail.authenticity.common.mechanism.spf.SPFResult;
+import com.openexchange.mail.authenticity.handler.MailAuthenticityHandler;
 import com.openexchange.mail.authenticity.internal.MailAuthenticityHandlerImpl;
 import com.openexchange.mail.dataobjects.MailAuthenticityResult;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -239,6 +239,38 @@ public class TestMailAuthenticationHandler {
 
         s = mechanismResult.getResult();
         assertEquals("The mechanism's result does not match", DKIMResult.FAIL.getTechnicalName(), s.getTechnicalName());
+    }
+
+    /**
+     * Tests the real world case where the <code>Authentication-Results</code> header field is present
+     * and the MTAs failed to authenticate with SPF and DKIM
+     */
+    @Test
+    public void testFailingSPFAndTempErrorDKIM() {
+        perform("ox.io; dkim=temperror (no key for signature) header.i=@some.mta.hop header.s=dkim header.b=sl5RAv9n; spf=fail (ox.io: domain of bob@aliceland.com does not designate 1.2.3.4 as permitted sender) smtp.mailfrom=bob@aliceland.com");
+        
+        assertEquals("The overall status does not match", MailAuthenticityStatus.FAIL, result.getStatus());
+        assertEquals("The domain does not match", "ox.io", result.getDomain());
+        assertEquals("The mail authentication mechanisms amount does not match", 2, result.getAuthenticationMechanisms().size());
+        assertTrue("The mail authentication mechansism does not match", result.getAuthenticationMechanisms().contains(MailAuthenticityMechanism.DKIM));
+        assertTrue("The mail authentication mechansism does not match", result.getAuthenticationMechanisms().contains(MailAuthenticityMechanism.SPF));
+        assertEquals("The mail authentication mechanism results amount does not match", 2, result.getMailAuthenticationMechanismResults().size());
+
+        MailAuthenticityMechanismResult mechanismResult = result.getMailAuthenticationMechanismResults().get(0);
+        assertEquals("The mechanism's domain does not match", "some.mta.hop", mechanismResult.getDomain());
+        assertNotNull("The mechanism's result is null", mechanismResult.getResult());
+        assertEquals("The mechanism's reason does not match", "no key for signature", mechanismResult.getReason());
+
+        AuthenticityMechanismResult s = mechanismResult.getResult();
+        assertEquals("The mechanism's result does not match", DKIMResult.TEMPERROR.getTechnicalName(), s.getTechnicalName());
+
+        mechanismResult = result.getMailAuthenticationMechanismResults().get(1);
+        assertEquals("The mechanism's domain does not match", "aliceland.com", mechanismResult.getDomain());
+        assertNotNull("The mechanism's result is null", mechanismResult.getResult());
+        assertEquals("The mechanism's reason does not match", "ox.io: domain of bob@aliceland.com does not designate 1.2.3.4 as permitted sender", mechanismResult.getReason());
+
+        s = mechanismResult.getResult();
+        assertEquals("The mechanism's result does not match", SPFResult.FAIL.getTechnicalName(), s.getTechnicalName());
     }
 
     ///////////////////////////// HELPERS //////////////////////////////
