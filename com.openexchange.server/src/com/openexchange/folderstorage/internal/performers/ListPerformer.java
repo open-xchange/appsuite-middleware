@@ -77,6 +77,7 @@ import com.openexchange.folderstorage.FolderType;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.SortableId;
 import com.openexchange.folderstorage.StorageParameters;
+import com.openexchange.folderstorage.SubfolderListingFolderStorage;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.internal.CalculatePermission;
 import com.openexchange.folderstorage.mail.MailFolderType;
@@ -388,18 +389,18 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
         /*
          * Determine needed storages for given parent
          */
-        final String[] subfolderIds = collectAndSortSubfolderIds(treeId, parentId);
-        if (subfolderIds.length == 0) {
+        IdsOrObjects idsOrObjects = collectAndSortSubfolderIds(treeId, parentId, all, checkOnly);
+        if (idsOrObjects.isEmpty()) {
             return new UserizedFolder[0];
         }
 
-        return loadFolders(treeId, subfolderIds, all, checkOnly);
+        return null != idsOrObjects.folders ? idsOrObjects.folders : loadFolders(treeId, idsOrObjects.ids, all, checkOnly);
     }
 
-    private String[] collectAndSortSubfolderIds(final String treeId, final String parentId) throws OXException {
+    private IdsOrObjects collectAndSortSubfolderIds(final String treeId, final String parentId, final boolean all, final boolean checkOnly) throws OXException {
         FolderStorage[] neededStorages = folderStorageDiscoverer.getFolderStoragesForParent(treeId, parentId);
         if (null == neededStorages || 0 == neededStorages.length) {
-            return new String[0];
+            return EMPTY_IDS_OR_OBJECTS;
         }
 
         /*
@@ -408,6 +409,50 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
         final List<SortableId> allSubfolderIds;
         if (1 == neededStorages.length) {
             FolderStorage neededStorage = neededStorages[0];
+            if (neededStorage instanceof SubfolderListingFolderStorage) {
+                SubfolderListingFolderStorage listingStorage = (SubfolderListingFolderStorage) neededStorage;
+
+                List<FolderStorage> openedStorages = new ArrayList<FolderStorage>(2);
+                if (neededStorage.startTransaction(storageParameters, false)) {
+                    openedStorages.add(neededStorage);
+                }
+                try {
+                    Folder[] folders = listingStorage.getSubfolderObjects(treeId, parentId, storageParameters);
+
+                    if (null != folders) {
+                        UserizedFolder[] subfolders = new UserizedFolder[folders.length];
+
+                        // Convert to userized folders and put into array
+                        for (int i = 0; i < folders.length; i++) {
+                            Folder subfolder = folders[i];
+                            if (null != subfolder) {
+                                setSubfolder(subfolders, subfolder, i, all, checkOnly, treeId, storageParameters, openedStorages);
+                            }
+                        }
+
+                        for (final FolderStorage fs : openedStorages) {
+                            fs.commitTransaction(storageParameters);
+                        }
+
+                        return new IdsOrObjects(subfolders);
+                    }
+
+                    for (FolderStorage fs : openedStorages) {
+                        fs.commitTransaction(storageParameters);
+                    }
+                } catch (OXException e) {
+                    for (FolderStorage fs : openedStorages) {
+                        fs.rollback(storageParameters);
+                    }
+                    throw e;
+                } catch (RuntimeException e) {
+                    for (FolderStorage fs : openedStorages) {
+                        fs.rollback(storageParameters);
+                    }
+                    throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
+                }
+            }
+
             boolean started = neededStorage.startTransaction(storageParameters, false);
             try {
                 allSubfolderIds = Arrays.asList(neededStorage.getSubfolders(treeId, parentId, storageParameters));
@@ -459,7 +504,7 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
             subfolderIds[i] = subfolderId.getId();
         }
 
-        return subfolderIds;
+        return new IdsOrObjects(subfolderIds);
     }
 
     private UserizedFolder[] loadFolders(final String treeId, final String[] subfolderIds, final boolean all, final boolean checkOnly) throws OXException {
@@ -614,6 +659,30 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
             if (userPermission.isVisible()) {
                 subfolders[index] = getUserizedFolder(subfolder, userPermission, treeId, all, true, newParameters, openedStorages, checkOnly);
             }
+        }
+    }
+
+    private static final IdsOrObjects EMPTY_IDS_OR_OBJECTS = new IdsOrObjects(new String[0]);
+
+    private static final class IdsOrObjects {
+
+        final String[] ids;
+        final UserizedFolder[] folders;
+
+        IdsOrObjects(String[] ids) {
+            super();
+            this.ids = ids;
+            this.folders = null;
+        }
+
+        IdsOrObjects(UserizedFolder[] folders) {
+            super();
+            this.ids = null;
+            this.folders = folders;
+        }
+
+        boolean isEmpty() {
+            return null == ids ? folders.length == 0 : ids.length == 0;
         }
     }
 

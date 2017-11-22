@@ -198,7 +198,13 @@ final class DropboxExceptionHandler {
             case CANT_NEST_SHARED_FOLDER:
             case OTHER:
             case TO:
-                return mapWriteError(e.errorValue.getToValue(), fileId, accountDisplayName, e);
+                {
+                    WriteError error = e.errorValue.getToValue();
+                    if (WriteConflictError.FILE == error.getConflictValue()) {
+                        return mapWriteError(error, fileId, accountDisplayName, e);
+                    }
+                    return mapWriteError(error, folderId, accountDisplayName, e);
+                }
             case TOO_MANY_FILES:
             default:
                 // Everything else falls through to 'unexpected error'
@@ -413,13 +419,21 @@ final class DropboxExceptionHandler {
                     }
 
                     int slashPos = id.lastIndexOf('/');
-                    String parentId = id.substring(0, slashPos);
+                    String name;
+                    String parentName;
+                    if (slashPos > 0) {
+                        String parentId = id.substring(0, slashPos);
 
-                    String name = id.substring(slashPos + 1);
-                    String parentName = parentId.substring(parentId.lastIndexOf('/') + 1);
-                    if (Strings.isEmpty(parentName)) {
+                        name = id.substring(slashPos + 1);
+                        parentName = parentId.substring(parentId.lastIndexOf('/') + 1);
+                        if (Strings.isEmpty(parentName)) {
+                            parentName = accountDisplayName;
+                        }
+                    } else {
+                        name = id;
                         parentName = accountDisplayName;
                     }
+
                     return FileStorageExceptionCodes.DUPLICATE_FOLDER.create(e, name, parentName);
                 }
             default:

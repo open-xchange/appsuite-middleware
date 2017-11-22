@@ -78,8 +78,10 @@ import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileDelta;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountAccess;
+import com.openexchange.file.storage.FileStorageAutoRenameFoldersAccess;
 import com.openexchange.file.storage.FileStorageCaseInsensitiveAccess;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
+import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageLockedFileAccess;
 import com.openexchange.file.storage.FileStorageUtility;
 import com.openexchange.file.storage.FileTimedResult;
@@ -104,22 +106,34 @@ import com.openexchange.tools.iterator.SearchIteratorAdapter;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class BoxFileAccess extends AbstractBoxResourceAccess implements ThumbnailAware, FileStorageLockedFileAccess, FileStorageCaseInsensitiveAccess {
+public class BoxFileAccess extends AbstractBoxResourceAccess implements ThumbnailAware, FileStorageLockedFileAccess, FileStorageCaseInsensitiveAccess, FileStorageAutoRenameFoldersAccess {
 
     static final Logger LOGGER = LoggerFactory.getLogger(BoxFileAccess.class);
 
     // --------------------------------------------------------------------------------------------
 
     private final BoxAccountAccess accountAccess;
+    private final BoxFolderAccess folderAccess;
     final int userId;
 
     /**
      * Initializes a new {@link BoxFileAccess}.
      */
-    public BoxFileAccess(BoxOAuthAccess boxAccess, FileStorageAccount account, Session session, BoxAccountAccess accountAccess) throws OXException {
+    public BoxFileAccess(BoxOAuthAccess boxAccess, FileStorageAccount account, Session session, BoxAccountAccess accountAccess, BoxFolderAccess folderAccess) throws OXException {
         super(boxAccess, account, session);
         this.accountAccess = accountAccess;
+        this.folderAccess = folderAccess;
         userId = session.getUserId();
+    }
+
+    @Override
+    public String createFolder(FileStorageFolder toCreate, boolean autoRename) throws OXException {
+        return folderAccess.createFolder(toCreate, autoRename);
+    }
+
+    @Override
+    public String moveFolder(String folderId, String newParentId, String newName, boolean autoRename) throws OXException {
+        return folderAccess.moveFolder(folderId, newParentId, newName, autoRename);
     }
 
     @Override
