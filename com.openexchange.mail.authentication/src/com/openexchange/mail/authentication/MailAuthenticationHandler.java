@@ -52,8 +52,10 @@ package com.openexchange.mail.authentication;
 import java.util.Collection;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.authentication.mechanism.MailAuthenticationMechanism;
+import com.openexchange.mail.dataobjects.MailAuthenticationResult;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
+import com.openexchange.session.Session;
 
 /**
  * {@link MailAuthenticationHandler}
@@ -91,4 +93,13 @@ public interface MailAuthenticationHandler {
      * @return an unmodifiable {@link Collection} with all required mail headers
      */
     Collection<String> getRequiredHeaders();
+
+    /**
+     * Determines whether the {@link MailAuthenticationHandler} is enabled for the user
+     * that is denoted by the specified {@link Session}
+     * 
+     * @param session The groupware {@link Session}
+     * @return <code>true</code> if the {@link MailAuthenticationHandler} is enabled; <code>false</code> otherwise
+     */
+    boolean isEnabled(Session session);
 }
