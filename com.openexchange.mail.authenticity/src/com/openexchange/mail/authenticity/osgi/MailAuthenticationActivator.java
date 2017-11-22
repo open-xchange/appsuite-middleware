@@ -49,11 +49,15 @@
 
 package com.openexchange.mail.authenticity.osgi;
 
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Reloadable;
 import com.openexchange.mail.authenticity.MailAuthenticationHandler;
 import com.openexchange.mail.authenticity.MailAuthenticationHandlerRegistry;
 import com.openexchange.mail.authenticity.internal.MailAuthenticationHandlerRegistryImpl;
+import com.openexchange.mail.authenticity.internal.TrustedDomainAuthenticationHandler;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
+import com.openexchange.server.ServiceExceptionCode;
 
 
 /**
@@ -73,7 +77,7 @@ public class MailAuthenticationActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] {};
+        return new Class<?>[] {ConfigurationService.class};
     }
 
     @Override
@@ -85,6 +89,13 @@ public class MailAuthenticationActivator extends HousekeepingActivator {
         openTrackers();
 
         registerService(MailAuthenticationHandlerRegistry.class, registry);
+
+        ConfigurationService configurationService = getService(ConfigurationService.class);
+        if(configurationService == null){
+            throw ServiceExceptionCode.absentService(ConfigurationService.class);
+        }
+        Reloadable trustedMailDomainService = new TrustedDomainAuthenticationHandler(configurationService);
+        registerService(Reloadable.class, trustedMailDomainService);
     }
 
 }

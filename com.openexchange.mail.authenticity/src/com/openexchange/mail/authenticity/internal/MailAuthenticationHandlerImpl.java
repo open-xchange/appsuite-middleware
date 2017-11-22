@@ -157,7 +157,7 @@ public class MailAuthenticationHandlerImpl implements MailAuthenticationHandler 
      * @see com.openexchange.mail.authentication.MailAuthenticationHandler#handle(com.openexchange.mail.dataobjects.MailPart)
      */
     @Override
-    public void handle(MailMessage mailMessage) {
+    public void handle(Session session, MailMessage mailMessage) {
         //TODO: Perform preliminary configuration checks,
         //      like whether the feature is enabled or
         //      the core engine shall be used.
@@ -317,7 +317,7 @@ public class MailAuthenticationHandlerImpl implements MailAuthenticationHandler 
 
     /**
      * Removes the preceding "at" symbol ('@') from the domain
-     * 
+     *
      * @param domain The domain to cleanse
      * @return The cleansed domain
      */

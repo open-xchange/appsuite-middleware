@@ -47,27 +47,32 @@
  *
  */
 
-package com.openexchange.mail.authentication.impl;
+package com.openexchange.mail.authenticity.internal;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import javax.mail.internet.InternetAddress;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.DefaultInterests;
 import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
 import com.openexchange.java.Strings;
-import com.openexchange.mail.authentication.TrustedDomain;
-import com.openexchange.mail.authentication.TrustedMailDomainService;
+import com.openexchange.mail.MailField;
+import com.openexchange.mail.authenticity.MailAuthenticationHandler;
+import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.session.Session;
 
 /**
- * {@link TrustedMailDomainServiceImpl}
+ * {@link TrustedDomainAuthenticationHandler}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.0
  */
-public class TrustedMailDomainServiceImpl implements TrustedMailDomainService, Reloadable{
+public class TrustedDomainAuthenticationHandler implements Reloadable, MailAuthenticationHandler {
 
     Map<String, List<TrustedDomain>> trustedDomains = new ConcurrentHashMap<>();
 
@@ -75,21 +80,30 @@ public class TrustedMailDomainServiceImpl implements TrustedMailDomainService, R
     private static final String TENANT = "tenants";
     private static final String DOMAINS = ".domains";
     private static final String IMAGE = ".image";
+    private static final String FALLBACK_TENANT = "OX_FALLBACK";
 
 
     /**
-     * Initializes a new {@link TrustedMailDomainServiceImpl}.
+     * Initializes a new {@link TrustedDomainAuthenticationHandler}.
      */
-    public TrustedMailDomainServiceImpl(ConfigurationService configurationService) {
+    public TrustedDomainAuthenticationHandler(ConfigurationService configurationService) {
         super();
         init(configurationService);
 
     }
 
-    @Override
-    public TrustedDomain checkHost(String tenant, String host) {
+    private TrustedDomain checkHost(String tenant, String host) {
         if(trustedDomains.containsKey(tenant)){
             List<TrustedDomain> domains = trustedDomains.get(tenant);
+            for(TrustedDomain domain: domains){
+                if(domain.matches(host)){
+                    return domain;
+                }
+            }
+        }
+
+        if(trustedDomains.containsKey(FALLBACK_TENANT)){
+            List<TrustedDomain> domains = trustedDomains.get(FALLBACK_TENANT);
             for(TrustedDomain domain: domains){
                 if(domain.matches(host)){
                     return domain;
@@ -113,9 +127,21 @@ public class TrustedMailDomainServiceImpl implements TrustedMailDomainService, R
                     domainList.add(new TrustedDomain(domain, image));
                 }
                 trustedDomains.put(tenant, domainList);
-
             }
         }
+
+        // Add single tenant / fallback configuration
+        String commaSeparatedListOfDomains = configurationService.getProperty(PREFIX + DOMAINS.substring(1), (String) null);
+        if (Strings.isNotEmpty(commaSeparatedListOfDomains)) {
+            String[] domains = Strings.splitByCommaNotInQuotes(commaSeparatedListOfDomains);
+            String image = configurationService.getProperty(PREFIX + IMAGE.substring(1), (String) null);
+            List<TrustedDomain> domainList = new ArrayList<>();
+            for (String domain : domains) {
+                domainList.add(new TrustedDomain(domain, image));
+            }
+            trustedDomains.put(FALLBACK_TENANT, domainList);
+        }
+
     }
 
     @Override
@@ -125,14 +151,53 @@ public class TrustedMailDomainServiceImpl implements TrustedMailDomainService, R
 
     @Override
     public Interests getInterests() {
-        String [] properties = new String[1 + trustedDomains.size() * 2];
-        properties[0] = PREFIX + TENANT;
-        int x=1;
+        ArrayList<String> properties = new ArrayList<>(trustedDomains.size());
+        properties.add(PREFIX + TENANT);
         for(String tenant: trustedDomains.keySet()){
-            properties[x++] = PREFIX+tenant+DOMAINS;
-            properties[x++] = PREFIX+tenant+IMAGE;
+            if(tenant.equals(FALLBACK_TENANT)){
+                continue;
+            }
+            properties.add(PREFIX+tenant+DOMAINS);
+            properties.add(PREFIX+tenant+IMAGE);
         }
-        return DefaultInterests.builder().propertiesOfInterest(properties).build();
+        properties.add(PREFIX+DOMAINS.substring(1));
+        properties.add(PREFIX+IMAGE.substring(1));
+        return DefaultInterests.builder().propertiesOfInterest(properties.toArray(new String[properties.size()])).build();
+    }
+
+    @Override
+    public void handle(Session session, MailMessage mailMessage) {
+        String tenant = (String) session.getParameter(Session.PARAM_HOST_NAME);
+        TrustedDomain trustedDomain = checkHost(tenant, getFrom(mailMessage));
+        if(trustedDomain != null){
+            // TODO insert infos
+            mailMessage.getAuthenticationResult();
+        }
+    }
+
+    private String getFrom(MailMessage msg){
+        InternetAddress[] from = msg.getFrom();
+        return from[0].getAddress().substring(from[0].getAddress().indexOf("@"), from[0].getAddress().length());
+    }
+
+    @Override
+    public Collection<MailField> getRequiredFields() {
+        return Collections.emptyList();
+    }
+
+    @Override
+    public Collection<String> getRequiredHeaders() {
+        return Collections.emptyList();
+    }
+
+    @Override
+    public boolean isEnabled(Session session) {
+        return true;
+    }
+
+    @Override
+    public int getRanking() {
+        return 100;
     }
 
 }

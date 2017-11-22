@@ -47,10 +47,9 @@
  *
  */
 
-package com.openexchange.mail.authentication;
+package com.openexchange.mail.authenticity.internal;
 
 import java.util.regex.Pattern;
-import com.openexchange.mail.authentication.impl.TrustedMailDomainServiceImpl;
 
 /**
  * {@link TrustedDomain}
@@ -65,7 +64,11 @@ public class TrustedDomain {
     private final Object image;
 
     /**
-     * Initializes a new {@link TrustedMailDomainServiceImpl.TrustedDomain}.
+     *
+     * Initializes a new {@link TrustedDomain}.
+     *
+     * @param domain The domain
+     * @param image The image
      */
     public TrustedDomain(String domain, Object image) {
         super();
@@ -99,7 +102,12 @@ public class TrustedDomain {
         return image;
     }
 
-    public boolean matches(String host){
-        return pattern.matcher(host).matches();
+    /**
+     * Checks whether this trusted domain matches the given domain
+     * @param domain
+     * @return
+     */
+    public boolean matches(String domain){
+        return pattern.matcher(domain).matches();
     }
 }
