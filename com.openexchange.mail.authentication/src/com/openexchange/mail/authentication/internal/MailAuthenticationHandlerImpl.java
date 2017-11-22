@@ -165,7 +165,7 @@ public class MailAuthenticationHandlerImpl implements MailAuthenticationHandler 
         String[] authHeaders = headerCollection.getHeader(MailAuthenticationHandler.AUTH_RESULTS_HEADER);
         if (authHeaders == null || authHeaders.length == 0) {
             // TODO: Pass on to custom handlers; return neutral status for now
-            mailMessage.setMailAuthenticationResult(new MailAuthenticationResult());
+            mailMessage.setMailAuthenticationResult(MailAuthenticationResult.NEUTRAL_RESULT);
             return;
         }
 
@@ -174,7 +174,7 @@ public class MailAuthenticationHandlerImpl implements MailAuthenticationHandler 
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.mail.authentication.MailAuthenticationHandler#getRequiredFields()
      */
     @Override
@@ -184,7 +184,7 @@ public class MailAuthenticationHandlerImpl implements MailAuthenticationHandler 
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.mail.authentication.MailAuthenticationHandler#getRequiredHeaders()
      */
     @Override
@@ -201,13 +201,11 @@ public class MailAuthenticationHandlerImpl implements MailAuthenticationHandler 
      * @return
      */
     private MailAuthenticationResult parseHeaders(String[] authHeaders) {
-        MailAuthenticationResult result = new MailAuthenticationResult();
-
         // There can only be one, if there are more only the first one is relevant
         List<String> split = splitLines(authHeaders[0]);
         if (split.isEmpty()) {
             // Huh? Invalid/Malformed authentication results header, return as is
-            return result;
+            return MailAuthenticationResult.NEUTRAL_RESULT;
         }
 
         // The first property of the header MUST always be the domain (i.e. the authserv-id)
@@ -215,8 +213,10 @@ public class MailAuthenticationHandlerImpl implements MailAuthenticationHandler 
         String domain = cleanseVersion(split.get(0));
         if (!isValidDomain(domain)) {
             // Not a valid domain, thus we return with 'neutral' status
-            return result;
+            return MailAuthenticationResult.NEUTRAL_RESULT;
         }
+
+        MailAuthenticationResult.Builder result = MailAuthenticationResult.builder();
         result.setDomain(domain);
 
         // Get all attributes except the domain
@@ -228,14 +228,14 @@ public class MailAuthenticationHandlerImpl implements MailAuthenticationHandler 
 
         //TODO: add the remaining attributes as is to the result
 
-        return result;
+        return result.build();
     }
 
     /**
      * @param extractedMechanismResults
      * @param result
      */
-    private void parseMechanismResults(List<String> extractedMechanismResults, MailAuthenticationResult result) {
+    private void parseMechanismResults(List<String> extractedMechanismResults, MailAuthenticationResult.Builder result) {
         // Sort by ordinal
         Collections.sort(extractedMechanismResults, MAIL_AUTH_COMPARATOR);
         for (String extractedMechanism : extractedMechanismResults) {
@@ -317,7 +317,7 @@ public class MailAuthenticationHandlerImpl implements MailAuthenticationHandler 
 
     /**
      * Parses the specified line to a {@link Map}.
-     * 
+     *
      * @param line The line to parse
      * @return A {@link Map} with the key/value pairs of the line
      */
@@ -357,7 +357,7 @@ public class MailAuthenticationHandlerImpl implements MailAuthenticationHandler 
                         //Remove the key from the value buffer
                         valueBuffer.setLength(valueBuffer.length() - backtrackIndex);
                         pairs.put(key, valueBuffer.toString().trim());
-                        // Retain the new key (and reverse if that key came from backtracking) 
+                        // Retain the new key (and reverse if that key came from backtracking)
                         key = backtracking ? keyBuffer.reverse().toString() : keyBuffer.toString();
                         // Reset counters
                         keyBuffer.setLength(0);
@@ -398,7 +398,7 @@ public class MailAuthenticationHandlerImpl implements MailAuthenticationHandler 
 
     /**
      * Splits the parametrised header to lines
-     * 
+     *
      * @param header The header to split
      * @return A {@link List} with the split lines
      */

@@ -49,9 +49,9 @@
 
 package com.openexchange.mail.dataobjects;
 
-import java.util.Collections;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
+import com.google.common.collect.ImmutableSet;
 import com.openexchange.mail.authentication.MailAuthenticationStatus;
 import com.openexchange.mail.authentication.mechanism.MailAuthenticationMechanism;
 import com.openexchange.mail.authentication.mechanism.MailAuthenticationMechanismResult;
@@ -63,39 +63,92 @@ import com.openexchange.mail.authentication.mechanism.MailAuthenticationMechanis
  */
 public class MailAuthenticationResult {
 
-    /** The default status is NEUTRAL */
-    private MailAuthenticationStatus status = MailAuthenticationStatus.NEUTRAL;
-    private String domain;
+    /** The empty neutral authentication result */
+    public static MailAuthenticationResult NEUTRAL_RESULT = builder().build();
+
+    /**
+     * Creates a new builder instance.
+     *
+     * @return The new builder instance
+     */
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    /** The builder or instance of <code>MailAuthenticationResult</code> */
+    public static class Builder {
+
+        private MailAuthenticationStatus status;
+        private String domain;
+        private final Set<MailAuthenticationMechanism> mailAuthenticationMechanisms;
+        private final Set<MailAuthenticationMechanismResult> mailAuthenticationMechanismResults;
+
+        /**
+         * Initializes a new {@link Builder}.
+         */
+        Builder() {
+            super();
+            status = MailAuthenticationStatus.NEUTRAL;
+            mailAuthenticationMechanismResults = new LinkedHashSet<>();
+            mailAuthenticationMechanisms = new LinkedHashSet<>();
+        }
+
+        /**
+         * Adds the specified {@link MailAuthenticationMechanismResult} to the overall result {@link Set}
+         *
+         * @param result The {@link MailAuthenticationMechanismResult} to add
+         * @return This builder
+         */
+        public Builder addResult(MailAuthenticationMechanismResult result) {
+            mailAuthenticationMechanisms.add(result.getMechanism());
+            mailAuthenticationMechanismResults.add(result);
+            return this;
+        }
+
+        /**
+         * Sets the domain
+         *
+         * @param domain The domain to set
+         * @return This builder
+         */
+        public Builder setDomain(String domain) {
+            this.domain = domain;
+            return this;
+        }
+
+        /**
+         * Sets the status of the entire mail authentication
+         *
+         * @param status The status to set
+         * @return This builder
+         */
+        public Builder setStatus(MailAuthenticationStatus status) {
+            this.status = status;
+            return this;
+        }
+
+        public MailAuthenticationResult build() {
+            return new MailAuthenticationResult(status, domain, ImmutableSet.copyOf(mailAuthenticationMechanisms), ImmutableSet.copyOf(mailAuthenticationMechanismResults));
+        }
+
+    }
+
+    // ---------------------------------------------------------------------------------------------------------
+
+    private final MailAuthenticationStatus status;
+    private final String domain;
     private final Set<MailAuthenticationMechanism> mailAuthenticationMechanisms;
     private final Set<MailAuthenticationMechanismResult> mailAuthenticationMechanismResults;
 
     /**
-     * Initialises a new {@link MailAuthenticationResult}.
+     * Initializes a new {@link MailAuthenticationResult}.
      */
-    public MailAuthenticationResult() {
+    MailAuthenticationResult(MailAuthenticationStatus status, String domain, ImmutableSet<MailAuthenticationMechanism> mailAuthenticationMechanisms, ImmutableSet<MailAuthenticationMechanismResult> mailAuthenticationMechanismResults) {
         super();
-        mailAuthenticationMechanismResults = new HashSet<>();
-        mailAuthenticationMechanisms = new HashSet<>();
-    }
-
-    /**
-     * Adds the specified {@link MailAuthenticationMechanismResult} to the overall
-     * result {@link Set}
-     * 
-     * @param result The {@link MailAuthenticationMechanismResult} to add
-     */
-    public void addResult(MailAuthenticationMechanismResult result) {
-        mailAuthenticationMechanisms.add(result.getMechanism());
-        mailAuthenticationMechanismResults.add(result);
-    }
-
-    /**
-     * Sets the domain
-     *
-     * @param domain The domain to set
-     */
-    public void setDomain(String domain) {
+        this.status = status;
         this.domain = domain;
+        this.mailAuthenticationMechanisms = mailAuthenticationMechanisms;
+        this.mailAuthenticationMechanismResults = mailAuthenticationMechanismResults;
     }
 
     /**
@@ -117,21 +170,12 @@ public class MailAuthenticationResult {
     }
 
     /**
-     * Sets the status of the entire mail authentication
-     *
-     * @param status The status to set
-     */
-    public void setStatus(MailAuthenticationStatus status) {
-        this.status = status;
-    }
-
-    /**
      * Returns an unmodifiable {@link Set} with the used mail authentication mechanisms
      *
      * @return an unmodifiable {@link Set} with the used mail authentication mechanisms
      */
     public Set<MailAuthenticationMechanism> getAuthenticationMechanisms() {
-        return Collections.unmodifiableSet(mailAuthenticationMechanisms);
+        return mailAuthenticationMechanisms;
     }
 
     /**
@@ -140,14 +184,9 @@ public class MailAuthenticationResult {
      * @return an unmodifiable {@link Set} with the results of the used mail authentication mechanisms
      */
     public Set<MailAuthenticationMechanismResult> getMailAuthenticationMechanismResults() {
-        return Collections.unmodifiableSet(mailAuthenticationMechanismResults);
+        return mailAuthenticationMechanismResults;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.lang.Object#toString()
-     */
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();

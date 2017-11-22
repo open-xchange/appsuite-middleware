@@ -5,7 +5,10 @@ Bundle-SymbolicName: com.openexchange.mail.authentication
 Bundle-Version: 7.10
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Import-Package: com.openexchange.java,
+Import-Package: com.google.common.annotations,
+ com.google.common.base,
+ com.google.common.collect,
+ com.openexchange.java,
  com.openexchange.mail,
  com.openexchange.mail.authentication,
  com.openexchange.mail.authentication.mechanism,
