@@ -258,7 +258,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
         String domain = cleanseDomain(split.get(0));
         if (!isValidDomain(domain)) {
             // Not a valid domain, thus we return with 'neutral' status
-            //return MailAuthenticationResult.NEUTRAL_RESULT;
+            return MailAuthenticityResult.NEUTRAL_RESULT;
         }
 
         MailAuthenticityResult.Builder result = MailAuthenticityResult.builder();
