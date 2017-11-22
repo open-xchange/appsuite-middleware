@@ -518,12 +518,12 @@ public abstract class MailMessage extends MailPart {
      */
     private SecurityResult securityResult;
     private boolean b_securityResult;
-    
+
     /**
      * Email authentication results
      */
-    private MailAuthenticationResult mailAuthResult;
-    private boolean b_mailAuthResult;
+    private MailAuthenticationResult authenticationResult;
+    private boolean b_authenticationResult;
 
     /**
      * The text preview
@@ -2146,48 +2146,48 @@ public abstract class MailMessage extends MailPart {
     }
 
     /**
-     * Sets the given mail authentication result.
+     * Sets the given authentication result for this mail.
      *
-     * @param result The mail authentication result to set
+     * @param result The authentication result to set
      */
-    public void setMailAuthenticationResult(MailAuthenticationResult result) {
-        this.mailAuthResult = result;
-        b_mailAuthResult = true;
+    public void setAuthenticationResult(MailAuthenticationResult authenticationResult) {
+        this.authenticationResult = authenticationResult;
+        b_authenticationResult = true;
     }
 
     /**
-     * Gets the mail authentication result
+     * Gets the authentication result for this mail.
      *
-     * @return The mail authentication result or <code>null</code> if not set
+     * @return The authentication result or <code>null</code> if not set
      */
-    public MailAuthenticationResult getMailAuthenticationResult() {
-        return this.mailAuthResult;
+    public MailAuthenticationResult getAuthenticationResult() {
+        return this.authenticationResult;
     }
 
     /**
-     * Checks if mail authentication result is available
+     * Checks if authentication result is available.
      *
      * @return <code>true</code> if available; otherwise <code>false</code>
      */
-    public boolean hasMailAuthenticationResult() {
-        return mailAuthResult != null;
+    public boolean hasAuthenticationResult() {
+        return authenticationResult != null;
     }
 
     /**
-     * Checks if mail authentication result has been set
+     * Checks if authentication result has been set for this mail.
      *
      * @return <code>true</code> if set; otherwise <code>false</code>
      */
-    public boolean containsMailAuthenticationResult() {
-        return b_mailAuthResult;
+    public boolean containsAuthenticationResult() {
+        return b_authenticationResult;
     }
 
     /**
-     * Removes the mail authentication result.
+     * Removes the authentication result from this mail.
      */
-    public void removeMailAuthenticationResult() {
-        this.mailAuthResult = null;
-        b_mailAuthResult = false;
+    public void removeAuthenticationResult() {
+        this.authenticationResult = null;
+        b_authenticationResult = false;
     }
 
     /**

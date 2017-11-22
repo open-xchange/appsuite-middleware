@@ -59,27 +59,29 @@ public enum MailAuthenticationStatus {
     /**
      * Passed authentication status
      */
-    PASS("Pass"),
+    PASS("Pass", "pass"),
     /**
      * Failed authentication status
      */
-    FAIL("Fail"),
+    FAIL("Fail", "fail"),
     /**
      * Cannot determine status, or temporary errors occurred
      */
-    NEUTRAL("Neutral"),
+    NEUTRAL("Neutral", "neutral"),
     /**
-     * Nothing has been analysed
+     * Nothing has been analyzed
      */
-    NOT_ANALYZED("Not Analyzed");
+    NOT_ANALYZED("Not Analyzed", "not_analyzed");
 
     private final String displayName;
+    private final String technicalName;
 
     /**
      * Initialises a new {@link MailAuthenticationStatus}.
      */
-    private MailAuthenticationStatus(String displayName) {
+    private MailAuthenticationStatus(String displayName, String technicalName) {
         this.displayName = displayName;
+        this.technicalName = technicalName;
     }
 
     /**
@@ -93,10 +95,10 @@ public enum MailAuthenticationStatus {
 
     /**
      * Returns the technical name of the AuthenticationStatus
-     * 
+     *
      * @return the technical name of the AuthenticationStatus
      */
     public String getTechnicalName() {
-        return name().toLowerCase();
+        return technicalName;
     }
 }

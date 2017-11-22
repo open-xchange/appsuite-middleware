@@ -62,71 +62,63 @@ public enum DKIMResult implements AuthenticationMechanismResult {
     /**
      * The message was not signed.
      */
-    NONE("None"),
+    NONE("None", "none"),
     /**
      * The message was signed, the signature or signatures were
      * acceptable to the ADMD, and the signature(s) passed verification
      * tests.
      */
-    PASS("Pass"),
+    PASS("Pass", "pass"),
     /**
      * The message was signed and the signature or signatures were
      * acceptable to the ADMD, but they failed the verification test(s).
      */
-    FAIL("Fail"),
+    FAIL("Fail", "fail"),
     /**
      * The message was signed, but some aspect of the signature or
      * signatures was not acceptable to the ADMD.
      */
-    POLICY("Policy"),
+    POLICY("Policy", "policy"),
     /**
      * The message was signed, but the signature or signatures
      * contained syntax errors or were not otherwise able to be
      * processed. This result is also used for other failures not
      * covered elsewhere in this list.
-     * 
+     *
      */
-    NEUTRAL("Neutral"),
+    NEUTRAL("Neutral", "neutral"),
     /**
      * The message could not be verified due to some error that
      * is likely transient in nature, such as a temporary inability to
      * retrieve a public key. A later attempt may produce a final
      * result.
      */
-    TEMPERROR("Temporary Error"),
+    TEMPERROR("Temporary Error", "temperror"),
     /**
      * The message could not be verified due to some error that
      * is unrecoverable, such as a required header field being absent. A
      * later attempt is unlikely to produce a final result.
      */
-    PERMFAIL("Permanent Failure");
+    PERMFAIL("Permanent Failure", "permfail");
 
     private final String displayName;
+    private final String technicalName;
 
     /**
      * Initialises a new {@link DKIMResult}.
      */
-    private DKIMResult(String displayName) {
+    private DKIMResult(String displayName, String technicalName) {
         this.displayName = displayName;
+        this.technicalName = technicalName;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.mail.authentication.AuthenticationMechanismResult#getDisplayName()
-     */
     @Override
     public String getDisplayName() {
         return displayName;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.mail.authentication.AuthenticationMechanismResult#getTechnicalName()
-     */
     @Override
     public String getTechnicalName() {
-        return name().toLowerCase();
+        return technicalName;
     }
 }

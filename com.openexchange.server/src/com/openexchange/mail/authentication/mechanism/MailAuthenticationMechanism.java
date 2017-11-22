@@ -59,17 +59,29 @@ import com.openexchange.mail.authentication.mechanism.spf.SPFResult;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public enum MailAuthenticationMechanism {
-    DMARC(DMARCResult.class),
-    DKIM(DKIMResult.class),
-    SPF(SPFResult.class);
+
+    DMARC("DMARC", DMARCResult.class),
+    DKIM("DKIM", DKIMResult.class),
+    SPF("SPF", SPFResult.class);
 
     private final Class<? extends AuthenticationMechanismResult> resultType;
+    private final String displayName;
 
     /**
-     * Initialises a new {@link MailAuthenticationMechanism}.
+     * Initializes a new {@link MailAuthenticationMechanism}.
      */
-    private MailAuthenticationMechanism(Class<? extends AuthenticationMechanismResult> resultType) {
+    private MailAuthenticationMechanism(String displayName, Class<? extends AuthenticationMechanismResult> resultType) {
+        this.displayName = displayName;
         this.resultType = resultType;
+    }
+
+    /**
+     * Gets the display name
+     *
+     * @return The display name
+     */
+    public String getDisplayName() {
+        return displayName;
     }
 
     /**

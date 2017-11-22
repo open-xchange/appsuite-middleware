@@ -60,38 +60,30 @@ public enum DMARCResult implements AuthenticationMechanismResult {
     /**
      * Passed the DMARC check
      */
-    PASS("Pass"),
+    PASS("Pass", "pass"),
     /**
      * Failed the DMARC check
      */
-    FAIL("Fail");
+    FAIL("Fail", "fail");
 
     private final String displayName;
+    private final String technicalName;
 
     /**
      * Initialises a new {@link DMARCResult}.
      */
-    private DMARCResult(String displayName) {
+    private DMARCResult(String displayName, String technicalName) {
         this.displayName = displayName;
+        this.technicalName = technicalName;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.mail.authentication.AuthenticationMechanismResult#getDisplayName()
-     */
     @Override
     public String getDisplayName() {
         return displayName;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.mail.authentication.AuthenticationMechanismResult#getTechnicalName()
-     */
     @Override
     public String getTechnicalName() {
-        return name().toLowerCase();
+        return technicalName;
     }
 }

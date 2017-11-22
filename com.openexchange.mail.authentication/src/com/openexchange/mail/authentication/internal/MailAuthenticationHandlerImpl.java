@@ -165,11 +165,11 @@ public class MailAuthenticationHandlerImpl implements MailAuthenticationHandler 
         String[] authHeaders = headerCollection.getHeader(MailAuthenticationHandler.AUTH_RESULTS_HEADER);
         if (authHeaders == null || authHeaders.length == 0) {
             // TODO: Pass on to custom handlers; return neutral status for now
-            mailMessage.setMailAuthenticationResult(MailAuthenticationResult.NEUTRAL_RESULT);
+            mailMessage.setAuthenticationResult(MailAuthenticationResult.NEUTRAL_RESULT);
             return;
         }
 
-        mailMessage.setMailAuthenticationResult(parseHeaders(authHeaders));
+        mailMessage.setAuthenticationResult(parseHeaders(authHeaders));
     }
 
     /*
