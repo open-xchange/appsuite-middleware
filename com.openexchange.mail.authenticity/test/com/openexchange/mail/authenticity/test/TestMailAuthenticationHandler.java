@@ -81,30 +81,22 @@ import com.openexchange.mail.mime.HeaderCollection;
 @RunWith(PowerMockRunner.class)
 public class TestMailAuthenticationHandler {
 
-    public static void main(String[] args) {
-        //String[] authHeaders = { "mx.xyz.com; dkim=pass header.i=@open-xchange.com header.s=201705 header.b=VvWVD9kg; dkim=pass header.i=@open-xchange.com header.s=201705 header.b=0WC5u+VZ; dkim=pass header.i=@open-xchange.com header.s=201705 header.b=doOaQjgp; spf=pass (xyz.com: domain of jane.doe@open-xchange.com designates 1.2.3.4 as permitted sender) smtp.mailfrom=jane.doe@open-xchange.com; dmarc=pass (p=NONE sp=NONE dis=NONE) header.from=open-xchange.com" };
-        String[] authHeaders = { "mx1.open-xchange.com; dkim=pass reason=\"1024-bit key; unprotected key\" header.d=ox.io header.i=@ox.io header.b=lolhN/LS; dkim-adsp=pass; dkim-atps=neutral" };
-        MailAuthenticityHandlerImpl m = new MailAuthenticityHandlerImpl();
-        //MailAuthenticationResult r = m.parseHeaders(authHeaders);
-        //System.err.println(r);
-
-        String b = "spf=pass (xyz.com: domain of jane.doe@open-xchange.com designates 1.2.3.4 as permitted sender) smtp.mailfrom=jane.doe@open-xchange.com";
-        String a = "dkim=temperror (no key for signature) header.i=@foo.com header.s=e header.b=Sw4o2uM4";
-        String c = "blah";
-        String d = "key=value key2=value2 key3=value3";
-
-        //System.out.println(m.parseLine(a));
-        //System.out.println(m.parseLine(b));
-        //System.out.println(m.parseLine(c));
-        //System.out.println(m.parseLine(d));
-    }
-
     private MailMessage mailMessage;
     private HeaderCollection headerCollection;
     private ArgumentCaptor<MailAuthenticityResult> argumentCaptor;
     private MailAuthenticityHandler handler;
     private MailAuthenticityResult result;
 
+    /**
+     * Initialises a new {@link TestMailAuthenticationHandler}.
+     */
+    public TestMailAuthenticationHandler() {
+        super();
+    }
+
+    /**
+     * Sets up the test case
+     */
     @Before
     public void setUpTest() {
         argumentCaptor = ArgumentCaptor.forClass(MailAuthenticityResult.class);
