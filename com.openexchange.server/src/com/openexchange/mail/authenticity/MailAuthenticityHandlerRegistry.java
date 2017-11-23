@@ -76,7 +76,7 @@ public interface MailAuthenticityHandlerRegistry {
      * Tests if mail authenticity verification is enabled for session-associated user
      *
      * @param session The user's session
-     * @return <code>true</code> if enabled; otherwise <code>false</code> if disbaled
+     * @return <code>true</code> if enabled; otherwise <code>false</code> if disabled
      * @throws OXExceptionIf test fails
      */
     boolean isEnabledFor(Session session) throws OXException;
