@@ -49,7 +49,6 @@
 
 package com.openexchange.mail.authenticity;
 
-import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.osgi.annotation.SingletonService;
 import com.openexchange.session.Session;
@@ -93,12 +92,12 @@ public interface MailAuthenticityHandlerRegistry {
     long getDateThreshold(Session session) throws OXException;
 
     /**
-     * Gets a sorted listing of applicable handlers
+     * Gets the highest-ranked handler for session-associated user.
      *
      * @param session The user's session
-     * @return The sorted listing
+     * @return The highest-ranked handler or <code>null</code>
      * @throws OXException If sorted listing cannot be returned
      */
-    List<MailAuthenticityHandler> getSortedApplicableHandlersFor(Session session) throws OXException;
+    MailAuthenticityHandler getHighestRankedHandlerFor(Session session) throws OXException;
 
 }

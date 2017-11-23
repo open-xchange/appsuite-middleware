@@ -1525,11 +1525,9 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             {
                 MailAuthenticityHandlerRegistry authenticityHandlerRegistry = ServerServiceRegistry.getInstance().getService(MailAuthenticityHandlerRegistry.class);
                 if (null != authenticityHandlerRegistry) {
-                    List<MailAuthenticityHandler> handlers = authenticityHandlerRegistry.getSortedApplicableHandlersFor(session);
-                    if (null != handlers && !handlers.isEmpty()) {
-                        for (MailAuthenticityHandler handler : handlers) {
-                            handler.handle(session, mail);
-                        }
+                    MailAuthenticityHandler handler = authenticityHandlerRegistry.getHighestRankedHandlerFor(session);
+                    if (null != handler) {
+                        handler.handle(session, mail);
                     }
                 }
             }

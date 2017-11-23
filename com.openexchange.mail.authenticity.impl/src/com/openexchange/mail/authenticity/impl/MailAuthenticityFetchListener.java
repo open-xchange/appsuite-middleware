@@ -52,7 +52,6 @@ package com.openexchange.mail.authenticity.impl;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import com.openexchange.exception.OXException;
@@ -75,7 +74,7 @@ import com.openexchange.session.Session;
  */
 public class MailAuthenticityFetchListener implements MailFetchListener {
 
-    private static final String STATE_PARAM_HANDLERS = "mail.authenticity.handlers";
+    private static final String STATE_PARAM_HANDLER = "mail.authenticity.handler";
 
     private final MailAuthenticityHandlerRegistry handlerRegistry;
 
@@ -89,13 +88,19 @@ public class MailAuthenticityFetchListener implements MailFetchListener {
 
     @Override
     public boolean accept(MailMessage[] mailsFromCache, MailFetchArguments fetchArguments, Session session) throws OXException {
-        if (handlerRegistry.isNotEnabledFor(session) || (false == new MailFields(fetchArguments.getFields()).contains(MailField.AUTHENTICATION_RESULTS))) {
+        if (false == new MailFields(fetchArguments.getFields()).contains(MailField.AUTHENTICATION_RESULTS)) {
+            return true;
+        }
+
+        MailAuthenticityHandler handler = handlerRegistry.getHighestRankedHandlerFor(session);
+        if (null == handler) {
             return true;
         }
 
         long threshold = handlerRegistry.getDateThreshold(session);
         for (MailMessage mail : mailsFromCache) {
             if (false == mail.hasAuthenticityResult() && (threshold <= 0 || mail.getReceivedDate().getTime() >= threshold)) {
+                // Should hold an authenticity result
                 return false;
             }
         }
@@ -110,15 +115,15 @@ public class MailAuthenticityFetchListener implements MailFetchListener {
             return MailAttributation.NOT_APPLICABLE;
         }
 
-        List<MailAuthenticityHandler> handlers = handlerRegistry.getSortedApplicableHandlersFor(session);
-        if (null == handlers || handlers.isEmpty()) {
+        MailAuthenticityHandler handler = handlerRegistry.getHighestRankedHandlerFor(session);
+        if (null == handler) {
             return MailAttributation.NOT_APPLICABLE;
         }
 
         MailFields fields = null == fetchArguments.getFields() ? new MailFields() : new MailFields(fetchArguments.getFields());
         fields.add(MailField.RECEIVED_DATE);
         Set<String> headerNames = null == fetchArguments.getHeaderNames() ? new LinkedHashSet<>() : new LinkedHashSet<>(Arrays.asList(fetchArguments.getHeaderNames()));
-        for (MailAuthenticityHandler handler : handlers) {
+        {
             Collection<MailField> requiredFields = handler.getRequiredFields();
             if (null != requiredFields && !requiredFields.isEmpty()) {
                 for (MailField requiredField : requiredFields) {
@@ -133,21 +138,19 @@ public class MailAuthenticityFetchListener implements MailFetchListener {
             }
         }
 
-        state.put(STATE_PARAM_HANDLERS, handlers);
+        state.put(STATE_PARAM_HANDLER, handler);
         return MailAttributation.builder(fields.isEmpty() ? null : fields.toArray(), headerNames.isEmpty() ? null : headerNames.toArray(new String[headerNames.size()])).build();
     }
 
     @Override
     public MailFetchListenerResult onAfterFetch(MailMessage[] mails, boolean cacheable, Session session, Map<String, Object> state) throws OXException {
-        List<MailAuthenticityHandler> handlers = (List<MailAuthenticityHandler>) state.get(STATE_PARAM_HANDLERS);
-        if (null == handlers || handlers.isEmpty()) {
+        MailAuthenticityHandler handler = (MailAuthenticityHandler) state.get(STATE_PARAM_HANDLER);
+        if (null == handler) {
             return MailFetchListenerResult.neutral(mails, cacheable);
         }
 
         for (MailMessage mail : mails) {
-            for (MailAuthenticityHandler handler : handlers) {
-                handler.handle(session, mail);
-            }
+            handler.handle(session, mail);
         }
         return MailFetchListenerResult.neutral(mails, cacheable);
     }

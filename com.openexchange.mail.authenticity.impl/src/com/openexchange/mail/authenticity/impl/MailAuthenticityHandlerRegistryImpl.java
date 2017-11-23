@@ -113,16 +113,16 @@ public class MailAuthenticityHandlerRegistryImpl implements MailAuthenticityHand
     }
 
     @Override
-    public List<MailAuthenticityHandler> getSortedApplicableHandlersFor(Session session) throws OXException {
+    public MailAuthenticityHandler getHighestRankedHandlerFor(Session session) throws OXException {
         if (isNotEnabledFor(session)) {
             // Disabled per configuration
-            return Collections.emptyList();
+            return null;
         }
 
         List<MailAuthenticityHandler> snapshot = listing.getServiceList();
         if (snapshot == null || snapshot.isEmpty()) {
             // None registered
-            return Collections.emptyList();
+            return null;
         }
 
         long threshold = getDateThreshold(session);
@@ -135,11 +135,11 @@ public class MailAuthenticityHandlerRegistryImpl implements MailAuthenticityHand
 
         if (applicableHandlers.isEmpty()) {
             // No suitable handler found
-            return Collections.emptyList();
+            return null;
         }
 
         Collections.sort(applicableHandlers, comparator);
-        return applicableHandlers;
+        return applicableHandlers.get(0);
     }
 
 }
