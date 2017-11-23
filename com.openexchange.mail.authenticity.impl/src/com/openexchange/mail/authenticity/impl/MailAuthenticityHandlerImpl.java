@@ -64,6 +64,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.MailField;
+import com.openexchange.mail.authenticity.DefaultMailAuthenticityResultKey;
 import com.openexchange.mail.authenticity.MailAuthenticityHandler;
 import com.openexchange.mail.authenticity.MailAuthenticityStatus;
 import com.openexchange.mail.authenticity.mechanism.MailAuthenticityMechanism;
@@ -181,7 +182,14 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
             return;
         }
 
-        mailMessage.setAuthenticityResult(parseHeaders(authHeaders));
+        String[] fromHeaders = headerCollection.getHeader("From"); // FIXME: Use the global constant
+        if (fromHeaders == null || fromHeaders.length == 0) {
+            // TODO: Pass on to custom handlers; return neutral status for now
+            mailMessage.setAuthenticityResult(MailAuthenticityResult.NEUTRAL_RESULT);
+            return;
+        }
+
+        mailMessage.setAuthenticityResult(parseHeaders(authHeaders, fromHeaders[0]));
     }
 
     /*
@@ -233,7 +241,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
      * @param authHeaders The authenticity headers to parse
      * @return The {@link MailAuthenticityResult}
      */
-    private MailAuthenticityResult parseHeaders(String[] authHeaders) {
+    private MailAuthenticityResult parseHeaders(String[] authHeaders, String fromHeader) {
         // There can only be one, if there are more only the first one is relevant
         List<String> split = splitLines(authHeaders[0]);
         if (split.isEmpty()) {
@@ -242,14 +250,22 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
         }
         // The first property of the header MUST always be the domain (i.e. the authserv-id)
         // See https://tools.ietf.org/html/rfc7601 for the formal definition
-        String authServId = split.get(0);
-        if (!isAuthServIdValid(authServId)) {
-            // The 'authserv-id' is not valid, thus we return with 'neutral' status
-            return MailAuthenticityResult.NEUTRAL_RESULT;
-        }
+        //String authServId = split.get(0);
+        //if (!isAuthServIdValid(authServId)) {
+        // The 'authserv-id' is not valid, thus we return with 'neutral' status
+        //return MailAuthenticityResult.NEUTRAL_RESULT;
+        //}
 
-        MailAuthenticityResult.Builder result = MailAuthenticityResult.builder();
-        //result.setDomain();
+        MailAuthenticityResult result = new MailAuthenticityResult(MailAuthenticityStatus.NEUTRAL);
+
+        try {
+            String domain = parseDomain(fromHeader);
+            result.addAttribute(DefaultMailAuthenticityResultKey.DOMAIN, domain);
+        } catch (Exception e) {
+            // Malformed from header, be strict and return with failed result
+            result.setStatus(MailAuthenticityStatus.FAIL);
+            return result;
+        }
 
         // Get all attributes except the domain
         List<String> authResultLines = new ArrayList<>(split.size() - 1);
@@ -260,16 +276,36 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
 
         //TODO: add the remaining attributes as is to the result
 
-        return result.build();
+        return result;
+    }
+
+    /**
+     * Parses the specified from header and returns the domain of the sender
+     * 
+     * @param fromHeader The from header
+     * @return The domain of the sender
+     * @throws IllegalArgumentException if the specified header does not contain any valid parsable internet address
+     */
+    private String parseDomain(String fromHeader) {
+        try {
+            InternetAddress ia = new InternetAddress(fromHeader, true);
+            String address = ia.getAddress();
+            int index = address.indexOf('@');
+            return address.substring(index + 1);
+        } catch (AddressException e) {
+            throw new IllegalArgumentException("The specified header does not contain any valid parsable internet addresses", e);
+        }
     }
 
     /**
      * @param extractedMechanismResults
      * @param result
      */
-    private void parseMechanismResults(List<String> extractedMechanismResults, MailAuthenticityResult.Builder result) {
+    private void parseMechanismResults(List<String> extractedMechanismResults, MailAuthenticityResult result) {
         // Sort by ordinal
         Collections.sort(extractedMechanismResults, MAIL_AUTH_COMPARATOR);
+        List<MailAuthenticityMechanismResult> results = new ArrayList<>();
+        List<MailAuthenticityMechanism> mechanisms = new ArrayList<>();
         for (String extractedMechanism : extractedMechanismResults) {
             String[] s = extractedMechanism.split("=");
             if (s.length == 0) {
@@ -286,8 +322,12 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
                 LOGGER.debug("Unknown mail authenticity status '{}'", mailAuthMechResult.getResult().getTechnicalName(), e);
                 result.setStatus(MailAuthenticityStatus.NEUTRAL);
             }
-            result.addResult(mailAuthMechResult);
+            mechanisms.add(mechanism);
+            results.add(mailAuthMechResult);
         }
+
+        result.addAttribute(DefaultMailAuthenticityResultKey.MAIL_AUTH_MECHS, mechanisms);
+        result.addAttribute(DefaultMailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS, results);
     }
 
     /**

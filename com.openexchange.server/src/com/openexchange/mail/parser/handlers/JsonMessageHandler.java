@@ -73,6 +73,7 @@ import org.json.JSONObject;
 import com.google.common.collect.ImmutableSet;
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.fields.FolderChildFields;
+import com.openexchange.ajax.tools.JSONCoercion;
 import com.openexchange.data.conversion.ical.ICalParser;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
@@ -528,24 +529,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
             return null;
         }
 
-        JSONObject jAuthenticationResult = new JSONObject(2);
-        jAuthenticationResult.put("status", authenticationResult.getStatus().getDisplayName());
-        jAuthenticationResult.put("domain", authenticationResult.getDomain());
-        {
-            List<MailAuthenticityMechanismResult> authenticationMechanismResults = authenticationResult.getMailAuthenticityMechanismResults();
-            JSONArray jAuthenticationMechanismResults = new JSONArray(authenticationMechanismResults.size());
-            for (MailAuthenticityMechanismResult authenticationMechanismResult : authenticationMechanismResults) {
-                JSONObject jAuthenticationMechanismResult = new JSONObject(4);
-                jAuthenticationMechanismResult.put("mechanism", authenticationMechanismResult.getMechanism().getDisplayName());
-                jAuthenticationMechanismResult.put("client_ip", authenticationMechanismResult.getClientIP());
-                jAuthenticationMechanismResult.put("domain", authenticationMechanismResult.getDomain());
-                jAuthenticationMechanismResult.put("result", new JSONObject(1).put("name", authenticationMechanismResult.getResult().getDisplayName()));
-                jAuthenticationMechanismResults.put(jAuthenticationMechanismResult);
-            }
-            jAuthenticationResult.put("authentication_results", jAuthenticationMechanismResults);
-        }
-
-        return jAuthenticationResult;
+        return (JSONObject) JSONCoercion.coerceToJSON(authenticationResult.getAttributes());
     }
 
     /**

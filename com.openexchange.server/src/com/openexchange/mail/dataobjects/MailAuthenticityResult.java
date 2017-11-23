@@ -49,13 +49,11 @@
 
 package com.openexchange.mail.dataobjects;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-import com.google.common.collect.ImmutableList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import com.openexchange.mail.authenticity.MailAuthenticityResultKey;
 import com.openexchange.mail.authenticity.MailAuthenticityStatus;
-import com.openexchange.mail.authenticity.mechanism.MailAuthenticityMechanism;
-import com.openexchange.mail.authenticity.mechanism.MailAuthenticityMechanismResult;
 
 /**
  * {@link MailAuthenticityResult} - The result of the overall mail authenticity validation.
@@ -64,111 +62,83 @@ import com.openexchange.mail.authenticity.mechanism.MailAuthenticityMechanismRes
  */
 public final class MailAuthenticityResult {
 
-    /** The empty neutral authenticity result */
-    public static MailAuthenticityResult NEUTRAL_RESULT = builder().build();
+    /** The default neutral result */
+    public static final MailAuthenticityResult NEUTRAL_RESULT = new MailAuthenticityResult(MailAuthenticityStatus.NEUTRAL);
+
+    /** Map holding information about the result that does not accept <code>null</code> values */
+    private final Map<MailAuthenticityResultKey, Object> attributes;
+
+    /** The overall status of the result */
+    private MailAuthenticityStatus status;
 
     /**
-     * Creates a new builder instance.
-     *
-     * @return The new builder instance
+     * Initialises a new {@link MailAuthenticityResult}.
      */
-    public static Builder builder() {
-        return new Builder();
-    }
-
-    /** The builder or instance of {@link MailAuthenticityResult} */
-    public static class Builder {
-
-        private MailAuthenticityStatus status;
-        private String domain;
-        private final List<MailAuthenticityMechanism> mailAuthenticityMechanisms;
-        private final List<MailAuthenticityMechanismResult> mailAuthenticityMechanismResults;
-
-        /**
-         * Initializes a new {@link Builder}.
-         */
-        Builder() {
-            super();
-            status = MailAuthenticityStatus.NEUTRAL;
-            mailAuthenticityMechanismResults = new ArrayList<>();
-            mailAuthenticityMechanisms = new ArrayList<>();
-        }
-
-        /**
-         * Adds the specified {@link MailAuthenticityMechanismResult} to the overall result {@link Set}
-         *
-         * @param result The {@link MailAuthenticityMechanismResult} to add
-         * @return This builder
-         */
-        public Builder addResult(MailAuthenticityMechanismResult result) {
-            if (!mailAuthenticityMechanisms.contains(result.getMechanism())) {
-                mailAuthenticityMechanisms.add(result.getMechanism());
-            }
-            mailAuthenticityMechanismResults.add(result);
-            return this;
-        }
-
-        /**
-         * Sets the domain
-         *
-         * @param domain The domain to set
-         * @return This builder
-         */
-        public Builder setDomain(String domain) {
-            this.domain = domain;
-            return this;
-        }
-
-        /**
-         * Sets the status of the entire mail authenticity
-         *
-         * @param status The status to set
-         * @return This builder
-         */
-        public Builder setStatus(MailAuthenticityStatus status) {
-            this.status = status;
-            return this;
-        }
-
-        /**
-         * Builds the {@link MailAuthenticityResult}
-         *
-         * @return the built {@link MailAuthenticityResult}
-         */
-        public MailAuthenticityResult build() {
-            return new MailAuthenticityResult(status, domain, ImmutableList.copyOf(mailAuthenticityMechanisms), ImmutableList.copyOf(mailAuthenticityMechanismResults));
-        }
-    }
-
-    // ---------------------------------------------------------------------------------------------------------
-
-    private final MailAuthenticityStatus status;
-    private final String domain;
-    private final List<MailAuthenticityMechanism> mailAuthenticityMechanisms;
-    private final List<MailAuthenticityMechanismResult> mailAuthenticityMechanismResults;
-
-    /**
-     * Initializes a new {@link MailAuthenticityResult}.
-     */
-    MailAuthenticityResult(MailAuthenticityStatus status, String domain, ImmutableList<MailAuthenticityMechanism> mailAuthenticityMechanisms, ImmutableList<MailAuthenticityMechanismResult> mailAuthenticityMechanismResults) {
+    public MailAuthenticityResult(MailAuthenticityStatus status) {
         super();
         this.status = status;
-        this.domain = domain;
-        this.mailAuthenticityMechanisms = mailAuthenticityMechanisms;
-        this.mailAuthenticityMechanismResults = mailAuthenticityMechanismResults;
+        attributes = new HashMap<>();
     }
 
     /**
-     * Gets the domain
-     *
-     * @return The domain
+     * Adds the specified key with the specified value
+     * 
+     * @param key The {@link MailAuthenticityResultKey}
+     * @param value The value to add
+     * @throws IllegalArgumentException if the value is <code>null</code>
      */
-    public String getDomain() {
-        return domain;
+    public void addAttribute(MailAuthenticityResultKey key, Object value) {
+        if (value == null) {
+            throw new IllegalArgumentException("The value cannot be 'null'");
+        }
+        attributes.put(key, value);
     }
 
     /**
-     * Gets the status of the entire mail authenticity
+     * Returns the value of the attribute that is stored under the
+     * specified {@link MailAuthenticityResultKey}
+     * 
+     * @param key The {@link MailAuthenticityResultKey}
+     * @return The value of the attribute
+     */
+    public Object getAttribute(MailAuthenticityResultKey key) {
+        return attributes.get(key);
+    }
+
+    /**
+     * Returns the value of the attribute that is stored under the
+     * specified {@link MailAuthenticityResultKey}, casted to the specified type
+     * 
+     * @param key The {@link MailAuthenticityResultKey}
+     * @param type The type to cast the value of the attribute to
+     * @return The casted value of the attribute or <code>null</code> if no such attribute exists or
+     *         if the value is not of the specified type.
+     */
+    public <T> T getAttribute(MailAuthenticityResultKey key, Class<T> type) {
+        if (!attributes.containsKey(key)) {
+            return null;
+        }
+        Object o = attributes.get(key);
+        if (o == null) {
+            return null;
+        }
+        if (!o.getClass().isAssignableFrom(type)) {
+            return null;
+        }
+        return type.cast(attributes.get(key));
+    }
+
+    /**
+     * Returns an unmodifiable {@link Map} with the attributes of the result
+     * 
+     * @return an unmodifiable {@link Map} with the attributes of the result
+     */
+    public Map<MailAuthenticityResultKey, Object> getAttributes() {
+        return Collections.unmodifiableMap(attributes);
+    }
+
+    /**
+     * Gets the overall status of the result
      *
      * @return The status
      */
@@ -177,33 +147,11 @@ public final class MailAuthenticityResult {
     }
 
     /**
-     * Returns an unmodifiable {@link List} with the used mail authenticity mechanisms
+     * Sets the overall status of the result
      *
-     * @return an unmodifiable {@link List} with the used mail authenticity mechanisms
+     * @param status The status to set
      */
-    public List<MailAuthenticityMechanism> getAuthenticityMechanisms() {
-        return mailAuthenticityMechanisms;
-    }
-
-    /**
-     * Returns an unmodifiable {@link List} with the results of the used mail authenticity mechanisms
-     *
-     * @return an unmodifiable {@link List} with the results of the used mail authenticity mechanisms
-     */
-    public List<MailAuthenticityMechanismResult> getMailAuthenticityMechanismResults() {
-        return mailAuthenticityMechanismResults;
-    }
-
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.lang.Object#toString()
-     */
-    @Override
-    public String toString() {
-        StringBuilder builder = new StringBuilder();
-        builder.append("MailAuthenticityResult [status=").append(status).append(", domain=").append(domain).append(", mailAuthenticityMechanisms=");
-        builder.append(mailAuthenticityMechanisms).append(", mailAuthenticityMechanismResults=").append(mailAuthenticityMechanismResults).append("]");
-        return builder.toString();
+    public void setStatus(MailAuthenticityStatus status) {
+        this.status = status;
     }
 }
