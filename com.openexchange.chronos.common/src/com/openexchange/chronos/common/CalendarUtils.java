@@ -382,7 +382,7 @@ public class CalendarUtils {
      * @return <code>true</code> if the attendee is internal, <code>false</code>, otherwise
      */
     public static boolean isInternalUser(Attendee attendee) {
-        return attendee.getCuType().equals(CalendarUserType.INDIVIDUAL) && attendee.getEntity() > 0;
+        return null != attendee && attendee.getCuType().equals(CalendarUserType.INDIVIDUAL) && attendee.getEntity() > 0;
     }
 
     /**
@@ -392,7 +392,7 @@ public class CalendarUtils {
      * @return <code>true</code> if the attendee is internal, <code>false</code>, otherwise
      */
     public static boolean isExternalUser(Attendee attendee) {
-        return attendee.getCuType().equals(CalendarUserType.INDIVIDUAL) && attendee.getEntity() == 0;
+        return null != attendee && attendee.getCuType().equals(CalendarUserType.INDIVIDUAL) && attendee.getEntity() == 0;
     }
 
     /**

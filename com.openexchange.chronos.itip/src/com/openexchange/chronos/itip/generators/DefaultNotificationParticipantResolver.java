@@ -77,6 +77,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.resource.Resource;
@@ -125,9 +126,10 @@ public class DefaultNotificationParticipantResolver implements NotificationParti
                 if (CalendarUtils.isInternalUser(participant)) {
                     userIds.put(I(participant.getEntity()), participant);
                 } else if (CalendarUtils.isExternalUser(participant)) {
-                    if (!externalGuardian.contains(participant.getEMail())) {
+                    String mail = CalendarUtils.extractEMailAddress(participant.getUri());
+                    if (!externalGuardian.contains(mail)) {
                         externalParticipants.add(participant);
-                        externalGuardian.add(participant.getEMail());
+                        externalGuardian.add(mail);
                     }
                 } else if (participant.getCuType().equals(CalendarUserType.RESOURCE)) {
                     resourceIds.add(I(participant.getEntity()));
@@ -136,7 +138,6 @@ public class DefaultNotificationParticipantResolver implements NotificationParti
         }
 
         if (original != null) {
-
             participants = original.getAttendees();
             if (participants != null) {
                 for (Attendee participant : participants) {
@@ -145,9 +146,10 @@ public class DefaultNotificationParticipantResolver implements NotificationParti
                             userIds.put(I(participant.getEntity()), participant);
                         }
                     } else if (CalendarUtils.isExternalUser(participant)) {
-                        if (!externalGuardian.contains(participant.getEMail())) {
+                        String mail = CalendarUtils.extractEMailAddress(participant.getUri());
+                        if (!externalGuardian.contains(mail)) {
                             externalParticipants.add(participant);
-                            externalGuardian.add(participant.getEMail());
+                            externalGuardian.add(mail);
                         }
                     }
                 }
@@ -345,13 +347,18 @@ public class DefaultNotificationParticipantResolver implements NotificationParti
         final List<Attendee> confirmations = appointment.getAttendees();
         if (confirmations != null) {
             for (Attendee p : confirmations) {
-                if (CalendarUtils.isExternalUser(p))
-                    statusMap.put(p.getEMail(), p);
+                String mail = CalendarUtils.extractEMailAddress(p.getUri());
+                if (null != mail && CalendarUtils.isExternalUser(p))
+                    statusMap.put(mail, p);
             }
         }
 
         for (Attendee e : externalParticipants) {
-            final String mail = e.getEMail();
+            final String mail = CalendarUtils.extractEMailAddress(e.getUri());
+            if (null == mail) {
+                LOG.warn("The attendee {} has no mail address to write to. Attendees URI is \"{}\" Skipping it.", e.getCn(), e.getUri());
+                continue;
+            }
             final ITipRole role = (mail.equalsIgnoreCase(organizer)) ? ITipRole.ORGANIZER : ITipRole.ATTENDEE;
 
             foundOrganizer = foundOrganizer || role == ITipRole.ORGANIZER;
@@ -360,7 +367,7 @@ public class DefaultNotificationParticipantResolver implements NotificationParti
             participant.setDisplayName(e.getCn());
             participant.setTimezone(appointment.getStartDate().getTimeZone());
             participant.setLocale(user.getLocale());
-            Attendee cp = statusMap.get(e.getEMail());
+            Attendee cp = statusMap.get(mail);
             if (cp != null) {
                 participant.setConfirmStatus(cp.getPartStat());
                 participant.setComment(cp.getComment());
@@ -409,16 +416,17 @@ public class DefaultNotificationParticipantResolver implements NotificationParti
             if (organizer == null) {
                 return userService.getUser(appointment.getCreatedBy().getEntity(), ctx);
             }
-            String organizerMail = organizer.getEMail();
-            if (organizerMail.startsWith("mailto:")) {
-                organizerMail = organizerMail.substring(7).toLowerCase();
-            }
-            try {
-                return userService.searchUser(organizerMail, ctx);
-            } catch (final OXException x) {
-                return null;
+            String organizerMail = CalendarUtils.extractEMailAddress(organizer.getUri());
+            if (null != organizerMail) {
+                try {
+                    return userService.searchUser(organizerMail, ctx);
+                } catch (final OXException x) {
+                    // Fall through
+                    LOG.debug("", x);
+                }
             }
         }
+        return null;
     }
 
     private String determineOrganizer(Event original, Event appointment, final Context ctx) throws OXException {
@@ -437,6 +445,7 @@ public class DefaultNotificationParticipantResolver implements NotificationParti
 
     @Override
     public List<NotificationParticipant> getAllParticipants(final List<NotificationParticipant> allRecipients, final Event appointment, final User user, final Context ctx) {
+        final List<NotificationParticipant> filtered = new ArrayList<NotificationParticipant>();
         final Set<Integer> userIds = new HashSet<Integer>();
         final List<Attendee> users = appointment.getAttendees();
         final Set<String> externals = new HashSet<String>();
@@ -445,22 +454,18 @@ public class DefaultNotificationParticipantResolver implements NotificationParti
                 if (CalendarUtils.isInternalUser(userParticipant)) {
                     userIds.add(I(userParticipant.getEntity()));
                 } else if (CalendarUtils.isExternalUser(userParticipant)) {
-                    externals.add(userParticipant.getEMail());
+                    externals.add(CalendarUtils.extractEMailAddress(userParticipant.getUri()));
+                }
+            }
+            for (final NotificationParticipant p : allRecipients) {
+                if (p.isExternal() && externals.contains(p.getEmail())) {
+                    filtered.add(p);
+                } else if (!p.isExternal() && !p.isResource() && userIds.contains(I(p.getUser().getId()))) {
+                    filtered.add(p);
                 }
             }
         }
-
-        final List<NotificationParticipant> filtered = new ArrayList<NotificationParticipant>();
-        for (final NotificationParticipant p : allRecipients) {
-            if (p.isExternal() && externals.contains(p.getEmail().toLowerCase())) {
-                filtered.add(p);
-            } else if (!p.isExternal() && !p.isResource() && userIds.contains(I(p.getUser().getId()))) {
-                filtered.add(p);
-            }
-        }
-
         return filtered;
-
     }
 
     @Override
@@ -471,10 +476,14 @@ public class DefaultNotificationParticipantResolver implements NotificationParti
         }
         final List<NotificationParticipant> resourceParticipants = new ArrayList<NotificationParticipant>();
         for (final Attendee resource : resources) {
-
-            final NotificationParticipant np = new NotificationParticipant(ITipRole.ATTENDEE, false, resource.getEMail());
-            np.setDisplayName(resource.getCn());
-            resourceParticipants.add(np);
+            String email = CalendarUtils.extractEMailAddress(resource.getUri());
+            if (Strings.isNotEmpty(email)) {
+                final NotificationParticipant np = new NotificationParticipant(ITipRole.ATTENDEE, false, email);
+                np.setDisplayName(resource.getCn());
+                resourceParticipants.add(np);
+            } else {
+                LOG.debug("Resource {} has no mail address.", resource.getCn());
+            }
         }
         return resourceParticipants;
     }
