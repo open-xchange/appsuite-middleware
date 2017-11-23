@@ -105,7 +105,6 @@ import com.openexchange.chronos.service.SortOrder;
 import com.openexchange.chronos.service.TimestampedResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXException.ProblematicAttribute;
-import com.openexchange.groupware.tools.alias.UserAliasUtility;
 import com.openexchange.groupware.tools.mappings.Mapping;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.TimeZones;
@@ -1593,59 +1592,5 @@ public class CalendarUtils {
             throw CalendarExceptionCodes.ATTENDEE_NOT_FOUND.create(I(calendarUser), event.getId());
         }
         return userAttendee.getFolderId();
-    }
-
-    /**
-     * Get the mail address of an attendee. If the attendee was invited with an alias the alias is returned, otherwise the mail address
-     * stored in the attendee.
-     * 
-     * @param attendee The attendee to get the mail address from
-     * @param defaultMail A default mail address if the address can't be received by the attendee data
-     * @return The mail address to response to as {@link String}
-     */
-    public static String getResponseMail(Attendee attendee, String defaultMail) {
-        if (null == attendee || false == isInternal(attendee)) {
-            // Nothing to do ..
-            return defaultMail;
-        }
-        if (attendee.containsUri() && attendee.getUri().startsWith("mailto:")) {
-            return extractEMailAddress(attendee.getUri());
-        }
-        return attendee.containsEMail() ? attendee.getEMail() : defaultMail;
-    }
-
-    /**
-     * Get the mail address of an attendee. If the attendee was invited with an alias the alias is returned, otherwise the mail address
-     * stored in the attendee or the mail address of the user is returned.
-     * 
-     * @param attendee The attendee to get the mail address from
-     * @param defaultMail A default mail address if the address can't be received by the attendee data
-     * @param aliases The aliases of a specific user
-     * @return The mail address to response to as {@link String}
-     */
-    public static String getResponseMail(Attendee attendee, String defaultMail, String[] aliases) {
-        String alias = getResponseMail(attendee, defaultMail);
-        if (UserAliasUtility.isAlias(alias, aliases)) {
-            return alias;
-        }
-        return attendee.containsEMail() ? attendee.getEMail() : defaultMail;
-    }
-
-    /**
-     * If the attendee was invited with an alias the common name might not be the same as the internal display name for the associated user.
-     * Therefore this method decides based on the common name of the attendee which the correct display name is.
-     * 
-     * @param attendee The attendee
-     * @param defaultDisplayName The display name for the associated user
-     * @return The display name to use for the attendee
-     */
-    public static String getDisplayName(Attendee attendee, String defaultDisplayName) {
-        if (null != attendee && isInternal(attendee) && attendee.containsCn()) {
-            String commonName = attendee.getCn();
-            if (Strings.isNotEmpty(commonName) && false == commonName.equalsIgnoreCase(defaultDisplayName)) {
-                return commonName;
-            }
-        }
-        return defaultDisplayName;
     }
 }

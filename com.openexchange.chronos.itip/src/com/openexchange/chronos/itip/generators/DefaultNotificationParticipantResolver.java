@@ -58,7 +58,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.TimeZone;
 import org.slf4j.Logger;
@@ -174,7 +173,7 @@ public class DefaultNotificationParticipantResolver implements NotificationParti
         for (final User u : participantUsers) {
             final int id = u.getId();
             Attendee userParticipant = userIds.get(I(id));
-            final String mail = CalendarUtils.getResponseMail(userParticipant, u.getMail(), u.getAliases());
+            final String mail = CalendarUtils.extractEMailAddress(userParticipant.getUri());
 
             final Set<ITipRole> roles = EnumSet.noneOf(ITipRole.class);
 
@@ -193,7 +192,7 @@ public class DefaultNotificationParticipantResolver implements NotificationParti
             foundOnBehalfOf = foundOnBehalfOf || id == onBehalfOf.getId();
             foundPrincipal = foundPrincipal || roles.contains(ITipRole.PRINCIPAL);
 
-            participant.setDisplayName(CalendarUtils.getDisplayName(userParticipant, u.getDisplayName()));
+            participant.setDisplayName(userParticipant.getCn());
             participant.setLocale(u.getLocale());
             participant.setTimezone(TimeZone.getTimeZone(u.getTimeZone()));
             if (userParticipant != null) {
@@ -433,12 +432,7 @@ public class DefaultNotificationParticipantResolver implements NotificationParti
             final User owner = userService.getUser(appointment.getCreatedBy().getEntity(), ctx);
             return owner == null ? "unknown" : owner.getMail();
         }
-        try {
-            return CalendarUtils.getResponseMail(appointment.getAttendees().stream().filter(a -> a.getEntity() == organizer.getEntity()).findFirst().get(), organizer.getEMail());
-        } catch (NoSuchElementException e) {
-            LOG.debug("Couldn't find the organizer in the attendees list.", e);
-        }
-        return organizer.getEMail();
+        return CalendarUtils.extractEMailAddress(organizer.getUri());
     }
 
     @Override
