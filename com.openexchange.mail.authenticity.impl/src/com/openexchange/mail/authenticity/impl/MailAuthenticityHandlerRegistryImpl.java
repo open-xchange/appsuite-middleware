@@ -50,12 +50,16 @@
 package com.openexchange.mail.authenticity.impl;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.authenticity.MailAuthenticityHandler;
 import com.openexchange.mail.authenticity.MailAuthenticityHandlerRegistry;
 import com.openexchange.osgi.ServiceListing;
 import com.openexchange.session.Session;
+import com.openexchange.session.UserAndContext;
 
 /**
  * {@link MailAuthenticityHandlerRegistryImpl}
@@ -67,6 +71,7 @@ public class MailAuthenticityHandlerRegistryImpl implements MailAuthenticityHand
 
     private final ServiceListing<MailAuthenticityHandler> listing;
     private final LeanConfigurationService leanConfigService;
+    private final Cache<UserAndContext, Config> configCache;
 
     /**
      * Initializes a new {@link MailAuthenticityHandlerRegistryImpl}.
@@ -75,6 +80,28 @@ public class MailAuthenticityHandlerRegistryImpl implements MailAuthenticityHand
         super();
         this.listing = listing;
         this.leanConfigService = leanConfigService;
+        configCache = CacheBuilder.newBuilder().maximumSize(65536).expireAfterWrite(30, TimeUnit.MINUTES).build();
+    }
+
+    /**
+     * Clears the config cache.
+     */
+    public void invalidateCache() {
+        configCache.invalidateAll();
+    }
+
+    private Config getConfig(Session session) {
+        int userId = session.getUserId();
+        int contextId = session.getContextId();
+        UserAndContext key = UserAndContext.newInstance(userId, contextId);
+        Config config = configCache.getIfPresent(key);
+        if (null == config) {
+            boolean enabled = leanConfigService.getBooleanProperty(userId, contextId, MailAuthenticityProperty.enabled);
+            long dateThreshold = leanConfigService.getLongProperty(userId, contextId, MailAuthenticityProperty.threshold);
+            config = new Config(enabled, dateThreshold);
+            configCache.put(key, config);
+        }
+        return config;
     }
 
     @Override
@@ -84,12 +111,12 @@ public class MailAuthenticityHandlerRegistryImpl implements MailAuthenticityHand
 
     @Override
     public boolean isEnabledFor(Session session) throws OXException {
-        return leanConfigService.getBooleanProperty(session.getUserId(), session.getContextId(), MailAuthenticityProperty.enabled);
+        return getConfig(session).enabled;
     }
 
     @Override
     public long getDateThreshold(Session session) throws OXException {
-        return leanConfigService.getLongProperty(session.getUserId(), session.getContextId(), MailAuthenticityProperty.threshold);
+        return getConfig(session).dateThreshold;
     }
 
     @Override
@@ -114,6 +141,20 @@ public class MailAuthenticityHandlerRegistryImpl implements MailAuthenticityHand
         }
 
         return highestRankedHandler;
+    }
+
+    // --------------------------------------------------------------------------------------------------------------
+
+    private static class Config {
+
+        final boolean enabled;
+        final long dateThreshold;
+
+        Config(boolean enabled, long dateThreshold) {
+            super();
+            this.enabled = enabled;
+            this.dateThreshold = dateThreshold;
+        }
     }
 
 }

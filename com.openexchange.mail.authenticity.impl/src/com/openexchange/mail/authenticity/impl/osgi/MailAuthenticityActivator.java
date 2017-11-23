@@ -49,6 +49,9 @@
 
 package com.openexchange.mail.authenticity.impl.osgi;
 
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.ForcedReloadable;
+import com.openexchange.config.Interests;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.mail.MailFetchListener;
 import com.openexchange.mail.authenticity.MailAuthenticityHandler;
@@ -90,8 +93,21 @@ public class MailAuthenticityActivator extends HousekeepingActivator {
 
         openTrackers();
 
-        MailAuthenticityHandlerRegistryImpl registry = new MailAuthenticityHandlerRegistryImpl(handlerTracker, getService(LeanConfigurationService.class));
+        final MailAuthenticityHandlerRegistryImpl registry = new MailAuthenticityHandlerRegistryImpl(handlerTracker, getService(LeanConfigurationService.class));
         registerService(MailAuthenticityHandlerRegistry.class, registry);
+
+        registerService(ForcedReloadable.class, new ForcedReloadable() {
+
+            @Override
+            public void reloadConfiguration(ConfigurationService configService) {
+                registry.invalidateCache();
+            }
+
+            @Override
+            public Interests getInterests() {
+                return null;
+            }
+        });
 
         // It is OK to pass service references since 'stopOnServiceUnavailability' returns 'true'
         MailAuthenticityFetchListener fetchListener = new MailAuthenticityFetchListener(registry);
