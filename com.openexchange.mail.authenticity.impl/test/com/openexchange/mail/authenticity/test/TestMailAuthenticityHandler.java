@@ -149,7 +149,7 @@ public class TestMailAuthenticityHandler {
         assertEquals("The domain does not match", "example.com", result.getDomain());
         assertContains(MailAuthenticityMechanism.SPF);
         assertAmount(1);
-        
+
         assertAuthenticityMechanismResult(result.getMailAuthenticityMechanismResults().get(0), "example.net", SPFResult.PASS);
     }
 
@@ -318,6 +318,13 @@ public class TestMailAuthenticityHandler {
         assertEquals("The mail authenticity mechanism results amount does not match", amount, result.getMailAuthenticityMechanismResults().size());
     }
 
+    /**
+     * Asserts that the specified {@link MailAuthenticityMechanismResult} contains the expected domain and status result
+     * 
+     * @param actualMechanismResult The {@link MailAuthenticityMechanismResult}
+     * @param expectedDomain The expected domain
+     * @param expectedResult The expected result
+     */
     private void assertAuthenticityMechanismResult(MailAuthenticityMechanismResult actualMechanismResult, String expectedDomain, AuthenticityMechanismResult expectedResult) {
         assertEquals("The mechanism's domain does not match", expectedDomain, actualMechanismResult.getDomain());
         assertNotNull("The mechanism's result is null", actualMechanismResult.getResult());
@@ -325,6 +332,14 @@ public class TestMailAuthenticityHandler {
         assertEquals("The mechanism's result does not match", expectedResult.getTechnicalName(), s.getTechnicalName());
     }
 
+    /**
+     * Asserts that the specified {@link MailAuthenticityMechanismResult} contains the expected domain, reason and status result
+     * 
+     * @param actualMechanismResult The {@link MailAuthenticityMechanismResult}
+     * @param expectedDomain The expected domain
+     * @param expectedReason The expected reason
+     * @param expectedResult The expected result
+     */
     private void assertAuthenticityMechanismResult(MailAuthenticityMechanismResult actualMechanismResult, String expectedDomain, String expectedReason, AuthenticityMechanismResult expectedResult) {
         assertAuthenticityMechanismResult(actualMechanismResult, expectedDomain, expectedResult);
         assertEquals("The mechanism's reason does not match", expectedReason, actualMechanismResult.getReason());
