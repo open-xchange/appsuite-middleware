@@ -49,9 +49,6 @@
 
 package com.openexchange.mail.authenticity.impl;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.exception.OXException;
@@ -69,7 +66,6 @@ import com.openexchange.session.Session;
 public class MailAuthenticityHandlerRegistryImpl implements MailAuthenticityHandlerRegistry {
 
     private final ServiceListing<MailAuthenticityHandler> listing;
-    private final Comparator<MailAuthenticityHandler> comparator;
     private final LeanConfigurationService leanConfigService;
 
     /**
@@ -79,15 +75,6 @@ public class MailAuthenticityHandlerRegistryImpl implements MailAuthenticityHand
         super();
         this.listing = listing;
         this.leanConfigService = leanConfigService;
-        comparator = new Comparator<MailAuthenticityHandler>() {
-
-            @Override
-            public int compare(MailAuthenticityHandler o1, MailAuthenticityHandler o2) {
-                int r1 = o1.getRanking();
-                int r2 = o2.getRanking();
-                return (r1 < r2) ? 1 : ((r1 == r2) ? 0 : -1);
-            }
-        };
     }
 
     @Override
@@ -119,20 +106,14 @@ public class MailAuthenticityHandlerRegistryImpl implements MailAuthenticityHand
         }
 
         long threshold = getDateThreshold(session);
-        List<MailAuthenticityHandler> applicableHandlers = new ArrayList<>(snapshot.size());
+        MailAuthenticityHandler highestRankedHandler = null;
         for (MailAuthenticityHandler handler : snapshot) {
-            if (handler.isEnabled(session)) {
-                applicableHandlers.add(new ThresholdAwareAuthenticityHandler(handler, threshold));
+            if (handler.isEnabled(session) && (null == highestRankedHandler || highestRankedHandler.getRanking() < handler.getRanking())) {
+                highestRankedHandler = new ThresholdAwareAuthenticityHandler(handler, threshold);
             }
         }
 
-        if (applicableHandlers.isEmpty()) {
-            // No suitable handler found
-            return null;
-        }
-
-        Collections.sort(applicableHandlers, comparator);
-        return applicableHandlers.get(0);
+        return highestRankedHandler;
     }
 
 }
