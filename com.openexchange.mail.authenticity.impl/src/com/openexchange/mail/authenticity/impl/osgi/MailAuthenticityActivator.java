@@ -54,12 +54,10 @@ import com.openexchange.config.ForcedReloadable;
 import com.openexchange.config.Interests;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.mail.MailFetchListener;
-import com.openexchange.mail.authenticity.MailAuthenticityHandler;
 import com.openexchange.mail.authenticity.MailAuthenticityHandlerRegistry;
 import com.openexchange.mail.authenticity.impl.MailAuthenticityFetchListener;
 import com.openexchange.mail.authenticity.impl.MailAuthenticityHandlerRegistryImpl;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
 
 /**
  * {@link MailAuthenticityActivator}
@@ -88,12 +86,7 @@ public class MailAuthenticityActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        RankingAwareNearRegistryServiceTracker<MailAuthenticityHandler> handlerTracker = new RankingAwareNearRegistryServiceTracker<>(context, MailAuthenticityHandler.class);
-        rememberTracker(handlerTracker);
-
-        openTrackers();
-
-        final MailAuthenticityHandlerRegistryImpl registry = new MailAuthenticityHandlerRegistryImpl(handlerTracker, getService(LeanConfigurationService.class));
+        final MailAuthenticityHandlerRegistryImpl registry = new MailAuthenticityHandlerRegistryImpl(getService(LeanConfigurationService.class), context);
         registerService(MailAuthenticityHandlerRegistry.class, registry);
 
         registerService(ForcedReloadable.class, new ForcedReloadable() {
