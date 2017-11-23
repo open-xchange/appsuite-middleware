@@ -53,15 +53,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import com.openexchange.config.cascade.ConfigView;
-import com.openexchange.config.cascade.ConfigViewFactory;
-import com.openexchange.config.cascade.ConfigViews;
+import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.authenticity.MailAuthenticityHandler;
 import com.openexchange.mail.authenticity.MailAuthenticityHandlerRegistry;
 import com.openexchange.osgi.ServiceListing;
 import com.openexchange.session.Session;
-
 
 /**
  * {@link MailAuthenticityHandlerRegistryImpl}
@@ -73,15 +70,15 @@ public class MailAuthenticityHandlerRegistryImpl implements MailAuthenticityHand
 
     private final ServiceListing<MailAuthenticityHandler> listing;
     private final Comparator<MailAuthenticityHandler> comparator;
-    private final ConfigViewFactory viewFactory;
+    private final LeanConfigurationService leanConfigService;
 
     /**
      * Initializes a new {@link MailAuthenticityHandlerRegistryImpl}.
      */
-    public MailAuthenticityHandlerRegistryImpl(ServiceListing<MailAuthenticityHandler> listing, ConfigViewFactory viewFactory) {
+    public MailAuthenticityHandlerRegistryImpl(ServiceListing<MailAuthenticityHandler> listing, LeanConfigurationService leanConfigService) {
         super();
         this.listing = listing;
-        this.viewFactory = viewFactory;
+        this.leanConfigService = leanConfigService;
         comparator = new Comparator<MailAuthenticityHandler>() {
 
             @Override
@@ -100,16 +97,12 @@ public class MailAuthenticityHandlerRegistryImpl implements MailAuthenticityHand
 
     @Override
     public boolean isEnabledFor(Session session) throws OXException {
-        ConfigView view = viewFactory.getView(session.getUserId(), session.getContextId());
-        boolean def = false;
-        return ConfigViews.getDefinedBoolPropertyFrom("com.openexchange.mail.authenticity.enabled", def, view); // authenticity enabled?
+        return leanConfigService.getBooleanProperty(session.getUserId(), session.getContextId(), MailAuthenticityProperty.enabled);
     }
 
     @Override
     public long getDateThreshold(Session session) throws OXException {
-        ConfigView view = viewFactory.getView(session.getUserId(), session.getContextId());
-        long def = 0L;
-        return ConfigViews.getDefinedLongPropertyFrom("com.openexchange.mail.authenticity.threshold", def, view);
+        return leanConfigService.getLongProperty(session.getUserId(), session.getContextId(), MailAuthenticityProperty.threshold);
     }
 
     @Override

@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2017-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,55 +47,69 @@
  *
  */
 
-package com.openexchange.mail.authenticity.impl.osgi;
+package com.openexchange.mail.authenticity.impl;
 
-import com.openexchange.config.lean.LeanConfigurationService;
-import com.openexchange.mail.MailFetchListener;
-import com.openexchange.mail.authenticity.MailAuthenticityHandler;
-import com.openexchange.mail.authenticity.MailAuthenticityHandlerRegistry;
-import com.openexchange.mail.authenticity.impl.MailAuthenticityFetchListener;
-import com.openexchange.mail.authenticity.impl.MailAuthenticityHandlerRegistryImpl;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
+import com.openexchange.config.lean.Property;
 
 /**
- * {@link MailAuthenticityActivator}
+ * {@link MailAuthenticityProperty}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.10.0
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class MailAuthenticityActivator extends HousekeepingActivator {
+public enum MailAuthenticityProperty implements Property {
+    /**
+     * Defines whether the mail authenticity core feature is enabled
+     * Defaults to <code>false</code>
+     */
+    enabled(false),
+    /**
+     * Defines the date after which the e-mails will be analysed
+     * Defaults to 0
+     */
+    threshold(0L),
+    /**
+     * Defines the MANDATORY <code>authserv-id</code>
+     * Default is empty.
+     * 
+     * @see <a href="https://tools.ietf.org/html/rfc7601#section-2.2">RFC-7601, Section 2.2</a>
+     */
+    authServId;
+
+    private static final String EMPTY = "";
+    private static final String PREFIX = "com.openexchange.mail.authenticity";
+    private final Object defaultValue;
 
     /**
-     * Initializes a new {@link MailAuthenticityActivator}.
+     * Initialises a new {@link MailAuthenticityProperty}.
      */
-    public MailAuthenticityActivator() {
-        super();
+    private MailAuthenticityProperty() {
+        this(EMPTY);
     }
 
+    /**
+     * Initializes a new {@link MailAuthenticityProperty}.
+     */
+    private MailAuthenticityProperty(Object defaultValue) {
+        this.defaultValue = defaultValue;
+    }
+
+    /**
+     * Returns the fully qualified name for the property
+     *
+     * @return the fully qualified name for the property
+     */
     @Override
-    protected boolean stopOnServiceUnavailability() {
-        return true;
+    public String getFQPropertyName() {
+        return PREFIX + name();
     }
 
+    /**
+     * Returns the default value of this property
+     *
+     * @return the default value of this property
+     */
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { LeanConfigurationService.class };
+    public Object getDefaultValue() {
+        return defaultValue;
     }
-
-    @Override
-    protected void startBundle() throws Exception {
-        RankingAwareNearRegistryServiceTracker<MailAuthenticityHandler> handlerTracker = new RankingAwareNearRegistryServiceTracker<>(context, MailAuthenticityHandler.class);
-        rememberTracker(handlerTracker);
-
-        openTrackers();
-
-        MailAuthenticityHandlerRegistryImpl registry = new MailAuthenticityHandlerRegistryImpl(handlerTracker, getService(LeanConfigurationService.class));
-        registerService(MailAuthenticityHandlerRegistry.class, registry);
-
-        // It is OK to pass service references since 'stopOnServiceUnavailability' returns 'true'
-        MailAuthenticityFetchListener fetchListener = new MailAuthenticityFetchListener(registry);
-        registerService(MailFetchListener.class, fetchListener);
-    }
-
 }

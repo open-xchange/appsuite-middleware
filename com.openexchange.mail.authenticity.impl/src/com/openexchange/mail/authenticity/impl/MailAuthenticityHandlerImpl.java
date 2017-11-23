@@ -113,6 +113,8 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
     /** The ranking of this handler */
     private final int ranking;
 
+    private final String configuredAuthServId;
+
     /**
      * Initialises a new {@link MailAuthenticityHandlerImpl} with priority 0.
      */
@@ -128,6 +130,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
     public MailAuthenticityHandlerImpl(int ranking) {
         super();
         this.ranking = ranking;
+        this.configuredAuthServId = ""; //TODO: Fetch from the config service
         mechanismParsersRegitry = new HashMap<>(4);
         mechanismParsersRegitry.put(MailAuthenticityMechanism.DMARC, (line) -> {
             String value = line.get(MailAuthenticityMechanism.DMARC.name().toLowerCase());
@@ -245,19 +248,11 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
      * @return The {@link MailAuthenticityResult}
      */
     private MailAuthenticityResult parseHeaders(String[] authHeaders, String fromHeader) {
-        // There can only be one, if there are more only the first one is relevant
-        List<String> split = splitLines(authHeaders[0]);
-        if (split.isEmpty()) {
-            // Huh? Invalid/Malformed authenticity results header, return as is
+        String authHeader = extractAuthenticationResultHeader(authHeaders);
+        // No valid auth header was extracted, thus we return with neutral status
+        if (Strings.isEmpty(authHeader)) {
             return MailAuthenticityResult.NEUTRAL_RESULT;
         }
-        // The first property of the header MUST always be the domain (i.e. the authserv-id)
-        // See https://tools.ietf.org/html/rfc7601 for the formal definition
-        //String authServId = split.get(0);
-        //if (!isAuthServIdValid(authServId)) {
-        // The 'authserv-id' is not valid, thus we return with 'neutral' status
-        //return MailAuthenticityResult.NEUTRAL_RESULT;
-        //}
 
         MailAuthenticityResult result = new MailAuthenticityResult(MailAuthenticityStatus.NEUTRAL);
         try {
@@ -270,6 +265,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
         }
 
         // Get all attributes except the domain
+        List<String> split = splitLines(authHeader);
         List<String> authResultLines = new ArrayList<>(split.size() - 1);
         authResultLines.addAll(split.subList(1, split.size()));
         // Extract and parse the known mechanisms
@@ -279,6 +275,33 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
         //TODO: add the remaining attributes as is to the result
 
         return result;
+    }
+
+    /**
+     * Extracts the appropriate <code>Authentication-Results</code> header from the specified array.
+     * 
+     * @param authHeaders The array with the authentication results headers
+     * @return the appropriate <code>Authentication-Results</code> header or <code>null</code> if none can be extracted
+     */
+    private String extractAuthenticationResultHeader(String[] authHeaders) {
+        String authHeader = null;
+        for (String header : authHeaders) {
+            List<String> split = splitLines(header);
+            if (split.isEmpty()) {
+                //Huh? Invalid/Malformed authenticity results header, ignore
+                continue;
+            }
+
+            // The first property of the header MUST always be the domain (i.e. the authserv-id)
+            // See https://tools.ietf.org/html/rfc7601 for the formal definition
+            String authServId = split.get(0);
+            if (!isAuthServIdValid(authServId)) {
+                // Not a configured authserver-id, ignore
+                continue;
+            }
+            authHeader = header;
+        }
+        return authHeader;
     }
 
     /**
@@ -386,31 +409,11 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
         if (Strings.isEmpty(authServId)) {
             return false;
         }
-        //TODO: Get all valid authServIds from the config
-        String configuredAuthServId = "";
         // TODO: Regex and wildcard checks...
         if (configuredAuthServId.equals(authServId)) {
             return true;
         }
         return false;
-    }
-
-    /**
-     * Determines whether the specified string denotes a valid domain name
-     *
-     * @param domain Domain candidate
-     * @return <code>true</code> if the string denotes a valid domain, <code>false</code> otherwise
-     */
-    private boolean isValidDomain(String domain) {
-        StringBuilder sb = new StringBuilder("jane.doe");
-        sb.append("@").append(domain);
-        try {
-            InternetAddress.parse(domain, true);
-            return true;
-        } catch (AddressException e) {
-            LOGGER.debug("Unable to parse domain '{}'", domain, e);
-            return false;
-        }
     }
 
     /**
