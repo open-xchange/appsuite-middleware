@@ -51,7 +51,6 @@ package com.openexchange.session.management.hazelcast.osgi;
 
 import com.hazelcast.core.HazelcastInstance;
 import com.openexchange.config.lean.LeanConfigurationService;
-import com.openexchange.geolocation.GeoLocationService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.session.management.SessionManagementService;
 import com.openexchange.session.management.hazelcast.HazelcastSessionManagementServiceImpl;
@@ -75,9 +74,7 @@ public class HazelcastSessionManagementActivator extends HousekeepingActivator {
     @Override
     protected void startBundle() throws Exception {
         Services.setServiceLookup(this);
-        trackService(GeoLocationService.class);
         trackService(HazelcastInstance.class);
-        trackService(SessionManagementService.class);
         openTrackers();
 
         registerService(SessionManagementService.class, new HazelcastSessionManagementServiceImpl(), 100);

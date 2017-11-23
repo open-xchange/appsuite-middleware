@@ -130,7 +130,7 @@ public class SessionManagementServiceImpl implements SessionManagementService {
 
         String location = getDefaultLocation(session);
 
-        GeoLocationService geoLocationService = Services.optService(GeoLocationService.class);
+        GeoLocationService geoLocationService = getGeoLocationService();
         Map<String, String> ip2locationCache = new HashMap<>(localSessions.size());
         List<ManagedSession> result = new ArrayList<>(localSessions.size());
         for (Session s : localSessions) {
@@ -239,6 +239,10 @@ public class SessionManagementServiceImpl implements SessionManagementService {
             }
         }
         return location;
+    }
+
+    protected GeoLocationService getGeoLocationService() {
+        return Services.optService(GeoLocationService.class);
     }
 
 }

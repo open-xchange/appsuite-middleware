@@ -108,7 +108,7 @@ public class HazelcastSessionManagementServiceImpl extends SessionManagementServ
 
         Set<String> blackListedClients = getBlacklistedClients();
 
-        GeoLocationService geoLocationService = Services.optService(GeoLocationService.class);
+        GeoLocationService geoLocationService = getGeoLocationService();
         Map<String, String> ip2locationCache = new HashMap<>(remoteSessions.size());
 
         for (Session s : remoteSessions) {
