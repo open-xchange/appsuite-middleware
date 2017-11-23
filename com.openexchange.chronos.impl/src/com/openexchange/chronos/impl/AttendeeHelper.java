@@ -417,7 +417,7 @@ public class AttendeeHelper {
         Attendee requestedAttendee = find(requestedAttendees, defaultAttendee);
         if (null != requestedAttendee) {
             AttendeeMapper.getInstance().copy(requestedAttendee, defaultAttendee,
-                AttendeeField.RSVP, AttendeeField.COMMENT, AttendeeField.PARTSTAT, AttendeeField.ROLE, AttendeeField.PARTSTAT);
+                AttendeeField.RSVP, AttendeeField.COMMENT, AttendeeField.PARTSTAT, AttendeeField.ROLE, AttendeeField.PARTSTAT, AttendeeField.CN, AttendeeField.URI);
         }
         return defaultAttendee;
     }
