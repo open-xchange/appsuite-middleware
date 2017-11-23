@@ -21,7 +21,7 @@
       - in: query
         name: rangeEnd
         type: string
-        description: | 
+        description: |
           If expand is set to 'true' this parameter defines a upper exclusive limit as a utc date-time value as specified in rfc 5545 chapter 3.3.5. E.g. "20170708T220000Z". 
           Only events which end before this date are returned.
         required: false
@@ -37,7 +37,7 @@
         description: |
           'A JSON object containing the newly created event, if it was created successfully.
           If the event could not be created due to conflicts, the response body is an object with the
-          field `conflicts`, which informations about the conflict. In case of errors the responsible fields
+          field `conflicts`, which holds informations about the conflict. In case of errors the responsible fields
           in the response are filled (see [Error handling](#error-handling)).'
         schema:
           $ref: "#/definitions/ChronosCalendarResultResponse"
@@ -53,6 +53,8 @@
       one json payload describing the EventData, the rest json payloads (if present) will simply be ignored.
     consumes:
       - multipart/form-data
+    produces:
+      - text/html
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"
       - $ref: "#/parameters/QueryParamChronosFolder"
@@ -71,10 +73,8 @@
     responses:
       200:
         description: |
-          'A JSON object containing the newly created event, if it was created successfully.
-          If the event could not be created due to conflicts, the response body is an object with the
-          field `conflicts`, which informations about the conflict. In case of errors the responsible fields
-          in the response are filled (see [Error handling](#error-handling)).'
+          A HTML page containing the newly created event or in case of errors an error object (see [File uploads](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#file-uploads) as an example).
+          If the event could not be created due to conflicts, the HTML Page contains an object with the
+          field `conflicts`, which holds informations about the conflict.
         schema:
-          $ref: "#/definitions/ChronosCalendarResultResponse"
-
+          type: string
