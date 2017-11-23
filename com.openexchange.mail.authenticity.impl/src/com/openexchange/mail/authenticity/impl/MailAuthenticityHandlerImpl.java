@@ -83,6 +83,7 @@ import com.openexchange.mail.authenticity.mechanism.spf.SPFResultHeader;
 import com.openexchange.mail.dataobjects.MailAuthenticityResult;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.HeaderCollection;
+import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.session.Session;
 
 /**
@@ -184,7 +185,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
             return;
         }
 
-        String[] fromHeaders = headerCollection.getHeader("From"); // FIXME: Use the global constant
+        String[] fromHeaders = headerCollection.getHeader(MessageHeaders.HDR_FROM);
         if (fromHeaders == null || fromHeaders.length == 0) {
             // TODO: Pass on to custom handlers; return neutral status for now
             mailMessage.setAuthenticityResult(MailAuthenticityResult.NEUTRAL_RESULT);
@@ -259,7 +260,6 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
         //}
 
         MailAuthenticityResult result = new MailAuthenticityResult(MailAuthenticityStatus.NEUTRAL);
-
         try {
             String domain = parseDomain(fromHeader);
             result.addAttribute(DefaultMailAuthenticityResultKey.DOMAIN, domain);
