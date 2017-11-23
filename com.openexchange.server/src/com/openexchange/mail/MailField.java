@@ -199,7 +199,11 @@ public enum MailField {
      * The message's text preview; generate it if absent (may be slow)
      * @since v7.10.0
      */
-    TEXT_PREVIEW(MailListField.TEXT_PREVIEW)
+    TEXT_PREVIEW(MailListField.TEXT_PREVIEW),
+    /**
+     * The message's authentication results.
+     */
+    AUTHENTICATION_RESULTS(MailListField.AUTHENTICATION_RESULTS),
 
     ;
 

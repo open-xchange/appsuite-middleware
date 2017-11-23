@@ -94,8 +94,10 @@ import com.openexchange.mail.MailPath;
 import com.openexchange.mail.attachment.AttachmentToken;
 import com.openexchange.mail.attachment.AttachmentTokenConstants;
 import com.openexchange.mail.attachment.AttachmentTokenService;
+import com.openexchange.mail.authenticity.mechanism.MailAuthenticityMechanismResult;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.conversion.InlineImageDataSource;
+import com.openexchange.mail.dataobjects.MailAuthenticityResult;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.SecurityInfo;
@@ -160,6 +162,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
     private static final String SECURITY = MailJSONField.SECURITY.getKey();
     private static final String SECURITY_INFO = MailJSONField.SECURITY_INFO.getKey();
     private static final String TEXT_PREVIEW = MailJSONField.TEXT_PREVIEW.getKey();
+    private static final String AUTHENTICATION_RESULTS = MailJSONField.AUTHENTICATION_RESULTS.getKey();
 
     private static final String TRUNCATED = MailJSONField.TRUNCATED.getKey();
     private static final String SANITIZED = "sanitized";
@@ -424,12 +427,24 @@ public final class JsonMessageHandler implements MailMessageHandler {
                 if (mail.containsTextPreview()) {
                     jsonObject.put(TEXT_PREVIEW, mail.getTextPreview());
                 }
+                if (mail.containsAuthenticityResult()) {
+                    MailAuthenticityResult mailAuthenticityResult = mail.getAuthenticityResult();
+                    if (null != mailAuthenticityResult) {
+                        jsonObject.put(AUTHENTICATION_RESULTS, mailAuthenticityResult);
+                    }
+                }
                 // Guard info
                 if (mail.containsSecurityInfo()) {
-                    jsonObject.put(SECURITY_INFO, securityInfoToJSON(mail.getSecurityInfo()));
+                    SecurityInfo securityInfo = mail.getSecurityInfo();
+                    if (null != securityInfo) {
+                        jsonObject.put(SECURITY_INFO, securityInfoToJSON(securityInfo));
+                    }
                 }
                 if (mail.hasSecurityResult()) {
-                    jsonObject.put(SECURITY, securityResultToJSON(mail.getSecurityResult()));
+                    SecurityResult securityResult = mail.getSecurityResult();
+                    if (null != securityResult) {
+                        jsonObject.put(SECURITY, securityResultToJSON(securityResult));
+                    }
                 }
 
                 this.initialiserSequenceId = mail.getSequenceId();
@@ -489,7 +504,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
     }
 
     /**
-     * Create the JSON representation for this <code>SecurityInfo</code> object.
+     * Creates the JSON representation for specified <code>SecurityInfo</code> instance.
      *
      * @return The JSON representation
      * @throws JSONException If JSON representation cannot be returned
@@ -499,6 +514,38 @@ public final class JsonMessageHandler implements MailMessageHandler {
         security.put("encrypted", info.isEncrypted());
         security.put("signed", info.isSigned());
         return security;
+    }
+
+    /**
+     * Creates the JSON representation for specified <code>MailAuthenticationResult</code> instance.
+     *
+     * @param authenticationResult The authentication result to create the JSON representation for
+     * @return The JSON representation
+     * @throws JSONException If JSON representation cannot be returned
+     */
+    public static JSONObject authenticationResultToJson(MailAuthenticityResult authenticationResult) throws JSONException {
+        if (null == authenticationResult) {
+            return null;
+        }
+
+        JSONObject jAuthenticationResult = new JSONObject(2);
+        jAuthenticationResult.put("status", authenticationResult.getStatus().getDisplayName());
+        jAuthenticationResult.put("domain", authenticationResult.getDomain());
+        {
+            List<MailAuthenticityMechanismResult> authenticationMechanismResults = authenticationResult.getMailAuthenticityMechanismResults();
+            JSONArray jAuthenticationMechanismResults = new JSONArray(authenticationMechanismResults.size());
+            for (MailAuthenticityMechanismResult authenticationMechanismResult : authenticationMechanismResults) {
+                JSONObject jAuthenticationMechanismResult = new JSONObject(4);
+                jAuthenticationMechanismResult.put("mechanism", authenticationMechanismResult.getMechanism().getDisplayName());
+                jAuthenticationMechanismResult.put("client_ip", authenticationMechanismResult.getClientIP());
+                jAuthenticationMechanismResult.put("domain", authenticationMechanismResult.getDomain());
+                jAuthenticationMechanismResult.put("result", new JSONObject(1).put("name", authenticationMechanismResult.getResult().getDisplayName()));
+                jAuthenticationMechanismResults.put(jAuthenticationMechanismResult);
+            }
+            jAuthenticationResult.put("authentication_results", jAuthenticationMechanismResults);
+        }
+
+        return jAuthenticationResult;
     }
 
     /**

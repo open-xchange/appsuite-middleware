@@ -472,7 +472,7 @@ public class UnixCrypt {
 
      private static int [] des_set_key(byte key[])
      {
-        int schedule[] = new int[ITERATIONS * 2];
+        int schedule[] = new int[ITERATIONS << 1];
 
         int c = fourBytesToInt(key, 0);
         int d = fourBytesToInt(key, 4);

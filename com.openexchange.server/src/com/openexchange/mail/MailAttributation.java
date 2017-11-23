@@ -49,6 +49,7 @@
 
 package com.openexchange.mail;
 
+import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -60,6 +61,9 @@ import java.util.Set;
  */
 public class MailAttributation {
 
+    /** The constant for a non-applicable mail attributation */
+    public static final MailAttributation NOT_APPLICABLE = new MailAttributation(false, null, null);
+
     /**
      * Creates a new builder instance.
      *
@@ -67,7 +71,7 @@ public class MailAttributation {
      * @param originalHeaderNames The originally requested header names
      * @return The new builder instance
      */
-    public static Builder builder(int[] originalFields, String[] originalHeaderNames) {
+    public static Builder builder(MailField[] originalFields, String[] originalHeaderNames) {
         return new Builder(originalFields, originalHeaderNames);
     }
 
@@ -76,16 +80,16 @@ public class MailAttributation {
      */
     public static class Builder {
 
-        private final Set<Integer> fields;
+        private final Set<MailField> fields;
         private final Set<String> headerNames;
 
-        Builder(int[] originalFields, String[] originalHeaderNames) {
+        Builder(MailField[] originalFields, String[] originalHeaderNames) {
             super();
             fields = new LinkedHashSet<>();
             headerNames = new LinkedHashSet<>();
             if (null != originalFields) {
-                for (int field : originalFields) {
-                    fields.add(Integer.valueOf(field));
+                for (MailField field : originalFields) {
+                    fields.add(field);
                 }
             }
             if (null != originalHeaderNames) {
@@ -95,11 +99,23 @@ public class MailAttributation {
             }
         }
 
-        public Builder addField(int field) {
-            fields.add(Integer.valueOf(field));
+        /**
+         * Adds specified field.
+         *
+         * @param field The field to add
+         * @return This instance
+         */
+        public Builder addField(MailField field) {
+            fields.add(field);
             return this;
         }
 
+        /**
+         * Adds specified header name.
+         *
+         * @param headerName The header name to add
+         * @return This instance
+         */
         public Builder addHeaderName(String headerName) {
             if (null != headerName) {
                 headerNames.add(headerName);
@@ -107,28 +123,35 @@ public class MailAttributation {
             return this;
         }
 
+        /**
+         * Builds the resulting instance of {@code MailAttributation}.
+         *
+         * @return The resulting instance of {@code MailAttributation}
+         */
         public MailAttributation build() {
-            return new MailAttributation(fields, headerNames);
+            return new MailAttributation(true, fields, headerNames);
         }
     }
 
     // --------------------------------------------------------------------------------
 
-    private final int[] fields;
+    private final MailField[] fields;
     private final String[] headerNames;
+    private final boolean applicable;
 
     /**
      * Initializes a new {@link MailAttributation}.
      */
-    MailAttributation(Set<Integer> fields, Set<String> headerNames) {
+    MailAttributation(boolean applicable, Set<MailField> fields, Set<String> headerNames) {
         super();
+        this.applicable = applicable;
         if (null == fields || fields.isEmpty()) {
             this.fields = null;
         } else {
-            this.fields = new int[fields.size()];
+            this.fields = new MailField[fields.size()];
             int i = 0;
-            for (Integer field : fields) {
-                this.fields[i++] = field.intValue();
+            for (MailField field : fields) {
+                this.fields[i++] = field;
             }
         }
         if (null == headerNames || headerNames.isEmpty()) {
@@ -143,21 +166,48 @@ public class MailAttributation {
     }
 
     /**
-     * Gets the effective fields to request.
+     * Checks if this mail attribution is applicable to specified arguments passed on {@link MailFetchListener#onBeforeFetch(FullnameArgument, com.openexchange.mail.search.SearchTerm, MailSortField, OrderDirection, MailField[], String[]) onBeforeFetch} call.
+     *
+     * @return <code>true</code> if applicable; otherwise <code>false</code>
+     */
+    public boolean isApplicable() {
+        return applicable;
+    }
+
+    /**
+     * Gets the effective fields to request to satisfy invoked {@code MailFetchListener}.
+     * <p>
+     * The return value already includes previously requested ones.
      *
      * @return The fields to request or <code>null</code>
      */
-    public int[] getFields() {
+    public MailField[] getFields() {
         return fields;
     }
 
     /**
-     * Gets the effective header names to request.
+     * Gets the effective header names to request to satisfy invoked {@code MailFetchListener}.
+     * <p>
+     * The return value already includes previously requested ones.
      *
      * @return The header names to request or <code>null</code>
      */
     public String[] getHeaderNames() {
         return headerNames;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder builder2 = new StringBuilder();
+        builder2.append("[");
+        if (fields != null) {
+            builder2.append("fields=").append(Arrays.toString(fields)).append(", ");
+        }
+        if (headerNames != null) {
+            builder2.append("headerNames=").append(Arrays.toString(headerNames));
+        }
+        builder2.append("]");
+        return builder2.toString();
     }
 
 }

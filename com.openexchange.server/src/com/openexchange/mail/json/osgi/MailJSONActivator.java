@@ -101,6 +101,8 @@ import com.openexchange.groupware.settings.tree.modules.mail.Whitelist;
 import com.openexchange.groupware.userconfiguration.Permission;
 import com.openexchange.image.ImageLocation;
 import com.openexchange.jslob.ConfigTreeEquivalent;
+import com.openexchange.mail.MailFetchListener;
+import com.openexchange.mail.MailFetchListenerRegistry;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.api.crypto.CryptographicAwareMailAccessFactory;
 import com.openexchange.mail.attachment.storage.DefaultMailAttachmentStorage;
@@ -238,6 +240,10 @@ public final class MailJSONActivator extends AJAXModuleActivator {
         rememberTracker(exceptionHandlerTracker);
         MimeMailException.setExceptionHandlers(exceptionHandlerTracker);
 
+        RankingAwareNearRegistryServiceTracker<MailFetchListener> listing = new RankingAwareNearRegistryServiceTracker<MailFetchListener>(context, MailFetchListener.class);
+        MailFetchListenerRegistry.initInstance(listing);
+        rememberTracker(listing);
+
         openTrackers();
 
         registerService(ComposeHandlerRegistry.class, composeHandlerRegisty);
@@ -345,6 +351,7 @@ public final class MailJSONActivator extends AJAXModuleActivator {
         ServerServiceRegistry.getInstance().removeService(ComposeHandlerRegistry.class);
         DefaultMailAttachmentStorageRegistry.dropInstance();
         MailActionFactory.releaseActionFactory();
+        MailFetchListenerRegistry.releaseInstance();
         SERVICES.set(null);
     }
 
