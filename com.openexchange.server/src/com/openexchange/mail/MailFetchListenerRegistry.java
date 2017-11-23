@@ -52,6 +52,7 @@ package com.openexchange.mail;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 import com.google.common.collect.ImmutableList;
 import com.openexchange.exception.OXException;
 import com.openexchange.osgi.ServiceListing;
@@ -65,7 +66,7 @@ import com.openexchange.session.Session;
  */
 public class MailFetchListenerRegistry {
 
-    private static volatile MailFetchListenerRegistry instance;
+    private static final AtomicReference<MailFetchListenerRegistry> INSTANCE_REFERENCE = new AtomicReference<MailFetchListenerRegistry>(null);
 
     /**
      * Gets the instance
@@ -73,7 +74,7 @@ public class MailFetchListenerRegistry {
      * @return The instance
      */
     public static MailFetchListenerRegistry getInstance() {
-        return instance;
+        return INSTANCE_REFERENCE.get();
     }
 
     /**
@@ -82,16 +83,14 @@ public class MailFetchListenerRegistry {
      * @param listing The associated service listing
      */
     public static synchronized void initInstance(ServiceListing<MailFetchListener> listing) {
-        if (null == instance) {
-            instance = new MailFetchListenerRegistry(listing);
-        }
+        INSTANCE_REFERENCE.set(new MailFetchListenerRegistry(listing));
     }
 
     /**
      * Release the instance
      */
     public static synchronized void releaseInstance() {
-        instance = null;
+        INSTANCE_REFERENCE.set(null);
     }
 
     /**
@@ -104,7 +103,7 @@ public class MailFetchListenerRegistry {
      * @throws OXException If listener chain cannot be returned
      */
     public static MailFetchListenerChain determineFetchListenerChainFor(MailFetchArguments fetchArguments, Session session, Map<String, Object> state) throws OXException {
-        MailFetchListenerRegistry registry = instance;
+        MailFetchListenerRegistry registry = INSTANCE_REFERENCE.get();
         return null == registry ? MailFetchListenerChain.EMPTY_CHAIN : registry.getFetchListenerChainFor(fetchArguments, session, state);
     }
 
