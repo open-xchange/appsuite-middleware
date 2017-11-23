@@ -64,6 +64,7 @@ import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.authenticity.DefaultMailAuthenticityResultKey;
@@ -84,6 +85,7 @@ import com.openexchange.mail.dataobjects.MailAuthenticityResult;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.HeaderCollection;
 import com.openexchange.mail.mime.MessageHeaders;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 
 /**
@@ -118,8 +120,8 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
     /**
      * Initialises a new {@link MailAuthenticityHandlerImpl} with priority 0.
      */
-    public MailAuthenticityHandlerImpl() {
-        this(0);
+    public MailAuthenticityHandlerImpl(ServiceLookup services) {
+        this(0, services);
     }
 
     /**
@@ -127,10 +129,15 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
      *
      * @param ranking The ranking of this handler; a higher value means higher priority;
      */
-    public MailAuthenticityHandlerImpl(int ranking) {
+    public MailAuthenticityHandlerImpl(int ranking, ServiceLookup services) {
         super();
         this.ranking = ranking;
-        this.configuredAuthServId = ""; //TODO: Fetch from the config service
+        LeanConfigurationService leanConfigService = services.getService(LeanConfigurationService.class);
+        this.configuredAuthServId = leanConfigService.getProperty(MailAuthenticityProperty.authServId);
+        if (Strings.isEmpty(configuredAuthServId)) {
+            //TODO: proper exception code
+            throw new IllegalArgumentException("The property '" + MailAuthenticityProperty.authServId.getFQPropertyName() + "' is not configured but is mandatory. Failed to initialise the core mail authenticity handler");
+        }
         mechanismParsersRegitry = new HashMap<>(4);
         mechanismParsersRegitry.put(MailAuthenticityMechanism.DMARC, (line) -> {
             String value = line.get(MailAuthenticityMechanism.DMARC.name().toLowerCase());

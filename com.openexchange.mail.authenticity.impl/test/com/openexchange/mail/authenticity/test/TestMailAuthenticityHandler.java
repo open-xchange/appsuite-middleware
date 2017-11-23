@@ -108,7 +108,7 @@ public class TestMailAuthenticityHandler {
         mailMessage = mock(MailMessage.class);
         when(mailMessage.getHeaders()).thenReturn(headerCollection);
 
-        handler = new MailAuthenticityHandlerImpl();
+        handler = new MailAuthenticityHandlerImpl(null); //FIXME: mock ServiceLookup and LeanConfigurationService
     }
 
     /**
