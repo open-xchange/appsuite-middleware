@@ -64,10 +64,8 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.UserExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.user.AbstractUserServiceInterceptor;
-import com.openexchange.user.UserService;
 
 /**
  * {@link SchedJoulesUserServiceInterceptor}
@@ -87,7 +85,7 @@ public class SchedJoulesUserServiceInterceptor extends AbstractUserServiceInterc
 
     /**
      * Initialises a new {@link SchedJoulesUserServiceInterceptor}.
-     * 
+     *
      * @param services The {@link ServiceLookup} instance
      */
     public SchedJoulesUserServiceInterceptor(ServiceLookup services) {
@@ -97,18 +95,15 @@ public class SchedJoulesUserServiceInterceptor extends AbstractUserServiceInterc
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.user.AbstractUserServiceInterceptor#afterUpdate(com.openexchange.groupware.contexts.Context, com.openexchange.groupware.ldap.User, com.openexchange.groupware.container.Contact, java.util.Map)
      */
     @Override
     public void afterUpdate(Context context, User user, Contact contactData, Map<String, Object> properties) throws OXException {
-        if(null == user) {
-            user = loadUser(context, contactData);
-        }
-        Locale locale;
-        if (null == user || null == (locale = user.getLocale())) {
+        if (null == user || null == user.getLocale()) {
             return;
         }
+        String language = user.getLocale().getLanguage();
         AdministrativeCalendarAccountService service = services.getService(AdministrativeCalendarAccountService.class);
         List<CalendarAccount> accounts = service.getAccounts(context.getContextId(), new int[] { user.getId() }, SchedJoulesCalendarProvider.PROVIDER_ID);
         for (CalendarAccount account : accounts) {
@@ -121,7 +116,6 @@ public class SchedJoulesUserServiceInterceptor extends AbstractUserServiceInterc
                 try {
                     JSONObject folder = folders.getJSONObject(index);
                     String localeStr = folder.optString(SchedJoulesFields.LOCALE, "");
-                    String language = locale.getLanguage();
                     if (language.equals(new Locale(localeStr).getLanguage())) {
                         continue;
                     }
@@ -140,31 +134,8 @@ public class SchedJoulesUserServiceInterceptor extends AbstractUserServiceInterc
     }
 
     /**
-     * Load the user if it exits
-     * 
-     * @param context The {@link Context}
-     * @param contact The {@link Contact} data
-     * @return The user or <code>null</code>
-     * @throws OXException If an error is occurred
-     */
-    private User loadUser(Context context, Contact contact) throws OXException {
-        int internalUserId = contact.getInternalUserId();
-        if (internalUserId > 0) {
-            UserService userStorage = services.getServiceSafe(UserService.class);
-            try {
-                return userStorage.getUser(internalUserId, context.getContextId());
-            } catch (OXException e) {
-                if (!UserExceptionCode.USER_NOT_FOUND.equals(e)) {
-                    throw e;
-                }
-            }
-        }
-        return null;
-    }
-
-    /**
      * Replaces the locale in the specified URL string
-     * 
+     *
      * @param url The URL string
      * @param languageLocale The language locale to set
      * @return The new URL
