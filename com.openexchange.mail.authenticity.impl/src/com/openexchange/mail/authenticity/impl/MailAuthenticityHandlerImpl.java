@@ -240,17 +240,16 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
             // Huh? Invalid/Malformed authenticity results header, return as is
             return MailAuthenticityResult.NEUTRAL_RESULT;
         }
-
         // The first property of the header MUST always be the domain (i.e. the authserv-id)
         // See https://tools.ietf.org/html/rfc7601 for the formal definition
-        String domain = cleanseDomain(split.get(0));
-        if (!isValidDomain(domain)) {
-            // Not a valid domain, thus we return with 'neutral' status
+        String authServId = split.get(0);
+        if (!isAuthServIdValid(authServId)) {
+            // The 'authserv-id' is not valid, thus we return with 'neutral' status
             return MailAuthenticityResult.NEUTRAL_RESULT;
         }
 
         MailAuthenticityResult.Builder result = MailAuthenticityResult.builder();
-        result.setDomain(domain);
+        //result.setDomain();
 
         // Get all attributes except the domain
         List<String> authResultLines = new ArrayList<>(split.size() - 1);
@@ -329,6 +328,29 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
         //       e.g. mx[0-9]?.open-xchnge.com
         int index = domain.indexOf('@');
         return index < 0 ? domain : domain.substring(index + 1);
+    }
+
+    /**
+     * Determines whether the specified authServId is valid
+     * 
+     * @param authServId The authserv-id to check
+     * @return <code>true</code> if the string is valid; <code>false</code> otherwise
+     */
+    private boolean isAuthServIdValid(String authServId) {
+        String[] split = authServId.split(" ");
+        // Cleanse the optional version
+        authServId = split.length == 0 ? authServId : split[0];
+
+        if (Strings.isEmpty(authServId)) {
+            return false;
+        }
+        //TODO: Get all valid authServIds from the config
+        String configuredAuthServId = "";
+        // TODO: Regex and wildcard checks...
+        if (configuredAuthServId.equals(authServId)) {
+            return true;
+        }
+        return false;
     }
 
     /**
