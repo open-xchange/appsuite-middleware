@@ -55,7 +55,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import javax.mail.internet.InternetAddress;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.DefaultInterests;
 import com.openexchange.config.Interests;
@@ -63,6 +64,7 @@ import com.openexchange.config.Reloadable;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.authenticity.MailAuthenticationHandler;
+import com.openexchange.mail.dataobjects.MailAuthenticationResult;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.session.Session;
 
@@ -76,11 +78,13 @@ public class TrustedDomainAuthenticationHandler implements Reloadable, MailAuthe
 
     Map<String, List<TrustedDomain>> trustedDomains = new ConcurrentHashMap<>();
 
+    private static final Logger LOG = LoggerFactory.getLogger(TrustedDomainAuthenticationHandler.class);
+
     private static final String PREFIX = "com.openexchange.mail.authentication.trustedDomains.";
     private static final String TENANT = "tenants";
     private static final String DOMAINS = ".domains";
     private static final String IMAGE = ".image";
-    private static final String FALLBACK_TENANT = "OX_FALLBACK";
+    private static final List<TrustedDomain> FALLBACK_TENANT = new ArrayList<>();
 
 
     /**
@@ -102,9 +106,8 @@ public class TrustedDomainAuthenticationHandler implements Reloadable, MailAuthe
             }
         }
 
-        if(trustedDomains.containsKey(FALLBACK_TENANT)){
-            List<TrustedDomain> domains = trustedDomains.get(FALLBACK_TENANT);
-            for(TrustedDomain domain: domains){
+        if(FALLBACK_TENANT != null){
+            for(TrustedDomain domain: FALLBACK_TENANT){
                 if(domain.matches(host)){
                     return domain;
                 }
@@ -135,11 +138,9 @@ public class TrustedDomainAuthenticationHandler implements Reloadable, MailAuthe
         if (Strings.isNotEmpty(commaSeparatedListOfDomains)) {
             String[] domains = Strings.splitByCommaNotInQuotes(commaSeparatedListOfDomains);
             String image = configurationService.getProperty(PREFIX + IMAGE.substring(1), (String) null);
-            List<TrustedDomain> domainList = new ArrayList<>();
             for (String domain : domains) {
-                domainList.add(new TrustedDomain(domain, image));
+                FALLBACK_TENANT.add(new TrustedDomain(domain, image));
             }
-            trustedDomains.put(FALLBACK_TENANT, domainList);
         }
 
     }
@@ -154,9 +155,6 @@ public class TrustedDomainAuthenticationHandler implements Reloadable, MailAuthe
         ArrayList<String> properties = new ArrayList<>(trustedDomains.size());
         properties.add(PREFIX + TENANT);
         for(String tenant: trustedDomains.keySet()){
-            if(tenant.equals(FALLBACK_TENANT)){
-                continue;
-            }
             properties.add(PREFIX+tenant+DOMAINS);
             properties.add(PREFIX+tenant+IMAGE);
         }
@@ -168,16 +166,20 @@ public class TrustedDomainAuthenticationHandler implements Reloadable, MailAuthe
     @Override
     public void handle(Session session, MailMessage mailMessage) {
         String tenant = (String) session.getParameter(Session.PARAM_HOST_NAME);
-        TrustedDomain trustedDomain = checkHost(tenant, getFrom(mailMessage));
+        if(tenant==null){
+            LOG.warn("Missing host name session parameter. Unable to verify mail domain.");
+            return;
+        }
+        TrustedDomain trustedDomain = checkHost(tenant, getDomain(mailMessage));
         if(trustedDomain != null){
             // TODO insert infos
             mailMessage.getAuthenticationResult();
         }
     }
 
-    private String getFrom(MailMessage msg){
-        InternetAddress[] from = msg.getFrom();
-        return from[0].getAddress().substring(from[0].getAddress().indexOf("@"), from[0].getAddress().length());
+    private String getDomain(MailMessage msg){
+        MailAuthenticationResult authenticationResult = msg.getAuthenticationResult();
+        return authenticationResult == null ? null : authenticationResult.getDomain();
     }
 
     @Override
