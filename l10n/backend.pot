@@ -990,19 +990,19 @@ msgid "Your device configuration"
 msgstr ""
 
 #. %1$s, %2$s %3$s on %4$s %5$s
-#. E.g. Appsuite UI, Chrome 61 on Windows 10
+#. E.g. App Suite UI, Chrome 61 on Windows 10
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.clientinfo/src/com/openexchange/clientinfo/ClientInfoStrings.java:65
 msgid "%1$s, %2$s %3$s on %4$s %5$s"
 msgstr ""
 
 #. %1$s on %2$s %3$s
-#. E.g. Appsuite UI on Windows 10
+#. E.g. App Suite UI on Windows 10
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.clientinfo/src/com/openexchange/clientinfo/ClientInfoStrings.java:69
 msgid "%1$s on %2$s %3$s"
 msgstr ""
 
 #. %1$s
-#. E.g. Appsuite UI
+#. E.g. App Suite UI
 #. This simple message does not need to be translated. It is used to transport data to the frontend. Just put the same value in it for
 #. all translations or remove it from the PO file.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.clientinfo/src/com/openexchange/clientinfo/ClientInfoStrings.java:73
