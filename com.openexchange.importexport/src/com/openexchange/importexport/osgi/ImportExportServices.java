@@ -63,8 +63,6 @@ import com.openexchange.contact.vcard.storage.VCardStorageService;
 import com.openexchange.data.conversion.ical.ICalEmitter;
 import com.openexchange.data.conversion.ical.ICalParser;
 import com.openexchange.folderstorage.FolderService;
-import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
-import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.generic.FolderUpdaterRegistry;
 import com.openexchange.server.ServiceLookup;
 
@@ -82,14 +80,6 @@ public class ImportExportServices {
 
     public static ICalParser getIcalParser() {
         return LOOKUP.get().getService(ICalParser.class);
-    }
-
-    public static AppointmentSqlFactoryService getAppointmentFactoryService() {
-        return LOOKUP.get().getService(AppointmentSqlFactoryService.class);
-    }
-
-    public static CalendarCollectionService getCalendarCollectionService() {
-        return LOOKUP.get().getService(CalendarCollectionService.class);
     }
 
     public static ConfigurationService getConfigurationService() {
