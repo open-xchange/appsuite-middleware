@@ -183,9 +183,7 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
         for (EventID requestedID : eventIDs) {
             Integer accountId = I(getAccountId(requestedID.getFolderID()));
             Event event = find(eventsPerAccountId.get(accountId), getRelativeId(requestedID));
-            if (null != event) {
-                events.add(withUniqueID(event, accountId));
-            }
+            events.add(null != event ? withUniqueID(event, accountId) : null);
         }
         return events;
     }
@@ -522,7 +520,7 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
     private static Event find(List<Event> events, String folderId, String eventId, RecurrenceId recurrenceId) {
         if (null != events) {
             for (Event event : events) {
-                if (folderId.equals(event.getFolderId()) && eventId.equals(event.getId())) {
+                if (null != event && folderId.equals(event.getFolderId()) && eventId.equals(event.getId())) {
                     if (null == recurrenceId || recurrenceId.equals(event.getRecurrenceId())) {
                         return event;
                     }

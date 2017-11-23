@@ -561,7 +561,9 @@ public class CalendarUtils {
     public static long getMaximumTimestamp(Collection<Event> events) {
         long maximumTimestamp = 0L;
         for (Event event : events) {
-            maximumTimestamp = Math.max(maximumTimestamp, event.getTimestamp());
+            if (null != event) {
+                maximumTimestamp = Math.max(maximumTimestamp, event.getTimestamp());
+            }
         }
         return maximumTimestamp;
     }
