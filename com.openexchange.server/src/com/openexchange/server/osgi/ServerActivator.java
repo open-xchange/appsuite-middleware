@@ -189,6 +189,7 @@ import com.openexchange.mail.api.AuthenticationFailedHandlerService;
 import com.openexchange.mail.api.MailProvider;
 import com.openexchange.mail.api.unified.UnifiedViewService;
 import com.openexchange.mail.attachment.AttachmentTokenService;
+import com.openexchange.mail.authenticity.MailAuthenticityHandlerRegistry;
 import com.openexchange.mail.cache.MailAccessCacheEventListener;
 import com.openexchange.mail.cache.MailSessionEventHandler;
 import com.openexchange.mail.conversion.ICalMailPartDataSource;
@@ -461,6 +462,7 @@ public final class ServerActivator extends HousekeepingActivator {
         track(MessageGeneratorRegistry.class, new RegistryCustomizer<MessageGeneratorRegistry>(context, MessageGeneratorRegistry.class));
         track(AttachmentStorageRegistry.class, new RegistryCustomizer<AttachmentStorageRegistry>(context, AttachmentStorageRegistry.class));
         track(EnabledCheckerRegistry.class, new RegistryCustomizer<EnabledCheckerRegistry>(context, EnabledCheckerRegistry.class));
+        track(MailAuthenticityHandlerRegistry.class, new RegistryCustomizer<MailAuthenticityHandlerRegistry>(context, MailAuthenticityHandlerRegistry.class));
 
         // IP checker
         track(IPCheckService.class, new RegistryCustomizer<IPCheckService>(context, IPCheckService.class));
@@ -695,7 +697,7 @@ public final class ServerActivator extends HousekeepingActivator {
         registerService(ResourceService.class, ServerServiceRegistry.getInstance().getService(ResourceService.class, true));
         ServerServiceRegistry.getInstance().addService(UserConfigurationService.class, new UserConfigurationServiceImpl());
         registerService(UserConfigurationService.class, ServerServiceRegistry.getInstance().getService(UserConfigurationService.class, true));
-      
+
         ServerServiceRegistry.getInstance().addService(UserPermissionService.class, new UserPermissionServiceImpl());
         registerService(UserPermissionService.class, ServerServiceRegistry.getInstance().getService(UserPermissionService.class, true));
 

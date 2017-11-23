@@ -86,7 +86,7 @@ public class WebClientInfoProvider implements ClientInfoProvider {
                 String browserVersion = info.getVersionNumber().getMajor();
                 String client = "";
                 if (Client.APPSUITE_UI.getClientId().equals(session.getClient())) {
-                    client = "Appsuite UI";
+                    client = "App Suite UI";
                 } else if (Client.OX6_UI.getClientId().equals(session.getClient())) {
                     client = "OX6 UI";
                 }
@@ -101,7 +101,7 @@ public class WebClientInfoProvider implements ClientInfoProvider {
     public ClientInfo getClientInfo(String clientId) {
         String client = "";
         if (Client.APPSUITE_UI.getClientId().equals(clientId)) {
-            client = "Appsuite UI";
+            client = "App Suite UI";
         } else if (Client.OX6_UI.getClientId().equals(clientId)) {
             client = "OX6 UI";
         }

@@ -61,16 +61,19 @@ import com.openexchange.i18n.LocalizableStrings;
 public class ClientInfoStrings implements LocalizableStrings {
 
     // %1$s, %2$s %3$s on %4$s %5$s
-    // E.g. Appsuite UI, Chrome 61 on Windows 10
+    // E.g. App Suite UI, Chrome 61 on Windows 10
     public final static String DEFAULT_CLIENT_INFO_MESSAGE = "%1$s, %2$s %3$s on %4$s %5$s";
 
     // %1$s on %2$s %3$s
-    // E.g. Appsuite UI on Windows 10
+    // E.g. App Suite UI on Windows 10
     public final static String CLIENT_BROWSER_INFO_MESSAGE = "%1$s on %2$s %3$s";
 
     // %1$s
-    // E.g. Appsuite UI
+    // E.g. App Suite UI
     public final static String CLIENT_INFO_MESSAGE = "%1$s";
+
+    // Microsoft Exchange ActiveSync Client
+    public final static String USM_EAS_CLIENT = "Microsoft Exchange ActiveSync Client";
 
     private ClientInfoStrings() {}
 

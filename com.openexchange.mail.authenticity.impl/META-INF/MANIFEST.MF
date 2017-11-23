@@ -1,0 +1,34 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Open-Xchange Mail Authentication Defaul Implementation Bundle
+Bundle-SymbolicName: com.openexchange.mail.authenticity.impl
+Bundle-Version: 7.10
+Bundle-Vendor: OX Software GmbH
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Import-Package: com.google.common.annotations,
+ com.google.common.base,
+ com.google.common.collect,
+ com.openexchange.config,
+ com.openexchange.config.cascade,
+ com.openexchange.config.lean,
+ com.openexchange.exception,
+ com.openexchange.java,
+ com.openexchange.mail,
+ com.openexchange.mail.authenticity,
+ com.openexchange.mail.authenticity.mechanism,
+ com.openexchange.mail.authenticity.mechanism.dkim,
+ com.openexchange.mail.authenticity.mechanism.dmarc,
+ com.openexchange.mail.authenticity.mechanism.spf,
+ com.openexchange.mail.dataobjects,
+ com.openexchange.mail.mime,
+ com.openexchange.osgi,
+ com.openexchange.osgi.annotation,
+ com.openexchange.server,
+ com.openexchange.session,
+ javax.mail,
+ javax.mail.internet,
+ org.json,
+ org.osgi.framework,
+ org.osgi.util.tracker,
+ org.slf4j
+Bundle-Activator: com.openexchange.mail.authenticity.impl.osgi.MailAuthenticityActivator
