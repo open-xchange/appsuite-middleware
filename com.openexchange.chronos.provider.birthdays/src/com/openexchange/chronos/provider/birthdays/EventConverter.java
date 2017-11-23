@@ -129,7 +129,9 @@ public class EventConverter {
         event.setUid(contact.getUid());
         event.setSummary(getSummary(contact));
         event.setDescription(getDescription(contact));
-        event.setAttendees(Collections.singletonList(getAttendee(contact)));
+        if (Strings.isNotEmpty(contact.getEmail1())) {
+            event.setAttendees(Collections.singletonList(getAttendee(contact)));
+        }
         ExtendedProperties extendedProperties = new ExtendedProperties();
         extendedProperties.add(new ExtendedProperty("X-OX-CONTACT-ID", String.valueOf(contact.getObjectID())));
         extendedProperties.add(new ExtendedProperty("X-OX-CONTACT-FOLDER-ID", String.valueOf(contact.getParentFolderID())));
@@ -141,7 +143,7 @@ public class EventConverter {
         if (null == contacts || 0 == contacts.size()) {
             return Collections.emptyList();
         }
-        List<Event> events = new ArrayList<Event>(contacts.size());
+        List<Event> events = new ArrayList<>(contacts.size());
         for (Contact contact : contacts) {
             Event seriesMaster = getSeriesMaster(contact);
             if (isInRange(seriesMaster, from, until, timeZone)) {
@@ -152,7 +154,7 @@ public class EventConverter {
     }
 
     public List<Event> getOccurrences(Contact contact, Date from, Date until) throws OXException {
-        List<Event> occurrences = new ArrayList<Event>();
+        List<Event> occurrences = new ArrayList<>();
         Event seriesEvent = getSeriesMaster(contact);
         RecurrenceIterator<Event> iterator = services.getService(RecurrenceService.class).iterateEventOccurrences(seriesEvent, from, until);
         while (iterator.hasNext()) {
@@ -165,7 +167,7 @@ public class EventConverter {
         if (null == contacts || 0 == contacts.size()) {
             return Collections.emptyList();
         }
-        List<Event> occurrences = new ArrayList<Event>();
+        List<Event> occurrences = new ArrayList<>();
         for (Contact contact : contacts) {
             occurrences.addAll(getOccurrences(contact, from, until));
         }
