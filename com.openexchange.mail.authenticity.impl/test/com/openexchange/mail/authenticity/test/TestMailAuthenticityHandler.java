@@ -55,6 +55,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -146,16 +147,10 @@ public class TestMailAuthenticityHandler {
 
         assertEquals("The overall status does not match", MailAuthenticityStatus.PASS, result.getStatus());
         assertEquals("The domain does not match", "example.com", result.getDomain());
-        assertEquals("The mail authenticity mechanisms amount does not match", 1, result.getAuthenticityMechanisms().size());
-        assertTrue("The mail authenticity mechansism does not match", result.getAuthenticityMechanisms().contains(MailAuthenticityMechanism.SPF));
-        assertEquals("The mail authenticity mechanism results amount does not match", 1, result.getMailAuthenticityMechanismResults().size());
-
-        MailAuthenticityMechanismResult mechanismResult = result.getMailAuthenticityMechanismResults().get(0);
-        assertEquals("The mechanism's domain does not match", "example.net", mechanismResult.getDomain());
-        assertNotNull("The mechanism's result is null", mechanismResult.getResult());
-
-        AuthenticityMechanismResult s = mechanismResult.getResult();
-        assertEquals("The mechanism's result does not match", SPFResult.PASS.getTechnicalName(), s.getTechnicalName());
+        assertContains(MailAuthenticityMechanism.SPF);
+        assertAmount(1);
+        
+        assertAuthenticityMechanismResult(result.getMailAuthenticityMechanismResults().get(0), "example.net", SPFResult.PASS);
     }
 
     /**
@@ -168,16 +163,10 @@ public class TestMailAuthenticityHandler {
 
         assertEquals("The overall status does not match", MailAuthenticityStatus.PASS, result.getStatus());
         assertEquals("The domain does not match", "example.com", result.getDomain());
-        assertEquals("The mail authenticity mechanisms amount does not match", 1, result.getAuthenticityMechanisms().size());
-        assertTrue("The mail authenticity mechansism does not match", result.getAuthenticityMechanisms().contains(MailAuthenticityMechanism.SPF));
-        assertEquals("The mail authenticity mechanism results amount does not match", 1, result.getMailAuthenticityMechanismResults().size());
+        assertContains(MailAuthenticityMechanism.SPF);
+        assertAmount(1);
 
-        MailAuthenticityMechanismResult mechanismResult = result.getMailAuthenticityMechanismResults().get(0);
-        assertEquals("The mechanism's domain does not match", "example.net", mechanismResult.getDomain());
-        assertNotNull("The mechanism's result is null", mechanismResult.getResult());
-
-        AuthenticityMechanismResult s = mechanismResult.getResult();
-        assertEquals("The mechanism's result does not match", SPFResult.PASS.getTechnicalName(), s.getTechnicalName());
+        assertAuthenticityMechanismResult(result.getMailAuthenticityMechanismResults().get(0), "example.net", SPFResult.PASS);
     }
 
     /**
@@ -190,17 +179,10 @@ public class TestMailAuthenticityHandler {
 
         assertEquals("The overall status does not match", MailAuthenticityStatus.PASS, result.getStatus());
         assertEquals("The domain does not match", "example.com", result.getDomain());
-        assertEquals("The mail authenticity mechanisms amount does not match", 1, result.getAuthenticityMechanisms().size());
-        assertTrue("The mail authenticity mechansism does not match", result.getAuthenticityMechanisms().contains(MailAuthenticityMechanism.DKIM));
-        assertEquals("The mail authenticity mechanism results amount does not match", 1, result.getMailAuthenticityMechanismResults().size());
+        assertContains(MailAuthenticityMechanism.DKIM);
+        assertAmount(1);
 
-        MailAuthenticityMechanismResult mechanismResult = result.getMailAuthenticityMechanismResults().get(0);
-        assertEquals("The mechanism's domain does not match", "example.com", mechanismResult.getDomain());
-        assertNotNull("The mechanism's result is null", mechanismResult.getResult());
-        assertEquals("The mechanism's reason does not match", "good signature", mechanismResult.getReason());
-
-        AuthenticityMechanismResult s = mechanismResult.getResult();
-        assertEquals("The mechanism's result does not match", DKIMResult.PASS.getTechnicalName(), s.getTechnicalName());
+        assertAuthenticityMechanismResult(result.getMailAuthenticityMechanismResults().get(0), "example.com", "good signature", DKIMResult.PASS);
     }
 
     /**
@@ -213,25 +195,12 @@ public class TestMailAuthenticityHandler {
 
         assertEquals("The overall status does not match", MailAuthenticityStatus.FAIL, result.getStatus());
         assertEquals("The domain does not match", "example.com", result.getDomain());
-        assertEquals("The mail authenticity mechanisms amount does not match", 1, result.getAuthenticityMechanisms().size());
-        assertTrue("The mail authenticity mechansism does not match", result.getAuthenticityMechanisms().contains(MailAuthenticityMechanism.DKIM));
-        assertEquals("The mail authenticity mechanism results amount does not match", 2, result.getMailAuthenticityMechanismResults().size());
+        assertContains(MailAuthenticityMechanism.DKIM);
+        assertAmount(2);
 
-        MailAuthenticityMechanismResult mechanismResult = result.getMailAuthenticityMechanismResults().get(0);
-        assertEquals("The mechanism's domain does not match", "mail-router.example.net", mechanismResult.getDomain());
-        assertNotNull("The mechanism's result is null", mechanismResult.getResult());
-        assertEquals("The mechanism's reason does not match", "\"good signature\"", mechanismResult.getReason());
-
-        AuthenticityMechanismResult s = mechanismResult.getResult();
-        assertEquals("The mechanism's result does not match", DKIMResult.PASS.getTechnicalName(), s.getTechnicalName());
-
-        mechanismResult = result.getMailAuthenticityMechanismResults().get(1);
-        assertEquals("The mechanism's domain does not match", "newyork.example.com", mechanismResult.getDomain());
-        assertNotNull("The mechanism's result is null", mechanismResult.getResult());
-        assertEquals("The mechanism's reason does not match", "\"bad signature\"", mechanismResult.getReason());
-
-        s = mechanismResult.getResult();
-        assertEquals("The mechanism's result does not match", DKIMResult.FAIL.getTechnicalName(), s.getTechnicalName());
+        List<MailAuthenticityMechanismResult> results = result.getMailAuthenticityMechanismResults();
+        assertAuthenticityMechanismResult(results.get(0), "mail-router.example.net", "\"good signature\"", DKIMResult.PASS);
+        assertAuthenticityMechanismResult(results.get(1), "newyork.example.com", "\"bad signature\"", DKIMResult.FAIL);
     }
 
     /**
@@ -244,26 +213,12 @@ public class TestMailAuthenticityHandler {
 
         assertEquals("The overall status does not match", MailAuthenticityStatus.FAIL, result.getStatus());
         assertEquals("The domain does not match", "ox.io", result.getDomain());
-        assertEquals("The mail authenticity mechanisms amount does not match", 2, result.getAuthenticityMechanisms().size());
-        assertTrue("The mail authenticity mechansism does not match", result.getAuthenticityMechanisms().contains(MailAuthenticityMechanism.DKIM));
-        assertTrue("The mail authenticity mechansism does not match", result.getAuthenticityMechanisms().contains(MailAuthenticityMechanism.SPF));
-        assertEquals("The mail authenticity mechanism results amount does not match", 2, result.getMailAuthenticityMechanismResults().size());
+        assertContains(MailAuthenticityMechanism.DKIM, MailAuthenticityMechanism.SPF);
+        assertAmount(2);
 
-        MailAuthenticityMechanismResult mechanismResult = result.getMailAuthenticityMechanismResults().get(0);
-        assertEquals("The mechanism's domain does not match", "some.mta.hop", mechanismResult.getDomain());
-        assertNotNull("The mechanism's result is null", mechanismResult.getResult());
-        assertEquals("The mechanism's reason does not match", "no key for signature", mechanismResult.getReason());
-
-        AuthenticityMechanismResult s = mechanismResult.getResult();
-        assertEquals("The mechanism's result does not match", DKIMResult.TEMPERROR.getTechnicalName(), s.getTechnicalName());
-
-        mechanismResult = result.getMailAuthenticityMechanismResults().get(1);
-        assertEquals("The mechanism's domain does not match", "aliceland.com", mechanismResult.getDomain());
-        assertNotNull("The mechanism's result is null", mechanismResult.getResult());
-        assertEquals("The mechanism's reason does not match", "ox.io: domain of bob@aliceland.com does not designate 1.2.3.4 as permitted sender", mechanismResult.getReason());
-
-        s = mechanismResult.getResult();
-        assertEquals("The mechanism's result does not match", SPFResult.FAIL.getTechnicalName(), s.getTechnicalName());
+        List<MailAuthenticityMechanismResult> results = result.getMailAuthenticityMechanismResults();
+        assertAuthenticityMechanismResult(results.get(0), "some.mta.hop", "no key for signature", DKIMResult.TEMPERROR);
+        assertAuthenticityMechanismResult(results.get(1), "aliceland.com", "ox.io: domain of bob@aliceland.com does not designate 1.2.3.4 as permitted sender", SPFResult.FAIL);
     }
 
     /**
@@ -276,26 +231,12 @@ public class TestMailAuthenticityHandler {
 
         assertEquals("The overall status does not match", MailAuthenticityStatus.PASS, result.getStatus());
         assertEquals("The domain does not match", "ox.io", result.getDomain());
-        assertEquals("The mail authenticity mechanisms amount does not match", 2, result.getAuthenticityMechanisms().size());
-        assertTrue("The mail authenticity mechansism does not match", result.getAuthenticityMechanisms().contains(MailAuthenticityMechanism.DMARC));
-        assertTrue("The mail authenticity mechansism does not match", result.getAuthenticityMechanisms().contains(MailAuthenticityMechanism.SPF));
-        assertEquals("The mail authenticity mechanism results amount does not match", 2, result.getMailAuthenticityMechanismResults().size());
+        assertContains(MailAuthenticityMechanism.DMARC, MailAuthenticityMechanism.SPF);
+        assertAmount(2);
 
-        MailAuthenticityMechanismResult mechanismResult = result.getMailAuthenticityMechanismResults().get(0);
-        assertEquals("The mechanism's domain does not match", "aliceland.com", mechanismResult.getDomain());
-        assertNotNull("The mechanism's result is null", mechanismResult.getResult());
-        //assertEquals("The mechanism's reason does not match", "p=NONE sp=NONE dis=NONE", mechanismResult.getReason());
-
-        AuthenticityMechanismResult s = mechanismResult.getResult();
-        assertEquals("The mechanism's result does not match", DMARCResult.PASS.getTechnicalName(), s.getTechnicalName());
-
-        mechanismResult = result.getMailAuthenticityMechanismResults().get(1);
-        assertEquals("The mechanism's domain does not match", "aliceland.com", mechanismResult.getDomain());
-        assertNotNull("The mechanism's result is null", mechanismResult.getResult());
-        assertEquals("The mechanism's reason does not match", "ox.io: domain of alice@aliceland.com designates 1.2.3.4 as permitted sender", mechanismResult.getReason());
-
-        s = mechanismResult.getResult();
-        assertEquals("The mechanism's result does not match", SPFResult.PASS.getTechnicalName(), s.getTechnicalName());
+        List<MailAuthenticityMechanismResult> results = result.getMailAuthenticityMechanismResults();
+        assertAuthenticityMechanismResult(results.get(0), "aliceland.com", DMARCResult.PASS);
+        assertAuthenticityMechanismResult(results.get(1), "aliceland.com", "ox.io: domain of alice@aliceland.com designates 1.2.3.4 as permitted sender", SPFResult.PASS);
     }
 
     /**
@@ -308,26 +249,12 @@ public class TestMailAuthenticityHandler {
 
         assertEquals("The overall status does not match", MailAuthenticityStatus.PASS, result.getStatus());
         assertEquals("The domain does not match", "mx.ox.io", result.getDomain());
-        assertEquals("The mail authenticity mechanisms amount does not match", 2, result.getAuthenticityMechanisms().size());
-        assertTrue("The mail authenticity mechansism does not match", result.getAuthenticityMechanisms().contains(MailAuthenticityMechanism.DKIM));
-        assertTrue("The mail authenticity mechansism does not match", result.getAuthenticityMechanisms().contains(MailAuthenticityMechanism.SPF));
-        assertEquals("The mail authenticity mechanism results amount does not match", 2, result.getMailAuthenticityMechanismResults().size());
+        assertContains(MailAuthenticityMechanism.DKIM, MailAuthenticityMechanism.SPF);
+        assertAmount(2);
 
-        MailAuthenticityMechanismResult mechanismResult = result.getMailAuthenticityMechanismResults().get(0);
-        assertEquals("The mechanism's domain does not match", "bobland.com", mechanismResult.getDomain());
-        assertNotNull("The mechanism's result is null", mechanismResult.getResult());
-        assertEquals("The mechanism's reason does not match", "no key for signature", mechanismResult.getReason());
-
-        AuthenticityMechanismResult s = mechanismResult.getResult();
-        assertEquals("The mechanism's result does not match", DKIMResult.TEMPERROR.getTechnicalName(), s.getTechnicalName());
-
-        mechanismResult = result.getMailAuthenticityMechanismResults().get(1);
-        assertEquals("The mechanism's domain does not match", "ice.bobland.com", mechanismResult.getDomain());
-        assertNotNull("The mechanism's result is null", mechanismResult.getResult());
-        assertEquals("The mechanism's reason does not match", "ox.io: domain of alice@ice.bobland.com designates 1.2.3.4 as permitted sender", mechanismResult.getReason());
-
-        s = mechanismResult.getResult();
-        assertEquals("The mechanism's result does not match", SPFResult.PASS.getTechnicalName(), s.getTechnicalName());
+        List<MailAuthenticityMechanismResult> results = result.getMailAuthenticityMechanismResults();
+        assertAuthenticityMechanismResult(results.get(0), "bobland.com", "no key for signature", DKIMResult.TEMPERROR);
+        assertAuthenticityMechanismResult(results.get(1), "ice.bobland.com", "ox.io: domain of alice@ice.bobland.com designates 1.2.3.4 as permitted sender", SPFResult.PASS);
     }
 
     /**
@@ -340,17 +267,10 @@ public class TestMailAuthenticityHandler {
 
         assertEquals("The overall status does not match", MailAuthenticityStatus.PASS, result.getStatus());
         assertEquals("The domain does not match", "mx1.open-xchange.com", result.getDomain());
-        assertEquals("The mail authenticity mechanisms amount does not match", 1, result.getAuthenticityMechanisms().size());
-        assertTrue("The mail authenticity mechansism does not match", result.getAuthenticityMechanisms().contains(MailAuthenticityMechanism.DKIM));
-        assertEquals("The mail authenticity mechanism results amount does not match", 1, result.getMailAuthenticityMechanismResults().size());
+        assertContains(MailAuthenticityMechanism.DKIM);
+        assertAmount(1);
 
-        MailAuthenticityMechanismResult mechanismResult = result.getMailAuthenticityMechanismResults().get(0);
-        assertEquals("The mechanism's domain does not match", "ox.io", mechanismResult.getDomain());
-        assertNotNull("The mechanism's result is null", mechanismResult.getResult());
-        assertEquals("The mechanism's reason does not match", "\"1024-bit key; unprotected key\"", mechanismResult.getReason());
-
-        AuthenticityMechanismResult s = mechanismResult.getResult();
-        assertEquals("The mechanism's result does not match", DKIMResult.PASS.getTechnicalName(), s.getTechnicalName());
+        assertAuthenticityMechanismResult(result.getMailAuthenticityMechanismResults().get(0), "ox.io", "\"1024-bit key; unprotected key\"", DKIMResult.PASS);
     }
 
     /**
@@ -364,51 +284,52 @@ public class TestMailAuthenticityHandler {
 
         assertEquals("The overall status does not match", MailAuthenticityStatus.PASS, result.getStatus());
         assertEquals("The domain does not match", "mx.ox.io", result.getDomain());
-        assertEquals("The mail authenticity mechanisms amount does not match", 3, result.getAuthenticityMechanisms().size());
-        assertTrue("The mail authenticity mechansism does not match", result.getAuthenticityMechanisms().contains(MailAuthenticityMechanism.DMARC));
-        assertTrue("The mail authenticity mechansism does not match", result.getAuthenticityMechanisms().contains(MailAuthenticityMechanism.DKIM));
-        assertTrue("The mail authenticity mechansism does not match", result.getAuthenticityMechanisms().contains(MailAuthenticityMechanism.SPF));
-        assertEquals("The mail authenticity mechanism results amount does not match", 5, result.getMailAuthenticityMechanismResults().size());
+        assertContains(MailAuthenticityMechanism.values());
+        assertAmount(5);
 
-        MailAuthenticityMechanismResult mechanismResult = result.getMailAuthenticityMechanismResults().get(0);
-        assertEquals("The mechanism's domain does not match", "foobar.com", mechanismResult.getDomain());
-        assertNotNull("The mechanism's result is null", mechanismResult.getResult());
-
-        AuthenticityMechanismResult s = mechanismResult.getResult();
-        assertEquals("The mechanism's result does not match", DMARCResult.PASS.getTechnicalName(), s.getTechnicalName());
-
-        mechanismResult = result.getMailAuthenticityMechanismResults().get(1);
-        assertEquals("The mechanism's domain does not match", "foobar.com", mechanismResult.getDomain());
-        assertNotNull("The mechanism's result is null", mechanismResult.getResult());
-
-        s = mechanismResult.getResult();
-        assertEquals("The mechanism's result does not match", DKIMResult.PASS.getTechnicalName(), s.getTechnicalName());
-
-        mechanismResult = result.getMailAuthenticityMechanismResults().get(2);
-        assertEquals("The mechanism's domain does not match", "foobar.com", mechanismResult.getDomain());
-        assertNotNull("The mechanism's result is null", mechanismResult.getResult());
-
-        s = mechanismResult.getResult();
-        assertEquals("The mechanism's result does not match", DKIMResult.PASS.getTechnicalName(), s.getTechnicalName());
-
-        mechanismResult = result.getMailAuthenticityMechanismResults().get(3);
-        assertEquals("The mechanism's domain does not match", "foobar.com", mechanismResult.getDomain());
-        assertNotNull("The mechanism's result is null", mechanismResult.getResult());
-
-        s = mechanismResult.getResult();
-        assertEquals("The mechanism's result does not match", DKIMResult.PASS.getTechnicalName(), s.getTechnicalName());
-
-        mechanismResult = result.getMailAuthenticityMechanismResults().get(4);
-        assertEquals("The mechanism's domain does not match", "foobar.com", mechanismResult.getDomain());
-        assertNotNull("The mechanism's result is null", mechanismResult.getResult());
-        assertEquals("The mechanism's reason does not match", "ox.io: domain of jane.doe@foobar.com designates 1.2.3.4 as permitted sender", mechanismResult.getReason());
-
-        s = mechanismResult.getResult();
-        assertEquals("The mechanism's result does not match", SPFResult.PASS.getTechnicalName(), s.getTechnicalName());
+        List<MailAuthenticityMechanismResult> results = result.getMailAuthenticityMechanismResults();
+        assertAuthenticityMechanismResult(results.get(0), "foobar.com", DMARCResult.PASS);
+        assertAuthenticityMechanismResult(results.get(1), "foobar.com", DKIMResult.PASS);
+        assertAuthenticityMechanismResult(results.get(2), "foobar.com", DKIMResult.PASS);
+        assertAuthenticityMechanismResult(results.get(3), "foobar.com", DKIMResult.PASS);
+        assertAuthenticityMechanismResult(results.get(4), "foobar.com", "ox.io: domain of jane.doe@foobar.com designates 1.2.3.4 as permitted sender", SPFResult.PASS);
     }
 
     ///////////////////////////// HELPERS //////////////////////////////
-    
+
+    /**
+     * Asserts that the {@link MailAuthenticityResult} contains the specified {@link MailAuthenticityMechanism}s
+     * 
+     * @param mechanisms The {@link MailAuthenticityMechanism}s
+     */
+    private void assertContains(MailAuthenticityMechanism... mechanisms) {
+        assertEquals("The mail authenticity mechanisms amount does not match", mechanisms.length, result.getAuthenticityMechanisms().size());
+        for (MailAuthenticityMechanism mechanism : mechanisms) {
+            assertTrue("The mail authenticity mechansism does not match", result.getAuthenticityMechanisms().contains(mechanism));
+        }
+    }
+
+    /**
+     * Asserts that the {@link MailAuthenticityResult} contains the specified amount of results
+     * 
+     * @param amount The amount of results
+     */
+    private void assertAmount(int amount) {
+        assertEquals("The mail authenticity mechanism results amount does not match", amount, result.getMailAuthenticityMechanismResults().size());
+    }
+
+    private void assertAuthenticityMechanismResult(MailAuthenticityMechanismResult actualMechanismResult, String expectedDomain, AuthenticityMechanismResult expectedResult) {
+        assertEquals("The mechanism's domain does not match", expectedDomain, actualMechanismResult.getDomain());
+        assertNotNull("The mechanism's result is null", actualMechanismResult.getResult());
+        AuthenticityMechanismResult s = actualMechanismResult.getResult();
+        assertEquals("The mechanism's result does not match", expectedResult.getTechnicalName(), s.getTechnicalName());
+    }
+
+    private void assertAuthenticityMechanismResult(MailAuthenticityMechanismResult actualMechanismResult, String expectedDomain, String expectedReason, AuthenticityMechanismResult expectedResult) {
+        assertAuthenticityMechanismResult(actualMechanismResult, expectedDomain, expectedResult);
+        assertEquals("The mechanism's reason does not match", expectedReason, actualMechanismResult.getReason());
+    }
+
     /**
      * Performs the mail authenticity handling with no header
      */
