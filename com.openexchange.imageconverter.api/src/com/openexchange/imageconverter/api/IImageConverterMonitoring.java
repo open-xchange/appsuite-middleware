@@ -62,7 +62,7 @@ public interface IImageConverterMonitoring {
 
     public long getKeysProcessedCount();
 
-    public long getMedianKeyProcessTimeMilliss();
+    public long getMedianKeyProcessTimeMillis();
 
     public long getKeyRequestCount_Total();
     public long getKeyRequestCount_Background();
