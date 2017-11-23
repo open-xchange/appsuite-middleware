@@ -85,7 +85,7 @@ public class WebClientInfo implements ClientInfo {
         String out;
         if (Strings.isNotEmpty(platform) && Strings.isNotEmpty(platformVersion)) {
             out = helper.getString(ClientInfoStrings.DEFAULT_CLIENT_INFO_MESSAGE);
-            return String.format(out, client, platform, platformVersion, browser, browserVersion);
+            return String.format(out, client, browser, browserVersion, platform, platformVersion);
         } else if (Strings.isNotEmpty(browser) && Strings.isNotEmpty(browserVersion)) {
             out = helper.getString(ClientInfoStrings.CLIENT_BROWSER_INFO_MESSAGE);
             return String.format(out, client, browser, browserVersion);
@@ -98,26 +98,6 @@ public class WebClientInfo implements ClientInfo {
     @Override
     public ClientInfoType getType() {
         return ClientInfoType.BROWSER;
-    }
-
-    @Override
-    public String getPlatform() {
-        return platform;
-    }
-
-    @Override
-    public String getPlatformVersion() {
-        return platformVersion;
-    }
-
-    @Override
-    public String getApp() {
-        return browser;
-    }
-
-    @Override
-    public String getAppVersion() {
-        return browserVersion;
     }
 
 }

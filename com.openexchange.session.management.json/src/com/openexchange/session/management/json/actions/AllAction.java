@@ -93,10 +93,6 @@ public class AllAction implements AJAXActionService {
         if (null != userService) {
             locale = userService.getUser(session.getUserId(), session.getContextId()).getLocale();
         }
-        boolean extendedInfo = false;
-        if ("true".equalsIgnoreCase(requestData.getParameter("extendedInfo"))) {
-            extendedInfo = true;
-        }
         String unknownLocation = SessionManagementStrings.UNKNOWN_LOCATION;
         StringHelper helper = StringHelper.valueOf(locale);
         if (null != helper) {
@@ -131,7 +127,7 @@ public class AllAction implements AJAXActionService {
                         json.put("lastActive", loginTime);
                     }
                 }
-                JSONObject deviceInfo = getDeviceInfo(s, locale, extendedInfo);
+                JSONObject deviceInfo = getDeviceInfo(s, locale);
                 if (null != deviceInfo) {
                     json.put("device", deviceInfo);
                     String type = deviceInfo.getString("type");
@@ -169,41 +165,25 @@ public class AllAction implements AJAXActionService {
         return new AJAXRequestResult(result, "json");
     }
 
-    private JSONObject getDeviceInfo(ManagedSession session, Locale locale, boolean extendedInfo) {
-        ClientInfoService service = Services.getService(ClientInfoService.class);
-        if (null == service) {
-            return null;
-        }
-        ClientInfo info = service.getClientInfo(session);
-        if (null != info) {
-            JSONObject deviceInfo = new JSONObject(5);
-            try {
-                deviceInfo.put("info", info.toString(locale));
-                deviceInfo.put("type", info.getType().getName());
-                if (extendedInfo) {
-                    String app = info.getApp();
-                    if (Strings.isNotEmpty(app)) {
-                        deviceInfo.put("client", app);
-                    }
-                    String appVersion = info.getAppVersion();
-                    if (Strings.isNotEmpty(appVersion)) {
-                        deviceInfo.put("clientVersion", appVersion);
-                    }
-                    String platform = info.getPlatform();
-                    if (Strings.isNotEmpty(platform)) {
-                        deviceInfo.put("platform", platform);
-                    }
-                    String platformVersion = info.getPlatformVersion();
-                    if (Strings.isNotEmpty(platformVersion)) {
-                        deviceInfo.put("platformVersion", platformVersion);
-                    }
+    private JSONObject getDeviceInfo(ManagedSession session, Locale locale) {
+        JSONObject deviceInfo = new JSONObject(2);
+        try {
+            ClientInfoService service = Services.getService(ClientInfoService.class);
+            if (null != service) {
+                ClientInfo info = service.getClientInfo(session);
+                if (null != info) {
+                    deviceInfo.put("info", info.toString(locale));
+                    deviceInfo.put("type", info.getType().getName());
+                    return deviceInfo;
                 }
-                return deviceInfo;
-            } catch (JSONException e) {
-                // will not happen
             }
+            deviceInfo.put("info", "unknown");
+            deviceInfo.put("type", "other");
+            return deviceInfo;
+        } catch (JSONException e) {
+            // will not happen
         }
-        return null;
+        return deviceInfo;
     }
 
 }
