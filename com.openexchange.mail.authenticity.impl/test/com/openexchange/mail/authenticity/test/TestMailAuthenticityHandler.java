@@ -121,7 +121,7 @@ public class TestMailAuthenticityHandler {
 
         assertEquals("The overall status does not match", MailAuthenticityStatus.NEUTRAL, result.getStatus());
         assertEquals("The domain does not match", null, result.getAttribute(DefaultMailAuthenticityResultKey.DOMAIN));
-        assertTrue("The mail authenticity mechansisms should be null", result.getAttribute(DefaultMailAuthenticityResultKey.MAIL_AUTH_MECHS, List.class) == null);
+        assertTrue("The mail authenticity mechansisms should be null", result.getAttribute(DefaultMailAuthenticityResultKey.MAIL_AUTH_MECHS, Set.class) == null);
         assertTrue("The mail authenticity mechansism results should be null", result.getAttribute(DefaultMailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS, List.class) == null);
     }
 
@@ -136,7 +136,7 @@ public class TestMailAuthenticityHandler {
 
         assertEquals("The overall status does not match", MailAuthenticityStatus.NEUTRAL, result.getStatus());
         assertEquals("The domain does not match", "example.org", result.getAttribute(DefaultMailAuthenticityResultKey.DOMAIN));
-        assertTrue("The mail authenticity mechansisms should be empty", result.getAttribute(DefaultMailAuthenticityResultKey.MAIL_AUTH_MECHS, List.class).isEmpty());
+        assertTrue("The mail authenticity mechansisms should be empty", result.getAttribute(DefaultMailAuthenticityResultKey.MAIL_AUTH_MECHS, Set.class).isEmpty());
         assertTrue("The mail authenticity mechansism results should be empty", result.getAttribute(DefaultMailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS, List.class).isEmpty());
     }
 
