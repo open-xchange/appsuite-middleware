@@ -54,9 +54,11 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
@@ -305,7 +307,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
         // Sort by ordinal
         Collections.sort(extractedMechanismResults, MAIL_AUTH_COMPARATOR);
         List<MailAuthenticityMechanismResult> results = new ArrayList<>();
-        List<MailAuthenticityMechanism> mechanisms = new ArrayList<>();
+        Set<MailAuthenticityMechanism> mechanisms = new HashSet<>();
         for (String extractedMechanism : extractedMechanismResults) {
             String[] s = extractedMechanism.split("=");
             if (s.length == 0) {

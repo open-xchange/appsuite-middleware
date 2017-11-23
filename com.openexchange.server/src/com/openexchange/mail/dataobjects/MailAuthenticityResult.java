@@ -122,10 +122,14 @@ public final class MailAuthenticityResult {
         if (o == null) {
             return null;
         }
-        if (!o.getClass().isAssignableFrom(type)) {
+//        if (!o.getClass().isAssignableFrom(type)) {
+//            return null;
+//        }
+        try {
+            return type.cast(attributes.get(key));
+        } catch (Exception e) {
             return null;
         }
-        return type.cast(attributes.get(key));
     }
 
     /**
