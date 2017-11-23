@@ -533,7 +533,7 @@ public class DefaultEntityResolver implements EntityResolver {
         return resource;
     }
 
-    private Attendee applyEntityData(Attendee attendee, User user, AttendeeField... fields) {
+    private Attendee applyEntityData(Attendee attendee, User user, AttendeeField... fields) throws OXException {
         if (null == fields || Arrays.contains(fields, AttendeeField.ENTITY)) {
             attendee.setEntity(user.getId());
         }
@@ -541,30 +541,28 @@ public class DefaultEntityResolver implements EntityResolver {
             attendee.setCuType(CalendarUserType.INDIVIDUAL);
         }
         if (null == fields || Arrays.contains(fields, AttendeeField.CN)) {
-            attendee.setCn(getField(AttendeeField.CN, attendee, user.getDisplayName()));
+            attendee.setCn(Strings.isNotEmpty(attendee.getCn()) ? attendee.getCn() : user.getDisplayName());
         }
         if (null == fields || Arrays.contains(fields, AttendeeField.URI)) {
-            String address = getCalAddress(user);
-            String uri = getField(AttendeeField.URI, attendee, address);
-            attendee.setUri(UserAliasUtility.isAlias(extractEMailAddress(uri), user.getAliases()) ? uri : address);
+            if (Strings.isEmpty(attendee.getUri())) {
+                attendee.setUri(getCalAddress(user));
+            } else {
+                ResourceId resourceId;
+                try {
+                    resourceId = resolve(attendee.getUri());
+                } catch (OXException e) {
+                    throw CalendarExceptionCodes.INVALID_CALENDAR_USER.create(e, attendee.getUri(), user.getId(), CalendarUserType.INDIVIDUAL);
+                }
+                if (null == resourceId || resourceId.getEntity() != user.getId()) {
+                    throw CalendarExceptionCodes.INVALID_CALENDAR_USER.create(attendee.getUri(), user.getId(), CalendarUserType.INDIVIDUAL);
+                }
+                attendee.setUri(attendee.getUri());
+            }
         }
         if (null == fields || Arrays.contains(fields, AttendeeField.EMAIL)) {
             attendee.setEMail(getEMail(user));
         }
         return attendee;
-    }
-
-    private String getField(AttendeeField field, Attendee attendee, String defaultValue) {
-        try {
-            Mapping<? extends Object, Attendee> mapping = AttendeeMapper.getInstance().get(field);
-            if (mapping.isSet(attendee)) {
-                String value = mapping.get(attendee).toString();
-                return defaultValue.equalsIgnoreCase(value) ? defaultValue : value;
-            }
-        } catch (OXException e) {
-            LOG.debug("Couldn't get AttendeeField {}.", field.name(), e);
-        }
-        return defaultValue;
     }
 
     private Attendee applyEntityData(Attendee attendee, Group group, AttendeeField... fields) {

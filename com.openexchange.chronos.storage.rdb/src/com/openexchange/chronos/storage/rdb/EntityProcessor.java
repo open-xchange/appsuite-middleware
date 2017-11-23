@@ -140,24 +140,6 @@ public class EntityProcessor {
         return event;
     }
 
-    /**
-     * Adjusts certain properties of an attendee prior inserting it into the database.
-     *
-     * @param attendee The attendee to adjust
-     * @return The (possibly adjusted) attendee reference
-     */
-    public Attendee adjustPriorSave(Attendee attendee) throws OXException {
-        if (isInternal(attendee) && null != entityResolver) {
-            if (attendee.containsUri() && CalendarUtils.extractEMailAddress(attendee.getUri()).equals(attendee.getEMail())) {
-                Attendee savedAttendee = AttendeeMapper.getInstance().copy(attendee, null, (AttendeeField[]) null);
-                ResourceId resourceId = new ResourceId(entityResolver.getContextID(), savedAttendee.getEntity(), savedAttendee.getCuType());
-                savedAttendee.setUri(resourceId.getURI());
-                savedAttendee.removeCn();
-                return savedAttendee;
-            }
-        }
-        return attendee;
-    }
 
     /**
      * Adjusts certain properties of an attendee prior inserting it into the database.
@@ -171,9 +153,8 @@ public class EntityProcessor {
      */
     public Attendee adjustPriorInsert(Attendee attendee, Set<Integer> usedEntities) throws OXException {
         if (isInternal(attendee)) {
-            Attendee savedAttendee = adjustPriorSave(attendee);
-            usedEntities.add(I(savedAttendee.getEntity()));
-            return savedAttendee;
+            usedEntities.add(I(attendee.getEntity()));
+            return attendee;
         }
         Attendee savedAttendee = AttendeeMapper.getInstance().copy(attendee, null, (AttendeeField[]) null);
         savedAttendee.setEntity(determineEntity(attendee, usedEntities));
