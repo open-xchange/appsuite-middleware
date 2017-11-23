@@ -62,7 +62,7 @@ import com.openexchange.mail.authenticity.mechanism.MailAuthenticityMechanismRes
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class MailAuthenticityResult {
+public final class MailAuthenticityResult {
 
     /** The empty neutral authenticity result */
     public static MailAuthenticityResult NEUTRAL_RESULT = builder().build();
@@ -138,7 +138,6 @@ public class MailAuthenticityResult {
         public MailAuthenticityResult build() {
             return new MailAuthenticityResult(status, domain, ImmutableList.copyOf(mailAuthenticityMechanisms), ImmutableList.copyOf(mailAuthenticityMechanismResults));
         }
-
     }
 
     // ---------------------------------------------------------------------------------------------------------

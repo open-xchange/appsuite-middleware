@@ -426,7 +426,7 @@ public class TestMailAuthenticityHandler {
         for (String header : headers) {
             headerCollection.addHeader(MailAuthenticityHandler.AUTH_RESULTS_HEADER, header);
         }
-        handler.handle(mailMessage);
+        handler.handle(null, mailMessage);
         verify(mailMessage).setAuthenticityResult(argumentCaptor.capture());
         result = argumentCaptor.getValue();
     }

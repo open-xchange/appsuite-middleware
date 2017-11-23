@@ -146,7 +146,7 @@ public class MailAuthenticityFetchListener implements MailFetchListener {
 
         for (MailMessage mail : mails) {
             for (MailAuthenticityHandler handler : handlers) {
-                handler.handle(mail);
+                handler.handle(session, mail);
             }
         }
         return MailFetchListenerResult.neutral(mails, cacheable);

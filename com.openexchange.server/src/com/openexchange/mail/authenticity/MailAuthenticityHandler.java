@@ -75,10 +75,12 @@ public interface MailAuthenticityHandler {
      * and collects the results of the different {@link MailAuthenticityMechanism}s that might be present
      * in a {@link MailAuthenticityResult} object and returns that
      * 
+     * @param session The groupware {@link Session}
      * @param mailPart The {@link MailPart} to handle
+     * 
      * @return The {@link MailAuthenticityResult} with the collected results of the {@link MailAuthenticityMechanism}s
      */
-    void handle(MailMessage mailMessage);
+    void handle(Session session, MailMessage mailMessage);
 
     /**
      * Returns an unmodifiable {@link Collection} with all required {@link MailField}s

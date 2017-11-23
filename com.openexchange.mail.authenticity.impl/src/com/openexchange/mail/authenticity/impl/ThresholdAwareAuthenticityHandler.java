@@ -77,12 +77,12 @@ public class ThresholdAwareAuthenticityHandler implements MailAuthenticityHandle
     }
 
     @Override
-    public void handle(MailMessage mailMessage) {
+    public void handle(Session session, MailMessage mailMessage) {
        if (null == mailMessage || (threshold > 0 && mailMessage.getReceivedDate().getTime() < threshold)) {
            return;
        }
 
-       authenticityHandler.handle(mailMessage);
+       authenticityHandler.handle(session, mailMessage);
     }
 
     @Override

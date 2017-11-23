@@ -167,7 +167,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
      * @see com.openexchange.mail.authenticity.MailAuthenticityHandler#handle(com.openexchange.mail.dataobjects.MailPart)
      */
     @Override
-    public void handle(MailMessage mailMessage) {
+    public void handle(Session session, MailMessage mailMessage) {
         //TODO: Perform preliminary configuration checks,
         //      like whether the feature is enabled or
         //      the core engine shall be used.
