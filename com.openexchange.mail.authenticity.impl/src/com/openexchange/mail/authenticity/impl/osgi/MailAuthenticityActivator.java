@@ -86,6 +86,7 @@ public class MailAuthenticityActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
+        // It is OK to pass service references since 'stopOnServiceUnavailability' returns 'true'
         final MailAuthenticityHandlerRegistryImpl registry = new MailAuthenticityHandlerRegistryImpl(getService(LeanConfigurationService.class), context);
         registerService(MailAuthenticityHandlerRegistry.class, registry);
 
@@ -102,7 +103,6 @@ public class MailAuthenticityActivator extends HousekeepingActivator {
             }
         });
 
-        // It is OK to pass service references since 'stopOnServiceUnavailability' returns 'true'
         MailAuthenticityFetchListener fetchListener = new MailAuthenticityFetchListener(registry);
         registerService(MailFetchListener.class, fetchListener);
     }
