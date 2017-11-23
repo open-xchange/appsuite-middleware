@@ -49,12 +49,15 @@
 
 package com.openexchange.mail.authenticity.impl.osgi;
 
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Reloadable;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.mail.MailFetchListener;
 import com.openexchange.mail.authenticity.MailAuthenticityHandler;
 import com.openexchange.mail.authenticity.MailAuthenticityHandlerRegistry;
 import com.openexchange.mail.authenticity.impl.MailAuthenticityFetchListener;
 import com.openexchange.mail.authenticity.impl.MailAuthenticityHandlerRegistryImpl;
+import com.openexchange.mail.authenticity.impl.TrustedDomainAuthenticationHandler;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
 
@@ -80,15 +83,23 @@ public class MailAuthenticityActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { LeanConfigurationService.class };
+        return new Class<?>[] { LeanConfigurationService.class, ConfigurationService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
+
+        track(TrustedDomainAuthenticationHandler.class);
         RankingAwareNearRegistryServiceTracker<MailAuthenticityHandler> handlerTracker = new RankingAwareNearRegistryServiceTracker<>(context, MailAuthenticityHandler.class);
         rememberTracker(handlerTracker);
 
         openTrackers();
+
+        ConfigurationService configurationService = getService(ConfigurationService.class);
+        TrustedDomainAuthenticationHandler authenticationHandler = new TrustedDomainAuthenticationHandler(configurationService);
+
+        registerService(Reloadable.class, authenticationHandler);
+        registerService(TrustedDomainAuthenticationHandler.class, authenticationHandler);
 
         MailAuthenticityHandlerRegistryImpl registry = new MailAuthenticityHandlerRegistryImpl(handlerTracker, getService(LeanConfigurationService.class));
         registerService(MailAuthenticityHandlerRegistry.class, registry);

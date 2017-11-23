@@ -117,6 +117,8 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
 
     private final String configuredAuthServId;
 
+    private final TrustedDomainAuthenticationHandler trustedDomainHandler;
+
     /**
      * Initialises a new {@link MailAuthenticityHandlerImpl} with priority 0.
      */
@@ -133,6 +135,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
         super();
         this.ranking = ranking;
         LeanConfigurationService leanConfigService = services.getService(LeanConfigurationService.class);
+        this.trustedDomainHandler = services.getService(TrustedDomainAuthenticationHandler.class);
         this.configuredAuthServId = leanConfigService.getProperty(MailAuthenticityProperty.authServId);
         if (Strings.isEmpty(configuredAuthServId)) {
             //TODO: proper exception code
@@ -203,6 +206,10 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
         }
 
         mailMessage.setAuthenticityResult(parseHeaders(authHeaders, fromHeaders[0]));
+
+        if(trustedDomainHandler != null) {
+            trustedDomainHandler.handle(session, mailMessage);
+        }
     }
 
     /*
