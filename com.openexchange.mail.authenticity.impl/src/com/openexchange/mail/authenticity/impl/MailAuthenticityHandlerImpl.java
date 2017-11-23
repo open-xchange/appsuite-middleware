@@ -164,7 +164,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
     /*
      * (non-Javadoc)
      *
-     * @see com.openexchange.mail.authentication.MailAuthenticationHandler#handle(com.openexchange.mail.dataobjects.MailPart)
+     * @see com.openexchange.mail.authenticity.MailAuthenticityHandler#handle(com.openexchange.mail.dataobjects.MailPart)
      */
     @Override
     public void handle(MailMessage mailMessage) {
@@ -187,7 +187,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
     /*
      * (non-Javadoc)
      *
-     * @see com.openexchange.mail.authentication.MailAuthenticationHandler#getRequiredFields()
+     * @see com.openexchange.mail.authenticity.MailAuthenticityHandler#getRequiredFields()
      */
     @Override
     public Collection<MailField> getRequiredFields() {
@@ -197,7 +197,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
     /*
      * (non-Javadoc)
      *
-     * @see com.openexchange.mail.authentication.MailAuthenticationHandler#getRequiredHeaders()
+     * @see com.openexchange.mail.authenticity.MailAuthenticityHandler#getRequiredHeaders()
      */
     @Override
     public Collection<String> getRequiredHeaders() {
@@ -207,7 +207,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
     /*
      * (non-Javadoc)
      *
-     * @see com.openexchange.mail.authentication.MailAuthenticationHandler#isEnabled(com.openexchange.session.Session)
+     * @see com.openexchange.mail.authenticity.MailAuthenticityHandler#isEnabled(com.openexchange.session.Session)
      */
     @Override
     public boolean isEnabled(Session session) {
@@ -218,7 +218,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
     /*
      * (non-Javadoc)
      *
-     * @see com.openexchange.mail.authentication.MailAuthenticationHandler#getRanking()
+     * @see com.openexchange.mail.authenticity.MailAuthenticityHandler#getRanking()
      */
     @Override
     public int getRanking() {
@@ -228,16 +228,16 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
     ///////////////////////////////////// HELPERS ///////////////////////////////////////
 
     /**
-     * Parses the specified authentication headers
+     * Parses the specified authenticity headers
      *
-     * @param authHeaders The authentication headers to parse
+     * @param authHeaders The authenticity headers to parse
      * @return The {@link MailAuthenticityResult}
      */
     private MailAuthenticityResult parseHeaders(String[] authHeaders) {
         // There can only be one, if there are more only the first one is relevant
         List<String> split = splitLines(authHeaders[0]);
         if (split.isEmpty()) {
-            // Huh? Invalid/Malformed authentication results header, return as is
+            // Huh? Invalid/Malformed authenticity results header, return as is
             return MailAuthenticityResult.NEUTRAL_RESULT;
         }
 
@@ -284,7 +284,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
             try {
                 result.setStatus(MailAuthenticityStatus.valueOf(mailAuthMechResult.getResult().getTechnicalName().toUpperCase()));
             } catch (IllegalArgumentException e) {
-                LOGGER.debug("Unknown mail authentication status '{}'", mailAuthMechResult.getResult().getTechnicalName(), e);
+                LOGGER.debug("Unknown mail authenticity status '{}'", mailAuthMechResult.getResult().getTechnicalName(), e);
                 result.setStatus(MailAuthenticityStatus.NEUTRAL);
             }
             result.addResult(mailAuthMechResult);
@@ -294,7 +294,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
     /**
      * Extracts the supported mechanism results from the specified string array
      *
-     * @param authResults The authentication results
+     * @param authResults The authenticity results
      * @return An unmodifiable {@link List} with the supported mechanism results
      */
     private List<String> extractMechanismResults(List<String> authResults) {
@@ -478,7 +478,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
         try {
             return MailAuthenticityMechanism.valueOf(s.toUpperCase());
         } catch (IllegalArgumentException e) {
-            LOGGER.debug("Unknown mail authentication mechanism '{}'", s);
+            LOGGER.debug("Unknown mail authenticity mechanism '{}'", s);
         }
         return null;
     }

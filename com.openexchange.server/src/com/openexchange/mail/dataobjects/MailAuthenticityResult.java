@@ -64,7 +64,7 @@ import com.openexchange.mail.authenticity.mechanism.MailAuthenticityMechanismRes
  */
 public class MailAuthenticityResult {
 
-    /** The empty neutral authentication result */
+    /** The empty neutral authenticity result */
     public static MailAuthenticityResult NEUTRAL_RESULT = builder().build();
 
     /**
@@ -76,7 +76,7 @@ public class MailAuthenticityResult {
         return new Builder();
     }
 
-    /** The builder or instance of <code>MailAuthenticationResult</code> */
+    /** The builder or instance of {@link MailAuthenticityResult} */
     public static class Builder {
 
         private MailAuthenticityStatus status;
@@ -120,7 +120,7 @@ public class MailAuthenticityResult {
         }
 
         /**
-         * Sets the status of the entire mail authentication
+         * Sets the status of the entire mail authenticity
          *
          * @param status The status to set
          * @return This builder
@@ -169,7 +169,7 @@ public class MailAuthenticityResult {
     }
 
     /**
-     * Gets the status of the entire mail authentication
+     * Gets the status of the entire mail authenticity
      *
      * @return The status
      */
@@ -178,20 +178,20 @@ public class MailAuthenticityResult {
     }
 
     /**
-     * Returns an unmodifiable {@link List} with the used mail authentication mechanisms
+     * Returns an unmodifiable {@link List} with the used mail authenticity mechanisms
      *
-     * @return an unmodifiable {@link List} with the used mail authentication mechanisms
+     * @return an unmodifiable {@link List} with the used mail authenticity mechanisms
      */
-    public List<MailAuthenticityMechanism> getAuthenticationMechanisms() {
+    public List<MailAuthenticityMechanism> getAuthenticityMechanisms() {
         return mailAuthenticityMechanisms;
     }
 
     /**
-     * Returns an unmodifiable {@link List} with the results of the used mail authentication mechanisms
+     * Returns an unmodifiable {@link List} with the results of the used mail authenticity mechanisms
      *
-     * @return an unmodifiable {@link List} with the results of the used mail authentication mechanisms
+     * @return an unmodifiable {@link List} with the results of the used mail authenticity mechanisms
      */
-    public List<MailAuthenticityMechanismResult> getMailAuthenticationMechanismResults() {
+    public List<MailAuthenticityMechanismResult> getMailAuthenticityMechanismResults() {
         return mailAuthenticityMechanismResults;
     }
 
@@ -203,8 +203,8 @@ public class MailAuthenticityResult {
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        builder.append("MailAuthenticationResult [status=").append(status).append(", domain=").append(domain).append(", mailAuthenticationMechanisms=");
-        builder.append(mailAuthenticityMechanisms).append(", mailAuthenticationMechanismResults=").append(mailAuthenticityMechanismResults).append("]");
+        builder.append("MailAuthenticityResult [status=").append(status).append(", domain=").append(domain).append(", mailAuthenticityMechanisms=");
+        builder.append(mailAuthenticityMechanisms).append(", mailAuthenticityMechanismResults=").append(mailAuthenticityMechanismResults).append("]");
         return builder.toString();
     }
 }
