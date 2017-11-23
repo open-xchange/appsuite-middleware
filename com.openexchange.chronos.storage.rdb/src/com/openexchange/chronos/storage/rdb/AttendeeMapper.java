@@ -57,10 +57,8 @@ import java.util.List;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.CalendarUserType;
-import com.openexchange.chronos.ExtendedProperties;
 import com.openexchange.chronos.ParticipantRole;
 import com.openexchange.chronos.ParticipationStatus;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tools.mappings.database.BooleanMapping;
 import com.openexchange.groupware.tools.mappings.database.DbMapping;
 import com.openexchange.groupware.tools.mappings.database.DefaultDbMapper;
@@ -339,28 +337,6 @@ public class AttendeeMapper extends DefaultDbMapper<Attendee, AttendeeField> {
             @Override
             public void remove(Attendee attendee) {
                 attendee.removeMember();
-            }
-        });
-        mappings.put(AttendeeField.EXTENDED_PROPERTIES, new ExtendedPropertiesMapping<Attendee>("extendedProperties", "Extended Properties") {
-
-            @Override
-            public boolean isSet(Attendee object) {
-                return object.containsExtendedProperties();
-            }
-
-            @Override
-            public void set(Attendee object, ExtendedProperties value) throws OXException {
-                object.setExtendedProperties(value);
-            }
-
-            @Override
-            public ExtendedProperties get(Attendee object) {
-                return object.getExtendedProperties();
-            }
-
-            @Override
-            public void remove(Attendee object) {
-                object.removeExtendedProperties();
             }
         });
         return mappings;

@@ -104,10 +104,6 @@ public enum AttendeeField {
     /**
      * The e-mail address of the attendee.
      */
-    EMAIL,
-    /**
-     * Extended properties of the event.
-     */
-    EXTENDED_PROPERTIES;
-    
+    EMAIL
+
 }
