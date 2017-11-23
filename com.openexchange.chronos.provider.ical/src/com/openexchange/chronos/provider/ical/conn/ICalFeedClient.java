@@ -61,7 +61,6 @@ import org.apache.http.HttpStatus;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpHead;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.utils.DateUtils;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -174,30 +173,6 @@ public class ICalFeedClient {
         } finally {
             Streams.close(inputStream);
         }
-    }
-
-    public boolean isFeedAvailable() throws OXException {
-        HttpHead request = new HttpHead(iCalFeedConfig.getFeedUrl());
-
-        CloseableHttpResponse response = null;
-        try {
-            response = ICalFeedHttpClient.getInstance().execute(request);
-
-            int statusCode = response.getStatusLine().getStatusCode();
-            if (statusCode == HttpStatus.SC_SERVICE_UNAVAILABLE || statusCode == HttpStatus.SC_NOT_FOUND) {
-                return false;
-            }
-        } catch (ClientProtocolException e) {
-            LOG.error("Error while processing the retrieved information:{}.", e.getMessage(), e);
-            throw ICalProviderExceptionCodes.CLIENT_PROTOCOL_ERROR.create(e.getMessage(), e);
-        } catch (IOException e) {
-            LOG.error("Error while processing the retrieved information:{}.", e.getMessage(), e);
-            throw ICalProviderExceptionCodes.IO_ERROR.create(e.getMessage(), e);
-        } finally {
-            close(request, response);
-            Streams.close(response);
-        }
-        return true;
     }
 
     /**

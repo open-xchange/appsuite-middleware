@@ -55,7 +55,6 @@ import static com.openexchange.chronos.provider.CalendarFolderProperty.DESCRIPTI
 import static com.openexchange.chronos.provider.CalendarFolderProperty.SCHEDULE_TRANSP;
 import static com.openexchange.chronos.provider.CalendarFolderProperty.USED_FOR_SYNC;
 import java.util.Collections;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 import org.dmfs.rfc5545.Duration;
 import org.json.JSONException;
@@ -120,7 +119,7 @@ public class ICalCalendarAccess extends SingleFolderCachingCalendarAccess {
     @Override
     public long getRefreshInterval() {
         JSONObject iCalConfiguration = getICalConfiguration();
-        
+
         if (iCalConfiguration != null && !iCalConfiguration.isEmpty()) {
             Number calendarProviderInterval = (Number) iCalConfiguration.opt(ICalCalendarConstants.REFRESH_INTERVAL);
             if (calendarProviderInterval != null && calendarProviderInterval.longValue() > 0) {
@@ -128,14 +127,6 @@ public class ICalCalendarAccess extends SingleFolderCachingCalendarAccess {
             }
         }
         return Services.getService(LeanConfigurationService.class).getLongProperty(getSession().getUserId(), getSession().getContextId(), ICalCalendarProviderProperties.refreshInterval);
-    }
-
-    @Override
-    public List<CalendarFolder> getVisibleFolders() throws OXException {
-        if (this.feedClient.isFeedAvailable()) {
-            return Collections.singletonList(folder);
-        }
-        return Collections.emptyList();
     }
 
     protected JSONObject getICalConfiguration() {
