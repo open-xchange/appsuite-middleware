@@ -795,13 +795,6 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
         boolean modified = extendedProperties.removeAll("ATTENDEE");
         if (null != attendees) {
             for (Attendee attendee : attendees) {
-                if (null != entityProcessor) {
-                    try {
-                        attendee = entityProcessor.adjustPriorSave(attendee);
-                    } catch (OXException e) {
-                        addInvalidDataWaring(eventId, EventField.ALARMS, ProblemSeverity.NORMAL, "Error processing " + attendee, e);
-                    }
-                }
                 if (attendee.containsCn() && null != attendee.getCn()) {
                     List<ExtendedPropertyParameter> parameters = Collections.singletonList(new ExtendedPropertyParameter("CN", attendee.getCn()));
                     modified |= extendedProperties.add(new ExtendedProperty("ATTENDEE", attendee.getUri(), parameters));
