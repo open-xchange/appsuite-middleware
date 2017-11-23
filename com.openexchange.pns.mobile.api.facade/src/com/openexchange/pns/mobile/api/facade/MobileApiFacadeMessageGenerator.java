@@ -54,6 +54,7 @@ import org.json.JSONException;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
+import com.openexchange.pns.ApnsConstants;
 import com.openexchange.pns.KnownTransport;
 import com.openexchange.pns.Message;
 import com.openexchange.pns.PushExceptionCodes;
@@ -70,7 +71,6 @@ import javapns.notification.PushNotificationPayload;
 public class MobileApiFacadeMessageGenerator implements PushMessageGenerator {
 
     private static final String TRANSPORT_ID_GCM = KnownTransport.GCM.getTransportId();
-    private static final int GCM_MAX_PAYLOAD_SIZE = 4096;
     private static final String TRANSPORT_ID_APNS = KnownTransport.APNS.getTransportId();
 
     // ------------------------------------------------------------------------------------------------------------------------
@@ -143,7 +143,9 @@ public class MobileApiFacadeMessageGenerator implements PushMessageGenerator {
                     StringBuilder sb = new StringBuilder(sender);
                     sb.append("\n");
                     sb.append(subject);
-                    payload.addAlert(sb.toString());
+                    String alertMessage = sb.toString();
+                    alertMessage = alertMessage.length() > ApnsConstants.APNS_MAX_ALERT_LENGTH ? alertMessage.substring(0, ApnsConstants.APNS_MAX_ALERT_LENGTH) : alertMessage;
+                    payload.addAlert(alertMessage);
 
                     MobileApiFacadePushConfiguration config = MobileApiFacadePushConfiguration.getConfigFor(notification.getUserId(), notification.getContextId(), viewFactory);
 

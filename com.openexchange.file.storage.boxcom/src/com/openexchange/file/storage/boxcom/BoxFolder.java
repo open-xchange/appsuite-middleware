@@ -119,9 +119,10 @@ public final class BoxFolder extends DefaultFileStorageFolder implements TypeAwa
      * @param dir The Box.com directory
      * @param rootFolderId The identifier of the root folder
      * @param accountDisplayName The account's display name
+     * @param hasSubfolders <code>true</code> if this folder has sub-folders; otherwise <code>false</code>
      * @throws OXException If parsing Box.com directory fails
      */
-    public BoxFolder parseDirEntry(Info dir, String rootFolderId, String accountDisplayName) throws OXException {
+    public BoxFolder parseDirEntry(Info dir, String rootFolderId, String accountDisplayName, boolean hasSubfolders) throws OXException {
         if (null != dir) {
             try {
                 id = dir.getID();
@@ -156,11 +157,8 @@ public final class BoxFolder extends DefaultFileStorageFolder implements TypeAwa
                     }
                 }
 
-                {
-                    boolean hasSubfolders = dir.getPathCollection() != null && !dir.getPathCollection().isEmpty();
-                    setSubfolders(hasSubfolders);
-                    setSubscribedSubfolders(hasSubfolders);
-                }
+                setSubfolders(hasSubfolders);
+                setSubscribedSubfolders(hasSubfolders);
             } catch (final RuntimeException e) {
                 throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
             }

@@ -49,10 +49,15 @@
 
 package com.openexchange.file.storage.dropbox;
 
+import java.util.Collections;
+import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.CompositeFileStorageAccountManagerProvider;
+import com.openexchange.file.storage.DefaultFileStoragePermission;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountAccess;
+import com.openexchange.file.storage.FileStoragePermission;
+import com.openexchange.file.storage.RootFolderPermissionsAware;
 import com.openexchange.file.storage.dropbox.access.DropboxAccountAccess;
 import com.openexchange.file.storage.oauth.AbstractOAuthFileStorageService;
 import com.openexchange.oauth.KnownApi;
@@ -64,7 +69,7 @@ import com.openexchange.session.Session;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class DropboxFileStorageService extends AbstractOAuthFileStorageService {
+public final class DropboxFileStorageService extends AbstractOAuthFileStorageService implements RootFolderPermissionsAware {
 
     /**
      * Initializes a new {@link BoxFileStorageService}.
@@ -87,5 +92,14 @@ public final class DropboxFileStorageService extends AbstractOAuthFileStorageSer
     public FileStorageAccountAccess getAccountAccess(final String accountId, final Session session) throws OXException {
         final FileStorageAccount account = getAccountAccess(session, accountId);
         return new DropboxAccountAccess(this, account, session);
+    }
+
+    @Override
+    public List<FileStoragePermission> getRootFolderPermissions(String accountId, Session session) throws OXException {
+        DefaultFileStoragePermission permission = DefaultFileStoragePermission.newInstance();
+        permission.setAdmin(false);
+        permission.setFolderPermission(FileStoragePermission.CREATE_SUB_FOLDERS);
+        permission.setEntity(session.getUserId());
+        return Collections.<FileStoragePermission>singletonList(permission);
     }
 }
