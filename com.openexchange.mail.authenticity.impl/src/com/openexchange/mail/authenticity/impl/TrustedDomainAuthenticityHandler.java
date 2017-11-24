@@ -62,8 +62,13 @@ import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.authenticity.DefaultMailAuthenticityResultKey;
+import com.openexchange.mail.authenticity.MailAuthenticityResultKey;
 import com.openexchange.mail.authenticity.MailAuthenticityStatus;
+import com.openexchange.mail.authenticity.mechanism.AbstractAuthMechResult;
+import com.openexchange.mail.authenticity.mechanism.AuthenticityMechanismResult;
 import com.openexchange.mail.authenticity.mechanism.MailAuthenticityMechanism;
+import com.openexchange.mail.authenticity.mechanism.MailAuthenticityMechanismResult;
+import com.openexchange.mail.authenticity.mechanism.SimplePassFailResult;
 import com.openexchange.mail.dataobjects.MailAuthenticityResult;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.session.Session;
@@ -76,14 +81,30 @@ import com.openexchange.session.Session;
  */
 public class TrustedDomainAuthenticityHandler implements Reloadable {
 
-    Map<String, List<TrustedDomain>> trustedDomains = new ConcurrentHashMap<>();
-
     private static final Logger LOG = LoggerFactory.getLogger(TrustedDomainAuthenticityHandler.class);
+
+    /*
+     * Property keys
+     */
     private static final String PREFIX = "com.openexchange.mail.authentication.trustedDomains.";
     private static final String TENANT = "tenants";
     private static final String DOMAINS = ".domains";
     private static final String IMAGE = ".image";
+
+    Map<String, List<TrustedDomain>> trustedDomainsPerTenant = new ConcurrentHashMap<>();
     private static final List<TrustedDomain> FALLBACK_TENANT = new ArrayList<>();
+    private static final MailAuthenticityMechanism TRUSTED_DOMAIN_MECHANISM = new MailAuthenticityMechanism() {
+
+        @Override
+        public Class<? extends AuthenticityMechanismResult> getResultType() {
+            return SimplePassFailResult.class;
+        }
+
+        @Override
+        public String getDisplayName() {
+            return "TrustedDomain";
+        }
+    };
 
     /**
      * Initializes a new {@link TrustedDomainAuthenticityHandler}.
@@ -94,19 +115,50 @@ public class TrustedDomainAuthenticityHandler implements Reloadable {
 
     }
 
+    @SuppressWarnings("unchecked")
+    public void handle(Session session, MailMessage mailMessage) {
+        String tenant = (String) session.getParameter(Session.PARAM_HOST_NAME);
+        if (tenant == null) {
+            LOG.warn("Missing host name session parameter. Unable to verify mail domain.");
+            return;
+        }
+
+        MailAuthenticityResult authenticityResult = mailMessage.getAuthenticityResult();
+
+        if (MailAuthenticityStatus.PASS.equals(authenticityResult.getStatus())) {
+            String domain = getDomain(mailMessage);
+            TrustedDomain trustedDomain = checkHost(tenant, domain);
+            if (trustedDomain != null) {
+                Set<MailAuthenticityMechanism> mechanisms = authenticityResult.getAttribute(DefaultMailAuthenticityResultKey.MAIL_AUTH_MECHS, Set.class);
+                mechanisms.add(TRUSTED_DOMAIN_MECHANISM);
+                List<MailAuthenticityMechanismResult> results = authenticityResult.getAttribute(DefaultMailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS, List.class);
+                results.add(new TrustedDomainResult(domain, null, SimplePassFailResult.PASS));
+                if (trustedDomain.getImage() != null) {
+                    authenticityResult.addAttribute(new MailAuthenticityResultKey() {
+
+                        @Override
+                        public String getKey() {
+                            return "image";
+                        }
+                    }, trustedDomain.getImage());
+                }
+            }
+        }
+    }
+
     private TrustedDomain checkHost(String tenant, String host) {
-        if(trustedDomains.containsKey(tenant)){
-            List<TrustedDomain> domains = trustedDomains.get(tenant);
-            for(TrustedDomain domain: domains){
-                if(domain.matches(host)){
+        if (trustedDomainsPerTenant.containsKey(tenant)) {
+            List<TrustedDomain> domains = trustedDomainsPerTenant.get(tenant);
+            for (TrustedDomain domain : domains) {
+                if (domain.matches(host)) {
                     return domain;
                 }
             }
         }
 
-        if(FALLBACK_TENANT != null){
-            for(TrustedDomain domain: FALLBACK_TENANT){
-                if(domain.matches(host)){
+        if (FALLBACK_TENANT != null) {
+            for (TrustedDomain domain : FALLBACK_TENANT) {
+                if (domain.matches(host)) {
                     return domain;
                 }
             }
@@ -114,20 +166,20 @@ public class TrustedDomainAuthenticityHandler implements Reloadable {
         return null;
     }
 
-    private void init(ConfigurationService configurationService){
-        trustedDomains.clear();
-        String commaSeparatedListOfTenants = configurationService.getProperty(PREFIX+TENANT, "");
+    private void init(ConfigurationService configurationService) {
+        trustedDomainsPerTenant.clear();
+        String commaSeparatedListOfTenants = configurationService.getProperty(PREFIX + TENANT, "");
         String[] tenants = Strings.splitByCommaNotInQuotes(commaSeparatedListOfTenants);
-        for(String tenant: tenants){
-            String commaSeparatedListOfDomains = configurationService.getProperty(PREFIX+tenant+DOMAINS, (String) null);
-            if(Strings.isNotEmpty(commaSeparatedListOfDomains)){
+        for (String tenant : tenants) {
+            String commaSeparatedListOfDomains = configurationService.getProperty(PREFIX + tenant + DOMAINS, (String) null);
+            if (Strings.isNotEmpty(commaSeparatedListOfDomains)) {
                 String[] domains = Strings.splitByCommaNotInQuotes(commaSeparatedListOfDomains);
-                String image = configurationService.getProperty(PREFIX+tenant+IMAGE, (String) null);
+                String image = configurationService.getProperty(PREFIX + tenant + IMAGE, (String) null);
                 List<TrustedDomain> domainList = new ArrayList<>();
-                for(String domain: domains){
+                for (String domain : domains) {
                     domainList.add(new TrustedDomain(domain, image));
                 }
-                trustedDomains.put(tenant, domainList);
+                trustedDomainsPerTenant.put(tenant, domainList);
             }
         }
 
@@ -150,41 +202,39 @@ public class TrustedDomainAuthenticityHandler implements Reloadable {
 
     @Override
     public Interests getInterests() {
-        ArrayList<String> properties = new ArrayList<>(trustedDomains.size());
+        ArrayList<String> properties = new ArrayList<>(trustedDomainsPerTenant.size());
         properties.add(PREFIX + TENANT);
-        for(String tenant: trustedDomains.keySet()){
-            properties.add(PREFIX+tenant+DOMAINS);
-            properties.add(PREFIX+tenant+IMAGE);
+        for (String tenant : trustedDomainsPerTenant.keySet()) {
+            properties.add(PREFIX + tenant + DOMAINS);
+            properties.add(PREFIX + tenant + IMAGE);
         }
-        properties.add(PREFIX+DOMAINS.substring(1));
-        properties.add(PREFIX+IMAGE.substring(1));
+        properties.add(PREFIX + DOMAINS.substring(1));
+        properties.add(PREFIX + IMAGE.substring(1));
         return DefaultInterests.builder().propertiesOfInterest(properties.toArray(new String[properties.size()])).build();
     }
 
-    @SuppressWarnings("unchecked")
-    public void handle(Session session, MailMessage mailMessage) {
-        String tenant = (String) session.getParameter(Session.PARAM_HOST_NAME);
-        if (tenant == null) {
-            LOG.warn("Missing host name session parameter. Unable to verify mail domain.");
-            return;
-        }
-
-        MailAuthenticityResult authenticityResult = mailMessage.getAuthenticityResult();
-
-        if (MailAuthenticityStatus.PASS.equals(authenticityResult.getStatus())) {
-
-            TrustedDomain trustedDomain = checkHost(tenant, getDomain(mailMessage));
-            if (trustedDomain != null) {
-                // TODO insert infos
-                Set<MailAuthenticityMechanism> mechanisms = authenticityResult.getAttribute(DefaultMailAuthenticityResultKey.MAIL_AUTH_MECHS, Set.class);
-            }
-        }
-    }
-
-    private String getDomain(MailMessage msg){
+    private String getDomain(MailMessage msg) {
         MailAuthenticityResult authenticationResult = msg.getAuthenticityResult();
         return authenticationResult == null ? null : authenticationResult.getAttribute(DefaultMailAuthenticityResultKey.DOMAIN).toString();
     }
 
+    private class TrustedDomainResult extends AbstractAuthMechResult {
+
+        /**
+         * Initializes a new {@link TrustedDomainResult}.
+         *
+         * @param domain
+         * @param clientIP
+         * @param result
+         */
+        public TrustedDomainResult(String domain, String clientIP, AuthenticityMechanismResult result) {
+            super(domain, clientIP, result);
+        }
+
+        @Override
+        public MailAuthenticityMechanism getMechanism() {
+            return TRUSTED_DOMAIN_MECHANISM;
+        }
+    }
 
 }
