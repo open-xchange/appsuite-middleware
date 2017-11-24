@@ -84,14 +84,12 @@ public class PublicationUserDeleteListener implements DeleteListener {
 
     @Override
     public void deletePerformed(final DeleteEvent event, final Connection readCon, final Connection writeCon) throws OXException {
-        if (event.getType() == DeleteEvent.TYPE_USER) {
-            final int userID = event.getId();
-            final Context context = event.getContext();
-            final PublicationStorage store = getStorage(writeCon);
-            store.deletePublicationsOfUser(userID, context);
-        } else if (event.getType() == DeleteEvent.TYPE_CONTEXT) {
-            final Context context = event.getContext();
-            final PublicationStorage store = getStorage(writeCon);
+        Context context = event.getContext();
+        PublicationStorage store = getStorage(writeCon);
+        int type = event.getType();
+        if (type == DeleteEvent.TYPE_USER) {
+            store.deletePublicationsOfUser(event.getId(), context);
+        } else if (type == DeleteEvent.TYPE_CONTEXT) {
             store.deletePublicationsInContext(context.getContextId(), context);
         }
     }
