@@ -67,6 +67,8 @@ public class ICalExceptionMessages implements LocalizableStrings {
 
     public static final String VALIDATION_FAILED_MSG = "Validation failed: %1$s";
 
+    public static final String TRUNCATED_RESULTS_MSG = "Not all of the objects could be imported due to a configured limitation.";
+
     /**
      * Initializes a new {@link ICalExceptionMessages}.
      */

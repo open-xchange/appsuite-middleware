@@ -52,6 +52,7 @@ package com.openexchange.chronos.ical;
 import static com.openexchange.chronos.ical.ICalExceptionMessages.CONVERSION_FAILED_MSG;
 import static com.openexchange.chronos.ical.ICalExceptionMessages.NO_CALENDAR_FOUND_MSG;
 import static com.openexchange.chronos.ical.ICalExceptionMessages.PARSER_ERROR_MSG;
+import static com.openexchange.chronos.ical.ICalExceptionMessages.TRUNCATED_RESULTS_MSG;
 import static com.openexchange.chronos.ical.ICalExceptionMessages.VALIDATION_FAILED_MSG;
 import static com.openexchange.exception.OXExceptionStrings.MESSAGE;
 import com.openexchange.exception.Category;
@@ -91,6 +92,11 @@ public enum ICalExceptionCodes implements DisplayableOXExceptionCode {
      * <li>Validation failed: %1$s"</li>
      */
     VALIDATION_FAILED(VALIDATION_FAILED_MSG, VALIDATION_FAILED_MSG, Category.CATEGORY_WARNING, 5),
+    /**
+     * <li>Not all of the objects could be imported due to a configured limitation.</li>
+     * <li>Import truncated after %1$d objects (%2$d available)</li>
+     */
+    TRUNCATED_RESULTS("Import truncated after %1$d objects (%2$d available)", TRUNCATED_RESULTS_MSG, Category.CATEGORY_TRUNCATED, 6),
 
     ;
 

@@ -108,13 +108,25 @@ public interface ICalParameters {
     /**
      * {@link Boolean}
      * <p/>
-     * Configures whether properties that are not present in the iCalendat input should either be skipped, or if the mapped object
+     * Configures whether properties that are not present in the iCalendar input should either be skipped, or if the mapped object
      * attribute(s) should be explicitly set to <code>null</code>. The latter option will make the typical <code>containsXXX</code>
      * methods return <code>true</code>, while ignoring such properties will keep the attributes appear unset.
      * <p/>
      * Only effective during import, defaults to {@link Boolean#FALSE}.
      */
     String IGNORE_UNSET_PROPERTIES = "IGNORE_EMPTY_PROPERTIES";
+
+    /**
+     * {@link Integer}
+     * <p/>
+     * Configures the maximum number of components to consider during import. If the limit is exceeded, the import result will contain an
+     * appropriate warning ({@link ICalExceptionCodes#TRUNCATED_RESULTS}).
+     * <p/>
+     * Only effective during import, defaults to <code>-1</code>
+     * 
+     * @see ICalExceptionCodes#TRUNCATED_RESULTS
+     */
+    String IMPORT_LIMIT = "IGNORE_EMPTY_PROPERTIES";
 
     /**
      * Gets the value of an arbitrary extended parameter.
