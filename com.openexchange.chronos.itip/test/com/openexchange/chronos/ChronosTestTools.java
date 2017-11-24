@@ -143,7 +143,7 @@ public final class ChronosTestTools {
      */
     public static Attendee createExternalAttendee(int contextId, AttendeeField... attendeeFields) {
         Attendee attendee = createAttendee(contextId, attendeeFields);
-        attendee.setEntity(-1 * attendee.getEntity());
+        attendee.setEntity(0);
         attendee.setUri(CalendarUtils.getURI(attendee.getEMail()));
         return attendee;
     }
