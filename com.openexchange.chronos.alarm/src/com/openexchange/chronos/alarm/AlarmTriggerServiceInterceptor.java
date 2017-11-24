@@ -97,6 +97,10 @@ public class AlarmTriggerServiceInterceptor extends AbstractUserServiceIntercept
 
     @Override
     public void afterUpdate(Context context, User user, Contact contactData, Map<String, Object> properties) throws OXException {
+        if (context == null || user == null) {
+            // ignore
+            return;
+        }
         AdministrativeCalendarAccountService accountService = requireService(AdministrativeCalendarAccountService.class, services);
         List<CalendarAccount> accounts = accountService.getAccounts(context.getContextId(), user.getId());
 
