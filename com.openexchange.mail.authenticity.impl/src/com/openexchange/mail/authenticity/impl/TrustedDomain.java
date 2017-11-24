@@ -52,7 +52,7 @@ package com.openexchange.mail.authenticity.impl;
 import java.util.regex.Pattern;
 
 /**
- * {@link TrustedDomain}
+ * {@link TrustedDomain} specifies a trusted domain or a group of trusted domains via wildcards.
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.0
@@ -73,13 +73,11 @@ public class TrustedDomain {
     public TrustedDomain(String domain, Object image) {
         super();
         this.domain = domain;
-        pattern = Pattern.compile(toRegex(domain));
-
+        this.pattern = Pattern.compile(toRegex(domain));
         this.image = image;
     }
 
     private String toRegex(String domain){
-
         domain = domain.replaceAll("\\.", "[.]").replaceAll("\\*", ".*");
         return domain;
     }
@@ -109,5 +107,15 @@ public class TrustedDomain {
      */
     public boolean matches(String domain){
         return pattern.matcher(domain).matches();
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder("TrustedDomain [").append("domain = ").append(domain);
+        if (image != null) {
+            builder.append(" , image = ").append(image.toString());
+        }
+        return builder.append("]").toString();
+
     }
 }

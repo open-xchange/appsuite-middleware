@@ -40,25 +40,25 @@ import com.openexchange.admin.soap.context.dataobjects.Credentials;
 public class ListPageAll {
 
     @XmlElement(name = "offset", nillable = true)
-    protected int offset;
+    protected String offset;
     @XmlElement(name = "length", nillable = true)
-    protected int length;
+    protected String length;
     @XmlElement(nillable = true)
     protected Credentials auth;
 
-    public int getOffset() {
+    public String getOffset() {
         return offset;
     }
 
-    public void setOffset(int offset) {
+    public void setOffset(String offset) {
         this.offset = offset;
     }
 
-    public int getLength() {
+    public String getLength() {
         return length;
     }
 
-    public void setLength(int length) {
+    public void setLength(String length) {
         this.length = length;
     }
 

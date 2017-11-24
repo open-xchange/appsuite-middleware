@@ -316,7 +316,7 @@ public class TestMailAuthenticityHandler {
 
     /**
      * Asserts that the {@link MailAuthenticityResult} contains the specified {@link DefaultMailAuthenticityMechanism}s
-     * 
+     *
      * @param mechanisms The {@link DefaultMailAuthenticityMechanism}s
      */
     private void assertContains(MailAuthenticityMechanism... mechanisms) {
@@ -330,7 +330,7 @@ public class TestMailAuthenticityHandler {
 
     /**
      * Asserts that the {@link MailAuthenticityResult} contains the specified amount of results
-     * 
+     *
      * @param amount The amount of results
      */
     private void assertAmount(int amount) {
@@ -339,7 +339,7 @@ public class TestMailAuthenticityHandler {
 
     /**
      * Asserts that the specified {@link MailAuthenticityMechanismResult} contains the expected domain and status result
-     * 
+     *
      * @param actualMechanismResult The {@link MailAuthenticityMechanismResult}
      * @param expectedDomain The expected domain
      * @param expectedResult The expected result
@@ -353,7 +353,7 @@ public class TestMailAuthenticityHandler {
 
     /**
      * Asserts that the specified {@link MailAuthenticityMechanismResult} contains the expected domain, reason and status result
-     * 
+     *
      * @param actualMechanismResult The {@link MailAuthenticityMechanismResult}
      * @param expectedDomain The expected domain
      * @param expectedReason The expected reason
