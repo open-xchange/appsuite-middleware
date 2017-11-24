@@ -201,19 +201,22 @@ public class SwiftFileStorage implements FileStorage {
     @Override
     public boolean deleteFile(String identifier) throws OXException {
         UUID documentId = UUIDs.fromUnformattedString(identifier);
-        List<Chunk> chunks = chunkStorage.getChunks(documentId);
+        List<Chunk> chunks = chunkStorage.optChunks(documentId);
         if (null != chunks) {
             int size = chunks.size();
-            if (0 < size) {
-                List<UUID> swiftIds = new ArrayList<UUID>(size);
-                for (Chunk chunk : chunks) {
-                    swiftIds.add(chunk.getSwiftId());
-                }
-                checkOrCreateContainer();
-                client.delete(swiftIds);
-                chunkStorage.deleteDocument(documentId);
+            if (0 >= size) {
+                // Apparently no such document exists; consider as deleted
                 return true;
             }
+
+            List<UUID> swiftIds = new ArrayList<UUID>(size);
+            for (Chunk chunk : chunks) {
+                swiftIds.add(chunk.getSwiftId());
+            }
+            checkOrCreateContainer();
+            client.delete(swiftIds);
+            chunkStorage.deleteDocument(documentId);
+            return true;
         }
         return false;
     }

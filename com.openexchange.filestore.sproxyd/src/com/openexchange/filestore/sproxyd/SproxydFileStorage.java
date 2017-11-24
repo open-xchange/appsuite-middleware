@@ -148,9 +148,15 @@ public class SproxydFileStorage implements FileStorage {
     @Override
     public boolean deleteFile(String identifier) throws OXException {
         UUID documentId = UUIDs.fromUnformattedString(identifier);
-        List<Chunk> chunks = chunkStorage.getChunks(documentId);
-        if (null != chunks && 0 < chunks.size()) {
-            List<UUID> scalityIds = new ArrayList<UUID>(chunks.size());
+        List<Chunk> chunks = chunkStorage.optChunks(documentId);
+        if (null != chunks) {
+            int size = chunks.size();
+            if (0 >= size) {
+                // Apparently no such document exists; consider as deleted
+                return true;
+            }
+
+            List<UUID> scalityIds = new ArrayList<UUID>(size);
             for (Chunk chunk : chunks) {
                 scalityIds.add(chunk.getScalityId());
             }
