@@ -52,6 +52,7 @@ package com.openexchange.chronos.itip.generators;
 import static org.hamcrest.core.Is.is;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -168,7 +169,7 @@ public class DefaultNotificationParticipantResolverTest {
         Assert.assertFalse("No participants resolved", participants.isEmpty());
         for (NotificationParticipant participant : participants) {
             Attendee attendee = updated.getAttendees().stream().filter(a -> a.getEntity() == participant.getIdentifier()).findFirst().get();
-            Assert.assertThat("Participants mail should have been the alias", participant.getEmail(), is(attendee.getEMail()));
+            Assert.assertThat("Participants mail should have been the user email", participant.getEmail(), is(attendee.getEMail())); //  ChronosTestTools.convertToUser mocks users mail with attendee.getEmail
             Assert.assertThat("Participants comment should have been the same as the attendees", participant.getComment(), is(attendee.getComment()));
             Assert.assertThat("Participants status should be 'accepted'", participant.getConfirmStatus(), is(ParticipationStatus.ACCEPTED));
         }
@@ -184,7 +185,7 @@ public class DefaultNotificationParticipantResolverTest {
 
         Attendee aliasAttendee = ChronosTestTools.createAttendee(CONTEXT_ID, null);
         String aliasMail = "alias@example.org";
-        aliasAttendee.setUri(CalendarUtils.getURI(aliasMail));
+        aliasAttendee.setUri(CalendarUtils.getURI("mailto:" + aliasMail));
         aliasAttendee.setCn("AliasName, forUser");
         List<Attendee> extenedAttendees = new LinkedList<>(updated.getAttendees());
         extenedAttendees.add(aliasAttendee);
@@ -216,12 +217,12 @@ public class DefaultNotificationParticipantResolverTest {
 
         List<NotificationParticipant> participants = resolver.resolveAllRecipients(null, updated, user, onBehalfOf, context, session);
         Assert.assertFalse("No participants resolved", participants.isEmpty());
-        NotificationParticipant participant = participants.stream().filter(p -> p.getIdentifier() == external.getEntity()).findFirst().get();
+        NotificationParticipant participant = participants.stream().filter(p -> p.isExternal()).findFirst().get();
         Assert.assertThat("EMail souhld not differ!", participant.getEmail(), is(external.getEMail()));
         // Do not send internal data
-        Assert.assertThat("Display name should be the same as the mail!", participant.getDisplayName(), is(external.getEMail()));
+        Assert.assertThat("Display name should be equal to the transmitted common name!", participant.getDisplayName(), is(external.getCn()));
         Assert.assertThat("TimeZone souhld not differ!", participant.getTimeZone(), is(updated.getStartDate().getTimeZone()));
-        Assert.assertThat("Locale souhld not differ!", participant.getLocale(), is(ChronosTestTools.convertToUser(external).getLocale()));
+        Assert.assertThat("Locale souhld not differ!", participant.getLocale(), is(Locale.CANADA_FRENCH));
         Assert.assertThat("Comment souhld not differ!", participant.getComment(), is(external.getComment()));
         Assert.assertThat("Confirm status souhld not differ!", participant.getConfirmStatus(), is(external.getPartStat()));
     }

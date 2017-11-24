@@ -52,10 +52,12 @@ package com.openexchange.chronos;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 import org.dmfs.rfc5545.DateTime;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.groupware.ldap.MockUser;
+import com.openexchange.java.Strings;
 import edu.emory.mathcs.backport.java.util.Arrays;
 
 /**
@@ -230,26 +232,12 @@ public final class ChronosTestTools {
     public static List<MockUser> convertToUser(List<Attendee> attendees) {
         List<MockUser> users = new LinkedList<>();
         for (Attendee attendee : attendees) {
-            MockUser user = convertToUser(attendee);
-            users.add(user);
+            if (CalendarUtils.isInternal(attendee)) {
+                MockUser user = convertToUser(attendee);
+                users.add(user);
+            }
         }
         return users;
-    }
-
-    /**
-     * Converts {@link Attendee} to {@link MockUser}
-     * 
-     * @param attendee The attendee to convert
-     * @return A user with id and mail set
-     */
-    public static MockUser convertToUser(Attendee attendee) {
-        MockUser user = new MockUser(attendee.getEntity());
-        user.setMail(attendee.getEMail());
-        if (attendee.containsUri() && attendee.getUri().toLowerCase().startsWith("mailto:")) {
-            user.setAliases(new String[] { CalendarUtils.extractEMailAddress(attendee.getUri()) });
-        }
-        user.setTimeZone(new String());
-        return user;
     }
 
     /**
@@ -261,6 +249,11 @@ public final class ChronosTestTools {
     public static MockUser convertToUser(CalendarUser calendarUser) {
         MockUser user = new MockUser(calendarUser.getEntity());
         user.setMail(calendarUser.getEMail());
+        user.setTimeZone(new String());
+        user.setLocale(Locale.CANADA_FRENCH);
+        if (Strings.isNotEmpty(calendarUser.getUri()) && calendarUser.getUri().toLowerCase().startsWith("mailto:")) {
+            user.setAliases(new String[] { CalendarUtils.extractEMailAddress(calendarUser.getUri()) });
+        }
         return user;
     }
 
