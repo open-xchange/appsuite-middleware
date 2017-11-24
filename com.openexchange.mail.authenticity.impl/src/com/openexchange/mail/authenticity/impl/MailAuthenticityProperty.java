@@ -68,7 +68,8 @@ public enum MailAuthenticityProperty implements Property {
      */
     threshold(0L),
     /**
-     * Defines the MANDATORY <code>authserv-id</code>
+     * Defines the MANDATORY <code>authserv-id</code>. It can contain a single arbitrary string
+     * or a comma separated list of arbitrary strings
      * Default is empty.
      * 
      * @see <a href="https://tools.ietf.org/html/rfc7601#section-2.2">RFC-7601, Section 2.2</a>

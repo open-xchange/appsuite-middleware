@@ -64,7 +64,6 @@ import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.authenticity.DefaultMailAuthenticityResultKey;
@@ -85,7 +84,6 @@ import com.openexchange.mail.dataobjects.MailAuthenticityResult;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.HeaderCollection;
 import com.openexchange.mail.mime.MessageHeaders;
-import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 
 /**
@@ -115,29 +113,33 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
     /** The ranking of this handler */
     private final int ranking;
 
-    private final String configuredAuthServId;
+    private final List<String> configuredAuthServIds;
 
     /**
      * Initialises a new {@link MailAuthenticityHandlerImpl} with priority 0.
+     * 
+     * @param authServIds A {@link List} with all valid authserv-ids
+     * @throws IlegalArgumentException if the authServId is either <code>null</code> or empty
      */
-    public MailAuthenticityHandlerImpl(ServiceLookup services) {
-        this(0, services);
+    public MailAuthenticityHandlerImpl(List<String> authServIds) {
+        this(0, authServIds);
     }
 
     /**
-     * Initialises a new {@link MailAuthenticityHandlerImpl}.
+     * Initialises a new {@link MailAuthenticityHandlerImpl}.1
      *
      * @param ranking The ranking of this handler; a higher value means higher priority;
+     * @param authServIds A {@link List} with all valid authserv-ids
+     * @throws IlegalArgumentException if the authServId is either <code>null</code> or empty
      */
-    public MailAuthenticityHandlerImpl(int ranking, ServiceLookup services) {
+    public MailAuthenticityHandlerImpl(int ranking, List<String> authServIds) {
         super();
-        this.ranking = ranking;
-        LeanConfigurationService leanConfigService = services.getService(LeanConfigurationService.class);
-        this.configuredAuthServId = leanConfigService.getProperty(MailAuthenticityProperty.authServId);
-        if (Strings.isEmpty(configuredAuthServId)) {
+        if (authServIds == null || authServIds.isEmpty()) {
             //TODO: proper exception code
             throw new IllegalArgumentException("The property '" + MailAuthenticityProperty.authServId.getFQPropertyName() + "' is not configured but is mandatory. Failed to initialise the core mail authenticity handler");
         }
+        this.ranking = ranking;
+        this.configuredAuthServIds = authServIds;
         mechanismParsersRegitry = new HashMap<>(4);
         mechanismParsersRegitry.put(DefaultMailAuthenticityMechanism.DMARC, (line) -> {
             String value = line.get(DefaultMailAuthenticityMechanism.DMARC.name().toLowerCase());
@@ -417,7 +419,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
             return false;
         }
         // TODO: Regex and wildcard checks...
-        if (configuredAuthServId.equals(authServId)) {
+        if (configuredAuthServIds.contains(authServId)) {
             return true;
         }
         return false;
