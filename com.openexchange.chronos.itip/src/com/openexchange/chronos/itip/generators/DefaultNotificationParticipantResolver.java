@@ -68,6 +68,7 @@ import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.Organizer;
 import com.openexchange.chronos.ParticipationStatus;
+import com.openexchange.chronos.ResourceId;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.itip.ITipIntegrationUtility;
 import com.openexchange.chronos.itip.ITipRole;
@@ -175,7 +176,7 @@ public class DefaultNotificationParticipantResolver implements NotificationParti
         for (final User u : participantUsers) {
             final int id = u.getId();
             Attendee userParticipant = userIds.get(I(id));
-            final String mail = CalendarUtils.extractEMailAddress(userParticipant.getUri());
+            final String mail = getMailAddress(u, userParticipant);
 
             final Set<ITipRole> roles = EnumSet.noneOf(ITipRole.class);
 
@@ -396,6 +397,16 @@ public class DefaultNotificationParticipantResolver implements NotificationParti
         }
 
         return retval;
+    }
+
+    private String getMailAddress(User u, Attendee userParticipant) {
+        if (CalendarUtils.isInternal(userParticipant) && null == ResourceId.parse(userParticipant.getUri())) {
+            String mail = CalendarUtils.extractEMailAddress(userParticipant.getUri());
+            if (Strings.isNotEmpty(mail)) {
+                return mail;
+            }
+        }
+        return u.getMail();
     }
 
     private CalendarUser getPrincipal(CalendarSession session) {
