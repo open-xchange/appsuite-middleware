@@ -50,10 +50,12 @@
 package com.openexchange.mail.authenticity.impl;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.config.ConfigurationService;
@@ -91,8 +93,6 @@ public class TrustedDomainAuthenticityHandler implements Reloadable {
     private static final String DOMAINS = ".domains";
     private static final String IMAGE = ".image";
 
-    Map<String, List<TrustedDomain>> trustedDomainsPerTenant = new ConcurrentHashMap<>();
-    private static final List<TrustedDomain> FALLBACK_TENANT = new ArrayList<>();
     private static final MailAuthenticityMechanism TRUSTED_DOMAIN_MECHANISM = new MailAuthenticityMechanism() {
 
         @Override
@@ -111,13 +111,17 @@ public class TrustedDomainAuthenticityHandler implements Reloadable {
         }
     };
 
+    private final Map<String, List<TrustedDomain>> trustedDomainsPerTenant;
+    private final List<TrustedDomain> fallbackTenant;
+
     /**
      * Initializes a new {@link TrustedDomainAuthenticityHandler}.
      */
     public TrustedDomainAuthenticityHandler(ConfigurationService configurationService) {
         super();
+        trustedDomainsPerTenant = new ConcurrentHashMap<>();
+        fallbackTenant = new CopyOnWriteArrayList<>();
         init(configurationService);
-
     }
 
     @SuppressWarnings("unchecked")
@@ -161,8 +165,8 @@ public class TrustedDomainAuthenticityHandler implements Reloadable {
             }
         }
 
-        if (FALLBACK_TENANT != null) {
-            for (TrustedDomain domain : FALLBACK_TENANT) {
+        if (fallbackTenant != null) {
+            for (TrustedDomain domain : fallbackTenant) {
                 if (domain.matches(host)) {
                     return domain;
                 }
@@ -172,8 +176,6 @@ public class TrustedDomainAuthenticityHandler implements Reloadable {
     }
 
     private void init(ConfigurationService configurationService) {
-        trustedDomainsPerTenant.clear();
-        FALLBACK_TENANT.clear();
         String commaSeparatedListOfTenants = configurationService.getProperty(PREFIX + TENANT, "");
         String[] tenants = Strings.splitByCommaNotInQuotes(commaSeparatedListOfTenants);
         for (String tenant : tenants) {
@@ -189,26 +191,27 @@ public class TrustedDomainAuthenticityHandler implements Reloadable {
             }
         }
 
-        // Add single tenant / fallback configuration
+        // Add single tenant / fall-back configuration
         String commaSeparatedListOfDomains = configurationService.getProperty(PREFIX + DOMAINS.substring(1), (String) null);
         if (Strings.isNotEmpty(commaSeparatedListOfDomains)) {
             String[] domains = Strings.splitByCommaNotInQuotes(commaSeparatedListOfDomains);
             String image = configurationService.getProperty(PREFIX + IMAGE.substring(1), (String) null);
             for (String domain : domains) {
-                FALLBACK_TENANT.add(new TrustedDomain(domain, image));
+                fallbackTenant.add(new TrustedDomain(domain, image));
             }
         }
-
     }
 
     @Override
     public void reloadConfiguration(ConfigurationService configService) {
+        trustedDomainsPerTenant.clear();
+        fallbackTenant.clear();
         init(configService);
     }
 
     @Override
     public Interests getInterests() {
-        ArrayList<String> properties = new ArrayList<>(trustedDomainsPerTenant.size());
+        List<String> properties = new LinkedList<>();
         properties.add(PREFIX + TENANT);
         for (String tenant : trustedDomainsPerTenant.keySet()) {
             properties.add(PREFIX + tenant + DOMAINS);
