@@ -49,15 +49,21 @@
 
 package com.openexchange.mail.authenticity.impl.osgi;
 
+import java.util.Arrays;
+import java.util.List;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.Reloadable;
 import com.openexchange.config.ForcedReloadable;
 import com.openexchange.config.Interests;
+import com.openexchange.config.Reloadable;
 import com.openexchange.config.lean.LeanConfigurationService;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.MailFetchListener;
+import com.openexchange.mail.authenticity.MailAuthenticityHandler;
 import com.openexchange.mail.authenticity.MailAuthenticityHandlerRegistry;
 import com.openexchange.mail.authenticity.impl.MailAuthenticityFetchListener;
+import com.openexchange.mail.authenticity.impl.MailAuthenticityHandlerImpl;
 import com.openexchange.mail.authenticity.impl.MailAuthenticityHandlerRegistryImpl;
+import com.openexchange.mail.authenticity.impl.MailAuthenticityProperty;
 import com.openexchange.mail.authenticity.impl.TrustedDomainAuthenticityHandler;
 import com.openexchange.osgi.HousekeepingActivator;
 
@@ -95,6 +101,7 @@ public class MailAuthenticityActivator extends HousekeepingActivator {
         registerService(MailAuthenticityHandlerRegistry.class, registry);
 
         registerService(ForcedReloadable.class, new ForcedReloadable() {
+
             @Override
             public void reloadConfiguration(ConfigurationService configService) {
                 registry.invalidateCache();
@@ -107,6 +114,10 @@ public class MailAuthenticityActivator extends HousekeepingActivator {
         });
         ConfigurationService configurationService = getService(ConfigurationService.class);
         TrustedDomainAuthenticityHandler authenticationHandler = new TrustedDomainAuthenticityHandler(configurationService);
+
+        LeanConfigurationService leanConfigService = getService(LeanConfigurationService.class);
+        List<String> authServIds = Arrays.asList(Strings.splitByComma(leanConfigService.getProperty(MailAuthenticityProperty.authServId)));
+        registerService(MailAuthenticityHandler.class, new MailAuthenticityHandlerImpl(authServIds, this));
 
         registerService(Reloadable.class, authenticationHandler);
         registerService(TrustedDomainAuthenticityHandler.class, authenticationHandler);
