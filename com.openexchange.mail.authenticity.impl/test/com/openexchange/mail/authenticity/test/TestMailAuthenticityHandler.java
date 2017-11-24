@@ -155,7 +155,7 @@ public class TestMailAuthenticityHandler {
         perform("ox.io; spf=pass smtp.mailfrom=example.net");
 
         assertEquals("The overall status does not match", MailAuthenticityStatus.PASS, result.getStatus());
-        assertEquals("The domain does not match", "example.com", result.getAttribute(DefaultMailAuthenticityResultKey.DOMAIN));
+        assertEquals("The domain does not match", "example.net", result.getAttribute(DefaultMailAuthenticityResultKey.DOMAIN));
         assertContains(DefaultMailAuthenticityMechanism.SPF);
         assertAmount(1);
 
@@ -172,7 +172,7 @@ public class TestMailAuthenticityHandler {
         perform("ox.io; sender-id=pass header.from=example.net", "ox.io; auth=pass (cram-md5) smtp.auth=sender@example.net; spf=pass smtp.mailfrom=example.net");
 
         assertEquals("The overall status does not match", MailAuthenticityStatus.PASS, result.getStatus());
-        assertEquals("The domain does not match", "example.com", result.getAttribute(DefaultMailAuthenticityResultKey.DOMAIN));
+        assertEquals("The domain does not match", "example.net", result.getAttribute(DefaultMailAuthenticityResultKey.DOMAIN));
         assertContains(DefaultMailAuthenticityMechanism.SPF);
         assertAmount(1);
 
@@ -190,8 +190,8 @@ public class TestMailAuthenticityHandler {
 
         assertEquals("The overall status does not match", MailAuthenticityStatus.PASS, result.getStatus());
         assertEquals("The domain does not match", "example.com", result.getAttribute(DefaultMailAuthenticityResultKey.DOMAIN));
-        assertContains(DefaultMailAuthenticityMechanism.DKIM);
-        assertAmount(1);
+        assertContains(DefaultMailAuthenticityMechanism.DKIM, DefaultMailAuthenticityMechanism.SPF);
+        assertAmount(2);
 
         assertAuthenticityMechanismResult((MailAuthenticityMechanismResult) result.getAttribute(DefaultMailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS, List.class).get(0), "example.com", "good signature", DKIMResult.PASS);
     }
@@ -202,17 +202,17 @@ public class TestMailAuthenticityHandler {
      */
     @Test
     public void testMultiTieredAuthenticationDifferentMTAs() {
-        headerCollection.addHeader("From", "Jane Doe <jane.doe@example.com>");
+        headerCollection.addHeader("From", "Jane Doe <jane.doe@newyork.example.com>");
         perform("ox.io; dkim=pass (good signature) header.i=@newyork.example.com", "ox.io; dkim=pass reason=\"good signature\" header.i=@mail-router.example.net; dkim=fail reason=\"bad signature\" header.i=@newyork.example.com");
 
-        assertEquals("The overall status does not match", MailAuthenticityStatus.FAIL, result.getStatus());
-        assertEquals("The domain does not match", "example.com", result.getAttribute(DefaultMailAuthenticityResultKey.DOMAIN));
+        assertEquals("The overall status does not match", MailAuthenticityStatus.FAIL, result.getStatus()); // FIXME: Should it fail?
+        assertEquals("The domain does not match", "newyork.example.com", result.getAttribute(DefaultMailAuthenticityResultKey.DOMAIN));
         assertContains(DefaultMailAuthenticityMechanism.DKIM);
         assertAmount(2);
 
         List<MailAuthenticityMechanismResult> results = result.getAttribute(DefaultMailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS, List.class);
-        assertAuthenticityMechanismResult(results.get(0), "mail-router.example.net", "\"good signature\"", DKIMResult.PASS);
-        assertAuthenticityMechanismResult(results.get(1), "newyork.example.com", "\"bad signature\"", DKIMResult.FAIL);
+        assertAuthenticityMechanismResult(results.get(0), "newyork.example.com", "\"bad signature\"", DKIMResult.FAIL);
+        assertAuthenticityMechanismResult(results.get(1), "newyork.example.com", "good signature", DKIMResult.PASS);
     }
 
     /**
@@ -222,15 +222,15 @@ public class TestMailAuthenticityHandler {
     @Test
     public void testFailingSPFAndTempErrorDKIM() {
         headerCollection.addHeader("From", "Jane Doe <bob@aliceland.com>");
-        perform("ox.io; dkim=temperror (no key for signature) header.i=@some.mta.hop header.s=dkim header.b=sl5RAv9n; spf=fail (ox.io: domain of bob@aliceland.com does not designate 1.2.3.4 as permitted sender) smtp.mailfrom=bob@aliceland.com");
+        perform("ox.io; dkim=temperror (no key for signature) header.i=@aliceland.com header.s=dkim header.b=sl5RAv9n; spf=fail (ox.io: domain of bob@aliceland.com does not designate 1.2.3.4 as permitted sender) smtp.mailfrom=bob@aliceland.com");
 
         assertEquals("The overall status does not match", MailAuthenticityStatus.FAIL, result.getStatus());
-        assertEquals("The domain does not match", "ox.io", result.getAttribute(DefaultMailAuthenticityResultKey.DOMAIN));
+        assertEquals("The domain does not match", "aliceland.com", result.getAttribute(DefaultMailAuthenticityResultKey.DOMAIN));
         assertContains(DefaultMailAuthenticityMechanism.DKIM, DefaultMailAuthenticityMechanism.SPF);
         assertAmount(2);
 
         List<MailAuthenticityMechanismResult> results = result.getAttribute(DefaultMailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS, List.class);
-        assertAuthenticityMechanismResult(results.get(0), "some.mta.hop", "no key for signature", DKIMResult.TEMPERROR);
+        assertAuthenticityMechanismResult(results.get(0), "aliceland.com", "no key for signature", DKIMResult.TEMPERROR);
         assertAuthenticityMechanismResult(results.get(1), "aliceland.com", "ox.io: domain of bob@aliceland.com does not designate 1.2.3.4 as permitted sender", SPFResult.FAIL);
     }
 
@@ -244,7 +244,7 @@ public class TestMailAuthenticityHandler {
         perform("ox.io; spf=pass (ox.io: domain of alice@aliceland.com designates 1.2.3.4 as permitted sender) smtp.mailfrom=Alice@aliceland.com; dmarc=pass (p=NONE sp=NONE dis=NONE) header.from=aliceland.com");
 
         assertEquals("The overall status does not match", MailAuthenticityStatus.PASS, result.getStatus());
-        assertEquals("The domain does not match", "ox.io", result.getAttribute(DefaultMailAuthenticityResultKey.DOMAIN));
+        assertEquals("The domain does not match", "aliceland.com", result.getAttribute(DefaultMailAuthenticityResultKey.DOMAIN));
         assertContains(DefaultMailAuthenticityMechanism.DMARC, DefaultMailAuthenticityMechanism.SPF);
         assertAmount(2);
 
@@ -260,15 +260,15 @@ public class TestMailAuthenticityHandler {
     @Test
     public void testDKIMTempErrorAndSPFPass() {
         headerCollection.addHeader("From", "Jane Doe <alice@ice.bobland.com>");
-        perform("ox.io; dkim=temperror (no key for signature) header.i=@bobland.com header.s=e header.b=Sw4o2uM4; spf=pass (ox.io: domain of alice@ice.bobland.com designates 1.2.3.4 as permitted sender) smtp.mailfrom=alice@ice.bobland.com");
+        perform("ox.io; dkim=temperror (no key for signature) header.i=@ice.bobland.com header.s=e header.b=Sw4o2uM4; spf=pass (ox.io: domain of alice@ice.bobland.com designates 1.2.3.4 as permitted sender) smtp.mailfrom=alice@ice.bobland.com");
 
         assertEquals("The overall status does not match", MailAuthenticityStatus.PASS, result.getStatus());
-        assertEquals("The domain does not match", "ox.io", result.getAttribute(DefaultMailAuthenticityResultKey.DOMAIN));
+        assertEquals("The domain does not match", "ice.bobland.com", result.getAttribute(DefaultMailAuthenticityResultKey.DOMAIN));
         assertContains(DefaultMailAuthenticityMechanism.DKIM, DefaultMailAuthenticityMechanism.SPF);
         assertAmount(2);
 
         List<MailAuthenticityMechanismResult> results = result.getAttribute(DefaultMailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS, List.class);
-        assertAuthenticityMechanismResult(results.get(0), "bobland.com", "no key for signature", DKIMResult.TEMPERROR);
+        assertAuthenticityMechanismResult(results.get(0), "ice.bobland.com", "no key for signature", DKIMResult.TEMPERROR);
         assertAuthenticityMechanismResult(results.get(1), "ice.bobland.com", "ox.io: domain of alice@ice.bobland.com designates 1.2.3.4 as permitted sender", SPFResult.PASS);
     }
 
@@ -282,7 +282,7 @@ public class TestMailAuthenticityHandler {
         perform("ox.io; dkim=pass reason=\"1024-bit key; unprotected key\" header.d=ox.io header.i=@ox.io header.b=lolhN/LS; dkim-adsp=pass; dkim-atps=neutral");
 
         assertEquals("The overall status does not match", MailAuthenticityStatus.PASS, result.getStatus());
-        assertEquals("The domain does not match", "open-xchange.com", result.getAttribute(DefaultMailAuthenticityResultKey.DOMAIN));
+        assertEquals("The domain does not match", "ox.io", result.getAttribute(DefaultMailAuthenticityResultKey.DOMAIN));
         assertContains(DefaultMailAuthenticityMechanism.DKIM);
         assertAmount(1);
 
@@ -300,7 +300,7 @@ public class TestMailAuthenticityHandler {
         perform("ox.io; dkim=pass header.i=@foobar.com header.s=201705 header.b=VvWVD9kg; dkim=pass header.i=@foobar.com header.s=201705 header.b=0WC5u+VZ; dkim=pass header.i=@foobar.com header.s=201705 header.b=doOaQjgp; spf=pass (ox.io: domain of jane.doe@foobar.com designates 1.2.3.4 as permitted sender) smtp.mailfrom=jane.doe@foobar.com; dmarc=pass (p=NONE sp=NONE dis=NONE) header.from=foobar.com");
 
         assertEquals("The overall status does not match", MailAuthenticityStatus.PASS, result.getStatus());
-        assertEquals("The domain does not match", "ox.io", result.getAttribute(DefaultMailAuthenticityResultKey.DOMAIN));
+        assertEquals("The domain does not match", "foobar.com", result.getAttribute(DefaultMailAuthenticityResultKey.DOMAIN));
         assertContains(DefaultMailAuthenticityMechanism.values());
         assertAmount(5);
 
