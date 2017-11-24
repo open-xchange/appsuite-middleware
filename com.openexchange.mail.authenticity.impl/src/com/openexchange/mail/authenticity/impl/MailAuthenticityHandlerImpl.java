@@ -211,7 +211,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
 
             // Set the overall result only if it's 'none'            
             MailAuthenticityStatus mailAuthStatus = convert(spfResult);
-            if (overallResult.getStatus().equals(MailAuthenticityStatus.NEUTRAL)) {
+            if (overallResult.getStatus().equals(MailAuthenticityStatus.NEUTRAL) || (!overallResult.getStatus().equals(MailAuthenticityStatus.PASS) && mailAuthStatus.equals(MailAuthenticityStatus.PASS))) {
                 overallResult.setStatus(mailAuthStatus);
             }
 
