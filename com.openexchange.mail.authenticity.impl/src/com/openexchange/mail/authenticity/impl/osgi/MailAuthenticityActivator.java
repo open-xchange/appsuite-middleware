@@ -94,8 +94,6 @@ public class MailAuthenticityActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-
-        track(TrustedDomainAuthenticityHandler.class);
         // It is OK to pass service references since 'stopOnServiceUnavailability' returns 'true'
         final MailAuthenticityHandlerRegistryImpl registry = new MailAuthenticityHandlerRegistryImpl(getService(LeanConfigurationService.class), context);
         registerService(MailAuthenticityHandlerRegistry.class, registry);
@@ -116,9 +114,12 @@ public class MailAuthenticityActivator extends HousekeepingActivator {
         ConfigurationService configurationService = getService(ConfigurationService.class);
         TrustedDomainAuthenticityHandler authenticationHandler = new TrustedDomainAuthenticityHandler(configurationService);
         registerService(Reloadable.class, authenticationHandler);
+        registerService(TrustedDomainAuthenticityHandler.class, authenticationHandler);
+        trackService(TrustedDomainAuthenticityHandler.class).open();
+
         LeanConfigurationService leanConfigService = getService(LeanConfigurationService.class);
         List<String> authServIds = Arrays.asList(Strings.splitByComma(leanConfigService.getProperty(MailAuthenticityProperty.authServId)));
-        registerService(MailAuthenticityHandler.class, new MailAuthenticityHandlerImpl(authServIds, this, authenticationHandler));
+        registerService(MailAuthenticityHandler.class, new MailAuthenticityHandlerImpl(authServIds, this));
 
         MailAuthenticityFetchListener fetchListener = new MailAuthenticityFetchListener(registry);
         registerService(MailFetchListener.class, fetchListener);

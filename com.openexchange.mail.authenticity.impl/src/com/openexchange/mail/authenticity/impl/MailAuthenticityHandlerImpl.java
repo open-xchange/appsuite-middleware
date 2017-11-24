@@ -124,8 +124,8 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
      * @param authServIds A {@link List} with all valid authserv-ids
      * @throws IlegalArgumentException if the authServId is either <code>null</code> or empty
      */
-    public MailAuthenticityHandlerImpl(List<String> authServIds, ServiceLookup services, TrustedDomainAuthenticityHandler trustedDomainAuthenticityHandler) {
-        this(0, authServIds, services, trustedDomainAuthenticityHandler);
+    public MailAuthenticityHandlerImpl(List<String> authServIds, ServiceLookup services) {
+        this(0, authServIds, services);
     }
 
     /**
@@ -135,14 +135,14 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
      * @param authServIds A {@link List} with all valid authserv-ids
      * @throws IlegalArgumentException if the authServId is either <code>null</code> or empty
      */
-    public MailAuthenticityHandlerImpl(int ranking, List<String> authServIds, ServiceLookup services, TrustedDomainAuthenticityHandler trustedDomainAuthenticityHandler) {
+    public MailAuthenticityHandlerImpl(int ranking, List<String> authServIds, ServiceLookup services) {
         super();
         if (authServIds == null || authServIds.isEmpty() || authServIds.contains("")) {
             //TODO: proper exception code
             throw new IllegalArgumentException("The property '" + MailAuthenticityProperty.authServId.getFQPropertyName() + "' is not configured but is mandatory. Failed to initialise the core mail authenticity handler");
 
         }
-        this.trustedDomainHandler = trustedDomainAuthenticityHandler;
+        this.trustedDomainHandler = services.getService(TrustedDomainAuthenticityHandler.class);
         this.ranking = ranking;
         this.configuredAuthServIds = authServIds;
         mechanismParsersRegitry = new HashMap<>(4);
@@ -302,7 +302,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
      * @return the appropriate <code>Authentication-Results</code> header or <code>null</code> if none can be extracted
      */
     private String extractAuthenticationResultHeader(String[] authHeaders) {
-        String authHeader = null;
+        StringBuilder mergedAuthHeader = new StringBuilder(128);
         for (String header : authHeaders) {
             List<String> split = splitLines(header);
             if (split.isEmpty()) {
@@ -317,9 +317,9 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
                 // Not a configured authserver-id, ignore
                 continue;
             }
-            authHeader = header;
+            mergedAuthHeader.append(header);
         }
-        return authHeader;
+        return mergedAuthHeader.toString().trim();
     }
 
     /**
