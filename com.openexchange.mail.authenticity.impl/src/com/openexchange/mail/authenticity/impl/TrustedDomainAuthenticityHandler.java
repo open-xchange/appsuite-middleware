@@ -93,7 +93,7 @@ public class TrustedDomainAuthenticityHandler implements Reloadable {
     private static final String DOMAINS = ".domains";
     private static final String IMAGE = ".image";
 
-    private static final MailAuthenticityMechanism TRUSTED_DOMAIN_MECHANISM = new MailAuthenticityMechanism() {
+    static final MailAuthenticityMechanism TRUSTED_DOMAIN_MECHANISM = new MailAuthenticityMechanism() {
 
         @Override
         public Class<? extends AuthenticityMechanismResult> getResultType() {
@@ -227,7 +227,7 @@ public class TrustedDomainAuthenticityHandler implements Reloadable {
         return authenticationResult == null ? null : authenticationResult.getAttribute(DefaultMailAuthenticityResultKey.DOMAIN).toString();
     }
 
-    private class TrustedDomainResult extends AbstractAuthMechResult {
+    private static class TrustedDomainResult extends AbstractAuthMechResult {
 
         /**
          * Initializes a new {@link TrustedDomainResult}.
