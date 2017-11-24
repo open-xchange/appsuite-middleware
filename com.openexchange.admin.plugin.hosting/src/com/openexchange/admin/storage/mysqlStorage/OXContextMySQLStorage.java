@@ -912,9 +912,6 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             }
             LOG.debug("Data delete for context {} completed!", ctx.getId());
 
-            // check if scheme is empty after deleting context data on source db
-            // if yes, drop whole database
-            deleteSchemeFromDatabaseIfEmpty(ox_db_write_con, configdb_write_con, source_database_id, scheme);
             configdb_write_con.commit();
             ox_db_write_con.commit();
         } catch (final TargetDatabaseException tde) {
@@ -2072,42 +2069,6 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         }
         LOG.debug("using schema {} it for next context", found);
         return found;
-    }
-
-    private void deleteSchemeFromDatabaseIfEmpty(final Connection ox_db_write_con, final Connection configdb_con, final int source_database_id, final String scheme) throws SQLException {
-        PreparedStatement stmt = null;
-        PreparedStatement dropstmt = null;
-        try {
-            // check if any context is in scheme X on database Y
-            stmt = configdb_con.prepareStatement("SELECT db_schema FROM context_server2db_pool WHERE db_schema = ? AND write_db_pool_id = ?");
-            stmt.setString(1, scheme);
-            stmt.setInt(2, source_database_id);
-            final ResultSet rs = stmt.executeQuery();
-            if (!rs.next()) {
-                // no contexts found on this scheme and db, DROP scheme from db
-                LOG.debug("NO remaining contexts found in scheme {} on pool with id {}!", scheme, source_database_id);
-                LOG.debug("NOW dropping scheme {} on pool with id {}!", scheme, source_database_id);
-                dropstmt = ox_db_write_con.prepareStatement("DROP DATABASE if exists `" + scheme + "`");
-                dropstmt.executeUpdate();
-                LOG.debug("Scheme {} on pool with id {} dropped successfully!", scheme, source_database_id);
-            }
-            rs.close();
-        } finally {
-            try {
-                if (stmt != null) {
-                    stmt.close();
-                }
-            } catch (final Exception ex) {
-                LOG.error(OXContextMySQLStorageCommon.LOG_ERROR_CLOSING_STATEMENT, ex);
-            }
-            try {
-                if (dropstmt != null) {
-                    dropstmt.close();
-                }
-            } catch (final Exception ex) {
-                LOG.error(OXContextMySQLStorageCommon.LOG_ERROR_CLOSING_STATEMENT, ex);
-            }
-        }
     }
 
     private void fillTargetDatabase(List<TableObject> sorted_tables, Connection target_ox_db_con, Connection ox_db_connection, Object criteriaMatch) throws SQLException {
