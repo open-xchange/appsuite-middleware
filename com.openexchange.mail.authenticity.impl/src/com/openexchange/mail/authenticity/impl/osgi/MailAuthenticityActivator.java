@@ -99,6 +99,7 @@ public class MailAuthenticityActivator extends HousekeepingActivator {
         // It is OK to pass service references since 'stopOnServiceUnavailability' returns 'true'
         final MailAuthenticityHandlerRegistryImpl registry = new MailAuthenticityHandlerRegistryImpl(getService(LeanConfigurationService.class), context);
         registerService(MailAuthenticityHandlerRegistry.class, registry);
+        track(MailAuthenticityHandler.class, registry).open();
 
         registerService(ForcedReloadable.class, new ForcedReloadable() {
 
