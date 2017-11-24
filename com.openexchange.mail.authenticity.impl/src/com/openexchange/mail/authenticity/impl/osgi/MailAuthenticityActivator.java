@@ -50,6 +50,7 @@
 package com.openexchange.mail.authenticity.impl.osgi;
 
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Reloadable;
 import com.openexchange.config.ForcedReloadable;
 import com.openexchange.config.Interests;
 import com.openexchange.config.lean.LeanConfigurationService;
@@ -57,6 +58,7 @@ import com.openexchange.mail.MailFetchListener;
 import com.openexchange.mail.authenticity.MailAuthenticityHandlerRegistry;
 import com.openexchange.mail.authenticity.impl.MailAuthenticityFetchListener;
 import com.openexchange.mail.authenticity.impl.MailAuthenticityHandlerRegistryImpl;
+import com.openexchange.mail.authenticity.impl.TrustedDomainAuthenticityHandler;
 import com.openexchange.osgi.HousekeepingActivator;
 
 /**
@@ -81,17 +83,18 @@ public class MailAuthenticityActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { LeanConfigurationService.class };
+        return new Class<?>[] { LeanConfigurationService.class, ConfigurationService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
+
+        track(TrustedDomainAuthenticityHandler.class);
         // It is OK to pass service references since 'stopOnServiceUnavailability' returns 'true'
         final MailAuthenticityHandlerRegistryImpl registry = new MailAuthenticityHandlerRegistryImpl(getService(LeanConfigurationService.class), context);
         registerService(MailAuthenticityHandlerRegistry.class, registry);
 
         registerService(ForcedReloadable.class, new ForcedReloadable() {
-
             @Override
             public void reloadConfiguration(ConfigurationService configService) {
                 registry.invalidateCache();
@@ -102,6 +105,11 @@ public class MailAuthenticityActivator extends HousekeepingActivator {
                 return null;
             }
         });
+        ConfigurationService configurationService = getService(ConfigurationService.class);
+        TrustedDomainAuthenticityHandler authenticationHandler = new TrustedDomainAuthenticityHandler(configurationService);
+
+        registerService(Reloadable.class, authenticationHandler);
+        registerService(TrustedDomainAuthenticityHandler.class, authenticationHandler);
 
         MailAuthenticityFetchListener fetchListener = new MailAuthenticityFetchListener(registry);
         registerService(MailFetchListener.class, fetchListener);

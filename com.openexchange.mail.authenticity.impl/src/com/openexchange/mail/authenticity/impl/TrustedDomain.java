@@ -47,42 +47,67 @@
  *
  */
 
-package com.openexchange.objectusecount.osgi;
+package com.openexchange.mail.authenticity.impl;
 
-import com.openexchange.contact.ContactService;
-import com.openexchange.database.DatabaseService;
-import com.openexchange.groupware.delete.DeleteListener;
-import com.openexchange.objectusecount.ObjectUseCountService;
-import com.openexchange.objectusecount.groupware.ObjectUseCountDeleteListener;
-import com.openexchange.objectusecount.impl.ObjectUseCountServiceImpl;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.threadpool.ThreadPoolService;
-import com.openexchange.user.UserService;
+import java.util.regex.Pattern;
 
 /**
- * {@link ObjectUseCountActivator}
+ * {@link TrustedDomain}
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
- * @since v7.8.1
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.10.0
  */
-public class ObjectUseCountActivator extends HousekeepingActivator {
+public class TrustedDomain {
+
+    private final String domain;
+    private final Pattern pattern;
+    private final Object image;
 
     /**
-     * Initializes a new {@link ObjectUseCountActivator}.
+     *
+     * Initializes a new {@link TrustedDomain}.
+     *
+     * @param domain The domain
+     * @param image The image
      */
-    public ObjectUseCountActivator() {
+    public TrustedDomain(String domain, Object image) {
         super();
+        this.domain = domain;
+        pattern = Pattern.compile(toRegex(domain));
+
+        this.image = image;
     }
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { DatabaseService.class, ContactService.class, UserService.class, ThreadPoolService.class };
+    private String toRegex(String domain){
+
+        domain = domain.replaceAll("\\.", "[.]").replaceAll("\\*", ".*");
+        return domain;
     }
 
-    @Override
-    protected void startBundle() throws Exception {
-        registerService(ObjectUseCountService.class, new ObjectUseCountServiceImpl(this));
-        registerService(DeleteListener.class, new ObjectUseCountDeleteListener());
+    /**
+     * Gets the domain
+     *
+     * @return The domain
+     */
+    public String getDomain() {
+        return domain;
     }
 
+    /**
+     * Gets the image
+     *
+     * @return The image
+     */
+    public Object getImage() {
+        return image;
+    }
+
+    /**
+     * Checks whether this trusted domain matches the given domain
+     * @param domain
+     * @return
+     */
+    public boolean matches(String domain){
+        return pattern.matcher(domain).matches();
+    }
 }

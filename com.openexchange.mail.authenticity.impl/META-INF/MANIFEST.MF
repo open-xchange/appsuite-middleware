@@ -28,6 +28,7 @@ Import-Package: com.google.common.annotations,
  com.openexchange.session,
  javax.mail,
  javax.mail.internet,
+ org.json,
  org.osgi.framework,
  org.osgi.util.tracker,
  org.slf4j

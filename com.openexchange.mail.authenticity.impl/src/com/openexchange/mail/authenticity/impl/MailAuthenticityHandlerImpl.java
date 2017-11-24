@@ -84,6 +84,7 @@ import com.openexchange.mail.dataobjects.MailAuthenticityResult;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.HeaderCollection;
 import com.openexchange.mail.mime.MessageHeaders;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 
 /**
@@ -115,14 +116,16 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
 
     private final List<String> configuredAuthServIds;
 
+    private final TrustedDomainAuthenticityHandler trustedDomainHandler;
+
     /**
      * Initialises a new {@link MailAuthenticityHandlerImpl} with priority 0.
      * 
      * @param authServIds A {@link List} with all valid authserv-ids
      * @throws IlegalArgumentException if the authServId is either <code>null</code> or empty
      */
-    public MailAuthenticityHandlerImpl(List<String> authServIds) {
-        this(0, authServIds);
+    public MailAuthenticityHandlerImpl(List<String> authServIds, ServiceLookup services) {
+        this(0, authServIds, services);
     }
 
     /**
@@ -132,12 +135,14 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
      * @param authServIds A {@link List} with all valid authserv-ids
      * @throws IlegalArgumentException if the authServId is either <code>null</code> or empty
      */
-    public MailAuthenticityHandlerImpl(int ranking, List<String> authServIds) {
+    public MailAuthenticityHandlerImpl(int ranking, List<String> authServIds, ServiceLookup services) {
         super();
         if (authServIds == null || authServIds.isEmpty()) {
             //TODO: proper exception code
             throw new IllegalArgumentException("The property '" + MailAuthenticityProperty.authServId.getFQPropertyName() + "' is not configured but is mandatory. Failed to initialise the core mail authenticity handler");
+
         }
+        this.trustedDomainHandler = services.getService(TrustedDomainAuthenticityHandler.class);
         this.ranking = ranking;
         this.configuredAuthServIds = authServIds;
         mechanismParsersRegitry = new HashMap<>(4);
@@ -205,6 +210,10 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
         }
 
         mailMessage.setAuthenticityResult(parseHeaders(authHeaders, fromHeaders[0]));
+
+        if (trustedDomainHandler != null) {
+            trustedDomainHandler.handle(session, mailMessage);
+        }
     }
 
     /*
@@ -288,7 +297,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
 
     /**
      * Extracts the appropriate <code>Authentication-Results</code> header from the specified array.
-     * 
+     *
      * @param authHeaders The array with the authentication results headers
      * @return the appropriate <code>Authentication-Results</code> header or <code>null</code> if none can be extracted
      */
@@ -315,7 +324,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
 
     /**
      * Parses the specified from header and returns the domain of the sender
-     * 
+     *
      * @param fromHeader The from header
      * @return The domain of the sender
      * @throws IllegalArgumentException if the specified header does not contain any valid parsable internet address
@@ -406,7 +415,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
 
     /**
      * Determines whether the specified authServId is valid
-     * 
+     *
      * @param authServId The authserv-id to check
      * @return <code>true</code> if the string is valid; <code>false</code> otherwise
      */
@@ -561,7 +570,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
 
     /**
      * Extracts the outcome of the specified value.
-     * 
+     *
      * @param value the value to extract the outcome from
      * @return The extracted outcome
      */
@@ -572,7 +581,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
 
     /**
      * Extracts an optional comment that may reside within parentheses
-     * 
+     *
      * @param value The value to extract the comment form
      * @return The optional extracted comment; <code>null</code> if no comment was found
      */

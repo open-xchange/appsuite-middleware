@@ -47,42 +47,45 @@
  *
  */
 
-package com.openexchange.objectusecount.osgi;
+package com.openexchange.mail.authenticity.internal;
 
-import com.openexchange.contact.ContactService;
-import com.openexchange.database.DatabaseService;
-import com.openexchange.groupware.delete.DeleteListener;
-import com.openexchange.objectusecount.ObjectUseCountService;
-import com.openexchange.objectusecount.groupware.ObjectUseCountDeleteListener;
-import com.openexchange.objectusecount.impl.ObjectUseCountServiceImpl;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.threadpool.ThreadPoolService;
-import com.openexchange.user.UserService;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
- * {@link ObjectUseCountActivator}
+ * {@link TrustedDomainAuthenticationResult}
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
- * @since v7.8.1
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.10.0
  */
-public class ObjectUseCountActivator extends HousekeepingActivator {
+public class TrustedDomainAuthenticationResult {
+
+
+    private final TrustedDomain trustedDomain;
+    private final String IMAGE_KEY = "image";
+    private final String STATUS_KEY = "passed";
 
     /**
-     * Initializes a new {@link ObjectUseCountActivator}.
+     * Initializes a new {@link TrustedDomainAuthenticationResult}.
      */
-    public ObjectUseCountActivator() {
+    public TrustedDomainAuthenticationResult(TrustedDomain trustedDomain) {
         super();
+        this.trustedDomain = trustedDomain;
     }
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { DatabaseService.class, ContactService.class, UserService.class, ThreadPoolService.class };
+    public String toJSON() throws JSONException {
+        JSONObject json = new JSONObject();
+        if(trustedDomain != null){
+            json.put(STATUS_KEY, true);
+            json.put(IMAGE_KEY, trustedDomain.getImage());
+        } else {
+            json.put(STATUS_KEY, false);
+        }
+        return json.toString();
     }
 
-    @Override
-    protected void startBundle() throws Exception {
-        registerService(ObjectUseCountService.class, new ObjectUseCountServiceImpl(this));
-        registerService(DeleteListener.class, new ObjectUseCountDeleteListener());
+    public boolean hasPassed(){
+        return trustedDomain != null;
     }
 
 }

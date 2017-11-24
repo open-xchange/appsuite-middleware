@@ -74,24 +74,24 @@ public interface MailAuthenticityHandler {
      * and checks if the 'Authentication-Results' header is present. If it is, then parses that header
      * and collects the results of the different {@link MailAuthenticityMechanism}s that might be present
      * in a {@link MailAuthenticityResult} object and returns that
-     * 
+     *
      * @param session The groupware {@link Session}
      * @param mailPart The {@link MailPart} to handle
-     * 
+     *
      * @return The {@link MailAuthenticityResult} with the collected results of the {@link MailAuthenticityMechanism}s
      */
     void handle(Session session, MailMessage mailMessage);
 
     /**
      * Returns an unmodifiable {@link Collection} with all required {@link MailField}s
-     * 
+     *
      * @return an unmodifiable{@link Collection} with all required {@link MailField}s
      */
     Collection<MailField> getRequiredFields();
 
     /**
      * Returns an unmodifiable {@link Collection} with all required mail headers
-     * 
+     *
      * @return an unmodifiable {@link Collection} with all required mail headers
      */
     Collection<String> getRequiredHeaders();
@@ -99,7 +99,7 @@ public interface MailAuthenticityHandler {
     /**
      * Determines whether the {@link MailAuthenticityHandler} is enabled for the user
      * that is denoted by the specified {@link Session}
-     * 
+     *
      * @param session The groupware {@link Session}
      * @return <code>true</code> if the {@link MailAuthenticityHandler} is enabled; <code>false</code> otherwise
      */
@@ -108,7 +108,7 @@ public interface MailAuthenticityHandler {
     /**
      * Returns the ranking of this {@link MailAuthenticityHandler}. A higher number in ranking
      * means a higher priority.
-     * 
+     *
      * @return The ranking of the {@link MailAuthenticityHandler}
      */
     int getRanking();
