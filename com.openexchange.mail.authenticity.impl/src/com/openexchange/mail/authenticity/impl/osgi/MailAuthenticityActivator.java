@@ -57,7 +57,7 @@ import com.openexchange.mail.authenticity.MailAuthenticityHandler;
 import com.openexchange.mail.authenticity.MailAuthenticityHandlerRegistry;
 import com.openexchange.mail.authenticity.impl.MailAuthenticityFetchListener;
 import com.openexchange.mail.authenticity.impl.MailAuthenticityHandlerRegistryImpl;
-import com.openexchange.mail.authenticity.impl.TrustedDomainAuthenticationHandler;
+import com.openexchange.mail.authenticity.impl.TrustedDomainAuthenticityHandler;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
 
@@ -89,17 +89,17 @@ public class MailAuthenticityActivator extends HousekeepingActivator {
     @Override
     protected void startBundle() throws Exception {
 
-        track(TrustedDomainAuthenticationHandler.class);
+        track(TrustedDomainAuthenticityHandler.class);
         RankingAwareNearRegistryServiceTracker<MailAuthenticityHandler> handlerTracker = new RankingAwareNearRegistryServiceTracker<>(context, MailAuthenticityHandler.class);
         rememberTracker(handlerTracker);
 
         openTrackers();
 
         ConfigurationService configurationService = getService(ConfigurationService.class);
-        TrustedDomainAuthenticationHandler authenticationHandler = new TrustedDomainAuthenticationHandler(configurationService);
+        TrustedDomainAuthenticityHandler authenticationHandler = new TrustedDomainAuthenticityHandler(configurationService);
 
         registerService(Reloadable.class, authenticationHandler);
-        registerService(TrustedDomainAuthenticationHandler.class, authenticationHandler);
+        registerService(TrustedDomainAuthenticityHandler.class, authenticationHandler);
 
         MailAuthenticityHandlerRegistryImpl registry = new MailAuthenticityHandlerRegistryImpl(handlerTracker, getService(LeanConfigurationService.class));
         registerService(MailAuthenticityHandlerRegistry.class, registry);

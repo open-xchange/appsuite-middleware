@@ -52,6 +52,7 @@ package com.openexchange.mail.authenticity.impl;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,32 +62,33 @@ import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.authenticity.DefaultMailAuthenticityResultKey;
+import com.openexchange.mail.authenticity.MailAuthenticityStatus;
+import com.openexchange.mail.authenticity.mechanism.MailAuthenticityMechanism;
 import com.openexchange.mail.dataobjects.MailAuthenticityResult;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.session.Session;
 
 /**
- * {@link TrustedDomainAuthenticationHandler}
+ * {@link TrustedDomainAuthenticityHandler}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.0
  */
-public class TrustedDomainAuthenticationHandler implements Reloadable {
+public class TrustedDomainAuthenticityHandler implements Reloadable {
 
     Map<String, List<TrustedDomain>> trustedDomains = new ConcurrentHashMap<>();
 
-    private static final Logger LOG = LoggerFactory.getLogger(TrustedDomainAuthenticationHandler.class);
+    private static final Logger LOG = LoggerFactory.getLogger(TrustedDomainAuthenticityHandler.class);
     private static final String PREFIX = "com.openexchange.mail.authentication.trustedDomains.";
     private static final String TENANT = "tenants";
     private static final String DOMAINS = ".domains";
     private static final String IMAGE = ".image";
     private static final List<TrustedDomain> FALLBACK_TENANT = new ArrayList<>();
 
-
     /**
-     * Initializes a new {@link TrustedDomainAuthenticationHandler}.
+     * Initializes a new {@link TrustedDomainAuthenticityHandler}.
      */
-    public TrustedDomainAuthenticationHandler(ConfigurationService configurationService) {
+    public TrustedDomainAuthenticityHandler(ConfigurationService configurationService) {
         super();
         init(configurationService);
 
@@ -159,16 +161,23 @@ public class TrustedDomainAuthenticationHandler implements Reloadable {
         return DefaultInterests.builder().propertiesOfInterest(properties.toArray(new String[properties.size()])).build();
     }
 
+    @SuppressWarnings("unchecked")
     public void handle(Session session, MailMessage mailMessage) {
         String tenant = (String) session.getParameter(Session.PARAM_HOST_NAME);
-        if(tenant==null){
+        if (tenant == null) {
             LOG.warn("Missing host name session parameter. Unable to verify mail domain.");
             return;
         }
-        TrustedDomain trustedDomain = checkHost(tenant, getDomain(mailMessage));
-        if(trustedDomain != null){
-            // TODO insert infos
-            mailMessage.getAuthenticityResult();
+
+        MailAuthenticityResult authenticityResult = mailMessage.getAuthenticityResult();
+
+        if (MailAuthenticityStatus.PASS.equals(authenticityResult.getStatus())) {
+
+            TrustedDomain trustedDomain = checkHost(tenant, getDomain(mailMessage));
+            if (trustedDomain != null) {
+                // TODO insert infos
+                Set<MailAuthenticityMechanism> mechanisms = authenticityResult.getAttribute(DefaultMailAuthenticityResultKey.MAIL_AUTH_MECHS, Set.class);
+            }
         }
     }
 
