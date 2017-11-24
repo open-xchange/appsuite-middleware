@@ -69,6 +69,7 @@ import com.openexchange.mail.MailField;
 import com.openexchange.mail.authenticity.DefaultMailAuthenticityResultKey;
 import com.openexchange.mail.authenticity.MailAuthenticityHandler;
 import com.openexchange.mail.authenticity.MailAuthenticityStatus;
+import com.openexchange.mail.authenticity.mechanism.AuthenticityMechanismResult;
 import com.openexchange.mail.authenticity.mechanism.DefaultMailAuthenticityMechanism;
 import com.openexchange.mail.authenticity.mechanism.MailAuthenticityMechanismResult;
 import com.openexchange.mail.authenticity.mechanism.dkim.DKIMAuthMechResult;
@@ -156,6 +157,12 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
                 return null;
             }
 
+            // In case of a DMARC result != "none", set overall result to the DMARC result and continue with the next mechanism
+            MailAuthenticityStatus mailAuthStatus = convert(dmarcResult);
+            if (!mailAuthStatus.equals(MailAuthenticityStatus.NONE)) {
+                overallResult.setStatus(mailAuthStatus);
+            }
+
             DMARCAuthMechResult result = new DMARCAuthMechResult(cleanseDomain(domain), dmarcResult);
             result.setReason(extractComment(value));
             return result;
@@ -172,6 +179,12 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
             String fromDomain = overallResult.getAttribute(DefaultMailAuthenticityResultKey.DOMAIN, String.class);
             if (!fromDomain.equals(domain)) {
                 return null;
+            }
+
+            // In case of a DKIM result != "none", set overall result to the DKIM result and continue with the next mechanism
+            MailAuthenticityStatus mailAuthStatus = convert(dkimResult);
+            if (overallResult.getStatus().equals(MailAuthenticityStatus.NEUTRAL) && !mailAuthStatus.equals(MailAuthenticityStatus.NONE)) {
+                overallResult.setStatus(mailAuthStatus);
             }
 
             DKIMAuthMechResult result = new DKIMAuthMechResult(cleanseDomain(domain), dkimResult);
@@ -194,6 +207,12 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
             String fromDomain = overallResult.getAttribute(DefaultMailAuthenticityResultKey.DOMAIN, String.class);
             if (!fromDomain.equals(domain)) {
                 return null;
+            }
+
+            // Set the overall result only if it's 'none'            
+            MailAuthenticityStatus mailAuthStatus = convert(spfResult);
+            if (overallResult.getStatus().equals(MailAuthenticityStatus.NEUTRAL)) {
+                overallResult.setStatus(mailAuthStatus);
             }
 
             SPFAuthMechResult result = new SPFAuthMechResult(cleanseDomain(domain), spfResult);
@@ -389,22 +408,8 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
                 // Skip results that the 'From' domain does not match the mechanisms 'from' domain
                 continue;
             }
-
-            MailAuthenticityStatus mailAuthenticityStatus = MailAuthenticityStatus.NEUTRAL;
-            try {
-                mailAuthenticityStatus = MailAuthenticityStatus.valueOf(mailAuthMechResult.getResult().getTechnicalName().toUpperCase());
-            } catch (IllegalArgumentException e) {
-                LOGGER.debug("Unknown mail authenticity status '{}'", mailAuthMechResult.getResult().getTechnicalName(), e);
-            }
-            if (MailAuthenticityStatus.NONE.equals(mailAuthenticityStatus)) {
-                continue;
-            }
-            if (MailAuthenticityStatus.PASS.equals(mailAuthenticityStatus)) {
-                result.setStatus(mailAuthenticityStatus);
-                break;
-            }
-            mechanisms.add(mechanism);
             results.add(mailAuthMechResult);
+            mechanisms.add(mechanism);
         }
 
         result.addAttribute(DefaultMailAuthenticityResultKey.MAIL_AUTH_MECHS, mechanisms);
@@ -633,6 +638,38 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
             return null;
         }
         return value.substring(beginIndex + 1, endIndex);
+    }
+
+    /**
+     * Converts the specified {@link MailAuthenticityMechanismResult} to {@link MailAuthenticityStatus}
+     * 
+     * @param mechanismResult The {@link MailAuthenticityMechanismResult} to convert
+     * @return The converted {@link MailAuthenticityStatus}. The status {@link MailAuthenticityStatus#NEUTRAL} might
+     *         also get returned if the specified {@link MailAuthenticityMechanismResult} does not map to a valid {@link MailAuthenticityStatus}
+     */
+    private MailAuthenticityStatus convert(MailAuthenticityMechanismResult mechanismResult) {
+        return convert(mechanismResult.getResult());
+    }
+
+    /**
+     * Converts the specified {@link AuthenticityMechanismResult} to {@link MailAuthenticityStatus}
+     * 
+     * @param mechanismResult The {@link AuthenticityMechanismResult} to convert
+     * @return The converted {@link MailAuthenticityStatus}. The status {@link MailAuthenticityStatus#NEUTRAL} might
+     *         also get returned if the specified {@link AuthenticityMechanismResult} does not map to a valid {@link MailAuthenticityStatus}.
+     *         The status {@link MailAuthenticityStatus#NONE} will be returned if the specified {@link AuthenticityMechanismResult} is <code>null</code>
+     */
+    private MailAuthenticityStatus convert(AuthenticityMechanismResult authMechResult) {
+        if (authMechResult == null) {
+            return MailAuthenticityStatus.NONE;
+        }
+        MailAuthenticityStatus mailAuthenticityStatus = MailAuthenticityStatus.NEUTRAL;
+        try {
+            mailAuthenticityStatus = MailAuthenticityStatus.valueOf(authMechResult.getTechnicalName().toUpperCase());
+        } catch (IllegalArgumentException e) {
+            LOGGER.debug("Unknown mail authenticity status '{}'", authMechResult.getTechnicalName(), e);
+        }
+        return mailAuthenticityStatus;
     }
 
     ///////////////////////////////// HELPER CLASSES /////////////////////////////////
