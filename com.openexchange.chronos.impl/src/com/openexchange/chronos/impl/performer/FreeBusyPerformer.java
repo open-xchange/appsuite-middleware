@@ -101,6 +101,7 @@ import com.openexchange.chronos.service.FreeBusyResult;
 import com.openexchange.chronos.service.SearchOptions;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Autoboxing;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
@@ -254,7 +255,7 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
         Map<Attendee, FreeBusyResult> results = new HashMap<>();
         for (Attendee attendee : attendees) {
             if (!freeBusyPerAttendee.containsKey(attendee)) {
-                List<OXException> warnings = Collections.singletonList(CalendarExceptionCodes.ATTENDEE_NOT_FOUND.create(String.valueOf(attendee.toString())));
+                List<OXException> warnings = Collections.singletonList(CalendarExceptionCodes.INVALID_CALENDAR_USER.create(attendee.getUri(), Autoboxing.I(attendee.getEntity()), attendee.getCuType()));
                 FreeBusyResult result = new FreeBusyResult();
                 result.setWarnings(warnings);
                 results.put(attendee, result);
