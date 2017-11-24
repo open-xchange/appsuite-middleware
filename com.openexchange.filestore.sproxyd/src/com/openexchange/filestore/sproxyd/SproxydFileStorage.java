@@ -304,17 +304,18 @@ public class SproxydFileStorage implements FileStorage {
             {
                 UploadChunk chunk = chunkedUpload.next();
                 try {
+                    // ... and upload first chunk
                     long chunkSize = chunk.getSize();
+                    UUID scalityId = client.put(chunk.getData(), chunkSize);
+                    scalityIds.add(scalityId);
+                    chunkStorage.storeChunk(new Chunk(documentId, scalityId, off, chunkSize));
+
                     if (chunkSize <= 0) {
                         // Received an empty input stream
                         success = true;
                         return off;
                     }
 
-                    // ... and upload first chunk
-                    UUID scalityId = client.put(chunk.getData(), chunk.getSize());
-                    scalityIds.add(scalityId);
-                    chunkStorage.storeChunk(new Chunk(documentId, scalityId, off, chunk.getSize()));
                     off += chunk.getSize();
                 } finally {
                     Streams.close(chunk);

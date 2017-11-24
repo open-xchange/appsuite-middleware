@@ -380,20 +380,21 @@ public class SwiftFileStorage implements FileStorage {
             {
                 UploadChunk chunk = chunkedUpload.next();
                 try {
+                    // Check container...
+                    checkOrCreateContainer();
+
+                    // ... and upload first chunk
                     long chunkSize = chunk.getSize();
+                    UUID swiftId = client.put(chunk.getData(), chunkSize);
+                    swiftIds.add(swiftId);
+                    chunkStorage.storeChunk(new Chunk(documentId, swiftId, off, chunkSize));
+
                     if (chunkSize <= 0) {
                         // Received an empty input stream
                         deleteUploadedChunks = false;
                         return off;
                     }
 
-                    // Check container...
-                    checkOrCreateContainer();
-
-                    // ... and upload first chunk
-                    UUID swiftId = client.put(chunk.getData(), chunkSize);
-                    swiftIds.add(swiftId);
-                    chunkStorage.storeChunk(new Chunk(documentId, swiftId, off, chunkSize));
                     off += chunkSize;
                 } finally {
                     Streams.close(chunk);
