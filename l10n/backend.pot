@@ -1059,6 +1059,11 @@ msgstr ""
 msgid "Validation failed: %1$s"
 msgstr ""
 
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.ical/src/com/openexchange/chronos/ical/ICalExceptionMessages.java:70
+msgid ""
+"Not all of the objects could be imported due to a configured limitation."
+msgstr ""
+
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:267
 msgid "The appointment was rescheduled. Original date: %1$s. New date: %2$s"
 msgstr ""
