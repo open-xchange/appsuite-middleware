@@ -173,6 +173,7 @@ public class TrustedDomainAuthenticityHandler implements Reloadable {
 
     private void init(ConfigurationService configurationService) {
         trustedDomainsPerTenant.clear();
+        FALLBACK_TENANT.clear();
         String commaSeparatedListOfTenants = configurationService.getProperty(PREFIX + TENANT, "");
         String[] tenants = Strings.splitByCommaNotInQuotes(commaSeparatedListOfTenants);
         for (String tenant : tenants) {
