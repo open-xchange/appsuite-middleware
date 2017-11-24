@@ -51,6 +51,7 @@ package com.openexchange.mail.authenticity.mechanism.dmarc;
 
 import com.openexchange.mail.authenticity.mechanism.AbstractAuthMechResult;
 import com.openexchange.mail.authenticity.mechanism.MailAuthenticityMechanism;
+import com.openexchange.mail.authenticity.mechanism.DefaultMailAuthenticityMechanism;
 
 /**
  * {@link DMARCAuthMechResult}
@@ -87,7 +88,7 @@ public class DMARCAuthMechResult extends AbstractAuthMechResult {
      */
     @Override
     public MailAuthenticityMechanism getMechanism() {
-        return MailAuthenticityMechanism.DMARC;
+        return DefaultMailAuthenticityMechanism.DMARC;
     }
 
     /*

@@ -56,6 +56,7 @@ import com.openexchange.clientinfo.impl.USMEASClientInfoProvider;
 import com.openexchange.clientinfo.impl.WebClientInfoProvider;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.ServiceSet;
+import com.openexchange.serverconfig.ServerConfigService;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.uadetector.UserAgentParser;
 
@@ -70,7 +71,7 @@ public class ClientInfoActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { UserAgentParser.class, SessiondService.class };
+        return new Class<?>[] { UserAgentParser.class, SessiondService.class, ServerConfigService.class };
     }
 
     @Override

@@ -51,6 +51,7 @@ package com.openexchange.mail.authenticity.mechanism.dkim;
 
 import com.openexchange.mail.authenticity.mechanism.AbstractAuthMechResult;
 import com.openexchange.mail.authenticity.mechanism.MailAuthenticityMechanism;
+import com.openexchange.mail.authenticity.mechanism.DefaultMailAuthenticityMechanism;
 
 /**
  * {@link DKIMAuthMechResult}
@@ -87,7 +88,7 @@ public class DKIMAuthMechResult extends AbstractAuthMechResult {
      */
     @Override
     public MailAuthenticityMechanism getMechanism() {
-        return MailAuthenticityMechanism.DKIM;
+        return DefaultMailAuthenticityMechanism.DKIM;
     }
 
     /*

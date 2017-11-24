@@ -49,36 +49,48 @@
 
 package com.openexchange.session.management.hazelcast;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicReference;
 import org.slf4j.Logger;
+import com.google.common.collect.ImmutableSet;
 import com.hazelcast.core.Cluster;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IExecutorService;
 import com.hazelcast.core.Member;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.exception.OXException;
+import com.openexchange.geolocation.GeoInformation;
 import com.openexchange.geolocation.GeoLocationService;
+import com.openexchange.i18n.tools.StringHelper;
+import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
 import com.openexchange.session.management.ManagedSession;
+import com.openexchange.session.management.SessionManagementService;
+import com.openexchange.session.management.SessionManagementStrings;
+import com.openexchange.session.management.exception.SessionManagementExceptionCodes;
 import com.openexchange.session.management.hazelcast.osgi.Services;
 import com.openexchange.session.management.impl.DefaultManagedSession;
 import com.openexchange.session.management.impl.SessionManagementProperty;
-import com.openexchange.session.management.impl.SessionManagementServiceImpl;
+import com.openexchange.sessiond.SessionFilter;
+import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessionstorage.hazelcast.serialization.PortableMultipleSessionRemoteLookUp;
 import com.openexchange.sessionstorage.hazelcast.serialization.PortableSession;
 import com.openexchange.sessionstorage.hazelcast.serialization.PortableSessionCollection;
+import com.openexchange.user.UserService;
 
 /**
  * {@link HazelcastSessionManagementServiceImpl}
@@ -86,12 +98,20 @@ import com.openexchange.sessionstorage.hazelcast.serialization.PortableSessionCo
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since v7.10.0
  */
-public class HazelcastSessionManagementServiceImpl extends SessionManagementServiceImpl {
+public class HazelcastSessionManagementServiceImpl implements SessionManagementService {
 
     private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(HazelcastSessionManagementServiceImpl.class);
+    private static final HazelcastSessionManagementServiceImpl INSTANCE = new HazelcastSessionManagementServiceImpl();
 
-    public HazelcastSessionManagementServiceImpl() {
+    private final AtomicReference<Set<String>> blacklistedClients;
+
+    private HazelcastSessionManagementServiceImpl() {
         super();
+        blacklistedClients = new AtomicReference<Set<String>>(doGetBlacklistedClients());
+    }
+
+    public static HazelcastSessionManagementServiceImpl getInstance() {
+        return INSTANCE;
     }
 
     @Override
@@ -100,16 +120,27 @@ public class HazelcastSessionManagementServiceImpl extends SessionManagementServ
             return Collections.emptyList();
         }
 
-        Collection<ManagedSession> result = super.getSessionsForUser(session);
+        SessiondService sessiondService = Services.getService(SessiondService.class);
+        if (null == sessiondService) {
+            throw ServiceExceptionCode.absentService(SessiondService.class);
+        }
 
+        Set<String> blackListedClients = getBlacklistedClients();
+
+        Collection<Session> localSessions = sessiondService.getSessions(session.getUserId(), session.getContextId());
         Collection<PortableSession> remoteSessions = getRemoteSessionsForUser(session);
 
         String location = getDefaultLocation(session);
 
-        Set<String> blackListedClients = getBlacklistedClients();
-
-        GeoLocationService geoLocationService = getGeoLocationService();
-        Map<String, String> ip2locationCache = new HashMap<>(remoteSessions.size());
+        GeoLocationService geoLocationService = Services.optService(GeoLocationService.class);
+        Map<String, String> ip2locationCache = new HashMap<>(localSessions.size() + remoteSessions.size());
+        List<ManagedSession> result = new ArrayList<>(localSessions.size() + remoteSessions.size());
+        for (Session s : localSessions) {
+            if (false == blackListedClients.contains(s.getClient())) {
+                ManagedSession managedSession = DefaultManagedSession.builder(s).setLocation(optLocationFor(s, location, ip2locationCache, geoLocationService)).build();
+                result.add(managedSession);
+            }
+        }
 
         for (Session s : remoteSessions) {
             if (false == blackListedClients.contains(s.getClient())) {
@@ -122,7 +153,20 @@ public class HazelcastSessionManagementServiceImpl extends SessionManagementServ
 
     @Override
     public void removeSession(Session session, String sessionIdToRemove) throws OXException {
-        super.removeSession(session, sessionIdToRemove);
+        SessiondService sessiondService = Services.getService(SessiondService.class);
+        StringBuilder sb = new StringBuilder("(&");
+        sb.append("(").append(SessionFilter.SESSION_ID).append("=").append(sessionIdToRemove).append(")");
+        sb.append("(").append(SessionFilter.CONTEXT_ID).append("=").append(session.getContextId()).append(")");
+        sb.append("(").append(SessionFilter.USER_ID).append("=").append(session.getUserId()).append(")");
+        sb.append(")");
+        try {
+            Collection<String> removedSessions = sessiondService.removeSessionsGlobally(SessionFilter.create(sb.toString()));
+            if (removedSessions.isEmpty()) {
+                throw SessionManagementExceptionCodes.SESSION_NOT_FOUND.create();
+            }
+        } catch (OXException e) {
+            throw SessionManagementExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
     }
 
     private Collection<PortableSession> getRemoteSessionsForUser(Session session) throws OXException {
@@ -216,6 +260,92 @@ public class HazelcastSessionManagementServiceImpl extends SessionManagementServ
             } catch (Exception e) {
             /* Ignore */}
         }
+    }
+
+    private Set<String> getBlacklistedClients() {
+        return blacklistedClients.get();
+    }
+
+    /**
+     * Reinitializes clients black-list.
+     */
+    public void reinitBlacklistedClients() {
+        blacklistedClients.set(doGetBlacklistedClients());
+    }
+
+    protected Set<String> doGetBlacklistedClients() {
+        LeanConfigurationService configService = Services.getService(LeanConfigurationService.class);
+        if (null == configService) {
+            return Collections.emptySet();
+        }
+
+        String value = configService.getProperty(SessionManagementProperty.clientBlacklist);
+        if (Strings.isEmpty(value)) {
+            return Collections.emptySet();
+        }
+
+        String[] clients = Strings.splitByComma(value);
+        if (null == clients || clients.length == 0) {
+            return Collections.emptySet();
+        }
+
+        return ImmutableSet.copyOf(clients);
+    }
+
+    private String getDefaultLocation(Session session) {
+        // Initialize default value for location
+        String location;
+        {
+            location = SessionManagementStrings.UNKNOWN_LOCATION;
+            UserService userService = Services.getService(UserService.class);
+            if (null != userService) {
+                try {
+                    location = StringHelper.valueOf(userService.getUser(session.getUserId(), session.getContextId()).getLocale()).getString(SessionManagementStrings.UNKNOWN_LOCATION);
+                } catch (OXException e) {
+                    LOG.warn("", e);
+                }
+            }
+        }
+        return location;
+    }
+
+    private String optLocationFor(Session s, String def, Map<String, String> ip2locationCache, GeoLocationService geoLocationService) {
+        String ipAddress = s.getLocalIp();
+
+        // Check "cache" first
+        String location = ip2locationCache.get(ipAddress);
+        if (null != location) {
+            return location;
+        }
+
+        if (null != geoLocationService) {
+            try {
+                GeoInformation geoInformation = geoLocationService.getGeoInformation(ipAddress);
+
+                StringBuilder sb = null;
+                if (geoInformation.hasCity()) {
+                    sb = new StringBuilder(geoInformation.getCity());
+                }
+                if (geoInformation.hasCountry()) {
+                    if (null == sb) {
+                        sb = new StringBuilder();
+                    } else {
+                        sb.append(", ");
+                    }
+                    sb.append(geoInformation.getCountry());
+                }
+                if (null != sb) {
+                    location = sb.toString();
+                    ip2locationCache.put(ipAddress, location);
+                    return location;
+                }
+            } catch (OXException e) {
+                LOG.debug("Failed to determine location for session with IP address {}", ipAddress, e);
+            }
+        }
+
+        ip2locationCache.put(ipAddress, def);
+        return def;
     }
 
 }

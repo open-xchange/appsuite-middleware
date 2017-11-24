@@ -50,10 +50,15 @@
 package com.openexchange.session.management.hazelcast.osgi;
 
 import com.hazelcast.core.HazelcastInstance;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Interests;
+import com.openexchange.config.Reloadable;
+import com.openexchange.config.Reloadables;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.session.management.SessionManagementService;
 import com.openexchange.session.management.hazelcast.HazelcastSessionManagementServiceImpl;
+import com.openexchange.session.management.impl.SessionManagementProperty;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.user.UserService;
 
@@ -77,7 +82,19 @@ public class HazelcastSessionManagementActivator extends HousekeepingActivator {
         trackService(HazelcastInstance.class);
         openTrackers();
 
-        registerService(SessionManagementService.class, new HazelcastSessionManagementServiceImpl(), 100);
+        registerService(SessionManagementService.class, HazelcastSessionManagementServiceImpl.getInstance(), 100);
+        registerService(Reloadable.class, new Reloadable() {
+
+            @Override
+            public void reloadConfiguration(ConfigurationService configService) {
+                HazelcastSessionManagementServiceImpl.getInstance().reinitBlacklistedClients();
+            }
+
+            @Override
+            public Interests getInterests() {
+                return Reloadables.interestsForProperties(SessionManagementProperty.globalLookup.getFQPropertyName(), SessionManagementProperty.clientBlacklist.getFQPropertyName());
+            }
+        });
     }
 
 }

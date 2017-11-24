@@ -51,15 +51,15 @@ package com.openexchange.mail.authenticity.impl.osgi;
 
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
+import com.openexchange.config.ForcedReloadable;
+import com.openexchange.config.Interests;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.mail.MailFetchListener;
-import com.openexchange.mail.authenticity.MailAuthenticityHandler;
 import com.openexchange.mail.authenticity.MailAuthenticityHandlerRegistry;
 import com.openexchange.mail.authenticity.impl.MailAuthenticityFetchListener;
 import com.openexchange.mail.authenticity.impl.MailAuthenticityHandlerRegistryImpl;
 import com.openexchange.mail.authenticity.impl.TrustedDomainAuthenticityHandler;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
 
 /**
  * {@link MailAuthenticityActivator}
@@ -90,21 +90,27 @@ public class MailAuthenticityActivator extends HousekeepingActivator {
     protected void startBundle() throws Exception {
 
         track(TrustedDomainAuthenticityHandler.class);
-        RankingAwareNearRegistryServiceTracker<MailAuthenticityHandler> handlerTracker = new RankingAwareNearRegistryServiceTracker<>(context, MailAuthenticityHandler.class);
-        rememberTracker(handlerTracker);
+        // It is OK to pass service references since 'stopOnServiceUnavailability' returns 'true'
+        final MailAuthenticityHandlerRegistryImpl registry = new MailAuthenticityHandlerRegistryImpl(getService(LeanConfigurationService.class), context);
+        registerService(MailAuthenticityHandlerRegistry.class, registry);
 
-        openTrackers();
+        registerService(ForcedReloadable.class, new ForcedReloadable() {
+            @Override
+            public void reloadConfiguration(ConfigurationService configService) {
+                registry.invalidateCache();
+            }
 
+            @Override
+            public Interests getInterests() {
+                return null;
+            }
+        });
         ConfigurationService configurationService = getService(ConfigurationService.class);
         TrustedDomainAuthenticityHandler authenticationHandler = new TrustedDomainAuthenticityHandler(configurationService);
 
         registerService(Reloadable.class, authenticationHandler);
         registerService(TrustedDomainAuthenticityHandler.class, authenticationHandler);
 
-        MailAuthenticityHandlerRegistryImpl registry = new MailAuthenticityHandlerRegistryImpl(handlerTracker, getService(LeanConfigurationService.class));
-        registerService(MailAuthenticityHandlerRegistry.class, registry);
-
-        // It is OK to pass service references since 'stopOnServiceUnavailability' returns 'true'
         MailAuthenticityFetchListener fetchListener = new MailAuthenticityFetchListener(registry);
         registerService(MailFetchListener.class, fetchListener);
     }

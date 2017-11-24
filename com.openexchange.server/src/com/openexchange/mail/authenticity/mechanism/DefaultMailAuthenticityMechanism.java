@@ -47,36 +47,47 @@
  *
  */
 
-package com.openexchange.dav;
+package com.openexchange.mail.authenticity.mechanism;
 
-import java.util.Locale;
-import com.openexchange.clientinfo.ClientInfo;
-import com.openexchange.clientinfo.ClientInfoType;
-
+import com.openexchange.mail.authenticity.mechanism.dkim.DKIMResult;
+import com.openexchange.mail.authenticity.mechanism.dmarc.DMARCResult;
+import com.openexchange.mail.authenticity.mechanism.spf.SPFResult;
 
 /**
- * {@link DAVClientInfo}
+ * {@link DefaultMailAuthenticityMechanism}
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
- * @since v7.10.0
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class DAVClientInfo implements ClientInfo {
+public enum DefaultMailAuthenticityMechanism implements MailAuthenticityMechanism {
 
-    private final String app;
+    DMARC("DMARC", DMARCResult.class),
+    DKIM("DKIM", DKIMResult.class),
+    SPF("SPF", SPFResult.class);
 
-    public DAVClientInfo(String app) {
-        super();
-        this.app = app;
+    private final Class<? extends AuthenticityMechanismResult> resultType;
+    private final String displayName;
+
+    /**
+     * Initializes a new {@link DefaultMailAuthenticityMechanism}.
+     */
+    private DefaultMailAuthenticityMechanism(String displayName, Class<? extends AuthenticityMechanismResult> resultType) {
+        this.displayName = displayName;
+        this.resultType = resultType;
     }
 
+    /* (non-Javadoc)
+     * @see com.openexchange.mail.authenticity.mechanism.MailAuthMech#getDisplayName()
+     */
     @Override
-    public ClientInfoType getType() {
-        return ClientInfoType.SYNC;
+    public String getDisplayName() {
+        return displayName;
     }
 
+    /* (non-Javadoc)
+     * @see com.openexchange.mail.authenticity.mechanism.MailAuthMech#getResultType()
+     */
     @Override
-    public String toString(Locale locale) {
-        return app;
+    public Class<? extends AuthenticityMechanismResult> getResultType() {
+        return resultType;
     }
-
 }

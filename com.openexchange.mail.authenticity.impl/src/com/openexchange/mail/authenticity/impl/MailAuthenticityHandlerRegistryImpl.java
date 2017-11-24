@@ -49,16 +49,20 @@
 
 package com.openexchange.mail.authenticity.impl;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.TimeUnit;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.authenticity.MailAuthenticityHandler;
 import com.openexchange.mail.authenticity.MailAuthenticityHandlerRegistry;
-import com.openexchange.osgi.ServiceListing;
 import com.openexchange.session.Session;
+import com.openexchange.session.UserAndContext;
 
 /**
  * {@link MailAuthenticityHandlerRegistryImpl}
@@ -66,28 +70,53 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.10.0
  */
-public class MailAuthenticityHandlerRegistryImpl implements MailAuthenticityHandlerRegistry {
+public class MailAuthenticityHandlerRegistryImpl implements MailAuthenticityHandlerRegistry, ServiceTrackerCustomizer<MailAuthenticityHandler, MailAuthenticityHandler> {
 
-    private final ServiceListing<MailAuthenticityHandler> listing;
-    private final Comparator<MailAuthenticityHandler> comparator;
+    private final Queue<MailAuthenticityHandler> handlers;
+    private final Cache<UserAndContext, ConfigAndHandler> cache;
     private final LeanConfigurationService leanConfigService;
+    private final BundleContext context;
 
     /**
      * Initializes a new {@link MailAuthenticityHandlerRegistryImpl}.
      */
-    public MailAuthenticityHandlerRegistryImpl(ServiceListing<MailAuthenticityHandler> listing, LeanConfigurationService leanConfigService) {
+    public MailAuthenticityHandlerRegistryImpl(LeanConfigurationService leanConfigService, BundleContext context) {
         super();
-        this.listing = listing;
+        this.context = context;
+        this.handlers = new ConcurrentLinkedQueue<>();
         this.leanConfigService = leanConfigService;
-        comparator = new Comparator<MailAuthenticityHandler>() {
+        cache = CacheBuilder.newBuilder().maximumSize(65536).expireAfterWrite(30, TimeUnit.MINUTES).build();
+    }
 
-            @Override
-            public int compare(MailAuthenticityHandler o1, MailAuthenticityHandler o2) {
-                int r1 = o1.getRanking();
-                int r2 = o2.getRanking();
-                return (r1 < r2) ? 1 : ((r1 == r2) ? 0 : -1);
+    /**
+     * Clears the cache.
+     */
+    public void invalidateCache() {
+        cache.invalidateAll();
+    }
+
+    private ConfigAndHandler getConfigAndHandler(Session session) {
+        int userId = session.getUserId();
+        int contextId = session.getContextId();
+        UserAndContext key = UserAndContext.newInstance(userId, contextId);
+        ConfigAndHandler configAndHandler = cache.getIfPresent(key);
+        if (null == configAndHandler) {
+            boolean enabled = leanConfigService.getBooleanProperty(userId, contextId, MailAuthenticityProperty.enabled);
+            long dateThreshold = leanConfigService.getLongProperty(userId, contextId, MailAuthenticityProperty.threshold);
+
+            MailAuthenticityHandler highestRankedHandler = null;
+            if (enabled) {
+                for (MailAuthenticityHandler handler : handlers) {
+                    if (handler.isEnabled(session) && (null == highestRankedHandler || highestRankedHandler.getRanking() < handler.getRanking())) {
+                        highestRankedHandler = new ThresholdAwareAuthenticityHandler(handler, dateThreshold);
+                    }
+                }
             }
-        };
+
+            configAndHandler = new ConfigAndHandler(enabled, dateThreshold, highestRankedHandler);
+            cache.put(key, configAndHandler);
+        }
+        return configAndHandler;
     }
 
     @Override
@@ -97,42 +126,60 @@ public class MailAuthenticityHandlerRegistryImpl implements MailAuthenticityHand
 
     @Override
     public boolean isEnabledFor(Session session) throws OXException {
-        return leanConfigService.getBooleanProperty(session.getUserId(), session.getContextId(), MailAuthenticityProperty.enabled);
+        return getConfigAndHandler(session).enabled;
     }
 
     @Override
     public long getDateThreshold(Session session) throws OXException {
-        return leanConfigService.getLongProperty(session.getUserId(), session.getContextId(), MailAuthenticityProperty.threshold);
+        return getConfigAndHandler(session).dateThreshold;
     }
 
     @Override
     public MailAuthenticityHandler getHighestRankedHandlerFor(Session session) throws OXException {
-        if (isNotEnabledFor(session)) {
-            // Disabled per configuration
-            return null;
-        }
+        return getConfigAndHandler(session).highestRankedHandler;
+    }
 
-        List<MailAuthenticityHandler> snapshot = listing.getServiceList();
-        if (snapshot == null || snapshot.isEmpty()) {
-            // None registered
-            return null;
-        }
+    // --------------------------------------------------------------------------------------------------------------
 
-        long threshold = getDateThreshold(session);
-        List<MailAuthenticityHandler> applicableHandlers = new ArrayList<>(snapshot.size());
-        for (MailAuthenticityHandler handler : snapshot) {
-            if (handler.isEnabled(session)) {
-                applicableHandlers.add(new ThresholdAwareAuthenticityHandler(handler, threshold));
-            }
+    @Override
+    public MailAuthenticityHandler addingService(ServiceReference<MailAuthenticityHandler> reference) {
+        MailAuthenticityHandler appearedHandler = context.getService(reference);
+        if (handlers.offer(appearedHandler)) {
+            invalidateCache();
+            return appearedHandler;
         }
+        context.ungetService(reference);
+        return null;
+    }
 
-        if (applicableHandlers.isEmpty()) {
-            // No suitable handler found
-            return null;
+    @Override
+    public void modifiedService(ServiceReference<MailAuthenticityHandler> reference, MailAuthenticityHandler handler) {
+        // Ignore
+    }
+
+    @Override
+    public void removedService(ServiceReference<MailAuthenticityHandler> reference, MailAuthenticityHandler disappearedHandler) {
+        boolean removed = handlers.remove(disappearedHandler);
+        if (removed) {
+            invalidateCache();
         }
+        context.ungetService(reference);
+    }
 
-        Collections.sort(applicableHandlers, comparator);
-        return applicableHandlers.get(0);
+    // --------------------------------------------------------------------------------------------------------------
+
+    private static class ConfigAndHandler {
+
+        final boolean enabled;
+        final long dateThreshold;
+        final MailAuthenticityHandler highestRankedHandler;
+
+        ConfigAndHandler(boolean enabled, long dateThreshold, MailAuthenticityHandler highestRankedHandler) {
+            super();
+            this.enabled = enabled;
+            this.dateThreshold = dateThreshold;
+            this.highestRankedHandler = highestRankedHandler;
+        }
     }
 
 }

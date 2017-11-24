@@ -49,47 +49,25 @@
 
 package com.openexchange.mail.authenticity.mechanism;
 
-import com.openexchange.mail.authenticity.mechanism.dkim.DKIMResult;
-import com.openexchange.mail.authenticity.mechanism.dmarc.DMARCResult;
-import com.openexchange.mail.authenticity.mechanism.spf.SPFResult;
-
 /**
  * {@link MailAuthenticityMechanism}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public enum MailAuthenticityMechanism {
-
-    DMARC("DMARC", DMARCResult.class),
-    DKIM("DKIM", DKIMResult.class),
-    SPF("SPF", SPFResult.class);
-
-    private final Class<? extends AuthenticityMechanismResult> resultType;
-    private final String displayName;
-
-    /**
-     * Initializes a new {@link MailAuthenticityMechanism}.
-     */
-    private MailAuthenticityMechanism(String displayName, Class<? extends AuthenticityMechanismResult> resultType) {
-        this.displayName = displayName;
-        this.resultType = resultType;
-    }
+public interface MailAuthenticityMechanism {
 
     /**
      * Gets the display name
      *
      * @return The display name
      */
-    public String getDisplayName() {
-        return displayName;
-    }
+    String getDisplayName();
 
     /**
      * Gets the resultType
      *
      * @return The resultType
      */
-    public Class<? extends AuthenticityMechanismResult> getResultType() {
-        return resultType;
-    }
+    Class<? extends AuthenticityMechanismResult> getResultType();
+
 }

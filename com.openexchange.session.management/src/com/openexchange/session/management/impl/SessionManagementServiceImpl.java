@@ -99,9 +99,9 @@ public class SessionManagementServiceImpl implements SessionManagementService {
 
     // ----------------------------------------------------------------------------------------------------------------
 
-    protected final AtomicReference<Set<String>> blacklistedClients;
+    private final AtomicReference<Set<String>> blacklistedClients;
 
-    protected SessionManagementServiceImpl() {
+    private SessionManagementServiceImpl() {
         super();
         blacklistedClients = new AtomicReference<Set<String>>(doGetBlacklistedClients());
     }
@@ -130,7 +130,7 @@ public class SessionManagementServiceImpl implements SessionManagementService {
 
         String location = getDefaultLocation(session);
 
-        GeoLocationService geoLocationService = getGeoLocationService();
+        GeoLocationService geoLocationService = Services.optService(GeoLocationService.class);
         Map<String, String> ip2locationCache = new HashMap<>(localSessions.size());
         List<ManagedSession> result = new ArrayList<>(localSessions.size());
         for (Session s : localSessions) {
@@ -144,7 +144,7 @@ public class SessionManagementServiceImpl implements SessionManagementService {
         return result;
     }
 
-    protected String optLocationFor(Session s, String def, Map<String, String> ip2locationCache, GeoLocationService geoLocationService) {
+    private String optLocationFor(Session s, String def, Map<String, String> ip2locationCache, GeoLocationService geoLocationService) {
         String ipAddress = s.getLocalIp();
 
         // Check "cache" first
@@ -201,11 +201,11 @@ public class SessionManagementServiceImpl implements SessionManagementService {
         }
     }
 
-    protected Set<String> getBlacklistedClients() {
+    private Set<String> getBlacklistedClients() {
         return blacklistedClients.get();
     }
 
-    protected Set<String> doGetBlacklistedClients() {
+    private Set<String> doGetBlacklistedClients() {
         LeanConfigurationService configService = Services.getService(LeanConfigurationService.class);
         if (null == configService) {
             return Collections.emptySet();
@@ -224,7 +224,7 @@ public class SessionManagementServiceImpl implements SessionManagementService {
         return ImmutableSet.copyOf(clients);
     }
 
-    protected String getDefaultLocation(Session session) {
+    private String getDefaultLocation(Session session) {
         // Initialize default value for location
         String location;
         {
@@ -239,10 +239,6 @@ public class SessionManagementServiceImpl implements SessionManagementService {
             }
         }
         return location;
-    }
-
-    protected GeoLocationService getGeoLocationService() {
-        return Services.optService(GeoLocationService.class);
     }
 
 }

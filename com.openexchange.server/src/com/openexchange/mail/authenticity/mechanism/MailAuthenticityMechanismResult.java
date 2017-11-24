@@ -73,9 +73,9 @@ public interface MailAuthenticityMechanismResult {
     String getClientIP();
 
     /**
-     * Returns the {@link MailAuthenticityMechanism} used for this result
+     * Returns the {@link DefaultMailAuthenticityMechanism} used for this result
      * 
-     * @return the {@link MailAuthenticityMechanism} used for this result
+     * @return the {@link DefaultMailAuthenticityMechanism} used for this result
      */
     MailAuthenticityMechanism getMechanism();
 

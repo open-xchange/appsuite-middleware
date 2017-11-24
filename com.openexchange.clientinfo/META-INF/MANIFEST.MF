@@ -13,11 +13,13 @@ Import-Package: com.openexchange.ajax,
  com.openexchange.osgi,
  com.openexchange.osgi.annotation,
  com.openexchange.server,
+ com.openexchange.serverconfig,
  com.openexchange.session,
  com.openexchange.session.management,
  com.openexchange.sessiond,
  com.openexchange.uadetector,
  net.sf.uadetector,
- org.osgi.framework
+ org.osgi.framework,
+ org.slf4j;version="1.7.25"
 Bundle-Activator: com.openexchange.clientinfo.osgi.ClientInfoActivator
 Export-Package: com.openexchange.clientinfo

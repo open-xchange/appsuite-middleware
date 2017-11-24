@@ -70,7 +70,7 @@ import com.openexchange.mail.MailField;
 import com.openexchange.mail.authenticity.DefaultMailAuthenticityResultKey;
 import com.openexchange.mail.authenticity.MailAuthenticityHandler;
 import com.openexchange.mail.authenticity.MailAuthenticityStatus;
-import com.openexchange.mail.authenticity.mechanism.MailAuthenticityMechanism;
+import com.openexchange.mail.authenticity.mechanism.DefaultMailAuthenticityMechanism;
 import com.openexchange.mail.authenticity.mechanism.MailAuthenticityMechanismResult;
 import com.openexchange.mail.authenticity.mechanism.dkim.DKIMAuthMechResult;
 import com.openexchange.mail.authenticity.mechanism.dkim.DKIMResult;
@@ -99,7 +99,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
 
     private static final MailAuthenticityMechanismComparator MAIL_AUTH_COMPARATOR = new MailAuthenticityMechanismComparator();
 
-    private final Map<MailAuthenticityMechanism, Function<Map<String, String>, MailAuthenticityMechanismResult>> mechanismParsersRegitry;
+    private final Map<DefaultMailAuthenticityMechanism, Function<Map<String, String>, MailAuthenticityMechanismResult>> mechanismParsersRegitry;
 
     /** The required mail fields of this handler */
     private static final Collection<MailField> REQUIRED_MAIL_FIELDS;
@@ -142,16 +142,16 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
             throw new IllegalArgumentException("The property '" + MailAuthenticityProperty.authServId.getFQPropertyName() + "' is not configured but is mandatory. Failed to initialise the core mail authenticity handler");
         }
         mechanismParsersRegitry = new HashMap<>(4);
-        mechanismParsersRegitry.put(MailAuthenticityMechanism.DMARC, (line) -> {
-            String value = line.get(MailAuthenticityMechanism.DMARC.name().toLowerCase());
+        mechanismParsersRegitry.put(DefaultMailAuthenticityMechanism.DMARC, (line) -> {
+            String value = line.get(DefaultMailAuthenticityMechanism.DMARC.name().toLowerCase());
             DMARCResult dmarcResult = DMARCResult.valueOf(extractOutcome(value.toUpperCase()));
             String domain = line.get(DMARCResultHeader.HEADER_FROM);
             DMARCAuthMechResult result = new DMARCAuthMechResult(cleanseDomain(domain), dmarcResult);
             result.setReason(extractComment(value));
             return result;
         });
-        mechanismParsersRegitry.put(MailAuthenticityMechanism.DKIM, (line) -> {
-            String value = line.get(MailAuthenticityMechanism.DKIM.name().toLowerCase());
+        mechanismParsersRegitry.put(DefaultMailAuthenticityMechanism.DKIM, (line) -> {
+            String value = line.get(DefaultMailAuthenticityMechanism.DKIM.name().toLowerCase());
             DKIMResult dkimResult = DKIMResult.valueOf(extractOutcome(value.toUpperCase()));
             String domain = line.get(DKIMResultHeader.HEADER_I);
             if (Strings.isEmpty(domain)) {
@@ -165,8 +165,8 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
             result.setReason(reason);
             return result;
         });
-        mechanismParsersRegitry.put(MailAuthenticityMechanism.SPF, (line) -> {
-            String value = line.get(MailAuthenticityMechanism.SPF.name().toLowerCase());
+        mechanismParsersRegitry.put(DefaultMailAuthenticityMechanism.SPF, (line) -> {
+            String value = line.get(DefaultMailAuthenticityMechanism.SPF.name().toLowerCase());
             SPFResult spfResult = SPFResult.valueOf(extractOutcome(value.toUpperCase()));
             String domain = line.get(SPFResultHeader.SMTP_MAILFROM);
             if (Strings.isEmpty(domain)) {
@@ -344,13 +344,13 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
         // Sort by ordinal
         Collections.sort(extractedMechanismResults, MAIL_AUTH_COMPARATOR);
         List<MailAuthenticityMechanismResult> results = new ArrayList<>();
-        Set<MailAuthenticityMechanism> mechanisms = new HashSet<>();
+        Set<DefaultMailAuthenticityMechanism> mechanisms = new HashSet<>();
         for (String extractedMechanism : extractedMechanismResults) {
             String[] s = extractedMechanism.split("=");
             if (s.length == 0) {
                 continue;
             }
-            MailAuthenticityMechanism mechanism = convert(s[0]);
+            DefaultMailAuthenticityMechanism mechanism = convert(s[0]);
             if (mechanism == null) {
                 continue;
             }
@@ -380,7 +380,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
         Iterator<String> authResultsIterator = authResults.iterator();
         while (authResultsIterator.hasNext()) {
             String authResult = authResultsIterator.next();
-            for (MailAuthenticityMechanism mechanism : MailAuthenticityMechanism.values()) {
+            for (DefaultMailAuthenticityMechanism mechanism : DefaultMailAuthenticityMechanism.values()) {
                 if (authResult.startsWith(mechanism.name().toLowerCase())) {
                     list.add(authResult);
                     authResultsIterator.remove();
@@ -546,18 +546,18 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
     }
 
     /**
-     * Converts the specified string to a {@link MailAuthenticityMechanism}
+     * Converts the specified string to a {@link DefaultMailAuthenticityMechanism}
      *
      * @param s The string to convert
-     * @return the converted {@link MailAuthenticityMechanism}
+     * @return the converted {@link DefaultMailAuthenticityMechanism}
      */
-    private static MailAuthenticityMechanism convert(String s) {
+    private static DefaultMailAuthenticityMechanism convert(String s) {
         int index = s.indexOf(' ');
         if (index > 0) {
             s.substring(0, index);
         }
         try {
-            return MailAuthenticityMechanism.valueOf(s.toUpperCase());
+            return DefaultMailAuthenticityMechanism.valueOf(s.toUpperCase());
         } catch (IllegalArgumentException e) {
             LOGGER.debug("Unknown mail authenticity mechanism '{}'", s);
         }
@@ -596,7 +596,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
     ///////////////////////////////// HELPER CLASSES /////////////////////////////////
 
     /**
-     * {@link MailAuthenticityMechanismComparator} - Compares the {@link MailAuthenticityMechanism}s
+     * {@link MailAuthenticityMechanismComparator} - Compares the {@link DefaultMailAuthenticityMechanism}s
      * according to their ordinal value
      *
      * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
@@ -612,8 +612,8 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
         public int compare(String o1, String o2) {
             String[] s1 = o1.split("=");
             String[] s2 = o2.split("=");
-            MailAuthenticityMechanism mam1 = null;
-            MailAuthenticityMechanism mam2 = null;
+            DefaultMailAuthenticityMechanism mam1 = null;
+            DefaultMailAuthenticityMechanism mam2 = null;
             if (s1.length > 0) {
                 mam1 = convert(s1[0]);
             }

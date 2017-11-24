@@ -69,26 +69,6 @@ public class USMEASClientInfo implements ClientInfo {
     }
 
     @Override
-    public String getPlatform() {
-        return null;
-    }
-
-    @Override
-    public String getPlatformVersion() {
-        return null;
-    }
-
-    @Override
-    public String getApp() {
-        return null;
-    }
-
-    @Override
-    public String getAppVersion() {
-        return null;
-    }
-
-    @Override
     public String toString(Locale locale) {
         return ClientInfoStrings.USM_EAS_CLIENT;
     }
