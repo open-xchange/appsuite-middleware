@@ -151,7 +151,7 @@ public class TestMailAuthenticityHandler {
      */
     @Test
     public void testSPFAuthentication() {
-        headerCollection.addHeader("From", "Jane Doe <jane.doe@example.com>");
+        headerCollection.addHeader("From", "Jane Doe <jane.doe@example.net>");
         perform("ox.io; spf=pass smtp.mailfrom=example.net");
 
         assertEquals("The overall status does not match", MailAuthenticityStatus.PASS, result.getStatus());
@@ -168,7 +168,7 @@ public class TestMailAuthenticityHandler {
      */
     @Test
     public void testSeveralAuthenticationsWithUnknownMethodsAndSPF() {
-        headerCollection.addHeader("From", "Jane Doe <jane.doe@example.com>");
+        headerCollection.addHeader("From", "Jane Doe <jane.doe@example.net>");
         perform("ox.io; sender-id=pass header.from=example.net", "ox.io; auth=pass (cram-md5) smtp.auth=sender@example.net; spf=pass smtp.mailfrom=example.net");
 
         assertEquals("The overall status does not match", MailAuthenticityStatus.PASS, result.getStatus());
@@ -221,7 +221,7 @@ public class TestMailAuthenticityHandler {
      */
     @Test
     public void testFailingSPFAndTempErrorDKIM() {
-        headerCollection.addHeader("From", "Jane Doe <jane.doe@ox.io>");
+        headerCollection.addHeader("From", "Jane Doe <bob@aliceland.com>");
         perform("ox.io; dkim=temperror (no key for signature) header.i=@some.mta.hop header.s=dkim header.b=sl5RAv9n; spf=fail (ox.io: domain of bob@aliceland.com does not designate 1.2.3.4 as permitted sender) smtp.mailfrom=bob@aliceland.com");
 
         assertEquals("The overall status does not match", MailAuthenticityStatus.FAIL, result.getStatus());
@@ -240,7 +240,7 @@ public class TestMailAuthenticityHandler {
      */
     @Test
     public void testPassDMARCAndSPF() {
-        headerCollection.addHeader("From", "Jane Doe <jane.doe@ox.io>");
+        headerCollection.addHeader("From", "Jane Doe <alice@aliceland.com>");
         perform("ox.io; spf=pass (ox.io: domain of alice@aliceland.com designates 1.2.3.4 as permitted sender) smtp.mailfrom=Alice@aliceland.com; dmarc=pass (p=NONE sp=NONE dis=NONE) header.from=aliceland.com");
 
         assertEquals("The overall status does not match", MailAuthenticityStatus.PASS, result.getStatus());
@@ -259,7 +259,7 @@ public class TestMailAuthenticityHandler {
      */
     @Test
     public void testDKIMTempErrorAndSPFPass() {
-        headerCollection.addHeader("From", "Jane Doe <jane.doe@ox.io>");
+        headerCollection.addHeader("From", "Jane Doe <alice@ice.bobland.com>");
         perform("ox.io; dkim=temperror (no key for signature) header.i=@bobland.com header.s=e header.b=Sw4o2uM4; spf=pass (ox.io: domain of alice@ice.bobland.com designates 1.2.3.4 as permitted sender) smtp.mailfrom=alice@ice.bobland.com");
 
         assertEquals("The overall status does not match", MailAuthenticityStatus.PASS, result.getStatus());
@@ -278,7 +278,7 @@ public class TestMailAuthenticityHandler {
      */
     @Test
     public void testDKIMPassUnknownMechanisms() {
-        headerCollection.addHeader("From", "Jane Doe <jane.doe@open-xchange.com>");
+        headerCollection.addHeader("From", "Jane Doe <jane.doe@ox.io>");
         perform("ox.io; dkim=pass reason=\"1024-bit key; unprotected key\" header.d=ox.io header.i=@ox.io header.b=lolhN/LS; dkim-adsp=pass; dkim-atps=neutral");
 
         assertEquals("The overall status does not match", MailAuthenticityStatus.PASS, result.getStatus());
@@ -296,7 +296,7 @@ public class TestMailAuthenticityHandler {
      */
     @Test
     public void testPassAllKnownMechanisms() {
-        headerCollection.addHeader("From", "Jane Doe <jane.doe@ox.io>");
+        headerCollection.addHeader("From", "Jane Doe <jane.doe@foobar.com>");
         perform("ox.io; dkim=pass header.i=@foobar.com header.s=201705 header.b=VvWVD9kg; dkim=pass header.i=@foobar.com header.s=201705 header.b=0WC5u+VZ; dkim=pass header.i=@foobar.com header.s=201705 header.b=doOaQjgp; spf=pass (ox.io: domain of jane.doe@foobar.com designates 1.2.3.4 as permitted sender) smtp.mailfrom=jane.doe@foobar.com; dmarc=pass (p=NONE sp=NONE dis=NONE) header.from=foobar.com");
 
         assertEquals("The overall status does not match", MailAuthenticityStatus.PASS, result.getStatus());
