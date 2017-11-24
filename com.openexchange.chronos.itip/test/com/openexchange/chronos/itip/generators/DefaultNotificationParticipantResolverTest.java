@@ -50,9 +50,12 @@
 package com.openexchange.chronos.itip.generators;
 
 import static org.hamcrest.core.Is.is;
+import static org.hamcrest.core.IsNull.nullValue;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
+import java.util.NoSuchElementException;
+import java.util.TimeZone;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -201,7 +204,7 @@ public class DefaultNotificationParticipantResolverTest {
     }
 
     @Test
-    public void testResolveAllRecipients_WithExternallAttendees_AliasAsParticipantMail() throws OXException {
+    public void testResolveAllRecipients_WithExternalAttendees_AliasAsParticipantMail() throws OXException {
 
         // Setup test data
         Event updated = ChronosTestTools.createEvent(CONTEXT_ID, null);
@@ -218,13 +221,63 @@ public class DefaultNotificationParticipantResolverTest {
         List<NotificationParticipant> participants = resolver.resolveAllRecipients(null, updated, user, onBehalfOf, context, session);
         Assert.assertFalse("No participants resolved", participants.isEmpty());
         NotificationParticipant participant = participants.stream().filter(p -> p.isExternal()).findFirst().get();
-        Assert.assertThat("EMail souhld not differ!", participant.getEmail(), is(external.getEMail()));
-        // Do not send internal data
+        Assert.assertThat("EMail souhld not differ!", participant.getEmail(), is(external.getEMail())); //  ChronosTestTools.convertToUser mocks users mail with attendee.getEmail
         Assert.assertThat("Display name should be equal to the transmitted common name!", participant.getDisplayName(), is(external.getCn()));
         Assert.assertThat("TimeZone souhld not differ!", participant.getTimeZone(), is(updated.getStartDate().getTimeZone()));
         Assert.assertThat("Locale souhld not differ!", participant.getLocale(), is(Locale.CANADA_FRENCH));
         Assert.assertThat("Comment souhld not differ!", participant.getComment(), is(external.getComment()));
         Assert.assertThat("Confirm status souhld not differ!", participant.getConfirmStatus(), is(external.getPartStat()));
+    }
+
+    @Test(expected = NoSuchElementException.class)
+    public void testResolveAllRecipients_WithGroupAttendees_GroupIsRemoved() throws OXException {
+
+        // Setup test data
+        Event updated = ChronosTestTools.createEvent(CONTEXT_ID, null);
+        User user;
+        User onBehalfOf = user = ChronosTestTools.convertToUser(updated.getCreatedBy());
+
+        Attendee group = ChronosTestTools.createGroup(CONTEXT_ID, null);
+        List<Attendee> extenedAttendees = new LinkedList<>(updated.getAttendees());
+        extenedAttendees.add(group);
+        updated.setAttendees(extenedAttendees);
+
+        prepareServices(updated, onBehalfOf);
+
+        List<NotificationParticipant> participants = resolver.resolveAllRecipients(null, updated, user, onBehalfOf, context, session);
+        Assert.assertFalse("No participants resolved", participants.isEmpty());
+        // Should throw exception
+        NotificationParticipant participant = participants.stream().filter(p -> p.isExternal()).findFirst().get();
+        Assert.assertThat("Groups should not get mails..", participant, nullValue());
+    }
+
+    @Test
+    public void testResolveAllRecipients_WithResourceAttendees_ResourceIsResolved() throws OXException {
+
+        // Setup test data
+        Event updated = ChronosTestTools.createEvent(CONTEXT_ID, null);
+        User user;
+        User onBehalfOf = user = ChronosTestTools.convertToUser(updated.getCreatedBy());
+
+        Attendee resource = ChronosTestTools.createResource(CONTEXT_ID, null);
+        List<Attendee> extenedAttendees = new LinkedList<>(updated.getAttendees());
+        extenedAttendees.add(resource);
+        updated.setAttendees(extenedAttendees);
+
+        prepareServices(updated, onBehalfOf);
+        PowerMockito.when(resources.getResource(Matchers.anyInt(), Matchers.any(Context.class))).thenReturn(ChronosTestTools.convertToResource(resource));
+
+        List<NotificationParticipant> participants = resolver.resolveAllRecipients(null, updated, user, onBehalfOf, context, session);
+        Assert.assertFalse("No participants resolved", participants.isEmpty());
+        // Should throw exception
+        NotificationParticipant participant = participants.stream().filter(p -> p.isResource()).findFirst().get();
+        Assert.assertThat("EMail souhld not differ!", participant.getEmail(), is(resource.getEMail())); //  ChronosTestTools.convertToUser mocks users mail with attendee.getEmail
+        Assert.assertThat("Display name shouldn't be set.", participant.getDisplayName(), is(resource.getEMail())); // NotificationParticipant return mail on empty display name
+        Assert.assertThat("TimeZone souhld not differ!", participant.getTimeZone(), is(TimeZone.getDefault()));
+        Assert.assertThat("Locale souhld not differ!", participant.getLocale(), is(Locale.CANADA_FRENCH));
+        Assert.assertThat("Comment should not be set!", participant.getComment(), nullValue());
+        Assert.assertThat("Confirm status should not be set!", participant.getConfirmStatus(), is(ParticipationStatus.NEEDS_ACTION)); // NotificationParticipant default
+        Assert.assertFalse("Shouldn't be external!", participant.isExternal());
     }
 
 }

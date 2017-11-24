@@ -400,7 +400,7 @@ public class DefaultNotificationParticipantResolver implements NotificationParti
     }
 
     private String getMailAddress(User u, Attendee userParticipant) {
-        if (CalendarUtils.isInternal(userParticipant) && null == ResourceId.parse(userParticipant.getUri())) {
+        if (CalendarUtils.isInternalUser(userParticipant) && null == ResourceId.parse(userParticipant.getUri())) {
             String mail = CalendarUtils.extractEMailAddress(userParticipant.getUri());
             if (Strings.isNotEmpty(mail)) {
                 return mail;

@@ -58,7 +58,7 @@ import org.dmfs.rfc5545.DateTime;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.groupware.ldap.MockUser;
 import com.openexchange.java.Strings;
-import edu.emory.mathcs.backport.java.util.Arrays;
+import com.openexchange.resource.Resource;
 
 /**
  * {@link ChronosTestTools}
@@ -78,48 +78,46 @@ public final class ChronosTestTools {
      * @return An {@link Attendee}
      */
     public static Attendee createAttendee(int contextId, AttendeeField... attendeeFields) {
-        List<Enum<?>> fields = null == attendeeFields || 0 == attendeeFields.length ? null : Arrays.asList(attendeeFields);
-
         int uid = randomInt();
         String userId = String.valueOf(uid);
 
         Attendee attendee = new Attendee();
 
-        if (null == fields || containsField(fields, AttendeeField.URI)) {
+        if (null == attendeeFields || containsField(attendeeFields, AttendeeField.URI)) {
             attendee.setUri(ResourceId.forUser(contextId, uid));
         }
-        if (null == fields || containsField(fields, AttendeeField.CN)) {
+        if (null == attendeeFields || containsField(attendeeFields, AttendeeField.CN)) {
             attendee.setCn("Test, Attendee No." + userId);
         }
-        if (null == fields || containsField(fields, AttendeeField.ENTITY)) {
+        if (null == attendeeFields || containsField(attendeeFields, AttendeeField.ENTITY)) {
             attendee.setEntity(uid);
         }
-        if (null == fields || containsField(fields, AttendeeField.SENT_BY)) {
+        if (null == attendeeFields || containsField(attendeeFields, AttendeeField.SENT_BY)) {
             Attendee sendBy = createAttendee(contextId, AttendeeField.ENTITY, AttendeeField.CN, AttendeeField.EMAIL, AttendeeField.CU_TYPE);
             attendee.setSentBy(sendBy);
         }
-        if (null == fields || containsField(fields, AttendeeField.CU_TYPE)) {
+        if (null == attendeeFields || containsField(attendeeFields, AttendeeField.CU_TYPE)) {
             attendee.setCuType(CalendarUserType.INDIVIDUAL);
         }
-        if (null == fields || containsField(fields, AttendeeField.ROLE)) {
+        if (null == attendeeFields || containsField(attendeeFields, AttendeeField.ROLE)) {
             attendee.setRole(ParticipantRole.REQ_PARTICIPANT);
         }
-        if (null == fields || containsField(fields, AttendeeField.PARTSTAT)) {
+        if (null == attendeeFields || containsField(attendeeFields, AttendeeField.PARTSTAT)) {
             attendee.setPartStat(ParticipationStatus.ACCEPTED);
         }
-        if (null == fields || containsField(fields, AttendeeField.COMMENT)) {
+        if (null == attendeeFields || containsField(attendeeFields, AttendeeField.COMMENT)) {
             attendee.setComment("Totaly random comment for attendee NO. " + userId);
         }
-        if (null == fields || containsField(fields, AttendeeField.RSVP)) {
+        if (null == attendeeFields || containsField(attendeeFields, AttendeeField.RSVP)) {
             attendee.setRsvp(Boolean.TRUE);
         }
-        if (null == fields || containsField(fields, AttendeeField.FOLDER_ID)) {
+        if (null == attendeeFields || containsField(attendeeFields, AttendeeField.FOLDER_ID)) {
             attendee.setFolderId(String.valueOf(uid + 50));
         }
-        if (null == fields || containsField(fields, AttendeeField.MEMBER)) {
+        if (null == attendeeFields || containsField(attendeeFields, AttendeeField.MEMBER)) {
             attendee.setMember(Collections.emptyList());
         }
-        if (null == fields || containsField(fields, AttendeeField.EMAIL)) {
+        if (null == attendeeFields || containsField(attendeeFields, AttendeeField.EMAIL)) {
             attendee.setEMail("testAttendee" + userId + "@test.org");
         }
         return attendee;
@@ -151,6 +149,33 @@ public final class ChronosTestTools {
     }
 
     /**
+     * Create an {@link Attendee} with random data that is identified as internal group
+     * 
+     * @param contextId The identifier of the context
+     * @param attendeeFields <code>null</code> to fill all fields, otherwise the desired {@link AttendeeField}s
+     * @return An {@link Attendee}
+     */
+    public static Attendee createGroup(int contextId, AttendeeField... attendeeFields) {
+        Attendee group = createAttendee(contextId, attendeeFields);
+        group.setCuType(CalendarUserType.GROUP);
+        group.setEntity(0);
+        return group;
+    }
+
+    /**
+     * Create an {@link Attendee} with random data that is identified as resource
+     * 
+     * @param contextId The identifier of the context
+     * @param attendeeFields <code>null</code> to fill all fields, otherwise the desired {@link AttendeeField}s
+     * @return An {@link Attendee}
+     */
+    public static Attendee createResource(int contextId, AttendeeField... attendeeFields) {
+        Attendee resource = createAttendee(contextId, attendeeFields);
+        resource.setCuType(CalendarUserType.RESOURCE);
+        return resource;
+    }
+
+    /**
      * Get a {@link List} of random {@link Attendee}s
      * 
      * @param contextId The identifier of the context
@@ -167,8 +192,6 @@ public final class ChronosTestTools {
     }
 
     public static Event createEvent(int contextId, EventField... eventFields) {
-        List<Enum<?>> fields = null == eventFields || 0 == eventFields.length ? null : Arrays.asList(eventFields);
-
         long currentTimeMillis = System.currentTimeMillis();
         int uid = randomInt();
         String uniqueId = String.valueOf(uid);
@@ -176,33 +199,33 @@ public final class ChronosTestTools {
         Attendee owner = createAttendee(contextId, null);
         Event event = new Event();
 
-        if (null == fields || containsField(fields, EventField.ID)) {
+        if (null == eventFields || containsField(eventFields, EventField.ID)) {
             event.setId(uniqueId);
         }
-        if (null == fields || containsField(fields, EventField.UID)) {
+        if (null == eventFields || containsField(eventFields, EventField.UID)) {
             event.setUid(uniqueId);
         }
-        if (null == fields || containsField(fields, EventField.FOLDER_ID)) {
+        if (null == eventFields || containsField(eventFields, EventField.FOLDER_ID)) {
             event.setFolderId("222");
         }
-        if (null == fields || containsField(fields, EventField.ATTENDEES)) {
+        if (null == eventFields || containsField(eventFields, EventField.ATTENDEES)) {
             List<Attendee> attendees = getAttendees(contextId, 3);
             attendees.add(owner);
             event.setAttendees(attendees);
         }
-        if (null == fields || containsField(fields, EventField.SUMMARY)) {
+        if (null == eventFields || containsField(eventFields, EventField.SUMMARY)) {
             event.setSummary("Random event summury of event NO." + uniqueId);
         }
-        if (null == fields || containsField(fields, EventField.CALENDAR_USER)) {
+        if (null == eventFields || containsField(eventFields, EventField.CALENDAR_USER)) {
             event.setCalendarUser(owner);
         }
-        if (null == fields || containsField(fields, EventField.CREATED_BY)) {
+        if (null == eventFields || containsField(eventFields, EventField.CREATED_BY)) {
             event.setCreatedBy(owner);
         }
-        if (null == fields || containsField(fields, EventField.MODIFIED_BY)) {
+        if (null == eventFields || containsField(eventFields, EventField.MODIFIED_BY)) {
             event.setModifiedBy(owner);
         }
-        if (null == fields || containsField(fields, EventField.ORGANIZER)) {
+        if (null == eventFields || containsField(eventFields, EventField.ORGANIZER)) {
             Organizer organizer = new Organizer();
             organizer.setCn(owner.getCn());
             organizer.setEMail(owner.getEMail());
@@ -210,13 +233,13 @@ public final class ChronosTestTools {
             organizer.setUri(owner.getUri());
             event.setOrganizer(organizer);
         }
-        if (null == fields || containsField(fields, EventField.TIMESTAMP)) {
+        if (null == eventFields || containsField(eventFields, EventField.TIMESTAMP)) {
             event.setTimestamp(currentTimeMillis);
         }
-        if (null == fields || containsField(fields, EventField.START_DATE)) {
+        if (null == eventFields || containsField(eventFields, EventField.START_DATE)) {
             event.setStartDate(new DateTime(currentTimeMillis + 100));
         }
-        if (null == fields || containsField(fields, EventField.END_DATE)) {
+        if (null == eventFields || containsField(eventFields, EventField.END_DATE)) {
             event.setEndDate(new DateTime(currentTimeMillis + TimeUnit.HOURS.toMillis(12)));
         }
         // TODO rest of fields
@@ -232,7 +255,7 @@ public final class ChronosTestTools {
     public static List<MockUser> convertToUser(List<Attendee> attendees) {
         List<MockUser> users = new LinkedList<>();
         for (Attendee attendee : attendees) {
-            if (CalendarUtils.isInternal(attendee)) {
+            if (CalendarUtils.isInternalUser(attendee)) {
                 MockUser user = convertToUser(attendee);
                 users.add(user);
             }
@@ -257,11 +280,54 @@ public final class ChronosTestTools {
         return user;
     }
 
+    /**
+     * Converts an attendee to a {@link Resource}
+     * 
+     * @param resource The attendee to convert
+     * @return a {@link Resource}
+     */
+    public static Resource convertToResource(Attendee resource) {
+        Resource r = new Resource();
+        r.setAvailable(true);
+        r.setDescription(resource.getComment());
+        r.setDisplayName(resource.getCn());
+        r.setIdentifier(resource.getEntity());
+        r.setLastModified(System.currentTimeMillis());
+        r.setMail(resource.getEMail());
+        r.setSimpleName("Resource No." + String.valueOf(resource.getEntity()));
+
+        return r;
+    }
+
+    /**
+     * Generates a random integer
+     * 
+     * @return An integer
+     */
     private static int randomInt() {
         return 1337 + (int) (Math.random() * 47111337);
     }
 
-    private static boolean containsField(List<Enum<?>> fields, Enum<?> field) {
-        return fields.stream().filter(f -> f.equals(field)).findFirst().isPresent();
+    /**
+     * Gets a value indicating whether the supplied array contains an element that is "equal to" the supplied one.
+     * Copied from com.openexchange.tools.arrays.Arrays
+     *
+     * @param array The array to check
+     * @param t The element to lookup
+     * @return <code>true</code> if an equal element was found, <code>false</code>, otherwise
+     */
+    private static <T> boolean containsField(T[] array, T t) {
+        if (null != t) {
+            if (null == array) {
+                return false;
+            }
+
+            for (int i = array.length; i-- > 0;) {
+                if (t.equals(array[i])) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 }
