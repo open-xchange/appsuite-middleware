@@ -49,7 +49,6 @@
 
 package com.openexchange.session.management.osgi;
 
-import com.hazelcast.core.HazelcastInstance;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
@@ -87,10 +86,9 @@ public class SessionManagementActivator extends HousekeepingActivator {
     protected void startBundle() throws Exception {
         Services.setServiceLookup(this);
         trackService(GeoLocationService.class);
-        trackService(HazelcastInstance.class);
         openTrackers();
 
-        registerService(SessionManagementService.class, SessionManagementServiceImpl.getInstance());
+        registerService(SessionManagementService.class, SessionManagementServiceImpl.getInstance(), 0);
         registerService(Reloadable.class, new Reloadable() {
 
             @Override

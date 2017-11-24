@@ -224,11 +224,40 @@ public class TestMailAuthenticationHandler {
         assertEquals("The mail authentication mechanism results amount does not match", 2, result.getMailAuthenticationMechanismResults().size());
 
         MailAuthenticationMechanismResult mechanismResult = result.getMailAuthenticationMechanismResults().get(0);
-        assertEquals("The mechanism's domain does not match", "example.com", mechanismResult.getDomain());
+        assertEquals("The mechanism's domain does not match", "mail-router.example.net", mechanismResult.getDomain());
         assertNotNull("The mechanism's result is null", mechanismResult.getResult());
 
         AuthenticationMechanismResult s = mechanismResult.getResult();
         assertEquals("The mechanism's result does not match", DKIMResult.PASS.getTechnicalName(), s.getTechnicalName());
+
+        mechanismResult = result.getMailAuthenticationMechanismResults().get(1);
+        assertEquals("The mechanism's domain does not match", "newyork.example.com", mechanismResult.getDomain());
+        assertNotNull("The mechanism's result is null", mechanismResult.getResult());
+
+        s = mechanismResult.getResult();
+        assertEquals("The mechanism's result does not match", DKIMResult.FAIL.getTechnicalName(), s.getTechnicalName());
+    }
+
+    /**
+     * Tests the case where the <code>Authentication-Results</code> header field is present
+     * and the attributes are heavily loaded with comments
+     */
+    @Test
+    public void testCommentHeavy() {
+        perform("foo.example.net (foobar) 1 (baz); dkim (Because I like it) / 1 (One yay) = (wait for it) fail policy (A dot can go here) . (like that) expired (this surprised me) = (as I wasn't expecting it) 1362471462");
+
+        assertEquals("The overall status does not match", MailAuthenticationStatus.FAIL, result.getStatus());
+        assertEquals("The domain does not match", "foo.example.net", result.getDomain());
+        assertEquals("The mail authentication mechanisms amount does not match", 1, result.getAuthenticationMechanisms().size());
+        assertTrue("The mail authentication mechansism does not match", result.getAuthenticationMechanisms().contains(MailAuthenticationMechanism.DKIM));
+        assertEquals("The mail authentication mechanism results amount does not match", 1, result.getMailAuthenticationMechanismResults().size());
+
+        MailAuthenticationMechanismResult mechanismResult = result.getMailAuthenticationMechanismResults().get(0);
+        assertEquals("The mechanism's domain does not match", null, mechanismResult.getDomain());
+        assertNotNull("The mechanism's result is null", mechanismResult.getResult());
+
+        AuthenticationMechanismResult s = mechanismResult.getResult();
+        assertEquals("The mechanism's result does not match", DKIMResult.FAIL.getTechnicalName(), s.getTechnicalName());
     }
 
     ///////////////////////////// HELPERS //////////////////////////////
@@ -243,14 +272,15 @@ public class TestMailAuthenticationHandler {
     /**
      * Performs the mail authentication handling with the specified headers and
      * captures the result via the {@link ArgumentCaptor} to the 'result' object
-     * 
+     *
      * @param headers The 'Authentication-Results' headers to add
      */
     private void perform(String... headers) {
         for (String header : headers) {
             headerCollection.addHeader(MailAuthenticationHandler.AUTH_RESULTS_HEADER, header);
         }
-        handler.handle(mailMessage);
+        // TODO use proper session
+        handler.handle(null, mailMessage);
         verify(mailMessage).setAuthenticationResult(argumentCaptor.capture());
         result = argumentCaptor.getValue();
     }

@@ -52,6 +52,7 @@ package com.openexchange.mail;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailFetchListenerResult.ListenerReply;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -99,7 +100,7 @@ public class MailFetchListenerChain implements MailFetchListener {
     }
 
     @Override
-    public MailAttributation onBeforeFetch(MailFetchArguments fetchArguments, Session session) throws OXException {
+    public MailAttributation onBeforeFetch(MailFetchArguments fetchArguments, Session session, Map<String, Object> state) throws OXException {
         if (null != optPrecomputedAttributation) {
             return optPrecomputedAttributation;
         }
@@ -114,7 +115,7 @@ public class MailFetchListenerChain implements MailFetchListener {
         boolean anyApplicable = false;
         do {
             MailFetchListener listener = iterator.next();
-            MailAttributation attributation = listener.onBeforeFetch(MailFetchArguments.copy(fetchArguments, fs, hns), session);
+            MailAttributation attributation = listener.onBeforeFetch(MailFetchArguments.copy(fetchArguments, fs, hns), session, state);
             if (attributation.isApplicable()) {
                 fs = attributation.getFields();
                 hns = attributation.getHeaderNames();
@@ -126,7 +127,7 @@ public class MailFetchListenerChain implements MailFetchListener {
     }
 
     @Override
-    public MailFetchListenerResult onAfterFetch(MailMessage[] mails, boolean cacheable, Session session) throws OXException {
+    public MailFetchListenerResult onAfterFetch(MailMessage[] mails, boolean cacheable, Session session, Map<String, Object> state) throws OXException {
         Iterator<MailFetchListener> iterator = this.listeners.iterator();
         if (false == iterator.hasNext()) {
             return MailFetchListenerResult.neutral(mails, true);
@@ -136,7 +137,7 @@ public class MailFetchListenerChain implements MailFetchListener {
         MailMessage[] ms = mails;
         do {
             MailFetchListener listener = iterator.next();
-            MailFetchListenerResult result = listener.onAfterFetch(ms, wannaCache, session);
+            MailFetchListenerResult result = listener.onAfterFetch(ms, wannaCache, session, state);
             if (ListenerReply.NEUTRAL != result.getReply()) {
                 return MailFetchListenerResult.copy(result, wannaCache);
             }

@@ -53,12 +53,14 @@ import com.openexchange.ajax.Client;
 import com.openexchange.clientinfo.ClientInfo;
 import com.openexchange.clientinfo.ClientInfoProvider;
 import com.openexchange.clientinfo.osgi.Services;
+import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
+import com.openexchange.serverconfig.ServerConfig;
+import com.openexchange.serverconfig.ServerConfigService;
 import com.openexchange.session.Session;
 import com.openexchange.uadetector.UserAgentParser;
 import net.sf.uadetector.OperatingSystem;
 import net.sf.uadetector.ReadableUserAgent;
-
 
 /**
  * {@link WebClientInfoProvider}
@@ -68,9 +70,31 @@ import net.sf.uadetector.ReadableUserAgent;
  */
 public class WebClientInfoProvider implements ClientInfoProvider {
 
+    private final String APPSUITE = "OX App Suite";
+    private final String OX6 = "OX6 UI";
+
     @Override
     public ClientInfo getClientInfo(Session session) {
         if (null != session) {
+            String client = "";
+            if (Client.APPSUITE_UI.getClientId().equals(session.getClient())) {
+                ServerConfigService serverConfigService = Services.getService(ServerConfigService.class);
+                if (null != serverConfigService) {
+                    try {
+                        String hostname = (String) session.getParameter(Session.PARAM_HOST_NAME);
+                        ServerConfig config = serverConfigService.getServerConfig(hostname, session);
+                        client = config.getProductName();
+                    } catch (OXException e) {
+                        client = APPSUITE;
+                    }
+                }
+            }
+            if (Client.OX6_UI.getClientId().equals(session.getClient())) {
+                client = OX6;
+            }
+            if (Strings.isEmpty(client)) {
+                return null;
+            }
             UserAgentParser parser = Services.getService(UserAgentParser.class);
             String userAgent = (String) session.getParameter(Session.PARAM_USER_AGENT);
             if (null != parser && Strings.isNotEmpty(userAgent)) {
@@ -84,12 +108,7 @@ public class WebClientInfoProvider implements ClientInfoProvider {
                 }
                 String browser = info.getName();
                 String browserVersion = info.getVersionNumber().getMajor();
-                String client = "";
-                if (Client.APPSUITE_UI.getClientId().equals(session.getClient())) {
-                    client = "Appsuite UI";
-                } else if (Client.OX6_UI.getClientId().equals(session.getClient())) {
-                    client = "OX6 UI";
-                }
+
                 return new WebClientInfo(client, os, osVersion, browser, browserVersion);
             }
         }
@@ -101,9 +120,9 @@ public class WebClientInfoProvider implements ClientInfoProvider {
     public ClientInfo getClientInfo(String clientId) {
         String client = "";
         if (Client.APPSUITE_UI.getClientId().equals(clientId)) {
-            client = "Appsuite UI";
+            client = APPSUITE;
         } else if (Client.OX6_UI.getClientId().equals(clientId)) {
-            client = "OX6 UI";
+            client = OX6;
         }
         return new WebClientInfo(client, null, null, null, null);
     }

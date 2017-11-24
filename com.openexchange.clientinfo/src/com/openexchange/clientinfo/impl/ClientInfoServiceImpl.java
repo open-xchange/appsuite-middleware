@@ -52,6 +52,7 @@ package com.openexchange.clientinfo.impl;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.slf4j.Logger;
 import com.openexchange.clientinfo.ClientInfo;
 import com.openexchange.clientinfo.ClientInfoProvider;
 import com.openexchange.clientinfo.ClientInfoService;
@@ -67,6 +68,8 @@ import com.openexchange.session.management.ManagedSession;
  * @since v7.10.0
  */
 public class ClientInfoServiceImpl implements ClientInfoService {
+
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(ClientInfoServiceImpl.class);
 
     private final ServiceSet<ClientInfoProvider> providers;
 
@@ -91,6 +94,7 @@ public class ClientInfoServiceImpl implements ClientInfoService {
                 if (null != info) {
                     return info;
                 }
+                LOG.debug("Unknown client found. Client identifier: {} User-Agent: {}", session.getClient(), session.getParameter(Session.PARAM_USER_AGENT));
             }
         }
         return null;

@@ -520,10 +520,10 @@ public abstract class MailMessage extends MailPart {
     private boolean b_securityResult;
 
     /**
-     * Email authentication results
+     * Email authenticity results
      */
-    private MailAuthenticationResult authenticationResult;
-    private boolean b_authenticationResult;
+    private MailAuthenticityResult authenticityResult;
+    private boolean b_authenticityResult;
 
     /**
      * The text preview
@@ -2150,9 +2150,9 @@ public abstract class MailMessage extends MailPart {
      *
      * @param result The authentication result to set
      */
-    public void setAuthenticationResult(MailAuthenticationResult authenticationResult) {
-        this.authenticationResult = authenticationResult;
-        b_authenticationResult = true;
+    public void setAuthenticityResult(MailAuthenticityResult authenticationResult) {
+        this.authenticityResult = authenticationResult;
+        b_authenticityResult = true;
     }
 
     /**
@@ -2160,8 +2160,8 @@ public abstract class MailMessage extends MailPart {
      *
      * @return The authentication result or <code>null</code> if not set
      */
-    public MailAuthenticationResult getAuthenticationResult() {
-        return this.authenticationResult;
+    public MailAuthenticityResult getAuthenticityResult() {
+        return this.authenticityResult;
     }
 
     /**
@@ -2169,8 +2169,8 @@ public abstract class MailMessage extends MailPart {
      *
      * @return <code>true</code> if available; otherwise <code>false</code>
      */
-    public boolean hasAuthenticationResult() {
-        return authenticationResult != null;
+    public boolean hasAuthenticityResult() {
+        return authenticityResult != null;
     }
 
     /**
@@ -2178,16 +2178,16 @@ public abstract class MailMessage extends MailPart {
      *
      * @return <code>true</code> if set; otherwise <code>false</code>
      */
-    public boolean containsAuthenticationResult() {
-        return b_authenticationResult;
+    public boolean containsAuthenticityResult() {
+        return b_authenticityResult;
     }
 
     /**
      * Removes the authentication result from this mail.
      */
-    public void removeAuthenticationResult() {
-        this.authenticationResult = null;
-        b_authenticationResult = false;
+    public void removeAuthenticityResult() {
+        this.authenticityResult = null;
+        b_authenticityResult = false;
     }
 
     /**
