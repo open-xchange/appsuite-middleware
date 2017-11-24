@@ -71,13 +71,13 @@ public enum MailAuthenticityProperty implements Property {
      * Defines the MANDATORY <code>authserv-id</code>. It can contain a single arbitrary string
      * or a comma separated list of arbitrary strings
      * Default is empty.
-     * 
+     *
      * @see <a href="https://tools.ietf.org/html/rfc7601#section-2.2">RFC-7601, Section 2.2</a>
      */
     authServId;
 
     private static final String EMPTY = "";
-    private static final String PREFIX = "com.openexchange.mail.authenticity";
+    private static final String PREFIX = "com.openexchange.mail.authenticity.";
     private final Object defaultValue;
 
     /**

@@ -86,7 +86,7 @@ public class TrustedDomainAuthenticityHandler implements Reloadable {
     /*
      * Property keys
      */
-    private static final String PREFIX = "com.openexchange.mail.authentication.trustedDomains.";
+    private static final String PREFIX = "com.openexchange.mail.authenticity.trustedDomains.";
     private static final String TENANT = "tenants";
     private static final String DOMAINS = ".domains";
     private static final String IMAGE = ".image";
