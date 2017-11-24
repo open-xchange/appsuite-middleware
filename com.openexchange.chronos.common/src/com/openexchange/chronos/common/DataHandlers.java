@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.common;
 
+import java.util.TimeZone;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Available;
 import com.openexchange.chronos.Event;
@@ -83,5 +84,29 @@ public enum DataHandlers {
 
     /** The identifier of the data handler to convert from an {@link ExtendedProperties} to its JSON representation. */
     public static final String XPROPERTIES2JSON = "com.openexchange.chronos.xproperties2json";
+
+    /** The identifier of the data handler to convert from an alarm's iCalendar representation to an {@link Alarm}. */
+    public static final String ICAL2ALARM = "com.openexchange.chronos.ical2alarm";
+
+    /** The identifier of the data handler to convert from one or more alarm's iCalendar representation to {@link Alarm}s. */
+    public static final String ICAL2ALARMS = "com.openexchange.chronos.ical2alarms";
+
+    /** The identifier of the data handler to convert from an {@link Event} to its iCalendar representation. */
+    public static final String EVENT2ICAL = "com.openexchange.chronos.event2ical";
+
+    /** The identifier of the data handler to convert from an event's iCalendar representation to an {@link Event}. */
+    public static final String ICAL2EVENT = "com.openexchange.chronos.ical2event";
+
+    /** The identifier of the data handler to convert from one or more event's iCalendar representation to {@link Event}s. */
+    public static final String ICAL2EVENTS = "com.openexchange.chronos.ical2events";
+
+    /** The identifier of the data handler to convert from an {@link Alarm} to its iCalendar representation. */
+    public static final String ALARM2ICAL = "com.openexchange.chronos.alarm2ical";
+
+    /** The identifier of the data handler to convert from an timezone's iCalendar representation to {@link TimeZone}s. */
+    public static final String ICAL2TIMEZONE = "com.openexchange.chronos.ical2timezone";
+
+    /** The identifier of the data handler to convert from an {@link TimeZone} to its iCalendar representation. */
+    public static final String TIMEZONE2ICAL = "com.openexchange.chronos.timezone2ical";
 
 }

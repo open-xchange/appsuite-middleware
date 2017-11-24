@@ -119,7 +119,6 @@ import net.fortuna.ical4j.model.component.VAlarm;
 import net.fortuna.ical4j.model.component.VAvailability;
 import net.fortuna.ical4j.model.component.VEvent;
 import net.fortuna.ical4j.model.component.VFreeBusy;
-import net.fortuna.ical4j.model.component.VTimeZone;
 import net.fortuna.ical4j.model.parameter.XParameter;
 import net.fortuna.ical4j.model.property.XProperty;
 
@@ -171,9 +170,6 @@ public class ICalUtils {
         if (null == calendar) {
             throw ICalExceptionCodes.NO_CALENDAR.create();
         }
-
-        VTimeZone tz;
-
         return calendar;
     }
 
@@ -208,7 +204,7 @@ public class ICalUtils {
         return importedCalendar;
     }
 
-    static List<Event> importEvents(ComponentList eventComponents, ICalMapper mapper, ICalParameters parameters) throws OXException {
+    public static List<Event> importEvents(ComponentList eventComponents, ICalMapper mapper, ICalParameters parameters) throws OXException {
         if (null == eventComponents) {
             return null;
         }
@@ -228,7 +224,7 @@ public class ICalUtils {
         return importedEvent;
     }
 
-    static List<Alarm> importAlarms(ComponentList alarmComponents, ICalMapper mapper, ICalParameters parameters) throws OXException {
+    public static List<Alarm> importAlarms(ComponentList alarmComponents, ICalMapper mapper, ICalParameters parameters) throws OXException {
         if (null == alarmComponents || alarmComponents.isEmpty()) {
             return null;
         }
@@ -261,7 +257,7 @@ public class ICalUtils {
 
     /**
      * Imports the specified {@link VAvailability} components
-     * 
+     *
      * @param availabilityComponent A {@link ComponentList} with all the {@link VAvailability} components
      * @param mapper The {@link ICalMapper}
      * @param parameters The {@link ICalParameters}
@@ -345,7 +341,7 @@ public class ICalUtils {
         }
     }
 
-    static void exportComponents(OutputStream outputStream, ComponentList components, ICalParameters parameters) throws OXException {
+    public static void exportComponents(OutputStream outputStream, ComponentList components, ICalParameters parameters) throws OXException {
         FoldingWriter writer = null;
         try {
             writer = new FoldingWriter(new OutputStreamWriter(outputStream, Charsets.UTF_8), FoldingWriter.REDUCED_FOLD_LENGTH);
@@ -399,7 +395,7 @@ public class ICalUtils {
         return parameterList;
     }
 
-    static <T extends Component> T removeProperties(T component, String[] propertyNames) {
+    public static <T extends Component> T removeProperties(T component, String[] propertyNames) {
         if (null == propertyNames || 0 == propertyNames.length) {
             return component;
         }
@@ -463,7 +459,7 @@ public class ICalUtils {
         return propertyParameters;
     }
 
-    private static CalendarBuilder getCalendarBuilder(ICalParameters parameters) {
+    public static CalendarBuilder getCalendarBuilder(ICalParameters parameters) {
         ICalParameters iCalParameters = getParametersOrDefault(parameters);
         CalendarParser calendarParser = CalendarParserFactory.getInstance().createParser();
         TimeZoneRegistry timeZoneRegistry = iCalParameters.get(ICalParametersImpl.TIMEZONE_REGISTRY, TimeZoneRegistry.class);
@@ -508,7 +504,7 @@ public class ICalUtils {
         }
     }
 
-    static ComponentList parseVAlarmComponents(InputStream inputStream, ICalParameters parameters) throws OXException {
+    public static ComponentList parseVAlarmComponents(InputStream inputStream, ICalParameters parameters) throws OXException {
         Enumeration<InputStream> streamSequence = Collections.enumeration(Arrays.asList(Streams.newByteArrayInputStream(VALARM_PROLOGUE), inputStream, Streams.newByteArrayInputStream(VALARM_EPILOGUE)));
         SequenceInputStream sequenceStream = null;
         Calendar calendar = null;
@@ -524,6 +520,31 @@ public class ICalUtils {
             Streams.close(sequenceStream);
         }
         return calendar.getComponents(Component.VALARM);
+    }
+
+    public static ComponentList parseComponents(InputStream inputStream, String component, byte[] icsPrefix, byte[] icsSuffix, ICalParameters parameters) throws OXException {
+        List<InputStream> streams = new ArrayList<InputStream>();
+        if (null != icsPrefix) {
+            streams.add(Streams.newByteArrayInputStream(icsPrefix));
+        }
+        streams.add(inputStream);
+        if (null != icsSuffix) {
+            streams.add(Streams.newByteArrayInputStream(icsSuffix));
+        }
+        SequenceInputStream sequenceStream = null;
+        Calendar calendar = null;
+        CalendarBuilder calendarBuilder = getCalendarBuilder(parameters);
+        try {
+            sequenceStream = new SequenceInputStream(Collections.enumeration(streams));
+            calendar = calendarBuilder.build(sequenceStream);
+        } catch (IOException e) {
+            throw new OXException(e);
+        } catch (ParserException e) {
+            throw asOXException(e);
+        } finally {
+            Streams.close(sequenceStream);
+        }
+        return calendar.getComponents(component);
     }
 
     private static PropertyFactoryRegistry initPropertyFactory() {

@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,73 +47,83 @@
  *
  */
 
-package com.openexchange.chronos.ical.impl;
+package com.openexchange.chronos.ical.ical4j.osgi;
 
-import java.util.HashMap;
-import java.util.Map;
-import org.slf4j.LoggerFactory;
-import com.openexchange.chronos.ical.ICalParameters;
-import net.fortuna.ical4j.model.TimeZoneRegistry;
-import net.fortuna.ical4j.model.TimeZoneRegistryImpl;
+import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.exception.OXException;
+import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link ICalParametersImpl}
+ * {@link Services}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class ICalParametersImpl implements ICalParameters {
+public class Services {
 
     /**
-     * {@link TimeZoneRegistry}
-     * <p/>
-     * Holds a reference to the underlying timezone registry.
+     * Initializes a new {@link Services}.
      */
-    public static final String TIMEZONE_REGISTRY = TimeZoneRegistry.class.getName();
-
-    /** The default timezone registry to use */
-    private static final TimeZoneRegistry DEFAULT_TIMEZONE_REGISTRY = new TimeZoneRegistryImpl("zoneinfo-outlook/");
-
-    private final Map<String, Object> parameters;
-
-    /**
-     * Initializes a new, empty {@link ICalParametersImpl}.
-     */
-    public ICalParametersImpl() {
+    private Services() {
         super();
-        this.parameters = new HashMap<String, Object>();
-        applyDefaults();
     }
 
-    private void applyDefaults() {
-        set(TIMEZONE_REGISTRY, DEFAULT_TIMEZONE_REGISTRY);
+    private static final AtomicReference<ServiceLookup> REF = new AtomicReference<ServiceLookup>();
 
-        //
-        //        //        TimeZoneRegistry defaultRegistry = TimeZoneRegistryFactory.getInstance().createRegistry();
-        //        TimeZoneRegistry outlookRegistry = OutlookTimeZoneRegistryFactory.getInstance().createRegistry();
-        //        set(TIMEZONE_REGISTRY, outlookRegistry);
+    /**
+     * Sets the service lookup.
+     *
+     * @param serviceLookup The service lookup or <code>null</code>
+     */
+    public static void setServiceLookup(final ServiceLookup serviceLookup) {
+        REF.set(serviceLookup);
     }
 
-    @Override
-    public <T> T get(String name, Class<T> clazz) {
-        if (null != name) {
-            try {
-                return clazz.cast(parameters.get(name));
-            } catch (ClassCastException e) {
-                LoggerFactory.getLogger(ICalParametersImpl.class).warn("Error getting iCal parameter {}", name, e);
-            }
+    /**
+     * Gets the service lookup.
+     *
+     * @return The service lookup or <code>null</code>
+     */
+    public static ServiceLookup getServiceLookup() {
+        return REF.get();
+    }
+
+    /**
+     * Gets the service of specified type
+     *
+     * @param clazz The service's class
+     * @return The service
+     * @throws IllegalStateException If an error occurs while returning the demanded service
+     */
+    public static <S extends Object> S getService(final Class<? extends S> clazz) {
+        final com.openexchange.server.ServiceLookup serviceLookup = REF.get();
+        if (null == serviceLookup) {
+            throw new IllegalStateException("Missing ServiceLookup instance. Bundle \"com.openexchange.chronos.ical.ical4j\" not started?");
         }
-        return null;
+        return serviceLookup.getService(clazz);
     }
 
-    @Override
-    public <T> ICalParameters set(String name, T value) {
-        if (null != name) {
-            parameters.put(name, value);
-        } else {
-            parameters.remove(name);
+    public static <S extends Object> S getService(Class<? extends S> c, boolean throwOnAbsence) throws OXException {
+        S service = getService(c);
+        if (null == service && throwOnAbsence) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(c.getName());
         }
-        return this;
+        return service;
+    }
+
+    /**
+     * (Optionally) Gets the service of specified type
+     *
+     * @param clazz The service's class
+     * @return The service or <code>null</code> if absent
+     */
+    public static <S extends Object> S optService(final Class<? extends S> clazz) {
+        try {
+            return getService(clazz);
+        } catch (final IllegalStateException e) {
+            return null;
+        }
     }
 
 }

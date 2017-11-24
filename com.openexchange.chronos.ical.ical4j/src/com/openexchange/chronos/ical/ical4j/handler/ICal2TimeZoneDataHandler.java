@@ -47,73 +47,43 @@
  *
  */
 
-package com.openexchange.chronos.ical.impl;
+package com.openexchange.chronos.ical.ical4j.handler;
 
-import java.util.HashMap;
-import java.util.Map;
-import org.slf4j.LoggerFactory;
+import java.io.InputStream;
+import java.util.TimeZone;
 import com.openexchange.chronos.ical.ICalParameters;
-import net.fortuna.ical4j.model.TimeZoneRegistry;
-import net.fortuna.ical4j.model.TimeZoneRegistryImpl;
+import com.openexchange.chronos.ical.ical4j.mapping.TimeZoneUtils;
+import com.openexchange.chronos.ical.impl.ICalUtils;
+import com.openexchange.exception.OXException;
+import net.fortuna.ical4j.model.Component;
+import net.fortuna.ical4j.model.ComponentList;
+import net.fortuna.ical4j.model.component.VTimeZone;
 
 /**
- * {@link ICalParametersImpl}
+ * {@link ICal2TimeZoneDataHandler}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class ICalParametersImpl implements ICalParameters {
+public class ICal2TimeZoneDataHandler extends ICal2ObjectDataHandler<TimeZone> {
 
     /**
-     * {@link TimeZoneRegistry}
-     * <p/>
-     * Holds a reference to the underlying timezone registry.
+     * Initializes a new {@link ICal2TimeZoneDataHandler}.
      */
-    public static final String TIMEZONE_REGISTRY = TimeZoneRegistry.class.getName();
-
-    /** The default timezone registry to use */
-    private static final TimeZoneRegistry DEFAULT_TIMEZONE_REGISTRY = new TimeZoneRegistryImpl("zoneinfo-outlook/");
-
-    private final Map<String, Object> parameters;
-
-    /**
-     * Initializes a new, empty {@link ICalParametersImpl}.
-     */
-    public ICalParametersImpl() {
+    public ICal2TimeZoneDataHandler() {
         super();
-        this.parameters = new HashMap<String, Object>();
-        applyDefaults();
-    }
-
-    private void applyDefaults() {
-        set(TIMEZONE_REGISTRY, DEFAULT_TIMEZONE_REGISTRY);
-
-        //
-        //        //        TimeZoneRegistry defaultRegistry = TimeZoneRegistryFactory.getInstance().createRegistry();
-        //        TimeZoneRegistry outlookRegistry = OutlookTimeZoneRegistryFactory.getInstance().createRegistry();
-        //        set(TIMEZONE_REGISTRY, outlookRegistry);
     }
 
     @Override
-    public <T> T get(String name, Class<T> clazz) {
-        if (null != name) {
-            try {
-                return clazz.cast(parameters.get(name));
-            } catch (ClassCastException e) {
-                LoggerFactory.getLogger(ICalParametersImpl.class).warn("Error getting iCal parameter {}", name, e);
-            }
+    protected TimeZone parse(InputStream inputStream, ICalParameters parameters) throws OXException {
+        ComponentList components = ICalUtils.parseComponents(inputStream, Component.VTIMEZONE, VCALENDAR_PREFIX, VCALENDAR_SUFFIX, parameters);
+        if (null == components || components.isEmpty()) {
+            return null;
         }
-        return null;
-    }
-
-    @Override
-    public <T> ICalParameters set(String name, T value) {
-        if (null != name) {
-            parameters.put(name, value);
-        } else {
-            parameters.remove(name);
-        }
-        return this;
+        VTimeZone vTimeZone = (VTimeZone) components.getComponent(Component.VTIMEZONE);
+        net.fortuna.ical4j.model.TimeZone iCal4jTimeZone = new net.fortuna.ical4j.model.TimeZone(vTimeZone);
+        TimeZone defaultTimeZone = ICalUtils.getParametersOrDefault(parameters).get(ICalParameters.DEFAULT_TIMEZONE, TimeZone.class);
+        return TimeZoneUtils.selectTimeZone(iCal4jTimeZone, defaultTimeZone);
     }
 
 }

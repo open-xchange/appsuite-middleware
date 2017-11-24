@@ -51,8 +51,20 @@ package com.openexchange.chronos.ical.ical4j.osgi;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.openexchange.chronos.common.DataHandlers;
 import com.openexchange.chronos.ical.ICalService;
+import com.openexchange.chronos.ical.ical4j.handler.Alarm2ICalDataHandler;
+import com.openexchange.chronos.ical.ical4j.handler.Event2ICalDataHandler;
+import com.openexchange.chronos.ical.ical4j.handler.ICal2AlarmDataHandler;
+import com.openexchange.chronos.ical.ical4j.handler.ICal2AlarmsDataHandler;
+import com.openexchange.chronos.ical.ical4j.handler.ICal2EventDataHandler;
+import com.openexchange.chronos.ical.ical4j.handler.ICal2EventsDataHandler;
+import com.openexchange.chronos.ical.ical4j.handler.ICal2TimeZoneDataHandler;
+import com.openexchange.chronos.ical.ical4j.handler.TimeZone2ICalDataHandler;
+import com.openexchange.chronos.ical.ical4j.mapping.ICalMapper;
 import com.openexchange.chronos.ical.impl.ICalServiceImpl;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.conversion.DataHandler;
 import com.openexchange.osgi.HousekeepingActivator;
 
 /**
@@ -74,7 +86,7 @@ public class ICal4jActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] {};
+        return new Class<?>[] { ConfigurationService.class };
     }
 
     @Override
@@ -84,7 +96,20 @@ public class ICal4jActivator extends HousekeepingActivator {
             /*
              * register services
              */
+            Services.setServiceLookup(this);
+            ICalMapper mapper = new ICalMapper();
             registerService(ICalService.class, new ICalServiceImpl());
+            /*
+             * register data handlers
+             */
+            registerService(DataHandler.class, new Alarm2ICalDataHandler(mapper), singletonDictionary("identifier", DataHandlers.ALARM2ICAL));
+            registerService(DataHandler.class, new ICal2AlarmsDataHandler(mapper), singletonDictionary("identifier", DataHandlers.ICAL2ALARMS));
+            registerService(DataHandler.class, new ICal2AlarmDataHandler(mapper), singletonDictionary("identifier", DataHandlers.ICAL2ALARM));
+            registerService(DataHandler.class, new Event2ICalDataHandler(mapper), singletonDictionary("identifier", DataHandlers.EVENT2ICAL));
+            registerService(DataHandler.class, new ICal2EventsDataHandler(mapper), singletonDictionary("identifier", DataHandlers.ICAL2EVENTS));
+            registerService(DataHandler.class, new ICal2EventDataHandler(mapper), singletonDictionary("identifier", DataHandlers.ICAL2EVENT));
+            registerService(DataHandler.class, new TimeZone2ICalDataHandler(), singletonDictionary("identifier", DataHandlers.TIMEZONE2ICAL));
+            registerService(DataHandler.class, new ICal2TimeZoneDataHandler(), singletonDictionary("identifier", DataHandlers.ICAL2TIMEZONE));
         } catch (Exception e) {
             LOG.error("error starting {}", context.getBundle(), e);
             throw e;
@@ -94,6 +119,7 @@ public class ICal4jActivator extends HousekeepingActivator {
     @Override
     protected void stopBundle() throws Exception {
         LOG.info("stopping bundle {}", context.getBundle());
+        Services.setServiceLookup(null);
         super.stopBundle();
     }
 
