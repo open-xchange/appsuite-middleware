@@ -59,7 +59,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Function;
+import java.util.function.BiFunction;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import org.slf4j.Logger;
@@ -98,7 +98,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
 
     private static final MailAuthenticityMechanismComparator MAIL_AUTH_COMPARATOR = new MailAuthenticityMechanismComparator();
 
-    private final Map<DefaultMailAuthenticityMechanism, Function<Map<String, String>, MailAuthenticityMechanismResult>> mechanismParsersRegitry;
+    private final Map<DefaultMailAuthenticityMechanism, BiFunction<Map<String, String>, MailAuthenticityResult, MailAuthenticityMechanismResult>> mechanismParsersRegitry;
 
     /** The required mail fields of this handler */
     private static final Collection<MailField> REQUIRED_MAIL_FIELDS;
@@ -146,21 +146,34 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
         this.ranking = ranking;
         this.configuredAuthServIds = authServIds;
         mechanismParsersRegitry = new HashMap<>(4);
-        mechanismParsersRegitry.put(DefaultMailAuthenticityMechanism.DMARC, (line) -> {
+        mechanismParsersRegitry.put(DefaultMailAuthenticityMechanism.DMARC, (line, overallResult) -> {
             String value = line.get(DefaultMailAuthenticityMechanism.DMARC.name().toLowerCase());
             DMARCResult dmarcResult = DMARCResult.valueOf(extractOutcome(value.toUpperCase()));
+
             String domain = line.get(DMARCResultHeader.HEADER_FROM);
+            String fromDomain = overallResult.getAttribute(DefaultMailAuthenticityResultKey.DOMAIN, String.class);
+            if (!fromDomain.equals(domain)) {
+                return null;
+            }
+
             DMARCAuthMechResult result = new DMARCAuthMechResult(cleanseDomain(domain), dmarcResult);
             result.setReason(extractComment(value));
             return result;
         });
-        mechanismParsersRegitry.put(DefaultMailAuthenticityMechanism.DKIM, (line) -> {
+        mechanismParsersRegitry.put(DefaultMailAuthenticityMechanism.DKIM, (line, overallResult) -> {
             String value = line.get(DefaultMailAuthenticityMechanism.DKIM.name().toLowerCase());
             DKIMResult dkimResult = DKIMResult.valueOf(extractOutcome(value.toUpperCase()));
+
             String domain = line.get(DKIMResultHeader.HEADER_I);
             if (Strings.isEmpty(domain)) {
                 domain = line.get(DKIMResultHeader.HEADER_D);
             }
+
+            String fromDomain = overallResult.getAttribute(DefaultMailAuthenticityResultKey.DOMAIN, String.class);
+            if (!fromDomain.equals(domain)) {
+                return null;
+            }
+
             DKIMAuthMechResult result = new DKIMAuthMechResult(cleanseDomain(domain), dkimResult);
             String reason = extractComment(value);
             if (Strings.isEmpty(reason)) {
@@ -169,13 +182,20 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
             result.setReason(reason);
             return result;
         });
-        mechanismParsersRegitry.put(DefaultMailAuthenticityMechanism.SPF, (line) -> {
+        mechanismParsersRegitry.put(DefaultMailAuthenticityMechanism.SPF, (line, overallResult) -> {
             String value = line.get(DefaultMailAuthenticityMechanism.SPF.name().toLowerCase());
             SPFResult spfResult = SPFResult.valueOf(extractOutcome(value.toUpperCase()));
+
             String domain = line.get(SPFResultHeader.SMTP_MAILFROM);
             if (Strings.isEmpty(domain)) {
                 domain = line.get(SPFResultHeader.SMTP_HELO);
             }
+
+            String fromDomain = overallResult.getAttribute(DefaultMailAuthenticityResultKey.DOMAIN, String.class);
+            if (!fromDomain.equals(domain)) {
+                return null;
+            }
+
             SPFAuthMechResult result = new SPFAuthMechResult(cleanseDomain(domain), spfResult);
             result.setReason(extractComment(value));
             return result;
@@ -304,7 +324,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
     private String extractAuthenticationResultHeader(String[] authHeaders) {
         StringBuilder mergedAuthHeader = new StringBuilder(128);
         for (String header : authHeaders) {
-            List<String> split = splitLines(header);
+            List<String> split = splitLines(header.trim());
             if (split.isEmpty()) {
                 //Huh? Invalid/Malformed authenticity results header, ignore
                 continue;
@@ -318,6 +338,10 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
                 continue;
             }
             mergedAuthHeader.append(header);
+            if (!header.endsWith(";")) {
+                mergedAuthHeader.append(";");
+            }
+
         }
         return mergedAuthHeader.toString().trim();
     }
@@ -356,14 +380,28 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
             }
             DefaultMailAuthenticityMechanism mechanism = convert(s[0]);
             if (mechanism == null) {
+                // Not a valid mechanism, skip
+                // TODO: add their raw data to the result
                 continue;
             }
-            MailAuthenticityMechanismResult mailAuthMechResult = mechanismParsersRegitry.get(mechanism).apply(parseLine(extractedMechanism));
+            MailAuthenticityMechanismResult mailAuthMechResult = mechanismParsersRegitry.get(mechanism).apply(parseLine(extractedMechanism), result);
+            if (mailAuthMechResult == null) {
+                // Skip results that the 'From' domain does not match the mechanisms 'from' domain
+                continue;
+            }
+
+            MailAuthenticityStatus mailAuthenticityStatus = MailAuthenticityStatus.NEUTRAL;
             try {
-                result.setStatus(MailAuthenticityStatus.valueOf(mailAuthMechResult.getResult().getTechnicalName().toUpperCase()));
+                mailAuthenticityStatus = MailAuthenticityStatus.valueOf(mailAuthMechResult.getResult().getTechnicalName().toUpperCase());
             } catch (IllegalArgumentException e) {
                 LOGGER.debug("Unknown mail authenticity status '{}'", mailAuthMechResult.getResult().getTechnicalName(), e);
-                result.setStatus(MailAuthenticityStatus.NEUTRAL);
+            }
+            if (MailAuthenticityStatus.NONE.equals(mailAuthenticityStatus)) {
+                continue;
+            }
+            if (MailAuthenticityStatus.PASS.equals(mailAuthenticityStatus)) {
+                result.setStatus(mailAuthenticityStatus);
+                break;
             }
             mechanisms.add(mechanism);
             results.add(mailAuthMechResult);

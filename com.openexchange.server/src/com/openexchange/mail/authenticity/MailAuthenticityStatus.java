@@ -71,7 +71,11 @@ public enum MailAuthenticityStatus {
     /**
      * Nothing has been analyzed
      */
-    NOT_ANALYZED("Not Analyzed", "not_analyzed");
+    NOT_ANALYZED("Not Analyzed", "not_analyzed"),
+    /**
+     * None status (Used only for internal mapping)
+     */
+    NONE("None", "none");
 
     private final String displayName;
     private final String technicalName;
