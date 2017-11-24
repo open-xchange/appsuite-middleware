@@ -49,25 +49,45 @@
 
 package com.openexchange.mail.authenticity.mechanism;
 
+import com.openexchange.mail.authenticity.mechanism.dkim.DKIMResult;
+import com.openexchange.mail.authenticity.mechanism.dmarc.DMARCResult;
+import com.openexchange.mail.authenticity.mechanism.spf.SPFResult;
+
 /**
- * {@link MailAuthenticityMechanism}
+ * {@link DefaultMailAuthenticityMechanism}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public interface MailAuthenticityMechanism {
+public enum DefaultMailAuthenticityMechanism implements MailAuthenticityMechanism {
+
+    DMARC("DMARC", DMARCResult.class),
+    DKIM("DKIM", DKIMResult.class),
+    SPF("SPF", SPFResult.class);
+
+    private final Class<? extends AuthenticityMechanismResult> resultType;
+    private final String displayName;
 
     /**
-     * Gets the display name
-     *
-     * @return The display name
+     * Initializes a new {@link DefaultMailAuthenticityMechanism}.
      */
-    String getDisplayName();
+    private DefaultMailAuthenticityMechanism(String displayName, Class<? extends AuthenticityMechanismResult> resultType) {
+        this.displayName = displayName;
+        this.resultType = resultType;
+    }
 
-    /**
-     * Gets the resultType
-     *
-     * @return The resultType
+    /* (non-Javadoc)
+     * @see com.openexchange.mail.authenticity.mechanism.MailAuthMech#getDisplayName()
      */
-    Class<? extends AuthenticityMechanismResult> getResultType();
+    @Override
+    public String getDisplayName() {
+        return displayName;
+    }
 
+    /* (non-Javadoc)
+     * @see com.openexchange.mail.authenticity.mechanism.MailAuthMech#getResultType()
+     */
+    @Override
+    public Class<? extends AuthenticityMechanismResult> getResultType() {
+        return resultType;
+    }
 }

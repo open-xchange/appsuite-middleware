@@ -49,7 +49,7 @@
 
 package com.openexchange.mail.authenticity;
 
-import com.openexchange.mail.authenticity.mechanism.MailAuthenticityMechanism;
+import com.openexchange.mail.authenticity.mechanism.DefaultMailAuthenticityMechanism;
 import com.openexchange.mail.authenticity.mechanism.MailAuthenticityMechanismResult;
 import com.openexchange.mail.dataobjects.MailAuthenticityResult;
 
