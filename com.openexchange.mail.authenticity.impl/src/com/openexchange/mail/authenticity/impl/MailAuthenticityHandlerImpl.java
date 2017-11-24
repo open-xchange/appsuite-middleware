@@ -152,7 +152,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
             DMARCResult dmarcResult = DMARCResult.valueOf(extractOutcome(value.toUpperCase()));
 
             String domain = line.get(DMARCResultHeader.HEADER_FROM);
-            String fromDomain = overallResult.getAttribute(DefaultMailAuthenticityResultKey.DOMAIN, String.class);
+            String fromDomain = cleanseDomain(overallResult.getAttribute(DefaultMailAuthenticityResultKey.DOMAIN, String.class));
             if (!fromDomain.equals(domain)) {
                 return null;
             }
@@ -171,9 +171,9 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
             String value = line.get(DefaultMailAuthenticityMechanism.DKIM.name().toLowerCase());
             DKIMResult dkimResult = DKIMResult.valueOf(extractOutcome(value.toUpperCase()));
 
-            String domain = line.get(DKIMResultHeader.HEADER_I);
+            String domain = cleanseDomain(line.get(DKIMResultHeader.HEADER_I));
             if (Strings.isEmpty(domain)) {
-                domain = line.get(DKIMResultHeader.HEADER_D);
+                domain = cleanseDomain(line.get(DKIMResultHeader.HEADER_D));
             }
 
             String fromDomain = overallResult.getAttribute(DefaultMailAuthenticityResultKey.DOMAIN, String.class);
@@ -199,9 +199,9 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
             String value = line.get(DefaultMailAuthenticityMechanism.SPF.name().toLowerCase());
             SPFResult spfResult = SPFResult.valueOf(extractOutcome(value.toUpperCase()));
 
-            String domain = line.get(SPFResultHeader.SMTP_MAILFROM);
+            String domain = cleanseDomain(line.get(SPFResultHeader.SMTP_MAILFROM));
             if (Strings.isEmpty(domain)) {
-                domain = line.get(SPFResultHeader.SMTP_HELO);
+                domain = cleanseDomain(line.get(SPFResultHeader.SMTP_HELO));
             }
 
             String fromDomain = overallResult.getAttribute(DefaultMailAuthenticityResultKey.DOMAIN, String.class);
@@ -444,9 +444,13 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
      *
      * @see <a href="https://tools.ietf.org/html/rfc7601#section-2.2">RFC 7601, Section 2.2</a>
      * @param domain The domain to cleanse
-     * @return The cleansed domain
+     * @return The cleansed domain or <code>null</code> if the specified domain is <code>null</code>
+     *         or empty in the first place
      */
     private String cleanseDomain(String domain) {
+        if (Strings.isEmpty(domain)) {
+            return domain;
+        }
         String[] split = domain.split(" ");
         // Cleanse the optional version
         domain = split.length == 0 ? domain : split[0];
