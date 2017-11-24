@@ -51,8 +51,9 @@ package com.openexchange.chronos.ical.impl;
 
 import java.util.HashMap;
 import java.util.Map;
-import org.slf4j.LoggerFactory;
 import com.openexchange.chronos.ical.ICalParameters;
+import com.openexchange.chronos.ical.ical4j.osgi.Services;
+import com.openexchange.config.ConfigurationService;
 import net.fortuna.ical4j.model.TimeZoneRegistry;
 import net.fortuna.ical4j.model.TimeZoneRegistryImpl;
 
@@ -87,23 +88,18 @@ public class ICalParametersImpl implements ICalParameters {
 
     private void applyDefaults() {
         set(TIMEZONE_REGISTRY, DEFAULT_TIMEZONE_REGISTRY);
-
-        //
-        //        //        TimeZoneRegistry defaultRegistry = TimeZoneRegistryFactory.getInstance().createRegistry();
-        //        TimeZoneRegistry outlookRegistry = OutlookTimeZoneRegistryFactory.getInstance().createRegistry();
-        //        set(TIMEZONE_REGISTRY, outlookRegistry);
+        set(IMPORT_LIMIT, Services.getService(ConfigurationService.class).getIntProperty("com.openexchange.import.ical.limit", -1));
     }
 
     @Override
-    public <T> T get(String name, Class<T> clazz) {
-        if (null != name) {
-            try {
-                return clazz.cast(parameters.get(name));
-            } catch (ClassCastException e) {
-                LoggerFactory.getLogger(ICalParametersImpl.class).warn("Error getting iCal parameter {}", name, e);
-            }
-        }
-        return null;
+    public <T> T get(String parameter, Class<T> clazz) {
+        return get(parameter, clazz, null);
+    }
+
+    @Override
+    public <T> T get(String parameter, Class<T> clazz, T defaultValue) {
+        Object value = parameters.get(parameter);
+        return null == value ? defaultValue : clazz.cast(value);
     }
 
     @Override

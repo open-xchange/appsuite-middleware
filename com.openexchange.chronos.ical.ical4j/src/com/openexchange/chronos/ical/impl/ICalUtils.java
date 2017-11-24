@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.ical.impl;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -198,8 +199,8 @@ public class ICalUtils {
         List<OXException> warnings = new ArrayList<OXException>();
         removeProperties(vCalendar, parameters.get(ICalParameters.IGNORED_PROPERTIES, String[].class));
         ImportedCalendar importedCalendar = new ImportedCalendar(mapper.importVCalendar(vCalendar, parameters, warnings), warnings);
-        importedCalendar.setEvents(importEvents(vCalendar.getEvents(), mapper, parameters));
-        importedCalendar.setFreeBusyDatas(importFreeBusys(vCalendar.getFreeBusys(), mapper, parameters));
+        importedCalendar.setEvents(importEvents(limitComponents(vCalendar.getEvents(), parameters, warnings), mapper, parameters));
+        importedCalendar.setFreeBusyDatas(importFreeBusys(limitComponents(vCalendar.getFreeBusys(), parameters, warnings), mapper, parameters));
         importedCalendar.setAvailability(importAvailability(vCalendar.getAvailability(), mapper, parameters));
         return importedCalendar;
     }
@@ -210,7 +211,7 @@ public class ICalUtils {
         }
         List<Event> events = new ArrayList<Event>(eventComponents.size());
         int index = 0;
-        for (Iterator<?> iterator = eventComponents.iterator(); iterator.hasNext();) {
+        for (Iterator<?> iterator = eventComponents.iterator(); iterator.hasNext(); index++) {
             events.add(importEvent(index, (VEvent) iterator.next(), mapper, parameters));
         }
         return events;
@@ -579,6 +580,33 @@ public class ICalUtils {
             message = message.replaceFirst("Error at line \\d+:", ""); // net.fortuna.ical4j.data.ParserException.ERROR_MESSAGE_PATTERN
         }
         return ICalExceptionCodes.PARSER_ERROR.create(e, Autoboxing.I(e.getLineNo()), message);
+    }
+
+    /**
+     * Applies a configured limitation for the maximum number of components as needed.
+     * <p/>
+     * If truncation is necessary, an appropriate warning is added to the supplied warings list automatically.
+     *
+     * @param components The components to apply the limit for
+     * @param parameters The iCal parameters
+     * @param warnings The warnings
+     * @return The (possibly truncated) list of components
+     */
+    private static ComponentList limitComponents(ComponentList components, ICalParameters parameters, List<OXException> warnings) {
+        if (null == components || components.isEmpty()) {
+            return components;
+        }
+        int limit = parameters.get(ICalParameters.IMPORT_LIMIT, Integer.class, I(-1)).intValue();
+        if (0 < limit && limit < components.size()) {
+            ComponentList truncatedComponents = new ComponentList(limit);
+            int count = 0;
+            for (Iterator<?> iterator = components.iterator(); iterator.hasNext() && count < limit; count++) {
+                truncatedComponents.add(iterator.next());
+            }
+            warnings.add(ICalExceptionCodes.TRUNCATED_RESULTS.create(I(limit), I(components.size())));
+            return truncatedComponents;
+        }
+        return components;
     }
 
 }

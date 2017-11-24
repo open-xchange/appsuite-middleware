@@ -123,10 +123,10 @@ public interface ICalParameters {
      * appropriate warning ({@link ICalExceptionCodes#TRUNCATED_RESULTS}).
      * <p/>
      * Only effective during import, defaults to <code>-1</code>
-     * 
+     *
      * @see ICalExceptionCodes#TRUNCATED_RESULTS
      */
-    String IMPORT_LIMIT = "IGNORE_EMPTY_PROPERTIES";
+    String IMPORT_LIMIT = "IMPORT_LIMIT";
 
     /**
      * Gets the value of an arbitrary extended parameter.
@@ -136,6 +136,16 @@ public interface ICalParameters {
      * @return The parameter's value, or <code>null</code> if not set
      */
     <T> T get(String name, Class<T> clazz);
+
+    /**
+     * Gets a parameter, falling back to a custom default value if not set.
+     *
+     * @param parameter The parameter name
+     * @param clazz The value's target type
+     * @param defaultValue The default value to use as fallback if the parameter is not set
+     * @return The parameter value, or the passed default value if not set
+     */
+    <T> T get(String parameter, Class<T> clazz, T defaultValue);
 
     /**
      * Sets the value for an arbitrary extended parameter.
