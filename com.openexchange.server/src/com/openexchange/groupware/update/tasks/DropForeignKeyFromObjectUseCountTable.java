@@ -47,42 +47,77 @@
  *
  */
 
-package com.openexchange.objectusecount.osgi;
+package com.openexchange.groupware.update.tasks;
 
-import com.openexchange.contact.ContactService;
-import com.openexchange.database.DatabaseService;
-import com.openexchange.groupware.delete.DeleteListener;
-import com.openexchange.objectusecount.ObjectUseCountService;
-import com.openexchange.objectusecount.groupware.ObjectUseCountDeleteListener;
-import com.openexchange.objectusecount.impl.ObjectUseCountServiceImpl;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.threadpool.ThreadPoolService;
-import com.openexchange.user.UserService;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.Arrays;
+import java.util.List;
+import com.openexchange.database.Databases;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.update.PerformParameters;
+import com.openexchange.groupware.update.UpdateExceptionCodes;
+import com.openexchange.groupware.update.UpdateTaskAdapter;
+import com.openexchange.tools.update.Tools;
 
 /**
- * {@link ObjectUseCountActivator}
+ * {@link DropForeignKeyFromObjectUseCountTable} - Drops rather needless foreign key from <code>"object_use_count"</code> table.
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
- * @since v7.8.1
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class ObjectUseCountActivator extends HousekeepingActivator {
+public final class DropForeignKeyFromObjectUseCountTable extends UpdateTaskAdapter {
 
     /**
-     * Initializes a new {@link ObjectUseCountActivator}.
+     * Initializes a new {@link DropForeignKeyFromObjectUseCountTable}.
      */
-    public ObjectUseCountActivator() {
+    public DropForeignKeyFromObjectUseCountTable() {
         super();
     }
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { DatabaseService.class, ContactService.class, UserService.class, ThreadPoolService.class };
+    public String[] getDependencies() {
+        return new String[] {};
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        registerService(ObjectUseCountService.class, new ObjectUseCountServiceImpl(this));
-        registerService(DeleteListener.class, new ObjectUseCountDeleteListener());
+    public void perform(final PerformParameters params) throws OXException {
+        Connection con = params.getConnection();
+        boolean rollback = false;
+        try {
+            Databases.startTransaction(con);
+            rollback = true;
+
+            // Drop foreign keys from...
+            for (String table : Arrays.asList("object_use_count")) {
+                dropForeignKeysFrom(table, con);
+            }
+
+            con.commit();
+            rollback = false;
+        } catch (SQLException e) {
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } catch (final RuntimeException e) {
+            throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
+        } finally {
+            if (rollback) {
+                Databases.rollback(con);
+            }
+            Databases.autocommit(con);
+        }
+    }
+
+    private void dropForeignKeysFrom(String table, Connection con) throws SQLException {
+        List<String> keyNames = Tools.allForeignKey(con, table);
+        Statement stmt = null;
+        for (String keyName : keyNames) {
+            try {
+                stmt = con.createStatement();
+                stmt.execute("ALTER TABLE " + table + " DROP FOREIGN KEY " + keyName);
+            } finally {
+                Databases.closeSQLStuff(stmt);
+            }
+        }
     }
 
 }

@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,42 +47,60 @@
  *
  */
 
-package com.openexchange.objectusecount.osgi;
+package com.openexchange.objectusecount.groupware;
 
-import com.openexchange.contact.ContactService;
-import com.openexchange.database.DatabaseService;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import com.openexchange.database.Databases;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.delete.DeleteEvent;
+import com.openexchange.groupware.delete.DeleteFailedExceptionCodes;
 import com.openexchange.groupware.delete.DeleteListener;
-import com.openexchange.objectusecount.ObjectUseCountService;
-import com.openexchange.objectusecount.groupware.ObjectUseCountDeleteListener;
-import com.openexchange.objectusecount.impl.ObjectUseCountServiceImpl;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.threadpool.ThreadPoolService;
-import com.openexchange.user.UserService;
 
 /**
- * {@link ObjectUseCountActivator}
+ * {@link ObjectUseCountDeleteListener}
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
- * @since v7.8.1
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.10.0
  */
-public class ObjectUseCountActivator extends HousekeepingActivator {
+public class ObjectUseCountDeleteListener implements DeleteListener {
 
     /**
-     * Initializes a new {@link ObjectUseCountActivator}.
+     * Initializes a new {@link ObjectUseCountDeleteListener}.
      */
-    public ObjectUseCountActivator() {
+    public ObjectUseCountDeleteListener() {
         super();
     }
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { DatabaseService.class, ContactService.class, UserService.class, ThreadPoolService.class };
+    public void deletePerformed(DeleteEvent event, Connection readCon, Connection writeCon) throws OXException {
+        int type = event.getType();
+        if (type == DeleteEvent.TYPE_CONTEXT) {
+            handleDeletion(writeCon, event.getContext(), 0);
+        } else if (type == DeleteEvent.TYPE_USER) {
+            handleDeletion(writeCon, event.getContext(), event.getId());
+        }
     }
 
-    @Override
-    protected void startBundle() throws Exception {
-        registerService(ObjectUseCountService.class, new ObjectUseCountServiceImpl(this));
-        registerService(DeleteListener.class, new ObjectUseCountDeleteListener());
+    private void handleDeletion(Connection writeCon, Context ctx, int optUserId) throws OXException {
+        PreparedStatement stmt = null;
+        try {
+            if (optUserId > 0) {
+                stmt = writeCon.prepareStatement("DELETE FROM object_use_count WHERE cid=? AND user=?");
+                stmt.setInt(1, ctx.getContextId());
+                stmt.setInt(2, optUserId);
+            } else {
+                stmt = writeCon.prepareStatement("DELETE FROM object_use_count WHERE cid=?");
+                stmt.setInt(1, ctx.getContextId());
+            }
+            stmt.executeUpdate();
+        } catch (final SQLException e) {
+            throw DeleteFailedExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            Databases.closeSQLStuff(stmt);
+        }
     }
 
 }
