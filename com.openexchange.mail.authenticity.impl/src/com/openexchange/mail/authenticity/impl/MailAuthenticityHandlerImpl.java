@@ -137,7 +137,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
      */
     public MailAuthenticityHandlerImpl(int ranking, List<String> authServIds, ServiceLookup services) {
         super();
-        if (authServIds == null || authServIds.isEmpty()) {
+        if (authServIds == null || authServIds.isEmpty() || authServIds.contains("")) {
             //TODO: proper exception code
             throw new IllegalArgumentException("The property '" + MailAuthenticityProperty.authServId.getFQPropertyName() + "' is not configured but is mandatory. Failed to initialise the core mail authenticity handler");
 
