@@ -104,6 +104,11 @@ public class TrustedDomainAuthenticityHandler implements Reloadable {
         public String getDisplayName() {
             return "TrustedDomain";
         }
+
+        @Override
+        public String toString() {
+            return getDisplayName();
+        }
     };
 
     /**
@@ -234,6 +239,13 @@ public class TrustedDomainAuthenticityHandler implements Reloadable {
         @Override
         public MailAuthenticityMechanism getMechanism() {
             return TRUSTED_DOMAIN_MECHANISM;
+        }
+
+        @Override
+        public String toString() {
+            StringBuilder builder = new StringBuilder();
+            builder.append("TrustedDomainResult [mechanism=").append(getMechanism()).append(", domain=").append(getDomain()).append(", result=").append(getResult()).append("]");
+            return builder.toString();
         }
     }
 

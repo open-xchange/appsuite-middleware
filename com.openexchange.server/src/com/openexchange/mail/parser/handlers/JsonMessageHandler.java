@@ -55,6 +55,7 @@ import static com.openexchange.mail.parser.MailMessageParser.generateFilename;
 import static com.openexchange.mail.utils.MailFolderUtility.prepareFullname;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
@@ -73,7 +74,6 @@ import org.json.JSONObject;
 import com.google.common.collect.ImmutableSet;
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.fields.FolderChildFields;
-import com.openexchange.ajax.tools.JSONCoercion;
 import com.openexchange.data.conversion.ical.ICalParser;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
@@ -95,6 +95,7 @@ import com.openexchange.mail.MailPath;
 import com.openexchange.mail.attachment.AttachmentToken;
 import com.openexchange.mail.attachment.AttachmentTokenConstants;
 import com.openexchange.mail.attachment.AttachmentTokenService;
+import com.openexchange.mail.authenticity.MailAuthenticityResultKey;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.conversion.InlineImageDataSource;
 import com.openexchange.mail.dataobjects.MailAuthenticityResult;
@@ -430,7 +431,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                 if (mail.containsAuthenticityResult()) {
                     MailAuthenticityResult mailAuthenticityResult = mail.getAuthenticityResult();
                     if (null != mailAuthenticityResult) {
-                        jsonObject.put(AUTHENTICATION_RESULTS, mailAuthenticityResult);
+                        jsonObject.put(AUTHENTICATION_RESULTS, JsonMessageHandler.authenticationResultToJson(mailAuthenticityResult));
                     }
                 }
                 // Guard info
@@ -528,7 +529,18 @@ public final class JsonMessageHandler implements MailMessageHandler {
             return null;
         }
 
-        return (JSONObject) JSONCoercion.coerceToJSON(authenticationResult.getAttributes());
+        Map<MailAuthenticityResultKey, Object> attributes = authenticationResult.getAttributes();
+        JSONObject result = new JSONObject(attributes.size());
+        for (MailAuthenticityResultKey key : attributes.keySet()) {
+            Object object = attributes.get(key);
+            if (object instanceof Collection<?>) {
+                result.put(key.getKey(), (Collection<?>) object);
+            } else {
+                result.put(key.getKey(), object);
+            }
+        }
+        result.put("status", authenticationResult.getStatus().name());
+        return result;
     }
 
     /**

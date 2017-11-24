@@ -115,13 +115,10 @@ public class MailAuthenticityActivator extends HousekeepingActivator {
         });
         ConfigurationService configurationService = getService(ConfigurationService.class);
         TrustedDomainAuthenticityHandler authenticationHandler = new TrustedDomainAuthenticityHandler(configurationService);
-
+        registerService(Reloadable.class, authenticationHandler);
         LeanConfigurationService leanConfigService = getService(LeanConfigurationService.class);
         List<String> authServIds = Arrays.asList(Strings.splitByComma(leanConfigService.getProperty(MailAuthenticityProperty.authServId)));
-        registerService(MailAuthenticityHandler.class, new MailAuthenticityHandlerImpl(authServIds, this));
-
-        registerService(Reloadable.class, authenticationHandler);
-        registerService(TrustedDomainAuthenticityHandler.class, authenticationHandler);
+        registerService(MailAuthenticityHandler.class, new MailAuthenticityHandlerImpl(authServIds, this, authenticationHandler));
 
         MailAuthenticityFetchListener fetchListener = new MailAuthenticityFetchListener(registry);
         registerService(MailFetchListener.class, fetchListener);

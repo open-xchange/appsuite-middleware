@@ -120,12 +120,12 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
 
     /**
      * Initialises a new {@link MailAuthenticityHandlerImpl} with priority 0.
-     * 
+     *
      * @param authServIds A {@link List} with all valid authserv-ids
      * @throws IlegalArgumentException if the authServId is either <code>null</code> or empty
      */
-    public MailAuthenticityHandlerImpl(List<String> authServIds, ServiceLookup services) {
-        this(0, authServIds, services);
+    public MailAuthenticityHandlerImpl(List<String> authServIds, ServiceLookup services, TrustedDomainAuthenticityHandler trustedDomainAuthenticityHandler) {
+        this(0, authServIds, services, trustedDomainAuthenticityHandler);
     }
 
     /**
@@ -135,14 +135,14 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
      * @param authServIds A {@link List} with all valid authserv-ids
      * @throws IlegalArgumentException if the authServId is either <code>null</code> or empty
      */
-    public MailAuthenticityHandlerImpl(int ranking, List<String> authServIds, ServiceLookup services) {
+    public MailAuthenticityHandlerImpl(int ranking, List<String> authServIds, ServiceLookup services, TrustedDomainAuthenticityHandler trustedDomainAuthenticityHandler) {
         super();
         if (authServIds == null || authServIds.isEmpty() || authServIds.contains("")) {
             //TODO: proper exception code
             throw new IllegalArgumentException("The property '" + MailAuthenticityProperty.authServId.getFQPropertyName() + "' is not configured but is mandatory. Failed to initialise the core mail authenticity handler");
 
         }
-        this.trustedDomainHandler = services.getService(TrustedDomainAuthenticityHandler.class);
+        this.trustedDomainHandler = trustedDomainAuthenticityHandler;
         this.ranking = ranking;
         this.configuredAuthServIds = authServIds;
         mechanismParsersRegitry = new HashMap<>(4);
