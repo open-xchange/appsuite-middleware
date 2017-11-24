@@ -88,6 +88,7 @@ import com.nimbusds.oauth2.sdk.auth.Secret;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.oauth2.sdk.id.Issuer;
+import com.nimbusds.oauth2.sdk.id.State;
 import com.nimbusds.oauth2.sdk.token.RefreshToken;
 import com.nimbusds.openid.connect.sdk.AuthenticationRequest.Builder;
 import com.nimbusds.openid.connect.sdk.LogoutRequest;
@@ -224,7 +225,7 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
             IDTokenValidator idTokenValidator = new IDTokenValidator(new Issuer(this.getBackendConfig().getIssuer()), new ClientID(this.getBackendConfig().getClientID()), expectedJWSAlg, new URL(this.getBackendConfig().getJwkSetEndpoint()));
             result = idTokenValidator.validate(idToken, new Nonce(nounce));
         } catch (BadJOSEException e) {
-            throw OIDCExceptionCode.IDTOKEN_VALIDATON_FAILED_CONTENT.create(e, "");
+            throw OIDCExceptionCode.IDTOKEN_VALIDATON_FAILED_CONTENT.create(e, e.getMessage());
         } catch (JOSEException e) {
             throw OIDCExceptionCode.IDTOKEN_VALIDATON_FAILED.create(e, "");
         } catch (MalformedURLException e) {
@@ -255,7 +256,7 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
     }
 
     @Override
-    public String getLogoutFromIDPRequest(Session session) throws OXException {
+    public LogoutRequest getLogoutFromIDPRequest(Session session) throws OXException {
         LOG.trace("getLogoutFromIDPRequest(Session session: {})", session.getSessionID());
         URI endSessionEndpoint = OIDCTools.getURIFromPath(this.getBackendConfig().getLogoutEndpoint());
 
@@ -267,9 +268,9 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
         }
 
         URI postLogoutTarget = OIDCTools.getURIFromPath(this.getBackendConfig().getRedirectURIPostSSOLogout());
-        LogoutRequest logoutRequest = new LogoutRequest(endSessionEndpoint, idToken, postLogoutTarget, null);
+        LogoutRequest logoutRequest = new LogoutRequest(endSessionEndpoint, idToken, postLogoutTarget, new State());
         LOG.trace("final logout request: {}", logoutRequest.toURI().toString());
-        return logoutRequest.toURI().toString();
+        return logoutRequest;
     }
 
     @Override

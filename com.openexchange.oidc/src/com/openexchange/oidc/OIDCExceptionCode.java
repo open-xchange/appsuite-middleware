@@ -84,7 +84,7 @@ public enum OIDCExceptionCode implements OXExceptionCode {
     /**
      * Users IDToken validation failed because of invalid claims or signature
      */
-    IDTOKEN_VALIDATON_FAILED_CONTENT("Users IDToken validation failed because of invalid claims or signature", Category.CATEGORY_PERMISSION_DENIED, 6),
+    IDTOKEN_VALIDATON_FAILED_CONTENT("Users IDToken validation failed because of invalid claims or signature. Reason: '%1$s'", Category.CATEGORY_PERMISSION_DENIED, 6),
     /**
      * Users IDToken validation failed because internal errors: '%1$s'
      */

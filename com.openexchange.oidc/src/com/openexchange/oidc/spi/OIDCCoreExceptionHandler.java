@@ -49,34 +49,12 @@
 
 package com.openexchange.oidc.spi;
 
-import java.io.IOException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import com.openexchange.exception.OXException;
-
-
 /**
  * {@link OIDCCoreExceptionHandler} The core implementation of the {@link OIDCExceptionHandler}
  *
  * @author <a href="mailto:vitali.sjablow@open-xchange.com">Vitali Sjablow</a>
  * @since v7.10.0
  */
-public class OIDCCoreExceptionHandler implements OIDCExceptionHandler {
-
-    private static final Logger LOG = LoggerFactory.getLogger(OIDCExceptionHandler.class);
-
-    @Override
-    public void handleAuthenticationFailed(HttpServletRequest request, HttpServletResponse response, OXException exception) throws IOException {
-        LOG.trace("handleAuthenticationFailed(request: {}, HttpServletResponse response, OXException: {})", request.getRequestURI(), exception.getExceptionCode());
-        response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-    }
-
-    @Override
-    public void handleLogoutFailed(HttpServletRequest request, HttpServletResponse response, OXException exception) throws IOException {
-        LOG.trace("handleAuthenticationFailed(request: {}, HttpServletResponse response, OXException: {})", request.getRequestURI(), exception.getExceptionCode());
-        response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-    }
-
+public class OIDCCoreExceptionHandler extends AbstractOIDCExceptionHandler {
+    
 }

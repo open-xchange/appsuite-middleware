@@ -79,6 +79,7 @@ import com.nimbusds.oauth2.sdk.id.State;
 import com.nimbusds.oauth2.sdk.token.BearerAccessToken;
 import com.nimbusds.oauth2.sdk.token.RefreshToken;
 import com.nimbusds.openid.connect.sdk.AuthenticationRequest.Builder;
+import com.nimbusds.openid.connect.sdk.LogoutRequest;
 import com.nimbusds.openid.connect.sdk.Nonce;
 import com.nimbusds.openid.connect.sdk.OIDCTokenResponse;
 import com.nimbusds.openid.connect.sdk.OIDCTokenResponseParser;
@@ -354,15 +355,16 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
     public String getLogoutRedirectRequest(HttpServletRequest request, HttpServletResponse response) throws OXException {
         LOG.trace("getLogoutRedirectRequest(HttpServletRequest request: {}, HttpServletResponse response)", request.getRequestURI());
         Session session = this.extractSessionFromRequest(request);
-        String logoutRequest = "";
+        String logoutRequestString = "";
         if (this.backend.getBackendConfig().isSSOLogout()) {
-            logoutRequest = this.backend.getLogoutFromIDPRequest(session);
-            this.stateManagement.addLogoutRequest(new DefaultLogoutRequestInfo(new State().getValue(), OIDCTools.getDomainName(request, services.getOptionalService(HostnameService.class)), session.getSessionID()));
+            LogoutRequest logoutRequest = this.backend.getLogoutFromIDPRequest(session);
+            this.stateManagement.addLogoutRequest(new DefaultLogoutRequestInfo(logoutRequest.getState().getValue(), OIDCTools.getDomainName(request, services.getOptionalService(HostnameService.class)), session.getSessionID()));
+            logoutRequestString = logoutRequest.toURI().toString();
         } else {
-            logoutRequest = this.getRedirectForLogoutFromOXServer(session, request, response, null);
+            logoutRequestString = this.getRedirectForLogoutFromOXServer(session, request, response, null);
         }
-        LOG.trace("Logout request: {}", logoutRequest);
-        return logoutRequest;
+        LOG.trace("Logout request: {}", logoutRequestString);
+        return logoutRequestString;
     }
 
     private Session extractSessionFromRequest(HttpServletRequest request) throws OXException {

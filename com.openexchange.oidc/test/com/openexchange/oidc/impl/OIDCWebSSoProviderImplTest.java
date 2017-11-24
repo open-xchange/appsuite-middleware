@@ -51,6 +51,7 @@ package com.openexchange.oidc.impl;
 
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import java.net.URI;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.junit.Before;
@@ -73,6 +74,7 @@ import com.nimbusds.oauth2.sdk.id.State;
 import com.nimbusds.oauth2.sdk.token.AccessToken;
 import com.nimbusds.oauth2.sdk.token.AccessTokenType;
 import com.nimbusds.oauth2.sdk.token.RefreshToken;
+import com.nimbusds.openid.connect.sdk.LogoutRequest;
 import com.nimbusds.openid.connect.sdk.Nonce;
 import com.nimbusds.openid.connect.sdk.OIDCTokenResponse;
 import com.nimbusds.openid.connect.sdk.OIDCTokenResponseParser;
@@ -334,12 +336,14 @@ public class OIDCWebSSoProviderImplTest {
         PowerMockito.doReturn(mockedSession).when(this.provider, PowerMockito.method(OIDCWebSSOProviderImpl.class, "extractSessionFromRequest", HttpServletRequest.class)).withArguments(Matchers.any(HttpServletRequest.class));
         String logoutRequest = "firstRequest";
         Mockito.when(mockedBackendConfig.getRedirectURILogout()).thenReturn(logoutRequest);
-        String backendLogout = "backendLogoutRequest";
+        LogoutRequest backendLogout = Mockito.mock(LogoutRequest.class);
+        Mockito.when(backendLogout.getState()).thenReturn(new State());
         Mockito.when(mockedBackend.getLogoutFromIDPRequest(mockedSession)).thenReturn(backendLogout);
         PowerMockito.doNothing().when(mockedStateManagement).addLogoutRequest(Matchers.any(DefaultLogoutRequestInfo.class));
-
+        URI resultUri = new URI("logoutRequest");
+        PowerMockito.when(backendLogout.toURI()).thenReturn(resultUri);
         String result = provider.getLogoutRedirectRequest(mockedRequest, mockedResponse);
-        assertTrue("Wrong request as result", result.equals(backendLogout));
+        assertTrue("Wrong request as result", result.equals("logoutRequest"));
     }
 
     @Test

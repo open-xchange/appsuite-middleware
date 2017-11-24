@@ -79,7 +79,7 @@ public class LogoutService extends OIDCServlet{
     }
 
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         if (request.getParameter(OIDCTools.TYPE) == null) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST);
         } else if (request.getParameter(OIDCTools.TYPE).equalsIgnoreCase(OIDCTools.END)) {

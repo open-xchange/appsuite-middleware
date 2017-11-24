@@ -56,6 +56,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.oidc.OIDCWebSSOProvider;
 import com.openexchange.oidc.spi.OIDCExceptionHandler;
 
@@ -76,6 +77,12 @@ public class AuthenticationService extends OIDCServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        
+        if (Strings.toLowerCase(request.getQueryString()).contains("error")) {
+            exceptionHandler.handleResponseException(request, response, null);
+            return;
+        }
+        
         try {
             this.provider.authenticateUser(request, response);
         } catch (OXException e) {

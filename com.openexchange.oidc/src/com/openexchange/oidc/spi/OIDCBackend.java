@@ -64,6 +64,7 @@ import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.token.AccessToken;
 import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
 import com.nimbusds.openid.connect.sdk.AuthenticationRequest.Builder;
+import com.nimbusds.openid.connect.sdk.LogoutRequest;
 import com.nimbusds.openid.connect.sdk.OIDCTokenResponse;
 import com.nimbusds.openid.connect.sdk.claims.IDTokenClaimsSet;
 import com.openexchange.ajax.login.LoginConfiguration;
@@ -204,10 +205,10 @@ public interface OIDCBackend {
      * Get the OP logout request for the given {@link Session}.
      * 
      * @param session The {@link Session} that should be terminated.
-     * @return The request to logout a user from the OP
+     * @return The {@link LogoutRequest} to logout a user from the OP
      * @throws OXException If anything fails
      */
-    String getLogoutFromIDPRequest(Session session) throws OXException;
+    LogoutRequest getLogoutFromIDPRequest(Session session) throws OXException;
     
     /**
      * Finishing touches that should be applied after a logout.

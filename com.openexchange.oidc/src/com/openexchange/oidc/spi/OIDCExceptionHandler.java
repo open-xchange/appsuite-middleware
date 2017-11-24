@@ -81,4 +81,6 @@ public interface OIDCExceptionHandler {
      */
     void handleLogoutFailed(HttpServletRequest request, HttpServletResponse response, OXException exception) throws IOException;
     
+    void handleResponseException(HttpServletRequest request, HttpServletResponse response, OXException exception) throws IOException;
+    
 }
