@@ -428,12 +428,8 @@ public final class JsonMessageHandler implements MailMessageHandler {
                 if (mail.containsTextPreview()) {
                     jsonObject.put(TEXT_PREVIEW, mail.getTextPreview());
                 }
-                if (mail.containsAuthenticityResult()) {
-                    MailAuthenticityResult mailAuthenticityResult = mail.getAuthenticityResult();
-                    if (null != mailAuthenticityResult) {
-                        jsonObject.put(AUTHENTICATION_RESULTS, JsonMessageHandler.authenticationResultToJson(mailAuthenticityResult));
-                    }
-                }
+                MailAuthenticityResult mailAuthenticityResult = mail.getAuthenticityResult();
+                jsonObject.put(AUTHENTICATION_RESULTS, null == mailAuthenticityResult ? JSONObject.NULL : JsonMessageHandler.authenticationResultToJson(mailAuthenticityResult));
                 // Guard info
                 if (mail.containsSecurityInfo()) {
                     SecurityInfo securityInfo = mail.getSecurityInfo();

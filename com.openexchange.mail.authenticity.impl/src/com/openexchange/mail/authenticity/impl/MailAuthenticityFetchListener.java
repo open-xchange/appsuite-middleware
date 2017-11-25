@@ -55,6 +55,7 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 import com.openexchange.exception.OXException;
+import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailAttributation;
 import com.openexchange.mail.MailFetchArguments;
 import com.openexchange.mail.MailFetchListener;
@@ -64,6 +65,7 @@ import com.openexchange.mail.MailFields;
 import com.openexchange.mail.authenticity.MailAuthenticityHandler;
 import com.openexchange.mail.authenticity.MailAuthenticityHandlerRegistry;
 import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.session.Session;
 
 /**
@@ -86,9 +88,18 @@ public class MailAuthenticityFetchListener implements MailFetchListener {
         this.handlerRegistry = handlerRegistry;
     }
 
+    private boolean isNotApplicableFor(MailFetchArguments fetchArguments) {
+        return false == isApplicableFor(fetchArguments);
+    }
+
+    private boolean isApplicableFor(MailFetchArguments fetchArguments) {
+        FullnameArgument folder = fetchArguments.getFolder();
+        return (null != folder && MailAccount.DEFAULT_ID == folder.getAccountId()) && new MailFields(fetchArguments.getFields()).contains(MailField.AUTHENTICATION_RESULTS);
+    }
+
     @Override
     public boolean accept(MailMessage[] mailsFromCache, MailFetchArguments fetchArguments, Session session) throws OXException {
-        if (false == new MailFields(fetchArguments.getFields()).contains(MailField.AUTHENTICATION_RESULTS)) {
+        if (isNotApplicableFor(fetchArguments)) {
             return true;
         }
 
@@ -110,7 +121,7 @@ public class MailAuthenticityFetchListener implements MailFetchListener {
 
     @Override
     public MailAttributation onBeforeFetch(MailFetchArguments fetchArguments, Session session, Map<String, Object> state) throws OXException {
-        if (false == new MailFields(fetchArguments.getFields()).contains(MailField.AUTHENTICATION_RESULTS)) {
+        if (isNotApplicableFor(fetchArguments)) {
             // Special field not contained
             return MailAttributation.NOT_APPLICABLE;
         }

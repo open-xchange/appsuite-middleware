@@ -1522,7 +1522,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 LOG.error("", e);
             }
 
-            {
+            if (MailAccount.DEFAULT_ID == accountId) {
                 MailAuthenticityHandlerRegistry authenticityHandlerRegistry = ServerServiceRegistry.getInstance().getService(MailAuthenticityHandlerRegistry.class);
                 if (null != authenticityHandlerRegistry) {
                     MailAuthenticityHandler handler = authenticityHandlerRegistry.getHighestRankedHandlerFor(session);
