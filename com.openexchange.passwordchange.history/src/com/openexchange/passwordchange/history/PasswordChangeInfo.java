@@ -67,9 +67,9 @@ public interface PasswordChangeInfo {
     long getCreated();
 
     /**
-     * The client that did the last password change. See {@link com.openexchange.passwordchange.history.groupware.PasswordChangeClients}
+     * The client that did the last password change. See {@link PasswordChangeClients}
      * 
-     * @return The client as described in {@link com.openexchange.passwordchange.history.groupware.PasswordChangeClients#getIdentifier()}
+     * @return The client as described in {@link PasswordChangeClients#getIdentifier()}
      */
     String getClient();
 

@@ -77,7 +77,7 @@ public class PasswordChangeInterceptor extends AbstractUserServiceInterceptor {
     /**
      * Initializes a new {@link PasswordChangeInterceptor}.
      *
-     * @param registry The {@link PasswordChangeRecorderRegistryService} to get the {@link PasswordChangeRecorder} from
+     * @param registry The {@link PasswordChangeRecorderRegistryService}
      * @param services The {@link ServiceLookup} to get services from
      */
     public PasswordChangeInterceptor(PasswordChangeRecorderRegistryService registry, ServiceLookup services) {
