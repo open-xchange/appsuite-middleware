@@ -2,7 +2,7 @@ feature_name: Soap
 properties:
     - key: com.openexchange.soap.cxf.baseAddress
       description: |
-        Specifies the base address for published end points; e.g. "http://www.myserver.com/myservices"
+        Specifies the base address for published end points; e.g. "http://www.myserver.com/webservices"
         An empty value means that the running machine's address is used.
       defaultValue:
       version: 
