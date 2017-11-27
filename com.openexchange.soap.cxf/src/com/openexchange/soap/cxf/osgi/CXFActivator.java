@@ -222,7 +222,6 @@ public class CXFActivator extends HousekeepingActivator {
                             /*
                              * Initialize Webservice collector
                              */
-                            baseAddress = null;
                             final WebserviceCollector collector = new WebserviceCollector(baseAddress, context);
                             context.addServiceListener(collector);
                             collector.open();
