@@ -321,10 +321,8 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
             return result;
         }
 
-        // Get all attributes except the domain
-        List<String> split = splitLines(authHeader);
-        List<String> authResultLines = new ArrayList<>(split.size() - 1);
-        authResultLines.addAll(split.subList(1, split.size()));
+        // Get all attributes of the header
+        List<String> authResultLines = splitLines(authHeader);
         // Extract and parse the known mechanisms
         List<String> extractedMechanismResults = extractMechanismResults(authResultLines);
         parseMechanismResults(extractedMechanismResults, result);
