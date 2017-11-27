@@ -49,11 +49,8 @@
 
 package com.openexchange.oidc.impl;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.oidc.OIDCBackendConfig;
-import com.openexchange.oidc.OIDCBackendProperty;
 
 /**
  * {@link OIDCBackendConfigImpl} Default implementation of {@link OIDCBackendConfig}
@@ -61,131 +58,10 @@ import com.openexchange.oidc.OIDCBackendProperty;
  * @author <a href="mailto:vitali.sjablow@open-xchange.com">Vitali Sjablow</a>
  * @since v7.10.0
  */
-public class OIDCBackendConfigImpl implements OIDCBackendConfig{
+public class OIDCBackendConfigImpl extends AbstractOIDCBackendConfig{
 
-    private final static Logger LOG = LoggerFactory.getLogger(OIDCBackendConfigImpl.class);
-
-    private LeanConfigurationService leanConfigurationService;
-
-    public OIDCBackendConfigImpl(LeanConfigurationService leanConfigurationService) {
-        this.leanConfigurationService = leanConfigurationService;
+    public OIDCBackendConfigImpl(LeanConfigurationService leanConfigurationService, String backendName) {
+        super(leanConfigurationService, backendName);
     }
 
-    @Override
-    public String getClientID() {
-        return this.leanConfigurationService.getProperty(OIDCBackendProperty.clientId);
-    }
-
-    @Override
-    public String getRedirectURIInit() {
-        return this.leanConfigurationService.getProperty(OIDCBackendProperty.redirectURIInit);
-    }
-
-    @Override
-    public String getRedirectURIAuth() {
-        return this.leanConfigurationService.getProperty(OIDCBackendProperty.redirectURIAuth);
-    }
-
-    @Override
-    public String getAuthorizationEndpoint() {
-        return this.leanConfigurationService.getProperty(OIDCBackendProperty.authorizationEndpoint);
-    }
-
-    @Override
-    public String getTokenEndpoint() {
-        return this.leanConfigurationService.getProperty(OIDCBackendProperty.tokenEndpoint);
-    }
-
-    @Override
-    public String getClientSecret() {
-        return this.leanConfigurationService.getProperty(OIDCBackendProperty.clientSecret);
-    }
-
-    @Override
-    public String getJwkSetEndpoint() {
-        return this.leanConfigurationService.getProperty(OIDCBackendProperty.jwkSetEndpoint);
-    }
-
-    @Override
-    public String getJWSAlgortihm() {
-        return this.leanConfigurationService.getProperty(OIDCBackendProperty.jwsAlgorithm);
-    }
-
-    @Override
-    public String getScope() {
-        return this.leanConfigurationService.getProperty(OIDCBackendProperty.scope);
-    }
-
-    @Override
-    public String getIssuer() {
-        return this.leanConfigurationService.getProperty(OIDCBackendProperty.issuer);
-    }
-
-    @Override
-    public String getResponseType() {
-        return this.leanConfigurationService.getProperty(OIDCBackendProperty.responseType);
-    }
-
-    @Override
-    public String getUserInfoEndpoint() {
-        return this.leanConfigurationService.getProperty(OIDCBackendProperty.userInfoEndpoint);
-    }
-
-    @Override
-    public String getLogoutEndpoint() {
-        return this.leanConfigurationService.getProperty(OIDCBackendProperty.logoutEndpoint);
-    }
-
-    @Override
-    public String getRedirectURIPostSSOLogout() {
-        return this.leanConfigurationService.getProperty(OIDCBackendProperty.redirectURIPostSSOLogout);
-    }
-
-    @Override
-    public boolean isSSOLogout() {
-        return this.leanConfigurationService.getBooleanProperty(OIDCBackendProperty.ssoLogout);
-    }
-
-    @Override
-    public String getRedirectURILogout() {
-        return this.leanConfigurationService.getProperty(OIDCBackendProperty.redirectURILogout);
-    }
-
-    @Override
-    public String autologinCookieMode() {
-        return this.leanConfigurationService.getProperty(OIDCBackendProperty.autologinCookieMode);
-    }
-
-    @Override
-    public boolean isStoreOAuthTokensEnabled() {
-        return this.leanConfigurationService.getBooleanProperty(OIDCBackendProperty.storeOAuthTokens);
-    }
-
-    @Override
-    public boolean isAutologinEnabled() {
-        boolean result = false;
-        AutologinMode autologinMode = OIDCBackendConfig.AutologinMode.get(this.autologinCookieMode());
-
-        if (autologinMode == null) {
-            LOG.debug("Unknown value for parameter com.openexchange.oidc.autologinCookieMode. Value is: {}", this.autologinCookieMode());
-        } else {
-            result = (autologinMode == AutologinMode.OX_DIRECT || autologinMode == AutologinMode.SSO_REDIRECT);
-        }
-        return result;
-    }
-
-    @Override
-    public int getOauthRefreshTime() {
-        return this.leanConfigurationService.getIntProperty(OIDCBackendProperty.oauthRefreshTime);
-    }
-
-    @Override
-    public String getUIWebpath() {
-        return this.leanConfigurationService.getProperty(OIDCBackendProperty.uiWebPath);
-    }
-    
-    @Override
-    public String getBackendPath() {
-        return this.leanConfigurationService.getProperty(OIDCBackendProperty.backendPath);
-    }
 }

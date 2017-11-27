@@ -157,7 +157,7 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
 
     @Override
     public OIDCBackendConfig getBackendConfig() {
-        return new OIDCBackendConfigImpl(Services.getService(LeanConfigurationService.class));
+        return new OIDCBackendConfigImpl(Services.getService(LeanConfigurationService.class), "");
     }
 
     @Override

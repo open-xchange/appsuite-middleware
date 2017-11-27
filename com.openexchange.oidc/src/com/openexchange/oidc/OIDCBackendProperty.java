@@ -144,7 +144,6 @@ public enum OIDCBackendProperty implements Property {
      * uiWebPath - This backends UI path
      */
     uiWebPath(OIDCProperty.PREFIX, "/appsuite/"),
-    
     /**
      * backendPath - This backends servlet path, which is appended to the default /oidc/ path.
      */
@@ -169,7 +168,10 @@ public enum OIDCBackendProperty implements Property {
             return clazz.cast(defaultValue);
         }
         throw new IllegalArgumentException("The object cannot be converted to the specified type '" + clazz.getCanonicalName() + "'");
-
+    }
+    
+    public Object getDefaultValue() {
+        return this.defaultValue;
     }
 
 }

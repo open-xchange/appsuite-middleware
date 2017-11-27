@@ -50,7 +50,6 @@
 package com.openexchange.oidc.spi;
 
 import java.io.IOException;
-import java.io.PrintWriter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
@@ -124,8 +123,6 @@ public abstract class AbstractOIDCExceptionHandler implements OIDCExceptionHandl
         response.setCharacterEncoding(Charsets.UTF_8_NAME);
         response.setContentType("text/html");
         response.setContentLength(content.getBytes().length);
-        PrintWriter writer = response.getWriter();
-        writer.println(content);
-        writer.flush();
+        response.getWriter().write(content);
     }
 }
