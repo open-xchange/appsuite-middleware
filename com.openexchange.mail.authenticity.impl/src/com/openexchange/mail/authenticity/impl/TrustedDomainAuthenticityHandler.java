@@ -49,18 +49,26 @@
 
 package com.openexchange.mail.authenticity.impl;
 
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import javax.naming.ConfigurationException;
+import org.apache.commons.validator.routines.UrlValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.DefaultInterests;
+import com.openexchange.config.ForcedReloadable;
 import com.openexchange.config.Interests;
-import com.openexchange.config.Reloadable;
+import com.openexchange.config.PropertyFilter;
+import com.openexchange.config.Reloadables;
+import com.openexchange.exception.OXException;
+import com.openexchange.filemanagement.ManagedFile;
+import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.authenticity.DefaultMailAuthenticityResultKey;
 import com.openexchange.mail.authenticity.MailAuthenticityResultKey;
@@ -72,6 +80,7 @@ import com.openexchange.mail.authenticity.mechanism.MailAuthenticityMechanismRes
 import com.openexchange.mail.authenticity.mechanism.SimplePassFailResult;
 import com.openexchange.mail.dataobjects.MailAuthenticityResult;
 import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.session.Session;
 
 /**
@@ -80,7 +89,7 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.0
  */
-public class TrustedDomainAuthenticityHandler implements Reloadable {
+public class TrustedDomainAuthenticityHandler implements ForcedReloadable {
 
     private static final Logger LOG = LoggerFactory.getLogger(TrustedDomainAuthenticityHandler.class);
 
@@ -90,7 +99,8 @@ public class TrustedDomainAuthenticityHandler implements Reloadable {
     private static final String PREFIX = "com.openexchange.mail.authenticity.trustedDomains.";
     private static final String TENANT = "tenants";
     private static final String DOMAINS = ".domains";
-    private static final String IMAGE = ".image";
+    private static final String IMAGE = ".image.";
+    private static final String FALLBACK_IMAGE = ".fallbackImage";
 
     static final MailAuthenticityMechanism TRUSTED_DOMAIN_MECHANISM = new MailAuthenticityMechanism() {
 
@@ -112,14 +122,18 @@ public class TrustedDomainAuthenticityHandler implements Reloadable {
 
     private final Map<String, List<TrustedDomain>> trustedDomainsPerTenant;
     private final List<TrustedDomain> fallbackTenant;
+    private final ManagedFileManagement managedFileManagement;
 
     /**
      * Initializes a new {@link TrustedDomainAuthenticityHandler}.
+     *
+     * @throws OXException
      */
-    public TrustedDomainAuthenticityHandler(ConfigurationService configurationService) {
+    public TrustedDomainAuthenticityHandler(ConfigurationService configurationService, ManagedFileManagement managedFileManagement) throws OXException {
         super();
-        trustedDomainsPerTenant = new ConcurrentHashMap<>();
-        fallbackTenant = new CopyOnWriteArrayList<>();
+        this.trustedDomainsPerTenant = new ConcurrentHashMap<>();
+        this.fallbackTenant = new CopyOnWriteArrayList<>();
+        this.managedFileManagement = managedFileManagement;
         init(configurationService);
     }
 
@@ -140,16 +154,27 @@ public class TrustedDomainAuthenticityHandler implements Reloadable {
                 List<MailAuthenticityMechanismResult> results = authenticityResult.getAttribute(DefaultMailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS, List.class);
                 results.add(new TrustedDomainResult(domain, null, SimplePassFailResult.PASS));
                 if (trustedDomain.getImage() != null) {
-                    authenticityResult.addAttribute(new MailAuthenticityResultKey() {
+                    try {
+                        authenticityResult.addAttribute(new MailAuthenticityResultKey() {
 
-                        @Override
-                        public String getKey() {
-                            return "image";
-                        }
-                    }, trustedDomain.getImage());
+                            @Override
+                            public String getKey() {
+                                return "image";
+                            }
+                        }, buildIconURL(trustedDomain.getImage(), session));
+                    } catch (OXException e) {
+                        LOG.error("Unable to add trusted domain image to mail authenticity result.", e);
+                    }
                 }
             }
         }
+    }
+
+    private String buildIconURL(Icon icon, Session session) throws OXException {
+        ManagedFile managedFile = managedFileManagement.createManagedFile(icon.getData());
+        managedFile.setContentType(icon.getMimeType());
+        managedFile.setFileName(MimeType2ExtMap.getFileExtension(icon.getMimeType()));
+        return managedFile.constructURL(session);
     }
 
     private TrustedDomain checkHost(String tenant, String host) {
@@ -172,17 +197,28 @@ public class TrustedDomainAuthenticityHandler implements Reloadable {
         return null;
     }
 
-    private void init(ConfigurationService configurationService) {
+    private void init(ConfigurationService configurationService) throws OXException {
         String commaSeparatedListOfTenants = configurationService.getProperty(PREFIX + TENANT, "");
         String[] tenants = Strings.splitByCommaNotInQuotes(commaSeparatedListOfTenants);
         for (String tenant : tenants) {
             String commaSeparatedListOfDomains = configurationService.getProperty(PREFIX + tenant + DOMAINS, (String) null);
             if (Strings.isNotEmpty(commaSeparatedListOfDomains)) {
-                String[] domains = Strings.splitByCommaNotInQuotes(commaSeparatedListOfDomains);
-                String image = configurationService.getProperty(PREFIX + tenant + IMAGE, (String) null);
+                String[] domains = Strings.splitByDelimNotInQuotes(commaSeparatedListOfDomains, '|');
+                String fallbackImageStr = configurationService.getProperty(PREFIX + tenant + FALLBACK_IMAGE, (String) null);
+                Icon fallbackImage = null;
+                if(!Strings.isEmpty(fallbackImageStr)) {
+                    fallbackImage = getIcon(fallbackImageStr, tenant);
+                }
+                Map<String, String> images = configurationService.getProperties(new PropertyFilter() {
+
+                    @Override
+                    public boolean accept(String name, String value) throws OXException {
+                        return name.startsWith(PREFIX + tenant + IMAGE);
+                    }
+                });
                 List<TrustedDomain> domainList = new ArrayList<>();
                 for (String domain : domains) {
-                    domainList.add(new TrustedDomain(domain, image));
+                    domainList.add(getTrustedDomain(domain, images, fallbackImage, tenant));
                 }
                 trustedDomainsPerTenant.put(tenant, domainList);
             }
@@ -194,29 +230,85 @@ public class TrustedDomainAuthenticityHandler implements Reloadable {
             String[] domains = Strings.splitByCommaNotInQuotes(commaSeparatedListOfDomains);
             String image = configurationService.getProperty(PREFIX + IMAGE.substring(1), (String) null);
             for (String domain : domains) {
-                fallbackTenant.add(new TrustedDomain(domain, image));
+                fallbackTenant.add(new TrustedDomain(domain, getIcon(image, null)));
             }
         }
+    }
+
+    /**
+     *
+     * @param domain
+     * @param images
+     * @param tenant
+     * @return
+     * @throws OXException
+     */
+    private TrustedDomain getTrustedDomain(String domain, Map<String, String> images, Icon fallbackImage, String tenant) throws OXException {
+        if (domain.indexOf(":") > 0) {
+            String[] domainConfig = Strings.splitByColon(domain);
+            if (domainConfig.length != 2) {
+                throw new OXException(new ConfigurationException("Unable to to parse trusted domain config. Only one colon is allowed: " + domain));
+            }
+            String image = images.get(PREFIX + tenant + IMAGE + domainConfig[1]);
+            if (image != null) {
+                return new TrustedDomain(domainConfig[0], getIcon(image, tenant));
+            }
+        }
+        return new TrustedDomain(domain, fallbackImage);
+    }
+
+    private Icon getIcon(String image, String tenant) {
+        Icon icon = null;
+        if (!Strings.isEmpty(image)) {
+            if (UrlValidator.getInstance().isValid(image)) {
+                try {
+                    icon = new ImageIcon(new URL(image));
+                } catch (IOException e) {
+                    if (tenant != null) {
+                        LOG.error("Unable to resolve configured trusted domain image for tenant " + tenant + ": " + image, e);
+                    } else {
+                        LOG.error("Unable to resolve configured trusted domain fallback image: " + image, e);
+                    }
+                    e.printStackTrace();
+                }
+            } else {
+                File f = new File(image);
+                if (f.exists() && !f.isDirectory()) {
+                    try {
+                        icon = new ImageIcon(f);
+                    } catch (IOException e) {
+                        if (tenant != null) {
+                            LOG.error("Unable to resolve configured trusted domain image for tenant " + tenant + ": " + image, e);
+                        } else {
+                            LOG.error("Unable to resolve configured trusted domain fallback image: " + image, e);
+                        }
+                    }
+                } else {
+                    if (tenant != null) {
+                        LOG.error("Unable to resolve configured trusted domain image for tenant " + tenant + ": " + image);
+                    } else {
+                        LOG.error("Unable to resolve configured trusted domain fallback image: " + image);
+                    }
+                }
+            }
+        }
+        return icon;
     }
 
     @Override
     public void reloadConfiguration(ConfigurationService configService) {
         trustedDomainsPerTenant.clear();
         fallbackTenant.clear();
-        init(configService);
+        try {
+            init(configService);
+        } catch (OXException e) {
+            LOG.error("Error during config reload: "+e.getMessage(), e);
+        }
     }
 
     @Override
     public Interests getInterests() {
-        List<String> properties = new LinkedList<>();
-        properties.add(PREFIX + TENANT);
-        for (String tenant : trustedDomainsPerTenant.keySet()) {
-            properties.add(PREFIX + tenant + DOMAINS);
-            properties.add(PREFIX + tenant + IMAGE);
-        }
-        properties.add(PREFIX + DOMAINS.substring(1));
-        properties.add(PREFIX + IMAGE.substring(1));
-        return DefaultInterests.builder().propertiesOfInterest(properties.toArray(new String[properties.size()])).build();
+        return Reloadables.getInterestsForAll();
     }
 
     private String getDomain(MailMessage msg) {

@@ -54,8 +54,8 @@ import java.util.List;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.ForcedReloadable;
 import com.openexchange.config.Interests;
-import com.openexchange.config.Reloadable;
 import com.openexchange.config.lean.LeanConfigurationService;
+import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.MailFetchListener;
 import com.openexchange.mail.authenticity.MailAuthenticityHandler;
@@ -89,7 +89,7 @@ public class MailAuthenticityActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { LeanConfigurationService.class, ConfigurationService.class };
+        return new Class<?>[] { LeanConfigurationService.class, ConfigurationService.class, ManagedFileManagement.class };
     }
 
     @Override
@@ -112,8 +112,9 @@ public class MailAuthenticityActivator extends HousekeepingActivator {
             }
         });
         ConfigurationService configurationService = getService(ConfigurationService.class);
-        TrustedDomainAuthenticityHandler authenticationHandler = new TrustedDomainAuthenticityHandler(configurationService);
-        registerService(Reloadable.class, authenticationHandler);
+        ManagedFileManagement managedFileManagement = getService(ManagedFileManagement.class);
+        TrustedDomainAuthenticityHandler authenticationHandler = new TrustedDomainAuthenticityHandler(configurationService, managedFileManagement);
+        registerService(ForcedReloadable.class, authenticationHandler);
         registerService(TrustedDomainAuthenticityHandler.class, authenticationHandler);
         trackService(TrustedDomainAuthenticityHandler.class).open();
 

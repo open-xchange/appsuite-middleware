@@ -49,70 +49,27 @@
 
 package com.openexchange.mail.authenticity.impl;
 
-import java.util.regex.Pattern;
-
 /**
- * {@link TrustedDomain} specifies a trusted domain or a group of trusted domains via wildcards.
+ *
+ * {@link Icon} represents an Icon for trusted domains
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.0
  */
-public class TrustedDomain {
-
-    private final String domain;
-    private final Pattern pattern;
-    private final Icon image;
+public interface Icon {
 
     /**
+     * Gets the mime type of this icon (e.g. image/png).
      *
-     * Initializes a new {@link TrustedDomain}.
-     *
-     * @param domain The domain
-     * @param image The image
+     * @return The mime type
      */
-    public TrustedDomain(String domain, Icon image) {
-        super();
-        this.domain = domain;
-        this.pattern = Pattern.compile(toRegex(domain));
-        this.image = image;
-    }
-
-    private String toRegex(String domain){
-        domain = domain.replaceAll("\\.", "[.]").replaceAll("\\*", ".*");
-        return domain;
-    }
+    String getMimeType();
 
     /**
-     * Gets the domain
+     * Gets the icons raw bytes.
      *
-     * @return The domain
+     * @return The icon data
      */
-    public String getDomain() {
-        return domain;
-    }
+    byte[] getData();
 
-    /**
-     * Gets the image
-     *
-     * @return The image
-     */
-    public Icon getImage() {
-        return image;
-    }
-
-    /**
-     * Checks whether this trusted domain matches the given domain
-     * @param domain
-     * @return
-     */
-    public boolean matches(String domain){
-        return pattern.matcher(domain).matches();
-    }
-
-    @Override
-    public String toString() {
-        StringBuilder builder = new StringBuilder("TrustedDomain [").append("domain = ").append(domain);
-        return builder.append("]").toString();
-
-    }
 }
