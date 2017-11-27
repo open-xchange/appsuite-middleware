@@ -52,9 +52,9 @@ package com.openexchange.mail.authenticity.impl;
 import java.util.Collection;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.authenticity.MailAuthenticityHandler;
+import com.openexchange.mail.dataobjects.MailAuthenticityResult;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.session.Session;
-
 
 /**
  * {@link ThresholdAwareAuthenticityHandler} - A simple authenticity handler, which only delegates if date threshold is fulfilled.
@@ -78,11 +78,15 @@ public class ThresholdAwareAuthenticityHandler implements MailAuthenticityHandle
 
     @Override
     public void handle(Session session, MailMessage mailMessage) {
-       if (null == mailMessage || (threshold > 0 && mailMessage.getReceivedDate().getTime() < threshold)) {
-           return;
-       }
+        if (null == mailMessage) {
+            return;
+        }
+        if ((threshold > 0 && mailMessage.getReceivedDate().getTime() < threshold)) {
+            mailMessage.setAuthenticityResult(MailAuthenticityResult.NOT_ANALYZED_RESULT);
+            return;
+        }
 
-       authenticityHandler.handle(session, mailMessage);
+        authenticityHandler.handle(session, mailMessage);
     }
 
     @Override

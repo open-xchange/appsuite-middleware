@@ -62,6 +62,9 @@ import com.openexchange.mail.authenticity.MailAuthenticityStatus;
  */
 public final class MailAuthenticityResult {
 
+    /** The 'not_analyzed' result */
+    public static final MailAuthenticityResult NOT_ANALYZED_RESULT = new MailAuthenticityResult(MailAuthenticityStatus.NOT_ANALYZED);
+
     /** The default neutral result */
     public static final MailAuthenticityResult NEUTRAL_RESULT = new MailAuthenticityResult(MailAuthenticityStatus.NEUTRAL);
 
@@ -122,9 +125,9 @@ public final class MailAuthenticityResult {
         if (o == null) {
             return null;
         }
-//        if (!o.getClass().isAssignableFrom(type)) {
-//            return null;
-//        }
+        //        if (!o.getClass().isAssignableFrom(type)) {
+        //            return null;
+        //        }
         try {
             return type.cast(attributes.get(key));
         } catch (Exception e) {
