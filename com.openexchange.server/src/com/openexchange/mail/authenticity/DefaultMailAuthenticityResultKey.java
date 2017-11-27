@@ -49,7 +49,6 @@
 
 package com.openexchange.mail.authenticity;
 
-import com.openexchange.mail.authenticity.mechanism.MailAuthenticityMechanism;
 import com.openexchange.mail.authenticity.mechanism.MailAuthenticityMechanismResult;
 import com.openexchange.mail.dataobjects.MailAuthenticityResult;
 
@@ -71,11 +70,6 @@ public enum DefaultMailAuthenticityResultKey implements MailAuthenticityResultKe
      * which the authenticity was evaluated.
      */
     FROM_DOMAIN("fromDomain"),
-    /**
-     * Defines the {@link MailAuthenticityMechanism}s used during the
-     * evaluation process of the e-mail.
-     */
-    MAIL_AUTH_MECHS("mailAuthenticityMechanisms"),
     /**
      * Defines the {@link MailAuthenticityMechanismResult}s that were
      * collected during the evaluation process of the e-mail.

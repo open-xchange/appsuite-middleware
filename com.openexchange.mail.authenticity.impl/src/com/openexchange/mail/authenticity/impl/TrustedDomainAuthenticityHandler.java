@@ -138,8 +138,6 @@ public class TrustedDomainAuthenticityHandler implements Reloadable {
             String domain = getDomain(mailMessage);
             TrustedDomain trustedDomain = checkHost(tenant, domain);
             if (trustedDomain != null) {
-                Set<MailAuthenticityMechanism> mechanisms = authenticityResult.getAttribute(DefaultMailAuthenticityResultKey.MAIL_AUTH_MECHS, Set.class);
-                mechanisms.add(TRUSTED_DOMAIN_MECHANISM);
                 List<MailAuthenticityMechanismResult> results = authenticityResult.getAttribute(DefaultMailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS, List.class);
                 results.add(new TrustedDomainResult(domain, null, SimplePassFailResult.PASS));
                 if (trustedDomain.getImage() != null) {
