@@ -409,9 +409,15 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
                 unknownResults.add(extractedMechanism);
                 continue;
             }
-            MailAuthenticityMechanismResult mailAuthMechResult = mechanismParsersRegitry.get(mechanism).apply(parseLine(extractedMechanism), result);
+            BiFunction<Map<String, String>, MailAuthenticityResult, MailAuthenticityMechanismResult> mechanismParser = mechanismParsersRegitry.get(mechanism);
+            if (mechanismParser == null) {
+                // Not a valid mechanism, skip but add to the overall result
+                unknownResults.add(extractedMechanism);
+                continue;
+            }
+            MailAuthenticityMechanismResult mailAuthMechResult = mechanismParser.apply(parseLine(extractedMechanism), result);
             if (mailAuthMechResult == null) {
-                // Skip results that the 'From' domain does not match the mechanisms 'from' domain
+                // Skip results that the 'From' domain does not match the mechanism's 'From' domain
                 continue;
             }
             results.add(mailAuthMechResult);
