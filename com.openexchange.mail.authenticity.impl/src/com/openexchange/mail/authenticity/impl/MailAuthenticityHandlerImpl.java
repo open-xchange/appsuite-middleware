@@ -152,7 +152,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
             DMARCResult dmarcResult = DMARCResult.valueOf(extractOutcome(value.toUpperCase()));
 
             String domain = line.get(DMARCResultHeader.HEADER_FROM);
-            String fromDomain = cleanseDomain(overallResult.getAttribute(DefaultMailAuthenticityResultKey.DOMAIN, String.class));
+            String fromDomain = cleanseDomain(overallResult.getAttribute(DefaultMailAuthenticityResultKey.FROM_DOMAIN, String.class));
             if (!fromDomain.equals(domain)) {
                 return null;
             }
@@ -176,7 +176,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
                 domain = cleanseDomain(line.get(DKIMResultHeader.HEADER_D));
             }
 
-            String fromDomain = overallResult.getAttribute(DefaultMailAuthenticityResultKey.DOMAIN, String.class);
+            String fromDomain = overallResult.getAttribute(DefaultMailAuthenticityResultKey.FROM_DOMAIN, String.class);
             if (!fromDomain.equals(domain)) {
                 return null;
             }
@@ -204,7 +204,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
                 domain = cleanseDomain(line.get(SPFResultHeader.SMTP_HELO));
             }
 
-            String fromDomain = overallResult.getAttribute(DefaultMailAuthenticityResultKey.DOMAIN, String.class);
+            String fromDomain = overallResult.getAttribute(DefaultMailAuthenticityResultKey.FROM_DOMAIN, String.class);
             if (!fromDomain.equals(domain)) {
                 return null;
             }
@@ -314,7 +314,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
         MailAuthenticityResult result = new MailAuthenticityResult(MailAuthenticityStatus.NEUTRAL);
         try {
             String domain = parseDomain(fromHeader);
-            result.addAttribute(DefaultMailAuthenticityResultKey.DOMAIN, domain);
+            result.addAttribute(DefaultMailAuthenticityResultKey.FROM_DOMAIN, domain);
         } catch (Exception e) {
             // Malformed from header, be strict and return with failed result
             result.setStatus(MailAuthenticityStatus.FAIL);
@@ -336,6 +336,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
 
     /**
      * Extracts the appropriate <code>Authentication-Results</code> header from the specified array.
+     * If there are multiple headers it merges them and returns them as one.
      *
      * @param authHeaders The array with the authentication results headers
      * @return the appropriate <code>Authentication-Results</code> header or <code>null</code> if none can be extracted
@@ -345,7 +346,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
         for (String header : authHeaders) {
             List<String> split = splitLines(header.trim());
             if (split.isEmpty()) {
-                //Huh? Invalid/Malformed authenticity results header, ignore
+                // Huh? Invalid/Malformed authenticity results header, ignore
                 continue;
             }
 

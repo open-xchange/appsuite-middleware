@@ -224,7 +224,7 @@ public class TrustedDomainAuthenticityHandler implements Reloadable {
 
     private String getDomain(MailMessage msg) {
         MailAuthenticityResult authenticationResult = msg.getAuthenticityResult();
-        return authenticationResult == null ? null : authenticationResult.getAttribute(DefaultMailAuthenticityResultKey.DOMAIN).toString();
+        return authenticationResult == null ? null : authenticationResult.getAttribute(DefaultMailAuthenticityResultKey.FROM_DOMAIN).toString();
     }
 
     private static class TrustedDomainResult extends AbstractAuthMechResult {
