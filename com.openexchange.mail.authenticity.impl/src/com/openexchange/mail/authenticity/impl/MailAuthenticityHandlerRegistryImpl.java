@@ -102,18 +102,19 @@ public class MailAuthenticityHandlerRegistryImpl implements MailAuthenticityHand
         ConfigAndHandler configAndHandler = cache.getIfPresent(key);
         if (null == configAndHandler) {
             boolean enabled = leanConfigService.getBooleanProperty(userId, contextId, MailAuthenticityProperty.enabled);
-            long dateThreshold = leanConfigService.getLongProperty(userId, contextId, MailAuthenticityProperty.threshold);
-
-            MailAuthenticityHandler highestRankedHandler = null;
             if (enabled) {
+                long dateThreshold = leanConfigService.getLongProperty(userId, contextId, MailAuthenticityProperty.threshold);
+                MailAuthenticityHandler highestRankedHandler = null;
                 for (MailAuthenticityHandler handler : handlers) {
                     if (handler.isEnabled(session) && (null == highestRankedHandler || highestRankedHandler.getRanking() < handler.getRanking())) {
                         highestRankedHandler = new ThresholdAwareAuthenticityHandler(handler, dateThreshold);
                     }
                 }
+                configAndHandler = new ConfigAndHandler(enabled, dateThreshold, highestRankedHandler);
+            } else {
+                // Not enabled
+                configAndHandler = ConfigAndHandler.NOT_ENABLED;
             }
-
-            configAndHandler = new ConfigAndHandler(enabled, dateThreshold, highestRankedHandler);
             cache.put(key, configAndHandler);
         }
         return configAndHandler;
@@ -169,6 +170,8 @@ public class MailAuthenticityHandlerRegistryImpl implements MailAuthenticityHand
     // --------------------------------------------------------------------------------------------------------------
 
     private static class ConfigAndHandler {
+
+        static final ConfigAndHandler NOT_ENABLED = new ConfigAndHandler(false, 0, null);
 
         final boolean enabled;
         final long dateThreshold;
