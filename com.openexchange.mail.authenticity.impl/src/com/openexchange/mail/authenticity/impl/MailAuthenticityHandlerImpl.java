@@ -313,7 +313,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
 
         MailAuthenticityResult result = new MailAuthenticityResult(MailAuthenticityStatus.NEUTRAL);
         try {
-            String domain = parseDomain(fromHeader);
+            String domain = extractDomain(fromHeader);
             result.addAttribute(DefaultMailAuthenticityResultKey.FROM_DOMAIN, domain);
         } catch (Exception e) {
             // Malformed from header, be strict and return with failed result
@@ -365,13 +365,13 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
     }
 
     /**
-     * Parses the specified from header and returns the domain of the sender
+     * Extracts the domain of the sender from the specified <code>From</code> header and returns it
      *
      * @param fromHeader The from header
      * @return The domain of the sender
-     * @throws IllegalArgumentException if the specified header does not contain any valid parsable internet address
+     * @throws IllegalArgumentException if the specified header does not contain any valid parsable Internet address
      */
-    private String parseDomain(String fromHeader) {
+    private String extractDomain(String fromHeader) {
         try {
             InternetAddress ia = new InternetAddress(fromHeader, true);
             String address = ia.getAddress();
@@ -641,17 +641,6 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
             return null;
         }
         return value.substring(beginIndex + 1, endIndex);
-    }
-
-    /**
-     * Converts the specified {@link MailAuthenticityMechanismResult} to {@link MailAuthenticityStatus}
-     * 
-     * @param mechanismResult The {@link MailAuthenticityMechanismResult} to convert
-     * @return The converted {@link MailAuthenticityStatus}. The status {@link MailAuthenticityStatus#NEUTRAL} might
-     *         also get returned if the specified {@link MailAuthenticityMechanismResult} does not map to a valid {@link MailAuthenticityStatus}
-     */
-    private MailAuthenticityStatus convert(MailAuthenticityMechanismResult mechanismResult) {
-        return convert(mechanismResult.getResult());
     }
 
     /**
