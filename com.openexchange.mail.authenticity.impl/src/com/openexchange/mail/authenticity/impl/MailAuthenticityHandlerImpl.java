@@ -322,10 +322,17 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
         // Get all attributes of the header
         List<String> authResultLines = splitLines(authHeader);
         // Extract and parse the known mechanisms
-        List<String> extractedMechanismResults = extractMechanismResults(authResultLines);
+        List<String> extractedMechanismResults = extractKnownMechanismResults(authResultLines);
         parseMechanismResults(extractedMechanismResults, result);
 
-        //TODO: add the remaining attributes as is to the result
+        // Add the remaining attributes as is to the result
+        if (!extractedMechanismResults.isEmpty()) {
+            List<String> unknownResults = (List<String>) result.getAttribute(DefaultMailAuthenticityResultKey.UNKNOWN_AUTH_MECH_RESULTS);
+            if (unknownResults == null) {
+                unknownResults = new ArrayList<>();
+            }
+            unknownResults.addAll(extractedMechanismResults);
+        }
 
         return result;
     }
@@ -381,13 +388,16 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
     }
 
     /**
-     * @param extractedMechanismResults
-     * @param result
+     * Parses from the specified list the known mechanism results and sets those to the specified result.
+     * 
+     * @param extractedMechanismResults A {@link List} with the extract mechanism results from the 'Authorization-Header'
+     * @param result The {@link MailAuthenticityResult}
      */
     private void parseMechanismResults(List<String> extractedMechanismResults, MailAuthenticityResult result) {
         // Sort by ordinal
         Collections.sort(extractedMechanismResults, MAIL_AUTH_COMPARATOR);
         List<MailAuthenticityMechanismResult> results = new ArrayList<>();
+        List<String> unknownResults = new ArrayList<>();
         for (String extractedMechanism : extractedMechanismResults) {
             String[] s = extractedMechanism.split("=");
             if (s.length == 0) {
@@ -395,8 +405,8 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
             }
             DefaultMailAuthenticityMechanism mechanism = convert(s[0]);
             if (mechanism == null) {
-                // Not a valid mechanism, skip
-                // TODO: add their raw data to the result
+                // Not a valid mechanism, skip but add to the overall result
+                unknownResults.add(extractedMechanism);
                 continue;
             }
             MailAuthenticityMechanismResult mailAuthMechResult = mechanismParsersRegitry.get(mechanism).apply(parseLine(extractedMechanism), result);
@@ -416,7 +426,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
      * @param authResults The authenticity results
      * @return An unmodifiable {@link List} with the supported mechanism results
      */
-    private List<String> extractMechanismResults(List<String> authResults) {
+    private List<String> extractKnownMechanismResults(List<String> authResults) {
         List<String> list = new ArrayList<>();
         Iterator<String> authResultsIterator = authResults.iterator();
         while (authResultsIterator.hasNext()) {
