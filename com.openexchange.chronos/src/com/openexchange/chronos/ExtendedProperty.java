@@ -59,10 +59,6 @@ import java.util.List;
  */
 public class ExtendedProperty {
     
-    public final static String CN = "original_cn";
-    public final static String EMAIL = "original_email";
-    public final static String URI = "original_uri";
-
     private final String name;
     private final String value;
     private final List<ExtendedPropertyParameter> parameters;
