@@ -129,9 +129,12 @@ public interface Property {
      * @return the default value of the {@link Property}
      * @throws IllegalArgumentException If specified type does not match the one of the default value
      */
-    default <T extends Object> T getDefaultValue(Class<T> clazz) {
+    default <T extends Object> T getDefaultValue(Class<T> clazz) throws IllegalArgumentException {
         Object defaultValue = getDefaultValue();
-        if (null != defaultValue && defaultValue.getClass().isAssignableFrom(clazz)) {
+        if (null == defaultValue) {
+            return null;
+        }
+        if (clazz.isAssignableFrom(defaultValue.getClass())) {
             return clazz.cast(defaultValue);
         }
         throw new IllegalArgumentException("The object cannot be converted to the specified type '" + clazz.getCanonicalName() + "'");
