@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.exception;
 
+import static com.openexchange.chronos.exception.CalendarExceptionMessages.ACCOUNT_DISABLED_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.ACCOUNT_NOT_FOUND_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.ATTACHMENT_NOT_FOUND_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.ATTENDEE_NOT_FOUND_MSG;
@@ -68,6 +69,7 @@ import static com.openexchange.chronos.exception.CalendarExceptionMessages.INVAL
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.INVALID_GEO_LOCATION_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.INVALID_RRULE_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.INVALID_TIMEZONE_MSG;
+import static com.openexchange.chronos.exception.CalendarExceptionMessages.IO_ERROR_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.MANDATORY_FIELD_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.MISSING_CAPABILITY_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.MOVE_OCCURRENCE_NOT_SUPPORTED_MSG;
@@ -86,7 +88,6 @@ import static com.openexchange.chronos.exception.CalendarExceptionMessages.UNSUP
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.UNSUPPORTED_FOLDER_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.UNSUPPORTED_OPERATION_FOR_PROVIDER_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.UNSUPPORTED_RRULE_MSG;
-import static com.openexchange.chronos.exception.CalendarExceptionMessages.IO_ERROR_MSG;
 import static com.openexchange.exception.OXExceptionStrings.MESSAGE;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.DisplayableOXExceptionCode;
@@ -302,17 +303,20 @@ public enum CalendarExceptionCodes implements DisplayableOXExceptionCode {
      * <li>Unexpected database error, try again [%1$s]</li>
      */
     DB_ERROR_TRY_AGAIN("Unexpected database error, try again [%1$s]", OXExceptionStrings.SQL_ERROR_MSG, Category.CATEGORY_TRY_AGAIN, 5002),
-
     /**
      * An I/O error occurred: %1$s
      */
     IO_ERROR("An I/O error occurred: %1$s", IO_ERROR_MSG, Category.CATEGORY_ERROR, 5003),
-
     /**
      * <li>The calendar provider \"%1$s\" is not available.</li>
      * <li>Missing calendar provider [provider: %1$s]</li>
      */
     PROVIDER_NOT_AVAILABLE("Missing calendar provider [provider: %1$s]", PROVIDER_NOT_AVAILABLE_MSG, Category.CATEGORY_SERVICE_DOWN, 5030),
+    /**
+     * <li>The requested calendar account is currently disabled. Please enable the account and try again.</li>
+     * <li>Calendar account disabled [provider: %1$s, account %2$d]</li>
+     */
+    ACCOUNT_DISABLED("Calendar account disabled [provider: %1$s, account %2$d]", ACCOUNT_DISABLED_MSG, Category.CATEGORY_SERVICE_DOWN, 5031),
     /**
      * <li>Some data entered exceeded the field limit. Please shorten the value for \"%1$s\" (limit: %2$d, current: %3$d) and try again.</li>
      * <li>Data truncation [field %1$s, limit %2$d, current %3$d]</li>
