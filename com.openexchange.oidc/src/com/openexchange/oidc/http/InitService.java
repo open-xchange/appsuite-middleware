@@ -71,6 +71,10 @@ import com.openexchange.oidc.tools.OIDCTools;
  */
 public class InitService extends OIDCServlet {
 
+    private static final String LOGIN = "login";
+    private static final String LOGOUT = "logout";
+    private static final String THIRD_PARTY = "thirdParty";
+    
     private static final Logger LOG = LoggerFactory.getLogger(InitService.class);
     private static final long serialVersionUID = -7066156332544428369L;
 
@@ -78,8 +82,9 @@ public class InitService extends OIDCServlet {
 
         private static final long serialVersionUID = -2423863714624255114L;
         {
-            add("login");
-            add("logout");
+            add(LOGIN);
+            add(LOGOUT);
+            add(THIRD_PARTY);
         }
     };
 
@@ -98,7 +103,7 @@ public class InitService extends OIDCServlet {
             String redirectURI = this.getRedirectURI(flow, request, response);
             OIDCTools.buildRedirectResponse(response, redirectURI, request.getParameter("redirect"));
         } catch (OXException e) {
-            if (e.getExceptionCode() == OIDCExceptionCode.INVALID_LOGOUT_REQUEST) {
+            if (e.getExceptionCode() == OIDCExceptionCode.INVALID_LOGOUT_REQUEST || e.getExceptionCode() == OIDCExceptionCode.INVALID_THIRDPARTY_LOGIN_REQUEST) {
                 LOG.error(e.getLocalizedMessage(), e);
                 response.sendError(HttpServletResponse.SC_BAD_REQUEST);
             } else if (e.getExceptionCode() == OIDCExceptionCode.UNABLE_TO_PARSE_SESSIONS_IDTOKEN) {
@@ -107,6 +112,23 @@ public class InitService extends OIDCServlet {
             } else {
                 exceptionHandler.handleResponseException(request, response, e);
             }
+        }
+    }
+    
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        String flow = request.getParameter("flow");
+        if (!flow.equals(THIRD_PARTY) || (flow.equals(THIRD_PARTY) && !provider.validateThirdPartyRequest(request))) {
+            LOG.warn("Either wrong flow or unkown issuer in POST request of third-party login initiation attempt.");
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+            return;
+        }
+        
+        try {
+            String redirectURI = provider.getLoginRedirectRequest(request, response);
+            OIDCTools.buildRedirectResponse(response, redirectURI, request.getParameter("redirect"));
+        } catch (OXException e) {
+            exceptionHandler.handleResponseException(request, response, e);
         }
     }
 
@@ -123,9 +145,13 @@ public class InitService extends OIDCServlet {
     private String getRedirectURI(String flow, HttpServletRequest request, HttpServletResponse response) throws OXException {
         LOG.trace("getRedirectURI(String flow: {}, HttpServletRequest request: {}, HttpServletResponse response)", flow, request.getRequestURI());
         String redirectUri = "";
-        if (flow.equals("login")) {
+        if (flow.equals(THIRD_PARTY) && !provider.validateThirdPartyRequest(request)) {
+            throw OIDCExceptionCode.INVALID_THIRDPARTY_LOGIN_REQUEST.create("Issuer is unknown to the backend.");
+        }
+        
+        if (flow.equals(LOGIN) || flow.equals(THIRD_PARTY)) {
             redirectUri = provider.getLoginRedirectRequest(request, response);
-        } else if (flow.equals("logout")) {
+        } else if (flow.equals(LOGOUT)) {
             redirectUri = provider.getLogoutRedirectRequest(request, response);
         }
         return redirectUri;

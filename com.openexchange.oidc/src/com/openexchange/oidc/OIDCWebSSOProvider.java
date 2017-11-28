@@ -111,4 +111,14 @@ public interface OIDCWebSSOProvider {
      * @throws OXException when something fails during the process
      */
     void logoutInCaseOfError(String sessionId, HttpServletRequest request, HttpServletResponse response) throws OXException;
+
+    /**
+     * Check the request for valid third party login informations. The iss parameters content
+     * is checked by comparing it to the backends known issuer in {@link OIDCBackendConfig}.getIssuer().
+     * 
+     * @param request - The request to validate
+     * @return true if the issuer is known, false if no iss parameter is available or not matching the
+     *  backends known issuer.
+     */
+    boolean validateThirdPartyRequest(HttpServletRequest request);
 }

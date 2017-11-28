@@ -438,4 +438,14 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
         Session session = LoginPerformer.getInstance().lookupSession(sessionId);
         this.backend.logoutCurrentUser(session, request, response);
     }
+
+    @Override
+    public boolean validateThirdPartyRequest(HttpServletRequest request) {
+        boolean result = false;
+        String issuer = request.getParameter("iss");
+        if (!Strings.isEmpty(issuer)) {
+            result = this.backend.getBackendConfig().getIssuer().equals(issuer);
+        }
+        return result;
+    }
 }
