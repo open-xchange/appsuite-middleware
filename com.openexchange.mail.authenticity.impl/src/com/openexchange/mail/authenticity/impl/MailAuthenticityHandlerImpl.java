@@ -87,7 +87,19 @@ import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 
 /**
- * {@link MailAuthenticityHandlerImpl}
+ * <p>{@link MailAuthenticityHandlerImpl} - The default core implementation of the {@link MailAuthenticityHandler}</p>
+ * 
+ * <p>This handler considers only the {@link DefaultMailAuthenticityMechanism#DMARC}, {@link DefaultMailAuthenticityMechanism#DKIM} and
+ * {@link DefaultMailAuthenticityMechanism#SPF} in that particular order.</p>
+ * 
+ * <p>The default overall status of the {@link MailAuthenticityResult} is the {@link MailAuthenticityStatus#NEUTRAL}. If there are none of the above mentioned
+ * mechnisms in the e-mail <code>Authentication-Results</code>, then that status applies. Unknown mechanisms and ptypes are ignored from the evaluation
+ * but their raw data is included in the overall result's attributes under the {@link DefaultMailAuthenticityResultKey#UNKNOWN_AUTH_MECH_RESULTS} key.</p>
+ * 
+ * <p>In case there are multiple <code>Authentication-Results</code> in the e-mail's headers, then all of them are evaluated (top to bottom). Their mechanisms are sorted
+ * by their predefined ordinal (DMARC > DKIM > SPF) and evaluated in that order.</p>
+ * 
+ * <p><code>Authentication-Results</code> headers with an invalid/unknown/absent <code>authserv-id</code> are simply ignored and <u>NOT</u> included in the result.</p>
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
