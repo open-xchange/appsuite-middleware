@@ -444,7 +444,7 @@ public class TestMailAuthenticityHandler {
         headerCollection.addHeader("From", "Jane Doe <jane.doe@foobar.com>");
         perform("ox.io; dmarc=pass (p=NONE sp=NONE dis=NONE) header.from=foobar.com; spf=fail smtp.mailfrom=foobar.com; " + "dmarc=fail (p=NONE sp=NONE dis=REJECT) header.from=foobar.com; dkim=pass header.i=@foobar.com header.s=201705 header.b=VvWVD9kg; " + "dkim=pass header.i=@foobar.com header.s=201705 header.b=0WC5u+VZ; spf=pass (ox.io: domain of jane.doe@foobar.com designates 1.2.3.4 as permitted sender) smtp.mailfrom=jane.doe@foobar.com; ");
 
-        assertStatus(MailAuthenticityStatus.FAIL, result.getStatus());
+        assertStatus(MailAuthenticityStatus.PASS, result.getStatus());
         assertDomain("foobar.com", result.getAttribute(DefaultMailAuthenticityResultKey.FROM_DOMAIN, String.class));
         assertAmount(6);
 
