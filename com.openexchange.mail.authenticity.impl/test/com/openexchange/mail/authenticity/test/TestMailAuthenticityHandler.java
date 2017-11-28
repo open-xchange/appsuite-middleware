@@ -52,6 +52,7 @@ package com.openexchange.mail.authenticity.test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -62,6 +63,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.powermock.modules.junit4.PowerMockRunner;
+import com.openexchange.exception.OXException;
+import com.openexchange.mail.authenticity.AllowedAuthServId;
 import com.openexchange.mail.authenticity.DefaultMailAuthenticityResultKey;
 import com.openexchange.mail.authenticity.MailAuthenticityHandler;
 import com.openexchange.mail.authenticity.MailAuthenticityStatus;
@@ -87,7 +90,7 @@ public class TestMailAuthenticityHandler {
     private MailMessage mailMessage;
     private HeaderCollection headerCollection;
     private ArgumentCaptor<MailAuthenticityResult> argumentCaptor;
-    private MailAuthenticityHandler handler;
+    private MailAuthenticityHandlerImpl handler;
     private MailAuthenticityResult result;
 
     /**
@@ -101,7 +104,7 @@ public class TestMailAuthenticityHandler {
      * Sets up the test case
      */
     @Before
-    public void setUpTest() {
+    public void setUpTest() throws Exception {
         argumentCaptor = ArgumentCaptor.forClass(MailAuthenticityResult.class);
         headerCollection = new HeaderCollection();
 
@@ -110,7 +113,10 @@ public class TestMailAuthenticityHandler {
         mailMessage = mock(MailMessage.class);
         when(mailMessage.getHeaders()).thenReturn(headerCollection);
 
-        handler = new MailAuthenticityHandlerImpl(Collections.singletonList("ox.io"), services);
+        handler = new MailAuthenticityHandlerImpl(services);
+
+        List<AllowedAuthServId> allowedAuthServIds = AllowedAuthServId.allowedAuthServIdsFor(Collections.singletonList("ox.io"));
+        when(handler.getAllowedAuthServIds(null)).thenReturn(allowedAuthServIds);
     }
 
     /**
@@ -370,11 +376,15 @@ public class TestMailAuthenticityHandler {
      * @param headers The 'Authentication-Results' headers to add
      */
     private void perform(String... headers) {
-        for (String header : headers) {
-            headerCollection.addHeader(MailAuthenticityHandler.AUTH_RESULTS_HEADER, header);
+        try {
+            for (String header : headers) {
+                headerCollection.addHeader(MailAuthenticityHandler.AUTH_RESULTS_HEADER, header);
+            }
+            handler.handle(null, mailMessage);
+            verify(mailMessage).setAuthenticityResult(argumentCaptor.capture());
+            result = argumentCaptor.getValue();
+        } catch (OXException e) {
+            fail(e.getMessage());
         }
-        handler.handle(null, mailMessage);
-        verify(mailMessage).setAuthenticityResult(argumentCaptor.capture());
-        result = argumentCaptor.getValue();
     }
 }

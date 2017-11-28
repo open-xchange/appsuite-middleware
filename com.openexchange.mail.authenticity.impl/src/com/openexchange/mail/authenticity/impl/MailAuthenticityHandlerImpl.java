@@ -50,6 +50,7 @@
 package com.openexchange.mail.authenticity.impl;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -57,14 +58,21 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.function.BiFunction;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+import com.openexchange.config.lean.LeanConfigurationService;
+import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.MailField;
+import com.openexchange.mail.authenticity.AllowedAuthServId;
 import com.openexchange.mail.authenticity.DefaultMailAuthenticityResultKey;
+import com.openexchange.mail.authenticity.MailAuthenticityExceptionCodes;
 import com.openexchange.mail.authenticity.MailAuthenticityHandler;
 import com.openexchange.mail.authenticity.MailAuthenticityStatus;
 import com.openexchange.mail.authenticity.mechanism.AuthenticityMechanismResult;
@@ -85,6 +93,7 @@ import com.openexchange.mail.mime.HeaderCollection;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
+import com.openexchange.session.UserAndContext;
 
 /**
  * <p>{@link MailAuthenticityHandlerImpl} - The default core implementation of the {@link MailAuthenticityHandler}</p>
@@ -124,38 +133,31 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
 
     /** The ranking of this handler */
     private final int ranking;
-
-    private final List<String> configuredAuthServIds;
-
+    private final Cache<UserAndContext, List<AllowedAuthServId>> authServIdsCache;
     private final TrustedDomainAuthenticityHandler trustedDomainHandler;
+    private final ServiceLookup services;
 
     /**
      * Initialises a new {@link MailAuthenticityHandlerImpl} with priority 0.
      *
-     * @param authServIds A {@link List} with all valid authserv-ids
      * @throws IlegalArgumentException if the authServId is either <code>null</code> or empty
      */
-    public MailAuthenticityHandlerImpl(List<String> authServIds, ServiceLookup services) {
-        this(0, authServIds, services);
+    public MailAuthenticityHandlerImpl(ServiceLookup services) {
+        this(0, services);
     }
 
     /**
      * Initialises a new {@link MailAuthenticityHandlerImpl}.1
      *
      * @param ranking The ranking of this handler; a higher value means higher priority;
-     * @param authServIds A {@link List} with all valid authserv-ids
      * @throws IlegalArgumentException if the authServId is either <code>null</code> or empty
      */
-    public MailAuthenticityHandlerImpl(int ranking, List<String> authServIds, ServiceLookup services) {
+    public MailAuthenticityHandlerImpl(int ranking, ServiceLookup services) {
         super();
-        if (authServIds == null || authServIds.isEmpty() || authServIds.contains("")) {
-            //TODO: proper exception code
-            throw new IllegalArgumentException("The property '" + MailAuthenticityProperty.authServId.getFQPropertyName() + "' is not configured but is mandatory. Failed to initialise the core mail authenticity handler");
-
-        }
+        this.services = services;
         this.trustedDomainHandler = services.getService(TrustedDomainAuthenticityHandler.class);
         this.ranking = ranking;
-        this.configuredAuthServIds = authServIds;
+        this.authServIdsCache = CacheBuilder.newBuilder().maximumSize(65536).expireAfterWrite(30, TimeUnit.MINUTES).build();
         mechanismParsersRegitry = new HashMap<>(4);
         mechanismParsersRegitry.put(DefaultMailAuthenticityMechanism.DMARC, (line, overallResult) -> {
             String value = line.get(DefaultMailAuthenticityMechanism.DMARC.name().toLowerCase());
@@ -219,7 +221,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
                 return null;
             }
 
-            // Set the overall result only if it's 'none'            
+            // Set the overall result only if it's 'none'
             MailAuthenticityStatus mailAuthStatus = convert(spfResult);
             if (overallResult.getStatus().equals(MailAuthenticityStatus.NEUTRAL) || (!overallResult.getStatus().equals(MailAuthenticityStatus.PASS) && mailAuthStatus.equals(MailAuthenticityStatus.PASS))) {
                 overallResult.setStatus(mailAuthStatus);
@@ -231,13 +233,50 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
         });
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.mail.authenticity.MailAuthenticityHandler#handle(com.openexchange.mail.dataobjects.MailPart)
+    /**
+     * Clears the authserv-ids cache.
      */
+    public void invalidateAuthServIdsCache() {
+        authServIdsCache.invalidateAll();
+    }
+
+    /**
+     * Gets the allowed authserv-ids for session-associated user.
+     *
+     * @param session The session
+     * @return The allowed authserv-ids
+     * @throws OXException If authserv-ids are missing
+     */
+    public List<AllowedAuthServId> getAllowedAuthServIds(Session session) throws OXException {
+        int userId = session.getUserId();
+        int contextId = session.getContextId();
+        UserAndContext key = UserAndContext.newInstance(userId, contextId);
+        List<AllowedAuthServId> authServIds = authServIdsCache.getIfPresent(key);
+        if (null == authServIds) {
+            // This is not thread-safe, but does not need to
+            LeanConfigurationService leanConfigService = services.getService(LeanConfigurationService.class);
+            String sAuthServIds = leanConfigService.getProperty(userId, contextId, MailAuthenticityProperty.authServId);
+            if (Strings.isEmpty(sAuthServIds)) {
+                throw MailAuthenticityExceptionCodes.INVALID_AUTHSERV_IDS.create();
+            }
+
+            List<String> tokens = Arrays.asList(Strings.splitByComma(sAuthServIds));
+            if (tokens == null || tokens.isEmpty() || tokens.contains("")) {
+                throw MailAuthenticityExceptionCodes.INVALID_AUTHSERV_IDS.create();
+            }
+
+            authServIds = AllowedAuthServId.allowedAuthServIdsFor(tokens);
+            if (authServIds == null || authServIds.isEmpty()) {
+                throw MailAuthenticityExceptionCodes.INVALID_AUTHSERV_IDS.create();
+            }
+
+            authServIdsCache.put(key, authServIds);
+        }
+        return authServIds;
+    }
+
     @Override
-    public void handle(Session session, MailMessage mailMessage) {
+    public void handle(Session session, MailMessage mailMessage) throws OXException {
         HeaderCollection headerCollection = mailMessage.getHeaders();
         String[] authHeaders = headerCollection.getHeader(MailAuthenticityHandler.AUTH_RESULTS_HEADER);
         if (authHeaders == null || authHeaders.length == 0) {
@@ -253,7 +292,8 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
             return;
         }
 
-        mailMessage.setAuthenticityResult(parseHeaders(authHeaders, fromHeaders[0]));
+        List<AllowedAuthServId> allowedAuthServIds = getAllowedAuthServIds(session);
+        mailMessage.setAuthenticityResult(parseHeaders(authHeaders, fromHeaders[0], allowedAuthServIds));
 
         if (trustedDomainHandler != null) {
             trustedDomainHandler.handle(session, mailMessage);
@@ -309,8 +349,8 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
      * @param authHeaders The <code>Authentication-Results</code> headers to parse
      * @return The {@link MailAuthenticityResult}
      */
-    private MailAuthenticityResult parseHeaders(String[] authHeaders, String fromHeader) {
-        List<String> authHeadersList = extractValidAuthenticationResults(authHeaders);
+    private MailAuthenticityResult parseHeaders(String[] authHeaders, String fromHeader, List<AllowedAuthServId> allowedAuthServIds) {
+        List<String> authHeadersList = extractValidAuthenticationResults(authHeaders, allowedAuthServIds);
         // No valid auth header was extracted, thus we return with neutral status
         if (authHeadersList.isEmpty()) {
             return MailAuthenticityResult.NEUTRAL_RESULT;
@@ -345,7 +385,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
      * @param authHeaders The array with the authentication results headers
      * @return A {@link List} with the appropriate <code>Authentication-Results</code> headers or an empty {@link List} if none can be extracted
      */
-    private List<String> extractValidAuthenticationResults(String[] authHeaders) {
+    private List<String> extractValidAuthenticationResults(String[] authHeaders, List<AllowedAuthServId> allowedAuthServIds) {
         List<String> authHeadersList = new ArrayList<>(authHeaders.length);
         for (String header : authHeaders) {
             List<String> split = splitElements(header.trim());
@@ -357,7 +397,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
             // The first property of the header MUST always be the domain (i.e. the authserv-id)
             // See https://tools.ietf.org/html/rfc7601 for the formal definition
             String authServId = split.get(0);
-            if (!isAuthServIdValid(authServId)) {
+            if (!isAuthServIdValid(authServId, allowedAuthServIds)) {
                 // Not a configured authserver-id, ignore
                 continue;
             }
@@ -386,7 +426,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
 
     /**
      * Parses all known mechanism results from the specified authResults {@link List}
-     * 
+     *
      * @param authResults A {@link List} with all authentication results
      * @param result The {@link MailAuthenticityResult}
      */
@@ -435,7 +475,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
 
     /**
      * Gets the mechanism from the specified attributes
-     * 
+     *
      * @param attributes The attributes
      * @return The {@link DefaultMailAuthenticityMechanism} or <code>null</code> if none exists
      */
@@ -476,16 +516,20 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
      * @param authServId The authserv-id to check
      * @return <code>true</code> if the string is valid; <code>false</code> otherwise
      */
-    private boolean isAuthServIdValid(String authServId) {
+    private boolean isAuthServIdValid(String authServId, List<AllowedAuthServId> allowedAuthServIds) {
         if (Strings.isEmpty(authServId)) {
             return false;
         }
         String[] split = authServId.split(" ");
+
         // Cleanse the optional version
         authServId = split.length == 0 ? authServId : split[0];
-        // TODO: Regex and wildcard checks...
-        if (configuredAuthServIds.contains(authServId)) {
-            return true;
+
+        // Regex and wildcard checks...
+        for (AllowedAuthServId allowedAuthServId : allowedAuthServIds) {
+            if (allowedAuthServId.allows(authServId)) {
+                return true;
+            }
         }
         return false;
     }
@@ -656,7 +700,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
 
     /**
      * Converts the specified {@link AuthenticityMechanismResult} to {@link MailAuthenticityStatus}
-     * 
+     *
      * @param mechanismResult The {@link AuthenticityMechanismResult} to convert
      * @return The converted {@link MailAuthenticityStatus}. The status {@link MailAuthenticityStatus#NEUTRAL} might
      *         also get returned if the specified {@link AuthenticityMechanismResult} does not map to a valid {@link MailAuthenticityStatus}.

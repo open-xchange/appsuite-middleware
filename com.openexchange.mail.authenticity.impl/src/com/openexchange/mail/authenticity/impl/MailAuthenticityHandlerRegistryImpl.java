@@ -49,6 +49,8 @@
 
 package com.openexchange.mail.authenticity.impl;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
@@ -138,6 +140,11 @@ public class MailAuthenticityHandlerRegistryImpl implements MailAuthenticityHand
     @Override
     public MailAuthenticityHandler getHighestRankedHandlerFor(Session session) throws OXException {
         return getConfigAndHandler(session).highestRankedHandler;
+    }
+
+    @Override
+    public Collection<MailAuthenticityHandler> getHandlers() throws OXException {
+        return Collections.unmodifiableCollection(handlers);
     }
 
     // --------------------------------------------------------------------------------------------------------------

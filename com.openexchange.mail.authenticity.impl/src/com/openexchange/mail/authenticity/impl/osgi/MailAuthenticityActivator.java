@@ -49,14 +49,13 @@
 
 package com.openexchange.mail.authenticity.impl.osgi;
 
-import java.util.Arrays;
-import java.util.List;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.ForcedReloadable;
 import com.openexchange.config.Interests;
+import com.openexchange.config.Reloadable;
+import com.openexchange.config.Reloadables;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.filemanagement.ManagedFileManagement;
-import com.openexchange.java.Strings;
 import com.openexchange.mail.MailFetchListener;
 import com.openexchange.mail.authenticity.MailAuthenticityHandler;
 import com.openexchange.mail.authenticity.MailAuthenticityHandlerRegistry;
@@ -97,30 +96,37 @@ public class MailAuthenticityActivator extends HousekeepingActivator {
         // It is OK to pass service references since 'stopOnServiceUnavailability' returns 'true'
         final MailAuthenticityHandlerRegistryImpl registry = new MailAuthenticityHandlerRegistryImpl(getService(LeanConfigurationService.class), context);
         registerService(MailAuthenticityHandlerRegistry.class, registry);
-        track(MailAuthenticityHandler.class, registry).open();
+        track(MailAuthenticityHandler.class, registry);
 
-        registerService(ForcedReloadable.class, new ForcedReloadable() {
+        openTrackers();
+
+        final MailAuthenticityHandlerImpl handlerImpl = new MailAuthenticityHandlerImpl(this);
+        registerService(MailAuthenticityHandler.class, handlerImpl);
+
+        registerService(Reloadable.class, new Reloadable() {
 
             @Override
             public void reloadConfiguration(ConfigurationService configService) {
                 registry.invalidateCache();
+                handlerImpl.invalidateAuthServIdsCache();
             }
 
             @Override
             public Interests getInterests() {
-                return null;
+                return Reloadables.interestsForProperties(
+                    MailAuthenticityProperty.enabled.getFQPropertyName(),
+                    MailAuthenticityProperty.threshold.getFQPropertyName(),
+                    MailAuthenticityProperty.authServId.getFQPropertyName()
+                );
             }
         });
+
         ConfigurationService configurationService = getService(ConfigurationService.class);
         ManagedFileManagement managedFileManagement = getService(ManagedFileManagement.class);
         TrustedDomainAuthenticityHandler authenticationHandler = new TrustedDomainAuthenticityHandler(configurationService, managedFileManagement);
         registerService(ForcedReloadable.class, authenticationHandler);
         registerService(TrustedDomainAuthenticityHandler.class, authenticationHandler);
         trackService(TrustedDomainAuthenticityHandler.class).open();
-
-        LeanConfigurationService leanConfigService = getService(LeanConfigurationService.class);
-        List<String> authServIds = Arrays.asList(Strings.splitByComma(leanConfigService.getProperty(MailAuthenticityProperty.authServId)));
-        registerService(MailAuthenticityHandler.class, new MailAuthenticityHandlerImpl(authServIds, this));
 
         MailAuthenticityFetchListener fetchListener = new MailAuthenticityFetchListener(registry);
         registerService(MailFetchListener.class, fetchListener);

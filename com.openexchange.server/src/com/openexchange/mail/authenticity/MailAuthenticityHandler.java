@@ -50,15 +50,17 @@
 package com.openexchange.mail.authenticity;
 
 import java.util.Collection;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.authenticity.mechanism.MailAuthenticityMechanism;
 import com.openexchange.mail.dataobjects.MailAuthenticityResult;
 import com.openexchange.mail.dataobjects.MailMessage;
-import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.session.Session;
 
 /**
- * {@link MailAuthenticityHandler}
+ * {@link MailAuthenticityHandler} - Checks the authenticity of a given mail message.
+ * <p>
+ * Results are stored to {@link MailMessage#getAuthenticityResult()}.
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
@@ -70,17 +72,16 @@ public interface MailAuthenticityHandler {
     static final String AUTH_RESULTS_HEADER = "Authentication-Results";
 
     /**
-     * Handles the specified {@link MailPart}. Extracts the mail headers from the {@link MailPart}
+     * Handles the specified mail message. Extracts the mail headers from the mail message
      * and checks if the 'Authentication-Results' header is present. If it is, then parses that header
      * and collects the results of the different {@link MailAuthenticityMechanism}s that might be present
      * in a {@link MailAuthenticityResult} object and returns that
      *
-     * @param session The groupware {@link Session}
-     * @param mailPart The {@link MailPart} to handle
-     *
-     * @return The {@link MailAuthenticityResult} with the collected results of the {@link MailAuthenticityMechanism}s
+     * @param session The session providing user data
+     * @param mailMessage The mail message to handle
+     * @throws OXException If checking/verifying mail authenticity fails
      */
-    void handle(Session session, MailMessage mailMessage);
+    void handle(Session session, MailMessage mailMessage) throws OXException;
 
     /**
      * Returns an unmodifiable {@link Collection} with all required {@link MailField}s

@@ -76,15 +76,14 @@ public enum MailAuthenticityProperty implements Property {
      */
     authServId;
 
-    private static final String EMPTY = "";
-    private static final String PREFIX = "com.openexchange.mail.authenticity.";
     private final Object defaultValue;
+    private final String fqn;
 
     /**
      * Initialises a new {@link MailAuthenticityProperty}.
      */
     private MailAuthenticityProperty() {
-        this(EMPTY);
+        this("");
     }
 
     /**
@@ -92,6 +91,7 @@ public enum MailAuthenticityProperty implements Property {
      */
     private MailAuthenticityProperty(Object defaultValue) {
         this.defaultValue = defaultValue;
+        fqn = "com.openexchange.mail.authenticity." + name();
     }
 
     /**
@@ -101,7 +101,7 @@ public enum MailAuthenticityProperty implements Property {
      */
     @Override
     public String getFQPropertyName() {
-        return PREFIX + name();
+        return fqn;
     }
 
     /**

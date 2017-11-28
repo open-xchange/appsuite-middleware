@@ -47,67 +47,26 @@
  *
  */
 
-package com.openexchange.mail.authenticity.impl;
+package com.openexchange.mail.authenticity;
 
-import java.util.Collection;
-import com.openexchange.exception.OXException;
-import com.openexchange.mail.MailField;
-import com.openexchange.mail.authenticity.MailAuthenticityHandler;
-import com.openexchange.mail.dataobjects.MailAuthenticityResult;
-import com.openexchange.mail.dataobjects.MailMessage;
-import com.openexchange.session.Session;
+import com.openexchange.i18n.LocalizableStrings;
 
 /**
- * {@link ThresholdAwareAuthenticityHandler} - A simple authenticity handler, which only delegates if date threshold is fulfilled.
+ * {@link MailAuthenticityExceptionMessages} - Translatable messages for {@link MailAuthenticityExceptionCodes}.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.10.0
  */
-public class ThresholdAwareAuthenticityHandler implements MailAuthenticityHandler {
+public final class MailAuthenticityExceptionMessages implements LocalizableStrings {
 
-    private final MailAuthenticityHandler authenticityHandler;
-    private final long threshold;
+    // Missing or invalid authserv-ids.
+    public static final String INVALID_AUTHSERV_IDS_MSG = "Missing or invalid authserv-ids.";
 
     /**
-     * Initializes a new {@link ThresholdAwareAuthenticityHandler}.
+     * Prevent instantiation.
      */
-    public ThresholdAwareAuthenticityHandler(MailAuthenticityHandler authenticityHandler, long threshold) {
+    private MailAuthenticityExceptionMessages() {
         super();
-        this.authenticityHandler = authenticityHandler;
-        this.threshold = threshold;
-    }
-
-    @Override
-    public void handle(Session session, MailMessage mailMessage) throws OXException {
-        if (null == mailMessage) {
-            return;
-        }
-        if ((threshold > 0 && mailMessage.getReceivedDate().getTime() < threshold)) {
-            mailMessage.setAuthenticityResult(MailAuthenticityResult.NOT_ANALYZED_RESULT);
-            return;
-        }
-
-        authenticityHandler.handle(session, mailMessage);
-    }
-
-    @Override
-    public Collection<MailField> getRequiredFields() {
-        return authenticityHandler.getRequiredFields();
-    }
-
-    @Override
-    public Collection<String> getRequiredHeaders() {
-        return authenticityHandler.getRequiredHeaders();
-    }
-
-    @Override
-    public boolean isEnabled(Session session) {
-        return authenticityHandler.isEnabled(session);
-    }
-
-    @Override
-    public int getRanking() {
-        return authenticityHandler.getRanking();
     }
 
 }
