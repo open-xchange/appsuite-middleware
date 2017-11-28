@@ -164,11 +164,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
             DMARCResult dmarcResult = DMARCResult.valueOf(extractOutcome(value.toUpperCase()));
 
             String domain = line.get(DMARCResultHeader.HEADER_FROM);
-            String fromDomain = cleanseDomain(overallResult.getAttribute(DefaultMailAuthenticityResultKey.FROM_DOMAIN, String.class));
-            boolean domainMismatch = !fromDomain.equals(domain);
-            if (domainMismatch) {
-                overallResult.setStatus(MailAuthenticityStatus.NEUTRAL);
-            }
+            boolean domainMismatch = checkDomainMismatch(overallResult, domain);
 
             // In case of a DMARC result != "none", set overall result to the DMARC result and continue with the next mechanism
             MailAuthenticityStatus mailAuthStatus = convert(dmarcResult);
@@ -189,11 +185,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
                 domain = cleanseDomain(line.get(DKIMResultHeader.HEADER_D));
             }
 
-            String fromDomain = overallResult.getAttribute(DefaultMailAuthenticityResultKey.FROM_DOMAIN, String.class);
-            boolean domainMismatch = !fromDomain.equals(domain);
-            if (domainMismatch) {
-                overallResult.setStatus(MailAuthenticityStatus.NEUTRAL);
-            }
+            boolean domainMismatch = checkDomainMismatch(overallResult, domain);
 
             // In case of a DKIM result != "none", set overall result to the DKIM result and continue with the next mechanism
             MailAuthenticityStatus mailAuthStatus = convert(dkimResult);
@@ -218,11 +210,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
                 domain = cleanseDomain(line.get(SPFResultHeader.SMTP_HELO));
             }
 
-            String fromDomain = overallResult.getAttribute(DefaultMailAuthenticityResultKey.FROM_DOMAIN, String.class);
-            boolean domainMismatch = !fromDomain.equals(domain);
-            if (domainMismatch) {
-                overallResult.setStatus(MailAuthenticityStatus.NEUTRAL);
-            }
+            boolean domainMismatch = checkDomainMismatch(overallResult, domain);
 
             // Set the overall result only if it's 'none'
             MailAuthenticityStatus mailAuthStatus = convert(spfResult);
@@ -716,6 +704,25 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
             LOGGER.debug("Unknown mail authenticity status '{}'", authMechResult.getTechnicalName(), e);
         }
         return mailAuthenticityStatus;
+    }
+
+    /**
+     * Checks whether there is a domain mismatch between the domain extracted from the <code>From</code> header
+     * and the domain extracted from the authenticity mechanism. If there is a mismatch the overall status
+     * is set to {@link MailAuthenticityStatus#NEUTRAL} and <code>true</code> is returned. Otherwise
+     * no further action is performed and <code>false</code> is returned.
+     * 
+     * @param overallResult The overall {@link MailAuthenticityResult}
+     * @param domain The domain extracted from the mechanism result
+     * @return <code>true</code> if there is a mismatch between the domains, <code>false</code> otherwise
+     */
+    private boolean checkDomainMismatch(MailAuthenticityResult overallResult, String domain) {
+        String fromDomain = overallResult.getAttribute(DefaultMailAuthenticityResultKey.FROM_DOMAIN, String.class);
+        boolean domainMismatch = !fromDomain.equals(domain);
+        if (domainMismatch) {
+            overallResult.setStatus(MailAuthenticityStatus.NEUTRAL);
+        }
+        return domainMismatch;
     }
 
     ///////////////////////////////// HELPER CLASSES /////////////////////////////////
