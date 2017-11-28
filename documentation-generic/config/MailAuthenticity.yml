@@ -1,4 +1,4 @@
-feature_name: Mail Authentication
+feature_name: Mail Authenticity
 properties:
     - key: com.openexchange.mail.authenticity.trustedDomains.tenants
       description: |
@@ -8,45 +8,101 @@ properties:
       reloadable: true
       configcascadeAware: false
       related: 
-      file: mailAuthentication.properties
+        - "com.openexchange.mail.authenticity.trustedDomains.[tenant].domains"
+        - "com.openexchange.mail.authenticity.trustedDomains.[tenant].image.[imageId]"
+        - "com.openexchange.mail.authenticity.trustedDomains.[tenant].fallbackImage"
+      file: mailAuthenticity.properties
       packageName: open-xchange-mail-authenticity
       tags: ["Mail Authenticity","Mail"]
     - key: com.openexchange.mail.authenticity.trustedDomains.[tenant].domains
       description: |
-        A comma separated list of trusted domains. This list also supports '*' wildcards.
+        A comma separated list of trusted domain configurations. 
+        Each configuration consists of a trusted domain and an optional imageId separated by a colon (domain[:imageId]). 
+        The domain also support '*' wildcards.
 
-        [tenant] must be replaced with a tenant identifier.
-
-        For example:
+        Here are some valid domain configurations provided that an image with id 'img1' is also configured:
         ```
-        com.openexchange.mail.authenticity.trustedDomains.myhost1.domains = *.myhost1.com, *.myhost1.de
-        com.openexchange.mail.authenticity.trustedDomains.myhost2.domains = *.myhost2.com, otherdomain.com
+        sub.domain.com
+        sub.domain.com:img1
+        *.domain.com
+        *.domain.com:img1
+        ```
+        
+        Note:
+        The [tenant] must either be replaced with a tenant identifier or must be omitted (e.g. for single tenant systems).
+
+        A complete configuration example for two tenants could look like this:
+        ```
+        com.openexchange.mail.authenticity.trustedDomains.tenants = myhost1, myhost2
+
+        com.openexchange.mail.authenticity.trustedDomains.myhost1.image.1 = http://myhost1/imgs/icon.png
+        com.openexchange.mail.authenticity.trustedDomains.myhost1.fallbackImage = /images/fallback.jpg
+        com.openexchange.mail.authenticity.trustedDomains.myhost1.domains = *.myhost1.com, *.myhost1.de:1
+
+        com.openexchange.mail.authenticity.trustedDomains.myhost2.image.1 = http://myhost2/imgs/icon.png
+        com.openexchange.mail.authenticity.trustedDomains.myhost2.domains = *.myhost2.com:1, otherdomain.com
         ```
       defaultValue:
       version: 7.10.0
       reloadable: true
       configcascadeAware: false
-      related: com.openexchange.mail.authenticity.trustedDomains.tenants
-      file: mailAuthentication.properties
+      related: 
+        - "com.openexchange.mail.authenticity.trustedDomains.tenants"
+        - "com.openexchange.mail.authenticity.trustedDomains.[tenant].image.[imageId]"
+        - "com.openexchange.mail.authenticity.trustedDomains.[tenant].fallbackImage"
+      file: mailAuthenticity.properties
       packageName: open-xchange-mail-authenticity
       tags: ["Mail Authenticity","Mail"]
-    - key: com.openexchange.mail.authenticity.trustedDomains.[tenant].image
+    - key: com.openexchange.mail.authenticity.trustedDomains.[tenant.]image.[imageId]
       description: |
-        For each tenant an image can be configured which is shown by the client for trusted domains.
+        For each tenant a set of images can be configured which is to be shown by clients for trusted domains.
 
-        [tenant] must be replaced with a tenant identifier.
+        Note:
+        The [tenant] must either be replaced with a tenant identifier or must be omitted (e.g. for single tenant systems).
+        The [imageId] must be a tenant unique identifier. E.g. an ascending number.
 
         For example:
         ```
-        com.openexchange.mail.authenticity.trustedDomains.myhost1.image = http://www.myhost1.com/images/icon.png
-        com.openexchange.mail.authenticity.trustedDomains.myhost2.image = http://www.myhost2.com/images/icon.jpg
+        com.openexchange.mail.authenticity.trustedDomains.image.1 = http://www.myhost2.com/images/icon.jpg
+
+        com.openexchange.mail.authenticity.trustedDomains.myhost1.image.1 = http://www.myhost1.com/images/icon.png
+        com.openexchange.mail.authenticity.trustedDomains.myhost1.image.2 = http://www.myhost1.com/images/icon2.png
+
+        com.openexchange.mail.authenticity.trustedDomains.myhost2.image.1 = http://www.myhost2.com/images/icon.jpg
         ```
       defaultValue:
       version: 7.10.0
       reloadable: true
       configcascadeAware: false
-      related: com.openexchange.mail.authenticity.trustedDomains.tenants
-      file: mailAuthentication.properties
+      related:
+        - "com.openexchange.mail.authenticity.trustedDomains.tenants"
+        - "com.openexchange.mail.authenticity.trustedDomains.[tenant].domains
+        - "com.openexchange.mail.authenticity.trustedDomains.[tenant].fallbackImage"
+      file: mailAuthenticity.properties
+      packageName: open-xchange-mail-authenticity
+      tags: ["Mail Authenticity","Mail"]
+    - key: com.openexchange.mail.authenticity.trustedDomains.[tenant].fallbackImage
+      description: |
+        For each tenant a fallback image can be configured which is shown by the client for trusted domains without a configured image.
+
+        Note:
+        The [tenant] must either be replaced with a tenant identifier or must be omitted (e.g. for single tenant systems).
+
+        For example:
+        ```
+        com.openexchange.mail.authenticity.trustedDomains.fallbackImage = /images/fallback.png
+        com.openexchange.mail.authenticity.trustedDomains.myhost1.fallbackImage = http://www.myhost1.com/images/fallback.png
+        com.openexchange.mail.authenticity.trustedDomains.myhost2.fallbackImage = http://www.myhost2.com/images/fallback.jpg
+        ```
+      defaultValue:
+      version: 7.10.0
+      reloadable: true
+      configcascadeAware: false
+      related: 
+        - "com.openexchange.mail.authenticity.trustedDomains.tenants"
+        - "com.openexchange.mail.authenticity.trustedDomains.[tenant].image.[imageId]"
+        - "com.openexchange.mail.authenticity.trustedDomains.[tenant].domains"
+      file: mailAuthenticity.properties
       packageName: open-xchange-mail-authenticity
       tags: ["Mail Authenticity","Mail"]
 
