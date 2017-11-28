@@ -111,22 +111,20 @@ public class TestMailAuthenticityHandler {
         argumentCaptor = ArgumentCaptor.forClass(MailAuthenticityResult.class);
         headerCollection = new HeaderCollection();
 
-        ServiceLookup services = mock(ServiceLookup.class);
-
         session = mock(Session.class);
 
         when(session.getUserId()).thenReturn(1);
         when(session.getContextId()).thenReturn(1);
 
         leanConfig = mock(LeanConfigurationService.class);
+        ServiceLookup services = mock(ServiceLookup.class);
         when(services.getService(LeanConfigurationService.class)).thenReturn(leanConfig);
+        when(leanConfig.getProperty(1, 1, MailAuthenticityProperty.authServId)).thenReturn("ox.io");
 
         mailMessage = mock(MailMessage.class);
         when(mailMessage.getHeaders()).thenReturn(headerCollection);
 
         handler = new MailAuthenticityHandlerImpl(services);
-
-        when(leanConfig.getProperty(1, 1, MailAuthenticityProperty.authServId)).thenReturn("ox.io");
     }
 
     /**
