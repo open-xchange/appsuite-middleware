@@ -226,11 +226,12 @@ public class TestMailAuthenticityHandler {
 
         assertEquals("The overall status does not match", MailAuthenticityStatus.FAIL, result.getStatus()); // FIXME: Should it fail?
         assertEquals("The domain does not match", "newyork.example.com", result.getAttribute(DefaultMailAuthenticityResultKey.FROM_DOMAIN));
-        assertAmount(2);
+        assertAmount(3);
 
         List<MailAuthenticityMechanismResult> results = result.getAttribute(DefaultMailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS, List.class);
-        assertAuthenticityMechanismResult(results.get(0), "newyork.example.com", "\"bad signature\"", DKIMResult.FAIL);
-        assertAuthenticityMechanismResult(results.get(1), "newyork.example.com", "good signature", DKIMResult.PASS);
+        assertAuthenticityMechanismResult(results.get(0), "mail-router.example.net", "\"good signature\"", DKIMResult.PASS);
+        assertAuthenticityMechanismResult(results.get(1), "newyork.example.com", "\"bad signature\"", DKIMResult.FAIL);
+        assertAuthenticityMechanismResult(results.get(2), "newyork.example.com", "good signature", DKIMResult.PASS);
     }
 
     /**
@@ -356,6 +357,40 @@ public class TestMailAuthenticityHandler {
         assertTrue("The from domain does not match", result.getAttribute(DefaultMailAuthenticityResultKey.FROM_DOMAIN) == null);
         assertTrue("The mail authentication mechanism results do not match", result.getAttribute(DefaultMailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS) == null);
         assertTrue("The unknown mail authentication mechanism results do not match", result.getAttribute(DefaultMailAuthenticityResultKey.UNKNOWN_AUTH_MECH_RESULTS) == null);
+    }
+
+    /**
+     * Tests the real world case where the <code>Authentication-Results</code> header field is present
+     * and the DMARC and DKIM delivered a 'none' status and the SPF passed.
+     */
+    @Test
+    public void testDMARCNoneDKIMNoneSPFPass() {
+        headerCollection.addHeader("From", "Jane Doe <jane.doe@foobar.com>");
+        perform("ox.io; dkim=none header.i=@foobar.com header.s=201705 header.b=VvWVD9kg; spf=pass (ox.io: domain of jane.doe@foobar.com designates 1.2.3.4 as permitted sender) smtp.mailfrom=jane.doe@foobar.com; dmarc=none (p=NONE sp=NONE dis=NONE) header.from=foobar.com");
+        assertEquals("The overall status does not match", MailAuthenticityStatus.PASS, result.getStatus());
+        assertEquals("The domain does not match", "foobar.com", result.getAttribute(DefaultMailAuthenticityResultKey.FROM_DOMAIN));
+        assertAmount(3);
+
+        List<MailAuthenticityMechanismResult> results = result.getAttribute(DefaultMailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS, List.class);
+        assertAuthenticityMechanismResult(results.get(0), "foobar.com", DMARCResult.NONE);
+        assertAuthenticityMechanismResult(results.get(1), "foobar.com", DKIMResult.NONE);
+        assertAuthenticityMechanismResult(results.get(2), "foobar.com", "ox.io: domain of jane.doe@foobar.com designates 1.2.3.4 as permitted sender", SPFResult.PASS);
+    }
+
+    /**
+     * Tests the edge case where the <code>Authentication-Results</code> header field is present
+     * and the DMARC passed but the <code>From</code> header has a different domain as in DMARC.
+     */
+    @Test
+    public void testDMARCWithMismatchingFromHeader() {
+        headerCollection.addHeader("From", "Jane Doe <jane.doe@some.foobar.com>");
+        perform("ox.io; dmarc=pass (p=NONE sp=NONE dis=NONE) header.from=foobar.com");
+        assertEquals("The overall status does not match", MailAuthenticityStatus.NEUTRAL, result.getStatus());
+        assertEquals("The domain does not match", "some.foobar.com", result.getAttribute(DefaultMailAuthenticityResultKey.FROM_DOMAIN));
+        assertAmount(1);
+
+        List<MailAuthenticityMechanismResult> results = result.getAttribute(DefaultMailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS, List.class);
+        assertAuthenticityMechanismResult(results.get(0), "foobar.com", DMARCResult.PASS);
     }
 
     ///////////////////////////// HELPERS //////////////////////////////

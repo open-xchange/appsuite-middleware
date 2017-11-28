@@ -165,13 +165,14 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
 
             String domain = line.get(DMARCResultHeader.HEADER_FROM);
             String fromDomain = cleanseDomain(overallResult.getAttribute(DefaultMailAuthenticityResultKey.FROM_DOMAIN, String.class));
-            if (!fromDomain.equals(domain)) {
-                return null;
+            boolean domainMismatch = !fromDomain.equals(domain);
+            if (domainMismatch) {
+                overallResult.setStatus(MailAuthenticityStatus.NEUTRAL);
             }
 
             // In case of a DMARC result != "none", set overall result to the DMARC result and continue with the next mechanism
             MailAuthenticityStatus mailAuthStatus = convert(dmarcResult);
-            if (!mailAuthStatus.equals(MailAuthenticityStatus.NONE)) {
+            if (!mailAuthStatus.equals(MailAuthenticityStatus.NONE) && !domainMismatch) {
                 overallResult.setStatus(mailAuthStatus);
             }
 
@@ -189,13 +190,14 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
             }
 
             String fromDomain = overallResult.getAttribute(DefaultMailAuthenticityResultKey.FROM_DOMAIN, String.class);
-            if (!fromDomain.equals(domain)) {
-                return null;
+            boolean domainMismatch = !fromDomain.equals(domain);
+            if (domainMismatch) {
+                overallResult.setStatus(MailAuthenticityStatus.NEUTRAL);
             }
 
             // In case of a DKIM result != "none", set overall result to the DKIM result and continue with the next mechanism
             MailAuthenticityStatus mailAuthStatus = convert(dkimResult);
-            if (overallResult.getStatus().equals(MailAuthenticityStatus.NEUTRAL) && !mailAuthStatus.equals(MailAuthenticityStatus.NONE)) {
+            if (overallResult.getStatus().equals(MailAuthenticityStatus.NEUTRAL) && !mailAuthStatus.equals(MailAuthenticityStatus.NONE) && !domainMismatch) {
                 overallResult.setStatus(mailAuthStatus);
             }
 
@@ -217,13 +219,14 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
             }
 
             String fromDomain = overallResult.getAttribute(DefaultMailAuthenticityResultKey.FROM_DOMAIN, String.class);
-            if (!fromDomain.equals(domain)) {
-                return null;
+            boolean domainMismatch = !fromDomain.equals(domain);
+            if (domainMismatch) {
+                overallResult.setStatus(MailAuthenticityStatus.NEUTRAL);
             }
 
             // Set the overall result only if it's 'none'
             MailAuthenticityStatus mailAuthStatus = convert(spfResult);
-            if (overallResult.getStatus().equals(MailAuthenticityStatus.NEUTRAL) || (!overallResult.getStatus().equals(MailAuthenticityStatus.PASS) && mailAuthStatus.equals(MailAuthenticityStatus.PASS))) {
+            if (!domainMismatch && (overallResult.getStatus().equals(MailAuthenticityStatus.NEUTRAL) || (!overallResult.getStatus().equals(MailAuthenticityStatus.PASS) && mailAuthStatus.equals(MailAuthenticityStatus.PASS)))) {
                 overallResult.setStatus(mailAuthStatus);
             }
 
@@ -456,10 +459,6 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
                     continue;
                 }
                 MailAuthenticityMechanismResult mailAuthMechResult = mechanismParser.apply(attributes, result);
-                if (mailAuthMechResult == null) {
-                    // Skip results that the 'From' domain does not match the mechanism's 'From' domain
-                    continue;
-                }
                 results.add(mailAuthMechResult);
             }
             if (unknownAuthElements.length() > 0) {
