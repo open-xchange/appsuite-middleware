@@ -106,4 +106,11 @@ public interface CalendarFolder {
      */
     EnumSet<CalendarCapability> getSupportedCapabilites();
 
+    /**
+     * Gets the corresponding calendar account.
+     *
+     * @return The calendar account, or <code>null</code> if not set
+     */
+    CalendarAccount getAccount();
+
 }

@@ -56,12 +56,14 @@ import java.util.List;
 import java.util.Map;
 import com.openexchange.chronos.ExtendedProperties;
 import com.openexchange.chronos.ExtendedProperty;
+import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.CalendarFolder;
 import com.openexchange.chronos.provider.CalendarPermission;
 import com.openexchange.chronos.provider.DefaultCalendarPermission;
 import com.openexchange.chronos.provider.groupware.DefaultGroupwareCalendarFolder;
 import com.openexchange.chronos.provider.groupware.GroupwareCalendarFolder;
 import com.openexchange.chronos.provider.groupware.GroupwareFolderType;
+import com.openexchange.folderstorage.calendar.CalendarAccountField;
 import com.openexchange.folderstorage.calendar.CalendarFolderStorage;
 import com.openexchange.folderstorage.calendar.CalendarStorageFolder;
 import com.openexchange.folderstorage.calendar.ExtendedPropertiesField;
@@ -78,6 +80,8 @@ import com.openexchange.folderstorage.type.SharedType;
 public class CalendarFolderConverter {
 
     private static final FolderField EXTENDED_PROPERTIES_FIELD = ExtendedPropertiesField.getInstance();
+
+    private static final FolderField CALENDAR_ACCOUNT_FIELD = CalendarAccountField.getInstance();
 
     /**
      * Converts a calendar folder into a folder storage compatible folder.
@@ -101,6 +105,7 @@ public class CalendarFolderConverter {
         folder.setSubfolderIDs(new String[0]);
         folder.setSubscribedSubfolders(false);
         folder.setProperty(EXTENDED_PROPERTIES_FIELD, calendarFolder.getExtendedProperties());
+        folder.setProperty(CALENDAR_ACCOUNT_FIELD, calendarFolder.getAccount());
         folder.setSupportedCapabilities(getCapabilityNames(calendarFolder.getSupportedCapabilites()));
         return folder;
     }
@@ -128,6 +133,7 @@ public class CalendarFolderConverter {
         folder.setType(getStorageType(calendarFolder.getType()));
         folder.setDefault(calendarFolder.isDefaultFolder());
         folder.setProperty(EXTENDED_PROPERTIES_FIELD, calendarFolder.getExtendedProperties());
+        folder.setProperty(CALENDAR_ACCOUNT_FIELD, calendarFolder.getAccount());
         folder.setSupportedCapabilities(getCapabilityNames(calendarFolder.getSupportedCapabilites()));
         return folder;
     }
@@ -335,6 +341,7 @@ public class CalendarFolderConverter {
         calendarFolder.setPermissions(getCalendarPermissions(folder.getPermissions()));
         if (ParameterizedFolder.class.isInstance(folder)) {
             calendarFolder.setExtendedProperties(getExtendedProperties(((ParameterizedFolder) folder).getProperties()));
+            calendarFolder.setAccount(getCalendarAccount(((ParameterizedFolder) folder).getProperties()));
         }
         calendarFolder.setSupportedCapabilites(getCapabilities(folder.getSupportedCapabilities()));
         return calendarFolder;
@@ -354,6 +361,17 @@ public class CalendarFolderConverter {
         FolderProperty folderProperty = folderProperties.get(EXTENDED_PROPERTIES_FIELD);
         if (null != folderProperty && null != folderProperty.getValue() && ExtendedProperties.class.isInstance(folderProperty.getValue())) {
             return (ExtendedProperties) folderProperty.getValue();
+        }
+        return null;
+    }
+
+    private static CalendarAccount getCalendarAccount(Map<FolderField, FolderProperty> folderProperties) {
+        if (null == folderProperties) {
+            return null;
+        }
+        FolderProperty folderProperty = folderProperties.get(CALENDAR_ACCOUNT_FIELD);
+        if (null != folderProperty && null != folderProperty.getValue() && CalendarAccount.class.isInstance(folderProperty.getValue())) {
+            return (CalendarAccount) folderProperty.getValue();
         }
         return null;
     }

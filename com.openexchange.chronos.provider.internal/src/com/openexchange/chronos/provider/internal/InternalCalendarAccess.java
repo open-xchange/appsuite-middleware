@@ -82,6 +82,7 @@ import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.TimeTransparency;
 import com.openexchange.chronos.compat.Appointment2Event;
+import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.CalendarCapability;
 import com.openexchange.chronos.provider.CalendarFolder;
 import com.openexchange.chronos.provider.CalendarFolderProperty;
@@ -126,16 +127,19 @@ public class InternalCalendarAccess implements GroupwareCalendarAccess, SyncAwar
 
     private final CalendarSession session;
     private final ServiceLookup services;
+    private final CalendarAccount account;
 
     /**
      * Initializes a new {@link InternalCalendarAccess}.
      *
      * @param session The calendar session
+     * @param account The calendar account
      * @param services A service lookup reference
      */
-    public InternalCalendarAccess(CalendarSession session, ServiceLookup services) {
+    public InternalCalendarAccess(CalendarSession session, CalendarAccount account, ServiceLookup services) {
         super();
         this.session = session;
+        this.account = account;
         this.services = services;
     }
 
@@ -367,6 +371,7 @@ public class InternalCalendarAccess implements GroupwareCalendarAccess, SyncAwar
         DefaultGroupwareCalendarFolder calendarFolder = CalendarFolderConverter.getCalendarFolder(userizedFolder);
         calendarFolder.setExtendedProperties(getProperties(userizedFolder));
         calendarFolder.setSupportedCapabilites(CalendarCapability.getCapabilities(InternalCalendarAccess.class));
+        calendarFolder.setAccount(account);
         return calendarFolder;
     }
 

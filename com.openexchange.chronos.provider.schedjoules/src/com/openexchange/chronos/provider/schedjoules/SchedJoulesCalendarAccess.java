@@ -98,6 +98,8 @@ public class SchedJoulesCalendarAccess extends CachingCalendarAccess {
      */
     private static final int EXTERNAL_REQUEST_TIMEOUT = 60;
 
+    private final CalendarAccount account;
+
     /**
      * Initialises a new {@link SchedJoulesCalendarAccess}.
      *
@@ -108,6 +110,7 @@ public class SchedJoulesCalendarAccess extends CachingCalendarAccess {
      */
     protected SchedJoulesCalendarAccess(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
         super(session, account, parameters);
+        this.account = account;
     }
 
     /*
@@ -363,6 +366,7 @@ public class SchedJoulesCalendarAccess extends CachingCalendarAccess {
 
         folder.setPermissions(Collections.singletonList(DefaultCalendarPermission.readOnlyPermissionsFor(getAccount().getUserId())));
         folder.setLastModified(getAccount().getLastModified());
+        folder.setAccount(account);
 
         applyConfiguration(folder, folderId);
         return folder;

@@ -164,8 +164,8 @@ public class CachingCalendarAccessTest {
     @Test
     public void testMerge_multipleNewVisibleFolders_returnInstructionsToInsert() {
         List<CalendarFolder> visibleFolders = new ArrayList<>();
-        visibleFolders.add(new DefaultCalendarFolder("myFolderId", "The name of my folder ids folder"));
-        visibleFolders.add(new DefaultCalendarFolder("mySecondFolderId", "The SECOND ONE"));
+        visibleFolders.add(new DefaultCalendarFolder(account, "myFolderId", "The name of my folder ids folder"));
+        visibleFolders.add(new DefaultCalendarFolder(account, "mySecondFolderId", "The SECOND ONE"));
 
         Set<FolderUpdateState> processingInstructions = cachingCalendarAccess.merge(Collections.<FolderUpdateState> emptyList(), visibleFolders);
 
@@ -196,8 +196,8 @@ public class CachingCalendarAccessTest {
         lastFolders.add(new FolderUpdateState("mySecondFolderId", new Long(System.currentTimeMillis() - 111111111), 1, FolderProcessingType.UPDATE));
 
         List<CalendarFolder> visibleFolders = new ArrayList<>();
-        visibleFolders.add(new DefaultCalendarFolder("myFolderId", "The name of my folder ids folder"));
-        visibleFolders.add(new DefaultCalendarFolder("a new Folder", "The NEW ONE"));
+        visibleFolders.add(new DefaultCalendarFolder(account, "myFolderId", "The name of my folder ids folder"));
+        visibleFolders.add(new DefaultCalendarFolder(account, "a new Folder", "The NEW ONE"));
 
         Set<FolderUpdateState> processingInstructions = cachingCalendarAccess.merge(lastFolders, visibleFolders);
 

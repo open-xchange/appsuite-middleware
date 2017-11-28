@@ -62,6 +62,7 @@ import com.openexchange.chronos.ExtendedProperties;
  */
 public class DefaultCalendarFolder implements CalendarFolder {
 
+    private CalendarAccount account;
     private String id;
     private String name;
     private Date lastModified;
@@ -83,6 +84,7 @@ public class DefaultCalendarFolder implements CalendarFolder {
      */
     public DefaultCalendarFolder(CalendarFolder folder) {
         super();
+        account = folder.getAccount();
         id = folder.getId();
         name = folder.getName();
         lastModified = folder.getLastModified();
@@ -94,13 +96,24 @@ public class DefaultCalendarFolder implements CalendarFolder {
     /**
      * Initializes a new {@link DefaultCalendarFolder}.
      *
+     * @param account The parent calendar account
      * @param id The folder identifier
      * @param name The folder name
      */
-    public DefaultCalendarFolder(String id, String name) {
+    public DefaultCalendarFolder(CalendarAccount account, String id, String name) {
         this();
+        this.account = account;
         this.id = id;
         this.name = name;
+    }
+
+    @Override
+    public CalendarAccount getAccount() {
+        return account;
+    }
+
+    public void setAccount(CalendarAccount account) {
+        this.account = account;
     }
 
     @Override

@@ -195,7 +195,7 @@ public class BirthdaysCalendarAccess extends SingleFolderCalendarAccess implemen
     @Override
     public String updateFolder(String folderId, CalendarFolder folder, long clientTimestamp) throws OXException {
         /*
-         * prevent updates to permissions or folder name 
+         * prevent updates to permissions or folder name
          */
         if (null != folder.getName() && false == folder.getName().equals(this.folder.getName()) ||
             null != folder.getPermissions() && false == folder.getPermissions().equals(this.folder.getPermissions())) {
@@ -378,7 +378,7 @@ public class BirthdaysCalendarAccess extends SingleFolderCalendarAccess implemen
 
     private static DefaultCalendarFolder prepareFolder(ConversionService conversionService, ServerSession session, CalendarAccount account) throws OXException {
         StringHelper stringHelper = StringHelper.valueOf(session.getUser().getLocale());
-        DefaultCalendarFolder folder = new DefaultCalendarFolder(FOLDER_ID, stringHelper.getString(BirthdaysCalendarStrings.CALENDAR_NAME));
+        DefaultCalendarFolder folder = new DefaultCalendarFolder(account, FOLDER_ID, stringHelper.getString(BirthdaysCalendarStrings.CALENDAR_NAME));
         folder.setSupportedCapabilites(CalendarCapability.getCapabilities(BirthdaysCalendarAccess.class));
         folder.setLastModified(account.getLastModified());
         ExtendedProperties extendedProperties = SingleFolderCalendarAccessUtils.parseExtendedProperties(conversionService, account.getInternalConfiguration().optJSONObject("extendedProperties"));

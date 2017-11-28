@@ -428,11 +428,9 @@ public class GoogleCalendarAccess extends CachingCalendarAccess {
     }
 
     private CalendarFolder prepareFolder(String folderId, String summary, String color, String description, ConversionService conversionService) throws OXException {
-        DefaultCalendarFolder folder = new DefaultCalendarFolder();
-        folder.setId(folderId);
+        DefaultCalendarFolder folder = new DefaultCalendarFolder(account, folderId, summary);
         folder.setPermissions(Collections.singletonList(DefaultCalendarPermission.readOnlyPermissionsFor(account.getUserId())));
         folder.setLastModified(account.getLastModified());
-        folder.setName(summary);
 
         JSONObject folderConfig = account.getInternalConfiguration()!=null ? account.getInternalConfiguration().optJSONObject(folderId) : null;
 
