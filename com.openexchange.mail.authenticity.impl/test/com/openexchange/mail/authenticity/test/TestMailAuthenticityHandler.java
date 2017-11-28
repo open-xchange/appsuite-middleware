@@ -170,6 +170,13 @@ public class TestMailAuthenticityHandler {
         assertAmount(1);
 
         assertAuthenticityMechanismResult((MailAuthenticityMechanismResult) result.getAttribute(DefaultMailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS, List.class).get(0), "example.net", SPFResult.PASS);
+
+        String unknownMech = (String) result.getAttribute(DefaultMailAuthenticityResultKey.UNKNOWN_AUTH_MECH_RESULTS, List.class).get(0);
+        assertEquals("ox.io; auth=pass (cram-md5) smtp.auth=sender@example.net", unknownMech);
+
+        unknownMech = (String) result.getAttribute(DefaultMailAuthenticityResultKey.UNKNOWN_AUTH_MECH_RESULTS, List.class).get(1);
+        assertEquals("ox.io; sender-id=pass header.from=example.net", unknownMech);
+
     }
 
     /**
@@ -186,6 +193,12 @@ public class TestMailAuthenticityHandler {
         assertAmount(2);
 
         assertAuthenticityMechanismResult((MailAuthenticityMechanismResult) result.getAttribute(DefaultMailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS, List.class).get(0), "example.com", "good signature", DKIMResult.PASS);
+
+        String unknownMech = (String) result.getAttribute(DefaultMailAuthenticityResultKey.UNKNOWN_AUTH_MECH_RESULTS, List.class).get(0);
+        assertEquals("ox.io; sender-id=fail header.from=example.com", unknownMech);
+
+        unknownMech = (String) result.getAttribute(DefaultMailAuthenticityResultKey.UNKNOWN_AUTH_MECH_RESULTS, List.class).get(1);
+        assertEquals("ox.io; auth=pass (cram-md5) smtp.auth=sender@example.com", unknownMech);
     }
 
     /**
@@ -274,6 +287,9 @@ public class TestMailAuthenticityHandler {
         assertAmount(1);
 
         assertAuthenticityMechanismResult((MailAuthenticityMechanismResult) result.getAttribute(DefaultMailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS, List.class).get(0), "ox.io", "\"1024-bit key; unprotected key\"", DKIMResult.PASS);
+
+        String unknownMech = (String) result.getAttribute(DefaultMailAuthenticityResultKey.UNKNOWN_AUTH_MECH_RESULTS, List.class).get(0);
+        assertEquals("ox.io; dkim-adsp=pass; dkim-atps=neutral", unknownMech);
     }
 
     /**
@@ -321,6 +337,10 @@ public class TestMailAuthenticityHandler {
         assertNotNull("The mechanism's result is null", actualMechanismResult.getResult());
         AuthenticityMechanismResult s = actualMechanismResult.getResult();
         assertEquals("The mechanism's result does not match", expectedResult.getTechnicalName(), s.getTechnicalName());
+    }
+
+    private void assertUnknownResult() {
+
     }
 
     /**
