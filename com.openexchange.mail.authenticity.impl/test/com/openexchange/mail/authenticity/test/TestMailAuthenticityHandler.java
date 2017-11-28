@@ -353,10 +353,6 @@ public class TestMailAuthenticityHandler {
         assertEquals("The mechanism's result does not match", expectedResult.getTechnicalName(), s.getTechnicalName());
     }
 
-    private void assertUnknownResult() {
-
-    }
-
     /**
      * Asserts that the specified {@link MailAuthenticityMechanismResult} contains the expected domain, reason and status result
      *
