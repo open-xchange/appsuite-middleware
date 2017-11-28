@@ -110,7 +110,7 @@ properties:
       configcascadeAware: false
       related:
         - "com.openexchange.mail.authenticity.trustedDomains.tenants"
-        - "com.openexchange.mail.authenticity.trustedDomains.[tenant].domains
+        - "com.openexchange.mail.authenticity.trustedDomains.[tenant].domains"
         - "com.openexchange.mail.authenticity.trustedDomains.[tenant].fallbackImage"
       file: mailAuthenticity.properties
       packageName: open-xchange-mail-authenticity
