@@ -382,21 +382,25 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
         Iterator<String> authResultsIterator = authResults.iterator();
         List<MailAuthenticityMechanismResult> results = new ArrayList<>();
         List<String> unknownResults = new ArrayList<>();
+        StringBuilder unknownAuthElements = new StringBuilder(128);
         while (authResultsIterator.hasNext()) {
             String authResult = authResultsIterator.next();
             List<String> authHeader = splitElements(authResult);
             // Sort by ordinal
             Collections.sort(authHeader, MAIL_AUTH_COMPARATOR);
             for (int index = 0; index < authHeader.size(); index++) {
-                Map<String, String> attributes = parseLine(authHeader.get(index));
+                String authHederElement = authHeader.get(index);
+                Map<String, String> attributes = parseLine(authHederElement);
                 DefaultMailAuthenticityMechanism mechanism = getMechanism(attributes);
                 if (mechanism == null) {
+                    // Unknown or not parsable mechanism
+                    unknownAuthElements.append(authHederElement).append("; ");
                     continue;
                 }
                 BiFunction<Map<String, String>, MailAuthenticityResult, MailAuthenticityMechanismResult> mechanismParser = mechanismParsersRegitry.get(mechanism);
                 if (mechanismParser == null) {
                     // Not a valid mechanism, skip but add to the overall result
-                    unknownResults.add(authResult);
+                    unknownAuthElements.append(authHederElement).append("; ");
                     continue;
                 }
                 MailAuthenticityMechanismResult mailAuthMechResult = mechanismParser.apply(attributes, result);
@@ -405,6 +409,11 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
                     continue;
                 }
                 results.add(mailAuthMechResult);
+            }
+            if (unknownAuthElements.length() > 0) {
+                unknownAuthElements.setLength(unknownAuthElements.length() - 2);
+                unknownResults.add(unknownAuthElements.toString().trim());
+                unknownAuthElements.setLength(0);
             }
             authResultsIterator.remove();
         }
