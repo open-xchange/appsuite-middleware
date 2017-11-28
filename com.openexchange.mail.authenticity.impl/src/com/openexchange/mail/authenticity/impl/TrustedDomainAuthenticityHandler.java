@@ -203,7 +203,7 @@ public class TrustedDomainAuthenticityHandler implements ForcedReloadable {
         for (String tenant : tenants) {
             String commaSeparatedListOfDomains = configurationService.getProperty(PREFIX + tenant + DOMAINS, (String) null);
             if (Strings.isNotEmpty(commaSeparatedListOfDomains)) {
-                String[] domains = Strings.splitByDelimNotInQuotes(commaSeparatedListOfDomains, '|');
+                String[] domains = Strings.splitByCommaNotInQuotes(commaSeparatedListOfDomains);
                 String fallbackImageStr = configurationService.getProperty(PREFIX + tenant + FALLBACK_IMAGE, (String) null);
                 Icon fallbackImage = null;
                 if(!Strings.isEmpty(fallbackImageStr)) {
