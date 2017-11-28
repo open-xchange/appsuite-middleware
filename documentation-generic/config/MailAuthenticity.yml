@@ -62,7 +62,7 @@ properties:
         *.domain.com:img1
         </pre>
         
-        Note:
+        Note:  
         The [tenant] must either be replaced with a tenant identifier or must be omitted (e.g. for single tenant systems).
 
         A complete configuration example for two tenants could look like this:
@@ -91,8 +91,8 @@ properties:
       description: |
         For each tenant a set of images can be configured which is to be shown by clients for trusted domains.
 
-        Note:
-        The [tenant] must either be replaced with a tenant identifier or must be omitted (e.g. for single tenant systems).
+        Note:  
+        The [tenant] must either be replaced with a tenant identifier or must be omitted (e.g. for single tenant systems).  
         The [imageId] must be a tenant unique identifier. E.g. an ascending number.
 
         For example:
@@ -119,7 +119,7 @@ properties:
       description: |
         For each tenant a fallback image can be configured which is shown by the client for trusted domains without a configured image.
 
-        Note:
+        Note:  
         The [tenant] must either be replaced with a tenant identifier or must be omitted (e.g. for single tenant systems).
 
         For example:
