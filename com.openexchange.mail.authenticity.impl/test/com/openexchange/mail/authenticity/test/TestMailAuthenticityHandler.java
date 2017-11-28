@@ -393,6 +393,25 @@ public class TestMailAuthenticityHandler {
         assertAuthenticityMechanismResult(results.get(0), "foobar.com", DMARCResult.PASS);
     }
 
+    /**
+     * Tests the edge case where the <code>Authentication-Results</code> header field is present
+     * and one DMARC passed one faled but the <code>From</code> header has a different domain as in
+     * the passing DMARC.
+     */
+    @Test
+    public void testMultipleDMARCWithOneMismatchingFromHeader() {
+        headerCollection.addHeader("From", "Jane Doe <jane.doe@some.foobar.com>");
+        perform("ox.io; dmarc=pass (p=NONE sp=NONE dis=NONE) header.from=foobar.com; dmarc=fail (p=NONE sp=NONE dis=NONE) header.from=some.foobar.com");
+        assertEquals("The overall status does not match", MailAuthenticityStatus.FAIL, result.getStatus());
+        assertEquals("The domain does not match", "some.foobar.com", result.getAttribute(DefaultMailAuthenticityResultKey.FROM_DOMAIN));
+        assertAmount(2);
+
+        List<MailAuthenticityMechanismResult> results = result.getAttribute(DefaultMailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS, List.class);
+        assertAuthenticityMechanismResult(results.get(0), "foobar.com", DMARCResult.PASS);
+        assertAuthenticityMechanismResult(results.get(1), "some.foobar.com", DMARCResult.FAIL);
+        
+    }
+
     ///////////////////////////// HELPERS //////////////////////////////
 
     /**
