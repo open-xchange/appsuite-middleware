@@ -231,41 +231,6 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
         authServIdsCache.invalidateAll();
     }
 
-    /**
-     * Gets the allowed authserv-ids for session-associated user.
-     *
-     * @param session The session
-     * @return The allowed authserv-ids
-     * @throws OXException If authserv-ids are missing
-     */
-    public List<AllowedAuthServId> getAllowedAuthServIds(Session session) throws OXException {
-        int userId = session.getUserId();
-        int contextId = session.getContextId();
-        UserAndContext key = UserAndContext.newInstance(userId, contextId);
-        List<AllowedAuthServId> authServIds = authServIdsCache.getIfPresent(key);
-        if (null == authServIds) {
-            // This is not thread-safe, but does not need to
-            LeanConfigurationService leanConfigService = services.getService(LeanConfigurationService.class);
-            String sAuthServIds = leanConfigService.getProperty(userId, contextId, MailAuthenticityProperty.authServId);
-            if (Strings.isEmpty(sAuthServIds)) {
-                throw MailAuthenticityExceptionCodes.INVALID_AUTHSERV_IDS.create();
-            }
-
-            List<String> tokens = Arrays.asList(Strings.splitByComma(sAuthServIds));
-            if (tokens == null || tokens.isEmpty() || tokens.contains("")) {
-                throw MailAuthenticityExceptionCodes.INVALID_AUTHSERV_IDS.create();
-            }
-
-            authServIds = AllowedAuthServId.allowedAuthServIdsFor(tokens);
-            if (authServIds == null || authServIds.isEmpty()) {
-                throw MailAuthenticityExceptionCodes.INVALID_AUTHSERV_IDS.create();
-            }
-
-            authServIdsCache.put(key, authServIds);
-        }
-        return authServIds;
-    }
-
     @Override
     public void handle(Session session, MailMessage mailMessage) throws OXException {
         HeaderCollection headerCollection = mailMessage.getHeaders();
@@ -491,8 +456,6 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
         String[] split = domain.split(" ");
         // Cleanse the optional version
         domain = split.length == 0 ? domain : split[0];
-        // TODO: Consider wildcards and regexes...
-        //       e.g. mx[0-9]?.open-xchnge.com
         int index = domain.indexOf('@');
         return index < 0 ? domain : domain.substring(index + 1);
     }
@@ -723,6 +686,54 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
             overallResult.setStatus(MailAuthenticityStatus.NEUTRAL);
         }
         return domainMismatch;
+    }
+
+    /**
+     * Gets the allowed authserv-ids for session-associated user.
+     *
+     * @param session The session
+     * @return The allowed authserv-ids
+     * @throws OXException If authserv-ids are missing
+     */
+    private List<AllowedAuthServId> getAllowedAuthServIds(Session session) throws OXException {
+        int userId = session.getUserId();
+        int contextId = session.getContextId();
+        UserAndContext key = UserAndContext.newInstance(userId, contextId);
+        List<AllowedAuthServId> authServIds = authServIdsCache.getIfPresent(key);
+        return authServIds == null ? getAllowedAuthServIds(userId, contextId, key) : authServIds;
+    }
+
+    /**
+     * Gets the allowed authserv-ids for the specified user in the specified context
+     * and caches them for future use.
+     * 
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @param key The cache key
+     * @return The allowed authserv-ids
+     * @throws OXException If authserv-ids are missing
+     */
+    private List<AllowedAuthServId> getAllowedAuthServIds(int userId, int contextId, UserAndContext key) throws OXException {
+        List<AllowedAuthServId> authServIds;
+        // This is not thread-safe, but does not need to
+        LeanConfigurationService leanConfigService = services.getService(LeanConfigurationService.class);
+        String sAuthServIds = leanConfigService.getProperty(userId, contextId, MailAuthenticityProperty.authServId);
+        if (Strings.isEmpty(sAuthServIds)) {
+            throw MailAuthenticityExceptionCodes.INVALID_AUTHSERV_IDS.create();
+        }
+
+        List<String> tokens = Arrays.asList(Strings.splitByComma(sAuthServIds));
+        if (tokens == null || tokens.isEmpty() || tokens.contains("")) {
+            throw MailAuthenticityExceptionCodes.INVALID_AUTHSERV_IDS.create();
+        }
+
+        authServIds = AllowedAuthServId.allowedAuthServIdsFor(tokens);
+        if (authServIds == null || authServIds.isEmpty()) {
+            throw MailAuthenticityExceptionCodes.INVALID_AUTHSERV_IDS.create();
+        }
+
+        authServIdsCache.put(key, authServIds);
+        return authServIds;
     }
 
     ///////////////////////////////// HELPER CLASSES /////////////////////////////////

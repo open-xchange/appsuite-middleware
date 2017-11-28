@@ -409,7 +409,6 @@ public class TestMailAuthenticityHandler {
         List<MailAuthenticityMechanismResult> results = result.getAttribute(DefaultMailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS, List.class);
         assertAuthenticityMechanismResult(results.get(0), "foobar.com", DMARCResult.PASS);
         assertAuthenticityMechanismResult(results.get(1), "some.foobar.com", DMARCResult.FAIL);
-        
     }
 
     ///////////////////////////// HELPERS //////////////////////////////
