@@ -7937,6 +7937,11 @@ msgid ""
 "Please reauthorize the account %5$s to enable it again."
 msgstr ""
 
+#. Missing or invalid authserv-ids.
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/authenticity/MailAuthenticityExceptionMessages.java:63
+msgid "Missing or invalid authserv-ids."
+msgstr ""
+
 #. The default name for a file
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/json/compose/share/ShareComposeStrings.java:73
 msgid "File"
