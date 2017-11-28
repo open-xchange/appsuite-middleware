@@ -51,7 +51,7 @@ properties:
     - key: com.openexchange.mail.authenticity.trustedDomains.[tenant].domains
       description: |
         A comma separated list of trusted domain configurations. 
-        Each configuration consists of a trusted domain and an optional imageId separated by a colon (domain[:imageId]). 
+        Each configuration consists of a trusted domain and an optional imageId separated by a colon (<code>domain[:imageId]</code>). 
         The domain also support <code>*</code> wildcards.
 
         Here are some valid domain configurations provided that an image with id 'img1' is also configured:
