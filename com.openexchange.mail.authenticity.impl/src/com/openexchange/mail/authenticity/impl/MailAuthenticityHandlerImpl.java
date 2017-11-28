@@ -317,6 +317,12 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
         // Parse the known mechanisms
         parseKnownMechanismResults(authHeadersList, result);
 
+        // Add the remaining attributes as is to the result
+        if (!authHeadersList.isEmpty()) {
+            List<String> unknownResults = (List<String>) result.getAttribute(DefaultMailAuthenticityResultKey.UNKNOWN_AUTH_MECH_RESULTS);
+            unknownResults.addAll(authHeadersList);
+        }
+
         return result;
     }
 
@@ -343,7 +349,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
                 // Not a configured authserver-id, ignore
                 continue;
             }
-            authHeadersList.add(header);
+            authHeadersList.add(new String(header));
         }
         return authHeadersList;
     }
@@ -400,6 +406,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
                 }
                 results.add(mailAuthMechResult);
             }
+            authResultsIterator.remove();
         }
         result.addAttribute(DefaultMailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS, results);
         result.addAttribute(DefaultMailAuthenticityResultKey.UNKNOWN_AUTH_MECH_RESULTS, unknownResults);
