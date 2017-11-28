@@ -97,8 +97,15 @@ public class MailAuthenticityActivator extends HousekeepingActivator {
         final MailAuthenticityHandlerRegistryImpl registry = new MailAuthenticityHandlerRegistryImpl(getService(LeanConfigurationService.class), context);
         registerService(MailAuthenticityHandlerRegistry.class, registry);
         track(MailAuthenticityHandler.class, registry);
-
+        trackService(TrustedDomainAuthenticityHandler.class);
         openTrackers();
+
+        ConfigurationService configurationService = getService(ConfigurationService.class);
+        ManagedFileManagement managedFileManagement = getService(ManagedFileManagement.class);
+        TrustedDomainAuthenticityHandler authenticationHandler = new TrustedDomainAuthenticityHandler(configurationService, managedFileManagement);
+        registerService(ForcedReloadable.class, authenticationHandler);
+        registerService(TrustedDomainAuthenticityHandler.class, authenticationHandler);
+
 
         final MailAuthenticityHandlerImpl handlerImpl = new MailAuthenticityHandlerImpl(this);
         registerService(MailAuthenticityHandler.class, handlerImpl);
@@ -120,13 +127,6 @@ public class MailAuthenticityActivator extends HousekeepingActivator {
                 );
             }
         });
-
-        ConfigurationService configurationService = getService(ConfigurationService.class);
-        ManagedFileManagement managedFileManagement = getService(ManagedFileManagement.class);
-        TrustedDomainAuthenticityHandler authenticationHandler = new TrustedDomainAuthenticityHandler(configurationService, managedFileManagement);
-        registerService(ForcedReloadable.class, authenticationHandler);
-        registerService(TrustedDomainAuthenticityHandler.class, authenticationHandler);
-        trackService(TrustedDomainAuthenticityHandler.class).open();
 
         MailAuthenticityFetchListener fetchListener = new MailAuthenticityFetchListener(registry);
         registerService(MailFetchListener.class, fetchListener);

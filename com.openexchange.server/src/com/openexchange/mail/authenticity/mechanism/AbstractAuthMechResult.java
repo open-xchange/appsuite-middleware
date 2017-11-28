@@ -49,6 +49,8 @@
 
 package com.openexchange.mail.authenticity.mechanism;
 
+import org.json.JSONException;
+import org.json.JSONObject;
 import com.openexchange.mail.authenticity.mechanism.dmarc.DMARCAuthMechResult;
 
 /**
@@ -94,7 +96,7 @@ public abstract class AbstractAuthMechResult implements MailAuthenticityMechanis
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.mail.authenticity.common.mechanism.MailAuthenticityMechanismResult#getReason()
      */
     @Override
@@ -104,10 +106,22 @@ public abstract class AbstractAuthMechResult implements MailAuthenticityMechanis
 
     /**
      * Sets the reason of the result
-     * 
+     *
      * @param reason the reason to set
      */
     public void setReason(String reason) {
         this.reason = reason;
+    }
+
+    @Override
+    public JSONObject toJson() {
+        JSONObject json = new JSONObject();
+        try {
+            json.put(KEY_MECHANISM, getMechanism());
+            json.put(KEY_RESULT, getResult());
+        } catch (JSONException e) {
+            // should never be thrown
+        }
+        return json;
     }
 }

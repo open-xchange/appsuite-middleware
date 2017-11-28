@@ -96,6 +96,7 @@ import com.openexchange.mail.attachment.AttachmentToken;
 import com.openexchange.mail.attachment.AttachmentTokenConstants;
 import com.openexchange.mail.attachment.AttachmentTokenService;
 import com.openexchange.mail.authenticity.MailAuthenticityResultKey;
+import com.openexchange.mail.authenticity.mechanism.MailAuthenticityMechanismResult;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.conversion.InlineImageDataSource;
 import com.openexchange.mail.dataobjects.MailAuthenticityResult;
@@ -530,7 +531,16 @@ public final class JsonMessageHandler implements MailMessageHandler {
         for (MailAuthenticityResultKey key : attributes.keySet()) {
             Object object = attributes.get(key);
             if (object instanceof Collection<?>) {
-                result.put(key.getKey(), (Collection<?>) object);
+                Collection<?> col = (Collection<?>) object;
+                JSONArray array = new JSONArray(col.size());
+                for (Object o : col) {
+                    if (o instanceof MailAuthenticityMechanismResult) {
+                        array.put(((MailAuthenticityMechanismResult) o).toJson());
+                    } else {
+                        array.put(o);
+                    }
+                }
+                result.put(key.getKey(), array);
             } else {
                 result.put(key.getKey(), object);
             }

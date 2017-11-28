@@ -228,9 +228,21 @@ public class TrustedDomainAuthenticityHandler implements ForcedReloadable {
         String commaSeparatedListOfDomains = configurationService.getProperty(PREFIX + DOMAINS.substring(1), (String) null);
         if (Strings.isNotEmpty(commaSeparatedListOfDomains)) {
             String[] domains = Strings.splitByCommaNotInQuotes(commaSeparatedListOfDomains);
-            String image = configurationService.getProperty(PREFIX + IMAGE.substring(1), (String) null);
+            String fallbackImageStr = configurationService.getProperty(PREFIX + FALLBACK_IMAGE.substring(1), (String) null);
+            Icon fallbackImage = null;
+            if (!Strings.isEmpty(fallbackImageStr)) {
+                fallbackImage = getIcon(fallbackImageStr, null);
+            }
+
+            Map<String, String> images = configurationService.getProperties(new PropertyFilter() {
+
+                @Override
+                public boolean accept(String name, String value) throws OXException {
+                    return name.startsWith(PREFIX + IMAGE.substring(1));
+                }
+            });
             for (String domain : domains) {
-                fallbackTenant.add(new TrustedDomain(domain, getIcon(image, null)));
+                fallbackTenant.add(getTrustedDomain(domain, images, fallbackImage, null));
             }
         }
     }
@@ -249,9 +261,16 @@ public class TrustedDomainAuthenticityHandler implements ForcedReloadable {
             if (domainConfig.length != 2) {
                 throw new OXException(new ConfigurationException("Unable to to parse trusted domain config. Only one colon is allowed: " + domain));
             }
-            String image = images.get(PREFIX + tenant + IMAGE + domainConfig[1]);
+            String image = null;
+            if (tenant == null) {
+                image = images.get(PREFIX + IMAGE.substring(1) + domainConfig[1]);
+            } else {
+                image = images.get(PREFIX + tenant + IMAGE + domainConfig[1]);
+            }
             if (image != null) {
                 return new TrustedDomain(domainConfig[0], getIcon(image, tenant));
+            } else {
+                return new TrustedDomain(domainConfig[0], fallbackImage);
             }
         }
         return new TrustedDomain(domain, fallbackImage);
@@ -332,13 +351,6 @@ public class TrustedDomainAuthenticityHandler implements ForcedReloadable {
         @Override
         public MailAuthenticityMechanism getMechanism() {
             return TRUSTED_DOMAIN_MECHANISM;
-        }
-
-        @Override
-        public String toString() {
-            StringBuilder builder = new StringBuilder();
-            builder.append("TrustedDomainResult [mechanism=").append(getMechanism()).append(", domain=").append(getDomain()).append(", result=").append(getResult()).append("]");
-            return builder.toString();
         }
     }
 

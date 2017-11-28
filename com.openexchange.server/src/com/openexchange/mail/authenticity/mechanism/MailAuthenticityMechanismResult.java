@@ -49,6 +49,8 @@
 
 package com.openexchange.mail.authenticity.mechanism;
 
+import org.json.JSONObject;
+
 /**
  * {@link MailAuthenticityMechanismResult} - Defines the methods of the mail authentication
  * mechanism result dataobject
@@ -57,16 +59,19 @@ package com.openexchange.mail.authenticity.mechanism;
  */
 public interface MailAuthenticityMechanismResult {
 
+    static final String KEY_MECHANISM = "mechanism";
+    static final String KEY_RESULT = "result";
+
     /**
      * Returns the domain for which this mechanism was applied
-     * 
+     *
      * @return the domain for which this mechanism was applied
      */
     String getDomain();
 
     /**
      * Returns the (optional) client IP which was used to send the e-mail
-     * 
+     *
      * @return the (optional) client IP which was used to send the e-mail;
      *         <code>null</code> if none available
      */
@@ -74,22 +79,29 @@ public interface MailAuthenticityMechanismResult {
 
     /**
      * Returns the {@link DefaultMailAuthenticityMechanism} used for this result
-     * 
+     *
      * @return the {@link DefaultMailAuthenticityMechanism} used for this result
      */
     MailAuthenticityMechanism getMechanism();
 
     /**
      * Returns the result of the authentication mechanism
-     * 
+     *
      * @return the result of the authentication mechanism
      */
     AuthenticityMechanismResult getResult();
 
     /**
      * Returns the reason of the result
-     * 
+     *
      * @return the reason of the result
      */
     String getReason();
+
+    /**
+     * Returns a json representation of the result.
+     *
+     * @return The {@link JSONObject}
+     */
+    JSONObject toJson();
 }
