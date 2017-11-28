@@ -714,7 +714,6 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
      * @throws OXException If authserv-ids are missing
      */
     private List<AllowedAuthServId> getAllowedAuthServIds(int userId, int contextId, UserAndContext key) throws OXException {
-        List<AllowedAuthServId> authServIds;
         // This is not thread-safe, but does not need to
         LeanConfigurationService leanConfigService = services.getService(LeanConfigurationService.class);
         String sAuthServIds = leanConfigService.getProperty(userId, contextId, MailAuthenticityProperty.authServId);
@@ -727,7 +726,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
             throw MailAuthenticityExceptionCodes.INVALID_AUTHSERV_IDS.create();
         }
 
-        authServIds = AllowedAuthServId.allowedAuthServIdsFor(tokens);
+        List<AllowedAuthServId> authServIds = AllowedAuthServId.allowedAuthServIdsFor(tokens);
         if (authServIds == null || authServIds.isEmpty()) {
             throw MailAuthenticityExceptionCodes.INVALID_AUTHSERV_IDS.create();
         }
