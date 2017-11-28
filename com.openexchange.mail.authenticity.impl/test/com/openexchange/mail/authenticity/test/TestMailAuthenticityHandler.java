@@ -343,6 +343,21 @@ public class TestMailAuthenticityHandler {
         assertTrue("The unknown mail authentication mechanism results do not match", result.getAttribute(DefaultMailAuthenticityResultKey.UNKNOWN_AUTH_MECH_RESULTS) == null);
     }
 
+    /**
+     * Tests the real world case where the <code>Authentication-Results</code> header field is present
+     * has valid mechanisms but the <code>authserv-id</code> is absent.
+     */
+    @Test
+    public void testAbsentAuthServId() {
+        headerCollection.addHeader("From", "Jane Doe <jane.doe@foobar.com>");
+        perform("; dkim=pass header.i=@foobar.com header.s=201705 header.b=VvWVD9kg; dmarc=pass (p=NONE sp=NONE dis=NONE) header.from=foobar.com");
+
+        assertEquals("The overall status does not match", MailAuthenticityStatus.NEUTRAL, result.getStatus());
+        assertTrue("The from domain does not match", result.getAttribute(DefaultMailAuthenticityResultKey.FROM_DOMAIN) == null);
+        assertTrue("The mail authentication mechanism results do not match", result.getAttribute(DefaultMailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS) == null);
+        assertTrue("The unknown mail authentication mechanism results do not match", result.getAttribute(DefaultMailAuthenticityResultKey.UNKNOWN_AUTH_MECH_RESULTS) == null);
+    }
+
     ///////////////////////////// HELPERS //////////////////////////////
 
     /**
