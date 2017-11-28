@@ -461,7 +461,10 @@ public class InternalCalendarAccess implements GroupwareCalendarAccess, SyncAwar
             for (ExtendedProperty property : propertiesToStore) {
                 String name = USER_PROPERTY_PREFIX + property.getName();
                 if (null != property.getValue()) {
-                    updatedProperties.put(name, property.getValue());
+                    if (false == String.class.isInstance(property.getValue())) {
+                        throw OXException.noPermissionForFolder();
+                    }
+                    updatedProperties.put(name, (String) property.getValue());
                 } else {
                     removedProperties.add(name);
                 }

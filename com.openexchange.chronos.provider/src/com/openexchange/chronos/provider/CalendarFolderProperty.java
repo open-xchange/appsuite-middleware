@@ -251,7 +251,7 @@ public enum CalendarFolderProperty {
      * @param name The name of the extended property to get the value from
      * @return The property value, or <code>null</code> if not defined
      */
-    public static String optPropertyValue(ExtendedProperties extendedProperties, String name) {
+    public static Object optPropertyValue(ExtendedProperties extendedProperties, String name) {
         if (null != extendedProperties) {
             ExtendedProperty property = extendedProperties.get(name);
             if (null != property) {

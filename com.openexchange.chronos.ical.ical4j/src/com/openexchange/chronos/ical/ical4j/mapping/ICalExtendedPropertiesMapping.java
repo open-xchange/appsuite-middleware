@@ -158,7 +158,7 @@ public abstract class ICalExtendedPropertiesMapping<T extends Component, U> exte
     }
 
     private static Property exportProperty(ExtendedProperty property) {
-        return new XProperty(property.getName(), exportParameters(property.getParameters()), property.getValue());
+        return new XProperty(property.getName(), exportParameters(property.getParameters()), String.valueOf(property.getValue()));
     }
 
     private static ParameterList exportParameters(List<ExtendedPropertyParameter> list) {

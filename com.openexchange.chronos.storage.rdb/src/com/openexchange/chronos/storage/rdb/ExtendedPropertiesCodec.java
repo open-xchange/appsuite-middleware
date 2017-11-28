@@ -58,7 +58,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
-import java.util.zip.Deflater;
+import java.util.zip.DeflaterOutputStream;
 import java.util.zip.InflaterInputStream;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -97,7 +97,7 @@ public class ExtendedPropertiesCodec {
      * @return The encoded properties, or <code>null</code> if passed are <code>null</code> or empty
      */
     public static byte[] encode(ExtendedProperties extendedProperties) throws IOException {
-        return encode(extendedProperties, TYPE_VOBJECT);
+        return encode(extendedProperties, TYPE_JSON_DEFLATE);
     }
 
     /**
@@ -107,7 +107,7 @@ public class ExtendedPropertiesCodec {
      * @return The encoded parameters, or <code>null</code> if passed are <code>null</code> or empty
      */
     public static byte[] encodeParameters(List<ExtendedPropertyParameter> parameters) throws IOException {
-        return encode(parameters, TYPE_VOBJECT);
+        return encode(parameters, TYPE_JSON_DEFLATE);
     }
 
     /**
@@ -230,15 +230,11 @@ public class ExtendedPropertiesCodec {
     }
 
     private static void encodeDeflatedJson(JSONValue json, ByteArrayOutputStream outputStream) throws IOException {
-        byte[] jsonBytes = json.toString().getBytes(Charsets.US_ASCII);
-        Deflater deflater = new Deflater();
-        deflater.setInput(jsonBytes);
-        deflater.finish();
-        byte[] buffer = new byte[4096];
-        do {
-            deflater.deflate(buffer);
-        } while (false == deflater.finished());
-        //            return new DeflaterInputStream(new JSONInputStream(encodeJsonProperties(extendedProperties), "US-ASCII"));
+        try (DeflaterOutputStream deflaterOutputStream = new DeflaterOutputStream(outputStream)) {
+            byte[] jsonBytes = json.toString().getBytes(Charsets.US_ASCII);
+            deflaterOutputStream.write(jsonBytes);
+            deflaterOutputStream.finish();
+        }
     }
 
     private static JSONArray encodeJsonProperties(ExtendedProperties extendedProperties) throws JSONException {
@@ -271,7 +267,11 @@ public class ExtendedPropertiesCodec {
     }
 
     private static VObjectProperty encodeVObjectProperty(ExtendedProperty extendedProperty) throws IOException {
-        VObjectProperty vObjectProperty = new VObjectProperty(extendedProperty.getName(), extendedProperty.getValue());
+        Object value = extendedProperty.getValue();
+        if (null != value && false == String.class.isInstance(value)) {
+            throw new IOException("Can't encode " + value.getClass());
+        }
+        VObjectProperty vObjectProperty = new VObjectProperty(extendedProperty.getName(), (String) extendedProperty.getValue());
         List<ExtendedPropertyParameter> parameters = extendedProperty.getParameters();
         if (null != parameters) {
             vObjectProperty.setParameters(encodeVObjectParameters(parameters));
@@ -339,7 +339,7 @@ public class ExtendedPropertiesCodec {
 
     private static ExtendedProperty decodeJsonProperty(JSONObject jsonExtendedProperty) throws JSONException {
         String name = jsonExtendedProperty.optString("name", null);
-        String value = jsonExtendedProperty.optString("value", null);
+        Object value = jsonExtendedProperty.opt("value");
         JSONArray jsonParameters = jsonExtendedProperty.optJSONArray("parameters");
         if (null == jsonParameters || jsonParameters.isEmpty()) {
             return new ExtendedProperty(name, value);

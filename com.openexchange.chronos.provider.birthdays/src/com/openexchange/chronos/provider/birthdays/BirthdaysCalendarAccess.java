@@ -194,6 +194,13 @@ public class BirthdaysCalendarAccess extends SingleFolderCalendarAccess implemen
 
     @Override
     public String updateFolder(String folderId, CalendarFolder folder, long clientTimestamp) throws OXException {
+        /*
+         * prevent updates to permissions or folder name 
+         */
+        if (null != folder.getName() && false == folder.getName().equals(this.folder.getName()) ||
+            null != folder.getPermissions() && false == folder.getPermissions().equals(this.folder.getPermissions())) {
+            throw CalendarExceptionCodes.UNSUPPORTED_OPERATION_FOR_PROVIDER.create(BirthdaysCalendarProvider.PROVIDER_ID);
+        }
         ExtendedProperties originalProperties = this.folder.getExtendedProperties();
         ExtendedProperties updatedProperties = SingleFolderCalendarAccessUtils.merge(originalProperties, folder.getExtendedProperties());
         if (false == originalProperties.equals(updatedProperties)) {

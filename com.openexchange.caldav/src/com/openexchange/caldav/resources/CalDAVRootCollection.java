@@ -262,8 +262,8 @@ public class CalDAVRootCollection extends DAVRootCollection {
         if (isTrashFolder(folder)) {
             return false;
         }
-        String value = optPropertyValue(CalendarFolderConverter.getExtendedProperties(folder), USED_FOR_SYNC_LITERAL);
-        return null == value || Boolean.parseBoolean(value);
+        Object value = optPropertyValue(CalendarFolderConverter.getExtendedProperties(folder), USED_FOR_SYNC_LITERAL);
+        return null == value || Boolean.parseBoolean(String.valueOf(value));
     }
 
     /**

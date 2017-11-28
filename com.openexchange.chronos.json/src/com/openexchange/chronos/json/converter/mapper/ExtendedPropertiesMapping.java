@@ -145,13 +145,13 @@ public abstract class ExtendedPropertiesMapping<O> extends DefaultJsonMapping<Ex
             return new ExtendedProperty(name, null);
         }
         if (1 == jsonObject.length() && jsonObject.has("value")) {
-            return new ExtendedProperty(name, jsonObject.getString("value"));
+            return new ExtendedProperty(name, jsonObject.get("value"));
         }
         List<ExtendedPropertyParameter> parameters = new ArrayList<ExtendedPropertyParameter>(jsonObject.length());
-        String value = null;
+        Object value = null;
         for (Entry<String, Object> entry : jsonObject.entrySet()) {
             if ("value".equals(entry.getKey())) {
-                value = (String) entry.getValue();
+                value = entry.getValue();
             } else {
                 parameters.add(new ExtendedPropertyParameter(entry.getKey(), (String) entry.getValue()));
             }
@@ -170,7 +170,7 @@ public abstract class ExtendedPropertiesMapping<O> extends DefaultJsonMapping<Ex
         return extendedProperties;
     }
 
-    private static JSONObject serializeExtendedProperty(String value, List<ExtendedPropertyParameter> parameters) throws JSONException {
+    private static JSONObject serializeExtendedProperty(Object value, List<ExtendedPropertyParameter> parameters) throws JSONException {
         if (null == parameters || parameters.isEmpty()) {
             return new JSONObject(1).put("value", value);
         }

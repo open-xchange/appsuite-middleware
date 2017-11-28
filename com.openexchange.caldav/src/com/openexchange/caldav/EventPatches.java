@@ -253,7 +253,7 @@ public class EventPatches {
                 }
                 Attendee attendee = find(importedEvent.getAttendees(), eventResource.getFactory().getUser().getId());
                 if (null != attendee && false == attendee.containsComment()) {
-                    attendee.setComment(extendedProperty.getValue());
+                    attendee.setComment(String.valueOf(extendedProperty.getValue()));
                 }
             }
         }
@@ -539,14 +539,14 @@ public class EventPatches {
         private static void applyCalendarserverAccess(EventResource eventResource, CalDAVImport caldavImport) {
             if (DAVUserAgent.IOS.equals(eventResource.getUserAgent()) || DAVUserAgent.MAC_CALENDAR.equals(eventResource.getUserAgent())) {
                 ExtendedProperty property = optExtendedProperty(caldavImport.getCalender(), "X-CALENDARSERVER-ACCESS");
-                if (null == property || Strings.isEmpty(property.getValue())) {
+                if (null == property || false == String.class.isInstance(property.getValue()) || Strings.isEmpty((String) property.getValue())) {
                     return;
                 }
                 if (null == property.getValue()) {
                     LOG.warn("Ignoring unknown X-CALENDARSERVER-ACCESS '{}'", property.getValue());
                     return;
                 }
-                Classification classification = new Classification(property.getValue());
+                Classification classification = new Classification((String) property.getValue());
                 if (null != caldavImport.getEvent()) {
                     caldavImport.getEvent().setClassification(classification);
                 }

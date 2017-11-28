@@ -115,9 +115,9 @@ public class Tools {
      */
     public static Date optExtendedPropertyAsDate(ExtendedProperties extendedProperties, String propertyName) {
         ExtendedProperty extendedProperty = optExtendedProperty(extendedProperties, propertyName);
-        if (null != extendedProperty && Strings.isNotEmpty(extendedProperty.getValue())) {
+        if (null != extendedProperty && String.class.isInstance(extendedProperty.getValue()) && Strings.isNotEmpty((String) extendedProperty.getValue())) {
             try {
-                return parseUTC(extendedProperty.getValue());
+                return parseUTC((String) extendedProperty.getValue());
             } catch (ParseException e) {
                 LoggerFactory.getLogger(Tools.class).warn("Error parsing UTC date from iCal property", e);
             }

@@ -636,7 +636,7 @@ public class AlarmUtils extends CalendarUtils {
      * @param name The name of the extended property to get
      * @return The extended property value, or <code>null</code> if not set
      */
-    public static String optExtendedPropertyValue(Alarm alarm, String name) {
+    public static Object optExtendedPropertyValue(Alarm alarm, String name) {
         ExtendedProperty extendedProperty = optExtendedProperty(alarm, name);
         return null != extendedProperty ? extendedProperty.getValue() : null;
     }

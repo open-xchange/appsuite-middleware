@@ -61,7 +61,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 
 /**
- * 
+ *
  * {@link GetResponse}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
@@ -86,7 +86,7 @@ public class GetResponse {
 
     /**
      * Returns the imported calendar if there have been updates. Otherwise <code>null</code> will be returned.
-     * 
+     *
      * @return {@link ImportedCalendar} with the available {@link Event}s or <code>null</code> if there haven't been updates.
      */
     public ImportedCalendar getCalendar() {
@@ -149,7 +149,7 @@ public class GetResponse {
         if (extendedProperty == null) {
             return null;
         }
-        return extendedProperty.getValue();
+        return String.valueOf(extendedProperty.getValue());
     }
 
     public GetResponseState getState() {

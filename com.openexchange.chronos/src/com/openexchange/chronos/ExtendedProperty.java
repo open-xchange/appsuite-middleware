@@ -58,9 +58,9 @@ import java.util.List;
  * @since v7.10.0
  */
 public class ExtendedProperty {
-    
+
     private final String name;
-    private final String value;
+    private final Object value;
     private final List<ExtendedPropertyParameter> parameters;
 
     /**
@@ -70,7 +70,7 @@ public class ExtendedProperty {
      * @param value The value
      * @param parameters The parameters, or <code>null</code> if there are none
      */
-    public ExtendedProperty(String name, String value, List<ExtendedPropertyParameter> parameters) {
+    public ExtendedProperty(String name, Object value, List<ExtendedPropertyParameter> parameters) {
         super();
         this.name = name;
         this.value = value;
@@ -83,7 +83,7 @@ public class ExtendedProperty {
      * @param name The property name
      * @param value The value
      */
-    public ExtendedProperty(String name, String value) {
+    public ExtendedProperty(String name, Object value) {
         this(name, value, null);
     }
 
@@ -101,7 +101,7 @@ public class ExtendedProperty {
      *
      * @return The property value
      */
-    public String getValue() {
+    public Object getValue() {
         return value;
     }
 

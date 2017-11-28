@@ -383,7 +383,7 @@ public class ICalUtils {
     }
 
     static Property exportProperty(ExtendedProperty extendedProperty) {
-        return new XProperty(extendedProperty.getName(), exportParameters(extendedProperty.getParameters()), extendedProperty.getValue());
+        return new XProperty(extendedProperty.getName(), exportParameters(extendedProperty.getParameters()), String.valueOf(extendedProperty.getValue()));
     }
 
     private static ParameterList exportParameters(List<ExtendedPropertyParameter> propertyParameters) {

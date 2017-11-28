@@ -608,12 +608,12 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
          */
         ExtendedProperty summaryProperty = extendedProperties.get("SUMMARY");
         if (null != summaryProperty) {
-            alarm.setSummary(summaryProperty.getValue());
+            alarm.setSummary((String) summaryProperty.getValue());
             extendedProperties.remove(summaryProperty);
         }
         ExtendedProperty descriptionProperty = extendedProperties.get("DESCRIPTION");
         if (null != descriptionProperty) {
-            alarm.setDescription(descriptionProperty.getValue());
+            alarm.setDescription((String) descriptionProperty.getValue());
             extendedProperties.remove(descriptionProperty);
         }
         List<ExtendedProperty> attendeeProperties = extendedProperties.getAll("ATTENDEE");
@@ -678,7 +678,7 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
         List<Attendee> attendees = new ArrayList<Attendee>(attendeeProperties.size());
         for (ExtendedProperty attendeeProperty : attendeeProperties) {
             Attendee attendee = new Attendee();
-            attendee.setUri(attendeeProperty.getValue());
+            attendee.setUri((String) attendeeProperty.getValue());
             ExtendedPropertyParameter cnParameter = attendeeProperty.getParameter("CN");
             if (null != cnParameter) {
                 attendee.setCn(cnParameter.getValue());
@@ -724,13 +724,13 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
             if (null != valueParameter && "BINARY".equals(valueParameter.getValue())) {
                 try {
                     ThresholdFileHolder fileHolder = new ThresholdFileHolder();
-                    fileHolder.write(BaseEncoding.base64().decode(attachmentProperty.getValue()));
+                    fileHolder.write(BaseEncoding.base64().decode((String) attachmentProperty.getValue()));
                     attachment.setData(fileHolder);
                 } catch (IllegalArgumentException | OXException e) {
                     addInvalidDataWaring(eventId, EventField.ALARMS, ProblemSeverity.NORMAL, "Error processing binary alarm data", e);
                 }
             } else {
-                attachment.setUri(attachmentProperty.getValue());
+                attachment.setUri((String) attachmentProperty.getValue());
             }
             attachments.add(attachment);
         }
