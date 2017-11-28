@@ -56,19 +56,19 @@ import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import java.util.Collections;
 import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.powermock.modules.junit4.PowerMockRunner;
+import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.exception.OXException;
-import com.openexchange.mail.authenticity.AllowedAuthServId;
 import com.openexchange.mail.authenticity.DefaultMailAuthenticityResultKey;
 import com.openexchange.mail.authenticity.MailAuthenticityHandler;
 import com.openexchange.mail.authenticity.MailAuthenticityStatus;
 import com.openexchange.mail.authenticity.impl.MailAuthenticityHandlerImpl;
+import com.openexchange.mail.authenticity.impl.MailAuthenticityProperty;
 import com.openexchange.mail.authenticity.mechanism.AuthenticityMechanismResult;
 import com.openexchange.mail.authenticity.mechanism.MailAuthenticityMechanismResult;
 import com.openexchange.mail.authenticity.mechanism.dkim.DKIMResult;
@@ -78,6 +78,7 @@ import com.openexchange.mail.dataobjects.MailAuthenticityResult;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.HeaderCollection;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.session.Session;
 
 /**
  * {@link TestMailAuthenticityHandler}
@@ -92,6 +93,8 @@ public class TestMailAuthenticityHandler {
     private ArgumentCaptor<MailAuthenticityResult> argumentCaptor;
     private MailAuthenticityHandlerImpl handler;
     private MailAuthenticityResult result;
+    private Session session;
+    private LeanConfigurationService leanConfig;
 
     /**
      * Initialises a new {@link TestMailAuthenticityHandler}.
@@ -110,13 +113,20 @@ public class TestMailAuthenticityHandler {
 
         ServiceLookup services = mock(ServiceLookup.class);
 
+        session = mock(Session.class);
+
+        when(session.getUserId()).thenReturn(1);
+        when(session.getContextId()).thenReturn(1);
+
+        leanConfig = mock(LeanConfigurationService.class);
+        when(services.getService(LeanConfigurationService.class)).thenReturn(leanConfig);
+
         mailMessage = mock(MailMessage.class);
         when(mailMessage.getHeaders()).thenReturn(headerCollection);
 
         handler = new MailAuthenticityHandlerImpl(services);
 
-        List<AllowedAuthServId> allowedAuthServIds = AllowedAuthServId.allowedAuthServIdsFor(Collections.singletonList("ox.io"));
-        when(handler.getAllowedAuthServIds(null)).thenReturn(allowedAuthServIds);
+        when(leanConfig.getProperty(1, 1, MailAuthenticityProperty.authServId)).thenReturn("ox.io");
     }
 
     /**
@@ -380,7 +390,7 @@ public class TestMailAuthenticityHandler {
             for (String header : headers) {
                 headerCollection.addHeader(MailAuthenticityHandler.AUTH_RESULTS_HEADER, header);
             }
-            handler.handle(null, mailMessage);
+            handler.handle(session, mailMessage);
             verify(mailMessage).setAuthenticityResult(argumentCaptor.capture());
             result = argumentCaptor.getValue();
         } catch (OXException e) {
