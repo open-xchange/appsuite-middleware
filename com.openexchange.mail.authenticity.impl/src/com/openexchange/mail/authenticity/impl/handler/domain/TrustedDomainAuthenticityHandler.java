@@ -206,7 +206,7 @@ public class TrustedDomainAuthenticityHandler implements ForcedReloadable {
                 String[] domains = Strings.splitByCommaNotInQuotes(commaSeparatedListOfDomains);
                 String fallbackImageStr = configurationService.getProperty(PREFIX + tenant + FALLBACK_IMAGE, (String) null);
                 Icon fallbackImage = null;
-                if(!Strings.isEmpty(fallbackImageStr)) {
+                if (!Strings.isEmpty(fallbackImageStr)) {
                     fallbackImage = getIcon(fallbackImageStr, tenant);
                 }
                 Map<String, String> images = configurationService.getProperties(new PropertyFilter() {
@@ -284,11 +284,10 @@ public class TrustedDomainAuthenticityHandler implements ForcedReloadable {
                     icon = new ImageIcon(new URL(image));
                 } catch (IOException e) {
                     if (tenant != null) {
-                        LOG.error("Unable to resolve configured trusted domain image for tenant " + tenant + ": " + image, e);
+                        LOG.error("Unable to resolve configured trusted domain image for tenant {}: {}", tenant, image, e);
                     } else {
-                        LOG.error("Unable to resolve configured trusted domain fallback image: " + image, e);
+                        LOG.error("Unable to resolve configured trusted domain fallback image: {}", image, e);
                     }
-                    e.printStackTrace();
                 }
             } else {
                 File f = new File(image);
@@ -297,16 +296,16 @@ public class TrustedDomainAuthenticityHandler implements ForcedReloadable {
                         icon = new ImageIcon(f);
                     } catch (IOException e) {
                         if (tenant != null) {
-                            LOG.error("Unable to resolve configured trusted domain image for tenant " + tenant + ": " + image, e);
+                            LOG.error("Unable to resolve configured trusted domain image for tenant {}: {}", tenant, image, e);
                         } else {
-                            LOG.error("Unable to resolve configured trusted domain fallback image: " + image, e);
+                            LOG.error("Unable to resolve configured trusted domain fallback image: {}", image, e);
                         }
                     }
                 } else {
                     if (tenant != null) {
-                        LOG.error("Unable to resolve configured trusted domain image for tenant " + tenant + ": " + image);
+                        LOG.error("Unable to resolve configured trusted domain image for tenant {}: {}", tenant, image);
                     } else {
-                        LOG.error("Unable to resolve configured trusted domain fallback image: " + image);
+                        LOG.error("Unable to resolve configured trusted domain fallback image: {}", image);
                     }
                 }
             }
@@ -321,7 +320,7 @@ public class TrustedDomainAuthenticityHandler implements ForcedReloadable {
         try {
             init(configService);
         } catch (OXException e) {
-            LOG.error("Error during config reload: "+e.getMessage(), e);
+            LOG.error("Error during config reload: {}", e.getMessage(), e);
         }
     }
 
