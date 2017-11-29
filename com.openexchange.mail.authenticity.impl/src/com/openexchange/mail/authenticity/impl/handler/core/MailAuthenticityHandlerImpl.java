@@ -239,14 +239,14 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
         HeaderCollection headerCollection = mailMessage.getHeaders();
         String[] authHeaders = headerCollection.getHeader(MailAuthenticityHandler.AUTH_RESULTS_HEADER);
         if (authHeaders == null || authHeaders.length == 0) {
-            // TODO: Pass on to custom handlers; return neutral status for now
+            // Pass on to custom handlers
             mailMessage.setAuthenticityResult(MailAuthenticityResult.NEUTRAL_RESULT);
             return;
         }
 
         String[] fromHeaders = headerCollection.getHeader(MessageHeaders.HDR_FROM);
         if (fromHeaders == null || fromHeaders.length == 0) {
-            // TODO: Pass on to custom handlers; return neutral status for now
+            // Pass on to custom handlers
             mailMessage.setAuthenticityResult(MailAuthenticityResult.NEUTRAL_RESULT);
             return;
         }
