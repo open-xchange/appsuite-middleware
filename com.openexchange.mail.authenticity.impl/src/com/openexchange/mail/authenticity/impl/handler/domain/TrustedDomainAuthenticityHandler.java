@@ -115,6 +115,11 @@ public class TrustedDomainAuthenticityHandler implements ForcedReloadable {
         }
 
         @Override
+        public String getTechnicalName() {
+            return "TrustedDomain";
+        }
+
+        @Override
         public String toString() {
             return getDisplayName();
         }

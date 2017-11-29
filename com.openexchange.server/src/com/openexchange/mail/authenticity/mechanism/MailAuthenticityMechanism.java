@@ -64,6 +64,13 @@ public interface MailAuthenticityMechanism {
     String getDisplayName();
 
     /**
+     * Gets the technicalName
+     *
+     * @return The technicalName
+     */
+    String getTechnicalName();
+
+    /**
      * Gets the resultType
      *
      * @return The resultType

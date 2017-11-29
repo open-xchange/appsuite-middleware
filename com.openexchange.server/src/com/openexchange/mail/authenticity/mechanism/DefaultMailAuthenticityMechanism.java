@@ -60,18 +60,20 @@ import com.openexchange.mail.authenticity.mechanism.spf.SPFResult;
  */
 public enum DefaultMailAuthenticityMechanism implements MailAuthenticityMechanism {
 
-    DMARC("DMARC", DMARCResult.class),
-    DKIM("DKIM", DKIMResult.class),
-    SPF("SPF", SPFResult.class);
+    DMARC("DMARC", "dmarc", DMARCResult.class),
+    DKIM("DKIM", "dkim", DKIMResult.class),
+    SPF("SPF", "spf", SPFResult.class);
 
     private final Class<? extends AuthenticityMechanismResult> resultType;
     private final String displayName;
+    private final String technicalName;
 
     /**
      * Initializes a new {@link DefaultMailAuthenticityMechanism}.
      */
-    private DefaultMailAuthenticityMechanism(String displayName, Class<? extends AuthenticityMechanismResult> resultType) {
+    private DefaultMailAuthenticityMechanism(String displayName, String technicalName, Class<? extends AuthenticityMechanismResult> resultType) {
         this.displayName = displayName;
+        this.technicalName = technicalName;
         this.resultType = resultType;
     }
 
@@ -93,5 +95,15 @@ public enum DefaultMailAuthenticityMechanism implements MailAuthenticityMechanis
     @Override
     public Class<? extends AuthenticityMechanismResult> getResultType() {
         return resultType;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.mail.authenticity.mechanism.MailAuthenticityMechanism#getTechnicalName()
+     */
+    @Override
+    public String getTechnicalName() {
+        return technicalName;
     }
 }

@@ -161,7 +161,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
         this.authServIdsCache = CacheBuilder.newBuilder().maximumSize(65536).expireAfterWrite(30, TimeUnit.MINUTES).build();
         mechanismParsersRegitry = new HashMap<>(4);
         mechanismParsersRegitry.put(DefaultMailAuthenticityMechanism.DMARC, (line, overallResult) -> {
-            String value = line.get(DefaultMailAuthenticityMechanism.DMARC.name().toLowerCase());
+            String value = line.get(DefaultMailAuthenticityMechanism.DMARC.getTechnicalName());
             DMARCResult dmarcResult = DMARCResult.valueOf(extractOutcome(value.toUpperCase()));
 
             String domain = line.get(DMARCResultHeader.HEADER_FROM);
@@ -178,7 +178,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
             return result;
         });
         mechanismParsersRegitry.put(DefaultMailAuthenticityMechanism.DKIM, (line, overallResult) -> {
-            String value = line.get(DefaultMailAuthenticityMechanism.DKIM.name().toLowerCase());
+            String value = line.get(DefaultMailAuthenticityMechanism.DKIM.getTechnicalName());
             DKIMResult dkimResult = DKIMResult.valueOf(extractOutcome(value.toUpperCase()));
 
             String domain = cleanseDomain(line.get(DKIMResultHeader.HEADER_I));
@@ -203,7 +203,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
             return result;
         });
         mechanismParsersRegitry.put(DefaultMailAuthenticityMechanism.SPF, (line, overallResult) -> {
-            String value = line.get(DefaultMailAuthenticityMechanism.SPF.name().toLowerCase());
+            String value = line.get(DefaultMailAuthenticityMechanism.SPF.getTechnicalName());
             SPFResult spfResult = SPFResult.valueOf(extractOutcome(value.toUpperCase()));
 
             String domain = cleanseDomain(line.get(SPFResultHeader.SMTP_MAILFROM));
