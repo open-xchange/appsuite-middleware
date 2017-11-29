@@ -255,12 +255,18 @@ public class IDMangling {
 
     /**
      * Gets the account identifier of a specific unique composite folder identifier.
+     * <p/>
+     * {@link IDMangling#ROOT_FOLDER_IDS} as well as identifiers starting with {@link IDMangling#SHARED_PREFIX} will always yield the
+     * identifier of the default account.
      *
      * @param uniqueFolderId The unique composite folder identifier, e.g. <code>cal://4/35</code>
      * @return The extracted account identifier
      * @throws OXException {@link CalendarExceptionCodes#UNSUPPORTED_FOLDER} if the account identifier can't be extracted from the passed composite identifier
      */
     public static int getAccountId(String uniqueFolderId) throws OXException {
+        if (ROOT_FOLDER_IDS.contains(uniqueFolderId) || uniqueFolderId.startsWith(SHARED_PREFIX)) {
+            return CalendarAccount.DEFAULT_ACCOUNT.getAccountId();
+        }
         try {
             return Integer.parseInt(unmangleFolderId(uniqueFolderId).get(1));
         } catch (IllegalArgumentException e) {
@@ -411,7 +417,7 @@ public class IDMangling {
      * @return The event representations with unique identifiers, or the passed exception as-is in case there's nothing to adjust
      */
     private static OXException adjustEventConflicts(OXException e, int accountId) {
-        if (4091 != e.getCode() && 4091 != e.getCode()) {
+        if (4091 != e.getCode() && 4092 != e.getCode()) {
             return e;
         }
         List<EventConflict> eventConflicts = CalendarUtils.extractEventConflicts(e);
@@ -453,7 +459,8 @@ public class IDMangling {
             }
             e.setLogMessage(exceptionCode.getMessage(), logArgs);
         } catch (Exception x) {
-            LoggerFactory.getLogger(IDMangling.class).warn("Unexpected error while attempting to replace exceltpion log arguments for {}", e.getLogMessage(), x);
+            LoggerFactory.getLogger(IDMangling.class).warn(
+                "Unexpected error while attempting to replace exception log arguments for {}", e.getLogMessage(), x);
         }
         return e;
     }
