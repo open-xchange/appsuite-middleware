@@ -138,6 +138,11 @@ public enum DefaultMailAuthenticityMechanism implements MailAuthenticityMechanis
      * @return The {@link DefaultMailAuthenticityMechanism} or <code>null</code> if none exists
      */
     public static DefaultMailAuthenticityMechanism extractMechanism(Map<String, String> attributes) {
-
+        for (DefaultMailAuthenticityMechanism mechanism : DefaultMailAuthenticityMechanism.values()) {
+            if (attributes.containsKey(mechanism.name().toLowerCase())) {
+                return mechanism;
+            }
+        }
+        return null;
     }
 }
