@@ -148,9 +148,15 @@ public class SproxydFileStorage implements FileStorage {
     @Override
     public boolean deleteFile(String identifier) throws OXException {
         UUID documentId = UUIDs.fromUnformattedString(identifier);
-        List<Chunk> chunks = chunkStorage.getChunks(documentId);
-        if (null != chunks && 0 < chunks.size()) {
-            List<UUID> scalityIds = new ArrayList<UUID>(chunks.size());
+        List<Chunk> chunks = chunkStorage.optChunks(documentId);
+        if (null != chunks) {
+            int size = chunks.size();
+            if (0 >= size) {
+                // Apparently no such document exists; consider as deleted
+                return true;
+            }
+
+            List<UUID> scalityIds = new ArrayList<UUID>(size);
             for (Chunk chunk : chunks) {
                 scalityIds.add(chunk.getScalityId());
             }
@@ -304,17 +310,18 @@ public class SproxydFileStorage implements FileStorage {
             {
                 UploadChunk chunk = chunkedUpload.next();
                 try {
+                    // ... and upload first chunk
                     long chunkSize = chunk.getSize();
+                    UUID scalityId = client.put(chunk.getData(), chunkSize);
+                    scalityIds.add(scalityId);
+                    chunkStorage.storeChunk(new Chunk(documentId, scalityId, off, chunkSize));
+
                     if (chunkSize <= 0) {
                         // Received an empty input stream
                         success = true;
                         return off;
                     }
 
-                    // ... and upload first chunk
-                    UUID scalityId = client.put(chunk.getData(), chunk.getSize());
-                    scalityIds.add(scalityId);
-                    chunkStorage.storeChunk(new Chunk(documentId, scalityId, off, chunk.getSize()));
                     off += chunk.getSize();
                 } finally {
                     Streams.close(chunk);

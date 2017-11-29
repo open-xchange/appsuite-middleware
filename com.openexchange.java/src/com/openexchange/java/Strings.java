@@ -472,6 +472,16 @@ public class Strings {
         return splitBy(s, ':', true);
     }
 
+    /**
+     * Splits given string by semi-colon separator.
+     *
+     * @param s The string to split
+     * @return The split string
+     */
+    public static String[] splitBySemiColon(final String s) {
+        return splitBy(s, ';', true);
+    }
+
     // private static final Pattern P_SPLIT_DOT = Pattern.compile("\\s*\\.\\s*");
 
     /**

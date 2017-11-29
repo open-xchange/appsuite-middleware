@@ -188,7 +188,7 @@ public class BasicTasksDriver extends AbstractContactFacetingModuleSearchDriver 
                 queries = extractMailAddessesFrom(c);
             }
 
-            participants.add(buildParticipantFacet(valueId, DisplayItems.convert(c, session), queries));
+            participants.add(buildParticipantFacet(valueId, DisplayItems.convert(c, session.getUser().getLocale()), queries));
         }
 
         //add field facets

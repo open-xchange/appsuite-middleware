@@ -146,13 +146,23 @@ public class RdbChunkStorage implements ChunkStorage {
     public List<Chunk> getChunks(UUID documentId) throws OXException {
         Connection con = databaseAccess.acquireReadOnly();
         try {
-            return getChunks(documentId, userId, contextId, con);
+            return getChunks(documentId, userId, contextId, true, con);
         } finally {
             databaseAccess.releaseReadOnly(con);
         }
     }
 
-    private static List<Chunk> getChunks(UUID documentId, int userId, int contextId, Connection con) throws OXException {
+    @Override
+    public List<Chunk> optChunks(UUID documentId) throws OXException {
+        Connection con = databaseAccess.acquireReadOnly();
+        try {
+            return getChunks(documentId, userId, contextId, false, con);
+        } finally {
+            databaseAccess.releaseReadOnly(con);
+        }
+    }
+
+    private static List<Chunk> getChunks(UUID documentId, int userId, int contextId, boolean errorOnAbsence, Connection con) throws OXException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
@@ -162,8 +172,12 @@ public class RdbChunkStorage implements ChunkStorage {
             stmt.setBytes(3, UUIDs.toByteArray(documentId));
             rs = stmt.executeQuery();
             if (!rs.next()) {
-                throw SproxydExceptionCode.NO_SUCH_DOCUMENT.create(UUIDs.getUnformattedString(documentId));
+                if (errorOnAbsence) {
+                    throw SproxydExceptionCode.NO_SUCH_DOCUMENT.create(UUIDs.getUnformattedString(documentId));
+                }
+                return Collections.emptyList();
             }
+
             List<Chunk> chunks = new LinkedList<Chunk>();
             do {
                 chunks.add(new Chunk(documentId, UUIDs.toUUID(rs.getBytes(1)), rs.getLong(2), rs.getLong(3)));

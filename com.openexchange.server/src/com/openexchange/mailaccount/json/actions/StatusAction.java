@@ -69,6 +69,7 @@ import com.openexchange.mailaccount.MailAccountExceptionCodes;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.Status;
 import com.openexchange.mailaccount.TransportAuth;
+import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.mailaccount.json.ActiveProviderDetector;
 import com.openexchange.mailaccount.json.MailAccountFields;
 import com.openexchange.mailaccount.json.MailAccountOAuthConstants;
@@ -97,33 +98,22 @@ public final class StatusAction extends AbstractValidateMailAccountAction implem
     @Override
     protected AJAXRequestResult innerPerform(final AJAXRequestData requestData, final ServerSession session, final JSONValue jVoid) throws OXException {
         try {
-
             MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
             List<OXException> warnings = new LinkedList<>();
 
             {
                 int id = optionalIntParameter(AJAXServlet.PARAMETER_ID, -1, requestData);
                 if (id >= 0) {
-                    if (!session.getUserPermissionBits().isMultipleMailAccounts() && MailAccount.DEFAULT_ID != id) {
-                        throw MailAccountExceptionCodes.NOT_ENABLED.create(Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()));
-                    }
-
-                    Status status = determineAccountStatus(id, true, storageService, warnings, session);
-                    String message = status.getMessage(session.getUser().getLocale());
-
-                    JSONObject jStatus = new JSONObject(4).put("status", status.getId());
-                    if (Strings.isNotEmpty(message)) {
-                        jStatus.put("message", message);
-                    }
-                    return new AJAXRequestResult(new JSONObject(2).put(Integer.toString(id), jStatus), "json").addWarnings(warnings);
+                    return getStatusFor(id, session, storageService, warnings);
                 }
             }
 
-            // Get status for all mail accounts
             if (!session.getUserPermissionBits().isMultipleMailAccounts()) {
-                throw MailAccountExceptionCodes.NOT_ENABLED.create(Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()));
+                // Only primary allowed
+                return getStatusFor(MailAccount.DEFAULT_ID, session, storageService, warnings);
             }
 
+            // Get status for all mail accounts
             MailAccount[] accounts = storageService.getUserMailAccounts(session.getUserId(), session.getContextId());
             JSONObject jStatuses = new JSONObject(accounts.length);
 
@@ -144,6 +134,24 @@ public final class StatusAction extends AbstractValidateMailAccountAction implem
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
+    }
+
+    private AJAXRequestResult getStatusFor(int id, final ServerSession session, MailAccountStorageService storageService, List<OXException> warnings) throws OXException, JSONException {
+        if (MailAccount.DEFAULT_ID != id && !session.getUserPermissionBits().isMultipleMailAccounts()) {
+            UnifiedInboxManagement unifiedInboxManagement = ServerServiceRegistry.getInstance().getService(UnifiedInboxManagement.class);
+            if ((null == unifiedInboxManagement) || (id != unifiedInboxManagement.getUnifiedINBOXAccountID(session))) {
+                throw MailAccountExceptionCodes.NOT_ENABLED.create(Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()));
+            }
+        }
+
+        Status status = determineAccountStatus(id, true, storageService, warnings, session);
+        String message = status.getMessage(session.getUser().getLocale());
+
+        JSONObject jStatus = new JSONObject(4).put("status", status.getId());
+        if (Strings.isNotEmpty(message)) {
+            jStatus.put("message", message);
+        }
+        return new AJAXRequestResult(new JSONObject(2).put(Integer.toString(id), jStatus), "json").addWarnings(warnings);
     }
 
     private Status determineAccountStatus(int id, boolean singleRequested, MailAccountStorageService storageService, List<OXException> warnings, ServerSession session) throws OXException {

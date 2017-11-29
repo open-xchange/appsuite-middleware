@@ -671,6 +671,8 @@ public final class MimeReply extends AbstractMimeProcessing {
             }
             // Copy security setting
             replyMail.setSecurityResult(originalMsg.getSecurityResult());
+            // Copy authenticity setting
+            replyMail.setAuthenticityResult(originalMsg.getAuthenticityResult());
 
             return replyMail;
         } catch (final MessagingException e) {
@@ -725,7 +727,7 @@ public final class MimeReply extends AbstractMimeProcessing {
         if (addrs == null) {
             return new HashSet<InternetAddress>(0);
         }
-        final Set<InternetAddress> set = new HashSet<InternetAddress>(Arrays.asList(addrs));
+        final Set<InternetAddress> set = new LinkedHashSet<InternetAddress>(Arrays.asList(addrs));
         /*
          * Remove all addresses from set which are contained in filter
          */

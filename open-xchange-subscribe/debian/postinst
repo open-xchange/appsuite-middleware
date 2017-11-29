@@ -33,6 +33,7 @@ postFix() {
     ox_add_property com.openexchange.subscribe.microformats.createModifyEnabled false /opt/open-xchange/etc/microformatSubscription.properties
 
     # SoftwareChange_Request-2670
+    pfile=/opt/open-xchange/etc/crawler.properties
     ox_remove_property com.openexchange.subscribe.crawler.t-online.de $pfile
     ox_remove_property com.openexchange.subscribe.crawler.t-online.de.autorunInterval $pfile
 

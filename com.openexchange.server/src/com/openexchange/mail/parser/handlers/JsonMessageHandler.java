@@ -55,6 +55,7 @@ import static com.openexchange.mail.parser.MailMessageParser.generateFilename;
 import static com.openexchange.mail.utils.MailFolderUtility.prepareFullname;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
@@ -94,8 +95,11 @@ import com.openexchange.mail.MailPath;
 import com.openexchange.mail.attachment.AttachmentToken;
 import com.openexchange.mail.attachment.AttachmentTokenConstants;
 import com.openexchange.mail.attachment.AttachmentTokenService;
+import com.openexchange.mail.authenticity.MailAuthenticityResultKey;
+import com.openexchange.mail.authenticity.mechanism.MailAuthenticityMechanismResult;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.conversion.InlineImageDataSource;
+import com.openexchange.mail.dataobjects.MailAuthenticityResult;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.SecurityInfo;
@@ -160,6 +164,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
     private static final String SECURITY = MailJSONField.SECURITY.getKey();
     private static final String SECURITY_INFO = MailJSONField.SECURITY_INFO.getKey();
     private static final String TEXT_PREVIEW = MailJSONField.TEXT_PREVIEW.getKey();
+    private static final String AUTHENTICATION_RESULTS = MailJSONField.AUTHENTICATION_RESULTS.getKey();
 
     private static final String TRUNCATED = MailJSONField.TRUNCATED.getKey();
     private static final String SANITIZED = "sanitized";
@@ -424,12 +429,20 @@ public final class JsonMessageHandler implements MailMessageHandler {
                 if (mail.containsTextPreview()) {
                     jsonObject.put(TEXT_PREVIEW, mail.getTextPreview());
                 }
+                MailAuthenticityResult mailAuthenticityResult = mail.getAuthenticityResult();
+                jsonObject.put(AUTHENTICATION_RESULTS, null == mailAuthenticityResult ? JSONObject.NULL : JsonMessageHandler.authenticationResultToJson(mailAuthenticityResult));
                 // Guard info
                 if (mail.containsSecurityInfo()) {
-                    jsonObject.put(SECURITY_INFO, securityInfoToJSON(mail.getSecurityInfo()));
+                    SecurityInfo securityInfo = mail.getSecurityInfo();
+                    if (null != securityInfo) {
+                        jsonObject.put(SECURITY_INFO, securityInfoToJSON(securityInfo));
+                    }
                 }
                 if (mail.hasSecurityResult()) {
-                    jsonObject.put(SECURITY, securityResultToJSON(mail.getSecurityResult()));
+                    SecurityResult securityResult = mail.getSecurityResult();
+                    if (null != securityResult) {
+                        jsonObject.put(SECURITY, securityResultToJSON(securityResult));
+                    }
                 }
 
                 this.initialiserSequenceId = mail.getSequenceId();
@@ -489,7 +502,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
     }
 
     /**
-     * Create the JSON representation for this <code>SecurityInfo</code> object.
+     * Creates the JSON representation for specified <code>SecurityInfo</code> instance.
      *
      * @return The JSON representation
      * @throws JSONException If JSON representation cannot be returned
@@ -499,6 +512,45 @@ public final class JsonMessageHandler implements MailMessageHandler {
         security.put("encrypted", info.isEncrypted());
         security.put("signed", info.isSigned());
         return security;
+    }
+
+    /**
+     * Creates the JSON representation for specified <code>MailAuthenticationResult</code> instance.
+     *
+     * @param authenticationResult The authentication result to create the JSON representation for
+     * @return The JSON representation
+     * @throws JSONException If JSON representation cannot be returned
+     */
+    public static JSONObject authenticationResultToJson(MailAuthenticityResult authenticationResult) throws JSONException {
+        if (null == authenticationResult) {
+            return null;
+        }
+
+        Map<MailAuthenticityResultKey, Object> attributes = authenticationResult.getAttributes();
+        JSONObject result = new JSONObject(attributes.size());
+        for (MailAuthenticityResultKey key : attributes.keySet()) {
+            Object object = attributes.get(key);
+            if (object instanceof Collection<?>) {
+                Collection<?> col = (Collection<?>) object;
+                JSONArray array = new JSONArray(col.size());
+                for (Object o : col) {
+                    if (o instanceof MailAuthenticityMechanismResult) {
+                        MailAuthenticityMechanismResult mechResult = (MailAuthenticityMechanismResult) o;
+                        JSONObject mailAuthMechResultJson = new JSONObject();
+                        mailAuthMechResultJson.put("mechanism", mechResult.getMechanism().getDisplayName());
+                        mailAuthMechResultJson.put("result", mechResult.getResult().getDisplayName());
+                        array.put(mailAuthMechResultJson);
+                    } else {
+                        array.put(o);
+                    }
+                }
+                result.put(key.getKey(), array);
+            } else {
+                result.put(key.getKey(), object);
+            }
+        }
+        result.put("status", authenticationResult.getStatus().name());
+        return result;
     }
 
     /**

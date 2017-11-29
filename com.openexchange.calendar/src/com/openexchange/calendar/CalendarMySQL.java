@@ -5319,7 +5319,7 @@ public class CalendarMySQL implements CalendarSqlImp {
             oid = edao.getRecurrenceID();
         }
 
-        if (edao != null && edao.getRecurrenceID() > 0 && !cdao.containsRecurrenceID()) {
+        if (edao != null && cdao!=null && edao.getRecurrenceID() > 0 && !cdao.containsRecurrenceID()) {
             cdao.setRecurrenceID(edao.getRecurrenceID());
         }
 

@@ -50,26 +50,15 @@
 package com.openexchange.session.management.impl;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
-import java.util.concurrent.CancellationException;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicReference;
 import org.slf4j.Logger;
 import com.google.common.collect.ImmutableSet;
-import com.hazelcast.core.Cluster;
-import com.hazelcast.core.HazelcastInstance;
-import com.hazelcast.core.IExecutorService;
-import com.hazelcast.core.Member;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.geolocation.GeoInformation;
@@ -85,9 +74,6 @@ import com.openexchange.session.management.exception.SessionManagementExceptionC
 import com.openexchange.session.management.osgi.Services;
 import com.openexchange.sessiond.SessionFilter;
 import com.openexchange.sessiond.SessiondService;
-import com.openexchange.sessionstorage.hazelcast.serialization.PortableMultipleSessionRemoteLookUp;
-import com.openexchange.sessionstorage.hazelcast.serialization.PortableSession;
-import com.openexchange.sessionstorage.hazelcast.serialization.PortableSessionCollection;
 import com.openexchange.user.UserService;
 
 /**
@@ -141,26 +127,12 @@ public class SessionManagementServiceImpl implements SessionManagementService {
         Set<String> blackListedClients = getBlacklistedClients();
 
         Collection<Session> localSessions = sessiondService.getSessions(session.getUserId(), session.getContextId());
-        Collection<PortableSession> remoteSessions = getRemoteSessionsForUser(session);
 
-        // Initialize default value for location
-        String location;
-        {
-            location = SessionManagementStrings.UNKNOWN_LOCATION;
-            UserService userService = Services.getService(UserService.class);
-            if (null != userService) {
-                try {
-                    location = StringHelper.valueOf(userService.getUser(session.getUserId(), session.getContextId()).getLocale()).getString(SessionManagementStrings.UNKNOWN_LOCATION);
-                } catch (OXException e) {
-                    LOG.warn("", e);
-                }
-            }
-        }
+        String location = getDefaultLocation(session);
 
         GeoLocationService geoLocationService = Services.optService(GeoLocationService.class);
-        int totalSize = localSessions.size() + remoteSessions.size();
-        Map<String, String> ip2locationCache = new HashMap<>(totalSize);
-        List<ManagedSession> result = new ArrayList<>(totalSize);
+        Map<String, String> ip2locationCache = new HashMap<>(localSessions.size());
+        List<ManagedSession> result = new ArrayList<>(localSessions.size());
         for (Session s : localSessions) {
             if (false == blackListedClients.contains(s.getClient())) {
                 ManagedSession managedSession = DefaultManagedSession.builder(s)
@@ -168,15 +140,6 @@ public class SessionManagementServiceImpl implements SessionManagementService {
                     .build();
                 result.add(managedSession);
             }
-        }
-        for (PortableSession s : remoteSessions) {
-            if (false == blackListedClients.contains(s.getClient())) {
-                ManagedSession managedSession = DefaultManagedSession.builder(s)
-                    .setLocation(optLocationFor(s, location, ip2locationCache, geoLocationService))
-                    .build();
-                result.add(managedSession);
-            }
-
         }
         return result;
     }
@@ -261,97 +224,21 @@ public class SessionManagementServiceImpl implements SessionManagementService {
         return ImmutableSet.copyOf(clients);
     }
 
-    private Collection<PortableSession> getRemoteSessionsForUser(Session session) throws OXException {
-        LeanConfigurationService configService = Services.getService(LeanConfigurationService.class);
-        if (null == configService) {
-            throw ServiceExceptionCode.absentService(LeanConfigurationService.class);
-        }
-        if (!configService.getBooleanProperty(SessionManagementProperty.globalLookup)) {
-            return Collections.emptyList();
-        }
-        HazelcastInstance hzInstance = Services.optService(HazelcastInstance.class);
-        if (null == hzInstance) {
-            LOG.warn("Missing hazelcast instance.", ServiceExceptionCode.absentService(HazelcastInstance.class));
-            return Collections.emptyList();
-        }
-
-        Cluster cluster = hzInstance.getCluster();
-
-        // Get local member
-        Member localMember = cluster.getLocalMember();
-
-        // Determine other cluster members
-        Set<Member> otherMembers = getOtherMembers(cluster.getMembers(), localMember);
-        if (otherMembers.isEmpty()) {
-            return Collections.emptyList();
-        }
-        IExecutorService executor = hzInstance.getExecutorService("default");
-        Map<Member, Future<PortableSessionCollection>> futureMap = executor.submitToMembers(new PortableMultipleSessionRemoteLookUp(session.getUserId(), session.getContextId()), otherMembers);
-        for (Iterator<Entry<Member, Future<PortableSessionCollection>>> it = futureMap.entrySet().iterator(); it.hasNext();) {
-            Future<PortableSessionCollection> future = it.next().getValue();
-            // Check Future's return value
-            int retryCount = 3;
-            while (retryCount-- > 0) {
+    private String getDefaultLocation(Session session) {
+        // Initialize default value for location
+        String location;
+        {
+            location = SessionManagementStrings.UNKNOWN_LOCATION;
+            UserService userService = Services.getService(UserService.class);
+            if (null != userService) {
                 try {
-                    PortableSessionCollection portableSessionCollection = future.get();
-                    retryCount = 0;
-
-                    PortableSession[] portableSessions = portableSessionCollection.getSessions();
-                    if (null != portableSessions) {
-                        return Arrays.asList(portableSessions);
-                    }
-                } catch (InterruptedException e) {
-                    // Interrupted - Keep interrupted state
-                    Thread.currentThread().interrupt();
-                } catch (CancellationException e) {
-                    // Canceled
-                    retryCount = 0;
-                } catch (ExecutionException e) {
-                    Throwable cause = e.getCause();
-
-                    // Check for Hazelcast timeout
-                    if (!(cause instanceof com.hazelcast.core.OperationTimeoutException)) {
-                        if (cause instanceof RuntimeException) {
-                            throw ((RuntimeException) cause);
-                        }
-                        if (cause instanceof Error) {
-                            throw (Error) cause;
-                        }
-                        throw new IllegalStateException("Not unchecked", cause);
-                    }
-
-                    // Timeout while awaiting remote result
-                    if (retryCount <= 0) {
-                        // No further retry
-                        cancelFutureSafe(future);
-                    }
+                    location = StringHelper.valueOf(userService.getUser(session.getUserId(), session.getContextId()).getLocale()).getString(SessionManagementStrings.UNKNOWN_LOCATION);
+                } catch (OXException e) {
+                    LOG.warn("", e);
                 }
             }
         }
-        return Collections.emptyList();
-
-    }
-
-    private Set<Member> getOtherMembers(Set<Member> allMembers, Member localMember) {
-        Set<Member> otherMembers = new LinkedHashSet<Member>(allMembers);
-        if (!otherMembers.remove(localMember)) {
-            LOG.warn("Couldn't remove local member from cluster members.");
-        }
-        return otherMembers;
-    }
-
-    /**
-     * Cancels given {@link Future} safely
-     *
-     * @param future The {@code Future} to cancel
-     */
-    static <V> void cancelFutureSafe(Future<V> future) {
-        if (null != future) {
-            try {
-                future.cancel(true);
-            } catch (Exception e) {
-                /* Ignore */}
-        }
+        return location;
     }
 
 }

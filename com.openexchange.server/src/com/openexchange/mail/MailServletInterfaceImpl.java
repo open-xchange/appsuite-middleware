@@ -77,8 +77,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 import java.util.concurrent.locks.Lock;
 import javax.mail.Address;
 import javax.mail.Message;
@@ -122,6 +120,7 @@ import com.openexchange.java.IOs;
 import com.openexchange.java.Reference;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
+import com.openexchange.mail.MailFetchListenerResult.ListenerReply;
 import com.openexchange.mail.api.FromAddressProvider;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailFolderStorageEnhanced;
@@ -138,6 +137,8 @@ import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.api.crypto.CryptographicAwareMailAccessFactory;
 import com.openexchange.mail.api.unified.UnifiedFullName;
 import com.openexchange.mail.api.unified.UnifiedViewService;
+import com.openexchange.mail.authenticity.MailAuthenticityHandler;
+import com.openexchange.mail.authenticity.MailAuthenticityHandlerRegistry;
 import com.openexchange.mail.cache.MailMessageCache;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailFolder;
@@ -172,9 +173,6 @@ import com.openexchange.mail.search.SearchTerm;
 import com.openexchange.mail.search.SearchUtility;
 import com.openexchange.mail.search.service.SearchTermMapper;
 import com.openexchange.mail.service.EncryptedMailService;
-import com.openexchange.mail.threader.Conversation;
-import com.openexchange.mail.threader.Conversations;
-import com.openexchange.mail.threader.ThreadableMapping;
 import com.openexchange.mail.transport.MailTransport;
 import com.openexchange.mail.transport.MtaStatusInfo;
 import com.openexchange.mail.transport.TransportProvider;
@@ -199,8 +197,6 @@ import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.spamhandler.SpamHandlerRegistry;
 import com.openexchange.threadpool.AbstractTask;
-import com.openexchange.threadpool.AbstractTrackableTask;
-import com.openexchange.threadpool.Task;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.threadpool.behavior.CallerRunsBehavior;
@@ -1077,16 +1073,30 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     private static final MailMessageComparator COMPARATOR_DESC = new MailMessageComparator(MailSortField.RECEIVED_DATE, true, null);
 
     @Override
-    public List<List<MailMessage>> getAllSimpleThreadStructuredMessages(String folder, boolean includeSent, boolean cache, int sortCol, int order, int[] fields, String[] headerFields, int[] fromToIndices, final long lookAhead, SearchTerm<?> searchTerm) throws OXException {
+    public List<List<MailMessage>> getAllSimpleThreadStructuredMessages(String folder, boolean includeSent, boolean cache, int sortCol, int order, int[] fields, String[] headerFields2, int[] fromToIndices, final long lookAhead, SearchTerm<?> searchTerm) throws OXException {
         FullnameArgument argument = prepareMailFolderParam(folder);
         int accountId = argument.getAccountId();
         initConnection(accountId);
         String fullName = argument.getFullname();
         boolean mergeWithSent = includeSent && !mailAccess.getFolderStorage().getSentFolder().equals(fullName);
-        final MailFields mailFields = new MailFields(MailField.getFields(fields));
+        MailFields mailFields = new MailFields(MailField.getFields(fields));
         mailFields.add(MailField.FOLDER_ID);
         mailFields.add(MailField.toField(MailListField.getField(sortCol)));
+        MailSortField sortField = MailSortField.getField(sortCol);
+        OrderDirection orderDir = OrderDirection.getOrderDirection(order);
+        String[] headerFields = headerFields2;
         checkFieldsForColorCheck(mailFields);
+
+        MailFetchArguments fetchArguments = MailFetchArguments.builder(argument, mailFields.toArray(), headerFields).setSearchTerm(searchTerm).setSortOptions(sortField, orderDir).build();
+        Map<String, Object> fetchListenerState = new HashMap<>(4);
+        MailFetchListenerChain listenerChain = MailFetchListenerRegistry.determineFetchListenerChainFor(fetchArguments, session, fetchListenerState);
+        if (null != listenerChain) {
+            MailAttributation attributation = listenerChain.onBeforeFetch(fetchArguments, session, fetchListenerState);
+            if (attributation.isApplicable()) {
+                mailFields = new MailFields(attributation.getFields());
+                headerFields = attributation.getHeaderNames();
+            }
+        }
 
         // Check message storage
         final IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
@@ -1100,14 +1110,37 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                     cache,
                     null == fromToIndices ? IndexRange.NULL : new IndexRange(fromToIndices[0], fromToIndices[1]),
                     lookAhead,
-                    MailSortField.getField(sortCol),
-                    OrderDirection.getOrderDirection(order),
+                    sortField,
+                    orderDir,
                     mailFields.toArray(),
                     headerFields,
                     searchTerm);
 
                 if (!mailAccess.getWarnings().isEmpty()) {
                     warnings.addAll(mailAccess.getWarnings());
+                }
+
+                /*
+                 * Trigger fetch listener processing
+                 */
+                if (null != listenerChain) {
+                    List<MailMessage> l = new ArrayList<>(result.size());
+                    for (List<MailMessage> mails: result) {
+                        for (MailMessage mail : mails) {
+                            l.add(mail);
+                        }
+                    }
+                    MailMessage[] mails = l.toArray(new MailMessage[l.size()]);
+
+                    MailFetchListenerResult listenerResult = listenerChain.onAfterFetch(mails, false, session, fetchListenerState);
+                    if (ListenerReply.DENY == listenerResult.getReply()) {
+                        OXException e = listenerResult.getError();
+                        if (null == e) {
+                            // Should not occur
+                            e = MailExceptionCode.UNEXPECTED_ERROR.create("Fetch listener processing failed");
+                        }
+                        throw e;
+                    }
                 }
 
                 checkMailsForColor(result);
@@ -1129,8 +1162,8 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                     cache,
                     null == fromToIndices ? IndexRange.NULL : new IndexRange(fromToIndices[0], fromToIndices[1]),
                     lookAhead,
-                    MailSortField.getField(sortCol),
-                    OrderDirection.getOrderDirection(order),
+                    sortField,
+                    orderDir,
                     mailFields.toArray(),
                     searchTerm);
 
@@ -1141,6 +1174,30 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 if (!mailAccess.getWarnings().isEmpty()) {
                     warnings.addAll(mailAccess.getWarnings());
                 }
+
+                /*
+                 * Trigger fetch listener processing
+                 */
+                if (null != listenerChain) {
+                    List<MailMessage> l = new ArrayList<>(mails.size());
+                    for (List<MailMessage> sublist: mails) {
+                        for (MailMessage mail : sublist) {
+                            l.add(mail);
+                        }
+                    }
+                    MailMessage[] ma = l.toArray(new MailMessage[l.size()]);
+
+                    MailFetchListenerResult listenerResult = listenerChain.onAfterFetch(ma, false, session, fetchListenerState);
+                    if (ListenerReply.DENY == listenerResult.getReply()) {
+                        OXException e = listenerResult.getError();
+                        if (null == e) {
+                            // Should not occur
+                            e = MailExceptionCode.UNEXPECTED_ERROR.create("Fetch listener processing failed");
+                        }
+                        throw e;
+                    }
+                }
+
                 checkMailsForColor(mails);
                 return mails;
             } catch (OXException e) {
@@ -1151,173 +1208,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             }
         }
 
-        // Sort by references
-        Future<List<MailMessage>> messagesFromSentFolder;
-        if (mergeWithSent) {
-            final String sentFolder = mailAccess.getFolderStorage().getSentFolder();
-            messagesFromSentFolder = ThreadPools.getThreadPool().submit(new AbstractTask<List<MailMessage>>() {
-
-                @Override
-                public List<MailMessage> call() throws Exception {
-                    return Conversations.messagesFor(sentFolder, (int) lookAhead, mailFields, messageStorage);
-                }
-            });
-        } else {
-            messagesFromSentFolder = null;
-        }
-        // For actual folder
-        List<Conversation> conversations = Conversations.conversationsFor(fullName, (int) lookAhead, mailFields, messageStorage);
-        // Retrieve from sent folder
-        if (null != messagesFromSentFolder) {
-            List<MailMessage> sentMessages = getFrom(messagesFromSentFolder);
-            for (Conversation conversation : conversations) {
-                for (MailMessage sentMessage : sentMessages) {
-                    if (conversation.referencesOrIsReferencedBy(sentMessage)) {
-                        conversation.addMessage(sentMessage);
-                    }
-                }
-            }
-        }
-        // Fold it
-        Conversations.fold(conversations);
-        // Comparator
-        MailMessageComparator threadComparator = COMPARATOR_DESC;
-        // Sort
-        List<List<MailMessage>> list = new LinkedList<>();
-        for (Conversation conversation : conversations) {
-            list.add(conversation.getMessages(threadComparator));
-        }
-        // Sort root elements
-        {
-            MailSortField sortField = MailSortField.getField(sortCol);
-            MailSortField effectiveSortField = null == sortField ? MailSortField.RECEIVED_DATE : sortField;
-            Comparator<List<MailMessage>> listComparator = getListComparator(effectiveSortField, OrderDirection.getOrderDirection(order), folder, getUserLocale());
-            Collections.sort(list, listComparator);
-        }
-        // Check for index range
-        IndexRange indexRange = null == fromToIndices ? IndexRange.NULL : new IndexRange(fromToIndices[0], fromToIndices[1]);
-        if (null != indexRange) {
-            int fromIndex = indexRange.start;
-            int toIndex = indexRange.end;
-            int size = list.size();
-            if ((fromIndex) > size) {
-                // Return empty iterator if start is out of range
-                if (!mailAccess.getWarnings().isEmpty()) {
-                    warnings.addAll(mailAccess.getWarnings());
-                }
-                return Collections.emptyList();
-            }
-            // Reset end index if out of range
-            if (toIndex >= size) {
-                toIndex = size;
-            }
-            list = list.subList(fromIndex, toIndex);
-        }
-        /*
-         * Apply account identifier
-         */
-        setAccountInfo2(list);
-
-        if (null != headerFields && headerFields.length > 0) {
-            MessageUtility.enrichWithHeaders(list, headerFields, messageStorage);
-        }
-
-        // Return list
-        if (!mailAccess.getWarnings().isEmpty()) {
-            warnings.addAll(mailAccess.getWarnings());
-        }
-        checkMailsForColor(list);
-        return list;
-    }
-
-    private static Future<ThreadableMapping> getThreadableMapping(final String sentFolder, final int limit, final MailFields mailFields, final IMailMessageStorage messageStorage) {
-        Task<ThreadableMapping> task = new AbstractTrackableTask<ThreadableMapping>() {
-
-            @Override
-            public ThreadableMapping call() throws Exception {
-                List<MailMessage> mails = Conversations.messagesFor(sentFolder, limit, mailFields, messageStorage);
-                return new ThreadableMapping(64).initWith(mails);
-            }
-
-        };
-        return ThreadPools.getThreadPool().submit(task, CallerRunsBehavior.<ThreadableMapping> getInstance());
-    }
-
-    private Comparator<List<MailMessage>> getListComparator(final MailSortField sortField, final OrderDirection order, final String folder, Locale locale) throws OXException {
-        final MailMessageComparator comparator = new MailMessageComparator(sortField, OrderDirection.DESC.equals(order), locale, mailAccess.getMailConfig().getMailProperties().isUserFlagsEnabled());
-        Comparator<List<MailMessage>> listComparator = new Comparator<List<MailMessage>>() {
-
-            @Override
-            public int compare(List<MailMessage> o1, List<MailMessage> o2) {
-                MailMessage msg1 = lookUpFirstBelongingToFolder(folder, o1);
-                MailMessage msg2 = lookUpFirstBelongingToFolder(folder, o2);
-
-                int result = comparator.compare(o1.get(0), o2.get(0));
-                if ((0 != result) || (MailSortField.RECEIVED_DATE != sortField)) {
-                    return result;
-                }
-                // Zero as comparison result AND primarily sorted by received-date
-                String inReplyTo1 = msg1.getInReplyTo();
-                String inReplyTo2 = msg2.getInReplyTo();
-                if (null == inReplyTo1) {
-                    result = null == inReplyTo2 ? 0 : -1;
-                } else {
-                    result = null == inReplyTo2 ? 1 : 0;
-                }
-                return 0 == result ? new MailMessageComparator(MailSortField.SENT_DATE, OrderDirection.DESC.equals(order), null).compare(msg1, msg2) : result;
-            }
-
-            private MailMessage lookUpFirstBelongingToFolder(String folder, List<MailMessage> mails) {
-                for (MailMessage mail : mails) {
-                    if (folder.equals(mail.getFolder())) {
-                        return mail;
-                    }
-                }
-                return mails.get(0);
-            }
-        };
-        return listComparator;
-    }
-
-    private static <T> T getFrom(Future<T> f) throws OXException {
-        if (null == f) {
-            return null;
-        }
-        try {
-            return f.get();
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt(); // Keep interrupted state
-            throw MailExceptionCode.INTERRUPT_ERROR.create(e, e.getMessage());
-        } catch (ExecutionException e) {
-            Throwable cause = e.getCause();
-            if (cause instanceof MessagingException) {
-                throw MimeMailException.handleMessagingException((MessagingException) cause);
-            }
-            throw ThreadPools.launderThrowable(e, OXException.class);
-        }
-
-    }
-
-    /**
-     * Sets account ID and name in given instances of {@link MailMessage}.
-     *
-     * @param mailMessages The {@link MailMessage} instances
-     * @return The given instances of {@link MailMessage} each with account ID and name set
-     * @throws OXException If mail account cannot be obtained
-     */
-    private <C extends Collection<MailMessage>, W extends Collection<C>> W setAccountInfo2(W col) throws OXException {
-        MailAccount account = getMailAccount();
-        String name = account.getName();
-        int id = account.getId();
-        for (C mailMessages : col) {
-            for (MailMessage mailMessage : mailMessages) {
-                if (null != mailMessage) {
-                    mailMessage.setAccountId(id);
-                    mailMessage.setAccountName(name);
-                }
-            }
-        }
-        return col;
+        throw MailExceptionCode.UNSUPPORTED_OPERATION.create();
     }
 
     @Override
@@ -1629,6 +1520,16 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 }
             } catch (OXException e) {
                 LOG.error("", e);
+            }
+
+            if (MailAccount.DEFAULT_ID == accountId) {
+                MailAuthenticityHandlerRegistry authenticityHandlerRegistry = ServerServiceRegistry.getInstance().getService(MailAuthenticityHandlerRegistry.class);
+                if (null != authenticityHandlerRegistry) {
+                    MailAuthenticityHandler handler = authenticityHandlerRegistry.getHighestRankedHandlerFor(session);
+                    if (null != handler) {
+                        handler.handle(session, mail);
+                    }
+                }
             }
 
             /*
@@ -2058,19 +1959,19 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     }
 
     @Override
-    public MailMessage[] getMessageList(String folder, String[] uids, int[] fields, String[] headerFields) throws OXException {
+    public MailMessage[] getMessageList(String folder, String[] uids, int[] fields, String[] headerNames) throws OXException {
         /*
          * Although message cache is only used within mail implementation, we have to examine if cache already holds desired messages. If
          * the cache holds the desired messages no connection has to be fetched/established. This avoids a lot of overhead.
          */
-        int accountId;
-        String fullName;
-        {
-            FullnameArgument argument = prepareMailFolderParam(folder);
-            accountId = argument.getAccountId();
-            fullName = argument.getFullname();
-        }
-        boolean loadHeaders = (null != headerFields && 0 < headerFields.length);
+        FullnameArgument argument = prepareMailFolderParam(folder);
+        int accountId = argument.getAccountId();
+        String fullName = argument.getFullname();
+        String[] headers = headerNames;
+        boolean loadHeaders = (null != headers && 0 < headers.length);
+        MailFetchArguments fetchArguments = MailFetchArguments.builder(argument, MailField.getFields(fields), headerNames).build();
+        Map<String, Object> fetchListenerState = new HashMap<>(4);
+        MailFetchListenerChain listenerChain = MailFetchListenerRegistry.determineFetchListenerChainFor(fetchArguments, session, fetchListenerState);
         /*-
          * Check for presence in cache
          * TODO: Think about switching to live-fetch if loadHeaders is true. Loading all data once may be faster than
@@ -2079,55 +1980,61 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         try {
             MailMessage[] mails = MailMessageCache.getInstance().getMessages(uids, accountId, fullName, session.getUserId(), contextId);
             if (null != mails) {
-                /*
-                 * List request can be served from cache; apply proper account ID to (unconnected) mail servlet interface
-                 */
-                this.accountId = accountId;
-                /*
-                 * Check if headers shall be loaded
-                 */
-                if (loadHeaders) {
-                    /*
-                     * Load headers of cached mails
-                     */
-                    List<String> loadMe = new LinkedList<>();
-                    Map<String, MailMessage> finder = new HashMap<>(mails.length);
-                    for (MailMessage mail : mails) {
-                        String mailId = mail.getMailId();
-                        finder.put(mailId, mail);
-                        if (!mail.hasHeaders(headerFields)) {
-                            loadMe.add(mailId);
-                        }
-                    }
-                    if (!loadMe.isEmpty()) {
-                        initConnection(accountId);
-                        IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
-
-                        IMailMessageStorageExt messageStorageExt = messageStorage.supports(IMailMessageStorageExt.class);
-                        if (null != messageStorageExt) {
-                            for (MailMessage header : messageStorageExt.getMessages(fullName, loadMe.toArray(new String[loadMe.size()]), FIELDS_ID_INFO, headerFields)) {
-                                if (null != header) {
-                                    MailMessage mailMessage = finder.get(header.getMailId());
-                                    if (null != mailMessage) {
-                                        mailMessage.addHeaders(header.getHeaders());
-                                    }
-                                }
-                            }
-                        } else {
-                            for (MailMessage header : messageStorage.getMessages(fullName, loadMe.toArray(new String[loadMe.size()]), HEADERS)) {
-                                if (null != header) {
-                                    MailMessage mailMessage = finder.get(header.getMailId());
-                                    if (null != mailMessage) {
-                                        mailMessage.addHeaders(header.getHeaders());
-                                    }
-                                }
-                            }
-                        }
-                    }
+                boolean accepted = true;
+                if (null != listenerChain) {
+                    accepted = listenerChain.accept(mails, fetchArguments, session);
                 }
+                if (accepted) {
+                    /*
+                     * List request can be served from cache; apply proper account ID to (unconnected) mail servlet interface
+                     */
+                    this.accountId = accountId;
+                    /*
+                     * Check if headers shall be loaded
+                     */
+                    if (loadHeaders) {
+                        /*
+                         * Load headers of cached mails
+                         */
+                        List<String> loadMe = new LinkedList<>();
+                        Map<String, MailMessage> finder = new HashMap<>(mails.length);
+                        for (MailMessage mail : mails) {
+                            String mailId = mail.getMailId();
+                            finder.put(mailId, mail);
+                            if (!mail.hasHeaders(headers)) {
+                                loadMe.add(mailId);
+                            }
+                        }
+                        if (!loadMe.isEmpty()) {
+                            initConnection(accountId);
+                            IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
 
-                checkMailsForColor(mails);
-                return mails;
+                            IMailMessageStorageExt messageStorageExt = messageStorage.supports(IMailMessageStorageExt.class);
+                            if (null != messageStorageExt) {
+                                for (MailMessage header : messageStorageExt.getMessages(fullName, loadMe.toArray(new String[loadMe.size()]), FIELDS_ID_INFO, headers)) {
+                                    if (null != header) {
+                                        MailMessage mailMessage = finder.get(header.getMailId());
+                                        if (null != mailMessage) {
+                                            mailMessage.addHeaders(header.getHeaders());
+                                        }
+                                    }
+                                }
+                            } else {
+                                for (MailMessage header : messageStorage.getMessages(fullName, loadMe.toArray(new String[loadMe.size()]), HEADERS)) {
+                                    if (null != header) {
+                                        MailMessage mailMessage = finder.get(header.getMailId());
+                                        if (null != mailMessage) {
+                                            mailMessage.addHeaders(header.getHeaders());
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    checkMailsForColor(mails);
+                    return mails;
+                }
             }
         } catch (OXException e) {
             LOG.error("", e);
@@ -2145,8 +2052,16 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         }
 
         MailFields mailFieldsForCheck = new MailFields(useFields);
-        if(checkFieldsForColorCheck(mailFieldsForCheck)){
+        if (checkFieldsForColorCheck(mailFieldsForCheck)) {
             useFields = mailFieldsForCheck.toArray();
+        }
+
+        if (null != listenerChain) {
+            MailAttributation attributation = listenerChain.onBeforeFetch(fetchArguments, session, fetchListenerState);
+            if (attributation.isApplicable()) {
+                useFields = attributation.getFields();
+                headers = attributation.getHeaderNames();
+            }
         }
 
         MailMessage[] mails;
@@ -2155,7 +2070,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 
             IMailMessageStorageExt messageStorageExt = messageStorage.supports(IMailMessageStorageExt.class);
             if (null != messageStorageExt) {
-                mails = messageStorageExt.getMessages(fullName, uids, useFields, headerFields);
+                mails = messageStorageExt.getMessages(fullName, uids, useFields, headers);
             } else {
                 /*
                  * Get appropriate mail fields
@@ -2174,6 +2089,23 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 mails = messageStorage.getMessages(fullName, uids, mailFields);
             }
         }
+
+        if (null != listenerChain) {
+            MailFetchListenerResult result = listenerChain.onAfterFetch(mails, cachable, session, fetchListenerState);
+            if (ListenerReply.DENY == result.getReply()) {
+                OXException e = result.getError();
+                if (null == e) {
+                    // Should not occur
+                    e = MailExceptionCode.UNEXPECTED_ERROR.create("Fetch listener processing failed");
+                }
+                throw e;
+            }
+            mails = result.getMails();
+            if (false == result.isCacheable()) {
+                cachable = false;
+            }
+        }
+
         try {
             if (cachable && MailMessageCache.getInstance().containsFolderMessages(accountId, fullName, session.getUserId(), contextId) && mailAccess.getWarnings().isEmpty()) {
                 MailMessageCache.getInstance().putMessages(accountId, mails, session.getUserId(), contextId);
@@ -2227,11 +2159,12 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 
         // Identify and sort messages according to search term and sort criteria while only fetching their IDs
         String fullName = argument.getFullname();
+        MailSortField sortField = MailSortField.getField(sortCol);
+        OrderDirection orderDir = OrderDirection.getOrderDirection(order);
+        String[] headers = headerNames;
         MailMessage[] mails = null;
         {
             IndexRange indexRange = null == fromToIndices ? IndexRange.NULL : new IndexRange(fromToIndices[0], fromToIndices[1]);
-            MailSortField sortField = MailSortField.getField(sortCol);
-            OrderDirection orderDir = OrderDirection.getOrderDirection(order);
             if ("unified/inbox".equalsIgnoreCase(fullName)) {
                 UnifiedViewService unifiedView = ServerServiceRegistry.getInstance().getService(UnifiedViewService.class);
                 if (null == unifiedView) {
@@ -2247,7 +2180,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 
                 // Check if a certain range/page is requested
                 if (IndexRange.NULL != indexRange) {
-                    return getMessageRange(searchTerm, fields, headerNames, fullName, indexRange, sortField, orderDir, accountId);
+                    return getMessageRange(searchTerm, fields, headers, fullName, indexRange, sortField, orderDir, accountId);
                 }
 
                 mails = mailAccess.getMessageStorage().searchMessages(fullName, indexRange, sortField, orderDir, searchTerm, FIELDS_ID_INFO);
@@ -2272,7 +2205,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             onlyFolderAndID = false;
         } else {
             useFields = MailField.getFields(fields);
-            onlyFolderAndID = (null != headerNames && 0 < headerNames.length) ? false : onlyFolderAndID(useFields);
+            onlyFolderAndID = (null != headers && 0 < headers.length) ? false : onlyFolderAndID(useFields);
         }
         if (supportsContinuation) {
             MailFields mfs = new MailFields(useFields);
@@ -2283,9 +2216,22 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         }
 
         MailFields mailFields = new MailFields(useFields);
-        if(checkFieldsForColorCheck(mailFields)){
+        if (checkFieldsForColorCheck(mailFields)) {
             useFields = mailFields.toArray();
         }
+
+        MailFetchArguments fetchArguments = MailFetchArguments.builder(argument, useFields, headerNames).setSearchTerm(searchTerm).setSortOptions(sortField, orderDir).build();
+        Map<String, Object> fetchListenerState = new HashMap<>(4);
+        MailFetchListenerChain listenerChain = MailFetchListenerRegistry.determineFetchListenerChainFor(fetchArguments, session, fetchListenerState);
+        if (null != listenerChain) {
+            MailAttributation attributation = listenerChain.onBeforeFetch(fetchArguments, session, fetchListenerState);
+            if (attributation.isApplicable()) {
+                useFields = attributation.getFields();
+                headers = attributation.getHeaderNames();
+                onlyFolderAndID = (null != headers && 0 < headers.length) ? false : onlyFolderAndID(useFields);
+            }
+        }
+
         /*-
          * More than ID and folder requested?
          *  AND
@@ -2305,22 +2251,41 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             /*
              * Fetch identified messages by their IDs and pre-fill them according to specified fields
              */
-            if (null != headerNames && 0 < headerNames.length) {
+            if (null != headers && 0 < headers.length) {
                 IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
 
                 IMailMessageStorageExt messageStorageExt = messageStorage.supports(IMailMessageStorageExt.class);
                 if (null != messageStorageExt) {
-                    mails = messageStorageExt.getMessages(fullName, mailIds, useFields, headerNames);
+                    mails = messageStorageExt.getMessages(fullName, mailIds, useFields, headers);
                 } else {
                     useFields = MailFields.addIfAbsent(useFields, MailField.ID);
                     mails = messageStorage.getMessages(fullName, mailIds, useFields);
-                    MessageUtility.enrichWithHeaders(fullName, mails, headerNames, messageStorage);
+                    MessageUtility.enrichWithHeaders(fullName, mails, headers, messageStorage);
                 }
             } else {
                 mails = mailAccess.getMessageStorage().getMessages(fullName, mailIds, useFields);
             }
             if ((mails == null) || (mails.length == 0) || onlyNull(mails)) {
                 return SearchIteratorAdapter.emptyIterator();
+            }
+        }
+
+        /*
+         * Trigger fetch listener processing
+         */
+        if (null != listenerChain) {
+            MailFetchListenerResult result = listenerChain.onAfterFetch(mails, cachable, session, fetchListenerState);
+            if (ListenerReply.DENY == result.getReply()) {
+                OXException e = result.getError();
+                if (null == e) {
+                    // Should not occur
+                    e = MailExceptionCode.UNEXPECTED_ERROR.create("Fetch listener processing failed");
+                }
+                throw e;
+            }
+            mails = result.getMails();
+            if (false == result.isCacheable()) {
+                cachable = false;
             }
         }
 
@@ -2367,19 +2332,30 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             useFields = MailFields.addIfAbsent(useFields, MailField.ID, MailField.FOLDER_ID);
         }
         MailFields mailFields = new MailFields(useFields);
-        if(checkFieldsForColorCheck(mailFields)){
+        if (checkFieldsForColorCheck(mailFields)) {
             useFields = mailFields.toArray();
         }
+        String[] headers = headerNames;
+        MailFetchArguments fetchArguments = MailFetchArguments.builder(new FullnameArgument(accountId, fullName), useFields, headerNames).setSearchTerm(searchTerm).setSortOptions(sortField, orderDir).build();
+        Map<String, Object> fetchListenerState = new HashMap<>(4);
+        MailFetchListenerChain listenerChain = MailFetchListenerRegistry.determineFetchListenerChainFor(fetchArguments, session, fetchListenerState);
+        if (null != listenerChain) {
+            MailAttributation attributation = listenerChain.onBeforeFetch(fetchArguments, session, fetchListenerState);
+            if (attributation.isApplicable()) {
+                useFields = attributation.getFields();
+                headers = attributation.getHeaderNames();
+            }
+        }
         MailMessage[] mails;
-        if (null != headerNames && 0 < headerNames.length) {
+        if (null != headers && 0 < headers.length) {
             IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
 
             IMailMessageStorageExt messageStorageExt = messageStorage.supports(IMailMessageStorageExt.class);
             if (null != messageStorageExt) {
-                mails = messageStorageExt.searchMessages(fullName, indexRange, sortField, orderDir, searchTerm, useFields, headerNames);
+                mails = messageStorageExt.searchMessages(fullName, indexRange, sortField, orderDir, searchTerm, useFields, headers);
             } else {
                 mails = mailAccess.getMessageStorage().searchMessages(fullName, indexRange, sortField, orderDir, searchTerm, useFields);
-                MessageUtility.enrichWithHeaders(fullName, mails, headerNames, messageStorage);
+                MessageUtility.enrichWithHeaders(fullName, mails, headers, messageStorage);
             }
         } else {
             mails = mailAccess.getMessageStorage().searchMessages(fullName, indexRange, sortField, orderDir, searchTerm, useFields);
@@ -2424,6 +2400,24 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 
                 mails = l.toArray(new MailMessage[l.size()]);
                 l = null; // Help GC
+            }
+        }
+        /*
+         * Trigger fetch listener processing
+         */
+        if (null != listenerChain) {
+            MailFetchListenerResult result = listenerChain.onAfterFetch(mails, cachable, session, fetchListenerState);
+            if (ListenerReply.DENY == result.getReply()) {
+                OXException e = result.getError();
+                if (null == e) {
+                    // Should not occur
+                    e = MailExceptionCode.UNEXPECTED_ERROR.create("Fetch listener processing failed");
+                }
+                throw e;
+            }
+            mails = result.getMails();
+            if (false == result.isCacheable()) {
+                cachable = false;
             }
         }
         /*
@@ -2771,20 +2765,13 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         int accountId = argument.getAccountId();
         initConnection(accountId);
         String fullName = argument.getFullname();
-        SearchTerm<?> searchTerm = (searchCols == null) || (searchCols.length == 0) ? null : SearchUtility.parseFields(
-            searchCols,
-            searchPatterns,
-            linkSearchTermsWithOR);
+        SearchTerm<?> searchTerm = (searchCols == null) || (searchCols.length == 0) ? null : SearchUtility.parseFields(searchCols, searchPatterns, linkSearchTermsWithOR);
+        MailSortField sortField = MailSortField.getField(sortCol);
+        OrderDirection orderDirection = OrderDirection.getOrderDirection(order);
         /*
          * Identify and thread-sort messages according to search term while only fetching their IDs
          */
-        MailMessage[] mails = mailAccess.getMessageStorage().getThreadSortedMessages(
-            fullName,
-            fromToIndices == null ? IndexRange.NULL : new IndexRange(fromToIndices[0], fromToIndices[1]),
-            MailSortField.getField(sortCol),
-            OrderDirection.getOrderDirection(order),
-            searchTerm,
-            FIELDS_ID_INFO);
+        MailMessage[] mails = mailAccess.getMessageStorage().getThreadSortedMessages(fullName, fromToIndices == null ? IndexRange.NULL : new IndexRange(fromToIndices[0], fromToIndices[1]), sortField, orderDirection, searchTerm, FIELDS_ID_INFO);
         if ((mails == null) || (mails.length == 0)) {
             return SearchIteratorAdapter.<MailMessage> emptyIterator();
         }
@@ -2803,10 +2790,22 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             onlyFolderAndID = onlyFolderAndID(useFields);
         }
 
+        MailFetchArguments fetchArguments = MailFetchArguments.builder(argument, useFields, null).setSearchTerm(searchTerm).setSortOptions(sortField, orderDirection).build();
+        Map<String, Object> fetchListenerState = new HashMap<>(4);
+        MailFetchListenerChain listenerChain = MailFetchListenerRegistry.determineFetchListenerChainFor(fetchArguments, session, fetchListenerState);
+        if (null != listenerChain) {
+            MailAttributation attributation = listenerChain.onBeforeFetch(fetchArguments, session, fetchListenerState);
+            if (attributation.isApplicable()) {
+                useFields = attributation.getFields();
+                onlyFolderAndID = onlyFolderAndID(useFields);
+            }
+        }
+
         MailFields mailFields = new MailFields(useFields);
-        if(checkFieldsForColorCheck(mailFields)){
+        if (checkFieldsForColorCheck(mailFields)){
             useFields = mailFields.toArray();
         }
+
         if (!onlyFolderAndID) {
             /*
              * Extract IDs
@@ -2836,6 +2835,24 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         for (MailMessage mail : mails) {
             if (mail != null && (!mail.containsAccountId() || mail.getAccountId() < 0)) {
                 mail.setAccountId(accountId);
+            }
+        }
+        /*
+         * Trigger fetch listener processing
+         */
+        if (null != listenerChain) {
+            MailFetchListenerResult result = listenerChain.onAfterFetch(mails, cacheable, session, fetchListenerState);
+            if (ListenerReply.DENY == result.getReply()) {
+                OXException e = result.getError();
+                if (null == e) {
+                    // Should not occur
+                    e = MailExceptionCode.UNEXPECTED_ERROR.create("Fetch listener processing failed");
+                }
+                throw e;
+            }
+            mails = result.getMails();
+            if (false == result.isCacheable()) {
+                cacheable = false;
             }
         }
         try {
@@ -4222,12 +4239,30 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         int accountId = argument.getAccountId();
         initConnection(accountId);
         String fullName = argument.getFullname();
-        MailField[] mailFieldsArray = MailField.getFields(fields);
-        MailFields mailFields = new MailFields(mailFieldsArray);
-        if(checkFieldsForColorCheck(mailFields)){
-            mailFieldsArray = mailFields.toArray();
+        MailFields mailFields = new MailFields(MailField.getFields(fields));
+        checkFieldsForColorCheck(mailFields);
+        MailFetchArguments fetchArguments = MailFetchArguments.builder(argument, mailFields.toArray(), null).build();
+        Map<String, Object> fetchListenerState = new HashMap<>(4);
+        MailFetchListenerChain listenerChain = MailFetchListenerRegistry.determineFetchListenerChainFor(fetchArguments, session, fetchListenerState);
+        if (null != listenerChain) {
+            MailAttributation attributation = listenerChain.onBeforeFetch(fetchArguments, session, fetchListenerState);
+            if (attributation.isApplicable()) {
+                mailFields = new MailFields(attributation.getFields());
+            }
         }
-        MailMessage[] mails = mailAccess.getMessageStorage().getNewAndModifiedMessages(fullName,mailFieldsArray);
+        MailMessage[] mails = mailAccess.getMessageStorage().getNewAndModifiedMessages(fullName, mailFields.toArray());
+        if (null != listenerChain) {
+            MailFetchListenerResult result = listenerChain.onAfterFetch(mails, false, session, fetchListenerState);
+            if (ListenerReply.DENY == result.getReply()) {
+                OXException e = result.getError();
+                if (null == e) {
+                    // Should not occur
+                    e = MailExceptionCode.UNEXPECTED_ERROR.create("Fetch listener processing failed");
+                }
+                throw e;
+            }
+            mails = result.getMails();
+        }
         checkMailsForColor(mails);
         return mails;
     }
@@ -4238,12 +4273,30 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         int accountId = argument.getAccountId();
         initConnection(accountId);
         String fullName = argument.getFullname();
-        MailField[] mailFieldsArray = MailField.getFields(fields);
-        MailFields mailFields = new MailFields(mailFieldsArray);
-        if(checkFieldsForColorCheck(mailFields)){
-            mailFieldsArray = mailFields.toArray();
+        MailFields mailFields = new MailFields(MailField.getFields(fields));
+        checkFieldsForColorCheck(mailFields);
+        MailFetchArguments fetchArguments = MailFetchArguments.builder(argument, mailFields.toArray(), null).build();
+        Map<String, Object> fetchListenerState = new HashMap<>(4);
+        MailFetchListenerChain listenerChain = MailFetchListenerRegistry.determineFetchListenerChainFor(fetchArguments, session, fetchListenerState);
+        if (null != listenerChain) {
+            MailAttributation attributation = listenerChain.onBeforeFetch(fetchArguments, session, fetchListenerState);
+            if (attributation.isApplicable()) {
+                mailFields = new MailFields(attributation.getFields());
+            }
         }
-        MailMessage[] mails = mailAccess.getMessageStorage().getDeletedMessages(fullName, mailFieldsArray);
+        MailMessage[] mails = mailAccess.getMessageStorage().getDeletedMessages(fullName, mailFields.toArray());
+        if (null != listenerChain) {
+            MailFetchListenerResult result = listenerChain.onAfterFetch(mails, false, session, fetchListenerState);
+            if (ListenerReply.DENY == result.getReply()) {
+                OXException e = result.getError();
+                if (null == e) {
+                    // Should not occur
+                    e = MailExceptionCode.UNEXPECTED_ERROR.create("Fetch listener processing failed");
+                }
+                throw e;
+            }
+            mails = result.getMails();
+        }
         checkMailsForColor(mails);
         return mails;
     }

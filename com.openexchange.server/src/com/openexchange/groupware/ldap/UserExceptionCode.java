@@ -127,9 +127,14 @@ public enum UserExceptionCode implements DisplayableOXExceptionCode {
         Category.CATEGORY_ERROR, 12),
 
     /**
-     * No CATEGORY_PERMISSION_DENIED to modify resources in context %1$s
+     * No permission to modify resources in context %1$s
      */
     PERMISSION("No permission to modify resources in context %1$s", UserExceptionMessage.PERMISSION_DISPLAY,
+        Category.CATEGORY_PERMISSION_DENIED, 13),
+    /**
+     * No permission to modify resources in context %1$s
+     */
+    PERMISSION_ACCESS("No permission to access resources in context %1$s", UserExceptionMessage.PERMISSION_ACCESS_DISPLAY,
         Category.CATEGORY_PERMISSION_DENIED, 13),
 
     /**

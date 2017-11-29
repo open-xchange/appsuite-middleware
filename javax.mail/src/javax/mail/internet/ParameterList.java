@@ -260,6 +260,10 @@ public class ParameterList {
 		// tolerate trailing semicolon, even though it violates the spec
 		if (tk.getType() == HeaderTokenizer.Token.EOF)
 		    break;
+		if (null != tk.getValue() && ";".equals(tk.getValue().trim())) {
+		    prevValue = ";";
+            continue;
+        }
 		// parameter name must be a MIME Atom
 		if (tk.getType() != HeaderTokenizer.Token.ATOM)
 		    throw new ParseException("In parameter list <" + s + ">" +

@@ -650,6 +650,9 @@ public final class InternalList {
         // Adds the column "type" to the oxfolder_permissions table
         list.add(new AddTypeToFolderPermissionTableUpdateTask());
 
+        // Drops rather needless foreign key from "object_use_count" table
+        list.add(new com.openexchange.groupware.update.tasks.DropForeignKeyFromObjectUseCountTable());
+
         return list.toArray(new UpdateTaskV2[list.size()]);
     }
 

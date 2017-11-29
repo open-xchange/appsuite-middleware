@@ -155,7 +155,7 @@ case "${BNAME}" in
     "checkdatabase")
     ACTION="util.database.CheckDatabase"
     ;;
-	"upgadeschemata")
+	"upgradeschemata")
     ACTION="util.database.UpgradeSchemata"
     ;;
     "unblockdatabase")

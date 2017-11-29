@@ -66,8 +66,6 @@ import com.openexchange.image.ImageDataSource;
 import com.openexchange.image.ImageLocation;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.Pair;
-import com.openexchange.session.Session;
-import com.openexchange.tools.session.ServerSession;
 
 /**
  * A helper class to create {@link DisplayItem}s for common cases.
@@ -84,11 +82,11 @@ public class DisplayItems {
      * Converts the specified {@link Contact} result into a {@link ComplexDisplayItem}
      *
      * @param contact the {@link Contact} to convert
-     * @param session the groupware {@link Session}
+     * @param locale the user's {@link Locale}
      * @return The {@link ComplexDisplayItem}
      */
-    public static ComplexDisplayItem convert(Contact contact, ServerSession session) {
-        String displayName = formatDisplayName(contact, session.getUser().getLocale());
+    public static ComplexDisplayItem convert(Contact contact, Locale locale) {
+        String displayName = formatDisplayName(contact, locale);
         String primaryAddress = extractPrimaryMailAddress(contact);
         if (Strings.isEmpty(displayName)) {
             displayName = Strings.isEmpty(primaryAddress) ? "" : primaryAddress;
@@ -131,7 +129,7 @@ public class DisplayItems {
 
     /**
      * Determines whether the specified {@link Contact} has the department set and is an entry in the GAB (Global Address Book)
-     * 
+     *
      * @param contact The {@link Contact}
      * @return <code>true</code> if it has the department set and is an entry in the GAB, <code>false</code> otherwise
      */
@@ -141,13 +139,13 @@ public class DisplayItems {
 
     /**
      * Get the display name template to use
-     * 
+     *
      * @param locale The locale to use for the translation of the template
      * @param hasDepartment Whether the contact has the department field set
      * @return The display name template
      */
     private static String getTemplate(Locale locale, boolean hasDepartment) {
-        String toLocalise = showDepartments() && hasDepartment ? ContactDisplayNameFormat.DISPLAY_NAME_FORMAT_WITH_DEPARTMENT : ContactDisplayNameFormat.DISPLAY_NAME_FORMAT_WITHOUT_DEPARTMENT;
+        String toLocalise = hasDepartment && showDepartments() ? ContactDisplayNameFormat.DISPLAY_NAME_FORMAT_WITH_DEPARTMENT : ContactDisplayNameFormat.DISPLAY_NAME_FORMAT_WITHOUT_DEPARTMENT;
         I18nServiceRegistry registry = Services.optService(I18nServiceRegistry.class);
         if (registry == null) {
             LOGGER.warn("No such service: {}. Returning default template '{}' for display name format", toLocalise, I18nServiceRegistry.class);
@@ -168,17 +166,17 @@ public class DisplayItems {
 
     /**
      * Look-up the property
-     * 
+     *
      * @return <code>true</code> to show departments, <code>false</code> otherwise
      */
     private static boolean showDepartments() {
         LeanConfigurationService configService = Services.optService(LeanConfigurationService.class);
         if (null == configService) {
             boolean defaultValue = false;
-            LOGGER.warn("No such service: {}. Assuming default value of '{}' for property '{}'", LeanConfigurationService.class.getName(), defaultValue, ContactProperty.showDepartments);
+            LOGGER.warn("No such service: {}. Assuming default value of '{}' for property '{}'", LeanConfigurationService.class.getName(), defaultValue, ContactProperty.showDepartment);
             return defaultValue;
         }
-        return configService.getBooleanProperty(ContactProperty.showDepartments);
+        return configService.getBooleanProperty(ContactProperty.showDepartment);
     }
 
     /**

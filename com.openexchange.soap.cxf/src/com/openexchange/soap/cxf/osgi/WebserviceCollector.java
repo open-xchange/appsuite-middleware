@@ -56,9 +56,12 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import javax.jws.WebService;
 import javax.xml.ws.Endpoint;
+import org.apache.cxf.endpoint.ServerImpl;
+import org.apache.cxf.frontend.WSDLGetUtils;
 import org.apache.cxf.interceptor.DocLiteralInInterceptor;
 import org.apache.cxf.interceptor.Interceptor;
 import org.apache.cxf.message.Message;
+import org.apache.cxf.service.model.EndpointInfo;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceEvent;
@@ -198,10 +201,17 @@ public class WebserviceCollector implements ServiceListener {
         Endpoint oldEndpoint;
         try {
             // Publish new server endpoint
-            if (null != baseUri) {
-                address = baseUri + address;
+            final Endpoint endpoint = Endpoint.create(service);
+            {
+                org.apache.cxf.jaxws.EndpointImpl endpointImpl = (org.apache.cxf.jaxws.EndpointImpl) endpoint;
+                if (null != baseUri) {
+                    ServerImpl serv = endpointImpl.getServer(address);
+                    EndpointInfo endpointInfo = serv.getEndpoint().getEndpointInfo();
+                    String publishedEndpointUrl = baseUri + address;
+                    endpointInfo.setProperty(WSDLGetUtils.PUBLISHED_ENDPOINT_URL, publishedEndpointUrl);
+                }
             }
-            final Endpoint endpoint = Endpoint.publish(address, service);
+            endpoint.publish(address);
             {
                 // Alter server's in-stream interceptors
                 final org.apache.cxf.endpoint.Endpoint serverEndpoint = (org.apache.cxf.endpoint.Endpoint) endpoint.getProperties();

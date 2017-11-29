@@ -64,13 +64,13 @@ import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.StatusLine;
 import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.HttpResponseException;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.InputStreamEntity;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONException;
@@ -270,7 +270,7 @@ public abstract class AbstractOneDriveResourceAccess {
                 try {
                     int keepOn = 1;
                     while (keepOn > 0) {
-                        DefaultHttpClient httpClient = oneDriveAccess.<DefaultHttpClient> getClient().client;
+                        HttpClient httpClient = oneDriveAccess.<HttpClient> getClient().client;
                         HttpGet method = new HttpGet(buildUri("/me/skydrive", initiateQueryString()));
                         request = method;
                         // HttpClients.setRequestTimeout(3500, method);
@@ -315,7 +315,7 @@ public abstract class AbstractOneDriveResourceAccess {
      * @throws ClientProtocolException If client protocol error occurs
      * @throws IOException If an I/O error occurs
      */
-    protected HttpResponse execute(HttpRequestBase method, DefaultHttpClient httpClient) throws ClientProtocolException, IOException {
+    protected HttpResponse execute(HttpRequestBase method, HttpClient httpClient) throws ClientProtocolException, IOException {
         //long st = System.currentTimeMillis();
         HttpResponse httpResponse = httpClient.execute(method);
         //long dur = System.currentTimeMillis() - st;
@@ -469,7 +469,7 @@ public abstract class AbstractOneDriveResourceAccess {
      * @throws OXException If performing closure fails
      */
     protected <R> R perform(OneDriveClosure<R> closure) throws OXException {
-        return closure.perform(this, oneDriveAccess.<DefaultHttpClient> getClient().client, session);
+        return closure.perform(this, oneDriveAccess.<HttpClient> getClient().client, session);
     }
 
     /**

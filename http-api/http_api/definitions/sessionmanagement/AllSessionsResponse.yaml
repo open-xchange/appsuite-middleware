@@ -27,7 +27,4 @@ properties:
     type: string
     description: Guessed location based on IP address
   device:
-    type: string
-    format: json
-    schema:
-      $ref: "#/definitions/DeviceInfo"
+    $ref: "#/definitions/DeviceInfo"

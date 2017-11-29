@@ -76,6 +76,7 @@ import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentType;
+import com.openexchange.mail.mime.EmptyStringMimeMultipart;
 import com.openexchange.mail.mime.ManagedMimeMessage;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.MimeCleanUp;
@@ -509,6 +510,23 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
         return NO_ENCLOSED_PARTS;
     }
 
+    /**
+     * Checks if backing multipart content was initialized from an empty string
+     *
+     * @return <code>true</code> if backing multipart content was initialized from an empty string; otherwise <code>false</code>
+     * @throws OXException If check fails
+     */
+    public boolean isEmptyStringMultipart() throws OXException {
+        Part part = this.part;
+        if (null == part) {
+            throw new IllegalStateException(ERR_NULL_PART);
+        }
+        if (isMulti) {
+            return getMultipartWrapper().isEmptyStringContent();
+        }
+        return false;
+    }
+
     private int handleMissingStartBoundary(final OXException e) throws OXException {
         final Throwable cause = e.getCause();
         if (!(cause instanceof MessagingException) || !"Missing start boundary".equals(((MessagingException) cause).getMessage())) {
@@ -617,7 +635,14 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
                     /*
                      * Compose a new body part with multipart/ data
                      */
-                    this.part = part = createBodyMultipart(getStreamFromMultipart(getMultipartContentFrom(part, contentType.toString())), contentType.toString());
+                    Multipart ex = getMultipartContentFrom(part, contentType.toString());
+                    if (ex instanceof EmptyStringMimeMultipart) {
+                        MimeBodyPart mimeBodyPart = new MimeBodyPart();
+                        MessageUtility.setContent(ex, mimeBodyPart);
+                        this.part = part = mimeBodyPart;
+                    } else {
+                        this.part = part = createBodyMultipart(getStreamFromMultipart(ex), contentType.toString());
+                    }
                     this.multipart = null;
                     contentLoaded = true;
                 } else if (contentType.startsWith(MimeTypes.MIME_MESSAGE_RFC822)) {
@@ -1055,6 +1080,8 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
         public int getCount() throws OXException;
 
         public MailPart getMailPart(int index) throws OXException;
+
+        public boolean isEmptyStringContent();
     }
 
     private static class MIMEMultipartWrapper implements MultipartWrapper {
@@ -1074,6 +1101,11 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
         @Override
         public MailPart getMailPart(final int index) throws OXException {
             return multipartMailPart.getEnclosedMailPart(index);
+        }
+
+        @Override
+        public boolean isEmptyStringContent() {
+            return false;
         }
 
     } // End of MIMEMultipartWrapper
@@ -1103,6 +1135,11 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
             } catch (final MessagingException e) {
                 throw MailExceptionCode.MESSAGING_ERROR.create(e, e.getMessage());
             }
+        }
+
+        @Override
+        public boolean isEmptyStringContent() {
+            return jmMultipart instanceof EmptyStringMimeMultipart;
         }
 
     } // End of JavaMailMultipartWrapper

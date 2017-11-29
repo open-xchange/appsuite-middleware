@@ -269,5 +269,4 @@ public abstract class AbstractAPIClientSession {
         assertNotNull(data);
         return data;
     }
-
 }

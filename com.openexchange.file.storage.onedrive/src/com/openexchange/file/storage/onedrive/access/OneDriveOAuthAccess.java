@@ -50,12 +50,14 @@
 package com.openexchange.file.storage.onedrive.access;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import javax.net.ssl.SSLHandshakeException;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -65,6 +67,7 @@ import org.scribe.model.Token;
 import org.slf4j.Logger;
 import com.openexchange.cluster.lock.ClusterLockService;
 import com.openexchange.cluster.lock.ClusterTask;
+import com.openexchange.exception.ExceptionUtils;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
@@ -73,6 +76,7 @@ import com.openexchange.file.storage.onedrive.OneDriveClosure;
 import com.openexchange.file.storage.onedrive.OneDriveConstants;
 import com.openexchange.file.storage.onedrive.osgi.Services;
 import com.openexchange.java.Strings;
+import com.openexchange.net.ssl.exception.SSLExceptionCode;
 import com.openexchange.oauth.AbstractReauthorizeClusterTask;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthExceptionCodes;
@@ -106,7 +110,7 @@ public class OneDriveOAuthAccess extends AbstractOAuthAccess {
 
     @Override
     public void dispose() {
-        OAuthClient<DefaultHttpClient> oAuthClient = this.<DefaultHttpClient> getOAuthClient();
+        OAuthClient<HttpClient> oAuthClient = this.<HttpClient> getOAuthClient();
         if (null != oAuthClient) {
             HttpClients.shutDown(oAuthClient.client);
         }
@@ -139,7 +143,7 @@ public class OneDriveOAuthAccess extends AbstractOAuthAccess {
         OneDriveClosure<Boolean> closure = new OneDriveClosure<Boolean>() {
 
             @Override
-            protected Boolean doPerform(DefaultHttpClient httpClient) throws OXException, JSONException, IOException {
+            protected Boolean doPerform(HttpClient httpClient) throws OXException, JSONException, IOException {
                 HttpGet request = null;
                 try {
                     List<NameValuePair> qparams = new LinkedList<NameValuePair>();
@@ -158,7 +162,7 @@ public class OneDriveOAuthAccess extends AbstractOAuthAccess {
                 }
             }
         };
-        return closure.perform(null, this.<DefaultHttpClient> getClient().client, getSession()).booleanValue();
+        return closure.perform(null, this.<HttpClient> getClient().client, getSession()).booleanValue();
     }
 
     @Override
@@ -227,19 +231,68 @@ public class OneDriveOAuthAccess extends AbstractOAuthAccess {
             Session session = getSession();
             OAuthAccount cachedAccount = getCachedAccount();
 
+            String refreshToken = cachedAccount.getSecret();
+            if (Strings.isEmpty(refreshToken)) {
+                // Impossible request a new access token without a refresh token. Manual reauthorization is required.
+                throw OAuthExceptionCodes.OAUTH_ACCESS_TOKEN_INVALID.create(cachedAccount.getDisplayName(), cachedAccount.getId(), session.getUserId(), session.getContextId());
+            }
+
             final ServiceBuilder serviceBuilder = new ServiceBuilder().provider(MsLiveConnectApi.class);
             serviceBuilder.apiKey(cachedAccount.getMetaData().getAPIKey(session)).apiSecret(cachedAccount.getMetaData().getAPISecret(session));
             MsLiveConnectApi.MsLiveConnectService scribeOAuthService = (MsLiveConnectApi.MsLiveConnectService) serviceBuilder.build();
 
             try {
-                Token accessToken = scribeOAuthService.getAccessToken(new Token(cachedAccount.getToken(), cachedAccount.getSecret()), null);
+                Token accessToken = scribeOAuthService.getAccessToken(new Token(cachedAccount.getToken(), refreshToken), null);
                 if (Strings.isEmpty(accessToken.getSecret())) {
                     LOGGER.warn("Received invalid request_token from Live Connect: {}. Response:{}{}", null == accessToken.getSecret() ? "null" : accessToken.getSecret(), Strings.getLineSeparator(), accessToken.getRawResponse());
                 }
                 return accessToken;
             } catch (org.scribe.exceptions.OAuthException e) {
-                throw OAuthExceptionCodes.INVALID_ACCOUNT_EXTENDED.create(e, cachedAccount.getDisplayName(), Integer.valueOf(cachedAccount.getId()));
+                throw handleScribeOAuthException(e, cachedAccount, session);
             }
         }
     }
+
+    static OXException handleScribeOAuthException(org.scribe.exceptions.OAuthException e, OAuthAccount oauthAccount, Session session) {
+        if (ExceptionUtils.isEitherOf(e, SSLHandshakeException.class)) {
+            List<Object> displayArgs = new ArrayList<>(2);
+            displayArgs.add(SSLExceptionCode.extractArgument(e, "fingerprint"));
+            displayArgs.add("apis.live.net");
+            return SSLExceptionCode.UNTRUSTED_CERTIFICATE.create(e, displayArgs.toArray(new Object[] {}));
+        }
+
+        String exMessage = e.getMessage();
+        String errorMsg = parseErrorFrom(exMessage);
+        if (Strings.isEmpty(errorMsg)) {
+            return OAuthExceptionCodes.OAUTH_ERROR.create(e, exMessage);
+        }
+        if (exMessage.contains("invalid_grant") || exMessage.contains("invalid_request")) {
+            if (null != oauthAccount) {
+                return OAuthExceptionCodes.OAUTH_ACCESS_TOKEN_INVALID.create(e, oauthAccount.getDisplayName(), oauthAccount.getId(), session.getUserId(), session.getContextId());
+            }
+            return OAuthExceptionCodes.INVALID_ACCOUNT.create(e, new Object[0]);
+        }
+        return OAuthExceptionCodes.OAUTH_ERROR.create(exMessage, e);
+    }
+
+    private static String parseErrorFrom(String message) {
+        if (Strings.isEmpty(message)) {
+            return null;
+        }
+
+        String marker = "Can't extract a token from this: '";
+        int pos = message.indexOf(marker);
+        if (pos < 0) {
+            return null;
+        }
+
+        try {
+            JSONObject jo = new JSONObject(message.substring(pos + marker.length(), message.length() - 1));
+            return jo.optString("error", null);
+        } catch (JSONException e) {
+            // Apparent no JSON response
+            return null;
+        }
+    }
+
 }

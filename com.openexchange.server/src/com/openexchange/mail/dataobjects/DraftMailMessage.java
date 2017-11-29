@@ -1150,6 +1150,31 @@ public class DraftMailMessage extends MailMessage {
         message.removeSecurityResult();
     }
 
+    @Override
+    public void setAuthenticityResult(MailAuthenticityResult authenticationResult) {
+        message.setAuthenticityResult(authenticationResult);
+    }
+
+    @Override
+    public MailAuthenticityResult getAuthenticityResult() {
+        return message.getAuthenticityResult();
+    }
+
+    @Override
+    public boolean hasAuthenticityResult() {
+        return message.hasAuthenticityResult();
+    }
+
+    @Override
+    public boolean containsAuthenticityResult() {
+        return message.containsAuthenticityResult();
+    }
+
+    @Override
+    public void removeAuthenticityResult() {
+        message.removeAuthenticityResult();
+    }
+
     /**
      * Initializes a new {@link DraftMailMessage}.
      */
