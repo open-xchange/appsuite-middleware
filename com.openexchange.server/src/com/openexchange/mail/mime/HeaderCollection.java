@@ -874,7 +874,7 @@ public class HeaderCollection implements Serializable {
      * @param isName <code>true</code> to check a header name; otherwise <code>false</code> to check a header value
      * @return <code>true</code> if string is invalid; otherwise <code>false</code>
      */
-    private static final boolean isInvalid(final String str, final boolean isName) {
+    public static final boolean isInvalid(final String str, final boolean isName) {
         if (str == null) {
             return true;
         }
