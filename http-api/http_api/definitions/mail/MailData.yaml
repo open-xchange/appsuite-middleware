@@ -11,7 +11,7 @@ properties:
     description: Information regarding signature verification or decryption type after processed by Guard
     items:
       $ref: "#/definitions/GuardSecurityResult"
-  authentication_result:
+  authentication_results:
     type: object
     description: Informations about the authenticity of the sender domain.
     title: AuthenticationResult
