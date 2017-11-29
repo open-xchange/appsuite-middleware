@@ -165,7 +165,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
             String value = line.get(DefaultMailAuthenticityMechanism.DMARC.getTechnicalName());
             DMARCResult dmarcResult = DMARCResult.valueOf(extractOutcome(value.toUpperCase()));
 
-            String domain = line.get(DMARCResultHeader.HEADER_FROM);
+            String domain = extractDomain(line, DMARCResultHeader.HEADER_FROM);
             boolean domainMismatch = checkDomainMismatch(overallResult, domain);
 
             // In case of a DMARC result != "none", set overall result to the DMARC result and continue with the next mechanism
@@ -174,7 +174,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
                 overallResult.setStatus(mailAuthStatus);
             }
 
-            DMARCAuthMechResult result = new DMARCAuthMechResult(cleanseDomain(domain), dmarcResult);
+            DMARCAuthMechResult result = new DMARCAuthMechResult(domain, dmarcResult);
             result.setReason(extractComment(value));
             return result;
         });
@@ -182,11 +182,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
             String value = line.get(DefaultMailAuthenticityMechanism.DKIM.getTechnicalName());
             DKIMResult dkimResult = DKIMResult.valueOf(extractOutcome(value.toUpperCase()));
 
-            String domain = cleanseDomain(line.get(DKIMResultHeader.HEADER_I));
-            if (Strings.isEmpty(domain)) {
-                domain = cleanseDomain(line.get(DKIMResultHeader.HEADER_D));
-            }
-
+            String domain = extractDomain(line, DKIMResultHeader.HEADER_I, DKIMResultHeader.HEADER_D);
             boolean domainMismatch = checkDomainMismatch(overallResult, domain);
 
             // In case of a DKIM result != "none", set overall result to the DKIM result and continue with the next mechanism
@@ -195,7 +191,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
                 overallResult.setStatus(mailAuthStatus);
             }
 
-            DKIMAuthMechResult result = new DKIMAuthMechResult(cleanseDomain(domain), dkimResult);
+            DKIMAuthMechResult result = new DKIMAuthMechResult(domain, dkimResult);
             String reason = extractComment(value);
             if (Strings.isEmpty(reason)) {
                 reason = line.get(DKIMResultHeader.REASON);
@@ -207,11 +203,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
             String value = line.get(DefaultMailAuthenticityMechanism.SPF.getTechnicalName());
             SPFResult spfResult = SPFResult.valueOf(extractOutcome(value.toUpperCase()));
 
-            String domain = cleanseDomain(line.get(SPFResultHeader.SMTP_MAILFROM));
-            if (Strings.isEmpty(domain)) {
-                domain = cleanseDomain(line.get(SPFResultHeader.SMTP_HELO));
-            }
-
+            String domain = extractDomain(line, SPFResultHeader.SMTP_MAILFROM, SPFResultHeader.SMTP_HELO);
             boolean domainMismatch = checkDomainMismatch(overallResult, domain);
 
             // Set the overall result only if it's 'none'
@@ -220,7 +212,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
                 overallResult.setStatus(mailAuthStatus);
             }
 
-            SPFAuthMechResult result = new SPFAuthMechResult(cleanseDomain(domain), spfResult);
+            SPFAuthMechResult result = new SPFAuthMechResult(domain, spfResult);
             result.setReason(extractComment(value));
             return result;
         });
@@ -510,6 +502,23 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
             return null;
         }
         return value.substring(beginIndex + 1, endIndex);
+    }
+
+    /**
+     * Extracts the domain value of the specified key from the specified attributes {@link Map}
+     * 
+     * @param attributes The attributes {@link Map}
+     * @param keys The keys
+     * @return The cleansed domain if present, <code>null</code> if none exists
+     */
+    private String extractDomain(Map<String, String> attributes, String... keys) {
+        for (String key : keys) {
+            String value = attributes.get(key);
+            if (!Strings.isEmpty(value)) {
+                return cleanseDomain(value);
+            }
+        }
+        return null;
     }
 
     /**
