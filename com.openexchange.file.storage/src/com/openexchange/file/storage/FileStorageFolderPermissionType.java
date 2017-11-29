@@ -50,34 +50,54 @@
 package com.openexchange.file.storage;
 
 /**
- * {@link FileStorageFolderPermissionType}
+ * {@link FileStorageFolderPermissionType} defines available permission types for filestorage folders.
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.0
  */
 public enum FileStorageFolderPermissionType {
-    normal(0),
-    legator(1),
-    inherited(2);
+    /**
+     * The normal permission type
+     */
+    NORMAL(0),
+    /**
+     * Permissions of this type are going to be handed down to sub-folders
+     */
+    LEGATOR(1),
+    /**
+     * Permissions of this type are inherited permissions of a {@link FileStorageFolderPermissionType#LEGATOR} permission
+     */
+    INHERITED(2);
 
     private final int type;
 
     /**
-     * Initializes a new {@link FolderPermissionType}.
+     * Initializes a new {@link FileStorageFolderPermissionType}.
      */
     private FileStorageFolderPermissionType(int type) {
         this.type = type;
     }
 
+    /**
+     * Return the corresponding {@link FolderPermissionType} with the given type number or the {@link FileStorageFolderPermissionType#NORMAL} type in case the given type number is unknown.
+     *
+     * @param type The type number
+     * @return The {@link FileStorageFolderPermissionType}
+     */
     public static FileStorageFolderPermissionType getType(int type) {
         for (FileStorageFolderPermissionType tmp : FileStorageFolderPermissionType.values()) {
             if (tmp.type == type) {
                 return tmp;
             }
         }
-        return normal;
+        return NORMAL;
     }
 
+    /**
+     * Returns the identifying number of this type
+     *
+     * @return the type number
+     */
     public int getTypeNumber() {
         return type;
     }

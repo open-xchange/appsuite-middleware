@@ -51,14 +51,23 @@ package com.openexchange.folderstorage;
 
 
 /**
- * {@link FolderPermissionType}
+ * {@link FolderPermissionType} defines available permission types for folders.
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.0
  */
 public enum FolderPermissionType {
+    /**
+     * The normal permission type
+     */
     NORMAL(0),
+    /**
+     * Permissions of this type are going to be handed down to sub-folders
+     */
     LEGATOR(1),
+    /**
+     * Permissions of this type are inherited permissions of a {@link FolderPermissionType#LEGATOR} permission
+     */
     INHERITED(2);
 
     private final int type;
@@ -70,6 +79,11 @@ public enum FolderPermissionType {
         this.type = type;
     }
 
+    /**
+     * Return the corresponding {@link FolderPermissionType} with the given type number or the {@link FolderPermissionType#NORMAL} type in case the given type number is unknown.
+     * @param type The type number
+     * @return The {@link FolderPermissionType}
+     */
     public static FolderPermissionType getType(int type) {
         for (FolderPermissionType tmp : FolderPermissionType.values()) {
             if (tmp.type == type) {
@@ -79,6 +93,11 @@ public enum FolderPermissionType {
         return NORMAL;
     }
 
+    /**
+     * Returns the identifying number of this type
+     *
+     * @return the type number
+     */
     public int getTypeNumber() {
         return type;
     }

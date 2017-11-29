@@ -258,6 +258,7 @@ public class ImmutablePermission implements Permission {
         result = prime * result + writePermission;
         result = prime * result + deletePermission;
         result = prime * result + system;
+        result = prime * result + type.getTypeNumber();
         hash = result;
     }
 

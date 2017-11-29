@@ -50,34 +50,54 @@
 package com.openexchange.messaging;
 
 /**
- * {@link MessagingFolderPermissionType}
+ * {@link MessagingFolderPermissionType} defines available permission types for messaging folders.
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.0
  */
 public enum MessagingFolderPermissionType {
-    normal(0),
-    legator(1),
-    inherited(2);
+    /**
+     * The normal permission type
+     */
+    NORMAL(0),
+    /**
+     * Permissions of this type are going to be handed down to sub-folders
+     */
+    LEGATOR(1),
+    /**
+     * Permissions of this type are inherited permissions of a {@link MessagingFolderPermissionType#LEGATOR} permission
+     */
+    INHERITED(2);
 
     private final int type;
 
     /**
-     * Initializes a new {@link FolderPermissionType}.
+     * Initializes a new {@link MessagingFolderPermissionType}.
      */
     private MessagingFolderPermissionType(int type) {
         this.type = type;
     }
 
+    /**
+     * Return the corresponding {@link FolderPermissionType} with the given type number or the {@link MessagingFolderPermissionType#NORMAL} type in case the given type number is unknown.
+     *
+     * @param type The type number
+     * @return The {@link MessagingFolderPermissionType}
+     */
     public static MessagingFolderPermissionType getType(int type) {
         for (MessagingFolderPermissionType tmp : MessagingFolderPermissionType.values()) {
             if (tmp.type == type) {
                 return tmp;
             }
         }
-        return normal;
+        return NORMAL;
     }
 
+    /**
+     * Returns the identifying number of this type
+     *
+     * @return the type number
+     */
     public int getTypeNumber() {
         return type;
     }
