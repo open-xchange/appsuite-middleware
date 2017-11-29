@@ -78,6 +78,7 @@ import com.openexchange.mail.authenticity.MailAuthenticityStatus;
 import com.openexchange.mail.authenticity.impl.handler.domain.TrustedDomainAuthenticityHandler;
 import com.openexchange.mail.authenticity.mechanism.DefaultMailAuthenticityMechanism;
 import com.openexchange.mail.authenticity.mechanism.MailAuthenticityMechanismResult;
+import com.openexchange.mail.authenticity.mechanism.UnknownMailAuthenticityMechanismResult;
 import com.openexchange.mail.authenticity.mechanism.dkim.DKIMAuthMechResult;
 import com.openexchange.mail.authenticity.mechanism.dkim.DKIMResult;
 import com.openexchange.mail.authenticity.mechanism.dkim.DKIMResultHeader;
@@ -378,20 +379,14 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
     private void parseMechanismResults(List<String> authHeadersList, MailAuthenticityResult result) {
         Iterator<String> authResultsIterator = authHeadersList.iterator();
         List<MailAuthenticityMechanismResult> results = new ArrayList<>();
-        List<String> unknownResults = new ArrayList<>();
-        StringBuilder unknownAuthElements = new StringBuilder(128);
+        List<UnknownMailAuthenticityMechanismResult> unknownResults = new ArrayList<>();
         while (authResultsIterator.hasNext()) {
             String authResult = authResultsIterator.next();
             List<String> authHeader = StringUtil.splitElements(authResult);
             // Sort by ordinal
             Collections.sort(authHeader, MAIL_AUTH_COMPARATOR);
             for (int index = 0; index < authHeader.size(); index++) {
-                parseAuthHeaderElement(authHeader.get(index), unknownAuthElements, results, result);
-            }
-            if (unknownAuthElements.length() > 0) {
-                unknownAuthElements.setLength(unknownAuthElements.length() - 2);
-                unknownResults.add(unknownAuthElements.toString().trim());
-                unknownAuthElements.setLength(0);
+                parseAuthHeaderElement(authHeader.get(index), unknownResults, results, result);
             }
             authResultsIterator.remove();
         }
@@ -399,8 +394,8 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
         result.addAttribute(DefaultMailAuthenticityResultKey.UNKNOWN_AUTH_MECH_RESULTS, unknownResults);
 
         // Add the remaining attributes as is to the result
-        if (!authHeadersList.isEmpty()) {
-            unknownResults.addAll(authHeadersList);
+        for (String authHeader : authHeadersList) {
+            unknownResults.add(new UnknownMailAuthenticityMechanismResult(StringUtil.parseLine(authHeader)));
         }
     }
 
@@ -412,18 +407,18 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
      * @param results The {@link MailAuthenticityMechanismResult}s
      * @param result The overall {@link MailAuthenticityResult}
      */
-    private void parseAuthHeaderElement(String authHeaderElement, StringBuilder unknownAuthElements, List<MailAuthenticityMechanismResult> results, MailAuthenticityResult result) {
+    private void parseAuthHeaderElement(String authHeaderElement, List<UnknownMailAuthenticityMechanismResult> unknownResults, List<MailAuthenticityMechanismResult> results, MailAuthenticityResult result) {
         Map<String, String> attributes = StringUtil.parseLine(authHeaderElement);
         DefaultMailAuthenticityMechanism mechanism = DefaultMailAuthenticityMechanism.extractMechanism(attributes);
         if (mechanism == null) {
             // Unknown or not parsable mechanism
-            unknownAuthElements.append(authHeaderElement).append("; ");
+            unknownResults.add(new UnknownMailAuthenticityMechanismResult(attributes));
             return;
         }
         BiFunction<Map<String, String>, MailAuthenticityResult, MailAuthenticityMechanismResult> mechanismParser = mechanismParsersRegitry.get(mechanism);
         if (mechanismParser == null) {
             // Not a valid mechanism, skip but add to the overall result
-            unknownAuthElements.append(authHeaderElement).append("; ");
+            unknownResults.add(new UnknownMailAuthenticityMechanismResult(attributes));
             return;
         }
         results.add(mechanismParser.apply(attributes, result));

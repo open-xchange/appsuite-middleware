@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2017-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,46 +49,34 @@
 
 package com.openexchange.mail.authenticity.mechanism;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import com.openexchange.mail.authenticity.MailAuthenticityStatus;
+import java.util.Map;
 
 /**
- * {@link AuthenticityMechanismResult}
+ * {@link UnknownMailAuthenticityMechanismResult}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public interface AuthenticityMechanismResult {
+public class UnknownMailAuthenticityMechanismResult {
 
-    static final Logger LOGGER = LoggerFactory.getLogger(AuthenticityMechanismResult.class);
+    private final Map<String, String> attributes;
 
     /**
-     * Returns the display name of the mechanism's result
+     * Initialises a new {@link UnknownMailAuthenticityMechanismResult}.
      * 
-     * @return the display name of the mechanism's result
+     * @param name the unknown mechanism's name
+     * @param attributes The unknown mechanism's attributes
      */
-    String getDisplayName();
+    public UnknownMailAuthenticityMechanismResult(Map<String, String> attributes) {
+        super();
+        this.attributes = attributes;
+    }
 
     /**
-     * Returns the technical name of the mechanism's result
-     * 
-     * @return the technical name of the mechanism's result
-     */
-    String getTechnicalName();
-
-    /**
-     * Converts the specified {@link AuthenticityMechanismResult} to {@link MailAuthenticityStatus}
+     * Gets the attributes
      *
-     * @param mechanismResult The {@link AuthenticityMechanismResult} to convert
-     * @return The converted {@link MailAuthenticityStatus}. The status {@link MailAuthenticityStatus#NEUTRAL} might
-     *         also get returned if the specified {@link AuthenticityMechanismResult} does not map to a valid {@link MailAuthenticityStatus}.
+     * @return The attributes
      */
-    default MailAuthenticityStatus convert() {
-        try {
-            return MailAuthenticityStatus.valueOf(getTechnicalName().toUpperCase());
-        } catch (IllegalArgumentException e) {
-            LOGGER.debug("Unknown mail authenticity status '{}'", getTechnicalName(), e);
-            return MailAuthenticityStatus.NEUTRAL;
-        }
+    public Map<String, String> getAttributes() {
+        return attributes;
     }
 }
