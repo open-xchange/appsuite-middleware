@@ -137,7 +137,6 @@ public enum OIDCExceptionCode implements OXExceptionCode {
      * Unable to send login redirect, because of: '%1$s'
      */
     UNABLE_TO_SEND_REDIRECT("Unable to send login redirect, because of: '%1$s'", Category.CATEGORY_WARNING, 19), 
-    
     /**
      * "Unable to handle third party login request, because of: '%1$s'"
      */

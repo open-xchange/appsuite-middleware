@@ -49,6 +49,7 @@
 
 package com.openexchange.oidc.impl;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import java.net.URI;
@@ -425,4 +426,29 @@ public class OIDCWebSSoProviderImplTest {
         assertTrue("Wrong request as result", result.equals(logoutRequest));
     }
     
+    @Test
+    public void validateThirdPartyRequest_NoIssParameterTest() {
+        Mockito.when(mockedRequest.getParameter("iss")).thenReturn(null);
+        boolean result = provider.validateThirdPartyRequest(mockedRequest);
+        assertFalse("Input should not have passed validation", result);
+        Mockito.when(mockedRequest.getParameter("iss")).thenReturn("");
+        result = provider.validateThirdPartyRequest(mockedRequest);
+        assertFalse("Input should not have passed validation", result);
+    }
+    
+    @Test
+    public void validateThirdPartyRequest_NoMatchingIssParameterTest() {
+        Mockito.when(mockedRequest.getParameter("iss")).thenReturn("wrong");
+        Mockito.when(mockedBackendConfig.getIssuer()).thenReturn("correct");
+        boolean result = provider.validateThirdPartyRequest(mockedRequest);
+        assertFalse("Input should not have passed validation", result);
+    }
+    
+    @Test
+    public void validateThirdPartyRequest_PassTest() {
+        Mockito.when(mockedRequest.getParameter("iss")).thenReturn("correct");
+        Mockito.when(mockedBackendConfig.getIssuer()).thenReturn("correct");
+        boolean result = provider.validateThirdPartyRequest(mockedRequest);
+        assertTrue("Input should have passed validation", result);
+    }
 }
