@@ -51,7 +51,6 @@ package com.openexchange.chronos.impl;
 
 import static com.openexchange.chronos.impl.Utils.getFolder;
 import static com.openexchange.java.Autoboxing.L;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map.Entry;
@@ -71,7 +70,6 @@ import com.openexchange.chronos.impl.performer.CreatePerformer;
 import com.openexchange.chronos.impl.performer.DeletePerformer;
 import com.openexchange.chronos.impl.performer.GetAttachmentPerformer;
 import com.openexchange.chronos.impl.performer.GetPerformer;
-import com.openexchange.chronos.impl.performer.ImportPerformer;
 import com.openexchange.chronos.impl.performer.ListPerformer;
 import com.openexchange.chronos.impl.performer.MovePerformer;
 import com.openexchange.chronos.impl.performer.SearchPerformer;
@@ -90,7 +88,6 @@ import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.chronos.service.CalendarServiceUtilities;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.EventID;
-import com.openexchange.chronos.service.ImportResult;
 import com.openexchange.chronos.service.SearchFilter;
 import com.openexchange.chronos.service.UpdatesResult;
 import com.openexchange.chronos.storage.CalendarStorage;
@@ -418,38 +415,12 @@ public class CalendarServiceImpl implements CalendarService {
         return result.getUserizedResult();
     }
 
-    public List<ImportResult> importEvents(CalendarSession session, String folderID, List<Event> events) throws OXException {
-        /*
-         * import events & notify handlers
-         */
-        List<InternalImportResult> results = new InternalCalendarStorageOperation<List<InternalImportResult>>(session) {
-
-            @Override
-            protected List<InternalImportResult> execute(CalendarSession session, CalendarStorage storage) throws OXException {
-                return new ImportPerformer(storage, session, getFolder(session, folderID)).perform(events);
-            }
-
-        }.executeUpdate();
-        /*
-         * notify handlers & return userized result
-         */
-        List<ImportResult> importResults = new ArrayList<ImportResult>(results.size());
-        for (InternalImportResult result : results) {
-            importResults.add(result.getImportResult());
-            notifyHandlers(result.getCalendarEvent());
-        }
-        return importResults;
-    }
-
     private InternalCalendarResult notifyHandlers(InternalCalendarResult result) {
-        notifyHandlers(result.getCalendarEvent());
-        return result;
-    }
-
-    private void notifyHandlers(CalendarEvent calendarEvent) {
+        CalendarEvent calendarEvent = result.getCalendarEvent();
         for (CalendarHandler handler : calendarHandlers) {
             handler.handle(calendarEvent);
         }
+        return result;
     }
 
     @Override
