@@ -390,7 +390,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
             authResultsIterator.remove();
         }
         result.addAttribute(DefaultMailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS, results);
-        result.addAttribute(DefaultMailAuthenticityResultKey.UNKNOWN_AUTH_MECH_RESULTS, unknownResults);
+        //result.addAttribute(DefaultMailAuthenticityResultKey.UNKNOWN_AUTH_MECH_RESULTS, unknownResults);
 
         // Add the remaining attributes as is to the result
         for (String authHeader : authHeadersList) {
