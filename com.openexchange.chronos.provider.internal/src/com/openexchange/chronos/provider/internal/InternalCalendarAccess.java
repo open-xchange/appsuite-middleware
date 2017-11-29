@@ -370,7 +370,7 @@ public class InternalCalendarAccess implements GroupwareCalendarAccess, SyncAwar
     private DefaultGroupwareCalendarFolder getCalendarFolder(UserizedFolder userizedFolder) throws OXException {
         DefaultGroupwareCalendarFolder calendarFolder = CalendarFolderConverter.getCalendarFolder(userizedFolder);
         calendarFolder.setExtendedProperties(getProperties(userizedFolder));
-        calendarFolder.setSupportedCapabilites(CalendarCapability.getCapabilities(InternalCalendarAccess.class));
+        calendarFolder.setSupportedCapabilites(CalendarCapability.getCapabilities(getClass()));
         calendarFolder.setAccount(account);
         return calendarFolder;
     }

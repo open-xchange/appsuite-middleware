@@ -58,6 +58,7 @@ import com.openexchange.chronos.provider.internal.share.CalendarFolderHandlerMod
 import com.openexchange.chronos.provider.internal.share.CalendarModuleAdjuster;
 import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.chronos.service.RecurrenceService;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.conversion.ConversionService;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.jslob.JSlobService;
@@ -84,7 +85,7 @@ public class InternalCalendarProviderActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { FolderService.class, CalendarService.class, RecurrenceService.class, UserService.class, ConversionService.class };
+        return new Class<?>[] { FolderService.class, CalendarService.class, RecurrenceService.class, UserService.class, ConversionService.class, ConfigurationService.class };
     }
 
     @Override

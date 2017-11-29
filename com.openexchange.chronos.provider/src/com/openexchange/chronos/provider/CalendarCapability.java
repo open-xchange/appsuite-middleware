@@ -54,6 +54,7 @@ import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Set;
+import com.openexchange.chronos.provider.extensions.LegacyStorageMarker;
 import com.openexchange.chronos.provider.extensions.PermissionAware;
 import com.openexchange.chronos.provider.extensions.PersonalAlarmAware;
 import com.openexchange.chronos.provider.extensions.QuotaAware;
@@ -100,11 +101,17 @@ public enum CalendarCapability {
      */
     SYNC("sync", SyncAware.class),
     /**
-     * Provides a collection of warnings that occurrend during processing.
+     * Provides a collection of warnings that occurred during processing.
      *
      * @see WarningsAware
      */
     WARNINGS("warnings", WarningsAware.class),
+    /**
+     * Indicates that data is backed by the legacy storage with reduced functionality.
+     *
+     * @see LegacyStorageMarker
+     */
+    LEGACY_STORAGE("legacyStorage", LegacyStorageMarker.class),
 
     ;
 
