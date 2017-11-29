@@ -49,8 +49,6 @@
 
 package com.openexchange.mail.authenticity.mechanism;
 
-import org.json.JSONObject;
-
 /**
  * {@link MailAuthenticityMechanismResult} - Defines the methods of the mail authentication
  * mechanism result dataobject
@@ -58,9 +56,6 @@ import org.json.JSONObject;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public interface MailAuthenticityMechanismResult {
-
-    static final String KEY_MECHANISM = "mechanism";
-    static final String KEY_RESULT = "result";
 
     /**
      * Returns the domain for which this mechanism was applied
