@@ -131,7 +131,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
     }
 
     /** The required headers of this handler */
-    private static final Collection<String> REQUIRED_HEADERS = Collections.emptyList();
+    private static final Collection<String> REQUIRED_HEADERS = Collections.singleton(AUTH_RESULTS_HEADER);
 
     /** The ranking of this handler */
     private final int ranking;
