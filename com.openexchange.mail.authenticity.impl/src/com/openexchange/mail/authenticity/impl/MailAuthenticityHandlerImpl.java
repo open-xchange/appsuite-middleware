@@ -478,6 +478,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
      */
     private boolean isAuthServIdValid(String authServId, List<AllowedAuthServId> allowedAuthServIds) {
         if (Strings.isEmpty(authServId)) {
+            LOGGER.warn("The authserv-id is missing from the 'Authentication-Results'");
             return false;
         }
         String[] split = authServId.split(" ");
@@ -491,6 +492,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
                 return true;
             }
         }
+        LOGGER.warn("The authserv-id '{}' is not in the allowed authserv ids list (see server property '{}'). Server misconfiguration?", authServId, MailAuthenticityProperty.authServId);
         return false;
     }
 
