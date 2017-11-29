@@ -54,7 +54,7 @@ import com.openexchange.mail.authenticity.mechanism.dmarc.DMARCResult;
 import com.openexchange.mail.authenticity.mechanism.spf.SPFResult;
 
 /**
- * {@link DefaultMailAuthenticityMechanism}
+ * {@link DefaultMailAuthenticityMechanism} - The default supported {@link MailAuthenticityMechanism}s
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
@@ -75,7 +75,9 @@ public enum DefaultMailAuthenticityMechanism implements MailAuthenticityMechanis
         this.resultType = resultType;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.openexchange.mail.authenticity.mechanism.MailAuthMech#getDisplayName()
      */
     @Override
@@ -83,7 +85,9 @@ public enum DefaultMailAuthenticityMechanism implements MailAuthenticityMechanis
         return displayName;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.openexchange.mail.authenticity.mechanism.MailAuthMech#getResultType()
      */
     @Override

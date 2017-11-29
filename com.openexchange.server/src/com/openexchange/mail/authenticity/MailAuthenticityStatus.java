@@ -50,7 +50,7 @@
 package com.openexchange.mail.authenticity;
 
 /**
- * {@link MailAuthenticityStatus}
+ * {@link MailAuthenticityStatus} - Defines the different status types of the overall status
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */

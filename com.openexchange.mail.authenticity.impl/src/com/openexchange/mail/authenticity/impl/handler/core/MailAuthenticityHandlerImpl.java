@@ -432,8 +432,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
             unknownAuthElements.append(authHeaderElement).append("; ");
             return;
         }
-        MailAuthenticityMechanismResult mailAuthMechResult = mechanismParser.apply(attributes, result);
-        results.add(mailAuthMechResult);
+        results.add(mechanismParser.apply(attributes, result));
     }
 
     /**

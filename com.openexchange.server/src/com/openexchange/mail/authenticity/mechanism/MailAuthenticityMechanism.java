@@ -50,7 +50,7 @@
 package com.openexchange.mail.authenticity.mechanism;
 
 /**
- * {@link MailAuthenticityMechanism}
+ * {@link MailAuthenticityMechanism} - Defines the different supported mechanism types
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
