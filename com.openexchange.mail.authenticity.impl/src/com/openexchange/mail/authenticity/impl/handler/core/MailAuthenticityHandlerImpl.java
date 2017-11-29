@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.mail.authenticity.impl;
+package com.openexchange.mail.authenticity.impl.handler.core;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -75,6 +75,7 @@ import com.openexchange.mail.authenticity.DefaultMailAuthenticityResultKey;
 import com.openexchange.mail.authenticity.MailAuthenticityExceptionCodes;
 import com.openexchange.mail.authenticity.MailAuthenticityHandler;
 import com.openexchange.mail.authenticity.MailAuthenticityStatus;
+import com.openexchange.mail.authenticity.impl.handler.domain.TrustedDomainAuthenticityHandler;
 import com.openexchange.mail.authenticity.mechanism.AuthenticityMechanismResult;
 import com.openexchange.mail.authenticity.mechanism.DefaultMailAuthenticityMechanism;
 import com.openexchange.mail.authenticity.mechanism.MailAuthenticityMechanismResult;

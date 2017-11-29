@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.mail.authenticity.impl;
+package com.openexchange.mail.authenticity.impl.handler.domain;
 
 import java.io.File;
 import java.io.IOException;

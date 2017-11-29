@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.mail.authenticity.impl;
+package com.openexchange.mail.authenticity.impl.handler.core;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -63,6 +63,7 @@ import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.authenticity.MailAuthenticityHandler;
 import com.openexchange.mail.authenticity.MailAuthenticityHandlerRegistry;
+import com.openexchange.mail.authenticity.impl.handler.threshold.ThresholdAwareAuthenticityHandler;
 import com.openexchange.session.Session;
 import com.openexchange.session.UserAndContext;
 

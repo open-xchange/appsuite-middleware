@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2017-2020 OX Software GmbH
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,70 +47,72 @@
  *
  */
 
-package com.openexchange.mail.authenticity.impl;
+package com.openexchange.mail.authenticity.impl.handler.domain;
 
-import com.openexchange.config.lean.Property;
+import java.util.regex.Pattern;
 
 /**
- * {@link MailAuthenticityProperty}
+ * {@link TrustedDomain} specifies a trusted domain or a group of trusted domains via wildcards.
  *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.10.0
  */
-public enum MailAuthenticityProperty implements Property {
+public class TrustedDomain {
+
+    private final String domain;
+    private final Pattern pattern;
+    private final Icon image;
+
     /**
-     * Defines whether the mail authenticity core feature is enabled
-     * Defaults to <code>false</code>
-     */
-    enabled(false),
-    /**
-     * Defines the date after which the e-mails will be analysed
-     * Defaults to 0
-     */
-    threshold(0L),
-    /**
-     * Defines the MANDATORY <code>authserv-id</code>. It can contain a single arbitrary string
-     * or a comma separated list of arbitrary strings
-     * Default is empty.
      *
-     * @see <a href="https://tools.ietf.org/html/rfc7601#section-2.2">RFC-7601, Section 2.2</a>
+     * Initializes a new {@link TrustedDomain}.
+     *
+     * @param domain The domain
+     * @param image The image
      */
-    authServId;
+    public TrustedDomain(String domain, Icon image) {
+        super();
+        this.domain = domain;
+        this.pattern = Pattern.compile(toRegex(domain));
+        this.image = image;
+    }
 
-    private final Object defaultValue;
-    private final String fqn;
-
-    /**
-     * Initialises a new {@link MailAuthenticityProperty}.
-     */
-    private MailAuthenticityProperty() {
-        this("");
+    private String toRegex(String domain){
+        domain = domain.replaceAll("\\.", "[.]").replaceAll("\\*", ".*");
+        return domain;
     }
 
     /**
-     * Initializes a new {@link MailAuthenticityProperty}.
+     * Gets the domain
+     *
+     * @return The domain
      */
-    private MailAuthenticityProperty(Object defaultValue) {
-        this.defaultValue = defaultValue;
-        fqn = "com.openexchange.mail.authenticity." + name();
+    public String getDomain() {
+        return domain;
     }
 
     /**
-     * Returns the fully qualified name for the property
+     * Gets the image
      *
-     * @return the fully qualified name for the property
+     * @return The image
      */
+    public Icon getImage() {
+        return image;
+    }
+
+    /**
+     * Checks whether this trusted domain matches the given domain
+     * @param domain
+     * @return
+     */
+    public boolean matches(String domain){
+        return pattern.matcher(domain).matches();
+    }
+
     @Override
-    public String getFQPropertyName() {
-        return fqn;
-    }
+    public String toString() {
+        StringBuilder builder = new StringBuilder("TrustedDomain [").append("domain = ").append(domain);
+        return builder.append("]").toString();
 
-    /**
-     * Returns the default value of this property
-     *
-     * @return the default value of this property
-     */
-    @Override
-    public Object getDefaultValue() {
-        return defaultValue;
     }
 }

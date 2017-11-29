@@ -47,68 +47,29 @@
  *
  */
 
-package com.openexchange.mail.authenticity.impl;
-
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import javax.imageio.ImageIO;
+package com.openexchange.mail.authenticity.impl.handler.domain;
 
 /**
- * {@link ImageIcon}
+ *
+ * {@link Icon} represents an Icon for trusted domains
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.0
  */
-public class ImageIcon implements Icon {
-
-    private final byte[] byteArray;
-    private final static String MIME_TYPE = "image/png";
+public interface Icon {
 
     /**
-     * Initializes a new {@link ImageIcon}.
+     * Gets the mime type of this icon (e.g. image/png).
      *
-     * @param url A url to a valid image
-     * @throws IOException
-     * @throws MalformedURLException
+     * @return The mime type
      */
-    public ImageIcon(URL url) throws MalformedURLException, IOException {
-        super();
-        BufferedImage image = ImageIO.read(url);
-        if(image==null) {
-            throw new IOException("No image found");
-        }
-        ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        ImageIO.write(image, "png", stream);
-        byteArray = stream.toByteArray();
-    }
+    String getMimeType();
 
     /**
-     * Initializes a new {@link ImageIcon}.
-     * 
-     * @param file An image file
-     * @throws IOException
-     * @throws MalformedURLException
+     * Gets the icons raw bytes.
+     *
+     * @return The icon data
      */
-    public ImageIcon(File file) throws MalformedURLException, IOException {
-        super();
-        BufferedImage image = ImageIO.read(file);
-        ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        ImageIO.write(image, "png", stream);
-        byteArray = stream.toByteArray();
-    }
-
-    @Override
-    public String getMimeType() {
-        return MIME_TYPE;
-    }
-
-    @Override
-    public byte[] getData() {
-        return byteArray;
-    }
+    byte[] getData();
 
 }

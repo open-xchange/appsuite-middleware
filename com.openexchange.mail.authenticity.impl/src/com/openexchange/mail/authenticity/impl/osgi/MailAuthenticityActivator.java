@@ -59,11 +59,11 @@ import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.mail.MailFetchListener;
 import com.openexchange.mail.authenticity.MailAuthenticityHandler;
 import com.openexchange.mail.authenticity.MailAuthenticityHandlerRegistry;
-import com.openexchange.mail.authenticity.impl.MailAuthenticityFetchListener;
-import com.openexchange.mail.authenticity.impl.MailAuthenticityHandlerImpl;
-import com.openexchange.mail.authenticity.impl.MailAuthenticityHandlerRegistryImpl;
-import com.openexchange.mail.authenticity.impl.MailAuthenticityProperty;
-import com.openexchange.mail.authenticity.impl.TrustedDomainAuthenticityHandler;
+import com.openexchange.mail.authenticity.impl.handler.core.MailAuthenticityFetchListener;
+import com.openexchange.mail.authenticity.impl.handler.core.MailAuthenticityHandlerImpl;
+import com.openexchange.mail.authenticity.impl.handler.core.MailAuthenticityHandlerRegistryImpl;
+import com.openexchange.mail.authenticity.impl.handler.core.MailAuthenticityProperty;
+import com.openexchange.mail.authenticity.impl.handler.domain.TrustedDomainAuthenticityHandler;
 import com.openexchange.osgi.HousekeepingActivator;
 
 /**

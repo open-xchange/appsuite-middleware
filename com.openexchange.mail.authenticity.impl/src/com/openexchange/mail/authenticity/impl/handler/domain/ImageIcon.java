@@ -47,72 +47,68 @@
  *
  */
 
-package com.openexchange.mail.authenticity.impl;
+package com.openexchange.mail.authenticity.impl.handler.domain;
 
-import java.util.regex.Pattern;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import javax.imageio.ImageIO;
 
 /**
- * {@link TrustedDomain} specifies a trusted domain or a group of trusted domains via wildcards.
+ * {@link ImageIcon}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.0
  */
-public class TrustedDomain {
+public class ImageIcon implements Icon {
 
-    private final String domain;
-    private final Pattern pattern;
-    private final Icon image;
+    private final byte[] byteArray;
+    private final static String MIME_TYPE = "image/png";
 
     /**
+     * Initializes a new {@link ImageIcon}.
      *
-     * Initializes a new {@link TrustedDomain}.
-     *
-     * @param domain The domain
-     * @param image The image
+     * @param url A url to a valid image
+     * @throws IOException
+     * @throws MalformedURLException
      */
-    public TrustedDomain(String domain, Icon image) {
+    public ImageIcon(URL url) throws MalformedURLException, IOException {
         super();
-        this.domain = domain;
-        this.pattern = Pattern.compile(toRegex(domain));
-        this.image = image;
-    }
-
-    private String toRegex(String domain){
-        domain = domain.replaceAll("\\.", "[.]").replaceAll("\\*", ".*");
-        return domain;
-    }
-
-    /**
-     * Gets the domain
-     *
-     * @return The domain
-     */
-    public String getDomain() {
-        return domain;
+        BufferedImage image = ImageIO.read(url);
+        if(image==null) {
+            throw new IOException("No image found");
+        }
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        ImageIO.write(image, "png", stream);
+        byteArray = stream.toByteArray();
     }
 
     /**
-     * Gets the image
-     *
-     * @return The image
+     * Initializes a new {@link ImageIcon}.
+     * 
+     * @param file An image file
+     * @throws IOException
+     * @throws MalformedURLException
      */
-    public Icon getImage() {
-        return image;
-    }
-
-    /**
-     * Checks whether this trusted domain matches the given domain
-     * @param domain
-     * @return
-     */
-    public boolean matches(String domain){
-        return pattern.matcher(domain).matches();
+    public ImageIcon(File file) throws MalformedURLException, IOException {
+        super();
+        BufferedImage image = ImageIO.read(file);
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        ImageIO.write(image, "png", stream);
+        byteArray = stream.toByteArray();
     }
 
     @Override
-    public String toString() {
-        StringBuilder builder = new StringBuilder("TrustedDomain [").append("domain = ").append(domain);
-        return builder.append("]").toString();
-
+    public String getMimeType() {
+        return MIME_TYPE;
     }
+
+    @Override
+    public byte[] getData() {
+        return byteArray;
+    }
+
 }

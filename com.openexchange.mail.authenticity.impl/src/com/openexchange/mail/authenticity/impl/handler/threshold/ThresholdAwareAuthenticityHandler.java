@@ -47,29 +47,67 @@
  *
  */
 
-package com.openexchange.mail.authenticity.impl;
+package com.openexchange.mail.authenticity.impl.handler.threshold;
+
+import java.util.Collection;
+import com.openexchange.exception.OXException;
+import com.openexchange.mail.MailField;
+import com.openexchange.mail.authenticity.MailAuthenticityHandler;
+import com.openexchange.mail.dataobjects.MailAuthenticityResult;
+import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.session.Session;
 
 /**
+ * {@link ThresholdAwareAuthenticityHandler} - A simple authenticity handler, which only delegates if date threshold is fulfilled.
  *
- * {@link Icon} represents an Icon for trusted domains
- *
- * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.10.0
  */
-public interface Icon {
+public class ThresholdAwareAuthenticityHandler implements MailAuthenticityHandler {
+
+    private final MailAuthenticityHandler authenticityHandler;
+    private final long threshold;
 
     /**
-     * Gets the mime type of this icon (e.g. image/png).
-     *
-     * @return The mime type
+     * Initializes a new {@link ThresholdAwareAuthenticityHandler}.
      */
-    String getMimeType();
+    public ThresholdAwareAuthenticityHandler(MailAuthenticityHandler authenticityHandler, long threshold) {
+        super();
+        this.authenticityHandler = authenticityHandler;
+        this.threshold = threshold;
+    }
 
-    /**
-     * Gets the icons raw bytes.
-     *
-     * @return The icon data
-     */
-    byte[] getData();
+    @Override
+    public void handle(Session session, MailMessage mailMessage) throws OXException {
+        if (null == mailMessage) {
+            return;
+        }
+        if ((threshold > 0 && mailMessage.getReceivedDate().getTime() < threshold)) {
+            mailMessage.setAuthenticityResult(MailAuthenticityResult.NOT_ANALYZED_RESULT);
+            return;
+        }
+
+        authenticityHandler.handle(session, mailMessage);
+    }
+
+    @Override
+    public Collection<MailField> getRequiredFields() {
+        return authenticityHandler.getRequiredFields();
+    }
+
+    @Override
+    public Collection<String> getRequiredHeaders() {
+        return authenticityHandler.getRequiredHeaders();
+    }
+
+    @Override
+    public boolean isEnabled(Session session) {
+        return authenticityHandler.isEnabled(session);
+    }
+
+    @Override
+    public int getRanking() {
+        return authenticityHandler.getRanking();
+    }
 
 }

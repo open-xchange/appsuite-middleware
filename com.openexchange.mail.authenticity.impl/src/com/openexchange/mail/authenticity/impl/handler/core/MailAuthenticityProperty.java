@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2017-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,67 +47,70 @@
  *
  */
 
-package com.openexchange.mail.authenticity.impl;
+package com.openexchange.mail.authenticity.impl.handler.core;
 
-import java.util.Collection;
-import com.openexchange.exception.OXException;
-import com.openexchange.mail.MailField;
-import com.openexchange.mail.authenticity.MailAuthenticityHandler;
-import com.openexchange.mail.dataobjects.MailAuthenticityResult;
-import com.openexchange.mail.dataobjects.MailMessage;
-import com.openexchange.session.Session;
+import com.openexchange.config.lean.Property;
 
 /**
- * {@link ThresholdAwareAuthenticityHandler} - A simple authenticity handler, which only delegates if date threshold is fulfilled.
+ * {@link MailAuthenticityProperty}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.10.0
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class ThresholdAwareAuthenticityHandler implements MailAuthenticityHandler {
+public enum MailAuthenticityProperty implements Property {
+    /**
+     * Defines whether the mail authenticity core feature is enabled
+     * Defaults to <code>false</code>
+     */
+    enabled(false),
+    /**
+     * Defines the date after which the e-mails will be analysed
+     * Defaults to 0
+     */
+    threshold(0L),
+    /**
+     * Defines the MANDATORY <code>authserv-id</code>. It can contain a single arbitrary string
+     * or a comma separated list of arbitrary strings
+     * Default is empty.
+     *
+     * @see <a href="https://tools.ietf.org/html/rfc7601#section-2.2">RFC-7601, Section 2.2</a>
+     */
+    authServId;
 
-    private final MailAuthenticityHandler authenticityHandler;
-    private final long threshold;
+    private final Object defaultValue;
+    private final String fqn;
 
     /**
-     * Initializes a new {@link ThresholdAwareAuthenticityHandler}.
+     * Initialises a new {@link MailAuthenticityProperty}.
      */
-    public ThresholdAwareAuthenticityHandler(MailAuthenticityHandler authenticityHandler, long threshold) {
-        super();
-        this.authenticityHandler = authenticityHandler;
-        this.threshold = threshold;
+    private MailAuthenticityProperty() {
+        this("");
     }
 
+    /**
+     * Initializes a new {@link MailAuthenticityProperty}.
+     */
+    private MailAuthenticityProperty(Object defaultValue) {
+        this.defaultValue = defaultValue;
+        fqn = "com.openexchange.mail.authenticity." + name();
+    }
+
+    /**
+     * Returns the fully qualified name for the property
+     *
+     * @return the fully qualified name for the property
+     */
     @Override
-    public void handle(Session session, MailMessage mailMessage) throws OXException {
-        if (null == mailMessage) {
-            return;
-        }
-        if ((threshold > 0 && mailMessage.getReceivedDate().getTime() < threshold)) {
-            mailMessage.setAuthenticityResult(MailAuthenticityResult.NOT_ANALYZED_RESULT);
-            return;
-        }
-
-        authenticityHandler.handle(session, mailMessage);
+    public String getFQPropertyName() {
+        return fqn;
     }
 
+    /**
+     * Returns the default value of this property
+     *
+     * @return the default value of this property
+     */
     @Override
-    public Collection<MailField> getRequiredFields() {
-        return authenticityHandler.getRequiredFields();
+    public Object getDefaultValue() {
+        return defaultValue;
     }
-
-    @Override
-    public Collection<String> getRequiredHeaders() {
-        return authenticityHandler.getRequiredHeaders();
-    }
-
-    @Override
-    public boolean isEnabled(Session session) {
-        return authenticityHandler.isEnabled(session);
-    }
-
-    @Override
-    public int getRanking() {
-        return authenticityHandler.getRanking();
-    }
-
 }
