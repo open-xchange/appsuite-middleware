@@ -132,7 +132,6 @@ import com.openexchange.group.internal.GroupServiceImpl;
 import com.openexchange.groupware.alias.UserAliasStorage;
 import com.openexchange.groupware.alias.impl.RdbAliasStorage;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
-import com.openexchange.groupware.calendar.CalendarAdministrationService;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.configuration.ParticipantConfig;
 import com.openexchange.groupware.container.Contact;
@@ -677,7 +676,6 @@ public final class Init {
             TestServiceRegistry.getInstance().addService(CalendarCollectionService.class, new CalendarCollection());
             TestServiceRegistry.getInstance().addService(AppointmentSqlFactoryService.class, new AppointmentSqlFactory());
             TargetRegistry.getInstance().addService(Types.APPOINTMENT, new CalendarReminderDelete());
-            TestServiceRegistry.getInstance().addService(CalendarAdministrationService.class, new CalendarAdministration());
 
             if (null == CalendarVolatileCache.getInstance()) {
                 try {
