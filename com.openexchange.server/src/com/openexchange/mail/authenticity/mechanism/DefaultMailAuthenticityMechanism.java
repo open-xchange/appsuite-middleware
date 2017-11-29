@@ -49,6 +49,8 @@
 
 package com.openexchange.mail.authenticity.mechanism;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.mail.authenticity.mechanism.dkim.DKIMResult;
 import com.openexchange.mail.authenticity.mechanism.dmarc.DMARCResult;
 import com.openexchange.mail.authenticity.mechanism.spf.SPFResult;
@@ -63,6 +65,8 @@ public enum DefaultMailAuthenticityMechanism implements MailAuthenticityMechanis
     DMARC("DMARC", "dmarc", DMARCResult.class),
     DKIM("DKIM", "dkim", DKIMResult.class),
     SPF("SPF", "spf", SPFResult.class);
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultMailAuthenticityMechanism.class);
 
     private final Class<? extends AuthenticityMechanismResult> resultType;
     private final String displayName;
@@ -105,5 +109,24 @@ public enum DefaultMailAuthenticityMechanism implements MailAuthenticityMechanis
     @Override
     public String getTechnicalName() {
         return technicalName;
+    }
+
+    /**
+     * Converts the specified string to a {@link DefaultMailAuthenticityMechanism}
+     *
+     * @param s The string to convert
+     * @return the converted {@link DefaultMailAuthenticityMechanism}
+     */
+    public static DefaultMailAuthenticityMechanism parse(String s) {
+        int index = s.indexOf(' ');
+        if (index > 0) {
+            s.substring(0, index);
+        }
+        try {
+            return DefaultMailAuthenticityMechanism.valueOf(s.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            LOGGER.debug("Unknown mail authenticity mechanism '{}'", s);
+        }
+        return null;
     }
 }

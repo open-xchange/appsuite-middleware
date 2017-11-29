@@ -76,7 +76,6 @@ import com.openexchange.mail.authenticity.MailAuthenticityExceptionCodes;
 import com.openexchange.mail.authenticity.MailAuthenticityHandler;
 import com.openexchange.mail.authenticity.MailAuthenticityStatus;
 import com.openexchange.mail.authenticity.impl.handler.domain.TrustedDomainAuthenticityHandler;
-import com.openexchange.mail.authenticity.mechanism.AuthenticityMechanismResult;
 import com.openexchange.mail.authenticity.mechanism.DefaultMailAuthenticityMechanism;
 import com.openexchange.mail.authenticity.mechanism.MailAuthenticityMechanismResult;
 import com.openexchange.mail.authenticity.mechanism.dkim.DKIMAuthMechResult;
@@ -170,7 +169,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
             boolean domainMismatch = checkDomainMismatch(overallResult, domain);
 
             // In case of a DMARC result != "none", set overall result to the DMARC result and continue with the next mechanism
-            MailAuthenticityStatus mailAuthStatus = convert(dmarcResult);
+            MailAuthenticityStatus mailAuthStatus = dmarcResult.convert();
             if (!mailAuthStatus.equals(MailAuthenticityStatus.NONE) && !domainMismatch) {
                 overallResult.setStatus(mailAuthStatus);
             }
@@ -191,7 +190,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
             boolean domainMismatch = checkDomainMismatch(overallResult, domain);
 
             // In case of a DKIM result != "none", set overall result to the DKIM result and continue with the next mechanism
-            MailAuthenticityStatus mailAuthStatus = convert(dkimResult);
+            MailAuthenticityStatus mailAuthStatus = dkimResult.convert();
             if (overallResult.getStatus().equals(MailAuthenticityStatus.NEUTRAL) && !mailAuthStatus.equals(MailAuthenticityStatus.NONE) && !domainMismatch) {
                 overallResult.setStatus(mailAuthStatus);
             }
@@ -216,7 +215,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
             boolean domainMismatch = checkDomainMismatch(overallResult, domain);
 
             // Set the overall result only if it's 'none'
-            MailAuthenticityStatus mailAuthStatus = convert(spfResult);
+            MailAuthenticityStatus mailAuthStatus = spfResult.convert();
             if (!domainMismatch && (overallResult.getStatus().equals(MailAuthenticityStatus.NEUTRAL) || (!overallResult.getStatus().equals(MailAuthenticityStatus.PASS) && mailAuthStatus.equals(MailAuthenticityStatus.PASS)))) {
                 overallResult.setStatus(mailAuthStatus);
             }
@@ -342,7 +341,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
     private List<String> extractValidAuthenticationResults(String[] authHeaders, List<AllowedAuthServId> allowedAuthServIds) {
         List<String> authHeadersList = new ArrayList<>(authHeaders.length);
         for (String header : authHeaders) {
-            List<String> split = splitElements(header.trim());
+            List<String> split = StringUtil.splitElements(header.trim());
             if (split.isEmpty()) {
                 // Huh? Invalid/Malformed authenticity results header, ignore
                 continue;
@@ -391,7 +390,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
         StringBuilder unknownAuthElements = new StringBuilder(128);
         while (authResultsIterator.hasNext()) {
             String authResult = authResultsIterator.next();
-            List<String> authHeader = splitElements(authResult);
+            List<String> authHeader = StringUtil.splitElements(authResult);
             // Sort by ordinal
             Collections.sort(authHeader, MAIL_AUTH_COMPARATOR);
             for (int index = 0; index < authHeader.size(); index++) {
@@ -422,7 +421,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
      * @param result The overall {@link MailAuthenticityResult}
      */
     private void parseAuthHeaderElement(String authHeaderElement, StringBuilder unknownAuthElements, List<MailAuthenticityMechanismResult> results, MailAuthenticityResult result) {
-        Map<String, String> attributes = parseLine(authHeaderElement);
+        Map<String, String> attributes = StringUtil.parseLine(authHeaderElement);
         DefaultMailAuthenticityMechanism mechanism = getMechanism(attributes);
         if (mechanism == null) {
             // Unknown or not parsable mechanism
@@ -500,141 +499,6 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
     }
 
     /**
-     * Parses the specified line to a {@link Map}.
-     *
-     * @param line The line to parse
-     * @return A {@link Map} with the key/value pairs of the line
-     */
-    private Map<String, String> parseLine(String line) {
-        Map<String, String> pairs = new HashMap<>();
-        // No pairs; return as a singleton Map with the line being both the key and the value
-        if (!line.contains("=")) {
-            pairs.put(line, line);
-            return pairs;
-        }
-
-        StringBuilder keyBuffer = new StringBuilder(32);
-        StringBuilder valueBuffer = new StringBuilder(64);
-        String key = null;
-        boolean valueMode = false;
-        boolean backtracking = false;
-        int backtrackIndex = 0;
-        for (int index = 0; index < line.length();) {
-            char c = line.charAt(index);
-            switch (c) {
-                case '=':
-                    if (valueMode) {
-                        // A key found while in value mode, so we backtrack
-                        backtracking = true;
-                        valueMode = false;
-                        index--;
-                    } else {
-                        // Retain the key and switch to value mode
-                        key = keyBuffer.toString();
-                        keyBuffer.setLength(0);
-                        valueMode = true;
-                        index++;
-                    }
-                    break;
-                case ' ':
-                    if (!valueMode) {
-                        //Remove the key from the value buffer
-                        valueBuffer.setLength(valueBuffer.length() - backtrackIndex);
-                        pairs.put(key, valueBuffer.toString().trim());
-                        // Retain the new key (and reverse if that key came from backtracking)
-                        key = backtracking ? keyBuffer.reverse().toString() : keyBuffer.toString();
-                        // Reset counters
-                        keyBuffer.setLength(0);
-                        valueBuffer.setLength(0);
-                        // Skip to the value of the retained new key (position after the '=' sign)
-                        index += backtrackIndex + 2;
-                        backtrackIndex = 0;
-                        backtracking = false;
-                        valueMode = true;
-                        break;
-                    }
-                    // while in value mode spaces are considered as literals, hence fall-through to 'default'
-                default:
-                    if (valueMode) {
-                        // While in value mode append all literals to the value buffer
-                        valueBuffer.append(c);
-                        index++;
-                    } else {
-                        // While in key mode append all key literals to the key buffer...
-                        keyBuffer.append(c);
-                        if (backtracking) {
-                            // ... and if we are backtracking, update the counters
-                            index--;
-                            backtrackIndex++;
-                        } else {
-                            // ... if we are not backtracking and we are in key mode, go forth
-                            index++;
-                        }
-                    }
-            }
-        }
-        // Add the last pair
-        if (valueBuffer.length() > 0) {
-            pairs.put(key, valueBuffer.toString());
-        }
-        return pairs;
-    }
-
-    /**
-     * Splits the parametrised header to single elements using the semicolon (';')
-     * as the split character
-     *
-     * @param header The header to split
-     * @return A {@link List} with the split elements
-     */
-    private List<String> splitElements(String header) {
-        List<String> split = new ArrayList<>();
-        boolean openQuotes = false;
-        StringBuilder lineBuffer = new StringBuilder(128);
-        for (int index = 0; index < header.length(); index++) {
-            char c = header.charAt(index);
-            switch (c) {
-                case '"':
-                    openQuotes = !openQuotes;
-                    lineBuffer.append(c);
-                    break;
-                case ';':
-                    if (!openQuotes) {
-                        split.add(lineBuffer.toString().trim());
-                        lineBuffer.setLength(0);
-                        break;
-                    }
-                default:
-                    lineBuffer.append(c);
-            }
-        }
-        // Add last one
-        if (lineBuffer.length() > 0) {
-            split.add(lineBuffer.toString().trim());
-        }
-        return split;
-    }
-
-    /**
-     * Converts the specified string to a {@link DefaultMailAuthenticityMechanism}
-     *
-     * @param s The string to convert
-     * @return the converted {@link DefaultMailAuthenticityMechanism}
-     */
-    private static DefaultMailAuthenticityMechanism convert(String s) {
-        int index = s.indexOf(' ');
-        if (index > 0) {
-            s.substring(0, index);
-        }
-        try {
-            return DefaultMailAuthenticityMechanism.valueOf(s.toUpperCase());
-        } catch (IllegalArgumentException e) {
-            LOGGER.debug("Unknown mail authenticity mechanism '{}'", s);
-        }
-        return null;
-    }
-
-    /**
      * Extracts the outcome of the specified value.
      *
      * @param value the value to extract the outcome from
@@ -661,27 +525,6 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
             return null;
         }
         return value.substring(beginIndex + 1, endIndex);
-    }
-
-    /**
-     * Converts the specified {@link AuthenticityMechanismResult} to {@link MailAuthenticityStatus}
-     *
-     * @param mechanismResult The {@link AuthenticityMechanismResult} to convert
-     * @return The converted {@link MailAuthenticityStatus}. The status {@link MailAuthenticityStatus#NEUTRAL} might
-     *         also get returned if the specified {@link AuthenticityMechanismResult} does not map to a valid {@link MailAuthenticityStatus}.
-     *         The status {@link MailAuthenticityStatus#NONE} will be returned if the specified {@link AuthenticityMechanismResult} is <code>null</code>
-     */
-    private MailAuthenticityStatus convert(AuthenticityMechanismResult authMechResult) {
-        if (authMechResult == null) {
-            return MailAuthenticityStatus.NONE;
-        }
-        MailAuthenticityStatus mailAuthenticityStatus = MailAuthenticityStatus.NEUTRAL;
-        try {
-            mailAuthenticityStatus = MailAuthenticityStatus.valueOf(authMechResult.getTechnicalName().toUpperCase());
-        } catch (IllegalArgumentException e) {
-            LOGGER.debug("Unknown mail authenticity status '{}'", authMechResult.getTechnicalName(), e);
-        }
-        return mailAuthenticityStatus;
     }
 
     /**
@@ -772,10 +615,10 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
             DefaultMailAuthenticityMechanism mam1 = null;
             DefaultMailAuthenticityMechanism mam2 = null;
             if (s1.length > 0) {
-                mam1 = convert(s1[0]);
+                mam1 = DefaultMailAuthenticityMechanism.parse(s1[0]);
             }
             if (s2.length > 0) {
-                mam2 = convert(s2[0]);
+                mam2 = DefaultMailAuthenticityMechanism.parse(s2[0]);
             }
             if (mam1 != null && mam2 != null) {
                 return mam1.compareTo(mam2);
