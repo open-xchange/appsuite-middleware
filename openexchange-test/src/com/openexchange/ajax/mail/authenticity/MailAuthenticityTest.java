@@ -66,6 +66,7 @@ import com.openexchange.testing.httpclient.models.MailDestinationData;
 import com.openexchange.testing.httpclient.models.MailImportResponse;
 import com.openexchange.testing.httpclient.models.MailListElement;
 import com.openexchange.testing.httpclient.models.MailResponse;
+import com.openexchange.testing.httpclient.models.MailsCleanUpResponse;
 import com.openexchange.testing.httpclient.models.MechanismResult;
 import com.openexchange.testing.httpclient.modules.MailApi;
 
@@ -79,10 +80,16 @@ public class MailAuthenticityTest extends AbstractAPIClientSession {
 
     private static final String folder = "default0%2FINBOX";
     private static final String SubFolder = "authenticity";
-    private static final String[] mailNames = new String[] {"passAll.eml"};
+    private static final String PASS_ALL = "passAll.eml";
+    private static final String PISHING = "pishing.eml";
+    private static final String[] mailNames = new String[] {PASS_ALL, PISHING};
     private MailApi api;
     private final Map<String, MailDestinationData> importedMails = new HashMap<>();
     private Long timestamp = 0l;
+
+    private static final String DKIM = "DKIM";
+    private static final String SPF = "SPF";
+    private static final String DMARC = "DMARC";
 
     @Override
     public void setUp() throws Exception {
@@ -105,20 +112,27 @@ public class MailAuthenticityTest extends AbstractAPIClientSession {
 
     @Override
     public void tearDown() throws Exception {
-        super.tearDown();
-        List<MailListElement> body = new ArrayList<>();
-        for(MailDestinationData dest: importedMails.values()) {
-            MailListElement mailListElement = new MailListElement();
-            mailListElement.setFolder(dest.getFolderId());
-            mailListElement.setId(dest.getId());
-            body.add(mailListElement);
+        try {
+            List<MailListElement> body = new ArrayList<>();
+            for (MailDestinationData dest : importedMails.values()) {
+                MailListElement mailListElement = new MailListElement();
+                mailListElement.setFolder(dest.getFolderId());
+                mailListElement.setId(dest.getId());
+                body.add(mailListElement);
+            }
+            MailsCleanUpResponse deleteMails = api.deleteMails(getClient().getSession(), body, timestamp);
+            Assert.assertNull(deleteMails.getErrorDesc(), deleteMails.getError());
+        } finally {
+            super.tearDown();
         }
-        api.deleteMails(getClient().getSession(), body, timestamp);
     }
 
     @Test
     public void testBasicFunctionality() throws ApiException {
-       MailResponse resp = api.getMail(getClient().getSession(), folder, importedMails.get(mailNames[0]).getId(), null, 0, null, false, null, null, null, null, null);
+        /*
+         * Test pass all
+         */
+       MailResponse resp = api.getMail(getClient().getSession(), folder, importedMails.get(PASS_ALL).getId(), null, 0, null, false, null, null, null, null, null);
        MailData mail = checkResponse(resp);
        AuthenticationResult authenticationResult = mail.getAuthenticationResults();
        Assert.assertNotNull(authenticationResult);
@@ -128,13 +142,13 @@ public class MailAuthenticityTest extends AbstractAPIClientSession {
        boolean spf=false, dmarc=false, dkim=false;
        for(MechanismResult result: mailAuthenticityMechanismResults) {
            switch(result.getMechanism()) {
-               case "DKIM":
+               case DKIM:
                    dkim=true;
                    break;
-               case "DMARC":
+               case DMARC:
                    dmarc = true;
                    break;
-               case "SPF":
+               case SPF:
                    spf = true;
                    break;
            }
@@ -143,6 +157,37 @@ public class MailAuthenticityTest extends AbstractAPIClientSession {
 
        Assert.assertTrue(spf && dmarc && dkim);
        Assert.assertEquals(StatusEnum.PASS, authenticationResult.getStatus());
+
+       /*
+        * Test pishing
+        */
+       resp = api.getMail(getClient().getSession(), folder, importedMails.get(PISHING).getId(), null, 0, null, false, null, null, null, null, null);
+       mail = checkResponse(resp);
+       authenticationResult = mail.getAuthenticationResults();
+       Assert.assertNotNull(authenticationResult);
+       mailAuthenticityMechanismResults = authenticationResult.getMailAuthenticityMechanismResults();
+       Assert.assertFalse(mailAuthenticityMechanismResults.isEmpty());
+
+       spf=false;
+       dmarc=false;
+       dkim=false;
+       for(MechanismResult result: mailAuthenticityMechanismResults) {
+           switch(result.getMechanism()) {
+               case DKIM:
+                   dkim=true;
+                   break;
+               case DMARC:
+                   dmarc = true;
+                   break;
+               case SPF:
+                   spf = true;
+                   break;
+           }
+           Assert.assertEquals("Fail", result.getResult());
+       }
+
+       Assert.assertTrue(spf || dmarc || dkim);
+       Assert.assertEquals(StatusEnum.FAIL, authenticationResult.getStatus());
     }
 
     private MailData checkResponse(MailResponse resp) {
