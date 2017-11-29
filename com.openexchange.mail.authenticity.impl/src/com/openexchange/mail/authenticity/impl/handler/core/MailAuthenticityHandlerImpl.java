@@ -117,9 +117,11 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MailAuthenticityHandlerImpl.class);
 
+    private final Map<DefaultMailAuthenticityMechanism, BiFunction<Map<String, String>, MailAuthenticityResult, MailAuthenticityMechanismResult>> mechanismParsersRegitry;
+
     private static final MailAuthenticityMechanismComparator MAIL_AUTH_COMPARATOR = new MailAuthenticityMechanismComparator();
 
-    private final Map<DefaultMailAuthenticityMechanism, BiFunction<Map<String, String>, MailAuthenticityResult, MailAuthenticityMechanismResult>> mechanismParsersRegitry;
+    private static final String EMPTY_STRING = "";
 
     /** The required mail fields of this handler */
     private static final Collection<MailField> REQUIRED_MAIL_FIELDS;
@@ -319,6 +321,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
             result.addAttribute(DefaultMailAuthenticityResultKey.FROM_DOMAIN, domain);
         } catch (Exception e) {
             // Malformed from header, be strict and return with failed result
+            LOGGER.debug("An error occurred while trying to extract a valid domain from the 'From' header", e);
             result.setStatus(MailAuthenticityStatus.FAIL);
             return result;
         }
@@ -734,7 +737,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
         }
 
         List<String> tokens = Arrays.asList(Strings.splitByComma(sAuthServIds));
-        if (tokens == null || tokens.isEmpty() || tokens.contains("")) {
+        if (tokens == null || tokens.isEmpty() || tokens.contains(EMPTY_STRING)) {
             throw MailAuthenticityExceptionCodes.INVALID_AUTHSERV_IDS.create();
         }
 
