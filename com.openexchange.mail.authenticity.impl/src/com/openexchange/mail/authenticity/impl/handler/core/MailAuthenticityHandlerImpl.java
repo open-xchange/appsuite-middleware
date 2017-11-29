@@ -422,7 +422,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
      */
     private void parseAuthHeaderElement(String authHeaderElement, StringBuilder unknownAuthElements, List<MailAuthenticityMechanismResult> results, MailAuthenticityResult result) {
         Map<String, String> attributes = StringUtil.parseLine(authHeaderElement);
-        DefaultMailAuthenticityMechanism mechanism = getMechanism(attributes);
+        DefaultMailAuthenticityMechanism mechanism = DefaultMailAuthenticityMechanism.extractMechanism(attributes);
         if (mechanism == null) {
             // Unknown or not parsable mechanism
             unknownAuthElements.append(authHeaderElement).append("; ");
@@ -435,21 +435,6 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
             return;
         }
         results.add(mechanismParser.apply(attributes, result));
-    }
-
-    /**
-     * Gets the mechanism from the specified attributes
-     *
-     * @param attributes The attributes
-     * @return The {@link DefaultMailAuthenticityMechanism} or <code>null</code> if none exists
-     */
-    private DefaultMailAuthenticityMechanism getMechanism(Map<String, String> attributes) {
-        for (DefaultMailAuthenticityMechanism mechanism : DefaultMailAuthenticityMechanism.values()) {
-            if (attributes.containsKey(mechanism.name().toLowerCase())) {
-                return mechanism;
-            }
-        }
-        return null;
     }
 
     /**

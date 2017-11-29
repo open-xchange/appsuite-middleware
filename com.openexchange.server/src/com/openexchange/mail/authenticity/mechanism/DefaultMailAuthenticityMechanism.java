@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.authenticity.mechanism;
 
+import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.mail.authenticity.mechanism.dkim.DKIMResult;
@@ -128,5 +129,15 @@ public enum DefaultMailAuthenticityMechanism implements MailAuthenticityMechanis
             LOGGER.debug("Unknown mail authenticity mechanism '{}'", s);
         }
         return null;
+    }
+
+    /**
+     * Tries to extract a known mechanism from the specified attributes
+     *
+     * @param attributes The attributes
+     * @return The {@link DefaultMailAuthenticityMechanism} or <code>null</code> if none exists
+     */
+    public static DefaultMailAuthenticityMechanism extractMechanism(Map<String, String> attributes) {
+
     }
 }
