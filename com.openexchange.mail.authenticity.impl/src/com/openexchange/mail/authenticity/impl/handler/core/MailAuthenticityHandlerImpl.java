@@ -78,7 +78,6 @@ import com.openexchange.mail.authenticity.MailAuthenticityStatus;
 import com.openexchange.mail.authenticity.impl.handler.domain.TrustedDomainAuthenticityHandler;
 import com.openexchange.mail.authenticity.mechanism.DefaultMailAuthenticityMechanism;
 import com.openexchange.mail.authenticity.mechanism.MailAuthenticityMechanismResult;
-import com.openexchange.mail.authenticity.mechanism.UnknownMailAuthenticityMechanismResult;
 import com.openexchange.mail.authenticity.mechanism.dkim.DKIMAuthMechResult;
 import com.openexchange.mail.authenticity.mechanism.dkim.DKIMResult;
 import com.openexchange.mail.authenticity.mechanism.dkim.DKIMResultHeader;
@@ -379,7 +378,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
     private void parseMechanismResults(List<String> authHeadersList, MailAuthenticityResult result) {
         Iterator<String> authResultsIterator = authHeadersList.iterator();
         List<MailAuthenticityMechanismResult> results = new ArrayList<>();
-        List<UnknownMailAuthenticityMechanismResult> unknownResults = new ArrayList<>();
+        List<Map<String, String>> unknownResults = new ArrayList<>();
         while (authResultsIterator.hasNext()) {
             String authResult = authResultsIterator.next();
             List<String> authHeader = StringUtil.splitElements(authResult);
@@ -395,7 +394,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
 
         // Add the remaining attributes as is to the result
         for (String authHeader : authHeadersList) {
-            unknownResults.add(new UnknownMailAuthenticityMechanismResult(StringUtil.parseLine(authHeader)));
+            unknownResults.add(StringUtil.parseLine(authHeader));
         }
     }
 
@@ -407,18 +406,18 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
      * @param results The {@link MailAuthenticityMechanismResult}s
      * @param result The overall {@link MailAuthenticityResult}
      */
-    private void parseAuthHeaderElement(String authHeaderElement, List<UnknownMailAuthenticityMechanismResult> unknownResults, List<MailAuthenticityMechanismResult> results, MailAuthenticityResult result) {
+    private void parseAuthHeaderElement(String authHeaderElement, List<Map<String, String>> unknownResults, List<MailAuthenticityMechanismResult> results, MailAuthenticityResult result) {
         Map<String, String> attributes = StringUtil.parseLine(authHeaderElement);
         DefaultMailAuthenticityMechanism mechanism = DefaultMailAuthenticityMechanism.extractMechanism(attributes);
         if (mechanism == null) {
             // Unknown or not parsable mechanism
-            unknownResults.add(new UnknownMailAuthenticityMechanismResult(attributes));
+            unknownResults.add(attributes);
             return;
         }
         BiFunction<Map<String, String>, MailAuthenticityResult, MailAuthenticityMechanismResult> mechanismParser = mechanismParsersRegitry.get(mechanism);
         if (mechanismParser == null) {
             // Not a valid mechanism, skip but add to the overall result
-            unknownResults.add(new UnknownMailAuthenticityMechanismResult(attributes));
+            unknownResults.add(attributes);
             return;
         }
         results.add(mechanismParser.apply(attributes, result));

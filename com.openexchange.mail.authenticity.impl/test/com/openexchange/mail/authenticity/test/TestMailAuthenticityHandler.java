@@ -57,6 +57,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import java.util.List;
+import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -185,10 +186,10 @@ public class TestMailAuthenticityHandler {
 
         assertAuthenticityMechanismResult((MailAuthenticityMechanismResult) result.getAttribute(DefaultMailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS, List.class).get(0), "example.net", SPFResult.PASS);
 
-        String unknownMech = (String) result.getAttribute(DefaultMailAuthenticityResultKey.UNKNOWN_AUTH_MECH_RESULTS, List.class).get(0);
+        Map<String, String> unknownMech = (Map) result.getAttribute(DefaultMailAuthenticityResultKey.UNKNOWN_AUTH_MECH_RESULTS, List.class).get(0);
         assertEquals("ox.io; auth=pass (cram-md5) smtp.auth=sender@example.net", unknownMech);
 
-        unknownMech = (String) result.getAttribute(DefaultMailAuthenticityResultKey.UNKNOWN_AUTH_MECH_RESULTS, List.class).get(1);
+        unknownMech = (Map) result.getAttribute(DefaultMailAuthenticityResultKey.UNKNOWN_AUTH_MECH_RESULTS, List.class).get(1);
         assertEquals("ox.io; sender-id=pass header.from=example.net", unknownMech);
 
     }
@@ -208,10 +209,10 @@ public class TestMailAuthenticityHandler {
 
         assertAuthenticityMechanismResult((MailAuthenticityMechanismResult) result.getAttribute(DefaultMailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS, List.class).get(0), "example.com", "good signature", DKIMResult.PASS);
 
-        String unknownMech = (String) result.getAttribute(DefaultMailAuthenticityResultKey.UNKNOWN_AUTH_MECH_RESULTS, List.class).get(0);
+        Map<String, String> unknownMech = (Map) result.getAttribute(DefaultMailAuthenticityResultKey.UNKNOWN_AUTH_MECH_RESULTS, List.class).get(0);
         assertEquals("ox.io; sender-id=fail header.from=example.com", unknownMech);
 
-        unknownMech = (String) result.getAttribute(DefaultMailAuthenticityResultKey.UNKNOWN_AUTH_MECH_RESULTS, List.class).get(1);
+        unknownMech = (Map) result.getAttribute(DefaultMailAuthenticityResultKey.UNKNOWN_AUTH_MECH_RESULTS, List.class).get(1);
         assertEquals("ox.io; auth=pass (cram-md5) smtp.auth=sender@example.com", unknownMech);
     }
 
@@ -303,7 +304,7 @@ public class TestMailAuthenticityHandler {
 
         assertAuthenticityMechanismResult((MailAuthenticityMechanismResult) result.getAttribute(DefaultMailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS, List.class).get(0), "ox.io", "\"1024-bit key; unprotected key\"", DKIMResult.PASS);
 
-        String unknownMech = (String) result.getAttribute(DefaultMailAuthenticityResultKey.UNKNOWN_AUTH_MECH_RESULTS, List.class).get(0);
+        Map<String, String> unknownMech = (Map) result.getAttribute(DefaultMailAuthenticityResultKey.UNKNOWN_AUTH_MECH_RESULTS, List.class).get(0);
         assertEquals("ox.io; dkim-adsp=pass; dkim-atps=neutral", unknownMech);
     }
 
