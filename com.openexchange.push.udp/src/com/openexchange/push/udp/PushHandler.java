@@ -125,14 +125,14 @@ public class PushHandler implements EventHandler {
         switch (module) {
         case Types.APPOINTMENT:
             for (final Entry<Integer, Set<Integer>> entry : transform(event.getAffectedUsersWithFolder()).entrySet()) {
-                event(i(entry.getKey()), I2i(entry.getValue()), module, ctx, getTimestamp((com.openexchange.chronos.Event) event.getActionObj()));
+                event(i(entry.getKey()), I2i(entry.getValue()), module, ctx, getTimestamp(castTo(event.getActionObj(), com.openexchange.chronos.Event.class)));
             }
             break;
         case Types.TASK:
         case Types.CONTACT:
         case Types.FOLDER:
             for (final Entry<Integer, Set<Integer>> entry : transform(event.getAffectedUsersWithFolder()).entrySet()) {
-                event(i(entry.getKey()), I2i(entry.getValue()), module, ctx, getTimestamp((DataObject) event.getActionObj()));
+                event(i(entry.getKey()), I2i(entry.getValue()), module, ctx, getTimestamp(castTo(event.getActionObj(), DataObject.class)));
             }
             break;
         case Types.EMAIL:
@@ -140,11 +140,11 @@ public class PushHandler implements EventHandler {
             break;
         case Types.INFOSTORE:
             for (final Entry<Integer, Set<Integer>> entry : transform(event.getAffectedUsersWithFolder()).entrySet()) {
-                event(i(entry.getKey()), I2i(entry.getValue()), module, ctx, getTimestamp(((DocumentMetadata) event.getActionObj()).getLastModified()));
+                event(i(entry.getKey()), I2i(entry.getValue()), module, ctx, getTimestamp((castTo(event.getActionObj(), DocumentMetadata.class))));
             }
             break;
         default:
-            LOG.warn("Got event with unimplemented module: {}", module);
+            LOG.warn("Got event with unimplemented module: {}", Integer.valueOf(module));
         }
     }
 
@@ -172,6 +172,10 @@ public class PushHandler implements EventHandler {
     private static long getTimestamp(final com.openexchange.chronos.Event event) {
         return null == event ? 0 : getTimestamp(event.getLastModified());
     }
+    
+    private static long getTimestamp(final DocumentMetadata meta) {
+        return null == meta ? 0 : getTimestamp(meta.getLastModified());
+    }
 
     private static final Map<Integer, Set<Integer>> transform(final Map<Integer, Set<Integer>> map) {
         final Map<Integer, Set<Integer>> retval = new HashMap<Integer, Set<Integer>>();
@@ -186,5 +190,13 @@ public class PushHandler implements EventHandler {
             }
         }
         return retval;
+    }
+    
+    private static <T> T castTo(Object actionObject, Class<T> clazz) {
+        if (null != actionObject && clazz.isAssignableFrom(actionObject.getClass())) {
+            return clazz.cast(actionObject);
+        }
+        LOG.debug("Couldn't cast object {} to desired class {}.", actionObject.getClass().getName(), clazz.getName());
+        return null;
     }
 }

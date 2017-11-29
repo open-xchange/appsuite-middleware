@@ -435,8 +435,8 @@ public class AuditEventHandler implements EventHandler {
         Validate.notNull(logBuilder, "StringBuilder to write to mustn't be null.");
 
         // Get calendar events
-        final com.openexchange.chronos.Event event = (com.openexchange.chronos.Event) commonEvent.getActionObj();
-        final com.openexchange.chronos.Event oldEvent = (com.openexchange.chronos.Event) commonEvent.getOldObj();
+        final com.openexchange.chronos.Event event = castTo(commonEvent.getActionObj(), com.openexchange.chronos.Event.class);
+        final com.openexchange.chronos.Event oldEvent = castTo(commonEvent.getOldObj(), com.openexchange.chronos.Event.class);
         Validate.notNull(event, "Calendar event is null. Can't write usefull information.");
 
         logBuilder.append("OBJECT TYPE: EVENT; ");
@@ -661,5 +661,12 @@ public class AuditEventHandler implements EventHandler {
         } else {
             logBuilder.append(text).append(value).append("; ");
         }
+    }
+    
+    private static <T> T castTo(Object actionObject, Class<T> clazz) {
+        if (null != actionObject && clazz.isAssignableFrom(actionObject.getClass())) {
+            return clazz.cast(actionObject);
+        }
+        return null;
     }
 }
