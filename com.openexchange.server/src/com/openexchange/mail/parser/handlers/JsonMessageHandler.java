@@ -535,7 +535,10 @@ public final class JsonMessageHandler implements MailMessageHandler {
                 JSONArray array = new JSONArray(col.size());
                 for (Object o : col) {
                     if (o instanceof MailAuthenticityMechanismResult) {
-                        array.put(((MailAuthenticityMechanismResult) o).toJson());
+                        MailAuthenticityMechanismResult mechResult = (MailAuthenticityMechanismResult) o;
+                        JSONObject mailAuthMechResultJson = new JSONObject();
+                        mailAuthMechResultJson.put("mechanism", mechResult.getMechanism().getDisplayName());
+                        mailAuthMechResultJson.put("result", mechResult.getResult().getDisplayName());
                     } else {
                         array.put(o);
                     }

@@ -97,11 +97,4 @@ public interface MailAuthenticityMechanismResult {
      * @return the reason of the result
      */
     String getReason();
-
-    /**
-     * Returns a json representation of the result.
-     *
-     * @return The {@link JSONObject}
-     */
-    JSONObject toJson();
 }
