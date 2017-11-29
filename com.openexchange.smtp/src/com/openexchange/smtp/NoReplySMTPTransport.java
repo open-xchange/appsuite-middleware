@@ -233,6 +233,11 @@ public class NoReplySMTPTransport extends AbstractSMTPTransport {
         public String getSSLCipherSuites() {
             return smtpProperties.getSSLCipherSuites();
         }
+        
+        @Override
+        public String getOptionalMailHeader() {
+            return smtpProperties.getOptionalMailHeader();
+        }
     }
 
 }

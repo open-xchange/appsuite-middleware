@@ -122,5 +122,12 @@ public interface ISMTPProperties extends ITransportProperties {
      * @return <code>true</code> if partial send is allowed; otherwise <code>false</code>
      */
     public boolean isSendPartial();
+    
+    /**
+     * Get the optional mail header to append.
+     * 
+     * @return The mail headers name or <code>null</code> if not set
+     */
+    public String getOptionalMailHeader();
 
 }

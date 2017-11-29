@@ -276,5 +276,22 @@ public final class MailAccountSMTPProperties extends MailAccountTransportPropert
 
         return lookUpProperty("com.openexchange.smtp.ssl.ciphersuites", SMTPProperties.getInstance().getSSLCipherSuites());
     }
+    
+    @Override
+    public String getOptionalMailHeader() {
+        String tmp = getAccountProperty("com.openexchange.smtp.setPrimaryAddressHeader");
+        if (null != tmp) {
+            return tmp.trim();
+        }
+
+        if (mailAccountId == PRIMARY) {
+            tmp = lookUpProperty("com.openexchange.smtp.setPrimaryAddressHeader");
+            if (null != tmp) {
+                return tmp.trim();
+            }
+        }
+
+        return lookUpProperty("com.openexchange.smtp.setPrimaryAddressHeader", SMTPProperties.getInstance().getOptionalMailHeader());
+    }
 
 }
