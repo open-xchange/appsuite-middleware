@@ -322,14 +322,8 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
             return result;
         }
 
-        // Parse the known mechanisms
-        parseKnownMechanismResults(authHeadersList, result);
-
-        // Add the remaining attributes as is to the result
-        if (!authHeadersList.isEmpty()) {
-            List<String> unknownResults = (List<String>) result.getAttribute(DefaultMailAuthenticityResultKey.UNKNOWN_AUTH_MECH_RESULTS);
-            unknownResults.addAll(authHeadersList);
-        }
+        // Parse the mechanism results
+        parseMechanismResults(authHeadersList, result);
 
         return result;
     }
@@ -383,11 +377,11 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
     /**
      * Parses all known mechanism results from the specified authResults {@link List}
      *
-     * @param authResults A {@link List} with all authentication results
+     * @param authHeadersList A {@link List} with all authentication results
      * @param result The {@link MailAuthenticityResult}
      */
-    private void parseKnownMechanismResults(List<String> authResults, MailAuthenticityResult result) {
-        Iterator<String> authResultsIterator = authResults.iterator();
+    private void parseMechanismResults(List<String> authHeadersList, MailAuthenticityResult result) {
+        Iterator<String> authResultsIterator = authHeadersList.iterator();
         List<MailAuthenticityMechanismResult> results = new ArrayList<>();
         List<String> unknownResults = new ArrayList<>();
         StringBuilder unknownAuthElements = new StringBuilder(128);
@@ -397,22 +391,8 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
             // Sort by ordinal
             Collections.sort(authHeader, MAIL_AUTH_COMPARATOR);
             for (int index = 0; index < authHeader.size(); index++) {
-                String authHederElement = authHeader.get(index);
-                Map<String, String> attributes = parseLine(authHederElement);
-                DefaultMailAuthenticityMechanism mechanism = getMechanism(attributes);
-                if (mechanism == null) {
-                    // Unknown or not parsable mechanism
-                    unknownAuthElements.append(authHederElement).append("; ");
-                    continue;
-                }
-                BiFunction<Map<String, String>, MailAuthenticityResult, MailAuthenticityMechanismResult> mechanismParser = mechanismParsersRegitry.get(mechanism);
-                if (mechanismParser == null) {
-                    // Not a valid mechanism, skip but add to the overall result
-                    unknownAuthElements.append(authHederElement).append("; ");
-                    continue;
-                }
-                MailAuthenticityMechanismResult mailAuthMechResult = mechanismParser.apply(attributes, result);
-                results.add(mailAuthMechResult);
+                String authHeaderElement = authHeader.get(index);
+                parseAutheHeaderElement(authHeaderElement, unknownAuthElements, results, result);
             }
             if (unknownAuthElements.length() > 0) {
                 unknownAuthElements.setLength(unknownAuthElements.length() - 2);
@@ -423,6 +403,37 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
         }
         result.addAttribute(DefaultMailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS, results);
         result.addAttribute(DefaultMailAuthenticityResultKey.UNKNOWN_AUTH_MECH_RESULTS, unknownResults);
+
+        // Add the remaining attributes as is to the result
+        if (!authHeadersList.isEmpty()) {
+            unknownResults.addAll(authHeadersList);
+        }
+    }
+
+    /**
+     * Parses the specified authentication header element and adds it to it's appropriate list
+     * 
+     * @param authHeaderElement The authentication header element
+     * @param unknownAuthElements The unknown authentication elements
+     * @param results The {@link MailAuthenticityMechanismResult}s
+     * @param result The overall {@link MailAuthenticityResult}
+     */
+    private void parseAutheHeaderElement(String authHeaderElement, StringBuilder unknownAuthElements, List<MailAuthenticityMechanismResult> results, MailAuthenticityResult result) {
+        Map<String, String> attributes = parseLine(authHeaderElement);
+        DefaultMailAuthenticityMechanism mechanism = getMechanism(attributes);
+        if (mechanism == null) {
+            // Unknown or not parsable mechanism
+            unknownAuthElements.append(authHeaderElement).append("; ");
+            return;
+        }
+        BiFunction<Map<String, String>, MailAuthenticityResult, MailAuthenticityMechanismResult> mechanismParser = mechanismParsersRegitry.get(mechanism);
+        if (mechanismParser == null) {
+            // Not a valid mechanism, skip but add to the overall result
+            unknownAuthElements.append(authHeaderElement).append("; ");
+            return;
+        }
+        MailAuthenticityMechanismResult mailAuthMechResult = mechanismParser.apply(attributes, result);
+        results.add(mailAuthMechResult);
     }
 
     /**
