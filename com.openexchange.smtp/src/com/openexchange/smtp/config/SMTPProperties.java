@@ -104,7 +104,7 @@ public final class SMTPProperties extends AbstractProtocolProperties implements 
 
     private String cipherSuites;
     
-    private String optionalMailHeader;
+    private String primaryAdressHeader;
 
     /**
      * Initializes a new {@link SMTPProperties}
@@ -199,8 +199,8 @@ public final class SMTPProperties extends AbstractProtocolProperties implements 
         
         {
             final String tmp = configuration.getProperty("com.openexchange.smtp.setPrimaryAddressHeader").trim();
-            optionalMailHeader = (tmp == null) || (tmp.length() == 0) || "null".equalsIgnoreCase(tmp) ? null : tmp;
-            logBuilder.append("\tOptional mail header: ").append(optionalMailHeader).append('\n');
+            primaryAdressHeader = (tmp == null) || (tmp.length() == 0) || "null".equalsIgnoreCase(tmp) ? null : tmp;
+            logBuilder.append("\tPrimary address header: ").append(primaryAdressHeader).append('\n');
         }
 
         logBuilder.append("Global SMTP properties successfully loaded!");
@@ -219,7 +219,7 @@ public final class SMTPProperties extends AbstractProtocolProperties implements 
         logTransport = false;
         sslProtocols = "SSLv3 TLSv1";
         cipherSuites = null;
-        optionalMailHeader = null;
+        primaryAdressHeader = null;
     }
 
     @Override
@@ -278,7 +278,7 @@ public final class SMTPProperties extends AbstractProtocolProperties implements 
     }
 
     @Override
-    public String getOptionalMailHeader() {
-        return optionalMailHeader;
+    public String getPrimaryAddressHeader() {
+        return primaryAdressHeader;
     }
 }

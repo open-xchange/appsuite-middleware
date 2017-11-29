@@ -235,8 +235,8 @@ public class NoReplySMTPTransport extends AbstractSMTPTransport {
         }
         
         @Override
-        public String getOptionalMailHeader() {
-            return smtpProperties.getOptionalMailHeader();
+        public String getPrimaryAddressHeader() {
+            return smtpProperties.getPrimaryAddressHeader();
         }
     }
 

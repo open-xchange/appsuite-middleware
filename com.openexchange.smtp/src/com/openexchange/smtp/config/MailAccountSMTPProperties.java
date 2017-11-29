@@ -278,20 +278,18 @@ public final class MailAccountSMTPProperties extends MailAccountTransportPropert
     }
     
     @Override
-    public String getOptionalMailHeader() {
+    public String getPrimaryAddressHeader() {
+        // Only applies for the primary mail account
+        if (mailAccountId != PRIMARY) {
+            return null;
+        }
+        
         String tmp = getAccountProperty("com.openexchange.smtp.setPrimaryAddressHeader");
         if (null != tmp) {
             return tmp.trim();
         }
 
-        if (mailAccountId == PRIMARY) {
-            tmp = lookUpProperty("com.openexchange.smtp.setPrimaryAddressHeader");
-            if (null != tmp) {
-                return tmp.trim();
-            }
-        }
-
-        return lookUpProperty("com.openexchange.smtp.setPrimaryAddressHeader", SMTPProperties.getInstance().getOptionalMailHeader());
+        return lookUpProperty("com.openexchange.smtp.setPrimaryAddressHeader", SMTPProperties.getInstance().getPrimaryAddressHeader());
     }
 
 }

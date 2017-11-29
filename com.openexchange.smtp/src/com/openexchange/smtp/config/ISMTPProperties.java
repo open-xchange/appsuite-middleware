@@ -124,10 +124,10 @@ public interface ISMTPProperties extends ITransportProperties {
     public boolean isSendPartial();
     
     /**
-     * Get the optional mail header to append.
+     * Get the primary address header to append.
      * 
-     * @return The mail headers name or <code>null</code> if not set
+     * @return The primary address header name or <code>null</code> if not set
      */
-    public String getOptionalMailHeader();
+    public String getPrimaryAddressHeader();
 
 }
