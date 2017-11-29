@@ -391,8 +391,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
             // Sort by ordinal
             Collections.sort(authHeader, MAIL_AUTH_COMPARATOR);
             for (int index = 0; index < authHeader.size(); index++) {
-                String authHeaderElement = authHeader.get(index);
-                parseAutheHeaderElement(authHeaderElement, unknownAuthElements, results, result);
+                parseAuthHeaderElement(authHeader.get(index), unknownAuthElements, results, result);
             }
             if (unknownAuthElements.length() > 0) {
                 unknownAuthElements.setLength(unknownAuthElements.length() - 2);
@@ -418,7 +417,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
      * @param results The {@link MailAuthenticityMechanismResult}s
      * @param result The overall {@link MailAuthenticityResult}
      */
-    private void parseAutheHeaderElement(String authHeaderElement, StringBuilder unknownAuthElements, List<MailAuthenticityMechanismResult> results, MailAuthenticityResult result) {
+    private void parseAuthHeaderElement(String authHeaderElement, StringBuilder unknownAuthElements, List<MailAuthenticityMechanismResult> results, MailAuthenticityResult result) {
         Map<String, String> attributes = parseLine(authHeaderElement);
         DefaultMailAuthenticityMechanism mechanism = getMechanism(attributes);
         if (mechanism == null) {
