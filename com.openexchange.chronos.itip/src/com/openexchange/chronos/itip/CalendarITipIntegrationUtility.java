@@ -63,7 +63,7 @@ import com.openexchange.chronos.service.EventConflict;
 import com.openexchange.chronos.service.EventID;
 import com.openexchange.chronos.service.FreeBusyService;
 import com.openexchange.chronos.storage.CalendarStorage;
-import com.openexchange.chronos.storage.rdb.RdbCalendarStorageFactory;
+import com.openexchange.chronos.storage.CalendarStorageFactory;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
@@ -105,7 +105,21 @@ public class CalendarITipIntegrationUtility implements ITipIntegrationUtility {
     @Override
     public Event resolveUid(final String uid, final CalendarSession session) throws OXException {
         String id = session.getCalendarService().getUtilities().resolveByUID(session, uid);
-        return getStorage(session).getEventStorage().loadEvent(id, null);
+        if (id == null) {
+            return null;
+        }
+        CalendarStorage storage = getStorage(session);
+        Event event = storage.getEventStorage().loadEvent(id, null);
+        event.setAttendees(storage.getAttendeeStorage().loadAttendees(event.getId()));
+        for (Attendee attendee : event.getAttendees()) {
+            if (attendee.getEntity() == session.getUserId()) {
+                event.setFolderId(attendee.getFolderId());
+            }
+        }
+        if (event.getFolderId() == null) {
+            event.setFolderId(getFolderIdForUser(session, id));
+        }
+        return event;
     }
 
     @Override
@@ -179,7 +193,7 @@ public class CalendarITipIntegrationUtility implements ITipIntegrationUtility {
     }
 
     private CalendarStorage getStorage(CalendarSession session) throws OXException {
-        RdbCalendarStorageFactory storageFactory = Services.getService(RdbCalendarStorageFactory.class);
+        CalendarStorageFactory storageFactory = Services.getService(CalendarStorageFactory.class);
         Context context = contexts.getContext(session.getSession().getContextId());
         return storageFactory.create(context, CalendarAccount.DEFAULT_ACCOUNT.getAccountId(), session.getEntityResolver());
     }

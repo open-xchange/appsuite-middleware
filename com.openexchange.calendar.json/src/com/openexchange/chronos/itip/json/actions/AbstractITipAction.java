@@ -111,11 +111,11 @@ public abstract class AbstractITipAction extends AppointmentAction {
         TimeZone outputTimeZone = timezoneParameter == null ? tz : TimeZone.getTimeZone(timezoneParameter);
 
         final Map<String, String> mailHeader = new HashMap<String, String>();
-        final InputStream stream = getInputStreamAndFillMailHeader(request.getData(), session, mailHeader);
+        final InputStream stream = getInputStreamAndFillMailHeader(request.getRequest(), session, mailHeader);
         final List<ITipAnalysis> analysis = analyzer.analyze(stream, request.getParameter("descriptionFormat"), session, mailHeader);
         Object result;
         try {
-            result = process(analysis, request.getData(), session, outputTimeZone);
+            result = process(analysis, request.getRequest(), session, outputTimeZone);
         } catch (final JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e);
         }

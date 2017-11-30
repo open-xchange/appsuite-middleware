@@ -67,7 +67,7 @@ import com.openexchange.chronos.itip.sender.DefaultMailSenderService;
 import com.openexchange.chronos.itip.sender.MailSenderService;
 import com.openexchange.chronos.itip.sender.PoolingMailSenderService;
 import com.openexchange.chronos.service.RecurrenceService;
-import com.openexchange.chronos.storage.rdb.RdbCalendarStorageFactory;
+import com.openexchange.chronos.storage.CalendarStorageFactory;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -86,7 +86,7 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, TimerService.class, ContextService.class, RdbCalendarStorageFactory.class, RecurrenceService.class, UserService.class, ResourceService.class, ICalService.class };
+        return new Class<?>[] { ConfigurationService.class, TimerService.class, ContextService.class, CalendarStorageFactory.class, RecurrenceService.class, UserService.class, ResourceService.class, ICalService.class };
     }
 
     @Override

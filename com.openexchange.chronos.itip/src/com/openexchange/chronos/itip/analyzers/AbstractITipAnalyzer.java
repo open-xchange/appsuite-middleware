@@ -58,6 +58,7 @@ import java.util.Map;
 import java.util.TimeZone;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
+import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.Organizer;
@@ -436,6 +437,7 @@ public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
             Attendee attendee = new Attendee();
             attendee.setEntity(owner);
             attendee.setPartStat(ParticipationStatus.NEEDS_ACTION);
+            attendee.setCuType(CalendarUserType.INDIVIDUAL);
             if (event.getAttendees() == null) {
                 event.setAttendees(new ArrayList<>());
             }

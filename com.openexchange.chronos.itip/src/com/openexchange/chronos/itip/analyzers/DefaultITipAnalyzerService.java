@@ -106,7 +106,7 @@ public class DefaultITipAnalyzerService implements ITipAnalyzerService {
             owner = Integer.parseInt(mailHeader.get("com.openexchange.conversion.owner"));
         }
 
-        List<ITipMessage> messages = itipParser.parseMessage(ical, tz, owner);
+        List<ITipMessage> messages = itipParser.parseMessage(ical, tz, owner, session);
 
         List<ITipAnalysis> result = new ArrayList<ITipAnalysis>(messages.size());
         for (ITipMessage message : messages) {

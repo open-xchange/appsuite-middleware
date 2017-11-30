@@ -49,22 +49,22 @@
 
 package com.openexchange.chronos.itip.ical;
 
-import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
+import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.ical.ICalParameters;
 import com.openexchange.chronos.ical.ICalService;
 import com.openexchange.chronos.ical.ImportedCalendar;
 import com.openexchange.chronos.itip.ITipMessage;
 import com.openexchange.chronos.itip.ITipMethod;
 import com.openexchange.chronos.itip.ITipSpecialHandling;
 import com.openexchange.chronos.itip.osgi.Services;
+import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 
@@ -77,20 +77,13 @@ public class ICal4JITipParser {
 
     private static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ICal4JITipParser.class);
 
-    public List<ITipMessage> parseMessage(String icalText, TimeZone defaultTZ, int owner) throws OXException {
-        try {
-            return parseMessage(new ByteArrayInputStream(icalText.getBytes("UTF-8")), defaultTZ, owner);
-        } catch (UnsupportedEncodingException e) {
-            LOG.error("", e);
-        }
-        return Collections.emptyList();
-    }
-
-    public List<ITipMessage> parseMessage(InputStream ical, TimeZone defaultTZ, int owner) throws OXException {
+    public List<ITipMessage> parseMessage(InputStream ical, TimeZone defaultTZ, int owner, CalendarSession session) throws OXException {
         List<ITipMessage> messages = new ArrayList<ITipMessage>();
         Map<String, ITipMessage> messagesPerUID = new HashMap<String, ITipMessage>();
         ICalService iCalService = Services.getService(ICalService.class);
-        ImportedCalendar calendar = iCalService.importICal(ical, iCalService.initParameters());
+        ICalParameters parameters = iCalService.initParameters();
+        parameters.set(ICalParameters.IGNORE_UNSET_PROPERTIES, Boolean.TRUE);
+        ImportedCalendar calendar = iCalService.importICal(ical, parameters);
 
         boolean microsoft = looksLikeMicrosoft(calendar);
 
@@ -112,6 +105,9 @@ public class ICal4JITipParser {
                 message.setOwner(owner);
             }
 
+            resolveAttendees(event, session);
+            resolveOrganizer(event, session);
+
             if (event.containsRecurrenceId()) {
                 message.addException(event);
             } else {
@@ -122,6 +118,22 @@ public class ICal4JITipParser {
         }
 
         return messages;
+    }
+
+    private void resolveAttendees(Event event, CalendarSession session) throws OXException {
+        if (event.getAttendees() == null || event.getAttendees().isEmpty()) {
+            return;
+        }
+
+        session.getEntityResolver().prepare(event.getAttendees());
+    }
+
+    private void resolveOrganizer(Event event, CalendarSession session) throws OXException {
+        if (event.getOrganizer() == null) {
+            return;
+        }
+
+        session.getEntityResolver().prepare(event.getOrganizer(), CalendarUserType.INDIVIDUAL);
     }
 
     private boolean looksLikeMicrosoft(ImportedCalendar calendar) {
