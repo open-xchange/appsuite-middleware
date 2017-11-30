@@ -85,6 +85,7 @@ import com.openexchange.imagetransformation.ImageTransformationService;
 import com.openexchange.imagetransformation.ScaleType;
 import com.openexchange.imagetransformation.TransformedImage;
 import com.openexchange.java.Charsets;
+import com.openexchange.java.InetAddresses;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.MimeType2ExtMap;
@@ -454,7 +455,7 @@ public class PhotoMapping extends AbstractMapping {
 
             try {
                 InetAddress inetAddress = InetAddress.getByName(url.getHost());
-                if (inetAddress.isAnyLocalAddress() || inetAddress.isSiteLocalAddress() || inetAddress.isLoopbackAddress() || inetAddress.isLinkLocalAddress()) {
+                if (InetAddresses.isInternalAddress(inetAddress)) {
                     addConversionWarning(warnings, "PHOTO", "image URL \"" + origUrlString + "\" appears not to be valid, skipping import.");
                     return NULL_RESULT;
                 }
