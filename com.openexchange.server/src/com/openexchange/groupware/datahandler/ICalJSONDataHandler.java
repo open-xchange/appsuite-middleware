@@ -65,9 +65,17 @@ import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.DefaultConverter;
+import com.openexchange.ajax.requesthandler.ResultConverter;
+import com.openexchange.ajax.requesthandler.ResultConverterRegistry;
 import com.openexchange.ajax.writer.AppointmentWriter;
 import com.openexchange.ajax.writer.TaskWriter;
 import com.openexchange.api2.AppointmentSQLInterface;
+import com.openexchange.chronos.Event;
+import com.openexchange.chronos.ical.ICalService;
+import com.openexchange.chronos.ical.ImportedCalendar;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.conversion.ConversionResult;
 import com.openexchange.conversion.Data;
@@ -96,6 +104,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.TimeZoneUtils;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
+import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
@@ -145,7 +154,7 @@ public final class ICalJSONDataHandler implements DataHandler {
         if (iCalParser == null) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(ICalParser.class.getName());
         }
-        final List<CalendarDataObject> appointments;
+        final List<Event> events;
         final List<Task> tasks;
         final InputStreamCopy inputStreamCopy;
         {
@@ -166,6 +175,7 @@ public final class ICalJSONDataHandler implements DataHandler {
             timeZone =
                 TimeZoneUtils.getTimeZone(null == timeZoneId ? UserStorage.getInstance().getUser(session.getUserId(), ctx).getTimeZone() : timeZoneId);
         }
+        ServerSession serverSession = ServerSessionAdapter.valueOf(session);
         try {
             /*
              * Errors and warnings
@@ -176,8 +186,17 @@ public final class ICalJSONDataHandler implements DataHandler {
                 /*
                  * Start parsing appointments
                  */
-                appointments = parseAppointmentStream(ctx, iCalParser, inputStreamCopy, conversionErrors, conversionWarnings, timeZone);
-                resolveUid(appointments, dataArguments, session);
+                InputStream stream = null;
+                try {
+                    ICalService iCalService = ServerServiceRegistry.getServize(ICalService.class, true);
+                    stream = inputStreamCopy.getInputStream();
+                    ImportedCalendar calendar = iCalService.importICal(stream, null);
+                    events = calendar.getEvents();
+                } finally {
+                    if (null != stream) {
+                        stream.close();
+                    }
+                }
                 // TODO: Handle errors/warnings
                 conversionErrors.clear();
                 conversionWarnings.clear();
@@ -195,68 +214,24 @@ public final class ICalJSONDataHandler implements DataHandler {
          * The JSON array to return
          */
         final JSONArray objects = new JSONArray();
+        ResultConverterRegistry converterRegistry = ServerServiceRegistry.getServize(ResultConverterRegistry.class, true);
+        AJAXRequestData request = new AJAXRequestData();
+        request.setSession(serverSession);
         /*
          * Fill JSON appointments
          */
-        if (!appointments.isEmpty()) {
+        if (!events.isEmpty()) {
             /*
              * Insert parsed appointments into denoted calendar folder
              */
-            try {
-                final AppointmentWriter appointmentwriter = new AppointmentWriter(timeZone).setSession(ServerSessionAdapter.valueOf(session));
-                final CalendarCollectionService recColl = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class);
-                /*
-                 * Get recurrence position
-                 */
-                final int recurrencePosition;
-                {
-                    final String recPosArg = "com.openexchange.groupware.calendar.recurrencePosition";
-                    final String recPosStr = dataArguments.get(recPosArg);
-                    if (null == recPosStr) {
-                        recurrencePosition = 0;
-                    } else {
-                        int tmp = 0;
-                        try {
-                            tmp = Integer.parseInt(recPosStr.trim());
-                        } catch (final NumberFormatException e) {
-                            LOG.error("Data argument \"{}\" is not a number: {}", recPosArg, recPosStr, e);
-                            tmp = 0;
-                        }
-                        recurrencePosition = tmp;
-                    }
+            ResultConverter resultConverter = converterRegistry.getResultConverter("eventDocument", "json");
+            if (null != resultConverter) {
+                for (Event event : events) {
+                    AJAXRequestResult result = new AJAXRequestResult(event);
+                    resultConverter.convert(request, result, serverSession, new DefaultConverter());
+                    Object resultObject = result.getResultObject();
+                    objects.put(resultObject);
                 }
-                for (final CalendarDataObject appointment : appointments) {
-                    final JSONObject jsonAppointment = new JSONObject();
-                    // TODO: Deliver recurrence position through an argument?
-                    if (appointment.getRecurrenceType() != CalendarObject.NONE && recurrencePosition > 0) {
-                        // Commented this because this is done in CalendarOperation.loadAppointment():207 that calls
-                        // extractRecurringInformation()
-                        // appointmentobject.calculateRecurrence();
-                        final RecurringResultsInterface recuResults =
-                            recColl.calculateRecurring(
-                                appointment,
-                                0,
-                                0,
-                                recurrencePosition,
-                                CalendarCollectionService.MAX_OCCURRENCESE,
-                                true);
-                        if (recuResults.size() == 0) {
-                            LOG.warn("No occurrence at position {}", recurrencePosition);
-                            OXCalendarExceptionCodes.UNKNOWN_RECURRENCE_POSITION.create(Integer.valueOf(recurrencePosition));
-                        }
-                        final RecurringResultInterface result = recuResults.getRecurringResult(0);
-                        appointment.setStartDate(new Date(result.getStart()));
-                        appointment.setEndDate(new Date(result.getEnd()));
-                        appointment.setRecurrencePosition(result.getPosition());
-
-                        appointmentwriter.writeAppointment(appointment, jsonAppointment);
-                    } else {
-                        appointmentwriter.writeAppointment(appointment, jsonAppointment);
-                    }
-                    objects.put(jsonAppointment);
-                }
-            } catch (final JSONException e) {
-                throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e, new Object[0]);
             }
         }
         /*
@@ -266,15 +241,14 @@ public final class ICalJSONDataHandler implements DataHandler {
             /*
              * Insert parsed tasks into denoted task folder
              */
-            try {
+            ResultConverter resultConverter = converterRegistry.getResultConverter("task", "json");
+            if (null != resultConverter) {
                 for (final Task task : tasks) {
-                    final TaskWriter taskWriter = new TaskWriter(timeZone).setSession(session);
-                    final JSONObject jsonTask = new JSONObject();
-                    taskWriter.writeTask(task, jsonTask);
-                    objects.put(jsonTask);
+                    AJAXRequestResult result = new AJAXRequestResult(task);
+                    resultConverter.convert(request, result, serverSession, new DefaultConverter());
+                    Object resultObject = result.getResultObject();
+                    objects.put(resultObject);
                 }
-            } catch (final JSONException e) {
-                throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e, new Object[0]);
             }
         }
         ConversionResult result = new ConversionResult();

@@ -99,7 +99,7 @@ public class EventResultConverter extends AbstractCalendarJSONResultConverter {
         if (null == resultObject) {
             return;
         }
-        CalendarSession calendarSession = services.getService(CalendarService.class).init(request.getSession());
+        CalendarSession calendarSession = services.getServiceSafe(CalendarService.class).init(request.getSession());
         EventConverter eventConverter = new DefaultEventConverter(services, calendarSession);
         if (Event.class.isInstance(resultObject)) {
             CalendarDataObject appointment = eventConverter.getAppointment((Event) resultObject);
