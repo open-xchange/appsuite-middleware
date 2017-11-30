@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.mail.authenticity.impl.handler.domain;
+package com.openexchange.mail.authenticity.impl.handler.domain.internal;
 
 import java.io.File;
 import java.io.IOException;
@@ -67,12 +67,12 @@ import com.openexchange.config.Interests;
 import com.openexchange.config.PropertyFilter;
 import com.openexchange.config.Reloadables;
 import com.openexchange.exception.OXException;
-import com.openexchange.filemanagement.ManagedFile;
-import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.authenticity.DefaultMailAuthenticityResultKey;
 import com.openexchange.mail.authenticity.MailAuthenticityResultKey;
 import com.openexchange.mail.authenticity.MailAuthenticityStatus;
+import com.openexchange.mail.authenticity.impl.handler.domain.Icon;
+import com.openexchange.mail.authenticity.impl.handler.domain.TrustedDomainService;
 import com.openexchange.mail.authenticity.mechanism.AbstractAuthMechResult;
 import com.openexchange.mail.authenticity.mechanism.AuthenticityMechanismResult;
 import com.openexchange.mail.authenticity.mechanism.MailAuthenticityMechanism;
@@ -80,7 +80,6 @@ import com.openexchange.mail.authenticity.mechanism.MailAuthenticityMechanismRes
 import com.openexchange.mail.authenticity.mechanism.SimplePassFailResult;
 import com.openexchange.mail.dataobjects.MailAuthenticityResult;
 import com.openexchange.mail.dataobjects.MailMessage;
-import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.session.Session;
 
 /**
@@ -89,7 +88,7 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.0
  */
-public class TrustedDomainAuthenticityHandler implements ForcedReloadable {
+public class TrustedDomainAuthenticityHandler implements ForcedReloadable, TrustedDomainService {
 
     private static final Logger LOG = LoggerFactory.getLogger(TrustedDomainAuthenticityHandler.class);
 
@@ -127,21 +126,20 @@ public class TrustedDomainAuthenticityHandler implements ForcedReloadable {
 
     private final Map<String, List<TrustedDomain>> trustedDomainsPerTenant;
     private final List<TrustedDomain> fallbackTenant;
-    private final ManagedFileManagement managedFileManagement;
 
     /**
      * Initializes a new {@link TrustedDomainAuthenticityHandler}.
      *
      * @throws OXException
      */
-    public TrustedDomainAuthenticityHandler(ConfigurationService configurationService, ManagedFileManagement managedFileManagement) throws OXException {
+    public TrustedDomainAuthenticityHandler(ConfigurationService configurationService) throws OXException {
         super();
         this.trustedDomainsPerTenant = new ConcurrentHashMap<>();
         this.fallbackTenant = new CopyOnWriteArrayList<>();
-        this.managedFileManagement = managedFileManagement;
         init(configurationService);
     }
 
+    @Override
     @SuppressWarnings("unchecked")
     public void handle(Session session, MailMessage mailMessage) {
         String tenant = (String) session.getParameter(Session.PARAM_HOST_NAME);
@@ -158,28 +156,15 @@ public class TrustedDomainAuthenticityHandler implements ForcedReloadable {
             if (trustedDomain != null) {
                 List<MailAuthenticityMechanismResult> results = authenticityResult.getAttribute(DefaultMailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS, List.class);
                 results.add(new TrustedDomainResult(domain, null, SimplePassFailResult.PASS));
-                if (trustedDomain.getImage() != null) {
-                    try {
-                        authenticityResult.addAttribute(new MailAuthenticityResultKey() {
+                authenticityResult.addAttribute(new MailAuthenticityResultKey() {
 
-                            @Override
-                            public String getKey() {
-                                return "image";
-                            }
-                        }, buildIconURL(trustedDomain.getImage(), session));
-                    } catch (OXException e) {
-                        LOG.error("Unable to add trusted domain image to mail authenticity result.", e);
+                    @Override
+                    public String getKey() {
+                        return "trustedDomain";
                     }
-                }
+                }, true);
             }
         }
-    }
-
-    private String buildIconURL(Icon icon, Session session) throws OXException {
-        ManagedFile managedFile = managedFileManagement.createManagedFile(icon.getData());
-        managedFile.setContentType(icon.getMimeType());
-        managedFile.setFileName(MimeType2ExtMap.getFileExtension(icon.getMimeType()));
-        return managedFile.constructURL(session);
     }
 
     private TrustedDomain checkHost(String tenant, String host) {
@@ -236,7 +221,7 @@ public class TrustedDomainAuthenticityHandler implements ForcedReloadable {
             String fallbackImageStr = configurationService.getProperty(PREFIX + FALLBACK_IMAGE.substring(1), (String) null);
             Icon fallbackImage = null;
             if (!Strings.isEmpty(fallbackImageStr)) {
-                fallbackImage = getIcon(fallbackImageStr, null);
+                fallbackImage = getIcon(fallbackImageStr, (String) null);
             }
 
             Map<String, String> images = configurationService.getProperties(new PropertyFilter() {
@@ -327,6 +312,28 @@ public class TrustedDomainAuthenticityHandler implements ForcedReloadable {
         } catch (OXException e) {
             LOG.error("Error during config reload: {}", e.getMessage(), e);
         }
+    }
+
+    @Override
+    public Icon getIcon(String domain, Session session) {
+        String tenant = (String) session.getParameter(Session.PARAM_HOST_NAME);
+        if (tenant == null) {
+            LOG.warn("Missing host name session parameter. Unable to verify mail domain.");
+            return null;
+        }
+        List<TrustedDomain> list = trustedDomainsPerTenant.get(tenant);
+        for(TrustedDomain dom: list) {
+            if(dom.matches(domain)) {
+                return dom.getImage();
+            }
+        }
+
+        for(TrustedDomain dom: fallbackTenant) {
+            if(dom.matches(domain)) {
+                return dom.getImage();
+            }
+        }
+        return null;
     }
 
     @Override

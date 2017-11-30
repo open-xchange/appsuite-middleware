@@ -47,68 +47,29 @@
  *
  */
 
-package com.openexchange.mail.authenticity.impl.handler.domain;
+package com.openexchange.halo;
 
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import javax.imageio.ImageIO;
+import com.openexchange.exception.OXException;
+import com.openexchange.session.Session;
 
 /**
- * {@link ImageIcon}
+ * {@link TrustedDomainHalo}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.0
  */
-public class ImageIcon implements Icon {
-
-    private final byte[] byteArray;
-    private final static String MIME_TYPE = "image/png";
+public interface TrustedDomainHalo {
 
     /**
-     * Initializes a new {@link ImageIcon}.
-     *
-     * @param url A url to a valid image
-     * @throws IOException
-     * @throws MalformedURLException
+     * Retrieves the picture of a trusted domain
+     * @return the {@link Picture}
      */
-    public ImageIcon(URL url) throws MalformedURLException, IOException {
-        super();
-        BufferedImage image = ImageIO.read(url);
-        if(image==null) {
-            throw new IOException("No image found");
-        }
-        ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        ImageIO.write(image, "png", stream);
-        byteArray = stream.toByteArray();
-    }
+    public Picture getPicture(String trustedDomain, Session session) throws OXException;
 
     /**
-     * Initializes a new {@link ImageIcon}.
-     * 
-     * @param file An image file
-     * @throws IOException
-     * @throws MalformedURLException
+     * Retrieves the etag of a trusted domain picture
+     * @return the etag of the {@link Picture}
      */
-    public ImageIcon(File file) throws MalformedURLException, IOException {
-        super();
-        BufferedImage image = ImageIO.read(file);
-        ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        ImageIO.write(image, "png", stream);
-        byteArray = stream.toByteArray();
-    }
-
-    @Override
-    public String getMimeType() {
-        return MIME_TYPE;
-    }
-
-    @Override
-    public byte[] getData() {
-        return byteArray;
-    }
+    public String getPictureETag(String trustedDomain, Session session) throws OXException;
 
 }

@@ -55,7 +55,6 @@ import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
 import com.openexchange.config.Reloadables;
 import com.openexchange.config.lean.LeanConfigurationService;
-import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.mail.MailFetchListener;
 import com.openexchange.mail.authenticity.MailAuthenticityHandler;
 import com.openexchange.mail.authenticity.MailAuthenticityHandlerRegistry;
@@ -63,7 +62,8 @@ import com.openexchange.mail.authenticity.impl.handler.core.MailAuthenticityFetc
 import com.openexchange.mail.authenticity.impl.handler.core.MailAuthenticityHandlerImpl;
 import com.openexchange.mail.authenticity.impl.handler.core.MailAuthenticityHandlerRegistryImpl;
 import com.openexchange.mail.authenticity.impl.handler.core.MailAuthenticityProperty;
-import com.openexchange.mail.authenticity.impl.handler.domain.TrustedDomainAuthenticityHandler;
+import com.openexchange.mail.authenticity.impl.handler.domain.TrustedDomainService;
+import com.openexchange.mail.authenticity.impl.handler.domain.internal.TrustedDomainAuthenticityHandler;
 import com.openexchange.osgi.HousekeepingActivator;
 
 /**
@@ -88,7 +88,7 @@ public class MailAuthenticityActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { LeanConfigurationService.class, ConfigurationService.class, ManagedFileManagement.class };
+        return new Class<?>[] { LeanConfigurationService.class, ConfigurationService.class };
     }
 
     @Override
@@ -101,11 +101,9 @@ public class MailAuthenticityActivator extends HousekeepingActivator {
         openTrackers();
 
         ConfigurationService configurationService = getService(ConfigurationService.class);
-        ManagedFileManagement managedFileManagement = getService(ManagedFileManagement.class);
-        TrustedDomainAuthenticityHandler authenticationHandler = new TrustedDomainAuthenticityHandler(configurationService, managedFileManagement);
+        TrustedDomainAuthenticityHandler authenticationHandler = new TrustedDomainAuthenticityHandler(configurationService);
         registerService(ForcedReloadable.class, authenticationHandler);
-        registerService(TrustedDomainAuthenticityHandler.class, authenticationHandler);
-
+        registerService(TrustedDomainService.class, authenticationHandler);
 
         final MailAuthenticityHandlerImpl handlerImpl = new MailAuthenticityHandlerImpl(this);
         registerService(MailAuthenticityHandler.class, handlerImpl);

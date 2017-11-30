@@ -75,7 +75,7 @@ import com.openexchange.mail.authenticity.DefaultMailAuthenticityResultKey;
 import com.openexchange.mail.authenticity.MailAuthenticityExceptionCodes;
 import com.openexchange.mail.authenticity.MailAuthenticityHandler;
 import com.openexchange.mail.authenticity.MailAuthenticityStatus;
-import com.openexchange.mail.authenticity.impl.handler.domain.TrustedDomainAuthenticityHandler;
+import com.openexchange.mail.authenticity.impl.handler.domain.TrustedDomainService;
 import com.openexchange.mail.authenticity.mechanism.DefaultMailAuthenticityMechanism;
 import com.openexchange.mail.authenticity.mechanism.MailAuthenticityMechanismResult;
 import com.openexchange.mail.authenticity.mechanism.dkim.DKIMAuthMechResult;
@@ -97,17 +97,17 @@ import com.openexchange.session.UserAndContext;
 
 /**
  * <p>{@link MailAuthenticityHandlerImpl} - The default core implementation of the {@link MailAuthenticityHandler}</p>
- * 
+ *
  * <p>This handler considers only the {@link DefaultMailAuthenticityMechanism#DMARC}, {@link DefaultMailAuthenticityMechanism#DKIM} and
  * {@link DefaultMailAuthenticityMechanism#SPF} in that particular order.</p>
- * 
+ *
  * <p>The default overall status of the {@link MailAuthenticityResult} is the {@link MailAuthenticityStatus#NEUTRAL}. If there are none of the above mentioned
  * mechnisms in the e-mail <code>Authentication-Results</code>, then that status applies. Unknown mechanisms and ptypes are ignored from the evaluation
  * but their raw data is included in the overall result's attributes under the {@link DefaultMailAuthenticityResultKey#UNKNOWN_AUTH_MECH_RESULTS} key.</p>
- * 
+ *
  * <p>In case there are multiple <code>Authentication-Results</code> in the e-mail's headers, then all of them are evaluated (top to bottom). Their mechanisms are sorted
  * by their predefined ordinal (DMARC > DKIM > SPF) and evaluated in that order.</p>
- * 
+ *
  * <p><code>Authentication-Results</code> headers with an invalid/unknown/absent <code>authserv-id</code> are simply ignored and <u>NOT</u> included in the result.</p>
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
@@ -136,7 +136,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
     /** The ranking of this handler */
     private final int ranking;
     private final Cache<UserAndContext, List<AllowedAuthServId>> authServIdsCache;
-    private final TrustedDomainAuthenticityHandler trustedDomainHandler;
+    private final TrustedDomainService trustedDomainHandler;
     private final ServiceLookup services;
 
     /**
@@ -157,7 +157,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
     public MailAuthenticityHandlerImpl(int ranking, ServiceLookup services) {
         super();
         this.services = services;
-        this.trustedDomainHandler = services.getService(TrustedDomainAuthenticityHandler.class);
+        this.trustedDomainHandler = services.getService(TrustedDomainService.class);
         this.ranking = ranking;
         this.authServIdsCache = CacheBuilder.newBuilder().maximumSize(65536).expireAfterWrite(30, TimeUnit.MINUTES).build();
         mechanismParsersRegitry = new HashMap<>(4);
@@ -400,7 +400,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
 
     /**
      * Parses the specified authentication header element and adds it to it's appropriate list
-     * 
+     *
      * @param authHeaderElement The authentication header element
      * @param unknownAuthElements The unknown authentication elements
      * @param results The {@link MailAuthenticityMechanismResult}s
@@ -500,7 +500,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
 
     /**
      * Extracts the domain value of the specified key from the specified attributes {@link Map}
-     * 
+     *
      * @param attributes The attributes {@link Map}
      * @param keys The keys
      * @return The cleansed domain if present, <code>null</code> if none exists
@@ -520,7 +520,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
      * and the domain extracted from the authenticity mechanism. If there is a mismatch the overall status
      * is set to {@link MailAuthenticityStatus#NEUTRAL} and <code>true</code> is returned. Otherwise
      * no further action is performed and <code>false</code> is returned.
-     * 
+     *
      * @param overallResult The overall {@link MailAuthenticityResult}
      * @param domain The domain extracted from the mechanism result
      * @return <code>true</code> if there is a mismatch between the domains, <code>false</code> otherwise
@@ -552,7 +552,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
     /**
      * Gets the allowed authserv-ids for the specified user in the specified context
      * and caches them for future use.
-     * 
+     *
      * @param userId The user identifier
      * @param contextId The context identifier
      * @param key The cache key
