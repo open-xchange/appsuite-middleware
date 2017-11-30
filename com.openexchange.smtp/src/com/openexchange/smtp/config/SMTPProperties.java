@@ -198,7 +198,7 @@ public final class SMTPProperties extends AbstractProtocolProperties implements 
         }
         
         {
-            final String tmp = configuration.getProperty("com.openexchange.smtp.setPrimaryAddressHeader").trim();
+            final String tmp = configuration.getProperty("com.openexchange.smtp.setPrimaryAddressHeader", new String()).trim();
             primaryAdressHeader = (tmp == null) || (tmp.length() == 0) || "null".equalsIgnoreCase(tmp) ? null : tmp;
             logBuilder.append("\tPrimary address header: ").append(primaryAdressHeader).append('\n');
         }
