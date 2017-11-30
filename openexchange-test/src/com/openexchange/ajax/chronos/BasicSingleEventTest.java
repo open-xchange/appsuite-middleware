@@ -64,6 +64,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
+import org.json.JSONObject;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.BlockJUnit4ClassRunner;
@@ -208,11 +209,11 @@ public class BasicSingleEventTest extends AbstractChronosTest {
     public void testCreateSingleWithAttachment() throws Exception {
         Asset asset = assetManager.getRandomAsset(AssetType.jpg);
 
-        EventData expectedEventData = eventManager.createEventWithAttachment(EventFactory.createSingleEventWithAttachment(defaultUserApi.getCalUser(), testUser.getLogin(), "testCreateSingleWithAttachment", asset), asset);
-        assertEquals("The amount of attachments is not correct", 1, expectedEventData.getAttachments().size());
+        JSONObject expectedEventData = eventManager.createEventWithAttachment(EventFactory.createSingleEventWithAttachment(defaultUserApi.getCalUser(), testUser.getLogin(), "testCreateSingleWithAttachment", asset), asset);
+        assertEquals("The amount of attachments is not correct", 1, expectedEventData.getJSONArray("attachments").length());
 
-        EventData actualEventData = eventManager.getEvent(expectedEventData.getId());
-        AssertUtil.assertEventsEqual(expectedEventData, actualEventData);
+        EventData actualEventData = eventManager.getEvent(expectedEventData.getString("id"));
+        assertEquals(expectedEventData, actualEventData.toJson());
     }
 
     /**
@@ -222,21 +223,21 @@ public class BasicSingleEventTest extends AbstractChronosTest {
     public void testUpdateSingleWithAttachment() throws Exception {
         Asset asset = assetManager.getRandomAsset(AssetType.jpg);
 
-        EventData expectedEventData = eventManager.createEventWithAttachment(EventFactory.createSingleEventWithAttachment(defaultUserApi.getCalUser(), testUser.getLogin(), "testUpdateSingleWithAttachment", asset), asset);
-        assertEquals("The amount of attachments is not correct", 1, expectedEventData.getAttachments().size());
+        JSONObject expectedEventData = eventManager.createEventWithAttachment(EventFactory.createSingleEventWithAttachment(defaultUserApi.getCalUser(), testUser.getLogin(), "testUpdateSingleWithAttachment", asset), asset);
+        assertEquals("The amount of attachments is not correct", 1, expectedEventData.getJSONArray("attachments").length());
 
-        EventData actualEventData = eventManager.getEvent(expectedEventData.getId());
-        AssertUtil.assertEventsEqual(expectedEventData, actualEventData);
+        EventData actualEventData = eventManager.getEvent(expectedEventData.getString("id"));
+        assertEquals(expectedEventData, actualEventData.toJson());
 
         asset = assetManager.getRandomAsset(AssetType.png);
         actualEventData.getAttachments().get(0).setManagedId(actualEventData.getAttachments().get(0).getManagedId());
         actualEventData.getAttachments().add(EventFactory.createAttachment(asset));
 
         expectedEventData = eventManager.updateEventWithAttachment(actualEventData, asset);
-        assertEquals("The amount of attachments is not correct", 2, expectedEventData.getAttachments().size());
+        assertEquals("The amount of attachments is not correct", 2, expectedEventData.getJSONArray("attachments").length());
 
-        actualEventData = eventManager.getEvent(expectedEventData.getId());
-        AssertUtil.assertEventsEqual(expectedEventData, actualEventData);
+        actualEventData = eventManager.getEvent(expectedEventData.getString("id"));
+        assertEquals(expectedEventData, actualEventData.toJson());
     }
 
     /**
@@ -249,10 +250,10 @@ public class BasicSingleEventTest extends AbstractChronosTest {
         Path path = Paths.get(asset.getAbsolutePath());
         byte[] expectedAttachmentData = Files.readAllBytes(path);
 
-        EventData expectedEventData = eventManager.createEventWithAttachment(EventFactory.createSingleEventWithAttachment(defaultUserApi.getCalUser(), testUser.getLogin(), "testUpdateSingleWithAttachment", asset), asset);
-        assertEquals("The amount of attachments is not correct", 1, expectedEventData.getAttachments().size());
+        JSONObject expectedEventData = eventManager.createEventWithAttachment(EventFactory.createSingleEventWithAttachment(defaultUserApi.getCalUser(), testUser.getLogin(), "testUpdateSingleWithAttachment", asset), asset);
+        assertEquals("The amount of attachments is not correct", 1, expectedEventData.getJSONArray("attachments").length());
 
-        byte[] actualAttachmentData = eventManager.getAttachment(expectedEventData.getId(), expectedEventData.getAttachments().get(0).getManagedId());
+        byte[] actualAttachmentData = eventManager.getAttachment(expectedEventData.getString("id"), expectedEventData.getJSONArray("attachments").getJSONObject(0).getInt("managedId"));
         assertArrayEquals("The attachment binary data does not match", expectedAttachmentData, actualAttachmentData);
     }
 
@@ -268,11 +269,11 @@ public class BasicSingleEventTest extends AbstractChronosTest {
         assets.add(assetA);
         assets.add(assetB);
 
-        EventData expectedEventData = eventManager.createEventWithAttachments(EventFactory.createSingleEventWithAttachments(defaultUserApi.getCalUser(), testUser.getLogin(), "testUpdateSingleWithAttachmentsDeleteOne", assets), assets);
-        assertEquals("The amount of attachments is not correct", 2, expectedEventData.getAttachments().size());
+        JSONObject expectedEventData = eventManager.createEventWithAttachments(EventFactory.createSingleEventWithAttachments(defaultUserApi.getCalUser(), testUser.getLogin(), "testUpdateSingleWithAttachmentsDeleteOne", assets), assets);
+        assertEquals("The amount of attachments is not correct", 2, expectedEventData.getJSONArray("attachments").length());
 
-        EventData actualEventData = eventManager.getEvent(expectedEventData.getId());
-        AssertUtil.assertEventsEqual(expectedEventData, actualEventData);
+        EventData actualEventData = eventManager.getEvent(expectedEventData.getString("id"));
+        assertEquals(expectedEventData, actualEventData.toJson());
 
         // Set the managed id for the retained attachment
         ChronosAttachment retainedAttachment = actualEventData.getAttachments().get(0);
@@ -284,8 +285,8 @@ public class BasicSingleEventTest extends AbstractChronosTest {
         // Update the event
         actualEventData = eventManager.updateEvent(updateData);
         // Get...
-        expectedEventData = eventManager.getEvent(actualEventData.getId());
+        EventData exEventData = eventManager.getEvent(actualEventData.getId());
         // ...and assert
-        AssertUtil.assertEventsEqual(expectedEventData, actualEventData);
+        AssertUtil.assertEventsEqual(exEventData, actualEventData);
     }
 }

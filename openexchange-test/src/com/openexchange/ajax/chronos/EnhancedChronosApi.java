@@ -58,7 +58,6 @@ import java.util.Map;
 import javax.ws.rs.core.GenericType;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.invoker.Pair;
-import com.openexchange.testing.httpclient.models.ChronosCalendarResultResponse;
 import com.openexchange.testing.httpclient.modules.ChronosApi;
 
 /**
@@ -94,7 +93,7 @@ public class EnhancedChronosApi extends ChronosApi {
      * with the API parameter<code>plainJson</code> to signal the response renderer to return a plain json object instead of the regular
      * HTML response. It also takes multiple files as parameters
      */
-    public ChronosCalendarResultResponse createEventWithAttachments(String session, String folder, String json0, List<File> files, Boolean ignoreConflicts, Boolean sendInternalNotifications) throws ApiException {
+    public String createEventWithAttachments(String session, String folder, String json0, List<File> files, Boolean ignoreConflicts, Boolean sendInternalNotifications) throws ApiException {
         Object localVarPostBody = null;
 
         // verify the required parameter 'session' is set
@@ -150,7 +149,7 @@ public class EnhancedChronosApi extends ChronosApi {
 
         String[] localVarAuthNames = new String[] {};
 
-        GenericType<ChronosCalendarResultResponse> localVarReturnType = new GenericType<ChronosCalendarResultResponse>() {};
+        GenericType<String> localVarReturnType = new GenericType<String>() {};
         return enhancedApiClient.invokeAPI(localVarPath, "POST", localVarQueryParams, localVarPostBody, localVarHeaderParams, localVarFormParams, localVarAccept, localVarContentType, localVarAuthNames, localVarReturnType);
     }
 
@@ -160,7 +159,7 @@ public class EnhancedChronosApi extends ChronosApi {
      * HTML response.
      */
     @Override
-    public ChronosCalendarResultResponse createEventWithAttachments(String session, String folder, String json0, File file0, Boolean ignoreConflicts, Boolean sendInternalNotifications) throws ApiException {
+    public String createEventWithAttachments(String session, String folder, String json0, File file0, Boolean ignoreConflicts, Boolean sendInternalNotifications) throws ApiException {
         return createEventWithAttachments(session, folder, json0, Collections.singletonList(file0), ignoreConflicts, sendInternalNotifications);
     }
 
@@ -170,7 +169,7 @@ public class EnhancedChronosApi extends ChronosApi {
      * HTML response.
      */
     @Override
-    public ChronosCalendarResultResponse updateEventWithAttachments(String session, String folder, String id, Long timestamp, String json0, File file0, String recurrenceId, Boolean ignoreConflicts, Boolean sendInternalNotifications) throws ApiException {
+    public String updateEventWithAttachments(String session, String folder, String id, Long timestamp, String json0, File file0, String recurrenceId, Boolean ignoreConflicts, Boolean sendInternalNotifications) throws ApiException {
         Object localVarPostBody = null;
 
         // verify the required parameter 'session' is set
@@ -235,7 +234,7 @@ public class EnhancedChronosApi extends ChronosApi {
 
         String[] localVarAuthNames = new String[] {};
 
-        GenericType<ChronosCalendarResultResponse> localVarReturnType = new GenericType<ChronosCalendarResultResponse>() {};
+        GenericType<String> localVarReturnType = new GenericType<String>() {};
         return enhancedApiClient.invokeAPI(localVarPath, "POST", localVarQueryParams, localVarPostBody, localVarHeaderParams, localVarFormParams, localVarAccept, localVarContentType, localVarAuthNames, localVarReturnType);
     }
 }

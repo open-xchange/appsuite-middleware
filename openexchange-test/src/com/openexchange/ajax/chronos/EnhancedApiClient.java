@@ -51,11 +51,14 @@ package com.openexchange.ajax.chronos;
 
 import java.io.File;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Form;
+import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import org.glassfish.jersey.media.multipart.FormDataBodyPart;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.MultiPart;
@@ -64,6 +67,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.testing.httpclient.invoker.ApiClient;
 import com.openexchange.testing.httpclient.invoker.ApiException;
+import com.openexchange.testing.httpclient.models.EventData;
 
 /**
  * {@link EnhancedApiClient}
@@ -76,26 +80,27 @@ public class EnhancedApiClient extends ApiClient {
      * Serialize the given Java object into string entity according the given
      * Content-Type (only JSON is supported for now).
      */
-    public Entity<?> serialize(Object obj, Map<String, Object> formParams, String contentType) throws ApiException {
+    @Override
+    public Entity<?> serialize(final Object obj, final Map<String, Object> formParams, final String contentType) throws ApiException {
         Entity<?> entity = null;
         if (contentType.startsWith("multipart/form-data")) {
             // Extract attachments (if any)
-            Map<String, String> attachments = extractAttachments(formParams);
-            MultiPart multiPart = new MultiPart();
-            for (Entry<String, Object> param : formParams.entrySet()) {
+            final Map<String, String> attachments = extractAttachments(formParams);
+            final MultiPart multiPart = new MultiPart();
+            for (final Entry<String, Object> param : formParams.entrySet()) {
                 FormDataBodyPart bodyPart;
                 if (param.getValue() instanceof File) {
-                    File file = (File) param.getValue();
-                    FormDataContentDisposition contentDisp = FormDataContentDisposition.name(param.getKey()).fileName(file.getName()).size(file.length()).build();
+                    final File file = (File) param.getValue();
+                    final FormDataContentDisposition contentDisp = FormDataContentDisposition.name(param.getKey()).fileName(file.getName()).size(file.length()).build();
                     bodyPart = new FormDataBodyPart(contentDisp, file, MediaType.APPLICATION_OCTET_STREAM_TYPE);
 
                     // Set the contentId of the attachments (if exists)
-                    String contentId = (String) attachments.get(file.getName());
+                    final String contentId = attachments.get(file.getName());
                     if (contentId != null && !contentId.isEmpty()) {
                         bodyPart.getHeaders().add("Content-ID", contentId);
                     }
                 } else {
-                    FormDataContentDisposition contentDisp = FormDataContentDisposition.name(param.getKey()).build();
+                    final FormDataContentDisposition contentDisp = FormDataContentDisposition.name(param.getKey()).build();
                     bodyPart = new FormDataBodyPart(contentDisp, parameterToString(param.getValue()));
                 }
 
@@ -103,8 +108,8 @@ public class EnhancedApiClient extends ApiClient {
             }
             entity = Entity.entity(multiPart, MediaType.MULTIPART_FORM_DATA_TYPE);
         } else if (contentType.startsWith("application/x-www-form-urlencoded")) {
-            Form form = new Form();
-            for (Entry<String, Object> param : formParams.entrySet()) {
+            final Form form = new Form();
+            for (final Entry<String, Object> param : formParams.entrySet()) {
                 form.param(param.getKey(), parameterToString(param.getValue()));
             }
             entity = Entity.entity(form, MediaType.APPLICATION_FORM_URLENCODED_TYPE);
@@ -116,33 +121,63 @@ public class EnhancedApiClient extends ApiClient {
     }
 
     /**
+     * Deserialize response body to Java object according to the Content-Type.
+     */
+    @SuppressWarnings("unchecked")
+    @Override
+    public <T> T deserialize(final Response response, final GenericType<T> returnType) throws ApiException {
+        if (response == null || returnType == null) {
+            return null;
+        }
+        
+        if ("byte[]".equals(returnType.toString())) {
+            // Handle binary response (byte array).
+            return (T) response.readEntity(byte[].class);
+        } else if (returnType.getRawType().equals(File.class)) {
+            // Handle file downloading.
+            return (T) downloadFileFromResponse(response);
+        }
+
+        String contentType = null;
+        final List<Object> contentTypes = response.getHeaders().get("Content-Type");
+        if (contentTypes != null && !contentTypes.isEmpty()) {
+            contentType = String.valueOf(contentTypes.get(0));
+        }
+        if (contentType == null) {
+            throw new ApiException(500, "missing Content-Type in response");
+        }
+
+        return response.readEntity(returnType);
+    }
+
+    /**
      * Create a {@link Map} with the attachments (if any)
      * 
      * @param formParams The form parameters with the attachments
      * @return A {@link Map} with the attachment name and contentId
      * @throws ApiException if an API error is occurred
      */
-    private Map<String, String> extractAttachments(Map<String, Object> formParams) throws ApiException {
-        String json0 = (String) formParams.get("json_0");
-        Map<String, String> tmp = new HashMap<>();
+    private Map<String, String> extractAttachments(final Map<String, Object> formParams) throws ApiException {
+        final String json0 = (String) formParams.get("json_0");
+        final Map<String, String> tmp = new HashMap<>();
         if (json0 != null) {
             JSONObject json;
             try {
                 json = new JSONObject(json0);
-            } catch (JSONException e) {
+            } catch (final JSONException e) {
                 throw new ApiException(400, "The required parameter 'json0' when calling createEventWithAttachments is not of type JSONObject. " + json0);
             }
-            JSONArray attachments = json.optJSONArray("attachments");
+            final JSONArray attachments = json.optJSONArray("attachments");
             if (attachments == null || attachments.isEmpty()) {
                 throw new ApiException(400, "Missing the required field 'attachments' when calling createEventWithAttachments");
             }
 
             try {
                 for (int index = 0; index < attachments.length(); index++) {
-                    JSONObject attachment = attachments.getJSONObject(index);
+                    final JSONObject attachment = attachments.getJSONObject(index);
                     tmp.put(attachment.getString("filename"), attachment.optString("cid"));
                 }
-            } catch (JSONException e) {
+            } catch (final JSONException e) {
                 throw new ApiException(400, "A JSON error occurred: " + e.getMessage());
             }
         }

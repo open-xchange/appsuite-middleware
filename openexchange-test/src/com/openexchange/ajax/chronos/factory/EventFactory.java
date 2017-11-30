@@ -169,7 +169,7 @@ public final class EventFactory {
         ChronosAttachment attachment = new ChronosAttachment();
         attachment.setFilename(asset.getFilename());
         attachment.setFmtType(asset.getAssetType().name());
-        attachment.setUri("file:");
+        attachment.setUri("cid:file_0");
 
         return attachment;
     }

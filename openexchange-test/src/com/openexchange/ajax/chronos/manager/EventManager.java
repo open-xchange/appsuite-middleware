@@ -60,6 +60,9 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import com.openexchange.ajax.chronos.UserApi;
 import com.openexchange.ajax.chronos.util.DateTimeUtil;
 import com.openexchange.configuration.asset.Asset;
@@ -148,7 +151,7 @@ public class EventManager extends AbstractManager {
      * @throws ApiException if an API error is occurred
      * @throws ChronosApiException if a Chronos API error is occurred
      */
-    public EventData createEventWithAttachment(EventData eventData, Asset asset) throws ApiException, ChronosApiException {
+    public JSONObject createEventWithAttachment(EventData eventData, Asset asset) throws ApiException, ChronosApiException {
         return createEventWithAttachment(eventData, asset, false);
     }
 
@@ -162,14 +165,15 @@ public class EventManager extends AbstractManager {
      * @throws ApiException if an API error is occurred
      * @throws ChronosApiException if a Chronos API error is occurred
      */
-    public EventData createEventWithAttachment(EventData eventData, Asset asset, boolean expectException) throws ApiException, ChronosApiException {
-        ChronosCalendarResultResponse createEvent = userApi.getEnhancedChronosApi().createEventWithAttachments(userApi.getEnhancedSession(), defaultFolder, eventData.toJson(), new File(asset.getAbsolutePath()), false, false);
+    public JSONObject createEventWithAttachment(EventData eventData, Asset asset, boolean expectException) throws ApiException, ChronosApiException {
+        String response = userApi.getEnhancedChronosApi().createEventWithAttachments(userApi.getEnhancedSession(), defaultFolder, eventData.toJson(), new File(asset.getAbsolutePath()), false, false);
+        JSONObject responseData = extractBody(response);
+        ChronosCalendarResultResponse createEvent = null;
         if (expectException) {
-            assertNotNull("An error was expected", createEvent.getError());
-            throw new ChronosApiException(createEvent.getCode(), createEvent.getError());
+            assertNotNull("An error was expected", responseData.optString("error"));
+            throw new ChronosApiException(responseData.optString("code"), responseData.optString("error"));
         }
-        EventData event = handleCreation(createEvent);
-        return event;
+        return handleCreation(response);
     }
 
     /**
@@ -179,15 +183,14 @@ public class EventManager extends AbstractManager {
      * @param assets The {@link Asset}s to attach
      * @return The created {@link EventData}
      * @throws ApiException if an API error is occurred
+     * @throws ChronosApiException
      */
-    public EventData createEventWithAttachments(EventData eventData, List<Asset> assets) throws ApiException {
+    public JSONObject createEventWithAttachments(EventData eventData, List<Asset> assets) throws ApiException, ChronosApiException {
         List<File> files = new ArrayList<>();
         for (Asset asset : assets) {
             files.add(new File(asset.getAbsolutePath()));
         }
-        ChronosCalendarResultResponse createEvent = userApi.getEnhancedChronosApi().createEventWithAttachments(userApi.getEnhancedSession(), defaultFolder, eventData.toJson(), files, false, false);
-        EventData event = handleCreation(createEvent);
-        return event;
+        return handleCreation(userApi.getEnhancedChronosApi().createEventWithAttachments(userApi.getEnhancedSession(), defaultFolder, eventData.toJson(), files, false, false));
     }
 
     /**
@@ -197,10 +200,10 @@ public class EventManager extends AbstractManager {
      * @param asset The {@link Asset} to attach
      * @return The updated {@link EventData}
      * @throws ApiException if an API error is occurred
+     * @throws ChronosApiException
      */
-    public EventData updateEventWithAttachment(EventData eventData, Asset asset) throws ApiException {
-        ChronosCalendarResultResponse updateResponse = userApi.getEnhancedChronosApi().updateEventWithAttachments(userApi.getEnhancedSession(), defaultFolder, eventData.getId(), System.currentTimeMillis(), eventData.toJson(), new File(asset.getAbsolutePath()), null, true, false);
-        return handleUpdate(updateResponse);
+    public JSONObject updateEventWithAttachment(EventData eventData, Asset asset) throws ApiException, ChronosApiException {
+        return handleUpdate(userApi.getEnhancedChronosApi().updateEventWithAttachments(userApi.getEnhancedSession(), defaultFolder, eventData.getId(), System.currentTimeMillis(), eventData.toJson(), new File(asset.getAbsolutePath()), null, true, false));
     }
 
     /**
@@ -481,6 +484,49 @@ public class EventManager extends AbstractManager {
     }
 
     //////////////////////////////////////////////// HELPERS ///////////////////////////////////////////////////
+
+    private JSONObject extractBody(String response) throws ChronosApiException {
+        try {
+            JSONObject responseData = new JSONObject(response);
+            return checkResponse(responseData.optString("error", null), responseData.optString("error_desc", null), responseData.optJSONObject("data"));
+        } catch (JSONException e) {
+            throw new ChronosApiException("JSON_ERROR", e.getMessage());
+        }
+    }
+
+    private JSONObject handleCreation(String response) throws ChronosApiException {
+        try {
+            JSONObject result = extractBody(response);
+            JSONArray optJSONArray = result.optJSONArray("conflicts");
+            if (optJSONArray == null) {
+                optJSONArray = new JSONArray();
+            }
+            assertEquals("Found unexpected conflicts", 0, optJSONArray.length());
+            JSONObject event = result.optJSONArray("created").getJSONObject(0);
+
+            EventId eventId = new EventId();
+            eventId.setId(event.optString("id"));
+            eventId.setFolderId(event.optString("folder"));
+            rememberEventId(eventId);
+            lastTimeStamp = event.optLong("timestamp");
+
+            return event;
+        } catch (JSONException e) {
+            throw new ChronosApiException("JSON_ERROR", e.getMessage());
+        }
+    }
+
+    private JSONObject handleUpdate(String response) throws ChronosApiException {
+        try {
+            JSONObject result = extractBody(response);
+            JSONArray array = result.optJSONArray("updated");
+            assertTrue(array.length() == 1);
+            lastTimeStamp = array.getJSONObject(0).optLong("timestamp");
+            return array.getJSONObject(0);
+        } catch (JSONException e) {
+            throw new ChronosApiException("JSON_ERROR", e.getMessage());
+        }
+    }
 
     /**
      * Handles the result response of an event creation
