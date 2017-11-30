@@ -82,7 +82,8 @@ public class MailAuthenticityTest extends AbstractAPIClientSession {
     private static final String SubFolder = "authenticity";
     private static final String PASS_ALL = "passAll.eml";
     private static final String PISHING = "pishing.eml";
-    private static final String[] mailNames = new String[] {PASS_ALL, PISHING};
+    private static final String NONE = "none.eml";
+    private static final String[] mailNames = new String[] {PASS_ALL, PISHING, NONE};
     private MailApi api;
     private final Map<String, MailDestinationData> importedMails = new HashMap<>();
     private Long timestamp = 0l;
@@ -188,6 +189,37 @@ public class MailAuthenticityTest extends AbstractAPIClientSession {
 
        Assert.assertTrue(spf || dmarc || dkim);
        Assert.assertEquals(StatusEnum.FAIL, authenticationResult.getStatus());
+
+       /*
+        * Test none
+        */
+       resp = api.getMail(getClient().getSession(), folder, importedMails.get(NONE).getId(), null, 0, null, false, null, null, null, null, null);
+       mail = checkResponse(resp);
+       authenticationResult = mail.getAuthenticationResults();
+       Assert.assertNotNull(authenticationResult);
+       mailAuthenticityMechanismResults = authenticationResult.getMailAuthenticityMechanismResults();
+       Assert.assertFalse(mailAuthenticityMechanismResults.isEmpty());
+
+       spf=false;
+       dmarc=false;
+       dkim=false;
+       for(MechanismResult result: mailAuthenticityMechanismResults) {
+           switch(result.getMechanism()) {
+               case DKIM:
+                   dkim=true;
+                   break;
+               case DMARC:
+                   dmarc = true;
+                   break;
+               case SPF:
+                   spf = true;
+                   break;
+           }
+           Assert.assertEquals("None", result.getResult());
+       }
+
+       Assert.assertTrue(spf && dmarc && dkim);
+       Assert.assertEquals(StatusEnum.NEUTRAL, authenticationResult.getStatus());
     }
 
     private MailData checkResponse(MailResponse resp) {
