@@ -50,8 +50,10 @@
 package com.openexchange.mail.autoconfig.sources;
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.UnknownHostException;
 import java.util.Arrays;
 import org.apache.http.Header;
 import org.apache.http.HttpHost;
@@ -68,6 +70,7 @@ import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.java.InetAddresses;
 import com.openexchange.mail.autoconfig.Autoconfig;
 import com.openexchange.mail.autoconfig.xmlparser.AutoconfigParser;
 import com.openexchange.mail.autoconfig.xmlparser.ClientConfig;
@@ -91,21 +94,31 @@ public class ConfigServer extends AbstractProxyAwareConfigSource {
     }
 
     @Override
-    public Autoconfig getAutoconfig(final String emailLocalPart, final String emailDomain, final String password, final User user, final Context context) throws OXException {
+    public Autoconfig getAutoconfig(final String emailLocalPart, final String emailDomain, final String password, User user, Context context) throws OXException {
         return getAutoconfig(emailLocalPart, emailDomain, password, user, context, true);
     }
 
     @Override
-    public Autoconfig getAutoconfig(final String emailLocalPart, final String emailDomain, final String password, final User user, final Context context, boolean forceSecure) throws OXException {
+    public Autoconfig getAutoconfig(final String emailLocalPart, final String emailDomain, final String password, User user, Context context, boolean forceSecure) throws OXException {
         URL url;
         {
             String sUrl = new StringBuilder("http://autoconfig.").append(emailDomain).append("/mail/config-v1.1.xml").toString();
             try {
                 url = new URL(sUrl);
             } catch (MalformedURLException e) {
-                LOG.warn("Unable to parse URL: {}", sUrl, e);
+                LOG.warn("Unable to parse URL: {}. Skipping config server source for mail auto-config", sUrl, e);
                 return null;
             }
+        }
+
+        boolean isLocalAddress;
+        try {
+            InetAddress inetAddress = InetAddress.getByName(url.getHost());
+            isLocalAddress = InetAddresses.isInternalAddress(inetAddress);
+        } catch (UnknownHostException e) {
+            // IP address of that host could not be determined
+            LOG.warn("Unknown host: {}. Skipping config server source for mail auto-config", url.getHost(), e);
+            return null;
         }
 
         // New HTTP client
@@ -113,14 +126,13 @@ public class ConfigServer extends AbstractProxyAwareConfigSource {
         try {
 
             {
-                int timeout = 3000;
-                HttpClients.ClientConfig clientConfig = HttpClients.ClientConfig.newInstance().setConnectionTimeout(timeout).setSocketReadTimeout(timeout).setUserAgent("Open-Xchange Auto-Config Client");
-                httpclient = HttpClients.getHttpClient(clientConfig);
-            }
+                int readTimeout = 10000;
+                int connecTimeout = 3000;
+                HttpClients.ClientConfig clientConfig = HttpClients.ClientConfig.newInstance().setConnectionTimeout(connecTimeout).setSocketReadTimeout(readTimeout).setUserAgent("Open-Xchange Auto-Config Client").setDenyLocalRedirect(false == isLocalAddress);
 
-            {
                 ConfigViewFactory configViewFactory = services.getService(ConfigViewFactory.class);
                 ConfigView view = configViewFactory.getView(user.getId(), context.getContextId());
+                httpclient = HttpClients.getHttpClient(clientConfig);
                 HttpHost proxy = getHttpProxyIfEnabled(httpclient, view);
                 if (null != proxy) {
                     httpclient.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY, proxy);
@@ -153,9 +165,9 @@ public class ConfigServer extends AbstractProxyAwareConfigSource {
                     return null;
                 }
             }
-            
+
             Header contentType = rsp.getFirstHeader("Content-Type");
-            if (!contentType.getValue().equals("text/xml")) {
+            if (!contentType.getValue().contains("text/xml")) {
                 LOG.warn("Could not retrieve config XML from autoconfig server. The response's content type is not of 'text/xml'.");
                 return null;
             }
@@ -163,24 +175,36 @@ public class ConfigServer extends AbstractProxyAwareConfigSource {
             ClientConfig clientConfig = new AutoconfigParser().getConfig(rsp.getEntity().getContent());
 
             Autoconfig autoconfig = getBestConfiguration(clientConfig, emailDomain);
+            if (null == autoconfig) {
+                return null;
+            }
+
+            // If 'forceSecure' is true, ensure that both - mail and transport settings - either support SSL or STARTTLS
+            if (forceSecure && ((!autoconfig.isMailSecure() && !autoconfig.isMailStartTls()) || (!autoconfig.isTransportSecure() && !autoconfig.isTransportStartTls()))) {
+                // Either mail or transport do not support a secure connection (or neither of them)
+                return null;
+            }
+
             replaceUsername(autoconfig, emailLocalPart, emailDomain);
-            autoconfig.setMailStartTls(forceSecure);
-            autoconfig.setTransportStartTls(forceSecure);
             return autoconfig;
         } catch (ClientProtocolException e) {
             LOG.warn("Could not retrieve config XML.", e);
             return null;
+        } catch (java.net.UnknownHostException e) {
+            // Apparently an invalid host-name was deduced from given auto-config data
+            LOG.debug("Could not retrieve config XML.", e);
+            return null;
         } catch (IOException e) {
-            LOG.warn("Could not retrieve config XML.", e);
+            // Apparently an I/O communication problem occurred while trying to connect to/read from deduced end-point from auto-config data
+            LOG.debug("Could not retrieve config XML.", e);
             return null;
         } finally {
             // When HttpClient instance is no longer needed,
             // shut down the connection manager to ensure
             // immediate deallocation of all system resources
-            if (null != httpclient) {
-                httpclient.getConnectionManager().shutdown();
-            }
+            HttpClients.shutDown(httpclient);
         }
     }
+
 }
 

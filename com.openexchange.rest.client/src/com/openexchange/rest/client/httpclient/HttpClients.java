@@ -51,6 +51,9 @@ package com.openexchange.rest.client.httpclient;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.InetAddress;
+import java.net.URI;
+import java.net.UnknownHostException;
 import java.util.concurrent.TimeUnit;
 import java.util.zip.GZIPInputStream;
 import org.apache.http.ConnectionReuseStrategy;
@@ -61,6 +64,7 @@ import org.apache.http.HttpEntity;
 import org.apache.http.HttpException;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpResponseInterceptor;
+import org.apache.http.ProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.conn.ClientConnectionRequest;
@@ -72,6 +76,7 @@ import org.apache.http.conn.scheme.SchemeRegistry;
 import org.apache.http.entity.HttpEntityWrapper;
 import org.apache.http.impl.DefaultConnectionReuseStrategy;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.DefaultRedirectStrategy;
 import org.apache.http.impl.conn.PoolingClientConnectionManager;
 import org.apache.http.message.BasicHeaderElementIterator;
 import org.apache.http.params.BasicHttpParams;
@@ -80,6 +85,7 @@ import org.apache.http.params.HttpParams;
 import org.apache.http.params.HttpProtocolParams;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.protocol.HttpContext;
+import com.openexchange.java.InetAddresses;
 import com.openexchange.rest.client.httpclient.ssl.EasySSLSocketFactory;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.timer.ScheduledTimerTask;
@@ -165,6 +171,10 @@ public final class HttpClients {
             }
         };
 
+        if (config.denyLocalRedirect) {
+            c.setRedirectStrategy(DenyLocalRedirectStrategy.DENY_LOCAL_INSTANCE);
+        }
+
         c.addResponseInterceptor(new HttpResponseInterceptor() {
 
             @Override
@@ -216,8 +226,11 @@ public final class HttpClients {
 
         private String userAgent;
 
+        private boolean denyLocalRedirect;
+
         ClientConfig() {
             super();
+            denyLocalRedirect = false;
         }
 
         /**
@@ -317,6 +330,24 @@ public final class HttpClients {
          */
         public ClientConfig setUserAgent(String userAgent) {
             this.userAgent = userAgent;
+            return this;
+        }
+
+        /**
+         * Sets whether to deny redirect attempts to a local address.
+         * <p>
+         * If set to <code>true</code> the host of every redirect URL is checked if its IP address is resolvable to a network-internal address by checking:
+         * <pre>
+         *    InetAddress inetAddress = InetAddress.getByName(extractedHost);
+         *    if (inetAddress.isAnyLocalAddress() || inetAddress.isSiteLocalAddress() || inetAddress.isLoopbackAddress() || inetAddress.isLinkLocalAddress()) {
+         *       // Deny!
+         *    }
+         * </pre>
+         *
+         * @param denyLocalRedirect <code>true</code> to deny redirect attempts to a local address; otherwise <code>false</code>
+         */
+        public ClientConfig setDenyLocalRedirect(boolean denyLocalRedirect) {
+            this.denyLocalRedirect = denyLocalRedirect;
             return this;
         }
 
@@ -527,6 +558,29 @@ public final class HttpClients {
         public long getContentLength() {
             // length of ungzipped content is not known
             return -1;
+        }
+    }
+
+    private static class DenyLocalRedirectStrategy extends DefaultRedirectStrategy {
+
+        static final DenyLocalRedirectStrategy DENY_LOCAL_INSTANCE = new DenyLocalRedirectStrategy();
+
+        private DenyLocalRedirectStrategy() {
+            super();
+        }
+
+        @Override
+        protected URI createLocationURI(String location) throws ProtocolException {
+            try {
+                URI locationURI = super.createLocationURI(location);
+                InetAddress inetAddress = InetAddress.getByName(locationURI.getHost());
+                if (InetAddresses.isInternalAddress(inetAddress)) {
+                    throw new ProtocolException("Invalid redirect URI: " + location + ". No redirect to local address allowed.");
+                }
+                return locationURI;
+            } catch (UnknownHostException e) {
+                throw new ProtocolException("Invalid redirect URI: " + location + ". Unknown host.", e);
+            }
         }
     }
 
