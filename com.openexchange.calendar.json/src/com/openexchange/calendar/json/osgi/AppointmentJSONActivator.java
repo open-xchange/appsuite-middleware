@@ -80,7 +80,7 @@ import com.openexchange.user.UserService;
 public class AppointmentJSONActivator extends AJAXModuleActivator {
 
     private static final Class<?>[] NEEDED = new Class[] {
-        CalendarService.class, UserService.class, ICalEmitter.class, RecurrenceService.class, ConversionService.class
+        CalendarService.class, UserService.class, ICalEmitter.class, RecurrenceService.class, ConversionService.class, ITipActionPerformerFactoryService.class, ITipAnalyzerService.class
     };
 
     @Override
