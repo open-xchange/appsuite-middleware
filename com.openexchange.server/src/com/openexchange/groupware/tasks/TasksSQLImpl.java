@@ -170,18 +170,9 @@ public class TasksSQLImpl implements TasksSQLInterface {
             }
             throw e;
         }
-        boolean onlyOwn;
-        try {
-            onlyOwn = Permission.canReadInFolder(ctx, user, permissionBits, folder);
-        } catch (final OXException e) {
-            throw e;
-        }
+        boolean onlyOwn = Permission.canReadInFolder(ctx, user, permissionBits, folder);
         final boolean noPrivate = Tools.isFolderShared(folder, user);
-        try {
-            return TaskSearch.getInstance().listModifiedTasks(ctx, folderId, type, columns, since, onlyOwn, userId, noPrivate);
-        } catch (final OXException e) {
-            throw e;
-        }
+        return TaskSearch.getInstance().listModifiedTasks(ctx, folderId, type, columns, since, onlyOwn, userId, noPrivate);
     }
 
     @Override
@@ -245,19 +236,11 @@ public class TasksSQLImpl implements TasksSQLInterface {
 
     @Override
     public void updateTaskObject(Task task, int folderId, Date lastRead) throws OXException {
-        final Context ctx;
         final int userId = session.getUserId();
-        final User user;
-        final UserPermissionBits permissionBits;
-        final FolderObject folder;
-        try {
-            ctx = Tools.getContext(session.getContextId());
-            user = Tools.getUser(ctx, userId);
-            permissionBits = Tools.getUserPermissionBits(ctx, userId);
-            folder = Tools.getFolder(ctx, folderId);
-        } catch (final OXException e) {
-            throw e;
-        }
+        Context ctx = Tools.getContext(session.getContextId());
+        User user = Tools.getUser(ctx, userId);
+        UserPermissionBits permissionBits = Tools.getUserPermissionBits(ctx, userId);
+        FolderObject folder = Tools.getFolder(ctx, folderId);
         final UpdateData update = new UpdateData(ctx, user, permissionBits, folder, task, lastRead);
         try {
             update.prepare();
@@ -310,64 +293,34 @@ public class TasksSQLImpl implements TasksSQLInterface {
 
     @Override
     public void deleteTaskObject(int taskId, int folderId, Date lastModified) throws OXException {
-        final FolderObject folder;
-        final Context ctx;
         final int userId = session.getUserId();
-        final User user;
-        final UserPermissionBits permissionBits;
-        try {
-            ctx = Tools.getContext(session.getContextId());
-            user = Tools.getUser(ctx, userId);
-            permissionBits = Tools.getUserPermissionBits(ctx, userId);
-            folder = Tools.getFolder(ctx, folderId);
-        } catch (final OXException e) {
-            throw e;
-        }
+        Context ctx = Tools.getContext(session.getContextId());
+        User user = Tools.getUser(ctx, userId);
+        UserPermissionBits permissionBits = Tools.getUserPermissionBits(ctx, userId);
+        FolderObject folder = Tools.getFolder(ctx, folderId);
         final DeleteData delete = new DeleteData(ctx, user, permissionBits, folder, taskId, lastModified);
-        try {
-            delete.prepare();
-            delete.doDelete();
-            delete.sentEvent(session);
-        } catch (final OXException e) {
-            throw e;
-        }
+        delete.prepare();
+        delete.doDelete();
+        delete.sentEvent(session);
     }
 
     @Override
     public Date setUserConfirmation(final int taskId, final int userId, final int confirm, final String message) throws OXException {
-        final Context ctx;
-        try {
-            ctx = Tools.getContext(session.getContextId());
-        } catch (final OXException e) {
-            throw e;
-        }
-        final Date lastModified;
-        try {
-            final ConfirmTask confirmT = new ConfirmTask(ctx, taskId, userId, confirm, message);
-            confirmT.prepare();
-            confirmT.doConfirmation();
-            lastModified = confirmT.getLastModified();
-            confirmT.sentEvent(session);
-        } catch (final OXException e) {
-            throw e;
-        }
+        Context ctx = Tools.getContext(session.getContextId());
+        final ConfirmTask confirmT = new ConfirmTask(ctx, taskId, userId, confirm, message);
+        confirmT.prepare();
+        confirmT.doConfirmation();
+        Date lastModified = confirmT.getLastModified();
+        confirmT.sentEvent(session);
         return lastModified;
     }
 
     @Override
-    public SearchIterator<Task> getObjectsById(final int[][] ids,
-        final int[] columns) throws OXException {
-        final Context ctx;
+    public SearchIterator<Task> getObjectsById(final int[][] ids, final int[] columns) throws OXException {
         final int userId = session.getUserId();
-        final User user;
-        final UserPermissionBits permissionBits;
-        try {
-            ctx = Tools.getContext(session.getContextId());
-            user = Tools.getUser(ctx, userId);
-            permissionBits = Tools.getUserPermissionBits(ctx, userId);
-        } catch (final OXException e) {
-            throw e;
-        }
+        Context ctx = Tools.getContext(session.getContextId());
+        User user = Tools.getUser(ctx, userId);
+        UserPermissionBits permissionBits = Tools.getUserPermissionBits(ctx, userId);
         // TODO Improve performance
         final List<Task> tasks = new ArrayList<Task>();
         for (final int[] objectAndFolderId : ids) {
@@ -384,19 +337,12 @@ public class TasksSQLImpl implements TasksSQLInterface {
 
     @Override
     public SearchIterator<Task> getTasksByExtendedSearch(final TaskSearchObject searchData, final int orderBy, final Order order, final int[] columns) throws OXException {
-        final Context ctx;
-        final User user;
-        final UserPermissionBits permissionBits;
         final int userId = session.getUserId();
-        try {
-            ctx = Tools.getContext(session.getContextId());
-            user = Tools.getUser(ctx, userId);
-            permissionBits = Tools.getUserPermissionBits(ctx, userId);
-            final Search search = new Search(ctx, user, permissionBits, searchData, orderBy, order, columns);
-            return search.perform();
-        } catch (final OXException e) {
-            throw e;
-        }
+        Context ctx = Tools.getContext(session.getContextId());
+        User user = Tools.getUser(ctx, userId);
+        UserPermissionBits permissionBits = Tools.getUserPermissionBits(ctx, userId);
+        final Search search = new Search(ctx, user, permissionBits, searchData, orderBy, order, columns);
+        return search.perform();
     }
 
     @Override
