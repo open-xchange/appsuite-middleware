@@ -49,6 +49,8 @@
 
 package com.openexchange.chronos.storage.operation;
 
+import java.sql.Connection;
+import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarUtilities;
 import com.openexchange.chronos.service.EntityResolver;
 import com.openexchange.chronos.storage.CalendarStorage;
@@ -84,7 +86,24 @@ public abstract class OSGiCalendarStorageOperation<T> extends CalendarStorageOpe
      * @param accountId The account identifier
      */
     protected OSGiCalendarStorageOperation(ServiceLookup services, int contextId, int accountId) throws OXException {
-        super(services.getService(DatabaseService.class), contextId);
+        this(services, contextId, accountId, null);
+    }
+
+    /**
+     * Initializes a new {@link OSGiCalendarStorageOperation}.
+     * <p/>
+     * The passed service lookup reference should yield the {@link ContextService}, the {@link DatabaseService} and the
+     * {@link CalendarStorageFactory}, and optionally the {@link CalendarUtilities} service.
+     * <p/>
+     * An existing, <i>external</i> database connection may be supplied as <code>java.sql.Connection</code> parameter.
+     *
+     * @param services A service lookup reference providing access for the needed services
+     * @param contextId The context identifier
+     * @param accountId The account identifier
+     * @param parameters Optional additional calendar parameters
+     */
+    protected OSGiCalendarStorageOperation(ServiceLookup services, int contextId, int accountId, CalendarParameters parameters) throws OXException {
+        super(services.getService(DatabaseService.class), contextId, DEFAULT_RETRIES, optConnection(parameters));
         this.services = services;
         this.accountId = accountId;
     }
@@ -104,6 +123,16 @@ public abstract class OSGiCalendarStorageOperation<T> extends CalendarStorageOpe
     protected EntityResolver optEntityResolver() throws OXException {
         CalendarUtilities calendarUtilities = services.getOptionalService(CalendarUtilities.class);
         return null != calendarUtilities ? calendarUtilities.getEntityResolver(contextId) : null;
+    }
+
+    /**
+     * Optionally gets a database connection set in calendar parameters.
+     *
+     * @param parameters The calendar parameters to get the connection from
+     * @return The connection, or <code>null</code> if not defined
+     */
+    private static Connection optConnection(CalendarParameters parameters) {
+        return null != parameters ? parameters.get(Connection.class.getName(), Connection.class, null) : null;
     }
 
 }
