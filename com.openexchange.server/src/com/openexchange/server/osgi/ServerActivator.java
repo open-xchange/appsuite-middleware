@@ -81,6 +81,8 @@ import com.openexchange.ajax.customizer.folder.AdditionalFolderField;
 import com.openexchange.ajax.customizer.folder.osgi.FolderFieldCollector;
 import com.openexchange.ajax.ipcheck.IPCheckService;
 import com.openexchange.ajax.requesthandler.AJAXRequestHandler;
+import com.openexchange.ajax.requesthandler.ResultConverter;
+import com.openexchange.ajax.requesthandler.ResultConverterRegistry;
 import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.auth.Authenticator;
 import com.openexchange.auth.mbean.AuthenticatorMBean;
@@ -678,6 +680,9 @@ public final class ServerActivator extends HousekeepingActivator {
         track(ObjectUseCountService.class, new ObjectUseCountServiceTracker(context));
         track(CalendarService.class, new RegistryCustomizer<CalendarService>(context, CalendarService.class));
         track(ICalService.class, new RegistryCustomizer<ICalService>(context, ICalService.class));
+        
+        CommonResultConverterRegistry resultConverterRegistry = new CommonResultConverterRegistry(context);
+        track(ResultConverter.class, resultConverterRegistry);
 
         // Start up server the usual way
         starter.start();
@@ -799,6 +804,10 @@ public final class ServerActivator extends HousekeepingActivator {
         // registerService(DataSource.class, dataSource, props);
         // ImageServlet.addMapping(dataSource.getRegistrationName(), dataSource.getAlias());
         // }
+        
+        registerService(ResultConverterRegistry.class, resultConverterRegistry);
+        ServerServiceRegistry.getInstance().addService(ResultConverterRegistry.class, resultConverterRegistry);
+        
         /*
          * Register data handlers
          */
