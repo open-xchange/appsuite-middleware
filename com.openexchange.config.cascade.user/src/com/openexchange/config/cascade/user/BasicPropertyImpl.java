@@ -57,6 +57,7 @@ import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.java.ConvertUtils;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.user.UserService;
 
@@ -84,7 +85,7 @@ final class BasicPropertyImpl implements BasicProperty {
         super();
         // Preload value
         User user = services.getService(UserService.class).getUser(userId, services.getService(ContextService.class).getContext(contextId));
-        value = user.getAttributes().get(new StringBuilder(DYNAMIC_ATTR_PREFIX).append(property).toString());
+        value = ConvertUtils.loadConvert(user.getAttributes().get(new StringBuilder(DYNAMIC_ATTR_PREFIX).append(property).toString()));
         // Assign rest
         this.contextId = contextId;
         this.userId = userId;
@@ -108,9 +109,10 @@ final class BasicPropertyImpl implements BasicProperty {
     }
 
     @Override
-    public void set(final String value) throws OXException {
+    public void set(String value) throws OXException {
+        String valueToStore = ConvertUtils.saveConvert(value, false, true);
         final Context context = services.getService(ContextService.class).getContext(contextId);
-        services.getService(UserService.class).setAttribute(new StringBuilder(DYNAMIC_ATTR_PREFIX).append(property).toString(), value, userId, context);
+        services.getService(UserService.class).setAttribute(new StringBuilder(DYNAMIC_ATTR_PREFIX).append(property).toString(), valueToStore, userId, context);
         this.value = value;
     }
 
