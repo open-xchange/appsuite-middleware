@@ -66,11 +66,11 @@ import com.openexchange.testing.httpclient.invoker.ApiClient;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.CommonResponse;
 import com.openexchange.testing.httpclient.models.EventId;
-import com.openexchange.testing.httpclient.models.FolderBody;
-import com.openexchange.testing.httpclient.models.FolderData;
 import com.openexchange.testing.httpclient.models.FolderPermission;
 import com.openexchange.testing.httpclient.models.FolderUpdateResponse;
 import com.openexchange.testing.httpclient.models.FoldersVisibilityResponse;
+import com.openexchange.testing.httpclient.models.NewFolderBody;
+import com.openexchange.testing.httpclient.models.NewFolderBodyFolder;
 import com.openexchange.testing.httpclient.modules.ChronosApi;
 import com.openexchange.testing.httpclient.modules.ExportApi;
 import com.openexchange.testing.httpclient.modules.FoldersApi;
@@ -213,13 +213,13 @@ public class AbstractChronosTest extends AbstractEnhancedApiClientSession {
         List<FolderPermission> permissions = new ArrayList<>();
         permissions.add(perm);
 
-        FolderData folderData = new FolderData();
+        NewFolderBodyFolder folderData = new NewFolderBodyFolder();
         folderData.setModule("event");
         folderData.setSubscribed(true);
         folderData.setTitle("chronos_test_" + new UID().toString());
         folderData.setPermissions(permissions);
 
-        FolderBody body = new FolderBody();
+        NewFolderBody body = new NewFolderBody();
         body.setFolder(folderData);
 
         FolderUpdateResponse createFolder = api.getFoldersApi().createFolder(parent, session, body, "0", "calendar");
