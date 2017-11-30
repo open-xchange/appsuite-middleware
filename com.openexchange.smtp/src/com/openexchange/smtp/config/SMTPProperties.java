@@ -103,7 +103,7 @@ public final class SMTPProperties extends AbstractProtocolProperties implements 
     private String sslProtocols;
 
     private String cipherSuites;
-    
+
     private String primaryAdressHeader;
 
     /**
@@ -196,9 +196,9 @@ public final class SMTPProperties extends AbstractProtocolProperties implements 
             this.cipherSuites = Strings.isEmpty(tmp) ? null : tmp;
             logBuilder.append("\tSupported SSL cipher suites: ").append(null == this.cipherSuites ? "<default>" : cipherSuites).append("\n");
         }
-        
+
         {
-            final String tmp = configuration.getProperty("com.openexchange.smtp.setPrimaryAddressHeader", new String()).trim();
+            final String tmp = configuration.getProperty("com.openexchange.smtp.setPrimaryAddressHeader", "").trim();
             primaryAdressHeader = (tmp == null) || (tmp.length() == 0) || "null".equalsIgnoreCase(tmp) ? null : tmp;
             logBuilder.append("\tPrimary address header: ").append(primaryAdressHeader).append('\n');
         }
