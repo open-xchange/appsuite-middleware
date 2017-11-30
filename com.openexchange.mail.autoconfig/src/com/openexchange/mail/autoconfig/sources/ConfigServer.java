@@ -50,11 +50,18 @@
 package com.openexchange.mail.autoconfig.sources;
 
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.httpclient.DefaultHttpMethodRetryHandler;
+import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.HttpConnectionManager;
 import org.apache.commons.httpclient.HttpException;
+import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
 import org.apache.commons.httpclient.NameValuePair;
 import org.apache.commons.httpclient.URI;
 import org.apache.commons.httpclient.cookie.CookiePolicy;
@@ -63,6 +70,7 @@ import org.apache.commons.httpclient.params.HttpMethodParams;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.java.InetAddresses;
 import com.openexchange.mail.autoconfig.Autoconfig;
 import com.openexchange.mail.autoconfig.xmlparser.AutoconfigParser;
 import com.openexchange.mail.autoconfig.xmlparser.ClientConfig;
@@ -87,10 +95,38 @@ public class ConfigServer extends AbstractConfigSource {
         client.getParams().setParameter("http.protocol.single-cookie-header", Boolean.TRUE);
         client.getParams().setCookiePolicy(CookiePolicy.BROWSER_COMPATIBILITY);
 
-        // GET method
-        String uri = new StringBuilder("http://autoconfig.").append(emailDomain).append("/mail/config-v1.1.xml").toString();
-        final GetMethod getMethod = new GetMethod(uri);
         try {
+            // Build URI
+            String host = "autoconfig." + emailDomain;
+            String uri = new StringBuilder("http://").append(host).append("/mail/config-v1.1.xml").toString();
+            // Check if URI denotes an internal host
+            boolean handleRedirectsManually;
+            try {
+                InetAddress inetAddress = InetAddress.getByName(host);
+                handleRedirectsManually = false == InetAddresses.isInternalAddress(inetAddress);
+            } catch (UnknownHostException e) {
+                // IP address of that host could not be determined
+                LOG.warn("Unknown host: {}. Skipping config server source for mail auto-config", host, e);
+                return null;
+            }
+            return doGetAutoconfig(uri, emailLocalPart, emailDomain, password, user, context, handleRedirectsManually, client);
+        } finally {
+            HttpConnectionManager connectionManager = client.getHttpConnectionManager();
+            if (connectionManager instanceof MultiThreadedHttpConnectionManager) {
+                ((MultiThreadedHttpConnectionManager) connectionManager).shutdown();
+            }
+        }
+    }
+
+    private Autoconfig doGetAutoconfig(String uri, String emailLocalPart, String emailDomain, String password, User user, Context context, boolean handleRedirectsManually, HttpClient client) throws OXException {
+        // GET method
+        GetMethod getMethod = new GetMethod(uri);
+        try {
+            // Deny to follow-redirects
+            if (handleRedirectsManually) {
+                getMethod.setFollowRedirects(false);
+            }
+
             // Name-value-pairs
             final List<NameValuePair> pairs = new ArrayList<NameValuePair>(4);
             {
@@ -102,13 +138,76 @@ public class ConfigServer extends AbstractConfigSource {
             // Execute GET request
             int statusCode = client.executeMethod(getMethod);
             if (statusCode != 200) {
+                if (handleRedirectsManually && statusCode >= 300 && statusCode < 400) {
+                    Header locationHeader = getMethod.getResponseHeader("location");
+                    if (locationHeader != null) {
+                        String redirectLocation = locationHeader.getValue();
+
+                        URL url;
+                        {
+                            try {
+                                url = new URL(redirectLocation);
+                            } catch (MalformedURLException e) {
+                                LOG.warn("Unable to parse redirect location: {}. Skipping config server source for mail auto-config", redirectLocation, e);
+                                return null;
+                            }
+                        }
+
+                        try {
+                            InetAddress inetAddress = InetAddress.getByName(url.getHost());
+                            if (InetAddresses.isInternalAddress(inetAddress)) {
+                                LOG.warn("Denied redirect location: {}. Skipping config server source for mail auto-config", redirectLocation);
+                                return null;
+                            }
+
+                            return doGetAutoconfig(redirectLocation, emailLocalPart, emailDomain, password, user, context, handleRedirectsManually, client);
+                        } catch (UnknownHostException e) {
+                            // IP address of that host could not be determined
+                            LOG.warn("Unknown host: {}. Skipping config server source for mail auto-config", url.getHost(), e);
+                            return null;
+                        }
+                    }
+                }
+
                 LOG.info("Could not retrieve config XML from autoconfig server. Return code was: {}", statusCode);
+
                 // Try 2nd URL
                 uri = new StringBuilder(64).append("http://").append(emailDomain).append("/.well-known/autoconfig/mail/config-v1.1.xml").toString();
                 getMethod.setURI(new URI(uri, false));
                 statusCode = client.executeMethod(getMethod);
                 if (statusCode != 200) {
                     LOG.info("Could not retrieve config XML from main domain. Return code was: {}", statusCode);
+                    if (handleRedirectsManually && statusCode >= 300 && statusCode < 400) {
+                        Header locationHeader = getMethod.getResponseHeader("location");
+                        if (locationHeader != null) {
+                            String redirectLocation = locationHeader.getValue();
+
+                            URL url;
+                            {
+                                try {
+                                    url = new URL(redirectLocation);
+                                } catch (MalformedURLException e) {
+                                    LOG.warn("Unable to parse redirect location: {}. Skipping config server source for mail auto-config", redirectLocation, e);
+                                    return null;
+                                }
+                            }
+
+                            try {
+                                InetAddress inetAddress = InetAddress.getByName(url.getHost());
+                                if (InetAddresses.isInternalAddress(inetAddress)) {
+                                    LOG.warn("Denied redirect location: {}. Skipping config server source for mail auto-config", redirectLocation);
+                                    return null;
+                                }
+
+                                return doGetAutoconfig(redirectLocation, emailLocalPart, emailDomain, password, user, context, handleRedirectsManually, client);
+                            } catch (UnknownHostException e) {
+                                // IP address of that host could not be determined
+                                LOG.warn("Unknown host: {}. Skipping config server source for mail auto-config", url.getHost(), e);
+                                return null;
+                            }
+                        }
+                    }
+
                     return null;
                 }
             }
@@ -134,6 +233,9 @@ public class ConfigServer extends AbstractConfigSource {
             LOG.debug("Could not connect to {}.", uri, e);
         } catch (final IOException e) {
             LOG.warn("Could not retrieve config XML.", e);
+        } finally {
+            getMethod.abort();
+            getMethod.releaseConnection();
         }
         return null;
     }
