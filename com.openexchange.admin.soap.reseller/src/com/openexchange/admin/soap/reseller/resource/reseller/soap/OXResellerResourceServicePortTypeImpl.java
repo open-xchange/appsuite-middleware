@@ -568,12 +568,8 @@ public class OXResellerResourceServicePortTypeImpl implements OXResellerResource
             return null;
         }
         final com.openexchange.admin.rmi.dataobjects.Database ret = new com.openexchange.admin.rmi.dataobjects.Database();
-        Integer itg = soapDatabase.getClusterWeight();
-        if (itg != null) {
-            ret.setClusterWeight(itg);
-        }
 
-        itg = soapDatabase.getCurrentUnits();
+        Integer itg = soapDatabase.getCurrentUnits();
         if (itg != null) {
             ret.setCurrentUnits(itg);
         }
@@ -706,7 +702,6 @@ public class OXResellerResourceServicePortTypeImpl implements OXResellerResource
             return null;
         }
         final Database soapDatabase = new Database();
-        soapDatabase.setClusterWeight(database.getClusterWeight());
         soapDatabase.setCurrentUnits(database.getCurrentUnits());
         soapDatabase.setDriver(database.getDriver());
         soapDatabase.setId(database.getId());

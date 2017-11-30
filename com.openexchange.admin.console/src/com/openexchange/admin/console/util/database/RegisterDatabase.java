@@ -167,7 +167,6 @@ public final class RegisterDatabase extends DatabaseAbstraction {
         setDatabasePasswdOption(parser, true);
         setDatabaseIsMasterOption(parser, true);
         setDatabaseMasterIDOption(parser, false);
-        setDatabaseWeightOption(parser, String.valueOf(OXUtilInterface.DEFAULT_DB_WEIGHT), false);
         setDatabaseMaxUnitsOption(parser, String.valueOf(OXUtilInterface.DEFAULT_MAXUNITS), false);
         setDatabasePoolHardlimitOption(parser, String.valueOf(OXUtilInterface.DEFAULT_POOL_HARD_LIMIT), false);
         setDatabasePoolInitialOption(parser, String.valueOf(OXUtilInterface.DEFAULT_POOL_INITIAL), false);

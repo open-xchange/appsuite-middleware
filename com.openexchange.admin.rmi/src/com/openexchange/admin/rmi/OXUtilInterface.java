@@ -116,7 +116,6 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
  */
 public interface OXUtilInterface extends Remote {
 
-    public static final int DEFAULT_DB_WEIGHT = 100;
     public static final String DEFAULT_DRIVER = "com.mysql.jdbc.Driver";
     public static final int DEFAULT_MAXUNITS = 1000;
     public static final boolean DEFAULT_POOL_HARD_LIMIT = true;
@@ -243,7 +242,7 @@ public interface OXUtilInterface extends Remote {
 
     /**
      * Changes the server for all the contexts in the specified schema
-     * 
+     *
      * @param server Server with id set.
      * @param schemaName The schema name for which to change the server
      * @param credentials Credentials for authenticating against server.
@@ -609,7 +608,7 @@ public interface OXUtilInterface extends Remote {
 
     /**
      * A method to list file stores matching some search pattern.
-     * 
+     *
      * @param searchPattern The search pattern the file store should match to. The pattern "*" will list all file stores.
      * @param credentials must be the master administration credentials to be allowed to list file stores.
      * @param omitUsage <code>true</code> to not load the current file store usage from the database, which is an expensive operation

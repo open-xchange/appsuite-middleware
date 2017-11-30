@@ -115,7 +115,6 @@ public class ChangeDatabase extends DatabaseAbstraction {
 //        setDatabaseIsMasterOption(parser, false);
 //        setDatabaseMasterIDOption(parser, false);
 
-        setDatabaseWeightOption(parser, null, false);
         setDatabaseMaxUnitsOption(parser, null, false);
         setDatabasePoolHardlimitOption(parser, null, false);
         setDatabasePoolInitialOption(parser, null, false);

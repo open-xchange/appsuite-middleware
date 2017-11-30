@@ -1783,12 +1783,7 @@ public class OXResellerContextServicePortTypeImpl implements OXResellerContextSe
         }
         final com.openexchange.admin.rmi.dataobjects.Database ret = new com.openexchange.admin.rmi.dataobjects.Database();
 
-        Integer itg = db.getClusterWeight();
-        if (itg != null) {
-            ret.setClusterWeight(itg);
-        }
-
-        itg = db.getCurrentUnits();
+        Integer itg = db.getCurrentUnits();
         if (itg != null) {
             ret.setCurrentUnits(itg);
         }
@@ -2104,7 +2099,6 @@ public class OXResellerContextServicePortTypeImpl implements OXResellerContextSe
             return null;
         }
         final Database soapDatabase = new Database();
-        soapDatabase.setClusterWeight(database.getClusterWeight());
         soapDatabase.setCurrentUnits(database.getCurrentUnits());
         soapDatabase.setDriver(database.getDriver());
         soapDatabase.setId(database.getId());
@@ -2208,12 +2202,7 @@ public class OXResellerContextServicePortTypeImpl implements OXResellerContextSe
         }
         final com.openexchange.admin.rmi.dataobjects.Database ret = new com.openexchange.admin.rmi.dataobjects.Database();
 
-        Integer itg = db.getClusterWeight();
-        if (itg != null) {
-            ret.setClusterWeight(itg);
-        }
-
-        itg = db.getCurrentUnits();
+        Integer itg = db.getCurrentUnits();
         if (itg != null) {
             ret.setCurrentUnits(itg);
         }

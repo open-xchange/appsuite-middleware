@@ -97,10 +97,6 @@ public class Database extends EnforceableDataObject implements NameAndIdObject {
 
     private boolean schemeset;
 
-    private Integer clusterWeight;
-
-    private boolean clusterWeightset;
-
     private Integer maxUnits;
 
     private boolean maxUnitsset;
@@ -157,8 +153,6 @@ public class Database extends EnforceableDataObject implements NameAndIdObject {
     public Database(final Database toCopy) {
         super();
         init();
-        this.clusterWeight = toCopy.clusterWeight;
-        this.clusterWeightset = toCopy.clusterWeightset;
         this.currentUnits = toCopy.currentUnits;
         this.currentUnitsset = toCopy.currentUnitsset;
         this.driver = toCopy.driver;
@@ -275,20 +269,6 @@ public class Database extends EnforceableDataObject implements NameAndIdObject {
     public void setScheme(final String scheme) {
         this.scheme = scheme;
         this.schemeset = true;
-    }
-
-    public Integer getClusterWeight() {
-        return this.clusterWeight;
-    }
-
-    /**
-     * The system weight factor of this database in percent, value is Integer
-     * This value defines how contexts will be distributed over multiple
-     * databases/db pools.
-     */
-    public void setClusterWeight(final Integer clusterWeight) {
-        this.clusterWeight = clusterWeight;
-        this.clusterWeightset = true;
     }
 
     public Integer getMaxUnits() {
@@ -411,7 +391,6 @@ public class Database extends EnforceableDataObject implements NameAndIdObject {
     private void init() {
         this.id = null;
         this.read_id = null;
-        this.clusterWeight = null;
         this.url = null;
         this.login = null;
         this.password = null;
@@ -457,13 +436,6 @@ public class Database extends EnforceableDataObject implements NameAndIdObject {
     @Override
     public String[] getMandatoryMembersRegister() {
         return new String[] { "password", "name", "master" };
-    }
-
-    /**
-     * @return the clusterWeightset
-     */
-    public boolean isClusterWeightset() {
-        return clusterWeightset;
     }
 
     /**
@@ -578,8 +550,6 @@ public class Database extends EnforceableDataObject implements NameAndIdObject {
     public int hashCode() {
         final int prime = 31;
         int result = super.hashCode();
-        result = prime * result + ((clusterWeight == null) ? 0 : clusterWeight.hashCode());
-        result = prime * result + (clusterWeightset ? 1231 : 1237);
         result = prime * result + ((currentUnits == null) ? 0 : currentUnits.hashCode());
         result = prime * result + (currentUnitsset ? 1231 : 1237);
         result = prime * result + ((driver == null) ? 0 : driver.hashCode());
@@ -628,16 +598,6 @@ public class Database extends EnforceableDataObject implements NameAndIdObject {
             return false;
         }
         final Database other = (Database) obj;
-        if (clusterWeight == null) {
-            if (other.clusterWeight != null) {
-                return false;
-            }
-        } else if (!clusterWeight.equals(other.clusterWeight)) {
-            return false;
-        }
-        if (clusterWeightset != other.clusterWeightset) {
-            return false;
-        }
         if (currentUnits == null) {
             if (other.currentUnits != null) {
                 return false;

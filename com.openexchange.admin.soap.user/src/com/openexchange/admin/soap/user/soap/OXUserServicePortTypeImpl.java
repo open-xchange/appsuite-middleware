@@ -1512,7 +1512,7 @@ public class OXUserServicePortTypeImpl implements OXUserServicePortType {
         if (tmp != null) {
             user.setDefaultSenderAddress(tmp);
         }
-        
+
         tmp = soapUser.getDriveUserFolderMode();
         if (tmp != null) {
             user.setDriveFolderMode(tmp);
@@ -2105,7 +2105,7 @@ public class OXUserServicePortTypeImpl implements OXUserServicePortType {
         if (tmp != null) {
             user.setPrimaryAccountName(tmp);
         }
-        
+
         Boolean bool_tmp = soapUser.isConvertDriveUserFolders();
         if (bool_tmp != null) {
             user.setConvertDriveUserFolders(bool_tmp);
@@ -2398,12 +2398,7 @@ public class OXUserServicePortTypeImpl implements OXUserServicePortType {
         }
         final com.openexchange.admin.rmi.dataobjects.Database ret = new com.openexchange.admin.rmi.dataobjects.Database();
 
-        Integer itg = soapDatabase.getClusterWeight();
-        if (itg != null) {
-            ret.setClusterWeight(itg);
-        }
-
-        itg = soapDatabase.getCurrentUnits();
+        Integer itg = soapDatabase.getCurrentUnits();
         if (itg != null) {
             ret.setCurrentUnits(itg);
         }
