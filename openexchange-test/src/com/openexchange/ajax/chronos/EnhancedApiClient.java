@@ -51,14 +51,11 @@ package com.openexchange.ajax.chronos;
 
 import java.io.File;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Form;
-import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import org.glassfish.jersey.media.multipart.FormDataBodyPart;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.MultiPart;
@@ -67,7 +64,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.testing.httpclient.invoker.ApiClient;
 import com.openexchange.testing.httpclient.invoker.ApiException;
-import com.openexchange.testing.httpclient.models.EventData;
 
 /**
  * {@link EnhancedApiClient}
@@ -118,36 +114,6 @@ public class EnhancedApiClient extends ApiClient {
             entity = Entity.entity(obj, contentType);
         }
         return entity;
-    }
-
-    /**
-     * Deserialize response body to Java object according to the Content-Type.
-     */
-    @SuppressWarnings("unchecked")
-    @Override
-    public <T> T deserialize(final Response response, final GenericType<T> returnType) throws ApiException {
-        if (response == null || returnType == null) {
-            return null;
-        }
-        
-        if ("byte[]".equals(returnType.toString())) {
-            // Handle binary response (byte array).
-            return (T) response.readEntity(byte[].class);
-        } else if (returnType.getRawType().equals(File.class)) {
-            // Handle file downloading.
-            return (T) downloadFileFromResponse(response);
-        }
-
-        String contentType = null;
-        final List<Object> contentTypes = response.getHeaders().get("Content-Type");
-        if (contentTypes != null && !contentTypes.isEmpty()) {
-            contentType = String.valueOf(contentTypes.get(0));
-        }
-        if (contentType == null) {
-            throw new ApiException(500, "missing Content-Type in response");
-        }
-
-        return response.readEntity(returnType);
     }
 
     /**

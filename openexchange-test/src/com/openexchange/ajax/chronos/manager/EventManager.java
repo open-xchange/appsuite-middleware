@@ -168,7 +168,6 @@ public class EventManager extends AbstractManager {
     public JSONObject createEventWithAttachment(EventData eventData, Asset asset, boolean expectException) throws ApiException, ChronosApiException {
         String response = userApi.getEnhancedChronosApi().createEventWithAttachments(userApi.getEnhancedSession(), defaultFolder, eventData.toJson(), new File(asset.getAbsolutePath()), false, false);
         JSONObject responseData = extractBody(response);
-        ChronosCalendarResultResponse createEvent = null;
         if (expectException) {
             assertNotNull("An error was expected", responseData.optString("error"));
             throw new ChronosApiException(responseData.optString("code"), responseData.optString("error"));
