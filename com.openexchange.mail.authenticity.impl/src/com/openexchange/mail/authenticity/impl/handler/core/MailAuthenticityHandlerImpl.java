@@ -343,7 +343,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
     private void parseMechanisms(List<String> elements, List<MailAuthenticityMechanismResult> results, List<Map<String, String>> unknownResults, MailAuthenticityResult overallResult) {
         Collections.sort(elements, MAIL_AUTH_COMPARATOR);
         for (String element : elements) {
-            List<MailAuthenticityAttribute> attributes = StringUtil.parseElement(element);
+            List<MailAuthenticityAttribute> attributes = StringUtil.parseList(element);
 
             DefaultMailAuthenticityMechanism mechanism = DefaultMailAuthenticityMechanism.extractMechanism(attributes);
             if (mechanism == null) {
@@ -357,7 +357,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
                 unknownResults.add(parseUnknownMechs(attributes));
                 continue;
             }
-            results.add(mechanismParser.apply(StringUtil.parseAttributes(element), overallResult));
+            results.add(mechanismParser.apply(StringUtil.parseMap(element), overallResult));
         }
     }
 

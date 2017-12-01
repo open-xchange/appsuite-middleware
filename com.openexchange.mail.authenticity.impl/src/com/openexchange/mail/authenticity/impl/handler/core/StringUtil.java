@@ -63,98 +63,39 @@ import com.openexchange.mail.authenticity.MailAuthenticityAttribute;
 class StringUtil {
 
     /**
-     * Parses the attributes (key value pairs separated by an equals '=' sign) of the specified element to a {@link Map}.
-     *
+     * Parses the specified element as a key/value {@link Map}
+     * 
      * @param element The element to parse
      * @return A {@link Map} with the key/value attributes of the element
      */
-    static Map<String, String> parseAttributes(String element) {
-        Map<String, String> pairs = new HashMap<>();
-        // No pairs; return as a singleton Map with the line being both the key and the value
-        if (!element.contains("=")) {
-            pairs.put(element, element);
-            return pairs;
-        }
-
-        StringBuilder keyBuffer = new StringBuilder(32);
-        StringBuilder valueBuffer = new StringBuilder(64);
-        String key = null;
-        boolean valueMode = false;
-        boolean backtracking = false;
-        int backtrackIndex = 0;
-        for (int index = 0; index < element.length();) {
-            char c = element.charAt(index);
-            switch (c) {
-                case '=':
-                    if (valueMode) {
-                        // A key found while in value mode, so we backtrack
-                        backtracking = true;
-                        valueMode = false;
-                        index--;
-                    } else {
-                        // Retain the key and switch to value mode
-                        key = keyBuffer.toString();
-                        keyBuffer.setLength(0);
-                        valueMode = true;
-                        index++;
-                    }
-                    break;
-                case ' ':
-                    if (!valueMode) {
-                        //Remove the key from the value buffer
-                        valueBuffer.setLength(valueBuffer.length() - backtrackIndex);
-                        pairs.put(key, valueBuffer.toString().trim());
-                        // Retain the new key (and reverse if that key came from backtracking)
-                        key = backtracking ? keyBuffer.reverse().toString() : keyBuffer.toString();
-                        // Reset counters
-                        keyBuffer.setLength(0);
-                        valueBuffer.setLength(0);
-                        // Skip to the value of the retained new key (position after the '=' sign)
-                        index += backtrackIndex + 2;
-                        backtrackIndex = 0;
-                        backtracking = false;
-                        valueMode = true;
-                        break;
-                    }
-                    // while in value mode spaces are considered as literals, hence fall-through to 'default'
-                default:
-                    if (valueMode) {
-                        // While in value mode append all literals to the value buffer
-                        valueBuffer.append(c);
-                        index++;
-                    } else {
-                        // While in key mode append all key literals to the key buffer...
-                        keyBuffer.append(c);
-                        if (backtracking) {
-                            // ... and if we are backtracking, update the counters
-                            index--;
-                            backtrackIndex++;
-                        } else {
-                            // ... if we are not backtracking and we are in key mode, go forth
-                            index++;
-                        }
-                    }
-            }
-        }
-        // Add the last pair
-        if (valueBuffer.length() > 0) {
-            pairs.put(key, valueBuffer.toString());
-        }
-        return pairs;
+    static Map<String, String> parseMap(String element) {
+        Map<String, String> mapCollector = new HashMap<>();
+        return parseToCollector(element, mapCollector);
     }
 
     /**
-     * Parses the attributes (key value pairs separated by an equals '=' sign) of the specified element to a {@link Map}.
+     * Parses the specified element as a {@link List} of {@link MailAuthenticityAttribute}s
+     * 
+     * @param element The element to parse
+     * @return a {@link List} with the {@link MailAuthenticityAttribute}s
+     */
+    static List<MailAuthenticityAttribute> parseList(String element) {
+        List<MailAuthenticityAttribute> listCollector = new ArrayList<>();
+        return parseToCollector(element, listCollector);
+    }
+
+    /**
+     * Parses the attributes (key value pairs separated by an equals '=' sign) of the specified element to the specified {@link T} collector.
      *
      * @param element The element to parse
-     * @return A {@link Map} with the key/value attributes of the element
+     * @return A {@link T} with the key/value attributes of the element
      */
-    static List<MailAuthenticityAttribute> parseElement(String element) {
-        List<MailAuthenticityAttribute> attributes = new ArrayList<>();
-        // No pairs; return as a singleton Map with the line being both the key and the value
+    private static <T> T parseToCollector(String element, T collector) {
+        // No pairs; return as a singleton collector with the line being both the key and the value
         if (!element.contains("=")) {
-            attributes.add(new MailAuthenticityAttribute(element, element));
-            return attributes;
+            //pairs.put(element, element);
+            add(element, element, collector);
+            return collector;
         }
 
         StringBuilder keyBuffer = new StringBuilder(32);
@@ -184,7 +125,8 @@ class StringUtil {
                     if (!valueMode) {
                         //Remove the key from the value buffer
                         valueBuffer.setLength(valueBuffer.length() - backtrackIndex);
-                        attributes.add(new MailAuthenticityAttribute(key, valueBuffer.toString().trim()));
+                        //pairs.put(key, valueBuffer.toString().trim());
+                        add(key, valueBuffer.toString().trim(), collector);
                         // Retain the new key (and reverse if that key came from backtracking)
                         key = backtracking ? keyBuffer.reverse().toString() : keyBuffer.toString();
                         // Reset counters
@@ -219,9 +161,29 @@ class StringUtil {
         }
         // Add the last pair
         if (valueBuffer.length() > 0) {
-            attributes.add(new MailAuthenticityAttribute(key, valueBuffer.toString()));
+            //pairs.put(key, valueBuffer.toString());
+            add(key, valueBuffer.toString(), collector);
         }
-        return attributes;
+        return collector;
+    }
+
+    /**
+     * Adds the specified key/value to the specified {@link T} collector
+     * 
+     * @param key The key
+     * @param value The value
+     * @param collector The {@link T} collector
+     */
+    private static <T> void add(String key, String value, T collector) {
+        if (collector instanceof Map) {
+            Map<String, String> m = (Map<String, String>) collector;
+            m.put(key, value);
+        } else if (collector instanceof List) {
+            List<MailAuthenticityAttribute> l = (List<MailAuthenticityAttribute>) collector;
+            l.add(new MailAuthenticityAttribute(key, value));
+        } else {
+            throw new IllegalArgumentException("Unsupported collector type '" + collector.getClass() + "'");
+        }
     }
 
     /**
