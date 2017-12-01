@@ -370,11 +370,17 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
         Map<String, String> unknownResults = new HashMap<>();
         MailAuthenticityAttribute mechanism = attributes.get(0);
         unknownResults.put("mechanism", mechanism.getKey());
-        // TODO: extract possible comment enclosed in parentheses from the result value
-        unknownResults.put("result", mechanism.getValue());
+        unknownResults.put("result", extractOutcome(mechanism.getValue()));
 
         for (int index = 1; index < attributes.size(); index++) {
             unknownResults.put(attributes.get(index).getKey(), attributes.get(index).getValue());
+        }
+
+        if (!unknownResults.containsKey("comment")) {
+            String reason = extractComment(mechanism.getValue());
+            if (!Strings.isEmpty(reason)) {
+                unknownResults.put("reason", reason);
+            }
         }
 
         return unknownResults;
