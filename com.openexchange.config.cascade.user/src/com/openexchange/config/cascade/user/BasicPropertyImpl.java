@@ -58,7 +58,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.ConvertUtils;
-import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.user.UserService;
 
@@ -111,10 +110,6 @@ final class BasicPropertyImpl implements BasicProperty {
 
     @Override
     public void set(String value) throws OXException {
-        if (Strings.isEmpty(value)) {
-            throw ConfigCascadeExceptionCodes.UNEXPECTED_ERROR.create("New value is null");
-        }
-
         ContextService contextService = services.getService(ContextService.class);
         UserService userService = services.getService(UserService.class);
 
