@@ -101,7 +101,7 @@ public class SchemaCleanupTask extends AbstractTask<Map<Integer, List<GuestClean
     @Override
     public Map<Integer, List<GuestCleanupTask>> call() throws Exception {
         try {
-            return cleanContext();
+            return cleanSchema();
         } catch (OXException e) {
             if ("CTX-0002".equals(e.getErrorCode())) {
                 LOG.debug("Context {} no longer found, cancelling cleanup.", representativeContextId, e);
@@ -111,7 +111,7 @@ public class SchemaCleanupTask extends AbstractTask<Map<Integer, List<GuestClean
         }
     }
 
-    private Map<Integer, List<GuestCleanupTask>> cleanContext() throws OXException {
+    private Map<Integer, List<GuestCleanupTask>> cleanSchema() throws OXException {
         /*
          * Check if context needs update
          */
@@ -196,7 +196,7 @@ public class SchemaCleanupTask extends AbstractTask<Map<Integer, List<GuestClean
 
     @Override
     public String toString() {
-        return "ContextCleanupTask [representativeContextId=" + representativeContextId + "]";
+        return "SchemaCleanupTask [representativeContextId=" + representativeContextId + "]";
     }
 
 }
