@@ -56,6 +56,17 @@ import java.util.List;
 import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.ajax.fields.DataFields;
+import com.openexchange.ajax.fields.FolderChildFields;
+import com.openexchange.chronos.Event;
+import com.openexchange.chronos.exception.CalendarExceptionCodes;
+import com.openexchange.chronos.ical.ICalService;
+import com.openexchange.chronos.ical.ImportedCalendar;
+import com.openexchange.chronos.service.CalendarResult;
+import com.openexchange.chronos.service.CalendarService;
+import com.openexchange.chronos.service.CalendarSession;
+import com.openexchange.chronos.service.CreateResult;
 import com.openexchange.conversion.ConversionResult;
 import com.openexchange.conversion.Data;
 import com.openexchange.conversion.DataArguments;
@@ -66,7 +77,6 @@ import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.ICalParser;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
-import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.UserStorage;
@@ -85,7 +95,7 @@ import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 public final class ICalInsertDataHandler extends ICalDataHandler {
 
     private static final String[] ARGS = { "com.openexchange.groupware.calendar.folder",
-            "com.openexchange.groupware.task.folder" };
+        "com.openexchange.groupware.task.folder" };
 
     private static final Class<?>[] TYPES = { InputStream.class };
 
@@ -98,7 +108,7 @@ public final class ICalInsertDataHandler extends ICalDataHandler {
 
     @Override
     public String[] getRequiredArguments() {
-        return new String[]{};
+        return new String[] {};
     }
 
     @Override
@@ -126,14 +136,12 @@ public final class ICalInsertDataHandler extends ICalDataHandler {
             }
         }
 
-        Confirm confirm = parseConfirmation(dataArguments);
-
         final Context ctx = ContextStorage.getStorageContext(session);
         final ICalParser iCalParser = ServerServiceRegistry.getInstance().getService(ICalParser.class);
         if (iCalParser == null) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(ICalParser.class.getName());
         }
-        final List<CalendarDataObject> appointments;
+        final List<Event> events;
         final List<Task> tasks;
         final InputStreamCopy inputStreamCopy;
         {
@@ -149,8 +157,7 @@ public final class ICalInsertDataHandler extends ICalDataHandler {
             /*
              * Get user time zone
              */
-            final TimeZone defaultZone = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class).getTimeZone(UserStorage.getInstance().getUser(session.getUserId(), ctx)
-                    .getTimeZone());
+            final TimeZone defaultZone = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class).getTimeZone(UserStorage.getInstance().getUser(session.getUserId(), ctx).getTimeZone());
             /*
              * Errors and warnings
              */
@@ -160,7 +167,17 @@ public final class ICalInsertDataHandler extends ICalDataHandler {
                 /*
                  * Start parsing appointments
                  */
-                appointments = parseAppointmentStream(ctx, iCalParser, inputStreamCopy, conversionErrors, conversionWarnings, defaultZone);
+                InputStream stream = null;
+                try {
+                    ICalService iCalService = ServerServiceRegistry.getServize(ICalService.class, true);
+                    stream = inputStreamCopy.getInputStream();
+                    ImportedCalendar calendar = iCalService.importICal(stream, null);
+                    events = calendar.getEvents();
+                } finally {
+                    if (null != stream) {
+                        stream.close();
+                    }
+                }
                 /*
                  * Start parsing tasks
                  */
@@ -176,17 +193,46 @@ public final class ICalInsertDataHandler extends ICalDataHandler {
          */
         final JSONArray folderAndIdArray = new JSONArray();
         ConversionResult result = new ConversionResult();
-        if (!appointments.isEmpty()) {
+        if (!events.isEmpty()) {
             if (calendarFolder == 0) {
                 result.addWarning(ConversionWarning.Code.NO_FOLDER_FOR_APPOINTMENTS.create());
             } else {
                 /*
                  * Insert parsed appointments into denoted calendar folder
                  */
-                try {
-                    insertAppointments(session, calendarFolder, ctx, appointments, confirm, folderAndIdArray);
-                } catch (final JSONException e) {
-                    throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e, new Object[0]);
+                CalendarService calendarService = ServerServiceRegistry.getServize(CalendarService.class, true);
+                CalendarSession calendarSession = calendarService.init(session);
+                String folderId = String.valueOf(calendarFolder);
+                for (Event event : events) {
+                    try {
+                        insertEvent(calendarFolder, folderAndIdArray, calendarService, calendarSession, folderId, event);
+                    } catch (JSONException e) {
+                        throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
+                    } catch (OXException e) {
+                        if (CalendarExceptionCodes.UID_CONFLICT.equals(e)) {
+                            /*
+                             * TODO Discuss
+                             * Old implementation did add the user to the existing event
+                             */
+                            boolean old = true;
+                            if (old) {
+                                // Update existing event
+                                // String resolvedEvent = calendarService.getUtilities().resolveByUID(calendarSession, event.getUid());
+                                // ...
+                                throw e;
+                            } else {
+                                // Ignore error, insert as new event
+                                event.removeUid();
+                                try {
+                                    insertEvent(calendarFolder, folderAndIdArray, calendarService, calendarSession, folderId, event);
+                                } catch (JSONException e1) {
+                                    throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e1);
+                                }
+                            }
+                        } else {
+                            throw e;
+                        }
+                    }
                 }
             }
         }
@@ -207,7 +253,15 @@ public final class ICalInsertDataHandler extends ICalDataHandler {
         result.setData(folderAndIdArray);
         return result;
     }
-    
+
+    private void insertEvent(int calendarFolder, final JSONArray folderAndIdArray, CalendarService calendarService, CalendarSession calendarSession, String folderId, Event event) throws OXException, JSONException {
+        CalendarResult calendarResult;
+        calendarResult = calendarService.createEvent(calendarSession, folderId, event);
+        for (CreateResult created : calendarResult.getCreations()) {
+            folderAndIdArray.put(new JSONObject().put(FolderChildFields.FOLDER_ID, calendarFolder).put(DataFields.ID, created.getCreatedEvent().getId()));
+        }
+    }
+
     private boolean hasValue(DataArguments dataArguments, String key) {
         if (!dataArguments.containsKey(key)) {
             return false;
@@ -222,18 +276,5 @@ public final class ICalInsertDataHandler extends ICalDataHandler {
             return false;
         }
         return true;
-    }
-
-    private Confirm parseConfirmation(final DataArguments dataArguments) {
-        int confirmStatus = -1;
-        String confirmMessage = null;
-        if (dataArguments.containsKey("com.openexchange.groupware.calendar.confirmstatus")) {
-            confirmStatus = Integer.parseInt(dataArguments.get("com.openexchange.groupware.calendar.confirmstatus"));
-            if (dataArguments.containsKey("com.openexchange.groupware.calendar.confirmmessage")) {
-                confirmMessage = dataArguments.get("com.openexchange.groupware.calendar.confirmmessage");
-            }
-            return new Confirm(confirmStatus, confirmMessage);
-        }
-        return null;
     }
 }

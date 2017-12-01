@@ -58,9 +58,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
 import org.json.JSONArray;
@@ -68,7 +65,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.fields.FolderChildFields;
-import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.api2.TasksSQLInterface;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.conversion.DataExceptionCodes;
@@ -77,20 +73,11 @@ import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.ICalParser;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXException.Generic;
-import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
-import com.openexchange.groupware.calendar.CalendarDataObject;
-import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
-import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.container.Participant;
-import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TasksSQLImpl;
 import com.openexchange.java.Streams;
-import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
-import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
@@ -111,151 +98,6 @@ public abstract class ICalDataHandler implements DataHandler {
             task.setParentFolderID(taskFolder);
             taskSql.insertTaskObject(task);
             folderAndIdArray.put(new JSONObject().put(FolderChildFields.FOLDER_ID, taskFolder).put(DataFields.ID, task.getObjectID()));
-        }
-    }
-
-    protected void insertAppointments(final Session session, final int calendarFolder, final Context ctx, final List<CalendarDataObject> appointments, Confirm confirm, final JSONArray folderAndIdArray) throws OXException, JSONException, OXException {
-        final AppointmentSQLInterface appointmentSql = ServerServiceRegistry.getInstance().getService(AppointmentSqlFactoryService.class).createAppointmentSql(
-            session);
-        for (final CalendarDataObject appointment : appointments) {
-            appointment.setContext(ctx);
-            if (confirm != null) {
-                setConfirmation(session, appointment, confirm);
-            }
-            String uid;
-            int objectId = 0;
-            if (appointment.containsUid() && (uid = appointment.getUid()) != null) {
-                objectId = appointmentSql.resolveUid(uid);
-            }
-
-            if (objectId != 0) {
-                try {
-                    if (confirm == null) {
-                        confirm = new Confirm(CalendarDataObject.ACCEPT, null);
-                    } else {
-                        updateOwnParticipantStatus(session, ctx, objectId, confirm, appointmentSql);
-                    }
-                    appointment.setObjectID(objectId);
-                    appointment.setIgnoreConflicts(true);
-                    updateAppointment(appointment, calendarFolder, appointmentSql);
-                    folderAndIdArray.put(new JSONObject().put(FolderChildFields.FOLDER_ID, calendarFolder).put(DataFields.ID, objectId));
-                } catch (final OXException e) {
-                    if (e.isGeneric(Generic.NO_PERMISSION)) {
-                        handleWithoutPermission(session, appointment, calendarFolder, confirm, appointmentSql);
-                    } else {
-                        throw e;
-                    }
-                }
-            } else {
-                appointment.setParentFolderID(calendarFolder);
-                appointment.setIgnoreConflicts(true);
-                appointmentSql.insertAppointmentObject(appointment);
-                folderAndIdArray.put(new JSONObject().put(FolderChildFields.FOLDER_ID, calendarFolder).put(
-                    DataFields.ID,
-                    appointment.getObjectID()));
-            }
-        }
-    }
-
-    private void updateAppointment(final CalendarDataObject appointment, final int calendarFolder, final AppointmentSQLInterface appointmentSql) throws OXException {
-        try {
-            final CalendarDataObject loadAppointment = appointmentSql.getObjectById(appointment.getObjectID(), calendarFolder);
-            if (loadAppointment.getSequence() >= appointment.getSequence()) {
-                throw OXCalendarExceptionCodes.OUTDATED_SEQUENCE.create();
-            }
-        } catch (final SQLException e) {
-            throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(e);
-        }
-
-        appointmentSql.updateAppointmentObject(appointment, calendarFolder, new Date());
-    }
-
-    private void handleWithoutPermission(final Session session, final CalendarDataObject appointment, final int calendarFolder, final Confirm confirm, final AppointmentSQLInterface appointmentSql) throws OXException {
-        appointment.removeUid();
-        appointment.removeObjectID();
-        appointment.setParentFolderID(calendarFolder);
-
-        boolean found = false;
-        if (appointment.getUsers() != null) {
-            for (UserParticipant up : appointment.getUsers()) {
-                if (up.getIdentifier() == session.getUserId()) {
-                    up.setConfirm(confirm.getConfirm());
-                    up.setConfirmMessage(confirm.getConfirmMessage());
-                }
-            }
-        }
-        if (!found) {
-            UserParticipant self = new UserParticipant(session.getUserId());
-            self.setConfirm(confirm.getConfirm());
-            self.setConfirmMessage(confirm.getConfirmMessage());
-            ArrayList<UserParticipant> ups = new ArrayList<UserParticipant>();
-            ups.add(self);
-            if (appointment.getUsers() != null) {
-                for (UserParticipant up : appointment.getUsers()) {
-                    ups.add(up);
-                }
-            }
-            appointment.setUsers(ups);
-        }
-
-        appointmentSql.insertAppointmentObject(appointment);
-    }
-
-    private void updateOwnParticipantStatus(final Session session, final Context ctx, final int objectId, final Confirm confirm, final AppointmentSQLInterface appSql) throws OXException, OXException {
-        final FolderObject calendarFolder = new OXFolderAccess(ctx).getDefaultFolder(session.getUserId(), FolderObject.CALENDAR);
-        try {
-            final CalendarDataObject loadedObject = appSql.getObjectById(objectId, calendarFolder.getObjectID());
-            final UserParticipant[] users = loadedObject.getUsers();
-            boolean found = false;
-            for (final UserParticipant user : users) {
-                if (user.getIdentifier() == session.getUserId()) {
-                    found = true;
-                    break;
-                }
-            }
-
-            if (found) {
-                try {
-                    appSql.setUserConfirmation(objectId, calendarFolder.getObjectID(), session.getUserId(), confirm.getConfirm(), confirm.getConfirmMessage());
-                } catch (final OXException e) {
-                    throw DataExceptionCodes.UNABLE_TO_CHANGE_DATA.create("Error during confirmation update.");
-                }
-            } else {
-                throw DataExceptionCodes.UNABLE_TO_CHANGE_DATA.create("Object already exists, but user is not participant.");
-            }
-
-        } catch (final SQLException e) {
-            throw DataExceptionCodes.ERROR.create(e, e.getMessage());
-        }
-    }
-
-    /**
-     * @param appointment
-     * @param confirm
-     */
-    private void setConfirmation(final Session session, final CalendarDataObject appointment, final Confirm confirm) {
-        final Participant[] participants = appointment.getParticipants();
-        if (null != participants) {
-            for (final Participant participant : participants) {
-                if (participant.getType() == Participant.USER) {
-                    final UserParticipant user = (UserParticipant) participant;
-                    if (user.getIdentifier() == session.getUserId()) {
-                        user.setConfirm(confirm.getConfirm());
-                        if (confirm.getConfirmMessage() != null) {
-                            user.setConfirmMessage(confirm.getConfirmMessage());
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    protected List<CalendarDataObject> parseAppointmentStream(final Context ctx, final ICalParser iCalParser, final InputStreamCopy inputStreamCopy, final List<ConversionError> conversionErrors, final List<ConversionWarning> conversionWarnings, final TimeZone defaultZone) throws IOException, ConversionError {
-        final InputStream inputStream = inputStreamCopy.getInputStream();
-        try {
-            return iCalParser.parseAppointments(inputStream, defaultZone, ctx, conversionErrors, conversionWarnings).getImportedObjects();
-        } finally {
-            Streams.close(inputStream);
         }
     }
 
