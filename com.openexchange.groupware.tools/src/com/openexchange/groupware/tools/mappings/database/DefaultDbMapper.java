@@ -113,7 +113,7 @@ public abstract class DefaultDbMapper<O, E extends Enum<E>> extends DefaultMappe
 
     @Override
     public List<O> listFromResultSet(ResultSet resultSet, E[] fields) throws OXException, SQLException {
-        List<O> list = new ArrayList<O>();
+        List<O> list = new ArrayList<>();
         while (resultSet.next()) {
             O object = this.newInstance();
             for (E field : fields) {
@@ -163,9 +163,6 @@ public abstract class DefaultDbMapper<O, E extends Enum<E>> extends DefaultMappe
 			throw new IllegalArgumentException("columnLabel");
 		}
         for (Entry<E, ? extends DbMapping<? extends Object, O>> entry : mappings.entrySet()) {
-			if (columnLabel.equals(entry.getValue().getColumnLabel())) {
-				return entry.getKey();
-			}
             if (DbMultiMapping.class.isInstance(entry.getValue())) {
                 for (String column : ((DbMultiMapping<?, ?>) entry.getValue()).getColumnLabels()) {
                     if (columnLabel.equals(column)) {
@@ -173,6 +170,9 @@ public abstract class DefaultDbMapper<O, E extends Enum<E>> extends DefaultMappe
                     }
                 }
             }
+			if (columnLabel.equals(entry.getValue().getColumnLabel())) {
+				return entry.getKey();
+			}
 		}
 		return null;
 	}
@@ -235,7 +235,7 @@ public abstract class DefaultDbMapper<O, E extends Enum<E>> extends DefaultMappe
         if (null == requestedFields) {
             mappedFields = knownFields;
         } else {
-            mappedFields = new HashSet<E>(requestedFields.length);
+            mappedFields = new HashSet<>(requestedFields.length);
             for (E field : requestedFields) {
                 if (knownFields.contains(field)) {
                     mappedFields.add(field);
