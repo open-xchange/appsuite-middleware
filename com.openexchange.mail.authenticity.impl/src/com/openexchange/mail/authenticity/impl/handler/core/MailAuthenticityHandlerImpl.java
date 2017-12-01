@@ -173,7 +173,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
 
             // In case of a DMARC result != "none", set overall result to the DMARC result and continue with the next mechanism
             MailAuthenticityStatus mailAuthStatus = dmarcResult.convert();
-            if (!mailAuthStatus.equals(MailAuthenticityStatus.NONE) && !domainMismatch) {
+            if (!domainMismatch) {
                 overallResult.setStatus(mailAuthStatus);
             }
 
@@ -191,7 +191,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
 
             // In case of a DKIM result != "none", set overall result to the DKIM result and continue with the next mechanism
             MailAuthenticityStatus mailAuthStatus = dkimResult.convert();
-            if (overallResult.getStatus().equals(MailAuthenticityStatus.NEUTRAL) && !mailAuthStatus.equals(MailAuthenticityStatus.NONE) && !domainMismatch) {
+            if (overallResult.getStatus().equals(MailAuthenticityStatus.NEUTRAL) && !domainMismatch) {
                 overallResult.setStatus(mailAuthStatus);
             }
 
@@ -505,7 +505,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
         value = Strings.unquote(value);
         return value.substring(beginIndex + 1, endIndex);
     }
-    
+
     /**
      * Extracts the domain value of the specified key from the specified attributes {@link Map}
      *
