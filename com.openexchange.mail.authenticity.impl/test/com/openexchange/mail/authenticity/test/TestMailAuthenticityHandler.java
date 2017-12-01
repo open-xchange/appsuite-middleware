@@ -250,8 +250,8 @@ public class TestMailAuthenticityHandler {
         assertAmount(3);
 
         List<MailAuthenticityMechanismResult> results = result.getAttribute(DefaultMailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS, List.class);
-        assertAuthenticityMechanismResult(results.get(0), "mail-router.example.net", "\"good signature\"", DKIMResult.PASS);
-        assertAuthenticityMechanismResult(results.get(1), "newyork.example.com", "\"bad signature\"", DKIMResult.FAIL);
+        assertAuthenticityMechanismResult(results.get(0), "mail-router.example.net", "good signature", DKIMResult.PASS);
+        assertAuthenticityMechanismResult(results.get(1), "newyork.example.com", "bad signature", DKIMResult.FAIL);
         assertAuthenticityMechanismResult(results.get(2), "newyork.example.com", "good signature", DKIMResult.PASS);
     }
 
@@ -322,7 +322,7 @@ public class TestMailAuthenticityHandler {
         assertDomain("ox.io", result.getAttribute(DefaultMailAuthenticityResultKey.FROM_DOMAIN, String.class));
         assertAmount(1);
 
-        assertAuthenticityMechanismResult((MailAuthenticityMechanismResult) result.getAttribute(DefaultMailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS, List.class).get(0), "ox.io", "\"1024-bit key; unprotected key\"", DKIMResult.PASS);
+        assertAuthenticityMechanismResult((MailAuthenticityMechanismResult) result.getAttribute(DefaultMailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS, List.class).get(0), "ox.io", "1024-bit key; unprotected key", DKIMResult.PASS);
 
         Map<String, String> unknownMech = (Map) result.getAttribute(DefaultMailAuthenticityResultKey.UNKNOWN_AUTH_MECH_RESULTS, List.class).get(0);
         Map<String, String> expectedUnknownMech = new HashMap<>();
