@@ -198,7 +198,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
             DKIMAuthMechResult result = new DKIMAuthMechResult(domain, dkimResult);
             String reason = extractComment(value);
             if (Strings.isEmpty(reason)) {
-                reason = attributes.get(DKIMResultHeader.REASON);
+                reason = Strings.unquote(attributes.remove(DKIMResultHeader.REASON));
             }
             result.setReason(reason);
             addProperties(attributes, result);
@@ -502,9 +502,10 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
         if (endIndex < 0) {
             return null;
         }
+        value = Strings.unquote(value);
         return value.substring(beginIndex + 1, endIndex);
     }
-
+    
     /**
      * Extracts the domain value of the specified key from the specified attributes {@link Map}
      *
