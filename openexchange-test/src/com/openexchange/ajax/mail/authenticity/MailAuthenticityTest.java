@@ -89,9 +89,9 @@ public class MailAuthenticityTest extends AbstractConfigAwareAPIClientSession {
     private final Map<String, MailDestinationData> IMPORTED_EMAILS = new HashMap<>();
     private Long timestamp = 0l;
 
-    private static final String DKIM = "DKIM";
-    private static final String SPF = "SPF";
-    private static final String DMARC = "DMARC";
+    private static final String DKIM = "dkim";
+    private static final String SPF = "spf";
+    private static final String DMARC = "dmarc";
 
     @Override
     public void setUp() throws Exception {
@@ -167,7 +167,7 @@ public class MailAuthenticityTest extends AbstractConfigAwareAPIClientSession {
                    spf = true;
                    break;
            }
-           Assert.assertEquals("Pass", result.getResult());
+            Assert.assertEquals("pass", result.getResult());
        }
 
        Assert.assertTrue(spf && dmarc && dkim);
