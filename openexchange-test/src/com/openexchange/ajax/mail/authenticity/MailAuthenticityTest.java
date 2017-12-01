@@ -198,7 +198,7 @@ public class MailAuthenticityTest extends AbstractConfigAwareAPIClientSession {
                    spf = true;
                    break;
            }
-           Assert.assertEquals("Fail", result.getResult());
+            Assert.assertEquals("fail", result.getResult());
        }
 
        Assert.assertTrue(spf || dmarc || dkim);
@@ -229,7 +229,7 @@ public class MailAuthenticityTest extends AbstractConfigAwareAPIClientSession {
                    spf = true;
                    break;
            }
-           Assert.assertEquals("None", result.getResult());
+            Assert.assertEquals("none", result.getResult());
        }
 
        Assert.assertTrue(spf && dmarc && dkim);
