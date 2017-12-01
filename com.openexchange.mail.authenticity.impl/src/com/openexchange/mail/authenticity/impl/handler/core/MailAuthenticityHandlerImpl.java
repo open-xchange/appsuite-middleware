@@ -376,7 +376,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
             unknownResults.put(attributes.get(index).getKey(), attributes.get(index).getValue());
         }
 
-        if (!unknownResults.containsKey("comment")) {
+        if (!unknownResults.containsKey("reason")) {
             String reason = extractComment(mechanism.getValue());
             if (!Strings.isEmpty(reason)) {
                 unknownResults.put("reason", reason);
