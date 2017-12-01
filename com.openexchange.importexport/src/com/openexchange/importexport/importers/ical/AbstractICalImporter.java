@@ -50,6 +50,7 @@
 package com.openexchange.importexport.importers.ical;
 
 import java.util.Map;
+import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -60,11 +61,13 @@ import com.openexchange.tools.session.ServerSession;
  */
 public abstract class AbstractICalImporter implements ICalImport {
 
-    ServerSession session;
+    private ServerSession session;
+    private UserizedFolder userizedFolder;
 
-    public AbstractICalImporter(ServerSession session) {
+    public AbstractICalImporter(ServerSession session, UserizedFolder userizedFolder) {
         super();
         this.session = session;
+        this.userizedFolder = userizedFolder;
     }
 
     /**
@@ -81,6 +84,14 @@ public abstract class AbstractICalImporter implements ICalImport {
             }
         }
         return false;
+    }
+
+    public ServerSession getSession() {
+        return session;
+    }
+
+    public UserizedFolder getUserizedFolder() {
+        return userizedFolder;
     }
 
 }

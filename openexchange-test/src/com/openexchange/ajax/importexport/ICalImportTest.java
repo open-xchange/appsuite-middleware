@@ -76,7 +76,7 @@ public class ICalImportTest extends AbstractICalTest {
         icalText.append("PRODID:OPEN-XCHANGE").append('\n');
 
         icalText.append("BEGIN:VEVENT").append('\n');
-        icalText.append("CLASS:SUPERCALIFRAGILISTICEXPLIALIDOCIOUS").append('\n');
+        icalText.append("CLASS:SUPERCALIFRAGILISTICEXPLIALIDOCIOUSSUPERCALIFRAGILISTICEXPLIALIDOCIOUSSUPERCALIFRAGILISTICEXPLIALIDOCIOUSSUPERCALIFRAGILISTICEXPLIALIDOCIOUSSUPERCALIFRAGILISTICEXPLIALIDOCIOUSSUPERCALIFRAGILISTICEXPLIALIDOCIOUS").append('\n');
         icalText.append("DTSTART:20070101T080000Z").append('\n');
         icalText.append("DTEND:20070101T100000Z").append('\n');
         icalText.append("SUMMARY: appointmentWithWarnings ICalImportTest#testWarnings " + System.currentTimeMillis()).append('\n');

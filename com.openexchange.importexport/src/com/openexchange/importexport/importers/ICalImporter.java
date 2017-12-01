@@ -64,7 +64,6 @@ import com.openexchange.folderstorage.database.contentType.TaskContentType;
 import com.openexchange.groupware.importexport.ImportResult;
 import com.openexchange.importexport.exceptions.ImportExportExceptionCodes;
 import com.openexchange.importexport.formats.Format;
-import com.openexchange.importexport.importers.ical.ICalCompositeEventImporter;
 import com.openexchange.importexport.importers.ical.ICalEventImporter;
 import com.openexchange.importexport.importers.ical.ICalImport;
 import com.openexchange.importexport.importers.ical.ICalTaskImporter;
@@ -135,15 +134,13 @@ public class ICalImporter extends AbstractImporter {
 		final List<ImportResult> list = new ArrayList<>();
         ICalImport importer;
         if (TaskContentType.getInstance().equals(userizedFolder.getContentType())) {
-            importer = new ICalTaskImporter(session);
-        } else if (null != userizedFolder.getAccountID()) {
-            importer = new ICalCompositeEventImporter(session);
-        } else if (null == userizedFolder.getAccountID()) {
-            importer = new ICalEventImporter(session);
+            importer = new ICalTaskImporter(session, userizedFolder);
+        } else if (null != userizedFolder.getAccountID() || null == userizedFolder.getAccountID()) {
+            importer = new ICalEventImporter(session, userizedFolder);
         } else {
             throw ImportExportExceptionCodes.CANNOT_IMPORT.create(format, userizedFolder.getID());
         }
-        truncationInfo = importer.importData(userizedFolder, is, list, optionalParams);
+        truncationInfo = importer.importData(is, list, optionalParams);
 		return new DefaultImportResults(list, truncationInfo);
 	}
 

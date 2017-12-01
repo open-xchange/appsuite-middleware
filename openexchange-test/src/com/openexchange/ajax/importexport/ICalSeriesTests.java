@@ -50,10 +50,8 @@
 package com.openexchange.ajax.importexport;
 
 import static org.junit.Assert.assertEquals;
-import java.io.IOException;
 import java.util.Date;
 import java.util.TimeZone;
-import org.json.JSONException;
 import org.junit.Test;
 import com.openexchange.ajax.appointment.action.AllRequest;
 import com.openexchange.ajax.appointment.action.GetRequest;
@@ -62,7 +60,6 @@ import com.openexchange.ajax.appointment.recurrence.ManagedAppointmentTest;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.ajax.importexport.actions.ICalImportRequest;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Appointment;
 
@@ -76,7 +73,7 @@ public class ICalSeriesTests extends ManagedAppointmentTest {
     }
 
     @Test
-    public void testDeleteException() throws OXException, IOException, JSONException {
+    public void testDeleteException() throws Exception {
         String ical = "BEGIN:VCALENDAR\n" + "VERSION:2.0\n" + "BEGIN:VEVENT\n" + "DTSTART;TZID=Europe/Rome:20100202T103000\n" + "DTEND;TZID=Europe/Rome:20100202T120000\n" + "RRULE:FREQ=DAILY;UNTIL=20100204T215959Z\n" + "EXDATE:20100203T103000\n" + "DTSTAMP:20110105T174810Z\n" + "SUMMARY:Exceptional Meeting #1\n" + "END:VEVENT\n";
 
         AJAXClient client = getClient();
@@ -99,16 +96,16 @@ public class ICalSeriesTests extends ManagedAppointmentTest {
         String title = "Change to exceptional meeting #3: One hour later";
         String ical = "BEGIN:VCALENDAR\n" + "VERSION:2.0\n" +
 
-            "BEGIN:VEVENT\n" + "DTSTART;TZID=Europe/Rome:20171009T080000\n" + "DTEND;TZID=Europe/Rome:20171009T090000\n" + "DTSTAMP:20171012T140049Z\n" + "SUMMARY:" + title + "\n" +"RECURRENCE-ID:20171010T060000Z" + "\n" + "UID:" + uid + "\n" + "END:VEVENT\n" +
+            "BEGIN:VEVENT\n" + "DTSTART;TZID=Europe/Rome:20171010T080000\n" + "DTEND;TZID=Europe/Rome:20171010T100000\n" + "DTSTAMP:20171012T140049Z\n" + "SUMMARY:" + title + "\n" +"RECURRENCE-ID:20171010T060000Z" + "\n" + "UID:" + uid + "\n" + "END:VEVENT\n" +
 
-            "BEGIN:VEVENT\n" + "DTSTART;TZID=Europe/Rome:20171009T080000\n" + "DTEND;TZID=Europe/Rome:20171009T090000\n" + "RRULE:FREQ=DAILY;UNTIL=20171013T215959Z\n" + "DTSTAMP:20110105T174810Z\n" + "SUMMARY:Exceptional meeting #3\n" + "UID:" + uid + "\n" + "END:VEVENT\n";
+            "BEGIN:VEVENT\n" + "DTSTART;TZID=Europe/Rome:20171009T080000\n" + "DTEND;TZID=Europe/Rome:20171009T090000\n" + "RRULE:FREQ=DAILY;UNTIL=20171013T215959Z\n" + "DTSTAMP:20171012T140049Z\n" + "SUMMARY:Exceptional meeting #3\n" + "UID:" + uid + "\n" + "END:VEVENT\n";
 
         TimeZone tz = TimeZone.getTimeZone("GMT");
 
-        Date start = D("2017-10-09 08:00", tz);
-        Date end = D("2017-10-09 09:00", tz);
+        Date start = D("2017-10-10 00:00", tz);
+        Date end = D("2017-10-11 00:00", tz);
 
-        testChangeException(ical, title, start, end, 2);
+        testChangeException(ical, title, start, end, 1);
     }
 
     @Test

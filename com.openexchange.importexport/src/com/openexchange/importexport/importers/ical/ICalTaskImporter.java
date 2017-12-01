@@ -93,19 +93,19 @@ public class ICalTaskImporter extends AbstractICalImporter {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ICalTaskImporter.class);
 
-    public ICalTaskImporter(ServerSession session) {
-        super(session);
+    public ICalTaskImporter(ServerSession session, UserizedFolder userizedFolder) {
+        super(session, userizedFolder);
     }
 
     @Override
-    public TruncationInfo importData(UserizedFolder userizedFolder, InputStream is, List<ImportResult> list, Map<String, String[]> optionalParams) throws OXException {
+    public TruncationInfo importData(InputStream is, List<ImportResult> list, Map<String, String[]> optionalParams) throws OXException {
         final List<ConversionError> errors = new ArrayList<>();
         final List<ConversionWarning> warnings = new ArrayList<>();
-        final TasksSQLInterface taskInterface = retrieveTaskInterface(Integer.parseInt(userizedFolder.getID()), session);
+        final TasksSQLInterface taskInterface = retrieveTaskInterface(Integer.parseInt(getUserizedFolder().getID()), getSession());
         final ICalParser parser = ImportExportServices.getIcalParser();
-        final Context ctx = session.getContext();
-        final TimeZone defaultTz = TimeZoneUtils.getTimeZone(UserStorage.getInstance().getUser(session.getUserId(), ctx).getTimeZone());
-        return importTask(is, optionalParams, Integer.parseInt(userizedFolder.getID()), taskInterface, parser, ctx, defaultTz, list, errors, warnings);
+        final Context ctx = getSession().getContext();
+        final TimeZone defaultTz = TimeZoneUtils.getTimeZone(UserStorage.getInstance().getUser(getSession().getUserId(), ctx).getTimeZone());
+        return importTask(is, optionalParams, Integer.parseInt(getUserizedFolder().getID()), taskInterface, parser, ctx, defaultTz, list, errors, warnings);
     }
 
     private TruncationInfo importTask(final InputStream is, final Map<String, String[]> optionalParams, final int taskFolderId,
