@@ -58,10 +58,10 @@ import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.mail.MailFetchListener;
 import com.openexchange.mail.authenticity.MailAuthenticityHandler;
 import com.openexchange.mail.authenticity.MailAuthenticityHandlerRegistry;
+import com.openexchange.mail.authenticity.MailAuthenticityProperty;
 import com.openexchange.mail.authenticity.impl.handler.core.MailAuthenticityFetchListener;
 import com.openexchange.mail.authenticity.impl.handler.core.MailAuthenticityHandlerImpl;
 import com.openexchange.mail.authenticity.impl.handler.core.MailAuthenticityHandlerRegistryImpl;
-import com.openexchange.mail.authenticity.impl.handler.core.MailAuthenticityProperty;
 import com.openexchange.mail.authenticity.impl.handler.domain.TrustedDomainService;
 import com.openexchange.mail.authenticity.impl.handler.domain.internal.TrustedDomainAuthenticityHandler;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -118,11 +118,7 @@ public class MailAuthenticityActivator extends HousekeepingActivator {
 
             @Override
             public Interests getInterests() {
-                return Reloadables.interestsForProperties(
-                    MailAuthenticityProperty.enabled.getFQPropertyName(),
-                    MailAuthenticityProperty.threshold.getFQPropertyName(),
-                    MailAuthenticityProperty.authServId.getFQPropertyName()
-                );
+                return Reloadables.interestsForProperties(MailAuthenticityProperty.enabled.getFQPropertyName(), MailAuthenticityProperty.threshold.getFQPropertyName(), MailAuthenticityProperty.authServId.getFQPropertyName());
             }
         });
 

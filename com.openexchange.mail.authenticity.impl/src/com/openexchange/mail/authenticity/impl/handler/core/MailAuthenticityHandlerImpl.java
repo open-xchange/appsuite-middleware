@@ -74,6 +74,7 @@ import com.openexchange.mail.authenticity.AllowedAuthServId;
 import com.openexchange.mail.authenticity.DefaultMailAuthenticityResultKey;
 import com.openexchange.mail.authenticity.MailAuthenticityExceptionCodes;
 import com.openexchange.mail.authenticity.MailAuthenticityHandler;
+import com.openexchange.mail.authenticity.MailAuthenticityProperty;
 import com.openexchange.mail.authenticity.MailAuthenticityStatus;
 import com.openexchange.mail.authenticity.impl.handler.domain.TrustedDomainService;
 import com.openexchange.mail.authenticity.mechanism.DefaultMailAuthenticityMechanism;

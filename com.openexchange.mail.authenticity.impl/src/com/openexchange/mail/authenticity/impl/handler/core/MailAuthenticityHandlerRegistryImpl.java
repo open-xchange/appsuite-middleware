@@ -63,6 +63,7 @@ import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.authenticity.MailAuthenticityHandler;
 import com.openexchange.mail.authenticity.MailAuthenticityHandlerRegistry;
+import com.openexchange.mail.authenticity.MailAuthenticityProperty;
 import com.openexchange.mail.authenticity.impl.handler.threshold.ThresholdAwareAuthenticityHandler;
 import com.openexchange.session.Session;
 import com.openexchange.session.UserAndContext;
