@@ -552,7 +552,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                 result.put(key.getKey(), object);
             }
         }
-        result.put("status", authenticationResult.getStatus().name());
+        result.put("status", authenticationResult.getStatus().getTechnicalName());
         return result;
     }
 
