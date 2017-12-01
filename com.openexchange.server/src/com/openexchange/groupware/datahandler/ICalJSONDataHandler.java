@@ -156,39 +156,34 @@ public final class ICalJSONDataHandler implements DataHandler {
         final TimeZone timeZone;
         {
             final String timeZoneId = dataArguments.get("com.openexchange.groupware.calendar.timezone");
-            timeZone =
-                TimeZoneUtils.getTimeZone(null == timeZoneId ? UserStorage.getInstance().getUser(session.getUserId(), ctx).getTimeZone() : timeZoneId);
+            timeZone = TimeZoneUtils.getTimeZone(null == timeZoneId ? UserStorage.getInstance().getUser(session.getUserId(), ctx).getTimeZone() : timeZoneId);
         }
         ServerSession serverSession = ServerSessionAdapter.valueOf(session);
         try {
+            /*
+             * Start parsing appointments
+             */
+            InputStream stream = null;
+            try {
+                ICalService iCalService = ServerServiceRegistry.getServize(ICalService.class, true);
+                stream = inputStreamCopy.getInputStream();
+                ImportedCalendar calendar = iCalService.importICal(stream, null);
+                events = calendar.getEvents();
+            } finally {
+                if (null != stream) {
+                    stream.close();
+                }
+            }
             /*
              * Errors and warnings
              */
             final List<ConversionError> conversionErrors = new ArrayList<ConversionError>(4);
             final List<ConversionWarning> conversionWarnings = new ArrayList<ConversionWarning>(4);
-            {
-                /*
-                 * Start parsing appointments
-                 */
-                InputStream stream = null;
-                try {
-                    ICalService iCalService = ServerServiceRegistry.getServize(ICalService.class, true);
-                    stream = inputStreamCopy.getInputStream();
-                    ImportedCalendar calendar = iCalService.importICal(stream, null);
-                    events = calendar.getEvents();
-                } finally {
-                    if (null != stream) {
-                        stream.close();
-                    }
-                }
-                // TODO: Handle errors/warnings
-                conversionErrors.clear();
-                conversionWarnings.clear();
-                /*
-                 * Start parsing tasks
-                 */
-                tasks = parseTaskStream(ctx, iCalParser, inputStreamCopy, conversionErrors, conversionWarnings, timeZone);
-            }
+            /*
+             * Start parsing tasks
+             */
+            tasks = parseTaskStream(ctx, iCalParser, inputStreamCopy, conversionErrors, conversionWarnings, timeZone);
+            // TODO: Handle errors/warnings
         } catch (final IOException e) {
             throw DataExceptionCodes.ERROR.create(e, e.getMessage());
         } finally {
@@ -281,8 +276,7 @@ public final class ICalJSONDataHandler implements DataHandler {
         }
 
         public InputStream getInputStream() throws IOException {
-            return bytes == null ? (file == null ? null : (new BufferedInputStream(new FileInputStream(file), DEFAULT_BUF_SIZE))) : (new UnsynchronizedByteArrayInputStream(
-                bytes));
+            return bytes == null ? (file == null ? null : (new BufferedInputStream(new FileInputStream(file), DEFAULT_BUF_SIZE))) : (new UnsynchronizedByteArrayInputStream(bytes));
         }
 
         public void close() {
@@ -309,7 +303,7 @@ public final class ICalJSONDataHandler implements DataHandler {
             out.close();
             return bytes.length;
         }
-        
+
         @SuppressWarnings("unused")
         public long getSize() {
             return size;
@@ -318,8 +312,7 @@ public final class ICalJSONDataHandler implements DataHandler {
         private long copy2File(final InputStream in) throws IOException {
             long totalBytes = 0;
             {
-                final File tmpFile =
-                    File.createTempFile(FILE_PREFIX, null, new File(ServerConfig.getProperty(ServerConfig.Property.UploadDirectory)));
+                final File tmpFile = File.createTempFile(FILE_PREFIX, null, new File(ServerConfig.getProperty(ServerConfig.Property.UploadDirectory)));
                 tmpFile.deleteOnExit();
                 OutputStream out = null;
                 try {
