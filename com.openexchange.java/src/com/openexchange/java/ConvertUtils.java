@@ -73,6 +73,10 @@ public class ConvertUtils {
      * @return The converted argument
      */
     public static String saveConvert(String arg, boolean escapeSpace, boolean escapeUnicode) {
+        if (Strings.isEmpty(arg)) {
+            return arg;
+        }
+
         int len = arg.length();
 
         StringBuilder sb = null;
