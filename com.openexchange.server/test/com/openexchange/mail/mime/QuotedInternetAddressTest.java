@@ -70,6 +70,21 @@ public class QuotedInternetAddressTest {
     }
 
     @Test
+    public void testBug52107() throws Exception {
+        QuotedInternetAddress addr = new QuotedInternetAddress("(just a comment) \"Doe, Jane (JD)\" <doe.jane@domain.de>", true);
+        assertEquals("Unexpected personal", "Doe, Jane (JD)", addr.getPersonal());
+        assertEquals("Unexpected address", "doe.jane@domain.de", addr.getAddress());
+
+        addr = new QuotedInternetAddress("(just a comment(with more) inside) \"Doe, Jane (JD)\" <doe.jane@domain.de>", true);
+        assertEquals("Unexpected personal", "Doe, Jane (JD)", addr.getPersonal());
+        assertEquals("Unexpected address", "doe.jane@domain.de", addr.getAddress());
+
+        addr = new QuotedInternetAddress("(just a comment(with more) inside) \"Doe, Jane (JD)\" (in the mid) <doe.jane@domain.de> (last comment)", true);
+        assertEquals("Unexpected personal", "Doe, Jane (JD)", addr.getPersonal());
+        assertEquals("Unexpected address", "doe.jane@domain.de", addr.getAddress());
+    }
+
+    @Test
     public void testBug55360_2() throws Exception {
         try {
             QuotedInternetAddress addr = new QuotedInternetAddress("=?utf-8?b?c2VydmljZUBwYXlwYWwuY29tKFBheVBhbClgYGA=?==?utf-8?Q?=0A=00?=@pwnsdx.pw", false);
