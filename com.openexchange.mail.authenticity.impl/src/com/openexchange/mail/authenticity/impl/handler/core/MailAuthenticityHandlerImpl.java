@@ -227,6 +227,11 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
         authServIdsCache.invalidateAll();
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.mail.authenticity.MailAuthenticityHandler#handle(com.openexchange.session.Session, com.openexchange.mail.dataobjects.MailMessage)
+     */
     @Override
     public void handle(Session session, MailMessage mailMessage) throws OXException {
         HeaderCollection headerCollection = mailMessage.getHeaders();
@@ -294,6 +299,16 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
 
     ///////////////////////////////////// HELPERS ///////////////////////////////////////
 
+    /**
+     * Performs the parsing magic of the specified <code>Authentication-Results</code> headers and <code>From</code> header and
+     * returns the overall {@link MailAuthenticityResult}
+     * 
+     * @param authenticationHeaders The <code>Authentication-Results</code> headers
+     * @param fromHeader The <code>From</code> header
+     * @param session The groupware {@link Session}
+     * @return The overall {@link MailAuthenticityResult}
+     * @throws OXException if the allowed authserv-ids cannot be retrieved from the configuration
+     */
     private MailAuthenticityResult parseHeaders(List<String> authenticationHeaders, String fromHeader, Session session) throws OXException {
         List<AllowedAuthServId> allowedAuthServIds = getAllowedAuthServIds(session);
 
@@ -337,8 +352,12 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
     }
 
     /**
-     * @param elements
-     * @param overallResult
+     * Parses the mechanisms (known and unknown) and adds the results to their respective {@link List}s
+     * 
+     * @param elements A {@link List} with the elements of a single <code>Authentication-Results</code> header.
+     * @param results A {@link List} with the results of the known mechanisms
+     * @param unknownResults A {@link List} with the unknown results
+     * @param overallResult The overall {@link MailAuthenticityResult}
      */
     private void parseMechanisms(List<String> elements, List<MailAuthenticityMechanismResult> results, List<Map<String, String>> unknownResults, MailAuthenticityResult overallResult) {
         Collections.sort(elements, MAIL_AUTH_COMPARATOR);
@@ -362,12 +381,14 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
     }
 
     /**
-     * @param attributes
-     * @param overallResult
+     * Parses the unknown mechanism's attributes and returns those as a {@link Map}
+     * 
+     * @param attributes The attributes to parse
+     * @return A {@link Map} with the parsed attributes of the unknown mechanism
      */
     private Map<String, String> parseUnknownMechs(List<MailAuthenticityAttribute> attributes) {
-        // First element is always the mechanism
         Map<String, String> unknownResults = new HashMap<>();
+        // First element is always the mechanism
         MailAuthenticityAttribute mechanism = attributes.get(0);
         unknownResults.put("mechanism", mechanism.getKey());
         unknownResults.put("result", extractOutcome(mechanism.getValue()));
