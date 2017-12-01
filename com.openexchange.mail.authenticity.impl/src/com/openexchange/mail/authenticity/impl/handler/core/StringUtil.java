@@ -60,7 +60,41 @@ import com.openexchange.mail.authenticity.MailAuthenticityAttribute;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
+@SuppressWarnings("unchecked")
 class StringUtil {
+
+    private static interface CollectorAdder {
+
+        /**
+         * Adds the specified key/value to the specified {@link T} collector
+         * 
+         * @param key The key
+         * @param value The value
+         * @param collector The {@link T} collector
+         */
+        <T> void add(String key, String value, T collector);
+    }
+
+    private static final Map<Class<?>, CollectorAdder> collectorAdders = new HashMap<>();
+    static {
+        collectorAdders.put(HashMap.class, new CollectorAdder() {
+
+            @Override
+            public <T> void add(String key, String value, T collector) {
+                Map<String, String> m = (Map<String, String>) collector;
+                m.put(key, value);
+            }
+        });
+
+        collectorAdders.put(ArrayList.class, new CollectorAdder() {
+
+            @Override
+            public <T> void add(String key, String value, T collector) {
+                List<MailAuthenticityAttribute> l = (List<MailAuthenticityAttribute>) collector;
+                l.add(new MailAuthenticityAttribute(key, value));
+            }
+        });
+    }
 
     /**
      * Parses the specified element as a key/value {@link Map}
@@ -175,15 +209,11 @@ class StringUtil {
      * @param collector The {@link T} collector
      */
     private static <T> void add(String key, String value, T collector) {
-        if (collector instanceof Map) {
-            Map<String, String> m = (Map<String, String>) collector;
-            m.put(key, value);
-        } else if (collector instanceof List) {
-            List<MailAuthenticityAttribute> l = (List<MailAuthenticityAttribute>) collector;
-            l.add(new MailAuthenticityAttribute(key, value));
-        } else {
+        CollectorAdder collectorAdder = collectorAdders.get(collector.getClass());
+        if (collectorAdder == null) {
             throw new IllegalArgumentException("Unsupported collector type '" + collector.getClass() + "'");
         }
+        collectorAdder.add(key, value, collector);
     }
 
     /**
