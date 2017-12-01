@@ -190,7 +190,8 @@ public class TestMailAuthenticityHandler {
 
         Map<String, String> unknownMech = (Map) result.getAttribute(DefaultMailAuthenticityResultKey.UNKNOWN_AUTH_MECH_RESULTS, List.class).get(0);
         Map<String, String> expectedUnknownMech = new HashMap<>();
-        expectedUnknownMech.put("result", "pass (cram-md5)");
+        expectedUnknownMech.put("result", "pass");
+        expectedUnknownMech.put("reason", "cram-md5");
         expectedUnknownMech.put("mechanism", "auth");
         expectedUnknownMech.put("smtp.auth", "sender@example.net");
         assertEquals(expectedUnknownMech, unknownMech);
@@ -228,8 +229,9 @@ public class TestMailAuthenticityHandler {
 
         unknownMech = (Map) result.getAttribute(DefaultMailAuthenticityResultKey.UNKNOWN_AUTH_MECH_RESULTS, List.class).get(1);
         expectedUnknownMech.clear();
-        expectedUnknownMech.put("result", "pass (cram-md5)");
+        expectedUnknownMech.put("result", "pass");
         expectedUnknownMech.put("mechanism", "auth");
+        expectedUnknownMech.put("reason", "cram-md5");
         expectedUnknownMech.put("smtp.auth", "sender@example.com");
         assertEquals(expectedUnknownMech, unknownMech);
     }
