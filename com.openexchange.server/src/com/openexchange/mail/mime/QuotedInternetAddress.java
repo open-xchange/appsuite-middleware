@@ -253,34 +253,49 @@ public final class QuotedInternetAddress extends InternetAddress {
         return l.toArray(new InternetAddress[l.size()]);
     }
 
-    /*
-     * RFC822 Address parser. XXX - This is complex enough that it ought to be a real parser, not this ad-hoc mess, and because of that,
-     * this is not perfect. XXX - Deal with encoded Headers too.
-     */
-    private static InternetAddress[] parse(String str, boolean strict, boolean parseHdr, boolean decodeFirst) throws AddressException {
-        int start, end, index, nesting;
-        int start_personal = -1, end_personal = -1;
-        String s = init(decodeFirst ? MimeMessageUtility.decodeMultiEncodedHeader(str) : str);
-        boolean ignoreErrors = parseHdr && !strict;
-        
-        for (int pos; (pos = s.indexOf('(')) >= 0;) {
-            int i = pos;
+    private static String dropComments(String str, boolean ignoreErrors) throws AddressException {
+        String s = str;
+        boolean nextRun = true;
+        int start = 0;
+        while (nextRun) {
+            boolean lookForBracket = true;
+            boolean found = false;
+            boolean quoted = false;
+            int pos = 0;
+            int nest = 0;
             int length = s.length();
-            int nest;
-            for (i++, nest = 1; i < length && nest > 0; i++) {
+            int i;
+            for (i = start; lookForBracket && i < length; i++) {
                 char c = s.charAt(i);
                 switch (c) {
-                case '\\':
-                    i++; // skip both '\' and the escaped char
-                    break;
-                case '(':
-                    nest++;
-                    break;
-                case ')':
-                    nest--;
-                    break;
-                default:
-                    break;
+                    case '\\':
+                        i++; // skip both; '\' and the escaped character
+                        break;
+                    case '"':
+                        quoted = !quoted;
+                        break;
+                    case '(':
+                        if (!quoted) {
+                            nest++;
+                            if (nest == 1) {
+                                found = true;
+                                pos = i;
+                            }
+                        }
+                        break;
+                    case ')':
+                        if (!quoted) {
+                            nest--;
+                            if (nest == 0) {
+                                i++; // Skip closing bracket
+                                s = s.substring(0, pos) + s.substring(i);
+                                lookForBracket = false;
+                                start = pos + 1;
+                            }
+                        }
+                        break;
+                    default:
+                        break;
                 }
             }
             if (nest > 0) {
@@ -290,15 +305,30 @@ public final class QuotedInternetAddress extends InternetAddress {
                 // pretend the first paren was a regular character and
                 // continue parsing after it
                 i = pos + 1;
-                break;
+                if (i < length) {
+                    s = s.substring(0, pos) + s.substring(i);
+                } else {
+                    s = s.substring(0, pos);
+                }
             }
-            if (i < length) {                
-                s = s.substring(0, pos) + s.substring(i);
-            } else {
-                s = s.substring(0, pos);
+            if (!found) {
+                nextRun = false;
             }
         }
+        return s;
+    }
 
+    /*
+     * RFC822 Address parser. XXX - This is complex enough that it ought to be a real parser, not this ad-hoc mess, and because of that,
+     * this is not perfect. XXX - Deal with encoded Headers too.
+     */
+    private static InternetAddress[] parse(String str, boolean strict, boolean parseHdr, boolean decodeFirst) throws AddressException {
+        int start, end, index, nesting;
+        int start_personal = -1, end_personal = -1;
+        String s = init(decodeFirst ? MimeMessageUtility.decodeMultiEncodedHeader(str) : str);
+        boolean ignoreErrors = parseHdr && !strict;
+
+        s = dropComments(s, ignoreErrors);
         int length = s.length();
         List<InternetAddress> list = new LinkedList<InternetAddress>();
         boolean in_group = false; // we're processing a group term
