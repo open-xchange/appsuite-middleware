@@ -53,7 +53,7 @@ properties:
       status:
         type: string
         description: The overall authenticity status
-        enum: ["pass", "neutral","fail"]
+        enum: ["pass", "neutral","fail","not-analyzed"]
 
 
 
