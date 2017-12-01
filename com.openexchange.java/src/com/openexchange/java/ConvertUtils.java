@@ -219,9 +219,8 @@ public class ConvertUtils {
                             sb = initBuilderIfNeeded(sb, len, arg, st);
                             sb.append(aChar);
                         } else {
-                            if (null != sb) {
-                                sb.append(aChar);
-                            }
+                            sb = initBuilderIfNeeded(sb, len, arg, st);
+                            sb.append(aChar);
                         }
                     }
                 } else {
