@@ -56,6 +56,7 @@ import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.junit.Before;
@@ -86,6 +87,7 @@ import com.openexchange.session.Session;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
+@SuppressWarnings({ "unchecked", "rawtypes" })
 @RunWith(PowerMockRunner.class)
 public class TestMailAuthenticityHandler {
 
@@ -187,10 +189,18 @@ public class TestMailAuthenticityHandler {
         assertAuthenticityMechanismResult((MailAuthenticityMechanismResult) result.getAttribute(DefaultMailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS, List.class).get(0), "example.net", SPFResult.PASS);
 
         Map<String, String> unknownMech = (Map) result.getAttribute(DefaultMailAuthenticityResultKey.UNKNOWN_AUTH_MECH_RESULTS, List.class).get(0);
-        assertEquals("ox.io; auth=pass (cram-md5) smtp.auth=sender@example.net", unknownMech);
+        Map<String, String> expectedUnknownMech = new HashMap<>();
+        expectedUnknownMech.put("result", "pass (cram-md5)");
+        expectedUnknownMech.put("mechanism", "auth");
+        expectedUnknownMech.put("smtp.auth", "sender@example.net");
+        assertEquals(expectedUnknownMech, unknownMech);
 
         unknownMech = (Map) result.getAttribute(DefaultMailAuthenticityResultKey.UNKNOWN_AUTH_MECH_RESULTS, List.class).get(1);
-        assertEquals("ox.io; sender-id=pass header.from=example.net", unknownMech);
+        expectedUnknownMech.clear();
+        expectedUnknownMech.put("result", "pass");
+        expectedUnknownMech.put("mechanism", "sender-id");
+        expectedUnknownMech.put("header.from", "example.net");
+        assertEquals(expectedUnknownMech, unknownMech);
 
     }
 
@@ -210,10 +220,18 @@ public class TestMailAuthenticityHandler {
         assertAuthenticityMechanismResult((MailAuthenticityMechanismResult) result.getAttribute(DefaultMailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS, List.class).get(0), "example.com", "good signature", DKIMResult.PASS);
 
         Map<String, String> unknownMech = (Map) result.getAttribute(DefaultMailAuthenticityResultKey.UNKNOWN_AUTH_MECH_RESULTS, List.class).get(0);
-        assertEquals("ox.io; sender-id=fail header.from=example.com", unknownMech);
+        Map<String, String> expectedUnknownMech = new HashMap<>();
+        expectedUnknownMech.put("result", "fail");
+        expectedUnknownMech.put("mechanism", "sender-id");
+        expectedUnknownMech.put("header.from", "example.com");
+        assertEquals(expectedUnknownMech, unknownMech);
 
         unknownMech = (Map) result.getAttribute(DefaultMailAuthenticityResultKey.UNKNOWN_AUTH_MECH_RESULTS, List.class).get(1);
-        assertEquals("ox.io; auth=pass (cram-md5) smtp.auth=sender@example.com", unknownMech);
+        expectedUnknownMech.clear();
+        expectedUnknownMech.put("result", "pass (cram-md5)");
+        expectedUnknownMech.put("mechanism", "auth");
+        expectedUnknownMech.put("smtp.auth", "sender@example.com");
+        assertEquals(expectedUnknownMech, unknownMech);
     }
 
     /**
@@ -305,7 +323,16 @@ public class TestMailAuthenticityHandler {
         assertAuthenticityMechanismResult((MailAuthenticityMechanismResult) result.getAttribute(DefaultMailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS, List.class).get(0), "ox.io", "\"1024-bit key; unprotected key\"", DKIMResult.PASS);
 
         Map<String, String> unknownMech = (Map) result.getAttribute(DefaultMailAuthenticityResultKey.UNKNOWN_AUTH_MECH_RESULTS, List.class).get(0);
-        assertEquals("ox.io; dkim-adsp=pass; dkim-atps=neutral", unknownMech);
+        Map<String, String> expectedUnknownMech = new HashMap<>();
+        expectedUnknownMech.put("result", "pass");
+        expectedUnknownMech.put("mechanism", "dkim-adsp");
+        assertEquals(expectedUnknownMech, unknownMech);
+
+        unknownMech = (Map) result.getAttribute(DefaultMailAuthenticityResultKey.UNKNOWN_AUTH_MECH_RESULTS, List.class).get(1);
+        expectedUnknownMech.clear();
+        expectedUnknownMech.put("result", "neutral");
+        expectedUnknownMech.put("mechanism", "dkim-atps");
+        assertEquals(expectedUnknownMech, unknownMech);
     }
 
     /**
@@ -342,8 +369,8 @@ public class TestMailAuthenticityHandler {
         assertStatus(MailAuthenticityStatus.NEUTRAL, result.getStatus());
 
         assertTrue("The from domain does not match", result.getAttribute(DefaultMailAuthenticityResultKey.FROM_DOMAIN) == null);
-        assertTrue("The mail authentication mechanism results do not match", result.getAttribute(DefaultMailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS) == null);
-        assertTrue("The unknown mail authentication mechanism results do not match", result.getAttribute(DefaultMailAuthenticityResultKey.UNKNOWN_AUTH_MECH_RESULTS) == null);
+        assertTrue("The mail authentication mechanism results do not match", result.getAttribute(DefaultMailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS, List.class).isEmpty());
+        assertTrue("The unknown mail authentication mechanism results do not match", result.getAttribute(DefaultMailAuthenticityResultKey.UNKNOWN_AUTH_MECH_RESULTS, List.class).isEmpty());
     }
 
     /**
@@ -358,8 +385,8 @@ public class TestMailAuthenticityHandler {
         assertStatus(MailAuthenticityStatus.NEUTRAL, result.getStatus());
 
         assertTrue("The from domain does not match", result.getAttribute(DefaultMailAuthenticityResultKey.FROM_DOMAIN) == null);
-        assertTrue("The mail authentication mechanism results do not match", result.getAttribute(DefaultMailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS) == null);
-        assertTrue("The unknown mail authentication mechanism results do not match", result.getAttribute(DefaultMailAuthenticityResultKey.UNKNOWN_AUTH_MECH_RESULTS) == null);
+        assertTrue("The mail authentication mechanism results do not match", result.getAttribute(DefaultMailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS, List.class).isEmpty());
+        assertTrue("The unknown mail authentication mechanism results do not match", result.getAttribute(DefaultMailAuthenticityResultKey.UNKNOWN_AUTH_MECH_RESULTS, List.class).isEmpty());
     }
 
     /**
