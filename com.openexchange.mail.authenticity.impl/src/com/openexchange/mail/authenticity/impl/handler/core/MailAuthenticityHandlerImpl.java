@@ -244,13 +244,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
             return;
         }
 
-        //List<AllowedAuthServId> allowedAuthServIds = getAllowedAuthServIds(session);
-        //mailMessage.setAuthenticityResult(parseHeaders(authHeaders, fromHeaders[0], allowedAuthServIds));
-        List<String> ah = new ArrayList<>();
-        for (String s : authHeaders) {
-            ah.add(s);
-        }
-        mailMessage.setAuthenticityResult(parseHeaders(ah, fromHeaders[0], session));
+        mailMessage.setAuthenticityResult(parseHeaders(Arrays.asList(authHeaders), fromHeaders[0], session));
 
         if (trustedDomainHandler != null) {
             trustedDomainHandler.handle(session, mailMessage);
