@@ -49,9 +49,11 @@
 
 package com.openexchange.mail.authenticity.mechanism;
 
+import java.util.List;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.openexchange.mail.authenticity.MailAuthenticityAttribute;
 import com.openexchange.mail.authenticity.mechanism.dkim.DKIMResult;
 import com.openexchange.mail.authenticity.mechanism.dmarc.DMARCResult;
 import com.openexchange.mail.authenticity.mechanism.spf.SPFResult;
@@ -140,6 +142,20 @@ public enum DefaultMailAuthenticityMechanism implements MailAuthenticityMechanis
     public static DefaultMailAuthenticityMechanism extractMechanism(Map<String, String> attributes) {
         for (DefaultMailAuthenticityMechanism mechanism : DefaultMailAuthenticityMechanism.values()) {
             if (attributes.containsKey(mechanism.name().toLowerCase())) {
+                return mechanism;
+            }
+        }
+        return null;
+    }
+
+    public static DefaultMailAuthenticityMechanism extractMechanism(List<MailAuthenticityAttribute> attributes) {
+        // Mechanism is always the first element in the List
+        MailAuthenticityAttribute attribute = attributes.get(0);
+        if (attribute == null) {
+            return null;
+        }
+        for (DefaultMailAuthenticityMechanism mechanism : DefaultMailAuthenticityMechanism.values()) {
+            if (attribute.getKey().equals(mechanism.name().toLowerCase())) {
                 return mechanism;
             }
         }

@@ -74,6 +74,7 @@ import org.json.JSONObject;
 import com.google.common.collect.ImmutableSet;
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.fields.FolderChildFields;
+import com.openexchange.ajax.tools.JSONCoercion;
 import com.openexchange.data.conversion.ical.ICalParser;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
@@ -540,6 +541,8 @@ public final class JsonMessageHandler implements MailMessageHandler {
                         mailAuthMechResultJson.put("mechanism", mechResult.getMechanism().getDisplayName());
                         mailAuthMechResultJson.put("result", mechResult.getResult().getDisplayName());
                         array.put(mailAuthMechResultJson);
+                    } else if (o instanceof Map) {
+                        array.put(JSONCoercion.coerceToJSON(o));
                     } else {
                         array.put(o);
                     }

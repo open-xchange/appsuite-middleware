@@ -72,6 +72,7 @@ import com.openexchange.java.Strings;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.authenticity.AllowedAuthServId;
 import com.openexchange.mail.authenticity.DefaultMailAuthenticityResultKey;
+import com.openexchange.mail.authenticity.MailAuthenticityAttribute;
 import com.openexchange.mail.authenticity.MailAuthenticityExceptionCodes;
 import com.openexchange.mail.authenticity.MailAuthenticityHandler;
 import com.openexchange.mail.authenticity.MailAuthenticityProperty;
@@ -243,8 +244,13 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
             return;
         }
 
-        List<AllowedAuthServId> allowedAuthServIds = getAllowedAuthServIds(session);
-        mailMessage.setAuthenticityResult(parseHeaders(authHeaders, fromHeaders[0], allowedAuthServIds));
+        //List<AllowedAuthServId> allowedAuthServIds = getAllowedAuthServIds(session);
+        //mailMessage.setAuthenticityResult(parseHeaders(authHeaders, fromHeaders[0], allowedAuthServIds));
+        List<String> ah = new ArrayList<>();
+        for (String s : authHeaders) {
+            ah.add(s);
+        }
+        mailMessage.setAuthenticityResult(parseHeaders(ah, fromHeaders[0], session));
 
         if (trustedDomainHandler != null) {
             trustedDomainHandler.handle(session, mailMessage);
@@ -294,62 +300,91 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
 
     ///////////////////////////////////// HELPERS ///////////////////////////////////////
 
-    /**
-     * Parses the specified <code>Authentication-Results</code> headers
-     *
-     * @param authHeaders The <code>Authentication-Results</code> headers to parse
-     * @return The {@link MailAuthenticityResult}
-     */
-    private MailAuthenticityResult parseHeaders(String[] authHeaders, String fromHeader, List<AllowedAuthServId> allowedAuthServIds) {
-        List<String> authHeadersList = extractValidAuthenticationResults(authHeaders, allowedAuthServIds);
-        // No valid auth header was extracted, thus we return with neutral status
-        if (authHeadersList.isEmpty()) {
-            return MailAuthenticityResult.NEUTRAL_RESULT;
-        }
+    private MailAuthenticityResult parseHeaders(List<String> authenticationHeaders, String fromHeader, Session session) throws OXException {
+        List<AllowedAuthServId> allowedAuthServIds = getAllowedAuthServIds(session);
 
-        MailAuthenticityResult result = new MailAuthenticityResult(MailAuthenticityStatus.NEUTRAL);
-        try {
-            String domain = extractDomain(fromHeader);
-            result.addAttribute(DefaultMailAuthenticityResultKey.FROM_DOMAIN, domain);
-        } catch (Exception e) {
-            // Malformed from header, be strict and return with failed result
-            LOGGER.debug("An error occurred while trying to extract a valid domain from the 'From' header", e);
-            result.setStatus(MailAuthenticityStatus.FAIL);
-            return result;
-        }
+        MailAuthenticityResult overallResult = new MailAuthenticityResult(MailAuthenticityStatus.NEUTRAL);
+        List<MailAuthenticityMechanismResult> results = new ArrayList<>();
+        List<Map<String, String>> unknownResults = new ArrayList<>();
 
-        // Parse the mechanism results
-        parseMechanismResults(authHeadersList, result);
-
-        return result;
-    }
-
-    /**
-     * Extracts the appropriate <code>Authentication-Results</code> header from the specified array
-     * and ignores all headers that do not have a valid <code>authserv-id</code>.
-     *
-     * @param authHeaders The array with the authentication results headers
-     * @return A {@link List} with the appropriate <code>Authentication-Results</code> headers or an empty {@link List} if none can be extracted
-     */
-    private List<String> extractValidAuthenticationResults(String[] authHeaders, List<AllowedAuthServId> allowedAuthServIds) {
-        List<String> authHeadersList = new ArrayList<>(authHeaders.length);
-        for (String header : authHeaders) {
-            List<String> split = StringUtil.splitElements(header.trim());
-            if (split.isEmpty()) {
-                // Huh? Invalid/Malformed authenticity results header, ignore
-                continue;
-            }
+        Iterator<String> authHeaderIterator = authenticationHeaders.iterator();
+        while (authHeaderIterator.hasNext()) {
+            String authenticationHeader = authHeaderIterator.next();
+            List<String> elements = StringUtil.splitElements(authenticationHeader);
 
             // The first property of the header MUST always be the domain (i.e. the authserv-id)
             // See https://tools.ietf.org/html/rfc7601 for the formal definition
-            String authServId = split.get(0);
+            String authServId = elements.get(0);
             if (!isAuthServIdValid(authServId, allowedAuthServIds)) {
                 // Not a configured authserver-id, ignore
                 continue;
             }
-            authHeadersList.add(new String(header));
+            // Remove the authserv-id
+            elements = elements.subList(1, elements.size());
+
+            // Extract the domain from the 'From' header
+            try {
+                String domain = extractDomain(fromHeader);
+                overallResult.addAttribute(DefaultMailAuthenticityResultKey.FROM_DOMAIN, domain);
+            } catch (Exception e) {
+                // Malformed from header, be strict and return with failed result
+                LOGGER.debug("An error occurred while trying to extract a valid domain from the 'From' header", e);
+                overallResult.setStatus(MailAuthenticityStatus.FAIL);
+                return overallResult;
+            }
+
+            parseMechanisms(elements, results, unknownResults, overallResult);
         }
-        return authHeadersList;
+
+        overallResult.addAttribute(DefaultMailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS, results);
+        overallResult.addAttribute(DefaultMailAuthenticityResultKey.UNKNOWN_AUTH_MECH_RESULTS, unknownResults);
+
+        return overallResult;
+    }
+
+    /**
+     * @param elements
+     * @param overallResult
+     */
+    private void parseMechanisms(List<String> elements, List<MailAuthenticityMechanismResult> results, List<Map<String, String>> unknownResults, MailAuthenticityResult overallResult) {
+        Collections.sort(elements, MAIL_AUTH_COMPARATOR);
+        for (String element : elements) {
+            List<MailAuthenticityAttribute> attributes = StringUtil.parseElement(element);
+
+            DefaultMailAuthenticityMechanism mechanism = DefaultMailAuthenticityMechanism.extractMechanism(attributes);
+            if (mechanism == null) {
+                // Unknown or not parsable mechanism
+                unknownResults.add(parseUnknownMechs(attributes));
+                continue;
+            }
+            BiFunction<Map<String, String>, MailAuthenticityResult, MailAuthenticityMechanismResult> mechanismParser = mechanismParsersRegitry.get(mechanism);
+            if (mechanismParser == null) {
+                // Not a valid mechanism, skip but add to the overall result
+                unknownResults.add(parseUnknownMechs(attributes));
+                continue;
+            }
+            results.add(mechanismParser.apply(StringUtil.parseAttributes(element), overallResult));
+        }
+    }
+
+    /**
+     * @param attributes
+     * @param overallResult
+     */
+    private Map<String, String> parseUnknownMechs(List<MailAuthenticityAttribute> attributes) {
+        // First element is always the mechanism
+        Map<String, String> unknownResults = new HashMap<>();
+        MailAuthenticityAttribute mechanism = attributes.get(0);
+        unknownResults.put("mechanism", mechanism.getKey());
+        // TODO: extract possible comment enclosed in parentheses from the result value
+        unknownResults.put("result", mechanism.getValue());
+
+        for (int index = 1; index < attributes.size(); index++) {
+            unknownResults.put(attributes.get(index).getKey(), attributes.get(index).getValue());
+        }
+
+        return unknownResults;
+
     }
 
     /**
@@ -368,60 +403,6 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
         } catch (AddressException e) {
             throw new IllegalArgumentException("The specified header does not contain any valid parsable internet addresses", e);
         }
-    }
-
-    /**
-     * Parses all known mechanism results from the specified authResults {@link List}
-     *
-     * @param authHeadersList A {@link List} with all authentication results
-     * @param result The {@link MailAuthenticityResult}
-     */
-    private void parseMechanismResults(List<String> authHeadersList, MailAuthenticityResult result) {
-        Iterator<String> authResultsIterator = authHeadersList.iterator();
-        List<MailAuthenticityMechanismResult> results = new ArrayList<>();
-        List<Map<String, String>> unknownResults = new ArrayList<>();
-        while (authResultsIterator.hasNext()) {
-            String authResult = authResultsIterator.next();
-            List<String> authHeader = StringUtil.splitElements(authResult);
-            // Sort by ordinal
-            Collections.sort(authHeader, MAIL_AUTH_COMPARATOR);
-            for (int index = 0; index < authHeader.size(); index++) {
-                parseAuthHeaderElement(authHeader.get(index), unknownResults, results, result);
-            }
-            authResultsIterator.remove();
-        }
-        result.addAttribute(DefaultMailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS, results);
-        //result.addAttribute(DefaultMailAuthenticityResultKey.UNKNOWN_AUTH_MECH_RESULTS, unknownResults);
-
-        // Add the remaining attributes as is to the result
-        for (String authHeader : authHeadersList) {
-            unknownResults.add(StringUtil.parseLine(authHeader));
-        }
-    }
-
-    /**
-     * Parses the specified authentication header element and adds it to it's appropriate list
-     *
-     * @param authHeaderElement The authentication header element
-     * @param unknownAuthElements The unknown authentication elements
-     * @param results The {@link MailAuthenticityMechanismResult}s
-     * @param result The overall {@link MailAuthenticityResult}
-     */
-    private void parseAuthHeaderElement(String authHeaderElement, List<Map<String, String>> unknownResults, List<MailAuthenticityMechanismResult> results, MailAuthenticityResult result) {
-        Map<String, String> attributes = StringUtil.parseLine(authHeaderElement);
-        DefaultMailAuthenticityMechanism mechanism = DefaultMailAuthenticityMechanism.extractMechanism(attributes);
-        if (mechanism == null) {
-            // Unknown or not parsable mechanism
-            unknownResults.add(attributes);
-            return;
-        }
-        BiFunction<Map<String, String>, MailAuthenticityResult, MailAuthenticityMechanismResult> mechanismParser = mechanismParsersRegitry.get(mechanism);
-        if (mechanismParser == null) {
-            // Not a valid mechanism, skip but add to the overall result
-            unknownResults.add(attributes);
-            return;
-        }
-        results.add(mechanismParser.apply(attributes, result));
     }
 
     /**
