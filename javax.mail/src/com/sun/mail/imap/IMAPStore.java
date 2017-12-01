@@ -271,7 +271,9 @@ public class IMAPStore extends Store
     // enable notification of IMAP responses during IDLE
     private boolean enableImapEvents = false;
     private String propagateClientIpAddress = null;
+    private volatile String generatedExternalId = null;
     private Map<String, String> clientParameters = null;
+    private ExternalIdGenerator externalIdGenerator = null;
     private boolean failOnNOFetch = false;
     private int authTimeout = -1;
     private final String guid;			// for Yahoo! Mail IMAP
@@ -764,12 +766,30 @@ public class IMAPStore extends Store
     }
 
     /**
+     * Sets the external ID generator
+     *
+     * @param externalIdGenerator The generator to set
+     */
+    public void setExternalIdGenerator(ExternalIdGenerator externalIdGenerator) {
+        this.externalIdGenerator = externalIdGenerator;
+    }
+
+    /**
      * Sets the client parameters
      *
      * @param clientParameters The client parameters to set
      */
     public void setClientParameters(Map<String, String> clientParameters) {
         this.clientParameters = clientParameters;
+    }
+
+    /**
+     * Gets the generated external session identifier.
+     *
+     * @return The generated external session identifier or <code>null</code>
+     */
+    public String getGeneratedExternalId() {
+        return generatedExternalId;
     }
 
     /**
@@ -931,27 +951,45 @@ public class IMAPStore extends Store
 	preLogin(p);
 
 	// issue special ID command to Yahoo! Mail IMAP server
-	// http://en.wikipedia.org/wiki/Yahoo%21_Mail#Free_IMAP_and_SMTPs_access
-	{
-	    Map<String, String> clientParams = clientParameters;
-        if (null != clientParams || guid != null) {
-            if (guid == null) {
-                if (p.hasCapability("ID")) {
-                    try {
-                        p.id(clientParams);
-                    } catch (Exception e) {
-                        // Ignore errors
-                    }
+    // http://en.wikipedia.org/wiki/Yahoo%21_Mail#Free_IMAP_and_SMTPs_access
+    // Advertise client parameters (if any)
+    if (guid != null || p.getCapabilities().containsKey("ID")) {
+        Map<String, String> clientParams = null;
+        {
+            ExternalIdGenerator generator = this.externalIdGenerator;
+            if (null == generator) {
+                if (null != this.clientParameters) {
+                    clientParams = new LinkedHashMap<String, String>(this.clientParameters);
                 }
             } else {
-                if (null == clientParams) {
+                // Generate external identifier & add to client parameters
+                String generatedExternalId = generator.generateExternalId();
+                if (null == this.clientParameters) {
                     clientParams = new LinkedHashMap<String, String>(2);
+                } else {
+                    // Overwrite "x-session-ext-id" client parameter with the generated one
+                    clientParams = new LinkedHashMap<String, String>(this.clientParameters);
                 }
-                clientParams.put("GUID", guid);
-                p.id(clientParams);
+                clientParams.put("x-session-ext-id", generatedExternalId);
+                this.generatedExternalId = generatedExternalId;
             }
         }
-	}
+
+        if (null == clientParams && guid != null) {
+            clientParams = new LinkedHashMap<String, String>(2);
+            clientParams.put("GUID", guid);
+        }
+
+        if (null != clientParams) {
+            try {
+                p.id(clientParams);
+            } catch (CommandFailedException cex) {
+                // Swallow "NO" responses
+            } catch (BadCommandException e) {
+                // Swallow "BAD" responses
+            }
+        }
+    }
 
 	/*
 	 * Put a special "marker" in the capabilities list so we can

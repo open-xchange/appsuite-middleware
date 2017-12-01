@@ -49,9 +49,16 @@
 
 package com.openexchange.imap;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import com.openexchange.java.Strings;
+import com.openexchange.log.LogProperties;
 import com.openexchange.session.Session;
+import com.openexchange.version.Version;
 import com.sun.mail.imap.IMAPStore;
 
 
@@ -100,17 +107,16 @@ public enum IMAPClientParameters {
     /**
      * Generates the session information.
      * <pre>
-     *  &lt;session-id&gt; + "-" &lt;user-id&gt; + "-" + &lt;context-id&gt; + "-" + &lt;store-hash&gt;
+     *  &lt;session-id&gt; + "-" &lt;user-id&gt; + "-" + &lt;context-id&gt; + "-" + &lt;random&gt;
      *
      *  Example:
      *  6ceec6585485458eb27456ad6ec97b62-17-1337-1356782
      * </pre>
      *
      * @param session The user-associated session
-     * @param imapStore The IMAP store
      * @return The session information
      */
-    public static String generateSessionInformation(Session session, IMAPStore imapStore) {
+    public static String generateSessionInformation(Session session) {
         StringBuilder buf = new StringBuilder(64);
         buf.append(session.getSessionID());
         buf.append('-').append(session.getUserId());
@@ -157,7 +163,7 @@ public enum IMAPClientParameters {
     private static String asHex(byte[] hash, int len) {
         int length = len <= 0 || len > hash.length ?  hash.length : len;
 
-        char[] buf = new char[length * 2];
+        char[] buf = new char[length << 1];
         for (int i = 0, x = 0; i < length; i++) {
             buf[x++] = HEX_CHARS[(hash[i] >>> 4) & 0xf];
             buf[x++] = HEX_CHARS[hash[i] & 0xf];
@@ -177,6 +183,70 @@ public enum IMAPClientParameters {
 
     private static byte[] intToBytes(int value) {
         return new byte[] { (byte) (value >>> 24), (byte) (value >>> 16), (byte) (value >>> 8), (byte) value };
+    }
+
+    /**
+     * Generates the session information.
+     * <pre>
+     *  &lt;session-id&gt; + "-" &lt;user-id&gt; + "-" + &lt;context-id&gt; + "-" + &lt;random&gt;
+     *
+     *  Example:
+     *  6ceec6585485458eb27456ad6ec97b62-17-1337-1356782
+     * </pre>
+     *
+     * @param session The user-associated session
+     * @param imapStore The IMAP store
+     * @return The session information
+     */
+    public static String generateSessionInformation(Session session, IMAPStore imapStore) {
+        return generateSessionInformation(session);
+    }
+
+    private static final class Generator implements com.sun.mail.imap.ExternalIdGenerator {
+
+        private final Session session;
+
+        Generator(Session session) {
+            super();
+            this.session = session;
+        }
+
+        @Override
+        public String generateExternalId() {
+            String imapSessionId = generateSessionInformation(session);
+            LogProperties.put(LogProperties.Name.MAIL_SESSION, imapSessionId);
+            return imapSessionId;
+        }
+    }
+
+    private static final String LOCAL_HOST;
+    static {
+        String fbHost;
+        try {
+            fbHost = InetAddress.getLocalHost().getHostAddress();
+        } catch (final UnknownHostException e) {
+            fbHost = "127.0.0.1";
+        }
+        LOCAL_HOST = fbHost;
+    }
+
+    /**
+     * Sets the default client parameters.
+     *
+     * @param imapStore The IMAP store to connect to
+     * @param session The associated Groupware session
+     */
+    public static void setDefaultClientParameters(IMAPStore imapStore, Session session) {
+        // Set generator
+        imapStore.setExternalIdGenerator(new Generator(session));
+
+        // Generate & set client parameters
+        Map<String, String> clientParams = new LinkedHashMap<String, String>(6);
+        String localIp = session.getLocalIp();
+        clientParams.put(IMAPClientParameters.ORIGINATING_IP.getParamName(), Strings.isEmpty(localIp) ? LOCAL_HOST : localIp);
+        clientParams.put(IMAPClientParameters.NAME.getParamName(), "Open-Xchange");
+        clientParams.put(IMAPClientParameters.VERSION.getParamName(), Version.getInstance().getVersionString());
+        imapStore.setClientParameters(clientParams);
     }
 
 }

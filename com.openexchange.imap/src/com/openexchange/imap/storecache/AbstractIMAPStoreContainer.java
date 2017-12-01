@@ -100,27 +100,11 @@ public abstract class AbstractIMAPStoreContainer implements IMAPStoreContainer {
         if (propagateClientIp) {
             imapStore.setPropagateClientIpAddress(session.getLocalIp());
         }
-        {
-            Map<String, String> clientParams = new LinkedHashMap<String, String>(6);
-            clientParams.put(IMAPClientParameters.ORIGINATING_IP.getParamName(), session.getLocalIp());
-            clientParams.put(IMAPClientParameters.SESSION_ID.getParamName(), IMAPClientParameters.generateSessionInformation(session, imapStore));
-            clientParams.put(IMAPClientParameters.NAME.getParamName(), "Open-Xchange");
-            clientParams.put(IMAPClientParameters.VERSION.getParamName(), Version.getInstance().getVersionString());
-            imapStore.setClientParameters(clientParams);
-        }
+        IMAPClientParameters.setDefaultClientParameters(imapStore, session);
         /*
          * ... and connect it
          */
-        try {
-            doIMAPConnect(imapSession, imapStore, server, port, login, pw);
-        } catch (final AuthenticationFailedException e) {
-            /*
-             * Retry connect with AUTH=PLAIN disabled
-             */
-            imapSession.getProperties().put("mail.imap.auth.login.disable", "true");
-            imapStore = (IMAPStore) imapSession.getStore(name);
-            doIMAPConnect(imapSession, imapStore, server, port, login, pw);
-        }
+        doIMAPConnect(imapSession, imapStore, server, port, login, pw);
         return imapStore;
     }
 
