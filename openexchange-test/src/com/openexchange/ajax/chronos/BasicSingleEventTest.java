@@ -211,9 +211,6 @@ public class BasicSingleEventTest extends AbstractChronosTest {
 
         JSONObject expectedEventData = eventManager.createEventWithAttachment(EventFactory.createSingleEventWithAttachment(defaultUserApi.getCalUser(), testUser.getLogin(), "testCreateSingleWithAttachment", asset), asset);
         assertEquals("The amount of attachments is not correct", 1, expectedEventData.getJSONArray("attachments").length());
-
-        EventData actualEventData = eventManager.getEvent(expectedEventData.getString("id"));
-        assertEquals(expectedEventData, actualEventData.toJson());
     }
 
     /**
@@ -227,7 +224,6 @@ public class BasicSingleEventTest extends AbstractChronosTest {
         assertEquals("The amount of attachments is not correct", 1, expectedEventData.getJSONArray("attachments").length());
 
         EventData actualEventData = eventManager.getEvent(expectedEventData.getString("id"));
-        assertEquals(expectedEventData, actualEventData.toJson());
 
         asset = assetManager.getRandomAsset(AssetType.png);
         actualEventData.getAttachments().get(0).setManagedId(actualEventData.getAttachments().get(0).getManagedId());
@@ -235,9 +231,6 @@ public class BasicSingleEventTest extends AbstractChronosTest {
 
         expectedEventData = eventManager.updateEventWithAttachment(actualEventData, asset);
         assertEquals("The amount of attachments is not correct", 2, expectedEventData.getJSONArray("attachments").length());
-
-        actualEventData = eventManager.getEvent(expectedEventData.getString("id"));
-        assertEquals(expectedEventData, actualEventData.toJson());
     }
 
     /**
@@ -273,7 +266,6 @@ public class BasicSingleEventTest extends AbstractChronosTest {
         assertEquals("The amount of attachments is not correct", 2, expectedEventData.getJSONArray("attachments").length());
 
         EventData actualEventData = eventManager.getEvent(expectedEventData.getString("id"));
-        assertEquals(expectedEventData, actualEventData.toJson());
 
         // Set the managed id for the retained attachment
         ChronosAttachment retainedAttachment = actualEventData.getAttachments().get(0);
