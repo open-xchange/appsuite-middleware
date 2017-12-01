@@ -97,7 +97,7 @@ public class MailAuthenticityActivator extends HousekeepingActivator {
         final MailAuthenticityHandlerRegistryImpl registry = new MailAuthenticityHandlerRegistryImpl(getService(LeanConfigurationService.class), context);
         registerService(MailAuthenticityHandlerRegistry.class, registry);
         track(MailAuthenticityHandler.class, registry);
-        trackService(TrustedDomainAuthenticityHandler.class);
+        trackService(TrustedDomainService.class);
         openTrackers();
 
         ConfigurationService configurationService = getService(ConfigurationService.class);
@@ -108,22 +108,37 @@ public class MailAuthenticityActivator extends HousekeepingActivator {
         final MailAuthenticityHandlerImpl handlerImpl = new MailAuthenticityHandlerImpl(this);
         registerService(MailAuthenticityHandler.class, handlerImpl);
 
-        registerService(Reloadable.class, new Reloadable() {
-
-            @Override
-            public void reloadConfiguration(ConfigurationService configService) {
-                registry.invalidateCache();
-                handlerImpl.invalidateAuthServIdsCache();
-            }
-
-            @Override
-            public Interests getInterests() {
-                return Reloadables.interestsForProperties(MailAuthenticityProperty.enabled.getFQPropertyName(), MailAuthenticityProperty.threshold.getFQPropertyName(), MailAuthenticityProperty.authServId.getFQPropertyName());
-            }
-        });
+        registerService(Reloadable.class, new ConfigReloader(registry, handlerImpl));
 
         MailAuthenticityFetchListener fetchListener = new MailAuthenticityFetchListener(registry);
         registerService(MailFetchListener.class, fetchListener);
+    }
+
+    class ConfigReloader implements Reloadable {
+
+        private final MailAuthenticityHandlerRegistryImpl registry;
+        private final MailAuthenticityHandlerImpl handlerImpl;
+
+        /**
+         * Initializes a new {@link MailAuthenticityActivator.ConfigReloader}.
+         */
+        public ConfigReloader(MailAuthenticityHandlerRegistryImpl registry, MailAuthenticityHandlerImpl handlerImpl) {
+            super();
+            this.registry = registry;
+            this.handlerImpl = handlerImpl;
+
+        }
+
+        @Override
+        public void reloadConfiguration(ConfigurationService configService) {
+            registry.invalidateCache();
+            handlerImpl.invalidateAuthServIdsCache();
+        }
+
+        @Override
+        public Interests getInterests() {
+            return Reloadables.interestsForProperties(MailAuthenticityProperty.enabled.getFQPropertyName(), MailAuthenticityProperty.threshold.getFQPropertyName(), MailAuthenticityProperty.authServId.getFQPropertyName());
+        }
     }
 
 }
