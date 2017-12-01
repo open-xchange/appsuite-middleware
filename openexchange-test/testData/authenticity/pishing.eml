@@ -30,7 +30,7 @@ Received: from sophos.office.local (mail.dkonikoff.com. [67.211.237.215])
         for <foo@bar.com>;
         Fri, 10 Nov 2017 00:18:11 -0800 (PST)
 Received-SPF: fail (google.com: domain of wyn.lasco@sts-int.net does not designate 67.211.237.215 as permitted sender) client-ip=67.211.237.215;
-Authentication-Results: mx.google.com;
+Authentication-Results: open-xchange.authenticity.test;
        spf=fail (google.com: domain of wyn.lasco@sts-int.net does not designate 67.211.237.215 as permitted sender) smtp.mailfrom=wyn.lasco@sts-int.net
 Received: from sophos.office.local (localhost.localdomain [127.0.0.1]) by localhost (Email Security Appliance) with SMTP id 04D5933735CF_A0560C3B for <foo@bar.com>; Fri, 10 Nov 2017 08:18:11 +0000 (GMT)
 Received: from [104.254.245.146] (unknown [104.254.245.146]) by sophos.office.local (Sophos Email Appliance) with ESMTPA id B66E1336EDEA_A0556E4F for <foo@bar.com>; Fri, 10 Nov 2017 07:36:04 +0000 (GMT)

@@ -12,7 +12,7 @@ Received: from DB5EUR03FT060.eop-EUR03.prod.protection.outlook.com
  (10.152.21.193) with Microsoft SMTP Server (version=TLS1_2,
  cipher=TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384_P384) id 15.1.1019.14; Thu, 13
  Apr 2017 10:38:25 +0000
-Authentication-Results: mx1.open-xchange.com; spf=none (sender IP is 193.209.119.8)
+Authentication-Results: open-xchange.authenticity.test; spf=none (sender IP is 193.209.119.8)
  smtp.mailfrom=lists.dovecot.fi; live.com; dkim=none (message not signed)
  header.d=none;live.com; dmarc=none action=none header.from=lists.dovecot.fi;
 Received-SPF: None (protection.outlook.com: lists.dovecot.fi does not

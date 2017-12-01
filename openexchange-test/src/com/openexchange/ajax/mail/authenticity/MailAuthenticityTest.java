@@ -55,9 +55,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.junit.Test;
-import com.openexchange.ajax.framework.AbstractAPIClientSession;
+import com.openexchange.ajax.framework.AbstractConfigAwareAPIClientSession;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.junit.Assert;
+import com.openexchange.mail.authenticity.MailAuthenticityProperty;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.AuthenticationResult;
 import com.openexchange.testing.httpclient.models.AuthenticationResult.StatusEnum;
@@ -76,16 +77,16 @@ import com.openexchange.testing.httpclient.modules.MailApi;
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.0
  */
-public class MailAuthenticityTest extends AbstractAPIClientSession {
+public class MailAuthenticityTest extends AbstractConfigAwareAPIClientSession {
 
-    private static final String folder = "default0%2FINBOX";
-    private static final String SubFolder = "authenticity";
+    private static final String FOLDER = "default0%2FINBOX";
+    private static final String SUBFOLDER = "authenticity";
     private static final String PASS_ALL = "passAll.eml";
     private static final String PISHING = "pishing.eml";
     private static final String NONE = "none.eml";
-    private static final String[] mailNames = new String[] {PASS_ALL, PISHING, NONE};
+    private static final String[] MAIL_NAMES = new String[] { PASS_ALL, PISHING, NONE };
     private MailApi api;
-    private final Map<String, MailDestinationData> importedMails = new HashMap<>();
+    private final Map<String, MailDestinationData> IMPORTED_EMAILS = new HashMap<>();
     private Long timestamp = 0l;
 
     private static final String DKIM = "DKIM";
@@ -95,17 +96,30 @@ public class MailAuthenticityTest extends AbstractAPIClientSession {
     @Override
     public void setUp() throws Exception {
         super.setUp();
+
+        // Setup configurations ----------------------------------
+        // general config
+        CONFIG.put(MailAuthenticityProperty.enabled.getFQPropertyName(), Boolean.TRUE.toString());
+        CONFIG.put(MailAuthenticityProperty.authServId.getFQPropertyName(), "open-xchange.authenticity.test");
+
+        // trusted domain config
+        String imgPath = AJAXConfig.getProperty(AJAXConfig.Property.TEST_MAIL_DIR) + SUBFOLDER + "/ox.jpg";
+        CONFIG.put("com.openexchange.mail.authenticity.trustedDomains.domains", "*trusted.domain.com:1");
+        CONFIG.put("com.openexchange.mail.authenticity.trustedDomains.image.1", imgPath);
+        super.setUpConfiguration();
+
+        // Setup client and import mails ------------------------
         getClient().login(testUser.getLogin(), testUser.getPassword());
         api = new MailApi(getClient());
-        String testMailDir = AJAXConfig.getProperty(AJAXConfig.Property.TEST_MAIL_DIR) + SubFolder;
-        for(String name : mailNames) {
+        String testMailDir = AJAXConfig.getProperty(AJAXConfig.Property.TEST_MAIL_DIR) + SUBFOLDER;
+        for (String name : MAIL_NAMES) {
             File f = new File(testMailDir, name);
             Assert.assertTrue(f.exists());
-            MailImportResponse response = api.importMail(getClient().getSession(), folder, f, null, true);
+            MailImportResponse response = api.importMail(getClient().getSession(), FOLDER, f, null, true);
             List<MailDestinationData> data = checkResponse(response);
             // data size should always be 1
             Assert.assertEquals(1, data.size());
-            importedMails.put(name, data.get(0));
+            IMPORTED_EMAILS.put(name, data.get(0));
             timestamp = response.getTimestamp();
         }
 
@@ -115,7 +129,7 @@ public class MailAuthenticityTest extends AbstractAPIClientSession {
     public void tearDown() throws Exception {
         try {
             List<MailListElement> body = new ArrayList<>();
-            for (MailDestinationData dest : importedMails.values()) {
+            for (MailDestinationData dest : IMPORTED_EMAILS.values()) {
                 MailListElement mailListElement = new MailListElement();
                 mailListElement.setFolder(dest.getFolderId());
                 mailListElement.setId(dest.getId());
@@ -133,7 +147,7 @@ public class MailAuthenticityTest extends AbstractAPIClientSession {
         /*
          * Test pass all
          */
-       MailResponse resp = api.getMail(getClient().getSession(), folder, importedMails.get(PASS_ALL).getId(), null, 0, null, false, null, null, null, null, null);
+        MailResponse resp = api.getMail(getClient().getSession(), FOLDER, IMPORTED_EMAILS.get(PASS_ALL).getId(), null, 0, null, false, null, null, null, null, null);
        MailData mail = checkResponse(resp);
        AuthenticationResult authenticationResult = mail.getAuthenticationResults();
        Assert.assertNotNull(authenticationResult);
@@ -162,7 +176,7 @@ public class MailAuthenticityTest extends AbstractAPIClientSession {
        /*
         * Test pishing
         */
-       resp = api.getMail(getClient().getSession(), folder, importedMails.get(PISHING).getId(), null, 0, null, false, null, null, null, null, null);
+        resp = api.getMail(getClient().getSession(), FOLDER, IMPORTED_EMAILS.get(PISHING).getId(), null, 0, null, false, null, null, null, null, null);
        mail = checkResponse(resp);
        authenticationResult = mail.getAuthenticationResults();
        Assert.assertNotNull(authenticationResult);
@@ -193,7 +207,7 @@ public class MailAuthenticityTest extends AbstractAPIClientSession {
        /*
         * Test none
         */
-       resp = api.getMail(getClient().getSession(), folder, importedMails.get(NONE).getId(), null, 0, null, false, null, null, null, null, null);
+        resp = api.getMail(getClient().getSession(), FOLDER, IMPORTED_EMAILS.get(NONE).getId(), null, 0, null, false, null, null, null, null, null);
        mail = checkResponse(resp);
        authenticationResult = mail.getAuthenticationResults();
        Assert.assertNotNull(authenticationResult);
@@ -232,6 +246,25 @@ public class MailAuthenticityTest extends AbstractAPIClientSession {
         Assert.assertNull(response.getError());
         Assert.assertNotNull(response.getData());
         return response.getData();
+    }
+
+    // -------------------------   prepare config --------------------------------------
+
+    private static final Map<String, String> CONFIG = new HashMap<String, String>();
+
+    @Override
+    protected Map<String, String> getNeededConfigurations() {
+        return CONFIG;
+    }
+
+    @Override
+    protected String getScope() {
+        return "user";
+    }
+
+    @Override
+    protected String getReloadables() {
+        return "ConfigReloader,TrustedDomainAuthenticityHandler";
     }
 
 
