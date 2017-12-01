@@ -49,6 +49,8 @@
 
 package com.openexchange.mail.authenticity.mechanism;
 
+import java.util.HashMap;
+import java.util.Map;
 import com.openexchange.mail.authenticity.mechanism.dmarc.DMARCAuthMechResult;
 
 /**
@@ -62,6 +64,7 @@ public abstract class AbstractAuthMechResult implements MailAuthenticityMechanis
     private final String clientIP;
     private final AuthenticityMechanismResult result;
     private String reason;
+    private final Map<String, String> properties;
 
     /**
      * Initialises a new {@link DMARCAuthMechResult}.
@@ -75,6 +78,7 @@ public abstract class AbstractAuthMechResult implements MailAuthenticityMechanis
         this.domain = domain;
         this.clientIP = clientIP;
         this.result = result;
+        properties = new HashMap<>();
     }
 
     @Override
@@ -90,6 +94,26 @@ public abstract class AbstractAuthMechResult implements MailAuthenticityMechanis
     @Override
     public AuthenticityMechanismResult getResult() {
         return result;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.mail.authenticity.mechanism.MailAuthenticityMechanismResult#getProperties()
+     */
+    @Override
+    public Map<String, String> getProperties() {
+        return properties;
+    }
+
+    /**
+     * Adds the specified property to the properties {@link Map}
+     * 
+     * @param key The name of the property
+     * @param value The value of the property
+     */
+    public void addProperty(String key, String value) {
+        properties.put(key, value);
     }
 
     /*

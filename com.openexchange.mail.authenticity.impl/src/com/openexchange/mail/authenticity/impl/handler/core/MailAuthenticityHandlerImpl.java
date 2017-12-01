@@ -78,6 +78,7 @@ import com.openexchange.mail.authenticity.MailAuthenticityHandler;
 import com.openexchange.mail.authenticity.MailAuthenticityProperty;
 import com.openexchange.mail.authenticity.MailAuthenticityStatus;
 import com.openexchange.mail.authenticity.impl.handler.domain.TrustedDomainService;
+import com.openexchange.mail.authenticity.mechanism.AbstractAuthMechResult;
 import com.openexchange.mail.authenticity.mechanism.DefaultMailAuthenticityMechanism;
 import com.openexchange.mail.authenticity.mechanism.MailAuthenticityMechanismResult;
 import com.openexchange.mail.authenticity.mechanism.dkim.DKIMAuthMechResult;
@@ -163,11 +164,11 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
         this.ranking = ranking;
         this.authServIdsCache = CacheBuilder.newBuilder().maximumSize(65536).expireAfterWrite(30, TimeUnit.MINUTES).build();
         mechanismParsersRegitry = new HashMap<>(4);
-        mechanismParsersRegitry.put(DefaultMailAuthenticityMechanism.DMARC, (line, overallResult) -> {
-            String value = line.get(DefaultMailAuthenticityMechanism.DMARC.getTechnicalName());
+        mechanismParsersRegitry.put(DefaultMailAuthenticityMechanism.DMARC, (attributes, overallResult) -> {
+            String value = attributes.remove(DefaultMailAuthenticityMechanism.DMARC.getTechnicalName());
             DMARCResult dmarcResult = DMARCResult.valueOf(extractOutcome(value.toUpperCase()));
 
-            String domain = extractDomain(line, DMARCResultHeader.HEADER_FROM);
+            String domain = extractDomain(attributes, DMARCResultHeader.HEADER_FROM);
             boolean domainMismatch = checkDomainMismatch(overallResult, domain);
 
             // In case of a DMARC result != "none", set overall result to the DMARC result and continue with the next mechanism
@@ -178,13 +179,14 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
 
             DMARCAuthMechResult result = new DMARCAuthMechResult(domain, dmarcResult);
             result.setReason(extractComment(value));
+            addProperties(attributes, result);
             return result;
         });
-        mechanismParsersRegitry.put(DefaultMailAuthenticityMechanism.DKIM, (line, overallResult) -> {
-            String value = line.get(DefaultMailAuthenticityMechanism.DKIM.getTechnicalName());
+        mechanismParsersRegitry.put(DefaultMailAuthenticityMechanism.DKIM, (attributes, overallResult) -> {
+            String value = attributes.remove(DefaultMailAuthenticityMechanism.DKIM.getTechnicalName());
             DKIMResult dkimResult = DKIMResult.valueOf(extractOutcome(value.toUpperCase()));
 
-            String domain = extractDomain(line, DKIMResultHeader.HEADER_I, DKIMResultHeader.HEADER_D);
+            String domain = extractDomain(attributes, DKIMResultHeader.HEADER_I, DKIMResultHeader.HEADER_D);
             boolean domainMismatch = checkDomainMismatch(overallResult, domain);
 
             // In case of a DKIM result != "none", set overall result to the DKIM result and continue with the next mechanism
@@ -196,16 +198,17 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
             DKIMAuthMechResult result = new DKIMAuthMechResult(domain, dkimResult);
             String reason = extractComment(value);
             if (Strings.isEmpty(reason)) {
-                reason = line.get(DKIMResultHeader.REASON);
+                reason = attributes.get(DKIMResultHeader.REASON);
             }
             result.setReason(reason);
+            addProperties(attributes, result);
             return result;
         });
-        mechanismParsersRegitry.put(DefaultMailAuthenticityMechanism.SPF, (line, overallResult) -> {
-            String value = line.get(DefaultMailAuthenticityMechanism.SPF.getTechnicalName());
+        mechanismParsersRegitry.put(DefaultMailAuthenticityMechanism.SPF, (attributes, overallResult) -> {
+            String value = attributes.remove(DefaultMailAuthenticityMechanism.SPF.getTechnicalName());
             SPFResult spfResult = SPFResult.valueOf(extractOutcome(value.toUpperCase()));
 
-            String domain = extractDomain(line, SPFResultHeader.SMTP_MAILFROM, SPFResultHeader.SMTP_HELO);
+            String domain = extractDomain(attributes, SPFResultHeader.SMTP_MAILFROM, SPFResultHeader.SMTP_HELO);
             boolean domainMismatch = checkDomainMismatch(overallResult, domain);
 
             // Set the overall result only if it's 'none'
@@ -216,6 +219,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
 
             SPFAuthMechResult result = new SPFAuthMechResult(domain, spfResult);
             result.setReason(extractComment(value));
+            addProperties(attributes, result);
             return result;
         });
     }
@@ -582,6 +586,18 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
 
         authServIdsCache.put(key, authServIds);
         return authServIds;
+    }
+
+    /**
+     * Adds the specified attributes to the specified {@link MailAuthenticityMechanismResult}
+     * 
+     * @param attributes The attributes to add
+     * @param mechResult The {@link MailAuthenticityMechanismResult} to add the attributs to
+     */
+    private void addProperties(Map<String, String> attributes, AbstractAuthMechResult mechResult) {
+        for (String key : attributes.keySet()) {
+            mechResult.addProperty(key, attributes.get(key));
+        }
     }
 
     ///////////////////////////////// HELPER CLASSES /////////////////////////////////
