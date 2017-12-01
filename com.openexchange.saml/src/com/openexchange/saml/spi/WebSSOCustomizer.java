@@ -54,11 +54,14 @@ import javax.servlet.http.HttpServletResponse;
 import org.opensaml.saml2.core.AuthnRequest;
 import org.opensaml.saml2.core.LogoutRequest;
 import org.opensaml.saml2.core.LogoutResponse;
+import org.opensaml.saml2.core.Response;
 import org.opensaml.saml2.metadata.SPSSODescriptor;
 import com.openexchange.exception.OXException;
 import com.openexchange.saml.OpenSAML;
 import com.openexchange.saml.SAMLConfig;
 import com.openexchange.saml.SAMLConfig.Binding;
+import com.openexchange.saml.state.AuthnRequestInfo;
+import com.openexchange.saml.state.StateManagement;
 import com.openexchange.session.Session;
 
 /**
@@ -219,5 +222,16 @@ public interface WebSSOCustomizer {
      * @throws OXException If thrown the further processing will be aborted
      */
     SPSSODescriptor customizeSPSSODescriptor(SPSSODescriptor descriptor) throws OXException;
+
+    /**
+     * Allows to customize the fetching of the RequestInfo. The WebSSCustomizer can also decide if the method is an unsolicited Response and fetch the
+     * AuthnRequestInfo accordingly
+     * @param httpRequest The servlet request containing the authn request
+     * @param response The authnResponse
+     * @param stateManagement The stateManagement that may contain the RelayState
+     * @return The AuthnRequestInfo or <code>null</code> if the normal handling should apply.
+     * @throws OXException If thrown the further processing will be aborted
+     */
+    AuthnRequestInfo getRequestInfo(HttpServletRequest httpRequest, Response response, StateManagement stateManagement) throws OXException;
 
 }
