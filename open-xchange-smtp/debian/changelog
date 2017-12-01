@@ -1,3 +1,9 @@
+open-xchange-smtp (7.10.0-1) stable; urgency=medium
+
+  * First preview for 7.10.0 release
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 01 Dec 2017 18:02:16 +0100
+
 open-xchange-smtp (7.10.0-0) unstable; urgency=medium
 
   * prepare for 7.10.0 release
