@@ -115,14 +115,9 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
      */
     public InternalCalendarResult perform(String objectId, RecurrenceId recurrenceId, Attendee attendee, Long clientTimestamp) throws OXException {
         /*
-         * load original event data & attendee
+         * load original event data & check current session user's permissions
          */
         Event originalEvent = loadEventData(objectId);
-        attendee = session.getEntityResolver().prepare(attendee);
-        Attendee originalAttendee = Check.attendeeExists(originalEvent, attendee);
-        /*
-         * check current session user's permissions
-         */
         Check.eventIsInFolder(originalEvent, folder);
         if (matches(originalEvent.getCreatedBy(), session.getUserId())) {
             requireCalendarPermission(folder, READ_FOLDER, READ_OWN_OBJECTS, WRITE_OWN_OBJECTS, NO_PERMISSIONS);
@@ -132,6 +127,11 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
         if (null != clientTimestamp) {
             requireUpToDateTimestamp(originalEvent, clientTimestamp.longValue());
         }
+        /*
+         * check targeted attendee
+         */
+        attendee = session.getEntityResolver().prepare(attendee);
+        Attendee originalAttendee = Check.attendeeExists(originalEvent, attendee);
         if (0 < originalAttendee.getEntity() && calendarUserId != originalAttendee.getEntity() && session.getUserId() != originalAttendee.getEntity()) {
             // TODO: even allowed for proxy user? calendarUserId != originalAttendee.getEntity()
             throw CalendarExceptionCodes.NO_WRITE_PERMISSION.create(folder.getID());
