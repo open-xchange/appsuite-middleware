@@ -47,27 +47,20 @@
  *
  */
 
-package com.openexchange.chronos.provider;
+package com.openexchange.chronos.provider.basic;
 
 import java.util.Date;
-import java.util.EnumSet;
-import java.util.List;
+import org.json.JSONObject;
 import com.openexchange.chronos.ExtendedProperties;
+import com.openexchange.chronos.provider.CalendarFolderProperty;
 
 /**
- * {@link CalendarFolder}
+ * {@link CalendarSettings}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public interface CalendarFolder {
-
-    /**
-     * Gets the identifier of the calendar folder.
-     *
-     * @return The folder identifier
-     */
-    String getId();
+public interface CalendarSettings {
 
     /**
      * Gets the name of the calendar folder.
@@ -84,13 +77,6 @@ public interface CalendarFolder {
     Date getLastModified();
 
     /**
-     * Gets the permissions
-     *
-     * @return The permissions
-     */
-    List<CalendarPermission> getPermissions();
-
-    /**
      * Gets the extended properties of the folder.
      * <p/>
      * See {@link CalendarFolderProperty} for a list of common folder properties evaluated by clients.
@@ -100,10 +86,10 @@ public interface CalendarFolder {
     ExtendedProperties getExtendedProperties();
 
     /**
-     * Gets the supported capabilities for a calendar access in this folder, describing the usable extended feature set.
+     * Gets the account's arbitrary external / user configuration data.
      *
-     * @return The supported calendar capabilities, or an empty set if no extended functionality is available
+     * @return The user configuration, or <code>null</code> if not set
      */
-    EnumSet<CalendarCapability> getSupportedCapabilites();
+    JSONObject getConfig();
 
 }

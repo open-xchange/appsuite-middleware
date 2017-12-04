@@ -65,6 +65,7 @@ import com.openexchange.chronos.Event;
 import com.openexchange.chronos.FreeBusyTime;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
+import com.openexchange.chronos.provider.AccountAwareCalendarFolder;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.CalendarFolder;
 import com.openexchange.chronos.provider.groupware.GroupwareCalendarFolder;
@@ -131,14 +132,14 @@ public class IDMangling {
      * @param accountId The identifier of the account
      * @return The calendar folder representation with unique identifiers
      */
-    public static CalendarFolder withUniqueID(CalendarFolder folder, int accountId) {
-        String newId = getUniqueFolderId(accountId, folder.getId());
+    public static AccountAwareCalendarFolder withUniqueID(CalendarFolder folder, CalendarAccount account) {
+        String newId = getUniqueFolderId(account.getAccountId(), folder.getId());
         if (GroupwareCalendarFolder.class.isInstance(folder)) {
             GroupwareCalendarFolder groupwareFolder = (GroupwareCalendarFolder) folder;
-            String newParentId = getUniqueFolderId(accountId, groupwareFolder.getParentId());
-            return new IDManglingGroupwareFolder(groupwareFolder, newId, newParentId);
+            String newParentId = getUniqueFolderId(account.getAccountId(), groupwareFolder.getParentId());
+            return new IDManglingAccountAwareGroupwareFolder(groupwareFolder, account, newId, newParentId);
         }
-        return new IDManglingFolder(folder, newId);
+        return new IDManglingAccountAwareFolder(folder, account, newId);
     }
 
     /**
@@ -146,16 +147,16 @@ public class IDMangling {
      * a specific calendar account.
      *
      * @param folders The calendar folders from the account
-     * @param accountId The identifier of the account
+     * @param account The calendar account
      * @return The calendar folder representations with unique identifiers
      */
-    public static List<CalendarFolder> withUniqueID(List<? extends CalendarFolder> folders, int accountId) {
+    public static List<CalendarFolder> withUniqueID(List<? extends CalendarFolder> folders, CalendarAccount account) {
         if (null == folders) {
             return null;
         }
         List<CalendarFolder> foldersWithUniqueIDs = new ArrayList<CalendarFolder>(folders.size());
         for (CalendarFolder folder : folders) {
-            foldersWithUniqueIDs.add(withUniqueID(folder, accountId));
+            foldersWithUniqueIDs.add(withUniqueID(folder, account));
         }
         return foldersWithUniqueIDs;
     }

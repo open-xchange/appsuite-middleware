@@ -113,6 +113,16 @@ public abstract class SingleFolderCachingCalendarAccess extends CachingCalendarA
     protected abstract String updateFolder(CalendarFolder folder, long clientTimestamp) throws OXException;
 
     @Override
+    public void deleteFolder(String folderId, long clientTimestamp) throws OXException {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public String createFolder(CalendarFolder folder) throws OXException {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public void handleExceptions(String folderId, OXException e) {
         try {
             checkFolderId(folderId);
@@ -145,7 +155,7 @@ public abstract class SingleFolderCachingCalendarAccess extends CachingCalendarA
         return externalCalendarResult;
     }
 
-    
+
     protected String checkFolderId(String folderId) throws OXException {
         if (false == folder.getId().equals(folderId)) {
             throw OXException.notFound(folderId);

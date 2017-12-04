@@ -47,79 +47,66 @@
  *
  */
 
-package com.openexchange.chronos.provider;
+package com.openexchange.chronos.provider.extensions;
 
-import java.util.EnumSet;
-import java.util.Locale;
+import java.util.List;
+import com.openexchange.chronos.Event;
+import com.openexchange.chronos.provider.CalendarAccess;
 import com.openexchange.chronos.service.CalendarParameters;
+import com.openexchange.chronos.service.UpdatesResult;
 import com.openexchange.exception.OXException;
-import com.openexchange.session.Session;
 
 /**
- * {@link CalendarProvider}
+ * {@link BasicSyncAware}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public interface CalendarProvider {
+public interface BasicSyncAware extends CalendarAccess {
 
     /**
-     * Gets the identifier of the calendar provider.
+     * Gets lists of new and updated as well as deleted events since a specific timestamp.
+     * <p/>
+     * The following calendar parameters are evaluated:
+     * <ul>
+     * <li>{@link CalendarParameters#PARAMETER_FIELDS}</li>
+     * <li>{@link CalendarParameters#PARAMETER_RANGE_START}</li>
+     * <li>{@link CalendarParameters#PARAMETER_RANGE_END}</li>
+     * <li>{@link CalendarParameters#PARAMETER_IGNORE} ("changed" and "deleted")</li>
+     * <li>{@link CalendarParameters#PARAMETER_EXPAND_OCCURRENCES}</li>
+     * <li>{@link CalendarParameters#PARAMETER_INCLUDE_PRIVATE}</li>
+     * </ul>
      *
-     * @return The identifier
+     * @param updatedSince The timestamp since when the updates should be retrieved
+     * @return The updates result yielding lists of new/modified and deleted events
      */
-    String getId();
+    UpdatesResult getUpdatedEvents(long updatedSince) throws OXException;
 
     /**
-     * Gets the provider's display name.
+     * Gets the sequence number, which is the highest last-modification timestamp of the account itself and his
+     * contents. Distinct object access permissions (e.g. <i>read own</i>) are not considered.
      *
-     * @param locale The current locale to get the display name in
-     * @return The display name
+     * @return The sequence number
      */
-    String getDisplayName(Locale locale);
+    long getSequenceNumber() throws OXException;
 
     /**
-     * Gets the supported capabilities for a calendar access of this calendar provider, describing the usable extended feature set.
+     * Resolves a specific event (and any overridden instances or <i>change exceptions</i>) by its externally used resource name, which
+     * typically matches the event's UID or filename property. The lookup is performed in a case-sensitive way.
+     * If an event series with overridden instances is matched, the series master event will be the first event in the returned list.
+     * <p/>
+     * It is also possible that that only overridden instances of an event series are returned, which may be the case for <i>detached</i>
+     * instances where the user has no access to the corresponding series master event.
+     * <p/>
+     * The following calendar parameters are evaluated:
+     * <ul>
+     * <li>{@link CalendarParameters#PARAMETER_FIELDS}</li>
+     * </ul>
      *
-     * @return The supported calendar capabilities, or an empty set if no extended functionality is available
+     * @param resourceName The resource name to resolve
+     * @return The resolved event(s), or <code>null</code> if no matching event was found
+     * @see <a href="https://tools.ietf.org/html/rfc4791#section-4.1">RFC 4791, section 4.1</a>
      */
-    EnumSet<CalendarCapability> getCapabilities();
-
-    /**
-     * Callback routine that is invoked after a new account for the calendar provider has been created.
-     *
-     * @param session The user's session
-     * @param account The calendar account that was created
-     * @param parameters Additional calendar parameters, or <code>null</code> if not set
-     */
-    void onAccountCreated(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException;
-
-    /**
-     * Callback routine that is invoked after an existing account for the calendar provider has been updated.
-     *
-     * @param session The user's session
-     * @param account The calendar account that was updated
-     * @param parameters Additional calendar parameters, or <code>null</code> if not set
-     */
-    void onAccountUpdated(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException;
-
-    /**
-     * Callback routine that is invoked after an existing account for the calendar provider has been deleted.
-     *
-     * @param session The user's session
-     * @param account The calendar account that was deleted
-     * @param parameters Additional calendar parameters, or <code>null</code> if not set
-     */
-    void onAccountDeleted(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException;
-
-    /**
-     * Initializes the connection to a specific calendar account.
-     *
-     * @param session The user's session
-     * @param account The calendar account to connect to
-     * @param parameters Additional calendar parameters
-     * @return The connected calendar access
-     */
-    CalendarAccess connect(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException;
+    List<Event> resolveResource(String resourceName) throws OXException;
 
 }

@@ -152,4 +152,16 @@ public class TestCachingCalendarAccessImpl extends CachingCalendarAccess {
         return null;
     }
 
+    @Override
+    public String createFolder(CalendarFolder folder) throws OXException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public void deleteFolder(String folderId, long clientTimestamp) throws OXException {
+        // TODO Auto-generated method stub
+
+    }
+
 }

@@ -74,14 +74,12 @@ public class CalendarStorageFolder extends AbstractFolder implements Parameteriz
      * Initializes a new calendar folder as used by the internal folder storage.
      *
      * @param treeId The identifier of the folder tree to take over
-     * @param accountId The fully-qualified account identifier to take over
      * @param contentType The content type to take over
      */
-    public CalendarStorageFolder(String treeId, String accountId, ContentType contentType) {
+    public CalendarStorageFolder(String treeId, ContentType contentType) {
         super();
         this.properties = new HashMap<FolderField, FolderProperty>();
         setTreeID(treeId);
-        setAccountID(accountId);
         setSubscribed(true);
         setContentType(contentType);
         setDefaultType(contentType.getModule());

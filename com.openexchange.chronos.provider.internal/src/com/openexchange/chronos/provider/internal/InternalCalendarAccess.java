@@ -55,7 +55,9 @@ import static com.openexchange.chronos.provider.CalendarFolderProperty.COLOR_LIT
 import static com.openexchange.chronos.provider.CalendarFolderProperty.SCHEDULE_TRANSP;
 import static com.openexchange.chronos.provider.CalendarFolderProperty.USED_FOR_SYNC;
 import static com.openexchange.chronos.provider.CalendarFolderProperty.USED_FOR_SYNC_LITERAL;
+import static com.openexchange.chronos.provider.internal.Constants.ACCOUNT_ID;
 import static com.openexchange.chronos.provider.internal.Constants.CONTENT_TYPE;
+import static com.openexchange.chronos.provider.internal.Constants.PROVIDER_ID;
 import static com.openexchange.chronos.provider.internal.Constants.QUALIFIED_ACCOUNT_ID;
 import static com.openexchange.chronos.provider.internal.Constants.TREE_ID;
 import static com.openexchange.chronos.provider.internal.Constants.USER_PROPERTY_PREFIX;
@@ -91,6 +93,7 @@ import com.openexchange.chronos.provider.extensions.QuotaAware;
 import com.openexchange.chronos.provider.extensions.SearchAware;
 import com.openexchange.chronos.provider.extensions.SyncAware;
 import com.openexchange.chronos.provider.extensions.WarningsAware;
+import com.openexchange.chronos.provider.folder.FolderCalendarAccess;
 import com.openexchange.chronos.provider.groupware.DefaultGroupwareCalendarFolder;
 import com.openexchange.chronos.provider.groupware.GroupwareCalendarAccess;
 import com.openexchange.chronos.provider.groupware.GroupwareCalendarFolder;
@@ -120,10 +123,9 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  * {@link InternalCalendarAccess}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.0
  */
-public class InternalCalendarAccess implements GroupwareCalendarAccess, SyncAware, PersonalAlarmAware, SearchAware, QuotaAware, WarningsAware {
+public class InternalCalendarAccess implements FolderCalendarAccess, GroupwareCalendarAccess, SyncAware, PersonalAlarmAware, SearchAware, QuotaAware, WarningsAware {
 
     private final CalendarSession session;
     private final ServiceLookup services;
@@ -193,18 +195,18 @@ public class InternalCalendarAccess implements GroupwareCalendarAccess, SyncAwar
         /*
          * perform common folder update
          */
-        ParameterizedFolder storageFolder = getStorageFolder(TREE_ID, QUALIFIED_ACCOUNT_ID, CONTENT_TYPE, folder);
+        ParameterizedFolder storageFolder = getStorageFolder(TREE_ID, CONTENT_TYPE, folder, PROVIDER_ID, ACCOUNT_ID, null);
         getFolderService().updateFolder(storageFolder, new Date(clientTimestamp), session.getSession(), initDecorator());
         return storageFolder.getID();
     }
 
     @Override
-    public String createFolder(String parentFolderId, CalendarFolder folder) throws OXException {
+    public String createFolder(CalendarFolder folder) throws OXException {
         /*
          * perform common folder create
          */
-        ParameterizedFolder folderToCreate = getStorageFolder(TREE_ID, QUALIFIED_ACCOUNT_ID, CONTENT_TYPE, folder);
-        folderToCreate.setParentID(parentFolderId);
+        ParameterizedFolder folderToCreate = getStorageFolder(TREE_ID, CONTENT_TYPE, folder, PROVIDER_ID, ACCOUNT_ID, null);
+        folderToCreate.setAccountID(QUALIFIED_ACCOUNT_ID);
         FolderResponse<String> response = getFolderService().createFolder(folderToCreate, session.getSession(), initDecorator());
         String folderId = response.getResponse();
         /*
@@ -371,7 +373,6 @@ public class InternalCalendarAccess implements GroupwareCalendarAccess, SyncAwar
         DefaultGroupwareCalendarFolder calendarFolder = CalendarFolderConverter.getCalendarFolder(userizedFolder);
         calendarFolder.setExtendedProperties(getProperties(userizedFolder));
         calendarFolder.setSupportedCapabilites(CalendarCapability.getCapabilities(getClass()));
-        calendarFolder.setAccount(account);
         return calendarFolder;
     }
 

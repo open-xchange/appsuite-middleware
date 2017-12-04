@@ -53,14 +53,17 @@ import static com.openexchange.chronos.common.CalendarUtils.DISTANT_FUTURE;
 import static com.openexchange.folderstorage.CalendarFolderConverter.getCalendarFolder;
 import static com.openexchange.folderstorage.CalendarFolderConverter.getCalendarType;
 import static com.openexchange.folderstorage.CalendarFolderConverter.getStorageFolder;
+import static com.openexchange.folderstorage.CalendarFolderConverter.optCalendarConfig;
+import static com.openexchange.folderstorage.CalendarFolderConverter.optCalendarProvider;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import org.json.JSONObject;
+import com.openexchange.chronos.provider.AccountAwareCalendarFolder;
 import com.openexchange.chronos.provider.CalendarFolder;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccessFactory;
-import com.openexchange.chronos.provider.groupware.GroupwareCalendarFolder;
 import com.openexchange.chronos.provider.groupware.GroupwareFolderType;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.ContentType;
@@ -77,7 +80,6 @@ import com.openexchange.folderstorage.calendar.contentType.CalendarContentType;
 import com.openexchange.folderstorage.tx.TransactionManager;
 import com.openexchange.folderstorage.type.CalendarType;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.tools.id.IDMangler;
 
 /**
  * {@link CalendarFolderStorage}
@@ -229,9 +231,28 @@ public class CalendarFolderStorage implements FolderStorage {
     @Override
     public void createFolder(Folder folder, StorageParameters storageParameters) throws OXException {
         IDBasedCalendarAccess calendarAccess = getCalendarAccess(storageParameters);
-        GroupwareCalendarFolder folderToCreate = getCalendarFolder(folder);
-        String folderID = calendarAccess.createFolder(folder.getParentID(), folderToCreate);
-        folder.setID(folderID);
+        CalendarFolder folderToCreate = getCalendarFolder(folder);
+        String providerId = optCalendarProvider(folder);
+        JSONObject userConfig = optCalendarConfig(folder);
+        String newFolderId = calendarAccess.createFolder(providerId, folderToCreate, userConfig);
+        folder.setID(newFolderId);
+    }
+
+    @Override
+    public void updateFolder(Folder folder, StorageParameters storageParameters) throws OXException {
+        IDBasedCalendarAccess calendarAccess = getCalendarAccess(storageParameters);
+        /*
+         * update folder
+         */
+        long timestamp = null != storageParameters.getTimeStamp() ? storageParameters.getTimeStamp().getTime() : DISTANT_FUTURE;
+        CalendarFolder folderToUpdate = getCalendarFolder(folder);
+        JSONObject userConfig = optCalendarConfig(folder);
+        String updatedFolderID = calendarAccess.updateFolder(folder.getID(), folderToUpdate, userConfig, timestamp);
+        /*
+         * take over updated identifiers in passed folder reference
+         */
+        folder.setID(updatedFolderID);
+        folder.setLastModified(folderToUpdate.getLastModified());
     }
 
     @Override
@@ -309,8 +330,8 @@ public class CalendarFolderStorage implements FolderStorage {
             throw FolderExceptionErrorMessage.UNSUPPORTED_STORAGE_TYPE.create(storageType);
         }
         IDBasedCalendarAccess calendarAccess = getCalendarAccess(storageParameters);
-        CalendarFolder calendarFolder = calendarAccess.getFolder(folderId);
-        return getStorageFolder(treeId, getQualifiedAccountID(folderId), getDefaultContentType(), calendarFolder);
+        AccountAwareCalendarFolder calendarFolder = calendarAccess.getFolder(folderId);
+        return getStorageFolder(treeId, getDefaultContentType(), calendarFolder, calendarFolder.getAccount());
     }
 
     @Override
@@ -350,23 +371,6 @@ public class CalendarFolderStorage implements FolderStorage {
         throw new UnsupportedOperationException("CalendarFolderStorage.getModifiedFolderIDs()");
     }
 
-    @Override
-    public void updateFolder(Folder folder, StorageParameters storageParameters) throws OXException {
-        IDBasedCalendarAccess calendarAccess = getCalendarAccess(storageParameters);
-        /*
-         * update folder
-         */
-        long timestamp = null != storageParameters.getTimeStamp() ? storageParameters.getTimeStamp().getTime() : DISTANT_FUTURE;
-        GroupwareCalendarFolder folderToUpdate = getCalendarFolder(folder);
-        String updatedFolderID = calendarAccess.updateFolder(folder.getID(), folderToUpdate, timestamp);
-        /*
-         * take over updated identifiers in passed folder reference
-         */
-        folder.setID(updatedFolderID);
-        folder.setParentID(folderToUpdate.getParentId());
-        folder.setLastModified(folderToUpdate.getLastModified());
-    }
-
     /**
      * Gets the ID based calendar access reference from the supplied storage parameters, throwing an appropriate exception in case it is
      * absent.
@@ -391,18 +395,6 @@ public class CalendarFolderStorage implements FolderStorage {
             sortableIds.add(new CalendarId(folders.get(i).getId(), i, null));
         }
         return sortableIds.toArray(new SortableId[sortableIds.size()]);
-    }
-
-    /**
-     * Gets a qualified, unique identifier for the calendar account referenced by the supplied composite folder identifier.
-     *
-     * @param uniqueID The unique identifier to get the account identifier for
-     * @return The qualified account identifier
-     */
-    private static String getQualifiedAccountID(String uniqueID) {
-        //TODO: account id in calendar folders?
-        List<String> unmangled = IDMangler.unmangle(uniqueID);
-        return IDMangler.mangle(unmangled.get(0), unmangled.get(1));
     }
 
 }

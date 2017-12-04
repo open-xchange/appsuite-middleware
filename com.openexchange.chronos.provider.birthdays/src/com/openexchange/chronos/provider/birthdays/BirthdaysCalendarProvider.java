@@ -49,9 +49,11 @@
 
 package com.openexchange.chronos.provider.birthdays;
 
+import static com.openexchange.chronos.provider.CalendarFolderProperty.COLOR_LITERAL;
 import static com.openexchange.chronos.provider.CalendarFolderProperty.DESCRIPTION;
 import static com.openexchange.chronos.provider.CalendarFolderProperty.SCHEDULE_TRANSP;
 import static com.openexchange.chronos.provider.CalendarFolderProperty.USED_FOR_SYNC;
+import static com.openexchange.chronos.provider.CalendarFolderProperty.optPropertyValue;
 import static com.openexchange.osgi.Tools.requireService;
 import java.util.EnumSet;
 import java.util.HashSet;
@@ -64,23 +66,21 @@ import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.ExtendedProperties;
 import com.openexchange.chronos.TimeTransparency;
 import com.openexchange.chronos.common.Check;
-import com.openexchange.chronos.common.DataHandlers;
 import com.openexchange.chronos.common.UserConfigWrapper;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.AutoProvisioningCalendarProvider;
-import com.openexchange.chronos.provider.CalendarAccess;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.CalendarCapability;
-import com.openexchange.chronos.provider.SingleAccountCalendarProvider;
+import com.openexchange.chronos.provider.SingleFolderCalendarAccessUtils;
+import com.openexchange.chronos.provider.basic.BasicCalendarAccess;
+import com.openexchange.chronos.provider.basic.BasicCalendarProvider;
+import com.openexchange.chronos.provider.basic.CalendarSettings;
 import com.openexchange.chronos.service.CalendarParameters;
-import com.openexchange.conversion.ConversionResult;
 import com.openexchange.conversion.ConversionService;
-import com.openexchange.conversion.DataArguments;
-import com.openexchange.conversion.DataHandler;
-import com.openexchange.conversion.SimpleData;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.i18n.tools.StringHelper;
+import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
@@ -92,7 +92,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class BirthdaysCalendarProvider implements AutoProvisioningCalendarProvider, SingleAccountCalendarProvider {
+public class BirthdaysCalendarProvider implements BasicCalendarProvider {
 
     static final String PROVIDER_ID = "birthdays";
 
@@ -123,7 +123,6 @@ public class BirthdaysCalendarProvider implements AutoProvisioningCalendarProvid
         return CalendarCapability.getCapabilities(BirthdaysCalendarAccess.class);
     }
 
-    @Override
     public JSONObject autoConfigureAccount(Session session, JSONObject userConfig, CalendarParameters parameters) throws OXException {
         /*
          * check capabilities and if user already has an account
@@ -145,35 +144,59 @@ public class BirthdaysCalendarProvider implements AutoProvisioningCalendarProvid
         extendedProperties.add(DESCRIPTION(stringHelper.getString(BirthdaysCalendarStrings.CALENDAR_DESCRIPTION), true));
         extendedProperties.add(USED_FOR_SYNC(Boolean.FALSE, true));
         JSONObject internalConfig = new JSONObject();
-        try {
-            DataHandler dataHandler = requireService(ConversionService.class, services).getDataHandler(DataHandlers.XPROPERTIES2JSON);
-            ConversionResult result = dataHandler.processData(new SimpleData<ExtendedProperties>(extendedProperties), new DataArguments(), null);
-            internalConfig.put("extendedProperties", result.getData());
-        } catch (JSONException e) {
-            throw CalendarExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        internalConfig.putSafe("extendedProperties", SingleFolderCalendarAccessUtils.writeExtendedProperties(
+            requireService(ConversionService.class, services), extendedProperties));
+        return internalConfig;
+    }
+
+    @Override
+    public JSONObject configureAccount(Session session, CalendarSettings settings, CalendarParameters parameters) throws OXException {
+        if (AutoProvisioningCalendarProvider.class.isInstance(getClass())) {
+            /*
+             * no manual account creation allowed as accounts are provisioned automatically
+             */
+            throw CalendarExceptionCodes.UNSUPPORTED_OPERATION_FOR_PROVIDER.create(PROVIDER_ID);
+        }
+        /*
+         * initialize & check user configuration for new account
+         */
+        initializeUserConfig(ServerSessionAdapter.valueOf(session), settings.getConfig());
+        /*
+         * prepare & return internal configuration for new account, taking over client-supplied values if set
+         */
+        JSONObject internalConfig = new JSONObject();
+        Object colorValue = optPropertyValue(settings.getExtendedProperties(), COLOR_LITERAL);
+        if (null != colorValue && String.class.isInstance(colorValue)) {
+            internalConfig.putSafe("color", colorValue);
+        }
+        if (Strings.isNotEmpty(settings.getName())) {
+            internalConfig.putSafe("name", settings.getName());
         }
         return internalConfig;
     }
 
     @Override
-    public JSONObject configureAccount(Session session, JSONObject userConfig, CalendarParameters parameters) throws OXException {
+    public JSONObject reconfigureAccount(Session session, CalendarAccount account, CalendarSettings settings, CalendarParameters parameters) throws OXException {
         /*
-         * no manual account creation allowed as accounts are provisioned automatically
-         */
-        throw CalendarExceptionCodes.UNSUPPORTED_OPERATION_FOR_PROVIDER.create(PROVIDER_ID);
-    }
-
-    @Override
-    public JSONObject reconfigureAccount(Session session, CalendarAccount calendarAccount, JSONObject userConfig, CalendarParameters parameters) throws OXException {
-        /*
-         * initialize & check user config
+         * initialize & check passed user config
          */
         ServerSession serverSession = ServerSessionAdapter.valueOf(session);
-        initializeUserConfig(serverSession, userConfig);
+        initializeUserConfig(serverSession, settings.getConfig());
         /*
-         * no further internal config needed
+         * check & apply changes to extended properties
          */
-        return null;
+        boolean changed = false;
+        JSONObject internalConfig = null != account.getInternalConfiguration() ? new JSONObject(account.getInternalConfiguration()) : new JSONObject();
+        Object colorValue = optPropertyValue(settings.getExtendedProperties(), COLOR_LITERAL);
+        if (null != colorValue && String.class.isInstance(colorValue) && false == colorValue.equals(internalConfig.opt("color"))) {
+            internalConfig.putSafe("color", colorValue);
+            changed = true;
+        }
+        if (Strings.isNotEmpty(settings.getName()) && false == settings.getName().equals(internalConfig.opt("name"))) {
+            internalConfig.putSafe("name", settings.getName());
+            changed = true;
+        }
+        return changed ? internalConfig : null;
     }
 
     @Override
@@ -192,7 +215,7 @@ public class BirthdaysCalendarProvider implements AutoProvisioningCalendarProvid
     }
 
     @Override
-    public CalendarAccess connect(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
+    public BasicCalendarAccess connect(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
         return getAccess(session, account, parameters);
     }
 

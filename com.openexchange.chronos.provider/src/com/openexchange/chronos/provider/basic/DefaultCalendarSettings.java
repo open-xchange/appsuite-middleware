@@ -47,63 +47,67 @@
  *
  */
 
-package com.openexchange.chronos.provider;
+package com.openexchange.chronos.provider.basic;
 
 import java.util.Date;
-import java.util.EnumSet;
-import java.util.List;
+import org.json.JSONObject;
 import com.openexchange.chronos.ExtendedProperties;
+import com.openexchange.chronos.provider.basic.CalendarSettings;
 
 /**
- * {@link CalendarFolder}
+ * {@link DefaultCalendarSettings}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public interface CalendarFolder {
+public class DefaultCalendarSettings implements CalendarSettings {
+
+    private String name;
+    private Date lastModified;
+    private ExtendedProperties extendedProperties;
+    private JSONObject config;
 
     /**
-     * Gets the identifier of the calendar folder.
-     *
-     * @return The folder identifier
+     * Initializes a new {@link DefaultCalendarSettings}.
      */
-    String getId();
+    public DefaultCalendarSettings() {
+        super();
+    }
 
-    /**
-     * Gets the name of the calendar folder.
-     *
-     * @return The folder name
-     */
-    String getName();
+    @Override
+    public String getName() {
+        return name;
+    }
 
-    /**
-     * Gets the last modification date of the calendar.
-     *
-     * @return The last modification date, or <code>null</code> if not defined
-     */
-    Date getLastModified();
+    public void setName(String name) {
+        this.name = name;
+    }
 
-    /**
-     * Gets the permissions
-     *
-     * @return The permissions
-     */
-    List<CalendarPermission> getPermissions();
+    @Override
+    public Date getLastModified() {
+        return lastModified;
+    }
 
-    /**
-     * Gets the extended properties of the folder.
-     * <p/>
-     * See {@link CalendarFolderProperty} for a list of common folder properties evaluated by clients.
-     *
-     * @return The extended properties, or <code>null</code> if not defined
-     */
-    ExtendedProperties getExtendedProperties();
+    public void setLastModified(Date lastModified) {
+        this.lastModified = lastModified;
+    }
 
-    /**
-     * Gets the supported capabilities for a calendar access in this folder, describing the usable extended feature set.
-     *
-     * @return The supported calendar capabilities, or an empty set if no extended functionality is available
-     */
-    EnumSet<CalendarCapability> getSupportedCapabilites();
+    @Override
+    public ExtendedProperties getExtendedProperties() {
+        return extendedProperties;
+    }
+
+    public void setExtendedProperties(ExtendedProperties extendedProperties) {
+        this.extendedProperties = extendedProperties;
+    }
+
+    @Override
+    public JSONObject getConfig() {
+        return config;
+    }
+
+    public void setConfig(JSONObject config) {
+        this.config = config;
+    }
 
 }

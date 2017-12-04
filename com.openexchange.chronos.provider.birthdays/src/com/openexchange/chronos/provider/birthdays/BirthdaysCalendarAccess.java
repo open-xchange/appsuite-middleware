@@ -51,11 +51,9 @@ package com.openexchange.chronos.provider.birthdays;
 
 import static com.openexchange.chronos.common.CalendarUtils.optTimeZone;
 import static com.openexchange.chronos.provider.CalendarFolderProperty.COLOR;
-import static com.openexchange.chronos.provider.CalendarFolderProperty.COLOR_LITERAL;
 import static com.openexchange.chronos.provider.CalendarFolderProperty.DESCRIPTION;
 import static com.openexchange.chronos.provider.CalendarFolderProperty.SCHEDULE_TRANSP;
 import static com.openexchange.chronos.provider.CalendarFolderProperty.USED_FOR_SYNC;
-import static com.openexchange.osgi.Tools.requireService;
 import static com.openexchange.tools.arrays.Arrays.contains;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -65,7 +63,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.TimeZone;
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmTrigger;
@@ -78,17 +75,12 @@ import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.DefaultCalendarResult;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.CalendarAccount;
-import com.openexchange.chronos.provider.CalendarCapability;
-import com.openexchange.chronos.provider.CalendarFolder;
-import com.openexchange.chronos.provider.CalendarPermission;
-import com.openexchange.chronos.provider.DefaultCalendarFolder;
-import com.openexchange.chronos.provider.DefaultCalendarPermission;
-import com.openexchange.chronos.provider.SingleFolderCalendarAccess;
-import com.openexchange.chronos.provider.SingleFolderCalendarAccessUtils;
-import com.openexchange.chronos.provider.account.AdministrativeCalendarAccountService;
 import com.openexchange.chronos.provider.account.CalendarAccountService;
+import com.openexchange.chronos.provider.basic.BasicCalendarAccess;
+import com.openexchange.chronos.provider.basic.CalendarSettings;
+import com.openexchange.chronos.provider.basic.DefaultCalendarSettings;
+import com.openexchange.chronos.provider.extensions.BasicSearchAware;
 import com.openexchange.chronos.provider.extensions.PersonalAlarmAware;
-import com.openexchange.chronos.provider.extensions.SearchAware;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarResult;
 import com.openexchange.chronos.service.EventID;
@@ -97,7 +89,6 @@ import com.openexchange.chronos.service.SearchOptions;
 import com.openexchange.chronos.service.UpdateResult;
 import com.openexchange.contact.ContactFieldOperand;
 import com.openexchange.contact.ContactService;
-import com.openexchange.conversion.ConversionService;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderResponse;
 import com.openexchange.folderstorage.FolderService;
@@ -112,6 +103,7 @@ import com.openexchange.folderstorage.type.SharedType;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.i18n.tools.StringHelper;
+import com.openexchange.java.Strings;
 import com.openexchange.java.util.TimeZones;
 import com.openexchange.search.CompositeSearchTerm;
 import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
@@ -130,7 +122,7 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class BirthdaysCalendarAccess extends SingleFolderCalendarAccess implements PersonalAlarmAware, SearchAware {
+public class BirthdaysCalendarAccess implements BasicCalendarAccess, PersonalAlarmAware, BasicSearchAware {
 
     /** Search term to query for contacts having a birthday */
     private static final SearchTerm<?> HAS_BIRTHDAY_TERM = new CompositeSearchTerm(CompositeOperation.NOT)
@@ -139,6 +131,8 @@ public class BirthdaysCalendarAccess extends SingleFolderCalendarAccess implemen
     private final ServerSession session;
     private final ServiceLookup services;
     private final EventConverter eventConverter;
+    private final CalendarAccount account;
+    private final CalendarParameters parameters;
 
     /**
      * Initializes a new {@link BirthdaysCalendarAccess}.
@@ -149,9 +143,11 @@ public class BirthdaysCalendarAccess extends SingleFolderCalendarAccess implemen
      * @param parameters Additional calendar parameters
      */
     public BirthdaysCalendarAccess(ServiceLookup services, ServerSession session, CalendarAccount account, CalendarParameters parameters) throws OXException {
-        super(session, account, parameters, prepareFolder(requireService(ConversionService.class, services), session, account));
+        super();
+        this.account = account;
         this.services = services;
         this.session = session;
+        this.parameters = parameters;
         this.eventConverter = new EventConverter(services, session.getUser().getLocale(), account.getUserId());
     }
 
@@ -182,7 +178,6 @@ public class BirthdaysCalendarAccess extends SingleFolderCalendarAccess implemen
         getAlarmHelper().deleteAllAlarms();
     }
 
-    @Override
     protected CalendarAccountService getAccountService() throws OXException {
         return services.getService(CalendarAccountService.class);
     }
@@ -193,38 +188,41 @@ public class BirthdaysCalendarAccess extends SingleFolderCalendarAccess implemen
     }
 
     @Override
-    public String updateFolder(String folderId, CalendarFolder folder, long clientTimestamp) throws OXException {
+    public CalendarSettings getSettings() {
         /*
-         * prevent updates to permissions or folder name
+         * init settings & and apply account configuration
          */
-        if (null != folder.getName() && false == folder.getName().equals(this.folder.getName()) ||
-            null != folder.getPermissions() && false == folder.getPermissions().equals(this.folder.getPermissions())) {
-            throw CalendarExceptionCodes.UNSUPPORTED_OPERATION_FOR_PROVIDER.create(BirthdaysCalendarProvider.PROVIDER_ID);
+        StringHelper stringHelper = StringHelper.valueOf(session.getUser().getLocale());
+        DefaultCalendarSettings settings = new DefaultCalendarSettings();
+        settings.setConfig(account.getUserConfiguration());
+        settings.setLastModified(account.getLastModified());
+        /*
+         * take over further properties from internal config
+         */
+        JSONObject internalConfig = null != account.getInternalConfiguration() ? account.getInternalConfiguration() : new JSONObject();
+        String name = internalConfig.optString("name", null);
+        if (Strings.isEmpty(name)) {
+            name = stringHelper.getString(BirthdaysCalendarStrings.CALENDAR_NAME);
         }
-        ExtendedProperties originalProperties = this.folder.getExtendedProperties();
-        ExtendedProperties updatedProperties = SingleFolderCalendarAccessUtils.merge(originalProperties, folder.getExtendedProperties());
-        if (false == originalProperties.equals(updatedProperties)) {
-            JSONObject internalConfig;
-            try {
-                internalConfig = null == account.getInternalConfiguration() ? new JSONObject() : new JSONObject(account.getInternalConfiguration().toString());
-                internalConfig.put("extendedProperties", SingleFolderCalendarAccessUtils.writeExtendedProperties(requireService(ConversionService.class, services), updatedProperties));
-            } catch (JSONException e) {
-                throw CalendarExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-            }
-            account = services.getService(AdministrativeCalendarAccountService.class).updateAccount(session.getContextId(), account.getUserId(), account.getAccountId(), null, internalConfig, null, account.getLastModified().getTime());
-        }
-        return folderId;
+        settings.setName(name);
+        ExtendedProperties extendedProperties = new ExtendedProperties();
+        extendedProperties.add(SCHEDULE_TRANSP(TimeTransparency.TRANSPARENT, true));
+        extendedProperties.add(DESCRIPTION(stringHelper.getString(BirthdaysCalendarStrings.CALENDAR_DESCRIPTION), true));
+        extendedProperties.add(USED_FOR_SYNC(Boolean.FALSE, true));
+        extendedProperties.add(COLOR(internalConfig.optString("color", null), false));
+        settings.setExtendedProperties(extendedProperties);
+        return settings;
     }
 
     @Override
-    protected Event getEvent(String eventId, RecurrenceId recurrenceId) throws OXException {
+    public Event getEvent(String eventId, RecurrenceId recurrenceId) throws OXException {
         Contact contact = getBirthdayContact(eventId);
         Event event = null == recurrenceId ? eventConverter.getSeriesMaster(contact) : eventConverter.getOccurrence(contact, recurrenceId);
         return postProcess(event);
     }
 
     @Override
-    protected List<Event> getEvents() throws OXException {
+    public List<Event> getEvents() throws OXException {
         List<Contact> contacts = getBirthdayContacts();
         if (isExpandOccurrences()) {
             return postProcess(eventConverter.getOccurrences(contacts, getFrom(), getUntil(), getTimeZone()));
@@ -234,9 +232,8 @@ public class BirthdaysCalendarAccess extends SingleFolderCalendarAccess implemen
     }
 
     @Override
-    public List<Event> getChangeExceptions(String folderId, String seriesId) throws OXException {
+    public List<Event> getChangeExceptions(String seriesId) throws OXException {
         // no change exceptions possible
-        checkFolderId(folderId);
         return Collections.emptyList();
     }
 
@@ -248,7 +245,6 @@ public class BirthdaysCalendarAccess extends SingleFolderCalendarAccess implemen
 
     @Override
     public CalendarResult updateAlarms(EventID eventID, List<Alarm> alarms, long clientTimestamp) throws OXException {
-        checkFolderId(eventID.getFolderID());
         if (null != eventID.getRecurrenceID()) {
             throw CalendarExceptionCodes.EVENT_RECURRENCE_NOT_FOUND.create(eventID.getObjectID(), eventID.getRecurrenceID());
         }
@@ -258,12 +254,7 @@ public class BirthdaysCalendarAccess extends SingleFolderCalendarAccess implemen
     }
 
     @Override
-    public List<Event> searchEvents(String[] folderIds, List<SearchFilter> filters, List<String> queries) throws OXException {
-        if (null != folderIds) {
-            for (String folderId : folderIds) {
-                checkFolderId(folderId);
-            }
-        }
+    public List<Event> searchEvents(List<SearchFilter> filters, List<String> queries) throws OXException {
         List<Contact> contacts = searchBirthdayContacts(SearchAdapter.getContactSearchTerm(filters, queries));
         if (isExpandOccurrences()) {
             return postProcess(eventConverter.getOccurrences(contacts, getFrom(), getUntil(), getTimeZone()));
@@ -376,49 +367,12 @@ public class BirthdaysCalendarAccess extends SingleFolderCalendarAccess implemen
         return null != timeZone ? timeZone : optTimeZone(session.getUser().getTimeZone(), TimeZones.UTC);
     }
 
-    private static DefaultCalendarFolder prepareFolder(ConversionService conversionService, ServerSession session, CalendarAccount account) throws OXException {
-        StringHelper stringHelper = StringHelper.valueOf(session.getUser().getLocale());
-        DefaultCalendarFolder folder = new DefaultCalendarFolder(account, FOLDER_ID, stringHelper.getString(BirthdaysCalendarStrings.CALENDAR_NAME));
-        folder.setSupportedCapabilites(CalendarCapability.getCapabilities(BirthdaysCalendarAccess.class));
-        folder.setLastModified(account.getLastModified());
-        ExtendedProperties extendedProperties = SingleFolderCalendarAccessUtils.parseExtendedProperties(conversionService, account.getInternalConfiguration().optJSONObject("extendedProperties"));
-        if (null == extendedProperties) {
-            extendedProperties = new ExtendedProperties();
-        }
-        /*
-         * always apply or overwrite protected defaults
-         */
-        extendedProperties.replace(SCHEDULE_TRANSP(TimeTransparency.TRANSPARENT, true));
-        extendedProperties.replace(DESCRIPTION(stringHelper.getString(BirthdaysCalendarStrings.CALENDAR_DESCRIPTION), true));
-        extendedProperties.replace(USED_FOR_SYNC(Boolean.FALSE, true));
-        /*
-         * insert further defaults if missing
-         */
-        if (false == extendedProperties.contains(COLOR_LITERAL)) {
-            extendedProperties.add(COLOR(null, false));
-        }
-        folder.setExtendedProperties(extendedProperties);
-        /*
-         *
-         */
-        CalendarPermission permission = new DefaultCalendarPermission(
-            account.getUserId(),
-            CalendarPermission.READ_FOLDER,
-            CalendarPermission.READ_ALL_OBJECTS,
-            CalendarPermission.WRITE_ALL_OBJECTS,
-            CalendarPermission.NO_PERMISSIONS,
-            false,
-            false,
-            CalendarPermission.NO_PERMISSIONS)
-        ;
-        folder.setPermissions(Collections.singletonList(permission));
-
-        return folder;
-    }
-
     private List<String> getContactFolderIds() throws OXException {
         List<String> folderIds = new ArrayList<String>();
         JSONArray typesJSONArray = account.getUserConfiguration().optJSONArray("folderTypes");
+        if (null == typesJSONArray) {
+            return null;
+        }
         for (int i = 0; i < typesJSONArray.length(); i++) {
             folderIds.addAll(getContactFolderIds(typesJSONArray.optString(i)));
         }
@@ -451,6 +405,14 @@ public class BirthdaysCalendarAccess extends SingleFolderCalendarAccess implemen
             }
         }
         return folderIds;
+    }
+
+    protected Date getFrom() {
+        return parameters.get(CalendarParameters.PARAMETER_RANGE_START, Date.class);
+    }
+
+    protected Date getUntil() {
+        return parameters.get(CalendarParameters.PARAMETER_RANGE_END, Date.class);
     }
 
 }

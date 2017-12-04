@@ -54,10 +54,10 @@ import java.util.Locale;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.auth.info.AuthType;
-import com.openexchange.chronos.provider.CalendarAccess;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.CalendarCapability;
 import com.openexchange.chronos.provider.caching.CachingCalendarProvider;
+import com.openexchange.chronos.provider.folder.FolderCalendarAccess;
 import com.openexchange.chronos.provider.ical.auth.ICalAuthParser;
 import com.openexchange.chronos.provider.ical.conn.ICalFeedClient;
 import com.openexchange.chronos.provider.ical.result.GetResponse;
@@ -93,7 +93,7 @@ public class ICalCalendarProvider extends CachingCalendarProvider {
     }
 
     @Override
-    public CalendarAccess connect(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
+    public FolderCalendarAccess connect(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
         return new ICalCalendarAccess(session, account, parameters);
     }
 

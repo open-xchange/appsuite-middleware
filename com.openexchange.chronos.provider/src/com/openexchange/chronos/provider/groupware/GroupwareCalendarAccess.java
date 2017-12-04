@@ -55,9 +55,8 @@ import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.ParticipationStatus;
-import com.openexchange.chronos.provider.CalendarAccess;
-import com.openexchange.chronos.provider.CalendarFolder;
 import com.openexchange.chronos.provider.extensions.PermissionAware;
+import com.openexchange.chronos.provider.folder.FolderCalendarAccess;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarResult;
 import com.openexchange.chronos.service.EventID;
@@ -71,35 +70,7 @@ import com.openexchange.exception.OXException;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.0
  */
-public interface GroupwareCalendarAccess extends CalendarAccess, PermissionAware {
-
-    /**
-     * Creates a new folder.
-     *
-     * @param parentFolderId The identifier of the parent folder
-     * @param folder The folder data to create
-     * @return The identifier of the newly created folder
-     */
-    String createFolder(String parentFolderId, CalendarFolder folder) throws OXException;
-
-    /**
-     * Updates an existing folder.
-     *
-     * @param folderId The identifier of the folder to update
-     * @param folder The folder data to update
-     * @param clientTimestamp The last timestamp / sequence number known by the client to catch concurrent updates
-     * @return The (possibly changed) identifier of the updated folder
-     */
-    @Override
-    String updateFolder(String folderId, CalendarFolder folder, long clientTimestamp) throws OXException;
-
-    /**
-     * Deletes an existing folder.
-     *
-     * @param folderId The identifier of the folder to delete
-     * @param clientTimestamp The last timestamp / sequence number known by the client to catch concurrent updates
-     */
-    void deleteFolder(String folderId, long clientTimestamp) throws OXException;
+public interface GroupwareCalendarAccess extends FolderCalendarAccess, PermissionAware {
 
     /**
      * Gets a list of all visible calendar folders.

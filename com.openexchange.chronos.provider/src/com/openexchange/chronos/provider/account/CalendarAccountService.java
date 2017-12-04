@@ -50,9 +50,9 @@
 package com.openexchange.chronos.provider.account;
 
 import java.util.List;
-import org.json.JSONObject;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.CalendarProvider;
+import com.openexchange.chronos.provider.basic.CalendarSettings;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.exception.OXException;
 import com.openexchange.osgi.annotation.SingletonService;
@@ -83,7 +83,7 @@ public interface CalendarAccountService {
      * @param parameters Additional calendar parameters, or <code>null</code> if not set
      * @return The created calendar account
      */
-    CalendarAccount createAccount(Session session, String providerId, JSONObject userConfig, CalendarParameters parameters) throws OXException;
+    CalendarAccount createAccount(Session session, String providerId, CalendarSettings settings, CalendarParameters parameters) throws OXException;
 
     /**
      * Updates an existing calendar account.
@@ -96,7 +96,7 @@ public interface CalendarAccountService {
      * @param parameters Additional calendar parameters, or <code>null</code> if not set
      * @return The updated calendar account
      */
-    CalendarAccount updateAccount(Session session, int id, Boolean enabled, JSONObject userConfig, long clientTimestamp, CalendarParameters parameters) throws OXException;
+    CalendarAccount updateAccount(Session session, int id, CalendarSettings settings, long clientTimestamp, CalendarParameters parameters) throws OXException;
 
     /**
      * Deletes an existing calendar account.

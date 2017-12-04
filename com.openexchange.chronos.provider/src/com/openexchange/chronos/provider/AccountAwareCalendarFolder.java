@@ -49,61 +49,19 @@
 
 package com.openexchange.chronos.provider;
 
-import java.util.Date;
-import java.util.EnumSet;
-import java.util.List;
-import com.openexchange.chronos.ExtendedProperties;
-
 /**
- * {@link CalendarFolder}
+ * {@link AccountAwareCalendarFolder}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public interface CalendarFolder {
+public interface AccountAwareCalendarFolder extends CalendarFolder {
 
     /**
-     * Gets the identifier of the calendar folder.
+     * Gets the parent calendar account.
      *
-     * @return The folder identifier
+     * @return The calendar account
      */
-    String getId();
-
-    /**
-     * Gets the name of the calendar folder.
-     *
-     * @return The folder name
-     */
-    String getName();
-
-    /**
-     * Gets the last modification date of the calendar.
-     *
-     * @return The last modification date, or <code>null</code> if not defined
-     */
-    Date getLastModified();
-
-    /**
-     * Gets the permissions
-     *
-     * @return The permissions
-     */
-    List<CalendarPermission> getPermissions();
-
-    /**
-     * Gets the extended properties of the folder.
-     * <p/>
-     * See {@link CalendarFolderProperty} for a list of common folder properties evaluated by clients.
-     *
-     * @return The extended properties, or <code>null</code> if not defined
-     */
-    ExtendedProperties getExtendedProperties();
-
-    /**
-     * Gets the supported capabilities for a calendar access in this folder, describing the usable extended feature set.
-     *
-     * @return The supported calendar capabilities, or an empty set if no extended functionality is available
-     */
-    EnumSet<CalendarCapability> getSupportedCapabilites();
+    CalendarAccount getAccount();
 
 }

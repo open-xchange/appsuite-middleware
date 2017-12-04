@@ -53,7 +53,6 @@ import java.util.Date;
 import java.util.EnumSet;
 import java.util.List;
 import com.openexchange.chronos.ExtendedProperties;
-import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.CalendarCapability;
 import com.openexchange.chronos.provider.CalendarFolder;
 import com.openexchange.chronos.provider.CalendarPermission;
@@ -79,11 +78,6 @@ public class IDManglingFolder implements CalendarFolder {
         super();
         this.delegate = delegate;
         this.newId = newId;
-    }
-
-    @Override
-    public CalendarAccount getAccount() {
-        return delegate.getAccount();
     }
 
     @Override

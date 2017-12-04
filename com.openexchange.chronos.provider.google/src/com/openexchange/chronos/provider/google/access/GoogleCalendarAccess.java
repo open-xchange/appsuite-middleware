@@ -85,7 +85,6 @@ import com.openexchange.chronos.provider.CalendarFolderProperty;
 import com.openexchange.chronos.provider.DefaultCalendarFolder;
 import com.openexchange.chronos.provider.DefaultCalendarPermission;
 import com.openexchange.chronos.provider.account.AdministrativeCalendarAccountService;
-import com.openexchange.chronos.provider.account.CalendarAccountService;
 import com.openexchange.chronos.provider.caching.CachingCalendarAccess;
 import com.openexchange.chronos.provider.caching.ExternalCalendarResult;
 import com.openexchange.chronos.provider.google.GoogleCalendarConfigField;
@@ -142,8 +141,8 @@ public class GoogleCalendarAccess extends CachingCalendarAccess {
         if (checkConfig) {
             if (account.getUserConfiguration().has(GoogleCalendarConfigField.MIGRATED)) {
                 account.getUserConfiguration().remove(GoogleCalendarConfigField.MIGRATED);
-                CalendarAccountService calendarAccountService = Services.getService(CalendarAccountService.class);
-                this.account = calendarAccountService.updateAccount(session, account.getAccountId(), account.isEnabled(), account.getUserConfiguration(), System.currentTimeMillis(), parameters);
+                AdministrativeCalendarAccountService calendarAccountService = Services.getService(AdministrativeCalendarAccountService.class);
+                this.account = calendarAccountService.updateAccount(session.getContextId(), session.getUserId(), account.getAccountId(), account.isEnabled(), null, account.getUserConfiguration(), System.currentTimeMillis());
             }
             initCalendarFolder(false);
         }
@@ -317,6 +316,16 @@ public class GoogleCalendarAccess extends CachingCalendarAccess {
         return folderId;
     }
 
+    @Override
+    public String createFolder(CalendarFolder folder) throws OXException {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void deleteFolder(String folderId, long clientTimestamp) throws OXException {
+        throw new UnsupportedOperationException();
+    }
+
     /**
      * Merges incoming extended properties as passed from the client during an update operation into a collection of original extended
      * properties.
@@ -428,7 +437,7 @@ public class GoogleCalendarAccess extends CachingCalendarAccess {
     }
 
     private CalendarFolder prepareFolder(String folderId, String summary, String color, String description, ConversionService conversionService) throws OXException {
-        DefaultCalendarFolder folder = new DefaultCalendarFolder(account, folderId, summary);
+        DefaultCalendarFolder folder = new DefaultCalendarFolder(folderId, summary);
         folder.setPermissions(Collections.singletonList(DefaultCalendarPermission.readOnlyPermissionsFor(account.getUserId())));
         folder.setLastModified(account.getLastModified());
 

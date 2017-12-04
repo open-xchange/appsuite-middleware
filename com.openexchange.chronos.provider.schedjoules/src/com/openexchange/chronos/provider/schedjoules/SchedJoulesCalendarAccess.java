@@ -188,6 +188,16 @@ public class SchedJoulesCalendarAccess extends CachingCalendarAccess {
         }
     }
 
+    @Override
+    public String createFolder(CalendarFolder folder) throws OXException {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void deleteFolder(String folderId, long clientTimestamp) throws OXException {
+        throw new UnsupportedOperationException();
+    }
+
     /*
      * (non-Javadoc)
      *
@@ -366,7 +376,6 @@ public class SchedJoulesCalendarAccess extends CachingCalendarAccess {
 
         folder.setPermissions(Collections.singletonList(DefaultCalendarPermission.readOnlyPermissionsFor(getAccount().getUserId())));
         folder.setLastModified(getAccount().getLastModified());
-        folder.setAccount(account);
 
         applyConfiguration(folder, folderId);
         return folder;
@@ -455,4 +464,5 @@ public class SchedJoulesCalendarAccess extends CachingCalendarAccess {
         }
         return true;
     }
+
 }

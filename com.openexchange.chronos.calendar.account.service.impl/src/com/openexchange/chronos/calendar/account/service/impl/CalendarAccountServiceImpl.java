@@ -66,6 +66,8 @@ import com.openexchange.chronos.provider.DefaultCalendarAccount;
 import com.openexchange.chronos.provider.SingleAccountCalendarProvider;
 import com.openexchange.chronos.provider.account.AdministrativeCalendarAccountService;
 import com.openexchange.chronos.provider.account.CalendarAccountService;
+import com.openexchange.chronos.provider.basic.BasicCalendarProvider;
+import com.openexchange.chronos.provider.basic.CalendarSettings;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.storage.CalendarAccountStorage;
 import com.openexchange.chronos.storage.CalendarStorage;
@@ -101,19 +103,19 @@ public class CalendarAccountServiceImpl implements CalendarAccountService, Admin
     }
 
     @Override
-    public CalendarAccount createAccount(Session session, String providerId, JSONObject userConfig, CalendarParameters parameters) throws OXException {
-        if (isGuest(session)) {
-            throw CalendarExceptionCodes.UNSUPPORTED_OPERATION_FOR_PROVIDER.create(providerId);
-        }
+    public CalendarAccount createAccount(Session session, String providerId, CalendarSettings settings, CalendarParameters parameters) throws OXException {
         /*
          * get associated calendar provider & initialize account config
          */
         CalendarProvider calendarProvider = getProvider(providerId);
-        JSONObject internalConfig = calendarProvider.configureAccount(session, userConfig, parameters);
+        if (isGuest(session) || false == BasicCalendarProvider.class.isInstance(calendarProvider)) {
+            throw CalendarExceptionCodes.UNSUPPORTED_OPERATION_FOR_PROVIDER.create(providerId);
+        }
+        JSONObject internalConfig = ((BasicCalendarProvider) calendarProvider).configureAccount(session, settings, parameters);
         /*
          * insert calendar account in storage within transaction
          */
-        CalendarAccount account = insertAccount(session.getContextId(), calendarProvider, session.getUserId(), internalConfig, userConfig);
+        CalendarAccount account = insertAccount(session.getContextId(), calendarProvider, session.getUserId(), internalConfig, settings.getConfig(), parameters);
         /*
          * let provider perform any additional initialization
          */
@@ -122,7 +124,7 @@ public class CalendarAccountServiceImpl implements CalendarAccountService, Admin
     }
 
     @Override
-    public CalendarAccount updateAccount(Session session, int id, Boolean enabled, JSONObject userConfig, long clientTimestamp, CalendarParameters parameters) throws OXException {
+    public CalendarAccount updateAccount(Session session, int id, CalendarSettings settings, long clientTimestamp, CalendarParameters parameters) throws OXException {
         /*
          * get & check stored calendar account
          */
@@ -130,19 +132,18 @@ public class CalendarAccountServiceImpl implements CalendarAccountService, Admin
         if (null != storedAccount.getLastModified() && storedAccount.getLastModified().getTime() > clientTimestamp) {
             throw CalendarExceptionCodes.CONCURRENT_MODIFICATION.create(String.valueOf(id), clientTimestamp, storedAccount.getLastModified().getTime());
         }
-        if (isGuest(session)) {
-            throw CalendarExceptionCodes.UNSUPPORTED_OPERATION_FOR_PROVIDER.create(storedAccount.getProviderId());
-        }
         /*
-         * get associated calendar provider & re-initialize account config
+         * get associated calendar provider & initialize account config
          */
         CalendarProvider calendarProvider = getProvider(storedAccount.getProviderId());
-
-        JSONObject internalConfig = calendarProvider.reconfigureAccount(session, storedAccount, userConfig, parameters);
+        if (isGuest(session) || false == BasicCalendarProvider.class.isInstance(calendarProvider)) {
+            throw CalendarExceptionCodes.UNSUPPORTED_OPERATION_FOR_PROVIDER.create(storedAccount.getProviderId());
+        }
+        JSONObject internalConfig = ((BasicCalendarProvider) calendarProvider).reconfigureAccount(session, storedAccount, settings, parameters);
         /*
          * update calendar account in storage within transaction
          */
-        CalendarAccount account = updateAccount(session.getContextId(), session.getUserId(), id, enabled, internalConfig, userConfig, clientTimestamp);
+        CalendarAccount account = updateAccount(session.getContextId(), session.getUserId(), id, null, internalConfig, settings.getConfig(), clientTimestamp, parameters);
         /*
          * let provider perform any additional initialization
          */
@@ -178,7 +179,7 @@ public class CalendarAccountServiceImpl implements CalendarAccountService, Admin
         /*
          * delete calendar account in storage within transaction
          */
-        new OSGiCalendarStorageOperation<Void>(services, session.getContextId(), -1) {
+        new OSGiCalendarStorageOperation<Void>(services, session.getContextId(), -1, parameters) {
 
             @Override
             protected Void call(CalendarStorage storage) throws OXException {
@@ -320,7 +321,11 @@ public class CalendarAccountServiceImpl implements CalendarAccountService, Admin
 
     @Override
     public CalendarAccount updateAccount(int contextId, int userId, int accountId, Boolean enabled, JSONObject internalConfig, JSONObject userConfig, long clientTimestamp) throws OXException {
-        CalendarAccount account = new OSGiCalendarStorageOperation<CalendarAccount>(services, contextId, -1) {
+        return updateAccount(contextId, userId, accountId, enabled, internalConfig, userConfig, clientTimestamp, null);
+    }
+
+    private CalendarAccount updateAccount(int contextId, int userId, int accountId, Boolean enabled, JSONObject internalConfig, JSONObject userConfig, long clientTimestamp, CalendarParameters parameters) throws OXException {
+        CalendarAccount account = new OSGiCalendarStorageOperation<CalendarAccount>(services, contextId, -1, parameters) {
 
             @Override
             protected CalendarAccount call(CalendarStorage storage) throws OXException {
@@ -373,8 +378,8 @@ public class CalendarAccountServiceImpl implements CalendarAccountService, Admin
      * @param userConfig The account's external / user configuration data
      * @return The new calendar account
      */
-    private CalendarAccount insertAccount(int contextId, CalendarProvider calendarProvider, int userId, JSONObject internalConfig, JSONObject userConfig) throws OXException {
-        CalendarAccount account = new OSGiCalendarStorageOperation<CalendarAccount>(services, contextId, -1) {
+    private CalendarAccount insertAccount(int contextId, CalendarProvider calendarProvider, int userId, JSONObject internalConfig, JSONObject userConfig, CalendarParameters parameters) throws OXException {
+        CalendarAccount account = new OSGiCalendarStorageOperation<CalendarAccount>(services, contextId, -1, parameters) {
 
             @Override
             protected CalendarAccount call(CalendarStorage storage) throws OXException {

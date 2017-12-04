@@ -365,7 +365,7 @@ public abstract class AbstractCompositingIDBasedCalendarAccess implements Transa
      * @return The calendar account
      */
     protected CalendarAccount getAccount(int accountId) throws OXException {
-        CalendarAccount account = requireService(CalendarAccountService.class, services).getAccount(session, accountId);
+        CalendarAccount account = optAccount(accountId);
         if (null == account) {
             throw CalendarExceptionCodes.ACCOUNT_NOT_FOUND.create(I(accountId));
         }
@@ -373,6 +373,16 @@ public abstract class AbstractCompositingIDBasedCalendarAccess implements Transa
             throw CalendarExceptionCodes.ACCOUNT_DISABLED.create(account.getProviderId(), I(accountId));
         }
         return account;
+    }
+
+    /**
+     * Optionally gets a specific calendar account.
+     *
+     * @param accountId The identifier of the account to get
+     * @return The calendar account, or <code>null</code> if not found
+     */
+    protected CalendarAccount optAccount(int accountId) throws OXException {
+        return requireService(CalendarAccountService.class, services).getAccount(session, accountId);
     }
 
     /**

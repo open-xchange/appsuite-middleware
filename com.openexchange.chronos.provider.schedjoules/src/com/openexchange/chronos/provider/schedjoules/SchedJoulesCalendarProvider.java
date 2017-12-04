@@ -57,10 +57,10 @@ import org.apache.commons.codec.digest.DigestUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.chronos.provider.CalendarAccess;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.CalendarCapability;
 import com.openexchange.chronos.provider.caching.CachingCalendarProvider;
+import com.openexchange.chronos.provider.folder.FolderCalendarAccess;
 import com.openexchange.chronos.provider.schedjoules.exception.SchedJoulesProviderExceptionCodes;
 import com.openexchange.chronos.schedjoules.api.SchedJoulesAPI;
 import com.openexchange.chronos.schedjoules.exception.SchedJoulesAPIExceptionCodes;
@@ -126,7 +126,7 @@ public class SchedJoulesCalendarProvider extends CachingCalendarProvider {
      * @see com.openexchange.chronos.provider.CalendarProvider#connect(com.openexchange.chronos.provider.Session, com.openexchange.chronos.provider.CalendarAccount, com.openexchange.chronos.provider.CalendarParameters)
      */
     @Override
-    public CalendarAccess connect(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
+    public FolderCalendarAccess connect(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
         return new SchedJoulesCalendarAccess(session, account, parameters);
     }
 
@@ -249,7 +249,7 @@ public class SchedJoulesCalendarProvider extends CachingCalendarProvider {
 
     /**
      * Returns the user's {@link Locale}
-     * 
+     *
      * @param session The groupware {@link Session}
      * @return The user's {@link Locale}
      * @throws OXException if the locale cannot be returned

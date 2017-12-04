@@ -53,6 +53,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.json.JSONObject;
 import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmTrigger;
@@ -61,10 +62,13 @@ import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.ParticipationStatus;
+import com.openexchange.chronos.provider.AccountAwareCalendarFolder;
 import com.openexchange.chronos.provider.CalendarFolder;
+import com.openexchange.chronos.provider.basic.BasicCalendarProvider;
 import com.openexchange.chronos.provider.extensions.PersonalAlarmAware;
 import com.openexchange.chronos.provider.extensions.SearchAware;
 import com.openexchange.chronos.provider.extensions.SyncAware;
+import com.openexchange.chronos.provider.folder.FolderCalendarProvider;
 import com.openexchange.chronos.provider.groupware.GroupwareFolderType;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarResult;
@@ -118,28 +122,36 @@ public interface IDBasedCalendarAccess extends TransactionAware, CalendarParamet
      * Gets a specific calendar folder.
      *
      * @param folderId The fully qualified identifier of the folder to get the events from
-     * @return The calendar folder
+     * @return The calendar folder (including information about the underlying account)
      */
-    CalendarFolder getFolder(String folderId) throws OXException;
+    AccountAwareCalendarFolder getFolder(String folderId) throws OXException;
 
     /**
      * Create a new calendar folder.
+     * <p/>
+     * Depending on the capabilities of the targeted calendar provider, either a new subfolder is created within an existing calendar
+     * account (of a {@link FolderCalendarProvider}), or a new calendar account representing a calendar subscription (of a
+     * {@link BasicCalendarProvider}) is created implicitly, resulting in a new virtual folder.
      *
-     * @param parentFolderId The fully qualified identifier of the parent folder
-     * @param folder The calendar folder to create
+     * @param providerId The fully qualified identifier of the parent folder, or <code>null</code> if not needed
+     * @param folder Calendar folder data to take over for the new calendar account
+     * @param userConfig Arbitrary user configuration data for the new calendar account, or <code>null</code> if not needed
      * @return The fully qualified identifier of the newly created folder
      */
-    String createFolder(String parentFolderId, CalendarFolder folder) throws OXException;
+    String createFolder(String providerId, CalendarFolder folder, JSONObject userConfig) throws OXException;
 
     /**
      * Updates a calendar folder.
+     * <p/>
+     * Depending on the capabilities of the underlying calendar provider, also arbitrary account properties can be updated.
      *
      * @param folderId The fully qualified identifier of the folder to update
      * @param folder The updated calendar folder data
+     * @param userConfig Arbitrary user configuration data for the calendar account, or <code>null</code> if not needed
      * @param clientTimestamp The last timestamp / sequence number known by the client to catch concurrent updates
      * @return The (possibly changed) fully qualified identifier of the updated folder
      */
-    String updateFolder(String folderId, CalendarFolder folder, long clientTimestamp) throws OXException;
+    String updateFolder(String folderId, CalendarFolder folder, JSONObject userConfig, long clientTimestamp) throws OXException;
 
     /**
      * Deletes a calendar folder.

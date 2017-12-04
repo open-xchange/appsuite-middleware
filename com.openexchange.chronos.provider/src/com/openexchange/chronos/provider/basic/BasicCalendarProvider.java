@@ -47,70 +47,51 @@
  *
  */
 
-package com.openexchange.chronos.provider;
+package com.openexchange.chronos.provider.basic;
 
-import java.util.EnumSet;
-import java.util.Locale;
+import org.json.JSONObject;
+import com.openexchange.chronos.provider.CalendarAccount;
+import com.openexchange.chronos.provider.CalendarProvider;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
 
 /**
- * {@link CalendarProvider}
+ * {@link BasicCalendarProvider}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public interface CalendarProvider {
+public interface BasicCalendarProvider extends CalendarProvider {
 
     /**
-     * Gets the identifier of the calendar provider.
-     *
-     * @return The identifier
-     */
-    String getId();
-
-    /**
-     * Gets the provider's display name.
-     *
-     * @param locale The current locale to get the display name in
-     * @return The display name
-     */
-    String getDisplayName(Locale locale);
-
-    /**
-     * Gets the supported capabilities for a calendar access of this calendar provider, describing the usable extended feature set.
-     *
-     * @return The supported calendar capabilities, or an empty set if no extended functionality is available
-     */
-    EnumSet<CalendarCapability> getCapabilities();
-
-    /**
-     * Callback routine that is invoked after a new account for the calendar provider has been created.
+     * Initializes the configuration prior creating a new calendar account.
+     * <p/>
+     * Any permission- or data validation checks are performed during this initialization phase. In case of erroneous or incomplete
+     * configuration data, an appropriate exception will be thrown. Upon success, any <i>internal</i> configuration data is returned for
+     * persisting along with the newly created calendar account.
      *
      * @param session The user's session
-     * @param account The calendar account that was created
+     * @param settings Calendar settings for the new account as supplied by the client
      * @param parameters Additional calendar parameters, or <code>null</code> if not set
+     * @return A JSON object holding the <i>internal</i> configuration to store along with the new account
      */
-    void onAccountCreated(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException;
+    JSONObject configureAccount(Session session, CalendarSettings settings, CalendarParameters parameters) throws OXException;
 
     /**
-     * Callback routine that is invoked after an existing account for the calendar provider has been updated.
+     * Re-initializes the configuration prior updating an existing calendar account.
+     * <p/>
+     * Any permission- or data validation checks are performed during this initialization phase. In case of erroneous or incomplete
+     * configuration data, an appropriate exception will be thrown. Upon success, any updated <i>internal</i> configuration data is
+     * returned for persisting along with the updated calendar account.
      *
      * @param session The user's session
-     * @param account The calendar account that was updated
+     * @param calendarAccount The currently stored calendar account holding the obsolete user and current <i>internal</i> configuration
+     * @param settings The updated settings for the updated account as supplied by the client
      * @param parameters Additional calendar parameters, or <code>null</code> if not set
+     * @return A JSON object holding the updated <i>internal</i> configuration to store along with update, or <code>null</code> if unchanged
      */
-    void onAccountUpdated(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException;
-
-    /**
-     * Callback routine that is invoked after an existing account for the calendar provider has been deleted.
-     *
-     * @param session The user's session
-     * @param account The calendar account that was deleted
-     * @param parameters Additional calendar parameters, or <code>null</code> if not set
-     */
-    void onAccountDeleted(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException;
+    JSONObject reconfigureAccount(Session session, CalendarAccount account, CalendarSettings settings, CalendarParameters parameters) throws OXException;
 
     /**
      * Initializes the connection to a specific calendar account.
@@ -120,6 +101,7 @@ public interface CalendarProvider {
      * @param parameters Additional calendar parameters
      * @return The connected calendar access
      */
-    CalendarAccess connect(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException;
+    @Override
+    BasicCalendarAccess connect(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException;
 
 }

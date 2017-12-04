@@ -55,11 +55,11 @@ import java.util.Locale;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
-import com.openexchange.chronos.provider.CalendarAccess;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.CalendarCapability;
-import com.openexchange.chronos.provider.CalendarProvider;
 import com.openexchange.chronos.provider.DefaultCalendarAccount;
+import com.openexchange.chronos.provider.folder.FolderCalendarAccess;
+import com.openexchange.chronos.provider.folder.FolderCalendarProvider;
 import com.openexchange.chronos.provider.google.access.GoogleCalendarAccess;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.exception.OXException;
@@ -71,7 +71,7 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.0
  */
-public class GoogleCalendarProvider implements CalendarProvider {
+public class GoogleCalendarProvider implements FolderCalendarProvider {
 
     public static final String PROVIDER_ID = "google";
     private static final String DISPLAY_NAME = "Google";
@@ -87,7 +87,7 @@ public class GoogleCalendarProvider implements CalendarProvider {
     }
 
     @Override
-    public CalendarAccess connect(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
+    public FolderCalendarAccess connect(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
         return new GoogleCalendarAccess(session, account, parameters, true);
 
     }

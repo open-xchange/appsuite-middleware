@@ -76,6 +76,7 @@ import com.openexchange.chronos.provider.caching.internal.response.DedicatedEven
 import com.openexchange.chronos.provider.caching.internal.response.FolderEventsResponseGenerator;
 import com.openexchange.chronos.provider.caching.internal.response.SingleEventResponseGenerator;
 import com.openexchange.chronos.provider.extensions.WarningsAware;
+import com.openexchange.chronos.provider.folder.FolderCalendarAccess;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.EventID;
 import com.openexchange.exception.OXException;
@@ -91,7 +92,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.10.0
  */
-public abstract class CachingCalendarAccess implements WarningsAware {
+public abstract class CachingCalendarAccess implements FolderCalendarAccess, WarningsAware {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CachingCalendarAccess.class);
 
@@ -360,7 +361,7 @@ public abstract class CachingCalendarAccess implements WarningsAware {
 
     /**
      * Updates the internal configuration data of a specific calendar account.
-     * 
+     *
      * @param internalConfiguration The internal configuration data.
      * @throws OXException if an error is occurred
      */
@@ -370,7 +371,7 @@ public abstract class CachingCalendarAccess implements WarningsAware {
 
     /**
      * Updates the external configuration data of a specific calendar account.
-     * 
+     *
      * @param externalConfiguration The external configuration data.
      * @throws OXException if an error is occurred
      */

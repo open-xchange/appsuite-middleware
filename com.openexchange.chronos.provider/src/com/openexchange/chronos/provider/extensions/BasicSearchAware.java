@@ -47,63 +47,43 @@
  *
  */
 
-package com.openexchange.chronos.provider;
+package com.openexchange.chronos.provider.extensions;
 
-import java.util.Date;
-import java.util.EnumSet;
 import java.util.List;
-import com.openexchange.chronos.ExtendedProperties;
+import com.openexchange.chronos.Event;
+import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.provider.basic.BasicCalendarAccess;
+import com.openexchange.chronos.service.CalendarParameters;
+import com.openexchange.chronos.service.SearchFilter;
+import com.openexchange.exception.OXException;
 
 /**
- * {@link CalendarFolder}
+ * {@link BasicSearchAware}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public interface CalendarFolder {
+public interface BasicSearchAware extends BasicCalendarAccess {
 
     /**
-     * Gets the identifier of the calendar folder.
-     *
-     * @return The folder identifier
-     */
-    String getId();
-
-    /**
-     * Gets the name of the calendar folder.
-     *
-     * @return The folder name
-     */
-    String getName();
-
-    /**
-     * Gets the last modification date of the calendar.
-     *
-     * @return The last modification date, or <code>null</code> if not defined
-     */
-    Date getLastModified();
-
-    /**
-     * Gets the permissions
-     *
-     * @return The permissions
-     */
-    List<CalendarPermission> getPermissions();
-
-    /**
-     * Gets the extended properties of the folder.
+     * Searches for events by one or more queries in the fields {@link EventField#SUMMARY}, {@link EventField#DESCRIPTION} and
+     * {@link EventField#CATEGORIES}. The queries are surrounded by wildcards implicitly to follow a <i>contains</i> semantic.
+     * Additional, storage-specific search filters can be applied.
      * <p/>
-     * See {@link CalendarFolderProperty} for a list of common folder properties evaluated by clients.
+     * The following calendar parameters are evaluated:
+     * <ul>
+     * <li>{@link CalendarParameters#PARAMETER_FIELDS}</li>
+     * <li>{@link CalendarParameters#PARAMETER_RANGE_START}</li>
+     * <li>{@link CalendarParameters#PARAMETER_RANGE_END}</li>
+     * <li>{@link CalendarParameters#PARAMETER_ORDER}</li>
+     * <li>{@link CalendarParameters#PARAMETER_ORDER_BY}</li>
+     * <li>{@link CalendarParameters#PARAMETER_EXPAND_OCCURRENCES}</li>
+     * </ul>
      *
-     * @return The extended properties, or <code>null</code> if not defined
+     * @param filters A list of additional filters to be applied on the search, or <code>null</code> if not specified
+     * @param queries The queries to search for, or <code>null</code> if not specified
+     * @return The found events, or an empty list if there are none
      */
-    ExtendedProperties getExtendedProperties();
-
-    /**
-     * Gets the supported capabilities for a calendar access in this folder, describing the usable extended feature set.
-     *
-     * @return The supported calendar capabilities, or an empty set if no extended functionality is available
-     */
-    EnumSet<CalendarCapability> getSupportedCapabilites();
+    List<Event> searchEvents(List<SearchFilter> filters, List<String> queries) throws OXException;
 
 }

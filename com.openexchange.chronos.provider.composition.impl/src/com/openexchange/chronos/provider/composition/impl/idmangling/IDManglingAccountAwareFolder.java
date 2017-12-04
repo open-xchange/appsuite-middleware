@@ -47,63 +47,82 @@
  *
  */
 
-package com.openexchange.chronos.provider;
+package com.openexchange.chronos.provider.composition.impl.idmangling;
 
 import java.util.Date;
 import java.util.EnumSet;
 import java.util.List;
 import com.openexchange.chronos.ExtendedProperties;
+import com.openexchange.chronos.provider.AccountAwareCalendarFolder;
+import com.openexchange.chronos.provider.CalendarAccount;
+import com.openexchange.chronos.provider.CalendarCapability;
+import com.openexchange.chronos.provider.CalendarFolder;
+import com.openexchange.chronos.provider.CalendarPermission;
 
 /**
- * {@link CalendarFolder}
+ * {@link IDManglingAccountAwareFolder}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public interface CalendarFolder {
+public class IDManglingAccountAwareFolder implements AccountAwareCalendarFolder {
+
+    protected final String newId;
+    protected final CalendarFolder delegate;
+    protected final CalendarAccount account;
 
     /**
-     * Gets the identifier of the calendar folder.
+     * Initializes a new {@link IDManglingGroupwareFolder}.
      *
-     * @return The folder identifier
+     * @param delegate The calendar folder delegate
+     * @param account The underlying calendar account
+     * @param newId The new identifier to hide the delegate's one
      */
-    String getId();
+    public IDManglingAccountAwareFolder(CalendarFolder delegate, CalendarAccount account, String newId) {
+        super();
+        this.account = account;
+        this.delegate = delegate;
+        this.newId = newId;
+    }
 
-    /**
-     * Gets the name of the calendar folder.
-     *
-     * @return The folder name
-     */
-    String getName();
+    @Override
+    public String getId() {
+        return newId;
+    }
 
-    /**
-     * Gets the last modification date of the calendar.
-     *
-     * @return The last modification date, or <code>null</code> if not defined
-     */
-    Date getLastModified();
+    @Override
+    public String getName() {
+        return delegate.getName();
+    }
 
-    /**
-     * Gets the permissions
-     *
-     * @return The permissions
-     */
-    List<CalendarPermission> getPermissions();
+    @Override
+    public Date getLastModified() {
+        return delegate.getLastModified();
+    }
 
-    /**
-     * Gets the extended properties of the folder.
-     * <p/>
-     * See {@link CalendarFolderProperty} for a list of common folder properties evaluated by clients.
-     *
-     * @return The extended properties, or <code>null</code> if not defined
-     */
-    ExtendedProperties getExtendedProperties();
+    @Override
+    public List<CalendarPermission> getPermissions() {
+        return delegate.getPermissions();
+    }
 
-    /**
-     * Gets the supported capabilities for a calendar access in this folder, describing the usable extended feature set.
-     *
-     * @return The supported calendar capabilities, or an empty set if no extended functionality is available
-     */
-    EnumSet<CalendarCapability> getSupportedCapabilites();
+    @Override
+    public ExtendedProperties getExtendedProperties() {
+        return delegate.getExtendedProperties();
+    }
+
+    @Override
+    public EnumSet<CalendarCapability> getSupportedCapabilites() {
+        return delegate.getSupportedCapabilites();
+    }
+
+    @Override
+    public CalendarAccount getAccount() {
+        return account;
+    }
+
+    @Override
+    public String toString() {
+        return "IDManglingFolder [newId=" + newId + ", delegate=" + delegate + "]";
+    }
 
 }

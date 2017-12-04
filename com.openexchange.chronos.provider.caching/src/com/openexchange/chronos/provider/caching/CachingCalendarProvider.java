@@ -54,8 +54,8 @@ import java.sql.SQLException;
 import org.json.JSONObject;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.CalendarAccount;
-import com.openexchange.chronos.provider.CalendarProvider;
 import com.openexchange.chronos.provider.caching.internal.Services;
+import com.openexchange.chronos.provider.folder.FolderCalendarProvider;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.chronos.storage.CalendarStorageFactory;
@@ -76,7 +76,7 @@ import com.openexchange.tools.sql.DBUtils;
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.10.0
  */
-public abstract class CachingCalendarProvider implements CalendarProvider {
+public abstract class CachingCalendarProvider implements FolderCalendarProvider {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CachingCalendarProvider.class);
 
@@ -138,7 +138,7 @@ public abstract class CachingCalendarProvider implements CalendarProvider {
 
     /**
      * Returns if a reconfiguration of the account should trigger a cache invalidation (for all folders of the account!) to ensure all associated calendar data will be updated with the next request.
-     * 
+     *
      * @param session The user's session
      * @param originUserConfiguration Previously stored user configuration
      * @param newUserConfiguration New user configuration

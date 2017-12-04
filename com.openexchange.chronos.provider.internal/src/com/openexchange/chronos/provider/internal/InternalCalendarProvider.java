@@ -55,10 +55,11 @@ import java.util.Locale;
 import org.json.JSONObject;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.AutoProvisioningCalendarProvider;
-import com.openexchange.chronos.provider.CalendarAccess;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.CalendarCapability;
 import com.openexchange.chronos.provider.SingleAccountCalendarProvider;
+import com.openexchange.chronos.provider.folder.FolderCalendarAccess;
+import com.openexchange.chronos.provider.folder.FolderCalendarProvider;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.chronos.service.CalendarSession;
@@ -78,7 +79,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class InternalCalendarProvider implements AutoProvisioningCalendarProvider, SingleAccountCalendarProvider {
+public class InternalCalendarProvider implements FolderCalendarProvider, AutoProvisioningCalendarProvider, SingleAccountCalendarProvider {
 
     private final ServiceLookup services;
 
@@ -108,7 +109,7 @@ public class InternalCalendarProvider implements AutoProvisioningCalendarProvide
     }
 
     @Override
-    public CalendarAccess connect(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
+    public FolderCalendarAccess connect(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
         CalendarService calendarService = services.getService(CalendarService.class);
         CalendarSession calendarSession = calendarService.init(session, parameters);
         if (usesLegacyStorage(session.getContextId())) {
@@ -132,7 +133,7 @@ public class InternalCalendarProvider implements AutoProvisioningCalendarProvide
          */
         ServerSession serverSession = ServerSessionAdapter.valueOf(session);
         new UserConfigHelper(services).checkUserConfig(serverSession, userConfig);
-        return calendarAccount.getInternalConfiguration();
+        return null;
     }
 
     @Override

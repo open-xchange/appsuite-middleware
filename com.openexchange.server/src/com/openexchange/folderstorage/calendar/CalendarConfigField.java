@@ -47,57 +47,41 @@
  *
  */
 
-package com.openexchange.chronos.account.json.actions;
+package com.openexchange.folderstorage.calendar;
 
-import static com.openexchange.chronos.account.json.CalendarAccountFields.CONFIGURATION;
-import static com.openexchange.chronos.account.json.CalendarAccountFields.PROVIDER;
-import org.json.JSONObject;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.chronos.account.json.ChronosAccountActionFactory;
-import com.openexchange.chronos.provider.CalendarAccount;
-import com.openexchange.chronos.provider.basic.DefaultCalendarSettings;
-import com.openexchange.exception.OXException;
-import com.openexchange.java.Strings;
-import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.servlet.AjaxExceptionCodes;
-import com.openexchange.tools.session.ServerSession;
+import com.openexchange.folderstorage.FolderField;
 
 /**
- * {@link NewAction}
+ * {@link CalendarConfigField}
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
- * @author <a href="mailto:Jan-Oliver.Huhn@open-xchange.com">Jan-Oliver Huhn</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-@OAuthAction(ChronosAccountActionFactory.OAUTH_WRITE_SCOPE)
-public class NewAction extends AbstractAccountAction {
+public class CalendarConfigField extends FolderField {
+
+    /** The column identifier of the field as used in the HTTP API */
+    private static final int COLUMN_ID = 3205;
+
+    /** The column name of the field as used in the HTTP API */
+    private static final String COLUMN_NAME = "com.openexchange.calendar.config";
+
+    private static final long serialVersionUID = 9084693144002186075L;
+    private static final CalendarConfigField INSTANCE = new CalendarConfigField();
 
     /**
-     * Initializes a new {@link NewAction}.
+     * Gets the extended properties field instance.
      *
-     * @param services The service look-up
+     * @return The instance
      */
-    public NewAction(ServiceLookup services) {
-        super(services);
+    public static CalendarConfigField getInstance() {
+        return INSTANCE;
     }
 
-    @Override
-    public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
-        String provider = requestData.getParameter(PROVIDER);
-        if (Strings.isEmpty(provider)) {
-            throw AjaxExceptionCodes.MISSING_PARAMETER.create(PROVIDER);
-        }
-        JSONObject data = requestData.getData(JSONObject.class);
-        if (null == data) {
-            throw AjaxExceptionCodes.MISSING_REQUEST_BODY.create();
-        }
-        DefaultCalendarSettings settings = new DefaultCalendarSettings();
-        settings.setConfig(data.optJSONObject(CONFIGURATION));
-        settings.setName("(new)"); //TODO
-        CalendarAccount account = getAccountService().createAccount(session, provider, settings, null);
-        return new AJAXRequestResult(serializeAccount(account), account.getLastModified(), "json");
+    /**
+     * Initializes a new {@link CalendarConfigField}.
+     */
+    private CalendarConfigField() {
+        super(COLUMN_ID, COLUMN_NAME, null);
     }
 
 }
