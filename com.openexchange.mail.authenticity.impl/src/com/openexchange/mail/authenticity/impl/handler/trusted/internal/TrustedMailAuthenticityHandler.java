@@ -341,7 +341,7 @@ public class TrustedMailAuthenticityHandler implements ForcedReloadable, Trusted
 
     private String getMailAddress(MailMessage msg) {
         MailAuthenticityResult authenticationResult = msg.getAuthenticityResult();
-        return authenticationResult == null ? null : authenticationResult.getAttribute(DefaultMailAuthenticityResultKey.FROM_DOMAIN).toString();
+        return authenticationResult == null ? null : authenticationResult.getAttribute(DefaultMailAuthenticityResultKey.TRUSTED_SENDER).toString();
     }
 
     private static class TrustedMailResult extends AbstractAuthMechResult {
