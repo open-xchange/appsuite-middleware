@@ -570,7 +570,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
      * Sets whether to set the exact length of mail parts.
      *
      * @param exactLength <code>true</code> to set the exact length of mail parts; otherwise use mail system's size estimation
-     * @return This {@link JsonMessageHandler} with new behavior applied
+     * @return This {@link JsonMessageHandler} with new behaviour applied
      */
     public JsonMessageHandler setSizePolicy(final SizePolicy sizePolicy) {
         this.sizePolicy = sizePolicy;
@@ -581,7 +581,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
      * Sets whether the HTML part of a <i>multipart/alternative</i> content shall be attached.
      *
      * @param attachHTMLAlternativePart Whether the HTML part of a <i>multipart/alternative</i> content shall be attached
-     * @return This {@link JsonMessageHandler} with new behavior applied
+     * @return This {@link JsonMessageHandler} with new behaviour applied
      */
     public JsonMessageHandler setAttachHTMLAlternativePart(final boolean attachHTMLAlternativePart) {
         this.attachHTMLAlternativePart = attachHTMLAlternativePart;
@@ -592,7 +592,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
      * Sets whether to include raw plain-text in generated JSON object.
      *
      * @param includePlainText <code>true</code> to include raw plain-text; otherwise <code>false</code>
-     * @return This {@link JsonMessageHandler} with new behavior applied
+     * @return This {@link JsonMessageHandler} with new behaviour applied
      */
     public JsonMessageHandler setIncludePlainText(final boolean includePlainText) {
         this.includePlainText = includePlainText;

@@ -69,8 +69,8 @@ import com.openexchange.config.Reloadables;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.authenticity.DefaultMailAuthenticityResultKey;
-import com.openexchange.mail.authenticity.MailAuthenticityResultKey;
 import com.openexchange.mail.authenticity.MailAuthenticityStatus;
+import com.openexchange.mail.authenticity.TrustedDomainResultKey;
 import com.openexchange.mail.authenticity.impl.handler.domain.Icon;
 import com.openexchange.mail.authenticity.impl.handler.domain.TrustedDomainService;
 import com.openexchange.mail.authenticity.mechanism.AbstractAuthMechResult;
@@ -156,13 +156,7 @@ public class TrustedDomainAuthenticityHandler implements ForcedReloadable, Trust
             if (trustedDomain != null) {
                 List<MailAuthenticityMechanismResult> results = authenticityResult.getAttribute(DefaultMailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS, List.class);
                 results.add(new TrustedDomainResult(domain, null, SimplePassFailResult.PASS));
-                authenticityResult.addAttribute(new MailAuthenticityResultKey() {
-
-                    @Override
-                    public String getKey() {
-                        return "trustedDomain";
-                    }
-                }, true);
+                authenticityResult.addAttribute(TrustedDomainResultKey.TRUSTED_DOMAIN, true);
             }
         }
     }
@@ -322,14 +316,14 @@ public class TrustedDomainAuthenticityHandler implements ForcedReloadable, Trust
             return null;
         }
         List<TrustedDomain> list = trustedDomainsPerTenant.get(tenant);
-        for(TrustedDomain dom: list) {
-            if(dom.matches(domain)) {
+        for (TrustedDomain dom : list) {
+            if (dom.matches(domain)) {
                 return dom.getImage();
             }
         }
 
-        for(TrustedDomain dom: fallbackTenant) {
-            if(dom.matches(domain)) {
+        for (TrustedDomain dom : fallbackTenant) {
+            if (dom.matches(domain)) {
                 return dom.getImage();
             }
         }
