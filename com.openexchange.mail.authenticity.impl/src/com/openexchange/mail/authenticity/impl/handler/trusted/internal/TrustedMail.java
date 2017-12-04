@@ -47,43 +47,72 @@
  *
  */
 
-package com.openexchange.halo.pictures;
+package com.openexchange.mail.authenticity.impl.handler.trusted.internal;
 
-import java.util.Arrays;
-import java.util.Collection;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
-import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceLookup;
-
+import java.util.regex.Pattern;
+import com.openexchange.mail.authenticity.impl.handler.trusted.Icon;
 
 /**
- * {@link TrustedDomainPictureHaloActionFactory}
+ * {@link TrustedMail} specifies a trusted mail address or a group of trusted mail addresses via wild-cards.
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.10.0
  */
-public class TrustedDomainPictureHaloActionFactory implements AJAXActionServiceFactory {
+public class TrustedMail {
 
-    private final GetTrustedDomainPictureAction getPictureAction;
+    private final String mail;
+    private final Pattern pattern;
+    private final Icon image;
 
     /**
-     * Initializes a new {@link TrustedDomainPictureHaloActionFactory}.
      *
-     * @param services The OSGi service look-up
+     * Initializes a new {@link TrustedMail}.
+     *
+     * @param mail The mail address. '*' and '?' wild-cards are allowed
+     * @param image The image
      */
-    public TrustedDomainPictureHaloActionFactory(ServiceLookup services) {
+    public TrustedMail(String mail, Icon image) {
         super();
-        getPictureAction = new GetTrustedDomainPictureAction(services);
+        this.mail = mail;
+        this.pattern = Pattern.compile(toRegex(mail));
+        this.image = image;
+    }
+
+    private String toRegex(String mail){
+        return mail.replaceAll("\\.", "[.]").replaceAll("\\*", ".*").replaceAll("\\?", ".");
+    }
+
+    /**
+     * Gets the mail address
+     *
+     * @return The mail address
+     */
+    public String getMail() {
+        return mail;
+    }
+
+    /**
+     * Gets the image
+     *
+     * @return The image
+     */
+    public Icon getImage() {
+        return image;
+    }
+
+    /**
+     * Checks whether this trusted mail matches the given mail address
+     * @param mailAddress
+     * @return true if the {@link TrustedMail} matches the given mail address, false otherwise
+     */
+    public boolean matches(String mailAddress){
+        return pattern.matcher(mailAddress).matches();
     }
 
     @Override
-    public AJAXActionService createActionService(String action) throws OXException {
-        return getPictureAction;
-    }
+    public String toString() {
+        StringBuilder builder = new StringBuilder("TrustedDomain [").append("domain = ").append(mail);
+        return builder.append("]").toString();
 
-    @Override
-    public Collection<?> getSupportedServices() {
-        return Arrays.asList("get");
     }
-
 }

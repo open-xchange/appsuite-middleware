@@ -49,12 +49,16 @@
 
 package com.openexchange.mail.authenticity.impl.osgi;
 
+import java.util.Dictionary;
+import java.util.Hashtable;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.ForcedReloadable;
 import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
 import com.openexchange.config.Reloadables;
 import com.openexchange.config.lean.LeanConfigurationService;
+import com.openexchange.conversion.DataSource;
+import com.openexchange.image.ImageActionFactory;
 import com.openexchange.jslob.JSlobEntry;
 import com.openexchange.mail.MailFetchListener;
 import com.openexchange.mail.authenticity.MailAuthenticityHandler;
@@ -64,8 +68,9 @@ import com.openexchange.mail.authenticity.impl.handler.core.MailAuthenticityFetc
 import com.openexchange.mail.authenticity.impl.handler.core.MailAuthenticityHandlerImpl;
 import com.openexchange.mail.authenticity.impl.handler.core.MailAuthenticityHandlerRegistryImpl;
 import com.openexchange.mail.authenticity.impl.handler.core.MailAuthenticityJSlobEntry;
-import com.openexchange.mail.authenticity.impl.handler.domain.TrustedDomainService;
-import com.openexchange.mail.authenticity.impl.handler.domain.internal.TrustedDomainAuthenticityHandler;
+import com.openexchange.mail.authenticity.impl.handler.trusted.TrustedMailService;
+import com.openexchange.mail.authenticity.impl.handler.trusted.internal.TrustedMailAuthenticityHandler;
+import com.openexchange.mail.authenticity.impl.handler.trusted.internal.TrustedMailDataSource;
 import com.openexchange.osgi.HousekeepingActivator;
 
 /**
@@ -99,13 +104,13 @@ public class MailAuthenticityActivator extends HousekeepingActivator {
         final MailAuthenticityHandlerRegistryImpl registry = new MailAuthenticityHandlerRegistryImpl(getService(LeanConfigurationService.class), context);
         registerService(MailAuthenticityHandlerRegistry.class, registry);
         track(MailAuthenticityHandler.class, registry);
-        trackService(TrustedDomainService.class);
+        trackService(TrustedMailService.class);
         openTrackers();
 
         ConfigurationService configurationService = getService(ConfigurationService.class);
-        TrustedDomainAuthenticityHandler authenticationHandler = new TrustedDomainAuthenticityHandler(configurationService);
+        TrustedMailAuthenticityHandler authenticationHandler = new TrustedMailAuthenticityHandler(configurationService);
         registerService(ForcedReloadable.class, authenticationHandler);
-        registerService(TrustedDomainService.class, authenticationHandler);
+        registerService(TrustedMailService.class, authenticationHandler);
 
         final MailAuthenticityHandlerImpl handlerImpl = new MailAuthenticityHandlerImpl(this);
         registerService(MailAuthenticityHandler.class, handlerImpl);
@@ -116,6 +121,16 @@ public class MailAuthenticityActivator extends HousekeepingActivator {
         registerService(MailFetchListener.class, fetchListener);
 
         registerService(JSlobEntry.class, new MailAuthenticityJSlobEntry(this));
+
+        {
+            // Register image data source
+            TrustedMailDataSource trustedMailDataSource = TrustedMailDataSource.getInstance();
+            Dictionary<String, Object> props = new Hashtable<String, Object>(1);
+            props.put("identifier", trustedMailDataSource.getRegistrationName());
+            registerService(DataSource.class, trustedMailDataSource, props);
+            ImageActionFactory.addMapping(trustedMailDataSource.getRegistrationName(), trustedMailDataSource.getAlias());
+        }
+        Services.setServiceLookup(this);
     }
 
     class ConfigReloader implements Reloadable {

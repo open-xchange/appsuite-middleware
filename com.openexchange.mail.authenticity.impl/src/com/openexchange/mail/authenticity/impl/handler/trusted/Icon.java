@@ -47,29 +47,35 @@
  *
  */
 
-package com.openexchange.halo.domains.osgi;
-
-import com.openexchange.halo.TrustedDomainHalo;
-import com.openexchange.halo.domains.impl.TrustedDomainHaloImpl;
-import com.openexchange.mail.authenticity.impl.handler.domain.TrustedDomainService;
-import com.openexchange.osgi.HousekeepingActivator;
+package com.openexchange.mail.authenticity.impl.handler.trusted;
 
 /**
- * 
- * {@link Activator}
+ *
+ * {@link Icon} represents an Icon for trusted mail addresses
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.0
  */
-public class Activator extends HousekeepingActivator {
+public interface Icon {
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class[] { TrustedDomainService.class };
-    }
+    /**
+     * Gets the mime type of this icon (e.g. image/png).
+     *
+     * @return The mime type
+     */
+    String getMimeType();
 
-    @Override
-    protected void startBundle() throws Exception {
-        registerService(TrustedDomainHalo.class, new TrustedDomainHaloImpl(getService(TrustedDomainService.class)));
-    }
+    /**
+     * Gets the icons raw bytes.
+     *
+     * @return The icon data
+     */
+    byte[] getData();
+
+    /**
+     * Returns a uid for this icon
+     * @return The uid
+     */
+    String getUID();
+
 }

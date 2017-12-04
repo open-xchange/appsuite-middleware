@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.mail.authenticity.impl.handler.domain.internal;
+package com.openexchange.mail.authenticity.impl.handler.trusted.internal;
 
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
@@ -55,8 +55,9 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.rmi.server.UID;
 import javax.imageio.ImageIO;
-import com.openexchange.mail.authenticity.impl.handler.domain.Icon;
+import com.openexchange.mail.authenticity.impl.handler.trusted.Icon;
 
 /**
  * {@link ImageIcon}
@@ -67,8 +68,10 @@ import com.openexchange.mail.authenticity.impl.handler.domain.Icon;
 public class ImageIcon implements Icon {
 
     private final byte[] byteArray;
-    private final static String MIME_TYPE = "image/png";
-    private final static String FORMAT = "png";
+    private static final String MIME_TYPE = "image/png";
+    private static final String FORMAT = "png";
+    private final String UID;
+    private static final String PREFIX = "trustedMail_";
 
     /**
      * Initializes a new {@link ImageIcon}.
@@ -86,6 +89,8 @@ public class ImageIcon implements Icon {
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         ImageIO.write(image, FORMAT, stream);
         byteArray = stream.toByteArray();
+        UID = PREFIX+new UID().toString();
+
     }
 
     /**
@@ -101,6 +106,7 @@ public class ImageIcon implements Icon {
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         ImageIO.write(image, FORMAT, stream);
         byteArray = stream.toByteArray();
+        UID = PREFIX+new UID().toString();
     }
 
     @Override
@@ -111,6 +117,11 @@ public class ImageIcon implements Icon {
     @Override
     public byte[] getData() {
         return byteArray;
+    }
+
+    @Override
+    public String getUID() {
+        return UID;
     }
 
 }

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2017-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,61 +47,41 @@
  *
  */
 
-package com.openexchange.halo.pictures;
-
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.DispatcherNotes;
-import com.openexchange.exception.OXException;
-import com.openexchange.halo.Picture;
-import com.openexchange.halo.TrustedDomainHalo;
-import com.openexchange.java.Strings;
-import com.openexchange.server.ServiceExceptionCode;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.session.ServerSession;
+package com.openexchange.mail.authenticity;
 
 /**
- * {@link GetTrustedDomainPictureAction}
+ * {@link TrustedMailResultKey}
  *
- * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
- * @since v7.10.0
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-@DispatcherNotes(allowPublicSession = true, defaultFormat = "file")
-public class GetTrustedDomainPictureAction extends AbstractGetPictureAction {
+public enum TrustedMailResultKey implements MailAuthenticityResultKey {
+    /**
+     * Defines the 'trusted' key for the response object
+     */
+    TRUSTED_MAIL("trusted"),
 
     /**
-     * Initializes a new {@link GetPictureAction}.
-     *
-     * @param services The OSGi service look-up
+     * Defines the 'image' key for the response object
      */
-    public GetTrustedDomainPictureAction(ServiceLookup services) {
-        super(services);
+    IMAGE("image"),
+    ;
+
+    private final String key;
+
+    /**
+     * Initializes a new {@link TrustedMailResultKey}.
+     */
+    private TrustedMailResultKey(String key) {
+        this.key = key;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
-    <V> V getPictureResource(AJAXRequestData req, ServerSession session, boolean eTagOnly) throws OXException {
-        final TrustedDomainHalo trustedDomainHalo = services.getService(TrustedDomainHalo.class);
-        if (null == trustedDomainHalo) {
-            throw ServiceExceptionCode.absentService(TrustedDomainHalo.class);
-        }
+    public String getKey() {
+        return key;
+    }
 
-        String trustedDomain = req.getParameter("domain");
-        if (Strings.isEmpty(trustedDomain)) {
-            return (V) fallbackPicture();
-        }
-
-        try {
-            if (eTagOnly) {
-                return (V) trustedDomainHalo.getPictureETag(trustedDomain, session);
-            }
-
-            Picture picture = trustedDomainHalo.getPicture(trustedDomain, session);
-            if (picture == null) {
-                return (V) fallbackPicture();
-            }
-            return (V) picture;
-        } catch (OXException x) {
-            return (V) (eTagOnly ? null : fallbackPicture());
-        }
+    @Override
+    public boolean isVisible() {
+        return true;
     }
 }

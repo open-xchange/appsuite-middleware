@@ -47,30 +47,31 @@
  *
  */
 
-package com.openexchange.mail.authenticity.impl.handler.domain;
+package com.openexchange.mail.authenticity.impl.handler.trusted;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.session.Session;
 
 /**
- * {@link TrustedDomainService}
+ * {@link TrustedMailService}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.0
  */
-public interface TrustedDomainService {
+public interface TrustedMailService {
 
     /**
-     * Retrieves an icon for the given domain and tenant or null in case no matche could be found.
+     * Retrieves the icon for the given uid.
      *
-     * @param domain The domain
-     * @param session The user session
+     * @param uid The identifier of the trusted domain image
      * @return The {@link Icon}
+     * @throws OXException in case the uid is invalid
      */
-    public Icon getIcon(String domain, Session session);
+    public Icon getIcon(Session session, String uid) throws OXException;
 
     /**
-     * Checks mail message for trusted domain and adapts authentication result accordingly
+     * Checks mail message for trusted mail address and adapts authentication result accordingly
      *
      * @param session The user session
      * @param mailMessage The mail message to handle

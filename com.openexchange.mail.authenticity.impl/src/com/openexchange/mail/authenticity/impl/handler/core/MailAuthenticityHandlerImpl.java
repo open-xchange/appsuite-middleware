@@ -76,7 +76,7 @@ import com.openexchange.mail.authenticity.MailAuthenticityExceptionCodes;
 import com.openexchange.mail.authenticity.MailAuthenticityHandler;
 import com.openexchange.mail.authenticity.MailAuthenticityProperty;
 import com.openexchange.mail.authenticity.MailAuthenticityStatus;
-import com.openexchange.mail.authenticity.impl.handler.domain.TrustedDomainService;
+import com.openexchange.mail.authenticity.impl.handler.trusted.TrustedMailService;
 import com.openexchange.mail.authenticity.mechanism.AbstractAuthMechResult;
 import com.openexchange.mail.authenticity.mechanism.DefaultMailAuthenticityMechanism;
 import com.openexchange.mail.authenticity.mechanism.MailAuthenticityMechanismResult;
@@ -136,7 +136,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
     /** The ranking of this handler */
     private final int ranking;
     private final Cache<UserAndContext, List<AllowedAuthServId>> authServIdsCache;
-    private final TrustedDomainService trustedDomainHandler;
+    private final TrustedMailService trustedDomainHandler;
     private final ServiceLookup services;
 
     /**
@@ -157,7 +157,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
     public MailAuthenticityHandlerImpl(int ranking, ServiceLookup services) {
         super();
         this.services = services;
-        this.trustedDomainHandler = services.getService(TrustedDomainService.class);
+        this.trustedDomainHandler = services.getService(TrustedMailService.class);
         this.ranking = ranking;
         this.authServIdsCache = CacheBuilder.newBuilder().maximumSize(65536).expireAfterWrite(30, TimeUnit.MINUTES).build();
         mechanismParsersRegitry = new HashMap<>(4);

@@ -47,73 +47,74 @@
  *
  */
 
-package com.openexchange.mail.authenticity.impl.handler.domain.internal;
+package com.openexchange.mail.authenticity.impl.osgi;
 
-import java.util.regex.Pattern;
-import com.openexchange.mail.authenticity.impl.handler.domain.Icon;
+import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link TrustedDomain} specifies a trusted domain or a group of trusted domains via wildcards.
+ *
+ * {@link Services}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.0
  */
-public class TrustedDomain {
-
-    private final String domain;
-    private final Pattern pattern;
-    private final Icon image;
+public class Services {
 
     /**
-     *
-     * Initializes a new {@link TrustedDomain}.
-     *
-     * @param domain The domain
-     * @param image The image
+     * Initializes a new {@link Services}.
      */
-    public TrustedDomain(String domain, Icon image) {
+    private Services() {
         super();
-        this.domain = domain;
-        this.pattern = Pattern.compile(toRegex(domain));
-        this.image = image;
     }
 
-    private String toRegex(String domain){
-        domain = domain.replaceAll("\\.", "[.]").replaceAll("\\*", ".*");
-        return domain;
-    }
+    private static final AtomicReference<ServiceLookup> REF = new AtomicReference<>();
 
     /**
-     * Gets the domain
+     * Sets the service lookup.
      *
-     * @return The domain
+     * @param serviceLookup The service lookup or <code>null</code>
      */
-    public String getDomain() {
-        return domain;
+    public static void setServiceLookup(final ServiceLookup serviceLookup) {
+        REF.set(serviceLookup);
     }
 
     /**
-     * Gets the image
+     * Gets the service lookup.
      *
-     * @return The image
+     * @return The service lookup or <code>null</code>
      */
-    public Icon getImage() {
-        return image;
+    public static ServiceLookup getServiceLookup() {
+        return REF.get();
     }
 
     /**
-     * Checks whether this trusted domain matches the given domain
-     * @param domain
-     * @return
+     * Gets the service of specified type
+     *
+     * @param clazz The service's class
+     * @return The service
+     * @throws IllegalStateException If an error occurs while returning the demanded service
      */
-    public boolean matches(String domain){
-        return pattern.matcher(domain).matches();
+    public static <S extends Object> S getService(final Class<? extends S> clazz) {
+        final com.openexchange.server.ServiceLookup serviceLookup = REF.get();
+        if (null == serviceLookup) {
+            throw new IllegalStateException("Missing ServiceLookup instance. Bundle \"com.openexchange.mail.authenticity.impl\" not started?");
+        }
+        return serviceLookup.getService(clazz);
     }
 
-    @Override
-    public String toString() {
-        StringBuilder builder = new StringBuilder("TrustedDomain [").append("domain = ").append(domain);
-        return builder.append("]").toString();
-
+    /**
+     * (Optionally) Gets the service of specified type
+     *
+     * @param clazz The service's class
+     * @return The service or <code>null</code> if absent
+     */
+    public static <S extends Object> S optService(final Class<? extends S> clazz) {
+        try {
+            return getService(clazz);
+        } catch (final IllegalStateException e) {
+            return null;
+        }
     }
+
 }

@@ -5,14 +5,19 @@ Bundle-SymbolicName: com.openexchange.mail.authenticity.impl
 Bundle-Version: 7.10.0
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-Activator: com.openexchange.mail.authenticity.impl.osgi.MailAuthenticityActivator
 Import-Package: com.google.common.annotations,
  com.google.common.base,
  com.google.common.cache,
  com.google.common.collect,
+ com.openexchange.ajax,
+ com.openexchange.ajax.requesthandler,
  com.openexchange.config,
  com.openexchange.config.cascade,
  com.openexchange.config.lean,
+ com.openexchange.conversion,
  com.openexchange.exception,
+ com.openexchange.image,
  com.openexchange.java,
  com.openexchange.jslob,
  com.openexchange.mail,
@@ -29,6 +34,7 @@ Import-Package: com.google.common.annotations,
  com.openexchange.server,
  com.openexchange.session,
  com.openexchange.tools.session,
+ com.openexchange.tools.stream,
  javax.imageio,
  javax.imageio.event,
  javax.imageio.metadata,
@@ -44,5 +50,3 @@ Import-Package: com.google.common.annotations,
  org.osgi.framework,
  org.osgi.util.tracker,
  org.slf4j
-Bundle-Activator: com.openexchange.mail.authenticity.impl.osgi.MailAuthenticityActivator
-Export-Package: com.openexchange.mail.authenticity.impl.handler.domain

@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.mail.authenticity.impl.handler.domain.internal;
+package com.openexchange.mail.authenticity.impl.handler.trusted.internal;
 
 import java.io.File;
 import java.io.IOException;
@@ -70,9 +70,10 @@ import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.authenticity.DefaultMailAuthenticityResultKey;
 import com.openexchange.mail.authenticity.MailAuthenticityStatus;
-import com.openexchange.mail.authenticity.TrustedDomainResultKey;
-import com.openexchange.mail.authenticity.impl.handler.domain.Icon;
-import com.openexchange.mail.authenticity.impl.handler.domain.TrustedDomainService;
+import com.openexchange.mail.authenticity.TrustedMailResultKey;
+import com.openexchange.mail.authenticity.impl.exception.MailAuthenticityExceptionCodes;
+import com.openexchange.mail.authenticity.impl.handler.trusted.Icon;
+import com.openexchange.mail.authenticity.impl.handler.trusted.TrustedMailService;
 import com.openexchange.mail.authenticity.mechanism.AbstractAuthMechResult;
 import com.openexchange.mail.authenticity.mechanism.AuthenticityMechanismResult;
 import com.openexchange.mail.authenticity.mechanism.MailAuthenticityMechanism;
@@ -83,25 +84,25 @@ import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.session.Session;
 
 /**
- * {@link TrustedDomainAuthenticityHandler}
+ * {@link TrustedMailAuthenticityHandler}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.0
  */
-public class TrustedDomainAuthenticityHandler implements ForcedReloadable, TrustedDomainService {
+public class TrustedMailAuthenticityHandler implements ForcedReloadable, TrustedMailService {
 
-    private static final Logger LOG = LoggerFactory.getLogger(TrustedDomainAuthenticityHandler.class);
+    private static final Logger LOG = LoggerFactory.getLogger(TrustedMailAuthenticityHandler.class);
 
     /*
      * Property keys
      */
-    private static final String PREFIX = "com.openexchange.mail.authenticity.trustedDomains.";
+    private static final String PREFIX = "com.openexchange.mail.authenticity.trusted.";
     private static final String TENANT = "tenants";
-    private static final String DOMAINS = ".domains";
+    private static final String CONFIG = ".config";
     private static final String IMAGE = ".image.";
     private static final String FALLBACK_IMAGE = ".fallbackImage";
 
-    static final MailAuthenticityMechanism TRUSTED_DOMAIN_MECHANISM = new MailAuthenticityMechanism() {
+    static final MailAuthenticityMechanism TRUSTED_MAIL_MECHANISM = new MailAuthenticityMechanism() {
 
         @Override
         public Class<? extends AuthenticityMechanismResult> getResultType() {
@@ -110,12 +111,12 @@ public class TrustedDomainAuthenticityHandler implements ForcedReloadable, Trust
 
         @Override
         public String getDisplayName() {
-            return "TrustedDomain";
+            return "TrustedMail";
         }
 
         @Override
         public String getTechnicalName() {
-            return "TrustedDomain";
+            return "TrustedMail";
         }
 
         @Override
@@ -124,17 +125,17 @@ public class TrustedDomainAuthenticityHandler implements ForcedReloadable, Trust
         }
     };
 
-    private final Map<String, List<TrustedDomain>> trustedDomainsPerTenant;
-    private final List<TrustedDomain> fallbackTenant;
+    private final Map<String, List<TrustedMail>> trustedMailAddressesPerTenant;
+    private final List<TrustedMail> fallbackTenant;
 
     /**
-     * Initializes a new {@link TrustedDomainAuthenticityHandler}.
+     * Initializes a new {@link TrustedMailAuthenticityHandler}.
      *
      * @throws OXException
      */
-    public TrustedDomainAuthenticityHandler(ConfigurationService configurationService) throws OXException {
+    public TrustedMailAuthenticityHandler(ConfigurationService configurationService) throws OXException {
         super();
-        this.trustedDomainsPerTenant = new ConcurrentHashMap<>();
+        this.trustedMailAddressesPerTenant = new ConcurrentHashMap<>();
         this.fallbackTenant = new CopyOnWriteArrayList<>();
         init(configurationService);
     }
@@ -144,37 +145,38 @@ public class TrustedDomainAuthenticityHandler implements ForcedReloadable, Trust
     public void handle(Session session, MailMessage mailMessage) {
         String tenant = (String) session.getParameter(Session.PARAM_HOST_NAME);
         if (tenant == null) {
-            LOG.warn("Missing host name session parameter. Unable to verify mail domain.");
+            LOG.warn("Missing host name session parameter. Unable to verify mail.");
             return;
         }
 
         MailAuthenticityResult authenticityResult = mailMessage.getAuthenticityResult();
 
         if (MailAuthenticityStatus.PASS.equals(authenticityResult.getStatus())) {
-            String domain = getDomain(mailMessage);
-            TrustedDomain trustedDomain = checkHost(tenant, domain);
+            String mailAddress = getMailAddress(mailMessage);
+            TrustedMail trustedDomain = checkMail(tenant, mailAddress);
             if (trustedDomain != null) {
                 List<MailAuthenticityMechanismResult> results = authenticityResult.getAttribute(DefaultMailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS, List.class);
-                results.add(new TrustedDomainResult(domain, null, SimplePassFailResult.PASS));
-                authenticityResult.addAttribute(TrustedDomainResultKey.TRUSTED_DOMAIN, true);
+                results.add(new TrustedMailResult(mailAddress, null, SimplePassFailResult.PASS));
+                authenticityResult.addAttribute(TrustedMailResultKey.TRUSTED_MAIL, true);
+                authenticityResult.addAttribute(TrustedMailResultKey.IMAGE, trustedDomain.getImage().getUID());
             }
         }
     }
 
-    private TrustedDomain checkHost(String tenant, String host) {
-        if (trustedDomainsPerTenant.containsKey(tenant)) {
-            List<TrustedDomain> domains = trustedDomainsPerTenant.get(tenant);
-            for (TrustedDomain domain : domains) {
-                if (domain.matches(host)) {
-                    return domain;
+    private TrustedMail checkMail(String tenant, String mailAddress) {
+        if (trustedMailAddressesPerTenant.containsKey(tenant)) {
+            List<TrustedMail> trustedMails = trustedMailAddressesPerTenant.get(tenant);
+            for (TrustedMail trustedMail : trustedMails) {
+                if (trustedMail.matches(mailAddress)) {
+                    return trustedMail;
                 }
             }
         }
 
         if (fallbackTenant != null) {
-            for (TrustedDomain domain : fallbackTenant) {
-                if (domain.matches(host)) {
-                    return domain;
+            for (TrustedMail trustedMail : fallbackTenant) {
+                if (trustedMail.matches(mailAddress)) {
+                    return trustedMail;
                 }
             }
         }
@@ -185,9 +187,9 @@ public class TrustedDomainAuthenticityHandler implements ForcedReloadable, Trust
         String commaSeparatedListOfTenants = configurationService.getProperty(PREFIX + TENANT, "");
         String[] tenants = Strings.splitByCommaNotInQuotes(commaSeparatedListOfTenants);
         for (String tenant : tenants) {
-            String commaSeparatedListOfDomains = configurationService.getProperty(PREFIX + tenant + DOMAINS, (String) null);
-            if (Strings.isNotEmpty(commaSeparatedListOfDomains)) {
-                String[] domains = Strings.splitByCommaNotInQuotes(commaSeparatedListOfDomains);
+            String commaSeparatedListOfMailAddresses = configurationService.getProperty(PREFIX + tenant + CONFIG, (String) null);
+            if (Strings.isNotEmpty(commaSeparatedListOfMailAddresses)) {
+                String[] mailAddresses = Strings.splitByCommaNotInQuotes(commaSeparatedListOfMailAddresses);
                 String fallbackImageStr = configurationService.getProperty(PREFIX + tenant + FALLBACK_IMAGE, (String) null);
                 Icon fallbackImage = null;
                 if (!Strings.isEmpty(fallbackImageStr)) {
@@ -200,18 +202,18 @@ public class TrustedDomainAuthenticityHandler implements ForcedReloadable, Trust
                         return name.startsWith(PREFIX + tenant + IMAGE);
                     }
                 });
-                List<TrustedDomain> domainList = new ArrayList<>();
-                for (String domain : domains) {
-                    domainList.add(getTrustedDomain(domain, images, fallbackImage, tenant));
+                List<TrustedMail> trustedMailList = new ArrayList<>();
+                for (String mailAddress : mailAddresses) {
+                    trustedMailList.add(getTrustedMail(mailAddress, images, fallbackImage, tenant));
                 }
-                trustedDomainsPerTenant.put(tenant, domainList);
+                trustedMailAddressesPerTenant.put(tenant, trustedMailList);
             }
         }
 
         // Add single tenant / fall-back configuration
-        String commaSeparatedListOfDomains = configurationService.getProperty(PREFIX + DOMAINS.substring(1), (String) null);
-        if (Strings.isNotEmpty(commaSeparatedListOfDomains)) {
-            String[] domains = Strings.splitByCommaNotInQuotes(commaSeparatedListOfDomains);
+        String commaSeparatedListOfMailAddresses = configurationService.getProperty(PREFIX + CONFIG.substring(1), (String) null);
+        if (Strings.isNotEmpty(commaSeparatedListOfMailAddresses)) {
+            String[] mailAddresses = Strings.splitByCommaNotInQuotes(commaSeparatedListOfMailAddresses);
             String fallbackImageStr = configurationService.getProperty(PREFIX + FALLBACK_IMAGE.substring(1), (String) null);
             Icon fallbackImage = null;
             if (!Strings.isEmpty(fallbackImageStr)) {
@@ -225,39 +227,39 @@ public class TrustedDomainAuthenticityHandler implements ForcedReloadable, Trust
                     return name.startsWith(PREFIX + IMAGE.substring(1));
                 }
             });
-            for (String domain : domains) {
-                fallbackTenant.add(getTrustedDomain(domain, images, fallbackImage, null));
+            for (String mailAddress : mailAddresses) {
+                fallbackTenant.add(getTrustedMail(mailAddress, images, fallbackImage, null));
             }
         }
     }
 
     /**
      *
-     * @param domain
+     * @param mailAddress
      * @param images
      * @param tenant
      * @return
      * @throws OXException
      */
-    private TrustedDomain getTrustedDomain(String domain, Map<String, String> images, Icon fallbackImage, String tenant) throws OXException {
-        if (domain.indexOf(":") > 0) {
-            String[] domainConfig = Strings.splitByColon(domain);
-            if (domainConfig.length != 2) {
-                throw new OXException(new ConfigurationException("Unable to to parse trusted domain config. Only one colon is allowed: " + domain));
+    private TrustedMail getTrustedMail(String mailAddress, Map<String, String> images, Icon fallbackImage, String tenant) throws OXException {
+        if (mailAddress.indexOf(":") > 0) {
+            String[] trustedMailConfig = Strings.splitByColon(mailAddress);
+            if (trustedMailConfig.length != 2) {
+                throw new OXException(new ConfigurationException("Unable to to parse trusted mail address config. Only one colon is allowed: " + mailAddress));
             }
             String image = null;
             if (tenant == null) {
-                image = images.get(PREFIX + IMAGE.substring(1) + domainConfig[1]);
+                image = images.get(PREFIX + IMAGE.substring(1) + trustedMailConfig[1]);
             } else {
-                image = images.get(PREFIX + tenant + IMAGE + domainConfig[1]);
+                image = images.get(PREFIX + tenant + IMAGE + trustedMailConfig[1]);
             }
             if (image != null) {
-                return new TrustedDomain(domainConfig[0], getIcon(image, tenant));
+                return new TrustedMail(trustedMailConfig[0], getIcon(image, tenant));
             } else {
-                return new TrustedDomain(domainConfig[0], fallbackImage);
+                return new TrustedMail(trustedMailConfig[0], fallbackImage);
             }
         }
-        return new TrustedDomain(domain, fallbackImage);
+        return new TrustedMail(mailAddress, fallbackImage);
     }
 
     private Icon getIcon(String image, String tenant) {
@@ -268,9 +270,9 @@ public class TrustedDomainAuthenticityHandler implements ForcedReloadable, Trust
                     icon = new ImageIcon(new URL(image));
                 } catch (IOException e) {
                     if (tenant != null) {
-                        LOG.error("Unable to resolve configured trusted domain image for tenant {}: {}", tenant, image, e);
+                        LOG.error("Unable to resolve configured trusted mail address image for tenant {}: {}", tenant, image, e);
                     } else {
-                        LOG.error("Unable to resolve configured trusted domain fallback image: {}", image, e);
+                        LOG.error("Unable to resolve configured trusted mail address fallback image: {}", image, e);
                     }
                 }
             } else {
@@ -280,16 +282,16 @@ public class TrustedDomainAuthenticityHandler implements ForcedReloadable, Trust
                         icon = new ImageIcon(f);
                     } catch (IOException e) {
                         if (tenant != null) {
-                            LOG.error("Unable to resolve configured trusted domain image for tenant {}: {}", tenant, image, e);
+                            LOG.error("Unable to resolve configured trusted mail address image for tenant {}: {}", tenant, image, e);
                         } else {
-                            LOG.error("Unable to resolve configured trusted domain fallback image: {}", image, e);
+                            LOG.error("Unable to resolve configured trusted mail address fallback image: {}", image, e);
                         }
                     }
                 } else {
                     if (tenant != null) {
-                        LOG.error("Unable to resolve configured trusted domain image for tenant {}: {}", tenant, image);
+                        LOG.error("Unable to resolve configured trusted mail address image for tenant {}: {}", tenant, image);
                     } else {
-                        LOG.error("Unable to resolve configured trusted domain fallback image: {}", image);
+                        LOG.error("Unable to resolve configured trusted mail address fallback image: {}", image);
                     }
                 }
             }
@@ -299,7 +301,7 @@ public class TrustedDomainAuthenticityHandler implements ForcedReloadable, Trust
 
     @Override
     public void reloadConfiguration(ConfigurationService configService) {
-        trustedDomainsPerTenant.clear();
+        trustedMailAddressesPerTenant.clear();
         fallbackTenant.clear();
         try {
             init(configService);
@@ -309,25 +311,27 @@ public class TrustedDomainAuthenticityHandler implements ForcedReloadable, Trust
     }
 
     @Override
-    public Icon getIcon(String domain, Session session) {
+    public Icon getIcon(Session session, String uri) throws OXException {
         String tenant = (String) session.getParameter(Session.PARAM_HOST_NAME);
         if (tenant == null) {
-            LOG.warn("Missing host name session parameter. Unable to verify mail domain.");
-            return null;
-        }
-        List<TrustedDomain> list = trustedDomainsPerTenant.get(tenant);
-        for (TrustedDomain dom : list) {
-            if (dom.matches(domain)) {
-                return dom.getImage();
+            LOG.warn("Missing host name session parameter. Falling back to fallback tenant.");
+        } else {
+            if (trustedMailAddressesPerTenant.containsKey(tenant)) {
+                for (TrustedMail trustedMail : trustedMailAddressesPerTenant.get(tenant)) {
+                    if (trustedMail.getImage() != null && trustedMail.getImage().getUID().equals(uri)) {
+                        return trustedMail.getImage();
+                    }
+                }
             }
         }
 
-        for (TrustedDomain dom : fallbackTenant) {
-            if (dom.matches(domain)) {
-                return dom.getImage();
+        for (TrustedMail trustedMail : fallbackTenant) {
+            if (trustedMail.getImage() != null && trustedMail.getImage().getUID().equals(uri)) {
+                return trustedMail.getImage();
             }
         }
-        return null;
+
+        throw MailAuthenticityExceptionCodes.INVALID_IMAGE_UID.create();
     }
 
     @Override
@@ -335,27 +339,27 @@ public class TrustedDomainAuthenticityHandler implements ForcedReloadable, Trust
         return Reloadables.getInterestsForAll();
     }
 
-    private String getDomain(MailMessage msg) {
+    private String getMailAddress(MailMessage msg) {
         MailAuthenticityResult authenticationResult = msg.getAuthenticityResult();
         return authenticationResult == null ? null : authenticationResult.getAttribute(DefaultMailAuthenticityResultKey.FROM_DOMAIN).toString();
     }
 
-    private static class TrustedDomainResult extends AbstractAuthMechResult {
+    private static class TrustedMailResult extends AbstractAuthMechResult {
 
         /**
-         * Initializes a new {@link TrustedDomainResult}.
+         * Initializes a new {@link TrustedMailResult}.
          *
-         * @param domain
+         * @param mailAddress
          * @param clientIP
          * @param result
          */
-        public TrustedDomainResult(String domain, String clientIP, AuthenticityMechanismResult result) {
-            super(domain, clientIP, result);
+        public TrustedMailResult(String mailAddress, String clientIP, AuthenticityMechanismResult result) {
+            super(mailAddress, clientIP, result);
         }
 
         @Override
         public MailAuthenticityMechanism getMechanism() {
-            return TRUSTED_DOMAIN_MECHANISM;
+            return TRUSTED_MAIL_MECHANISM;
         }
     }
 
