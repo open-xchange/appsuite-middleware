@@ -1,0 +1,22 @@
+/image/mail/trustedMail/picture:
+  get:
+    operationId: getTrustedMailPicture
+    tags:
+      - Image
+    summary: Requests an image for a trusted mail
+    produces:
+      - application/octet-stream
+    parameters:
+      - in: query
+        name: uid
+        type: string
+        description: The identifier of the image previously obtained from the authentication_results field of the mail module.
+        required: true
+    responses:
+      200:
+        description: The content of the requested image is directly written into output stream.
+        schema:
+          type: string
+          format: binary
+      400:
+        description: If request cannot be handled.

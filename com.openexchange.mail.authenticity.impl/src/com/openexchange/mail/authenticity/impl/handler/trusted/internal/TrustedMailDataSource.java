@@ -73,7 +73,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 
 /**
  *
- * {@link TrustedMailDataSource}
+ * {@link TrustedMailDataSource} is a source for trusted mail images
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.0
@@ -85,6 +85,8 @@ public final class TrustedMailDataSource implements ImageDataSource {
     private static final TrustedMailDataSource INSTANCE = new TrustedMailDataSource();
 
     private static final String ARG = "com.openexchange.mail.authenticity.trustedMail.uid";
+    private static final String ALIAS = "/mail/trustedMail/picture";
+    private static final String REGISTRATION_NAME = "com.openexchange.mail.authenticity.trustedMail";
 
     /**
      * Gets the instance.
@@ -163,14 +165,10 @@ public final class TrustedMailDataSource implements ImageDataSource {
         return new Class<?>[] { InputStream.class };
     }
 
-    private static final String REGISTRATION_NAME = "com.openexchange.mail.authenticity.trustedMail";
-
     @Override
     public String getRegistrationName() {
         return REGISTRATION_NAME;
     }
-
-    private static final String ALIAS = "/file/trustedMail";
 
     @Override
     public String getAlias() {
