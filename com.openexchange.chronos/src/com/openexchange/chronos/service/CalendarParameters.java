@@ -200,11 +200,12 @@ public interface CalendarParameters {
     static final String PARAMETER_MASK_ID = "maskId";
 
     /**
-     * {@link Long}
+     * {@link UIDConflictStrategy}
      * <p/>
-     * Specifies the field for the timestamp.
+     * Configures what to do in case an event cannot be saved due to another existing event with the same unique identifier. By default, an
+     * appropriate exception is thrown (as per {@link UIDConflictStrategy#THROW}.
      */
-    static final String PARAMETER_TIMESTAMP = "timestamp";
+    static final String UID_CONFLICT_STRATEGY = "uidConflictStrategy";
 
     /**
      * Sets a parameter.
