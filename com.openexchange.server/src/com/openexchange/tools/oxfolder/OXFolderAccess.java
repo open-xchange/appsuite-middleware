@@ -502,7 +502,7 @@ public class OXFolderAccess {
      * @param userId The user ID
      * @param module The module
      * @param type The type, or <code>-1</code> if not applicable
-     * @return The identifier of the user's default folder of given module and type
+     * @return The identifier of the user's default folder of given module and type, or -1 if no folder was found
      * @throws OXException If operation fails
      */
     public int getDefaultFolderID(int userId, int module, int type) throws OXException {
@@ -570,9 +570,6 @@ public class OXFolderAccess {
             } else {
                 DBPool.closeWriterAfterReading(ctx, wc);
             }
-        }
-        if (folderId == -1) {
-            throw OXFolderExceptionCode.FOLDER_COULD_NOT_BE_LOADED.create(FolderObject.getFolderString(type, userLocale), contextId);
         }
         return folderId;
     }
