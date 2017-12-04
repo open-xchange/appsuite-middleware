@@ -334,8 +334,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
 
             // Extract the domain from the 'From' header
             try {
-                String domain = extractDomain(from);
-                overallResult.addAttribute(DefaultMailAuthenticityResultKey.FROM_DOMAIN, domain);
+                overallResult.addAttribute(DefaultMailAuthenticityResultKey.FROM_DOMAIN, extractDomain(from));
                 overallResult.addAttribute(DefaultMailAuthenticityResultKey.TRUSTED_SENDER, from.getAddress());
             } catch (Exception e) {
                 // Malformed from header, be strict and return with failed result
