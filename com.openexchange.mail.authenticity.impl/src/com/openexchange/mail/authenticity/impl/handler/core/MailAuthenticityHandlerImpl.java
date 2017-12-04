@@ -366,31 +366,32 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
     private void parseMechanisms(List<String> elements, List<MailAuthenticityMechanismResult> results, List<Map<String, String>> unknownResults, MailAuthenticityResult overallResult) {
         Collections.sort(elements, MAIL_AUTH_COMPARATOR);
         for (String element : elements) {
-            List<MailAuthenticityAttribute> attributes = StringUtil.parseList(element);
+            Map<String, String> attributes = StringUtil.parseMap(element);
 
             DefaultMailAuthenticityMechanism mechanism = DefaultMailAuthenticityMechanism.extractMechanism(attributes);
             if (mechanism == null) {
                 // Unknown or not parsable mechanism
-                unknownResults.add(parseUnknownMechs(attributes));
+                unknownResults.add(parseUnknownMechs(element));
                 continue;
             }
             BiFunction<Map<String, String>, MailAuthenticityResult, MailAuthenticityMechanismResult> mechanismParser = mechanismParsersRegitry.get(mechanism);
             if (mechanismParser == null) {
                 // Not a valid mechanism, skip but add to the overall result
-                unknownResults.add(parseUnknownMechs(attributes));
+                unknownResults.add(parseUnknownMechs(element));
                 continue;
             }
-            results.add(mechanismParser.apply(StringUtil.parseMap(element), overallResult));
+            results.add(mechanismParser.apply(attributes, overallResult));
         }
     }
 
     /**
      * Parses the unknown mechanism's attributes and returns those as a {@link Map}
      * 
-     * @param attributes The attributes to parse
+     * @param element The element to parse
      * @return A {@link Map} with the parsed attributes of the unknown mechanism
      */
-    private Map<String, String> parseUnknownMechs(List<MailAuthenticityAttribute> attributes) {
+    private Map<String, String> parseUnknownMechs(String element) {
+        List<MailAuthenticityAttribute> attributes = StringUtil.parseList(element);
         Map<String, String> unknownResults = new HashMap<>();
         // First element is always the mechanism
         MailAuthenticityAttribute mechanism = attributes.get(0);
