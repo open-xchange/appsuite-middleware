@@ -54,6 +54,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.chronos.service.CalendarEvent;
+import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CreateResult;
 import com.openexchange.chronos.service.DeleteResult;
 import com.openexchange.chronos.service.UpdateResult;
@@ -75,6 +76,7 @@ public class DefaultCalendarEvent implements CalendarEvent {
     private final List<CreateResult> creations;
     private final List<UpdateResult> updates;
     private final List<DeleteResult> deletions;
+    private final CalendarParameters calendarParameters;
 
     /**
      * Initializes a new {@link DefaultCalendarEvent}.
@@ -87,8 +89,9 @@ public class DefaultCalendarEvent implements CalendarEvent {
      * @param creations The create results, or <code>null</code> if there are none
      * @param deletions The delete results, or <code>null</code> if there are none
      * @param updates The update results, or <code>null</code> if there are none
+     * @param calendarParameters Optional {@link CalendarParameters} can be empty or <code>null</code> if there are none
      */
-    public DefaultCalendarEvent(int contextId, int accountId, int calendarUserId, Session session, Map<Integer, List<String>> affectedFoldersPerUser, List<CreateResult> creations, List<UpdateResult> updates, List<DeleteResult> deletions) {
+    public DefaultCalendarEvent(int contextId, int accountId, int calendarUserId, Session session, Map<Integer, List<String>> affectedFoldersPerUser, List<CreateResult> creations, List<UpdateResult> updates, List<DeleteResult> deletions, CalendarParameters calendarParameters) {
         super();
         this.contextId = contextId;
         this.accountId = accountId;
@@ -98,6 +101,7 @@ public class DefaultCalendarEvent implements CalendarEvent {
         this.creations = creations;
         this.updates = updates;
         this.deletions = deletions;
+        this.calendarParameters = calendarParameters;
     }
 
     @Override
@@ -127,17 +131,22 @@ public class DefaultCalendarEvent implements CalendarEvent {
 
     @Override
     public List<DeleteResult> getDeletions() {
-        return null == deletions ? Collections.<DeleteResult> emptyList() : Collections.unmodifiableList(deletions);
+        return null == deletions ? Collections.<DeleteResult>emptyList() : Collections.unmodifiableList(deletions);
     }
 
     @Override
     public List<UpdateResult> getUpdates() {
-        return null == updates ? Collections.<UpdateResult> emptyList() : Collections.unmodifiableList(updates);
+        return null == updates ? Collections.<UpdateResult>emptyList() : Collections.unmodifiableList(updates);
     }
 
     @Override
     public List<CreateResult> getCreations() {
-        return null == creations ? Collections.<CreateResult> emptyList() : Collections.unmodifiableList(creations);
+        return null == creations ? Collections.<CreateResult>emptyList() : Collections.unmodifiableList(creations);
+    }
+
+    @Override
+    public CalendarParameters getCalendarParameters() {
+        return calendarParameters;
     }
 
     @Override

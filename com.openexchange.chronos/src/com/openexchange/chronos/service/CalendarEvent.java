@@ -118,4 +118,11 @@ public interface CalendarEvent extends TimestampedResult {
      */
     List<CreateResult> getCreations();
 
+    /**
+     * Gets the {@link CalendarParameters}.
+     * 
+     * @return The {@link CalendarParameters} or <code>null</code> if not available
+     */
+    CalendarParameters getCalendarParameters();
+
 }

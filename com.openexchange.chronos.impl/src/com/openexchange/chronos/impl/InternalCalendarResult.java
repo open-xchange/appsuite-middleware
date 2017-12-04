@@ -300,10 +300,11 @@ public class InternalCalendarResult {
     /**
      * Gets the calendar event representing the system-wide view on the performed calendar changes.
      *
+     * @param calendarSession The {@link CalendarSession}
      * @return The calendar event
      */
-    public CalendarEvent getCalendarEvent() {
-        return new DefaultCalendarEvent(session.getContextId(), Utils.ACCOUNT_ID, calendarUserId, session.getSession(), getAffectedFoldersPerUser(), creations, updates, deletions);
+    public CalendarEvent getCalendarEvent(CalendarSession calendarSession) {
+        return new DefaultCalendarEvent(session.getContextId(), Utils.ACCOUNT_ID, calendarUserId, session.getSession(), getAffectedFoldersPerUser(), creations, updates, deletions, calendarSession);
     }
 
     /**

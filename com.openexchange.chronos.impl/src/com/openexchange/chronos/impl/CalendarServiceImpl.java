@@ -275,7 +275,7 @@ public class CalendarServiceImpl implements CalendarService {
         /*
          * notify handlers & return userized result
          */
-        notifyHandlers(result);
+        notifyHandlers(result, session);
         return result.getUserizedResult();
     }
 
@@ -295,7 +295,7 @@ public class CalendarServiceImpl implements CalendarService {
         /*
          * notify handlers & return userized result
          */
-        notifyHandlers(result);
+        notifyHandlers(result, session);
         return result.getUserizedResult();
     }
 
@@ -315,7 +315,7 @@ public class CalendarServiceImpl implements CalendarService {
         /*
          * notify handlers & return userized result
          */
-        notifyHandlers(result);
+        notifyHandlers(result, session);
         return result.getUserizedResult();
     }
 
@@ -334,7 +334,7 @@ public class CalendarServiceImpl implements CalendarService {
         /*
          * notify handlers & return userized result
          */
-        notifyHandlers(result);
+        notifyHandlers(result, session);
         return result.getUserizedResult();
     }
 
@@ -354,7 +354,7 @@ public class CalendarServiceImpl implements CalendarService {
         /*
          * notify handlers & return userized result
          */
-        notifyHandlers(result);
+        notifyHandlers(result, session);
         return result.getUserizedResult();
     }
 
@@ -374,7 +374,7 @@ public class CalendarServiceImpl implements CalendarService {
         /*
          * notify handlers & return userized result
          */
-        notifyHandlers(result);
+        notifyHandlers(result, session);
         return result.getUserizedResult();
     }
 
@@ -394,7 +394,7 @@ public class CalendarServiceImpl implements CalendarService {
         /*
          * notify handlers & return userized result
          */
-        notifyHandlers(result);
+        notifyHandlers(result, session);
         return result.getUserizedResult();
     }
 
@@ -414,7 +414,7 @@ public class CalendarServiceImpl implements CalendarService {
         /*
          * notify handlers & return userized result
          */
-        notifyHandlers(result);
+        notifyHandlers(result, session);
         return result.getUserizedResult();
     }
 
@@ -442,14 +442,14 @@ public class CalendarServiceImpl implements CalendarService {
         return importResults;
     }
 
-    private InternalCalendarResult notifyHandlers(InternalCalendarResult result) {
-        notifyHandlers(result.getCalendarEvent());
+    private InternalCalendarResult notifyHandlers(InternalCalendarResult result, CalendarSession session) {
+        notifyHandlers(result.getCalendarEvent(session));
         return result;
     }
 
-    private void notifyHandlers(CalendarEvent calendarEvent) {
+    private void notifyHandlers(CalendarEvent event) {
         for (CalendarHandler handler : calendarHandlers) {
-            handler.handle(calendarEvent);
+            handler.handle(event);
         }
     }
 
