@@ -97,6 +97,7 @@ import com.openexchange.mail.attachment.AttachmentToken;
 import com.openexchange.mail.attachment.AttachmentTokenConstants;
 import com.openexchange.mail.attachment.AttachmentTokenService;
 import com.openexchange.mail.authenticity.MailAuthenticityResultKey;
+import com.openexchange.mail.authenticity.TrustedDomainResultKey;
 import com.openexchange.mail.authenticity.mechanism.MailAuthenticityMechanismResult;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.conversion.InlineImageDataSource;
@@ -518,8 +519,9 @@ public final class JsonMessageHandler implements MailMessageHandler {
     }
 
     /**
-     * Creates the JSON representation for specified <code>MailAuthenticationResult</code> instance.
-     *
+     * Creates the JSON representation of the essential information for the specified {@link MailAuthenticityResult} instance.
+     * That is the <code>status</code> and the <code>trustedDomain</code> (if present)
+     * 
      * @param authenticationResult The authentication result to create the JSON representation for
      * @return The JSON representation
      * @throws JSONException If JSON representation cannot be returned
@@ -529,7 +531,27 @@ public final class JsonMessageHandler implements MailMessageHandler {
             return null;
         }
 
-        Map<MailAuthenticityResultKey, Object> attributes = authenticationResult.getAttributes();
+        JSONObject result = new JSONObject(2);
+        result.put("status", authenticationResult.getStatus().getTechnicalName());
+        if (authenticationResult.getAttribute(TrustedDomainResultKey.TRUSTED_DOMAIN) != null) {
+            result.put(TrustedDomainResultKey.TRUSTED_DOMAIN.getKey(), authenticationResult.getAttribute(TrustedDomainResultKey.TRUSTED_DOMAIN));
+        }
+        return result;
+    }
+
+    /**
+     * Creates the JSON representation for specified <code>MailAuthenticationResult</code> instance.
+     *
+     * @param authenticationResult The authentication result to create the JSON representation for
+     * @return The JSON representation
+     * @throws JSONException If JSON representation cannot be returned
+     */
+    public static JSONObject authenticationMechanismResultsToJson(MailAuthenticityResult authenticityResult) throws JSONException {
+        if (null == authenticityResult) {
+            return null;
+        }
+
+        Map<MailAuthenticityResultKey, Object> attributes = authenticityResult.getAttributes();
         JSONObject result = new JSONObject(attributes.size());
         for (MailAuthenticityResultKey key : attributes.keySet()) {
             Object object = attributes.get(key);
@@ -558,12 +580,8 @@ public final class JsonMessageHandler implements MailMessageHandler {
                 result.put(key.getKey(), object);
             }
         }
-        result.put("status", authenticationResult.getStatus().getTechnicalName());
+        result.put("status", authenticityResult.getStatus().getTechnicalName());
         return result;
-    }
-    
-    public static JSONObject authenticationMechanismResultsToJson(MailAuthenticityResult authenticityResult) throws JSONException {
-        return null;
     }
 
     /**
