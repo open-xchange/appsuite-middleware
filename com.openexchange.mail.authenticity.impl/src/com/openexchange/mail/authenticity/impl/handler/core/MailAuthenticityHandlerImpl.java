@@ -60,7 +60,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiFunction;
-import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -244,14 +243,14 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
             return;
         }
 
-        String[] fromHeaders = headerCollection.getHeader(MessageHeaders.HDR_FROM);
-        if (fromHeaders == null || fromHeaders.length == 0) {
+        InternetAddress[] from = mailMessage.getFrom();
+        if (from == null || from.length == 0) {
             // Pass on to custom handlers
             mailMessage.setAuthenticityResult(MailAuthenticityResult.NEUTRAL_RESULT);
             return;
         }
 
-        mailMessage.setAuthenticityResult(parseHeaders(Arrays.asList(authHeaders), fromHeaders[0], session));
+        mailMessage.setAuthenticityResult(parseHeaders(Arrays.asList(authHeaders), from[0], session));
 
         if (trustedDomainHandler != null) {
             trustedDomainHandler.handle(session, mailMessage);
@@ -311,7 +310,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
      * @return The overall {@link MailAuthenticityResult}
      * @throws OXException if the allowed authserv-ids cannot be retrieved from the configuration
      */
-    private MailAuthenticityResult parseHeaders(List<String> authenticationHeaders, String fromHeader, Session session) throws OXException {
+    private MailAuthenticityResult parseHeaders(List<String> authenticationHeaders, InternetAddress from, Session session) throws OXException {
         List<AllowedAuthServId> allowedAuthServIds = getAllowedAuthServIds(session);
 
         MailAuthenticityResult overallResult = new MailAuthenticityResult(MailAuthenticityStatus.NEUTRAL);
@@ -335,10 +334,9 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
 
             // Extract the domain from the 'From' header
             try {
-                String address = extractAddress(fromHeader);
-                String domain = extractDomain(address);
+                String domain = extractDomain(from);
                 overallResult.addAttribute(DefaultMailAuthenticityResultKey.FROM_DOMAIN, domain);
-                overallResult.addAttribute(DefaultMailAuthenticityResultKey.TRUSTED_SENDER, address);
+                overallResult.addAttribute(DefaultMailAuthenticityResultKey.TRUSTED_SENDER, from.getAddress());
             } catch (Exception e) {
                 // Malformed from header, be strict and return with failed result
                 LOGGER.debug("An error occurred while trying to extract a valid domain from the 'From' header", e);
@@ -414,34 +412,18 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
     }
 
     /**
-     * Extracts the e-mail address of the sender from the specified <code>From</code> header and returns it
      *
-     * @param fromHeader The from header
-     * @return The e-mail address as {@link String}
-     * @throws IllegalArgumentException if the specified header does not contain any valid parsable Internet address
-     */
-    private String extractAddress(String fromHeader) {
-        try {
-            InternetAddress ia = new InternetAddress(fromHeader, true);
-            return ia.getAddress();
-        } catch (AddressException e) {
-            throw new IllegalArgumentException("The specified header does not contain any valid parsable internet addresses", e);
-        }
-    }
-
-    /**
-     * Extracts the domain of the sender from the specified address and returns it
-     *
-     * @param address The address as string
+     * @param adr The address as string
      * @return The domain of the sender
      * @throws IllegalAccessException if the address is either empty or <code>null</code
      */
-    private String extractDomain(String address) {
-        if (Strings.isEmpty(address)) {
+    private String extractDomain(InternetAddress address) {
+        if (address == null) {
             throw new IllegalArgumentException("The address can be neither empty nor null");
         }
-        int index = address.indexOf('@');
-        return address.substring(index + 1);
+        String adr = address.getAddress();
+        int index = adr.indexOf('@');
+        return adr.substring(index + 1);
     }
 
     /**
