@@ -49,15 +49,8 @@
 
 package com.openexchange.halo.pictures;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import javax.servlet.http.HttpServletResponse;
-import com.openexchange.ajax.container.ByteArrayFileHolder;
-import com.openexchange.ajax.helper.DownloadUtility;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.DispatcherNotes;
-import com.openexchange.ajax.requesthandler.ETagAwareAJAXActionService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.halo.ContactHalo;
@@ -65,33 +58,15 @@ import com.openexchange.halo.Picture;
 import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.servlet.AjaxExceptionCodes;
-import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
-
 
 /**
  * {@link GetPictureAction}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-@DispatcherNotes(allowPublicSession=true, defaultFormat="file")
-public class GetPictureAction implements ETagAwareAJAXActionService {
-
-    private static final byte[] TRANSPARENT_GIF = { 71, 73, 70, 56, 57, 97, 1, 0, 1, 0, -128, 0, 0, 0, 0, 0, -1, -1, -1, 33, -7, 4, 1, 0, 0, 0, 0, 44, 0, 0, 0, 0, 1, 0, 1, 0, 0, 2, 1, 68, 0, 59 };
-
-    private static final Picture FALLBACK_PICTURE;
-
-    static {
-        ByteArrayFileHolder fileHolder = new ByteArrayFileHolder(TRANSPARENT_GIF);
-        fileHolder.setContentType("image/gif");
-        fileHolder.setName("image.gif");
-        FALLBACK_PICTURE = new Picture(null, fileHolder);
-    }
-
-    // -----------------------------------------------------------------------------------------------------------------------------
-
-    private final ServiceLookup services;
+@DispatcherNotes(allowPublicSession = true, defaultFormat = "file")
+public class GetPictureAction extends AbstractGetPictureAction {
 
     /**
      * Initializes a new {@link GetPictureAction}.
@@ -99,90 +74,12 @@ public class GetPictureAction implements ETagAwareAJAXActionService {
      * @param services The OSGi service look-up
      */
     public GetPictureAction(ServiceLookup services) {
-        super();
-        this.services = services;
-    }
-
-    @Override
-    public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
-        Picture picture = getPicture(requestData, session);
-        if (picture == null) {
-            // 404 - Not Found
-            AJAXRequestResult result = new AJAXRequestResult();
-            result.setHttpStatusCode(HttpServletResponse.SC_NOT_FOUND);
-            return result;
-        }
-
-        if (FALLBACK_PICTURE == picture) {
-            ByteArrayFileHolder fileHolder = (ByteArrayFileHolder) picture.getFileHolder();
-            if (requestData.setResponseHeader("Content-Type", fileHolder.getContentType())) {
-                // Set HTTP response headers
-                {
-                    final StringBuilder sb = new StringBuilder(256);
-                    sb.append("inline");
-                    DownloadUtility.appendFilenameParameter(fileHolder.getName(), fileHolder.getContentType(), requestData.getUserAgent(), sb);
-                    requestData.setResponseHeader("Content-Disposition", sb.toString());
-
-                    String eTag = picture.getEtag();
-                    long expires = Tools.getDefaultImageExpiry();
-                    if (null == eTag) {
-                        if (expires > 0) {
-                            Tools.setExpires(expires, requestData.optHttpServletResponse());
-                        }
-                    } else {
-                        Tools.setETag(eTag, expires > 0 ? expires : -1L, requestData.optHttpServletResponse());
-                    }
-                }
-
-                // Write image file
-                try {
-                    OutputStream out = requestData.optOutputStream();
-                    out.write(fileHolder.getBytes());
-                    out.flush();
-                } catch (IOException e) {
-                    throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
-                }
-
-                // Signal direct response
-                return new AJAXRequestResult(AJAXRequestResult.DIRECT_OBJECT, "direct").setType(AJAXRequestResult.ResultType.DIRECT);
-            }
-        }
-
-        AJAXRequestResult result = new AJAXRequestResult(picture.getFileHolder(), "file");
-        setETag(picture.getEtag(), Tools.getDefaultImageExpiry(), result);
-        return result;
-    }
-
-    @Override
-    public boolean checkETag(String clientETag, AJAXRequestData request, ServerSession session) throws OXException {
-        String pictureETag = getPictureETag(request, session);
-        if (pictureETag == null) {
-            return false;
-        }
-        if (pictureETag.equals(clientETag)) {
-            return true;
-        }
-        return false;
-    }
-
-    @Override
-    public void setETag(String eTag, long expires, AJAXRequestResult result) throws OXException {
-        result.setExpires(expires);
-        if (eTag != null) {
-            result.setHeader("ETag", eTag);
-        }
-    }
-
-    private Picture getPicture(AJAXRequestData req, ServerSession session) throws OXException {
-        return getPictureResource(req, session, false);
-    }
-
-    private String getPictureETag(AJAXRequestData req, ServerSession session) throws OXException {
-        return getPictureResource(req, session, true);
+        super(services);
     }
 
     @SuppressWarnings("unchecked")
-    private <V> V getPictureResource(AJAXRequestData req, ServerSession session, boolean eTagOnly) throws OXException {
+    @Override
+    <V> V getPictureResource(AJAXRequestData req, ServerSession session, boolean eTagOnly) throws OXException {
         final ContactHalo contactHalo = services.getService(ContactHalo.class);
         if (null == contactHalo) {
             throw ServiceExceptionCode.absentService(ContactHalo.class);
@@ -250,9 +147,4 @@ public class GetPictureAction implements ETagAwareAJAXActionService {
             return (V) (eTagOnly ? null : fallbackPicture());
         }
     }
-
-    private Picture fallbackPicture() {
-        return FALLBACK_PICTURE;
-    }
-
 }
