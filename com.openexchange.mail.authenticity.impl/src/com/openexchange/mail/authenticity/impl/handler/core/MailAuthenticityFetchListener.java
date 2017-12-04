@@ -94,7 +94,7 @@ public class MailAuthenticityFetchListener implements MailFetchListener {
 
     private boolean isApplicableFor(MailFetchArguments fetchArguments) {
         FullnameArgument folder = fetchArguments.getFolder();
-        return (null != folder && MailAccount.DEFAULT_ID == folder.getAccountId()) && new MailFields(fetchArguments.getFields()).contains(MailField.AUTHENTICATION_RESULTS);
+        return (null != folder && MailAccount.DEFAULT_ID == folder.getAccountId()) && new MailFields(fetchArguments.getFields()).contains(MailField.AUTHENTICATION_OVERALL_RESULT);
     }
 
     @Override

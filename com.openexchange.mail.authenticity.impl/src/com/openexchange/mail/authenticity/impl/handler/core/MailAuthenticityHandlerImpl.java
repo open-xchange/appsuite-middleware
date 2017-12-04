@@ -129,7 +129,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
     private static final Collection<MailField> REQUIRED_MAIL_FIELDS;
     static {
         Collection<MailField> m = new ArrayList<>();
-        m.add(MailField.AUTHENTICATION_RESULTS);
+        m.add(MailField.AUTHENTICATION_OVERALL_RESULT);
         REQUIRED_MAIL_FIELDS = Collections.<MailField> unmodifiableCollection(m);
     }
 

@@ -165,7 +165,8 @@ public final class JsonMessageHandler implements MailMessageHandler {
     private static final String SECURITY = MailJSONField.SECURITY.getKey();
     private static final String SECURITY_INFO = MailJSONField.SECURITY_INFO.getKey();
     private static final String TEXT_PREVIEW = MailJSONField.TEXT_PREVIEW.getKey();
-    private static final String AUTHENTICATION_RESULTS = MailJSONField.AUTHENTICATION_RESULTS.getKey();
+    private static final String AUTHENTICATION_OVERALL_RESULT = MailJSONField.AUTHENTICATION_OVERALL_RESULT.getKey();
+    private static final String AUTHENTICATION_MECHANISM_RESULTS = MailJSONField.AUTHENTICATION_MECHANISM_RESULTS.getKey();
 
     private static final String TRUNCATED = MailJSONField.TRUNCATED.getKey();
     private static final String SANITIZED = "sanitized";
@@ -431,7 +432,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                     jsonObject.put(TEXT_PREVIEW, mail.getTextPreview());
                 }
                 MailAuthenticityResult mailAuthenticityResult = mail.getAuthenticityResult();
-                jsonObject.put(AUTHENTICATION_RESULTS, null == mailAuthenticityResult ? JSONObject.NULL : JsonMessageHandler.authenticationResultToJson(mailAuthenticityResult));
+                jsonObject.put(AUTHENTICATION_OVERALL_RESULT, null == mailAuthenticityResult ? JSONObject.NULL : JsonMessageHandler.authenticationResultToJson(mailAuthenticityResult));
                 // Guard info
                 if (mail.containsSecurityInfo()) {
                     SecurityInfo securityInfo = mail.getSecurityInfo();

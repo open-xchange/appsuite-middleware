@@ -547,7 +547,7 @@ public final class MessageWriter {
             writers.put(MailListField.TEXT_PREVIEW_IF_AVAILABLE, writer);
             writers.put(MailListField.TEXT_PREVIEW, writer);
         }
-        writers.put(MailListField.AUTHENTICATION_RESULTS, new MailFieldWriter() {
+        writers.put(MailListField.AUTHENTICATION_OVERALL_RESULT, new MailFieldWriter() {
 
             @Override
             public void writeField(JSONValue jsonContainer, MailMessage mail, int level, boolean withKey, int accountId, int user, int cid, TimeZone optTimeZone) throws OXException {
@@ -555,7 +555,7 @@ public final class MessageWriter {
                     MailAuthenticityResult mailAuthenticityResult = mail.getAuthenticityResult();
                     Object value = null == mailAuthenticityResult ? JSONObject.NULL : JsonMessageHandler.authenticationResultToJson(mailAuthenticityResult);
                     if (withKey) {
-                        jsonContainer.toObject().put(MailJSONField.AUTHENTICATION_RESULTS.getKey(), value);
+                        jsonContainer.toObject().put(MailJSONField.AUTHENTICATION_OVERALL_RESULT.getKey(), value);
                     } else {
                         jsonContainer.toArray().put(value);
                     }
