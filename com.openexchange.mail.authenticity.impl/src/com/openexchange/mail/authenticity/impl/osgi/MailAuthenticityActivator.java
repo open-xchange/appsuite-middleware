@@ -55,6 +55,7 @@ import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
 import com.openexchange.config.Reloadables;
 import com.openexchange.config.lean.LeanConfigurationService;
+import com.openexchange.jslob.JSlobEntry;
 import com.openexchange.mail.MailFetchListener;
 import com.openexchange.mail.authenticity.MailAuthenticityHandler;
 import com.openexchange.mail.authenticity.MailAuthenticityHandlerRegistry;
@@ -62,6 +63,7 @@ import com.openexchange.mail.authenticity.MailAuthenticityProperty;
 import com.openexchange.mail.authenticity.impl.handler.core.MailAuthenticityFetchListener;
 import com.openexchange.mail.authenticity.impl.handler.core.MailAuthenticityHandlerImpl;
 import com.openexchange.mail.authenticity.impl.handler.core.MailAuthenticityHandlerRegistryImpl;
+import com.openexchange.mail.authenticity.impl.handler.core.MailAuthenticityJSlobEntry;
 import com.openexchange.mail.authenticity.impl.handler.domain.TrustedDomainService;
 import com.openexchange.mail.authenticity.impl.handler.domain.internal.TrustedDomainAuthenticityHandler;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -112,6 +114,8 @@ public class MailAuthenticityActivator extends HousekeepingActivator {
 
         MailAuthenticityFetchListener fetchListener = new MailAuthenticityFetchListener(registry);
         registerService(MailFetchListener.class, fetchListener);
+
+        registerService(JSlobEntry.class, new MailAuthenticityJSlobEntry(this));
     }
 
     class ConfigReloader implements Reloadable {
