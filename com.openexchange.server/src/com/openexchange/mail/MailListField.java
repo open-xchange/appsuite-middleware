@@ -236,13 +236,13 @@ public enum MailListField {
      */
     TEXT_PREVIEW(663, MailJSONField.TEXT_PREVIEW.getKey()),
     /**
-     * The message's authentication overall result (light version).
+     * The message's authentication overall result (light version); maps to <code>"Authentication-Results"</code> header
      *
      * @since v7.10.0
      */
     AUTHENTICATION_OVERALL_RESULT(664, MailJSONField.AUTHENTICATION_RESULTS.getKey()),
     /**
-     * The message's authentication mechanism results (heavy version).
+     * The message's authentication mechanism results (heavy version); maps to <code>"Authentication-Results"</code> header
      *
      * @since v7.10.0
      */

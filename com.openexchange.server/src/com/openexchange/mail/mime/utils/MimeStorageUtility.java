@@ -540,6 +540,7 @@ public final class MimeStorageUtility {
         field2string.put(MailField.DISPOSITION_NOTIFICATION_TO, Collections.singletonList(MessageHeaders.HDR_DISP_NOT_TO));
         field2string.put(MailField.PRIORITY, Arrays.asList(MessageHeaders.HDR_IMPORTANCE, MessageHeaders.HDR_X_PRIORITY));
         field2string.put(MailField.AUTHENTICATION_OVERALL_RESULT, Collections.singletonList(MessageHeaders.HDR_AUTHENTICATION_RESULTS));
+        field2string.put(MailField.AUTHENTICATION_MECHANISM_RESULTS, Collections.singletonList(MessageHeaders.HDR_AUTHENTICATION_RESULTS));
         FIELD2STRING = field2string;
     }
 

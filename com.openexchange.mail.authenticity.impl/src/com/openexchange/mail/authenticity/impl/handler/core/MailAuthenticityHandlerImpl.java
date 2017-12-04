@@ -130,16 +130,8 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
     static {
         Collection<MailField> m = new ArrayList<>();
         m.add(MailField.AUTHENTICATION_OVERALL_RESULT);
+        m.add(MailField.FROM);
         REQUIRED_MAIL_FIELDS = Collections.<MailField> unmodifiableCollection(m);
-    }
-
-    /** The required headers of this handler */
-    private static final Collection<String> REQUIRED_HEADERS;
-    static {
-        Collection<String> m = new ArrayList<>();
-        m.add(MessageHeaders.HDR_AUTHENTICATION_RESULTS);
-        m.add(MessageHeaders.HDR_FROM);
-        REQUIRED_HEADERS = Collections.<String> unmodifiableCollection(m);
     }
 
     /** The ranking of this handler */
@@ -239,7 +231,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.mail.authenticity.MailAuthenticityHandler#handle(com.openexchange.session.Session, com.openexchange.mail.dataobjects.MailMessage)
      */
     @Override
@@ -283,7 +275,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
      */
     @Override
     public Collection<String> getRequiredHeaders() {
-        return REQUIRED_HEADERS;
+        return Collections.emptyList();
     }
 
     /*
@@ -312,7 +304,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
     /**
      * Performs the parsing magic of the specified <code>Authentication-Results</code> headers and <code>From</code> header and
      * returns the overall {@link MailAuthenticityResult}
-     * 
+     *
      * @param authenticationHeaders The <code>Authentication-Results</code> headers
      * @param fromHeader The <code>From</code> header
      * @param session The groupware {@link Session}
@@ -365,7 +357,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
 
     /**
      * Parses the mechanisms (known and unknown) and adds the results to their respective {@link List}s
-     * 
+     *
      * @param elements A {@link List} with the elements of a single <code>Authentication-Results</code> header.
      * @param results A {@link List} with the results of the known mechanisms
      * @param unknownResults A {@link List} with the unknown results
@@ -394,7 +386,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
 
     /**
      * Parses the unknown mechanism's attributes and returns those as a {@link Map}
-     * 
+     *
      * @param element The element to parse
      * @return A {@link Map} with the parsed attributes of the unknown mechanism
      */
@@ -423,7 +415,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
 
     /**
      * Extracts the e-mail address of the sender from the specified <code>From</code> header and returns it
-     * 
+     *
      * @param fromHeader The from header
      * @return The e-mail address as {@link String}
      * @throws IllegalArgumentException if the specified header does not contain any valid parsable Internet address
@@ -613,7 +605,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
 
     /**
      * Adds the specified attributes to the specified {@link MailAuthenticityMechanismResult}
-     * 
+     *
      * @param attributes The attributes to add
      * @param mechResult The {@link MailAuthenticityMechanismResult} to add the attributs to
      */
