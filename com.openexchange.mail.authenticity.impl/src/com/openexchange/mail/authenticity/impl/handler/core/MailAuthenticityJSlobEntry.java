@@ -66,7 +66,7 @@ import com.openexchange.session.Session;
 public class MailAuthenticityJSlobEntry implements JSlobEntry {
 
     private static final String NAME = "authenticityEnabled";
-    private ServiceLookup services;
+    private final ServiceLookup services;
 
     /**
      * Initialises a new {@link MailAuthenticityJSlobEntry}.
@@ -78,7 +78,7 @@ public class MailAuthenticityJSlobEntry implements JSlobEntry {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.jslob.JSlobEntry#getKey()
      */
     @Override
@@ -88,7 +88,7 @@ public class MailAuthenticityJSlobEntry implements JSlobEntry {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.jslob.JSlobEntry#getPath()
      */
     @Override
@@ -98,7 +98,7 @@ public class MailAuthenticityJSlobEntry implements JSlobEntry {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.jslob.JSlobEntry#isWritable(com.openexchange.session.Session)
      */
     @Override
@@ -108,18 +108,18 @@ public class MailAuthenticityJSlobEntry implements JSlobEntry {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.jslob.JSlobEntry#getValue(com.openexchange.session.Session)
      */
     @Override
     public Object getValue(Session session) throws OXException {
         LeanConfigurationService configService = services.getService(LeanConfigurationService.class);
-        return configService.getBooleanProperty(MailAuthenticityProperty.enabled);
+        return configService.getBooleanProperty(session.getUserId(), session.getContextId(), MailAuthenticityProperty.enabled);
     }
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.jslob.JSlobEntry#setValue(java.lang.Object, com.openexchange.session.Session)
      */
     @Override
@@ -129,7 +129,7 @@ public class MailAuthenticityJSlobEntry implements JSlobEntry {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.jslob.JSlobEntry#metadata(com.openexchange.session.Session)
      */
     @Override
