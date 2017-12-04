@@ -97,7 +97,8 @@ public class SchedJoulesRESTClient implements Closeable, Reloadable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SchedJoulesRESTClient.class);
 
-    private static final SimpleDateFormat DATE_FORMATTER = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss 'GMT'");
+    private static final String LAST_MODIFIED_DATE_PATTERN = "EEE, dd MMM yyyy HH:mm:ss 'GMT'";
+    private final ThreadLocal<SimpleDateFormat> lastModifiedDateParser;
 
     private static SchedJoulesRESTClient INSTANCE;
 
@@ -142,6 +143,9 @@ public class SchedJoulesRESTClient implements Closeable, Reloadable {
         authorizationHeader = prepareAuthorizationHeader();
         acceptHeader = prepareAcceptHeader();
         httpClient = initializeHttpClient();
+        
+        lastModifiedDateParser = new ThreadLocal<>();
+        lastModifiedDateParser.set(new SimpleDateFormat(LAST_MODIFIED_DATE_PATTERN));
 
         headerParsers = new HashMap<>();
 
@@ -152,7 +156,7 @@ public class SchedJoulesRESTClient implements Closeable, Reloadable {
                 return;
             }
             try {
-                schedjoulesResponse.setLastModified(DATE_FORMATTER.parse(value).getTime());
+                schedjoulesResponse.setLastModified(lastModifiedDateParser.get().parse(value).getTime());
             } catch (ParseException e) {
                 LOGGER.debug("Could not parse the value of the 'Last-Modified' header '{}'", value, e);
             }
@@ -280,7 +284,7 @@ public class SchedJoulesRESTClient implements Closeable, Reloadable {
                 request.addHeader(HttpHeaders.IF_NONE_MATCH, eTag);
             }
             if (lastModified > 0) {
-                request.addHeader(HttpHeaders.IF_MODIFIED_SINCE, DATE_FORMATTER.format(new Date(lastModified)));
+                request.addHeader(HttpHeaders.IF_MODIFIED_SINCE, lastModifiedDateParser.get().format(new Date(lastModified)));
             }
         } catch (URISyntaxException e) {
             throw SchedJoulesAPIExceptionCodes.INVALID_URI_PATH.create(path, e);
