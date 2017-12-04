@@ -554,6 +554,9 @@ public final class JsonMessageHandler implements MailMessageHandler {
         Map<MailAuthenticityResultKey, Object> attributes = authenticityResult.getAttributes();
         JSONObject result = new JSONObject(attributes.size());
         for (MailAuthenticityResultKey key : attributes.keySet()) {
+            if (!key.isVisible()) {
+                continue;
+            }
             Object object = attributes.get(key);
             if (object instanceof Collection<?>) {
                 Collection<?> col = (Collection<?>) object;
