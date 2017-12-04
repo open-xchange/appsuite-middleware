@@ -113,7 +113,28 @@ public class ImageUtils {
         } catch (final Exception e) {
             return false;
         } finally {
-            Streams.close(imageInputStream, inputStream);
+            closeInputStream(inputStream);
+            closeImageInputStream(imageInputStream);
+        }
+    }
+
+    private static void closeInputStream(InputStream toClose) {
+        if (null != toClose) {
+            try {
+                toClose.close();
+            } catch (final Exception e) {
+                // Ignore
+            }
+        }
+    }
+
+    private static void closeImageInputStream(ImageInputStream toClose) {
+        if (null != toClose) {
+            try {
+                toClose.close();
+            } catch (final Exception e) {
+                // Ignore
+            }
         }
     }
 
