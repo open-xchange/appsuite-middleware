@@ -50,6 +50,10 @@ properties:
             reason:
               type: string
               description: The (optional) reason of the status
+      trusted:
+        type: boolean
+        description: |
+          Defines whether the sender is a trusted sender. 
       image:
         type: string
         description: |
