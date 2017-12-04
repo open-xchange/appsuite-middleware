@@ -16,7 +16,7 @@ BuildRequires: java7-devel
 BuildRequires: java-devel >= 1.7.0
 %endif
 Version:       @OXVERSION@
-%define        ox_release 40
+%define        ox_release 41
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -65,6 +65,8 @@ ox_update_permissions /opt/open-xchange/etc/reportclient.properties root:open-xc
 %config(noreplace) /opt/open-xchange/etc/*
 
 %changelog
+* Mon Dec 04 2017 Carsten Hoeger <choeger@open-xchange.com>
+Build for Patch 2017-12-11 (4472)
 * Thu Nov 16 2017 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2017-11-20 (4440)
 * Tue Nov 14 2017 Carsten Hoeger <choeger@open-xchange.com>

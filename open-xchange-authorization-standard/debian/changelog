@@ -1,3 +1,9 @@
+open-xchange-authorization-standard (7.8.3-41) stable; urgency=medium
+
+  * Build for Patch 2017-12-11 (4472)
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 04 Dec 2017 15:10:23 +0100
+
 open-xchange-authorization-standard (7.8.3-40) stable; urgency=medium
 
   * Build for patch 2017-11-20 (4440)
