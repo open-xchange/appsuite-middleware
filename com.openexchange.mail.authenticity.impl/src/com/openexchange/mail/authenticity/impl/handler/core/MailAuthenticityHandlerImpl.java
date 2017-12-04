@@ -343,8 +343,10 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
 
             // Extract the domain from the 'From' header
             try {
-                String domain = extractDomain(fromHeader);
+                String address = extractAddress(fromHeader);
+                String domain = extractDomain(address);
                 overallResult.addAttribute(DefaultMailAuthenticityResultKey.FROM_DOMAIN, domain);
+                overallResult.addAttribute(DefaultMailAuthenticityResultKey.TRUSTED_SENDER, address);
             } catch (Exception e) {
                 // Malformed from header, be strict and return with failed result
                 LOGGER.debug("An error occurred while trying to extract a valid domain from the 'From' header", e);
@@ -420,21 +422,34 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
     }
 
     /**
-     * Extracts the domain of the sender from the specified <code>From</code> header and returns it
-     *
+     * Extracts the e-mail address of the sender from the specified <code>From</code> header and returns it
+     * 
      * @param fromHeader The from header
-     * @return The domain of the sender
+     * @return The e-mail address as {@link String}
      * @throws IllegalArgumentException if the specified header does not contain any valid parsable Internet address
      */
-    private String extractDomain(String fromHeader) {
+    private String extractAddress(String fromHeader) {
         try {
             InternetAddress ia = new InternetAddress(fromHeader, true);
-            String address = ia.getAddress();
-            int index = address.indexOf('@');
-            return address.substring(index + 1);
+            return ia.getAddress();
         } catch (AddressException e) {
             throw new IllegalArgumentException("The specified header does not contain any valid parsable internet addresses", e);
         }
+    }
+
+    /**
+     * Extracts the domain of the sender from the specified address and returns it
+     *
+     * @param address The address as string
+     * @return The domain of the sender
+     * @throws IllegalAccessException if the address is either empty or <code>null</code
+     */
+    private String extractDomain(String address) {
+        if (Strings.isEmpty(address)) {
+            throw new IllegalArgumentException("The address can be neither empty nor null");
+        }
+        int index = address.indexOf('@');
+        return address.substring(index + 1);
     }
 
     /**

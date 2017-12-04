@@ -79,15 +79,28 @@ public enum DefaultMailAuthenticityResultKey implements MailAuthenticityResultKe
      * Defines the unknown mail authenticity mechanism results
      * that were collected during the evaluation process of the e-mail.
      */
-    UNKNOWN_AUTH_MECH_RESULTS("unknownMailAuthenticityMechanismResults");
+    UNKNOWN_AUTH_MECH_RESULTS("unknownMailAuthenticityMechanismResults"),
+    /**
+     * Defines the complete address of the trusted sender of the e-mail
+     */
+    TRUSTED_SENDER("trustedSender", false);
 
     private final String key;
+    private final boolean isVisible;
 
     /**
      * Initialises a new {@link DefaultMailAuthenticityResultKey}.
      */
     private DefaultMailAuthenticityResultKey(String key) {
+        this(key, true);
+    }
+
+    /**
+     * Initialises a new {@link DefaultMailAuthenticityResultKey}.
+     */
+    private DefaultMailAuthenticityResultKey(String key, boolean isVisible) {
         this.key = key;
+        this.isVisible = isVisible;
     }
 
     /*
@@ -98,5 +111,15 @@ public enum DefaultMailAuthenticityResultKey implements MailAuthenticityResultKe
     @Override
     public String getKey() {
         return key;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.mail.authenticity.MailAuthenticityResultKey#isVisible()
+     */
+    @Override
+    public boolean isVisible() {
+        return isVisible;
     }
 }

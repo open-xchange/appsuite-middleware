@@ -65,4 +65,12 @@ public interface MailAuthenticityResultKey {
      * @return the name of the key
      */
     String getKey();
+
+    /**
+     * Determines whether the key is visible in the JSON layer, i.e.
+     * whether the key and its value will be written to the response object
+     * 
+     * @return <code>true</code> if the key should be written to the response object, <code>false</code> otherwise
+     */
+    boolean isVisible();
 }

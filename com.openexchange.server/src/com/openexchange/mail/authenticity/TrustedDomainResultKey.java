@@ -79,4 +79,14 @@ public enum TrustedDomainResultKey implements MailAuthenticityResultKey {
     public String getKey() {
         return key;
     }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.mail.authenticity.MailAuthenticityResultKey#isVisible()
+     */
+    @Override
+    public boolean isVisible() {
+        return true;
+    }
 }
