@@ -76,6 +76,14 @@ public interface CalendarEvent extends TimestampedResult {
     int getAccountId();
 
     /**
+     * Gets the the actual target calendar user based on the folder view the action has been performed in. This is either the current
+     * session's user when operating in <i>private</i> or <i>public</i> folders, or the folder owner for <i>shared</i> calendar folders.
+     *
+     * @return The identifier of the actual calendar user, or <code>-1</code> if not available
+     */
+    int getCalendarUser();
+
+    /**
      * Gets the client session if available.
      *
      * @return The session, or <code>null</code> if not available

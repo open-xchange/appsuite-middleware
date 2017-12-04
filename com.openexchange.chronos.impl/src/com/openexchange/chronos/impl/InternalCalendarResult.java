@@ -303,7 +303,7 @@ public class InternalCalendarResult {
      * @return The calendar event
      */
     public CalendarEvent getCalendarEvent() {
-        return new DefaultCalendarEvent(session.getContextId(), Utils.ACCOUNT_ID, session.getSession(), getAffectedFoldersPerUser(), creations, updates, deletions);
+        return new DefaultCalendarEvent(session.getContextId(), Utils.ACCOUNT_ID, calendarUserId, session.getSession(), getAffectedFoldersPerUser(), creations, updates, deletions);
     }
 
     /**

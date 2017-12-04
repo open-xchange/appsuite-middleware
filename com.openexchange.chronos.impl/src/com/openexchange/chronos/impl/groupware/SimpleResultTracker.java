@@ -95,7 +95,7 @@ class SimpleResultTracker {
 
     /**
      * Initializes a new {@link SimpleResultTracker}.
-     * 
+     *
      * @param calendarHandlers The {@link CalendarHandler}s to notify
      */
     public SimpleResultTracker(Set<CalendarHandler> calendarHandlers) {
@@ -108,7 +108,7 @@ class SimpleResultTracker {
 
     /**
      * Creates a new {@link CalendarEvent} and calls {@link CalendarHandler#handle(CalendarEvent)}
-     * 
+     *
      * @param connection The {@link Connection}
      * @param context The {@link Context}
      * @param session The {@link Session} of the context admin
@@ -117,7 +117,7 @@ class SimpleResultTracker {
     public void notifyCalenderHandlers(Connection connection, Context context, Session session, EntityResolver entityResolver) {
         Map<Integer, List<String>> affectedFoldersPerUser = getAffectedFoldersPerUser(context, connection, entityResolver);
         if (false == affectedFoldersPerUser.isEmpty()) {
-            DefaultCalendarEvent calendarEvent = new DefaultCalendarEvent(context.getContextId(), CalendarAccount.DEFAULT_ACCOUNT.getAccountId(), session, affectedFoldersPerUser, Collections.emptyList(), updateResults, deleteResults);
+            DefaultCalendarEvent calendarEvent = new DefaultCalendarEvent(context.getContextId(), CalendarAccount.DEFAULT_ACCOUNT.getAccountId(), -1, session, affectedFoldersPerUser, Collections.emptyList(), updateResults, deleteResults);
             for (CalendarHandler handler : calendarHandlers) {
                 handler.handle(calendarEvent);
             }
@@ -126,7 +126,7 @@ class SimpleResultTracker {
 
     /**
      * Add a deleted event as appropriated {@link CalendarEvent}.
-     * 
+     *
      * @param event The {@link Event} to delete
      * @param timestamp The timestamp of the deletion
      */
@@ -138,7 +138,7 @@ class SimpleResultTracker {
 
     /**
      * Add an updated event as appropriated {@link CalendarEvent}.
-     * 
+     *
      * @param originalEvent The original {@link Event}
      * @param updatedEvent The updated {@link Event}
      * @throws OXException See {@link UpdateResultImpl#UpdateResultImpl(Event, Event)}
@@ -151,7 +151,7 @@ class SimpleResultTracker {
 
     /**
      * Track the affected folders.
-     * 
+     *
      * @param event The {@link Event}
      */
     private void addFolders(Event event) {
@@ -163,7 +163,7 @@ class SimpleResultTracker {
 
     /**
      * Get the affected folders per user
-     * 
+     *
      * @param context The {@link Context}
      * @param connection The {@link Connection}
      * @param entityResolver The {@link EntityResolver}
