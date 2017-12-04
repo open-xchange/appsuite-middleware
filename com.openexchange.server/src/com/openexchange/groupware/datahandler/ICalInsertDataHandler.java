@@ -63,10 +63,14 @@ import com.openexchange.chronos.Event;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.ical.ICalService;
 import com.openexchange.chronos.ical.ImportedCalendar;
+import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarResult;
 import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.CreateResult;
+import com.openexchange.chronos.service.ImportResult;
+import com.openexchange.chronos.service.UIDConflictStrategy;
+import com.openexchange.chronos.service.UpdateResult;
 import com.openexchange.conversion.ConversionResult;
 import com.openexchange.conversion.Data;
 import com.openexchange.conversion.DataArguments;
@@ -200,39 +204,25 @@ public final class ICalInsertDataHandler extends ICalDataHandler {
                 /*
                  * Insert parsed appointments into denoted calendar folder
                  */
-                CalendarService calendarService = ServerServiceRegistry.getServize(CalendarService.class, true);
-                CalendarSession calendarSession = calendarService.init(session);
-                String folderId = String.valueOf(calendarFolder);
-                for (Event event : events) {
-                    try {
-                        insertEvent(calendarFolder, folderAndIdArray, calendarService, calendarSession, folderId, event);
-                    } catch (JSONException e) {
-                        throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
-                    } catch (OXException e) {
-                        if (CalendarExceptionCodes.UID_CONFLICT.equals(e)) {
-                            /*
-                             * TODO Discuss
-                             * Old implementation did add the user to the existing event
-                             */
-                            boolean old = true;
-                            if (old) {
-                                // Update existing event
-                                // String resolvedEvent = calendarService.getUtilities().resolveByUID(calendarSession, event.getUid());
-                                // ...
-                                throw e;
-                            } else {
-                                // Ignore error, insert as new event
-                                event.removeUid();
-                                try {
-                                    insertEvent(calendarFolder, folderAndIdArray, calendarService, calendarSession, folderId, event);
-                                } catch (JSONException e1) {
-                                    throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e1);
-                                }
+                try {
+                    CalendarService calendarService = ServerServiceRegistry.getServize(CalendarService.class, true);
+                    CalendarSession calendarSession = calendarService.init(session);
+                    calendarSession.set(CalendarParameters.UID_CONFLICT_STRATEGY, UIDConflictStrategy.UPDATE_OR_REASSIGN);
+                    List<ImportResult> importEvents = calendarService.importEvents(calendarSession, String.valueOf(calendarFolder), events);
+                    for (ImportResult importEvent : importEvents) {
+                        if (null == importEvent.getError()) {
+                            for (CreateResult created : importEvent.getCreations()) {
+                                folderAndIdArray.put(new JSONObject().put(FolderChildFields.FOLDER_ID, calendarFolder).put(DataFields.ID, created.getCreatedEvent().getId()));
+                            }
+                            for (UpdateResult updated : importEvent.getUpdates()) {
+                                folderAndIdArray.put(new JSONObject().put(FolderChildFields.FOLDER_ID, calendarFolder).put(DataFields.ID, updated.getUpdate().getId()));
                             }
                         } else {
-                            throw e;
+                            throw importEvent.getError();
                         }
                     }
+                } catch (JSONException e) {
+                    throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
                 }
             }
         }
@@ -252,14 +242,6 @@ public final class ICalInsertDataHandler extends ICalDataHandler {
         }
         result.setData(folderAndIdArray);
         return result;
-    }
-
-    private void insertEvent(int calendarFolder, final JSONArray folderAndIdArray, CalendarService calendarService, CalendarSession calendarSession, String folderId, Event event) throws OXException, JSONException {
-        CalendarResult calendarResult;
-        calendarResult = calendarService.createEvent(calendarSession, folderId, event);
-        for (CreateResult created : calendarResult.getCreations()) {
-            folderAndIdArray.put(new JSONObject().put(FolderChildFields.FOLDER_ID, calendarFolder).put(DataFields.ID, created.getCreatedEvent().getId()));
-        }
     }
 
     private boolean hasValue(DataArguments dataArguments, String key) {
