@@ -398,6 +398,8 @@ public interface CalendarService {
      */
     CalendarResult clearEvents(CalendarSession session, String folderId, long clientTimestamp) throws OXException;
 
+    List<ImportResult> importEvents(CalendarSession session, String folderID, List<Event> events) throws OXException;
+
     /**
      * Retrieves upcoming alarm triggers.
      *
