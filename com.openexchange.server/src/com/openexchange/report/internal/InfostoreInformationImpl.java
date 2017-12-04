@@ -72,10 +72,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
  * The {@link InfostoreInformationImpl} class is an implementations of {@link InfostoreInformationService} class.
-<<<<<<< HEAD
-=======
  *
->>>>>>> 4a7587b1989... Change for bug 55964: Optimize collecting data for drive metric calculation
  * @author <a href="mailto:vitali.sjablow@open-xchange.com">Vitali Sjablow</a>
  * @since v7.8.2
  */
