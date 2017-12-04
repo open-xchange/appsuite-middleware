@@ -67,11 +67,6 @@ import com.openexchange.session.Session;
 public interface MailAuthenticityHandler {
 
     /**
-     * The name of the authentication results header
-     */
-    static final String AUTH_RESULTS_HEADER = "Authentication-Results";
-
-    /**
      * Handles the specified mail message. Extracts the mail headers from the mail message
      * and checks if the 'Authentication-Results' header is present. If it is, then parses that header
      * and collects the results of the different {@link MailAuthenticityMechanism}s that might be present

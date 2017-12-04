@@ -67,7 +67,6 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.authenticity.DefaultMailAuthenticityResultKey;
-import com.openexchange.mail.authenticity.MailAuthenticityHandler;
 import com.openexchange.mail.authenticity.MailAuthenticityProperty;
 import com.openexchange.mail.authenticity.MailAuthenticityStatus;
 import com.openexchange.mail.authenticity.impl.handler.core.MailAuthenticityHandlerImpl;
@@ -79,6 +78,7 @@ import com.openexchange.mail.authenticity.mechanism.spf.SPFResult;
 import com.openexchange.mail.dataobjects.MailAuthenticityResult;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.HeaderCollection;
+import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 
@@ -561,7 +561,7 @@ public class TestMailAuthenticityHandler {
     private void perform(String... headers) {
         try {
             for (String header : headers) {
-                headerCollection.addHeader(MailAuthenticityHandler.AUTH_RESULTS_HEADER, header);
+                headerCollection.addHeader(MessageHeaders.HDR_AUTHENTICATION_RESULTS, header);
             }
             handler.handle(session, mailMessage);
             verify(mailMessage).setAuthenticityResult(argumentCaptor.capture());

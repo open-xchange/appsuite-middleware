@@ -134,7 +134,13 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
     }
 
     /** The required headers of this handler */
-    private static final Collection<String> REQUIRED_HEADERS = Collections.singleton(AUTH_RESULTS_HEADER);
+    private static final Collection<String> REQUIRED_HEADERS;
+    static {
+        Collection<String> m = new ArrayList<>();
+        m.add(MessageHeaders.HDR_AUTHENTICATION_RESULTS);
+        m.add(MessageHeaders.HDR_FROM);
+        REQUIRED_HEADERS = Collections.<String> unmodifiableCollection(m);
+    }
 
     /** The ranking of this handler */
     private final int ranking;
@@ -239,7 +245,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
     @Override
     public void handle(Session session, MailMessage mailMessage) throws OXException {
         HeaderCollection headerCollection = mailMessage.getHeaders();
-        String[] authHeaders = headerCollection.getHeader(MailAuthenticityHandler.AUTH_RESULTS_HEADER);
+        String[] authHeaders = headerCollection.getHeader(MessageHeaders.HDR_AUTHENTICATION_RESULTS);
         if (authHeaders == null || authHeaders.length == 0) {
             // Pass on to custom handlers
             mailMessage.setAuthenticityResult(MailAuthenticityResult.NEUTRAL_RESULT);
