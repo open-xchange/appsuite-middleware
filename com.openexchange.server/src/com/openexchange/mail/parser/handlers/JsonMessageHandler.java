@@ -432,7 +432,8 @@ public final class JsonMessageHandler implements MailMessageHandler {
                     jsonObject.put(TEXT_PREVIEW, mail.getTextPreview());
                 }
                 MailAuthenticityResult mailAuthenticityResult = mail.getAuthenticityResult();
-                jsonObject.put(AUTHENTICATION_OVERALL_RESULT, null == mailAuthenticityResult ? JSONObject.NULL : JsonMessageHandler.authenticationResultToJson(mailAuthenticityResult));
+                jsonObject.put(AUTHENTICATION_OVERALL_RESULT, null == mailAuthenticityResult ? JSONObject.NULL : JsonMessageHandler.authenticationOverallResultToJson(mailAuthenticityResult));
+                jsonObject.put(AUTHENTICATION_MECHANISM_RESULTS, null == mailAuthenticityResult ? JSONObject.NULL : JsonMessageHandler.authenticationMechanismResultsToJson(mailAuthenticityResult));
                 // Guard info
                 if (mail.containsSecurityInfo()) {
                     SecurityInfo securityInfo = mail.getSecurityInfo();
@@ -523,7 +524,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
      * @return The JSON representation
      * @throws JSONException If JSON representation cannot be returned
      */
-    public static JSONObject authenticationResultToJson(MailAuthenticityResult authenticationResult) throws JSONException {
+    public static JSONObject authenticationOverallResultToJson(MailAuthenticityResult authenticationResult) throws JSONException {
         if (null == authenticationResult) {
             return null;
         }
@@ -559,6 +560,10 @@ public final class JsonMessageHandler implements MailMessageHandler {
         }
         result.put("status", authenticationResult.getStatus().getTechnicalName());
         return result;
+    }
+    
+    public static JSONObject authenticationMechanismResultsToJson(MailAuthenticityResult authenticityResult) throws JSONException {
+        return null;
     }
 
     /**
