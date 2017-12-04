@@ -555,7 +555,7 @@ public final class MessageWriter {
                     MailAuthenticityResult mailAuthenticityResult = mail.getAuthenticityResult();
                     Object value = null == mailAuthenticityResult ? JSONObject.NULL : JsonMessageHandler.authenticationOverallResultToJson(mailAuthenticityResult);
                     if (withKey) {
-                        jsonContainer.toObject().put(MailJSONField.AUTHENTICATION_OVERALL_RESULT.getKey(), value);
+                        jsonContainer.toObject().put(MailJSONField.AUTHENTICATION_RESULTS.getKey(), value);
                     } else {
                         jsonContainer.toArray().put(value);
                     }
@@ -572,7 +572,7 @@ public final class MessageWriter {
                     MailAuthenticityResult mailAuthenticityResult = mail.getAuthenticityResult();
                     Object value = null == mailAuthenticityResult ? JSONObject.NULL : JsonMessageHandler.authenticationMechanismResultsToJson(mailAuthenticityResult);
                     if (withKey) {
-                        jsonContainer.toObject().put(MailJSONField.AUTHENTICATION_MECHANISM_RESULTS.getKey(), value);
+                        jsonContainer.toObject().put(MailJSONField.AUTHENTICATION_RESULTS.getKey(), value);
                     } else {
                         jsonContainer.toArray().put(value);
                     }

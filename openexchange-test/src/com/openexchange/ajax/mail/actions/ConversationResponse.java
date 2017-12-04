@@ -168,6 +168,9 @@ public class ConversationResponse extends AbstractAJAXResponse {
                     case AUTHENTICATION_OVERALL_RESULT:
                         message.setAuthenticityResult((MailAuthenticityResult) messageMap.get(key));
                         break;
+                    case AUTHENTICATION_MECHANISM_RESULTS:
+                        message.setAuthenticityResult((MailAuthenticityResult) messageMap.get(key));
+                        break;
                     case PRIORITY:
                         message.setPriority((int) messageMap.get(key));
                         break;
