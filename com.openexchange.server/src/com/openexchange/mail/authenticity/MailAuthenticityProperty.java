@@ -59,17 +59,20 @@ import com.openexchange.config.lean.Property;
 public enum MailAuthenticityProperty implements Property {
     /**
      * Defines whether the mail authenticity core feature is enabled
+     * <p>
      * Defaults to <code>false</code>
      */
     ENABLED("enabled", Boolean.FALSE),
     /**
-     * Defines the date after which the e-mails will be analysed
+     * Defines the date after which the e-mails will be analyzed
+     * <p>
      * Defaults to 0
      */
     THRESHOLD("threshold", Long.valueOf(0)),
     /**
      * Defines the MANDATORY <code>authserv-id</code>. It can contain a single arbitrary string
      * or a comma separated list of arbitrary strings
+     * <p>
      * Default is empty.
      *
      * @see <a href="https://tools.ietf.org/html/rfc7601#section-2.2">RFC-7601, Section 2.2</a>
