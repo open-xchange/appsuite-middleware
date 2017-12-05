@@ -437,7 +437,7 @@ public class CalendarServiceImpl implements CalendarService {
         List<ImportResult> importResults = new ArrayList<ImportResult>(results.size());
         for (InternalImportResult result : results) {
             importResults.add(result.getImportResult());
-            notifyHandlers(result.getCalendarEvent());
+            notifyHandlers(result.getCalendarEvent(session));
         }
         return importResults;
     }

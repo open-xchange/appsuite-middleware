@@ -51,6 +51,7 @@ package com.openexchange.chronos.impl;
 
 import java.util.List;
 import com.openexchange.chronos.service.CalendarEvent;
+import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarResult;
 import com.openexchange.chronos.service.EventID;
 import com.openexchange.chronos.service.ImportResult;
@@ -109,10 +110,11 @@ public class InternalImportResult {
     /**
      * Gets the calendar event representing the system-wide view on the performed calendar changes.
      *
+     * @param parameters Additional calendar parameters, or <code>null</code> if not available
      * @return The calendar event
      */
-    public CalendarEvent getCalendarEvent() {
-        return calendarResult.getCalendarEvent();
+    public CalendarEvent getCalendarEvent(CalendarParameters parameters) {
+        return calendarResult.getCalendarEvent(parameters);
     }
 
     /**
