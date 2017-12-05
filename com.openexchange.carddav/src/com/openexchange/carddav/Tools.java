@@ -52,6 +52,7 @@ package com.openexchange.carddav;
 import java.util.Date;
 import java.util.List;
 import com.openexchange.contact.ContactFieldOperand;
+import com.openexchange.dav.DAVOAuthScope;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.groupware.contact.ContactExceptionCodes;
@@ -78,7 +79,7 @@ public class Tools {
     /**
      * The OAuth scope token for CardDAV
      */
-    public static final String OAUTH_SCOPE = "carddav";
+    public static final String OAUTH_SCOPE = DAVOAuthScope.CARDDAV.getScope();
 
     /**
      * Extracts the UID part from the supplied {@link WebdavPath}, i.e. the

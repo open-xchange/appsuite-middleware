@@ -244,7 +244,7 @@ public class DAVServlet extends OXServlet {
             return true;
         }
         Scope scope = oAuthAccess.getScope();
-        return scope.has("caldav") || scope.has("carddav");
+        return scope.has(DAVOAuthScope.CALDAV.getScope()) || scope.has(DAVOAuthScope.CARDDAV.getScope());
     }
 
 }

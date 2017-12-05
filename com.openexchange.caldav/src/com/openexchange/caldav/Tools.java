@@ -55,6 +55,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
+import com.openexchange.dav.DAVOAuthScope;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
@@ -71,7 +72,10 @@ import com.openexchange.webdav.protocol.WebdavPath;
  */
 public class Tools {
 
-    public static final String OAUTH_SCOPE = "caldav";
+    /**
+     * The OAuth scope token for CalDAV
+     */
+    public static final String OAUTH_SCOPE = DAVOAuthScope.CALDAV.getScope();
 
     public static Date getLatestModified(Date lastModified1, Date lastModified2) {
         return lastModified1.after(lastModified2) ? lastModified1 : lastModified2;
