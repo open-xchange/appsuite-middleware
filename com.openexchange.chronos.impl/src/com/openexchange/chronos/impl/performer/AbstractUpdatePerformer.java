@@ -79,7 +79,6 @@ import com.openexchange.chronos.AlarmField;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.CalendarUserType;
-import com.openexchange.chronos.Classification;
 import com.openexchange.chronos.DelegatingEvent;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
@@ -638,65 +637,6 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
             organizer.setSentBy(session.getEntityResolver().applyEntityData(new CalendarUser(), session.getUserId()));
         }
         return organizer;
-    }
-
-    /**
-     * Creates a <i>userized</i> version of an event, representing the current calendar user's point of view on the event data, as derived
-     * via {@link #calendarUserId}. This includes
-     * <ul>
-     * <li><i>anonymization</i> of restricted event data in case the event it is not marked as {@link Classification#PUBLIC}, and the
-     * current session's user is neither creator, nor attendee of the event.</li>
-     * <li>selecting the appropriate parent folder identifier for the specific user</li>
-     * <li>apply <i>userized</i> versions of change- and delete-exception dates in the series master event based on the user's actual
-     * attendance</li>
-     * <li>taking over the user's personal list of alarms for the event</li>
-     * </ul>
-     *
-     * @param event The event to userize from the current calendar user's point of view
-     * @return The <i>userized</i> event
-     * @see Utils#applyExceptionDates
-     * @see Utils#anonymizeIfNeeded
-     */
-    protected Event userize(Event event) throws OXException {
-        return userize(event, calendarUserId);
-    }
-
-    /**
-     * Creates a <i>userized</i> version of an event, representing the current calendar user's point of view on the event data, as derived
-     * via {@link #calendarUserId}. This includes
-     * <ul>
-     * <li><i>anonymization</i> of restricted event data in case the event it is not marked as {@link Classification#PUBLIC}, and the
-     * current session's user is neither creator, nor attendee of the event.</li>
-     * <li>selecting the appropriate parent folder identifier for the specific user</li>
-     * <li>apply <i>userized</i> versions of change- and delete-exception dates in the series master event based on the user's actual
-     * attendance</li>
-     * <li>taking over the user's personal list of alarm for the event</li>
-     * </ul>
-     *
-     * @param event The event to userize from the current calendar user's point of view
-     * @param alarms The alarms to take over
-     * @return The <i>userized</i> event
-     * @see Utils#applyExceptionDates
-     * @see Utils#anonymizeIfNeeded
-     */
-    protected Event userize(Event event, List<Alarm> alarms) throws OXException {
-        event = userize(event, calendarUserId);
-        if (null == alarms && null != event.getAlarms() || null != alarms && null == event.getAlarms()) {
-            final List<Alarm> userizedAlarms = alarms;
-            event = new DelegatingEvent(event) {
-
-                @Override
-                public List<Alarm> getAlarms() {
-                    return userizedAlarms;
-                }
-
-                @Override
-                public boolean containsAlarms() {
-                    return true;
-                }
-            };
-        }
-        return event;
     }
 
     /**
