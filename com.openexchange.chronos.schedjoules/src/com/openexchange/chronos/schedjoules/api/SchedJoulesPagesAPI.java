@@ -49,14 +49,21 @@
 
 package com.openexchange.chronos.schedjoules.api;
 
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 import org.json.JSONObject;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.openexchange.chronos.schedjoules.api.auxiliary.SchedJoulesCategory;
 import com.openexchange.chronos.schedjoules.api.auxiliary.SchedJoulesCommonParameter;
 import com.openexchange.chronos.schedjoules.api.auxiliary.SchedJoulesSearchParameter;
+import com.openexchange.chronos.schedjoules.api.cache.SchedJoulesCachedItem;
+import com.openexchange.chronos.schedjoules.api.cache.SchedJoulesCachedItemKey;
 import com.openexchange.chronos.schedjoules.api.client.SchedJoulesRESTBindPoint;
 import com.openexchange.chronos.schedjoules.api.client.SchedJoulesRESTClient;
 import com.openexchange.chronos.schedjoules.api.client.SchedJoulesRequest;
 import com.openexchange.chronos.schedjoules.api.client.SchedJoulesResponse;
+import com.openexchange.chronos.schedjoules.exception.SchedJoulesAPIExceptionCodes;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 
@@ -68,6 +75,8 @@ import com.openexchange.java.Strings;
 public class SchedJoulesPagesAPI extends AbstractSchedJoulesAPI {
 
     private static final int MAX_ROWS = 20;
+
+    private final Cache<SchedJoulesCachedItemKey, SchedJoulesCachedItem> pagesCache = CacheBuilder.newBuilder().expireAfterAccess(24, TimeUnit.HOURS).maximumSize(1000).build();
 
     /**
      * Initialises a new {@link SchedJoulesPagesAPI}.
@@ -98,6 +107,7 @@ public class SchedJoulesPagesAPI extends AbstractSchedJoulesAPI {
         SchedJoulesRequest request = new SchedJoulesRequest(SchedJoulesRESTBindPoint.pages);
         request.setQueryParameter(SchedJoulesCommonParameter.location.name(), location);
         request.setQueryParameter(SchedJoulesCommonParameter.locale.name(), locale);
+        // TODO: resolve the pageId and add it to the request
 
         return executeRequest(request);
     }
@@ -124,6 +134,7 @@ public class SchedJoulesPagesAPI extends AbstractSchedJoulesAPI {
     public JSONObject getPage(int pageId, String locale) throws OXException {
         SchedJoulesRequest request = new SchedJoulesRequest(SchedJoulesRESTBindPoint.pages.getAbsolutePath() + "/" + pageId);
         request.setQueryParameter(SchedJoulesCommonParameter.locale.name(), Strings.isEmpty(locale) ? DEFAULT_LOCALE : locale);
+        request.setPageId(pageId);
 
         return executeRequest(request);
     }
@@ -176,7 +187,17 @@ public class SchedJoulesPagesAPI extends AbstractSchedJoulesAPI {
      * @throws OXException if an error is occurred
      */
     private JSONObject executeRequest(SchedJoulesRequest request) throws OXException {
-        SchedJoulesResponse response = client.executeRequest(request);
-        return (JSONObject) response.getResponseBody();
+        try {
+            return pagesCache.get(new SchedJoulesCachedItemKey(request.getPageId(), request.getQueryParameters().get(SchedJoulesCommonParameter.locale.name())), () -> {
+                SchedJoulesResponse response = client.executeRequest(request);
+                SchedJoulesCachedItem cachedItem = new SchedJoulesCachedItem();
+                cachedItem.setItemData((JSONObject) response.getResponseBody());
+                cachedItem.setLastModified(response.getLastModified());
+                cachedItem.setEtag(response.getETag());
+                return cachedItem;
+            }).getItemData();
+        } catch (ExecutionException e) {
+            throw SchedJoulesAPIExceptionCodes.UNEXPECTED_ERROR.create(e.getMessage(), e);
+        }
     }
 }

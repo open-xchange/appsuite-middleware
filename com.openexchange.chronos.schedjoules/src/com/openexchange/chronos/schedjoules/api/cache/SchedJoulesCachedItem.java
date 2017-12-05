@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2017-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,87 +47,62 @@
  *
  */
 
-package com.openexchange.chronos.schedjoules.api.client;
+package com.openexchange.chronos.schedjoules.api.cache;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import org.json.JSONObject;
 
 /**
- * {@link SchedJoulesRequest}
+ * {@link SchedJoulesCachedItem}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class SchedJoulesRequest {
+public class SchedJoulesCachedItem {
 
-    private final String path;
-    private final Map<String, String> queryParameters;
-    private final HttpMethod method;
-    private String eTag;
-    private int pageId;
+    private JSONObject itemData;
+    private long lastModified;
+    private String etag;
 
     /**
-     * Initialises a new {@link SchedJoulesRequest}.
-     * 
-     * @param restBindPoint The {@link SchedJoulesRESTBindPoint}
+     * Initialises a new {@link SchedJoulesCachedItem}.
      */
-    public SchedJoulesRequest(SchedJoulesRESTBindPoint restBindPoint) {
-        this(restBindPoint.getAbsolutePath());
-    }
-
-    /**
-     * Initialises a new {@link SchedJoulesRequest}.
-     */
-    public SchedJoulesRequest(String path) {
-        this(HttpMethod.GET, path);
-    }
-
-    /**
-     * Initialises a new {@link SchedJoulesRequest}.
-     */
-    public SchedJoulesRequest(HttpMethod method, String path) {
+    public SchedJoulesCachedItem() {
         super();
-        this.method = method;
-        this.path = path;
-        queryParameters = new HashMap<>();
     }
 
     /**
-     * Sets a query parameter. Any previously query parameter with the same name
-     * will be replaced.
-     * 
-     * @param name The name of the parameter
-     * @param value The value of the parameter
-     */
-    public void setQueryParameter(String name, String value) {
-        queryParameters.put(name, value);
-    }
-
-    /**
-     * Returns an unmodifiable {@link Map} with the query parameters
-     * 
-     * @return an unmodifiable {@link Map} with the query parameters
-     */
-    public Map<String, String> getQueryParameters() {
-        return Collections.unmodifiableMap(queryParameters);
-    }
-
-    /**
-     * Gets the path
+     * Gets the itemData
      *
-     * @return The path
+     * @return The itemData
      */
-    public String getPath() {
-        return path;
+    public JSONObject getItemData() {
+        return itemData;
     }
 
     /**
-     * Gets the method
+     * Sets the itemData
      *
-     * @return The method
+     * @param itemData The itemData to set
      */
-    public HttpMethod getMethod() {
-        return method;
+    public void setItemData(JSONObject itemData) {
+        this.itemData = itemData;
+    }
+
+    /**
+     * Gets the lastModified
+     *
+     * @return The lastModified
+     */
+    public long getLastModified() {
+        return lastModified;
+    }
+
+    /**
+     * Sets the lastModified
+     *
+     * @param lastModified The lastModified to set
+     */
+    public void setLastModified(long lastModified) {
+        this.lastModified = lastModified;
     }
 
     /**
@@ -135,8 +110,8 @@ public class SchedJoulesRequest {
      *
      * @return The eTag
      */
-    public String getETag() {
-        return eTag;
+    public String getEtag() {
+        return etag;
     }
 
     /**
@@ -144,25 +119,7 @@ public class SchedJoulesRequest {
      *
      * @param eTag The eTag to set
      */
-    public void setETag(String eTag) {
-        this.eTag = eTag;
-    }
-
-    /**
-     * Gets the pageId
-     *
-     * @return The pageId
-     */
-    public int getPageId() {
-        return pageId;
-    }
-
-    /**
-     * Sets the pageId
-     *
-     * @param pageId The pageId to set
-     */
-    public void setPageId(int pageId) {
-        this.pageId = pageId;
+    public void setEtag(String eTag) {
+        this.etag = eTag;
     }
 }
