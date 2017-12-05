@@ -15,7 +15,7 @@ BuildRequires: java7-devel
 BuildRequires: java-devel >= 1.7.0
 %endif
 Version:       @OXVERSION@
-%define        ox_release 41
+%define        ox_release 40
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -60,8 +60,6 @@ ox_update_permissions /opt/open-xchange/etc/sipgate.properties root:open-xchange
 %config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/sipgate.properties
 
 %changelog
-* Mon Dec 04 2017 Jan Bauerdick <jan.bauerdick@open-xchange.com>
-Build for Patch 2017-12-11 (4472)
 * Thu Nov 16 2017 Jan Bauerdick <jan.bauerdick@open-xchange.com>
 Build for patch 2017-11-20 (4440)
 * Tue Nov 14 2017 Jan Bauerdick <jan.bauerdick@open-xchange.com>
