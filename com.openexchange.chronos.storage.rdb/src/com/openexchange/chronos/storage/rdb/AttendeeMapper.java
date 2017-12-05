@@ -57,8 +57,13 @@ import java.util.List;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.CalendarUserType;
+import com.openexchange.chronos.ExtendedPropertyParameter;
 import com.openexchange.chronos.ParticipantRole;
 import com.openexchange.chronos.ParticipationStatus;
+import com.openexchange.chronos.TimeTransparency;
+import com.openexchange.chronos.Transp;
+import com.openexchange.chronos.compat.ShownAsTransparency;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tools.mappings.database.BooleanMapping;
 import com.openexchange.groupware.tools.mappings.database.DbMapping;
 import com.openexchange.groupware.tools.mappings.database.DefaultDbMapper;
@@ -337,6 +342,75 @@ public class AttendeeMapper extends DefaultDbMapper<Attendee, AttendeeField> {
             @Override
             public void remove(Attendee attendee) {
                 attendee.removeMember();
+            }
+        });
+        mappings.put(AttendeeField.TRANSP, new IntegerMapping<Attendee>("transp", "Transparency") {
+            // 0 - TRANSPARENT, FREE
+            // 1 - OPAQUE, RESERVED
+            // 2 - OPAQUE, TEMPORARY
+            // 3 - OPAQUE, ABSENT
+
+            @Override
+            public void set(Attendee attendee, Integer value) {
+                if (null == value) {
+                    attendee.setTransp(null);
+                } else if (0 == value.intValue()) {
+                    attendee.setTransp(TimeTransparency.TRANSPARENT);
+                } else if (2 == value.intValue()) {
+                    attendee.setTransp(ShownAsTransparency.TEMPORARY);
+                } else if (3 == value.intValue()) {
+                    attendee.setTransp(ShownAsTransparency.ABSENT);
+                } else {
+                    attendee.setTransp(TimeTransparency.OPAQUE);
+                }
+            }
+
+            @Override
+            public boolean isSet(Attendee attendee) {
+                return attendee.containsTransp();
+            }
+
+            @Override
+            public Integer get(Attendee attendee) {
+                Transp value = attendee.getTransp();
+                if (null == value) {
+                    return null;
+                } else if (Transp.TRANSPARENT.equals(value.getValue())) {
+                    return I(0);
+                } else if (ShownAsTransparency.TEMPORARY.equals(value)) {
+                    return I(2);
+                } else if (ShownAsTransparency.ABSENT.equals(value)) {
+                    return I(3);
+                } else {
+                    return I(1);
+                }
+            }
+
+            @Override
+            public void remove(Attendee attendee) {
+                attendee.removeTransp();
+            }
+        });
+        mappings.put(AttendeeField.EXTENDED_PARAMETERS, new ExtendedPropertyParametersMapping<Attendee>("extendedParameters", "Extended Parameters") {
+
+            @Override
+            public boolean isSet(Attendee object) {
+                return object.containsExtendedParameters();
+            }
+
+            @Override
+            public void set(Attendee object, List<ExtendedPropertyParameter> value) throws OXException {
+                object.setExtendedParameters(value);
+            }
+
+            @Override
+            public List<ExtendedPropertyParameter> get(Attendee object) {
+                return object.getExtendedParameters();
+            }
+
+            @Override
+            public void remove(Attendee object) {
+                object.removeExtendedParameters();
             }
         });
         return mappings;

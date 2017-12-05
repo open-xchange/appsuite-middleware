@@ -58,8 +58,10 @@ import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.CalendarUserType;
+import com.openexchange.chronos.ExtendedPropertyParameter;
 import com.openexchange.chronos.ParticipantRole;
 import com.openexchange.chronos.ParticipationStatus;
+import com.openexchange.chronos.Transp;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tools.mappings.DefaultMapper;
 import com.openexchange.groupware.tools.mappings.DefaultMapping;
@@ -372,6 +374,71 @@ public class AttendeeMapper extends DefaultMapper<Attendee, AttendeeField> {
             @Override
             public void remove(Attendee object) {
                 object.removeEMail();
+            }
+        });
+        mappings.put(AttendeeField.TRANSP, new DefaultMapping<Transp, Attendee>() {
+
+            @Override
+            public boolean equals(Attendee attendee1, Attendee attendee2) {
+                Transp transp1 = get(attendee1);
+                Transp transp2 = get(attendee2);
+                return null == transp1 ? null == transp2 : null == transp2 ? false : transp1.getValue().equals(transp2.getValue());
+            }
+
+            @Override
+            public boolean isSet(Attendee object) {
+                return object.containsTransp();
+            }
+
+            @Override
+            public void set(Attendee object, Transp value) throws OXException {
+                object.setTransp(value);
+            }
+
+            @Override
+            public Transp get(Attendee object) {
+                return object.getTransp();
+            }
+
+            @Override
+            public void remove(Attendee object) {
+                object.removeTransp();
+            }
+        });
+        mappings.put(AttendeeField.EXTENDED_PARAMETERS, new DefaultMapping<List<ExtendedPropertyParameter>, Attendee>() {
+
+            @Override
+            public void copy(Attendee from, Attendee to) throws OXException {
+                List<ExtendedPropertyParameter> value = get(from);
+                if (null == value) {
+                    set(to, null);
+                } else {
+                    List<ExtendedPropertyParameter> parameters = new ArrayList<ExtendedPropertyParameter>(value.size());
+                    for (ExtendedPropertyParameter parameter : value) {
+                        parameters.add(new ExtendedPropertyParameter(parameter));
+                    }
+                    set(to, parameters);
+                }
+            }
+
+            @Override
+            public boolean isSet(Attendee object) {
+                return object.containsExtendedParameters();
+            }
+
+            @Override
+            public void set(Attendee object, List<ExtendedPropertyParameter> value) throws OXException {
+                object.setExtendedParameters(value);
+            }
+
+            @Override
+            public List<ExtendedPropertyParameter> get(Attendee object) {
+                return object.getExtendedParameters();
+            }
+
+            @Override
+            public void remove(Attendee object) {
+                object.removeExtendedParameters();
             }
         });
         return mappings;

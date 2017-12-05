@@ -58,6 +58,7 @@ import javax.mail.internet.AddressException;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.CalendarUserType;
+import com.openexchange.chronos.ExtendedPropertyParameter;
 import com.openexchange.chronos.ParticipantRole;
 import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.ical.ICalParameters;
@@ -66,6 +67,7 @@ import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import net.fortuna.ical4j.model.AddressList;
 import net.fortuna.ical4j.model.Parameter;
+import net.fortuna.ical4j.model.ParameterList;
 import net.fortuna.ical4j.model.Property;
 import net.fortuna.ical4j.model.PropertyList;
 import net.fortuna.ical4j.model.component.CalendarComponent;
@@ -76,6 +78,7 @@ import net.fortuna.ical4j.model.parameter.PartStat;
 import net.fortuna.ical4j.model.parameter.Role;
 import net.fortuna.ical4j.model.parameter.Rsvp;
 import net.fortuna.ical4j.model.parameter.SentBy;
+import net.fortuna.ical4j.model.parameter.XParameter;
 import net.fortuna.ical4j.util.Uris;
 
 /**
@@ -191,6 +194,11 @@ public abstract class ICalAttendeeMapping<T extends CalendarComponent, U> extend
         } else {
             property.getParameters().removeAll(Parameter.MEMBER);
         }
+        if (null != attendee.getExtendedParameters() && 0 < attendee.getExtendedParameters().size()) {
+            for (ExtendedPropertyParameter parameter : attendee.getExtendedParameters()) {
+                property.getParameters().replace(new XParameter(parameter.getName(), parameter.getValue()));
+            }
+        }
         return property;
     }
 
@@ -209,35 +217,48 @@ public abstract class ICalAttendeeMapping<T extends CalendarComponent, U> extend
                 attendee.setUri("mailto:" + property.getValue());
             }
         }
-        Parameter sentByParameter = property.getParameter(Parameter.SENT_BY);
-        if (null != sentByParameter && Strings.isNotEmpty(sentByParameter.getValue())) {
-            CalendarUser sentByUser = new CalendarUser();
-            sentByUser.setUri(property.getValue());
-            attendee.setSentBy(sentByUser);
-        }
-        String cn = optParameterValue(property, Parameter.CN);
-        if (null != cn) {
-            attendee.setCn(cn);
-        }
-        String partStat = optParameterValue(property, Parameter.PARTSTAT);
-        if (null != partStat) {
-            attendee.setPartStat(new ParticipationStatus(partStat));
-        }
-        String role = optParameterValue(property, Parameter.ROLE);
-        if (null != role) {
-            attendee.setRole(new ParticipantRole(role));
-        }
-        String cuType = optParameterValue(property, Parameter.CUTYPE);
-        if (null != cuType) {
-            attendee.setCuType(new CalendarUserType(cuType));
-        }
-        String rsvp = optParameterValue(property, Parameter.RSVP);
-        if (null != rsvp) {
-            attendee.setRsvp(Boolean.valueOf(rsvp));
-        }
-        Parameter memberParameter = property.getParameter(Parameter.MEMBER);
-        if (null != memberParameter && Member.class.isInstance(memberParameter)) {
-            attendee.setMember(getUris(((Member) memberParameter).getGroups()));
+        ParameterList parameterList = property.getParameters();
+        if (null != parameterList && 0 < parameterList.size()) {
+            List<ExtendedPropertyParameter> extendedParameters = new ArrayList<ExtendedPropertyParameter>();
+            for (Iterator<?> iterator = parameterList.iterator(); iterator.hasNext();) {
+                Parameter parameter = (Parameter) iterator.next();
+                String value = parameter.getValue();
+                switch (parameter.getName()) {
+                    case Parameter.SENT_BY:
+                        if (Strings.isNotEmpty(value)) {
+                            CalendarUser sentByUser = new CalendarUser();
+                            sentByUser.setUri(value);
+                            attendee.setSentBy(sentByUser);
+                        }
+                        break;
+                    case Parameter.CN:
+                        attendee.setCn(value);
+                        break;
+                    case Parameter.PARTSTAT:
+                        attendee.setPartStat(null != value ? new ParticipationStatus(value) : null);
+                        break;
+                    case Parameter.ROLE:
+                        attendee.setRole(null != value ? new ParticipantRole(value) : null);
+                        break;
+                    case Parameter.CUTYPE:
+                        attendee.setCuType(null != value ? new CalendarUserType(value) : null);
+                        break;
+                    case Parameter.RSVP:
+                        attendee.setRsvp(Boolean.valueOf(value));
+                        break;
+                    case Parameter.MEMBER:
+                        if (Member.class.isInstance(parameter)) {
+                            attendee.setMember(getUris(((Member) parameter).getGroups()));
+                        }
+                        break;
+                    default:
+                        extendedParameters.add(new ExtendedPropertyParameter(parameter.getName(), parameter.getValue()));
+                        break;
+                }
+            }
+            if (0 < extendedParameters.size()) {
+                attendee.setExtendedParameters(extendedParameters);
+            }
         }
         return attendee;
     }

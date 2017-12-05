@@ -104,6 +104,15 @@ public enum AttendeeField {
     /**
      * The e-mail address of the attendee.
      */
-    EMAIL
+    EMAIL,
+    /**
+     * The attendee's time transparency of the event.
+     */
+    TRANSP,
+    /**
+     * Extended parameters of the attendee.
+     */
+    EXTENDED_PARAMETERS,
 
+    ;
 }

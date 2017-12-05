@@ -67,6 +67,7 @@ import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.ExtendedPropertyParameter;
 import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.common.mapping.AbstractCollectionUpdate;
 import com.openexchange.chronos.common.mapping.AttendeeMapper;
@@ -336,6 +337,11 @@ public class AttendeeHelper {
                 userAttendee.setPartStat(session.getConfig().getInitialPartStat(userAttendee.getEntity(), inPublicFolder));
             }
             attendees.add(userAttendee);
+
+            List<ExtendedPropertyParameter> ps = new ArrayList<>();
+            ps.add(new ExtendedPropertyParameter("X-WURST", "kuchen"));
+            ps.add(new ExtendedPropertyParameter("X-AUTO", "hund"));
+            userAttendee.setExtendedParameters(ps);
         }
         /*
          * resolve & add any internal group attendees

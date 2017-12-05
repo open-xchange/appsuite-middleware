@@ -73,6 +73,15 @@ public class ExtendedPropertyParameter {
     }
 
     /**
+     * Initializes a new {@link ExtendedPropertyParameter} based on another parameter.
+     *
+     * @param other The to copy over the name and value from
+     */
+    public ExtendedPropertyParameter(ExtendedPropertyParameter other) {
+        this(other.name, other.value);
+    }
+
+    /**
      * Gets the parameter name.
      *
      * @return The parameter name

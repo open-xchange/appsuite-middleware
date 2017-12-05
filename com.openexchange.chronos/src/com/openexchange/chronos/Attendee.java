@@ -68,6 +68,8 @@ public class Attendee extends CalendarUser {
     private Boolean rsvp;
     private String folderId;
     private List<String> member;
+    private Transp transp;
+    private List<ExtendedPropertyParameter> extendedParameters;
 
     private final EnumSet<AttendeeField> setFields;
 
@@ -538,6 +540,78 @@ public class Attendee extends CalendarUser {
      */
     public boolean containsEMail() {
         return isSet(AttendeeField.EMAIL);
+    }
+
+    /**
+     * Gets the attendee's time transparency of the event.
+     *
+     * @return The time transparency
+     */
+    public Transp getTransp() {
+        return transp;
+    }
+
+    /**
+     * Sets the attendee's time transparency of the event.
+     *
+     * @param value The time transparency to set
+     */
+    public void setTransp(Transp value) {
+        transp = value;
+        setFields.add(AttendeeField.TRANSP);
+    }
+
+    /**
+     * Removes the attendee's time transparency of the event.
+     */
+    public void removeTransp() {
+        transp = null;
+        setFields.remove(AttendeeField.TRANSP);
+    }
+
+    /**
+     * Gets a value indicating whether the attendee's time transparency of the event has been set or not.
+     *
+     * @return <code>true</code> if the attendee's time transparency is set, <code>false</code>, otherwise
+     */
+    public boolean containsTransp() {
+        return setFields.contains(AttendeeField.TRANSP);
+    }
+
+    /**
+     * Gets the extended parameters of the attendee.
+     *
+     * @return The extended parameters
+     */
+    public List<ExtendedPropertyParameter> getExtendedParameters() {
+        return extendedParameters;
+    }
+
+    /**
+     * Sets the extended parameters of the attendee.
+     *
+     * @param value The extended parameters to set
+     */
+    public void setExtendedParameters(List<ExtendedPropertyParameter> value) {
+        extendedParameters = value;
+        setFields.add(AttendeeField.EXTENDED_PARAMETERS);
+    }
+
+    /**
+     * Removes the extended parameters of the attendee.
+     */
+    public void removeExtendedParameters() {
+        extendedParameters = null;
+        setFields.remove(AttendeeField.EXTENDED_PARAMETERS);
+    }
+
+    /**
+     * Gets a value indicating whether extended parameters of the attendee have been set or not.
+     *
+     * @return <code>true</code> if extended parameters are set, <code>false</code>, otherwise
+     */
+    public boolean containsExtendedParameters() {
+        return setFields.contains(AttendeeField.EXTENDED_PARAMETERS);
     }
 
     @Override

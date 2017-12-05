@@ -88,7 +88,10 @@ public class ICalParametersImpl implements ICalParameters {
 
     private void applyDefaults() {
         set(TIMEZONE_REGISTRY, DEFAULT_TIMEZONE_REGISTRY);
-        set(IMPORT_LIMIT, Services.getService(ConfigurationService.class).getIntProperty("com.openexchange.import.ical.limit", -1));
+        ConfigurationService configService = Services.optService(ConfigurationService.class);
+        if (null != configService) {
+            set(IMPORT_LIMIT, configService.getIntProperty("com.openexchange.import.ical.limit", -1));
+        }
     }
 
     @Override
