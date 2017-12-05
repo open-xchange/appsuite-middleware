@@ -80,6 +80,7 @@ import com.openexchange.chronos.Event;
 import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.common.Check;
 import com.openexchange.chronos.common.FreeBusyUtils;
 import com.openexchange.chronos.common.SelfProtectionFactory;
 import com.openexchange.chronos.common.SelfProtectionFactory.SelfProtection;
@@ -167,6 +168,7 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
                 event = ((FolderCalendarAccess) access).getEvent(
                     relativeEventID.getFolderID(), relativeEventID.getObjectID(), relativeEventID.getRecurrenceID());
             } else if (BasicCalendarAccess.class.isInstance(access)) {
+                Check.parentFolderMatches(relativeEventID, BasicCalendarAccess.FOLDER_ID);
                 event = ((BasicCalendarAccess) access).getEvent(
                     relativeEventID.getObjectID(), relativeEventID.getRecurrenceID());
             } else {
@@ -192,6 +194,7 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
                 if (FolderCalendarAccess.class.isInstance(access)) {
                     eventsPerAccountId.put(I(account.getAccountId()), ((FolderCalendarAccess) access).getEvents(entry.getValue()));
                 } else if (BasicCalendarAccess.class.isInstance(access)) {
+                    Check.parentFolderMatches(entry.getValue(), BasicCalendarAccess.FOLDER_ID);
                     eventsPerAccountId.put(I(account.getAccountId()), ((BasicCalendarAccess) access).getEvents(entry.getValue()));
                 } else {
                     throw CalendarExceptionCodes.UNSUPPORTED_OPERATION_FOR_PROVIDER.create(account.getProviderId());
@@ -222,6 +225,7 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
                 return withUniqueIDs(changeExceptions, account.getAccountId());
             }
             if (BasicCalendarAccess.class.isInstance(access)) {
+                Check.folderMatches(getRelativeFolderId(folderId), BasicCalendarAccess.FOLDER_ID);
                 List<Event> changeExceptions = ((BasicCalendarAccess) access).getChangeExceptions(seriesId);
                 return withUniqueIDs(changeExceptions, account.getAccountId());
             }
@@ -241,6 +245,7 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
                 return withUniqueIDs(events, account.getAccountId());
             }
             if (BasicCalendarAccess.class.isInstance(access)) {
+                Check.folderMatches(getRelativeFolderId(folderId), BasicCalendarAccess.FOLDER_ID);
                 List<Event> events = ((BasicCalendarAccess) access).getEvents();
                 return withUniqueIDs(events, account.getAccountId());
             }
@@ -284,6 +289,9 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
                 if (FolderSearchAware.class.isInstance(access)) {
                     eventsInAccount = ((FolderSearchAware) access).searchEvents(relativeFolderIds, filters, queries);
                 } else if (BasicSearchAware.class.isInstance(access)) {
+                    for (String relativeFolderId : relativeFolderIds) {
+                        Check.folderMatches(relativeFolderId, BasicCalendarAccess.FOLDER_ID);
+                    }
                     eventsInAccount = ((BasicSearchAware) access).searchEvents(filters, queries);
                 } else {
                     throw CalendarExceptionCodes.UNSUPPORTED_OPERATION_FOR_PROVIDER.create(getAccount(accountId).getProviderId());
@@ -331,6 +339,7 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
                 UpdatesResult updatesResult = ((FolderSyncAware) access).getUpdatedEventsInFolder(getRelativeFolderId(folderId), updatedSince);
                 return new IDManglingUpdatesResult(updatesResult, account.getAccountId());
             } else if (BasicSyncAware.class.isInstance(access)) {
+                Check.folderMatches(getRelativeFolderId(folderId), BasicCalendarAccess.FOLDER_ID);
                 UpdatesResult updatesResult = ((BasicSyncAware) access).getUpdatedEvents(updatedSince);
                 return new IDManglingUpdatesResult(updatesResult, account.getAccountId());
             } else {
@@ -360,6 +369,7 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
                 List<Event> events = ((FolderSyncAware) access).resolveResource(getRelativeFolderId(folderId), resourceName);
                 return withUniqueIDs(events, account.getAccountId());
             } else if (BasicSyncAware.class.isInstance(access)) {
+                Check.folderMatches(getRelativeFolderId(folderId), BasicCalendarAccess.FOLDER_ID);
                 List<Event> events = ((BasicSyncAware) access).resolveResource(resourceName);
                 return withUniqueIDs(events, account.getAccountId());
             } else {
@@ -416,6 +426,7 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
                 return withUniqueID(folder, account);
             }
             if (BasicCalendarAccess.class.isInstance(access)) {
+                Check.folderMatches(getRelativeFolderId(folderId), BasicCalendarAccess.FOLDER_ID);
                 CalendarFolder folder = getBasicCalendarFolder((BasicCalendarAccess) access);
                 return withUniqueID(folder, account);
             }
@@ -593,6 +604,7 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
             /*
              * update account settings
              */
+            Check.folderMatches(getRelativeFolderId(folderId), BasicCalendarAccess.FOLDER_ID);
             CalendarSettings settings = getBasicCalendarSettings(folder, userConfig);
             CalendarAccount updatedAccount = requireService(CalendarAccountService.class, services).updateAccount(session, accountId, settings, clientTimestamp, this);
             return getUniqueFolderId(updatedAccount.getAccountId(), BasicCalendarAccess.FOLDER_ID);
@@ -615,6 +627,7 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
                 /*
                  * delete whole calendar account if not folder-aware
                  */
+                Check.folderMatches(getRelativeFolderId(folderId), BasicCalendarAccess.FOLDER_ID);
                 requireService(CalendarAccountService.class, services).deleteAccount(session, accountId, clientTimestamp, this);
             }
         } catch (OXException e) {

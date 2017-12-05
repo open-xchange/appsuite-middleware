@@ -54,6 +54,7 @@ import static com.openexchange.java.Autoboxing.L;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 import java.util.SortedSet;
 import java.util.TimeZone;
 import javax.mail.internet.AddressException;
@@ -69,6 +70,7 @@ import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.mapping.EventMapper;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
+import com.openexchange.chronos.service.EventID;
 import com.openexchange.chronos.service.RecurrenceData;
 import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.exception.OXException;
@@ -156,6 +158,53 @@ public class Check {
             throw CalendarExceptionCodes.INVALID_RECURRENCE_ID.create(String.valueOf(recurrenceID), seriesMaster.getRecurrenceRule());
         }
         return recurrenceID;
+    }
+
+    /**
+     * Checks that the folder identifier matches a specific expected folder id.
+     *
+     * @param folderId The folder identifier to check
+     * @param expectedFolderId The expected folder id to check against
+     * @return The passed folder identifier, after it was checked
+     * @throws OXException {@link CalendarExceptionCodes#FOLDER_NOT_FOUND}
+     */
+    public static String folderMatches(String folderId, String expectedFolderId) throws OXException {
+        if (false == Objects.equals(expectedFolderId, folderId)) {
+            throw CalendarExceptionCodes.FOLDER_NOT_FOUND.create(folderId);
+        }
+        return folderId;
+    }
+
+    /**
+     * Checks that the folder identifier within the supplied full event identifier matches a specific expected folder id.
+     *
+     * @param eventID The full event identifier to check
+     * @param expectedFolderId The expected folder id to check against
+     * @return The passed event identifier, after it was checked
+     * @throws OXException {@link CalendarExceptionCodes#EVENT_NOT_FOUND_IN_FOLDER}
+     */
+    public static EventID parentFolderMatches(EventID eventID, String expectedFolderId) throws OXException {
+        if (null != eventID && false == Objects.equals(expectedFolderId, eventID.getFolderID())) {
+            throw CalendarExceptionCodes.EVENT_NOT_FOUND_IN_FOLDER.create(eventID.getFolderID(), eventID.getObjectID());
+        }
+        return eventID;
+    }
+
+    /**
+     * Checks that all folder identifiers within the supplied list of full event identifiers match a specific expected folder id.
+     *
+     * @param eventIDs The list of full event identifiers to check
+     * @param expectedFolderId The expected folder id to check against
+     * @return The passed event identifiers, after all were checked
+     * @throws OXException {@link CalendarExceptionCodes#EVENT_NOT_FOUND_IN_FOLDER}
+     */
+    public static List<EventID> parentFolderMatches(List<EventID> eventIDs, String expectedFolderId) throws OXException {
+        if (null != eventIDs) {
+            for (EventID eventID : eventIDs) {
+                parentFolderMatches(eventID, expectedFolderId);
+            }
+        }
+        return eventIDs;
     }
 
     /**
