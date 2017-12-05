@@ -50,22 +50,10 @@
 package com.openexchange.chronos.impl.performer;
 
 import static com.openexchange.chronos.impl.Utils.getFolderIdTerm;
-import static com.openexchange.chronos.impl.Utils.getSearchTerm;
-import static com.openexchange.chronos.impl.Utils.isEnforceDefaultAttendee;
-import com.openexchange.chronos.AttendeeField;
-import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
-import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.UserizedFolder;
-import com.openexchange.folderstorage.type.PublicType;
-import com.openexchange.folderstorage.type.SharedType;
-import com.openexchange.java.Autoboxing;
-import com.openexchange.search.CompositeSearchTerm;
-import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
-import com.openexchange.search.SearchTerm;
-import com.openexchange.search.SingleSearchTerm.SingleOperation;
 
 /**
  * {@link CountEventsPerformer}
@@ -92,43 +80,6 @@ public class CountEventsPerformer extends AbstractQueryPerformer {
      */
     public long perform(UserizedFolder folder) throws OXException {
         return storage.getEventStorage().countEvents(getFolderIdTerm(session, folder));
-    }
-
-    public long perform3(UserizedFolder folder) throws OXException {
-        long count = 0L;
-        if (PublicType.getInstance().equals(folder.getType()) || false == isEnforceDefaultAttendee(session)) {
-            /*
-             * count events with matching common folder identifier
-             */
-            SearchTerm<?> searchTerm = getSearchTerm(EventField.FOLDER_ID, SingleOperation.EQUALS, folder.getID());
-            if (SharedType.getInstance().equals(folder.getType()) && folder.getOwnPermission().getReadPermission() < Permission.READ_ALL_OBJECTS) {
-                /*
-                 * if only access to "own" objects in shared folders; restrict to events created by the current session's user
-                 */
-                searchTerm = new CompositeSearchTerm(CompositeOperation.AND)
-                    .addSearchTerm(searchTerm)
-                    .addSearchTerm(getSearchTerm(EventField.CREATED_BY, SingleOperation.EQUALS, folder.getSession().getUserId()));
-            }
-            count += storage.getEventStorage().countEvents(searchTerm);
-        }
-        if (false == PublicType.getInstance().equals(folder.getType())) {
-            /*
-             * for personal folders, (additionally) match against the corresponding attendee's folder
-             */
-            SearchTerm<?> searchTerm = new CompositeSearchTerm(CompositeOperation.AND)
-                .addSearchTerm(getSearchTerm(AttendeeField.ENTITY, SingleOperation.EQUALS, Autoboxing.I(folder.getCreatedBy())))
-                .addSearchTerm(getSearchTerm(AttendeeField.FOLDER_ID, SingleOperation.EQUALS, folder.getID()));
-            if (SharedType.getInstance().equals(folder.getType()) && folder.getOwnPermission().getReadPermission() < Permission.READ_ALL_OBJECTS) {
-                /*
-                 * if only access to "own" objects in shared folders; restrict to events created by the current session's user
-                 */
-                searchTerm = new CompositeSearchTerm(CompositeOperation.AND)
-                    .addSearchTerm(searchTerm)
-                    .addSearchTerm(getSearchTerm(EventField.CREATED_BY, SingleOperation.EQUALS, folder.getSession().getUserId()));
-            }
-            count += storage.getEventStorage().countEvents(searchTerm);
-        }
-        return count;
     }
 
 }
