@@ -58,8 +58,25 @@ package com.openexchange.ajax.requesthandler.oauth;
  */
 public class OAuthConstants {
 
+    /**
+     * Prevent instantiation.
+     */
+    private OAuthConstants() {
+        super();
+    }
+
     public static final String BEARER_SCHEME = "Bearer";
 
     public static final String PARAM_OAUTH_ACCESS = "com.openexchange.oauth.access";
+
+    /**
+     * The Servlet alias sub-prefix for OAuth accesses:<br>
+     * <pre>
+     *  [prefix] + "oauth/modules/" + [module]
+     * </pre>
+     * Example<br>
+     * <code>"/ajax/<b>oauth/modules/</b>contacts"</code>
+     */
+    public static final String OAUTH_SERVLET_SUBPREFIX = "oauth/modules/";
 
 }

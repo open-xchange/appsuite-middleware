@@ -61,6 +61,7 @@ import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.AJAXUtility;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.crypto.CryptographicServiceAuthenticationFactory;
+import com.openexchange.ajax.requesthandler.oauth.OAuthConstants;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.notify.hostname.HostData;
@@ -71,6 +72,7 @@ import com.openexchange.java.Strings;
 import com.openexchange.log.LogProperties;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
+import com.openexchange.session.Sessions;
 import jonelo.jacksum.JacksumAPI;
 import jonelo.jacksum.algorithm.AbstractChecksum;
 import jonelo.jacksum.algorithm.MD;
@@ -352,18 +354,17 @@ public final class ImageUtility {
          */
         sb.append(prefix.endsWith("/") ? prefix.substring(0, prefix.length() - 1) : prefix);
         sb.append(getDispatcherPrefix());
+        boolean isOAuthSession = Sessions.isOAuthSession(session);
+        if (isOAuthSession) {
+            sb.append(OAuthConstants.OAUTH_SERVLET_SUBPREFIX);
+        }
         sb.append(ImageDataSource.ALIAS_APPENDIX);
         final String alias = imageDataSource.getAlias();
         if (null != alias) {
             sb.append(alias);
         }
-        if (optImageHostSet) {
+        if (optImageHostSet || isOAuthSession || addRoute(addRoute, imageLocation)) {
             if (null != httpSessionID) {
-                sb.append(";jsessionid=").append(httpSessionID);
-            }
-        } else if (addRoute ) {
-            final Boolean noRoute = (Boolean) imageLocation.getProperty(ImageLocation.PROPERTY_NO_ROUTE);
-            if ((null == noRoute || !noRoute.booleanValue()) && null != httpSessionID) {
                 sb.append(";jsessionid=").append(httpSessionID);
             }
         }
@@ -404,6 +405,22 @@ public final class ImageUtility {
             sb.append(first ? '?' : '&').append("accountId=").append(urlEncodeSafe(accountId));
             first = false;
         }
+    }
+
+    /**
+     * Checks whether JVM route is supposed to be added to image URL
+     *
+     * @param addRoute The flag signaling whether JVM route is supposed to be added
+     * @param imageLocation The image location providing additional properties to consider
+     * @return <code>true</code> if JVM route is supposed to be added; otherwise <code>false</code>
+     */
+    private static boolean addRoute(boolean addRoute, ImageLocation imageLocation) {
+        if (addRoute) {
+            Boolean noRoute = (Boolean) imageLocation.getProperty(ImageLocation.PROPERTY_NO_ROUTE);
+            return (null == noRoute || false == noRoute.booleanValue());
+        }
+
+        return false;
     }
 
     /**

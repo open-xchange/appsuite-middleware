@@ -73,6 +73,7 @@ import com.openexchange.ajax.login.LoginRequestImpl;
 import com.openexchange.authentication.Authenticated;
 import com.openexchange.authentication.Cookie;
 import com.openexchange.authentication.LoginExceptionCodes;
+import com.openexchange.authentication.SessionEnhancement;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.context.ContextService;
@@ -102,8 +103,9 @@ public class SessionProvider {
 
     private static final Logger LOG = LoggerFactory.getLogger(SessionProvider.class);
 
-    private final ServiceLookup services;
+    private static final String OAUTH_SESSION_KEY = "oauthSession";
 
+    private final ServiceLookup services;
     private final Cache<String, String> sessionCache;
 
     public SessionProvider(ServiceLookup services) {
@@ -147,28 +149,41 @@ public class SessionProvider {
                     }
                 });
 
-                if (sessiondService instanceof SessiondServiceExtended) {
-                    session = ((SessiondServiceExtended)sessiondService).getSession(sessionId, false);
+                Object attribute = httpRequest.getAttribute(OAUTH_SESSION_KEY);
+                if (attribute == null) {
+                    // Session identifier fetched from cache; validate it through fetching the session from SessionD
+                    session = sessiondService instanceof SessiondServiceExtended ? ((SessiondServiceExtended) sessiondService).getSession(sessionId, false) : sessiondService.getSession(sessionId);
+                    if (session == null) {
+                        LOG.debug("OAuth 2.0 session with ID {} was invalidated since last request", sessionId);
+                        sessionCache.asMap().remove(accessToken, sessionId);
+                    }
                 } else {
-                    session = sessiondService.getSession(sessionId);
-                }
-                if (session == null) {
-                    LOG.debug("OAuth 2.0 session with ID {} was invalidated since last request", sessionId);
-                    sessionCache.asMap().remove(accessToken, sessionId);
+                    // This thread performed the login using given HTTP request
+                    session = (Session) attribute;
                 }
             } while (session == null);
         } catch (ExecutionException e) {
             Throwable cause = e.getCause();
-            if (null != cause && OXException.class.isInstance(e.getCause())) {
+            if (OXException.class.isInstance(cause)) {
                 throw (OXException) cause;
             }
-            throw LoginExceptionCodes.UNKNOWN.create(e, e.getMessage());
+            throw LoginExceptionCodes.UNKNOWN.create(cause, cause.getMessage());
         }
 
         return session;
     }
 
-    private Session login(int contextId, int userId, String clientName, HttpServletRequest httpRequest) throws OXException {
+    /**
+     * Performs the actual login for the OAuth client.
+     *
+     * @param contextId The context identifier
+     * @param userId The user identifier
+     * @param clientName The name of the OAuth client
+     * @param httpRequest The HTTP request performing the login
+     * @return The established session
+     * @throws OXException If login fails
+     */
+    Session login(int contextId, int userId, String clientName, HttpServletRequest httpRequest) throws OXException {
         ContextService contextService = requireService(ContextService.class, services);
         UserService userService = requireService(UserService.class, services);
 
@@ -177,22 +192,13 @@ public class SessionProvider {
         LoginResult loginResult = LoginPerformer.getInstance().doLogin(getLoginRequest(httpRequest, user, clientName), new HashMap<String, Object>(1), new LoginMethodClosure() {
             @Override
             public Authenticated doAuthentication(LoginResultImpl retval) {
-                return new Authenticated() {
-                    @Override
-                    public String getUserInfo() {
-                        return user.getLoginInfo();
-                    }
-
-                    @Override
-                    public String getContextInfo() {
-                        return context.getLoginInfo()[0];
-                    }
-                };
+                return new OAuthProviderAuthenticated(user.getLoginInfo(), context.getLoginInfo()[0]);
             }
         });
 
         Session session = loginResult.getSession();
-        LOG.debug("Created new OAuth 2.0 session: {}", session);
+        httpRequest.setAttribute(OAUTH_SESSION_KEY, session);
+        LOG.debug("Created new OAuth 2.0 session: {}", session.getSessionID());
         return session;
     }
 
@@ -265,6 +271,34 @@ public class SessionProvider {
     private boolean forceHTTPS() throws OXException {
         ConfigurationService configService = requireService(ConfigurationService.class, services);
         return Boolean.parseBoolean(configService.getProperty(Property.FORCE_HTTPS.getPropertyName(), Property.FORCE_HTTPS.getDefaultValue()));
+    }
+
+    private static final class OAuthProviderAuthenticated implements Authenticated, SessionEnhancement {
+
+        private final String userInfo;
+        private final String contextInfo;
+
+        OAuthProviderAuthenticated(String userInfo, String contextInfo) {
+            super();
+            this.userInfo = userInfo;
+            this.contextInfo = contextInfo;
+        }
+
+        @Override
+        public void enhanceSession(Session session) {
+            session.setParameter(Session.PARAM_IS_OAUTH, Boolean.TRUE);
+        }
+
+        @Override
+        public String getContextInfo() {
+            return contextInfo;
+        }
+
+        @Override
+        public String getUserInfo() {
+            return userInfo;
+        }
+
     }
 
 }
