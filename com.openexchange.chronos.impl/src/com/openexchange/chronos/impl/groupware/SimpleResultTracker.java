@@ -60,7 +60,6 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.chronos.Event;
-import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.DeleteResultImpl;
 import com.openexchange.chronos.common.UpdateResultImpl;
 import com.openexchange.chronos.impl.DefaultCalendarEvent;
@@ -132,7 +131,7 @@ class SimpleResultTracker {
      */
     public void addDelete(Event event, long timestamp) {
         addFolders(event);
-        DeleteResult newResult = new DeleteResultImpl(timestamp, CalendarUtils.getEventID(event));
+        DeleteResult newResult = new DeleteResultImpl(timestamp, event);
         deleteResults.add(newResult);
     }
 

@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.common;
 
+import com.openexchange.chronos.Event;
 import com.openexchange.chronos.service.DeleteResult;
 import com.openexchange.chronos.service.EventID;
 
@@ -61,18 +62,18 @@ import com.openexchange.chronos.service.EventID;
 public class DeleteResultImpl implements DeleteResult {
 
     private final long timestamp;
-    private final EventID eventID;
+    private final Event event;
 
     /**
      * Initializes a new {@link DeleteResultImpl}.
      *
      * @param timestamp The timestamp
-     * @param eventID The identifier of the deleted event
+     * @param event The original event
      */
-    public DeleteResultImpl(long timestamp, EventID eventID) {
+    public DeleteResultImpl(long timestamp, Event originalEvent) {
         super();
         this.timestamp = timestamp;
-        this.eventID = eventID;
+        this.event = originalEvent;
     }
 
     @Override
@@ -82,12 +83,17 @@ public class DeleteResultImpl implements DeleteResult {
 
     @Override
     public EventID getEventID() {
-        return eventID;
+        return CalendarUtils.getEventID(event);
+    }
+
+    @Override
+    public Event getOriginal() {
+        return event;
     }
 
     @Override
     public String toString() {
-        return "DeleteResult [eventID=" + eventID + "]";
+        return "DeleteResult [original=" + event + "]";
     }
 
 }

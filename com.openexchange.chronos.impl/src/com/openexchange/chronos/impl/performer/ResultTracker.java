@@ -49,7 +49,7 @@
 
 package com.openexchange.chronos.impl.performer;
 
-import static com.openexchange.chronos.common.CalendarUtils.getEventID;
+import static com.openexchange.chronos.common.CalendarUtils.isSeriesException;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.chronos.impl.Utils.getCalendarUserId;
 import static com.openexchange.chronos.impl.Utils.getPersonalFolderIds;
@@ -67,8 +67,8 @@ import com.openexchange.chronos.impl.AbstractStorageOperation;
 import com.openexchange.chronos.impl.InternalCalendarResult;
 import com.openexchange.chronos.impl.InternalCalendarStorageOperation;
 import com.openexchange.chronos.impl.Utils;
+import com.openexchange.chronos.recurrence.service.EventOccurrence;
 import com.openexchange.chronos.service.CalendarSession;
-import com.openexchange.chronos.service.EventID;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.UserizedFolder;
@@ -122,6 +122,17 @@ public class ResultTracker {
      * @param createdEvent The created event
      */
     public void trackCreation(Event createdEvent) throws OXException {
+        trackCreation(createdEvent, null);
+    }
+
+    /**
+     * Tracks suitable results for a created event in the current internal calendar result, which includes adding a <i>plain</i> creation
+     * for the new event data, as well as an appropriate creation from the acting user's point of view.
+     *
+     * @param createdEvent The created event
+     * @param originalSeriesMaster The series master event in case a new overridden instance was created, or <code>null</code>, otherwise
+     */
+    public void trackCreation(Event createdEvent, Event originalSeriesMaster) throws OXException {
         /*
          * track affected folders and add 'plain' event creation
          */
@@ -140,7 +151,10 @@ public class ResultTracker {
             /*
              * possible for a new change exception w/o the calendar user attending
              */
-            result.addUserizedDeletion(timestamp, new EventID(folder.getID(), createdEvent.getId(), createdEvent.getRecurrenceId()));
+            if (isSeriesMaster(originalSeriesMaster) && isSeriesException(createdEvent)) {
+                Event originalUserizedMasterEvent = getOriginalUserizedEvent(originalSeriesMaster);
+                result.addUserizedDeletion(timestamp, new EventOccurrence(originalUserizedMasterEvent, createdEvent.getRecurrenceId()));
+            }
         }
     }
 
@@ -171,19 +185,19 @@ public class ResultTracker {
                             if (null == entry.getKey()) {
                                 result.addUserizedCreation(entry.getValue());
                             } else if (null == entry.getValue()) {
-                                result.addUserizedDeletion(timestamp, new EventID(folder.getID(), entry.getKey().getId(), entry.getKey().getRecurrenceId()));
+                                result.addUserizedDeletion(timestamp, entry.getKey());
                             } else {
                                 result.addUserizedUpdate(entry.getKey(), entry.getValue());
                             }
                         }
                     } else if (isSeriesMaster(originalEvent)) {
                         for (Event originalOccurrence : resolveOriginalUserizedOccurrences(originalEvent)) {
-                            result.addUserizedDeletion(timestamp, new EventID(folder.getID(), originalOccurrence.getId(), originalOccurrence.getRecurrenceId()));
+                            result.addUserizedDeletion(timestamp, originalOccurrence);
                         }
-                        result.addUserizedDeletion(timestamp, new EventID(folder.getID(), originalEvent.getId(), originalEvent.getRecurrenceId()));
+                        result.addUserizedDeletion(timestamp, userize(originalEvent));
                         result.addUserizedCreation(userize(updatedEvent));
                     } else if (isSeriesMaster(updatedEvent)) {
-                        result.addUserizedDeletion(timestamp, new EventID(folder.getID(), originalEvent.getId(), originalEvent.getRecurrenceId()));
+                        result.addUserizedDeletion(timestamp, userize(originalEvent));
                         result.addUserizedCreations(resolveOccurrences(userize(updatedEvent)));
                     }
                 } else {
@@ -195,10 +209,10 @@ public class ResultTracker {
                  */
                 if (isSeriesMaster(originalEvent) && isResolveOccurrences(session)) {
                     for (Event originalOccurrence : resolveOriginalUserizedOccurrences(originalEvent)) {
-                        result.addUserizedDeletion(timestamp, new EventID(folder.getID(), originalOccurrence.getId(), originalOccurrence.getRecurrenceId()));
+                        result.addUserizedDeletion(timestamp, originalOccurrence);
                     }
                 } else {
-                    result.addUserizedDeletion(timestamp, new EventID(folder.getID(), originalEvent.getId(), originalEvent.getRecurrenceId()));
+                    result.addUserizedDeletion(timestamp, userize(originalEvent));
                 }
             }
         } else if (isInFolder(updatedEvent, folder)) {
@@ -222,13 +236,13 @@ public class ResultTracker {
      */
     public void trackDeletion(Event deletedEvent) throws OXException {
         result.addAffectedFolderIds(folder.getID(), getPersonalFolderIds(deletedEvent.getAttendees()));
-        result.addPlainDeletion(timestamp, getEventID(deletedEvent));
+        result.addPlainDeletion(timestamp, deletedEvent);
         if (isSeriesMaster(deletedEvent) && isResolveOccurrences(session)) {
-            for (Event deletedOccurrence : resolveOccurrences(userize(deletedEvent))) {
-                result.addUserizedDeletion(timestamp, new EventID(folder.getID(), deletedOccurrence.getId(), deletedOccurrence.getRecurrenceId()));
+            for (Event deletedOccurrence : resolveOriginalUserizedOccurrences(deletedEvent)) {
+                result.addUserizedDeletion(timestamp, deletedOccurrence);
             }
         } else {
-            result.addUserizedDeletion(timestamp, new EventID(folder.getID(), deletedEvent.getId(), deletedEvent.getRecurrenceId()));
+            result.addUserizedDeletion(timestamp, getOriginalUserizedEvent(deletedEvent));
         }
     }
 
@@ -244,15 +258,19 @@ public class ResultTracker {
     }
 
     private List<Event> resolveOriginalUserizedOccurrences(Event masterEvent) throws OXException {
+        Event userizedOriginalMasterEvent = getOriginalUserizedEvent(masterEvent);
+        return Utils.asList(Utils.resolveOccurrences(session, userizedOriginalMasterEvent));
+    }
+
+    private Event getOriginalUserizedEvent(Event event) throws OXException {
         Connection oldConnection = session.get(AbstractStorageOperation.PARAM_CONNECTION, Connection.class);
         session.set(AbstractStorageOperation.PARAM_CONNECTION, null);
         try {
-            return new InternalCalendarStorageOperation<List<Event>>(session) {
+            return new InternalCalendarStorageOperation<Event>(session) {
 
                 @Override
-                protected List<Event> execute(CalendarSession session, CalendarStorage storage) throws OXException {
-                    Event userizedMasterEvent = Utils.userize(session, storage, masterEvent, getCalendarUserId(folder));
-                    return Utils.asList(Utils.resolveOccurrences(session, userizedMasterEvent));
+                protected Event execute(CalendarSession session, CalendarStorage storage) throws OXException {
+                    return Utils.userize(session, storage, event, getCalendarUserId(folder));
                 }
             }.executeQuery();
         } finally {

@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.provider.composition.impl.idmangling;
 
+import com.openexchange.chronos.Event;
 import com.openexchange.chronos.service.DeleteResult;
 import com.openexchange.chronos.service.EventID;
 
@@ -83,6 +84,11 @@ public class IDManglingDeleteResult implements DeleteResult {
     @Override
     public EventID getEventID() {
         return IDMangling.getUniqueId(accountId, delegate.getEventID());
+    }
+
+    @Override
+    public Event getOriginal() {
+        return IDMangling.withUniqueID(delegate.getOriginal(), accountId);
     }
 
 }

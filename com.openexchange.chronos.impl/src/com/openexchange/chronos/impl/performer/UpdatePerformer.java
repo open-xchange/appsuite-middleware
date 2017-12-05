@@ -229,7 +229,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
                 addChangeExceptionDate(originalEvent, recurrenceId);
                 Event updatedMasterEvent = loadEventData(originalEvent.getId());
                 resultTracker.trackUpdate(originalEvent, updatedMasterEvent);
-                resultTracker.trackCreation(loadEventData(newExceptionEvent.getId()));
+                resultTracker.trackCreation(loadEventData(newExceptionEvent.getId()), originalEvent);
 
                 storage.getAlarmTriggerStorage().deleteTriggers(originalEvent.getId());
                 storage.getAlarmTriggerStorage().insertTriggers(updatedMasterEvent);

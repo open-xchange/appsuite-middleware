@@ -366,7 +366,7 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
         Event createdException = loadEventData(exceptionEvent.getId());
         Event updatedMasterEvent = loadEventData(originalMasterEvent.getId());
         removeAlarmTrigger(createdException, updatedMasterEvent);
-        resultTracker.trackCreation(createdException);
+        resultTracker.trackCreation(createdException, originalMasterEvent);
         resultTracker.trackUpdate(originalMasterEvent, updatedMasterEvent);
     }
 

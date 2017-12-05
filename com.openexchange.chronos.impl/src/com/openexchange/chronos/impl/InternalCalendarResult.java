@@ -68,7 +68,6 @@ import com.openexchange.chronos.service.CalendarResult;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.CreateResult;
 import com.openexchange.chronos.service.DeleteResult;
-import com.openexchange.chronos.service.EventID;
 import com.openexchange.chronos.service.UpdateResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.UserizedFolder;
@@ -141,11 +140,11 @@ public class InternalCalendarResult {
      * Adds a plain/vanilla deletion to this calendar result.
      *
      * @param timestamp The timestamp
-     * @param eventID The identifier of the deleted event
+     * @param event The original event
      * @return A self reference
      */
-    public InternalCalendarResult addPlainDeletion(long timestamp, EventID eventID) {
-        return addPlainDeletion(new DeleteResultImpl(timestamp, eventID));
+    public InternalCalendarResult addPlainDeletion(long timestamp, Event event) {
+        return addPlainDeletion(new DeleteResultImpl(timestamp, event));
     }
 
     /**
@@ -166,11 +165,11 @@ public class InternalCalendarResult {
      * Adds a <i>userized</i> deletion to this calendar result.
      *
      * @param timestamp The timestamp
-     * @param eventID The identifier of the deleted event
+     * @param event The original event
      * @return A self reference
      */
-    public InternalCalendarResult addUserizedDeletion(long timestamp, EventID eventID) {
-        return addUserizedDeletion(new DeleteResultImpl(timestamp, eventID));
+    public InternalCalendarResult addUserizedDeletion(long timestamp, Event event) {
+        return addUserizedDeletion(new DeleteResultImpl(timestamp, event));
     }
 
     /**

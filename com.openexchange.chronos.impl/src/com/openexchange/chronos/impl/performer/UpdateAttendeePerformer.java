@@ -256,7 +256,7 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
                  */
                 Event createdException = loadEventData(exceptionEvent.getId());
                 Event updatedMasterEvent = loadEventData(originalEvent.getId());
-                resultTracker.trackCreation(createdException);
+                resultTracker.trackCreation(createdException, originalEvent);
                 resultTracker.trackUpdate(originalEvent, updatedMasterEvent);
             }
         } else if (isSeriesException(originalEvent)) {
