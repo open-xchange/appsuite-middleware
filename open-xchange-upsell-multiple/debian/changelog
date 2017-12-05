@@ -1,3 +1,9 @@
+open-xchange-upsell-multiple (7.8.3-41) stable; urgency=medium
+
+  * Build for Patch 2017-12-11 (4472)
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Tue, 05 Dec 2017 17:52:32 +0100
+
 open-xchange-upsell-multiple (7.8.3-40) stable; urgency=medium
 
   * Build for patch 2017-11-20 (4440)
