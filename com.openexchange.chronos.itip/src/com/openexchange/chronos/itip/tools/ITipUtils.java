@@ -53,7 +53,8 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
-
+import com.openexchange.chronos.CalendarUser;
+import com.openexchange.chronos.service.CalendarParameters;
 
 /**
  * {@link ITipUtils}
@@ -62,6 +63,7 @@ import java.util.TimeZone;
  * @since v7.10.0
  */
 public class ITipUtils {
+
     public static long startOfTheDay(Date recurrenceDatePosition) {
         GregorianCalendar calendar = new GregorianCalendar();
         calendar.setTimeZone(TimeZone.getTimeZone("UTC"));
@@ -81,5 +83,15 @@ public class ITipUtils {
         calendar.set(Calendar.SECOND, 0);
         calendar.add(Calendar.DAY_OF_YEAR, 1);
         return calendar.getTimeInMillis();
+    }
+
+    public static CalendarUser getPrincipal(CalendarParameters session) {
+        // ID is the only value used, so we are fine only checking for this
+        if (session.contains(CalendarParameters.PARAMETER_PRINCIPAL_ID)) {
+            CalendarUser principal = new CalendarUser();
+            principal.setEntity(session.get(CalendarParameters.PARAMETER_PRINCIPAL_ID, Integer.class).intValue());
+            return principal;
+        }
+        return null;
     }
 }

@@ -148,7 +148,7 @@ public class ReplyITipAnalyzer extends AbstractITipAnalyzer {
             }
         }
 
-        final List<Event> exceptions = util.getExceptions(original, session);
+        final List<Event> exceptions = util.getExceptions(original, session.getSession());
         for (final Event exception : message.exceptions()) {
             final Event matchingException = findAndRemoveMatchingException(exception, exceptions);
             ITipChange change = new ITipChange();

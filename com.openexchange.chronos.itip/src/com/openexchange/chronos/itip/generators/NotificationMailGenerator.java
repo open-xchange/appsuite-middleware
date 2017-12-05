@@ -59,6 +59,7 @@ import java.util.Map;
 import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
+import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.ParticipationStatus;
@@ -73,7 +74,7 @@ import com.openexchange.chronos.itip.Messages;
 import com.openexchange.chronos.itip.generators.changes.PassthroughWrapper;
 import com.openexchange.chronos.itip.osgi.Services;
 import com.openexchange.chronos.itip.tools.ITipEventUpdate;
-import com.openexchange.chronos.service.CalendarSession;
+import com.openexchange.chronos.service.CalendarUtilities;
 import com.openexchange.chronos.service.CollectionUpdate;
 import com.openexchange.chronos.service.ItemUpdate;
 import com.openexchange.chronos.service.RecurrenceIterator;
@@ -86,6 +87,7 @@ import com.openexchange.groupware.notify.State.Type;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.AllocatingStringWriter;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.session.Session;
 import com.openexchange.templating.OXTemplate;
 import com.openexchange.templating.TemplateService;
 
@@ -108,7 +110,7 @@ public class NotificationMailGenerator implements ITipMailGenerator {
 
     private final ITipIntegrationUtility util;
 
-    private final CalendarSession session;
+    private final Session session;
 
     private ITipEventUpdate diff;
 
@@ -130,13 +132,16 @@ public class NotificationMailGenerator implements ITipMailGenerator {
 
     private NotificationParticipant onBehalfOf;
 
-    public NotificationMailGenerator(final ServiceLookup services, final AttachmentMemory attachmentMemory, final NotificationParticipantResolver resolver, final ITipIntegrationUtility util, final Event original, final Event appointment, User user, final User onBehalfOf, final Context ctx, final CalendarSession session) throws OXException {
+    private CalendarUtilities calendarUtilities;
+
+    public NotificationMailGenerator(final ServiceLookup services, final AttachmentMemory attachmentMemory, final NotificationParticipantResolver resolver, final ITipIntegrationUtility util, final Event original, final Event appointment, User user, final User onBehalfOf, final Context ctx, final Session session, CalendarUser principal) throws OXException {
         this.util = util;
         this.ctx = ctx;
         this.services = services;
         this.attachmentMemory = attachmentMemory;
+        this.calendarUtilities = Services.getService(CalendarUtilities.class);
 
-        this.recipients = resolver.resolveAllRecipients(original, appointment, user, onBehalfOf, ctx, session);
+        this.recipients = resolver.resolveAllRecipients(original, appointment, user, onBehalfOf, ctx, session, principal);
         this.participants = resolver.getAllParticipants(this.recipients, appointment, user, ctx);
         this.resources = resolver.getResources(appointment, ctx);
 
@@ -414,7 +419,7 @@ public class NotificationMailGenerator implements ITipMailGenerator {
         final ITipMessage message = new ITipMessage();
         message.setMethod(ITipMethod.REFRESH);
 
-        final Event address = session.getUtilities().copyEvent(appointment, (EventField[]) null);
+        final Event address = calendarUtilities.copyEvent(appointment, (EventField[]) null);
         address.removeAttendees();
         address.removeDescription();
         address.removeLocation();
@@ -1005,7 +1010,7 @@ public class NotificationMailGenerator implements ITipMailGenerator {
         @Override
         public NotificationMail generateDeleteMailFor(final NotificationParticipant participant) throws OXException {
             if (actor.hasRole(ITipRole.ATTENDEE)) {
-                Event appointmentToReport = session.getUtilities().copyEvent(appointment, (EventField[]) null);
+                Event appointmentToReport = calendarUtilities.copyEvent(appointment, (EventField[]) null);
                 removeParticipant(appointmentToReport, session.getUserId());
                 NotificationMail request = request(participant, appointmentToReport, State.Type.MODIFIED);
                 request.setOriginal(appointment);

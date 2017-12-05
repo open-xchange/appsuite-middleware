@@ -67,6 +67,7 @@ import com.openexchange.chronos.Event;
 import com.openexchange.chronos.itip.generators.ITipMailGenerator;
 import com.openexchange.chronos.itip.generators.ITipMailGeneratorFactory;
 import com.openexchange.chronos.itip.generators.NotificationMail;
+import com.openexchange.chronos.itip.tools.ITipUtils;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.ExternalUserParticipant;
@@ -275,7 +276,7 @@ public class ShowMailAction extends AppointmentAction {
         final Event original = (appointments.length > 1) ? appointments[0] : null;
         final Event appointment = (appointments.length > 1) ? appointments[1] : appointments[0];
 
-        final ITipMailGenerator generator = service.create(original, appointment, session, session.getUserId());
+        final ITipMailGenerator generator = service.create(original, appointment, session.getSession(), session.getUserId(), ITipUtils.getPrincipal(session));
 
         final String type = request.getParameter("type");
         if (type.equalsIgnoreCase("create")) {

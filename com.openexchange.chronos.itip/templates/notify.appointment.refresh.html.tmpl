@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title></title>
+        <meta charset="UTF-8">
+        <style type="text/css">
+            ${templating.include( "notify.appointment.styles.css.tmpl" )}
+        </style>
+    </head>
+    <body>
+        <div class="content">
+            ${templating.include( "notify.appointment.intro.html.tmpl" )}
+            <div class="calendar-action">${labels.refreshIntroduction}</div>
+            ${templating.include( "notify.appointment.show.mini.html.tmpl" )}
+        </div>
+    </body>
+</html>

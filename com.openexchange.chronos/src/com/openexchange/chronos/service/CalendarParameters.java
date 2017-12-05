@@ -208,6 +208,22 @@ public interface CalendarParameters {
     static final String UID_CONFLICT_STRATEGY = "uidConflictStrategy";
 
     /**
+     * {@link Integer}
+     * <p/>
+     * The principal id in an itip context
+     * <p/>
+     */
+    static final String PARAMETER_PRINCIPAL_ID = "itip.principalId";
+
+    /**
+     * {@link String}
+     * <p/>
+     * The principal email address in an itip context
+     * <p/>
+     */
+    static final String PARAMETER_PRINCIPAL_EMAIL = "itip.principalEmail";
+
+    /**
      * Sets a parameter.
      *
      * @param parameter The parameter name to set

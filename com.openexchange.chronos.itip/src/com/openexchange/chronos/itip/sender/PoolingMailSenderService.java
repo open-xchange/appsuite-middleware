@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.itip.sender;
 
+import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.itip.AppointmentNotificationPoolService;
@@ -56,6 +57,7 @@ import com.openexchange.chronos.itip.generators.NotificationMail;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.notify.State.Type;
+import com.openexchange.session.Session;
 
 public class PoolingMailSenderService implements MailSenderService {
 
@@ -70,7 +72,7 @@ public class PoolingMailSenderService implements MailSenderService {
     }
 
     @Override
-    public void sendMail(NotificationMail mail, CalendarSession session) throws OXException {
+    public void sendMail(NotificationMail mail, Session session, CalendarUser principal) throws OXException {
         if (!mail.shouldBeSent()) {
             return;
         }
@@ -80,7 +82,7 @@ public class PoolingMailSenderService implements MailSenderService {
             // Dump messages if the appointment is deleted
             if (isDeleteMail(mail)) {
                 pool.drop(mail.getEvent(), session);
-                delegate.sendMail(mail, session);
+                delegate.sendMail(mail, session, principal);
                 return;
             }
 
@@ -89,7 +91,7 @@ public class PoolingMailSenderService implements MailSenderService {
                 if (mail.getSharedCalendarOwner() != null) {
                     sharedFolderOwner = mail.getSharedCalendarOwner().getIdentifier();
                 }
-                pool.enqueue(mail.getOriginal(), mail.getEvent(), session, sharedFolderOwner);
+                pool.enqueue(mail.getOriginal(), mail.getEvent(), session, sharedFolderOwner, principal);
                 return;
             }
 
@@ -100,10 +102,10 @@ public class PoolingMailSenderService implements MailSenderService {
                     app = mail.getEvent();
                 }
                 pool.fasttrack(app, session);
-                delegate.sendMail(mail, session);
+                delegate.sendMail(mail, session, principal);
                 return;
             }
-            poolAwareDirectSend(mail, session);
+            poolAwareDirectSend(mail, session, principal);
             //delegate.sendMail(mail, session);
 
         } catch (OXException x) {
@@ -118,9 +120,9 @@ public class PoolingMailSenderService implements MailSenderService {
      * @param session
      * @throws OXException
      */
-    private void poolAwareDirectSend(NotificationMail mail, CalendarSession session) throws OXException {
+    private void poolAwareDirectSend(NotificationMail mail, Session session, CalendarUser principal) throws OXException {
         pool.aware(mail.getEvent(), mail.getRecipient(), session);
-        delegate.sendMail(mail, session);
+        delegate.sendMail(mail, session, principal);
     }
 
     private boolean isStateChange(NotificationMail mail) {

@@ -74,7 +74,9 @@ public class ParticipantHelper {
         // TODO: Same width
         final String sConfirmStatus;
         ParticipationStatus status = participant.getConfirmStatus();
-        if (status.equals(ParticipationStatus.ACCEPTED)) {
+        if (status == null) {
+            sConfirmStatus = StringHelper.valueOf(recipientLocale).getString(Messages.WAITING);
+        } else if (status.equals(ParticipationStatus.ACCEPTED)) {
             sConfirmStatus = ContextSensitiveMessages.accepted(recipientLocale, ContextSensitiveMessages.Context.ADJECTIVE);
         } else if (status.equals(ParticipationStatus.DECLINED)) {
             sConfirmStatus = ContextSensitiveMessages.declined(recipientLocale, ContextSensitiveMessages.Context.ADJECTIVE);

@@ -49,8 +49,8 @@
 
 package com.openexchange.chronos.itip.generators;
 
-import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.Coll2i;
+import static com.openexchange.java.Autoboxing.I;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumSet;
@@ -83,6 +83,7 @@ import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.resource.Resource;
 import com.openexchange.resource.ResourceService;
+import com.openexchange.session.Session;
 import com.openexchange.user.UserService;
 
 /**
@@ -99,9 +100,6 @@ public class DefaultNotificationParticipantResolver implements NotificationParti
     private final ResourceService resources;
     private final ITipIntegrationUtility util;
 
-    public static final String PRINCIPAL_ID = "com.openexchange.chronos.itip.generators.DefaultNotificationParticipantResolver.PRINCIPAL_ID";
-    public static final String PRINCIPAL_EMAIL = "com.openexchange.chronos.itip.generators.DefaultNotificationParticipantResolver.PRINCIPAL_EMAIL";
-
     public DefaultNotificationParticipantResolver(ITipIntegrationUtility util) {
         super();
         this.userService = Services.getService(UserService.class);
@@ -112,7 +110,7 @@ public class DefaultNotificationParticipantResolver implements NotificationParti
 
     // TODO: Principal
     @Override
-    public List<NotificationParticipant> resolveAllRecipients(Event original, Event appointment, User user, User onBehalfOf, Context ctx, CalendarSession session) throws OXException {
+    public List<NotificationParticipant> resolveAllRecipients(Event original, Event appointment, User user, User onBehalfOf, Context ctx, Session session, CalendarUser principal) throws OXException {
         final NotificationConfiguration defaultConfiguration = getDefaultConfiguration(user, ctx);
 
         final Map<Integer, Attendee> userIds = new HashMap<Integer, Attendee>();
@@ -171,7 +169,6 @@ public class DefaultNotificationParticipantResolver implements NotificationParti
         boolean foundPrincipal = false;
 
         final String appId = (appointment.getId() == null && original != null) ? original.getId() : appointment.getId();
-        CalendarUser principal = getPrincipal(session);
 
         for (final User u : participantUsers) {
             final int id = u.getId();
@@ -407,16 +404,6 @@ public class DefaultNotificationParticipantResolver implements NotificationParti
             }
         }
         return u.getMail();
-    }
-
-    private CalendarUser getPrincipal(CalendarSession session) {
-        // ID is the only value used, so we are fine only checking for this
-        if (session.contains(PRINCIPAL_ID)) {
-            CalendarUser principal = new CalendarUser();
-            principal.setEntity(session.get(PRINCIPAL_ID, Integer.class).intValue());
-            return principal;
-        }
-        return null;
     }
 
     private User discoverOrganizer(final Event appointment, final Context ctx) throws OXException {

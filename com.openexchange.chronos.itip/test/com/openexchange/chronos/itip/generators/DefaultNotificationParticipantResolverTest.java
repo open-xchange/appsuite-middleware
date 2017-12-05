@@ -74,7 +74,6 @@ import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.itip.ITipIntegrationUtility;
 import com.openexchange.chronos.itip.osgi.Services;
-import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -84,6 +83,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.resource.ResourceService;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.session.Session;
 import com.openexchange.user.UserService;
 
 /**
@@ -118,7 +118,7 @@ public class DefaultNotificationParticipantResolverTest {
     private UserSettingMailStorage userSettingMailStorage;
 
     @Mock
-    private CalendarSession session;
+    private Session session;
 
     // --------- PRIVATE OBJECTS ------------
     private DefaultNotificationParticipantResolver resolver;
@@ -143,10 +143,7 @@ public class DefaultNotificationParticipantResolverTest {
         PowerMockito.when(userSettingMailStorage.getUserSettingMail(Matchers.anyInt(), Matchers.eq(Matchers.eq(context)))).thenReturn(null);
 
         // Mock util
-        PowerMockito.when(util.getFolderIdForUser(Matchers.any(CalendarSession.class), Matchers.anyString())).thenReturn(null);
-
-        // Mock session
-        PowerMockito.when(Boolean.valueOf(session.contains(Matchers.anyString()))).thenReturn(Boolean.FALSE);
+        PowerMockito.when(util.getFolderIdForUser(Matchers.any(Session.class), Matchers.anyString())).thenReturn(null);
 
         // Create service to test
         resolver = new DefaultNotificationParticipantResolver(util);
@@ -168,7 +165,7 @@ public class DefaultNotificationParticipantResolverTest {
 
         prepareServices(updated, onBehalfOf);
 
-        List<NotificationParticipant> participants = resolver.resolveAllRecipients(null, updated, user, onBehalfOf, context, session);
+        List<NotificationParticipant> participants = resolver.resolveAllRecipients(null, updated, user, onBehalfOf, context, session, null);
         Assert.assertFalse("No participants resolved", participants.isEmpty());
         for (NotificationParticipant participant : participants) {
             Attendee attendee = updated.getAttendees().stream().filter(a -> a.getEntity() == participant.getIdentifier()).findFirst().get();
@@ -196,7 +193,7 @@ public class DefaultNotificationParticipantResolverTest {
 
         prepareServices(updated, onBehalfOf);
 
-        List<NotificationParticipant> participants = resolver.resolveAllRecipients(null, updated, user, onBehalfOf, context, session);
+        List<NotificationParticipant> participants = resolver.resolveAllRecipients(null, updated, user, onBehalfOf, context, session, null);
         Assert.assertFalse("No participants resolved", participants.isEmpty());
         NotificationParticipant participant = participants.stream().filter(p -> p.getIdentifier() == aliasAttendee.getEntity()).findFirst().get();
         Assert.assertThat("The participants mail should have been the alias the user was invited by", participant.getEmail(), is(aliasMail));
@@ -218,7 +215,7 @@ public class DefaultNotificationParticipantResolverTest {
 
         prepareServices(updated, onBehalfOf);
 
-        List<NotificationParticipant> participants = resolver.resolveAllRecipients(null, updated, user, onBehalfOf, context, session);
+        List<NotificationParticipant> participants = resolver.resolveAllRecipients(null, updated, user, onBehalfOf, context, session, null);
         Assert.assertFalse("No participants resolved", participants.isEmpty());
         NotificationParticipant participant = participants.stream().filter(p -> p.isExternal()).findFirst().get();
         Assert.assertThat("EMail souhld not differ!", participant.getEmail(), is(external.getEMail())); //  ChronosTestTools.convertToUser mocks users mail with attendee.getEmail
@@ -244,7 +241,7 @@ public class DefaultNotificationParticipantResolverTest {
 
         prepareServices(updated, onBehalfOf);
 
-        List<NotificationParticipant> participants = resolver.resolveAllRecipients(null, updated, user, onBehalfOf, context, session);
+        List<NotificationParticipant> participants = resolver.resolveAllRecipients(null, updated, user, onBehalfOf, context, session, null);
         Assert.assertFalse("No participants resolved", participants.isEmpty());
         // Should throw exception
         NotificationParticipant participant = participants.stream().filter(p -> p.isExternal()).findFirst().get();
@@ -267,7 +264,7 @@ public class DefaultNotificationParticipantResolverTest {
         prepareServices(updated, onBehalfOf);
         PowerMockito.when(resources.getResource(Matchers.anyInt(), Matchers.any(Context.class))).thenReturn(ChronosTestTools.convertToResource(resource));
 
-        List<NotificationParticipant> participants = resolver.resolveAllRecipients(null, updated, user, onBehalfOf, context, session);
+        List<NotificationParticipant> participants = resolver.resolveAllRecipients(null, updated, user, onBehalfOf, context, session, null);
         Assert.assertFalse("No participants resolved", participants.isEmpty());
         // Should throw exception
         NotificationParticipant participant = participants.stream().filter(p -> p.isResource()).findFirst().get();

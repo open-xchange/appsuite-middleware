@@ -49,17 +49,20 @@
 
 package com.openexchange.chronos.itip.generators;
 
+import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.Event;
-import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.exception.OXException;
+import com.openexchange.session.Session;
 
 /**
+ * 
  * {@link ITipMailGeneratorFactory}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
+ * @since v7.10.0
  */
 public interface ITipMailGeneratorFactory {
 
-    ITipMailGenerator create(Event original, Event event, CalendarSession session, int onBehalfOfId) throws OXException;
+    ITipMailGenerator create(Event original, Event event, Session session, int onBehalfOfId, CalendarUser principal) throws OXException;
 
 }

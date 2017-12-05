@@ -142,7 +142,7 @@ public class UpdateITipAnalyzer extends AbstractITipAnalyzer {
             change.setType(ITipChange.Type.UPDATE);
             change.setCurrentEvent(original);
             differ = doAppointmentsDiffer(update, original);
-            exceptions = new ArrayList<Event>(util.getExceptions(original, session));
+            exceptions = new ArrayList<Event>(util.getExceptions(original, session.getSession()));
         } else {
             if (message.getMethod() == ITipMethod.COUNTER) {
                 analysis.addAnnotation(new ITipAnnotation(Messages.COUNTER_UNKNOWN_APPOINTMENT, locale));

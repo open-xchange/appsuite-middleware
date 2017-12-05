@@ -60,6 +60,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.locks.ReentrantLock;
 import com.openexchange.chronos.Attendee;
+import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
@@ -73,10 +74,10 @@ import com.openexchange.chronos.itip.generators.NotificationMailGeneratorFactory
 import com.openexchange.chronos.itip.generators.NotificationParticipant;
 import com.openexchange.chronos.itip.sender.MailSenderService;
 import com.openexchange.chronos.itip.tools.ITipEventUpdate;
-import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.notify.State;
 import com.openexchange.osgi.ExceptionUtils;
+import com.openexchange.session.Session;
 import com.openexchange.timer.TimerService;
 
 /**
@@ -134,7 +135,7 @@ public class AppointmentNotificationPool implements AppointmentNotificationPoolS
     }
 
     @Override
-    public void enqueue(Event original, Event newAppointment, CalendarSession session, int sharedFolderOwner) throws OXException {
+    public void enqueue(Event original, Event newAppointment, Session session, int sharedFolderOwner, CalendarUser principal) throws OXException {
         if (original == null) {
             throw new NullPointerException("Please specify an original appointment, a new appointment and a session");
         }
@@ -149,14 +150,14 @@ public class AppointmentNotificationPool implements AppointmentNotificationPoolS
 
         try {
             lock.lock();
-            item(session.getContextId(), original.getId()).remember(original, newAppointment, session, sharedFolderOwner);
+            item(session.getContextId(), original.getId()).remember(original, newAppointment, session, sharedFolderOwner, principal);
         } finally {
             lock.unlock();
         }
     }
 
     @Override
-    public void fasttrack(Event appointment, CalendarSession session) throws OXException {
+    public void fasttrack(Event appointment, Session session) throws OXException {
         try {
             lock.lock();
             tick(session.getContextId(), appointment.getId(), true);
@@ -166,7 +167,7 @@ public class AppointmentNotificationPool implements AppointmentNotificationPoolS
     }
 
     @Override
-    public void aware(Event appointment, NotificationParticipant recipient, CalendarSession session) {
+    public void aware(Event appointment, NotificationParticipant recipient, Session session) {
         Map<NotificationParticipant, List<Event>> participants = sent.get(session.getContextId());
         if (participants == null) {
             participants = new HashMap<NotificationParticipant, List<Event>>();
@@ -238,7 +239,7 @@ public class AppointmentNotificationPool implements AppointmentNotificationPoolS
     }
 
     @Override
-    public void drop(Event appointment, CalendarSession session) throws OXException {
+    public void drop(Event appointment, Session session) throws OXException {
         drop(session.getContextId(), appointment.getId());
     }
 
@@ -284,12 +285,12 @@ public class AppointmentNotificationPool implements AppointmentNotificationPoolS
 
         private final Event oldAppointment;
         private final Event newAppointment;
-        private final CalendarSession session;
+        private final Session session;
         private final long timestamp;
         private ITipEventUpdate diff;
         private int sharedFolderOwner = -1;
 
-        public Update(Event oldAppointment, Event newAppointment, CalendarSession session, int sharedFolderOwner) {
+        public Update(Event oldAppointment, Event newAppointment, Session session, int sharedFolderOwner) {
             this.oldAppointment = oldAppointment;
             this.newAppointment = newAppointment;
             this.session = session;
@@ -297,7 +298,7 @@ public class AppointmentNotificationPool implements AppointmentNotificationPoolS
             this.timestamp = System.currentTimeMillis();
         }
 
-        public CalendarSession getSession() {
+        public Session getSession() {
             return session;
         }
 
@@ -339,11 +340,13 @@ public class AppointmentNotificationPool implements AppointmentNotificationPoolS
         private Event mostRecent;
         private long newestTime;
         private long lastKnownStartDateForNextOccurrence;
-        private CalendarSession session;
+        private Session session;
+        private CalendarUser principal;
 
         private final LinkedList<Update> updates = new LinkedList<Update>();
 
-        public void remember(Event original, Event newAppointment, CalendarSession session, int sharedFolderOwner) throws OXException {
+        public void remember(Event original, Event newAppointment, Session session, int sharedFolderOwner, CalendarUser principal) throws OXException {
+            this.principal = principal;
             if (this.original == null) {
                 this.original = original;
                 this.mostRecent = newAppointment;
@@ -407,7 +410,7 @@ public class AppointmentNotificationPool implements AppointmentNotificationPoolS
         }
 
         private void notifyAllParticipantsAboutOverallChanges() throws OXException {
-            ITipMailGenerator generator = generatorFactory.create(original, mostRecent, session, -1);
+            ITipMailGenerator generator = generatorFactory.create(original, mostRecent, session, -1, principal);
             if (moreThanOneUserActed()) {
                 generator.noActor();
             }
@@ -419,13 +422,13 @@ public class AppointmentNotificationPool implements AppointmentNotificationPoolS
 
                 NotificationMail mail = generator.generateUpdateMailFor(participant);
                 if (mail != null && mail.getStateType() != State.Type.NEW) {
-                    notificationMailer.sendMail(mail, session);
+                    notificationMailer.sendMail(mail, session, principal);
                 }
             }
         }
 
         private void notifyInternalParticipantsAboutOverallChanges() throws OXException {
-            ITipMailGenerator generator = generatorFactory.create(original, mostRecent, session, -1);
+            ITipMailGenerator generator = generatorFactory.create(original, mostRecent, session, -1, principal);
             if (moreThanOneUserActed()) {
                 generator.noActor();
             }
@@ -438,7 +441,7 @@ public class AppointmentNotificationPool implements AppointmentNotificationPoolS
 
                     NotificationMail mail = generator.generateUpdateMailFor(participant);
                     if (mail != null && mail.getStateType() != State.Type.NEW) {
-                        notificationMailer.sendMail(mail, session);
+                        notificationMailer.sendMail(mail, session, principal);
                     }
                 }
             }
@@ -492,10 +495,10 @@ public class AppointmentNotificationPool implements AppointmentNotificationPoolS
             });
 
             for (Update[] userScopedUpdate : userScopedUpdates) {
-                CalendarSession session = userScopedUpdate[1].getSession();
+                Session session = userScopedUpdate[1].getSession();
                 Event oldAppointment = userScopedUpdate[0].getOldEvent();
                 Event newAppointment = userScopedUpdate[1].getNewEvent();
-                ITipMailGenerator generator = generatorFactory.create(oldAppointment, newAppointment, session, userScopedUpdate[0].getSharedFolderOwner());
+                ITipMailGenerator generator = generatorFactory.create(oldAppointment, newAppointment, session, userScopedUpdate[0].getSharedFolderOwner(), principal);
                 List<NotificationParticipant> recipients = generator.getRecipients();
                 for (NotificationParticipant participant : recipients) {
                     if (participant.isExternal() && !participant.hasRole(ITipRole.ORGANIZER)) {
@@ -503,7 +506,7 @@ public class AppointmentNotificationPool implements AppointmentNotificationPoolS
                     }
                     NotificationMail mail = generator.generateUpdateMailFor(participant);
                     if (mail != null && mail.getStateType() != State.Type.NEW) {
-                        notificationMailer.sendMail(mail, session);
+                        notificationMailer.sendMail(mail, session, principal);
                     }
                 }
             }
@@ -553,7 +556,7 @@ public class AppointmentNotificationPool implements AppointmentNotificationPoolS
 
             copyParticipantStates(original, facsimile);
 
-            ITipMailGenerator generator = generatorFactory.create(facsimile, mostRecent, session, -1);
+            ITipMailGenerator generator = generatorFactory.create(facsimile, mostRecent, session, -1, principal);
             generator.noActor();
             List<NotificationParticipant> recipients = generator.getRecipients();
             for (NotificationParticipant participant : recipients) {
@@ -562,13 +565,13 @@ public class AppointmentNotificationPool implements AppointmentNotificationPoolS
                 }
                 NotificationMail mail = generator.generateUpdateMailFor(participant);
                 if (mail != null && mail.getStateType() != State.Type.NEW) {
-                    notificationMailer.sendMail(mail, session);
+                    notificationMailer.sendMail(mail, session, principal);
                 }
             }
         }
 
         private void proposeChangesToExternalOrganizer() throws OXException {
-            ITipMailGenerator generator = generatorFactory.create(original, mostRecent, session, -1);
+            ITipMailGenerator generator = generatorFactory.create(original, mostRecent, session, -1, principal);
             if (moreThanOneUserActed()) {
                 generator.noActor();
             }
@@ -579,13 +582,13 @@ public class AppointmentNotificationPool implements AppointmentNotificationPoolS
                 }
                 NotificationMail mail = generator.generateUpdateMailFor(participant);
                 if (mail != null && mail.getStateType() != State.Type.NEW) {
-                    notificationMailer.sendMail(mail, session);
+                    notificationMailer.sendMail(mail, session, principal);
                 }
             }
         }
 
         private void notifyExternalParticipantsAboutOverallChangesAsOrganizer() throws OXException {
-            ITipMailGenerator generator = generatorFactory.create(original, mostRecent, session, -1);
+            ITipMailGenerator generator = generatorFactory.create(original, mostRecent, session, -1, principal);
             if (moreThanOneUserActed()) {
                 generator.noActor();
             }
@@ -596,7 +599,7 @@ public class AppointmentNotificationPool implements AppointmentNotificationPoolS
                 }
                 NotificationMail mail = generator.generateUpdateMailFor(participant);
                 if (mail != null && mail.getStateType() != State.Type.NEW) {
-                    notificationMailer.sendMail(mail, session);
+                    notificationMailer.sendMail(mail, session, principal);
                 }
             }
         }

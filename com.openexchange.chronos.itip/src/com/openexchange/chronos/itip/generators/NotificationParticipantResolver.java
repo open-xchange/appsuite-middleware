@@ -50,11 +50,12 @@
 package com.openexchange.chronos.itip.generators;
 
 import java.util.List;
+import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.Event;
-import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.session.Session;
 
 /**
  * {@link NotificationParticipantResolver}
@@ -63,7 +64,7 @@ import com.openexchange.groupware.ldap.User;
  */
 public interface NotificationParticipantResolver {
 
-    List<NotificationParticipant> resolveAllRecipients(Event original, Event appointment, User user, User onBehalfOf, Context ctx, CalendarSession session) throws OXException;
+    List<NotificationParticipant> resolveAllRecipients(Event original, Event appointment, User user, User onBehalfOf, Context ctx, Session session, CalendarUser principal) throws OXException;
 
     List<NotificationParticipant> getAllParticipants(List<NotificationParticipant> allRecipients, Event appointment, User user, Context ctx);
 

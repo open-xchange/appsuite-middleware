@@ -62,16 +62,21 @@ import com.openexchange.chronos.itip.generators.AttachmentMemory;
 import com.openexchange.chronos.itip.generators.DefaultNotificationParticipantResolver;
 import com.openexchange.chronos.itip.generators.ITipMailGeneratorFactory;
 import com.openexchange.chronos.itip.generators.NotificationMailGeneratorFactory;
+import com.openexchange.chronos.itip.handler.ITipHandler;
 import com.openexchange.chronos.itip.performers.DefaultITipActionPerformerFactoryService;
 import com.openexchange.chronos.itip.sender.DefaultMailSenderService;
 import com.openexchange.chronos.itip.sender.MailSenderService;
 import com.openexchange.chronos.itip.sender.PoolingMailSenderService;
+import com.openexchange.chronos.service.CalendarHandler;
+import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.chronos.storage.CalendarStorageFactory;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
+import com.openexchange.html.HtmlService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.resource.ResourceService;
+import com.openexchange.templating.TemplateService;
 import com.openexchange.timer.TimerService;
 import com.openexchange.user.UserService;
 
@@ -86,7 +91,7 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, TimerService.class, ContextService.class, CalendarStorageFactory.class, RecurrenceService.class, UserService.class, ResourceService.class, ICalService.class };
+        return new Class<?>[] { ConfigurationService.class, TimerService.class, ContextService.class, CalendarStorageFactory.class, RecurrenceService.class, UserService.class, ResourceService.class, ICalService.class, CalendarService.class, HtmlService.class, TemplateService.class };
     }
 
     @Override
@@ -105,10 +110,10 @@ public class Activator extends HousekeepingActivator {
 
         CalendarITipIntegrationUtility util = new CalendarITipIntegrationUtility();
         DefaultNotificationParticipantResolver resolver = new DefaultNotificationParticipantResolver(util);
-        NotificationMailGeneratorFactory mails = new NotificationMailGeneratorFactory(resolver, util, this, attachmentMemory);
+        NotificationMailGeneratorFactory generatorFactory = new NotificationMailGeneratorFactory(resolver, util, this, attachmentMemory);
 
         if (poolEnabled) {
-            AppointmentNotificationPool pool = new AppointmentNotificationPool(timers, mails, sender, detailInterval, stateChangeInterval, priorityInterval);
+            AppointmentNotificationPool pool = new AppointmentNotificationPool(timers, generatorFactory, sender, detailInterval, stateChangeInterval, priorityInterval);
             sender = new PoolingMailSenderService(pool, sender);
         }
 
@@ -117,10 +122,11 @@ public class Activator extends HousekeepingActivator {
         registerService(ITipAnalyzerService.class, new DefaultITipAnalyzerService(util), analyzerProps);
         Dictionary<String, Object> factoryProps = new Hashtable<String, Object>();
         factoryProps.put(Constants.SERVICE_RANKING, DefaultITipActionPerformerFactoryService.RANKING); // Default
-        registerService(ITipActionPerformerFactoryService.class, new DefaultITipActionPerformerFactoryService(util, sender, mails), factoryProps);
+        registerService(ITipActionPerformerFactoryService.class, new DefaultITipActionPerformerFactoryService(util, sender, generatorFactory), factoryProps);
 
-        registerService(ITipMailGeneratorFactory.class, mails);
+        registerService(ITipMailGeneratorFactory.class, generatorFactory);
         registerService(MailSenderService.class, sender);
+        registerService(CalendarHandler.class, new ITipHandler(generatorFactory, sender));
     }
 
 }

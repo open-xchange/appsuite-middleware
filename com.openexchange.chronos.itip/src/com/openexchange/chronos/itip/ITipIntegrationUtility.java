@@ -55,6 +55,7 @@ import com.openexchange.chronos.Event;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.EventConflict;
 import com.openexchange.exception.OXException;
+import com.openexchange.session.Session;
 
 /**
  * 
@@ -69,7 +70,7 @@ public interface ITipIntegrationUtility {
 
     List<EventConflict> getConflicts(Event event, CalendarSession session) throws OXException;
 
-    List<Event> getExceptions(Event original, CalendarSession session) throws OXException;
+    List<Event> getExceptions(Event original, Session session) throws OXException;
 
     String getPrivateCalendarFolderId(CalendarSession session) throws OXException;
 
@@ -85,6 +86,6 @@ public interface ITipIntegrationUtility {
 
     Event loadEvent(Event event, CalendarSession session) throws OXException;
 
-    String getFolderIdForUser(CalendarSession session, String eventId) throws OXException;
+    String getFolderIdForUser(Session session, String eventId) throws OXException;
 
 }

@@ -68,6 +68,7 @@ import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.session.Session;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 
 /**
@@ -96,9 +97,10 @@ public class CalendarITipIntegrationUtility implements ITipIntegrationUtility {
     }
 
     @Override
-    public List<Event> getExceptions(final Event original, final CalendarSession session) throws OXException {
-        CalendarService calendarService = session.getCalendarService();
-        List<Event> changeExceptions = calendarService.getChangeExceptions(session, original.getFolderId(), original.getId());
+    public List<Event> getExceptions(final Event original, final Session session) throws OXException {
+        CalendarService calendarService = Services.getService(CalendarService.class);
+        CalendarSession calendarSession = calendarService.init(session);
+        List<Event> changeExceptions = calendarService.getChangeExceptions(calendarSession, original.getFolderId(), original.getId());
         return changeExceptions;
     }
 
@@ -117,7 +119,7 @@ public class CalendarITipIntegrationUtility implements ITipIntegrationUtility {
             }
         }
         if (event.getFolderId() == null) {
-            event.setFolderId(getFolderIdForUser(session, id));
+            event.setFolderId(getFolderIdForUser(session.getSession(), id));
         }
         return event;
     }
@@ -147,13 +149,14 @@ public class CalendarITipIntegrationUtility implements ITipIntegrationUtility {
     }
 
     @Override
-    public String getFolderIdForUser(CalendarSession session, String eventId) throws OXException {
+    public String getFolderIdForUser(Session session, String eventId) throws OXException {
+        CalendarSession calendarSession = Services.getService(CalendarService.class).init(session);
         if (eventId == null) {
             return null;
         }
 
-        Event loadEvent = getStorage(session).getEventStorage().loadEvent(eventId, null);
-        loadEvent = getStorage(session).getUtilities().loadAdditionalEventData(session.getUserId(), loadEvent, null);
+        Event loadEvent = getStorage(calendarSession).getEventStorage().loadEvent(eventId, null);
+        loadEvent = getStorage(calendarSession).getUtilities().loadAdditionalEventData(session.getUserId(), loadEvent, null);
         return CalendarUtils.getFolderView(loadEvent, session.getUserId());
     }
 
