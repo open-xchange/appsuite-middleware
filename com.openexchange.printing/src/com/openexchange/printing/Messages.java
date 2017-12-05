@@ -2,7 +2,7 @@
  *
  *    OPEN-XCHANGE legal information
  *
- *    All intellectual property rights in the Software are protected by
+ *    All intellectual property rights in the Software are public by
  *    international copyright laws.
  *
  *
@@ -49,74 +49,17 @@
 
 package com.openexchange.printing;
 
-import java.util.Date;
-import java.util.Locale;
-import java.util.Map;
-import java.util.TimeZone;
-import com.openexchange.i18n.tools.StringHelper;
+import com.openexchange.i18n.LocalizableStrings;
+
 
 /**
- * {@link CalendarFormatter}
- * 
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco
- *         Laguna</a>
+ * {@link Messages}
+ *
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class TimeSpanFormatter extends DateFormatter {
-	
-	private final Map<String, Object> timespanThingy;
+public class Messages implements LocalizableStrings {
 
-	public TimeSpanFormatter(Map<String, Object> timeSpanThingy, Locale locale, TimeZone tz) {
-		super(locale, tz);
-		this.timespanThingy = timeSpanThingy;
-	}
-
-	public String getInterval() {
-		return formatInterval(timespanThingy);
-	}
-
-
-	public String formatDate(Date startDate, Date endDate, boolean isFullTime) {
-	
-		if (isFullTime) {
-			endDate = new Date(endDate.getTime() - 1000);
-		}
-	
-		if (differentDays(startDate, endDate)) {
-			if (isFullTime) {
-				return String.format("%s - %s", formatDate(startDate, utc),
-						formatDate(endDate, utc));
-			} else {
-				return String.format("%s - %s", formatDate(startDate),
-						formatDate(endDate));
-			}
-		} else {
-			return formatDate(startDate);
-		}
-	}
-	public String formatDate(Map<String, Object> appointment) {
-		Date startDate = new Date((Long) appointment.get("start_date"));
-		Date endDate = new Date((Long) appointment.get("end_date"));
-		return formatDate(startDate, endDate, isFullTime());
-	}
-
-	public String formatInterval(Map<String, Object> appointment) {
-		if (isFullTime()) {
-			return StringHelper.valueOf(locale).getString(Messages.FULL_TIME);
-		}
-		Date startDate = new Date((Long) appointment.get("start_date"));
-		Date endDate = new Date((Long) appointment.get("end_date"));
-		return formatInterval(startDate, endDate, isFullTime());
-	}
-
-	public String getDateSpec() {
-		StringBuilder b = new StringBuilder();
-		b.append(formatDate(timespanThingy));
-		return b.toString();
-	}
-
-	private boolean isFullTime() {
-		Boolean fullTime = (Boolean) timespanThingy.get("full_time");
-		return fullTime == null || fullTime;
-	}
+    public static final String FULL_TIME = "The entire day";
 
 }
+
