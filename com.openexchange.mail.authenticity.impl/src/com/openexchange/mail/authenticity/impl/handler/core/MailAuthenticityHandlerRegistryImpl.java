@@ -105,9 +105,9 @@ public class MailAuthenticityHandlerRegistryImpl implements MailAuthenticityHand
         UserAndContext key = UserAndContext.newInstance(userId, contextId);
         ConfigAndHandler configAndHandler = cache.getIfPresent(key);
         if (null == configAndHandler) {
-            boolean enabled = leanConfigService.getBooleanProperty(userId, contextId, MailAuthenticityProperty.enabled);
+            boolean enabled = leanConfigService.getBooleanProperty(userId, contextId, MailAuthenticityProperty.ENABLED);
             if (enabled) {
-                long dateThreshold = leanConfigService.getLongProperty(userId, contextId, MailAuthenticityProperty.threshold);
+                long dateThreshold = leanConfigService.getLongProperty(userId, contextId, MailAuthenticityProperty.THRESHOLD);
                 MailAuthenticityHandler highestRankedHandler = null;
                 for (MailAuthenticityHandler handler : handlers) {
                     if (handler.isEnabled(session) && (null == highestRankedHandler || highestRankedHandler.getRanking() < handler.getRanking())) {

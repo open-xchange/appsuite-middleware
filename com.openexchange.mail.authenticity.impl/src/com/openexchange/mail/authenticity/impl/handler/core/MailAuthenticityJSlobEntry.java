@@ -114,7 +114,7 @@ public class MailAuthenticityJSlobEntry implements JSlobEntry {
     @Override
     public Object getValue(Session session) throws OXException {
         LeanConfigurationService configService = services.getService(LeanConfigurationService.class);
-        return configService.getBooleanProperty(session.getUserId(), session.getContextId(), MailAuthenticityProperty.enabled);
+        return configService.getBooleanProperty(session.getUserId(), session.getContextId(), MailAuthenticityProperty.ENABLED);
     }
 
     /*

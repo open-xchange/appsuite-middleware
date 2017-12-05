@@ -64,8 +64,11 @@ import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailFields;
 import com.openexchange.mail.authenticity.MailAuthenticityHandler;
 import com.openexchange.mail.authenticity.MailAuthenticityHandlerRegistry;
+import com.openexchange.mail.authenticity.impl.osgi.Services;
+import com.openexchange.mail.dataobjects.Delegatized;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mailaccount.MailAccount;
+import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.session.Session;
 
 /**
@@ -88,13 +91,32 @@ public class MailAuthenticityFetchListener implements MailFetchListener {
         this.handlerRegistry = handlerRegistry;
     }
 
-    private boolean isNotApplicableFor(MailFetchArguments fetchArguments) {
-        return false == isApplicableFor(fetchArguments);
+    private boolean isNotApplicableFor(MailFetchArguments fetchArguments, Session session) throws OXException {
+        return false == isApplicableFor(fetchArguments, session);
     }
 
-    private boolean isApplicableFor(MailFetchArguments fetchArguments) {
+    private boolean isApplicableFor(MailFetchArguments fetchArguments, Session session) throws OXException {
         FullnameArgument folder = fetchArguments.getFolder();
-        return (null != folder && MailAccount.DEFAULT_ID == folder.getAccountId()) && isAuthResultRequested(fetchArguments);
+        return null != folder && isAuthResultRequested(fetchArguments) && isAcceptableAccount(folder.getAccountId(), session);
+    }
+
+    private boolean isAcceptableAccount(int accountId, Session session) throws OXException {
+        if (MailAccount.DEFAULT_ID == accountId) {
+            // Primary account
+            return true;
+        }
+
+        // Check for special Unified Mail account
+        return getUnifiedINBOXAccountId(session) == accountId;
+    }
+
+    private int getUnifiedINBOXAccountId(Session session) throws OXException {
+        UnifiedInboxManagement unifiedInboxManagement = Services.optService(UnifiedInboxManagement.class);
+        if (null == unifiedInboxManagement) {
+            return -1;
+        }
+
+        return unifiedInboxManagement.getUnifiedINBOXAccountID(session);
     }
 
     private boolean isAuthResultRequested(MailFetchArguments fetchArguments) {
@@ -104,7 +126,7 @@ public class MailAuthenticityFetchListener implements MailFetchListener {
 
     @Override
     public boolean accept(MailMessage[] mailsFromCache, MailFetchArguments fetchArguments, Session session) throws OXException {
-        if (isNotApplicableFor(fetchArguments)) {
+        if (isNotApplicableFor(fetchArguments, session)) {
             return true;
         }
 
@@ -126,7 +148,7 @@ public class MailAuthenticityFetchListener implements MailFetchListener {
 
     @Override
     public MailAttributation onBeforeFetch(MailFetchArguments fetchArguments, Session session, Map<String, Object> state) throws OXException {
-        if (isNotApplicableFor(fetchArguments)) {
+        if (isNotApplicableFor(fetchArguments, session)) {
             // Special field not contained
             return MailAttributation.NOT_APPLICABLE;
         }
@@ -137,7 +159,7 @@ public class MailAuthenticityFetchListener implements MailFetchListener {
         }
 
         MailFields fields = null == fetchArguments.getFields() ? new MailFields() : new MailFields(fetchArguments.getFields());
-        fields.add(MailField.RECEIVED_DATE);
+        fields.add(MailField.RECEIVED_DATE); // For date threshold
         Set<String> headerNames = null == fetchArguments.getHeaderNames() ? new LinkedHashSet<>() : new LinkedHashSet<>(Arrays.asList(fetchArguments.getHeaderNames()));
         {
             Collection<MailField> requiredFields = handler.getRequiredFields();
@@ -165,8 +187,20 @@ public class MailAuthenticityFetchListener implements MailFetchListener {
             return MailFetchListenerResult.neutral(mails, cacheable);
         }
 
+        int unifiedINBOXAccountId = getUnifiedINBOXAccountId(session);
         for (MailMessage mail : mails) {
-            handler.handle(session, mail);
+            if (mail != null) {
+                int accId = mail.getAccountId();
+                if (mail instanceof Delegatized) {
+                    int undelegatedAccountId = ((Delegatized) mail).getUndelegatedAccountId();
+                    if (undelegatedAccountId >= 0) {
+                        accId = undelegatedAccountId;
+                    }
+                }
+                if (accId == MailAccount.DEFAULT_ID || accId == unifiedINBOXAccountId) {
+                    handler.handle(session, mail);
+                }
+            }
         }
         return MailFetchListenerResult.neutral(mails, cacheable);
     }

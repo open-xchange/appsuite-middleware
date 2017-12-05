@@ -82,7 +82,7 @@ public enum MailAuthenticityExceptionCodes implements DisplayableOXExceptionCode
     /**
      * The property 'com.openexchange.mail.authenticity.authServId' is missing or invalid.
      */
-    INVALID_AUTHSERV_IDS("The property '" + MailAuthenticityProperty.authServId.getFQPropertyName() + "' is missing or invalid.", MailAuthenticityExceptionMessages.INVALID_AUTHSERV_IDS_MSG, Category.CATEGORY_CONFIGURATION, 5);
+    INVALID_AUTHSERV_IDS("The property '" + MailAuthenticityProperty.AUTHSERV_ID.getFQPropertyName() + "' is missing or invalid.", MailAuthenticityExceptionMessages.INVALID_AUTHSERV_IDS_MSG, Category.CATEGORY_CONFIGURATION, 5);
     ;
 
     /** The error code prefix for mail authenticity */

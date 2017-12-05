@@ -61,10 +61,10 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiFunction;
 import javax.mail.internet.InternetAddress;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
@@ -116,52 +116,41 @@ import com.openexchange.session.UserAndContext;
  */
 public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(MailAuthenticityHandlerImpl.class);
+    private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(MailAuthenticityHandlerImpl.class);
 
-    private final Map<DefaultMailAuthenticityMechanism, BiFunction<Map<String, String>, MailAuthenticityResult, MailAuthenticityMechanismResult>> mechanismParsersRegitry;
-
-    private static final MailAuthenticityMechanismComparator MAIL_AUTH_COMPARATOR = new MailAuthenticityMechanismComparator();
-
-    private static final String EMPTY_STRING = "";
-
-    /** The required mail fields of this handler */
-    private static final Collection<MailField> REQUIRED_MAIL_FIELDS;
-    static {
-        Collection<MailField> m = new ArrayList<>();
-        m.add(MailField.AUTHENTICATION_OVERALL_RESULT);
-        m.add(MailField.FROM);
-        REQUIRED_MAIL_FIELDS = Collections.<MailField> unmodifiableCollection(m);
-    }
-
-    /** The ranking of this handler */
+    private final Comparator<String> mailAuthComparator;
     private final int ranking;
+    private final Map<DefaultMailAuthenticityMechanism, BiFunction<Map<String, String>, MailAuthenticityResult, MailAuthenticityMechanismResult>> mechanismParsersRegistry;
     private final Cache<UserAndContext, List<AllowedAuthServId>> authServIdsCache;
     private final TrustedMailService trustedDomainHandler;
     private final ServiceLookup services;
+    private final Collection<MailField> requiredMailFields;
 
     /**
-     * Initialises a new {@link MailAuthenticityHandlerImpl} with priority 0.
+     * Initializes a new {@link MailAuthenticityHandlerImpl} with ranking of <code>0</code> (zero).
      *
-     * @throws IlegalArgumentException if the authServId is either <code>null</code> or empty
+     * @param services The service look-up
      */
     public MailAuthenticityHandlerImpl(ServiceLookup services) {
         this(0, services);
     }
 
     /**
-     * Initialises a new {@link MailAuthenticityHandlerImpl}.1
+     * Initializes a new {@link MailAuthenticityHandlerImpl}.
      *
-     * @param ranking The ranking of this handler; a higher value means higher priority;
-     * @throws IlegalArgumentException if the authServId is either <code>null</code> or empty
+     * @param ranking The ranking of this handler; a higher value means higher priority
+     * @param services The service look-up
      */
     public MailAuthenticityHandlerImpl(int ranking, ServiceLookup services) {
         super();
         this.services = services;
         this.trustedDomainHandler = services.getService(TrustedMailService.class);
         this.ranking = ranking;
+        mailAuthComparator = new MailAuthenticityMechanismComparator();
         this.authServIdsCache = CacheBuilder.newBuilder().maximumSize(65536).expireAfterWrite(30, TimeUnit.MINUTES).build();
-        mechanismParsersRegitry = new HashMap<>(4);
-        mechanismParsersRegitry.put(DefaultMailAuthenticityMechanism.DMARC, (attributes, overallResult) -> {
+        requiredMailFields = ImmutableList.of(MailField.FROM);
+        ImmutableMap.Builder<DefaultMailAuthenticityMechanism, BiFunction<Map<String, String>, MailAuthenticityResult, MailAuthenticityMechanismResult>> mechanismParsersRegistry = ImmutableMap.builder();
+        mechanismParsersRegistry.put(DefaultMailAuthenticityMechanism.DMARC, (attributes, overallResult) -> {
             String value = attributes.remove(DefaultMailAuthenticityMechanism.DMARC.getTechnicalName());
             DMARCResult dmarcResult = DMARCResult.valueOf(extractOutcome(value.toUpperCase()));
 
@@ -179,7 +168,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
             addProperties(attributes, result);
             return result;
         });
-        mechanismParsersRegitry.put(DefaultMailAuthenticityMechanism.DKIM, (attributes, overallResult) -> {
+        mechanismParsersRegistry.put(DefaultMailAuthenticityMechanism.DKIM, (attributes, overallResult) -> {
             String value = attributes.remove(DefaultMailAuthenticityMechanism.DKIM.getTechnicalName());
             DKIMResult dkimResult = DKIMResult.valueOf(extractOutcome(value.toUpperCase()));
 
@@ -201,7 +190,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
             addProperties(attributes, result);
             return result;
         });
-        mechanismParsersRegitry.put(DefaultMailAuthenticityMechanism.SPF, (attributes, overallResult) -> {
+        mechanismParsersRegistry.put(DefaultMailAuthenticityMechanism.SPF, (attributes, overallResult) -> {
             String value = attributes.remove(DefaultMailAuthenticityMechanism.SPF.getTechnicalName());
             SPFResult spfResult = SPFResult.valueOf(extractOutcome(value.toUpperCase()));
 
@@ -219,6 +208,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
             addProperties(attributes, result);
             return result;
         });
+        this.mechanismParsersRegistry = mechanismParsersRegistry.build();
     }
 
     /**
@@ -264,7 +254,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
      */
     @Override
     public Collection<MailField> getRequiredFields() {
-        return REQUIRED_MAIL_FIELDS;
+        return requiredMailFields;
     }
 
     /*
@@ -362,7 +352,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
      * @param overallResult The overall {@link MailAuthenticityResult}
      */
     private void parseMechanisms(List<String> elements, List<MailAuthenticityMechanismResult> results, List<Map<String, String>> unknownResults, MailAuthenticityResult overallResult) {
-        Collections.sort(elements, MAIL_AUTH_COMPARATOR);
+        Collections.sort(elements, mailAuthComparator);
         for (String element : elements) {
             Map<String, String> attributes = StringUtil.parseMap(element);
 
@@ -372,7 +362,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
                 unknownResults.add(parseUnknownMechs(element));
                 continue;
             }
-            BiFunction<Map<String, String>, MailAuthenticityResult, MailAuthenticityMechanismResult> mechanismParser = mechanismParsersRegitry.get(mechanism);
+            BiFunction<Map<String, String>, MailAuthenticityResult, MailAuthenticityMechanismResult> mechanismParser = mechanismParsersRegistry.get(mechanism);
             if (mechanismParser == null) {
                 // Not a valid mechanism, skip but add to the overall result
                 unknownResults.add(parseUnknownMechs(element));
@@ -397,7 +387,8 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
         unknownResults.put("result", extractOutcome(mechanism.getValue()));
 
         for (int index = 1; index < attributes.size(); index++) {
-            unknownResults.put(attributes.get(index).getKey(), attributes.get(index).getValue());
+            MailAuthenticityAttribute attribute = attributes.get(index);
+            unknownResults.put(attribute.getKey(), attribute.getValue());
         }
 
         if (!unknownResults.containsKey("reason")) {
@@ -468,7 +459,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
                 return true;
             }
         }
-        LOGGER.warn("The authserv-id '{}' is not in the allowed authserv ids list (see server property '{}'). Server misconfiguration?", authServId, MailAuthenticityProperty.authServId);
+        LOGGER.warn("The authserv-id '{}' is not in the allowed authserv ids list (see server property '{}'). Server misconfiguration?", authServId, MailAuthenticityProperty.AUTHSERV_ID);
         return false;
     }
 
@@ -566,13 +557,13 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
     private List<AllowedAuthServId> getAllowedAuthServIds(int userId, int contextId, UserAndContext key) throws OXException {
         // This is not thread-safe, but does not need to
         LeanConfigurationService leanConfigService = services.getService(LeanConfigurationService.class);
-        String sAuthServIds = leanConfigService.getProperty(userId, contextId, MailAuthenticityProperty.authServId);
+        String sAuthServIds = leanConfigService.getProperty(userId, contextId, MailAuthenticityProperty.AUTHSERV_ID);
         if (Strings.isEmpty(sAuthServIds)) {
             throw MailAuthenticityExceptionCodes.INVALID_AUTHSERV_IDS.create();
         }
 
         List<String> tokens = Arrays.asList(Strings.splitByComma(sAuthServIds));
-        if (tokens == null || tokens.isEmpty() || tokens.contains(EMPTY_STRING)) {
+        if (tokens == null || tokens.isEmpty() || tokens.contains("")) {
             throw MailAuthenticityExceptionCodes.INVALID_AUTHSERV_IDS.create();
         }
 
@@ -607,11 +598,13 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
      */
     private static class MailAuthenticityMechanismComparator implements Comparator<String> {
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
+        /**
+         * Initializes a new {@link MailAuthenticityHandlerImpl.MailAuthenticityMechanismComparator}.
          */
+        MailAuthenticityMechanismComparator() {
+            super();
+        }
+
         @Override
         public int compare(String o1, String o2) {
             String[] s1 = o1.split("=");

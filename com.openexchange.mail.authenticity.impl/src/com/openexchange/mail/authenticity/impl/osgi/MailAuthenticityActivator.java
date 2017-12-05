@@ -71,6 +71,7 @@ import com.openexchange.mail.authenticity.impl.handler.core.MailAuthenticityJSlo
 import com.openexchange.mail.authenticity.impl.handler.trusted.TrustedMailService;
 import com.openexchange.mail.authenticity.impl.handler.trusted.internal.TrustedMailAuthenticityHandler;
 import com.openexchange.mail.authenticity.impl.handler.trusted.internal.TrustedMailDataSource;
+import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.osgi.HousekeepingActivator;
 
 /**
@@ -95,7 +96,7 @@ public class MailAuthenticityActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { LeanConfigurationService.class, ConfigurationService.class };
+        return new Class<?>[] { LeanConfigurationService.class, ConfigurationService.class, UnifiedInboxManagement.class };
     }
 
     @Override
@@ -156,7 +157,7 @@ public class MailAuthenticityActivator extends HousekeepingActivator {
 
         @Override
         public Interests getInterests() {
-            return Reloadables.interestsForProperties(MailAuthenticityProperty.enabled.getFQPropertyName(), MailAuthenticityProperty.threshold.getFQPropertyName(), MailAuthenticityProperty.authServId.getFQPropertyName());
+            return Reloadables.interestsForProperties(MailAuthenticityProperty.ENABLED.getFQPropertyName(), MailAuthenticityProperty.THRESHOLD.getFQPropertyName(), MailAuthenticityProperty.AUTHSERV_ID.getFQPropertyName());
         }
     }
 

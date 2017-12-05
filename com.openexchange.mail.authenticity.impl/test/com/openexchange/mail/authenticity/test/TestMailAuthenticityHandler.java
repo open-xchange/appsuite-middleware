@@ -122,7 +122,7 @@ public class TestMailAuthenticityHandler {
         leanConfig = mock(LeanConfigurationService.class);
         ServiceLookup services = mock(ServiceLookup.class);
         when(services.getService(LeanConfigurationService.class)).thenReturn(leanConfig);
-        when(leanConfig.getProperty(1, 1, MailAuthenticityProperty.authServId)).thenReturn("ox.io");
+        when(leanConfig.getProperty(1, 1, MailAuthenticityProperty.AUTHSERV_ID)).thenReturn("ox.io");
 
         mailMessage = mock(MailMessage.class);
         when(mailMessage.getHeaders()).thenReturn(headerCollection);

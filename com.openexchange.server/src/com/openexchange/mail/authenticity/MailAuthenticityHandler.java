@@ -79,31 +79,29 @@ public interface MailAuthenticityHandler {
     void handle(Session session, MailMessage mailMessage) throws OXException;
 
     /**
-     * Returns an unmodifiable {@link Collection} with all required {@link MailField}s
+     * Returns an unmodifiable collection with all additionally required mail fields beside mandatory {@link MailField#AUTHENTICATION_OVERALL_RESULT} or {@link MailField#AUTHENTICATION_MECHANISM_RESULTS}
      *
-     * @return an unmodifiable{@link Collection} with all required {@link MailField}s
+     * @return an unmodifiable collection with all additionally required mail fields
      */
     Collection<MailField> getRequiredFields();
 
     /**
-     * Returns an unmodifiable {@link Collection} with all required mail headers
+     * Returns an unmodifiable collection with all additionally required mail headers
      *
-     * @return an unmodifiable {@link Collection} with all required mail headers
+     * @return an unmodifiable collection with all additionally required mail headers
      */
     Collection<String> getRequiredHeaders();
 
     /**
-     * Determines whether the {@link MailAuthenticityHandler} is enabled for the user
-     * that is denoted by the specified {@link Session}
+     * Determines whether this handler is enabled for the user that is associated with specified session.
      *
-     * @param session The groupware {@link Session}
-     * @return <code>true</code> if the {@link MailAuthenticityHandler} is enabled; <code>false</code> otherwise
+     * @param session The session providing user data
+     * @return <code>true</code> if this handler is enabled; <code>false</code> otherwise
      */
     boolean isEnabled(Session session);
 
     /**
-     * Returns the ranking of this {@link MailAuthenticityHandler}. A higher number in ranking
-     * means a higher priority.
+     * Gets the ranking of this handler. A higher number in ranking means a higher priority.
      *
      * @return The ranking of the {@link MailAuthenticityHandler}
      */

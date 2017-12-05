@@ -102,8 +102,8 @@ public class MailAuthenticityTest extends AbstractConfigAwareAPIClientSession {
 
         // Setup configurations ----------------------------------
         // general config
-        CONFIG.put(MailAuthenticityProperty.enabled.getFQPropertyName(), Boolean.TRUE.toString());
-        CONFIG.put(MailAuthenticityProperty.authServId.getFQPropertyName(), "open-xchange.authenticity.test");
+        CONFIG.put(MailAuthenticityProperty.ENABLED.getFQPropertyName(), Boolean.TRUE.toString());
+        CONFIG.put(MailAuthenticityProperty.AUTHSERV_ID.getFQPropertyName(), "open-xchange.authenticity.test");
 
         // trusted domain config
         CONFIG.put("com.openexchange.mail.authenticity.trusted.config", "support@open-xchange.com:1");
