@@ -87,7 +87,7 @@ public class SchedJoulesPagesAPI extends AbstractSchedJoulesAPI {
 
     private static final int MAX_ROWS = 20;
 
-    private final LoadingCache<SchedJoulesCachedItemKey, SchedJoulesPage> pagesCache = CacheBuilder.newBuilder().maximumSize(1000).expireAfterAccess(24, TimeUnit.HOURS).refreshAfterWrite(30, TimeUnit.SECONDS).build(new CacheLoader<SchedJoulesCachedItemKey, SchedJoulesPage>() {
+    private final LoadingCache<SchedJoulesCachedItemKey, SchedJoulesPage> pagesCache = CacheBuilder.newBuilder().maximumSize(1000).expireAfterAccess(24, TimeUnit.HOURS).refreshAfterWrite(24, TimeUnit.HOURS).build(new CacheLoader<SchedJoulesCachedItemKey, SchedJoulesPage>() {
 
         @Override
         public SchedJoulesPage load(SchedJoulesCachedItemKey key) throws Exception {
