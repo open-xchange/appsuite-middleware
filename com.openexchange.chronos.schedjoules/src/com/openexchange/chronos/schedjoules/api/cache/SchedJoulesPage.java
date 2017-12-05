@@ -52,21 +52,24 @@ package com.openexchange.chronos.schedjoules.api.cache;
 import org.json.JSONObject;
 
 /**
- * {@link SchedJoulesCachedItem}
+ * {@link SchedJoulesPage}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class SchedJoulesCachedItem {
+public class SchedJoulesPage {
 
-    private JSONObject itemData;
-    private long lastModified;
-    private String etag;
+    private final JSONObject itemData;
+    private final long lastModified;
+    private final String etag;
 
     /**
-     * Initialises a new {@link SchedJoulesCachedItem}.
+     * Initialises a new {@link SchedJoulesPage}.
      */
-    public SchedJoulesCachedItem() {
+    public SchedJoulesPage(JSONObject itemData, String etag, long lastModified) {
         super();
+        this.itemData = itemData;
+        this.etag = etag;
+        this.lastModified = lastModified;
     }
 
     /**
@@ -79,30 +82,12 @@ public class SchedJoulesCachedItem {
     }
 
     /**
-     * Sets the itemData
-     *
-     * @param itemData The itemData to set
-     */
-    public void setItemData(JSONObject itemData) {
-        this.itemData = itemData;
-    }
-
-    /**
      * Gets the lastModified
      *
      * @return The lastModified
      */
     public long getLastModified() {
         return lastModified;
-    }
-
-    /**
-     * Sets the lastModified
-     *
-     * @param lastModified The lastModified to set
-     */
-    public void setLastModified(long lastModified) {
-        this.lastModified = lastModified;
     }
 
     /**
@@ -115,11 +100,54 @@ public class SchedJoulesCachedItem {
     }
 
     /**
-     * Sets the eTag
-     *
-     * @param eTag The eTag to set
+     * {@link SchedJoulesPageBuilder}
      */
-    public void setEtag(String eTag) {
-        this.etag = eTag;
+    public static class SchedJoulesPageBuilder {
+
+        private JSONObject itemData;
+        private long lastModified;
+        private String etag;
+
+        /**
+         * Initialises a new {@link SchedJoulesPage.SchedJoulesPageBuilder}.
+         */
+        public SchedJoulesPageBuilder() {
+            super();
+        }
+
+        /**
+         * Sets the itemData
+         *
+         * @param itemData The itemData to set
+         */
+        public SchedJoulesPageBuilder itemData(JSONObject itemData) {
+            this.itemData = itemData;
+            return this;
+        }
+
+        /**
+         * Sets the lastModified
+         *
+         * @param lastModified The lastModified to set
+         */
+        public SchedJoulesPageBuilder lastModified(long lastModified) {
+            this.lastModified = lastModified;
+            return this;
+        }
+
+        /**
+         * Sets the etag
+         *
+         * @param etag The etag to set
+         */
+        public SchedJoulesPageBuilder etag(String etag) {
+            this.etag = etag;
+            return this;
+        }
+
+        public SchedJoulesPage build() {
+            return new SchedJoulesPage(itemData, etag, lastModified);
+        }
+
     }
 }

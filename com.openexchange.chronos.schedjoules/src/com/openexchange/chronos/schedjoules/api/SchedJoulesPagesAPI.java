@@ -52,20 +52,29 @@ package com.openexchange.chronos.schedjoules.api;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import org.json.JSONObject;
-import com.google.common.cache.Cache;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.ListenableFutureTask;
 import com.openexchange.chronos.schedjoules.api.auxiliary.SchedJoulesCategory;
 import com.openexchange.chronos.schedjoules.api.auxiliary.SchedJoulesCommonParameter;
 import com.openexchange.chronos.schedjoules.api.auxiliary.SchedJoulesSearchParameter;
-import com.openexchange.chronos.schedjoules.api.cache.SchedJoulesCachedItem;
 import com.openexchange.chronos.schedjoules.api.cache.SchedJoulesCachedItemKey;
+import com.openexchange.chronos.schedjoules.api.cache.SchedJoulesPage;
+import com.openexchange.chronos.schedjoules.api.cache.SchedJoulesPage.SchedJoulesPageBuilder;
+import com.openexchange.chronos.schedjoules.api.client.HttpMethod;
 import com.openexchange.chronos.schedjoules.api.client.SchedJoulesRESTBindPoint;
 import com.openexchange.chronos.schedjoules.api.client.SchedJoulesRESTClient;
 import com.openexchange.chronos.schedjoules.api.client.SchedJoulesRequest;
 import com.openexchange.chronos.schedjoules.api.client.SchedJoulesResponse;
 import com.openexchange.chronos.schedjoules.exception.SchedJoulesAPIExceptionCodes;
+import com.openexchange.chronos.schedjoules.osgi.Services;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
+import com.openexchange.timer.TimerService;
 
 /**
  * {@link SchedJoulesPagesAPI}
@@ -74,9 +83,43 @@ import com.openexchange.java.Strings;
  */
 public class SchedJoulesPagesAPI extends AbstractSchedJoulesAPI {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(SchedJoulesAPI.class);
+
     private static final int MAX_ROWS = 20;
 
-    private final Cache<SchedJoulesCachedItemKey, SchedJoulesCachedItem> pagesCache = CacheBuilder.newBuilder().expireAfterAccess(24, TimeUnit.HOURS).maximumSize(1000).build();
+    private final LoadingCache<SchedJoulesCachedItemKey, SchedJoulesPage> pagesCache = CacheBuilder.newBuilder().maximumSize(1000).expireAfterAccess(24, TimeUnit.HOURS).refreshAfterWrite(30, TimeUnit.SECONDS).build(new CacheLoader<SchedJoulesCachedItemKey, SchedJoulesPage>() {
+
+        @Override
+        public SchedJoulesPage load(SchedJoulesCachedItemKey key) throws Exception {
+            LOGGER.debug("Loading entry with key 'itemId: {}, locale: {}'...", key.getItemId(), key.getLocale());
+            SchedJoulesRequest request = new SchedJoulesRequest(SchedJoulesRESTBindPoint.pages.getAbsolutePath() + "/" + key.getItemId());
+            request.setQueryParameter(SchedJoulesCommonParameter.locale.name(), Strings.isEmpty(key.getLocale()) ? DEFAULT_LOCALE : key.getLocale());
+            request.setPageId(key.getItemId());
+
+            return executeRequest(request);
+        }
+
+        @Override
+        public ListenableFuture<SchedJoulesPage> reload(final SchedJoulesCachedItemKey key, SchedJoulesPage oldValue) throws Exception {
+            TimerService timerService = Services.getService(TimerService.class);
+            LOGGER.debug("Reloading entry with key 'itemId: {}, locale: {}'", key.getItemId(), key.getLocale());
+
+            ListenableFutureTask<SchedJoulesPage> task = ListenableFutureTask.create(() -> {
+                SchedJoulesRequest request = new SchedJoulesRequest(SchedJoulesRESTBindPoint.pages.getAbsolutePath() + "/" + key.getItemId());
+                SchedJoulesResponse response = client.executeRequest(request, HttpMethod.HEAD, oldValue.getEtag(), oldValue.getLastModified());
+                if (response.getStatusCode() == 304) {
+                    LOGGER.debug("The entry with key  'itemId: {}, locale: {}' was not modified since last fetch.", key.getItemId(), key.getLocale());
+                    return oldValue;
+                }
+                LOGGER.debug("The entry with key 'itemId: {}, locale: {}' was modified since last fetch. Reloading...", key.getItemId(), key.getLocale());
+                return load(key);
+            });
+
+            timerService.getExecutor().execute(task);
+
+            return task;
+        };
+    });
 
     /**
      * Initialises a new {@link SchedJoulesPagesAPI}.
@@ -109,7 +152,7 @@ public class SchedJoulesPagesAPI extends AbstractSchedJoulesAPI {
         request.setQueryParameter(SchedJoulesCommonParameter.locale.name(), locale);
         // TODO: resolve the pageId and add it to the request
 
-        return executeRequest(request);
+        return executeRequest(request).getItemData();
     }
 
     /**
@@ -132,11 +175,7 @@ public class SchedJoulesPagesAPI extends AbstractSchedJoulesAPI {
      * @throws OXException if an error is occurred
      */
     public JSONObject getPage(int pageId, String locale) throws OXException {
-        SchedJoulesRequest request = new SchedJoulesRequest(SchedJoulesRESTBindPoint.pages.getAbsolutePath() + "/" + pageId);
-        request.setQueryParameter(SchedJoulesCommonParameter.locale.name(), Strings.isEmpty(locale) ? DEFAULT_LOCALE : locale);
-        request.setPageId(pageId);
-
-        return executeRequest(request);
+        return fetchPage(pageId, locale).getItemData();
     }
 
     /**
@@ -149,7 +188,7 @@ public class SchedJoulesPagesAPI extends AbstractSchedJoulesAPI {
     public JSONObject search(String query) throws OXException {
         SchedJoulesRequest request = new SchedJoulesRequest(SchedJoulesRESTBindPoint.search);
         request.setQueryParameter(SchedJoulesSearchParameter.q.name(), query);
-        return executeRequest(request);
+        return executeRequest(request).getItemData();
     }
 
     /**
@@ -179,6 +218,24 @@ public class SchedJoulesPagesAPI extends AbstractSchedJoulesAPI {
         return (JSONObject) response.getResponseBody();
     }
 
+    //////////////////////////////////////////// HELPERS /////////////////////////////////////////////
+
+    /**
+     * Fetches the page
+     * 
+     * @param pageId
+     * @param locale
+     * @return
+     * @throws OXException
+     */
+    private SchedJoulesPage fetchPage(int pageId, String locale) throws OXException {
+        try {
+            return pagesCache.get(new SchedJoulesCachedItemKey(pageId, locale));
+        } catch (ExecutionException e) {
+            throw SchedJoulesAPIExceptionCodes.UNEXPECTED_ERROR.create(e.getMessage(), e);
+        }
+    }
+
     /**
      * Executes the specified request and returns the {@link JSONObject} payload of the response
      * 
@@ -186,18 +243,8 @@ public class SchedJoulesPagesAPI extends AbstractSchedJoulesAPI {
      * @return The {@link JSONObject} of the response payload
      * @throws OXException if an error is occurred
      */
-    private JSONObject executeRequest(SchedJoulesRequest request) throws OXException {
-        try {
-            return pagesCache.get(new SchedJoulesCachedItemKey(request.getPageId(), request.getQueryParameters().get(SchedJoulesCommonParameter.locale.name())), () -> {
-                SchedJoulesResponse response = client.executeRequest(request);
-                SchedJoulesCachedItem cachedItem = new SchedJoulesCachedItem();
-                cachedItem.setItemData((JSONObject) response.getResponseBody());
-                cachedItem.setLastModified(response.getLastModified());
-                cachedItem.setEtag(response.getETag());
-                return cachedItem;
-            }).getItemData();
-        } catch (ExecutionException e) {
-            throw SchedJoulesAPIExceptionCodes.UNEXPECTED_ERROR.create(e.getMessage(), e);
-        }
+    private SchedJoulesPage executeRequest(SchedJoulesRequest request) throws OXException {
+        SchedJoulesResponse response = client.executeRequest(request);
+        return new SchedJoulesPageBuilder().itemData((JSONObject) response.getResponseBody()).etag(response.getETag()).lastModified(response.getLastModified()).build();
     }
 }

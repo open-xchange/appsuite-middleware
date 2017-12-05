@@ -6,6 +6,7 @@ Bundle-Version: 7.10.0
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.google.common.cache;version="23.0.0",
+ com.google.common.util.concurrent;version="23.0.0",
  com.openexchange.chronos,
  com.openexchange.chronos.exception,
  com.openexchange.chronos.ical,
@@ -17,6 +18,7 @@ Import-Package: com.google.common.cache;version="23.0.0",
  com.openexchange.rest.client.httpclient,
  com.openexchange.server,
  com.openexchange.session,
+ com.openexchange.timer,
  com.openexchange.tools.id,
  org.apache.commons.io,
  org.apache.http,

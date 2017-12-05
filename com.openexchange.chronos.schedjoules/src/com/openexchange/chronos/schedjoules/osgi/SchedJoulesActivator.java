@@ -57,6 +57,7 @@ import com.openexchange.chronos.schedjoules.impl.SchedJoulesServiceImpl;
 import com.openexchange.config.Reloadable;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.timer.TimerService;
 
 /**
  * {@link SchedJoulesActivator}
@@ -79,7 +80,7 @@ public class SchedJoulesActivator extends HousekeepingActivator {
      */
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { LeanConfigurationService.class, ICalService.class };
+        return new Class<?>[] { LeanConfigurationService.class, ICalService.class, TimerService.class };
     }
 
     /*

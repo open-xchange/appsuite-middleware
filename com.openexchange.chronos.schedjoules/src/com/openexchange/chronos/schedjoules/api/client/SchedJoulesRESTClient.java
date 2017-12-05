@@ -396,6 +396,23 @@ public class SchedJoulesRESTClient implements Closeable, Reloadable {
     }
 
     /**
+     * Executes the specified {@link SchedJoulesRequest} with the specified method
+     * 
+     * @param url The {@link URL}
+     * @param httpMethod the {@link HttpMethod} to use
+     * @param eTag The optional etag to use
+     * @param lastModified The optional last modified timestamp to use
+     * @return The {@link SchedJoulesResponse}
+     * @throws OXException if an error is occurred
+     */
+    public SchedJoulesResponse executeRequest(SchedJoulesRequest request, HttpMethod httpMethod, String eTag, long lastModified) throws OXException {
+        HttpRequestBase httpRequest = createRequest(httpMethod);
+        prepareRequest(httpRequest, SCHEME, BASE_URL, request.getPath(), prepareQuery(request.getQueryParameters()), eTag, lastModified);
+        httpRequest.addHeader(HttpHeaders.AUTHORIZATION, authorizationHeader);
+        return executeRequest(httpRequest);
+    }
+
+    /**
      * Executes a request with the specified method to the specified {@link URL}
      * 
      * @param url The {@link URL}
