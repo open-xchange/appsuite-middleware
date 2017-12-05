@@ -284,8 +284,9 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
      */
     @Override
     public boolean isEnabled(Session session) {
-        LeanConfigurationService leanConfigService = services.getService(LeanConfigurationService.class);
-        return leanConfigService.getBooleanProperty(session.getUserId(), session.getContextId(), MailAuthenticityProperty.enabled);
+        // MailAuthenticityProperty.enabled is already checked in MailAuthenticityHandlerRegistryImpl
+        // No further individual conditions to check
+        return true;
     }
 
     /*
