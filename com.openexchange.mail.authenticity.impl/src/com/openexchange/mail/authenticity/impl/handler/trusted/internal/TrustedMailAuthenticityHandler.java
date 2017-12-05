@@ -158,7 +158,9 @@ public class TrustedMailAuthenticityHandler implements ForcedReloadable, Trusted
                 List<MailAuthenticityMechanismResult> results = authenticityResult.getAttribute(DefaultMailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS, List.class);
                 results.add(new TrustedMailResult(mailAddress, null, SimplePassFailResult.PASS));
                 authenticityResult.addAttribute(TrustedMailResultKey.TRUSTED_MAIL, true);
-                authenticityResult.addAttribute(TrustedMailResultKey.IMAGE, trustedDomain.getImage().getUID());
+                if(trustedDomain.getImage() != null) {
+                    authenticityResult.addAttribute(TrustedMailResultKey.IMAGE, trustedDomain.getImage().getUID());
+                }
             }
         }
     }
@@ -185,28 +187,30 @@ public class TrustedMailAuthenticityHandler implements ForcedReloadable, Trusted
 
     private void init(ConfigurationService configurationService) throws OXException {
         String commaSeparatedListOfTenants = configurationService.getProperty(PREFIX + TENANT, "");
-        String[] tenants = Strings.splitByCommaNotInQuotes(commaSeparatedListOfTenants);
-        for (String tenant : tenants) {
-            String commaSeparatedListOfMailAddresses = configurationService.getProperty(PREFIX + tenant + CONFIG, (String) null);
-            if (Strings.isNotEmpty(commaSeparatedListOfMailAddresses)) {
-                String[] mailAddresses = Strings.splitByCommaNotInQuotes(commaSeparatedListOfMailAddresses);
-                String fallbackImageStr = configurationService.getProperty(PREFIX + tenant + FALLBACK_IMAGE, (String) null);
-                Icon fallbackImage = null;
-                if (!Strings.isEmpty(fallbackImageStr)) {
-                    fallbackImage = getIcon(fallbackImageStr, tenant);
-                }
-                Map<String, String> images = configurationService.getProperties(new PropertyFilter() {
-
-                    @Override
-                    public boolean accept(String name, String value) throws OXException {
-                        return name.startsWith(PREFIX + tenant + IMAGE);
+        if (!Strings.isEmpty(commaSeparatedListOfTenants)) {
+            String[] tenants = Strings.splitByCommaNotInQuotes(commaSeparatedListOfTenants);
+            for (String tenant : tenants) {
+                String commaSeparatedListOfMailAddresses = configurationService.getProperty(PREFIX + tenant + CONFIG, (String) null);
+                if (Strings.isNotEmpty(commaSeparatedListOfMailAddresses)) {
+                    String[] mailAddresses = Strings.splitByCommaNotInQuotes(commaSeparatedListOfMailAddresses);
+                    String fallbackImageStr = configurationService.getProperty(PREFIX + tenant + FALLBACK_IMAGE, (String) null);
+                    Icon fallbackImage = null;
+                    if (!Strings.isEmpty(fallbackImageStr)) {
+                        fallbackImage = getIcon(fallbackImageStr, tenant);
                     }
-                });
-                List<TrustedMail> trustedMailList = new ArrayList<>();
-                for (String mailAddress : mailAddresses) {
-                    trustedMailList.add(getTrustedMail(mailAddress, images, fallbackImage, tenant));
+                    Map<String, String> images = configurationService.getProperties(new PropertyFilter() {
+
+                        @Override
+                        public boolean accept(String name, String value) throws OXException {
+                            return name.startsWith(PREFIX + tenant + IMAGE);
+                        }
+                    });
+                    List<TrustedMail> trustedMailList = new ArrayList<>();
+                    for (String mailAddress : mailAddresses) {
+                        trustedMailList.add(getTrustedMail(mailAddress, images, fallbackImage, tenant));
+                    }
+                    trustedMailAddressesPerTenant.put(tenant, trustedMailList);
                 }
-                trustedMailAddressesPerTenant.put(tenant, trustedMailList);
             }
         }
 
