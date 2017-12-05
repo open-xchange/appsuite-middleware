@@ -4,7 +4,7 @@ Bundle-Name: The JSON interface for AJAX Job Queue
 Bundle-SymbolicName: com.openexchange.ajax.requesthandler.jobqueue.json
 Bundle-Version: 7.8.4
 Bundle-Vendor: OX Software GmbH
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: com.google.common.annotations,
  com.google.common.base,
  com.google.common.collect,
