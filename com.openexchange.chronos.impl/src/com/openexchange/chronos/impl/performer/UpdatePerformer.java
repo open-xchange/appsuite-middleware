@@ -49,6 +49,8 @@
 
 package com.openexchange.chronos.impl.performer;
 
+import static com.openexchange.chronos.common.CalendarUtils.calculateEnd;
+import static com.openexchange.chronos.common.CalendarUtils.calculateStart;
 import static com.openexchange.chronos.common.CalendarUtils.combine;
 import static com.openexchange.chronos.common.CalendarUtils.contains;
 import static com.openexchange.chronos.common.CalendarUtils.filter;
@@ -88,6 +90,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import org.dmfs.rfc5545.DateTime;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Attendee;
@@ -297,6 +300,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
              * adjust change & delete exceptions as needed
              */
             adjustExceptionsOnReschedule(eventUpdate);
+            //            propagateToChangeExceptions(eventUpdate, attendeeHelper);
             /*
              * check for conflicts
              */
@@ -322,7 +326,11 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
          * process any attendee updates
          */
         if (eventData.containsAttendees()) {
-            wasUpdated |= updateAttendees(originalEvent, eventData, attendeeHelper);
+            if (updateAttendees(originalEvent, eventData, attendeeHelper)) {
+
+                //
+                wasUpdated = true;
+            }
         } else if (null != eventUpdate && needsParticipationStatusReset(eventUpdate)) {
             wasUpdated |= resetParticipationStatus(originalEvent.getId(), originalEvent.getAttendees());
         }
@@ -444,6 +452,87 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
             }
         }
         return wasUpdated;
+    }
+
+    private boolean propagateToChangeExceptions(ItemUpdate<Event, EventField> eventUpdate, AttendeeHelper attendeeHelper) throws OXException {
+        /*
+         * check if applicable for event update
+         */
+        Event originalEvent = eventUpdate.getOriginal();
+        if (false == isSeriesMaster(originalEvent) || isNullOrEmpty(originalEvent.getChangeExceptionDates())) {
+            return false;
+        }
+        boolean wasUpdated = false;
+        for (Event changeException : loadExceptionData(originalEvent.getSeriesId())) {
+            wasUpdated |= propagateToChangeException(eventUpdate, changeException, attendeeHelper);
+        }
+        return wasUpdated;
+    }
+
+    private boolean propagateToChangeException(ItemUpdate<Event, EventField> eventUpdate, Event originalException, AttendeeHelper attendeeHelper) throws OXException {
+        Event originalMaster = eventUpdate.getOriginal();
+        Event updatedMaster = eventUpdate.getUpdate();
+        RecurrenceId recurrenceId = originalException.getRecurrenceId();
+        if (false == isSeriesMaster(originalMaster) || false == isSeriesException(originalException)) {
+            throw new UnsupportedOperationException();
+        }
+        Event exceptionUpdate = EventMapper.getInstance().copy(originalException, null, (EventField[]) null);
+        boolean needsUpdate = false;
+
+        for (EventField updatedField : eventUpdate.getUpdatedFields()) {
+            switch (updatedField) {
+                /*
+                 * propagate simple property updates if equal to original value in master
+                 */
+                case SUMMARY:
+                case LOCATION:
+                case DESCRIPTION:
+                case COLOR:
+                case URL:
+                case CATEGORIES:
+                    if (EventMapper.getInstance().equalsByFields(originalMaster, originalException, updatedField)) {
+                        exceptionUpdate = EventMapper.getInstance().copy(updatedMaster, exceptionUpdate, updatedField);
+                        needsUpdate = true;
+                    }
+                    break;
+                /*
+                 * propagate start/enddate change if timeslot is equal to original value in master
+                 */
+                case START_DATE:
+                case END_DATE:
+
+                    //TODO: not possible at the moment, as recurrence id changes along with updated master startdate
+
+                    DateTime occurrenceStart = calculateStart(originalMaster, recurrenceId);
+                    DateTime occurrenceEnd = calculateEnd(originalMaster, recurrenceId);
+                    if (occurrenceStart.equals(originalException.getStartDate()) && occurrenceEnd.equals(originalException.getEndDate())) {
+                        exceptionUpdate.setStartDate(calculateStart(updatedMaster, recurrenceId));
+                        exceptionUpdate.setEndDate(calculateEnd(updatedMaster, recurrenceId));
+                        needsUpdate = true;
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
+        if (attendeeHelper.hasChanges()) {
+            for (Attendee newAttendee : attendeeHelper.getAttendeesToInsert()) {
+                if (false == contains(exceptionUpdate.getAttendees(), newAttendee)) {
+                    needsUpdate |= exceptionUpdate.getAttendees().add(newAttendee);
+                }
+            }
+            for (Attendee removedAttendee : attendeeHelper.getAttendeesToDelete()) {
+                Attendee matchingAttendee = find(exceptionUpdate.getAttendees(), removedAttendee);
+                if (null != matchingAttendee) {
+                    needsUpdate |= exceptionUpdate.getAttendees().remove(matchingAttendee);
+                }
+            }
+        }
+        if (needsUpdate && updateEvent(originalException, exceptionUpdate)) {
+            resultTracker.trackUpdate(originalException, loadEventData(originalException.getId()));
+            return true;
+        }
+        return false;
     }
 
     /**
