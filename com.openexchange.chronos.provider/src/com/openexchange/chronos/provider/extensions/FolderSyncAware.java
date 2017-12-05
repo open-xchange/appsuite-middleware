@@ -51,38 +51,64 @@ package com.openexchange.chronos.provider.extensions;
 
 import java.util.List;
 import com.openexchange.chronos.Event;
-import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.service.CalendarParameters;
-import com.openexchange.chronos.service.SearchFilter;
+import com.openexchange.chronos.service.UpdatesResult;
 import com.openexchange.exception.OXException;
 
 /**
- * {@link BasicSearchAware}
+ * {@link FolderSyncAware}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public interface BasicSearchAware extends SearchAware {
+public interface FolderSyncAware extends SyncAware {
 
     /**
-     * Searches for events by one or more queries in the fields {@link EventField#SUMMARY}, {@link EventField#DESCRIPTION} and
-     * {@link EventField#CATEGORIES}. The queries are surrounded by wildcards implicitly to follow a <i>contains</i> semantic.
-     * Additional, storage-specific search filters can be applied.
+     * Gets lists of new and updated as well as deleted events since a specific timestamp in a folder.
      * <p/>
      * The following calendar parameters are evaluated:
      * <ul>
      * <li>{@link CalendarParameters#PARAMETER_FIELDS}</li>
      * <li>{@link CalendarParameters#PARAMETER_RANGE_START}</li>
      * <li>{@link CalendarParameters#PARAMETER_RANGE_END}</li>
-     * <li>{@link CalendarParameters#PARAMETER_ORDER}</li>
-     * <li>{@link CalendarParameters#PARAMETER_ORDER_BY}</li>
+     * <li>{@link CalendarParameters#PARAMETER_IGNORE} ("changed" and "deleted")</li>
      * <li>{@link CalendarParameters#PARAMETER_EXPAND_OCCURRENCES}</li>
+     * <li>{@link CalendarParameters#PARAMETER_INCLUDE_PRIVATE}</li>
      * </ul>
      *
-     * @param filters A list of additional filters to be applied on the search, or <code>null</code> if not specified
-     * @param queries The queries to search for, or <code>null</code> if not specified
-     * @return The found events, or an empty list if there are none
+     * @param folderId The fully qualified identifier of the folder to get the updated events from
+     * @param updatedSince The timestamp since when the updates should be retrieved
+     * @return The updates result yielding lists of new/modified and deleted events
      */
-    List<Event> searchEvents(List<SearchFilter> filters, List<String> queries) throws OXException;
+    UpdatesResult getUpdatedEventsInFolder(String folderId, long updatedSince) throws OXException;
+
+    /**
+     * Gets the sequence number of a calendar folder, which is the highest last-modification timestamp of the folder itself and his
+     * contents. Distinct object access permissions (e.g. <i>read own</i>) are not considered.
+     *
+     * @param folderId The identifier of the folder to get the sequence number for
+     * @return The sequence number
+     */
+    long getSequenceNumber(String folderId) throws OXException;
+
+    /**
+     * Resolves a specific event (and any overridden instances or <i>change exceptions</i>) by its externally used resource name, which
+     * typically matches the event's UID or filename property. The lookup is performed within a specific folder in a case-sensitive way.
+     * If an event series with overridden instances is matched, the series master event will be the first event in the returned list.
+     * <p/>
+     * It is also possible that that only overridden instances of an event series are returned, which may be the case for <i>detached</i>
+     * instances where the user has no access to the corresponding series master event.
+     * <p/>
+     * The following calendar parameters are evaluated:
+     * <ul>
+     * <li>{@link CalendarParameters#PARAMETER_FIELDS}</li>
+     * </ul>
+     *
+     * @param folderId The identifier of the folder to resolve the resource name in
+     * @param resourceName The resource name to resolve
+     * @return The resolved event(s), or <code>null</code> if no matching event was found
+     * @see <a href="https://tools.ietf.org/html/rfc4791#section-4.1">RFC 4791, section 4.1</a>
+     */
+    List<Event> resolveResource(String folderId, String resourceName) throws OXException;
 
 }

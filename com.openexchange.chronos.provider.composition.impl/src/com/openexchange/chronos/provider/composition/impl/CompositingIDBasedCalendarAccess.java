@@ -102,6 +102,8 @@ import com.openexchange.chronos.provider.composition.impl.idmangling.IDManglingC
 import com.openexchange.chronos.provider.composition.impl.idmangling.IDManglingUpdatesResult;
 import com.openexchange.chronos.provider.extensions.BasicSearchAware;
 import com.openexchange.chronos.provider.extensions.BasicSyncAware;
+import com.openexchange.chronos.provider.extensions.FolderSearchAware;
+import com.openexchange.chronos.provider.extensions.FolderSyncAware;
 import com.openexchange.chronos.provider.extensions.PersonalAlarmAware;
 import com.openexchange.chronos.provider.extensions.SearchAware;
 import com.openexchange.chronos.provider.extensions.SyncAware;
@@ -278,9 +280,9 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
             int accountId = i(entry.getKey());
             try {
                 List<Event> eventsInAccount;
-                CalendarAccess access = getAccess(accountId);
-                if (SearchAware.class.isInstance(access)) {
-                    eventsInAccount = ((SearchAware) access).searchEvents(relativeFolderIds, filters, queries);
+                CalendarAccess access = getAccess(accountId, SearchAware.class);
+                if (FolderSearchAware.class.isInstance(access)) {
+                    eventsInAccount = ((FolderSearchAware) access).searchEvents(relativeFolderIds, filters, queries);
                 } else if (BasicSearchAware.class.isInstance(access)) {
                     eventsInAccount = ((BasicSearchAware) access).searchEvents(filters, queries);
                 } else {
@@ -299,7 +301,15 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
         List<Event> events = new ArrayList<Event>();
         for (CalendarAccount account : getAccounts(CalendarCapability.SEARCH)) {
             try {
-                List<Event> eventsInAccount = getAccess(account, SearchAware.class).searchEvents(null, filters, queries);
+                List<Event> eventsInAccount;
+                CalendarAccess access = getAccess(account, SearchAware.class);
+                if (FolderSearchAware.class.isInstance(access)) {
+                    eventsInAccount = ((FolderSearchAware) access).searchEvents(null, filters, queries);
+                } else if (BasicSearchAware.class.isInstance(access)) {
+                    eventsInAccount = ((BasicSearchAware) access).searchEvents(filters, queries);
+                } else {
+                    throw CalendarExceptionCodes.UNSUPPORTED_OPERATION_FOR_PROVIDER.create(account.getProviderId());
+                }
                 events.addAll(withUniqueIDs(eventsInAccount, account.getAccountId()));
                 getSelfProtection().checkEventCollection(events);
             } catch (OXException e) {
@@ -316,12 +326,12 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
     public UpdatesResult getUpdatedEventsInFolder(String folderId, long updatedSince) throws OXException {
         CalendarAccount account = getAccount(getAccountId(folderId));
         try {
-            CalendarAccess access = getAccess(account.getAccountId());
-            if (SyncAware.class.isInstance(access)) {
-                UpdatesResult updatesResult = getAccess(account.getAccountId(), SyncAware.class).getUpdatedEventsInFolder(getRelativeFolderId(folderId), updatedSince);
+            CalendarAccess access = getAccess(account.getAccountId(), SyncAware.class);
+            if (FolderSyncAware.class.isInstance(access)) {
+                UpdatesResult updatesResult = ((FolderSyncAware) access).getUpdatedEventsInFolder(getRelativeFolderId(folderId), updatedSince);
                 return new IDManglingUpdatesResult(updatesResult, account.getAccountId());
             } else if (BasicSyncAware.class.isInstance(access)) {
-                UpdatesResult updatesResult = getAccess(account.getAccountId(), BasicSyncAware.class).getUpdatedEvents(updatedSince);
+                UpdatesResult updatesResult = ((BasicSyncAware) access).getUpdatedEvents(updatedSince);
                 return new IDManglingUpdatesResult(updatesResult, account.getAccountId());
             } else {
                 throw CalendarExceptionCodes.UNSUPPORTED_OPERATION_FOR_PROVIDER.create(account.getProviderId());
@@ -343,12 +353,20 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
 
     @Override
     public List<Event> resolveResource(String folderId, String resourceName) throws OXException {
-        int accountId = getAccountId(folderId);
+        CalendarAccount account = getAccount(getAccountId(folderId));
         try {
-            List<Event> events = getAccess(accountId, SyncAware.class).resolveResource(getRelativeFolderId(folderId), resourceName);
-            return withUniqueIDs(events, accountId);
+            CalendarAccess access = getAccess(account.getAccountId(), SyncAware.class);
+            if (FolderSyncAware.class.isInstance(access)) {
+                List<Event> events = ((FolderSyncAware) access).resolveResource(getRelativeFolderId(folderId), resourceName);
+                return withUniqueIDs(events, account.getAccountId());
+            } else if (BasicSyncAware.class.isInstance(access)) {
+                List<Event> events = ((BasicSyncAware) access).resolveResource(resourceName);
+                return withUniqueIDs(events, account.getAccountId());
+            } else {
+                throw CalendarExceptionCodes.UNSUPPORTED_OPERATION_FOR_PROVIDER.create(account.getProviderId());
+            }
         } catch (OXException e) {
-            throw withUniqueIDs(e, accountId);
+            throw withUniqueIDs(e, account.getAccountId());
         }
     }
 

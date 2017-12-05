@@ -87,7 +87,7 @@ public enum CalendarCapability {
      *
      * @see QuotaAware
      */
-    QUOTA("quota", SearchAware.class),
+    QUOTA("quota", QuotaAware.class),
     /**
      * Support for personal alarms on events.
      *

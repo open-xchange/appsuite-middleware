@@ -51,7 +51,6 @@ package com.openexchange.chronos.provider.extensions;
 
 import java.util.List;
 import com.openexchange.chronos.Event;
-import com.openexchange.chronos.provider.CalendarAccess;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.UpdatesResult;
 import com.openexchange.exception.OXException;
@@ -62,7 +61,7 @@ import com.openexchange.exception.OXException;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public interface BasicSyncAware extends CalendarAccess {
+public interface BasicSyncAware extends SyncAware {
 
     /**
      * Gets lists of new and updated as well as deleted events since a specific timestamp.
