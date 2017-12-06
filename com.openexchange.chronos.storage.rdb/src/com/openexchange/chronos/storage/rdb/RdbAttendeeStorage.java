@@ -441,7 +441,7 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
             .append(" WHERE cid=? AND account=? AND event").append(getPlaceholders(eventIds.length))
         ;
         if (null != internal) {
-            stringBuilder.append(" AND entity IS ").append(internal.booleanValue() ? " NOT NULL" : "NULL");
+            stringBuilder.append(" AND entity").append(internal.booleanValue() ? ">=0" : "<0");
         }
         stringBuilder.append(';');
         Map<String, List<Attendee>> attendeesByEventId = new HashMap<String, List<Attendee>>(eventIds.length);
