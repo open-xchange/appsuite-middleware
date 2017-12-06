@@ -50,39 +50,21 @@
 package com.openexchange.mail.authenticity.test;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
 import org.powermock.modules.junit4.PowerMockRunner;
-import com.openexchange.config.lean.LeanConfigurationService;
-import com.openexchange.exception.OXException;
 import com.openexchange.mail.authenticity.DefaultMailAuthenticityResultKey;
-import com.openexchange.mail.authenticity.MailAuthenticityProperty;
 import com.openexchange.mail.authenticity.MailAuthenticityStatus;
-import com.openexchange.mail.authenticity.impl.core.MailAuthenticityHandlerImpl;
-import com.openexchange.mail.authenticity.mechanism.AuthenticityMechanismResult;
 import com.openexchange.mail.authenticity.mechanism.MailAuthenticityMechanismResult;
 import com.openexchange.mail.authenticity.mechanism.dkim.DKIMResult;
 import com.openexchange.mail.authenticity.mechanism.dmarc.DMARCResult;
 import com.openexchange.mail.authenticity.mechanism.spf.SPFResult;
-import com.openexchange.mail.dataobjects.MailAuthenticityResult;
-import com.openexchange.mail.dataobjects.MailMessage;
-import com.openexchange.mail.mime.HeaderCollection;
-import com.openexchange.mail.mime.MessageHeaders;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.session.Session;
 
 /**
  * {@link TestMailAuthenticityHandler}
@@ -91,49 +73,13 @@ import com.openexchange.session.Session;
  */
 @SuppressWarnings({ "unchecked", "rawtypes" })
 @RunWith(PowerMockRunner.class)
-public class TestMailAuthenticityHandler {
-
-    private MailMessage mailMessage;
-    private HeaderCollection headerCollection;
-    private ArgumentCaptor<MailAuthenticityResult> argumentCaptor;
-    private MailAuthenticityHandlerImpl handler;
-    private MailAuthenticityResult result;
-    private Session session;
-    private LeanConfigurationService leanConfig;
-    private InternetAddress[] fromAddresses;
+public class TestMailAuthenticityHandler extends AbstractTestMailAuthenticity {
 
     /**
      * Initialises a new {@link TestMailAuthenticityHandler}.
      */
     public TestMailAuthenticityHandler() {
         super();
-    }
-
-    /**
-     * Sets up the test case
-     */
-    @Before
-    public void setUpTest() throws Exception {
-        argumentCaptor = ArgumentCaptor.forClass(MailAuthenticityResult.class);
-        headerCollection = new HeaderCollection();
-
-        session = mock(Session.class);
-
-        when(session.getUserId()).thenReturn(1);
-        when(session.getContextId()).thenReturn(1);
-
-        leanConfig = mock(LeanConfigurationService.class);
-        ServiceLookup services = mock(ServiceLookup.class);
-        when(services.getService(LeanConfigurationService.class)).thenReturn(leanConfig);
-        when(leanConfig.getProperty(1, 1, MailAuthenticityProperty.AUTHSERV_ID)).thenReturn("ox.io");
-
-        mailMessage = mock(MailMessage.class);
-        when(mailMessage.getHeaders()).thenReturn(headerCollection);
-
-        fromAddresses = new InternetAddress[1];
-        when(mailMessage.getFrom()).thenReturn(fromAddresses);
-
-        handler = new MailAuthenticityHandlerImpl(services);
     }
 
     /**
@@ -495,85 +441,4 @@ public class TestMailAuthenticityHandler {
 
     ///////////////////////////// HELPERS //////////////////////////////
 
-    /**
-     * Asserts that the {@link MailAuthenticityResult} contains the specified amount of results
-     *
-     * @param amount The amount of results
-     */
-    private void assertAmount(int amount) {
-        assertEquals("The mail authenticity mechanism results amount does not match", amount, result.getAttribute(DefaultMailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS, List.class).size());
-    }
-
-    /**
-     * Asserts that the specified {@link MailAuthenticityMechanismResult} contains the expected domain and status result
-     *
-     * @param actualMechanismResult The {@link MailAuthenticityMechanismResult}
-     * @param expectedDomain The expected domain
-     * @param expectedResult The expected result
-     */
-    private void assertAuthenticityMechanismResult(MailAuthenticityMechanismResult actualMechanismResult, String expectedDomain, AuthenticityMechanismResult expectedResult) {
-        assertEquals("The mechanism's domain does not match", expectedDomain, actualMechanismResult.getDomain());
-        assertNotNull("The mechanism's result is null", actualMechanismResult.getResult());
-        AuthenticityMechanismResult s = actualMechanismResult.getResult();
-        assertEquals("The mechanism's result does not match", expectedResult.getTechnicalName(), s.getTechnicalName());
-    }
-
-    /**
-     * Asserts that the specified {@link MailAuthenticityMechanismResult} contains the expected domain, reason and status result
-     *
-     * @param actualMechanismResult The {@link MailAuthenticityMechanismResult}
-     * @param expectedDomain The expected domain
-     * @param expectedReason The expected reason
-     * @param expectedResult The expected result
-     */
-    private void assertAuthenticityMechanismResult(MailAuthenticityMechanismResult actualMechanismResult, String expectedDomain, String expectedReason, AuthenticityMechanismResult expectedResult) {
-        assertAuthenticityMechanismResult(actualMechanismResult, expectedDomain, expectedResult);
-        assertEquals("The mechanism's reason does not match", expectedReason, actualMechanismResult.getReason());
-    }
-
-    /**
-     * Asserts that the objets are equal
-     * 
-     * @param expected The expected {@link MailAuthenticityStatus}
-     * @param actual The actual {@link MailAuthenticityStatus}
-     */
-    private void assertStatus(MailAuthenticityStatus expected, MailAuthenticityStatus actual) {
-        assertEquals("The overall status does not match", expected, actual);
-    }
-
-    /**
-     * Asserts that the domains are euqla
-     * 
-     * @param expected The expected domain
-     * @param actual The actual domain
-     */
-    private void assertDomain(String expected, String actual) {
-        assertEquals("The domain does not match", expected, actual);
-    }
-
-    /**
-     * Performs the mail authenticity handling with no header
-     */
-    private void perform() {
-        perform(new String[] {});
-    }
-
-    /**
-     * Performs the mail authenticity handling with the specified headers and
-     * captures the result via the {@link ArgumentCaptor} to the 'result' object
-     *
-     * @param headers The 'Authentication-Results' headers to add
-     */
-    private void perform(String... headers) {
-        try {
-            for (String header : headers) {
-                headerCollection.addHeader(MessageHeaders.HDR_AUTHENTICATION_RESULTS, header);
-            }
-            handler.handle(session, mailMessage);
-            verify(mailMessage).setAuthenticityResult(argumentCaptor.capture());
-            result = argumentCaptor.getValue();
-        } catch (OXException e) {
-            fail(e.getMessage());
-        }
-    }
 }
