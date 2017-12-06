@@ -74,6 +74,7 @@ import com.openexchange.timer.TimerService;
 public abstract class AbstractSchedJoulesCacheLoader<T> extends CacheLoader<T, SchedJoulesPage> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractSchedJoulesCacheLoader.class);
+
     final SchedJoulesRESTClient client;
     final SchedJoulesRESTBindPoint restBindPoint;
 
@@ -89,6 +90,11 @@ public abstract class AbstractSchedJoulesCacheLoader<T> extends CacheLoader<T, S
         this.restBindPoint = restBindPoint;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.google.common.cache.CacheLoader#reload(java.lang.Object, java.lang.Object)
+     */
     @Override
     public ListenableFuture<SchedJoulesPage> reload(T key, SchedJoulesPage oldValue) throws Exception {
         TimerService timerService = Services.getService(TimerService.class);

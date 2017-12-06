@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2017-2020 OX Software GmbH
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,22 +49,26 @@
 
 package com.openexchange.chronos.schedjoules.api;
 
-import com.openexchange.chronos.schedjoules.api.client.SchedJoulesRESTClient;
-
 /**
- * {@link AbstractSchedJoulesAPI}
+ * {@link SchedJoulesAPIDefaultValues}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-abstract class AbstractSchedJoulesAPI {
-
-    final SchedJoulesRESTClient client;
+public final class SchedJoulesAPIDefaultValues {
 
     /**
-     * Initialises a new {@link AbstractSchedJoulesAPI}.
+     * Defines the value of the default/fall-back locale, when the
+     * URL parameter is missing
      */
-    public AbstractSchedJoulesAPI(SchedJoulesRESTClient client) {
-        super();
-        this.client = client;
-    }
+    public static final String DEFAULT_LOCALE = "en";
+    /**
+     * Defines the value of the default/fall-back language, when the
+     * URL parameter is missing
+     */
+    public static final String DEFAULT_LOCATION = "us";
+    /**
+     * Defines the value of the default/fall-back maxRows, when the
+     * URL parameter is missing
+     */
+    public static int MAX_ROWS = 20;
 }

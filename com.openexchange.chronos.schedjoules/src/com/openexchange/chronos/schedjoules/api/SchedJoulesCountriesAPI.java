@@ -84,7 +84,7 @@ public class SchedJoulesCountriesAPI extends AbstractSchedJoulesAPI {
      * @throws OXException if a parsing error is occurred
      */
     public JSONArray listCountries() throws OXException {
-        return listCountries(DEFAULT_LOCALE);
+        return listCountries(SchedJoulesAPIDefaultValues.DEFAULT_LOCALE);
     }
 
     /**

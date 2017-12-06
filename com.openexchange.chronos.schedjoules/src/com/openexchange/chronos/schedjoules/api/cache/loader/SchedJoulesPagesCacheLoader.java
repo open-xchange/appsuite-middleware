@@ -51,6 +51,7 @@ package com.openexchange.chronos.schedjoules.api.cache.loader;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.openexchange.chronos.schedjoules.api.SchedJoulesAPIDefaultValues;
 import com.openexchange.chronos.schedjoules.api.auxiliary.SchedJoulesCommonParameter;
 import com.openexchange.chronos.schedjoules.api.cache.SchedJoulesCachedItemKey;
 import com.openexchange.chronos.schedjoules.api.cache.SchedJoulesPage;
@@ -68,7 +69,6 @@ public class SchedJoulesPagesCacheLoader extends AbstractSchedJoulesCacheLoader<
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SchedJoulesPagesCacheLoader.class);
     // FIXME: consolidate in some common place
-    private static final String DEFAULT_LOCALE = "en";
 
     /**
      * Initialises a new {@link SchedJoulesPagesCacheLoader}.
@@ -89,7 +89,7 @@ public class SchedJoulesPagesCacheLoader extends AbstractSchedJoulesCacheLoader<
     public SchedJoulesPage load(SchedJoulesCachedItemKey key) throws Exception {
         LOGGER.debug("Loading entry with key 'itemId: {}, locale: {}'...", key.getItemId(), key.getLocale());
         SchedJoulesRequest request = new SchedJoulesRequest(restBindPoint.getAbsolutePath() + "/" + key.getItemId());
-        request.setQueryParameter(SchedJoulesCommonParameter.locale.name(), Strings.isEmpty(key.getLocale()) ? DEFAULT_LOCALE : key.getLocale());
+        request.setQueryParameter(SchedJoulesCommonParameter.locale.name(), Strings.isEmpty(key.getLocale()) ? SchedJoulesAPIDefaultValues.DEFAULT_LOCALE : key.getLocale());
         request.setPageId(key.getItemId());
 
         return executeRequest(request);

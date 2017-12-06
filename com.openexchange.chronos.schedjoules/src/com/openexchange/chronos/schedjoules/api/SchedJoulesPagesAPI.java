@@ -77,8 +77,6 @@ import com.openexchange.java.Strings;
  */
 public class SchedJoulesPagesAPI extends AbstractSchedJoulesAPI {
 
-    private static final int MAX_ROWS = 20;
-
     /**
      * Caches the page obejcts
      */
@@ -103,7 +101,7 @@ public class SchedJoulesPagesAPI extends AbstractSchedJoulesAPI {
      * @throws OXException
      */
     public JSONObject getRootPage() throws OXException {
-        return getRootPage(DEFAULT_LOCALE, DEFAULT_LOCATION);
+        return getRootPage(SchedJoulesAPIDefaultValues.DEFAULT_LOCALE, SchedJoulesAPIDefaultValues.DEFAULT_LOCATION);
     }
 
     /**
@@ -142,7 +140,7 @@ public class SchedJoulesPagesAPI extends AbstractSchedJoulesAPI {
      * @throws OXException if an error is occurred
      */
     public JSONObject getPage(int pageId) throws OXException {
-        return getPage(pageId, DEFAULT_LOCALE);
+        return getPage(pageId, SchedJoulesAPIDefaultValues.DEFAULT_LOCALE);
     }
 
     /**
@@ -185,14 +183,14 @@ public class SchedJoulesPagesAPI extends AbstractSchedJoulesAPI {
     public JSONObject search(String query, String locale, int countryId, int categoryId, int maxRows) throws OXException {
         SchedJoulesRequest request = new SchedJoulesRequest(SchedJoulesRESTBindPoint.pages.getAbsolutePath() + "/search");
         request.setQueryParameter(SchedJoulesSearchParameter.q.name(), query);
-        request.setQueryParameter(SchedJoulesSearchParameter.locale.name(), Strings.isEmpty(locale) ? DEFAULT_LOCALE : locale);
+        request.setQueryParameter(SchedJoulesSearchParameter.locale.name(), Strings.isEmpty(locale) ? SchedJoulesAPIDefaultValues.DEFAULT_LOCALE : locale);
         if (countryId > 0) {
             request.setQueryParameter(SchedJoulesSearchParameter.country_id.name(), Integer.toString(countryId));
         }
         if (categoryId > 0 && categoryId <= SchedJoulesCategory.values().length) {
             request.setQueryParameter(SchedJoulesSearchParameter.category_id.name(), Integer.toString(SchedJoulesCategory.values()[categoryId - 1].getId()));
         }
-        request.setQueryParameter(SchedJoulesSearchParameter.nr_results.name(), Integer.toString(maxRows <= 0 ? MAX_ROWS : maxRows));
+        request.setQueryParameter(SchedJoulesSearchParameter.nr_results.name(), Integer.toString(maxRows <= 0 ? SchedJoulesAPIDefaultValues.MAX_ROWS : maxRows));
         SchedJoulesResponse response = client.executeRequest(request);
         return (JSONObject) response.getResponseBody();
     }
