@@ -87,10 +87,10 @@ public class BrowseAction extends AbstractSchedJoulesAction implements AJAXActio
         // Execute the request
         SchedJoulesService service = services.getService(SchedJoulesService.class);
         if (pageId == null) {
-            return new AJAXRequestResult(service.getRoot(language, country).getData());
+            return new AJAXRequestResult(service.getRoot(session.getContextId(), language, country).getData());
         }
 
         int pid = requestData.getIntParameter(SchedJoulesBrowseParameter.ID);
-        return new AJAXRequestResult(service.getPage(pid, language).getData());
+        return new AJAXRequestResult(service.getPage(session.getContextId(), pid, language).getData());
     }
 }

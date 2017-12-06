@@ -60,40 +60,44 @@ public interface SchedJoulesService {
 
     /**
      * Retrieves the starting SchedJoules page.
+     * @param contextId The context identifier
      * 
      * @return The {@link SchedJoulesResult}
      * @throws OXException if an error is occurred
      */
-    SchedJoulesResult getRoot() throws OXException;
+    SchedJoulesResult getRoot(int contextId) throws OXException;
 
     /**
      * Retrieves the starting SchedJoules page for the specified location
      * in the specified locale
-     * 
+     * @param contextId The context identifier
      * @param locale The locale to use
      * @param location The location to use
+     * 
      * @return The {@link SchedJoulesResult}
      * @throws OXException if an error is occurred
      */
-    SchedJoulesResult getRoot(String locale, String location) throws OXException;
+    SchedJoulesResult getRoot(int contextId, String locale, String location) throws OXException;
 
     /**
      * Retrieves the SchedJoules page with the specified identifier
-     * 
+     * @param contextId The context identifier
      * @param pageId The page identifier
+     * 
      * @return The {@link SchedJoulesResult}
      * @throws OXException if an error is occurred
      */
-    SchedJoulesResult getPage(int pageId) throws OXException;
+    SchedJoulesResult getPage(int contextId, int pageId) throws OXException;
 
     /**
      * Retrieves the SchedJoules page with the specified identifier
-     * 
+     * @param contextId The context identifier
      * @param pageId The page identifier
+     * 
      * @return The {@link SchedJoulesResult}
      * @throws OXException if an error is occurred
      */
-    SchedJoulesResult getPage(int pageId, String locale) throws OXException;
+    SchedJoulesResult getPage(int contextId, int pageId, String locale) throws OXException;
 
     /**
      * Retrieves a list of supported country names with the default locale 'en'.
@@ -105,32 +109,36 @@ public interface SchedJoulesService {
 
     /**
      * Retrieves a list of supported and localised country names
-     * 
+     * @param contextId The context identifier
      * @param locale The locale
+     * 
      * @return The {@link SchedJoulesResult}
      * @throws OXException if an error is occurred
      */
-    SchedJoulesResult listCountries(String locale) throws OXException;
+    SchedJoulesResult listCountries(int contextId, String locale) throws OXException;
 
     /**
      * Retrieves a list of supported languages
+     * @param contextId The context identifier
      * 
      * @return The {@link SchedJoulesResult}
      * @throws OXException if an error is occurred
      */
-    SchedJoulesResult listLanguages() throws OXException;
+    SchedJoulesResult listLanguages(int contextId) throws OXException;
 
     /**
      * Performs a search with the specified parameters. If the country and/or category identifiers are
      * specified, then a search is only performed within those countries/categories respectively.
      * 
+     * @param contextId The context identifier
      * @param query The query (free text search query parameter)
      * @param locale The locale. Defaults to 'en' if empty
      * @param countryId The country identifier. Ignored if less than or equal to '0'.
      * @param categoryId The category identifier. Ignored if less than or equal to '0'.
      * @param maxRows The maximum amount of results. Defaults to 20.
+     * 
      * @return The {@link SchedJoulesResult}
      * @throws OXException if an error is occurred
      */
-    SchedJoulesResult search(String query, String locale, int countryId, int categoryId, int maxRows) throws OXException;
+    SchedJoulesResult search(int contextId, String query, String locale, int countryId, int categoryId, int maxRows) throws OXException;
 }

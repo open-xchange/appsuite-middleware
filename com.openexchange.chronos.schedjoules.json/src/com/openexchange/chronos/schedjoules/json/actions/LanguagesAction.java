@@ -84,6 +84,6 @@ public class LanguagesAction implements AJAXActionService {
     @Override
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
         SchedJoulesService service = services.getService(SchedJoulesService.class);
-        return new AJAXRequestResult(service.listLanguages().getData());
+        return new AJAXRequestResult(service.listLanguages(session.getContextId()).getData());
     }
 }

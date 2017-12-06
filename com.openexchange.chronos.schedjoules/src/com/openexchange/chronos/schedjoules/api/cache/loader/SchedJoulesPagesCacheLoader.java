@@ -68,7 +68,6 @@ import com.openexchange.java.Strings;
 public class SchedJoulesPagesCacheLoader extends AbstractSchedJoulesCacheLoader<SchedJoulesCachedItemKey> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SchedJoulesPagesCacheLoader.class);
-    // FIXME: consolidate in some common place
 
     /**
      * Initialises a new {@link SchedJoulesPagesCacheLoader}.

@@ -94,6 +94,6 @@ public class SearchAction extends AbstractSchedJoulesAction implements AJAXActio
 
         // Execute
         SchedJoulesService service = services.getService(SchedJoulesService.class);
-        return new AJAXRequestResult(service.search(query, locale, countryId, categoryId, maxRows).getData());
+        return new AJAXRequestResult(service.search(session.getContextId(), query, locale, countryId, categoryId, maxRows).getData());
     }
 }

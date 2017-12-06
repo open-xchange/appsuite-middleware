@@ -83,6 +83,6 @@ public class CountriesAction extends AbstractSchedJoulesAction implements AJAXAc
         String locale = getLanguage(requestData, session);
 
         SchedJoulesService service = services.getService(SchedJoulesService.class);
-        return new AJAXRequestResult(service.listCountries(locale).getData());
+        return new AJAXRequestResult(service.listCountries(session.getContextId(), locale).getData());
     }
 }

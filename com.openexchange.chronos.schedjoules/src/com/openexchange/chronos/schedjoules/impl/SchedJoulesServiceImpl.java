@@ -88,7 +88,7 @@ public class SchedJoulesServiceImpl implements SchedJoulesService {
      * @see com.openexchange.chronos.service.SchedJoulesService#getRoot()
      */
     @Override
-    public SchedJoulesResult getRoot() throws OXException {
+    public SchedJoulesResult getRoot(int contextId) throws OXException {
         return new SchedJoulesResult(filterContent(api.pages().getRootPage()));
     }
 
@@ -98,7 +98,7 @@ public class SchedJoulesServiceImpl implements SchedJoulesService {
      * @see com.openexchange.chronos.service.SchedJoulesService#getRoot(java.lang.String, java.lang.String)
      */
     @Override
-    public SchedJoulesResult getRoot(String locale, String location) throws OXException {
+    public SchedJoulesResult getRoot(int contextId, String locale, String location) throws OXException {
         return new SchedJoulesResult(filterContent(api.pages().getRootPage(locale, location)));
     }
 
@@ -108,7 +108,7 @@ public class SchedJoulesServiceImpl implements SchedJoulesService {
      * @see com.openexchange.chronos.service.SchedJoulesService#getPage(int)
      */
     @Override
-    public SchedJoulesResult getPage(int pageId) throws OXException {
+    public SchedJoulesResult getPage(int contextId, int pageId) throws OXException {
         return new SchedJoulesResult(filterContent(api.pages().getPage(pageId)));
     }
 
@@ -118,7 +118,7 @@ public class SchedJoulesServiceImpl implements SchedJoulesService {
      * @see com.openexchange.chronos.schedjoules.SchedJoulesService#getPage(int, java.lang.String)
      */
     @Override
-    public SchedJoulesResult getPage(int pageId, String locale) throws OXException {
+    public SchedJoulesResult getPage(int contextId, int pageId, String locale) throws OXException {
         return new SchedJoulesResult(filterContent(api.pages().getPage(pageId, locale)));
     }
 
@@ -138,7 +138,7 @@ public class SchedJoulesServiceImpl implements SchedJoulesService {
      * @see com.openexchange.chronos.schedjoules.SchedJoulesService#listCountries(java.lang.String)
      */
     @Override
-    public SchedJoulesResult listCountries(String locale) throws OXException {
+    public SchedJoulesResult listCountries(int contextId, String locale) throws OXException {
         return new SchedJoulesResult(api.countries().listCountries(locale));
     }
 
@@ -148,7 +148,7 @@ public class SchedJoulesServiceImpl implements SchedJoulesService {
      * @see com.openexchange.chronos.schedjoules.SchedJoulesService#listLanguages()
      */
     @Override
-    public SchedJoulesResult listLanguages() throws OXException {
+    public SchedJoulesResult listLanguages(int contextId) throws OXException {
         return new SchedJoulesResult(api.languages().listLanguages());
     }
 
@@ -158,7 +158,7 @@ public class SchedJoulesServiceImpl implements SchedJoulesService {
      * @see com.openexchange.chronos.schedjoules.SchedJoulesService#search(java.lang.String, java.lang.String, int, int, int)
      */
     @Override
-    public SchedJoulesResult search(String query, String locale, int countryId, int categoryId, int maxRows) throws OXException {
+    public SchedJoulesResult search(int contextId, String query, String locale, int countryId, int categoryId, int maxRows) throws OXException {
         return new SchedJoulesResult(filterContent(api.pages().search(query, locale, countryId, categoryId, maxRows)));
     }
 
