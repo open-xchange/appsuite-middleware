@@ -54,6 +54,7 @@ import java.util.concurrent.TimeUnit;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -87,6 +88,9 @@ public class SchedJoulesPagesAPI extends AbstractSchedJoulesAPI {
 
     private static final int MAX_ROWS = 20;
 
+    /**
+     * Caches the page obejcts
+     */
     private final LoadingCache<SchedJoulesCachedItemKey, SchedJoulesPage> pagesCache = CacheBuilder.newBuilder().maximumSize(1000).expireAfterAccess(24, TimeUnit.HOURS).refreshAfterWrite(24, TimeUnit.HOURS).build(new CacheLoader<SchedJoulesCachedItemKey, SchedJoulesPage>() {
 
         @Override
@@ -122,6 +126,11 @@ public class SchedJoulesPagesAPI extends AbstractSchedJoulesAPI {
     });
 
     /**
+     * Caches the root page item ids
+     */
+    private final Cache<String, Integer> rootItemIdCache = CacheBuilder.newBuilder().maximumSize(1000).expireAfterAccess(24, TimeUnit.HOURS).refreshAfterWrite(24, TimeUnit.HOURS).build();
+
+    /**
      * Initialises a new {@link SchedJoulesPagesAPI}.
      */
     SchedJoulesPagesAPI(SchedJoulesRESTClient client) {
@@ -147,12 +156,23 @@ public class SchedJoulesPagesAPI extends AbstractSchedJoulesAPI {
      * @throws OXException if an error is occurred
      */
     public JSONObject getRootPage(String locale, String location) throws OXException {
-        SchedJoulesRequest request = new SchedJoulesRequest(SchedJoulesRESTBindPoint.pages);
-        request.setQueryParameter(SchedJoulesCommonParameter.location.name(), location);
-        request.setQueryParameter(SchedJoulesCommonParameter.locale.name(), locale);
-        // TODO: resolve the pageId and add it to the request
+        try {
+            int itemId = rootItemIdCache.get(location, () -> {
+                SchedJoulesRequest request = new SchedJoulesRequest(SchedJoulesRESTBindPoint.pages);
+                request.setQueryParameter(SchedJoulesCommonParameter.location.name(), location);
+                request.setQueryParameter(SchedJoulesCommonParameter.locale.name(), locale);
 
-        return executeRequest(request).getItemData();
+                SchedJoulesPage page = executeRequest(request);
+                JSONObject itemData = page.getItemData();
+                int rootPageItemId = itemData.getInt("item_id");
+
+                pagesCache.put(new SchedJoulesCachedItemKey(rootPageItemId, locale), page);
+                return rootPageItemId;
+            });
+            return fetchPage(itemId, locale).getItemData();
+        } catch (ExecutionException e) {
+            throw SchedJoulesAPIExceptionCodes.UNEXPECTED_ERROR.create(e.getMessage(), e);
+        }
     }
 
     /**
