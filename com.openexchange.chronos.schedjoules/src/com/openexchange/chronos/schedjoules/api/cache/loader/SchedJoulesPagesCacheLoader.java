@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2017-2020 OX Software GmbH
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,28 +47,51 @@
  *
  */
 
-package com.openexchange.chronos.schedjoules.api;
+package com.openexchange.chronos.schedjoules.api.cache.loader;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import com.openexchange.chronos.schedjoules.api.auxiliary.SchedJoulesCommonParameter;
+import com.openexchange.chronos.schedjoules.api.cache.SchedJoulesCachedItemKey;
+import com.openexchange.chronos.schedjoules.api.cache.SchedJoulesPage;
+import com.openexchange.chronos.schedjoules.api.client.SchedJoulesRESTBindPoint;
 import com.openexchange.chronos.schedjoules.api.client.SchedJoulesRESTClient;
+import com.openexchange.chronos.schedjoules.api.client.SchedJoulesRequest;
+import com.openexchange.java.Strings;
 
 /**
- * {@link AbstractSchedJoulesAPI}
+ * {@link SchedJoulesPagesCacheLoader}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-abstract class AbstractSchedJoulesAPI {
+public class SchedJoulesPagesCacheLoader extends AbstractSchedJoulesCacheLoader<SchedJoulesCachedItemKey> {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(SchedJoulesPagesCacheLoader.class);
     // FIXME: consolidate in some common place
-    static final String DEFAULT_LOCALE = "en";
-    static final String DEFAULT_LOCATION = "us";
-
-    final SchedJoulesRESTClient client;
+    private static final String DEFAULT_LOCALE = "en";
 
     /**
-     * Initialises a new {@link AbstractSchedJoulesAPI}.
+     * Initialises a new {@link SchedJoulesPagesCacheLoader}.
+     * 
+     * @param client
+     * @param restBindPoint
      */
-    public AbstractSchedJoulesAPI(SchedJoulesRESTClient client) {
-        super();
-        this.client = client;
+    public SchedJoulesPagesCacheLoader(SchedJoulesRESTClient client, SchedJoulesRESTBindPoint restBindPoint) {
+        super(client, restBindPoint);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.google.common.cache.CacheLoader#load(java.lang.Object)
+     */
+    @Override
+    public SchedJoulesPage load(SchedJoulesCachedItemKey key) throws Exception {
+        LOGGER.debug("Loading entry with key 'itemId: {}, locale: {}'...", key.getItemId(), key.getLocale());
+        SchedJoulesRequest request = new SchedJoulesRequest(restBindPoint.getAbsolutePath() + "/" + key.getItemId());
+        request.setQueryParameter(SchedJoulesCommonParameter.locale.name(), Strings.isEmpty(key.getLocale()) ? DEFAULT_LOCALE : key.getLocale());
+        request.setPageId(key.getItemId());
+
+        return executeRequest(request);
     }
 }

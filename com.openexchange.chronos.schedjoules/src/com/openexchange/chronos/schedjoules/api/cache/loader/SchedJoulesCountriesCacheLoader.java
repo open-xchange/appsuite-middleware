@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2017-2020 OX Software GmbH
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,28 +47,46 @@
  *
  */
 
-package com.openexchange.chronos.schedjoules.api;
+package com.openexchange.chronos.schedjoules.api.cache.loader;
 
+import org.json.JSONArray;
+import com.openexchange.chronos.schedjoules.api.auxiliary.SchedJoulesCommonParameter;
+import com.openexchange.chronos.schedjoules.api.cache.SchedJoulesPage;
+import com.openexchange.chronos.schedjoules.api.cache.SchedJoulesPage.SchedJoulesPageBuilder;
+import com.openexchange.chronos.schedjoules.api.client.SchedJoulesRESTBindPoint;
 import com.openexchange.chronos.schedjoules.api.client.SchedJoulesRESTClient;
+import com.openexchange.chronos.schedjoules.api.client.SchedJoulesRequest;
+import com.openexchange.chronos.schedjoules.api.client.SchedJoulesResponse;
 
 /**
- * {@link AbstractSchedJoulesAPI}
+ * {@link SchedJoulesCountriesCacheLoader}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-abstract class AbstractSchedJoulesAPI {
-
-    // FIXME: consolidate in some common place
-    static final String DEFAULT_LOCALE = "en";
-    static final String DEFAULT_LOCATION = "us";
-
-    final SchedJoulesRESTClient client;
+public class SchedJoulesCountriesCacheLoader extends AbstractSchedJoulesCacheLoader<String> {
 
     /**
-     * Initialises a new {@link AbstractSchedJoulesAPI}.
+     * Initialises a new {@link SchedJoulesCountriesCacheLoader}.
+     * 
+     * @param client
+     * @param restBindPoint
      */
-    public AbstractSchedJoulesAPI(SchedJoulesRESTClient client) {
-        super();
-        this.client = client;
+    public SchedJoulesCountriesCacheLoader(SchedJoulesRESTClient client, SchedJoulesRESTBindPoint restBindPoint) {
+        super(client, restBindPoint);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.google.common.cache.CacheLoader#load(java.lang.Object)
+     */
+    @Override
+    public SchedJoulesPage load(String key) throws Exception {
+        SchedJoulesRequest request = new SchedJoulesRequest(restBindPoint);
+        request.setQueryParameter(SchedJoulesCommonParameter.locale.name(), key);
+
+        SchedJoulesResponse response = client.executeRequest(request);
+        return new SchedJoulesPageBuilder().itemData((JSONArray) response.getResponseBody()).etag(response.getETag()).lastModified(response.getLastModified()).build();
+
     }
 }
