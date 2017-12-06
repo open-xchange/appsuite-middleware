@@ -49,7 +49,6 @@
 
 package com.openexchange.mail.authenticity;
 
-import static com.openexchange.exception.OXExceptionStrings.MESSAGE;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
@@ -83,11 +82,11 @@ public enum MailAuthenticityExceptionCodes implements DisplayableOXExceptionCode
     /**
      * The property '%1$s' is missing or invalid.
      */
-    INVALID_PROPERTY("The property '%1$s' is missing or invalid.", MESSAGE, Category.CATEGORY_CONFIGURATION, 5),
+    INVALID_PROPERTY("The property '%1$s' is missing or invalid.", null, Category.CATEGORY_CONFIGURATION, 5),
     /**
      * The provided image uid is invalid.
      */
-    INVALID_IMAGE_UID("The provided image uid is invalid.", MESSAGE, Category.CATEGORY_USER_INPUT, 6),
+    INVALID_IMAGE_UID("The provided image uid is invalid.", null, Category.CATEGORY_USER_INPUT, 6),
     ;
 
     /** The error code prefix for mail authenticity */
