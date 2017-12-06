@@ -135,7 +135,7 @@ public abstract class ICalDateTimeMapping<T extends Component, U> extends Abstra
                 TimeZone timeZone = TimeZoneUtils.selectTimeZone(property, (TimeZone) null);
                 setValue(object, org.dmfs.rfc5545.DateTime.parse(timeZone, property.getValue()));
             } else {
-                setValue(object, new org.dmfs.rfc5545.DateTime(property.getDate().getTime()).toAllDay());
+                setValue(object, org.dmfs.rfc5545.DateTime.parse(property.getValue()).toAllDay());
             }
         } else if (false == isIgnoreUnsetProperties(parameters)) {
             setValue(object, null);

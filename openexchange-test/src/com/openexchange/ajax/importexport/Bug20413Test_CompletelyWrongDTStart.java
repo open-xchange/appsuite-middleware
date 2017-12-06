@@ -2,21 +2,18 @@
 package com.openexchange.ajax.importexport;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import java.io.ByteArrayInputStream;
+import java.util.Calendar;
 import org.json.JSONArray;
+import org.json.JSONObject;
 import org.junit.Test;
 import com.openexchange.ajax.appointment.recurrence.ManagedAppointmentTest;
-import com.openexchange.ajax.framework.AbstractAJAXParser;
-import com.openexchange.ajax.importexport.actions.AbstractImportRequest;
-import com.openexchange.ajax.importexport.actions.ICalImportParser;
+import com.openexchange.ajax.importexport.actions.ICalImportRequest;
 import com.openexchange.ajax.importexport.actions.ICalImportResponse;
-import com.openexchange.java.Charsets;
+import com.openexchange.groupware.container.Appointment;
 
 public class Bug20413Test_CompletelyWrongDTStart extends ManagedAppointmentTest {
 
-    private final String ical = 
+    private final String ical =
         "BEGIN:VCALENDAR\n" +
         "PRODID:Strato Communicator 3.5\n"
         + "VERSION:2.0\n" + "CALSCALE:GREGORIAN\n"
@@ -45,27 +42,17 @@ public class Bug20413Test_CompletelyWrongDTStart extends ManagedAppointmentTest 
 
     @Test
     public void testDTStartMonstrosity() throws Exception {
-        ICalImportResponse response = getClient().execute(new TruncatedImportRequest(ical, folder.getObjectID()));
+        ICalImportResponse response = getClient().execute(new ICalImportRequest(folder.getObjectID(), ical));
         JSONArray arr = (JSONArray) response.getData();
 
-        response.getImports()[0].getException().getLogMessage();
         assertEquals(1, arr.length());
-        assertNotNull(response.getException());
-        assertTrue(response.getException().getLogMessage().contains("Data truncation [field Start date, limit 19, current 0]"));
 
-    }
-
-    private static final class TruncatedImportRequest extends AbstractImportRequest<ICalImportResponse> {
-
-        public TruncatedImportRequest(String iCal, int folderID) {
-            super(Action.ICal, folderID, new ByteArrayInputStream(Charsets.getBytes(iCal, Charsets.UTF_8)));
-        }
-
-        @Override
-        public AbstractAJAXParser<? extends ICalImportResponse> getParser() {
-            return new ICalImportParser(false);
-        }
-
+        JSONObject jsonObject = arr.getJSONObject(0);
+        Appointment actual = catm.get(jsonObject.getInt("folder_id"), jsonObject.getInt("id"));
+        Calendar startDate = Calendar.getInstance();
+        startDate.setTime(actual.getStartDate());
+        //NOTE: Completely irrelevant. Date format not allowed.
+        assertEquals(Calendar.NOVEMBER, startDate.get(Calendar.MONTH));
     }
 
 }
