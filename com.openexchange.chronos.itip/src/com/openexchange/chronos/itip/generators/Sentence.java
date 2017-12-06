@@ -56,7 +56,6 @@ import java.util.regex.Pattern;
 import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.itip.ContextSensitiveMessages;
 import com.openexchange.chronos.itip.generators.changes.PassthroughWrapper;
-import com.openexchange.groupware.container.participants.ConfirmStatus;
 import com.openexchange.i18n.tools.StringHelper;
 
 /**
@@ -105,19 +104,15 @@ public class Sentence {
                 }
             }
             if (type == ArgumentType.STATUS) {
-                ConfirmStatus status = (ConfirmStatus) extraInfo[0];
-                switch (status) {
-                    case ACCEPT:
-                        argument = ContextSensitiveMessages.accepted(locale, ContextSensitiveMessages.Context.VERB);
-                        break;
-                    case DECLINE:
-                        argument = ContextSensitiveMessages.declined(locale, ContextSensitiveMessages.Context.VERB);
-                        break;
-                    case TENTATIVE:
-                        argument = ContextSensitiveMessages.tentative(locale, ContextSensitiveMessages.Context.VERB);
-                        break;
-                    case NONE:
-                        argument = sh.getString((String) argument);
+                ParticipationStatus status = (ParticipationStatus) extraInfo[0];
+                if (status.equals(ParticipationStatus.ACCEPTED)) {
+                    argument = ContextSensitiveMessages.accepted(locale, ContextSensitiveMessages.Context.VERB);                    
+                } else if (status.equals(ParticipationStatus.DECLINED)) {
+                    argument = ContextSensitiveMessages.declined(locale, ContextSensitiveMessages.Context.VERB);                    
+                } else if (status.equals(ParticipationStatus.TENTATIVE)) {
+                    argument = ContextSensitiveMessages.tentative(locale, ContextSensitiveMessages.Context.VERB);                    
+                } else {
+                    argument = sh.getString((String) argument);                    
                 }
             }
             switch (type) {
@@ -134,7 +129,7 @@ public class Sentence {
                     wrapped.add(wrapper.participant(argument));
                     break;
                 case STATUS:
-                    wrapped.add(wrapper.state(argument, (ConfirmStatus) extraInfo[0]));
+                    wrapped.add(wrapper.state(argument, (ParticipationStatus) extraInfo[0]));
                     break;
                 case EMPHASIZED:
                     wrapped.add(wrapper.emphasiszed(argument));

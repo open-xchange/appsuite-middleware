@@ -67,6 +67,7 @@ import com.openexchange.chronos.itip.ITipChange;
 import com.openexchange.chronos.itip.ITipIntegrationUtility;
 import com.openexchange.chronos.itip.generators.ITipMailGeneratorFactory;
 import com.openexchange.chronos.itip.sender.MailSenderService;
+import com.openexchange.chronos.service.CalendarResult;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.EventID;
 import com.openexchange.chronos.service.EventUpdate;
@@ -162,7 +163,8 @@ public class UpdatePerformer extends AbstractActionPerformer {
     }
 
     private void createEvent(Event event, CalendarSession session) throws OXException {
-        session.getCalendarService().createEvent(session, event.getFolderId(), event);
+        CalendarResult createResult = session.getCalendarService().createEvent(session, event.getFolderId(), event);
+        event.setId(createResult.getCreations().get(0).getCreatedEvent().getId());
     }
 
     private void ensureAttendee(Event event, Event currentEvent, ITipAction action, int owner, ITipAttributes attributes) {

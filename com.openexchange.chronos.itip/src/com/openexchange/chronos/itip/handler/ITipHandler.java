@@ -111,7 +111,7 @@ public class ITipHandler implements CalendarHandler {
             List<DeleteResult> deletions = event.getDeletions();
             if (deletions != null && deletions.size() > 0) {
                 for (DeleteResult delete : deletions) {
-                    handleDelete(delete, event.getSession(), event.getCalendarUser());
+                    handleDelete(delete, event);
                 }
             }
         } catch (OXException oe) {
@@ -138,20 +138,22 @@ public class ITipHandler implements CalendarHandler {
 
     }
 
-    private void handleDelete(DeleteResult delete, Session session, int calendarUser) {
-        //
-        //        calculateExceptionPosition(appointmentObject, original, true);
-        //        ITipMailGenerator generator = generators.create(null, delete.get, session, onBehalfOf(calendarUser, session));
-        //        List<NotificationParticipant> recipients = generator.getRecipients();
-        //        for (final NotificationParticipant notificationParticipant : recipients) {
-        //            final NotificationMail mail = generator.generateDeleteMailFor(notificationParticipant);
-        //            if (mail != null) {
-        //                if (mail.getStateType() == null) {
-        //                    mail.setStateType(State.Type.DELETED);
-        //                }
-        //                sender.sendMail(mail, session);
-        //            }
-        //        }
+    private void handleDelete(DeleteResult delete, CalendarEvent event) throws OXException {
+        Session session = event.getSession();
+        int onBehalfOf = onBehalfOf(event.getCalendarUser(), session);
+        CalendarUser principal = ITipUtils.getPrincipal(event.getCalendarParameters());
+
+        ITipMailGenerator generator = generators.create(null, delete.getOriginal(), session, onBehalfOf, principal);
+        List<NotificationParticipant> recipients = generator.getRecipients();
+        for (final NotificationParticipant notificationParticipant : recipients) {
+            final NotificationMail mail = generator.generateDeleteMailFor(notificationParticipant);
+            if (mail != null) {
+                if (mail.getStateType() == null) {
+                    mail.setStateType(State.Type.DELETED);
+                }
+                sender.sendMail(mail, session, principal);
+            }
+        }
     }
 
     private void handleUpdate(UpdateResult update, CalendarEvent event) throws OXException {

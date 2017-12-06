@@ -49,8 +49,8 @@
 
 package com.openexchange.chronos.itip.generators.changes;
 
+import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.itip.generators.TypeWrapper;
-import com.openexchange.groupware.container.participants.ConfirmStatus;
 
 
 /**
@@ -79,7 +79,7 @@ public class PassthroughWrapper implements TypeWrapper {
     }
 
     @Override
-    public String state(final Object argument, final ConfirmStatus status) {
+    public String state(final Object argument, final ParticipationStatus status) {
         return none(argument);
     }
 

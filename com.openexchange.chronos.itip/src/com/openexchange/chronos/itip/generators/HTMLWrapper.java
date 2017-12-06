@@ -50,10 +50,9 @@
 package com.openexchange.chronos.itip.generators;
 
 import org.apache.commons.lang.StringEscapeUtils;
+import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.itip.generators.changes.PassthroughWrapper;
 import com.openexchange.groupware.container.Appointment;
-import com.openexchange.groupware.container.participants.ConfirmStatus;
-
 
 /**
  * {@link HTMLWrapper}
@@ -73,16 +72,19 @@ public class HTMLWrapper extends PassthroughWrapper {
     }
 
     @Override
-    public String state(Object argument, ConfirmStatus status) {
-        return wrap("status "+getName(status), argument);
+    public String state(Object argument, ParticipationStatus status) {
+        return wrap("status " + getName(status), argument);
     }
 
-    private String getName(ConfirmStatus status) {
-        switch (status) {
-        case ACCEPT: return "accepted";
-        case DECLINE: return "declined";
-        case TENTATIVE: return "tentative";
-        default: return "none";
+    private String getName(ParticipationStatus status) {
+        if (status.equals(ParticipationStatus.ACCEPTED)) {
+            return "accepted";
+        } else if (status.equals(ParticipationStatus.DECLINED)) {
+            return "declined";
+        } else if (status.equals(ParticipationStatus.TENTATIVE)) {
+            return "tentative";
+        } else {
+            return "none";
         }
     }
 
@@ -96,29 +98,33 @@ public class HTMLWrapper extends PassthroughWrapper {
         if (argument == null) {
             return "";
         }
-        return "<em>"+escapeHtml(argument.toString())+"</em>";
+        return "<em>" + escapeHtml(argument.toString()) + "</em>";
     }
 
     @Override
     public String shownAs(Object argument, int shownAs) {
-        return wrap("shown_as_label "+shownAsCssClass(shownAs), argument);
+        return wrap("shown_as_label " + shownAsCssClass(shownAs), argument);
     }
 
     private String shownAsCssClass(int shownAs) {
-    	switch(shownAs) {
-        case Appointment.RESERVED: return "reserved";
-        case Appointment.TEMPORARY: return "temporary";
-        case Appointment.ABSENT: return "absent";
-        case Appointment.FREE: return "free";
+        switch (shownAs) {
+            case Appointment.RESERVED:
+                return "reserved";
+            case Appointment.TEMPORARY:
+                return "temporary";
+            case Appointment.ABSENT:
+                return "absent";
+            case Appointment.FREE:
+                return "free";
         }
         return "unknown";
-	}
+    }
 
-	private String wrap(String string, Object argument) {
+    private String wrap(String string, Object argument) {
         if (argument == null) {
             return "";
         }
-        return "<span class='"+string+"'>"+escapeHtml(argument.toString())+"</span>";
+        return "<span class='" + string + "'>" + escapeHtml(argument.toString()) + "</span>";
     }
 
     @Override
@@ -127,12 +133,11 @@ public class HTMLWrapper extends PassthroughWrapper {
             return "";
         }
         String string = escapeHtml(argument.toString());
-    	return "<a href=\""+string+"\">"+string+"</a>";
+        return "<a href=\"" + string + "\">" + string + "</a>";
     }
 
     private String escapeHtml(String string) {
         return StringEscapeUtils.escapeHtml(string);
     }
-
 
 }

@@ -49,7 +49,7 @@
 
 package com.openexchange.chronos.itip.generators;
 
-import com.openexchange.groupware.container.participants.ConfirmStatus;
+import com.openexchange.chronos.ParticipationStatus;
 
 
 /**
@@ -61,7 +61,7 @@ public interface TypeWrapper {
     public String participant(Object argument);
     public String original(Object argument);
     public String updated(Object argument);
-    public String state(Object argument, ConfirmStatus confirmStatus);
+    public String state(Object argument, ParticipationStatus confirmStatus);
     public String none(Object argument);
 	public String emphasiszed(Object argument);
 	public String reference(Object argument);
