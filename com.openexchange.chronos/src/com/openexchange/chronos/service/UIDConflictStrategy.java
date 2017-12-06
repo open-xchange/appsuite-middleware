@@ -66,7 +66,7 @@ public enum UIDConflictStrategy {
      */
     UPDATE,
     /**
-     * Re-assign unique identifiers to avoid UID conflicts as workaround.
+     * Re-assign unique identifiers prior saving to avoid UID conflicts as workaround.
      */
     REASSIGN,
     /**
