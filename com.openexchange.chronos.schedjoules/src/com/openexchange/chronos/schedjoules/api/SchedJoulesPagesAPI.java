@@ -128,7 +128,7 @@ public class SchedJoulesPagesAPI extends AbstractSchedJoulesAPI {
     /**
      * Caches the root page item ids
      */
-    private final Cache<String, Integer> rootItemIdCache = CacheBuilder.newBuilder().maximumSize(1000).expireAfterAccess(24, TimeUnit.HOURS).refreshAfterWrite(24, TimeUnit.HOURS).build();
+    private final Cache<String, Integer> rootItemIdCache = CacheBuilder.newBuilder().maximumSize(1000).expireAfterAccess(24, TimeUnit.HOURS).build();
 
     /**
      * Initialises a new {@link SchedJoulesPagesAPI}.
@@ -163,13 +163,13 @@ public class SchedJoulesPagesAPI extends AbstractSchedJoulesAPI {
                 request.setQueryParameter(SchedJoulesCommonParameter.locale.name(), locale);
 
                 SchedJoulesPage page = executeRequest(request);
-                JSONObject itemData = page.getItemData();
+                JSONObject itemData = (JSONObject) page.getItemData();
                 int rootPageItemId = itemData.getInt("item_id");
 
                 pagesCache.put(new SchedJoulesCachedItemKey(rootPageItemId, locale), page);
                 return rootPageItemId;
             });
-            return fetchPage(itemId, locale).getItemData();
+            return (JSONObject) fetchPage(itemId, locale).getItemData();
         } catch (ExecutionException e) {
             throw SchedJoulesAPIExceptionCodes.UNEXPECTED_ERROR.create(e.getMessage(), e);
         }
@@ -195,7 +195,7 @@ public class SchedJoulesPagesAPI extends AbstractSchedJoulesAPI {
      * @throws OXException if an error is occurred
      */
     public JSONObject getPage(int pageId, String locale) throws OXException {
-        return fetchPage(pageId, locale).getItemData();
+        return (JSONObject) fetchPage(pageId, locale).getItemData();
     }
 
     /**
@@ -208,7 +208,7 @@ public class SchedJoulesPagesAPI extends AbstractSchedJoulesAPI {
     public JSONObject search(String query) throws OXException {
         SchedJoulesRequest request = new SchedJoulesRequest(SchedJoulesRESTBindPoint.search);
         request.setQueryParameter(SchedJoulesSearchParameter.q.name(), query);
-        return executeRequest(request).getItemData();
+        return (JSONObject) executeRequest(request).getItemData();
     }
 
     /**
@@ -241,12 +241,13 @@ public class SchedJoulesPagesAPI extends AbstractSchedJoulesAPI {
     //////////////////////////////////////////// HELPERS /////////////////////////////////////////////
 
     /**
-     * Fetches the page
+     * Fetches the requested {@link SchedJoulesPage} in the specified translation. First looks up in the cache
+     * and if not present it fetches it live from the SchedJoules servers
      * 
-     * @param pageId
-     * @param locale
-     * @return
-     * @throws OXException
+     * @param pageId The page identifier of the SchedJoules page to fetch
+     * @param locale The locale of the translation
+     * @return The {@link SchedJoulesPage}
+     * @throws OXException if an error is occurred
      */
     private SchedJoulesPage fetchPage(int pageId, String locale) throws OXException {
         try {
