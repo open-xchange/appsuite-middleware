@@ -47,52 +47,29 @@
  *
  */
 
-package com.openexchange.session.management.json;
+package com.openexchange.clientinfo.impl;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Map;
-import com.google.common.collect.ImmutableMap;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
-import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.session.management.json.actions.AllAction;
-import com.openexchange.session.management.json.actions.ClearAction;
-import com.openexchange.session.management.json.actions.DeleteAction;
-import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import java.util.Locale;
+import com.openexchange.clientinfo.ClientInfo;
+import com.openexchange.clientinfo.ClientInfoType;
+
 
 /**
- * {@link SessionManagementActionFactory}
+ * {@link USMEASClientInfo}
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since v7.10.0
  */
-public class SessionManagementActionFactory implements AJAXActionServiceFactory {
+public class USMEASClientInfo implements ClientInfo {
 
-    private final Map<String, AJAXActionService> actions;
-
-    public SessionManagementActionFactory(ServiceLookup services) {
-        super();
-        ImmutableMap.Builder<String, AJAXActionService> actions = ImmutableMap.builder();
-        actions.put("all", new AllAction(services));
-        actions.put("delete", new DeleteAction(services));
-        actions.put("clear", new ClearAction(services));
-        this.actions = actions.build();
+    @Override
+    public ClientInfoType getType() {
+        return ClientInfoType.SYNC;
     }
 
     @Override
-    public AJAXActionService createActionService(String action) throws OXException {
-        final AJAXActionService retval = actions.get(action);
-        if (null == retval) {
-            throw AjaxExceptionCodes.UNKNOWN_ACTION.create(action);
-        }
-        return retval;
-    }
-
-    @Override
-    public Collection<?> getSupportedServices() {
-        return Collections.unmodifiableCollection(actions.values());
+    public String toString(Locale locale) {
+        return ClientInfoStrings.USM_EAS_CLIENT;
     }
 
 }

@@ -185,5 +185,6 @@
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/javax.servlet-api-4.0.0.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.config.lean"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.net"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.session.management.impl"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>

@@ -47,52 +47,76 @@
  *
  */
 
-package com.openexchange.session.management.json;
+package com.openexchange.session.management.osgi;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Map;
-import com.google.common.collect.ImmutableMap;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
-import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.session.management.json.actions.AllAction;
-import com.openexchange.session.management.json.actions.ClearAction;
-import com.openexchange.session.management.json.actions.DeleteAction;
-import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import com.hazelcast.core.HazelcastInstance;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Interests;
+import com.openexchange.config.Reloadable;
+import com.openexchange.config.Reloadables;
+import com.openexchange.config.lean.LeanConfigurationService;
+import com.openexchange.geolocation.GeoLocationService;
+import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.session.management.SessionManagementService;
+import com.openexchange.session.management.impl.SessionManagementProperty;
+import com.openexchange.session.management.impl.SessionManagementServiceImpl;
+import com.openexchange.sessiond.SessiondService;
+import com.openexchange.user.UserService;
 
 /**
- * {@link SessionManagementActionFactory}
+ * {@link SessionManagementActivator}
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since v7.10.0
  */
-public class SessionManagementActionFactory implements AJAXActionServiceFactory {
+public class SessionManagementActivator extends HousekeepingActivator implements Reloadable {
 
-    private final Map<String, AJAXActionService> actions;
+    private SessionManagementServiceImpl sessionManagementImpl;
 
-    public SessionManagementActionFactory(ServiceLookup services) {
+    /**
+     * Initializes a new {@link SessionManagementActivator}.
+     */
+    public SessionManagementActivator() {
         super();
-        ImmutableMap.Builder<String, AJAXActionService> actions = ImmutableMap.builder();
-        actions.put("all", new AllAction(services));
-        actions.put("delete", new DeleteAction(services));
-        actions.put("clear", new ClearAction(services));
-        this.actions = actions.build();
     }
 
     @Override
-    public AJAXActionService createActionService(String action) throws OXException {
-        final AJAXActionService retval = actions.get(action);
-        if (null == retval) {
-            throw AjaxExceptionCodes.UNKNOWN_ACTION.create(action);
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[] { SessiondService.class, LeanConfigurationService.class, UserService.class };
+    }
+
+    @Override
+    protected synchronized void startBundle() throws Exception {
+        trackService(GeoLocationService.class);
+        trackService(HazelcastInstance.class);
+        openTrackers();
+
+        SessionManagementServiceImpl sessionManagementImpl = new SessionManagementServiceImpl(this);
+        this.sessionManagementImpl = sessionManagementImpl;
+        registerService(SessionManagementService.class, sessionManagementImpl);
+
+        registerService(Reloadable.class, this);
+    }
+
+    @Override
+    protected synchronized void stopBundle() throws Exception {
+        super.stopBundle();
+        this.sessionManagementImpl = null;
+    }
+
+    @Override
+    public synchronized void reloadConfiguration(ConfigurationService configService) {
+        SessionManagementServiceImpl sessionManagementImpl = this.sessionManagementImpl;
+        if (null != sessionManagementImpl) {
+            sessionManagementImpl.reinitBlacklistedClients();
         }
-        return retval;
     }
 
     @Override
-    public Collection<?> getSupportedServices() {
-        return Collections.unmodifiableCollection(actions.values());
+    public Interests getInterests() {
+        return Reloadables.interestsForProperties(
+            SessionManagementProperty.GLOBAL_LOOKUP.getFQPropertyName(),
+            SessionManagementProperty.CLIENT_BLACKLIST.getFQPropertyName());
     }
 
 }

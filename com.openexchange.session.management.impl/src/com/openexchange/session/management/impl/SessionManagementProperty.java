@@ -47,52 +47,39 @@
  *
  */
 
-package com.openexchange.session.management.json;
+package com.openexchange.session.management.impl;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Map;
-import com.google.common.collect.ImmutableMap;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
-import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.session.management.json.actions.AllAction;
-import com.openexchange.session.management.json.actions.ClearAction;
-import com.openexchange.session.management.json.actions.DeleteAction;
-import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import com.openexchange.config.lean.Property;
+
 
 /**
- * {@link SessionManagementActionFactory}
+ * {@link SessionManagementProperty}
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since v7.10.0
  */
-public class SessionManagementActionFactory implements AJAXActionServiceFactory {
+public enum SessionManagementProperty implements Property {
 
-    private final Map<String, AJAXActionService> actions;
+    GLOBAL_LOOKUP("globalLookup", Boolean.TRUE),
+    CLIENT_BLACKLIST("clientBlacklist", ""),
+    ;
 
-    public SessionManagementActionFactory(ServiceLookup services) {
-        super();
-        ImmutableMap.Builder<String, AJAXActionService> actions = ImmutableMap.builder();
-        actions.put("all", new AllAction(services));
-        actions.put("delete", new DeleteAction(services));
-        actions.put("clear", new ClearAction(services));
-        this.actions = actions.build();
+    private final String fqn;
+    private final Object defaultValue;
+
+    private SessionManagementProperty(String suffix, Object defaultValue) {
+        this.fqn = "com.openexchange.session.management." + suffix;
+        this.defaultValue = defaultValue;
     }
 
     @Override
-    public AJAXActionService createActionService(String action) throws OXException {
-        final AJAXActionService retval = actions.get(action);
-        if (null == retval) {
-            throw AjaxExceptionCodes.UNKNOWN_ACTION.create(action);
-        }
-        return retval;
+    public String getFQPropertyName() {
+        return fqn;
     }
 
     @Override
-    public Collection<?> getSupportedServices() {
-        return Collections.unmodifiableCollection(actions.values());
+    public Object getDefaultValue() {
+        return defaultValue;
     }
 
 }

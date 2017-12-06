@@ -47,52 +47,80 @@
  *
  */
 
-package com.openexchange.session.management.json;
+package com.openexchange.clientinfo.impl;
 
-import java.util.Collection;
-import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import com.google.common.collect.ImmutableMap;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
-import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.session.management.json.actions.AllAction;
-import com.openexchange.session.management.json.actions.ClearAction;
-import com.openexchange.session.management.json.actions.DeleteAction;
-import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import org.slf4j.Logger;
+import com.openexchange.clientinfo.ClientInfo;
+import com.openexchange.clientinfo.ClientInfoProvider;
+import com.openexchange.clientinfo.ClientInfoService;
+import com.openexchange.osgi.ServiceListing;
+import com.openexchange.session.Session;
+
 
 /**
- * {@link SessionManagementActionFactory}
+ * {@link ClientInfoServiceImpl}
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.10.0
  */
-public class SessionManagementActionFactory implements AJAXActionServiceFactory {
+public class ClientInfoServiceImpl implements ClientInfoService {
 
-    private final Map<String, AJAXActionService> actions;
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(ClientInfoServiceImpl.class);
 
-    public SessionManagementActionFactory(ServiceLookup services) {
+    private final ServiceListing<ClientInfoProvider> providers;
+
+    /**
+     * Initializes a new {@link ClientInfoServiceImpl}.
+     *
+     * @param providers The tracked providers
+     */
+    public ClientInfoServiceImpl(ServiceListing<ClientInfoProvider> providers) {
         super();
-        ImmutableMap.Builder<String, AJAXActionService> actions = ImmutableMap.builder();
-        actions.put("all", new AllAction(services));
-        actions.put("delete", new DeleteAction(services));
-        actions.put("clear", new ClearAction(services));
-        this.actions = actions.build();
+        this.providers = providers;
     }
 
     @Override
-    public AJAXActionService createActionService(String action) throws OXException {
-        final AJAXActionService retval = actions.get(action);
-        if (null == retval) {
-            throw AjaxExceptionCodes.UNKNOWN_ACTION.create(action);
+    public ClientInfo getClientInfo(Session session) {
+        if (null != session) {
+            for (ClientInfoProvider provider : providers) {
+                ClientInfo info = provider.getClientInfo(session);
+                if (null != info) {
+                    return info;
+                }
+            }
+            LOG.debug("Unknown client found. Client identifier: {} User-Agent: {}", session.getClient(), session.getParameter(Session.PARAM_USER_AGENT));
         }
-        return retval;
+        return null;
     }
 
     @Override
-    public Collection<?> getSupportedServices() {
-        return Collections.unmodifiableCollection(actions.values());
+    public ClientInfo getClientInfo(String clientId) {
+        if (null != clientId) {
+            for (ClientInfoProvider provider : providers) {
+                ClientInfo info = provider.getClientInfo(clientId);
+                if (null != info) {
+                    return info;
+                }
+            }
+            LOG.debug("Unknown client found. Client identifier: {}", clientId);
+        }
+        return null;
+    }
+
+    @Override
+    public Map<String, ClientInfo> getClientInfos(List<Session> sessions) {
+        Map<String, ClientInfo> map = new HashMap<>(sessions.size());
+        for (Session session : sessions) {
+            ClientInfo info = getClientInfo(session);
+            if (null != info) {
+                map.put(session.getSessionID(), info);
+            }
+        }
+        return map;
     }
 
 }

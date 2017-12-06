@@ -51,6 +51,7 @@ package com.openexchange.session.management;
 
 import java.util.Collection;
 import com.openexchange.exception.OXException;
+import com.openexchange.osgi.annotation.SingletonService;
 import com.openexchange.session.Session;
 
 /**
@@ -59,6 +60,7 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since v7.10.0
  */
+@SingletonService
 public interface SessionManagementService {
 
     /**

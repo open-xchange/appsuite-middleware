@@ -47,52 +47,36 @@
  *
  */
 
-package com.openexchange.session.management.json;
+package com.openexchange.clientinfo.impl;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Map;
-import com.google.common.collect.ImmutableMap;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
-import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.session.management.json.actions.AllAction;
-import com.openexchange.session.management.json.actions.ClearAction;
-import com.openexchange.session.management.json.actions.DeleteAction;
-import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import com.openexchange.i18n.LocalizableStrings;
+
 
 /**
- * {@link SessionManagementActionFactory}
+ * {@link ClientInfoStrings}
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since v7.10.0
  */
-public class SessionManagementActionFactory implements AJAXActionServiceFactory {
+public class ClientInfoStrings implements LocalizableStrings {
 
-    private final Map<String, AJAXActionService> actions;
+    // %1$s, %2$s %3$s on %4$s %5$s
+    // E.g. App Suite UI, Chrome 61 on Windows 10
+    public final static String DEFAULT_CLIENT_INFO_MESSAGE = "%1$s, %2$s %3$s on %4$s %5$s";
 
-    public SessionManagementActionFactory(ServiceLookup services) {
+    // %1$s on %2$s %3$s
+    // E.g. App Suite UI on Windows 10
+    public final static String CLIENT_BROWSER_INFO_MESSAGE = "%1$s on %2$s %3$s";
+
+    // %1$s
+    // E.g. App Suite UI
+    public final static String CLIENT_INFO_MESSAGE = "%1$s";
+
+    // Microsoft Exchange ActiveSync Client
+    public final static String USM_EAS_CLIENT = "Microsoft Exchange ActiveSync Client";
+
+    private ClientInfoStrings() {
         super();
-        ImmutableMap.Builder<String, AJAXActionService> actions = ImmutableMap.builder();
-        actions.put("all", new AllAction(services));
-        actions.put("delete", new DeleteAction(services));
-        actions.put("clear", new ClearAction(services));
-        this.actions = actions.build();
-    }
-
-    @Override
-    public AJAXActionService createActionService(String action) throws OXException {
-        final AJAXActionService retval = actions.get(action);
-        if (null == retval) {
-            throw AjaxExceptionCodes.UNKNOWN_ACTION.create(action);
-        }
-        return retval;
-    }
-
-    @Override
-    public Collection<?> getSupportedServices() {
-        return Collections.unmodifiableCollection(actions.values());
     }
 
 }

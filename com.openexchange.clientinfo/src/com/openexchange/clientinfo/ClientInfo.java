@@ -52,25 +52,26 @@ package com.openexchange.clientinfo;
 import java.util.Locale;
 
 /**
- * {@link ClientInfo}
+ * {@link ClientInfo} - Provides certain information for a client.
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.10.0
  */
 public interface ClientInfo {
 
     /**
      * Get client info type
-     * 
-     * @return
+     *
+     * @return The client info type
      */
     ClientInfoType getType();
 
     /**
      * Formats a string in user locale describing client info
-     * 
+     *
      * @param locale The user's locale
-     * @return
+     * @return The client's description
      */
     String toString(Locale locale);
 

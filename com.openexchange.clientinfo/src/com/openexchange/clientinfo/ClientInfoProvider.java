@@ -55,21 +55,22 @@ import com.openexchange.session.Session;
  * {@link ClientInfoProvider}
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.10.0
  */
 public interface ClientInfoProvider {
 
     /**
-     * Get client info for given session
-     * 
+     * Gets client info for given session
+     *
      * @param session The session
      * @return Client info
      */
     ClientInfo getClientInfo(Session session);
 
     /**
-     * Get client info for given client identifier
-     * 
+     * Gets client info for given client identifier
+     *
      * @param clientId The client identifier
      * @return Client info
      */

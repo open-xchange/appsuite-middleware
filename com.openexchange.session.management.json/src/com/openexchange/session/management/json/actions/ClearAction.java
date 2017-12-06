@@ -55,9 +55,9 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.management.ManagedSession;
 import com.openexchange.session.management.SessionManagementService;
-import com.openexchange.session.management.json.osgi.Services;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -68,18 +68,23 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class ClearAction implements AJAXActionService {
 
+    private final ServiceLookup services;
+
     /**
      * Initializes a new {@link ClearAction}.
+     *
+     * @param services The service look-up
      */
-    public ClearAction() {
+    public ClearAction(ServiceLookup services) {
         super();
+        this.services = services;
 
     }
 
     @Override
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
         // Get the service
-        SessionManagementService service = Services.getService(SessionManagementService.class);
+        SessionManagementService service = services.getService(SessionManagementService.class);
         if (null == service) {
             throw ServiceExceptionCode.absentService(SessionManagementService.class);
         }
