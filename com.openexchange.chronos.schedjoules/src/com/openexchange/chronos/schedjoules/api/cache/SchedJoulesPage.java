@@ -49,7 +49,7 @@
 
 package com.openexchange.chronos.schedjoules.api.cache;
 
-import org.json.JSONObject;
+import org.json.JSONValue;
 
 /**
  * {@link SchedJoulesPage}
@@ -58,14 +58,14 @@ import org.json.JSONObject;
  */
 public class SchedJoulesPage {
 
-    private final JSONObject itemData;
+    private final JSONValue itemData;
     private final long lastModified;
     private final String etag;
 
     /**
      * Initialises a new {@link SchedJoulesPage}.
      */
-    public SchedJoulesPage(JSONObject itemData, String etag, long lastModified) {
+    public SchedJoulesPage(JSONValue itemData, String etag, long lastModified) {
         super();
         this.itemData = itemData;
         this.etag = etag;
@@ -77,7 +77,7 @@ public class SchedJoulesPage {
      *
      * @return The itemData
      */
-    public JSONObject getItemData() {
+    public JSONValue getItemData() {
         return itemData;
     }
 
@@ -104,7 +104,7 @@ public class SchedJoulesPage {
      */
     public static class SchedJoulesPageBuilder {
 
-        private JSONObject itemData;
+        private JSONValue itemData;
         private long lastModified;
         private String etag;
 
@@ -120,7 +120,7 @@ public class SchedJoulesPage {
          *
          * @param itemData The itemData to set
          */
-        public SchedJoulesPageBuilder itemData(JSONObject itemData) {
+        public SchedJoulesPageBuilder itemData(JSONValue itemData) {
             this.itemData = itemData;
             return this;
         }
