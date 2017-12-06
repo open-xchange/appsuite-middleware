@@ -49,12 +49,28 @@
 
 package com.openexchange.chronos.schedjoules.api;
 
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 import org.json.JSONArray;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.ListenableFutureTask;
+import com.openexchange.chronos.schedjoules.api.auxiliary.SchedJoulesCommonParameter;
+import com.openexchange.chronos.schedjoules.api.cache.SchedJoulesPage;
+import com.openexchange.chronos.schedjoules.api.cache.SchedJoulesPage.SchedJoulesPageBuilder;
+import com.openexchange.chronos.schedjoules.api.client.HttpMethod;
 import com.openexchange.chronos.schedjoules.api.client.SchedJoulesRESTBindPoint;
 import com.openexchange.chronos.schedjoules.api.client.SchedJoulesRESTClient;
 import com.openexchange.chronos.schedjoules.api.client.SchedJoulesRequest;
 import com.openexchange.chronos.schedjoules.api.client.SchedJoulesResponse;
+import com.openexchange.chronos.schedjoules.exception.SchedJoulesAPIExceptionCodes;
+import com.openexchange.chronos.schedjoules.osgi.Services;
 import com.openexchange.exception.OXException;
+import com.openexchange.timer.TimerService;
 
 /**
  * {@link SchedJoulesLanguagesAPI}
@@ -62,6 +78,40 @@ import com.openexchange.exception.OXException;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class SchedJoulesLanguagesAPI extends AbstractSchedJoulesAPI {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(SchedJoulesCountriesAPI.class);
+
+    private static final String LANGUAGE_KEY = "languageKey";
+
+    private final LoadingCache<String, SchedJoulesPage> languagesCache = CacheBuilder.newBuilder().refreshAfterWrite(24, TimeUnit.HOURS).build(new CacheLoader<String, SchedJoulesPage>() {
+
+        @Override
+        public SchedJoulesPage load(String key) throws Exception {
+            SchedJoulesRequest request = new SchedJoulesRequest(SchedJoulesRESTBindPoint.languages);
+            request.setQueryParameter(SchedJoulesCommonParameter.locale.name(), key);
+
+            SchedJoulesResponse response = client.executeRequest(request);
+            return new SchedJoulesPageBuilder().itemData((JSONArray) response.getResponseBody()).etag(response.getETag()).lastModified(response.getLastModified()).build();
+        }
+
+        @Override
+        public ListenableFuture<SchedJoulesPage> reload(String key, SchedJoulesPage oldValue) throws Exception {
+            TimerService timerService = Services.getService(TimerService.class);
+            ListenableFutureTask<SchedJoulesPage> task = ListenableFutureTask.create(() -> {
+                SchedJoulesRequest request = new SchedJoulesRequest(SchedJoulesRESTBindPoint.languages.getAbsolutePath());
+                SchedJoulesResponse response = client.executeRequest(request, HttpMethod.HEAD, oldValue.getEtag(), oldValue.getLastModified());
+                if (response.getStatusCode() == 304) {
+                    LOGGER.debug("The entry with locale: {} was not modified since last fetch.", key);
+                    return oldValue;
+                }
+                LOGGER.debug("The entry with locale was modified since last fetch. Reloading...", key);
+                return load(key);
+            });
+            timerService.getExecutor().execute(task);
+            return task;
+        }
+
+    });
 
     /**
      * Initialises a new {@link SchedJoulesLanguagesAPI}.
@@ -77,8 +127,10 @@ public class SchedJoulesLanguagesAPI extends AbstractSchedJoulesAPI {
      * @throws OXException if a parsing error is occurred
      */
     public JSONArray listLanguages() throws OXException {
-        SchedJoulesRequest request = new SchedJoulesRequest(SchedJoulesRESTBindPoint.languages);
-        SchedJoulesResponse response = client.executeRequest(request);
-        return (JSONArray) response.getResponseBody();
+        try {
+            return (JSONArray) languagesCache.get(LANGUAGE_KEY).getItemData();
+        } catch (ExecutionException e) {
+            throw SchedJoulesAPIExceptionCodes.UNEXPECTED_ERROR.create(e.getMessage(), e);
+        }
     }
 }
