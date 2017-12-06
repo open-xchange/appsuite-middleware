@@ -57,6 +57,7 @@ import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.api2.TasksSQLInterface;
 import com.openexchange.data.conversion.ical.TruncationInfo;
 import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.UserizedFolder;
@@ -86,28 +87,25 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class ICalImporter extends AbstractImporter {
 
+    private static final ContentType TASK_CONTENT_TYPE = TaskContentType.getInstance();
+    private static final ContentType CALENDAR_CONTENT_TYPE = com.openexchange.folderstorage.database.contentType.CalendarContentType.getInstance();
+    private static final ContentType EVENT_CONTENT_TYPE = com.openexchange.folderstorage.calendar.contentType.CalendarContentType.getInstance();
+
     public ICalImporter(ServiceLookup services) {
         super(services);
     }
 
 	@Override
-    public boolean canImport(final ServerSession session, final Format format,
-			final List<String> folders,
-			final Map<String, String[]> optionalParams)
-			throws OXException {
-	    if(!format.equals(Format.ICAL)){
+    public boolean canImport(ServerSession session, Format format, List<String> folders, Map<String, String[]> optionalParams) throws OXException {
+        if (!format.equals(Format.ICAL) || null == folders || folders.isEmpty()) {
             return false;
         }
         UserizedFolder userizedFolder = getUserizedFolder(session, folders.get(0));
-        if (TaskContentType.getInstance().equals(userizedFolder.getContentType())) {
+        if (TASK_CONTENT_TYPE.equals(userizedFolder.getContentType())) {
             if (!session.getUserPermissionBits().hasTask()) {
                 return false;
             }
-        } else if (com.openexchange.folderstorage.database.contentType.CalendarContentType.getInstance().equals(userizedFolder.getContentType())) {
-            if (!session.getUserConfiguration().hasCalendar()) {
-                return false;
-            }
-        } else if (com.openexchange.folderstorage.calendar.contentType.CalendarContentType.getInstance().equals(userizedFolder.getContentType())) {
+        } else if (EVENT_CONTENT_TYPE.equals(userizedFolder.getContentType()) || CALENDAR_CONTENT_TYPE.equals(userizedFolder.getContentType())) {
             if (!session.getUserConfiguration().hasCalendar()) {
                 return false;
             }
@@ -133,9 +131,9 @@ public class ICalImporter extends AbstractImporter {
 		TruncationInfo truncationInfo = null;
 		final List<ImportResult> list = new ArrayList<>();
         ICalImport importer;
-        if (TaskContentType.getInstance().equals(userizedFolder.getContentType())) {
+        if (TASK_CONTENT_TYPE.equals(userizedFolder.getContentType())) {
             importer = new ICalTaskImporter(session, userizedFolder);
-        } else if (null != userizedFolder.getAccountID() || null == userizedFolder.getAccountID()) {
+        } else if (CALENDAR_CONTENT_TYPE.equals(userizedFolder.getContentType()) || EVENT_CONTENT_TYPE.equals(userizedFolder.getContentType())) {
             importer = new ICalEventImporter(session, userizedFolder);
         } else {
             throw ImportExportExceptionCodes.CANNOT_IMPORT.create(format, userizedFolder.getID());
