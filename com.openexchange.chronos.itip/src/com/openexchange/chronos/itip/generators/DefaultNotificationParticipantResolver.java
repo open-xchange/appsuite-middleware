@@ -73,7 +73,6 @@ import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.itip.ITipIntegrationUtility;
 import com.openexchange.chronos.itip.ITipRole;
 import com.openexchange.chronos.itip.osgi.Services;
-import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -130,7 +129,7 @@ public class DefaultNotificationParticipantResolver implements NotificationParti
                         externalParticipants.add(participant);
                         externalGuardian.add(mail);
                     }
-                } else if (participant.getCuType().equals(CalendarUserType.RESOURCE)) {
+                } else if (CalendarUserType.RESOURCE.equals(participant.getCuType())) {
                     resourceIds.add(I(participant.getEntity()));
                 }
             }
