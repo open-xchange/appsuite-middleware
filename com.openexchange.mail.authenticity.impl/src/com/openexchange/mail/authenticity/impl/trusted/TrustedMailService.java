@@ -47,94 +47,35 @@
  *
  */
 
-package com.openexchange.mail.authenticity.impl.handler.core;
+package com.openexchange.mail.authenticity.impl.trusted;
 
-import java.util.Map;
-import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.exception.OXException;
-import com.openexchange.jslob.JSlobEntry;
-import com.openexchange.jslob.JSlobKeys;
-import com.openexchange.mail.authenticity.MailAuthenticityProperty;
-import com.openexchange.server.ServiceLookup;
+import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.session.Session;
 
 /**
- * {@link MailAuthenticityJSlobEntry}
+ * {@link TrustedMailService}
  *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.10.0
  */
-public class MailAuthenticityJSlobEntry implements JSlobEntry {
-
-    private static final String NAME = "authenticityEnabled";
-    private final ServiceLookup services;
+public interface TrustedMailService {
 
     /**
-     * Initialises a new {@link MailAuthenticityJSlobEntry}.
-     */
-    public MailAuthenticityJSlobEntry(ServiceLookup services) {
-        super();
-        this.services = services;
-    }
-
-    /*
-     * (non-Javadoc)
+     * Retrieves the icon for the given uid.
      *
-     * @see com.openexchange.jslob.JSlobEntry#getKey()
+     * @param uid The identifier of the trusted domain image
+     * @return The {@link Icon}
+     * @throws OXException in case the uid is invalid
      */
-    @Override
-    public String getKey() {
-        return JSlobKeys.MAIL;
-    }
+    public Icon getIcon(Session session, String uid) throws OXException;
 
-    /*
-     * (non-Javadoc)
+    /**
+     * Checks mail message for trusted mail address and adapts authentication result accordingly
      *
-     * @see com.openexchange.jslob.JSlobEntry#getPath()
+     * @param session The user session
+     * @param mailMessage The mail message to handle
      */
-    @Override
-    public String getPath() {
-        return NAME;
-    }
+    public void handle(Session session, MailMessage mailMessage);
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.jslob.JSlobEntry#isWritable(com.openexchange.session.Session)
-     */
-    @Override
-    public boolean isWritable(Session session) throws OXException {
-        return false;
-    }
-
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.jslob.JSlobEntry#getValue(com.openexchange.session.Session)
-     */
-    @Override
-    public Object getValue(Session session) throws OXException {
-        LeanConfigurationService configService = services.getService(LeanConfigurationService.class);
-        return configService.getBooleanProperty(session.getUserId(), session.getContextId(), MailAuthenticityProperty.ENABLED);
-    }
-
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.jslob.JSlobEntry#setValue(java.lang.Object, com.openexchange.session.Session)
-     */
-    @Override
-    public void setValue(Object value, Session session) throws OXException {
-        // not writable
-    }
-
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.jslob.JSlobEntry#metadata(com.openexchange.session.Session)
-     */
-    @Override
-    public Map<String, Object> metadata(Session session) throws OXException {
-        // nope
-        return null;
-    }
 }

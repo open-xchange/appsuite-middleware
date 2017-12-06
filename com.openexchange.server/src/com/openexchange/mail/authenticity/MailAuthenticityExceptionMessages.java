@@ -59,9 +59,6 @@ import com.openexchange.i18n.LocalizableStrings;
  */
 public final class MailAuthenticityExceptionMessages implements LocalizableStrings {
 
-    // Missing or invalid authserv-ids.
-    public static final String INVALID_AUTHSERV_IDS_MSG = "Missing or invalid authserv-ids.";
-
     /**
      * Prevent instantiation.
      */

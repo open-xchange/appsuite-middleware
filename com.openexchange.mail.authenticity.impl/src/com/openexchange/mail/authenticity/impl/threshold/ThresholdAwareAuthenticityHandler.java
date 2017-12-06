@@ -47,35 +47,67 @@
  *
  */
 
-package com.openexchange.mail.authenticity.impl.handler.trusted;
+package com.openexchange.mail.authenticity.impl.threshold;
 
+import java.util.Collection;
 import com.openexchange.exception.OXException;
+import com.openexchange.mail.MailField;
+import com.openexchange.mail.authenticity.MailAuthenticityHandler;
+import com.openexchange.mail.dataobjects.MailAuthenticityResult;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.session.Session;
 
 /**
- * {@link TrustedMailService}
+ * {@link ThresholdAwareAuthenticityHandler} - A simple authenticity handler, which only delegates if date threshold is fulfilled.
  *
- * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.10.0
  */
-public interface TrustedMailService {
+public class ThresholdAwareAuthenticityHandler implements MailAuthenticityHandler {
+
+    private final MailAuthenticityHandler authenticityHandler;
+    private final long threshold;
 
     /**
-     * Retrieves the icon for the given uid.
-     *
-     * @param uid The identifier of the trusted domain image
-     * @return The {@link Icon}
-     * @throws OXException in case the uid is invalid
+     * Initializes a new {@link ThresholdAwareAuthenticityHandler}.
      */
-    public Icon getIcon(Session session, String uid) throws OXException;
+    public ThresholdAwareAuthenticityHandler(MailAuthenticityHandler authenticityHandler, long threshold) {
+        super();
+        this.authenticityHandler = authenticityHandler;
+        this.threshold = threshold;
+    }
 
-    /**
-     * Checks mail message for trusted mail address and adapts authentication result accordingly
-     *
-     * @param session The user session
-     * @param mailMessage The mail message to handle
-     */
-    public void handle(Session session, MailMessage mailMessage);
+    @Override
+    public void handle(Session session, MailMessage mailMessage) throws OXException {
+        if (null == mailMessage) {
+            return;
+        }
+        if ((threshold > 0 && mailMessage.getReceivedDate().getTime() < threshold)) {
+            mailMessage.setAuthenticityResult(MailAuthenticityResult.NOT_ANALYZED_RESULT);
+            return;
+        }
+
+        authenticityHandler.handle(session, mailMessage);
+    }
+
+    @Override
+    public Collection<MailField> getRequiredFields() {
+        return authenticityHandler.getRequiredFields();
+    }
+
+    @Override
+    public Collection<String> getRequiredHeaders() {
+        return authenticityHandler.getRequiredHeaders();
+    }
+
+    @Override
+    public boolean isEnabled(Session session) {
+        return authenticityHandler.isEnabled(session);
+    }
+
+    @Override
+    public int getRanking() {
+        return authenticityHandler.getRanking();
+    }
 
 }

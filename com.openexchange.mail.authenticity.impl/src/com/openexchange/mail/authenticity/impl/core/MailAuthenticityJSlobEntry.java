@@ -47,67 +47,94 @@
  *
  */
 
-package com.openexchange.mail.authenticity.impl.handler.threshold;
+package com.openexchange.mail.authenticity.impl.core;
 
-import java.util.Collection;
+import java.util.Map;
+import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.exception.OXException;
-import com.openexchange.mail.MailField;
-import com.openexchange.mail.authenticity.MailAuthenticityHandler;
-import com.openexchange.mail.dataobjects.MailAuthenticityResult;
-import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.jslob.JSlobEntry;
+import com.openexchange.jslob.JSlobKeys;
+import com.openexchange.mail.authenticity.MailAuthenticityProperty;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 
 /**
- * {@link ThresholdAwareAuthenticityHandler} - A simple authenticity handler, which only delegates if date threshold is fulfilled.
+ * {@link MailAuthenticityJSlobEntry}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.10.0
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class ThresholdAwareAuthenticityHandler implements MailAuthenticityHandler {
+public class MailAuthenticityJSlobEntry implements JSlobEntry {
 
-    private final MailAuthenticityHandler authenticityHandler;
-    private final long threshold;
+    private static final String NAME = "authenticityEnabled";
+    private final ServiceLookup services;
 
     /**
-     * Initializes a new {@link ThresholdAwareAuthenticityHandler}.
+     * Initialises a new {@link MailAuthenticityJSlobEntry}.
      */
-    public ThresholdAwareAuthenticityHandler(MailAuthenticityHandler authenticityHandler, long threshold) {
+    public MailAuthenticityJSlobEntry(ServiceLookup services) {
         super();
-        this.authenticityHandler = authenticityHandler;
-        this.threshold = threshold;
+        this.services = services;
     }
 
+    /*
+     * (non-Javadoc)
+     *
+     * @see com.openexchange.jslob.JSlobEntry#getKey()
+     */
     @Override
-    public void handle(Session session, MailMessage mailMessage) throws OXException {
-        if (null == mailMessage) {
-            return;
-        }
-        if ((threshold > 0 && mailMessage.getReceivedDate().getTime() < threshold)) {
-            mailMessage.setAuthenticityResult(MailAuthenticityResult.NOT_ANALYZED_RESULT);
-            return;
-        }
-
-        authenticityHandler.handle(session, mailMessage);
+    public String getKey() {
+        return JSlobKeys.MAIL;
     }
 
+    /*
+     * (non-Javadoc)
+     *
+     * @see com.openexchange.jslob.JSlobEntry#getPath()
+     */
     @Override
-    public Collection<MailField> getRequiredFields() {
-        return authenticityHandler.getRequiredFields();
+    public String getPath() {
+        return NAME;
     }
 
+    /*
+     * (non-Javadoc)
+     *
+     * @see com.openexchange.jslob.JSlobEntry#isWritable(com.openexchange.session.Session)
+     */
     @Override
-    public Collection<String> getRequiredHeaders() {
-        return authenticityHandler.getRequiredHeaders();
+    public boolean isWritable(Session session) throws OXException {
+        return false;
     }
 
+    /*
+     * (non-Javadoc)
+     *
+     * @see com.openexchange.jslob.JSlobEntry#getValue(com.openexchange.session.Session)
+     */
     @Override
-    public boolean isEnabled(Session session) {
-        return authenticityHandler.isEnabled(session);
+    public Object getValue(Session session) throws OXException {
+        LeanConfigurationService configService = services.getService(LeanConfigurationService.class);
+        return configService.getBooleanProperty(session.getUserId(), session.getContextId(), MailAuthenticityProperty.ENABLED);
     }
 
+    /*
+     * (non-Javadoc)
+     *
+     * @see com.openexchange.jslob.JSlobEntry#setValue(java.lang.Object, com.openexchange.session.Session)
+     */
     @Override
-    public int getRanking() {
-        return authenticityHandler.getRanking();
+    public void setValue(Object value, Session session) throws OXException {
+        // not writable
     }
 
+    /*
+     * (non-Javadoc)
+     *
+     * @see com.openexchange.jslob.JSlobEntry#metadata(com.openexchange.session.Session)
+     */
+    @Override
+    public Map<String, Object> metadata(Session session) throws OXException {
+        // nope
+        return null;
+    }
 }

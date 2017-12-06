@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.mail.authenticity.impl.handler.trusted.internal;
+package com.openexchange.mail.authenticity.impl.trusted.internal;
 
 import java.io.File;
 import java.io.IOException;
@@ -69,11 +69,11 @@ import com.openexchange.config.Reloadables;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.authenticity.DefaultMailAuthenticityResultKey;
+import com.openexchange.mail.authenticity.MailAuthenticityExceptionCodes;
 import com.openexchange.mail.authenticity.MailAuthenticityStatus;
 import com.openexchange.mail.authenticity.TrustedMailResultKey;
-import com.openexchange.mail.authenticity.impl.exception.MailAuthenticityExceptionCodes;
-import com.openexchange.mail.authenticity.impl.handler.trusted.Icon;
-import com.openexchange.mail.authenticity.impl.handler.trusted.TrustedMailService;
+import com.openexchange.mail.authenticity.impl.trusted.Icon;
+import com.openexchange.mail.authenticity.impl.trusted.TrustedMailService;
 import com.openexchange.mail.authenticity.mechanism.AbstractAuthMechResult;
 import com.openexchange.mail.authenticity.mechanism.AuthenticityMechanismResult;
 import com.openexchange.mail.authenticity.mechanism.MailAuthenticityMechanism;

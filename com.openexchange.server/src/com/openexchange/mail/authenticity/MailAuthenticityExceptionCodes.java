@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.authenticity;
 
+import static com.openexchange.exception.OXExceptionStrings.MESSAGE;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
@@ -80,9 +81,13 @@ public enum MailAuthenticityExceptionCodes implements DisplayableOXExceptionCode
      */
     JSON_ERROR("A JSON error occurred: %1$s", null, Category.CATEGORY_ERROR, 4),
     /**
-     * The property 'com.openexchange.mail.authenticity.authServId' is missing or invalid.
+     * The property '%1$s' is missing or invalid.
      */
-    INVALID_AUTHSERV_IDS("The property '" + MailAuthenticityProperty.AUTHSERV_ID.getFQPropertyName() + "' is missing or invalid.", MailAuthenticityExceptionMessages.INVALID_AUTHSERV_IDS_MSG, Category.CATEGORY_CONFIGURATION, 5);
+    INVALID_PROPERTY("The property '%1$s' is missing or invalid.", MESSAGE, Category.CATEGORY_CONFIGURATION, 5),
+    /**
+     * The provided image uid is invalid.
+     */
+    INVALID_IMAGE_UID("The provided image uid is invalid.", MESSAGE, Category.CATEGORY_USER_INPUT, 6),
     ;
 
     /** The error code prefix for mail authenticity */

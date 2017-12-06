@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.mail.authenticity.impl.handler.core;
+package com.openexchange.mail.authenticity.impl.core;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -76,7 +76,7 @@ import com.openexchange.mail.authenticity.MailAuthenticityExceptionCodes;
 import com.openexchange.mail.authenticity.MailAuthenticityHandler;
 import com.openexchange.mail.authenticity.MailAuthenticityProperty;
 import com.openexchange.mail.authenticity.MailAuthenticityStatus;
-import com.openexchange.mail.authenticity.impl.handler.trusted.TrustedMailService;
+import com.openexchange.mail.authenticity.impl.trusted.TrustedMailService;
 import com.openexchange.mail.authenticity.mechanism.AbstractAuthMechResult;
 import com.openexchange.mail.authenticity.mechanism.DefaultMailAuthenticityMechanism;
 import com.openexchange.mail.authenticity.mechanism.MailAuthenticityMechanismResult;
@@ -559,17 +559,17 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
         LeanConfigurationService leanConfigService = services.getService(LeanConfigurationService.class);
         String sAuthServIds = leanConfigService.getProperty(userId, contextId, MailAuthenticityProperty.AUTHSERV_ID);
         if (Strings.isEmpty(sAuthServIds)) {
-            throw MailAuthenticityExceptionCodes.INVALID_AUTHSERV_IDS.create();
+            throw MailAuthenticityExceptionCodes.INVALID_PROPERTY.create(MailAuthenticityProperty.AUTHSERV_ID.getFQPropertyName());
         }
 
         List<String> tokens = Arrays.asList(Strings.splitByComma(sAuthServIds));
         if (tokens == null || tokens.isEmpty() || tokens.contains("")) {
-            throw MailAuthenticityExceptionCodes.INVALID_AUTHSERV_IDS.create();
+            throw MailAuthenticityExceptionCodes.INVALID_PROPERTY.create(MailAuthenticityProperty.AUTHSERV_ID.getFQPropertyName());
         }
 
         List<AllowedAuthServId> authServIds = AllowedAuthServId.allowedAuthServIdsFor(tokens);
         if (authServIds == null || authServIds.isEmpty()) {
-            throw MailAuthenticityExceptionCodes.INVALID_AUTHSERV_IDS.create();
+            throw MailAuthenticityExceptionCodes.INVALID_PROPERTY.create(MailAuthenticityProperty.AUTHSERV_ID.getFQPropertyName());
         }
 
         authServIdsCache.put(key, authServIds);

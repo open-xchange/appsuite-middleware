@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.mail.authenticity.impl.handler.trusted.internal;
+package com.openexchange.mail.authenticity.impl.trusted.internal;
 
 import java.io.InputStream;
 import java.util.List;
@@ -63,9 +63,9 @@ import com.openexchange.image.ImageDataSource;
 import com.openexchange.image.ImageLocation;
 import com.openexchange.image.ImageUtility;
 import com.openexchange.java.Streams;
-import com.openexchange.mail.authenticity.impl.handler.trusted.Icon;
-import com.openexchange.mail.authenticity.impl.handler.trusted.TrustedMailService;
 import com.openexchange.mail.authenticity.impl.osgi.Services;
+import com.openexchange.mail.authenticity.impl.trusted.Icon;
+import com.openexchange.mail.authenticity.impl.trusted.TrustedMailService;
 import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;

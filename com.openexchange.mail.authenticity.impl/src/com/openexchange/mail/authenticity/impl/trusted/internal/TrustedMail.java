@@ -47,10 +47,10 @@
  *
  */
 
-package com.openexchange.mail.authenticity.impl.handler.trusted.internal;
+package com.openexchange.mail.authenticity.impl.trusted.internal;
 
 import java.util.regex.Pattern;
-import com.openexchange.mail.authenticity.impl.handler.trusted.Icon;
+import com.openexchange.mail.authenticity.impl.trusted.Icon;
 
 /**
  * {@link TrustedMail} specifies a trusted mail address or a group of trusted mail addresses via wild-cards.

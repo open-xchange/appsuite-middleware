@@ -47,35 +47,81 @@
  *
  */
 
-package com.openexchange.mail.authenticity.impl.handler.trusted;
+package com.openexchange.mail.authenticity.impl.trusted.internal;
+
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.rmi.server.UID;
+import javax.imageio.ImageIO;
+import com.openexchange.mail.authenticity.impl.trusted.Icon;
 
 /**
- *
- * {@link Icon} represents an Icon for trusted mail addresses
+ * {@link ImageIcon}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.0
  */
-public interface Icon {
+public class ImageIcon implements Icon {
+
+    private final byte[] byteArray;
+    private static final String MIME_TYPE = "image/png";
+    private static final String FORMAT = "png";
+    private final String UID;
+    private static final String PREFIX = "trustedMail_";
 
     /**
-     * Gets the mime type of this icon (e.g. image/png).
+     * Initializes a new {@link ImageIcon}.
      *
-     * @return The mime type
+     * @param url A url to a valid image
+     * @throws IOException
+     * @throws MalformedURLException
      */
-    String getMimeType();
+    public ImageIcon(URL url) throws MalformedURLException, IOException {
+        super();
+        BufferedImage image = ImageIO.read(url);
+        if(image==null) {
+            throw new IOException("No image found");
+        }
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        ImageIO.write(image, FORMAT, stream);
+        byteArray = stream.toByteArray();
+        UID = PREFIX+new UID().toString();
+
+    }
 
     /**
-     * Gets the icons raw bytes.
+     * Initializes a new {@link ImageIcon}.
      *
-     * @return The icon data
+     * @param file An image file
+     * @throws IOException
+     * @throws MalformedURLException
      */
-    byte[] getData();
+    public ImageIcon(File file) throws MalformedURLException, IOException {
+        super();
+        BufferedImage image = ImageIO.read(file);
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        ImageIO.write(image, FORMAT, stream);
+        byteArray = stream.toByteArray();
+        UID = PREFIX+new UID().toString();
+    }
 
-    /**
-     * Returns a uid for this icon
-     * @return The uid
-     */
-    String getUID();
+    @Override
+    public String getMimeType() {
+        return MIME_TYPE;
+    }
+
+    @Override
+    public byte[] getData() {
+        return byteArray;
+    }
+
+    @Override
+    public String getUID() {
+        return UID;
+    }
 
 }
