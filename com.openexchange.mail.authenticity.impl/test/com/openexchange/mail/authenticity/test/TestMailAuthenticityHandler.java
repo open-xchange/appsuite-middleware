@@ -59,6 +59,8 @@ import static org.mockito.Mockito.when;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -98,6 +100,7 @@ public class TestMailAuthenticityHandler {
     private MailAuthenticityResult result;
     private Session session;
     private LeanConfigurationService leanConfig;
+    private InternetAddress[] fromAddresses;
 
     /**
      * Initialises a new {@link TestMailAuthenticityHandler}.
@@ -127,6 +130,9 @@ public class TestMailAuthenticityHandler {
         mailMessage = mock(MailMessage.class);
         when(mailMessage.getHeaders()).thenReturn(headerCollection);
 
+        fromAddresses = new InternetAddress[1];
+        when(mailMessage.getFrom()).thenReturn(fromAddresses);
+
         handler = new MailAuthenticityHandlerImpl(services);
     }
 
@@ -148,8 +154,8 @@ public class TestMailAuthenticityHandler {
      * but no actual authenticity was performed on the MTA's side.
      */
     @Test
-    public void testWithHeaderPresentButNoAuthenticationDone() {
-        headerCollection.addHeader("From", "Jane Doe <jane.doe@example.org>");
+    public void testWithHeaderPresentButNoAuthenticationDone() throws AddressException {
+        fromAddresses[0] = new InternetAddress("Jane Doe <jane.doe@example.org>");
         perform("ox.io 1; none");
 
         assertStatus(MailAuthenticityStatus.NEUTRAL, result.getStatus());
@@ -162,8 +168,8 @@ public class TestMailAuthenticityHandler {
      * and the message was authenticated by the MTA via the SPF method.
      */
     @Test
-    public void testSPFAuthentication() {
-        headerCollection.addHeader("From", "Jane Doe <jane.doe@example.net>");
+    public void testSPFAuthentication() throws AddressException {
+        fromAddresses[0] = new InternetAddress("Jane Doe <jane.doe@example.net>");
         perform("ox.io; spf=pass smtp.mailfrom=example.net");
 
         assertStatus(MailAuthenticityStatus.PASS, result.getStatus());
@@ -178,8 +184,8 @@ public class TestMailAuthenticityHandler {
      * and the message was authenticated by the MTA via unknown methods and the SPF method.
      */
     @Test
-    public void testSeveralAuthenticationsWithUnknownMethodsAndSPF() {
-        headerCollection.addHeader("From", "Jane Doe <jane.doe@example.net>");
+    public void testSeveralAuthenticationsWithUnknownMethodsAndSPF() throws AddressException {
+        fromAddresses[0] = new InternetAddress("Jane Doe <jane.doe@example.net>");
         perform("ox.io; sender-id=pass header.from=example.net", "ox.io; auth=pass (cram-md5) smtp.auth=sender@example.net; spf=pass smtp.mailfrom=example.net");
 
         assertStatus(MailAuthenticityStatus.PASS, result.getStatus());
@@ -210,8 +216,8 @@ public class TestMailAuthenticityHandler {
      * and the message was authenticated by different MTAs via unknown methods and the DKIM and SPF methods.
      */
     @Test
-    public void testSeveralAuthenticationsDifferentMTAs() {
-        headerCollection.addHeader("From", "Jane Doe <jane.doe@example.com>");
+    public void testSeveralAuthenticationsDifferentMTAs() throws AddressException {
+        fromAddresses[0] = new InternetAddress("Jane Doe <jane.doe@example.com>");
         perform("ox.io; auth=pass (cram-md5) smtp.auth=sender@example.com; spf=fail smtp.mailfrom=example.com", "ox.io; sender-id=fail header.from=example.com; dkim=pass (good signature) header.d=example.com");
 
         assertStatus(MailAuthenticityStatus.PASS, result.getStatus());
@@ -241,8 +247,8 @@ public class TestMailAuthenticityHandler {
      * and the message was authenticated by different MTAs with a multi-tiered authenticity.
      */
     @Test
-    public void testMultiTieredAuthenticationDifferentMTAs() {
-        headerCollection.addHeader("From", "Jane Doe <jane.doe@newyork.example.com>");
+    public void testMultiTieredAuthenticationDifferentMTAs() throws AddressException {
+        fromAddresses[0] = new InternetAddress("Jane Doe <jane.doe@newyork.example.com>");
         perform("ox.io; dkim=pass (good signature) header.i=@newyork.example.com", "ox.io; dkim=pass reason=\"good signature\" header.i=@mail-router.example.net; dkim=fail reason=\"bad signature\" header.i=@newyork.example.com");
 
         assertStatus(MailAuthenticityStatus.FAIL, result.getStatus()); // FIXME: Should it fail?
@@ -260,8 +266,8 @@ public class TestMailAuthenticityHandler {
      * and the MTAs failed to authenticate with SPF and DKIM
      */
     @Test
-    public void testFailingSPFAndTempErrorDKIM() {
-        headerCollection.addHeader("From", "Jane Doe <bob@aliceland.com>");
+    public void testFailingSPFAndTempErrorDKIM() throws AddressException {
+        fromAddresses[0] = new InternetAddress("Jane Doe <bob@aliceland.com>");
         perform("ox.io; dkim=temperror (no key for signature) header.i=@aliceland.com header.s=dkim header.b=sl5RAv9n; spf=fail (ox.io: domain of bob@aliceland.com does not designate 1.2.3.4 as permitted sender) smtp.mailfrom=bob@aliceland.com");
 
         assertStatus(MailAuthenticityStatus.FAIL, result.getStatus());
@@ -278,8 +284,8 @@ public class TestMailAuthenticityHandler {
      * and the MTAs passed to authenticate with SPF and DMARC
      */
     @Test
-    public void testPassDMARCAndSPF() {
-        headerCollection.addHeader("From", "Jane Doe <alice@aliceland.com>");
+    public void testPassDMARCAndSPF() throws AddressException {
+        fromAddresses[0] = new InternetAddress("Jane Doe <alice@aliceland.com>");
         perform("ox.io; spf=pass (ox.io: domain of alice@aliceland.com designates 1.2.3.4 as permitted sender) smtp.mailfrom=Alice@aliceland.com; dmarc=pass (p=NONE sp=NONE dis=NONE) header.from=aliceland.com");
 
         assertStatus(MailAuthenticityStatus.PASS, result.getStatus());
@@ -296,8 +302,8 @@ public class TestMailAuthenticityHandler {
      * and the MTAs failed to authenticate with DKIM due to a temporary error and passed the SPF validation
      */
     @Test
-    public void testDKIMTempErrorAndSPFPass() {
-        headerCollection.addHeader("From", "Jane Doe <alice@ice.bobland.com>");
+    public void testDKIMTempErrorAndSPFPass() throws AddressException {
+        fromAddresses[0] = new InternetAddress("Jane Doe <alice@ice.bobland.com>");
         perform("ox.io; dkim=temperror (no key for signature) header.i=@ice.bobland.com header.s=e header.b=Sw4o2uM4; spf=pass (ox.io: domain of alice@ice.bobland.com designates 1.2.3.4 as permitted sender) smtp.mailfrom=alice@ice.bobland.com");
 
         assertStatus(MailAuthenticityStatus.PASS, result.getStatus());
@@ -314,8 +320,8 @@ public class TestMailAuthenticityHandler {
      * and the MTA passes the validation of DKIM and ignores all other unknown mechanisms
      */
     @Test
-    public void testDKIMPassUnknownMechanisms() {
-        headerCollection.addHeader("From", "Jane Doe <jane.doe@ox.io>");
+    public void testDKIMPassUnknownMechanisms() throws AddressException {
+        fromAddresses[0] = new InternetAddress("Jane Doe <jane.doe@ox.io>");
         perform("ox.io; dkim=pass reason=\"1024-bit key; unprotected key\" header.d=ox.io header.i=@ox.io header.b=lolhN/LS; dkim-adsp=pass; dkim-atps=neutral");
 
         assertStatus(MailAuthenticityStatus.PASS, result.getStatus());
@@ -343,8 +349,8 @@ public class TestMailAuthenticityHandler {
      * of the different mechanism results, i.e. DMARC > DKIM > SPF
      */
     @Test
-    public void testPassAllKnownMechanisms() {
-        headerCollection.addHeader("From", "Jane Doe <jane.doe@foobar.com>");
+    public void testPassAllKnownMechanisms() throws AddressException {
+        fromAddresses[0] = new InternetAddress("Jane Doe <jane.doe@foobar.com>");
         perform("ox.io; dkim=pass header.i=@foobar.com header.s=201705 header.b=VvWVD9kg; dkim=pass header.i=@foobar.com header.s=201705 header.b=0WC5u+VZ; dkim=pass header.i=@foobar.com header.s=201705 header.b=doOaQjgp; spf=pass (ox.io: domain of jane.doe@foobar.com designates 1.2.3.4 as permitted sender) smtp.mailfrom=jane.doe@foobar.com; dmarc=pass (p=NONE sp=NONE dis=NONE) header.from=foobar.com");
 
         assertStatus(MailAuthenticityStatus.PASS, result.getStatus());
@@ -364,8 +370,8 @@ public class TestMailAuthenticityHandler {
      * has valid mechanisms but the <code>authserv-id</code> is not in the configured allowed list.
      */
     @Test
-    public void testNotValidAuthServId() {
-        headerCollection.addHeader("From", "Jane Doe <jane.doe@foobar.com>");
+    public void testNotValidAuthServId() throws AddressException {
+        fromAddresses[0] = new InternetAddress("Jane Doe <jane.doe@foobar.com>");
         perform("some-auth-servId; dkim=pass header.i=@foobar.com header.s=201705 header.b=VvWVD9kg; dmarc=pass (p=NONE sp=NONE dis=NONE) header.from=foobar.com");
 
         assertStatus(MailAuthenticityStatus.NEUTRAL, result.getStatus());
@@ -380,8 +386,8 @@ public class TestMailAuthenticityHandler {
      * has valid mechanisms but the <code>authserv-id</code> is absent.
      */
     @Test
-    public void testAbsentAuthServId() {
-        headerCollection.addHeader("From", "Jane Doe <jane.doe@foobar.com>");
+    public void testAbsentAuthServId() throws AddressException {
+        fromAddresses[0] = new InternetAddress("Jane Doe <jane.doe@foobar.com>");
         perform("; dkim=pass header.i=@foobar.com header.s=201705 header.b=VvWVD9kg; dmarc=pass (p=NONE sp=NONE dis=NONE) header.from=foobar.com");
 
         assertStatus(MailAuthenticityStatus.NEUTRAL, result.getStatus());
@@ -396,8 +402,8 @@ public class TestMailAuthenticityHandler {
      * and the DMARC and DKIM delivered a 'none' status and the SPF passed.
      */
     @Test
-    public void testDMARCNoneDKIMNoneSPFPass() {
-        headerCollection.addHeader("From", "Jane Doe <jane.doe@foobar.com>");
+    public void testDMARCNoneDKIMNoneSPFPass() throws AddressException {
+        fromAddresses[0] = new InternetAddress("Jane Doe <jane.doe@foobar.com>");
         perform("ox.io; dkim=none header.i=@foobar.com header.s=201705 header.b=VvWVD9kg; spf=pass (ox.io: domain of jane.doe@foobar.com designates 1.2.3.4 as permitted sender) smtp.mailfrom=jane.doe@foobar.com; dmarc=none (p=NONE sp=NONE dis=NONE) header.from=foobar.com");
 
         assertStatus(MailAuthenticityStatus.PASS, result.getStatus());
@@ -415,8 +421,8 @@ public class TestMailAuthenticityHandler {
      * and the DMARC passed but the <code>From</code> header has a different domain as in DMARC.
      */
     @Test
-    public void testDMARCWithMismatchingFromHeader() {
-        headerCollection.addHeader("From", "Jane Doe <jane.doe@some.foobar.com>");
+    public void testDMARCWithMismatchingFromHeader() throws AddressException {
+        fromAddresses[0] = new InternetAddress("Jane Doe <jane.doe@some.foobar.com>");
         perform("ox.io; dmarc=pass (p=NONE sp=NONE dis=NONE) header.from=foobar.com");
 
         assertStatus(MailAuthenticityStatus.NEUTRAL, result.getStatus());
@@ -433,8 +439,8 @@ public class TestMailAuthenticityHandler {
      * the passing DMARC.
      */
     @Test
-    public void testMultipleDMARCWithOneMismatchingFromHeader() {
-        headerCollection.addHeader("From", "Jane Doe <jane.doe@some.foobar.com>");
+    public void testMultipleDMARCWithOneMismatchingFromHeader() throws AddressException {
+        fromAddresses[0] = new InternetAddress("Jane Doe <jane.doe@some.foobar.com>");
         perform("ox.io; dmarc=pass (p=NONE sp=NONE dis=NONE) header.from=foobar.com; dmarc=fail (p=NONE sp=NONE dis=NONE) header.from=some.foobar.com");
 
         assertStatus(MailAuthenticityStatus.FAIL, result.getStatus());
@@ -451,8 +457,8 @@ public class TestMailAuthenticityHandler {
      * the DMARC and DKIM passes but the SPF fails.
      */
     @Test
-    public void testDMARCPassDKIMPassSPFFail() {
-        headerCollection.addHeader("From", "Jane Doe <jane.doe@foobar.com>");
+    public void testDMARCPassDKIMPassSPFFail() throws AddressException {
+        fromAddresses[0] = new InternetAddress("Jane Doe <jane.doe@foobar.com>");
         perform("ox.io; dmarc=pass (p=NONE sp=NONE dis=NONE) header.from=foobar.com; spf=fail smtp.mailfrom=foobar.com; dkim=pass header.i=@foobar.com header.s=201705 header.b=VvWVD9kg");
 
         assertStatus(MailAuthenticityStatus.PASS, result.getStatus());
@@ -470,8 +476,8 @@ public class TestMailAuthenticityHandler {
      * and every mechanism is present twice.
      */
     @Test
-    public void testDuplicateAllMechanisms() {
-        headerCollection.addHeader("From", "Jane Doe <jane.doe@foobar.com>");
+    public void testDuplicateAllMechanisms() throws AddressException {
+        fromAddresses[0] = new InternetAddress("Jane Doe <jane.doe@foobar.com>");
         perform("ox.io; dmarc=fail (p=NONE sp=NONE dis=NONE) header.from=foobar.com; spf=fail smtp.mailfrom=foobar.com; " + "dmarc=pass (p=NONE sp=NONE dis=REJECT) header.from=foobar.com; dkim=pass header.i=@foobar.com header.s=201705 header.b=VvWVD9kg; " + "dkim=fail header.i=@foobar.com header.s=201705 header.b=0WC5u+VZ; spf=pass (ox.io: domain of jane.doe@foobar.com designates 1.2.3.4 as permitted sender) smtp.mailfrom=jane.doe@foobar.com; ");
 
         assertStatus(MailAuthenticityStatus.PASS, result.getStatus());
