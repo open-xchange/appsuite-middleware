@@ -202,7 +202,7 @@ public class CalendarCopyTask implements CopyUserTaskService {
             UserCopyTask.class.getName(),
             ContextLoadTask.class.getName(),
             ConnectionFetcherTask.class.getName(),
-            FolderCopyTask.class.getName()
+            FolderCopyTask.class.getName(),
         };
     }
 
@@ -281,7 +281,7 @@ public class CalendarCopyTask implements CopyUserTaskService {
         if (null == appointmentIds || appointmentIds.isEmpty()) {
             return Collections.<Integer, ExternalDate> emptyMap();
         }
-        final Map<Integer, ExternalDate> dates = new HashMap<Integer,ExternalDate>();
+        final Map<Integer, ExternalDate> dates = new HashMap<>();
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
@@ -411,7 +411,7 @@ public class CalendarCopyTask implements CopyUserTaskService {
 
     private void exchangeIds(final Map<Integer, CalendarDataObject> appointments, final ObjectMapping<FolderObject> folderMapping, final int dstUsrId, final int dstCtxId, final Connection dstCon, final int srcUsrId) throws OXException {
         try {
-            final Map<Integer, CalendarDataObject> seriesAppointments = new HashMap<Integer, CalendarDataObject>();
+            final Map<Integer, CalendarDataObject> seriesAppointments = new HashMap<>();
             for (final Entry<Integer, CalendarDataObject> appointmentEntry : appointments.entrySet()) {
                 final int newAppointmentId = IDGenerator.getId(dstCtxId, com.openexchange.groupware.Types.APPOINTMENT, dstCon);
                 final CalendarDataObject appointment = appointmentEntry.getValue();
@@ -478,7 +478,7 @@ public class CalendarCopyTask implements CopyUserTaskService {
     }
 
     private void checkAppointmentsForMissingRecurrenceMasters(final Map<Integer, CalendarDataObject> appointments) {
-        final List<Integer> toRemove = new ArrayList<Integer>();
+        final List<Integer> toRemove = new ArrayList<>();
         for (final Entry<Integer, CalendarDataObject> appointmentEntry : appointments.entrySet()) {
             final CalendarDataObject appointment = appointmentEntry.getValue();
             final int recurrenceId = appointment.getRecurrenceID();
@@ -502,7 +502,7 @@ public class CalendarCopyTask implements CopyUserTaskService {
     }
 
     private List<Participant> fetchMoveableParticipants(final CalendarDataObject appointment, final Connection srcCon, final Integer srcCtxId, final Integer srcUsrId) throws OXException {
-        final List<Participant> participants = new ArrayList<Participant>();
+        final List<Participant> participants = new ArrayList<>();
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
@@ -549,7 +549,7 @@ public class CalendarCopyTask implements CopyUserTaskService {
     }
 
     Map<Integer, CalendarDataObject> loadAppointmentsFromDB(final List<Integer> appointmentIds, final Integer srcCtxId, final Connection srcCon) throws OXException {
-        final Map<Integer, CalendarDataObject> appointments = new HashMap<Integer, CalendarDataObject>();
+        final Map<Integer, CalendarDataObject> appointments = new HashMap<>();
         if (!appointmentIds.isEmpty()) {
             final String selectStatement = CopyTools.replaceIdsInQuery("#IDS#", SELECT_APPOINTMENTS, appointmentIds);
             PreparedStatement stmt = null;
@@ -604,7 +604,7 @@ public class CalendarCopyTask implements CopyUserTaskService {
     }
 
     List<Integer> loadAppointmentIdsFromDB(final Set<Integer> sourceFolderIds, final Integer srcUsrId, final Integer srcCtxId, final Connection srcCon) throws OXException {
-        final List<Integer> appointmentIds = new ArrayList<Integer>();
+        final List<Integer> appointmentIds = new ArrayList<>();
         if (!sourceFolderIds.isEmpty()) {
             final String selectStatement = CopyTools.replaceIdsInQuery("#IDS#", SELECT_APP_IDS, sourceFolderIds);
             PreparedStatement stmt = null;
