@@ -70,8 +70,10 @@ import org.dmfs.rfc5545.DateTime;
 import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.Organizer;
 import com.openexchange.chronos.Period;
 import com.openexchange.chronos.RecurrenceId;
+import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.DefaultRecurrenceData;
 import com.openexchange.chronos.common.DefaultRecurrenceId;
 import com.openexchange.chronos.compat.Appointment2Event;
@@ -83,6 +85,7 @@ import com.openexchange.chronos.service.RecurrenceData;
 import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.chronos.storage.rdb.osgi.Services;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.java.util.TimeZones;
 
 /**
@@ -141,7 +144,28 @@ public class Compat {
          * enhance organizer with static properties
          */
         if (event.containsOrganizer() && null != event.getOrganizer() && null != eventStorage.getEntityResolver()) {
-            event.setOrganizer(eventStorage.getEntityResolver().applyEntityData(event.getOrganizer(), CalendarUserType.INDIVIDUAL));
+            try {
+                event.setOrganizer(eventStorage.getEntityResolver().applyEntityData(event.getOrganizer(), CalendarUserType.INDIVIDUAL));
+            } catch (OXException e) {
+                if ("CAL-4034".equals(e.getErrorCode())) {
+                    /*
+                     * invalid calendar user; possibly a no longer existing user - add as external organizer as fallback if possible
+                     */
+                    String email = CalendarUtils.extractEMailAddress(event.getOrganizer().getUri());
+                    if (Strings.isEmpty(email)) {
+                        eventStorage.addInvalidDataWaring(event.getId(), EventField.ORGANIZER, ProblemSeverity.NORMAL, "Skipping non-existent user " + event.getOrganizer(), e);
+                        event.setOrganizer(null);
+                    } else {
+                        String message = "Falling back to external attendee representation for non-existent user " + event.getOrganizer();
+                        eventStorage.addInvalidDataWaring(event.getId(), EventField.ORGANIZER, ProblemSeverity.MINOR, message, e);
+                        Organizer organizer = new Organizer();
+                        organizer.setUri(CalendarUtils.getURI(email));
+                        event.setOrganizer(eventStorage.getEntityResolver().applyEntityData(organizer, CalendarUserType.INDIVIDUAL));
+                    }
+                } else {
+                    throw e;
+                }
+            }
         }
         /*
          * derive calendar user based on present public folder and created by info
