@@ -49,6 +49,7 @@
 
 package com.openexchange.data.conversion.ical;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
 
@@ -66,8 +67,10 @@ public class Assert extends org.junit.Assert {
     }
 
     public static void assertStandardAppFields(final ICalFile ical, final Date start, final Date end, TimeZone tz) {
-        assertProperty(ical, "DTSTART", "TZID=" + tz.getID(), Tools.formatForICalWithoutTimezone(start));
-        assertProperty(ical, "DTEND", "TZID=" + tz.getID(), Tools.formatForICalWithoutTimezone(end));
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd'T'HHmmss");
+        sdf.setTimeZone(tz);
+        assertProperty(ical, "DTSTART", "TZID=" + tz.getID(), sdf.format(start));
+        assertProperty(ical, "DTEND", "TZID=" + tz.getID(), sdf.format(end));
     }
 
     public static void assertStandardTaskFields(final ICalFile ical, final Date start, final Date end, TimeZone tz) {
