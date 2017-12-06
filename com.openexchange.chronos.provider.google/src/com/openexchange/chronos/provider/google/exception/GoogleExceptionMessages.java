@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2017-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,32 +47,17 @@
  *
  */
 
-package com.openexchange.chronos.provider.google;
+package com.openexchange.chronos.provider.google.exception;
 
 /**
- * {@link GoogleCalendarConfigField}
+ *
+ * {@link GoogleExceptionMessages}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.0
  */
-public class GoogleCalendarConfigField {
+final class GoogleExceptionMessages {
 
-    public static final String OAUTH_ID = "oauthId";
-    public static final String FOLDER = "folder";
-    public static final String PRIMARY = "isPrimary";
-    public static final String SYNC_TOKEN = "syncToken";
-    /**
-     * A boolean field indicating that the account was migrated and config must be updated.
-     */
-    public static final String MIGRATED = "migrated";
-
-    /**
-     * In case the account was migrated. This field contains the folder of the former subscription
-     */
-    public static final String OLD_FOLDER = "oldSubscriptionFolder";
-
-    public static final String COLOR = "color";
-    public static final String DEFAULT_REMINDER = "default_reminders";
-    public static final String DESCRIPTION = "description";
+    static final String CALENDAR_NOT_FOUND_MSG = "The google calendar with id '%1$s' couldn't be found. Please provide a valid calendar id.";
 
 }

@@ -49,7 +49,6 @@
 
 package com.openexchange.chronos.provider.google;
 
-import java.util.Date;
 import java.util.EnumSet;
 import java.util.Locale;
 import org.json.JSONException;
@@ -57,12 +56,15 @@ import org.json.JSONObject;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.CalendarCapability;
-import com.openexchange.chronos.provider.DefaultCalendarAccount;
-import com.openexchange.chronos.provider.folder.FolderCalendarAccess;
-import com.openexchange.chronos.provider.folder.FolderCalendarProvider;
+import com.openexchange.chronos.provider.basic.BasicCalendarAccess;
+import com.openexchange.chronos.provider.basic.BasicCalendarProvider;
+import com.openexchange.chronos.provider.basic.CalendarSettings;
 import com.openexchange.chronos.provider.google.access.GoogleCalendarAccess;
+import com.openexchange.chronos.provider.google.osgi.Services;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.exception.OXException;
+import com.openexchange.oauth.OAuthService;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
 
 /**
@@ -71,7 +73,7 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.0
  */
-public class GoogleCalendarProvider implements FolderCalendarProvider {
+public class GoogleCalendarProvider implements BasicCalendarProvider {
 
     public static final String PROVIDER_ID = "google";
     private static final String DISPLAY_NAME = "Google";
@@ -86,50 +88,14 @@ public class GoogleCalendarProvider implements FolderCalendarProvider {
         return DISPLAY_NAME;
     }
 
-    @Override
-    public FolderCalendarAccess connect(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
-        return new GoogleCalendarAccess(session, account, parameters, true);
-
-    }
-
-    @Override
-    public JSONObject configureAccount(Session session, JSONObject userConfig, CalendarParameters parameters) throws OXException {
-        DefaultCalendarAccount account = new DefaultCalendarAccount(getId(), -1, session.getUserId(), true, null, userConfig, new Date());
-        checkConfig(account);
-        GoogleCalendarAccess access = new GoogleCalendarAccess(session, account, parameters, false);
-        JSONObject internalConfig = access.initCalendarFolder(true);
-        if (internalConfig == null) {
-            internalConfig = new JSONObject();
-        }
-        try {
-            userConfig.put(GoogleCalendarConfigField.FOLDERS, internalConfig.get(GoogleCalendarConfigField.FOLDERS));
-        } catch (JSONException e) {
-            throw CalendarExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-        }
-        return internalConfig;
-    }
-
-    @Override
-    public JSONObject reconfigureAccount(Session session, CalendarAccount calendarAccount, JSONObject userConfig, CalendarParameters parameters) throws OXException {
-        DefaultCalendarAccount account = new DefaultCalendarAccount(getId(), -1, session.getUserId(), true, calendarAccount.getInternalConfiguration(), userConfig, new Date());
-        checkConfig(account);
-        GoogleCalendarAccess access = new GoogleCalendarAccess(session, account, parameters, false);
-        JSONObject resultConfig = access.initCalendarFolder(false);
-        if (resultConfig == null) {
-            resultConfig = calendarAccount.getInternalConfiguration();
-        }
-        try {
-            userConfig.put(GoogleCalendarConfigField.FOLDERS, resultConfig.get(GoogleCalendarConfigField.FOLDERS));
-        } catch (JSONException e) {
-            throw CalendarExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-        }
-        return resultConfig;
-    }
-
-    private void checkConfig(CalendarAccount account) throws OXException{
-        JSONObject userConfig = account.getUserConfiguration();
+    private int checkConfig(JSONObject userConfig) throws OXException{
         if(!userConfig.hasAndNotNull(GoogleCalendarConfigField.OAUTH_ID)){
-            throw CalendarExceptionCodes.INVALID_CONFIGURATION.create(account.getUserConfiguration());
+            throw CalendarExceptionCodes.INVALID_CONFIGURATION.create(userConfig);
+        }
+        try {
+            return userConfig.getInt(GoogleCalendarConfigField.OAUTH_ID);
+        } catch (JSONException e) {
+            throw CalendarExceptionCodes.INVALID_CONFIGURATION.create(userConfig);
         }
     }
 
@@ -151,5 +117,65 @@ public class GoogleCalendarProvider implements FolderCalendarProvider {
     @Override
     public EnumSet<CalendarCapability> getCapabilities() {
         return CalendarCapability.getCapabilities(GoogleCalendarAccess.class);
+    }
+
+    @Override
+    public JSONObject configureAccount(Session session, CalendarSettings settings, CalendarParameters parameters) throws OXException {
+        int accountId = checkConfig(settings.getConfig());
+
+        final OAuthService oAuthService = Services.optService(OAuthService.class);
+        if (null == oAuthService) {
+            throw ServiceExceptionCode.absentService(OAuthService.class);
+        }
+
+        // Check existing google account
+        oAuthService.getAccount(accountId, session, session.getUserId(), session.getContextId());
+
+        JSONObject internalConfig = new JSONObject();
+        try {
+            internalConfig.put(GoogleCalendarConfigField.OAUTH_ID, accountId);
+            if(settings.getConfig().hasAndNotNull(GoogleCalendarConfigField.FOLDER)) {
+                internalConfig.put(GoogleCalendarConfigField.FOLDER, settings.getConfig().getString(GoogleCalendarConfigField.FOLDER));
+            }
+
+            // TODO check for color and description
+        } catch (JSONException e) {
+            // never happens
+        }
+        return internalConfig;
+    }
+
+    @Override
+    public JSONObject reconfigureAccount(Session session, CalendarAccount calendarAccount, CalendarSettings settings, CalendarParameters parameters) throws OXException {
+        int accountId = checkConfig(settings.getConfig());
+
+        final OAuthService oAuthService = Services.optService(OAuthService.class);
+        if (null == oAuthService) {
+            throw ServiceExceptionCode.absentService(OAuthService.class);
+        }
+
+        // Check existing google account
+        oAuthService.getAccount(accountId, session, session.getUserId(), session.getContextId());
+
+        JSONObject result = new JSONObject();
+        try {
+            result.put(GoogleCalendarConfigField.OAUTH_ID, accountId);
+            if(settings.getConfig().hasAndNotNull(GoogleCalendarConfigField.FOLDER)) {
+                result.put(GoogleCalendarConfigField.FOLDER, settings.getConfig().getString(GoogleCalendarConfigField.FOLDER));
+            }
+
+            // TODO check for color and description
+        } catch (JSONException e) {
+            // never happens
+        }
+        if(result.isEqualTo(calendarAccount.getInternalConfiguration())) {
+            return null;
+        }
+        return result;
+    }
+
+    @Override
+    public BasicCalendarAccess connect(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
+        return new GoogleCalendarAccess(session, account, parameters, true);
     }
 }

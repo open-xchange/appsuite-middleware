@@ -83,7 +83,7 @@ import com.openexchange.session.Session;
 public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess {
 
     protected final Session session;
-    protected final CalendarAccount account;
+    protected CalendarAccount account;
     protected final CalendarParameters parameters;
 
     private final SingleFolderCachingCalendarAccess cachingBridge;

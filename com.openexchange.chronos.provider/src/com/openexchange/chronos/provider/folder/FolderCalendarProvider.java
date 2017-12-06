@@ -101,6 +101,7 @@ public interface FolderCalendarProvider extends CalendarProvider {
      * @param parameters Additional calendar parameters
      * @return The connected calendar access
      */
+    @Override
     FolderCalendarAccess connect(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException;
 
 }

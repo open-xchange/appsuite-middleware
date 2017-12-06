@@ -86,13 +86,13 @@ public class GoogleCalendarResult extends ExternalCalendarResult implements Diff
 
     /**
      * Initializes a new {@link GoogleCalendarResult}.
-     * 
+     *
      * @param googleCalendarAccess
      * @param folderId
      * @throws OXException
      * @throws JSONException
      */
-    public GoogleCalendarResult(GoogleCalendarAccess googleCalendarAccess, String folderId) throws OXException {
+    public GoogleCalendarResult(GoogleCalendarAccess googleCalendarAccess) throws OXException {
         super(true, Collections.emptyList()); // overwritten by implementation... does not contain correct update state
         access = googleCalendarAccess;
         JSONObject internalConfiguration = access.getAccount().getInternalConfiguration();
@@ -104,6 +104,16 @@ public class GoogleCalendarResult extends ExternalCalendarResult implements Diff
                 throw CalendarExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
             }
         }
+        String folderId;
+        try {
+            folderId = internalConfiguration.getString(GoogleCalendarConfigField.FOLDER);
+            if(folderId==null) {
+                throw CalendarExceptionCodes.UNEXPECTED_ERROR.create("Google calendar account is invalid. Please delete and recreate it.");
+            }
+        } catch (JSONException e) {
+            throw CalendarExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+
         currentResult = access.getEventsInFolder(folderId, token, true);
     }
 
@@ -240,7 +250,7 @@ public class GoogleCalendarResult extends ExternalCalendarResult implements Diff
 
     /**
      * Searches the existing events for a event with the same google id (filename) and adds it to the removed events.
-     * 
+     *
      * @param existingEvents The existing events
      * @param googleId The google id
      * @param removed The list of removed events in this sync
@@ -280,7 +290,7 @@ public class GoogleCalendarResult extends ExternalCalendarResult implements Diff
 
     /**
      * Searches added, updated and existing events for the master event for a given uid and adds the recurrence id to the list of delete exceptions.
-     * 
+     *
      * @param existingEvents A list of existing events
      * @param uid The uid of the event series
      * @param recurrenceId The {@link RecurrenceId} to add
@@ -337,7 +347,7 @@ public class GoogleCalendarResult extends ExternalCalendarResult implements Diff
 
     /**
      * Add a {@link RecurrenceId} to an {@link Event}
-     * 
+     *
      * @param master The master {@link Event}
      * @param recurrenceId The {@link RecurrenceId}
      */
@@ -359,7 +369,7 @@ public class GoogleCalendarResult extends ExternalCalendarResult implements Diff
 
     /**
      * Checks whether the given event is the master event for a event series with the given uid
-     * 
+     *
      * @param event The event to check
      * @param uid The uid of the event series
      * @return true if the event is the master, false otherwise
@@ -373,7 +383,7 @@ public class GoogleCalendarResult extends ExternalCalendarResult implements Diff
 
     /**
      * Retrieves the existing event that corresponds to the updated event from the list of existing events.
-     * 
+     *
      * @param existingEvents A list of existing events
      * @param updated The updated event
      * @return The existing event or null if such an event doesn't exist yet

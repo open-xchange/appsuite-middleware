@@ -54,18 +54,13 @@ import static com.openexchange.chronos.provider.CalendarFolderProperty.COLOR_LIT
 import static com.openexchange.chronos.provider.CalendarFolderProperty.DESCRIPTION;
 import static com.openexchange.chronos.provider.CalendarFolderProperty.SCHEDULE_TRANSP;
 import static com.openexchange.chronos.provider.CalendarFolderProperty.USED_FOR_SYNC;
-import static com.openexchange.osgi.Tools.requireService;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.model.CalendarList;
 import com.google.api.services.calendar.model.CalendarListEntry;
@@ -85,12 +80,13 @@ import com.openexchange.chronos.provider.CalendarFolderProperty;
 import com.openexchange.chronos.provider.DefaultCalendarFolder;
 import com.openexchange.chronos.provider.DefaultCalendarPermission;
 import com.openexchange.chronos.provider.account.AdministrativeCalendarAccountService;
-import com.openexchange.chronos.provider.caching.CachingCalendarAccess;
 import com.openexchange.chronos.provider.caching.ExternalCalendarResult;
+import com.openexchange.chronos.provider.caching.basic.BasicCachingCalendarAccess;
 import com.openexchange.chronos.provider.google.GoogleCalendarConfigField;
 import com.openexchange.chronos.provider.google.config.GoogleCalendarConfig;
 import com.openexchange.chronos.provider.google.converter.GoogleEventConverter;
 import com.openexchange.chronos.provider.google.converter.GoogleEventConverter.GoogleItemMapping;
+import com.openexchange.chronos.provider.google.exception.GoogleExceptionCodes;
 import com.openexchange.chronos.provider.google.osgi.Services;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.conversion.ConversionResult;
@@ -99,6 +95,7 @@ import com.openexchange.conversion.DataArguments;
 import com.openexchange.conversion.DataHandler;
 import com.openexchange.conversion.SimpleData;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.session.Session;
 
 /**
@@ -107,17 +104,12 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.0
  */
-public class GoogleCalendarAccess extends CachingCalendarAccess {
-
-    private final static Logger LOG = LoggerFactory.getLogger(GoogleCalendarAccess.class);
+public class GoogleCalendarAccess extends BasicCachingCalendarAccess {
 
     private final GoogleOAuthAccess oauthAccess;
     private final CalendarParameters parameters;
-    private CalendarAccount account;
 
-    private final Map<String, CalendarFolder> folders = new HashMap<>(1);
-    private final Session session;
-
+    private CalendarFolder folder;
     private final long refreshInterval;
     private final long requestTimeout;
 
@@ -133,9 +125,8 @@ public class GoogleCalendarAccess extends CachingCalendarAccess {
         super(session, account, parameters);
         this.parameters = parameters;
         this.account = account;
-        this.session = session;
-        refreshInterval = GoogleCalendarConfig.getResfrehInterval(this.getSession());
-        requestTimeout = GoogleCalendarConfig.getRequestTimeout(this.getSession());
+        refreshInterval = GoogleCalendarConfig.getResfrehInterval(session);
+        requestTimeout = GoogleCalendarConfig.getRequestTimeout(session);
         oauthAccess = new GoogleOAuthAccess(account, session);
         oauthAccess.initialize();
         if (checkConfig) {
@@ -144,63 +135,50 @@ public class GoogleCalendarAccess extends CachingCalendarAccess {
                 AdministrativeCalendarAccountService calendarAccountService = Services.getService(AdministrativeCalendarAccountService.class);
                 this.account = calendarAccountService.updateAccount(session.getContextId(), session.getUserId(), account.getAccountId(), account.isEnabled(), null, account.getUserConfiguration(), System.currentTimeMillis());
             }
-            initCalendarFolder(false);
+            initCalendarFolder();
         }
     }
 
     /**
      * Initializes the calendar folder and returns an updated internal configuration or null.
      *
-     * @return the internal configuration
+     * @return the internal configuration or null if unchanged
      * @throws OXException
      */
-    public JSONObject initCalendarFolder(boolean subscribePrimary) throws OXException {
+    public JSONObject initCalendarFolder() throws OXException {
         try {
-            Calendar googleCal = (Calendar) oauthAccess.getClient().getClient();
-            CalendarList calendars = googleCal.calendarList().list().execute();
             JSONObject internalConfiguration = account.getInternalConfiguration();
-
             if (internalConfiguration == null) {
                 internalConfiguration = new JSONObject();
             }
 
             JSONObject userConfiguration = account.getUserConfiguration();
+            String folderId = null;
+            if (userConfiguration.has(GoogleCalendarConfigField.FOLDER)) {
+                folderId = userConfiguration.getString(GoogleCalendarConfigField.FOLDER);
+            }
+            Calendar googleCal = (Calendar) oauthAccess.getClient().getClient();
+            CalendarList calendars = googleCal.calendarList().list().execute();
 
-            boolean migrated = false;
+
             if (internalConfiguration.has(GoogleCalendarConfigField.MIGRATED)) {
                 internalConfiguration.remove(GoogleCalendarConfigField.MIGRATED);
                 userConfiguration.remove(GoogleCalendarConfigField.MIGRATED);
-                migrated = true;
             }
 
-            boolean changed = false;
-            JSONObject newConfig = new JSONObject();
             for (CalendarListEntry entry : calendars.getItems()) {
-
-                // enabled==true if user config is 'true' or if internal config is 'true' and user config is empty
-                Boolean internalCheck = checkConfig(internalConfiguration, entry.getId());
-                Boolean userCheck = checkConfig(userConfiguration, entry.getId());
-
-                if ((userCheck != null && userCheck)) {
-                    addEntry(entry, true, newConfig);
-                    if (internalCheck == null || !internalCheck) {
-                        // new config
-                        changed = true;
-                    }
-                } else if (userCheck == null && internalCheck != null && internalCheck) {
-                    addEntry(entry, true, newConfig);
-                } else if ((subscribePrimary || migrated) && entry.isPrimary()) {
-                    addEntry(entry, true, newConfig);
-                    changed = true;
-                } else {
-                    addEntry(entry, false, newConfig);
+                if (Strings.isEmpty(folderId) && entry.getPrimary()) {
+                    folder = addEntry(entry, internalConfiguration);
+                    internalConfiguration.put(GoogleCalendarConfigField.PRIMARY, Boolean.TRUE);
+                    break;
+                } else if (entry.getId().equals(folderId)) {
+                    folder = addEntry(entry, internalConfiguration);
+                    break;
                 }
             }
 
-            Map<String, Object> config = getConfig(internalConfiguration);
-            if (changed || config == null || config.size() != newConfig.asMap().size()) {
-                internalConfiguration.put(GoogleCalendarConfigField.FOLDERS, newConfig);
-                userConfiguration.put(GoogleCalendarConfigField.FOLDERS, newConfig);
+            if (this.folder == null) {
+                throw GoogleExceptionCodes.CALENDAR_NOT_FOUND.create(folderId);
             }
 
             return internalConfiguration;
@@ -211,30 +189,10 @@ public class GoogleCalendarAccess extends CachingCalendarAccess {
         }
     }
 
-    private Map<String, Object> getConfig(JSONObject json) throws JSONException {
-        if (json == null) {
-            return null;
-        }
-        if (json.has(GoogleCalendarConfigField.FOLDERS)) {
-            return json.getJSONObject(GoogleCalendarConfigField.FOLDERS).asMap();
-        }
-        return null;
-    }
-
-    @SuppressWarnings("unchecked")
-    private Boolean checkConfig(JSONObject config, String key) throws JSONException {
-        Map<String, Object> map = getConfig(config);
-        return map == null ? null : !map.containsKey(key) ? null : Boolean.valueOf((boolean) ((Map<String, Object>) map.get(key)).get(GoogleCalendarConfigField.Folders.ENABLED));
-    }
-
-    private void addEntry(CalendarListEntry entry, boolean enabled, JSONObject newConfig) throws JSONException, OXException {
-        if (enabled) {
-            folders.put(String.valueOf(entry.getId()), prepareFolder(entry.getId(), entry.getSummary(), getCalendarColor(entry), entry.getDescription(), Services.getService(ConversionService.class)));
-        }
-        JSONObject config = new JSONObject();
-        config.put(GoogleCalendarConfigField.Folders.ENABLED, enabled);
+    private CalendarFolder addEntry(CalendarListEntry entry, JSONObject config) throws JSONException, OXException {
+        CalendarFolder result = prepareFolder(entry.getId(), entry.getSummary(), getCalendarColor(entry), entry.getDescription(), Services.getService(ConversionService.class));
         if (entry.getBackgroundColor() != null) {
-            config.put(GoogleCalendarConfigField.Folders.COLOR, entry.getBackgroundColor());
+            config.put(GoogleCalendarConfigField.COLOR, entry.getBackgroundColor());
         }
         if (entry.getDefaultReminders() != null) {
             JSONArray array = new JSONArray();
@@ -246,15 +204,12 @@ public class GoogleCalendarAccess extends CachingCalendarAccess {
                 json.put("duration", alarm.getTrigger().getDuration());
                 array.put(json);
             }
-            config.put(GoogleCalendarConfigField.Folders.DEFAULT_REMINDER, array);
+            config.put(GoogleCalendarConfigField.DEFAULT_REMINDER, array);
         }
         if (entry.getDescription() != null) {
-            config.put(GoogleCalendarConfigField.Folders.DESCRIPTION, entry.getBackgroundColor());
+            config.put(GoogleCalendarConfigField.DESCRIPTION, entry.getBackgroundColor());
         }
-        if (entry.isPrimary()) {
-            config.put(GoogleCalendarConfigField.Folders.PRIMARY, true);
-        }
-        newConfig.put(entry.getId(), config);
+        return result;
     }
 
     private String getCalendarColor(CalendarListEntry entry) {
@@ -274,56 +229,6 @@ public class GoogleCalendarAccess extends CachingCalendarAccess {
     @Override
     public void close() {
         oauthAccess.dispose();
-    }
-
-    @Override
-    public CalendarFolder getFolder(String folderId) throws OXException {
-        return folders.get(folderId);
-    }
-
-    @Override
-    public List<CalendarFolder> getVisibleFolders() throws OXException {
-        return Collections.unmodifiableList(new ArrayList<>(folders.values()));
-    }
-
-    @Override
-    public String updateFolder(String folderId, CalendarFolder folder, long clientTimestamp) throws OXException {
-        JSONObject internalConfiguration = this.getAccount().getInternalConfiguration();
-        try {
-            JSONObject folders = internalConfiguration.getJSONObject(GoogleCalendarConfigField.FOLDERS);
-
-            if (folders != null && folders.has(folderId)) {
-                JSONObject folderConfig = folders.getJSONObject(folderId);
-                ExtendedProperties originalProperties = (ExtendedProperties) folderConfig.get("extendedProperties");
-
-                ExtendedProperties updatedProperties = merge(originalProperties, folder.getExtendedProperties());
-                if (false == originalProperties.equals(updatedProperties)) {
-                    JSONObject internalConfig;
-                    try {
-                        internalConfig = null == account.getInternalConfiguration() ? new JSONObject() : new JSONObject(account.getInternalConfiguration().toString());
-                        internalConfig.put("extendedProperties", writeExtendedProperties(requireService(ConversionService.class, Services.getServiceLookup()), updatedProperties));
-                    } catch (JSONException e) {
-                        throw CalendarExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-                    }
-                    account = Services.getService(AdministrativeCalendarAccountService.class).updateAccount(session.getContextId(), account.getUserId(), account.getAccountId(), null, internalConfig, null, account.getLastModified().getTime());
-                }
-
-            }
-        } catch (JSONException e) {
-            throw CalendarExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-        }
-
-        return folderId;
-    }
-
-    @Override
-    public String createFolder(CalendarFolder folder) throws OXException {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void deleteFolder(String folderId, long clientTimestamp) throws OXException {
-        throw new UnsupportedOperationException();
     }
 
     /**
@@ -416,24 +321,8 @@ public class GoogleCalendarAccess extends CachingCalendarAccess {
     }
 
     @Override
-    protected long getRefreshInterval(String folderId) {
-        return refreshInterval;
-    }
-
-    @Override
     public long getRetryAfterErrorInterval() {
         return requestTimeout;
-    }
-
-    @Override
-    public ExternalCalendarResult getAllEvents(String folderId) throws OXException {
-        return new GoogleCalendarResult(this, folderId);
-    }
-
-    @Override
-    public void handleExceptions(String calendarFolderId, OXException e) {
-        // TODO handle calendar missing
-        LOG.error(e.getMessage());
     }
 
     private CalendarFolder prepareFolder(String folderId, String summary, String color, String description, ConversionService conversionService) throws OXException {
@@ -441,7 +330,7 @@ public class GoogleCalendarAccess extends CachingCalendarAccess {
         folder.setPermissions(Collections.singletonList(DefaultCalendarPermission.readOnlyPermissionsFor(account.getUserId())));
         folder.setLastModified(account.getLastModified());
 
-        JSONObject folderConfig = account.getInternalConfiguration()!=null ? account.getInternalConfiguration().optJSONObject(folderId) : null;
+        JSONObject folderConfig = account.getInternalConfiguration() != null ? account.getInternalConfiguration().optJSONObject(folderId) : null;
 
         ExtendedProperties extendedProperties = null;
         if (folderConfig != null) {
@@ -483,5 +372,29 @@ public class GoogleCalendarAccess extends CachingCalendarAccess {
             }
         }
         return null;
+    }
+
+    @Override
+    protected String getName() {
+        return GoogleCalendarAccess.class.getSimpleName();
+    }
+
+    @Override
+    protected long getRefreshInterval() throws OXException {
+        return refreshInterval;
+    }
+
+    @Override
+    protected void handleExceptions(OXException e) {
+        // Nothing to do
+    }
+
+    @Override
+    protected ExternalCalendarResult getAllEvents() throws OXException {
+        return new GoogleCalendarResult(this);
+    }
+
+    protected CalendarAccount getAccount() {
+        return account;
     }
 }
