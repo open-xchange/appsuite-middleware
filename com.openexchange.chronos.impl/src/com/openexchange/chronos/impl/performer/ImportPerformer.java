@@ -56,14 +56,17 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.UUID;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.ical.ImportedComponent;
 import com.openexchange.chronos.impl.InternalCalendarResult;
 import com.openexchange.chronos.impl.InternalImportResult;
+import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.CreateResult;
 import com.openexchange.chronos.service.EventID;
+import com.openexchange.chronos.service.UIDConflictStrategy;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.UserizedFolder;
@@ -101,7 +104,16 @@ public class ImportPerformer extends AbstractUpdatePerformer {
          */
         List<InternalImportResult> results = new ArrayList<InternalImportResult>();
         for (Entry<String, List<Event>> entry : getEventsByUID(events, true).entrySet()) {
+            /*
+             * (re-) assign new UID to imported event if required
+             */
             List<Event> eventGroup = sortSeriesMasterFirst(entry.getValue());
+            if (UIDConflictStrategy.REASSIGN.equals(session.get(CalendarParameters.UID_CONFLICT_STRATEGY, UIDConflictStrategy.class))) {
+                String newUid = UUID.randomUUID().toString();
+                for (Event event : eventGroup) {
+                    event.setUid(newUid);
+                }
+            }
             /*
              * create first event (master or non-recurring)
              */
@@ -110,13 +122,15 @@ public class ImportPerformer extends AbstractUpdatePerformer {
             /*
              * create further events as change exceptions
              */
-            if (1 < events.size()) {
+            if (1 < eventGroup.size()) {
                 EventID masterEventID = result.getImportResult().getId();
-                long clientTimestamp = result.getImportResult().getTimestamp();
-                for (int i = 1; i < events.size(); i++) {
-                    result = createEventException(masterEventID, events.get(i), clientTimestamp);
-                    results.add(result);
-                    clientTimestamp = result.getImportResult().getTimestamp();
+                if (null != masterEventID) {
+                    long clientTimestamp = result.getImportResult().getTimestamp();
+                    for (int i = 1; i < eventGroup.size(); i++) {
+                        result = createEventException(masterEventID, eventGroup.get(i), clientTimestamp);
+                        results.add(result);
+                        clientTimestamp = result.getImportResult().getTimestamp();
+                    }
                 }
             }
         }

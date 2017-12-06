@@ -100,6 +100,7 @@ import com.openexchange.chronos.provider.basic.CalendarSettings;
 import com.openexchange.chronos.provider.basic.DefaultCalendarSettings;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
 import com.openexchange.chronos.provider.composition.impl.idmangling.IDManglingCalendarResult;
+import com.openexchange.chronos.provider.composition.impl.idmangling.IDManglingImportResult;
 import com.openexchange.chronos.provider.composition.impl.idmangling.IDManglingUpdatesResult;
 import com.openexchange.chronos.provider.extensions.BasicSearchAware;
 import com.openexchange.chronos.provider.extensions.BasicSyncAware;
@@ -115,6 +116,7 @@ import com.openexchange.chronos.provider.groupware.GroupwareFolderType;
 import com.openexchange.chronos.service.CalendarResult;
 import com.openexchange.chronos.service.EventID;
 import com.openexchange.chronos.service.FreeBusyResult;
+import com.openexchange.chronos.service.ImportResult;
 import com.openexchange.chronos.service.SearchFilter;
 import com.openexchange.chronos.service.SearchOptions;
 import com.openexchange.chronos.service.SortOrder;
@@ -503,6 +505,25 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
             GroupwareCalendarAccess calendarAccess = getGroupwareAccess(accountId);
             CalendarResult result = calendarAccess.deleteEvent(getRelativeId(eventID), clientTimestamp);
             return new IDManglingCalendarResult(result, accountId);
+        } catch (OXException e) {
+            throw withUniqueIDs(e, accountId);
+        }
+    }
+
+    @Override
+    public List<ImportResult> importEvents(String folderId, List<Event> events) throws OXException {
+        int accountId = getAccountId(folderId);
+        try {
+            GroupwareCalendarAccess calendarAccess = getGroupwareAccess(accountId);
+            List<ImportResult> results = calendarAccess.importEvents(getRelativeFolderId(folderId), events);
+            if (null == results) {
+                return null;
+            }
+            List<ImportResult> importResultsWithUniqueId = new ArrayList<ImportResult>(results.size());
+            for (ImportResult result : results) {
+                importResultsWithUniqueId.add(new IDManglingImportResult(result, accountId));
+            }
+            return importResultsWithUniqueId;
         } catch (OXException e) {
             throw withUniqueIDs(e, accountId);
         }

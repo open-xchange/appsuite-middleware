@@ -74,6 +74,7 @@ import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarResult;
 import com.openexchange.chronos.service.EventID;
 import com.openexchange.chronos.service.FreeBusyResult;
+import com.openexchange.chronos.service.ImportResult;
 import com.openexchange.chronos.service.SearchFilter;
 import com.openexchange.chronos.service.UpdatesResult;
 import com.openexchange.exception.OXException;
@@ -428,6 +429,24 @@ public interface IDBasedCalendarAccess extends TransactionAware, CalendarParamet
      * @return The delete result
      */
     CalendarResult deleteEvent(EventID eventID, long clientTimestamp) throws OXException;
+
+    /**
+     * Imports a list of events into a specific folder.
+     * <p/>
+     * <b>Note:</b> Only available for the internal <i>groupware</i> calendar provider.
+     * <p/>
+     * The following calendar parameters are evaluated:
+     * <ul>
+     * <li>{@link CalendarParameters#PARAMETER_IGNORE_CONFLICTS}</li>
+     * <li>{@link CalendarParameters#PARAMETER_NOTIFICATION}</li>
+     * <li>{@link CalendarParameters#UID_CONFLICT_STRATEGY}</li>
+     * </ul>
+     *
+     * @param folderId The fully qualified identifier of the target folder
+     * @param events The events to import
+     * @return A list of results holding further information about each imported event
+     */
+    List<ImportResult> importEvents(String folderId, List<Event> events) throws OXException;
 
     /**
      * Retrieves all upcoming alarm triggers until the given time.

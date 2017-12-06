@@ -398,7 +398,22 @@ public interface CalendarService {
      */
     CalendarResult clearEvents(CalendarSession session, String folderId, long clientTimestamp) throws OXException;
 
-    List<ImportResult> importEvents(CalendarSession session, String folderID, List<Event> events) throws OXException;
+    /**
+     * Imports a list of events into a specific folder.
+     * <p/>
+     * The following calendar parameters are evaluated:
+     * <ul>
+     * <li>{@link CalendarParameters#PARAMETER_IGNORE_CONFLICTS}</li>
+     * <li>{@link CalendarParameters#PARAMETER_NOTIFICATION}</li>
+     * <li>{@link CalendarParameters#UID_CONFLICT_STRATEGY}</li>
+     * </ul>
+     *
+     * @param session The calendar session
+     * @param folderId The identifier of the target folder
+     * @param events The events to import
+     * @return A list of results holding further information about each imported event
+     */
+    List<ImportResult> importEvents(CalendarSession session, String folderId, List<Event> events) throws OXException;
 
     /**
      * Retrieves upcoming alarm triggers.

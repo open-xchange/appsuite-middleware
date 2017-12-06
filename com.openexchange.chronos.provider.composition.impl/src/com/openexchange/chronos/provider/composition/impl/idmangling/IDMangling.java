@@ -103,6 +103,25 @@ public class IDMangling {
     private static final Pattern FOLDER_ARGUMENT_PATTERN = Pattern.compile("(?:\\[|, )folder %(\\d)\\$s(?:\\]|,)");
 
     /**
+     * Adjusts a list of exceptions raised by a specific calendar account so that any referenced identifiers appear in their unique
+     * composite representation.
+     *
+     * @param exceptions The exception to adjust
+     * @param accountId The identifier of the account
+     * @return The possibly adjusted exceptions
+     */
+    public static List<OXException> withUniqueID(List<OXException> exceptions, int accountId) {
+        if (null == exceptions || exceptions.isEmpty()) {
+            return exceptions;
+        }
+        List<OXException> adjustedExceptions = new ArrayList<OXException>(exceptions.size());
+        for (OXException e : exceptions) {
+            adjustedExceptions.add(withUniqueIDs(e, accountId));
+        }
+        return adjustedExceptions;
+    }
+
+    /**
      * Adjusts an exception raised by a specific calendar account so that any referenced identifiers appear in their unique composite
      * representation.
      *

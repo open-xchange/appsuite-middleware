@@ -102,6 +102,7 @@ import com.openexchange.chronos.service.CalendarResult;
 import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.EventID;
+import com.openexchange.chronos.service.ImportResult;
 import com.openexchange.chronos.service.SearchFilter;
 import com.openexchange.chronos.service.UpdatesResult;
 import com.openexchange.exception.OXException;
@@ -301,6 +302,11 @@ public class InternalCalendarAccess implements FolderCalendarAccess, GroupwareCa
     @Override
     public CalendarResult deleteEvent(EventID eventID, long clientTimestamp) throws OXException {
         return getCalendarService().deleteEvent(session, eventID, clientTimestamp);
+    }
+
+    @Override
+    public List<ImportResult> importEvents(String folderId, List<Event> events) throws OXException {
+        return getCalendarService().importEvents(session, folderId, events);
     }
 
     @Override
