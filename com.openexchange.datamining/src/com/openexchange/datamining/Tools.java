@@ -54,11 +54,9 @@ import java.math.BigInteger;
 
 /**
  * {@link Tools}
- * 
+ *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
- * @deprecated with 7.10.0
  */
-@Deprecated
 public class Tools {
 
     static String humanReadableBytes(String string) {

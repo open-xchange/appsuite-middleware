@@ -57,9 +57,7 @@ import java.util.LinkedHashMap;
  * {@link Questions}
  *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
- * @deprecated with 7.10.0
  */
-@Deprecated
 public class Questions {
 
     public static final String NUMBER_OF_USERS_WHO_ACTIVATED_MINI_CALENDAR = "numberOfUsersWhoActivatedMiniCalendar";

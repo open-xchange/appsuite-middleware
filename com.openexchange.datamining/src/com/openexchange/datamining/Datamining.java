@@ -94,9 +94,7 @@ import com.openexchange.java.Streams;
  * easy.
  *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
- * @deprecated with 7.10.0
  */
-@Deprecated
 public class Datamining {
 
     /**
@@ -139,9 +137,6 @@ public class Datamining {
     private static Options staticOptions;
 
     public static void main(String[] args) {
-        
-        System.out.println("This tool is deprecated.");
-        
         Calendar rightNow = Calendar.getInstance();
         final long before = rightNow.getTime().getTime();
 
