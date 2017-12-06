@@ -61,7 +61,7 @@ import com.openexchange.mail.authenticity.MailAuthenticityAttribute;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 @SuppressWarnings("unchecked")
-class StringUtil {
+final class StringUtil {
 
     private static interface CollectorAdder {
 
@@ -195,7 +195,6 @@ class StringUtil {
         }
         // Add the last pair
         if (valueBuffer.length() > 0) {
-            //pairs.put(key, valueBuffer.toString());
             add(key, valueBuffer.toString(), collector);
         }
         return collector;
