@@ -54,10 +54,15 @@ import static com.openexchange.chronos.common.CalendarUtils.getEventsByUID;
 import static com.openexchange.chronos.common.CalendarUtils.sortSeriesMasterFirst;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.ListIterator;
+import java.util.NoSuchElementException;
 import java.util.Map.Entry;
 import java.util.UUID;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.common.mapping.EventUpdateImpl;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.ical.ImportedComponent;
 import com.openexchange.chronos.impl.InternalCalendarResult;
@@ -97,8 +102,16 @@ public class ImportPerformer extends AbstractUpdatePerformer {
      *
      * @param events The events to import
      * @return The import result
+     * @throws OXException In case of error
      */
     public List<InternalImportResult> perform(List<Event> events) throws OXException {
+        /*
+         * set UIDConflict strategy. Use THROW as default
+         */
+        UIDConflictStrategy strategy = session.get(CalendarParameters.UID_CONFLICT_STRATEGY, UIDConflictStrategy.class);
+        if (null == strategy) {
+            strategy = UIDConflictStrategy.THROW;
+        }
         /*
          * import events (and possible associated overridden instances) grouped by UID event groups
          */
@@ -108,33 +121,134 @@ public class ImportPerformer extends AbstractUpdatePerformer {
              * (re-) assign new UID to imported event if required
              */
             List<Event> eventGroup = sortSeriesMasterFirst(entry.getValue());
-            if (UIDConflictStrategy.REASSIGN.equals(session.get(CalendarParameters.UID_CONFLICT_STRATEGY, UIDConflictStrategy.class))) {
-                String newUid = UUID.randomUUID().toString();
-                for (Event event : eventGroup) {
-                    event.setUid(newUid);
-                }
+            if (UIDConflictStrategy.REASSIGN.equals(strategy)) {
+                results.addAll(handleUIDConflict(strategy, eventGroup));
+                continue;
             }
+
             /*
              * create first event (master or non-recurring)
              */
-            InternalImportResult result = createEvent(eventGroup.get(0));
+            InternalImportResult result;
+            result = createEvent(eventGroup.get(0));
+
+            /*
+             * Check if UID Conflict needs to be handled
+             */
+            OXException e = result.getImportResult().getError();
+            if (null != e && CalendarExceptionCodes.UID_CONFLICT.equals(e)) {
+                if (false == UIDConflictStrategy.THROW.equals(strategy) && false == UIDConflictStrategy.REASSIGN.equals(strategy)) {
+                    results.addAll(handleUIDConflict(strategy, eventGroup));
+                    continue;
+                }
+                throw e;
+            }
+
             results.add(result);
             /*
              * create further events as change exceptions
              */
-            if (1 < eventGroup.size()) {
-                EventID masterEventID = result.getImportResult().getId();
-                if (null != masterEventID) {
-                    long clientTimestamp = result.getImportResult().getTimestamp();
-                    for (int i = 1; i < eventGroup.size(); i++) {
-                        result = createEventException(masterEventID, eventGroup.get(i), clientTimestamp);
-                        results.add(result);
-                        clientTimestamp = result.getImportResult().getTimestamp();
-                    }
-                }
-            }
+            addEventExceptions(eventGroup, results, result);
         }
         return results;
+
+    }
+
+    /**
+     * Resolves UID conflicts based on the strategy
+     * 
+     * @param strategy The strategy
+     * @param eventGroup The events with UID conflicts sorted by master first
+     * @return The imported results
+     * @throws OXException Various
+     */
+    private List<InternalImportResult> handleUIDConflict(UIDConflictStrategy strategy, List<Event> eventGroup) throws OXException {
+        List<InternalImportResult> results = new LinkedList<InternalImportResult>();
+        Event masterEvent = eventGroup.get(0);
+        switch (strategy) {
+            case REASSIGN: {
+                String newUid = UUID.randomUUID().toString();
+                eventGroup.forEach(e -> e.setUid(newUid));
+                InternalImportResult result = createEvent(masterEvent);
+                results.add(result);
+                if (isSuccess(result) && 1 < eventGroup.size()) {
+                    // Event was created, add exceptions
+                    addEventExceptions(eventGroup, results, result);
+                } // else; Failed to create event, return failure
+                return results;
+            }
+            case UPDATE: {
+                String eventId = session.getCalendarService().getUtilities().resolveByUID(session, masterEvent.getUid());
+                Event loadEvent = storage.getEventStorage().loadEvent(eventId, null);
+                loadEvent = storage.getUtilities().loadAdditionalEventData(session.getUserId(), loadEvent, null);
+                if (new EventUpdateImpl(loadEvent, masterEvent, false, EventField.LAST_MODIFIED, EventField.TIMESTAMP).getUpdatedFields().isEmpty()) {
+                    // Nothing to update
+                    return null;
+                }
+                UpdatePerformer u = new UpdatePerformer(storage, session, folder);
+                long clientTimestamp = System.currentTimeMillis();
+                InternalCalendarResult calendarResult = u.perform(eventId, loadEvent.getRecurrenceId(), masterEvent, clientTimestamp);
+                InternalImportResult result = new InternalImportResult(calendarResult, getEventID(masterEvent), extractIndex(masterEvent), extractWarnings(masterEvent));
+                results.add(result);
+                if (isSuccess(result) && 1 < eventGroup.size()) {
+                    // Exceptions from db
+                    List<Event> exceptionData = loadExceptionData(loadEvent.getSeriesId());
+                    ListIterator<Event> iterator = eventGroup.listIterator(1);
+                    do {
+                        Event event = iterator.next();
+                        try {
+                            // Try update
+                            Event loadException = exceptionData.stream().filter(e -> e.getRecurrenceId().equals(event.getRecurrenceId())).findFirst().get();
+                            calendarResult = u.perform(loadException.getId(), loadException.getRecurrenceId(), event, clientTimestamp);
+                            InternalImportResult internalImportResult = new InternalImportResult(calendarResult, getEventID(event), extractIndex(event), extractWarnings(event));
+                            results.add(internalImportResult);
+                        } catch (NoSuchElementException ex) {
+                            // Could not find event, try create
+                            createEventException(result.getImportResult().getId(), event, clientTimestamp);
+                        }
+                    } while (iterator.hasNext());
+                }
+                return results;
+            }
+            case UPDATE_OR_REASSIGN: {
+                List<InternalImportResult> list;
+                try {
+                    list = handleUIDConflict(UIDConflictStrategy.UPDATE, eventGroup);
+                } catch (OXException e) {
+                    list = Collections.emptyList();
+                }
+                if (list.isEmpty() || !isSuccess(list.get(0))) {
+                    // Updated failed, try reassign
+                    return handleUIDConflict(UIDConflictStrategy.REASSIGN, eventGroup);
+                }
+                return list;
+            }
+            default:
+                throw CalendarExceptionCodes.UNEXPECTED_ERROR.create("Unkown UIDConflictStrategy.");
+        }
+    }
+
+    private boolean isSuccess(InternalImportResult result) {
+        return null == result.getImportResult().getError();
+    }
+
+    /**
+     * Add {@link InternalImportResult} of series exceptions to the results
+     * 
+     * @param events The events with the same UID sorted by master first
+     * @param results The results to return by the import action
+     * @param result The {@link InternalImportResult} of the master event
+     */
+    private void addEventExceptions(List<Event> events, List<InternalImportResult> results, InternalImportResult result) {
+        if (1 < events.size()) {
+            EventID masterEventID = result.getImportResult().getId();
+            long clientTimestamp = result.getImportResult().getTimestamp();
+            for (int i = 1; i < events.size(); i++) {
+                result = createEventException(masterEventID, events.get(i), clientTimestamp);
+                results.add(result);
+                clientTimestamp = result.getImportResult().getTimestamp();
+            }
+        }
     }
 
     private InternalImportResult createEvent(Event importedEvent) {
