@@ -79,7 +79,7 @@ import com.openexchange.session.Session;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-abstract class AbstractTestMailAuthenticity {
+public abstract class AbstractTestMailAuthenticity {
 
     MailAuthenticityHandlerImpl handler;
     MailAuthenticityResult result;

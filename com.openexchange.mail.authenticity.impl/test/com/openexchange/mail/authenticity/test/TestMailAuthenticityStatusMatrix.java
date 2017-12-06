@@ -49,8 +49,17 @@
 
 package com.openexchange.mail.authenticity.test;
 
+import java.util.List;
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.powermock.modules.junit4.PowerMockRunner;
+import com.openexchange.mail.authenticity.DefaultMailAuthenticityResultKey;
+import com.openexchange.mail.authenticity.MailAuthenticityStatus;
+import com.openexchange.mail.authenticity.mechanism.MailAuthenticityMechanismResult;
+import com.openexchange.mail.authenticity.mechanism.dkim.DKIMResult;
+import com.openexchange.mail.authenticity.mechanism.spf.SPFResult;
 
 /**
  * {@link TestMailAuthenticityStatusMatrix}
@@ -60,4 +69,218 @@ import org.powermock.modules.junit4.PowerMockRunner;
 @RunWith(PowerMockRunner.class)
 public class TestMailAuthenticityStatusMatrix extends AbstractTestMailAuthenticity {
 
+    /**
+     * Initialises a new {@link TestMailAuthenticityStatusMatrix}.
+     */
+    public TestMailAuthenticityStatusMatrix() {
+        super();
+    }
+
+    /**
+     * (SPF: pass, DKIM: pass, Domain Match: true) -> (Overall Result: pass)
+     */
+    @Test
+    public void testSPFPassDKIMPassWithDomainMatch() throws AddressException {
+        fromAddresses[0] = new InternetAddress("Jane Doe <jane.doe@example.net>");
+        perform("ox.io; spf=pass smtp.mailfrom=example.net; dkim=pass (good signature) header.d=example.net");
+
+        assertStatus(MailAuthenticityStatus.PASS, result.getStatus());
+        assertDomain("example.net", result.getAttribute(DefaultMailAuthenticityResultKey.FROM_DOMAIN, String.class));
+        assertAmount(2);
+
+        assertAuthenticityMechanismResult((MailAuthenticityMechanismResult) result.getAttribute(DefaultMailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS, List.class).get(0), "example.net", DKIMResult.PASS);
+        assertAuthenticityMechanismResult((MailAuthenticityMechanismResult) result.getAttribute(DefaultMailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS, List.class).get(1), "example.net", SPFResult.PASS);
+    }
+
+    /**
+     * (SPF: pass, DKIM: pass, Domain Match: false) -> (Overall Result: neutral)
+     */
+    @Test
+    public void testSPFPassDKIMPassWithDomainMismatch() throws AddressException {
+        fromAddresses[0] = new InternetAddress("Jane Doe <jane.doe@example.com>");
+        perform("ox.io; spf=pass smtp.mailfrom=example.net; dkim=pass (good signature) header.d=example.net");
+
+        assertStatus(MailAuthenticityStatus.NEUTRAL, result.getStatus());
+        assertDomain("example.com", result.getAttribute(DefaultMailAuthenticityResultKey.FROM_DOMAIN, String.class));
+        assertAmount(2);
+
+        assertAuthenticityMechanismResult((MailAuthenticityMechanismResult) result.getAttribute(DefaultMailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS, List.class).get(0), "example.net", DKIMResult.PASS);
+        assertAuthenticityMechanismResult((MailAuthenticityMechanismResult) result.getAttribute(DefaultMailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS, List.class).get(1), "example.net", SPFResult.PASS);
+    }
+
+    /**
+     * (SPF: pass, DKIM: neutral, Domain Match: true) -> (Overall Result: pass)
+     */
+    @Test
+    public void testSPFPassDKIMNeutralWithDomainMatch() throws AddressException {
+        fromAddresses[0] = new InternetAddress("Jane Doe <jane.doe@example.net>");
+        perform("ox.io; spf=pass smtp.mailfrom=example.net; dkim=neutral header.d=example.net");
+
+        assertStatus(MailAuthenticityStatus.PASS, result.getStatus());
+        assertDomain("example.net", result.getAttribute(DefaultMailAuthenticityResultKey.FROM_DOMAIN, String.class));
+        assertAmount(2);
+
+        assertAuthenticityMechanismResult((MailAuthenticityMechanismResult) result.getAttribute(DefaultMailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS, List.class).get(0), "example.net", DKIMResult.NEUTRAL);
+        assertAuthenticityMechanismResult((MailAuthenticityMechanismResult) result.getAttribute(DefaultMailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS, List.class).get(1), "example.net", SPFResult.PASS);
+    }
+
+    /**
+     * (SPF: pass, DKIM: neutral, Domain Match: false) -> (Overall Result: neutral)
+     */
+    @Test
+    public void testSPFPassDKIMNeutralWithDomainMismatch() throws AddressException {
+        fromAddresses[0] = new InternetAddress("Jane Doe <jane.doe@example.com>");
+        perform("ox.io; spf=pass smtp.mailfrom=example.net; dkim=neutral header.d=example.net");
+
+        assertStatus(MailAuthenticityStatus.NEUTRAL, result.getStatus());
+        assertDomain("example.com", result.getAttribute(DefaultMailAuthenticityResultKey.FROM_DOMAIN, String.class));
+        assertAmount(2);
+
+        assertAuthenticityMechanismResult((MailAuthenticityMechanismResult) result.getAttribute(DefaultMailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS, List.class).get(0), "example.net", DKIMResult.NEUTRAL);
+        assertAuthenticityMechanismResult((MailAuthenticityMechanismResult) result.getAttribute(DefaultMailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS, List.class).get(1), "example.net", SPFResult.PASS);
+    }
+
+    /**
+     * (SPF: pass, DKIM: fail, Domain Match: indifferent) -> (Overall Result: neutral)
+     */
+    @Test
+    public void testSPFPassDKIMFail() throws AddressException {
+        fromAddresses[0] = new InternetAddress("Jane Doe <jane.doe@example.com>");
+        perform("ox.io; spf=pass smtp.mailfrom=example.net; dkim=fail (bad signature) header.d=example.net");
+
+        assertStatus(MailAuthenticityStatus.NEUTRAL, result.getStatus());
+        assertDomain("example.net", result.getAttribute(DefaultMailAuthenticityResultKey.FROM_DOMAIN, String.class));
+        assertAmount(2);
+
+        assertAuthenticityMechanismResult((MailAuthenticityMechanismResult) result.getAttribute(DefaultMailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS, List.class).get(0), "example.net", DKIMResult.FAIL);
+        assertAuthenticityMechanismResult((MailAuthenticityMechanismResult) result.getAttribute(DefaultMailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS, List.class).get(1), "example.net", SPFResult.PASS);
+    }
+
+    /**
+     * (SPF: neutral, DKIM: pass, Domain Match: true) -> (Overall Result: pass)
+     */
+    @Test
+    public void testSPFNeutralDKIMPassWithDomainMatch() throws AddressException {
+        fromAddresses[0] = new InternetAddress("Jane Doe <jane.doe@example.net>");
+        perform("ox.io; spf=neutral smtp.mailfrom=example.net; dkim=pass (good signature) header.d=example.net");
+
+        assertStatus(MailAuthenticityStatus.PASS, result.getStatus());
+        assertDomain("example.net", result.getAttribute(DefaultMailAuthenticityResultKey.FROM_DOMAIN, String.class));
+        assertAmount(2);
+
+        assertAuthenticityMechanismResult((MailAuthenticityMechanismResult) result.getAttribute(DefaultMailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS, List.class).get(0), "example.net", DKIMResult.PASS);
+        assertAuthenticityMechanismResult((MailAuthenticityMechanismResult) result.getAttribute(DefaultMailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS, List.class).get(1), "example.net", SPFResult.NEUTRAL);
+    }
+
+    /**
+     * (SPF: neutral, DKIM: pass, Domain Match: false) -> (Overall Result: neutral)
+     */
+    @Test
+    public void testSPFNeutralDKIMPassWithDomainMismatch() throws AddressException {
+        fromAddresses[0] = new InternetAddress("Jane Doe <jane.doe@example.com>");
+        perform("ox.io; spf=neutral smtp.mailfrom=example.net; dkim=pass (good signature) header.d=example.net");
+
+        assertStatus(MailAuthenticityStatus.NEUTRAL, result.getStatus());
+        assertDomain("example.com", result.getAttribute(DefaultMailAuthenticityResultKey.FROM_DOMAIN, String.class));
+        assertAmount(2);
+
+        assertAuthenticityMechanismResult((MailAuthenticityMechanismResult) result.getAttribute(DefaultMailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS, List.class).get(0), "example.net", DKIMResult.PASS);
+        assertAuthenticityMechanismResult((MailAuthenticityMechanismResult) result.getAttribute(DefaultMailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS, List.class).get(1), "example.net", SPFResult.NEUTRAL);
+    }
+
+    /**
+     * (SPF: neutral, DKIM: neutral, Domain Match: indifferent) -> (Overall Result: neutral)
+     */
+    @Test
+    public void testSPFNeutralDKIMNeutral() throws AddressException {
+        fromAddresses[0] = new InternetAddress("Jane Doe <jane.doe@example.net>");
+        perform("ox.io; spf=neutral smtp.mailfrom=example.net; dkim=neutral header.d=example.net");
+
+        assertStatus(MailAuthenticityStatus.NEUTRAL, result.getStatus());
+        assertDomain("example.net", result.getAttribute(DefaultMailAuthenticityResultKey.FROM_DOMAIN, String.class));
+        assertAmount(2);
+
+        assertAuthenticityMechanismResult((MailAuthenticityMechanismResult) result.getAttribute(DefaultMailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS, List.class).get(0), "example.net", DKIMResult.NEUTRAL);
+        assertAuthenticityMechanismResult((MailAuthenticityMechanismResult) result.getAttribute(DefaultMailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS, List.class).get(1), "example.net", SPFResult.NEUTRAL);
+    }
+
+    /**
+     * (SPF: neutral, DKIM: fail, Domain Match: indifferent) -> (Overall Result: neutral)
+     */
+    @Test
+    public void testSPFNeutralDKIMFail() throws AddressException {
+        fromAddresses[0] = new InternetAddress("Jane Doe <jane.doe@example.net>");
+        perform("ox.io; spf=neutral smtp.mailfrom=example.net; dkim=fail (bad signature) header.d=example.net");
+
+        assertStatus(MailAuthenticityStatus.NEUTRAL, result.getStatus());
+        assertDomain("example.net", result.getAttribute(DefaultMailAuthenticityResultKey.FROM_DOMAIN, String.class));
+        assertAmount(2);
+
+        assertAuthenticityMechanismResult((MailAuthenticityMechanismResult) result.getAttribute(DefaultMailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS, List.class).get(0), "example.net", DKIMResult.FAIL);
+        assertAuthenticityMechanismResult((MailAuthenticityMechanismResult) result.getAttribute(DefaultMailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS, List.class).get(1), "example.net", SPFResult.NEUTRAL);
+    }
+
+    /**
+     * (SPF: fail, DKIM: pass, Domain Match: true) -> (Overall Result: fail)
+     */
+    @Test
+    public void testSPFFailDKIMPassWithDomainMatch() throws AddressException {
+        fromAddresses[0] = new InternetAddress("Jane Doe <jane.doe@example.net>");
+        perform("ox.io; spf=fail smtp.mailfrom=example.net; dkim=pass (good signature) header.d=example.net");
+
+        assertStatus(MailAuthenticityStatus.FAIL, result.getStatus());
+        assertDomain("example.net", result.getAttribute(DefaultMailAuthenticityResultKey.FROM_DOMAIN, String.class));
+        assertAmount(2);
+
+        assertAuthenticityMechanismResult((MailAuthenticityMechanismResult) result.getAttribute(DefaultMailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS, List.class).get(0), "example.net", DKIMResult.PASS);
+        assertAuthenticityMechanismResult((MailAuthenticityMechanismResult) result.getAttribute(DefaultMailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS, List.class).get(1), "example.net", SPFResult.FAIL);
+    }
+
+    /**
+     * (SPF: fail, DKIM: pass, Domain Match: false) -> (Overall Result: fail)
+     */
+    @Test
+    public void testSPFFailDKIMPassWithDomainMismatch() throws AddressException {
+        fromAddresses[0] = new InternetAddress("Jane Doe <jane.doe@example.com>");
+        perform("ox.io; spf=fail smtp.mailfrom=example.net; dkim=pass (good signature) header.d=example.net");
+
+        assertStatus(MailAuthenticityStatus.FAIL, result.getStatus());
+        assertDomain("example.com", result.getAttribute(DefaultMailAuthenticityResultKey.FROM_DOMAIN, String.class));
+        assertAmount(2);
+
+        assertAuthenticityMechanismResult((MailAuthenticityMechanismResult) result.getAttribute(DefaultMailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS, List.class).get(0), "example.net", DKIMResult.PASS);
+        assertAuthenticityMechanismResult((MailAuthenticityMechanismResult) result.getAttribute(DefaultMailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS, List.class).get(1), "example.net", SPFResult.FAIL);
+    }
+
+    /**
+     * (SPF: fail, DKIM: neutral, Domain Match: indifferent) -> (Overall Result: fail)
+     */
+    @Test
+    public void testSPFFailDKIMNeutral() throws AddressException {
+        fromAddresses[0] = new InternetAddress("Jane Doe <jane.doe@example.net>");
+        perform("ox.io; spf=fail smtp.mailfrom=example.net; dkim=neutral header.d=example.net");
+
+        assertStatus(MailAuthenticityStatus.FAIL, result.getStatus());
+        assertDomain("example.net", result.getAttribute(DefaultMailAuthenticityResultKey.FROM_DOMAIN, String.class));
+        assertAmount(2);
+
+        assertAuthenticityMechanismResult((MailAuthenticityMechanismResult) result.getAttribute(DefaultMailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS, List.class).get(0), "example.net", DKIMResult.NEUTRAL);
+        assertAuthenticityMechanismResult((MailAuthenticityMechanismResult) result.getAttribute(DefaultMailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS, List.class).get(1), "example.net", SPFResult.FAIL);
+    }
+    
+    /**
+     * (SPF: fail, DKIM: fail, Domain Match: indifferent) -> (Overall Result: fail)
+     */
+    @Test
+    public void testSPFFailDKIMFail() throws AddressException {
+        fromAddresses[0] = new InternetAddress("Jane Doe <jane.doe@example.net>");
+        perform("ox.io; spf=fail smtp.mailfrom=example.net; dkim=fail (bad signature) header.d=example.net");
+
+        assertStatus(MailAuthenticityStatus.FAIL, result.getStatus());
+        assertDomain("example.net", result.getAttribute(DefaultMailAuthenticityResultKey.FROM_DOMAIN, String.class));
+        assertAmount(2);
+
+        assertAuthenticityMechanismResult((MailAuthenticityMechanismResult) result.getAttribute(DefaultMailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS, List.class).get(0), "example.net", DKIMResult.FAIL);
+        assertAuthenticityMechanismResult((MailAuthenticityMechanismResult) result.getAttribute(DefaultMailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS, List.class).get(1), "example.net", SPFResult.FAIL);
+    }
 }
