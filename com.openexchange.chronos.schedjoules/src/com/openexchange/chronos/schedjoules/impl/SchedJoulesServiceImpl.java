@@ -70,6 +70,7 @@ import com.openexchange.chronos.schedjoules.SchedJoulesResult;
 import com.openexchange.chronos.schedjoules.SchedJoulesService;
 import com.openexchange.chronos.schedjoules.api.SchedJoulesAPI;
 import com.openexchange.chronos.schedjoules.api.SchedJoulesAPIDefaultValues;
+import com.openexchange.chronos.schedjoules.api.cache.SchedJoulesCachedAPIKey;
 import com.openexchange.chronos.schedjoules.api.cache.SchedJoulesCachedItemKey;
 import com.openexchange.chronos.schedjoules.api.cache.SchedJoulesPage;
 import com.openexchange.chronos.schedjoules.exception.SchedJoulesAPIExceptionCodes;
@@ -91,8 +92,9 @@ public class SchedJoulesServiceImpl implements SchedJoulesService {
     /**
      * Cache for the API clients
      */
-    private final Cache<String, SchedJoulesAPI> apiCache = CacheBuilder.newBuilder().expireAfterAccess(1, TimeUnit.HOURS).removalListener(notification -> {
-        LOG.debug("Shutting down SchedJoules API for '{}'.", notification.getKey());
+    private final Cache<SchedJoulesCachedAPIKey, SchedJoulesAPI> apiCache = CacheBuilder.newBuilder().expireAfterAccess(1, TimeUnit.HOURS).removalListener(notification -> {
+        SchedJoulesCachedAPIKey key = (SchedJoulesCachedAPIKey) notification.getKey();
+        LOG.debug("Shutting down SchedJoules API for '{}'.", key.getContextId());
         SchedJoulesAPI api = (SchedJoulesAPI) notification.getValue();
         api.shutDown();
     }).build();
@@ -247,7 +249,7 @@ public class SchedJoulesServiceImpl implements SchedJoulesService {
      */
     private SchedJoulesAPI getAPI(int contextId) throws OXException {
         try {
-            return apiCache.get(getKey(contextId), () -> {
+            return apiCache.get(new SchedJoulesCachedAPIKey(getKey(contextId), contextId), () -> {
                 LOG.debug("Cache miss for context '{}', initialising new SchedJoules API.", contextId);
                 return new SchedJoulesAPI(getAPIKey(contextId));
             });
@@ -265,7 +267,7 @@ public class SchedJoulesServiceImpl implements SchedJoulesService {
      * @throws OXException if the API key is not configured for the specified context
      */
     private String getKey(int contextId) throws OXException {
-        return DigestUtils.sha256Hex(contextId + ":" + getAPIKey(contextId));
+        return DigestUtils.sha256Hex(getAPIKey(contextId));
 
     }
 
