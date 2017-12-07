@@ -54,15 +54,13 @@ import java.util.concurrent.TimeUnit;
 import org.json.JSONObject;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.LoadingCache;
 import com.openexchange.chronos.schedjoules.api.auxiliary.SchedJoulesCategory;
 import com.openexchange.chronos.schedjoules.api.auxiliary.SchedJoulesCommonParameter;
 import com.openexchange.chronos.schedjoules.api.auxiliary.SchedJoulesSearchParameter;
-import com.openexchange.chronos.schedjoules.api.cache.SchedJoulesCachedItemKey;
 import com.openexchange.chronos.schedjoules.api.cache.SchedJoulesCachedSearchKey;
 import com.openexchange.chronos.schedjoules.api.cache.SchedJoulesPage;
 import com.openexchange.chronos.schedjoules.api.cache.SchedJoulesPage.SchedJoulesPageBuilder;
-import com.openexchange.chronos.schedjoules.api.cache.loader.SchedJoulesPagesCacheLoader;
+import com.openexchange.chronos.schedjoules.api.client.HttpMethod;
 import com.openexchange.chronos.schedjoules.api.client.SchedJoulesRESTBindPoint;
 import com.openexchange.chronos.schedjoules.api.client.SchedJoulesRESTClient;
 import com.openexchange.chronos.schedjoules.api.client.SchedJoulesRequest;
@@ -77,16 +75,6 @@ import com.openexchange.java.Strings;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class SchedJoulesPagesAPI extends AbstractSchedJoulesAPI {
-
-    /**
-     * Caches the page obejcts
-     */
-    private final LoadingCache<SchedJoulesCachedItemKey, SchedJoulesPage> pagesCache = CacheBuilder.newBuilder().maximumSize(1000).expireAfterAccess(24, TimeUnit.HOURS).refreshAfterWrite(24, TimeUnit.HOURS).build(new SchedJoulesPagesCacheLoader(client, SchedJoulesRESTBindPoint.pages));
-
-    /**
-     * Caches the root page item ids
-     */
-    private final Cache<String, Integer> rootItemIdCache = CacheBuilder.newBuilder().maximumSize(1000).expireAfterAccess(24, TimeUnit.HOURS).build();
 
     /**
      * The search cache
@@ -119,23 +107,11 @@ public class SchedJoulesPagesAPI extends AbstractSchedJoulesAPI {
      * @throws OXException if an error is occurred
      */
     public SchedJoulesPage getRootPage(String locale, String location) throws OXException {
-        try {
-            int itemId = rootItemIdCache.get(location, () -> {
-                SchedJoulesRequest request = new SchedJoulesRequest(SchedJoulesRESTBindPoint.pages);
-                request.setQueryParameter(SchedJoulesCommonParameter.location.name(), location);
-                request.setQueryParameter(SchedJoulesCommonParameter.locale.name(), locale);
+        SchedJoulesRequest request = new SchedJoulesRequest(SchedJoulesRESTBindPoint.pages);
+        request.setQueryParameter(SchedJoulesCommonParameter.location.name(), location);
+        request.setQueryParameter(SchedJoulesCommonParameter.locale.name(), locale);
 
-                SchedJoulesPage page = executeRequest(request);
-                JSONObject itemData = (JSONObject) page.getItemData();
-                int rootPageItemId = itemData.getInt("item_id");
-
-                pagesCache.put(new SchedJoulesCachedItemKey(rootPageItemId, locale), page);
-                return rootPageItemId;
-            });
-            return fetchPage(itemId, locale);
-        } catch (ExecutionException e) {
-            throw SchedJoulesAPIExceptionCodes.UNEXPECTED_ERROR.create(e.getMessage(), e);
-        }
+        return executeRequest(request);
     }
 
     /**
@@ -193,6 +169,23 @@ public class SchedJoulesPagesAPI extends AbstractSchedJoulesAPI {
         }
     }
 
+    /**
+     * Checks whether a resource was modified
+     * 
+     * @param pageId The item identifier
+     * @param locale The optional locale (if absent, empty or <code>null</code> falls back to default 'en')
+     * @param etag The last known etag
+     * @param lastModified The last known modified timestamp
+     * @return <code>true</code> if it was modified; <code>false</code> otherwise
+     * @throws OXException if an error is occurred
+     */
+    public boolean isModified(int pageId, String locale, String etag, long lastModified) throws OXException {
+        SchedJoulesRequest request = new SchedJoulesRequest(SchedJoulesRESTBindPoint.pages.getAbsolutePath() + "/" + pageId);
+        request.setQueryParameter(SchedJoulesCommonParameter.locale.name(), Strings.isEmpty(locale) ? SchedJoulesAPIDefaultValues.DEFAULT_LOCALE : locale);
+        SchedJoulesResponse response = client.executeRequest(request, HttpMethod.HEAD, etag, lastModified);
+        return response.getStatusCode() != 304;
+    }
+
     //////////////////////////////////////////// HELPERS /////////////////////////////////////////////
 
     /**
@@ -205,11 +198,10 @@ public class SchedJoulesPagesAPI extends AbstractSchedJoulesAPI {
      * @throws OXException if an error is occurred
      */
     private SchedJoulesPage fetchPage(int pageId, String locale) throws OXException {
-        try {
-            return pagesCache.get(new SchedJoulesCachedItemKey(pageId, locale));
-        } catch (ExecutionException e) {
-            throw SchedJoulesAPIExceptionCodes.UNEXPECTED_ERROR.create(e.getMessage(), e);
-        }
+        SchedJoulesRequest request = new SchedJoulesRequest(SchedJoulesRESTBindPoint.pages.getAbsolutePath() + "/" + pageId);
+        request.setQueryParameter(SchedJoulesCommonParameter.locale.name(), Strings.isEmpty(locale) ? SchedJoulesAPIDefaultValues.DEFAULT_LOCALE : locale);
+
+        return executeRequest(request);
     }
 
     /**

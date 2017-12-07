@@ -64,7 +64,6 @@ public class SchedJoulesRequest {
     private final Map<String, String> queryParameters;
     private final HttpMethod method;
     private String eTag;
-    private int pageId;
 
     /**
      * Initialises a new {@link SchedJoulesRequest}.
@@ -146,23 +145,5 @@ public class SchedJoulesRequest {
      */
     public void setETag(String eTag) {
         this.eTag = eTag;
-    }
-
-    /**
-     * Gets the pageId
-     *
-     * @return The pageId
-     */
-    public int getPageId() {
-        return pageId;
-    }
-
-    /**
-     * Sets the pageId
-     *
-     * @param pageId The pageId to set
-     */
-    public void setPageId(int pageId) {
-        this.pageId = pageId;
     }
 }

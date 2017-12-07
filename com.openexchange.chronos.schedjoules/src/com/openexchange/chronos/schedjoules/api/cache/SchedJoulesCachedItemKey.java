@@ -56,6 +56,7 @@ package com.openexchange.chronos.schedjoules.api.cache;
  */
 public class SchedJoulesCachedItemKey {
 
+    private final int contextId;
     private final int itemId;
     private final String locale;
 
@@ -65,8 +66,9 @@ public class SchedJoulesCachedItemKey {
      * @param itemId
      * @param locale
      */
-    public SchedJoulesCachedItemKey(final int itemId, final String locale) {
+    public SchedJoulesCachedItemKey(final int contextId, final int itemId, final String locale) {
         super();
+        this.contextId = contextId;
         this.itemId = itemId;
         this.locale = locale;
     }
@@ -89,6 +91,15 @@ public class SchedJoulesCachedItemKey {
         return locale;
     }
 
+    /**
+     * Gets the contextId
+     *
+     * @return The contextId
+     */
+    public int getContextId() {
+        return contextId;
+    }
+
     /*
      * (non-Javadoc)
      * 
@@ -98,6 +109,7 @@ public class SchedJoulesCachedItemKey {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
+        result = prime * result + contextId;
         result = prime * result + itemId;
         result = prime * result + ((locale == null) ? 0 : locale.hashCode());
         return result;
@@ -120,6 +132,9 @@ public class SchedJoulesCachedItemKey {
             return false;
         }
         final SchedJoulesCachedItemKey other = (SchedJoulesCachedItemKey) obj;
+        if (contextId != other.contextId) {
+            return false;
+        }
         if (itemId != other.itemId) {
             return false;
         }
@@ -131,6 +146,18 @@ public class SchedJoulesCachedItemKey {
             return false;
         }
         return true;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("SchedJoulesCachedItemKey [contextId=").append(contextId).append(", itemId=").append(itemId).append(", locale=").append(locale).append("]");
+        return builder.toString();
     }
 
 }
