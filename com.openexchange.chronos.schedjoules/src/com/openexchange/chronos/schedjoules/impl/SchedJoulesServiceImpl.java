@@ -87,6 +87,10 @@ import com.openexchange.timer.TimerService;
  */
 public class SchedJoulesServiceImpl implements SchedJoulesService {
 
+    private static final int COUNTRIES_ID = -1;
+
+    private static final int LANGUAGES_ID = -2;
+
     private static final Logger LOG = LoggerFactory.getLogger(SchedJoulesServiceImpl.class);
 
     /**
@@ -125,6 +129,72 @@ public class SchedJoulesServiceImpl implements SchedJoulesService {
             timerService.getExecutor().execute(task);
             return task;
         };
+    });
+
+    /**
+     * Countries cache
+     */
+    private final LoadingCache<SchedJoulesCachedItemKey, SchedJoulesPage> countriesCache = CacheBuilder.newBuilder().refreshAfterWrite(24, TimeUnit.HOURS).build(new CacheLoader<SchedJoulesCachedItemKey, SchedJoulesPage>() {
+
+        @Override
+        public SchedJoulesPage load(SchedJoulesCachedItemKey key) throws Exception {
+            SchedJoulesAPI api = getAPI(key.getContextId());
+            return api.countries().listCountries(key.getLocale());
+        }
+
+        /*
+         * (non-Javadoc)
+         * 
+         * @see com.google.common.cache.CacheLoader#reload(java.lang.Object, java.lang.Object)
+         */
+        @Override
+        public ListenableFuture<SchedJoulesPage> reload(SchedJoulesCachedItemKey key, SchedJoulesPage oldValue) throws Exception {
+            TimerService timerService = Services.getService(TimerService.class);
+            ListenableFutureTask<SchedJoulesPage> task = ListenableFutureTask.create(() -> {
+                SchedJoulesAPI api = getAPI(key.getContextId());
+                if (!api.countries().isModified(key.getLocale(), oldValue.getEtag(), oldValue.getLastModified())) {
+                    LOG.debug("The entry with key: '{}' was not modified since last fetch.", key.toString());
+                    return oldValue;
+                }
+                LOG.debug("The entry with key: '{}' was modified since last fetch. Reloading...", key.toString());
+                return load(key);
+            });
+            timerService.getExecutor().execute(task);
+            return task;
+        }
+    });
+
+    /**
+     * Languages cache
+     */
+    private final LoadingCache<SchedJoulesCachedItemKey, SchedJoulesPage> languagesCache = CacheBuilder.newBuilder().refreshAfterWrite(24, TimeUnit.HOURS).build(new CacheLoader<SchedJoulesCachedItemKey, SchedJoulesPage>() {
+
+        @Override
+        public SchedJoulesPage load(SchedJoulesCachedItemKey key) throws Exception {
+            SchedJoulesAPI api = getAPI(key.getContextId());
+            return api.languages().listLanguages();
+        }
+
+        /*
+         * (non-Javadoc)
+         * 
+         * @see com.google.common.cache.CacheLoader#reload(java.lang.Object, java.lang.Object)
+         */
+        @Override
+        public ListenableFuture<SchedJoulesPage> reload(SchedJoulesCachedItemKey key, SchedJoulesPage oldValue) throws Exception {
+            TimerService timerService = Services.getService(TimerService.class);
+            ListenableFutureTask<SchedJoulesPage> task = ListenableFutureTask.create(() -> {
+                SchedJoulesAPI api = getAPI(key.getContextId());
+                if (!api.languages().isModified(oldValue.getEtag(), oldValue.getLastModified())) {
+                    LOG.debug("The entry with key: '{}' was not modified since last fetch.", key.toString());
+                    return oldValue;
+                }
+                LOG.debug("The entry with key: '{}' was modified since last fetch. Reloading...", key.toString());
+                return load(key);
+            });
+            timerService.getExecutor().execute(task);
+            return task;
+        }
     });
 
     /**
@@ -207,7 +277,11 @@ public class SchedJoulesServiceImpl implements SchedJoulesService {
      */
     @Override
     public SchedJoulesResult listCountries(int contextId, String locale) throws OXException {
-        return new SchedJoulesResult(getAPI(contextId).countries().listCountries(locale).getItemData());
+        try {
+            return new SchedJoulesResult(countriesCache.get(new SchedJoulesCachedItemKey(contextId, COUNTRIES_ID, locale)).getItemData());
+        } catch (ExecutionException e) {
+            throw SchedJoulesAPIExceptionCodes.UNEXPECTED_ERROR.create(e.getMessage(), e);
+        }
     }
 
     /*
@@ -217,7 +291,11 @@ public class SchedJoulesServiceImpl implements SchedJoulesService {
      */
     @Override
     public SchedJoulesResult listLanguages(int contextId) throws OXException {
-        return new SchedJoulesResult(getAPI(contextId).languages().listLanguages().getItemData());
+        try {
+            return new SchedJoulesResult(languagesCache.get(new SchedJoulesCachedItemKey(contextId, LANGUAGES_ID, null)).getItemData());
+        } catch (ExecutionException e) {
+            throw SchedJoulesAPIExceptionCodes.UNEXPECTED_ERROR.create(e.getMessage(), e);
+        }
     }
 
     /*
