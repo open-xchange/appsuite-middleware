@@ -113,6 +113,9 @@ public class GoogleSubscriptionsMigrationTask extends UpdateTaskAdapter {
 
         for (int ctxId : contextsInSameSchema) {
             Context ctx = contextService.loadContext(ctxId);
+            /*
+             * Step 1: Load subscriptions
+             */
             final List<Subscription> subscriptions = ((AdministrativeSubscriptionStorage) subscriptionStorage).getSubscriptionsForContext(ctx, SOURCE_ID, writeCon);
 
             /*
