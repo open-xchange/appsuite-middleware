@@ -105,6 +105,7 @@ public interface CalendarAccountService {
      * @param id The identifier of the account to delete
      * @param timestamp The timestamp that specifies the last modification of the account
      * @param parameters Additional calendar parameters, or <code>null</code> if not set
+     * @param parameters Additional calendar parameters, or <code>null</code> if not set
      * @throws OXException if permission check fails
      */
     void deleteAccount(Session session, int id, long timestamp, CalendarParameters parameters) throws OXException;
@@ -115,18 +116,20 @@ public interface CalendarAccountService {
      * @param session The current user session
      * @param id The identifier of the account to load
      * @return The loaded calendar account, or <code>null</code> if not found
+     * @param parameters Additional calendar parameters, or <code>null</code> if not set
      * @throws OXException if permission check fails
      */
-    CalendarAccount getAccount(Session session, int id) throws OXException;
+    CalendarAccount getAccount(Session session, int id, CalendarParameters parameters) throws OXException;
 
     /**
      * Gets a list of all calendar accounts stored for a specific user.
      *
      * @param session The current user session
      * @return The accounts, or an empty list if none were found
+     * @param parameters Additional calendar parameters, or <code>null</code> if not set
      * @throws OXException if permission check fails
      */
-    List<CalendarAccount> getAccounts(Session session) throws OXException;
+    List<CalendarAccount> getAccounts(Session session, CalendarParameters parameters) throws OXException;
 
     /**
      * Gets a list of all calendar accounts stored for s specific user and provider.
@@ -134,8 +137,9 @@ public interface CalendarAccountService {
      * @param session The current user session
      * @param providerId The providerId to search with
      * @return The accounts, or an empty list if none were found
+     * @param parameters Additional calendar parameters, or <code>null</code> if not set
      * @throws OXException if permission check fails
      */
-    List<CalendarAccount> getAccounts(Session session, String providerId) throws OXException;
+    List<CalendarAccount> getAccounts(Session session, String providerId, CalendarParameters parameters) throws OXException;
 
 }

@@ -84,7 +84,7 @@ public class AllAction extends AbstractAccountAction {
     @Override
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
         String provider = requestData.getParameter(PROVIDER);
-        List<CalendarAccount> accounts = Strings.isEmpty(provider) ? getAccountService().getAccounts(session) : getAccountService().getAccounts(session, provider);
+        List<CalendarAccount> accounts = Strings.isEmpty(provider) ? getAccountService().getAccounts(session, null) : getAccountService().getAccounts(session, provider, null);
         JSONArray response = new JSONArray(accounts.size());
         for (CalendarAccount account : accounts) {
             response.put(serializeAccount(account));

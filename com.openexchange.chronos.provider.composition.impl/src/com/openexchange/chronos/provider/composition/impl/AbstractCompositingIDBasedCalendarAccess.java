@@ -322,7 +322,7 @@ public abstract class AbstractCompositingIDBasedCalendarAccess implements Transa
      * @return The calendar accounts, or an empty list if there are none
      */
     protected List<CalendarAccount> getAccounts() throws OXException {
-        List<CalendarAccount> accounts = requireService(CalendarAccountService.class, services).getAccounts(session);
+        List<CalendarAccount> accounts = requireService(CalendarAccountService.class, services).getAccounts(session, this);
         return accounts.stream().filter(account -> account.isEnabled()).collect(Collectors.toList());
     }
 
@@ -382,7 +382,7 @@ public abstract class AbstractCompositingIDBasedCalendarAccess implements Transa
      * @return The calendar account, or <code>null</code> if not found
      */
     protected CalendarAccount optAccount(int accountId) throws OXException {
-        return requireService(CalendarAccountService.class, services).getAccount(session, accountId);
+        return requireService(CalendarAccountService.class, services).getAccount(session, accountId, this);
     }
 
     /**

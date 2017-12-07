@@ -128,7 +128,7 @@ public class CalendarAccountServiceImpl implements CalendarAccountService, Admin
         /*
          * get & check stored calendar account
          */
-        CalendarAccount storedAccount = getAccount(session, id);
+        CalendarAccount storedAccount = getAccount(session, id, parameters);
         if (null != storedAccount.getLastModified() && storedAccount.getLastModified().getTime() > clientTimestamp) {
             throw CalendarExceptionCodes.CONCURRENT_MODIFICATION.create(String.valueOf(id), clientTimestamp, storedAccount.getLastModified().getTime());
         }
@@ -204,8 +204,8 @@ public class CalendarAccountServiceImpl implements CalendarAccountService, Admin
     }
 
     @Override
-    public CalendarAccount getAccount(Session session, int id) throws OXException {
-        CalendarAccount storedAccount = new OSGiCalendarStorageOperation<CalendarAccount>(services, session.getContextId(), -1) {
+    public CalendarAccount getAccount(Session session, int id, CalendarParameters parameters) throws OXException {
+        CalendarAccount storedAccount = new OSGiCalendarStorageOperation<CalendarAccount>(services, session.getContextId(), -1, parameters) {
 
             @Override
             protected CalendarAccount call(CalendarStorage storage) throws OXException {
@@ -222,7 +222,7 @@ public class CalendarAccountServiceImpl implements CalendarAccountService, Admin
                 /*
                  * get default account from list to implicitly trigger pending auto-provisioning tasks of the default account
                  */
-                storedAccount = find(getAccounts(session), CalendarAccount.DEFAULT_ACCOUNT.getProviderId());
+                storedAccount = find(getAccounts(session, parameters), CalendarAccount.DEFAULT_ACCOUNT.getProviderId());
             }
         }
         if (null == storedAccount) {
@@ -232,7 +232,7 @@ public class CalendarAccountServiceImpl implements CalendarAccountService, Admin
     }
 
     @Override
-    public List<CalendarAccount> getAccounts(Session session) throws OXException {
+    public List<CalendarAccount> getAccounts(Session session, CalendarParameters parameters) throws OXException {
         /*
          * get accounts from storage
          */
@@ -241,8 +241,7 @@ public class CalendarAccountServiceImpl implements CalendarAccountService, Admin
          * check for pending provisioning tasks
          */
         if (false == getProvidersRequiringProvisioning(accounts).isEmpty() && false == isGuest(session)) {
-            CalendarParameters parameters = null;
-            accounts = new OSGiCalendarStorageOperation<List<CalendarAccount>>(services, session.getContextId(), -1) {
+            accounts = new OSGiCalendarStorageOperation<List<CalendarAccount>>(services, session.getContextId(), -1, parameters) {
 
                 @Override
                 protected List<CalendarAccount> call(CalendarStorage storage) throws OXException {
@@ -275,8 +274,8 @@ public class CalendarAccountServiceImpl implements CalendarAccountService, Admin
     }
 
     @Override
-    public List<CalendarAccount> getAccounts(Session session, String providerId) throws OXException {
-        return findAll(getAccounts(session), providerId);
+    public List<CalendarAccount> getAccounts(Session session, String providerId, CalendarParameters parameters) throws OXException {
+        return findAll(getAccounts(session, parameters), providerId);
     }
 
     @Override
