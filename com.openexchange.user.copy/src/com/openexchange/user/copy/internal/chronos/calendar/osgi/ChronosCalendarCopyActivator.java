@@ -51,6 +51,7 @@ package com.openexchange.user.copy.internal.chronos.calendar.osgi;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.openexchange.chronos.storage.CalendarAvailabilityStorageFactory;
 import com.openexchange.chronos.storage.CalendarStorageFactory;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.user.copy.CopyUserTaskService;
@@ -69,7 +70,8 @@ public class ChronosCalendarCopyActivator extends HousekeepingActivator {
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class[]{
-            CalendarStorageFactory.class
+            CalendarStorageFactory.class,
+            CalendarAvailabilityStorageFactory.class
         };
     }
 

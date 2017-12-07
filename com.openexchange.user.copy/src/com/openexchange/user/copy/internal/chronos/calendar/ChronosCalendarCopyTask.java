@@ -172,9 +172,8 @@ public class ChronosCalendarCopyTask implements CopyUserTaskService {
         //init storages
         setSourceCalendarStorage(srcCtx, srcCon);
         setDestinationCalendarStorage(dstCtx, dstCon);
-        //TODO add services to osgi
-//        setSourceAvailabilityStorage(srcCtx, srcCon);
-//        setDestinationAvailabilityStorage(dstCtx, dstCon);
+        setSourceAvailabilityStorage(srcCtx, srcCon);
+        setDestinationAvailabilityStorage(dstCtx, dstCon);
 
         final ObjectMapping<FolderObject> folderMapping = copyTools.getFolderMapping();
         final Set<Integer> sourceFolderIds = folderMapping.getSourceKeys();
@@ -184,7 +183,7 @@ public class ChronosCalendarCopyTask implements CopyUserTaskService {
         //Events
         List<Event> srcEventList = searchSourceEvents(srcUsrId, sourceFolderIds);
         //sourceAlarms
-        Map<String, Map<Integer, List<Alarm>>> alarmByEvent = loadSourceAlarms(srcEventList, srcUsrId);
+        Map<String, Map<Integer, List<Alarm>>> alarmByEvent = loadSourceAlarms(srcEventList);
         Map<String, Event> dstEventMapping = exchangeEventIds(srcEventList, dstCtx, dstUsrId, srcUsrId);
         insertDestinationEvents(new ArrayList<>(dstEventMapping.values()));
         //Attendees
@@ -198,12 +197,14 @@ public class ChronosCalendarCopyTask implements CopyUserTaskService {
         List<AlarmTrigger> alarmTrigger = loadAlarmTriggers(copyTools.getSourceConnection(), srcCtx.getContextId(), srcUsrId, sourceFolderIds);
         exchangeAlarmTriggerIds(alarmTrigger, dstEventMapping, dstUsrId, alarmByEventByUser);
         insertAlarmTriggers(copyTools.getDestinationConnection(), alarmTrigger, dstCtx.getContextId());
-        //CalendarAvailabilities
-
         //PerUserProperties
         List<FolderProperties> properties = loadFolderProperties(srcCon, srcCtx.getContextId(), srcUsrId, sourceFolderIds);
         exchangePropertyIds(properties, dstCtx.getContextId(), dstUsrId, folderMapping);
         insertFolderproperties(dstCon, properties);
+        //CalendarAvailabilities
+        List<Available> availabilities = getSourceAvailabilities(srcUsrId);
+        availabilities = exchangeAvailabilityIds(availabilities, dstUsrId);
+        insertDestinationAvailabilities(availabilities);
 
         return null;
     }
@@ -293,16 +294,16 @@ public class ChronosCalendarCopyTask implements CopyUserTaskService {
             List<AlarmTrigger> triggerList = new ArrayList<>();
             while (rs.next()) {
                 final AlarmTrigger trigger = new AlarmTrigger();
-                trigger.setAlarm(rs.getInt(1));
-                trigger.setUserId(rs.getInt(2));
-                trigger.setEventId(rs.getString(3));
-                trigger.setFolder(rs.getString(4));
-                trigger.setTime(rs.getLong(5));//triggerDate?
-                trigger.setAction(rs.getString(6));
+                trigger.setAlarm(rs.getInt(3));
+                trigger.setUserId(rs.getInt(4));
+                trigger.setEventId(rs.getString(5));
+                trigger.setFolder(rs.getString(6));
+                trigger.setTime(rs.getLong(7));//triggerDate?
+                trigger.setAction(rs.getString(8));
 //                trigger.setRecurrenceId(new DefaultRecurrenceId(rs.getString(7)));
 //                trigger.setTimezone(new TimeZone(rs.getString(8)));//TimeZone
-                trigger.setRelatedTime(rs.getLong(9));
-                trigger.setPushed(rs.getBoolean(10));
+                trigger.setRelatedTime(rs.getLong(11));
+                trigger.setPushed(rs.getBoolean(12));
                 triggerList.add(trigger);
             }
             return triggerList;
@@ -366,7 +367,6 @@ public class ChronosCalendarCopyTask implements CopyUserTaskService {
         Map<String, List<Attendee>> dstAttendees = new HashMap<>(eventAttendeeMapping.size());
         for (Map.Entry<String, List<Attendee>> entry : eventAttendeeMapping.entrySet()) {
             String srcEventId = entry.getKey();
-            Event event = eventMapping.get(srcEventId);
             List<Attendee> attendees = new ArrayList<>(entry.getValue().size());
             for (Attendee attendee : entry.getValue()) {
                 //setters for attendee values
@@ -445,7 +445,7 @@ public class ChronosCalendarCopyTask implements CopyUserTaskService {
         return dstEventList;
     }
 
-    private Map<String, Map<Integer, List<Alarm>>> loadSourceAlarms(List<Event> eventList, int userId) throws OXException {
+    private Map<String, Map<Integer, List<Alarm>>> loadSourceAlarms(List<Event> eventList) throws OXException {
         return srcCalendarStorage.getAlarmStorage().loadAlarms(eventList);
     }
 
@@ -458,7 +458,6 @@ public class ChronosCalendarCopyTask implements CopyUserTaskService {
                 alarmsByUser = new HashMap<>(1);
                 alarmList = new ArrayList<>(entry.getValue().size());
                 for (Alarm alarm : alarmsPerUser.getValue()) {
-                    int oldAlarmId = alarm.getId();
                     alarm.setId(dstCalendarStorage.getAlarmStorage().nextId());
                     if (false == alarm.containsUid() || null == alarm.getUid()) {
                         alarm.setUid(UUID.randomUUID().toString());
