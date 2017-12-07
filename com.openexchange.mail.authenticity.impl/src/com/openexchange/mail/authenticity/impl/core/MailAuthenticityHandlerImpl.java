@@ -59,6 +59,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiFunction;
 import javax.mail.internet.InternetAddress;
 import com.google.common.cache.Cache;
@@ -122,7 +123,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
     private final int ranking;
     private final Map<DefaultMailAuthenticityMechanism, BiFunction<Map<String, String>, MailAuthenticityResult, MailAuthenticityMechanismResult>> mechanismParsersRegistry;
     private final Cache<UserAndContext, List<AllowedAuthServId>> authServIdsCache;
-    private final TrustedMailService trustedDomainHandler;
+    private final TrustedMailService trustedMailService;
     private final ServiceLookup services;
     private final Collection<MailField> requiredMailFields;
 
@@ -131,8 +132,8 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
      *
      * @param services The service look-up
      */
-    public MailAuthenticityHandlerImpl(ServiceLookup services) {
-        this(0, services);
+    public MailAuthenticityHandlerImpl(TrustedMailService trustedMailService, ServiceLookup services) {
+        this(0, trustedMailService, services);
     }
 
     /**
@@ -141,10 +142,10 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
      * @param ranking The ranking of this handler; a higher value means higher priority
      * @param services The service look-up
      */
-    public MailAuthenticityHandlerImpl(int ranking, ServiceLookup services) {
+    public MailAuthenticityHandlerImpl(int ranking, TrustedMailService trustedMailService, ServiceLookup services) {
         super();
         this.services = services;
-        this.trustedDomainHandler = services.getService(TrustedMailService.class);
+        this.trustedMailService = trustedMailService;
         this.ranking = ranking;
         mailAuthComparator = new MailAuthenticityMechanismComparator();
         this.authServIdsCache = CacheBuilder.newBuilder().maximumSize(65536).expireAfterWrite(30, TimeUnit.MINUTES).build();
@@ -242,9 +243,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
 
         mailMessage.setAuthenticityResult(parseHeaders(Arrays.asList(authHeaders), from[0], session));
 
-        if (trustedDomainHandler != null) {
-            trustedDomainHandler.handle(session, mailMessage);
-        }
+        trustedMailService.handle(session, mailMessage);
     }
 
     /*

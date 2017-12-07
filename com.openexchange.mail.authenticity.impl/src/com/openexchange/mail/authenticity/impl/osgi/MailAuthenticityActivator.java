@@ -51,6 +51,7 @@ package com.openexchange.mail.authenticity.impl.osgi;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
+import org.osgi.framework.BundleContext;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.ForcedReloadable;
 import com.openexchange.config.Interests;
@@ -68,7 +69,6 @@ import com.openexchange.mail.authenticity.impl.core.MailAuthenticityFetchListene
 import com.openexchange.mail.authenticity.impl.core.MailAuthenticityHandlerImpl;
 import com.openexchange.mail.authenticity.impl.core.MailAuthenticityHandlerRegistryImpl;
 import com.openexchange.mail.authenticity.impl.core.MailAuthenticityJSlobEntry;
-import com.openexchange.mail.authenticity.impl.trusted.TrustedMailService;
 import com.openexchange.mail.authenticity.impl.trusted.internal.TrustedMailAuthenticityHandler;
 import com.openexchange.mail.authenticity.impl.trusted.internal.TrustedMailDataSource;
 import com.openexchange.mailaccount.UnifiedInboxManagement;
@@ -101,21 +101,20 @@ public class MailAuthenticityActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
+        final BundleContext context = this.context;
         // It is OK to pass service references since 'stopOnServiceUnavailability' returns 'true'
         final MailAuthenticityHandlerRegistryImpl registry = new MailAuthenticityHandlerRegistryImpl(getService(LeanConfigurationService.class), context);
         registerService(MailAuthenticityHandlerRegistry.class, registry);
+
         track(MailAuthenticityHandler.class, registry);
-        trackService(TrustedMailService.class);
         openTrackers();
 
         ConfigurationService configurationService = getService(ConfigurationService.class);
         TrustedMailAuthenticityHandler authenticationHandler = new TrustedMailAuthenticityHandler(configurationService);
         registerService(ForcedReloadable.class, authenticationHandler);
-        registerService(TrustedMailService.class, authenticationHandler);
 
-        final MailAuthenticityHandlerImpl handlerImpl = new MailAuthenticityHandlerImpl(this);
+        final MailAuthenticityHandlerImpl handlerImpl = new MailAuthenticityHandlerImpl(authenticationHandler, this);
         registerService(MailAuthenticityHandler.class, handlerImpl);
-
         registerService(Reloadable.class, new ConfigReloader(registry, handlerImpl));
 
         MailAuthenticityFetchListener fetchListener = new MailAuthenticityFetchListener(registry);
@@ -134,7 +133,7 @@ public class MailAuthenticityActivator extends HousekeepingActivator {
         Services.setServiceLookup(this);
     }
 
-    class ConfigReloader implements Reloadable {
+    private static class ConfigReloader implements Reloadable {
 
         private final MailAuthenticityHandlerRegistryImpl registry;
         private final MailAuthenticityHandlerImpl handlerImpl;
@@ -142,7 +141,7 @@ public class MailAuthenticityActivator extends HousekeepingActivator {
         /**
          * Initializes a new {@link MailAuthenticityActivator.ConfigReloader}.
          */
-        public ConfigReloader(MailAuthenticityHandlerRegistryImpl registry, MailAuthenticityHandlerImpl handlerImpl) {
+        ConfigReloader(MailAuthenticityHandlerRegistryImpl registry, MailAuthenticityHandlerImpl handlerImpl) {
             super();
             this.registry = registry;
             this.handlerImpl = handlerImpl;

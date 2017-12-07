@@ -68,7 +68,7 @@ public interface TrustedMailService {
      * @return The {@link Icon}
      * @throws OXException in case the uid is invalid
      */
-    public Icon getIcon(Session session, String uid) throws OXException;
+    Icon getIcon(Session session, String uid) throws OXException;
 
     /**
      * Checks mail message for trusted mail address and adapts authentication result accordingly
@@ -76,6 +76,6 @@ public interface TrustedMailService {
      * @param session The user session
      * @param mailMessage The mail message to handle
      */
-    public void handle(Session session, MailMessage mailMessage);
+    void handle(Session session, MailMessage mailMessage);
 
 }

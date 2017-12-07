@@ -50,6 +50,7 @@
 package com.openexchange.mail.authenticity.impl.trusted.internal;
 
 import java.util.regex.Pattern;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.authenticity.impl.trusted.Icon;
 
 /**
@@ -74,12 +75,8 @@ public class TrustedMail {
     public TrustedMail(String mail, Icon image) {
         super();
         this.mail = mail;
-        this.pattern = Pattern.compile(toRegex(mail));
+        this.pattern = Pattern.compile(Strings.wildcardToRegex(mail));
         this.image = image;
-    }
-
-    private String toRegex(String mail){
-        return mail.replaceAll("\\.", "[.]").replaceAll("\\*", ".*").replaceAll("\\?", ".");
     }
 
     /**
@@ -102,8 +99,9 @@ public class TrustedMail {
 
     /**
      * Checks whether this trusted mail matches the given mail address
+     *
      * @param mailAddress
-     * @return true if the {@link TrustedMail} matches the given mail address, false otherwise
+     * @return <code>true</code> if the {@link TrustedMail} matches the given mail address, <code>false</code> otherwise
      */
     public boolean matches(String mailAddress){
         return pattern.matcher(mailAddress).matches();
@@ -111,8 +109,6 @@ public class TrustedMail {
 
     @Override
     public String toString() {
-        StringBuilder builder = new StringBuilder("TrustedDomain [").append("domain = ").append(mail);
-        return builder.append("]").toString();
-
+        return new StringBuilder("TrustedDomain [").append("domain = ").append(mail).append(']').toString();
     }
 }

@@ -65,6 +65,8 @@ import com.openexchange.mail.authenticity.DefaultMailAuthenticityResultKey;
 import com.openexchange.mail.authenticity.MailAuthenticityProperty;
 import com.openexchange.mail.authenticity.MailAuthenticityStatus;
 import com.openexchange.mail.authenticity.impl.core.MailAuthenticityHandlerImpl;
+import com.openexchange.mail.authenticity.impl.trusted.Icon;
+import com.openexchange.mail.authenticity.impl.trusted.TrustedMailService;
 import com.openexchange.mail.authenticity.mechanism.AuthenticityMechanismResult;
 import com.openexchange.mail.authenticity.mechanism.MailAuthenticityMechanismResult;
 import com.openexchange.mail.dataobjects.MailAuthenticityResult;
@@ -121,8 +123,21 @@ public abstract class AbstractTestMailAuthenticity {
 
         fromAddresses = new InternetAddress[1];
         when(mailMessage.getFrom()).thenReturn(fromAddresses);
+        
+        TrustedMailService doNothingService = new TrustedMailService() {
+            
+            @Override
+            public void handle(Session session, MailMessage mailMessage) {
+                // Nothing
+            }
+            
+            @Override
+            public Icon getIcon(Session session, String uid) throws OXException {
+                return null;
+            }
+        };
 
-        handler = new MailAuthenticityHandlerImpl(services);
+        handler = new MailAuthenticityHandlerImpl(doNothingService, services);
     }
 
     /**
