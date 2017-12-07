@@ -414,7 +414,7 @@ public class GoogleCalendarResult extends ExternalCalendarResult implements Diff
 
     @Override
     public boolean isUpdated() {
-        return currentResult.getEvents().isEmpty();
+        return !currentResult.getEvents().isEmpty();
     }
 
 }

@@ -53,9 +53,11 @@ import java.util.EnumSet;
 import java.util.Locale;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.chronos.ExtendedProperties;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.CalendarCapability;
+import com.openexchange.chronos.provider.CalendarFolderProperty;
 import com.openexchange.chronos.provider.basic.BasicCalendarAccess;
 import com.openexchange.chronos.provider.basic.BasicCalendarProvider;
 import com.openexchange.chronos.provider.basic.CalendarSettings;
@@ -121,7 +123,8 @@ public class GoogleCalendarProvider implements BasicCalendarProvider {
 
     @Override
     public JSONObject configureAccount(Session session, CalendarSettings settings, CalendarParameters parameters) throws OXException {
-        int accountId = checkConfig(settings.getConfig());
+        JSONObject userConfig = settings.getConfig();
+        int accountId = checkConfig(userConfig);
 
         final OAuthService oAuthService = Services.optService(OAuthService.class);
         if (null == oAuthService) {
@@ -134,11 +137,21 @@ public class GoogleCalendarProvider implements BasicCalendarProvider {
         JSONObject internalConfig = new JSONObject();
         try {
             internalConfig.put(GoogleCalendarConfigField.OAUTH_ID, accountId);
-            if(settings.getConfig().hasAndNotNull(GoogleCalendarConfigField.FOLDER)) {
-                internalConfig.put(GoogleCalendarConfigField.FOLDER, settings.getConfig().getString(GoogleCalendarConfigField.FOLDER));
+            if(userConfig.hasAndNotNull(GoogleCalendarConfigField.FOLDER)) {
+                internalConfig.put(GoogleCalendarConfigField.FOLDER, userConfig.getString(GoogleCalendarConfigField.FOLDER));
             }
 
-            // TODO check for color and description
+            // store extended properties
+            ExtendedProperties extendedProperties = settings.getExtendedProperties();
+            Object colorValue = CalendarFolderProperty.optPropertyValue(extendedProperties, CalendarFolderProperty.COLOR_LITERAL);
+            if(colorValue != null) {
+                internalConfig.put(GoogleCalendarConfigField.COLOR, colorValue);
+            }
+
+            Object description = CalendarFolderProperty.optPropertyValue(extendedProperties, CalendarFolderProperty.DESCRIPTION_LITERAL);
+            if(description != null) {
+                internalConfig.put(GoogleCalendarConfigField.DESCRIPTION, description);
+            }
         } catch (JSONException e) {
             // never happens
         }
@@ -147,7 +160,8 @@ public class GoogleCalendarProvider implements BasicCalendarProvider {
 
     @Override
     public JSONObject reconfigureAccount(Session session, CalendarAccount calendarAccount, CalendarSettings settings, CalendarParameters parameters) throws OXException {
-        int accountId = checkConfig(settings.getConfig());
+        JSONObject userConfig = settings.getConfig();
+        int accountId = checkConfig(userConfig);
 
         final OAuthService oAuthService = Services.optService(OAuthService.class);
         if (null == oAuthService) {
@@ -160,11 +174,17 @@ public class GoogleCalendarProvider implements BasicCalendarProvider {
         JSONObject result = new JSONObject();
         try {
             result.put(GoogleCalendarConfigField.OAUTH_ID, accountId);
-            if(settings.getConfig().hasAndNotNull(GoogleCalendarConfigField.FOLDER)) {
-                result.put(GoogleCalendarConfigField.FOLDER, settings.getConfig().getString(GoogleCalendarConfigField.FOLDER));
+            if(userConfig.hasAndNotNull(GoogleCalendarConfigField.FOLDER)) {
+                result.put(GoogleCalendarConfigField.FOLDER, userConfig.getString(GoogleCalendarConfigField.FOLDER));
             }
 
-            // TODO check for color and description
+            if(userConfig.hasAndNotNull(GoogleCalendarConfigField.COLOR)) {
+                result.put(GoogleCalendarConfigField.COLOR, userConfig.getString(GoogleCalendarConfigField.COLOR));
+            }
+
+            if(userConfig.hasAndNotNull(GoogleCalendarConfigField.DESCRIPTION)) {
+                result.put(GoogleCalendarConfigField.DESCRIPTION, userConfig.getString(GoogleCalendarConfigField.DESCRIPTION));
+            }
         } catch (JSONException e) {
             // never happens
         }
