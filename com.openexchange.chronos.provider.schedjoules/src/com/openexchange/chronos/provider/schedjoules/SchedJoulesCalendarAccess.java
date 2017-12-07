@@ -72,11 +72,12 @@ import com.openexchange.chronos.provider.caching.CachingCalendarAccess;
 import com.openexchange.chronos.provider.caching.ExternalCalendarResult;
 import com.openexchange.chronos.provider.schedjoules.exception.SchedJoulesProviderExceptionCodes;
 import com.openexchange.chronos.schedjoules.SchedJoulesCalendar;
-import com.openexchange.chronos.schedjoules.api.SchedJoulesAPI;
+import com.openexchange.chronos.schedjoules.SchedJoulesService;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Enums;
 import com.openexchange.java.Strings;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 
 /**
@@ -100,6 +101,8 @@ public class SchedJoulesCalendarAccess extends CachingCalendarAccess {
 
     private final CalendarAccount account;
 
+    private final ServiceLookup services;
+
     /**
      * Initialises a new {@link SchedJoulesCalendarAccess}.
      *
@@ -108,8 +111,9 @@ public class SchedJoulesCalendarAccess extends CachingCalendarAccess {
      * @param parameters The optional {@link CalendarParameters}
      * @throws OXException If the context cannot be resolved
      */
-    protected SchedJoulesCalendarAccess(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
+    protected SchedJoulesCalendarAccess(ServiceLookup services, Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
         super(session, account, parameters);
+        this.services = services;
         this.account = account;
     }
 
@@ -242,8 +246,8 @@ public class SchedJoulesCalendarAccess extends CachingCalendarAccess {
             long lastModified = folder.optLong(SchedJoulesFields.LAST_MODIFIED, -1);
             URL url = getFeedURL(folder);
 
-            SchedJoulesAPI api = SchedJoulesAPI.getInstance();
-            SchedJoulesCalendar calendar = api.calendar().getCalendar(url, eTag, lastModified);
+            SchedJoulesService schedJoulesService = services.getService(SchedJoulesService.class);
+            SchedJoulesCalendar calendar = schedJoulesService.getCalendar(getSession().getContextId(), url, eTag, lastModified);
             if (eTag.equals(calendar.getETag())) {
                 return new ExternalCalendarResult(false, Collections.emptyList());
             }

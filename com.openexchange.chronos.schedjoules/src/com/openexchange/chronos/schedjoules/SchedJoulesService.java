@@ -49,6 +49,7 @@ package com.openexchange.chronos.schedjoules;
  *
  */
 
+import java.net.URL;
 import com.openexchange.exception.OXException;
 
 /**
@@ -60,6 +61,7 @@ public interface SchedJoulesService {
 
     /**
      * Retrieves the starting SchedJoules page.
+     * 
      * @param contextId The context identifier
      * 
      * @return The {@link SchedJoulesResult}
@@ -70,6 +72,7 @@ public interface SchedJoulesService {
     /**
      * Retrieves the starting SchedJoules page for the specified location
      * in the specified locale
+     * 
      * @param contextId The context identifier
      * @param locale The locale to use
      * @param location The location to use
@@ -81,6 +84,7 @@ public interface SchedJoulesService {
 
     /**
      * Retrieves the SchedJoules page with the specified identifier
+     * 
      * @param contextId The context identifier
      * @param pageId The page identifier
      * 
@@ -91,6 +95,7 @@ public interface SchedJoulesService {
 
     /**
      * Retrieves the SchedJoules page with the specified identifier
+     * 
      * @param contextId The context identifier
      * @param pageId The page identifier
      * 
@@ -100,15 +105,8 @@ public interface SchedJoulesService {
     SchedJoulesResult getPage(int contextId, int pageId, String locale) throws OXException;
 
     /**
-     * Retrieves a list of supported country names with the default locale 'en'.
-     * 
-     * @return The {@link SchedJoulesResult}
-     * @throws OXException if an error is occurred
-     */
-    SchedJoulesResult listCountries() throws OXException;
-
-    /**
      * Retrieves a list of supported and localised country names
+     * 
      * @param contextId The context identifier
      * @param locale The locale
      * 
@@ -119,6 +117,7 @@ public interface SchedJoulesService {
 
     /**
      * Retrieves a list of supported languages
+     * 
      * @param contextId The context identifier
      * 
      * @return The {@link SchedJoulesResult}
@@ -141,4 +140,16 @@ public interface SchedJoulesService {
      * @throws OXException if an error is occurred
      */
     SchedJoulesResult search(int contextId, String query, String locale, int countryId, int categoryId, int maxRows) throws OXException;
+
+    /**
+     * Retrieves the calendar data from the specified {@link URL}
+     * 
+     * @param contextId The context identifier
+     * @param url The {@link URL} from which to retrieve the ical data
+     * @param etag The etag (if available)
+     * @param lastModified The last modified timestamp (if available)
+     * @return The {@link SchedJoulesCalendar}
+     * @throws OXException if the calendar data cannot be retrieved
+     */
+    SchedJoulesCalendar getCalendar(int contextId, URL url, String etag, long lastModified) throws OXException;
 }

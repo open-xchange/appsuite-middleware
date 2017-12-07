@@ -62,12 +62,13 @@ import com.openexchange.chronos.provider.CalendarCapability;
 import com.openexchange.chronos.provider.caching.CachingCalendarProvider;
 import com.openexchange.chronos.provider.folder.FolderCalendarAccess;
 import com.openexchange.chronos.provider.schedjoules.exception.SchedJoulesProviderExceptionCodes;
-import com.openexchange.chronos.schedjoules.api.SchedJoulesAPI;
+import com.openexchange.chronos.schedjoules.SchedJoulesService;
 import com.openexchange.chronos.schedjoules.exception.SchedJoulesAPIExceptionCodes;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.Strings;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
@@ -88,11 +89,14 @@ public class SchedJoulesCalendarProvider extends CachingCalendarProvider {
      */
     private static final int MINIMUM_REFRESH_INTERVAL = 1440;
 
+    private final ServiceLookup services;
+
     /**
      * Initialises a new {@link SchedJoulesCalendarProvider}.
      */
-    public SchedJoulesCalendarProvider() {
+    public SchedJoulesCalendarProvider(ServiceLookup services) {
         super();
+        this.services = services;
     }
 
     @Override
@@ -127,7 +131,7 @@ public class SchedJoulesCalendarProvider extends CachingCalendarProvider {
      */
     @Override
     public FolderCalendarAccess connect(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
-        return new SchedJoulesCalendarAccess(session, account, parameters);
+        return new SchedJoulesCalendarAccess(services, session, account, parameters);
     }
 
     /*
@@ -148,7 +152,7 @@ public class SchedJoulesCalendarProvider extends CachingCalendarProvider {
         try {
             JSONObject internalConfig = new JSONObject();
             JSONArray internalConfigItems = new JSONArray();
-            addFolders(getUserLocale(session), folders, internalConfigItems);
+            addFolders(session, getUserLocale(session), folders, internalConfigItems);
             internalConfig.put(SchedJoulesFields.FOLDERS, internalConfigItems);
             internalConfig.put(SchedJoulesFields.USER_KEY, generateUserKey(session));
             return internalConfig;
@@ -177,7 +181,7 @@ public class SchedJoulesCalendarProvider extends CachingCalendarProvider {
             // Add all user configuration folders
             try {
                 internalConfigFolders = new JSONArray();
-                addFolders(getUserLocale(session), userConfigFolders, internalConfigFolders);
+                addFolders(session, getUserLocale(session), userConfigFolders, internalConfigFolders);
                 internalConfig.put(SchedJoulesFields.FOLDERS, internalConfigFolders);
                 return internalConfig;
             } catch (JSONException e) {
@@ -195,7 +199,7 @@ public class SchedJoulesCalendarProvider extends CachingCalendarProvider {
             }
 
             JSONArray additions = new JSONArray();
-            boolean added = handleAdditions(getUserLocale(session), userConfigFolders, internalItemIds, additions);
+            boolean added = handleAdditions(session, getUserLocale(session), userConfigFolders, internalItemIds, additions);
             boolean deleted = handleDeletions(internalConfigFolders, internalItemIds);
             addToInternalConfiguration(internalConfigFolders, additions);
 
@@ -268,10 +272,10 @@ public class SchedJoulesCalendarProvider extends CachingCalendarProvider {
      * @throws OXException If an error is occurred
      * @throws JSONException if a JSON error is occurred
      */
-    private void addFolders(Locale locale, JSONArray folders, JSONArray internalConfigFolders) throws OXException, JSONException {
+    private void addFolders(Session session, Locale locale, JSONArray folders, JSONArray internalConfigFolders) throws OXException, JSONException {
         for (int index = 0; index < folders.length(); index++) {
             JSONObject folder = folders.getJSONObject(index);
-            JSONObject internalItem = prepareFolder(folder, locale);
+            JSONObject internalItem = prepareFolder(session, folder, locale);
             internalConfigFolders.put(internalItem);
         }
     }
@@ -286,7 +290,7 @@ public class SchedJoulesCalendarProvider extends CachingCalendarProvider {
      * @throws JSONException if a JSON error is occurred
      * @throws OXException if an error is occurred
      */
-    private JSONObject prepareFolder(JSONObject folder, Locale fallbackLocale) throws JSONException, OXException {
+    private JSONObject prepareFolder(Session session, JSONObject folder, Locale fallbackLocale) throws JSONException, OXException {
         int itemId = folder.getInt(SchedJoulesFields.ITEM_ID);
         String locale = folder.optString(SchedJoulesFields.LOCALE, fallbackLocale.getLanguage());
         int refreshInterval = folder.optInt(SchedJoulesFields.REFRESH_INTERVAL, MINIMUM_REFRESH_INTERVAL);
@@ -294,7 +298,7 @@ public class SchedJoulesCalendarProvider extends CachingCalendarProvider {
             refreshInterval = MINIMUM_REFRESH_INTERVAL;
         }
 
-        JSONObject page = fetchItem(itemId, locale);
+        JSONObject page = fetchItem(session.getContextId(), itemId, locale);
 
         String name = folder.optString(SchedJoulesFields.NAME);
         if (Strings.isEmpty(name)) {
@@ -319,9 +323,11 @@ public class SchedJoulesCalendarProvider extends CachingCalendarProvider {
      * @return The calendar's metadata as JSONObject
      * @throws OXException if the calendar is not found, or any other error is occurred
      */
-    private JSONObject fetchItem(int itemId, String locale) throws OXException {
+    private JSONObject fetchItem(int contextId, int itemId, String locale) throws OXException {
         try {
-            JSONObject page = SchedJoulesAPI.getInstance().pages().getPage(itemId, locale);
+            SchedJoulesService schedJoulesService = services.getService(SchedJoulesService.class);
+            // FIXME: type check
+            JSONObject page = (JSONObject) schedJoulesService.getPage(contextId, itemId, locale).getData();
             if (!page.hasAndNotNull(SchedJoulesFields.URL)) {
                 throw SchedJoulesProviderExceptionCodes.NO_CALENDAR.create(itemId);
             }
@@ -345,12 +351,12 @@ public class SchedJoulesCalendarProvider extends CachingCalendarProvider {
      * @throws JSONException if a JSON error occurs
      * @throws OXException if any other error occurs
      */
-    private boolean handleAdditions(Locale locale, JSONArray userConfigFolders, Map<String, Integer> internalItemIds, JSONArray additions) throws JSONException, OXException {
+    private boolean handleAdditions(Session session, Locale locale, JSONArray userConfigFolders, Map<String, Integer> internalItemIds, JSONArray additions) throws JSONException, OXException {
         for (int index = 0; index < userConfigFolders.length(); index++) {
             JSONObject folder = userConfigFolders.getJSONObject(index);
             String itemId = folder.optString(SchedJoulesFields.ITEM_ID);
             if (!internalItemIds.containsKey(itemId)) {
-                additions.put(prepareFolder(folder, locale));
+                additions.put(prepareFolder(session, folder, locale));
             }
             internalItemIds.remove(itemId);
         }

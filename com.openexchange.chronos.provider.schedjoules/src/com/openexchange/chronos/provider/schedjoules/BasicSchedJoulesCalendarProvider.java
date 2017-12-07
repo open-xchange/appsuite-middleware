@@ -62,12 +62,13 @@ import com.openexchange.chronos.provider.basic.BasicCalendarAccess;
 import com.openexchange.chronos.provider.basic.BasicCalendarProvider;
 import com.openexchange.chronos.provider.basic.CalendarSettings;
 import com.openexchange.chronos.provider.schedjoules.exception.SchedJoulesProviderExceptionCodes;
-import com.openexchange.chronos.schedjoules.api.SchedJoulesAPI;
+import com.openexchange.chronos.schedjoules.SchedJoulesService;
 import com.openexchange.chronos.schedjoules.exception.SchedJoulesAPIExceptionCodes;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.Strings;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
@@ -86,12 +87,14 @@ public class BasicSchedJoulesCalendarProvider implements BasicCalendarProvider {
      * The minumum value for the refreshInterval in minutes (1 day)
      */
     private static final int MINIMUM_REFRESH_INTERVAL = 1440;
+    private final ServiceLookup services;
 
     /**
      * Initialises a new {@link BasicSchedJoulesCalendarProvider}.
      */
-    public BasicSchedJoulesCalendarProvider() {
+    public BasicSchedJoulesCalendarProvider(ServiceLookup services) {
         super();
+        this.services = services;
     }
 
     @Override
@@ -111,7 +114,7 @@ public class BasicSchedJoulesCalendarProvider implements BasicCalendarProvider {
 
     @Override
     public BasicCalendarAccess connect(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
-        return new BasicSchedJoulesCalendarAccess(session, account, parameters);
+        return new BasicSchedJoulesCalendarAccess(services, session, account, parameters);
     }
 
     @Override
@@ -151,7 +154,7 @@ public class BasicSchedJoulesCalendarProvider implements BasicCalendarProvider {
         userConfig.putSafe(SchedJoulesFields.LOCALE, locale);
         userConfig.putSafe(SchedJoulesFields.REFRESH_INTERVAL, refreshInterval);
 
-        JSONObject item = fetchItem(itemId, locale);
+        JSONObject item = fetchItem(session.getContextId(), itemId, locale);
         /*
          * prepare & return internal configuration for new account, taking over client-supplied values if set
          */
@@ -209,9 +212,11 @@ public class BasicSchedJoulesCalendarProvider implements BasicCalendarProvider {
      * @return The calendar's metadata as JSONObject
      * @throws OXException if the calendar is not found, or any other error is occurred
      */
-    private JSONObject fetchItem(int itemId, String locale) throws OXException {
+    private JSONObject fetchItem(int contextId, int itemId, String locale) throws OXException {
         try {
-            JSONObject page = SchedJoulesAPI.getInstance().pages().getPage(itemId, locale);
+            SchedJoulesService schedJoulesService = services.getService(SchedJoulesService.class);
+            // FIXME: type check
+            JSONObject page = (JSONObject) schedJoulesService.getPage(contextId, itemId, locale).getData();
             if (!page.hasAndNotNull(SchedJoulesFields.URL)) {
                 throw SchedJoulesProviderExceptionCodes.NO_CALENDAR.create(itemId);
             }
