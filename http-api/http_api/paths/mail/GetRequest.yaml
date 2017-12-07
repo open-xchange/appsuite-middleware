@@ -35,6 +35,7 @@
           html (to allow a possible HTML mail body being transferred as it is (but white-list filter applied)), 
           noimg (to allow a possible HTML content being transferred but without original image src attributes which references external images; 
           can be used to prevent loading external linked images (spam privacy protection)). 
+          document (to have a inline HTML representation of message's content in a separate window)
           **If set, the corresponding gui config setting will be ignored.**"
         required: false
         enum:
@@ -43,6 +44,12 @@
           - textNoHtmlAttach
           - html
           - noimg
+          - document
+      - in: query
+        name: forceImages
+        type: boolean
+        description: Use `true` to enforce that images are allowed in HTML content. Only applicable in case `view` parameter is `document`
+        required: false
       - in: query
         name: unseen
         type: boolean
