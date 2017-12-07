@@ -49,20 +49,15 @@
 
 package com.openexchange.chronos.schedjoules.api;
 
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
 import org.json.JSONArray;
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.LoadingCache;
 import com.openexchange.chronos.schedjoules.api.auxiliary.SchedJoulesCommonParameter;
 import com.openexchange.chronos.schedjoules.api.cache.SchedJoulesPage;
-import com.openexchange.chronos.schedjoules.api.cache.loader.SchedJoulesCountriesCacheLoader;
+import com.openexchange.chronos.schedjoules.api.cache.SchedJoulesPage.SchedJoulesPageBuilder;
 import com.openexchange.chronos.schedjoules.api.client.HttpMethod;
 import com.openexchange.chronos.schedjoules.api.client.SchedJoulesRESTBindPoint;
 import com.openexchange.chronos.schedjoules.api.client.SchedJoulesRESTClient;
 import com.openexchange.chronos.schedjoules.api.client.SchedJoulesRequest;
 import com.openexchange.chronos.schedjoules.api.client.SchedJoulesResponse;
-import com.openexchange.chronos.schedjoules.exception.SchedJoulesAPIExceptionCodes;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 
@@ -72,8 +67,6 @@ import com.openexchange.java.Strings;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class SchedJoulesCountriesAPI extends AbstractSchedJoulesAPI {
-
-    private final LoadingCache<String, SchedJoulesPage> countriesCache = CacheBuilder.newBuilder().refreshAfterWrite(24, TimeUnit.HOURS).build(new SchedJoulesCountriesCacheLoader(client, SchedJoulesRESTBindPoint.countries));
 
     /**
      * Initialises a new {@link SchedJoulesCountriesAPI}.
@@ -100,11 +93,11 @@ public class SchedJoulesCountriesAPI extends AbstractSchedJoulesAPI {
      * @throws OXException if a parsing error is occurred
      */
     public SchedJoulesPage listCountries(String locale) throws OXException {
-        try {
-            return countriesCache.get(locale);
-        } catch (ExecutionException e) {
-            throw SchedJoulesAPIExceptionCodes.UNEXPECTED_ERROR.create(e.getMessage(), e);
-        }
+        SchedJoulesRequest request = new SchedJoulesRequest(SchedJoulesRESTBindPoint.countries);
+        request.setQueryParameter(SchedJoulesCommonParameter.locale.name(), locale);
+
+        SchedJoulesResponse response = client.executeRequest(request);
+        return new SchedJoulesPageBuilder().itemData((JSONArray) response.getResponseBody()).etag(response.getETag()).lastModified(response.getLastModified()).build();
     }
 
     /**
