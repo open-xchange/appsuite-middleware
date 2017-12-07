@@ -318,14 +318,14 @@ properties:
         
         Note:  
         This property is statically used in IMAP authentication bundle
-      defaultValue: true
+      defaultValue: SSLv3 TLSv1
       version: 
       reloadable: true
       configcascadeAware: true
       related: 
       file: imap.properties
       packageName: open-xchange-imap
-      tags: ["Mail","IMAP"]
+      tags: ["Mail","IMAP","IMAP Auth","Authentication"]
     - key: com.openexchange.imap.ssl.ciphersuites
       description: |
         Specifies the SSL cipher suites that will be enabled for SSL connections. The property value is a whitespace separated list of tokens.
@@ -334,14 +334,14 @@ properties:
         
         Note:  
         This property is statically used in IMAP authentication bundle.
-      defaultValue: true
+      defaultValue:
       version: 
       reloadable: true
       configcascadeAware: true
       related: 
       file: imap.properties
       packageName: open-xchange-imap
-      tags: ["Mail","IMAP"]
+      tags: ["Mail","IMAP","IMAP Auth","Authentication"]
     - key: com.openexchange.imap.maxMailboxNameLength
       description: |
         The max. length of a mailbox name
@@ -675,17 +675,18 @@ properties:
     - key: com.openexchange.imap.primary.ssl.protocols
       description: |
         Specifies the SSL protocols that will be enabled for SSL connections for the primary account. The property value is a whitespace separated list of tokens.
-        
+        If left empty it falls-back to [[com.openexchange.imap.ssl.protocols]].
+
         Note:  
         This property is statically used in IMAP authentication bundle
-      defaultValue: true
+      defaultValue:
       version: 
       reloadable: true
       configcascadeAware: true
-      related: 
+      related: com.openexchange.imap.ssl.protocols
       file: imap.properties
       packageName: open-xchange-imap
-      tags: ["Mail","IMAP"]
+      tags: ["Mail","IMAP","IMAP Auth","Authentication"]
     - key: com.openexchange.imap.primary.ssl.ciphersuites
       description: |
         Specifies the SSL cipher suites that will be enabled for SSL connections for the primary account. The property value is a whitespace separated list of tokens.
@@ -694,14 +695,14 @@ properties:
         
         Note:  
         This property is statically used in IMAP authentication bundle.
-      defaultValue: true
+      defaultValue:
       version: 
       reloadable: true
       configcascadeAware: true
       related: 
       file: imap.properties
       packageName: open-xchange-imap
-      tags: ["Mail","IMAP"]
+      tags: ["Mail","IMAP","IMAP Auth","Authentication"]
     - key: com.openexchange.imap.primary.auditLog.enabled
       description: |
         Enables the audit log for issued IMAP commands via 'com.sun.mail.imap.AuditLog' class for the primary mail account.
