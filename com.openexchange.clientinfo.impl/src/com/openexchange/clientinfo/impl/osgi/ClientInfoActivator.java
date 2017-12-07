@@ -69,6 +69,13 @@ import com.openexchange.uadetector.UserAgentParser;
  */
 public class ClientInfoActivator extends HousekeepingActivator {
 
+    /**
+     * Initializes a new {@link ClientInfoActivator}.
+     */
+    public ClientInfoActivator() {
+        super();
+    }
+
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] { UserAgentParser.class, SessiondService.class, ServerConfigService.class };

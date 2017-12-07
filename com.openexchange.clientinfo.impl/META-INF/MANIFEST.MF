@@ -20,5 +20,6 @@ Import-Package: com.openexchange.ajax,
  com.openexchange.uadetector,
  net.sf.uadetector,
  org.osgi.framework,
+ org.osgi.util.tracker,
  org.slf4j
 Bundle-Activator: com.openexchange.clientinfo.impl.osgi.ClientInfoActivator
