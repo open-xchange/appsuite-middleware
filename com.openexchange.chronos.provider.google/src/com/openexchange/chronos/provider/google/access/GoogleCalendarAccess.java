@@ -184,22 +184,6 @@ public class GoogleCalendarAccess extends BasicCachingCalendarAccess {
     }
 
     @Override
-    public CalendarSettings getSettings() {
-        DefaultCalendarSettings settings = new DefaultCalendarSettings();
-        settings.setLastModified(account.getLastModified());
-        settings.setConfig(account.getUserConfiguration());
-        JSONObject internalConfig = account.getInternalConfiguration();
-        settings.setName(internalConfig.optString("name", "Google Calendar"));
-        ExtendedProperties extendedProperties = new ExtendedProperties();
-        extendedProperties.add(SCHEDULE_TRANSP(TimeTransparency.TRANSPARENT, true));
-        extendedProperties.add(DESCRIPTION(internalConfig.optString("description", null)));
-        extendedProperties.add(USED_FOR_SYNC(Boolean.FALSE, true));
-        extendedProperties.add(COLOR(internalConfig.optString("color", null), false));
-        settings.setExtendedProperties(extendedProperties);
-        return settings;
-    }
-
-    @Override
     public void close() {
         oauthAccess.dispose();
     }
@@ -338,10 +322,10 @@ public class GoogleCalendarAccess extends BasicCachingCalendarAccess {
     @Override
     public CalendarSettings getSettings() {
         DefaultCalendarSettings settings = new DefaultCalendarSettings();
-        settings.setName(getName());
         settings.setLastModified(account.getLastModified());
         settings.setConfig(account.getUserConfiguration());
         JSONObject internalConfig = account.getInternalConfiguration();
+        settings.setName(internalConfig.optString("name", "Google Calendar"));
         ExtendedProperties extendedProperties = new ExtendedProperties();
         extendedProperties.add(SCHEDULE_TRANSP(TimeTransparency.TRANSPARENT, true));
         extendedProperties.add(DESCRIPTION(internalConfig.optString(GoogleCalendarConfigField.DESCRIPTION, null), false));
