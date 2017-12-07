@@ -93,7 +93,7 @@ public abstract class AbstractICalExporter implements ICalExport {
      * @return ThresholdFileHolder The file holder
      * @throws OXException if export fails
      */
-    abstract protected ThresholdFileHolder exportBatchData(ServerSession session, OutputStream out) throws OXException ;
+    abstract protected ThresholdFileHolder exportBatchData(ServerSession session, OutputStream out) throws OXException;
 
     /**
      * Exports the requested folder
@@ -103,7 +103,7 @@ public abstract class AbstractICalExporter implements ICalExport {
      * @return ThresholdFileHolder The file holder
      * @throws OXException if export fails
      */
-    abstract protected ThresholdFileHolder exportFolderData(ServerSession session, OutputStream out) throws OXException ;
+    abstract protected ThresholdFileHolder exportFolderData(ServerSession session, OutputStream out) throws OXException;
 
     @Override
     public SizedInputStream exportData(ServerSession session, AJAXRequestData requestData, boolean isSaveToDisk, String filename) throws OXException {
@@ -113,7 +113,7 @@ public abstract class AbstractICalExporter implements ICalExport {
                 OutputStream out = requestData.optOutputStream();
                 if (null != out) {
                     requestData.setResponseHeader("Content-Type", isSaveToDisk ? "application/octet-stream" : Format.ICAL.getMimeType() + "; charset=UTF-8");
-                    requestData.setResponseHeader("Content-Disposition", "attachment"+filename);
+                    requestData.setResponseHeader("Content-Disposition", "attachment" + filename);
                     requestData.removeCachingHeader();
                     getExportDataSource(session, out);
                     return null;
@@ -138,11 +138,11 @@ public abstract class AbstractICalExporter implements ICalExport {
 
     @Override
     public ThresholdFileHolder getExportDataSource(ServerSession session, OutputStream out) throws OXException {
-        return isBatchExport() == true ? exportFolderData(session, out) : exportBatchData(session, out);
+        return isBatchExport() ? exportFolderData(session, out) : exportBatchData(session, out);
     }
 
     private boolean isBatchExport() {
-        return !Strings.isEmpty(getFolderId()) == true ? true : false;
+        return Strings.isEmpty(getFolderId());
     }
 
     public String getFolderId() {
