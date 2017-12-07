@@ -61,12 +61,14 @@ public class DefaultLogoutRequestInfo implements LogoutRequestInfo {
     private String state;
     private String domainName;
     private String sessionId;
+    private String requestURI;
     
-    public DefaultLogoutRequestInfo(String state, String domainName, String sessionId) {
+    public DefaultLogoutRequestInfo(String state, String domainName, String sessionId, String requestURI) {
         super();
         this.state = state;
         this.domainName = domainName;
         this.sessionId = sessionId;
+        this.requestURI = requestURI;
     }
 
     @Override
@@ -82,6 +84,11 @@ public class DefaultLogoutRequestInfo implements LogoutRequestInfo {
     @Override
     public String getSessionId() {
         return this.sessionId;
+    }
+    
+    @Override
+    public String getRequestURI() {
+        return this.requestURI;
     }
 
 }

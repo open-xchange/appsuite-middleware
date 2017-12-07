@@ -48,9 +48,11 @@
  */
 package com.openexchange.oidc;
 
+import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.exception.OXException;
+import com.openexchange.oidc.state.LogoutRequestInfo;
 
 /**
  * Provides the web features for OpenID SSO services.
@@ -121,4 +123,14 @@ public interface OIDCWebSSOProvider {
      *  backends known issuer.
      */
     boolean validateThirdPartyRequest(HttpServletRequest request);
+
+    /**
+     * Resume the user to his previously opened page before the logout attempt.
+     * 
+     * @param request The servlet request
+     * @param response The servlet response
+     * @throws OXException - If the {@link LogoutRequestInfo} can not be loaded
+     * @throws IOException - If the redirect URL can not be constructed
+     */
+    void resumeUser(HttpServletRequest request, HttpServletResponse response) throws OXException, IOException;
 }

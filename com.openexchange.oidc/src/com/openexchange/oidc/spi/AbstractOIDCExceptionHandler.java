@@ -113,6 +113,7 @@ public abstract class AbstractOIDCExceptionHandler implements OIDCExceptionHandl
     @Override
     public void handleResponseException(HttpServletRequest request, HttpServletResponse response, OXException exception) throws IOException {
         LOG.trace("handleException(request: {}, HttpServletResponse response, OXException: {})", request.getRequestURI(), exception != null ? exception.getMessage() : "");
+        LOG.error("", exception);
         String content = this.getDefaultErrorResponsePage(exception, request);
         if (Strings.isEmpty(content)) {
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);

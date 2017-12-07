@@ -69,6 +69,7 @@ public class PortableLogoutRequest extends AbstractCustomPortable {
     private static final String STATE = "state";
     private static final String DOMAINNAME = "domainname";
     private static final String SESSIONID = "sessionId";
+    private static final String REQUEST_URI = "requestURI";
     
     private LogoutRequestInfo delegate;
     
@@ -101,11 +102,12 @@ public class PortableLogoutRequest extends AbstractCustomPortable {
         writer.writeUTF(STATE, delegate.getState());
         writer.writeUTF(DOMAINNAME, delegate.getDomainName());
         writer.writeUTF(SESSIONID, delegate.getSessionId());
+        writer.writeUTF(REQUEST_URI, delegate.getRequestURI());
     }
     
     @Override
     public void readPortable(PortableReader reader) throws IOException {
-        DefaultLogoutRequestInfo logoutRequestInfo = new DefaultLogoutRequestInfo(reader.readUTF(STATE), reader.readUTF(DOMAINNAME), reader.readUTF(SESSIONID));
+        DefaultLogoutRequestInfo logoutRequestInfo = new DefaultLogoutRequestInfo(reader.readUTF(STATE), reader.readUTF(DOMAINNAME), reader.readUTF(SESSIONID), reader.readUTF(REQUEST_URI));
         this.setDelegate(logoutRequestInfo);
     }
 }

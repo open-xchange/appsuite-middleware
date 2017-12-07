@@ -79,4 +79,6 @@ public interface LogoutRequestInfo {
      * @return The session id
      */
     String getSessionId();
+    
+    String getRequestURI();
 }

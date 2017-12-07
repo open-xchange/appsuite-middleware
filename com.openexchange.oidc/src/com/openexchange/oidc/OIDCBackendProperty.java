@@ -98,7 +98,7 @@ public enum OIDCBackendProperty implements Property {
      */
     scope(OIDCProperty.PREFIX,"openid"),
     /**
-     * issuer - The OP path
+     * issuer - The OPs path
      */
     issuer(OIDCProperty.PREFIX, OIDCProperty.EMPTY),
     /**

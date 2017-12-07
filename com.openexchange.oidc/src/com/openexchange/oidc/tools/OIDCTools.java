@@ -100,6 +100,8 @@ public class OIDCTools {
     public static final String TYPE = "type";
 
     public static final String END = "end";
+    
+    public static final String RESUME = "resume";
 
     public static final String STATE = "state";
 

@@ -90,6 +90,12 @@ public class LogoutService extends OIDCServlet{
                 exceptionHandler.handleLogoutFailed(request, response, e);
                 LOG.error(e.getLocalizedMessage(), e);
             }
+        } else if (request.getParameter(OIDCTools.TYPE).equalsIgnoreCase(OIDCTools.RESUME)) {
+            try {
+                this.provider.resumeUser(request, response);
+            } catch (OXException e) {
+                exceptionHandler.handleResponseException(request, response, e);
+            }
         }
     }
 }

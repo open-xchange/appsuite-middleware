@@ -358,7 +358,7 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
         String logoutRequestString = "";
         if (this.backend.getBackendConfig().isSSOLogout()) {
             LogoutRequest logoutRequest = this.backend.getLogoutFromIDPRequest(session);
-            this.stateManagement.addLogoutRequest(new DefaultLogoutRequestInfo(logoutRequest.getState().getValue(), OIDCTools.getDomainName(request, services.getOptionalService(HostnameService.class)), session.getSessionID()));
+            this.stateManagement.addLogoutRequest(new DefaultLogoutRequestInfo(logoutRequest.getState().getValue(), OIDCTools.getDomainName(request, services.getOptionalService(HostnameService.class)), session.getSessionID(), request.getParameter("deep_link") == null ? "http://google.de" : request.getParameter("deep_link")));
             logoutRequestString = logoutRequest.toURI().toString();
         } else {
             logoutRequestString = this.getRedirectForLogoutFromOXServer(session, request, response, null);
@@ -390,18 +390,9 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
     @Override
     public String logoutSSOUser(HttpServletRequest request, HttpServletResponse response) throws OXException {
         LOG.trace("logoutSSOUser(HttpServletRequest request: {}, HttpServletResponse response)", request.getRequestURI());
-        //Check state
-        String state = request.getParameter(OIDCTools.STATE);
-        if (state == null) {
-            throw OIDCExceptionCode.INVALID_LOGOUT_REQUEST.create("missing state parameter in response from the OP.");
-        }
-        //load state
-        LogoutRequestInfo logoutRequestInfo = this.stateManagement.getAndRemoveLogoutRequestInfo(state);
-        if (logoutRequestInfo == null) {
-            throw OIDCExceptionCode.INVALID_LOGOUT_REQUEST.create("wrong state in response from the OP.");
-        }
+        LogoutRequestInfo logoutRequestInfo = loadLogoutRequestInfo(request);
         String sessionId = logoutRequestInfo.getSessionId();
-        LOG.trace("Try to logout user, via OP with state: {} and sessionId: {}", state, sessionId);
+        LOG.trace("Try to logout user, via OP with sessionId: {}", sessionId);
         //logout user
         return this.getRedirectForLogoutFromOXServer(this.getSessionFromId(sessionId), request, response, logoutRequestInfo);
     }
@@ -447,5 +438,28 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
             result = this.backend.getBackendConfig().getIssuer().equals(issuer);
         }
         return result;
+    }
+
+    @Override
+    public void resumeUser(HttpServletRequest request, HttpServletResponse response) throws OXException, IOException {
+        LOG.trace("resumeUser(HttpServletRequest request: {}, HttpServletResponse response)", request.getRequestURI());
+        LogoutRequestInfo logoutRequestInfo = loadLogoutRequestInfo(request);
+        OIDCTools.buildRedirectResponse(response, logoutRequestInfo.getRequestURI(), "true");
+    }
+
+    private LogoutRequestInfo loadLogoutRequestInfo(HttpServletRequest request) throws OXException {
+        LOG.trace("loadLogoutRequestInfo(HttpServletRequest request: {})", request.getRequestURI());
+        // state
+        String state = request.getParameter(OIDCTools.STATE);
+        if (state == null) {
+            throw OIDCExceptionCode.INVALID_LOGOUT_REQUEST.create("missing state parameter in response from the OP.");
+        }
+        LOG.trace("Try to load LogoutRequestInfo for user, with state: {}", state);
+        //load state
+        LogoutRequestInfo logoutRequestInfo = this.stateManagement.getAndRemoveLogoutRequestInfo(state);
+        if (logoutRequestInfo == null) {
+            throw OIDCExceptionCode.INVALID_LOGOUT_REQUEST.create("wrong state in response from the OP.");
+        }
+        return logoutRequestInfo;
     }
 }
