@@ -106,7 +106,7 @@ public class SchedJoulesPagesAPI extends AbstractSchedJoulesAPI {
      * @return The {@link SchedJoulesResponse}
      * @throws OXException
      */
-    public JSONObject getRootPage() throws OXException {
+    public SchedJoulesPage getRootPage() throws OXException {
         return getRootPage(SchedJoulesAPIDefaultValues.DEFAULT_LOCALE, SchedJoulesAPIDefaultValues.DEFAULT_LOCATION);
     }
 
@@ -118,7 +118,7 @@ public class SchedJoulesPagesAPI extends AbstractSchedJoulesAPI {
      * @return The page as a {@link JSONObject}
      * @throws OXException if an error is occurred
      */
-    public JSONObject getRootPage(String locale, String location) throws OXException {
+    public SchedJoulesPage getRootPage(String locale, String location) throws OXException {
         try {
             int itemId = rootItemIdCache.get(location, () -> {
                 SchedJoulesRequest request = new SchedJoulesRequest(SchedJoulesRESTBindPoint.pages);
@@ -132,7 +132,7 @@ public class SchedJoulesPagesAPI extends AbstractSchedJoulesAPI {
                 pagesCache.put(new SchedJoulesCachedItemKey(rootPageItemId, locale), page);
                 return rootPageItemId;
             });
-            return (JSONObject) fetchPage(itemId, locale).getItemData();
+            return fetchPage(itemId, locale);
         } catch (ExecutionException e) {
             throw SchedJoulesAPIExceptionCodes.UNEXPECTED_ERROR.create(e.getMessage(), e);
         }
@@ -145,7 +145,7 @@ public class SchedJoulesPagesAPI extends AbstractSchedJoulesAPI {
      * @return The page as a {@link JSONObject}
      * @throws OXException if an error is occurred
      */
-    public JSONObject getPage(int pageId) throws OXException {
+    public SchedJoulesPage getPage(int pageId) throws OXException {
         return getPage(pageId, SchedJoulesAPIDefaultValues.DEFAULT_LOCALE);
     }
 
@@ -157,8 +157,8 @@ public class SchedJoulesPagesAPI extends AbstractSchedJoulesAPI {
      * @return The page as a {@link JSONObject}
      * @throws OXException if an error is occurred
      */
-    public JSONObject getPage(int pageId, String locale) throws OXException {
-        return (JSONObject) fetchPage(pageId, locale).getItemData();
+    public SchedJoulesPage getPage(int pageId, String locale) throws OXException {
+        return fetchPage(pageId, locale);
     }
 
     /**
@@ -173,9 +173,9 @@ public class SchedJoulesPagesAPI extends AbstractSchedJoulesAPI {
      * @return A {@link JSONObject} with the results
      * @throws OXException if an error is occurred
      */
-    public JSONObject search(String query, String locale, int countryId, int categoryId, int maxRows) throws OXException {
+    public SchedJoulesPage search(String query, String locale, int countryId, int categoryId, int maxRows) throws OXException {
         try {
-            return (JSONObject) searchCache.get(new SchedJoulesCachedSearchKey(query, locale, countryId, categoryId, maxRows), () -> {
+            return searchCache.get(new SchedJoulesCachedSearchKey(query, locale, countryId, categoryId, maxRows), () -> {
                 SchedJoulesRequest request = new SchedJoulesRequest(SchedJoulesRESTBindPoint.pages.getAbsolutePath() + "/search");
                 request.setQueryParameter(SchedJoulesSearchParameter.q.name(), query);
                 request.setQueryParameter(SchedJoulesSearchParameter.locale.name(), Strings.isEmpty(locale) ? SchedJoulesAPIDefaultValues.DEFAULT_LOCALE : locale);
@@ -187,7 +187,7 @@ public class SchedJoulesPagesAPI extends AbstractSchedJoulesAPI {
                 }
                 request.setQueryParameter(SchedJoulesSearchParameter.nr_results.name(), Integer.toString(maxRows <= 0 ? SchedJoulesAPIDefaultValues.MAX_ROWS : maxRows));
                 return executeRequest(request);
-            }).getItemData();
+            });
         } catch (ExecutionException e) {
             throw SchedJoulesAPIExceptionCodes.UNEXPECTED_ERROR.create(e.getMessage(), e);
         }

@@ -69,7 +69,6 @@ import com.openexchange.chronos.provider.caching.basic.BasicCachingCalendarAcces
 import com.openexchange.chronos.provider.schedjoules.exception.SchedJoulesProviderExceptionCodes;
 import com.openexchange.chronos.schedjoules.SchedJoulesCalendar;
 import com.openexchange.chronos.schedjoules.SchedJoulesService;
-import com.openexchange.chronos.schedjoules.api.SchedJoulesAPI;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
@@ -173,7 +172,6 @@ public class BasicSchedJoulesCalendarAccess extends BasicCachingCalendarAccess {
     public long getRetryAfterErrorInterval() {
         return TimeUnit.MINUTES.toMinutes(EXTERNAL_REQUEST_TIMEOUT);
     }
-
 
     ///////////////////////////////////// HELPERS /////////////////////////////////
 

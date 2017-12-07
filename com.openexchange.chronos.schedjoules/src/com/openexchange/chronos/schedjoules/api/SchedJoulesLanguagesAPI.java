@@ -85,9 +85,9 @@ public class SchedJoulesLanguagesAPI extends AbstractSchedJoulesAPI {
      * @return A {@link JSONArray} with all available languages
      * @throws OXException if a parsing error is occurred
      */
-    public JSONArray listLanguages() throws OXException {
+    public SchedJoulesPage listLanguages() throws OXException {
         try {
-            return (JSONArray) languagesCache.get(LANGUAGE_KEY).getItemData();
+            return languagesCache.get(LANGUAGE_KEY);
         } catch (ExecutionException e) {
             throw SchedJoulesAPIExceptionCodes.UNEXPECTED_ERROR.create(e.getMessage(), e);
         }

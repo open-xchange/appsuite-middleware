@@ -77,8 +77,6 @@ import org.slf4j.LoggerFactory;
 import com.openexchange.chronos.schedjoules.api.auxiliary.SchedJoulesResponseParser;
 import com.openexchange.chronos.schedjoules.exception.SchedJoulesAPIExceptionCodes;
 import com.openexchange.chronos.schedjoules.impl.SchedJoulesProperty;
-import com.openexchange.chronos.schedjoules.osgi.Services;
-import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.rest.client.httpclient.HttpClients;
@@ -205,21 +203,6 @@ public class SchedJoulesRESTClient implements Closeable {
      * @return The authorisation header
      */
     private String prepareAuthorizationHeader(String apiKey) {
-        return AUTHORIZATION_HEADER.replaceFirst("\\{\\{token\\}\\}", apiKey);
-    }
-
-    /**
-     * Prepares the 'Authorization' header
-     * 
-     * @return The authorisation header
-     * @throws OXException if the API key is not configured
-     */
-    private String prepareAuthorizationHeader() throws OXException {
-        LeanConfigurationService service = Services.getService(LeanConfigurationService.class);
-        String apiKey = service.getProperty(SchedJoulesProperty.apiKey);
-        if (Strings.isEmpty(apiKey)) {
-            throw SchedJoulesAPIExceptionCodes.NO_API_KEY_CONFIGURED.create(SchedJoulesProperty.apiKey.getFQPropertyName());
-        }
         return AUTHORIZATION_HEADER.replaceFirst("\\{\\{token\\}\\}", apiKey);
     }
 

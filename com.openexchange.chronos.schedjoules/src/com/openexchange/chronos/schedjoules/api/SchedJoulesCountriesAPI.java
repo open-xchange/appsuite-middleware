@@ -83,7 +83,7 @@ public class SchedJoulesCountriesAPI extends AbstractSchedJoulesAPI {
      * @return A {@link JSONArray} with all available countries
      * @throws OXException if a parsing error is occurred
      */
-    public JSONArray listCountries() throws OXException {
+    public SchedJoulesPage listCountries() throws OXException {
         return listCountries(SchedJoulesAPIDefaultValues.DEFAULT_LOCALE);
     }
 
@@ -94,9 +94,9 @@ public class SchedJoulesCountriesAPI extends AbstractSchedJoulesAPI {
      * @return A {@link JSONArray} with all available countries
      * @throws OXException if a parsing error is occurred
      */
-    public JSONArray listCountries(String locale) throws OXException {
+    public SchedJoulesPage listCountries(String locale) throws OXException {
         try {
-            return (JSONArray) countriesCache.get(locale).getItemData();
+            return countriesCache.get(locale);
         } catch (ExecutionException e) {
             throw SchedJoulesAPIExceptionCodes.UNEXPECTED_ERROR.create(e.getMessage(), e);
         }

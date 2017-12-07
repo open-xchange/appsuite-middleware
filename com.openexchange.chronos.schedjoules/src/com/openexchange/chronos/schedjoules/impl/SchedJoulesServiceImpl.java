@@ -105,7 +105,7 @@ public class SchedJoulesServiceImpl implements SchedJoulesService {
      */
     @Override
     public SchedJoulesResult getRoot(int contextId) throws OXException {
-        return new SchedJoulesResult(filterContent(getAPI(contextId).pages().getRootPage()));
+        return new SchedJoulesResult(filterContent((JSONObject) getAPI(contextId).pages().getRootPage().getItemData()));
     }
 
     /*
@@ -115,7 +115,7 @@ public class SchedJoulesServiceImpl implements SchedJoulesService {
      */
     @Override
     public SchedJoulesResult getRoot(int contextId, String locale, String location) throws OXException {
-        return new SchedJoulesResult(filterContent(getAPI(contextId).pages().getRootPage(locale, location)));
+        return new SchedJoulesResult(filterContent((JSONObject) getAPI(contextId).pages().getRootPage(locale, location).getItemData()));
     }
 
     /*
@@ -125,7 +125,7 @@ public class SchedJoulesServiceImpl implements SchedJoulesService {
      */
     @Override
     public SchedJoulesResult getPage(int contextId, int pageId) throws OXException {
-        return new SchedJoulesResult(filterContent(getAPI(contextId).pages().getPage(pageId)));
+        return new SchedJoulesResult(filterContent((JSONObject) getAPI(contextId).pages().getPage(pageId).getItemData()));
     }
 
     /*
@@ -135,7 +135,7 @@ public class SchedJoulesServiceImpl implements SchedJoulesService {
      */
     @Override
     public SchedJoulesResult getPage(int contextId, int pageId, String locale) throws OXException {
-        return new SchedJoulesResult(filterContent(getAPI(contextId).pages().getPage(pageId, locale)));
+        return new SchedJoulesResult(filterContent((JSONObject) getAPI(contextId).pages().getPage(pageId, locale).getItemData()));
     }
 
     /*
@@ -145,7 +145,7 @@ public class SchedJoulesServiceImpl implements SchedJoulesService {
      */
     @Override
     public SchedJoulesResult listCountries(int contextId, String locale) throws OXException {
-        return new SchedJoulesResult(getAPI(contextId).countries().listCountries(locale));
+        return new SchedJoulesResult(getAPI(contextId).countries().listCountries(locale).getItemData());
     }
 
     /*
@@ -155,7 +155,7 @@ public class SchedJoulesServiceImpl implements SchedJoulesService {
      */
     @Override
     public SchedJoulesResult listLanguages(int contextId) throws OXException {
-        return new SchedJoulesResult(getAPI(contextId).languages().listLanguages());
+        return new SchedJoulesResult(getAPI(contextId).languages().listLanguages().getItemData());
     }
 
     /*
@@ -165,7 +165,7 @@ public class SchedJoulesServiceImpl implements SchedJoulesService {
      */
     @Override
     public SchedJoulesResult search(int contextId, String query, String locale, int countryId, int categoryId, int maxRows) throws OXException {
-        return new SchedJoulesResult(filterContent(getAPI(contextId).pages().search(query, locale, countryId, categoryId, maxRows)));
+        return new SchedJoulesResult(filterContent((JSONObject) getAPI(contextId).pages().search(query, locale, countryId, categoryId, maxRows).getItemData()));
     }
 
     /*
