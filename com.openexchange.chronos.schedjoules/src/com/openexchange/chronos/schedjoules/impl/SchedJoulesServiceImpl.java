@@ -92,7 +92,7 @@ public class SchedJoulesServiceImpl implements SchedJoulesService {
     /**
      * Cache for the API clients
      */
-    private final Cache<SchedJoulesCachedAPIKey, SchedJoulesAPI> apiCache = CacheBuilder.newBuilder().expireAfterAccess(30, TimeUnit.SECONDS).removalListener(notification -> {
+    private final Cache<SchedJoulesCachedAPIKey, SchedJoulesAPI> apiCache = CacheBuilder.newBuilder().expireAfterAccess(1, TimeUnit.HOURS).removalListener(notification -> {
         SchedJoulesCachedAPIKey key = (SchedJoulesCachedAPIKey) notification.getKey();
         LOG.debug("Shutting down SchedJoules API for context '{}'.", key.getContextId());
         SchedJoulesAPI api = (SchedJoulesAPI) notification.getValue();
