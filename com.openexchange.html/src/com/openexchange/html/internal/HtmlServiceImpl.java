@@ -528,6 +528,9 @@ public final class HtmlServiceImpl implements HtmlService {
         try {
             String html = htmlContent;
 
+            // Check if input is a full HTML document or a fragment of HTML to parse
+            boolean hasBody = html.indexOf("<body") >= 0 || html.indexOf("<BODY") >= 0;
+
             // Normalize the string
             {
                 Matcher matcher = PATTERN_URL.matcher(html);
@@ -541,7 +544,7 @@ public final class HtmlServiceImpl implements HtmlService {
                 }
             }
 
-            html = removeComments(html);
+            html = removeComments(html, hasBody);
 
             // Perform one-shot sanitizing
             html = replacePercentTags(html);
@@ -599,7 +602,7 @@ public final class HtmlServiceImpl implements HtmlService {
         }
     }
 
-    private static String removeComments(String html) {
+    private static String removeComments(String html, boolean hasBody) {
         Document document = Jsoup.parse(html);
         final Set<Node> removedNodes = new HashSet<>(16, 0.9F);
         document.traverse(new NodeVisitor() {
@@ -619,7 +622,7 @@ public final class HtmlServiceImpl implements HtmlService {
         for (Node node : removedNodes) {
             node.remove();
         }
-        return document.outerHtml();
+        return hasBody ? document.outerHtml() : document.body().html();
     }
 
     private FilterJerichoHandler getHandlerFor(int initialCapacity, String optionalConfigName) {
