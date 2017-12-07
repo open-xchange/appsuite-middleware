@@ -161,23 +161,32 @@ public class AllowedAuthServId {
             }
         }
 
-        ImmutableList.Builder<AllowedAuthServId> builder = ImmutableList.builder();
+        ImmutableList.Builder<AllowedAuthServId> builder = null;
         if (null != exacts) {
             for (String exact : exacts) {
+                if (null == builder) {
+                    builder = ImmutableList.builder();
+                }
                 builder.add(new AllowedAuthServId(exact, new ExactChecker(exact)));
             }
         }
         if (null != prefixes) {
             for (String prefix : prefixes) {
+                if (null == builder) {
+                    builder = ImmutableList.builder();
+                }
                 builder.add(new AllowedAuthServId(prefix, new StartsWithChecker(prefix)));
             }
         }
         if (null != wildcards) {
             for (String wildcard : wildcards) {
+                if (null == builder) {
+                    builder = ImmutableList.builder();
+                }
                 builder.add(new AllowedAuthServId(wildcard, RegExChecker.instanceFor(wildcard)));
             }
         }
-        return builder.build();
+        return null == builder ? Collections.<AllowedAuthServId> emptyList() : builder.build();
     }
 
     // --------------------------------------------------------------------------
