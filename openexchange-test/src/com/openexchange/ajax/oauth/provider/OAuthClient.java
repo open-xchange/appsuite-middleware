@@ -116,7 +116,7 @@ public class OAuthClient extends AJAXClient {
         @Override
         public String getServletPath() {
             String servletPath = delegate.getServletPath();
-            return servletPath.startsWith("/ajax/oauth/modules/") ? servletPath : "/ajax/oauth/modules/" + servletPath.substring(6) /* Cut off "/ajax/" prefix */;
+            return "/ajax/oauth/modules/" + servletPath.substring(6);
         }
 
         @Override

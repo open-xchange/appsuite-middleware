@@ -90,7 +90,6 @@ public abstract class AbstractOAuthTest extends AbstractSmtpAJAXSession {
         this.scope = scope;
     }
 
-    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -102,14 +101,10 @@ public abstract class AbstractOAuthTest extends AbstractSmtpAJAXSession {
         oAuthClient = new OAuthClient(testUser, clientApp.getId(), clientApp.getSecret(), clientApp.getRedirectURIs().get(0), scope);
     }
 
-    @Override
     @After
     public void tearDown() throws Exception {
         try {
-            OAuthClient oAuthClient = this.oAuthClient;
-            if (null != oAuthClient) {
-                oAuthClient.logout();
-            }
+            oAuthClient.logout();
             unregisterTestClient(clientApp);
         } finally {
             super.tearDown();

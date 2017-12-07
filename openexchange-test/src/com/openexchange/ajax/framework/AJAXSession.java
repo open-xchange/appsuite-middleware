@@ -51,16 +51,12 @@ package com.openexchange.ajax.framework;
 
 import org.apache.http.client.params.ClientPNames;
 import org.apache.http.client.params.CookiePolicy;
-import org.apache.http.conn.scheme.PlainSocketFactory;
-import org.apache.http.conn.scheme.Scheme;
-import org.apache.http.conn.scheme.SchemeRegistry;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import com.meterware.httpunit.HttpUnitOptions;
 import com.meterware.httpunit.WebConversation;
-import com.openexchange.ajax.framework.ssl.EasySSLSocketFactory;
 
 /**
  * This class stores the HTTP client instance and the session identifier for an AJAX session. Additionally the fallback web conversation is
@@ -123,14 +119,9 @@ public class AJAXSession {
     }
 
     public static DefaultHttpClient newHttpClient() {
-        SchemeRegistry schemeRegistry = new SchemeRegistry();
-        schemeRegistry.register(new Scheme("http", 80, PlainSocketFactory.getSocketFactory()));
-        schemeRegistry.register(new Scheme("https", 443, EasySSLSocketFactory.getInstance()));
-
-        ThreadSafeClientConnManager connManager = new ThreadSafeClientConnManager(schemeRegistry);
+        ThreadSafeClientConnManager connManager = new ThreadSafeClientConnManager();
         connManager.setDefaultMaxPerRoute(5000);
         connManager.setMaxTotal(10000);
-
         DefaultHttpClient retval = new DefaultHttpClient(connManager);
 
         HttpParams params = retval.getParams();

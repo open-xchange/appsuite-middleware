@@ -168,28 +168,28 @@ public class ReadContactTest extends AbstractOAuthTest {
         contact.setTelephoneBusiness1("+49112233445566");
         contact.setCompany("Internal Test AG");
         contact.setEmail1("hebert.meier@open-xchange.com");
-        contact.setParentFolderID(oAuthClient.getValues().getPrivateContactFolder());
+        contact.setParentFolderID(getClient().getValues().getPrivateContactFolder());
         contact.setFileAs("I'm the file_as field of Herbert Meier");
         contact.setImage1(image);
 
         InsertRequest insertContactReq = new InsertRequest(contact);
-        InsertResponse insertContactResp = oAuthClient.execute(insertContactReq);
+        InsertResponse insertContactResp = getClient().execute(insertContactReq);
         try {
             insertContactResp.fillObject(contact);
 
-            com.openexchange.ajax.contact.action.GetRequest getContactReq = new com.openexchange.ajax.contact.action.GetRequest(contact.getParentFolderID(), contact.getObjectID(), oAuthClient.getValues().getTimeZone());
-            com.openexchange.ajax.contact.action.GetResponse getContactResp = oAuthClient.execute(getContactReq);
+            com.openexchange.ajax.contact.action.GetRequest getContactReq = new com.openexchange.ajax.contact.action.GetRequest(contact.getParentFolderID(), contact.getObjectID(), getClient().getValues().getTimeZone());
+            com.openexchange.ajax.contact.action.GetResponse getContactResp = getClient().execute(getContactReq);
 
             JSONObject jContact = (JSONObject) getContactResp.getResponse().getData();
             String imageUrl = jContact.getString(ContactFields.IMAGE1_URL); // e.g. "/ajax/image/user/picture?id=273&timestamp=1468497596841"
 
             ImageRequest imageRequest = ImageRequest.parseFrom(imageUrl);
-            ImageResponse imageResponse = oAuthClient.execute(imageRequest);
+            ImageResponse imageResponse = getClient().execute(imageRequest);
 
             assertNotNull(imageResponse.getImage());
         } finally {
             com.openexchange.ajax.contact.action.DeleteRequest deleteContactReq = new com.openexchange.ajax.contact.action.DeleteRequest(contact, false);
-            oAuthClient.execute(deleteContactReq);
+            getClient().execute(deleteContactReq);
         }
     }
 
