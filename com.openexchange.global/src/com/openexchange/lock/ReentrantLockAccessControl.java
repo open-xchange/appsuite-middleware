@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -49,57 +49,71 @@
 
 package com.openexchange.lock;
 
-import java.util.concurrent.locks.Lock;
-import com.openexchange.exception.OXException;
-
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
- * {@link LockService} - Provides exclusive locks for arbitrary identifiers.
- * <p>
- * The locks a re self-managed and therefore are cleansed after certain amount of time (default idle time is 150 seconds).
+ * {@link ReentrantLockAccessControl}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.3
  */
-public interface LockService {
+public class ReentrantLockAccessControl implements AccessControl {
+
+    private final ReentrantLock lock;
 
     /**
-     * Gets the (volatile) lock for given identifier.
-     *
-     * @param identifier The identifier
-     * @return The associated lock
-     * @throws OXException If lock cannot be returned
+     * Initializes a new {@link ReentrantLockAccessControl}.
      */
-    Lock getLockFor(String identifier) throws OXException;
+    public ReentrantLockAccessControl() {
+        this(new ReentrantLock());
+    }
 
     /**
-     * Removes the lock for given identifier.
+     * Initializes a new {@link ReentrantLockAccessControl}.
      *
-     * @param identifier The identifier
+     * @param lock The reentrant lock to use
+     * @throws IllegalArgumentException If specified lock is <code>null</code>
      */
-    void removeLockFor(String identifier);
+    public ReentrantLockAccessControl(ReentrantLock lock) {
+        super();
+        if (null == lock) {
+            throw new IllegalArgumentException("lock is null");
+        }
+        this.lock = lock;
+    }
 
-    /**
-     * Gets the access control for specified number of permits.
-     * <pre>
-     * AccessControl accessControl = lockService.getAccessControlFor(...);
-     * try {
-     *     accessControl.acquireGrant();
-     *      ...
-     * } catch (InterruptedException e) {
-     *     Thread.currentThread().interrupt();
-     *     throw ...
-     * } finally {
-     *    accessControl.close();
-     * }
-     * </pre>
-     *
-     * @param identifier The identifier associated with the access control
-     * @param permits The number of permits
-     * @param userId The user identifier
-     * @param contextId The context identifier
-     * @return The access control
-     * @throws OXException If access control cannot be returned
-     */
-    AccessControl getAccessControlFor(String identifier, int permits, int userId, int contextId) throws OXException;
+    @Override
+    public void close() throws Exception {
+        release();
+    }
+
+    @Override
+    public void acquireGrant() throws InterruptedException {
+        lock.lock();
+    }
+
+    @Override
+    public boolean tryAcquireGrant() {
+        return lock.tryLock();
+    }
+
+    @Override
+    public boolean tryAcquireGrant(long timeout, TimeUnit unit) throws InterruptedException {
+        return lock.tryLock(timeout, unit);
+    }
+
+    @Override
+    public boolean release() {
+        return release(true);
+    }
+
+    @Override
+    public boolean release(boolean acquired) {
+        if (acquired) {
+            lock.unlock();
+        }
+        return true;
+    }
 
 }

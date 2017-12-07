@@ -47,59 +47,49 @@
  *
  */
 
-package com.openexchange.lock;
+package com.openexchange.database.osgi;
 
-import java.util.concurrent.locks.Lock;
-import com.openexchange.exception.OXException;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.database.internal.Initialization;
+import com.openexchange.lock.LockService;
 
 
 /**
- * {@link LockService} - Provides exclusive locks for arbitrary identifiers.
- * <p>
- * The locks a re self-managed and therefore are cleansed after certain amount of time (default idle time is 150 seconds).
+ * {@link LockServiceTracker}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.0
  */
-public interface LockService {
+public class LockServiceTracker implements ServiceTrackerCustomizer<LockService, LockService> {
+
+    private final BundleContext context;
 
     /**
-     * Gets the (volatile) lock for given identifier.
-     *
-     * @param identifier The identifier
-     * @return The associated lock
-     * @throws OXException If lock cannot be returned
+     * Initializes a new {@link LockServiceTracker}.
      */
-    Lock getLockFor(String identifier) throws OXException;
+    public LockServiceTracker(BundleContext context) {
+        super();
+        this.context = context;
+    }
 
-    /**
-     * Removes the lock for given identifier.
-     *
-     * @param identifier The identifier
-     */
-    void removeLockFor(String identifier);
+    @Override
+    public LockService addingService(ServiceReference<LockService> reference) {
+        LockService lockService = context.getService(reference);
+        Initialization.setLockService(lockService);
+        return lockService;
+    }
 
-    /**
-     * Gets the access control for specified number of permits.
-     * <pre>
-     * AccessControl accessControl = lockService.getAccessControlFor(...);
-     * try {
-     *     accessControl.acquireGrant();
-     *      ...
-     * } catch (InterruptedException e) {
-     *     Thread.currentThread().interrupt();
-     *     throw ...
-     * } finally {
-     *    accessControl.close();
-     * }
-     * </pre>
-     *
-     * @param identifier The identifier associated with the access control
-     * @param permits The number of permits
-     * @param userId The user identifier
-     * @param contextId The context identifier
-     * @return The access control
-     * @throws OXException If access control cannot be returned
-     */
-    AccessControl getAccessControlFor(String identifier, int permits, int userId, int contextId) throws OXException;
+    @Override
+    public void modifiedService(ServiceReference<LockService> reference, LockService service) {
+        // Ignore
+    }
+
+    @Override
+    public void removedService(ServiceReference<LockService> reference, LockService service) {
+        Initialization.setLockService(null);
+        context.ungetService(reference);
+    }
 
 }

@@ -61,7 +61,6 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -74,6 +73,8 @@ import com.openexchange.database.ConfigDatabaseService;
 import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
+import com.openexchange.lock.AccessControl;
+import com.openexchange.lock.LockService;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.linked.TIntLinkedList;
 
@@ -93,19 +94,16 @@ public final class ContextDatabaseAssignmentImpl implements ContextDatabaseAssig
     private static final String CONTEXTS_IN_SCHEMA = "SELECT cid FROM context_server2db_pool WHERE server_id=? AND write_db_pool_id=? AND db_schema=?";
     private static final String CONTEXTS_IN_DATABASE = "SELECT cid FROM context_server2db_pool WHERE read_db_pool_id=? OR write_db_pool_id=?";
     private static final String NOTFILLED = "SELECT schemaname,count FROM contexts_per_dbschema WHERE db_pool_id=? AND count<? ORDER BY count ASC";
-    private final ConfigDatabaseService configDatabaseService;
 
     private static final String CACHE_NAME = "OXDBPoolCache";
 
+    private static class CacheLockHolder {
+        static final CacheLock fallbackGlobalCacheLock = CacheLock.cacheLockFor(new ReentrantLock(true));
+    }
+
+    private final ConfigDatabaseService configDatabaseService;
     private volatile CacheService cacheService;
-
     private volatile Cache cache;
-
-    /**
-     * Lock for the cache.
-     */
-    private final Lock cacheLock = new ReentrantLock(true);
-
     private final LockMech lockMech;
 
     /**
@@ -115,6 +113,16 @@ public final class ContextDatabaseAssignmentImpl implements ContextDatabaseAssig
         super();
         this.configDatabaseService = configDatabaseService;
         this.lockMech = lockMech;
+    }
+
+    private CacheLock cacheLockFor(int contextId) throws OXException {
+        LockService lockService = Initialization.getLockService();
+        if (null == lockService) {
+            return CacheLockHolder.fallbackGlobalCacheLock;
+        }
+
+        AccessControl accessControl = lockService.getAccessControlFor(new StringBuilder(16).append(contextId).append('-').append("dbassign").toString(), 1, 1, contextId);
+        return CacheLock.cacheLockFor(accessControl);
     }
 
     @Override
@@ -140,18 +148,22 @@ public final class ContextDatabaseAssignmentImpl implements ContextDatabaseAssig
         }
 
         // Need to load - synchronously!
+        CacheLock cacheLock = cacheLockFor(contextId);
         cacheLock.lock();
         try {
-            AssignmentImpl retval = (AssignmentImpl) myCache.get(key);
-            if (null == retval) {
-                retval = loadAssignment(con, contextId, errorOnAbsence);
-                try {
-                    myCache.putSafe(key, retval);
-                } catch (OXException e) {
-                    LOG.error("Cannot put database assignment into cache.", e);
-                }
+            object = myCache.get(key);
+            if (object instanceof AssignmentImpl) {
+                // Loaded meanwhile
+                return (AssignmentImpl) object;
             }
-            return retval;
+
+            AssignmentImpl loaded = loadAssignment(con, contextId, errorOnAbsence);
+            try {
+                myCache.putSafe(key, loaded);
+            } catch (OXException e) {
+                LOG.error("Cannot put database assignment into cache.", e);
+            }
+            return loaded;
         } finally {
             cacheLock.unlock();
         }
@@ -274,6 +286,7 @@ public final class ContextDatabaseAssignmentImpl implements ContextDatabaseAssig
         Cache myCache = this.cache;
         if (null != myCache) {
             final CacheKey key = myCache.newCacheKey(assign.getContextId(), assign.getServerId());
+            CacheLock cacheLock = cacheLockFor(assign.getContextId());
             cacheLock.lock();
             try {
                 if (null != oldAssign) {

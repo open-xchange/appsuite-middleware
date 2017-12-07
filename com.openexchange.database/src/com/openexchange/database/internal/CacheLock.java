@@ -47,59 +47,106 @@
  *
  */
 
-package com.openexchange.lock;
+package com.openexchange.database.internal;
 
-import java.util.concurrent.locks.Lock;
 import com.openexchange.exception.OXException;
-
+import com.openexchange.lock.AccessControl;
+import java.util.concurrent.locks.Lock;
 
 /**
- * {@link LockService} - Provides exclusive locks for arbitrary identifiers.
- * <p>
- * The locks a re self-managed and therefore are cleansed after certain amount of time (default idle time is 150 seconds).
+ * {@link CacheLock}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.10.0
  */
-public interface LockService {
+public abstract class CacheLock {
 
     /**
-     * Gets the (volatile) lock for given identifier.
+     * Gets the cache lock backed by given lock instance
      *
-     * @param identifier The identifier
-     * @return The associated lock
-     * @throws OXException If lock cannot be returned
+     * @param lock The lock to use
+     * @return The cache lock
      */
-    Lock getLockFor(String identifier) throws OXException;
+    public static CacheLock cacheLockFor(Lock lock) {
+        return null == lock ? null : new CommonCacheLock(lock);
+    }
 
     /**
-     * Removes the lock for given identifier.
+     * Gets the cache lock backed by given access control instance
      *
-     * @param identifier The identifier
+     * @param accessControl The access control to use
+     * @return The cache lock
      */
-    void removeLockFor(String identifier);
+    public static CacheLock cacheLockFor(AccessControl accessControl) {
+        return null == accessControl ? null : new AccessControlCacheLock(accessControl);
+    }
+
+    // ---------------------------------------------------------------
 
     /**
-     * Gets the access control for specified number of permits.
-     * <pre>
-     * AccessControl accessControl = lockService.getAccessControlFor(...);
-     * try {
-     *     accessControl.acquireGrant();
-     *      ...
-     * } catch (InterruptedException e) {
-     *     Thread.currentThread().interrupt();
-     *     throw ...
-     * } finally {
-     *    accessControl.close();
-     * }
-     * </pre>
-     *
-     * @param identifier The identifier associated with the access control
-     * @param permits The number of permits
-     * @param userId The user identifier
-     * @param contextId The context identifier
-     * @return The access control
-     * @throws OXException If access control cannot be returned
+     * Initializes a new {@link CacheLock}.
      */
-    AccessControl getAccessControlFor(String identifier, int permits, int userId, int contextId) throws OXException;
+    protected CacheLock() {
+        super();
+    }
 
+    /**
+     * Acquires the lock.
+     *
+     * @throws OXException If interrupted while waiting for lock
+     */
+    public abstract void lock() throws OXException;
+
+    /**
+     * Releases the lock.
+     */
+    public abstract void unlock();
+
+    // ---------------------------------------------------------------
+
+    private static class CommonCacheLock extends CacheLock {
+
+        private final Lock lock;
+
+        CommonCacheLock(Lock lock) {
+            super();
+            this.lock = lock;
+        }
+
+        @Override
+        public void lock() {
+            lock.lock();
+        }
+
+        @Override
+        public void unlock() {
+            lock.unlock();
+        }
+    }
+
+    private static class AccessControlCacheLock extends CacheLock {
+
+        private final AccessControl accessControl;
+
+        AccessControlCacheLock(AccessControl accessControl) {
+            super();
+            this.accessControl = accessControl;
+        }
+
+        @Override
+        public void lock() throws OXException {
+            try {
+                accessControl.acquireGrant();
+            } catch (InterruptedException e) {
+                // Keep interrupted state
+                Thread.currentThread().interrupt();
+                throw OXException.general("Interrupted while acquiring grant", e);
+            }
+        }
+
+        @Override
+        public void unlock() {
+            accessControl.release();
+        }
+    }
 }
