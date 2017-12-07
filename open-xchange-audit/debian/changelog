@@ -1,3 +1,9 @@
+open-xchange-audit (7.8.2-38) stable; urgency=medium
+
+  * Build for Patch 2017-12-11 (4471)
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Thu, 07 Dec 2017 13:15:48 +0100
+
 open-xchange-audit (7.8.2-37) stable; urgency=medium
 
   * Build for patch 2017-10-30 (4424)
