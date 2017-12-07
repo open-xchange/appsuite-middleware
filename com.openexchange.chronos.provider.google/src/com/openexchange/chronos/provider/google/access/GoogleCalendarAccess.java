@@ -80,6 +80,8 @@ import com.openexchange.chronos.provider.CalendarFolderProperty;
 import com.openexchange.chronos.provider.DefaultCalendarFolder;
 import com.openexchange.chronos.provider.DefaultCalendarPermission;
 import com.openexchange.chronos.provider.account.AdministrativeCalendarAccountService;
+import com.openexchange.chronos.provider.basic.CalendarSettings;
+import com.openexchange.chronos.provider.basic.DefaultCalendarSettings;
 import com.openexchange.chronos.provider.caching.ExternalCalendarResult;
 import com.openexchange.chronos.provider.caching.basic.BasicCachingCalendarAccess;
 import com.openexchange.chronos.provider.google.GoogleCalendarConfigField;
@@ -224,6 +226,22 @@ public class GoogleCalendarAccess extends BasicCachingCalendarAccess {
             return entry.getColorId();
         }
         return null;
+    }
+
+    @Override
+    public CalendarSettings getSettings() {
+        DefaultCalendarSettings settings = new DefaultCalendarSettings();
+        settings.setLastModified(account.getLastModified());
+        settings.setConfig(account.getUserConfiguration());
+        JSONObject internalConfig = account.getInternalConfiguration();
+        settings.setName(internalConfig.optString("name", "Google Calendar"));
+        ExtendedProperties extendedProperties = new ExtendedProperties();
+        extendedProperties.add(SCHEDULE_TRANSP(TimeTransparency.TRANSPARENT, true));
+        extendedProperties.add(DESCRIPTION(internalConfig.optString("description", null)));
+        extendedProperties.add(USED_FOR_SYNC(Boolean.FALSE, true));
+        extendedProperties.add(COLOR(internalConfig.optString("color", null), false));
+        settings.setExtendedProperties(extendedProperties);
+        return settings;
     }
 
     @Override
@@ -372,11 +390,6 @@ public class GoogleCalendarAccess extends BasicCachingCalendarAccess {
             }
         }
         return null;
-    }
-
-    @Override
-    protected String getName() {
-        return GoogleCalendarAccess.class.getSimpleName();
     }
 
     @Override

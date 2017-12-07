@@ -49,17 +49,11 @@
 
 package com.openexchange.chronos.provider.caching.basic;
 
-import static com.openexchange.chronos.provider.CalendarFolderProperty.COLOR;
-import static com.openexchange.chronos.provider.CalendarFolderProperty.DESCRIPTION;
-import static com.openexchange.chronos.provider.CalendarFolderProperty.SCHEDULE_TRANSP;
-import static com.openexchange.chronos.provider.CalendarFolderProperty.USED_FOR_SYNC;
 import java.util.Collections;
 import java.util.List;
-import org.json.JSONObject;
+import java.util.concurrent.TimeUnit;
 import com.openexchange.chronos.Event;
-import com.openexchange.chronos.ExtendedProperties;
 import com.openexchange.chronos.RecurrenceId;
-import com.openexchange.chronos.TimeTransparency;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.CalendarFolder;
 import com.openexchange.chronos.provider.CalendarPermission;
@@ -67,7 +61,7 @@ import com.openexchange.chronos.provider.DefaultCalendarFolder;
 import com.openexchange.chronos.provider.DefaultCalendarPermission;
 import com.openexchange.chronos.provider.basic.BasicCalendarAccess;
 import com.openexchange.chronos.provider.basic.CalendarSettings;
-import com.openexchange.chronos.provider.basic.DefaultCalendarSettings;
+import com.openexchange.chronos.provider.caching.CachingCalendarAccess;
 import com.openexchange.chronos.provider.caching.ExternalCalendarResult;
 import com.openexchange.chronos.provider.caching.SingleFolderCachingCalendarAccess;
 import com.openexchange.chronos.service.CalendarParameters;
@@ -103,31 +97,37 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess 
         cachingBridge = new CachingAccessBridge(this);
     }
 
-    protected abstract String getName();
-
+    /**
+     * Defines the refresh interval in minutes that has to be expired to contact the external event provider for the up-to-date calendar.<br>
+     * <br>
+     * If the value is <=0 the default of one day will be used.
+     *
+     * @return The interval that defines the expire of the caching in {@link TimeUnit#MINUTES}
+     */
     protected abstract long getRefreshInterval() throws OXException;
 
+    /**
+     * Allows the underlying calendar provider to handle {@link OXException}s that might occur while retrieving data from the external source.
+     *
+     * @param e The {@link OXException} occurred
+     */
     protected abstract void handleExceptions(OXException e);
 
+    /**
+     * Returns an {@link ExternalCalendarResult} containing all external {@link Event}s by querying the underlying calendar.<b>
+     * <b>
+     * Make sure not to consider client parameters (available via {@link CachingCalendarAccess#getParameters()}) while requesting events!
+     *
+     * @return {@link ExternalCalendarResult}
+     */
     protected abstract ExternalCalendarResult getAllEvents() throws OXException;
 
+    /**
+     * Defines how long should be wait for the next request to the external calendar provider in case an error occurred.
+     *
+     * @return The time in {@link TimeUnit#MINUTES} that should be wait for contacting the external calendar provider for updates.
+     */
     protected abstract long getRetryAfterErrorInterval();
-
-    @Override
-    public CalendarSettings getSettings() {
-        DefaultCalendarSettings settings = new DefaultCalendarSettings();
-        settings.setName(getName());
-        settings.setLastModified(account.getLastModified());
-        settings.setConfig(account.getUserConfiguration());
-        JSONObject internalConfig = account.getInternalConfiguration();
-        ExtendedProperties extendedProperties = new ExtendedProperties();
-        extendedProperties.add(SCHEDULE_TRANSP(TimeTransparency.TRANSPARENT, true));
-        extendedProperties.add(DESCRIPTION(internalConfig.optString("description", null)));
-        extendedProperties.add(USED_FOR_SYNC(Boolean.FALSE, true));
-        extendedProperties.add(COLOR(internalConfig.optString("color", null), false));
-        settings.setExtendedProperties(extendedProperties);
-        return settings;
-    }
 
     @Override
     public Event getEvent(String eventId, RecurrenceId recurrenceId) throws OXException {

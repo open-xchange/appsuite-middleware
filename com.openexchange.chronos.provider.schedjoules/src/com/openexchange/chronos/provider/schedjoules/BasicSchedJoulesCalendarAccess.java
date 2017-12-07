@@ -49,13 +49,21 @@
 
 package com.openexchange.chronos.provider.schedjoules;
 
+import static com.openexchange.chronos.provider.CalendarFolderProperty.COLOR;
+import static com.openexchange.chronos.provider.CalendarFolderProperty.DESCRIPTION;
+import static com.openexchange.chronos.provider.CalendarFolderProperty.SCHEDULE_TRANSP;
+import static com.openexchange.chronos.provider.CalendarFolderProperty.USED_FOR_SYNC;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collections;
 import java.util.concurrent.TimeUnit;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.chronos.ExtendedProperties;
+import com.openexchange.chronos.TimeTransparency;
 import com.openexchange.chronos.provider.CalendarAccount;
+import com.openexchange.chronos.provider.basic.CalendarSettings;
+import com.openexchange.chronos.provider.basic.DefaultCalendarSettings;
 import com.openexchange.chronos.provider.caching.ExternalCalendarResult;
 import com.openexchange.chronos.provider.caching.basic.BasicCachingCalendarAccess;
 import com.openexchange.chronos.provider.schedjoules.exception.SchedJoulesProviderExceptionCodes;
@@ -101,8 +109,19 @@ public class BasicSchedJoulesCalendarAccess extends BasicCachingCalendarAccess {
     }
 
     @Override
-    protected String getName() {
-        return account.getInternalConfiguration().optString("name", "calendar");
+    public CalendarSettings getSettings() {
+        DefaultCalendarSettings settings = new DefaultCalendarSettings();
+        settings.setLastModified(account.getLastModified());
+        settings.setConfig(account.getUserConfiguration());
+        JSONObject internalConfig = account.getInternalConfiguration();
+        settings.setName(internalConfig.optString("name", "calendar"));
+        ExtendedProperties extendedProperties = new ExtendedProperties();
+        extendedProperties.add(SCHEDULE_TRANSP(TimeTransparency.TRANSPARENT, true));
+        extendedProperties.add(DESCRIPTION(internalConfig.optString("description", null)));
+        extendedProperties.add(USED_FOR_SYNC(Boolean.FALSE, true));
+        extendedProperties.add(COLOR(internalConfig.optString("color", null), false));
+        settings.setExtendedProperties(extendedProperties);
+        return settings;
     }
 
     @Override
