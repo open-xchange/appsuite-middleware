@@ -51,11 +51,16 @@ package com.openexchange.chronos.schedjoules.impl;
 
 import java.net.URL;
 import java.util.Iterator;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.openexchange.chronos.schedjoules.SchedJoulesCalendar;
 import com.openexchange.chronos.schedjoules.SchedJoulesResult;
 import com.openexchange.chronos.schedjoules.SchedJoulesService;
@@ -72,10 +77,17 @@ import com.openexchange.java.Strings;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class SchedJoulesServiceImpl implements SchedJoulesService {
-    
-    //TODO: cache for the API
 
     private static final Logger LOG = LoggerFactory.getLogger(SchedJoulesServiceImpl.class);
+
+    /**
+     * Cache for the API clients
+     */
+    private final Cache<String, SchedJoulesAPI> apiCache = CacheBuilder.newBuilder().expireAfterAccess(1, TimeUnit.HOURS).removalListener(notification -> {
+        LOG.debug("Shutting down API for '{}'", notification.getKey());
+        SchedJoulesAPI api = (SchedJoulesAPI) notification.getValue();
+        api.shutDown();
+    }).build();
 
     /**
      * Initialises a new {@link SchedJoulesServiceImpl}.
@@ -155,8 +167,10 @@ public class SchedJoulesServiceImpl implements SchedJoulesService {
     public SchedJoulesResult search(int contextId, String query, String locale, int countryId, int categoryId, int maxRows) throws OXException {
         return new SchedJoulesResult(filterContent(getAPI(contextId).pages().search(query, locale, countryId, categoryId, maxRows)));
     }
-    
-    /* (non-Javadoc)
+
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.openexchange.chronos.schedjoules.SchedJoulesService#getCalendar(int, java.net.URL, java.lang.String, long)
      */
     @Override
@@ -167,18 +181,47 @@ public class SchedJoulesServiceImpl implements SchedJoulesService {
     ///////////////////////////////////// HELPERS ///////////////////////////////////
 
     /**
-     * 
      * @param contextId
      * @return
      * @throws OXException
      */
     private SchedJoulesAPI getAPI(int contextId) throws OXException {
+        try {
+            return apiCache.get(getKey(contextId), () -> {
+                return new SchedJoulesAPI(getAPIKey(contextId));
+            });
+        } catch (ExecutionException e) {
+            throw SchedJoulesAPIExceptionCodes.UNEXPECTED_ERROR.create(e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Gets the API key for the specified context and hashes both values to create
+     * a unique key for the client
+     * 
+     * @param contextId The context identifier
+     * @return The hash
+     * @throws OXException if the API key is not configured for the specified context
+     */
+    private String getKey(int contextId) throws OXException {
+        return DigestUtils.sha256Hex(contextId + ":" + getAPIKey(contextId));
+
+    }
+
+    /**
+     * Retrieves the API key for the specified context
+     * 
+     * @param contextId The context identifier
+     * @return The API key
+     * @throws OXException if no API key is configured
+     */
+    private String getAPIKey(int contextId) throws OXException {
         LeanConfigurationService leanConfigService = Services.getService(LeanConfigurationService.class);
         String apiKey = leanConfigService.getProperty(-1, contextId, SchedJoulesProperty.apiKey);
         if (Strings.isEmpty(apiKey)) {
             throw SchedJoulesAPIExceptionCodes.NO_API_KEY_CONFIGURED.create(SchedJoulesProperty.apiKey.getFQPropertyName());
         }
-        return new SchedJoulesAPI(apiKey);
+        return apiKey;
     }
 
     /**
