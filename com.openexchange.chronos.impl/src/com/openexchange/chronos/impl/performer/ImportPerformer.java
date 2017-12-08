@@ -128,6 +128,8 @@ public class ImportPerformer extends AbstractUpdatePerformer {
 
             /*
              * create first event (master or non-recurring)
+             * 
+             * It is NOT possible to add event with another internal organizer
              */
             InternalImportResult result;
             result = createEvent(eventGroup.get(0));
@@ -177,6 +179,7 @@ public class ImportPerformer extends AbstractUpdatePerformer {
                 } // else; Failed to create event, return failure
                 return results;
             }
+
             case UPDATE: {
                 String eventId = session.getCalendarService().getUtilities().resolveByUID(session, masterEvent.getUid());
                 Event loadEvent = storage.getEventStorage().loadEvent(eventId, null);
@@ -185,36 +188,33 @@ public class ImportPerformer extends AbstractUpdatePerformer {
                     // Nothing to update
                     return null;
                 }
+                // In case an event is NOT in the default calendar, update call will fail (if organizer is internal ...)
                 UpdatePerformer u = new UpdatePerformer(storage, session, folder);
+
                 long clientTimestamp = System.currentTimeMillis();
                 InternalCalendarResult calendarResult = u.perform(eventId, loadEvent.getRecurrenceId(), masterEvent, clientTimestamp);
                 InternalImportResult result = new InternalImportResult(calendarResult, getEventID(masterEvent), extractIndex(masterEvent), extractWarnings(masterEvent));
                 results.add(result);
+
                 if (isSuccess(result) && 1 < eventGroup.size()) {
-                    // Exceptions from db
-                    List<Event> exceptionData = loadExceptionData(loadEvent.getSeriesId());
                     ListIterator<Event> iterator = eventGroup.listIterator(1);
                     do {
                         Event event = iterator.next();
-                        try {
-                            // Try update
-                            Event loadException = exceptionData.stream().filter(e -> e.getRecurrenceId().equals(event.getRecurrenceId())).findFirst().get();
-                            calendarResult = u.perform(loadException.getId(), loadException.getRecurrenceId(), event, clientTimestamp);
-                            InternalImportResult internalImportResult = new InternalImportResult(calendarResult, getEventID(event), extractIndex(event), extractWarnings(event));
-                            results.add(internalImportResult);
-                        } catch (NoSuchElementException ex) {
-                            // Could not find event, try create
-                            createEventException(result.getImportResult().getId(), event, clientTimestamp);
-                        }
+                        // Update event. UpdatePerformer will create event exceptions on its own, if necessary
+                        calendarResult = u.perform(loadEvent.getId(), event.getRecurrenceId(), event, clientTimestamp);
+                        InternalImportResult internalImportResult = new InternalImportResult(calendarResult, getEventID(event), extractIndex(event), extractWarnings(event));
+                        results.add(internalImportResult);
                     } while (iterator.hasNext());
                 }
                 return results;
             }
+
             case UPDATE_OR_REASSIGN: {
                 List<InternalImportResult> list;
                 try {
                     list = handleUIDConflict(UIDConflictStrategy.UPDATE, eventGroup);
                 } catch (OXException e) {
+                    LOG.warn("Could not update all events. Try to reassign event UID.", e);
                     list = Collections.emptyList();
                 }
                 if (list.isEmpty() || !isSuccess(list.get(0))) {
@@ -339,7 +339,6 @@ public class ImportPerformer extends AbstractUpdatePerformer {
     /**
      * Tries to handle data truncation and incorrect string errors automatically.
      *
-     * @param session The calendar session
      * @param e The exception to handle
      * @param event The event being saved
      * @return <code>true</code> if the excpetion could be handled and the operation should be tried again, <code>false</code>, otherwise
