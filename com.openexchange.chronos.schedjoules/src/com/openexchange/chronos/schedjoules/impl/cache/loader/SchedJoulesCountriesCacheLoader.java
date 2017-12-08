@@ -47,33 +47,39 @@
  *
  */
 
-package com.openexchange.chronos.schedjoules.api.cache.loader;
+package com.openexchange.chronos.schedjoules.impl.cache.loader;
 
-import com.openexchange.chronos.schedjoules.api.SchedJoulesAPIDefaultValues;
-import com.openexchange.chronos.schedjoules.api.auxiliary.SchedJoulesCategory;
-import com.openexchange.chronos.schedjoules.api.auxiliary.SchedJoulesSearchParameter;
-import com.openexchange.chronos.schedjoules.api.cache.SchedJoulesCachedSearchKey;
-import com.openexchange.chronos.schedjoules.api.cache.SchedJoulesPage;
-import com.openexchange.chronos.schedjoules.api.client.SchedJoulesRESTBindPoint;
-import com.openexchange.chronos.schedjoules.api.client.SchedJoulesRESTClient;
-import com.openexchange.chronos.schedjoules.api.client.SchedJoulesRequest;
-import com.openexchange.java.Strings;
+import com.openexchange.chronos.schedjoules.api.SchedJoulesAPI;
+import com.openexchange.chronos.schedjoules.api.SchedJoulesPage;
+import com.openexchange.chronos.schedjoules.impl.cache.SchedJoulesAPICache;
+import com.openexchange.chronos.schedjoules.impl.cache.SchedJoulesCachedItemKey;
+import com.openexchange.exception.OXException;
 
 /**
- * {@link SchedJoulesSearchCacheLoader}
+ * {@link SchedJoulesCountriesCacheLoader}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class SchedJoulesSearchCacheLoader extends AbstractSchedJoulesCacheLoader<SchedJoulesCachedSearchKey> {
+public class SchedJoulesCountriesCacheLoader extends AbstractSchedJoulesCacheLoader {
 
     /**
-     * Initialises a new {@link SchedJoulesSearchCacheLoader}.
+     * Initialises a new {@link SchedJoulesCountriesCacheLoader}.
      * 
-     * @param client
-     * @param restBindPoint
+     * @param apiCache
      */
-    public SchedJoulesSearchCacheLoader(SchedJoulesRESTClient client, SchedJoulesRESTBindPoint restBindPoint) {
-        super(client, restBindPoint);
+    public SchedJoulesCountriesCacheLoader(SchedJoulesAPICache apiCache) {
+        super(apiCache);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.chronos.schedjoules.impl.cache.AbstractSchedJoulesCacheLoader#isModified(com.openexchange.chronos.schedjoules.api.cache.SchedJoulesCachedItemKey, com.openexchange.chronos.schedjoules.api.cache.SchedJoulesPage)
+     */
+    @Override
+    boolean isModified(SchedJoulesCachedItemKey key, SchedJoulesPage page) throws OXException {
+        SchedJoulesAPI api = apiCache.getAPI(key.getContextId());
+        return api.countries().isModified(key.getLocale(), page.getEtag(), page.getLastModified());
     }
 
     /*
@@ -82,17 +88,9 @@ public class SchedJoulesSearchCacheLoader extends AbstractSchedJoulesCacheLoader
      * @see com.google.common.cache.CacheLoader#load(java.lang.Object)
      */
     @Override
-    public SchedJoulesPage load(SchedJoulesCachedSearchKey key) throws Exception {
-        SchedJoulesRequest request = new SchedJoulesRequest(restBindPoint.getAbsolutePath() + "/search");
-        request.setQueryParameter(SchedJoulesSearchParameter.q.name(), key.getQuery());
-        request.setQueryParameter(SchedJoulesSearchParameter.locale.name(), Strings.isEmpty(key.getLocale()) ? SchedJoulesAPIDefaultValues.DEFAULT_LOCALE : key.getLocale());
-        if (key.getCountryId() > 0) {
-            request.setQueryParameter(SchedJoulesSearchParameter.country_id.name(), Integer.toString(key.getCountryId()));
-        }
-        if (key.getCategoryId() > 0 && key.getCategoryId() <= SchedJoulesCategory.values().length) {
-            request.setQueryParameter(SchedJoulesSearchParameter.category_id.name(), Integer.toString(SchedJoulesCategory.values()[key.getCategoryId() - 1].getId()));
-        }
-        request.setQueryParameter(SchedJoulesSearchParameter.nr_results.name(), Integer.toString(key.getMaxRows() <= 0 ? SchedJoulesAPIDefaultValues.MAX_ROWS : key.getMaxRows()));
-        return executeRequest(request);
+    public SchedJoulesPage load(SchedJoulesCachedItemKey key) throws Exception {
+        SchedJoulesAPI api = apiCache.getAPI(key.getContextId());
+        return api.countries().listCountries(key.getLocale());
     }
+
 }

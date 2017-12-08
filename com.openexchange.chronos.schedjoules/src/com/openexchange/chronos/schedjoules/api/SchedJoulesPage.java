@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2017-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,63 +47,107 @@
  *
  */
 
-package com.openexchange.chronos.schedjoules.impl.cache;
+package com.openexchange.chronos.schedjoules.api;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import com.google.common.cache.CacheLoader;
-import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.ListenableFutureTask;
-import com.openexchange.chronos.schedjoules.api.cache.SchedJoulesCachedItemKey;
-import com.openexchange.chronos.schedjoules.api.cache.SchedJoulesPage;
-import com.openexchange.chronos.schedjoules.osgi.Services;
-import com.openexchange.exception.OXException;
-import com.openexchange.timer.TimerService;
+import org.json.JSONValue;
 
 /**
- * {@link AbstractSchedJoulesCacheLoader}
+ * {@link SchedJoulesPage}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-abstract class AbstractSchedJoulesCacheLoader extends CacheLoader<SchedJoulesCachedItemKey, SchedJoulesPage> {
+public class SchedJoulesPage {
 
-    private static final Logger LOG = LoggerFactory.getLogger(AbstractSchedJoulesCacheLoader.class);
-    final SchedJoulesAPICache apiCache;
+    private final JSONValue itemData;
+    private final long lastModified;
+    private final String etag;
 
     /**
-     * Initialises a new {@link AbstractSchedJoulesCacheLoader}.
-     * @param apiCache TODO
+     * Initialises a new {@link SchedJoulesPage}.
      */
-    public AbstractSchedJoulesCacheLoader(SchedJoulesAPICache apiCache) {
+    public SchedJoulesPage(JSONValue itemData, String etag, long lastModified) {
         super();
-        this.apiCache = apiCache;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.google.common.cache.CacheLoader#reload(java.lang.Object, java.lang.Object)
-     */
-    @Override
-    public ListenableFuture<SchedJoulesPage> reload(SchedJoulesCachedItemKey key, SchedJoulesPage oldValue) throws Exception {
-        TimerService timerService = Services.getService(TimerService.class);
-        ListenableFutureTask<SchedJoulesPage> task = ListenableFutureTask.create(() -> {
-            if (isModified(key, oldValue)) {
-                LOG.debug("The entry with key: '{}' was modified since last fetch. Reloading...", key.toString());
-                return load(key);
-            }
-            LOG.debug("The entry with key: '{}' was not modified since last fetch.", key.toString());
-            return oldValue;
-        });
-        timerService.getExecutor().execute(task);
-        return task;
+        this.itemData = itemData;
+        this.etag = etag;
+        this.lastModified = lastModified;
     }
 
     /**
-     * Checks if the specified {@link SchedJoulesPage} is modified
-     * 
-     * @param page The {@link SchedJoulesPage}
-     * @return <code>true</code> if the page was modified; <code>false</code> otherwise
+     * Gets the itemData
+     *
+     * @return The itemData
      */
-    abstract boolean isModified(SchedJoulesCachedItemKey key, SchedJoulesPage page) throws OXException;
+    public JSONValue getItemData() {
+        return itemData;
+    }
+
+    /**
+     * Gets the lastModified
+     *
+     * @return The lastModified
+     */
+    public long getLastModified() {
+        return lastModified;
+    }
+
+    /**
+     * Gets the eTag
+     *
+     * @return The eTag
+     */
+    public String getEtag() {
+        return etag;
+    }
+
+    /**
+     * {@link SchedJoulesPageBuilder}
+     */
+    public static class SchedJoulesPageBuilder {
+
+        private JSONValue itemData;
+        private long lastModified;
+        private String etag;
+
+        /**
+         * Initialises a new {@link SchedJoulesPage.SchedJoulesPageBuilder}.
+         */
+        public SchedJoulesPageBuilder() {
+            super();
+        }
+
+        /**
+         * Sets the itemData
+         *
+         * @param itemData The itemData to set
+         */
+        public SchedJoulesPageBuilder itemData(JSONValue itemData) {
+            this.itemData = itemData;
+            return this;
+        }
+
+        /**
+         * Sets the lastModified
+         *
+         * @param lastModified The lastModified to set
+         */
+        public SchedJoulesPageBuilder lastModified(long lastModified) {
+            this.lastModified = lastModified;
+            return this;
+        }
+
+        /**
+         * Sets the etag
+         *
+         * @param etag The etag to set
+         */
+        public SchedJoulesPageBuilder etag(String etag) {
+            this.etag = etag;
+            return this;
+        }
+
+        public SchedJoulesPage build() {
+            return new SchedJoulesPage(itemData, etag, lastModified);
+        }
+
+    }
 }

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2017-2020 OX Software GmbH
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,117 +47,49 @@
  *
  */
 
-package com.openexchange.chronos.schedjoules.api.cache;
+package com.openexchange.chronos.schedjoules.impl.cache.loader;
+
+import com.openexchange.chronos.schedjoules.api.SchedJoulesAPI;
+import com.openexchange.chronos.schedjoules.api.SchedJoulesPage;
+import com.openexchange.chronos.schedjoules.impl.cache.SchedJoulesAPICache;
+import com.openexchange.chronos.schedjoules.impl.cache.SchedJoulesCachedItemKey;
+import com.openexchange.exception.OXException;
 
 /**
- * {@link SchedJoulesCachedItemKey}
+ * {@link SchedJoulesLanguagesCacheLoader}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class SchedJoulesCachedItemKey {
-
-    private final int contextId;
-    private final int itemId;
-    private final String locale;
+public class SchedJoulesLanguagesCacheLoader extends AbstractSchedJoulesCacheLoader {
 
     /**
-     * Initialises a new {@link SchedJoulesCachedItemKey}.
+     * Initialises a new {@link SchedJoulesLanguagesCacheLoader}.
      * 
-     * @param itemId
-     * @param locale
+     * @param apiCache
      */
-    public SchedJoulesCachedItemKey(final int contextId, final int itemId, final String locale) {
-        super();
-        this.contextId = contextId;
-        this.itemId = itemId;
-        this.locale = locale;
-    }
-
-    /**
-     * Gets the itemId
-     *
-     * @return The itemId
-     */
-    public int getItemId() {
-        return itemId;
-    }
-
-    /**
-     * Gets the locale
-     *
-     * @return The locale
-     */
-    public String getLocale() {
-        return locale;
-    }
-
-    /**
-     * Gets the contextId
-     *
-     * @return The contextId
-     */
-    public int getContextId() {
-        return contextId;
+    public SchedJoulesLanguagesCacheLoader(SchedJoulesAPICache apiCache) {
+        super(apiCache);
     }
 
     /*
      * (non-Javadoc)
      * 
-     * @see java.lang.Object#hashCode()
+     * @see com.openexchange.chronos.schedjoules.impl.cache.AbstractSchedJoulesCacheLoader#isModified(com.openexchange.chronos.schedjoules.api.cache.SchedJoulesCachedItemKey, com.openexchange.chronos.schedjoules.api.cache.SchedJoulesPage)
      */
     @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + contextId;
-        result = prime * result + itemId;
-        result = prime * result + ((locale == null) ? 0 : locale.hashCode());
-        return result;
+    boolean isModified(SchedJoulesCachedItemKey key, SchedJoulesPage page) throws OXException {
+        SchedJoulesAPI api = apiCache.getAPI(key.getContextId());
+        return api.languages().isModified(page.getEtag(), page.getLastModified());
     }
 
     /*
      * (non-Javadoc)
      * 
-     * @see java.lang.Object#equals(java.lang.Object)
+     * @see com.google.common.cache.CacheLoader#load(java.lang.Object)
      */
     @Override
-    public boolean equals(final Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        final SchedJoulesCachedItemKey other = (SchedJoulesCachedItemKey) obj;
-        if (contextId != other.contextId) {
-            return false;
-        }
-        if (itemId != other.itemId) {
-            return false;
-        }
-        if (locale == null) {
-            if (other.locale != null) {
-                return false;
-            }
-        } else if (!locale.equals(other.locale)) {
-            return false;
-        }
-        return true;
+    public SchedJoulesPage load(SchedJoulesCachedItemKey key) throws Exception {
+        SchedJoulesAPI api = apiCache.getAPI(key.getContextId());
+        return api.languages().listLanguages();
     }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.lang.Object#toString()
-     */
-    @Override
-    public String toString() {
-        StringBuilder builder = new StringBuilder();
-        builder.append("SchedJoulesCachedItemKey [contextId=").append(contextId).append(", itemId=").append(itemId).append(", locale=").append(locale).append("]");
-        return builder.toString();
-    }
-
 }

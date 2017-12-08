@@ -49,23 +49,16 @@
 
 package com.openexchange.chronos.schedjoules.api;
 
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
 import org.json.JSONObject;
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
+import com.openexchange.chronos.schedjoules.api.SchedJoulesPage.SchedJoulesPageBuilder;
 import com.openexchange.chronos.schedjoules.api.auxiliary.SchedJoulesCategory;
 import com.openexchange.chronos.schedjoules.api.auxiliary.SchedJoulesCommonParameter;
 import com.openexchange.chronos.schedjoules.api.auxiliary.SchedJoulesSearchParameter;
-import com.openexchange.chronos.schedjoules.api.cache.SchedJoulesCachedSearchKey;
-import com.openexchange.chronos.schedjoules.api.cache.SchedJoulesPage;
-import com.openexchange.chronos.schedjoules.api.cache.SchedJoulesPage.SchedJoulesPageBuilder;
 import com.openexchange.chronos.schedjoules.api.client.HttpMethod;
 import com.openexchange.chronos.schedjoules.api.client.SchedJoulesRESTBindPoint;
 import com.openexchange.chronos.schedjoules.api.client.SchedJoulesRESTClient;
 import com.openexchange.chronos.schedjoules.api.client.SchedJoulesRequest;
 import com.openexchange.chronos.schedjoules.api.client.SchedJoulesResponse;
-import com.openexchange.chronos.schedjoules.exception.SchedJoulesAPIExceptionCodes;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 
@@ -75,11 +68,6 @@ import com.openexchange.java.Strings;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class SchedJoulesPagesAPI extends AbstractSchedJoulesAPI {
-
-    /**
-     * The search cache
-     */
-    private final Cache<SchedJoulesCachedSearchKey, SchedJoulesPage> searchCache = CacheBuilder.newBuilder().maximumSize(1000).expireAfterAccess(1, TimeUnit.HOURS).build();
 
     /**
      * Initialises a new {@link SchedJoulesPagesAPI}.
@@ -150,23 +138,17 @@ public class SchedJoulesPagesAPI extends AbstractSchedJoulesAPI {
      * @throws OXException if an error is occurred
      */
     public SchedJoulesPage search(String query, String locale, int countryId, int categoryId, int maxRows) throws OXException {
-        try {
-            return searchCache.get(new SchedJoulesCachedSearchKey(query, locale, countryId, categoryId, maxRows), () -> {
-                SchedJoulesRequest request = new SchedJoulesRequest(SchedJoulesRESTBindPoint.pages.getAbsolutePath() + "/search");
-                request.setQueryParameter(SchedJoulesSearchParameter.q.name(), query);
-                request.setQueryParameter(SchedJoulesSearchParameter.locale.name(), Strings.isEmpty(locale) ? SchedJoulesAPIDefaultValues.DEFAULT_LOCALE : locale);
-                if (countryId > 0) {
-                    request.setQueryParameter(SchedJoulesSearchParameter.country_id.name(), Integer.toString(countryId));
-                }
-                if (categoryId > 0 && categoryId <= SchedJoulesCategory.values().length) {
-                    request.setQueryParameter(SchedJoulesSearchParameter.category_id.name(), Integer.toString(SchedJoulesCategory.values()[categoryId - 1].getId()));
-                }
-                request.setQueryParameter(SchedJoulesSearchParameter.nr_results.name(), Integer.toString(maxRows <= 0 ? SchedJoulesAPIDefaultValues.MAX_ROWS : maxRows));
-                return executeRequest(request);
-            });
-        } catch (ExecutionException e) {
-            throw SchedJoulesAPIExceptionCodes.UNEXPECTED_ERROR.create(e.getMessage(), e);
+        SchedJoulesRequest request = new SchedJoulesRequest(SchedJoulesRESTBindPoint.pages.getAbsolutePath() + "/search");
+        request.setQueryParameter(SchedJoulesSearchParameter.q.name(), query);
+        request.setQueryParameter(SchedJoulesSearchParameter.locale.name(), Strings.isEmpty(locale) ? SchedJoulesAPIDefaultValues.DEFAULT_LOCALE : locale);
+        if (countryId > 0) {
+            request.setQueryParameter(SchedJoulesSearchParameter.country_id.name(), Integer.toString(countryId));
         }
+        if (categoryId > 0 && categoryId <= SchedJoulesCategory.values().length) {
+            request.setQueryParameter(SchedJoulesSearchParameter.category_id.name(), Integer.toString(SchedJoulesCategory.values()[categoryId - 1].getId()));
+        }
+        request.setQueryParameter(SchedJoulesSearchParameter.nr_results.name(), Integer.toString(maxRows <= 0 ? SchedJoulesAPIDefaultValues.MAX_ROWS : maxRows));
+        return executeRequest(request);
     }
 
     /**
@@ -211,7 +193,6 @@ public class SchedJoulesPagesAPI extends AbstractSchedJoulesAPI {
      * @return The {@link JSONObject} of the response payload
      * @throws OXException if an error is occurred
      */
-    // FIXME: executor mini framework
     private SchedJoulesPage executeRequest(SchedJoulesRequest request) throws OXException {
         SchedJoulesResponse response = client.executeRequest(request);
         return new SchedJoulesPageBuilder().itemData((JSONObject) response.getResponseBody()).etag(response.getETag()).lastModified(response.getLastModified()).build();

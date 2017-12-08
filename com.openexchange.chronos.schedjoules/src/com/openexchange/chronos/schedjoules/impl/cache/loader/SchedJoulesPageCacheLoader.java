@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2017-2020 OX Software GmbH
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,42 +47,47 @@
  *
  */
 
-package com.openexchange.chronos.schedjoules.api.cache;
+package com.openexchange.chronos.schedjoules.impl.cache.loader;
+
+import com.openexchange.chronos.schedjoules.api.SchedJoulesAPI;
+import com.openexchange.chronos.schedjoules.api.SchedJoulesPage;
+import com.openexchange.chronos.schedjoules.impl.cache.SchedJoulesAPICache;
+import com.openexchange.chronos.schedjoules.impl.cache.SchedJoulesCachedItemKey;
+import com.openexchange.exception.OXException;
 
 /**
- * {@link SchedJoulesCountryCachedItemKey}
+ * {@link SchedJoulesPageCacheLoader}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class SchedJoulesCountryCachedItemKey {
-
-    private final String countryCode;
-    private final String locale;
+public class SchedJoulesPageCacheLoader extends AbstractSchedJoulesCacheLoader {
 
     /**
-     * Initialises a new {@link SchedJoulesCountryCachedItemKey}.
+     * Initialises a new {@link SchedJoulesPageCacheLoader}.
      */
-    public SchedJoulesCountryCachedItemKey(String countryCode, String locale) {
-        super();
-        this.countryCode = countryCode;
-        this.locale = locale;
+    public SchedJoulesPageCacheLoader(SchedJoulesAPICache apiCache) {
+        super(apiCache);
     }
 
-    /**
-     * Gets the countryCode
-     *
-     * @return The countryCode
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.chronos.schedjoules.impl.cache.AbstractSchedJoulesCacheLoader#isModified(com.openexchange.chronos.schedjoules.api.cache.SchedJoulesPage)
      */
-    public String getCountryCode() {
-        return countryCode;
+    @Override
+    boolean isModified(SchedJoulesCachedItemKey key, SchedJoulesPage page) throws OXException {
+        SchedJoulesAPI api = apiCache.getAPI(key.getContextId());
+        return api.pages().isModified(key.getItemId(), key.getLocale(), page.getEtag(), page.getLastModified());
     }
 
-    /**
-     * Gets the locale
-     *
-     * @return The locale
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.google.common.cache.CacheLoader#load(java.lang.Object)
      */
-    public String getLocale() {
-        return locale;
+    @Override
+    public SchedJoulesPage load(SchedJoulesCachedItemKey key) throws Exception {
+        SchedJoulesAPI api = apiCache.getAPI(key.getContextId());
+        return api.pages().getPage(key.getItemId(), key.getLocale());
     }
 }

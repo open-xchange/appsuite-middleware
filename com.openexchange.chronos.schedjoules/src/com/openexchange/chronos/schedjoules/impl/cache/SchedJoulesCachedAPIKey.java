@@ -49,44 +49,80 @@
 
 package com.openexchange.chronos.schedjoules.impl.cache;
 
-import com.openexchange.chronos.schedjoules.api.SchedJoulesAPI;
-import com.openexchange.chronos.schedjoules.api.cache.SchedJoulesCachedItemKey;
-import com.openexchange.chronos.schedjoules.api.cache.SchedJoulesPage;
-import com.openexchange.exception.OXException;
-
 /**
- * {@link SchedJoulesPageCacheLoader}
+ * {@link SchedJoulesCachedAPIKey}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class SchedJoulesPageCacheLoader extends AbstractSchedJoulesCacheLoader {
+public class SchedJoulesCachedAPIKey {
+
+    private final String apiKeyHash;
+    private final int contextId;
 
     /**
-     * Initialises a new {@link SchedJoulesPageCacheLoader}.
+     * Initialises a new {@link SchedJoulesCachedAPIKey}.
      */
-    public SchedJoulesPageCacheLoader(SchedJoulesAPICache apiCache) {
-        super(apiCache);
+    public SchedJoulesCachedAPIKey(final String apiKeyHash, final int contextId) {
+        super();
+        this.apiKeyHash = apiKeyHash;
+        this.contextId = contextId;
+    }
+
+    /**
+     * Gets the apiKeyHash
+     *
+     * @return The apiKeyHash
+     */
+    public String getApiKeyHash() {
+        return apiKeyHash;
+    }
+
+    /**
+     * Gets the contextId
+     *
+     * @return The contextId
+     */
+    public int getContextId() {
+        return contextId;
     }
 
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.chronos.schedjoules.impl.cache.AbstractSchedJoulesCacheLoader#isModified(com.openexchange.chronos.schedjoules.api.cache.SchedJoulesPage)
+     * @see java.lang.Object#hashCode()
      */
     @Override
-    boolean isModified(SchedJoulesCachedItemKey key, SchedJoulesPage page) throws OXException {
-        SchedJoulesAPI api = apiCache.getAPI(key.getContextId());
-        return api.pages().isModified(key.getItemId(), key.getLocale(), page.getEtag(), page.getLastModified());
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((apiKeyHash == null) ? 0 : apiKeyHash.hashCode());
+        return result;
     }
 
     /*
      * (non-Javadoc)
      * 
-     * @see com.google.common.cache.CacheLoader#load(java.lang.Object)
+     * @see java.lang.Object#equals(java.lang.Object)
      */
     @Override
-    public SchedJoulesPage load(SchedJoulesCachedItemKey key) throws Exception {
-        SchedJoulesAPI api = apiCache.getAPI(key.getContextId());
-        return api.pages().getPage(key.getItemId(), key.getLocale());
+    public boolean equals(final Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final SchedJoulesCachedAPIKey other = (SchedJoulesCachedAPIKey) obj;
+        if (apiKeyHash == null) {
+            if (other.apiKeyHash != null) {
+                return false;
+            }
+        } else if (!apiKeyHash.equals(other.apiKeyHash)) {
+            return false;
+        }
+        return true;
     }
 }

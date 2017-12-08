@@ -147,7 +147,6 @@ public class BasicSchedJoulesCalendarAccess extends BasicCachingCalendarAccess {
             long lastModified = internalConfig.optLong(SchedJoulesFields.LAST_MODIFIED, -1);
             URL url = getFeedURL(internalConfig);
 
-            //SchedJoulesAPI api = SchedJoulesAPI.getInstance();
             SchedJoulesService schedJoulesService = services.getService(SchedJoulesService.class);
             SchedJoulesCalendar calendar = schedJoulesService.getCalendar(session.getContextId(), url, eTag, lastModified);
             if (eTag.equals(calendar.getETag())) {

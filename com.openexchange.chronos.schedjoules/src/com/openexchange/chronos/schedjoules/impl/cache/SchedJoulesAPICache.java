@@ -57,7 +57,6 @@ import org.slf4j.LoggerFactory;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.openexchange.chronos.schedjoules.api.SchedJoulesAPI;
-import com.openexchange.chronos.schedjoules.api.cache.SchedJoulesCachedAPIKey;
 import com.openexchange.chronos.schedjoules.exception.SchedJoulesAPIExceptionCodes;
 import com.openexchange.chronos.schedjoules.impl.SchedJoulesProperty;
 import com.openexchange.chronos.schedjoules.osgi.Services;

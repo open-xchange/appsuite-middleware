@@ -67,14 +67,14 @@ import com.openexchange.chronos.schedjoules.SchedJoulesResult;
 import com.openexchange.chronos.schedjoules.SchedJoulesService;
 import com.openexchange.chronos.schedjoules.api.SchedJoulesAPI;
 import com.openexchange.chronos.schedjoules.api.SchedJoulesAPIDefaultValues;
+import com.openexchange.chronos.schedjoules.api.SchedJoulesPage;
 import com.openexchange.chronos.schedjoules.api.SchedJoulesPageField;
-import com.openexchange.chronos.schedjoules.api.cache.SchedJoulesCachedItemKey;
-import com.openexchange.chronos.schedjoules.api.cache.SchedJoulesPage;
 import com.openexchange.chronos.schedjoules.exception.SchedJoulesAPIExceptionCodes;
 import com.openexchange.chronos.schedjoules.impl.cache.SchedJoulesAPICache;
-import com.openexchange.chronos.schedjoules.impl.cache.SchedJoulesCountriesCacheLoader;
-import com.openexchange.chronos.schedjoules.impl.cache.SchedJoulesLanguagesCacheLoader;
-import com.openexchange.chronos.schedjoules.impl.cache.SchedJoulesPageCacheLoader;
+import com.openexchange.chronos.schedjoules.impl.cache.SchedJoulesCachedItemKey;
+import com.openexchange.chronos.schedjoules.impl.cache.loader.SchedJoulesCountriesCacheLoader;
+import com.openexchange.chronos.schedjoules.impl.cache.loader.SchedJoulesLanguagesCacheLoader;
+import com.openexchange.chronos.schedjoules.impl.cache.loader.SchedJoulesPageCacheLoader;
 import com.openexchange.exception.OXException;
 
 /**
