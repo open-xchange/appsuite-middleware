@@ -49,10 +49,12 @@
 
 package com.openexchange.chronos.schedjoules.json.actions;
 
+import java.util.Collections;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.chronos.schedjoules.SchedJoulesService;
+import com.openexchange.chronos.schedjoules.api.SchedJoulesPageField;
 import com.openexchange.chronos.schedjoules.json.actions.parameter.SchedJoulesBrowseParameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
@@ -87,10 +89,10 @@ public class BrowseAction extends AbstractSchedJoulesAction implements AJAXActio
         // Execute the request
         SchedJoulesService service = services.getService(SchedJoulesService.class);
         if (pageId == null) {
-            return new AJAXRequestResult(service.getRoot(session.getContextId(), language, country).getData());
+            return new AJAXRequestResult(service.getRoot(session.getContextId(), language, country, Collections.singleton(SchedJoulesPageField.URL)).getData());
         }
 
         int pid = requestData.getIntParameter(SchedJoulesBrowseParameter.ID);
-        return new AJAXRequestResult(service.getPage(session.getContextId(), pid, language).getData());
+        return new AJAXRequestResult(service.getPage(session.getContextId(), pid, language, Collections.singleton(SchedJoulesPageField.URL)).getData());
     }
 }

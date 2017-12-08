@@ -51,6 +51,7 @@ package com.openexchange.chronos.schedjoules.impl;
 
 import java.net.URL;
 import java.util.Iterator;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import org.json.JSONArray;
@@ -66,6 +67,7 @@ import com.openexchange.chronos.schedjoules.SchedJoulesResult;
 import com.openexchange.chronos.schedjoules.SchedJoulesService;
 import com.openexchange.chronos.schedjoules.api.SchedJoulesAPI;
 import com.openexchange.chronos.schedjoules.api.SchedJoulesAPIDefaultValues;
+import com.openexchange.chronos.schedjoules.api.SchedJoulesPageField;
 import com.openexchange.chronos.schedjoules.api.cache.SchedJoulesCachedItemKey;
 import com.openexchange.chronos.schedjoules.api.cache.SchedJoulesPage;
 import com.openexchange.chronos.schedjoules.exception.SchedJoulesAPIExceptionCodes;
@@ -124,8 +126,8 @@ public class SchedJoulesServiceImpl implements SchedJoulesService {
      * @see com.openexchange.chronos.service.SchedJoulesService#getRoot()
      */
     @Override
-    public SchedJoulesResult getRoot(int contextId) throws OXException {
-        return getRoot(contextId, SchedJoulesAPIDefaultValues.DEFAULT_LOCALE, SchedJoulesAPIDefaultValues.DEFAULT_LOCATION);
+    public SchedJoulesResult getRoot(int contextId, Set<SchedJoulesPageField> filteredFields) throws OXException {
+        return getRoot(contextId, SchedJoulesAPIDefaultValues.DEFAULT_LOCALE, SchedJoulesAPIDefaultValues.DEFAULT_LOCATION, filteredFields);
     }
 
     /*
@@ -134,7 +136,7 @@ public class SchedJoulesServiceImpl implements SchedJoulesService {
      * @see com.openexchange.chronos.service.SchedJoulesService#getRoot(java.lang.String, java.lang.String)
      */
     @Override
-    public SchedJoulesResult getRoot(int contextId, String locale, String location) throws OXException {
+    public SchedJoulesResult getRoot(int contextId, String locale, String location, Set<SchedJoulesPageField> filteredFields) throws OXException {
         try {
             int itemId = rootItemIdCache.get(location, () -> {
                 SchedJoulesAPI api = apiCache.getAPI(contextId);
@@ -146,7 +148,7 @@ public class SchedJoulesServiceImpl implements SchedJoulesService {
                 pagesCache.put(new SchedJoulesCachedItemKey(contextId, rootPageItemId, locale), rootPage);
                 return rootPageItemId;
             });
-            return getPage(contextId, itemId, locale);
+            return getPage(contextId, itemId, locale, filteredFields);
         } catch (ExecutionException e) {
             throw SchedJoulesAPIExceptionCodes.UNEXPECTED_ERROR.create(e.getMessage(), e);
         }
@@ -158,8 +160,8 @@ public class SchedJoulesServiceImpl implements SchedJoulesService {
      * @see com.openexchange.chronos.service.SchedJoulesService#getPage(int)
      */
     @Override
-    public SchedJoulesResult getPage(int contextId, int pageId) throws OXException {
-        return getPage(contextId, pageId, SchedJoulesAPIDefaultValues.DEFAULT_LOCALE);
+    public SchedJoulesResult getPage(int contextId, int pageId, Set<SchedJoulesPageField> filteredFields) throws OXException {
+        return getPage(contextId, pageId, SchedJoulesAPIDefaultValues.DEFAULT_LOCALE, filteredFields);
     }
 
     /*
@@ -168,10 +170,12 @@ public class SchedJoulesServiceImpl implements SchedJoulesService {
      * @see com.openexchange.chronos.schedjoules.SchedJoulesService#getPage(int, java.lang.String)
      */
     @Override
-    public SchedJoulesResult getPage(int contextId, int pageId, String locale) throws OXException {
+    public SchedJoulesResult getPage(int contextId, int pageId, String locale, Set<SchedJoulesPageField> filteredFields) throws OXException {
         try {
             // FIXME: Don't filter when consumed internally
-            return new SchedJoulesResult(pagesCache.get(new SchedJoulesCachedItemKey(contextId, pageId, locale)).getItemData());
+            JSONObject content = (JSONObject) pagesCache.get(new SchedJoulesCachedItemKey(contextId, pageId, locale)).getItemData();
+            filterContent(content, SchedJoulesPageField.toSring(filteredFields));
+            return new SchedJoulesResult(content);
         } catch (ExecutionException e) {
             throw SchedJoulesAPIExceptionCodes.UNEXPECTED_ERROR.create(e.getMessage(), e);
         }
@@ -211,8 +215,8 @@ public class SchedJoulesServiceImpl implements SchedJoulesService {
      * @see com.openexchange.chronos.schedjoules.SchedJoulesService#search(java.lang.String, java.lang.String, int, int, int)
      */
     @Override
-    public SchedJoulesResult search(int contextId, String query, String locale, int countryId, int categoryId, int maxRows) throws OXException {
-        return new SchedJoulesResult(filterContent((JSONObject) apiCache.getAPI(contextId).pages().search(query, locale, countryId, categoryId, maxRows).getItemData()));
+    public SchedJoulesResult search(int contextId, String query, String locale, int countryId, int categoryId, int maxRows, Set<SchedJoulesPageField> filteredFields) throws OXException {
+        return new SchedJoulesResult(filterContent((JSONObject) apiCache.getAPI(contextId).pages().search(query, locale, countryId, categoryId, maxRows).getItemData(), SchedJoulesPageField.toSring(filteredFields)));
     }
 
     /*
@@ -234,10 +238,14 @@ public class SchedJoulesServiceImpl implements SchedJoulesService {
      * @return the filtered {@link JSONObject}
      * @throws OXException if a JSON error is occurred
      */
-    private JSONObject filterContent(JSONObject content) throws OXException {
+    private JSONObject filterContent(JSONObject content, Set<String> filteredFields) throws OXException {
+        if (filteredFields == null || filteredFields.isEmpty()) {
+            return content;
+        }
+
         try {
             long startTime = System.currentTimeMillis();
-            filterJSONObject(content);
+            filterJSONObject(content, filteredFields);
             LOG.trace("Filtered content in {} msec.", System.currentTimeMillis() - startTime);
             return content;
         } catch (JSONException e) {
@@ -252,14 +260,14 @@ public class SchedJoulesServiceImpl implements SchedJoulesService {
      * @return the filtered {@link JSONObject}
      * @throws OXException if a JSON error is occurred
      */
-    private void filterJSONObject(JSONObject object) throws JSONException, OXException {
+    private void filterJSONObject(JSONObject object, Set<String> filteredFields) throws JSONException, OXException {
         Iterator<String> keys = object.keys();
         while (keys.hasNext()) {
             String key = keys.next();
-            if (key.equals("url")) {
+            if (filteredFields.contains(key)) {
                 keys.remove();
             } else {
-                filterObject(object.get(key));
+                filterObject(object.get(key), filteredFields);
             }
         }
     }
@@ -271,9 +279,9 @@ public class SchedJoulesServiceImpl implements SchedJoulesService {
      * @throws OXException if a JSON error is occurred
      * @throws JSONException if JSON parsing error is occurred
      */
-    private void filterJSONArray(JSONArray array) throws OXException, JSONException {
+    private void filterJSONArray(JSONArray array, Set<String> filteredFields) throws OXException, JSONException {
         for (int index = 0; index < array.length(); index++) {
-            filterObject(array.get(index));
+            filterObject(array.get(index), filteredFields);
         }
     }
 
@@ -284,11 +292,11 @@ public class SchedJoulesServiceImpl implements SchedJoulesService {
      * @throws OXException if a JSON error is occurred
      * @throws JSONException if JSON parsing error is occurred
      */
-    private void filterObject(Object obj) throws JSONException, OXException {
+    private void filterObject(Object obj, Set<String> filteredFields) throws JSONException, OXException {
         if (obj instanceof JSONObject) {
-            filterJSONObject((JSONObject) obj);
+            filterJSONObject((JSONObject) obj, filteredFields);
         } else if (obj instanceof JSONArray) {
-            filterJSONArray((JSONArray) obj);
+            filterJSONArray((JSONArray) obj, filteredFields);
         }
     }
 }

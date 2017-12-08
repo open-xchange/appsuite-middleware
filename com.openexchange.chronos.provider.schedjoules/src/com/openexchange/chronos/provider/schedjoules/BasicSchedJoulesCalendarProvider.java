@@ -51,6 +51,7 @@ package com.openexchange.chronos.provider.schedjoules;
 
 import static com.openexchange.chronos.provider.CalendarFolderProperty.COLOR_LITERAL;
 import static com.openexchange.chronos.provider.CalendarFolderProperty.optPropertyValue;
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.Locale;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -216,7 +217,7 @@ public class BasicSchedJoulesCalendarProvider implements BasicCalendarProvider {
         try {
             SchedJoulesService schedJoulesService = services.getService(SchedJoulesService.class);
             // FIXME: type check
-            JSONObject page = (JSONObject) schedJoulesService.getPage(contextId, itemId, locale).getData();
+            JSONObject page = (JSONObject) schedJoulesService.getPage(contextId, itemId, locale, Collections.emptySet()).getData();
             if (!page.hasAndNotNull(SchedJoulesFields.URL)) {
                 throw SchedJoulesProviderExceptionCodes.NO_CALENDAR.create(itemId);
             }

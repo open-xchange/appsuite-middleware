@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2017-2020 OX Software GmbH
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,55 +47,49 @@
  *
  */
 
-package com.openexchange.chronos.schedjoules.json.actions;
+package com.openexchange.chronos.schedjoules.api;
 
-import java.util.Collections;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.chronos.schedjoules.SchedJoulesService;
-import com.openexchange.chronos.schedjoules.api.SchedJoulesPageField;
-import com.openexchange.chronos.schedjoules.json.actions.parameter.SchedJoulesSearchParameter;
-import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.session.ServerSession;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
- * {@link SearchAction}
+ * {@link SchedJoulesPageField}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class SearchAction extends AbstractSchedJoulesAction implements AJAXActionService {
+public enum SchedJoulesPageField {
+    URL("url");
+
+    private final String fieldName;
 
     /**
-     * Initialises a new {@link SearchAction}.
-     * 
-     * @param services The {@link ServiceLookup} instance
+     * Initialises a new {@link SchedJoulesPageField}.
      */
-    public SearchAction(ServiceLookup services) {
-        super(services);
+    private SchedJoulesPageField(String fieldName) {
+        this.fieldName = fieldName;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.requesthandler.AJAXActionService#perform(com.openexchange.ajax.requesthandler.AJAXRequestData, com.openexchange.tools.session.ServerSession)
+    /**
+     * Gets the fieldName
+     *
+     * @return The fieldName
      */
-    @Override
-    public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
-        // Get the mandatory 'query' parameter
-        String query = requestData.nonEmptyParameter(SchedJoulesSearchParameter.QUERY);
-        // Get optional 'maxRows' parameter
-        int maxRows = requestData.getIntParameter(SchedJoulesSearchParameter.MAX_ROWS);
-        // Get the optional 'language' parameter
-        String locale = getLanguage(requestData, session);
-        // Get the optional 'countryId' parameter
-        int countryId = requestData.getIntParameter(SchedJoulesSearchParameter.COUNTRY_ID);
-        // Get the optional 'categoryId' parameter
-        int categoryId = requestData.getIntParameter(SchedJoulesSearchParameter.CATEGORY_ID);
+    public String getFieldName() {
+        return fieldName;
+    }
 
-        // Execute
-        SchedJoulesService service = services.getService(SchedJoulesService.class);
-        return new AJAXRequestResult(service.search(session.getContextId(), query, locale, countryId, categoryId, maxRows, Collections.singleton(SchedJoulesPageField.URL)).getData());
+    /**
+     * Returns an unmodifiable {@link Set} with a stringified representation
+     * of the specified {@link SchedJoulesPageField} fields.
+     * 
+     * @param fields the {@link SchedJoulesPageField}s
+     * @return An unmodifiable {@link Set} with the stringified representation of the {@link SchedJoulesPageField}s
+     */
+    public static Set<String> toSring(Set<SchedJoulesPageField> fields) {
+        Set<String> stringFields = new HashSet<>();
+        for (SchedJoulesPageField field : fields) {
+            stringFields.add(field.getFieldName());
+        }
+        return stringFields;
     }
 }

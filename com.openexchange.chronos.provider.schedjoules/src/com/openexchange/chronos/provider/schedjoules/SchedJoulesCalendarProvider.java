@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.provider.schedjoules;
 
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Locale;
@@ -327,7 +328,7 @@ public class SchedJoulesCalendarProvider extends CachingCalendarProvider {
         try {
             SchedJoulesService schedJoulesService = services.getService(SchedJoulesService.class);
             // FIXME: type check
-            JSONObject page = (JSONObject) schedJoulesService.getPage(contextId, itemId, locale).getData();
+            JSONObject page = (JSONObject) schedJoulesService.getPage(contextId, itemId, locale, Collections.emptySet()).getData();
             if (!page.hasAndNotNull(SchedJoulesFields.URL)) {
                 throw SchedJoulesProviderExceptionCodes.NO_CALENDAR.create(itemId);
             }

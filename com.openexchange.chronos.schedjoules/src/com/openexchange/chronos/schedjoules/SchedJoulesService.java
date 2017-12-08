@@ -50,6 +50,8 @@ package com.openexchange.chronos.schedjoules;
  */
 
 import java.net.URL;
+import java.util.Set;
+import com.openexchange.chronos.schedjoules.api.SchedJoulesPageField;
 import com.openexchange.exception.OXException;
 
 /**
@@ -67,7 +69,7 @@ public interface SchedJoulesService {
      * @return The {@link SchedJoulesResult}
      * @throws OXException if an error is occurred
      */
-    SchedJoulesResult getRoot(int contextId) throws OXException;
+    SchedJoulesResult getRoot(int contextId, Set<SchedJoulesPageField> filteredFields) throws OXException;
 
     /**
      * Retrieves the starting SchedJoules page for the specified location
@@ -80,7 +82,7 @@ public interface SchedJoulesService {
      * @return The {@link SchedJoulesResult}
      * @throws OXException if an error is occurred
      */
-    SchedJoulesResult getRoot(int contextId, String locale, String location) throws OXException;
+    SchedJoulesResult getRoot(int contextId, String locale, String location, Set<SchedJoulesPageField> filteredFields) throws OXException;
 
     /**
      * Retrieves the SchedJoules page with the specified identifier
@@ -91,7 +93,7 @@ public interface SchedJoulesService {
      * @return The {@link SchedJoulesResult}
      * @throws OXException if an error is occurred
      */
-    SchedJoulesResult getPage(int contextId, int pageId) throws OXException;
+    SchedJoulesResult getPage(int contextId, int pageId, Set<SchedJoulesPageField> filteredFields) throws OXException;
 
     /**
      * Retrieves the SchedJoules page with the specified identifier
@@ -102,7 +104,7 @@ public interface SchedJoulesService {
      * @return The {@link SchedJoulesResult}
      * @throws OXException if an error is occurred
      */
-    SchedJoulesResult getPage(int contextId, int pageId, String locale) throws OXException;
+    SchedJoulesResult getPage(int contextId, int pageId, String locale, Set<SchedJoulesPageField> filteredFields) throws OXException;
 
     /**
      * Retrieves a list of supported and localised country names
@@ -139,7 +141,7 @@ public interface SchedJoulesService {
      * @return The {@link SchedJoulesResult}
      * @throws OXException if an error is occurred
      */
-    SchedJoulesResult search(int contextId, String query, String locale, int countryId, int categoryId, int maxRows) throws OXException;
+    SchedJoulesResult search(int contextId, String query, String locale, int countryId, int categoryId, int maxRows, Set<SchedJoulesPageField> filteredFields) throws OXException;
 
     /**
      * Retrieves the calendar data from the specified {@link URL}
