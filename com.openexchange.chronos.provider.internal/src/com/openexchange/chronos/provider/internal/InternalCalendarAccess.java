@@ -90,6 +90,7 @@ import com.openexchange.chronos.provider.extensions.FolderSearchAware;
 import com.openexchange.chronos.provider.extensions.FolderSyncAware;
 import com.openexchange.chronos.provider.extensions.PersonalAlarmAware;
 import com.openexchange.chronos.provider.extensions.QuotaAware;
+import com.openexchange.chronos.provider.extensions.SubscribeAware;
 import com.openexchange.chronos.provider.extensions.WarningsAware;
 import com.openexchange.chronos.provider.folder.FolderCalendarAccess;
 import com.openexchange.chronos.provider.groupware.DefaultGroupwareCalendarFolder;
@@ -124,7 +125,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class InternalCalendarAccess implements FolderCalendarAccess, GroupwareCalendarAccess, FolderSyncAware, PersonalAlarmAware, FolderSearchAware, QuotaAware, WarningsAware {
+public class InternalCalendarAccess implements FolderCalendarAccess, SubscribeAware, GroupwareCalendarAccess, FolderSyncAware, PersonalAlarmAware, FolderSearchAware, QuotaAware, WarningsAware {
 
     private final CalendarSession session;
     private final ServiceLookup services;

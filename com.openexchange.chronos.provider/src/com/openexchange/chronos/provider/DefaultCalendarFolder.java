@@ -75,6 +75,7 @@ public class DefaultCalendarFolder implements CalendarFolder {
      */
     public DefaultCalendarFolder() {
         super();
+        subscribed = true;
     }
 
     /**
@@ -83,7 +84,7 @@ public class DefaultCalendarFolder implements CalendarFolder {
      * @param folder The folder to copy the properties from
      */
     public DefaultCalendarFolder(CalendarFolder folder) {
-        super();
+        this();
         id = folder.getId();
         name = folder.getName();
         lastModified = folder.getLastModified();

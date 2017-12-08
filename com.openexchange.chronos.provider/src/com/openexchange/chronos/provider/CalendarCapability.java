@@ -59,6 +59,7 @@ import com.openexchange.chronos.provider.extensions.PermissionAware;
 import com.openexchange.chronos.provider.extensions.PersonalAlarmAware;
 import com.openexchange.chronos.provider.extensions.QuotaAware;
 import com.openexchange.chronos.provider.extensions.SearchAware;
+import com.openexchange.chronos.provider.extensions.SubscribeAware;
 import com.openexchange.chronos.provider.extensions.SyncAware;
 import com.openexchange.chronos.provider.extensions.WarningsAware;
 
@@ -112,6 +113,12 @@ public enum CalendarCapability {
      * @see LegacyStorageMarker
      */
     LEGACY_STORAGE("legacyStorage", LegacyStorageMarker.class),
+    /**
+     * Support for (un)subscribing calendars.
+     *
+     * @see SubscribeAware
+     */
+    SUBSCRIBE("subscribe", SubscribeAware.class),
 
     ;
 

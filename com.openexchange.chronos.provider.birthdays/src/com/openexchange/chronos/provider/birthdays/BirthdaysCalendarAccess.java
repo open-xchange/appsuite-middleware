@@ -81,6 +81,7 @@ import com.openexchange.chronos.provider.basic.CalendarSettings;
 import com.openexchange.chronos.provider.basic.DefaultCalendarSettings;
 import com.openexchange.chronos.provider.extensions.BasicSearchAware;
 import com.openexchange.chronos.provider.extensions.PersonalAlarmAware;
+import com.openexchange.chronos.provider.extensions.SubscribeAware;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarResult;
 import com.openexchange.chronos.service.EventID;
@@ -122,7 +123,7 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class BirthdaysCalendarAccess implements BasicCalendarAccess, PersonalAlarmAware, BasicSearchAware {
+public class BirthdaysCalendarAccess implements BasicCalendarAccess, SubscribeAware, PersonalAlarmAware, BasicSearchAware {
 
     /** Search term to query for contacts having a birthday */
     private static final SearchTerm<?> HAS_BIRTHDAY_TERM = new CompositeSearchTerm(CompositeOperation.NOT)
