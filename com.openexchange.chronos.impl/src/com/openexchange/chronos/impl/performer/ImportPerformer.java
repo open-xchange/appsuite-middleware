@@ -57,7 +57,6 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
-import java.util.NoSuchElementException;
 import java.util.Map.Entry;
 import java.util.UUID;
 import com.openexchange.chronos.Event;
@@ -80,6 +79,7 @@ import com.openexchange.folderstorage.UserizedFolder;
  * {@link ImportPerformer}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.0
  */
 public class ImportPerformer extends AbstractUpdatePerformer {
@@ -92,6 +92,7 @@ public class ImportPerformer extends AbstractUpdatePerformer {
      * @param storage The underlying calendar storage
      * @param session The calendar session
      * @param folder The calendar folder representing the current view on the events
+     * @throws OXException See {@link AbstractUpdatePerformer#AbstractUpdatePerformer(CalendarStorage, CalendarSession, UserizedFolder)}
      */
     public ImportPerformer(CalendarStorage storage, CalendarSession session, UserizedFolder folder) throws OXException {
         super(storage, session, folder);
@@ -267,7 +268,7 @@ public class ImportPerformer extends AbstractUpdatePerformer {
             } catch (OXException e) {
                 if (retryCount < MAX_RETRIES && handle(e, importedEvent)) {
                     // try again
-                    LOG.debug("{} - trying again ({}/{})", e.getMessage(), retryCount, MAX_RETRIES, e);
+                    LOG.debug("{} - trying again ({}/{})", e.getMessage(), Integer.valueOf(retryCount), Integer.valueOf(MAX_RETRIES), e);
                     warnings.add(e);
                     continue;
                 }
@@ -298,7 +299,7 @@ public class ImportPerformer extends AbstractUpdatePerformer {
             } catch (OXException e) {
                 if (retryCount < MAX_RETRIES && handle(e, importedException)) {
                     // try again
-                    LOG.debug("{} - trying again ({}/{})", e.getMessage(), retryCount, MAX_RETRIES, e);
+                    LOG.debug("{} - trying again ({}/{})", e.getMessage(), Integer.valueOf(retryCount), Integer.valueOf(MAX_RETRIES), e);
                     warnings.add(e);
                     continue;
                 }
@@ -341,7 +342,7 @@ public class ImportPerformer extends AbstractUpdatePerformer {
      *
      * @param e The exception to handle
      * @param event The event being saved
-     * @return <code>true</code> if the excpetion could be handled and the operation should be tried again, <code>false</code>, otherwise
+     * @return <code>true</code> if the exception could be handled and the operation should be tried again, <code>false</code>, otherwise
      */
     private boolean handle(OXException e, Event event) {
         try {
@@ -350,6 +351,9 @@ public class ImportPerformer extends AbstractUpdatePerformer {
                     return session.getUtilities().handleIncorrectString(e, event);
                 case "CAL-5070": // Data truncation [field %1$s, limit %2$d, current %3$d]
                     return session.getUtilities().handleDataTruncation(e, event);
+                default:
+                    // Fall through
+                    break;
             }
         } catch (Exception x) {
             LOG.warn("Error during automatic handling of {}", e.getErrorCode(), x);
