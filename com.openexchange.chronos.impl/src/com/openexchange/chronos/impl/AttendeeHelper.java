@@ -56,6 +56,7 @@ import static com.openexchange.chronos.common.CalendarUtils.find;
 import static com.openexchange.chronos.common.CalendarUtils.getAttendeeUpdates;
 import static com.openexchange.chronos.common.CalendarUtils.isInternal;
 import static com.openexchange.chronos.common.CalendarUtils.isLastUserAttendee;
+import static com.openexchange.chronos.common.CalendarUtils.matches;
 import static com.openexchange.chronos.impl.Utils.getCalendarUserId;
 import static com.openexchange.chronos.impl.Utils.isEnforceDefaultAttendee;
 import static com.openexchange.java.Autoboxing.I;
@@ -71,7 +72,9 @@ import com.openexchange.chronos.ExtendedPropertyParameter;
 import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.common.mapping.AbstractCollectionUpdate;
 import com.openexchange.chronos.common.mapping.AttendeeMapper;
+import com.openexchange.chronos.common.mapping.DefaultItemUpdate;
 import com.openexchange.chronos.service.CalendarSession;
+import com.openexchange.chronos.service.CollectionUpdate;
 import com.openexchange.chronos.service.ItemUpdate;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.UserizedFolder;
@@ -83,7 +86,7 @@ import com.openexchange.folderstorage.type.PublicType;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class AttendeeHelper {
+public class AttendeeHelper implements CollectionUpdate<Attendee, AttendeeField> {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AttendeeHelper.class);
 
@@ -92,7 +95,7 @@ public class AttendeeHelper {
     private final List<Attendee> originalAttendees;
     private final List<Attendee> attendeesToInsert;
     private final List<Attendee> attendeesToDelete;
-    private final List<Attendee> attendeesToUpdate;
+    private final List<ItemUpdate<Attendee, AttendeeField>> attendeesToUpdate;
 
     /**
      * Initializes a new {@link AttendeeHelper} for a new event.
@@ -165,43 +168,27 @@ public class AttendeeHelper {
         this.originalAttendees = emptyForNull(originalAttendees);
         this.attendeesToInsert = new ArrayList<Attendee>();
         this.attendeesToDelete = new ArrayList<Attendee>();
-        this.attendeesToUpdate = new ArrayList<Attendee>();
+        this.attendeesToUpdate = new ArrayList<ItemUpdate<Attendee, AttendeeField>>();
     }
 
-    /**
-     * Gets a list of newly added attendees that should be inserted.
-     *
-     * @return The attendees, or an empty list if there are none
-     */
-    public List<Attendee> getAttendeesToInsert() throws OXException {
+    @Override
+    public List<Attendee> getAddedItems() {
         return attendeesToInsert;
     }
 
-    /**
-     * Gets a list of removed attendees that should be deleted.
-     *
-     * @return The attendees, or an empty list if there are none
-     */
-    public List<Attendee> getAttendeesToDelete() {
+    @Override
+    public List<Attendee> getRemovedItems() {
         return attendeesToDelete;
     }
 
-    /**
-     * Gets a list of modified added attendees that should be updated.
-     *
-     * @return The attendees, or an empty list if there are none
-     */
-    public List<Attendee> getAttendeesToUpdate() {
-        return attendeesToUpdate;
+    @Override
+    public boolean isEmpty() {
+        return attendeesToInsert.isEmpty() && attendeesToDelete.isEmpty() && attendeesToUpdate.isEmpty();
     }
 
-    /**
-     * Gets a value indicating if there are any attendee-related changes.
-     *
-     * @return <code>true</code> if there are any changes, <code>false</code>, otherwise
-     */
-    public boolean hasChanges() {
-        return 0 < attendeesToInsert.size() || 0 < attendeesToDelete.size() || 0 < attendeesToUpdate.size();
+    @Override
+    public List<? extends ItemUpdate<Attendee, AttendeeField>> getUpdatedItems() {
+        return attendeesToUpdate;
     }
 
     /**
@@ -213,11 +200,11 @@ public class AttendeeHelper {
     public List<Attendee> previewChanges() throws OXException {
         List<Attendee> newAttendees = new ArrayList<Attendee>(originalAttendees);
         newAttendees.removeAll(attendeesToDelete);
-        for (Attendee attendeeToUpdate : attendeesToUpdate) {
-            Attendee originalAttendee = find(originalAttendees, attendeeToUpdate);
+        for (ItemUpdate<Attendee, AttendeeField> attendeeToUpdate : attendeesToUpdate) {
+            Attendee originalAttendee = attendeeToUpdate.getOriginal();
             newAttendees.remove(originalAttendee);
             Attendee newAttendee = AttendeeMapper.getInstance().copy(originalAttendee, null, (AttendeeField[]) null);
-            AttendeeMapper.getInstance().copy(attendeeToUpdate, newAttendee, AttendeeField.RSVP, AttendeeField.COMMENT, AttendeeField.PARTSTAT, AttendeeField.ROLE);
+            AttendeeMapper.getInstance().copy(attendeeToUpdate.getUpdate(), newAttendee, AttendeeField.RSVP, AttendeeField.COMMENT, AttendeeField.PARTSTAT, AttendeeField.ROLE);
             newAttendees.add(newAttendee);
         }
         newAttendees.addAll(attendeesToInsert);
@@ -304,7 +291,7 @@ public class AttendeeHelper {
             if (false == isInternal(attendee) && false == session.getConfig().isSkipExternalAttendeeURIChecks()) {
                 attendee = Check.requireValidEMail(attendee);
             }
-            attendeesToUpdate.add(attendee);
+            attendeesToUpdate.add(new DefaultItemUpdate<Attendee, AttendeeField>(AttendeeMapper.getInstance(), attendeeUpdate.getOriginal(), attendee));
         }
         /*
          * prepare & add all new attendees
@@ -432,6 +419,17 @@ public class AttendeeHelper {
         return null == attendees ? Collections.<Attendee> emptyList() : attendees;
     }
 
+    private static ItemUpdate<Attendee, AttendeeField> findUpdate(List<ItemUpdate<Attendee, AttendeeField>> attendeeUpdates, int entity) {
+        if (null != attendeeUpdates) {
+            for (ItemUpdate<Attendee, AttendeeField> attendeeUpdate : attendeeUpdates) {
+                if (matches(attendeeUpdate.getOriginal(), entity)) {
+                    return attendeeUpdate;
+                }
+            }
+        }
+        return null;
+    }
+
     /**
      * Processes the lists of attendees to update/delete/insert in terms of the configured handling of the implicit attendee for the
      * actual calendar user.
@@ -463,10 +461,10 @@ public class AttendeeHelper {
             if (null != defaultAttendee) {
                 attendeesToInsert.remove(defaultAttendee);
             }
-            defaultAttendee = find(attendeesToUpdate, calendarUserId);
-            if (null != defaultAttendee) {
-                attendeesToUpdate.remove(defaultAttendee);
-                attendeesToDelete.add(defaultAttendee);
+            ItemUpdate<Attendee, AttendeeField> defaultAttendeeUpdate = findUpdate(attendeesToUpdate, calendarUserId);
+            if (null != defaultAttendeeUpdate) {
+                attendeesToUpdate.remove(defaultAttendeeUpdate);
+                attendeesToDelete.add(defaultAttendeeUpdate.getOriginal());
             } else {
                 defaultAttendee = find(originalAttendees, calendarUserId);
                 if (null != defaultAttendee) {

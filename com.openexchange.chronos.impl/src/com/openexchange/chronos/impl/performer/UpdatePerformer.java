@@ -345,7 +345,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
         if (eventData.containsAlarms()) {
             wasUpdated |= updateAlarms(changedEvent, calendarUserId, storage.getAlarmStorage().loadAlarms(originalEvent, calendarUserId), eventData.getAlarms());
         }
-        for (int userId : getUserIDs(attendeeHelper.getAttendeesToInsert())) {
+        for (int userId : getUserIDs(attendeeHelper.getAddedItems())) {
             Alarm defaultAlarm = isAllDay(changedEvent) ? session.getConfig().getDefaultAlarmDate(userId) : session.getConfig().getDefaultAlarmDateTime(userId);
             if (null != defaultAlarm) {
                 insertAlarms(changedEvent, userId, Collections.singletonList(defaultAlarm), true);
@@ -515,13 +515,13 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
                     break;
             }
         }
-        if (attendeeHelper.hasChanges()) {
-            for (Attendee newAttendee : attendeeHelper.getAttendeesToInsert()) {
+        if (false == attendeeHelper.isEmpty()) {
+            for (Attendee newAttendee : attendeeHelper.getAddedItems()) {
                 if (false == contains(exceptionUpdate.getAttendees(), newAttendee)) {
                     needsUpdate |= exceptionUpdate.getAttendees().add(newAttendee);
                 }
             }
-            for (Attendee removedAttendee : attendeeHelper.getAttendeesToDelete()) {
+            for (Attendee removedAttendee : attendeeHelper.getRemovedItems()) {
                 Attendee matchingAttendee = find(exceptionUpdate.getAttendees(), removedAttendee);
                 if (null != matchingAttendee) {
                     needsUpdate |= exceptionUpdate.getAttendees().remove(matchingAttendee);
@@ -583,7 +583,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
         if (eventUpdate.getUpdatedFields().contains(EventField.TRANSP) && false == CalendarUtils.isOpaqueTransparency(eventUpdate.getOriginal())) {
             return true;
         }
-        if (0 < attendeeHelper.getAttendeesToInsert().size()) {
+        if (0 < attendeeHelper.getAddedItems().size()) {
             return true;
         }
         return false;
@@ -600,7 +600,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
         if (eventUpdate.containsAnyChangeOf(new EventField[] { EventField.SUMMARY, EventField.LOCATION, EventField.RECURRENCE_RULE, EventField.START_DATE, EventField.END_DATE })) {
             return true;
         }
-        if (0 < attendeeHelper.getAttendeesToDelete().size() || 0 < attendeeHelper.getAttendeesToInsert().size() || 0 < attendeeHelper.getAttendeesToUpdate().size()) {
+        if (0 < attendeeHelper.getAddedItems().size() || 0 < attendeeHelper.getRemovedItems().size()) {
             //TODO: more distinct evaluation of attendee updates
             return true;
         }
@@ -658,13 +658,13 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
     }
 
     private boolean updateAttendees(Event originalEvent, Event updatedEvent, AttendeeHelper attendeeHelper) throws OXException {
-        if (false == attendeeHelper.hasChanges()) {
+        if (attendeeHelper.isEmpty()) {
             return false;
         }
         /*
          * perform attendee deletions
          */
-        List<Attendee> attendeesToDelete = attendeeHelper.getAttendeesToDelete();
+        List<Attendee> attendeesToDelete = attendeeHelper.getRemovedItems();
         if (0 < attendeesToDelete.size()) {
             requireWritePermissions(originalEvent, attendeesToDelete);
             storage.getEventStorage().insertEventTombstone(storage.getUtilities().getTombstone(originalEvent, timestamp, calendarUser));
@@ -675,17 +675,24 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
         /*
          * perform attendee updates
          */
-        List<Attendee> attendeesToUpdate = attendeeHelper.getAttendeesToUpdate();
+        List<? extends ItemUpdate<Attendee, AttendeeField>> attendeesToUpdate = attendeeHelper.getUpdatedItems();
         if (0 < attendeesToUpdate.size()) {
-            requireWritePermissions(originalEvent, attendeesToUpdate);
-            storage.getAttendeeStorage().updateAttendees(originalEvent.getId(), attendeesToUpdate);
+            List<Attendee> attendeeUpdates = new ArrayList<Attendee>(attendeesToUpdate.size());
+            for (ItemUpdate<Attendee, AttendeeField> attendeeToUpdate : attendeesToUpdate) {
+                Attendee originalAttendee = attendeeToUpdate.getOriginal();
+                Attendee newAttendee = AttendeeMapper.getInstance().copy(originalAttendee, null, (AttendeeField[]) null);
+                AttendeeMapper.getInstance().copy(attendeeToUpdate.getUpdate(), newAttendee, AttendeeField.RSVP, AttendeeField.COMMENT, AttendeeField.PARTSTAT, AttendeeField.ROLE);
+                attendeeUpdates.add(newAttendee);
+            }
+            requireWritePermissions(originalEvent, attendeeUpdates);
+            storage.getAttendeeStorage().updateAttendees(originalEvent.getId(), attendeeUpdates);
         }
         /*
          * perform attendee inserts
          */
-        if (0 < attendeeHelper.getAttendeesToInsert().size()) {
+        if (0 < attendeeHelper.getAddedItems().size()) {
             requireWritePermissions(originalEvent);
-            storage.getAttendeeStorage().insertAttendees(originalEvent.getId(), attendeeHelper.getAttendeesToInsert());
+            storage.getAttendeeStorage().insertAttendees(originalEvent.getId(), attendeeHelper.getAddedItems());
         }
         return true;
     }

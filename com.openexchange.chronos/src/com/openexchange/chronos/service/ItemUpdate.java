@@ -88,4 +88,14 @@ public interface ItemUpdate<O, E extends Enum<E>> {
      */
     boolean containsAnyChangeOf(E[] fields);
 
+    /**
+     * Gets a value indicating whether the item update is empty or not, i.e. if no fields were changed at all.
+     *
+     * @return <code>true</code> if the update is empty, <code>false</code>, otherwise
+     */
+    default boolean isEmpty() {
+        Set<E> updatedFields = getUpdatedFields();
+        return null == updatedFields || updatedFields.isEmpty();
+    }
+
 }
