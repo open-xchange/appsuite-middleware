@@ -619,7 +619,7 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
                 /*
                  * update folder directly within folder-aware account
                  */
-                String updatedId = ((FolderCalendarAccess) calendarAccess).updateFolder(folderId, withRelativeID(folder), clientTimestamp);
+                String updatedId = ((FolderCalendarAccess) calendarAccess).updateFolder(getRelativeFolderId(folderId), withRelativeID(folder), clientTimestamp);
                 return getUniqueFolderId(accountId, updatedId);
             }
             /*
@@ -703,6 +703,7 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
         folder.setLastModified(settings.getLastModified());
         folder.setPermissions(Collections.singletonList(DefaultCalendarPermission.readOnlyPermissionsFor(session.getUserId())));
         folder.setSupportedCapabilites(CalendarCapability.getCapabilities(calendarAccess.getClass()));
+        folder.setSubscribed(settings.isSubscribed());
         return folder;
     }
 
@@ -712,6 +713,7 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
         settings.setName(calendarFolder.getName());
         settings.setLastModified(calendarFolder.getLastModified());
         settings.setConfig(userConfig);
+        settings.setSubscribed(calendarFolder.isSubscribed());
         return settings;
     }
 

@@ -77,6 +77,13 @@ public interface CalendarFolder {
     String getName();
 
     /**
+     * Gets a value indicating whether the folder is actually subscribed or not.
+     *
+     * @return <code>true</code> if the folder is subscribed, <code>false</code>, otherwise
+     */
+    boolean isSubscribed();
+
+    /**
      * Gets the last modification date of the calendar.
      *
      * @return The last modification date, or <code>null</code> if not defined

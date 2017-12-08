@@ -52,7 +52,6 @@ package com.openexchange.chronos.provider.basic;
 import java.util.Date;
 import org.json.JSONObject;
 import com.openexchange.chronos.ExtendedProperties;
-import com.openexchange.chronos.provider.basic.CalendarSettings;
 
 /**
  * {@link DefaultCalendarSettings}
@@ -66,6 +65,7 @@ public class DefaultCalendarSettings implements CalendarSettings {
     private Date lastModified;
     private ExtendedProperties extendedProperties;
     private JSONObject config;
+    private boolean subscribed;
 
     /**
      * Initializes a new {@link DefaultCalendarSettings}.
@@ -81,6 +81,15 @@ public class DefaultCalendarSettings implements CalendarSettings {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    @Override
+    public boolean isSubscribed() {
+        return subscribed;
+    }
+
+    public void setSubscribed(boolean subscribed) {
+        this.subscribed = subscribed;
     }
 
     @Override

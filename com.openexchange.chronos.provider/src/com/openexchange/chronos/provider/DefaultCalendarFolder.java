@@ -64,6 +64,7 @@ public class DefaultCalendarFolder implements CalendarFolder {
 
     private String id;
     private String name;
+    private boolean subscribed;
     private Date lastModified;
     private List<CalendarPermission> permissions;
     private ExtendedProperties extendedProperties;
@@ -89,6 +90,7 @@ public class DefaultCalendarFolder implements CalendarFolder {
         permissions = folder.getPermissions();
         extendedProperties = folder.getExtendedProperties();
         supportedCapabilites = folder.getSupportedCapabilites();
+        subscribed = folder.isSubscribed();
     }
 
     /**
@@ -119,6 +121,15 @@ public class DefaultCalendarFolder implements CalendarFolder {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    @Override
+    public boolean isSubscribed() {
+        return subscribed;
+    }
+
+    public void setSubscribed(boolean subscribed) {
+        this.subscribed = subscribed;
     }
 
     @Override

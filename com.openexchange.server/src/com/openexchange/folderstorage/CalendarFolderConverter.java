@@ -103,6 +103,7 @@ public class CalendarFolderConverter {
         folder.setID(calendarFolder.getId());
         folder.setName(calendarFolder.getName());
         folder.setPermissions(getStoragePermissions(calendarFolder.getPermissions()));
+        folder.setSubscribed(calendarFolder.isSubscribed());
         folder.setSubfolderIDs(new String[0]);
         folder.setSubscribedSubfolders(false);
         folder.setProperty(EXTENDED_PROPERTIES_FIELD, calendarFolder.getExtendedProperties());
@@ -216,6 +217,7 @@ public class CalendarFolderConverter {
         calendarFolder.setPermissions(getCalendarPermissions(folder.getPermissions()));
         calendarFolder.setExtendedProperties(optExtendedProperties(folder));
         calendarFolder.setSupportedCapabilites(getCapabilities(folder.getSupportedCapabilities()));
+        calendarFolder.setSubscribed(folder.isSubscribed());
         return calendarFolder;
     }
 

@@ -49,15 +49,9 @@
 
 package com.openexchange.chronos.provider.composition.impl.idmangling;
 
-import java.util.Date;
-import java.util.EnumSet;
-import java.util.List;
-import com.openexchange.chronos.ExtendedProperties;
 import com.openexchange.chronos.provider.AccountAwareCalendarFolder;
 import com.openexchange.chronos.provider.CalendarAccount;
-import com.openexchange.chronos.provider.CalendarCapability;
 import com.openexchange.chronos.provider.CalendarFolder;
-import com.openexchange.chronos.provider.CalendarPermission;
 
 /**
  * {@link IDManglingAccountAwareFolder}
@@ -65,10 +59,8 @@ import com.openexchange.chronos.provider.CalendarPermission;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class IDManglingAccountAwareFolder implements AccountAwareCalendarFolder {
+public class IDManglingAccountAwareFolder extends IDManglingFolder implements AccountAwareCalendarFolder {
 
-    protected final String newId;
-    protected final CalendarFolder delegate;
     protected final CalendarAccount account;
 
     /**
@@ -79,50 +71,13 @@ public class IDManglingAccountAwareFolder implements AccountAwareCalendarFolder 
      * @param newId The new identifier to hide the delegate's one
      */
     public IDManglingAccountAwareFolder(CalendarFolder delegate, CalendarAccount account, String newId) {
-        super();
+        super(delegate, newId);
         this.account = account;
-        this.delegate = delegate;
-        this.newId = newId;
-    }
-
-    @Override
-    public String getId() {
-        return newId;
-    }
-
-    @Override
-    public String getName() {
-        return delegate.getName();
-    }
-
-    @Override
-    public Date getLastModified() {
-        return delegate.getLastModified();
-    }
-
-    @Override
-    public List<CalendarPermission> getPermissions() {
-        return delegate.getPermissions();
-    }
-
-    @Override
-    public ExtendedProperties getExtendedProperties() {
-        return delegate.getExtendedProperties();
-    }
-
-    @Override
-    public EnumSet<CalendarCapability> getSupportedCapabilites() {
-        return delegate.getSupportedCapabilites();
     }
 
     @Override
     public CalendarAccount getAccount() {
         return account;
-    }
-
-    @Override
-    public String toString() {
-        return "IDManglingFolder [newId=" + newId + ", delegate=" + delegate + "]";
     }
 
 }

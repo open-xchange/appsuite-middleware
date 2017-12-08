@@ -91,6 +91,11 @@ public class IDManglingFolder implements CalendarFolder {
     }
 
     @Override
+    public boolean isSubscribed() {
+        return delegate.isSubscribed();
+    }
+
+    @Override
     public Date getLastModified() {
         return delegate.getLastModified();
     }

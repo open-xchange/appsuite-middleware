@@ -63,11 +63,18 @@ import com.openexchange.chronos.provider.CalendarFolderProperty;
 public interface CalendarSettings {
 
     /**
-     * Gets the name of the calendar folder.
+     * Gets the name of the calendar.
      *
-     * @return The folder name
+     * @return The calendar name
      */
     String getName();
+
+    /**
+     * Gets a value indicating whether the calendar is actually subscribed or not.
+     *
+     * @return <code>true</code> if the calendar is subscribed, <code>false</code>, otherwise
+     */
+    boolean isSubscribed();
 
     /**
      * Gets the last modification date of the calendar.
@@ -77,9 +84,9 @@ public interface CalendarSettings {
     Date getLastModified();
 
     /**
-     * Gets the extended properties of the folder.
+     * Gets the extended properties of the calendar.
      * <p/>
-     * See {@link CalendarFolderProperty} for a list of common folder properties evaluated by clients.
+     * See {@link CalendarFolderProperty} for a list of common properties evaluated by clients.
      *
      * @return The extended properties, or <code>null</code> if not defined
      */
