@@ -59,7 +59,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiFunction;
 import javax.mail.internet.InternetAddress;
 import com.google.common.cache.Cache;
@@ -174,11 +173,10 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
             DKIMResult dkimResult = DKIMResult.valueOf(extractOutcome(value.toUpperCase()));
 
             String domain = extractDomain(attributes, DKIMResultHeader.HEADER_I, DKIMResultHeader.HEADER_D);
-            boolean domainMismatch = checkDomainMismatch(overallResult, domain);
 
             // In case of a DKIM result != "none", set overall result to the DKIM result and continue with the next mechanism
             MailAuthenticityStatus mailAuthStatus = dkimResult.convert();
-            if (overallResult.getStatus().equals(MailAuthenticityStatus.NEUTRAL) && !domainMismatch) {
+            if (overallResult.getStatus().equals(MailAuthenticityStatus.NEUTRAL) && !checkDomainMismatch(overallResult, domain)) {
                 overallResult.setStatus(mailAuthStatus);
             }
 
