@@ -173,14 +173,14 @@ public class TestMailAuthenticityStatusMatrix extends AbstractTestMailAuthentici
     }
 
     /**
-     * (SPF: neutral, DKIM: pass, Domain Match: true) -> (Overall Result: pass)
+     * (SPF: neutral, DKIM: pass, Domain Match: true) -> (Overall Result: neutral)
      */
     @Test
     public void testSPFNeutralDKIMPassWithDomainMatch() throws AddressException {
         fromAddresses[0] = new InternetAddress("Jane Doe <jane.doe@example.net>");
         perform("ox.io; spf=neutral smtp.mailfrom=example.net; dkim=pass (good signature) header.d=example.net");
 
-        assertStatus(MailAuthenticityStatus.PASS, result.getStatus());
+        assertStatus(MailAuthenticityStatus.NEUTRAL, result.getStatus());
         assertDomain("example.net", result.getAttribute(DefaultMailAuthenticityResultKey.FROM_DOMAIN, String.class));
         assertAmount(2);
 
@@ -189,14 +189,14 @@ public class TestMailAuthenticityStatusMatrix extends AbstractTestMailAuthentici
     }
 
     /**
-     * (SPF: neutral, DKIM: pass, Domain Match: false) -> (Overall Result: neutral)
+     * (SPF: neutral, DKIM: pass, Domain Match: false) -> (Overall Result: fail)
      */
     @Test
     public void testSPFNeutralDKIMPassWithDomainMismatch() throws AddressException {
         fromAddresses[0] = new InternetAddress("Jane Doe <jane.doe@example.com>");
         perform("ox.io; spf=neutral smtp.mailfrom=example.net; dkim=pass (good signature) header.d=example.net");
 
-        assertStatus(MailAuthenticityStatus.NEUTRAL, result.getStatus());
+        assertStatus(MailAuthenticityStatus.FAIL, result.getStatus());
         assertDomain("example.com", result.getAttribute(DefaultMailAuthenticityResultKey.FROM_DOMAIN, String.class));
         assertAmount(2);
 

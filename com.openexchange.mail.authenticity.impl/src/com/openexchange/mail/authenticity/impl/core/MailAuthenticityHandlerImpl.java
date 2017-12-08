@@ -104,7 +104,7 @@ import com.openexchange.session.UserAndContext;
  * {@link DefaultMailAuthenticityMechanism#SPF} in that particular order.</p>
  *
  * <p>The default overall status of the {@link MailAuthenticityResult} is the {@link MailAuthenticityStatus#NEUTRAL}. If there are none of the above mentioned
- * mechnisms in the e-mail <code>Authentication-Results</code>, then that status applies. Unknown mechanisms and ptypes are ignored from the evaluation
+ * mechnisms in the e-mail's <code>Authentication-Results</code> header, then that status applies. Unknown mechanisms and ptypes are ignored from the evaluation
  * but their raw data is included in the overall result's attributes under the {@link DefaultMailAuthenticityResultKey#UNKNOWN_AUTH_MECH_RESULTS} key.</p>
  *
  * <p>In case there are multiple <code>Authentication-Results</code> in the e-mail's headers, then all of them are evaluated (top to bottom). Their mechanisms are sorted
@@ -157,14 +157,9 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
             String domain = extractDomain(attributes, DMARCResultHeader.HEADER_FROM);
             boolean domainMismatch = checkDomainMismatch(overallResult, domain);
 
-            // In case of a DMARC result != "none", set overall result to the DMARC result and continue with the next mechanism
-            MailAuthenticityStatus mailAuthStatus = dmarcResult.convert();
-            if (!domainMismatch) {
-                overallResult.setStatus(mailAuthStatus);
-            }
-
             DMARCAuthMechResult result = new DMARCAuthMechResult(domain, dmarcResult);
             result.setReason(extractComment(value));
+            result.setDomainMatch(!domainMismatch);
             addProperties(attributes, result);
             return result;
         });
@@ -173,12 +168,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
             DKIMResult dkimResult = DKIMResult.valueOf(extractOutcome(value.toUpperCase()));
 
             String domain = extractDomain(attributes, DKIMResultHeader.HEADER_I, DKIMResultHeader.HEADER_D);
-
-            // In case of a DKIM result != "none", set overall result to the DKIM result and continue with the next mechanism
-            MailAuthenticityStatus mailAuthStatus = dkimResult.convert();
-            if (overallResult.getStatus().equals(MailAuthenticityStatus.NEUTRAL) && !checkDomainMismatch(overallResult, domain)) {
-                overallResult.setStatus(mailAuthStatus);
-            }
+            boolean domainMismatch = checkDomainMismatch(overallResult, domain);
 
             DKIMAuthMechResult result = new DKIMAuthMechResult(domain, dkimResult);
             String reason = extractComment(value);
@@ -186,6 +176,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
                 reason = Strings.unquote(attributes.remove(DKIMResultHeader.REASON));
             }
             result.setReason(reason);
+            result.setDomainMatch(!domainMismatch);
             addProperties(attributes, result);
             return result;
         });
@@ -196,14 +187,9 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
             String domain = extractDomain(attributes, SPFResultHeader.SMTP_MAILFROM, SPFResultHeader.SMTP_HELO);
             boolean domainMismatch = checkDomainMismatch(overallResult, domain);
 
-            // Set the overall result only if it's 'none'
-            MailAuthenticityStatus mailAuthStatus = spfResult.convert();
-            if (!domainMismatch && (overallResult.getStatus().equals(MailAuthenticityStatus.NEUTRAL) || (!overallResult.getStatus().equals(MailAuthenticityStatus.PASS) && mailAuthStatus.equals(MailAuthenticityStatus.PASS)))) {
-                overallResult.setStatus(mailAuthStatus);
-            }
-
             SPFAuthMechResult result = new SPFAuthMechResult(domain, spfResult);
             result.setReason(extractComment(value));
+            result.setDomainMatch(!domainMismatch);
             addProperties(attributes, result);
             return result;
         });
@@ -334,6 +320,8 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
             parseMechanisms(elements, results, unknownResults, overallResult);
         }
 
+        determineOverallResult(overallResult, results);
+
         overallResult.addAttribute(DefaultMailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS, results);
         overallResult.addAttribute(DefaultMailAuthenticityResultKey.UNKNOWN_AUTH_MECH_RESULTS, unknownResults);
 
@@ -366,6 +354,92 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
                 continue;
             }
             results.add(mechanismParser.apply(attributes, overallResult));
+        }
+    }
+
+    /**
+     * Determine the overall result from the extracted results
+     * 
+     * @param overallResult The overall {@link MailAuthenticityResult}
+     * @param results A {@link List} with the results of the known mechanisms
+     */
+    private void determineOverallResult(MailAuthenticityResult overallResult, List<MailAuthenticityMechanismResult> results) {
+        // Separate results
+        List<MailAuthenticityMechanismResult> spfResults = new ArrayList<>();
+        List<MailAuthenticityMechanismResult> dkimResults = new ArrayList<>();
+        List<MailAuthenticityMechanismResult> dmarcResults = new ArrayList<>();
+        for (MailAuthenticityMechanismResult result : results) {
+            DefaultMailAuthenticityMechanism mechanism = (DefaultMailAuthenticityMechanism) result.getMechanism();
+            switch (mechanism) {
+                case DMARC:
+                    dmarcResults.add(result);
+                    break;
+                case DKIM:
+                    dkimResults.add(result);
+                    break;
+                case SPF:
+                    spfResults.add(result);
+                    break;
+            }
+        }
+
+        // If DMARC passes we set the overall status to PASS
+        for (MailAuthenticityMechanismResult result : dmarcResults) {
+            if (DMARCResult.PASS.equals(result.getResult()) && result.isDomainMatch()) {
+                overallResult.setStatus(MailAuthenticityStatus.PASS);
+                return;
+            } else if (DMARCResult.FAIL.equals(result.getResult())) {
+                overallResult.setStatus(MailAuthenticityStatus.FAIL);
+                return;
+            }
+        }
+
+        // The DMARC status was NEUTRAL or none existing, check for DKIM
+        boolean dkimFailed = false;
+        for (MailAuthenticityMechanismResult result : dkimResults) {
+            DKIMResult dkimResult = (DKIMResult) result.getResult();
+            switch (dkimResult) {
+                case PERMFAIL:
+                case FAIL:
+                    dkimFailed = true;
+                    break;
+                case PASS:
+                    overallResult.setStatus(result.isDomainMatch() ? MailAuthenticityStatus.PASS : MailAuthenticityStatus.NEUTRAL);
+                    break;
+                default:
+                    overallResult.setStatus(result.getResult().convert());
+            }
+        }
+
+        // Continue with SPF
+        for (MailAuthenticityMechanismResult result : spfResults) {
+            SPFResult spfResult = (SPFResult) result.getResult();
+            switch (spfResult) {
+                case SOFTFAIL:
+                case TEMPERROR:
+                case NONE:
+                case NEUTRAL:
+                    // Handle as neutral
+                    overallResult.setStatus(result.isDomainMatch() ? MailAuthenticityStatus.NEUTRAL : MailAuthenticityStatus.FAIL);
+                    break;
+                case PASS:
+                    // Pass
+                    if (dkimFailed) {
+                        overallResult.setStatus(result.isDomainMatch() ? MailAuthenticityStatus.NEUTRAL : MailAuthenticityStatus.FAIL);
+                    } else {
+                        overallResult.setStatus(result.isDomainMatch() ? MailAuthenticityStatus.PASS : MailAuthenticityStatus.NEUTRAL);
+                    }
+                    break;
+                case PERMERROR:
+                case FAIL:
+                    // Handle as fail
+                    overallResult.setStatus(MailAuthenticityStatus.FAIL);
+                    break;
+                case POLICY:
+                default:
+                    // Override
+                    overallResult.setStatus(result.getResult().convert());
+            }
         }
     }
 
@@ -520,9 +594,9 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
     private boolean checkDomainMismatch(MailAuthenticityResult overallResult, String domain) {
         String fromDomain = overallResult.getAttribute(DefaultMailAuthenticityResultKey.FROM_DOMAIN, String.class);
         boolean domainMismatch = !fromDomain.equals(domain);
-        if (domainMismatch) {
-            overallResult.setStatus(MailAuthenticityStatus.NEUTRAL);
-        }
+        //        if (domainMismatch) {
+        //            overallResult.setStatus(MailAuthenticityStatus.NEUTRAL);
+        //        }
         return domainMismatch;
     }
 

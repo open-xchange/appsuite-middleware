@@ -101,4 +101,11 @@ public interface MailAuthenticityMechanismResult {
      * @return a {@link Map} with the properties for the mechanism result
      */
     Map<String, String> getProperties();
+
+    /**
+     * Gets the domainMatch
+     *
+     * @return The domainMatch
+     */
+    boolean isDomainMatch();
 }

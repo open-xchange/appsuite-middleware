@@ -63,6 +63,7 @@ public abstract class AbstractAuthMechResult implements MailAuthenticityMechanis
     private final String domain;
     private final String clientIP;
     private final AuthenticityMechanismResult result;
+    private boolean domainMatch;
     private String reason;
     private final Map<String, String> properties;
 
@@ -133,5 +134,24 @@ public abstract class AbstractAuthMechResult implements MailAuthenticityMechanis
      */
     public void setReason(String reason) {
         this.reason = reason;
+    }
+
+    /**
+     * Gets the domainMatch
+     *
+     * @return The domainMatch
+     */
+    @Override
+    public boolean isDomainMatch() {
+        return domainMatch;
+    }
+
+    /**
+     * Sets the domainMatch
+     *
+     * @param domainMatch The domainMatch to set
+     */
+    public void setDomainMatch(boolean domainMatch) {
+        this.domainMatch = domainMatch;
     }
 }
