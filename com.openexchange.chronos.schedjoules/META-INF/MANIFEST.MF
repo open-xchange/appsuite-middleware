@@ -34,4 +34,5 @@ Import-Package: com.google.common.cache;version="23.0.0",
 Bundle-Activator: com.openexchange.chronos.schedjoules.osgi.SchedJoulesActivator
 Export-Package: com.openexchange.chronos.schedjoules,
  com.openexchange.chronos.schedjoules.api,
+ com.openexchange.chronos.schedjoules.api.auxiliary,
  com.openexchange.chronos.schedjoules.exception
