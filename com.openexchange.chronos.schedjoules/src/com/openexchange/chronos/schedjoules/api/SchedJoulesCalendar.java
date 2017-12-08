@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.chronos.schedjoules;
+package com.openexchange.chronos.schedjoules.api;
 
 import java.util.List;
 import com.openexchange.chronos.Event;

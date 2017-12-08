@@ -57,7 +57,7 @@ import org.json.JSONObject;
 import com.openexchange.chronos.Calendar;
 import com.openexchange.chronos.ical.ICalParameters;
 import com.openexchange.chronos.ical.ICalService;
-import com.openexchange.chronos.schedjoules.SchedJoulesCalendar;
+import com.openexchange.chronos.schedjoules.api.SchedJoulesCalendar;
 import com.openexchange.chronos.schedjoules.api.client.SchedJoulesResponse;
 import com.openexchange.chronos.schedjoules.exception.SchedJoulesAPIExceptionCodes;
 import com.openexchange.chronos.schedjoules.osgi.Services;

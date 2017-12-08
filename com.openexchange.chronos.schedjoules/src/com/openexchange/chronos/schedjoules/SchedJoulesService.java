@@ -51,6 +51,7 @@ package com.openexchange.chronos.schedjoules;
 
 import java.net.URL;
 import java.util.Set;
+import com.openexchange.chronos.schedjoules.api.SchedJoulesCalendar;
 import com.openexchange.chronos.schedjoules.api.SchedJoulesPageField;
 import com.openexchange.exception.OXException;
 
