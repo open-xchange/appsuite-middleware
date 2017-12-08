@@ -53,7 +53,6 @@ import java.net.URL;
 import java.util.Iterator;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
-import org.apache.commons.codec.digest.DigestUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -61,24 +60,20 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.ListenableFutureTask;
 import com.openexchange.chronos.schedjoules.SchedJoulesCalendar;
 import com.openexchange.chronos.schedjoules.SchedJoulesResult;
 import com.openexchange.chronos.schedjoules.SchedJoulesService;
 import com.openexchange.chronos.schedjoules.api.SchedJoulesAPI;
 import com.openexchange.chronos.schedjoules.api.SchedJoulesAPIDefaultValues;
-import com.openexchange.chronos.schedjoules.api.cache.SchedJoulesCachedAPIKey;
 import com.openexchange.chronos.schedjoules.api.cache.SchedJoulesCachedItemKey;
 import com.openexchange.chronos.schedjoules.api.cache.SchedJoulesPage;
 import com.openexchange.chronos.schedjoules.exception.SchedJoulesAPIExceptionCodes;
-import com.openexchange.chronos.schedjoules.osgi.Services;
-import com.openexchange.config.lean.LeanConfigurationService;
+import com.openexchange.chronos.schedjoules.impl.cache.SchedJoulesAPICache;
+import com.openexchange.chronos.schedjoules.impl.cache.SchedJoulesCountriesCacheLoader;
+import com.openexchange.chronos.schedjoules.impl.cache.SchedJoulesLanguagesCacheLoader;
+import com.openexchange.chronos.schedjoules.impl.cache.SchedJoulesPageCacheLoader;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.Strings;
-import com.openexchange.timer.TimerService;
 
 /**
  * {@link SchedJoulesServiceImpl}
@@ -87,116 +82,28 @@ import com.openexchange.timer.TimerService;
  */
 public class SchedJoulesServiceImpl implements SchedJoulesService {
 
-    private static final int COUNTRIES_ID = -1;
+    private static final int LANGUAGES_ID = -1;
 
-    private static final int LANGUAGES_ID = -2;
+    private static final int COUNTRIES_ID = -2;
 
     private static final Logger LOG = LoggerFactory.getLogger(SchedJoulesServiceImpl.class);
 
-    /**
-     * Cache for the API clients
-     */
-    private final Cache<SchedJoulesCachedAPIKey, SchedJoulesAPI> apiCache = CacheBuilder.newBuilder().expireAfterAccess(1, TimeUnit.HOURS).removalListener(notification -> {
-        SchedJoulesCachedAPIKey key = (SchedJoulesCachedAPIKey) notification.getKey();
-        LOG.debug("Shutting down SchedJoules API for context '{}'.", key.getContextId());
-        SchedJoulesAPI api = (SchedJoulesAPI) notification.getValue();
-        api.shutDown();
-    }).build();
+    private final SchedJoulesAPICache apiCache = new SchedJoulesAPICache();
 
     /**
      * Pages cache
      */
-    private final LoadingCache<SchedJoulesCachedItemKey, SchedJoulesPage> pagesCache = CacheBuilder.newBuilder().maximumSize(1000).expireAfterAccess(24, TimeUnit.HOURS).refreshAfterWrite(24, TimeUnit.HOURS).build(new CacheLoader<SchedJoulesCachedItemKey, SchedJoulesPage>() {
-
-        @Override
-        public SchedJoulesPage load(SchedJoulesCachedItemKey key) throws Exception {
-            SchedJoulesAPI api = getAPI(key.getContextId());
-            return api.pages().getPage(key.getItemId(), key.getLocale());
-        }
-
-        @Override
-        public ListenableFuture<SchedJoulesPage> reload(SchedJoulesCachedItemKey key, SchedJoulesPage oldValue) throws Exception {
-            TimerService timerService = Services.getService(TimerService.class);
-            ListenableFutureTask<SchedJoulesPage> task = ListenableFutureTask.create(() -> {
-                SchedJoulesAPI api = getAPI(key.getContextId());
-                if (!api.pages().isModified(key.getItemId(), key.getLocale(), oldValue.getEtag(), oldValue.getLastModified())) {
-                    LOG.debug("The entry with key: '{}' was not modified since last fetch.", key.toString());
-                    return oldValue;
-                }
-                LOG.debug("The entry with key: '{}' was modified since last fetch. Reloading...", key.toString());
-                return load(key);
-            });
-            timerService.getExecutor().execute(task);
-            return task;
-        };
-    });
+    private final LoadingCache<SchedJoulesCachedItemKey, SchedJoulesPage> pagesCache = CacheBuilder.newBuilder().maximumSize(1000).expireAfterAccess(24, TimeUnit.HOURS).refreshAfterWrite(24, TimeUnit.HOURS).build(new SchedJoulesPageCacheLoader(apiCache));
 
     /**
      * Countries cache
      */
-    private final LoadingCache<SchedJoulesCachedItemKey, SchedJoulesPage> countriesCache = CacheBuilder.newBuilder().refreshAfterWrite(24, TimeUnit.HOURS).build(new CacheLoader<SchedJoulesCachedItemKey, SchedJoulesPage>() {
-
-        @Override
-        public SchedJoulesPage load(SchedJoulesCachedItemKey key) throws Exception {
-            SchedJoulesAPI api = getAPI(key.getContextId());
-            return api.countries().listCountries(key.getLocale());
-        }
-
-        /*
-         * (non-Javadoc)
-         * 
-         * @see com.google.common.cache.CacheLoader#reload(java.lang.Object, java.lang.Object)
-         */
-        @Override
-        public ListenableFuture<SchedJoulesPage> reload(SchedJoulesCachedItemKey key, SchedJoulesPage oldValue) throws Exception {
-            TimerService timerService = Services.getService(TimerService.class);
-            ListenableFutureTask<SchedJoulesPage> task = ListenableFutureTask.create(() -> {
-                SchedJoulesAPI api = getAPI(key.getContextId());
-                if (!api.countries().isModified(key.getLocale(), oldValue.getEtag(), oldValue.getLastModified())) {
-                    LOG.debug("The entry with key: '{}' was not modified since last fetch.", key.toString());
-                    return oldValue;
-                }
-                LOG.debug("The entry with key: '{}' was modified since last fetch. Reloading...", key.toString());
-                return load(key);
-            });
-            timerService.getExecutor().execute(task);
-            return task;
-        }
-    });
+    private final LoadingCache<SchedJoulesCachedItemKey, SchedJoulesPage> countriesCache = CacheBuilder.newBuilder().refreshAfterWrite(24, TimeUnit.HOURS).build(new SchedJoulesCountriesCacheLoader(apiCache));
 
     /**
      * Languages cache
      */
-    private final LoadingCache<SchedJoulesCachedItemKey, SchedJoulesPage> languagesCache = CacheBuilder.newBuilder().refreshAfterWrite(24, TimeUnit.HOURS).build(new CacheLoader<SchedJoulesCachedItemKey, SchedJoulesPage>() {
-
-        @Override
-        public SchedJoulesPage load(SchedJoulesCachedItemKey key) throws Exception {
-            SchedJoulesAPI api = getAPI(key.getContextId());
-            return api.languages().listLanguages();
-        }
-
-        /*
-         * (non-Javadoc)
-         * 
-         * @see com.google.common.cache.CacheLoader#reload(java.lang.Object, java.lang.Object)
-         */
-        @Override
-        public ListenableFuture<SchedJoulesPage> reload(SchedJoulesCachedItemKey key, SchedJoulesPage oldValue) throws Exception {
-            TimerService timerService = Services.getService(TimerService.class);
-            ListenableFutureTask<SchedJoulesPage> task = ListenableFutureTask.create(() -> {
-                SchedJoulesAPI api = getAPI(key.getContextId());
-                if (!api.languages().isModified(oldValue.getEtag(), oldValue.getLastModified())) {
-                    LOG.debug("The entry with key: '{}' was not modified since last fetch.", key.toString());
-                    return oldValue;
-                }
-                LOG.debug("The entry with key: '{}' was modified since last fetch. Reloading...", key.toString());
-                return load(key);
-            });
-            timerService.getExecutor().execute(task);
-            return task;
-        }
-    });
-
+    private final LoadingCache<SchedJoulesCachedItemKey, SchedJoulesPage> languagesCache = CacheBuilder.newBuilder().refreshAfterWrite(24, TimeUnit.HOURS).build(new SchedJoulesLanguagesCacheLoader(apiCache));
     /**
      * Caches the root page item ids
      */
@@ -230,7 +137,7 @@ public class SchedJoulesServiceImpl implements SchedJoulesService {
     public SchedJoulesResult getRoot(int contextId, String locale, String location) throws OXException {
         try {
             int itemId = rootItemIdCache.get(location, () -> {
-                SchedJoulesAPI api = getAPI(contextId);
+                SchedJoulesAPI api = apiCache.getAPI(contextId);
                 SchedJoulesPage rootPage = api.pages().getRootPage(locale, location);
 
                 JSONObject itemData = (JSONObject) rootPage.getItemData();
@@ -305,7 +212,7 @@ public class SchedJoulesServiceImpl implements SchedJoulesService {
      */
     @Override
     public SchedJoulesResult search(int contextId, String query, String locale, int countryId, int categoryId, int maxRows) throws OXException {
-        return new SchedJoulesResult(filterContent((JSONObject) getAPI(contextId).pages().search(query, locale, countryId, categoryId, maxRows).getItemData()));
+        return new SchedJoulesResult(filterContent((JSONObject) apiCache.getAPI(contextId).pages().search(query, locale, countryId, categoryId, maxRows).getItemData()));
     }
 
     /*
@@ -315,55 +222,10 @@ public class SchedJoulesServiceImpl implements SchedJoulesService {
      */
     @Override
     public SchedJoulesCalendar getCalendar(int contextId, URL url, String etag, long lastModified) throws OXException {
-        return getAPI(contextId).calendar().getCalendar(url, etag, lastModified);
+        return apiCache.getAPI(contextId).calendar().getCalendar(url, etag, lastModified);
     }
 
     ///////////////////////////////////// HELPERS ///////////////////////////////////
-
-    /**
-     * @param contextId
-     * @return
-     * @throws OXException
-     */
-    private SchedJoulesAPI getAPI(int contextId) throws OXException {
-        try {
-            return apiCache.get(new SchedJoulesCachedAPIKey(getKey(contextId), contextId), () -> {
-                LOG.debug("Cache miss for context '{}', initialising new SchedJoules API.", contextId);
-                return new SchedJoulesAPI(getAPIKey(contextId));
-            });
-        } catch (ExecutionException e) {
-            throw SchedJoulesAPIExceptionCodes.UNEXPECTED_ERROR.create(e.getMessage(), e);
-        }
-    }
-
-    /**
-     * Gets the API key for the specified context and hashes both values to create
-     * a unique key for the client
-     * 
-     * @param contextId The context identifier
-     * @return The hash
-     * @throws OXException if the API key is not configured for the specified context
-     */
-    private String getKey(int contextId) throws OXException {
-        return DigestUtils.sha256Hex(getAPIKey(contextId));
-
-    }
-
-    /**
-     * Retrieves the API key for the specified context
-     * 
-     * @param contextId The context identifier
-     * @return The API key
-     * @throws OXException if no API key is configured
-     */
-    private String getAPIKey(int contextId) throws OXException {
-        LeanConfigurationService leanConfigService = Services.getService(LeanConfigurationService.class);
-        String apiKey = leanConfigService.getProperty(-1, contextId, SchedJoulesProperty.apiKey);
-        if (Strings.isEmpty(apiKey)) {
-            throw SchedJoulesAPIExceptionCodes.NO_API_KEY_CONFIGURED.create(SchedJoulesProperty.apiKey.getFQPropertyName());
-        }
-        return apiKey;
-    }
 
     /**
      * Filters the specified {@link JSONObject}
