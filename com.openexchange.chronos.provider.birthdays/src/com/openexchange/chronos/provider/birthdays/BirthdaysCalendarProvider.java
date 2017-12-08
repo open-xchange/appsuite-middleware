@@ -76,6 +76,9 @@ import com.openexchange.chronos.provider.basic.BasicCalendarAccess;
 import com.openexchange.chronos.provider.basic.BasicCalendarProvider;
 import com.openexchange.chronos.provider.basic.CalendarSettings;
 import com.openexchange.chronos.service.CalendarParameters;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.config.cascade.ConfigViews;
 import com.openexchange.conversion.ConversionService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
@@ -94,7 +97,11 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  */
 public class BirthdaysCalendarProvider implements BasicCalendarProvider {
 
-    static final String PROVIDER_ID = "birthdays";
+    /** The identifier of the calendar provider */
+    public static final String PROVIDER_ID = "birthdays";
+
+    /** The capability name indicating access to the birthdays calendar */
+    public static final String CAPABILITY_NAME = "calendar_birthdays";
 
     private final ServiceLookup services;
 
@@ -121,6 +128,27 @@ public class BirthdaysCalendarProvider implements BasicCalendarProvider {
     @Override
     public EnumSet<CalendarCapability> getCapabilities() {
         return CalendarCapability.getCapabilities(BirthdaysCalendarAccess.class);
+    }
+
+    /**
+     * Checks if a session's user may use this calendar.
+     *
+     * @param session The session to check
+     * @return <code>true</code> if the calendar provider is enabled for the session's user, <code>false</code>, otherwise
+     */
+    public boolean isEnabled(ServerSession session) throws OXException {
+        /*
+         * require a regular user account & module access for contacts and calendar
+         */
+        if (session.isAnonymous() || session.getUser().isGuest() ||
+            false == session.getUserPermissionBits().hasCalendar() || false == session.getUserPermissionBits().hasContact()) {
+            return false;
+        }
+        /*
+         * require that "com.openexchange.calendar.birthdays" is not diabled for user
+         */
+        ConfigView configView = requireService(ConfigViewFactory.class, services).getView(session.getUserId(), session.getContextId());
+        return ConfigViews.getDefinedBoolPropertyFrom("com.openexchange.calendar.birthdays", true, configView);
     }
 
     public JSONObject autoConfigureAccount(Session session, JSONObject userConfig, CalendarParameters parameters) throws OXException {
@@ -151,6 +179,10 @@ public class BirthdaysCalendarProvider implements BasicCalendarProvider {
 
     @Override
     public JSONObject configureAccount(Session session, CalendarSettings settings, CalendarParameters parameters) throws OXException {
+        ServerSession serverSession = ServerSessionAdapter.valueOf(session);
+        if (false == isEnabled(serverSession)) {
+            throw CalendarExceptionCodes.MISSING_CAPABILITY.create(CAPABILITY_NAME);
+        }
         if (AutoProvisioningCalendarProvider.class.isInstance(getClass())) {
             /*
              * no manual account creation allowed as accounts are provisioned automatically
@@ -177,10 +209,13 @@ public class BirthdaysCalendarProvider implements BasicCalendarProvider {
 
     @Override
     public JSONObject reconfigureAccount(Session session, CalendarAccount account, CalendarSettings settings, CalendarParameters parameters) throws OXException {
+        ServerSession serverSession = ServerSessionAdapter.valueOf(session);
+        if (false == isEnabled(serverSession)) {
+            throw CalendarExceptionCodes.MISSING_CAPABILITY.create(CAPABILITY_NAME);
+        }
         /*
          * initialize & check passed user config
          */
-        ServerSession serverSession = ServerSessionAdapter.valueOf(session);
         initializeUserConfig(serverSession, settings.getConfig());
         /*
          * check & apply changes to extended properties
@@ -271,8 +306,8 @@ public class BirthdaysCalendarProvider implements BasicCalendarProvider {
 
     private BirthdaysCalendarAccess getAccess(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
         ServerSession serverSession = ServerSessionAdapter.valueOf(session);
-        if (false == serverSession.getUserPermissionBits().hasContact()) {
-            throw CalendarExceptionCodes.MISSING_CAPABILITY.create(com.openexchange.groupware.userconfiguration.Permission.CONTACTS.getCapabilityName());
+        if (false == isEnabled(serverSession)) {
+            throw CalendarExceptionCodes.MISSING_CAPABILITY.create(CAPABILITY_NAME);
         }
         return new BirthdaysCalendarAccess(services, serverSession, account, parameters);
     }

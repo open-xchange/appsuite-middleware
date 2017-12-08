@@ -49,11 +49,12 @@
 
 package com.openexchange.chronos.provider.birthdays.osgi;
 
+import static com.openexchange.chronos.provider.birthdays.BirthdaysCalendarProvider.CAPABILITY_NAME;
 import static org.slf4j.LoggerFactory.getLogger;
-import java.util.Dictionary;
-import java.util.Hashtable;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
+import com.openexchange.capabilities.CapabilityChecker;
+import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.chronos.provider.CalendarProvider;
 import com.openexchange.chronos.provider.account.AdministrativeCalendarAccountService;
 import com.openexchange.chronos.provider.account.CalendarAccountService;
@@ -62,12 +63,16 @@ import com.openexchange.chronos.provider.birthdays.ContactEventHandler;
 import com.openexchange.chronos.service.CalendarUtilities;
 import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.chronos.storage.CalendarStorageFactory;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.contact.ContactService;
 import com.openexchange.context.ContextService;
 import com.openexchange.conversion.ConversionService;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.session.Session;
+import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  * {@link BirthdaysCalendarProviderActivator}
@@ -88,7 +93,7 @@ public class BirthdaysCalendarProviderActivator extends HousekeepingActivator {
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] { ContactService.class, RecurrenceService.class, CalendarUtilities.class, FolderService.class,
             CalendarStorageFactory.class, DatabaseService.class, ContextService.class, CalendarAccountService.class,
-            AdministrativeCalendarAccountService.class, ConversionService.class
+            AdministrativeCalendarAccountService.class, ConversionService.class, ConfigViewFactory.class, CapabilityService.class
         };
     }
 
@@ -99,13 +104,23 @@ public class BirthdaysCalendarProviderActivator extends HousekeepingActivator {
             /*
              * register calendar provider
              */
-            registerService(CalendarProvider.class, new BirthdaysCalendarProvider(this));
+            BirthdaysCalendarProvider calendarProvider = new BirthdaysCalendarProvider(this);
+            registerService(CalendarProvider.class, calendarProvider);
             /*
-             * register event handler
+             * declare capability & register an appropriate checker
              */
-            Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
-            serviceProperties.put(EventConstants.EVENT_TOPIC, ContactEventHandler.TOPICS);
-            registerService(EventHandler.class, new ContactEventHandler(this), serviceProperties);
+            getService(CapabilityService.class).declareCapability(CAPABILITY_NAME);
+            registerService(CapabilityChecker.class, new CapabilityChecker() {
+
+                @Override
+                public boolean isEnabled(String capability, Session session) throws OXException {
+                    return CAPABILITY_NAME.equals(capability) && calendarProvider.isEnabled(ServerSessionAdapter.valueOf(session));
+                }
+            }, singletonDictionary(CapabilityChecker.PROPERTY_CAPABILITIES, CAPABILITY_NAME));
+            /*
+             * register event handler for contact changes
+             */
+            registerService(EventHandler.class, new ContactEventHandler(this), singletonDictionary(EventConstants.EVENT_TOPIC, ContactEventHandler.TOPICS));
         } catch (Exception e) {
             getLogger(BirthdaysCalendarProviderActivator.class).error("error starting {}", context.getBundle(), e);
             throw e;
