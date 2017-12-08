@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2017-2020 OX Software GmbH
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,107 +47,28 @@
  *
  */
 
-package com.openexchange.chronos.schedjoules.api;
-
-import org.json.JSONValue;
+package com.openexchange.chronos.schedjoules.api.auxiliary;
 
 /**
- * {@link SchedJoulesPage}
+ * {@link SchedJoulesAPIDefaultValues}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class SchedJoulesPage {
-
-    private final JSONValue itemData;
-    private final long lastModified;
-    private final String etag;
+public final class SchedJoulesAPIDefaultValues {
 
     /**
-     * Initialises a new {@link SchedJoulesPage}.
+     * Defines the value of the default/fall-back locale, when the
+     * URL parameter is missing
      */
-    public SchedJoulesPage(JSONValue itemData, String etag, long lastModified) {
-        super();
-        this.itemData = itemData;
-        this.etag = etag;
-        this.lastModified = lastModified;
-    }
-
+    public static final String DEFAULT_LOCALE = "en";
     /**
-     * Gets the itemData
-     *
-     * @return The itemData
+     * Defines the value of the default/fall-back language, when the
+     * URL parameter is missing
      */
-    public JSONValue getItemData() {
-        return itemData;
-    }
-
+    public static final String DEFAULT_LOCATION = "us";
     /**
-     * Gets the lastModified
-     *
-     * @return The lastModified
+     * Defines the value of the default/fall-back maxRows, when the
+     * URL parameter is missing
      */
-    public long getLastModified() {
-        return lastModified;
-    }
-
-    /**
-     * Gets the eTag
-     *
-     * @return The eTag
-     */
-    public String getEtag() {
-        return etag;
-    }
-
-    /**
-     * {@link SchedJoulesPageBuilder}
-     */
-    public static class SchedJoulesPageBuilder {
-
-        private JSONValue itemData;
-        private long lastModified;
-        private String etag;
-
-        /**
-         * Initialises a new {@link SchedJoulesPage.SchedJoulesPageBuilder}.
-         */
-        public SchedJoulesPageBuilder() {
-            super();
-        }
-
-        /**
-         * Sets the itemData
-         *
-         * @param itemData The itemData to set
-         */
-        public SchedJoulesPageBuilder itemData(JSONValue itemData) {
-            this.itemData = itemData;
-            return this;
-        }
-
-        /**
-         * Sets the lastModified
-         *
-         * @param lastModified The lastModified to set
-         */
-        public SchedJoulesPageBuilder lastModified(long lastModified) {
-            this.lastModified = lastModified;
-            return this;
-        }
-
-        /**
-         * Sets the etag
-         *
-         * @param etag The etag to set
-         */
-        public SchedJoulesPageBuilder etag(String etag) {
-            this.etag = etag;
-            return this;
-        }
-
-        public SchedJoulesPage build() {
-            return new SchedJoulesPage(itemData, etag, lastModified);
-        }
-
-    }
+    public static int MAX_ROWS = 20;
 }

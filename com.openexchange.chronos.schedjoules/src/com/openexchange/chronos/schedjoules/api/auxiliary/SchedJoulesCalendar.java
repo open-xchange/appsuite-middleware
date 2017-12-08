@@ -47,28 +47,67 @@
  *
  */
 
-package com.openexchange.chronos.schedjoules.api;
+package com.openexchange.chronos.schedjoules.api.auxiliary;
+
+import java.util.List;
+import com.openexchange.chronos.Event;
 
 /**
- * {@link SchedJoulesAPIDefaultValues}
+ * {@link SchedJoulesCalendar}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public final class SchedJoulesAPIDefaultValues {
+public class SchedJoulesCalendar {
+
+    private final List<Event> events;
+    private final String eTag;
+    private final String name;
+    private final long lastModified;
 
     /**
-     * Defines the value of the default/fall-back locale, when the
-     * URL parameter is missing
+     * Initialises a new {@link SchedJoulesCalendar}.
      */
-    public static final String DEFAULT_LOCALE = "en";
+    public SchedJoulesCalendar(String name, List<Event> events, String eTag, long lastModified) {
+        super();
+        this.name = name;
+        this.events = events;
+        this.eTag = eTag;
+        this.lastModified = lastModified;
+    }
+
     /**
-     * Defines the value of the default/fall-back language, when the
-     * URL parameter is missing
+     * Gets the eTag
+     *
+     * @return The eTag
      */
-    public static final String DEFAULT_LOCATION = "us";
+    public String getETag() {
+        return eTag;
+    }
+
     /**
-     * Defines the value of the default/fall-back maxRows, when the
-     * URL parameter is missing
+     * Gets the events
+     *
+     * @return The events
      */
-    public static int MAX_ROWS = 20;
+    public List<Event> getEvents() {
+        return events;
+    }
+
+    /**
+     * Gets the name
+     *
+     * @return The name
+     */
+    public String getName() {
+        return name;
+    }
+
+    /**
+     * Gets the lastModified
+     *
+     * @return The lastModified
+     */
+    public long getLastModified() {
+        return lastModified;
+    }
 }

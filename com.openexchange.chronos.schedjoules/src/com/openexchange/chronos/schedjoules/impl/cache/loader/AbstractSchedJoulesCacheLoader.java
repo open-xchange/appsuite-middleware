@@ -54,7 +54,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.cache.CacheLoader;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListenableFutureTask;
-import com.openexchange.chronos.schedjoules.api.SchedJoulesPage;
+import com.openexchange.chronos.schedjoules.api.auxiliary.SchedJoulesPage;
 import com.openexchange.chronos.schedjoules.impl.cache.SchedJoulesAPICache;
 import com.openexchange.chronos.schedjoules.impl.cache.SchedJoulesCachedItemKey;
 import com.openexchange.chronos.schedjoules.osgi.Services;

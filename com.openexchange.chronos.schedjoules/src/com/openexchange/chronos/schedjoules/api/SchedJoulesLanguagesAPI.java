@@ -50,7 +50,8 @@
 package com.openexchange.chronos.schedjoules.api;
 
 import org.json.JSONArray;
-import com.openexchange.chronos.schedjoules.api.SchedJoulesPage.SchedJoulesPageBuilder;
+import com.openexchange.chronos.schedjoules.api.auxiliary.SchedJoulesPage;
+import com.openexchange.chronos.schedjoules.api.auxiliary.SchedJoulesPage.SchedJoulesPageBuilder;
 import com.openexchange.chronos.schedjoules.api.client.HttpMethod;
 import com.openexchange.chronos.schedjoules.api.client.SchedJoulesRESTBindPoint;
 import com.openexchange.chronos.schedjoules.api.client.SchedJoulesRESTClient;

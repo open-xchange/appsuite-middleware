@@ -50,7 +50,7 @@
 package com.openexchange.chronos.schedjoules.impl.cache.loader;
 
 import com.openexchange.chronos.schedjoules.api.SchedJoulesAPI;
-import com.openexchange.chronos.schedjoules.api.SchedJoulesPage;
+import com.openexchange.chronos.schedjoules.api.auxiliary.SchedJoulesPage;
 import com.openexchange.chronos.schedjoules.impl.cache.SchedJoulesAPICache;
 import com.openexchange.chronos.schedjoules.impl.cache.SchedJoulesCachedItemKey;
 import com.openexchange.exception.OXException;
