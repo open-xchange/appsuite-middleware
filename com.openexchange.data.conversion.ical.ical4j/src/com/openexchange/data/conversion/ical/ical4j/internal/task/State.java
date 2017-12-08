@@ -51,13 +51,18 @@ package com.openexchange.data.conversion.ical.ical4j.internal.task;
 
 import java.util.List;
 import java.util.TimeZone;
-import net.fortuna.ical4j.model.component.VToDo;
-import net.fortuna.ical4j.model.property.Status;
+
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.Mode;
 import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAttributeConverter;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.tasks.Task;
+import com.openexchange.java.Strings;
+
+import net.fortuna.ical4j.model.Property;
+import net.fortuna.ical4j.model.component.VToDo;
+import net.fortuna.ical4j.model.property.Status;
+import net.fortuna.ical4j.model.property.XProperty;
 
 /**
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
@@ -71,8 +76,7 @@ public final class State extends AbstractVerifyingAttributeConverter<VToDo, Task
     @Override
     public void emit(final Mode mode, final int index, final Task task, final VToDo vtodo, final List<ConversionWarning> warnings, final Context ctx, final Object... args) {
         try {
-            final Status status = new Status(toStatus(index, task.getStatus()).getValue());
-            vtodo.getProperties().add(status);
+        	toStatus(index, task.getStatus(), vtodo);
         } catch (final ConversionWarning e) {
             warnings.add(e);
         }
@@ -80,7 +84,7 @@ public final class State extends AbstractVerifyingAttributeConverter<VToDo, Task
 
     @Override
     public boolean hasProperty(final VToDo vtodo) {
-        return null != vtodo.getStatus();
+        return null != vtodo.getStatus() || null != vtodo.getProperty("X-OX-STATUS");
     }
 
     @Override
@@ -91,13 +95,13 @@ public final class State extends AbstractVerifyingAttributeConverter<VToDo, Task
     @Override
     public void parse(final int index, final VToDo vtodo, final Task task, final TimeZone timeZone, final Context ctx, final List<ConversionWarning> warnings) {
         try {
-            task.setStatus(toTask(index, vtodo.getStatus()));
+            task.setStatus(toTask(index, vtodo));
         } catch (final ConversionWarning e) {
             warnings.add(e);
         }
     }
 
-    public static Status toStatus(final int index, final int taskState) throws ConversionWarning {
+    public static void toStatus(final int index, final int taskState, final VToDo vtodo) throws ConversionWarning {
         Status retval = null;
         switch (taskState) {
         case Task.NOT_STARTED:
@@ -110,28 +114,42 @@ public final class State extends AbstractVerifyingAttributeConverter<VToDo, Task
             retval = Status.VTODO_COMPLETED;
             break;
         case Task.WAITING:
+        	retval = Status.VTODO_CANCELLED;
+        	vtodo.getProperties().add(new XProperty("X-OX-STATUS", "WAITING"));
+        	break;
         case Task.DEFERRED:
             retval = Status.VTODO_CANCELLED;
             break;
         default:
             throw new ConversionWarning(index, ConversionWarning.Code.INVALID_STATUS, Integer.valueOf(taskState));
         }
-        return retval;
+        vtodo.getProperties().add(retval);
     }
 
-    public static int toTask(final int index, final Status status) throws ConversionWarning {
-        int retval;
-        if (Status.VTODO_NEEDS_ACTION.equals(status)) {
-            retval = Task.NOT_STARTED;
-        } else if (Status.VTODO_IN_PROCESS.equals(status)) {
-            retval = Task.IN_PROGRESS;
-        } else if (Status.VTODO_COMPLETED.equals(status)) {
-            retval = Task.DONE;
-        } else if (Status.VTODO_CANCELLED.equals(status)) {
-            retval = Task.DEFERRED;
-        } else {
-            throw new ConversionWarning(index, ConversionWarning.Code.INVALID_STATUS, status.getValue());
-        }
+    public static int toTask(final int index, final VToDo vtodo) throws ConversionWarning {
+        int retval = 0;
+    	final Status status = vtodo.getStatus();
+    	if (null != status && Strings.isNotEmpty(status.getValue())) {
+            if (Status.VTODO_NEEDS_ACTION.equals(status)) {
+                retval = Task.NOT_STARTED;
+            } else if (Status.VTODO_IN_PROCESS.equals(status)) {
+                retval = Task.IN_PROGRESS;
+            } else if (Status.VTODO_COMPLETED.equals(status)) {
+                retval = Task.DONE;
+            } else if (Status.VTODO_CANCELLED.equals(status)) {
+                retval = Task.DEFERRED;
+            }
+		} else {
+        	Property waitingStatus = vtodo.getProperty("X-OX-STATUS");
+        	if (null != waitingStatus && Strings.isNotEmpty(waitingStatus.getValue())) {
+    			if (waitingStatus.getValue().equals("WAITING")) {
+    				retval = Task.WAITING;
+    			}
+    		}
+		}
+    	if (0 == retval) {
+    		throw new ConversionWarning(index, ConversionWarning.Code.INVALID_STATUS, status.getValue());
+		}
         return retval;
     }
 }
