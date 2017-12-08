@@ -65,7 +65,8 @@ import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 
 /**
- * {@link SchedJoulesAPICache}
+ * {@link SchedJoulesAPICache} - Caches {@link SchedJoulesAPI} instances by using the api key
+ * as the cache key.
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
@@ -78,7 +79,7 @@ public class SchedJoulesAPICache {
      */
     private final Cache<SchedJoulesCachedAPIKey, SchedJoulesAPI> apiCache = CacheBuilder.newBuilder().expireAfterAccess(1, TimeUnit.HOURS).removalListener(notification -> {
         SchedJoulesCachedAPIKey key = (SchedJoulesCachedAPIKey) notification.getKey();
-        LOG.debug("Shutting down SchedJoules API for context '{}'.", key.getContextId());
+        LOG.debug("Shutting down SchedJoules API for key '{}'.", key.getApiKeyHash());
         SchedJoulesAPI api = (SchedJoulesAPI) notification.getValue();
         api.shutDown();
     }).build();
@@ -91,14 +92,17 @@ public class SchedJoulesAPICache {
     }
 
     /**
-     * @param contextId
-     * @return
-     * @throws OXException
+     * Retrieves a {@link SchedJoulesAPI} instance. If none in cache a new one will be initialised.
+     * 
+     * @param contextId The context identifier
+     * @return The {@link SchedJoulesAPI}
+     * @throws OXException if an error is occurred
      */
     public SchedJoulesAPI getAPI(int contextId) throws OXException {
         try {
-            return apiCache.get(new SchedJoulesCachedAPIKey(getKey(contextId), contextId), () -> {
-                LOG.debug("Cache miss for context '{}', initialising new SchedJoules API.", contextId);
+            String apiKeyHash = getKey(contextId);
+            return apiCache.get(new SchedJoulesCachedAPIKey(apiKeyHash, contextId), () -> {
+                LOG.debug("Cache miss for key '{}', initialising new SchedJoules API.", apiKeyHash);
                 return new SchedJoulesAPI(getAPIKey(contextId));
             });
         } catch (ExecutionException e) {

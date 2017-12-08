@@ -172,7 +172,6 @@ public class SchedJoulesServiceImpl implements SchedJoulesService {
     @Override
     public SchedJoulesResult getPage(int contextId, int pageId, String locale, Set<SchedJoulesPageField> filteredFields) throws OXException {
         try {
-            // FIXME: Don't filter when consumed internally
             JSONObject content = (JSONObject) pagesCache.get(new SchedJoulesCachedItemKey(contextId, pageId, locale)).getItemData();
             filterContent(content, SchedJoulesPageField.toSring(filteredFields));
             return new SchedJoulesResult(content);
