@@ -193,7 +193,7 @@ public class Questions {
     protected static void reportNumberOfUsersWithEventsInPrivateCalendar() {
         try {
             Datamining.allTheQuestions.add(NUMBER_OF_USERS_WITH_EVENTS_IN_PRIVATE_CALENDAR);
-            String sql = "SELECT COUNT(DISTINCT cid, createdBy) FROM calendar_event";
+            String sql = "SELECT COUNT(DISTINCT cid, createdBy) FROM calendar_event WHERE account=0;";
             BigInteger numberOfUsers = Datamining.countOverAllSchemata(sql);
             Datamining.report(NUMBER_OF_USERS_WITH_EVENTS_IN_PRIVATE_CALENDAR, numberOfUsers.toString());
         } catch (Exception e) {
@@ -203,7 +203,7 @@ public class Questions {
     protected static void reportNumberOfUsersWithEventsInPrivateCalendarThatAreInTheFutureAndAreNotYearlySeries() { 
         try {
             Datamining.allTheQuestions.add(NUMBER_OF_USERS_WITH_EVENTS_IN_PRIVATE_CALENDAR_THAT_ARE_IN_THE_FUTURE_AND_ARE_NOT_YEARLY_SERIES);
-            String sql = "SELECT COUNT(DISTINCT cid, createdBy) FROM calendar_event WHERE start > NOW() AND folder IS NULL);";
+            String sql = "SELECT COUNT(*) FROM calendar_event WHERE account=0 AND start > NOW() AND folder IS NULL AND (rrule IS NULL OR rrule NOT LIKE '%FREQ=YEARLY%');";
             BigInteger numberOfUsers = Datamining.countOverAllSchemata(sql);
             Datamining.report(
                 NUMBER_OF_USERS_WITH_EVENTS_IN_PRIVATE_CALENDAR_THAT_ARE_IN_THE_FUTURE_AND_ARE_NOT_YEARLY_SERIES,
@@ -215,7 +215,7 @@ public class Questions {
     protected static void reportNumberOfUsersWhoChangedTheirCalendarInTheLast30Days() {
         try {
             Datamining.allTheQuestions.add(NUMBER_OF_USERS_WHO_CHANGED_THEIR_CALENDAR_IN_THE_LAST30_DAYS);
-            String sql = "SELECT count(DISTINCT cid, createdBy) FROM calendar_event WHERE DATE(FROM_UNIXTIME(SUBSTRING(CAST(timestamp AS CHAR) FROM 1 FOR 10))) BETWEEN (NOW() - INTERVAL 30 DAY) AND NOW()";
+            String sql = "SELECT count(*) FROM calendar_event WHERE account=0 AND timestamp>=" + Tools.calculate30DaysBack() + ";";
             BigInteger numberOfUsers = Datamining.countOverAllSchemata(sql);
             Datamining.report(NUMBER_OF_USERS_WHO_CHANGED_THEIR_CALENDAR_IN_THE_LAST30_DAYS, numberOfUsers.toString());
         } catch (Exception e) {
@@ -275,7 +275,7 @@ public class Questions {
     protected static void reportNumberOfAppointments() {
         try {
             Datamining.allTheQuestions.add(NUMBER_OF_APPOINTMENTS);
-            String sql = "SELECT count(*) FROM calendar_event;";
+            String sql = "SELECT count(*) FROM calendar_event WHERE account=0;";
             BigInteger numberOfAppointments = Datamining.countOverAllSchemata(sql);
             Datamining.report(NUMBER_OF_APPOINTMENTS, numberOfAppointments.toString());
         } catch (Exception e) {
@@ -335,7 +335,7 @@ public class Questions {
     protected static void reportMaximumNumberOfCreatedAppointmentsForOneUser() { 
         try {
             Datamining.allTheQuestions.add(MAXIMUM_NUMBER_OF_CREATED_APPOINTMENTS_FOR_ONE_USER);
-            String sql = "SELECT MAX(count) FROM (SELECT COUNT(*) AS count FROM calendar_event GROUP BY createdBy) AS x;";
+            String sql = "SELECT MAX(count) FROM (SELECT COUNT(*) AS count FROM calendar_event WHERE account=0 GROUP BY createdBy) AS x;";
             BigInteger numberOfInfostoreObjects = Datamining.maximumForAllSchemata(sql);
             Datamining.report(MAXIMUM_NUMBER_OF_CREATED_APPOINTMENTS_FOR_ONE_USER, numberOfInfostoreObjects.toString());
         } catch (Exception e) {
@@ -375,7 +375,7 @@ public class Questions {
     protected static void reportNumberOfUsersWhoCreatedAppointments() {
         try {
             Datamining.allTheQuestions.add(NUMBER_OF_USERS_WHO_CREATED_APPOINTMENTS); 
-            String sql = "SELECT COUNT(DISTINCT cid, createdBy) FROM calendar_event";
+            String sql = "SELECT COUNT(DISTINCT cid, createdBy) FROM calendar_event WHERE account=0;";
             BigInteger numberOfInfostoreObjects = Datamining.countOverAllSchemata(sql);
             Datamining.report(NUMBER_OF_USERS_WHO_CREATED_APPOINTMENTS, numberOfInfostoreObjects.toString());
         } catch (Exception e) {

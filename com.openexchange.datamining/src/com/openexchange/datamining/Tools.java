@@ -50,34 +50,44 @@
 package com.openexchange.datamining;
 
 import java.math.BigInteger;
-
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
 
 /**
  * {@link Tools}
  *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
-public class Tools {
+public final class Tools {
 
     static String humanReadableBytes(String string) {
         String returnString = "";
         BigInteger number = new BigInteger(string);
-        if (number.equals(new BigInteger("9999999999")) || Integer.parseInt(string) == Integer.MAX_VALUE ){
+        if (number.equals(new BigInteger("9999999999")) || Integer.parseInt(string) == Integer.MAX_VALUE) {
             returnString = "INFINITE";
-        }
-        else if (number.equals(new BigInteger("1"))){
+        } else if (number.equals(new BigInteger("1"))) {
             returnString = "1Byte";
-        }
-        else if (number.compareTo(new BigInteger("1000000000")) >= 0 ){
-            returnString = number.divide(new BigInteger("1000000000")).toString()+"GB";
-        }
-        else if (number.compareTo(new BigInteger("1000000")) >= 0 ){
-            returnString = number.divide(new BigInteger("1000000")).toString()+"MB";
-        }
-        else if (number.compareTo(new BigInteger("1000")) >= 0 ){
-            returnString = number.divide(new BigInteger("1000")).toString()+"KB";
+        } else if (number.compareTo(new BigInteger("1000000000")) >= 0) {
+            returnString = number.divide(new BigInteger("1000000000")).toString() + "GB";
+        } else if (number.compareTo(new BigInteger("1000000")) >= 0) {
+            returnString = number.divide(new BigInteger("1000000")).toString() + "MB";
+        } else if (number.compareTo(new BigInteger("1000")) >= 0) {
+            returnString = number.divide(new BigInteger("1000")).toString() + "KB";
         }
         return returnString;
+    }
+
+    /**
+     * Get a time stamp of 30 days back in milliseconds
+     * 
+     * @return The time stamp
+     */
+    static String calculate30DaysBack() {
+        Calendar cal = new GregorianCalendar();
+        cal.setTime(new Date());
+        cal.add(Calendar.DAY_OF_MONTH, -30);
+        return String.valueOf(cal.getTime().getTime());
     }
 
 }
