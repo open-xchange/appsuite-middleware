@@ -215,7 +215,7 @@ public class Questions {
     protected static void reportNumberOfUsersWhoChangedTheirCalendarInTheLast30Days() {
         try {
             Datamining.allTheQuestions.add(NUMBER_OF_USERS_WHO_CHANGED_THEIR_CALENDAR_IN_THE_LAST30_DAYS);
-            String sql = "SELECT count(*) FROM calendar_event WHERE account=0 AND timestamp>=" + Tools.calculate30DaysBack() + ";";
+            String sql = "SELECT count(DISTINCT cid, user) FROM calendar_event WHERE account=0 AND timestamp>=" + Tools.calculate30DaysBack() + ";";
             BigInteger numberOfUsers = Datamining.countOverAllSchemata(sql);
             Datamining.report(NUMBER_OF_USERS_WHO_CHANGED_THEIR_CALENDAR_IN_THE_LAST30_DAYS, numberOfUsers.toString());
         } catch (Exception e) {
@@ -335,7 +335,7 @@ public class Questions {
     protected static void reportMaximumNumberOfCreatedAppointmentsForOneUser() { 
         try {
             Datamining.allTheQuestions.add(MAXIMUM_NUMBER_OF_CREATED_APPOINTMENTS_FOR_ONE_USER);
-            String sql = "SELECT MAX(count) FROM (SELECT COUNT(*) AS count FROM calendar_event WHERE account=0 GROUP BY createdBy) AS x;";
+            String sql = "SELECT MAX(count) FROM (SELECT COUNT(*) AS count FROM calendar_event WHERE account=0 GROUP BY cid, createdBy) AS x;";
             BigInteger numberOfInfostoreObjects = Datamining.maximumForAllSchemata(sql);
             Datamining.report(MAXIMUM_NUMBER_OF_CREATED_APPOINTMENTS_FOR_ONE_USER, numberOfInfostoreObjects.toString());
         } catch (Exception e) {
