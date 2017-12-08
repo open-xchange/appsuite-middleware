@@ -57,8 +57,6 @@ import static com.openexchange.chronos.provider.CalendarFolderProperty.USED_FOR_
 import static com.openexchange.chronos.provider.CalendarFolderProperty.USED_FOR_SYNC_LITERAL;
 import static com.openexchange.chronos.provider.internal.Constants.ACCOUNT_ID;
 import static com.openexchange.chronos.provider.internal.Constants.CONTENT_TYPE;
-import static com.openexchange.chronos.provider.internal.Constants.PROVIDER_ID;
-import static com.openexchange.chronos.provider.internal.Constants.QUALIFIED_ACCOUNT_ID;
 import static com.openexchange.chronos.provider.internal.Constants.TREE_ID;
 import static com.openexchange.chronos.provider.internal.Constants.USER_PROPERTY_PREFIX;
 import static com.openexchange.folderstorage.CalendarFolderConverter.getStorageFolder;
@@ -185,18 +183,26 @@ public class InternalCalendarAccess implements FolderCalendarAccess, GroupwareCa
     @Override
     public String updateFolder(String folderId, CalendarFolder folder, long clientTimestamp) throws OXException {
         /*
-         * update extended properties
+         * update extended properties & subscribed flag as needed; 'hide' the change in folder update afterwards
          */
+        GroupwareCalendarFolder originalFolder = getFolder(folderId);
         if (null != folder.getExtendedProperties()) {
-            updateProperties(getFolder(folderId), folder.getExtendedProperties());
+            updateProperties(originalFolder, folder.getExtendedProperties());
             DefaultGroupwareCalendarFolder folderUpdate = new DefaultGroupwareCalendarFolder(folder);
             folderUpdate.setExtendedProperties(null);
+            folder = folderUpdate;
+        }
+        if (originalFolder.isSubscribed() != folder.isSubscribed()) {
+            Map<String, String> properties = Collections.singletonMap(USER_PROPERTY_PREFIX + "subscribed", String.valueOf(folder.isSubscribed()));
+            storeUserProperties(session.getContextId(), folderId, session.getUserId(), properties);
+            DefaultGroupwareCalendarFolder folderUpdate = new DefaultGroupwareCalendarFolder(folder);
+            folderUpdate.setSubscribed(true);
             folder = folderUpdate;
         }
         /*
          * perform common folder update
          */
-        ParameterizedFolder storageFolder = getStorageFolder(TREE_ID, CONTENT_TYPE, folder, PROVIDER_ID, ACCOUNT_ID, null);
+        ParameterizedFolder storageFolder = getStorageFolder(TREE_ID, CONTENT_TYPE, folder, null, ACCOUNT_ID, null);
         getFolderService().updateFolder(storageFolder, new Date(clientTimestamp), session.getSession(), initDecorator());
         return storageFolder.getID();
     }
@@ -204,17 +210,26 @@ public class InternalCalendarAccess implements FolderCalendarAccess, GroupwareCa
     @Override
     public String createFolder(CalendarFolder folder) throws OXException {
         /*
-         * perform common folder create
+         * perform common folder create (excluding extended properties & subscribe flag)
          */
-        ParameterizedFolder folderToCreate = getStorageFolder(TREE_ID, CONTENT_TYPE, folder, PROVIDER_ID, ACCOUNT_ID, null);
-        folderToCreate.setAccountID(QUALIFIED_ACCOUNT_ID);
-        FolderResponse<String> response = getFolderService().createFolder(folderToCreate, session.getSession(), initDecorator());
-        String folderId = response.getResponse();
+        String folderId;
+        {
+            DefaultGroupwareCalendarFolder plainFolder = new DefaultGroupwareCalendarFolder(folder);
+            plainFolder.setExtendedProperties(null);
+            plainFolder.setSubscribed(true);
+            ParameterizedFolder folderToCreate = getStorageFolder(TREE_ID, CONTENT_TYPE, plainFolder, null, ACCOUNT_ID, null);
+            FolderResponse<String> response = getFolderService().createFolder(folderToCreate, session.getSession(), initDecorator());
+            folderId = response.getResponse();
+        }
         /*
-         * update extended properties if needed
+         * insert extended properties & subscribed flag if needed
          */
         if (null != folder.getExtendedProperties()) {
             updateProperties(getFolder(folderId), folder.getExtendedProperties());
+        }
+        if (false == folder.isSubscribed()) {
+            Map<String, String> properties = Collections.singletonMap(USER_PROPERTY_PREFIX + "subscribed", String.valueOf(folder.isSubscribed()));
+            storeUserProperties(session.getContextId(), folderId, session.getUserId(), properties);
         }
         return folderId;
     }
@@ -376,9 +391,18 @@ public class InternalCalendarAccess implements FolderCalendarAccess, GroupwareCa
      * @return The groupware calendar folders
      */
     private DefaultGroupwareCalendarFolder getCalendarFolder(UserizedFolder userizedFolder) throws OXException {
+        /*
+         * convert to calendar folder
+         */
         DefaultGroupwareCalendarFolder calendarFolder = CalendarFolderConverter.getCalendarFolder(userizedFolder);
-        calendarFolder.setExtendedProperties(getProperties(userizedFolder));
+        /*
+         * apply further extended properties & capabilities
+         */
+        Map<String, String> userProperties = loadUserProperties(session.getContextId(), userizedFolder.getID(), session.getUserId());
+        calendarFolder.setExtendedProperties(getExtendedProperties(userProperties, userizedFolder));
         calendarFolder.setSupportedCapabilites(CalendarCapability.getCapabilities(getClass()));
+        String subscribed = userProperties.get(USER_PROPERTY_PREFIX + "subscribed");
+        calendarFolder.setSubscribed(null == subscribed || Boolean.parseBoolean(subscribed));
         return calendarFolder;
     }
 
@@ -406,8 +430,7 @@ public class InternalCalendarAccess implements FolderCalendarAccess, GroupwareCa
      * @param folder The folder to get the extended calendar properties for
      * @return The extended properties
      */
-    private ExtendedProperties getProperties(UserizedFolder folder) throws OXException {
-        Map<String, String> userProperties = loadUserProperties(session.getContextId(), folder.getID(), session.getUserId());
+    private static ExtendedProperties getExtendedProperties(Map<String, String> userProperties, UserizedFolder folder) throws OXException {
         ExtendedProperties properties = new ExtendedProperties();
         /*
          * used for sync
