@@ -145,7 +145,7 @@ public class BirthdaysCalendarProvider implements BasicCalendarProvider {
             return false;
         }
         /*
-         * require that "com.openexchange.calendar.birthdays" is not diabled for user
+         * require that "com.openexchange.calendar.birthdays" is not disabled for user
          */
         ConfigView configView = requireService(ConfigViewFactory.class, services).getView(session.getUserId(), session.getContextId());
         return ConfigViews.getDefinedBoolPropertyFrom("com.openexchange.calendar.birthdays", true, configView);
@@ -204,6 +204,7 @@ public class BirthdaysCalendarProvider implements BasicCalendarProvider {
         if (Strings.isNotEmpty(settings.getName())) {
             internalConfig.putSafe("name", settings.getName());
         }
+        internalConfig.putSafe("subscribed", settings.isSubscribed());
         return internalConfig;
     }
 
@@ -229,6 +230,10 @@ public class BirthdaysCalendarProvider implements BasicCalendarProvider {
         }
         if (Strings.isNotEmpty(settings.getName()) && false == settings.getName().equals(internalConfig.opt("name"))) {
             internalConfig.putSafe("name", settings.getName());
+            changed = true;
+        }
+        if (settings.isSubscribed() != internalConfig.optBoolean("subscribed", true)) {
+            internalConfig.putSafe("subscribed", settings.isSubscribed());
             changed = true;
         }
         return changed ? internalConfig : null;

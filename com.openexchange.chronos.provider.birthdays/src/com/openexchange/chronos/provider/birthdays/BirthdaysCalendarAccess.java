@@ -205,6 +205,7 @@ public class BirthdaysCalendarAccess implements BasicCalendarAccess, PersonalAla
             name = stringHelper.getString(BirthdaysCalendarStrings.CALENDAR_NAME);
         }
         settings.setName(name);
+        settings.setSubscribed(internalConfig.optBoolean("subscribed", true));
         ExtendedProperties extendedProperties = new ExtendedProperties();
         extendedProperties.add(SCHEDULE_TRANSP(TimeTransparency.TRANSPARENT, true));
         extendedProperties.add(DESCRIPTION(stringHelper.getString(BirthdaysCalendarStrings.CALENDAR_DESCRIPTION), true));
