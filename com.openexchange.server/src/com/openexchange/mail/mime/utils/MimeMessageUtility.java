@@ -2929,7 +2929,7 @@ public final class MimeMessageUtility {
             if (content instanceof String) {
                 String stringContent = (String) content;
                 if (Strings.isEmpty(stringContent)) {
-                    return new EmptyStringMimeMultipart(new MessageDataSource(Streams.newByteArrayInputStream(stringContent.getBytes(Charsets.ISO_8859_1)), null == contentType ? getHeader("Content-Type", null, part) : contentType));
+                    return new EmptyStringMimeMultipart(new MessageDataSource(new byte[0], null == contentType ? getHeader("Content-Type", null, part) : contentType));
                 }
                 return new MimeMultipart(new MessageDataSource(Streams.newByteArrayInputStream(stringContent.getBytes(Charsets.ISO_8859_1)), null == contentType ? getHeader("Content-Type", null, part) : contentType));
             }

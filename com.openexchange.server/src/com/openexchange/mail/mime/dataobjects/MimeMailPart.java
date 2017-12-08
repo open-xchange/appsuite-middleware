@@ -59,6 +59,7 @@ import java.io.PipedOutputStream;
 import java.io.PushbackInputStream;
 import java.io.UnsupportedEncodingException;
 import javax.activation.DataHandler;
+import javax.mail.BodyPart;
 import javax.mail.MessageRemovedException;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
@@ -130,6 +131,8 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
      * <code>message/rfc822</code> and <code>multipart/*</code>.
      */
     private static final int STYPE_MIME_BODY = 4;
+
+    private static final String CONTENT_TYPE = MessageHeaders.HDR_CONTENT_TYPE;
 
     /**
      * The delegate {@link Part} object.
@@ -1009,7 +1012,6 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
                 if (null == multipart) {
                     try {
                         Part part = this.part;
-                        final int size;
                         /*-
                          *
                         if (false && ((size = part.getSize()) > 0) && (size <= MAX_INMEMORY_SIZE)) {
@@ -1024,8 +1026,9 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
                              * If size is unknown or exceeds 1MB, use the stream-based implementation
                              */
                             final Object content = part.getContent();
-                            if (content instanceof Multipart) {
-                                multipart = new JavaMailMultipartWrapper((Multipart) content);
+                            Multipart javaMailMultipart = getValidMultipartFor(content);
+                            if (null != javaMailMultipart) {
+                                multipart = new JavaMailMultipartWrapper(javaMailMultipart);
                                 this.multipart = multipart;
                             } else {
                                 /*-
@@ -1073,6 +1076,34 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
             }
         }
         return multipart;
+    }
+
+    private Multipart getValidMultipartFor(Object content) throws OXException {
+        if (!(content instanceof Multipart)) {
+            return null;
+        }
+
+        try {
+            Multipart mp = (Multipart) content;
+            int count = mp.getCount();
+            if (count == 1) {
+                // Check for empty text/plain part
+                BodyPart bodyPart = mp.getBodyPart(0);
+                String[] contentTypeHdr = bodyPart.getHeader(CONTENT_TYPE);
+                if (null == contentTypeHdr) {
+                    String stringContent = MessageUtility.readMimePart(bodyPart, "US-ASCII");
+                    if (Strings.isEmpty(stringContent)) {
+                        return new EmptyStringMimeMultipart(new MessageDataSource(new byte[0], MimeMessageUtility.getHeader("Content-Type", null, part)));
+                    }
+                }
+            }
+            return mp;
+        } catch (MessageRemovedException e) {
+            throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e, new Object[0]);
+        } catch (MessagingException e) {
+            LOG.error("Failed to examine multipart content.", e);
+            return null;
+        }
     }
 
     private static interface MultipartWrapper {
