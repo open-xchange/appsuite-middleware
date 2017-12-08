@@ -100,7 +100,7 @@ public class SchedJoulesAPICache {
      */
     public SchedJoulesAPI getAPI(int contextId) throws OXException {
         try {
-            String apiKeyHash = getKey(contextId);
+            String apiKeyHash = getHashedAPIKey(contextId);
             return apiCache.get(new SchedJoulesCachedAPIKey(apiKeyHash, contextId), () -> {
                 LOG.debug("Cache miss for key '{}', initialising new SchedJoules API.", apiKeyHash);
                 return new SchedJoulesAPI(getAPIKey(contextId));
@@ -111,14 +111,14 @@ public class SchedJoulesAPICache {
     }
 
     /**
-     * Gets the API key for the specified context and hashes both values to create
+     * Gets the API key for the specified context and hashes it to create
      * a unique key for the client
      * 
      * @param contextId The context identifier
      * @return The hash
      * @throws OXException if the API key is not configured for the specified context
      */
-    private String getKey(int contextId) throws OXException {
+    private String getHashedAPIKey(int contextId) throws OXException {
         return DigestUtils.sha256Hex(getAPIKey(contextId));
 
     }
