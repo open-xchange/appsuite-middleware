@@ -84,4 +84,7 @@ public interface IImageConverterMonitoring {
     public long getMedianKeyQueueTimeMillis_Background();
     public long getMedianKeyQueueTimeMillis_Medium();
     public long getMedianKeyQueueTimeMillis_Instant();
+
+    public long getCacheKeyCount();
+    public long getCacheSize();
 }

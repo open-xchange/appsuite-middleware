@@ -135,6 +135,40 @@ public interface IFileItemService {
      */
     public String[] getGroups() throws FileItemException;
 
+    /**
+     * Getting the summed up length of all items within the given group
+     *
+     * @return The total length
+     * @throws FileItemException
+     */
+    public long getGroupLength(final String groupId) throws FileItemException;
+
+    /**
+     * Getting the summed up length of all items within the given group,
+     * satisfying the given properties
+     *
+     * @return The total length
+     * @throws FileItemException
+     */
+    public long getGroupLength(final String groupId, final Properties properties) throws FileItemException;
+
+    /**
+     * Getting the summed up length of all items within the given group and subgroup,
+     *
+     * @return The total length
+     * @throws FileItemException
+     */
+    public long getSubGroupLength(final String groupId, final String subGroupId) throws FileItemException;
+
+    /**
+     * Getting the summed up length of all items within the given group and subgroup,
+     * satisfying the given properties
+     *
+     * @return The total length
+     * @throws FileItemException
+     */
+    public long getSubGroupLength(final String groupId, final String subGroupId, final Properties properties) throws FileItemException;
+
     // -------------------------------------------------------------------------
 
     /**
