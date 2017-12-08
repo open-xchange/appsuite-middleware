@@ -72,6 +72,7 @@ public class DefaultCalendarSettings implements CalendarSettings {
      */
     public DefaultCalendarSettings() {
         super();
+        this.subscribed = true;
     }
 
     @Override
