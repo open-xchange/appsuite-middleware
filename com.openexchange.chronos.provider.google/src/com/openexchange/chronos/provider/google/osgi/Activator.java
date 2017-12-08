@@ -59,10 +59,14 @@ import com.openexchange.chronos.storage.CalendarStorageFactory;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.datatypes.genericonf.storage.GenericConfigurationStorageService;
+import com.openexchange.folderstorage.FolderService;
+import com.openexchange.group.GroupService;
 import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.tools.oxfolder.property.FolderUserPropertyStorage;
+import com.openexchange.user.UserService;
 
 public class Activator extends HousekeepingActivator {
 
@@ -73,7 +77,7 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getOptionalServices() {
-        return new Class[] { GenericConfigurationStorageService.class, CalendarStorageFactory.class, ContextService.class };
+        return new Class[] { GenericConfigurationStorageService.class, CalendarStorageFactory.class, ContextService.class, FolderUserPropertyStorage.class, GroupService.class, UserService.class, FolderService.class };
     }
 
     @Override

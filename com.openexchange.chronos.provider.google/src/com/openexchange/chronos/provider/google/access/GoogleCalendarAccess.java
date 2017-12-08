@@ -55,6 +55,7 @@ import static com.openexchange.chronos.provider.CalendarFolderProperty.SCHEDULE_
 import static com.openexchange.chronos.provider.CalendarFolderProperty.USED_FOR_SYNC;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -71,7 +72,6 @@ import com.openexchange.chronos.common.DataHandlers;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.CalendarFolderProperty;
-import com.openexchange.chronos.provider.account.AdministrativeCalendarAccountService;
 import com.openexchange.chronos.provider.basic.CalendarSettings;
 import com.openexchange.chronos.provider.basic.DefaultCalendarSettings;
 import com.openexchange.chronos.provider.caching.ExternalCalendarResult;
@@ -88,6 +88,8 @@ import com.openexchange.conversion.DataArguments;
 import com.openexchange.conversion.DataHandler;
 import com.openexchange.conversion.SimpleData;
 import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.FolderService;
+import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.java.Strings;
 import com.openexchange.session.Session;
 
@@ -121,27 +123,35 @@ public class GoogleCalendarAccess extends BasicCachingCalendarAccess {
         oauthAccess = new GoogleOAuthAccess(account, session);
         oauthAccess.initialize();
         if (checkConfig) {
-            if (account.getUserConfiguration().has(GoogleCalendarConfigField.MIGRATED)) {
-                account.getUserConfiguration().remove(GoogleCalendarConfigField.MIGRATED);
-                AdministrativeCalendarAccountService calendarAccountService = Services.getService(AdministrativeCalendarAccountService.class);
-                this.account = calendarAccountService.updateAccount(session.getContextId(), session.getUserId(), account.getAccountId(), account.isEnabled(), null, account.getUserConfiguration(), System.currentTimeMillis());
-            }
-            initCalendarFolder();
+            initCalendarFolder(session);
         }
     }
 
     /**
      * Initializes the calendar folder
      *
+     * @param session
+     *
      * @throws OXException
      */
-    public void initCalendarFolder() throws OXException {
+    public void initCalendarFolder(Session session) throws OXException {
         try {
             JSONObject internalConfiguration = account.getInternalConfiguration();
             if (internalConfiguration == null) {
                 internalConfiguration = new JSONObject();
             }
-            if(internalConfiguration.has(GoogleCalendarConfigField.FOLDER)) {
+
+            if (internalConfiguration.has(GoogleCalendarConfigField.OLD_FOLDER)) {
+                FolderService folderService = Services.getService(FolderService.class);
+                try {
+                    folderService.deleteFolder("0", internalConfiguration.getString(GoogleCalendarConfigField.OLD_FOLDER), new Date(), session, new FolderServiceDecorator());
+                    internalConfiguration.remove(GoogleCalendarConfigField.OLD_FOLDER);
+                } catch (OXException e) {
+                    // ignore
+                }
+            }
+
+            if (internalConfiguration.has(GoogleCalendarConfigField.FOLDER)) {
                 return;
             }
 
@@ -153,11 +163,6 @@ public class GoogleCalendarAccess extends BasicCachingCalendarAccess {
             Calendar googleCal = (Calendar) oauthAccess.getClient().getClient();
             CalendarList calendars = googleCal.calendarList().list().execute();
 
-
-            if (internalConfiguration.has(GoogleCalendarConfigField.MIGRATED)) {
-                internalConfiguration.remove(GoogleCalendarConfigField.MIGRATED);
-                userConfiguration.remove(GoogleCalendarConfigField.MIGRATED);
-            }
             boolean found = false;
             for (CalendarListEntry entry : calendars.getItems()) {
 
@@ -332,6 +337,7 @@ public class GoogleCalendarAccess extends BasicCachingCalendarAccess {
         extendedProperties.add(USED_FOR_SYNC(Boolean.FALSE, true));
         extendedProperties.add(COLOR(internalConfig.optString(GoogleCalendarConfigField.COLOR, null), false));
         settings.setExtendedProperties(extendedProperties);
+        settings.setSubscribed(true);
         return settings;
     }
 }

@@ -459,7 +459,7 @@ public class FolderUserPropertyStorageImpl implements FolderUserPropertyStorage 
         }
         Map<String, String> map = new HashMap<>(1);
         map.put(key, value);
-        insertFolderProperties(folderId, contextId, userId, map, connection);
+        insertFolderProperties(contextId, folderId, userId, map, connection);
     }
 
     @Override

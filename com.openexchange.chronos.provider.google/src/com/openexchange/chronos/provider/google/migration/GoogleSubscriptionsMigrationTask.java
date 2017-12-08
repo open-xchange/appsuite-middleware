@@ -51,8 +51,10 @@ package com.openexchange.chronos.provider.google.migration;
 
 import java.sql.Connection;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -66,6 +68,12 @@ import com.openexchange.chronos.storage.CalendarStorageFactory;
 import com.openexchange.context.ContextService;
 import com.openexchange.datatypes.genericonf.storage.GenericConfigurationStorageService;
 import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.FolderService;
+import com.openexchange.folderstorage.FolderServiceDecorator;
+import com.openexchange.folderstorage.Permission;
+import com.openexchange.folderstorage.UserizedFolder;
+import com.openexchange.group.Group;
+import com.openexchange.group.GroupService;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.update.Attributes;
 import com.openexchange.groupware.update.PerformParameters;
@@ -78,6 +86,8 @@ import com.openexchange.subscribe.AbstractSubscribeService;
 import com.openexchange.subscribe.AdministrativeSubscriptionStorage;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionStorage;
+import com.openexchange.tools.oxfolder.property.FolderUserPropertyStorage;
+import com.openexchange.user.UserService;
 
 /**
  * {@link GoogleSubscriptionsMigrationTask}
@@ -127,19 +137,19 @@ public class GoogleSubscriptionsMigrationTask extends UpdateTaskAdapter {
                 Subscription sub = iterator.next();
                 boolean inserted = false;
                 try {
-                    JSONObject config = new JSONObject();
                     Object oauthAccount = sub.getConfiguration().get("account");
                     if (oauthAccount == null) {
                         // Skip bad configured subscriptions
                         iterator.remove();
                         continue;
                     }
-                    config.put(GoogleCalendarConfigField.OAUTH_ID, oauthAccount);
-                    config.put(GoogleCalendarConfigField.MIGRATED, true);
-                    config.put(GoogleCalendarConfigField.OLD_FOLDER, sub.getFolderId());
+                    JSONObject internalConfig = new JSONObject();
+                    internalConfig.put(GoogleCalendarConfigField.OAUTH_ID, oauthAccount);
+                    JSONObject userConfig = new JSONObject(internalConfig);
+                    internalConfig.put(GoogleCalendarConfigField.OLD_FOLDER, sub.getFolderId());
 
                     int id = calendarStorage.getAccountStorage().nextId();
-                    calendarStorage.getAccountStorage().insertAccount(new DefaultCalendarAccount(GoogleCalendarProvider.PROVIDER_ID, id, sub.getUserId(), sub.isEnabled(), config, config, new Date()));
+                    calendarStorage.getAccountStorage().insertAccount(new DefaultCalendarAccount(GoogleCalendarProvider.PROVIDER_ID, id, sub.getUserId(), sub.isEnabled(), internalConfig, userConfig, new Date()));
                     inserted = true;
                     calendarStorage.getAccountStorage().invalidateAccount(sub.getUserId(), -1);
                 } catch (JSONException e) {
@@ -158,12 +168,44 @@ public class GoogleSubscriptionsMigrationTask extends UpdateTaskAdapter {
             }
 
             /*
-             * Step 3: Remove old subscriptions
+             * Step 3: Remove old subscriptions and unsubsribe old folder
              */
+            GroupService groupService = Services.getService(GroupService.class);
+            UserService userService = Services.getService(UserService.class);
+            FolderService folderService = Services.getService(FolderService.class);
+            FolderUserPropertyStorage storage = Services.getService(FolderUserPropertyStorage.class);
             for (Subscription sub : subscriptions) {
                 subscriptionStorage.forgetSubscription(sub);
+
+                // Unsubscribe old folder for all users with permissions
+
+                UserizedFolder folder = folderService.getFolder("0", sub.getFolderId(), userService.getUser(sub.getUserId(), ctx), ctx, new FolderServiceDecorator());
+                Set<Integer> userFromPermissions = getUserFromPermissions(folder.getPermissions(), groupService, ctx);
+                for (Integer user : userFromPermissions) {
+                    storage.insertFolderProperty(ctxId, Integer.valueOf(sub.getFolderId()), user, "cal/subscribed", Boolean.FALSE.toString(), writeCon);
+                }
             }
         }
+    }
+
+    private Set<Integer> getUserFromPermissions(Permission[] permissions, GroupService groupService, Context ctx) {
+        Set<Integer> result = new HashSet<Integer>(permissions.length);
+        for (Permission perm : permissions) {
+            if (perm.isGroup()) {
+                try {
+                    Group group = groupService.getGroup(ctx, perm.getEntity());
+                    for (Integer member : group.getMember()) {
+                        result.add(member);
+                    }
+                } catch (OXException e) {
+                    // Continue
+                }
+            } else {
+                result.add(perm.getEntity());
+            }
+        }
+        return result;
+
     }
 
     @Override

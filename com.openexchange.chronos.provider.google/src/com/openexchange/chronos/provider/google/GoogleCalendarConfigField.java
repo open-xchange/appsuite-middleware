@@ -62,11 +62,6 @@ public class GoogleCalendarConfigField {
     public static final String PRIMARY = "isPrimary";
     public static final String SYNC_TOKEN = "syncToken";
     /**
-     * A boolean field indicating that the account was migrated and config must be updated.
-     */
-    public static final String MIGRATED = "migrated";
-
-    /**
      * In case the account was migrated. This field contains the folder of the former subscription
      */
     public static final String OLD_FOLDER = "oldSubscriptionFolder";
