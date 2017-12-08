@@ -497,6 +497,10 @@ public class DispatcherServlet extends SessionServlet {
             if (null != locale) {
                 e.setProperty(OXExceptionConstants.PROPERTY_LOCALE, locale.toString());
             }
+            if (UploadException.UploadCode.IMAGE_TOO_BIG.equals(e) || UploadException.UploadCode.IMAGE_RESOLUTION_TOO_HIGH.equals(e)) {
+                // Do log exceed image size/resolution
+                LOG.warn(e.getSoleMessage());
+            }
             handleOXException(e, httpRequest, httpResp);
         } catch (OXException e) {
             exc = e;
