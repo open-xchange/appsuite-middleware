@@ -172,6 +172,10 @@ public class HostList {
      * @return <code>true</code> if contained; otherwise <code>false</code>
      */
     public boolean contains(InetAddress hostAddress) {
+        if (null == hostAddress) {
+            return false;
+        }
+
         byte[] octets = hostAddress.getAddress();
         if (null != octets) {
             if (INADDR4SZ == octets.length) {
