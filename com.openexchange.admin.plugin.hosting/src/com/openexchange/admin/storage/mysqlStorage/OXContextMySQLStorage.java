@@ -3071,7 +3071,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 prep = null;
 
                 if (oldFilestoreId != 0) {
-                    prep = configdb_write_con.prepareStatement("UPDATE contexts_per_filestore SET count=count-1 WHERE filestore_id=?");
+                    prep = configdb_write_con.prepareStatement("UPDATE contexts_per_filestore SET count=count-1 WHERE filestore_id=? AND count>0");
                     prep.setInt(1, oldFilestoreId);
                     prep.executeUpdate();
                     closeSQLStuff(prep);
