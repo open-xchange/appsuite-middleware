@@ -806,14 +806,14 @@ public final class PushManagerRegistry implements PushListenerService {
             /*
              * No "webmail" permission granted
              */
-            LOG.info("Denied registration of a push listener for client {} from user {} in context {}: Missing \"webmail\" permission.", session.getClient(), I(session.getUserId()), I(session.getContextId()));
+            LOG.debug("Denied registration of a push listener for client {} from user {} in context {}: Missing \"webmail\" permission.", session.getClient(), I(session.getUserId()), I(session.getContextId()));
             return null;
         }
         if (false == PushUtility.allowedClient(session.getClient(), null, true)) {
             /*
              * No push listener for the client associated with current session.
              */
-            LOG.info("Denied registration of a push listener for client {} from user {} in context {}: Not allowed for specified client.", session.getClient(), I(session.getUserId()), I(session.getContextId()));
+            LOG.debug("Denied registration of a push listener for client {} from user {} in context {}: Not allowed for specified client.", session.getClient(), I(session.getUserId()), I(session.getContextId()));
             return null;
         }
         /*
@@ -844,7 +844,7 @@ public final class PushManagerRegistry implements PushListenerService {
             /*
              * No push listener for the client associated with current session.
              */
-            LOG.info("Denied unregistration of a push listener for client {} from user {} in context {}: Not allowed for specified client.", session.getClient(), I(session.getUserId()), I(session.getContextId()));
+            LOG.debug("Denied unregistration of a push listener for client {} from user {} in context {}: Not allowed for specified client.", session.getClient(), I(session.getUserId()), I(session.getContextId()));
             return false;
         }
         /*
