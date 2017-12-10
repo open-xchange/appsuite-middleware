@@ -49,11 +49,9 @@
 
 package com.openexchange.sessiond.impl;
 
-import gnu.trove.map.TIntObjectMap;
-import gnu.trove.map.hash.TIntObjectHashMap;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 
 /**
@@ -63,97 +61,125 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  */
 public class UserRefCounter {
 
-    private final ReadWriteLock rwLock = new ReentrantReadWriteLock();
+    /** A counter wrapping an <code>AtomicInteger</code> instance, but implements hashcode()/equals() for safe removal from <code>ConcurrentMap</code> */
+    private static final class Counter {
 
-    private final TIntObjectMap<TIntObjectMap<int[]>> longTermUserGuardian = new TIntObjectHashMap<TIntObjectMap<int[]>>();
+        private final AtomicInteger count;
 
-    public void add(final int uid, final int cid) {
-        final Lock wl = rwLock.writeLock();
-        wl.lock();
-        try {
-            TIntObjectMap<int[]> counters = longTermUserGuardian.get(cid);
-            if (null == counters) {
-                counters = new TIntObjectHashMap<int[]>();
-                longTermUserGuardian.put(cid, counters);
+        Counter() {
+            super();
+            count = new AtomicInteger(0);
+        }
+
+        int incrementAndGet() {
+            return count.incrementAndGet();
+        }
+
+        int decrementAndGet() {
+            return count.decrementAndGet();
+        }
+
+        int get() {
+            return count.get();
+        }
+
+        @Override
+        public int hashCode() {
+            int prime = 31;
+            return prime * 1 + count.get();
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
             }
-            int[] counter = counters.get(uid);
-            if (null == counter) {
-                counter = new int[1];
-                counter[0] = 0;
-                counters.put(uid, counter);
+            if (!(obj instanceof Counter)) {
+                return false;
             }
-            counter[0] = counter[0] + 1;
-        } finally {
-            wl.unlock();
+            Counter other = (Counter) obj;
+            return count.get() == other.count.get();
         }
     }
 
-    public void remove(final int uid, final int cid) {
-        final Lock rl = rwLock.readLock();
-        rl.lock();
-        try {
-            final TIntObjectMap<int[]> counters = longTermUserGuardian.get(cid);
+    // ------------------------------------------------------------------------------------------
+
+    private final ConcurrentMap<Integer, ConcurrentMap<Integer, Counter>> longTermUserGuardian;
+
+    /**
+     * Initializes a new {@link UserRefCounter}.
+     */
+    public UserRefCounter() {
+        super();
+        longTermUserGuardian = new ConcurrentHashMap<>(256, 0.9F, 1);
+    }
+
+    public void add(final int uid, final int cid) {
+        Integer iContextId = Integer.valueOf(cid);
+        ConcurrentMap<Integer, Counter> counters = longTermUserGuardian.get(iContextId);
+        if (null == counters) {
+            ConcurrentMap<Integer, Counter> newCounters = new ConcurrentHashMap<>(16, 0.9F, 1);
+            counters = longTermUserGuardian.putIfAbsent(iContextId, newCounters);
             if (null == counters) {
-                return;
+                counters = newCounters;
             }
-            final int[] counter = counters.get(uid);
+        }
+
+        Integer iUserId = Integer.valueOf(uid);
+        Counter counter = counters.get(iUserId);
+        if (null == counter) {
+            Counter nuCounter = new Counter();
+            counter = counters.putIfAbsent(iUserId, nuCounter);
             if (null == counter) {
-                return;
+                counter = nuCounter;
             }
-            // Upgrade lock
-            final Lock wl = rwLock.writeLock();
-            rl.unlock();
-            wl.lock();
-            try {
-                counter[0] = counter[0] - 1;
-                if (counter[0] <= 0) {
-                    counters.remove(uid);
-                    if (counters.isEmpty()) {
-                        longTermUserGuardian.remove(cid);
-                    }
+        }
+        counter.incrementAndGet();
+    }
+
+    public void remove(final int uid, final int cid) {
+        Integer iContextId = Integer.valueOf(cid);
+        ConcurrentMap<Integer, Counter> counters = longTermUserGuardian.get(iContextId);
+        if (null == counters) {
+            return;
+        }
+
+        Integer iUserId = Integer.valueOf(uid);
+        Counter counter = counters.get(iUserId);
+        if (null == counter) {
+            return;
+        }
+
+        if (counter.decrementAndGet() <= 0) {
+            // Try to remove counter atomically (remove if equal to zero-count)
+            if (counters.remove(iUserId, new Counter())) {
+                // Counter was removed. Check if counter map is empty now.
+                if (counters.isEmpty()) {
+                    // Try to remove counter map atomically, that is if it is is equal to an empty map
+                    longTermUserGuardian.remove(iContextId, new ConcurrentHashMap<>(0, 0.9F, 1));
                 }
-            } finally {
-                // Downgrade by acquiring read lock before releasing write lock
-                rl.lock();
-                wl.unlock(); // Unlock write, still hold read
             }
-        } finally {
-            rl.unlock();
         }
     }
 
     public boolean contains(final int cid) {
-        final Lock rl = rwLock.readLock();
-        rl.lock();
-        try {
-            return longTermUserGuardian.containsKey(cid);
-        } finally {
-            rl.unlock();
-        }
+        return longTermUserGuardian.containsKey(Integer.valueOf(cid));
     }
 
     public boolean contains(final int uid, final int cid) {
-        final Lock rl = rwLock.readLock();
-        rl.lock();
-        try {
-            final TIntObjectMap<int[]> counters = longTermUserGuardian.get(cid);
-            if (null == counters) {
-                return false;
-            }
-            final int[] counter = counters.get(uid);
-            return null != counter && counter[0] > 0;
-        } finally {
-            rl.unlock();
+        Integer iContextId = Integer.valueOf(cid);
+        ConcurrentMap<Integer, Counter> counters = longTermUserGuardian.get(iContextId);
+        if (null == counters) {
+            return false;
         }
+
+        Integer iUserId = Integer.valueOf(uid);
+        Counter counter = counters.get(iUserId);
+        return null != counter && counter.get() > 0;
     }
 
     public void clear() {
-        final Lock wl = rwLock.writeLock();
-        wl.lock();
-        try {
-            longTermUserGuardian.clear();
-        } finally {
-            wl.unlock();
-        }
+        longTermUserGuardian.clear();
     }
+
 }
