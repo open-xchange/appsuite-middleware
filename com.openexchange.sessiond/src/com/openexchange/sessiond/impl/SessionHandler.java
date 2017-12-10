@@ -58,6 +58,7 @@ import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -245,12 +246,16 @@ public final class SessionHandler {
         /*
          * remove from session data
          */
-        SessionControl[] control = sessionData.removeUserSessions(userId, contextId);
-        Session[] retval = new Session[control.length];
+        SessionControl[] controls = sessionData.removeUserSessions(userId, contextId);
+        List<SessionControl> removedSessions = new ArrayList<SessionControl>(controls.length);
+        Session[] retval = new Session[controls.length];
         for (int i = 0; i < retval.length; i++) {
-            SessionImpl removedSession = control[i].getSession();
+            SessionImpl removedSession = controls[i].getSession();
             retval[i] = removedSession;
-            postSessionRemoval(removedSession);
+            removedSessions.add(controls[i]);
+        }
+        if (!removedSessions.isEmpty()) {
+            postContainerRemoval(removedSessions, true);
         }
         /*
          * remove local sessions from storage (if available), too
@@ -444,8 +449,22 @@ public final class SessionHandler {
      */
     public static List<String> removeLocalSessions(SessionFilter filter) {
         List<String> sessionIds = findLocalSessions(filter);
-        for (String sessionId : sessionIds) {
-            clearSession(sessionId);
+        if (null == sessionIds || sessionIds.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        List<SessionControl> removedSessions = new ArrayList<SessionControl>(sessionIds.size());
+        for (Iterator<String> iterator = sessionIds.iterator(); iterator.hasNext();) {
+            String sessionId = iterator.next();
+            SessionControl removedSession = clearSession(sessionId, false);
+            if (null == removedSession) {
+                iterator.remove();
+            } else {
+                removedSessions.add(removedSession);
+            }
+        }
+        if (!removedSessions.isEmpty()) {
+            postContainerRemoval(removedSessions, true);
         }
 
         return sessionIds;
@@ -1098,21 +1117,24 @@ public final class SessionHandler {
      * Clears the session denoted by given session ID from session container(s)
      *
      * @param sessionid The session ID
+     * @param postEvent <code>true</code> to post an event about session removal; otherwise <code>false</code> for no such event
      * @return <code>true</code> if a session could be removed; otherwise <code>false</code>
      */
-    protected static boolean clearSession(String sessionid) {
+    protected static SessionControl clearSession(String sessionid, boolean postEvent) {
         SessionData sessionData = SESSION_DATA_REF.get();
         if (null == sessionData) {
             LOG.warn("\tSessionData instance is null.");
-            return false;
+            return null;
         }
         SessionControl sessionControl = sessionData.clearSession(sessionid);
         if (null == sessionControl) {
             LOG.debug("Cannot find session for given identifier to remove session <{}>", sessionid);
-            return false;
+            return null;
         }
-        postSessionRemoval(sessionControl.getSession());
-        return true;
+        if (postEvent) {
+            postSessionRemoval(sessionControl.getSession());
+        }
+        return sessionControl;
     }
 
     /**
@@ -1158,11 +1180,18 @@ public final class SessionHandler {
          */
         List<SessionControl> userSessionControls = sessionData.getUserSessions(currentSession.getUserId(), currentSession.getContextId());
         if (null != userSessionControls) {
+            List<SessionControl> removedSessions = new ArrayList<SessionControl>(userSessionControls.size());
             for (SessionControl userSessionControl : userSessionControls) {
                 String otherSessionID = userSessionControl.getSession().getSessionID();
                 if (null != otherSessionID && false == otherSessionID.equals(sessionid)) {
-                    clearSession(otherSessionID);
+                    SessionControl removedSession = clearSession(otherSessionID, false);
+                    if (null != removedSession) {
+                        removedSessions.add(removedSession);
+                    }
                 }
+            }
+            if (!removedSessions.isEmpty()) {
+                postContainerRemoval(userSessionControls, true);
             }
         }
         /*
@@ -1596,16 +1625,18 @@ public final class SessionHandler {
             return;
         }
         List<SessionControl> controls = sessionData.rotateShort();
-        if (config.isAutoLogin()) {
-            for (final SessionControl sessionControl : controls) {
-                LOG.info("Session is moved to long life time container. All temporary session data will be cleaned up. ID: {}", sessionControl.getSession().getSessionID());
+        if (!controls.isEmpty()) {
+            if (config.isAutoLogin()) {
+                for (final SessionControl sessionControl : controls) {
+                    LOG.info("Session is moved to long life time container. All temporary session data will be cleaned up. ID: {}", sessionControl.getSession().getSessionID());
+                }
+                postSessionDataRemoval(controls);
+            } else {
+                for (final SessionControl sessionControl : controls) {
+                    LOG.info("Session timed out. ID: {}", sessionControl.getSession().getSessionID());
+                }
+                postContainerRemoval(controls, true);
             }
-            postSessionDataRemoval(controls);
-        } else {
-            for (final SessionControl sessionControl : controls) {
-                LOG.info("Session timed out. ID: {}", sessionControl.getSession().getSessionID());
-            }
-            postContainerRemoval(controls, true);
         }
     }
 
@@ -1616,10 +1647,12 @@ public final class SessionHandler {
             return;
         }
         List<SessionControl> controls = sessionData.rotateLongTerm();
-        for (SessionControl control : controls) {
-            LOG.info("Session timed out. ID: {}", control.getSession().getSessionID());
+        if (!controls.isEmpty()) {
+            for (SessionControl control : controls) {
+                LOG.info("Session timed out. ID: {}", control.getSession().getSessionID());
+            }
+            postContainerRemoval(controls, true);
         }
-        postContainerRemoval(controls, true);
     }
 
     public static int getNumberOfActiveSessions() {
@@ -1776,7 +1809,12 @@ public final class SessionHandler {
             // Asynchronous remove from session storage
             final SessionStorageService sessionStorageService = Services.optService(SessionStorageService.class);
             if (sessionStorageService != null) {
-                final List<SessionControl> tSessionControls = new ArrayList<SessionControl>(sessionControls);
+                final List<SessionControl> tSessionControls = new ArrayList<SessionControl>(sessionControls.size());
+                for (SessionControl sessionControl : sessionControls) {
+                    if (useSessionStorage(sessionControl.getSession())) {
+                        tSessionControls.add(sessionControl);
+                    }
+                }
                 ThreadPools.getThreadPool().submit(new AbstractTask<Void>() {
 
                     @Override
