@@ -182,7 +182,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
         if (authHeaders == null || authHeaders.length == 0) {
             // Pass on to custom handlers
             mailMessage.setAuthenticityResult(MailAuthenticityResult.NEUTRAL_RESULT);
-            logMetrics(authHeaders, mailMessage.getAuthenticityResult());
+            logMetrics(Collections.emptyList(), mailMessage.getAuthenticityResult());
             return;
         }
 
@@ -190,12 +190,13 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
         if (from == null || from.length == 0) {
             // Pass on to custom handlers
             mailMessage.setAuthenticityResult(MailAuthenticityResult.NEUTRAL_RESULT);
-            logMetrics(authHeaders, mailMessage.getAuthenticityResult());
+            logMetrics(Arrays.asList(authHeaders), mailMessage.getAuthenticityResult());
             return;
         }
 
-        mailMessage.setAuthenticityResult(parseHeaders(Arrays.asList(authHeaders), from[0], session));
-        logMetrics(authHeaders, mailMessage.getAuthenticityResult());
+        List<String> headers = Arrays.asList(authHeaders);
+        mailMessage.setAuthenticityResult(parseHeaders(headers, from[0], session));
+        logMetrics(headers, mailMessage.getAuthenticityResult());
 
         trustedMailService.handle(session, mailMessage);
     }
@@ -567,7 +568,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
      * @param authHeaders the raw headers
      * @param overallResult the overall result
      */
-    private void logMetrics(final String[] authHeaders, MailAuthenticityResult overallResult) {
+    private void logMetrics(final List<String> authHeaders, MailAuthenticityResult overallResult) {
         MailAuthenticityMetricLogger metricLogger = services.getService(MailAuthenticityMetricLogger.class);
         metricLogger.log(Arrays.asList(authHeaders), overallResult);
     }
