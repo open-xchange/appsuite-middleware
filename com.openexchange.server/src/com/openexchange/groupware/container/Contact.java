@@ -4075,6 +4075,8 @@ public class Contact extends CommonObject {
         return true;
     }
 
+    private static final String DIVIDER = "_";
+
     /**
      * Gets a string suitable to sort contacts (as used when ordering contact results via {@link Contact#SPECIAL_SORTING}).
      */
@@ -4099,6 +4101,9 @@ public class Contact extends CommonObject {
             StringBuilder stringBuilder = new StringBuilder(64);
             for (String value : new String[] { getYomiLastName(), getYomiFirstName(), getSurName(), getGivenName() }) {
                 if (Strings.isNotEmpty(value)) {
+                    if(stringBuilder.length() != 0) {
+                        stringBuilder.append(DIVIDER);
+                    }
                     stringBuilder.append(value);
                 }
             }
