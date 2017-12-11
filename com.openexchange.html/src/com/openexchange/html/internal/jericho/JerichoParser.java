@@ -456,9 +456,11 @@ public final class JerichoParser {
             return null;
         }
 
+        String closing = m.group(2);
+        boolean orderlyClosed = false == Strings.isEmpty(closing); // Ending '>' found?
+
         if (!force) {
-            String closing = m.group(2);
-            if (Strings.isEmpty(closing)) {
+            if (!orderlyClosed) {
                 // No closing '>' found
                 // throw HtmlExceptionCodes.CORRUPT.create();
             }
@@ -468,16 +470,20 @@ public final class JerichoParser {
         if (start > 0) {
             handler.handleSegment(saneCharSequence(segment.subSequence(0, start)));
         }
-        int[] remainder = null;
 
+        int[] remainder = null;
         int end = m.end();
         if (end < segment.length()) {
-            int pos = indexOf('>', end, segment);
-            if (pos >= 0) {
-                startTag = startTag + segment.subSequence(end, pos + 1);
-                remainder = new int[] { pos + 1, segment.length() };
-            } else {
+            if (orderlyClosed) {
                 remainder = new int[] { end, segment.length() };
+            } else {
+                int pos = indexOf('>', end, segment);
+                if (pos >= 0) {
+                    startTag = startTag + segment.subSequence(end, pos + 1);
+                    remainder = new int[] { pos + 1, segment.length() };
+                } else {
+                    remainder = new int[] { end, segment.length() };
+                }
             }
         }
 

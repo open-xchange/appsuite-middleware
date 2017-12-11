@@ -59,6 +59,22 @@ import com.openexchange.session.Session;
  */
 public class HtmlSanitizeOptions {
 
+    /** HTML parser preference */
+    public static enum ParserPreference {
+        /**
+         * No HTML parser preference.
+         */
+        NONE,
+        /**
+         * Preference for <a href="http://jericho.htmlparser.net/docs/index.html">Jericho HTML parser</a>
+         */
+        JERICHO,
+        /**
+         * Preference for <a href="https://jsoup.org/">jsoup HTML parser</a>
+         */
+        JSOUP;
+    }
+
     /**
      * Creates a new builder instance.
      *
@@ -80,6 +96,7 @@ public class HtmlSanitizeOptions {
         private boolean replaceBodyWithDiv;
         private boolean sanitize;
         private Session session;
+        private ParserPreference parserPreference;
 
         Builder() {
             super();
@@ -92,6 +109,13 @@ public class HtmlSanitizeOptions {
             replaceBodyWithDiv = false;
             session = null;
             sanitize = true;
+            parserPreference = ParserPreference.NONE;
+        }
+
+        /** Sets the parser preference */
+        public Builder setParserPreference(ParserPreference parserPreference) {
+            this.parserPreference = parserPreference;
+            return this;
         }
 
         /** Sets the session */
@@ -149,7 +173,7 @@ public class HtmlSanitizeOptions {
 
         /** Builds the instance from this builder's arguments */
         public HtmlSanitizeOptions build() {
-            return new HtmlSanitizeOptions(session, sanitize, optConfigName, dropExternalImages, modified, cssPrefix, maxContentSize, suppressLinks, replaceBodyWithDiv);
+            return new HtmlSanitizeOptions(session, sanitize, optConfigName, dropExternalImages, modified, cssPrefix, maxContentSize, suppressLinks, replaceBodyWithDiv, parserPreference);
         }
     }
 
@@ -164,8 +188,9 @@ public class HtmlSanitizeOptions {
     private final boolean suppressLinks;
     private final boolean replaceBodyWithDiv;
     private final Session session;
+    private final ParserPreference parserPreference;
 
-    HtmlSanitizeOptions(Session session, boolean sanitize, String optConfigName, boolean dropExternalImages, boolean[] modified, String cssPrefix, int maxContentSize, boolean suppressLinks, boolean replaceBodyWithDiv) {
+    HtmlSanitizeOptions(Session session, boolean sanitize, String optConfigName, boolean dropExternalImages, boolean[] modified, String cssPrefix, int maxContentSize, boolean suppressLinks, boolean replaceBodyWithDiv, ParserPreference parserPreference) {
         super();
         this.session = session;
         this.sanitize = sanitize;
@@ -176,6 +201,16 @@ public class HtmlSanitizeOptions {
         this.maxContentSize = maxContentSize;
         this.suppressLinks = suppressLinks;
         this.replaceBodyWithDiv = replaceBodyWithDiv;
+        this.parserPreference = null == parserPreference ? ParserPreference.NONE : parserPreference;
+    }
+
+    /**
+     * Gets the HTML parser preference
+     *
+     * @return The preference
+     */
+    public ParserPreference getParserPreference() {
+        return parserPreference;
     }
 
     /**

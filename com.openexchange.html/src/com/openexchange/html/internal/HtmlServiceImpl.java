@@ -561,7 +561,7 @@ public final class HtmlServiceImpl implements HtmlService {
             // Check if input is a full HTML document or a fragment of HTML to parse
             boolean hasBody = html.indexOf("<body") >= 0 || html.indexOf("<BODY") >= 0;
 
-            boolean useJericho = /*Jericho parser is not yet prepared for non-sanitizing*/ options.isSanitize() && HtmlServices.useJericho();
+            boolean useJericho = options.isSanitize() && (HtmlSanitizeOptions.ParserPreference.JERICHO == options.getParserPreference() || HtmlServices.useJericho());
             if (useJericho) {
                 // Normalize the string
                 {
