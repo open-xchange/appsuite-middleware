@@ -87,4 +87,14 @@ public enum SimplePassFailResult implements AuthenticityMechanismResult {
     public String getTechnicalName() {
         return technicalName;
     }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.mail.authenticity.mechanism.AuthenticityMechanismResult#getCode()
+     */
+    @Override
+    public int getCode() {
+        return ordinal();
+    }
 }

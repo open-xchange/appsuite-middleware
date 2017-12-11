@@ -77,6 +77,13 @@ public interface AuthenticityMechanismResult {
     String getTechnicalName();
 
     /**
+     * Returns the ordinal
+     * 
+     * @return The ordinal of the enum
+     */
+    int getCode();
+
+    /**
      * Converts the specified {@link AuthenticityMechanismResult} to {@link MailAuthenticityStatus}
      *
      * @param mechanismResult The {@link AuthenticityMechanismResult} to convert

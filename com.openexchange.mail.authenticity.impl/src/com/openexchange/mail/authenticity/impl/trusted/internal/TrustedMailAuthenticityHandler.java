@@ -123,6 +123,11 @@ public class TrustedMailAuthenticityHandler implements ForcedReloadable, Trusted
         public String toString() {
             return getDisplayName();
         }
+
+        @Override
+        public int getCode() {
+            return 0;
+        }
     };
 
     private final Map<String, List<TrustedMail>> trustedMailAddressesPerTenant;
@@ -158,7 +163,7 @@ public class TrustedMailAuthenticityHandler implements ForcedReloadable, Trusted
                 List<MailAuthenticityMechanismResult> results = authenticityResult.getAttribute(DefaultMailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS, List.class);
                 results.add(new TrustedMailResult(mailAddress, null, SimplePassFailResult.PASS));
                 authenticityResult.addAttribute(TrustedMailResultKey.TRUSTED_MAIL, true);
-                if(trustedDomain.getImage() != null) {
+                if (trustedDomain.getImage() != null) {
                     authenticityResult.addAttribute(TrustedMailResultKey.IMAGE, trustedDomain.getImage().getUID());
                 }
             }

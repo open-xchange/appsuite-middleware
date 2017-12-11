@@ -68,7 +68,6 @@ public enum SPFResult implements AuthenticityMechanismResult {
      * @see <a href="https://tools.ietf.org/html/rfc7208#section-8.1">RFC-7208, Section 8.1</a>
      */
     NONE("None", "none"),
-
     /**
      * <p>Indicates that although a policy for the identity was discovered, there is
      * no definite assertion (positive or negative) about the client.</p>
@@ -81,7 +80,6 @@ public enum SPFResult implements AuthenticityMechanismResult {
      * @see <a href="https://tools.ietf.org/html/rfc7208#section-8.2">RFC-7208, Section 8.2</a>
      */
     NEUTRAL("Neutral", "neutral"),
-
     /**
      * The client is authorised to inject mail with the given identity. The domain
      * can now, in the sense of reputation, be considered responsible for sending
@@ -91,7 +89,6 @@ public enum SPFResult implements AuthenticityMechanismResult {
      * @see <a href="https://tools.ietf.org/html/rfc7208#section-8.3">RFC-7208, Section 8.3</a>
      */
     PASS("Pass", "pass"),
-
     /**
      * An explicit statement that the client is not authorised to use the domain in the
      * given identity. Disposition of SPF fail messages is a matter of local policy.
@@ -99,7 +96,6 @@ public enum SPFResult implements AuthenticityMechanismResult {
      * @see <a href="https://tools.ietf.org/html/rfc7208#section-8.4">RFC-7208, Section 8.4</a>
      */
     FAIL("Fail", "fail"),
-
     /**
      * Ought to be treated as somewhere between "fail" and "neutral"/"none". The ADMD
      * believes the host is not authorised but is not willing to make a strong policy
@@ -109,16 +105,6 @@ public enum SPFResult implements AuthenticityMechanismResult {
      * @see <a href="https://tools.ietf.org/html/rfc7208#section-8.5">RFC-7208, Section 8.5</a>
      */
     SOFTFAIL("Soft Fail", "softfail"),
-
-    /**
-     * Indicates that some local policy mechanism was applied
-     * that augments or even replaces (i.e., overrides) the result returned
-     * by the authentication mechanism.
-     *
-     * @see <a href="https://tools.ietf.org/html/rfc7601#section-2.4">RFC-7601, Section 2.4</a>
-     */
-    POLICY("Policy", "policy"),
-
     /**
      * The SPF verifier encountered a transient (generally DNS) error while performing the check.
      * Checking software can choose to accept or temporarily reject the message. If the message
@@ -130,7 +116,6 @@ public enum SPFResult implements AuthenticityMechanismResult {
      * @see <a href="https://tools.ietf.org/html/rfc7208#section-8.6">RFC-7208, Section 8.6</a>
      */
     TEMPERROR("Temporary Error", "temperror"),
-
     /**
      * The domain's published records could not be correctly interpreted. This signals an error
      * condition that definitely requires DNS operator intervention to be resolved. If the message
@@ -144,7 +129,15 @@ public enum SPFResult implements AuthenticityMechanismResult {
      *
      * @see <a href="https://tools.ietf.org/html/rfc7208#section-8.7">RFC-7208, Section 8.7</a>
      */
-    PERMERROR("Permanent Error", "permerror");
+    PERMERROR("Permanent Error", "permerror"),
+    /**
+     * Indicates that some local policy mechanism was applied
+     * that augments or even replaces (i.e., overrides) the result returned
+     * by the authentication mechanism.
+     *
+     * @see <a href="https://tools.ietf.org/html/rfc7601#section-2.4">RFC-7601, Section 2.4</a>
+     */
+    POLICY("Policy", "policy");
 
     private final String displayName;
     private final String technicalName;
@@ -165,5 +158,10 @@ public enum SPFResult implements AuthenticityMechanismResult {
     @Override
     public String getTechnicalName() {
         return technicalName;
+    }
+
+    @Override
+    public int getCode() {
+        return ordinal();
     }
 }

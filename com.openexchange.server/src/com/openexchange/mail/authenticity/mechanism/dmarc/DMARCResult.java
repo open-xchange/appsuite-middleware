@@ -60,6 +60,11 @@ import com.openexchange.mail.authenticity.mechanism.AuthenticityMechanismResult;
  */
 public enum DMARCResult implements AuthenticityMechanismResult {
     /**
+     * No DMARC policy record was published for the aligned
+     * identifier, or no aligned identifier could be extracted.
+     */
+    NONE("None", "none"),
+    /**
      * A DMARC policy record was published for the aligned
      * identifier, and at least one of the authentication mechanisms
      * passed.
@@ -81,11 +86,7 @@ public enum DMARCResult implements AuthenticityMechanismResult {
      * attempt is unlikely to produce a final result.
      */
     PERMERROR("Permanent Error", "permerror"),
-    /**
-     * No DMARC policy record was published for the aligned
-     * identifier, or no aligned identifier could be extracted.
-     */
-    NONE("None", "none"),
+
     ;
 
     private final String displayName;
@@ -107,5 +108,10 @@ public enum DMARCResult implements AuthenticityMechanismResult {
     @Override
     public String getTechnicalName() {
         return technicalName;
+    }
+
+    @Override
+    public int getCode() {
+        return ordinal();
     }
 }

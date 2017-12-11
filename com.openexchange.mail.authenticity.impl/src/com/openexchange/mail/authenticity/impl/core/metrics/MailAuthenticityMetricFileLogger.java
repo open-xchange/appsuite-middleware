@@ -50,13 +50,17 @@
 package com.openexchange.mail.authenticity.impl.core.metrics;
 
 import java.util.List;
-import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.config.lean.LeanConfigurationService;
+import com.openexchange.mail.authenticity.DefaultMailAuthenticityResultKey;
 import com.openexchange.mail.authenticity.MailAuthenticityProperty;
 import com.openexchange.mail.authenticity.impl.osgi.Services;
+import com.openexchange.mail.authenticity.mechanism.AuthenticityMechanismResult;
+import com.openexchange.mail.authenticity.mechanism.MailAuthenticityMechanism;
+import com.openexchange.mail.authenticity.mechanism.MailAuthenticityMechanismResult;
 import com.openexchange.mail.dataobjects.MailAuthenticityResult;
 import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
 import ch.qos.logback.classic.spi.ILoggingEvent;
@@ -70,9 +74,10 @@ import ch.qos.logback.core.util.FileSize;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
+@SuppressWarnings("unchecked")
 public class MailAuthenticityMetricFileLogger implements MailAuthenticityMetricLogger {
 
-    private final Logger metricLogger;
+    private final ch.qos.logback.classic.Logger metricLogger;
 
     /**
      * Initialises a new {@link MailAuthenticityMetricFileLogger}.
@@ -101,7 +106,7 @@ public class MailAuthenticityMetricFileLogger implements MailAuthenticityMetricL
      */
     private PatternLayoutEncoder createPatternLayoutEncoder(LoggerContext loggerContext) {
         PatternLayoutEncoder patternLayoutEncoder = new PatternLayoutEncoder();
-        patternLayoutEncoder.setPattern("%message%n");
+        patternLayoutEncoder.setPattern("%date - %message %n");
         patternLayoutEncoder.setContext(loggerContext);
         patternLayoutEncoder.start();
         return patternLayoutEncoder;
@@ -132,8 +137,8 @@ public class MailAuthenticityMetricFileLogger implements MailAuthenticityMetricL
      * @param fileAppender The {@link RollingFileAppender} for the logger
      * @return the {@link ch.qos.logback.classic.Logger}
      */
-    private ch.qos.logback.classic.Logger createLogger(RollingFileAppender<ILoggingEvent> fileAppender) {
-        ch.qos.logback.classic.Logger logger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger("com.openexchange.mail.authenticity.metrics.MailAuthenticityMetricLogger");
+    private Logger createLogger(RollingFileAppender<ILoggingEvent> fileAppender) {
+        Logger logger = (Logger) LoggerFactory.getLogger("com.openexchange.mail.authenticity.metrics.MailAuthenticityMetricLogger");
         logger.addAppender(fileAppender);
         logger.setLevel(Level.INFO);
         logger.setAdditive(false);
@@ -183,8 +188,43 @@ public class MailAuthenticityMetricFileLogger implements MailAuthenticityMetricL
         if (!leanConfigService.getBooleanProperty(MailAuthenticityProperty.LOG_METRICS)) {
             return;
         }
+        switch (metricLogger.getLevel().toInt()) {
+            case Level.DEBUG_INT:
+                metricLogger.debug("{}, {}, {}", serialiseCodes(overallResult), serialiseRawHeaders(rawHeaders), serialiseTechnicalNames(overallResult));
+                break;
+            case Level.INFO_INT:
+            default:
+                metricLogger.info("{}", serialiseCodes(overallResult));
+        }
+    }
 
-        metricLogger.info("Raw headers: \n\t{} \nOverall Result: \n\t{}", serializeRawHeaders(rawHeaders), serializeOverallResult(overallResult));
+    /**
+     * Serialises the specified {@link MailAuthenticityMechanismResult} for loggin. Serialises only the codes
+     * of the mechanisms and overall result in a form like: <code>1|1:4|2:3</code>. The first number designates
+     * the code for the overall status, the pipe character '|' is used as a separator for key/values, and the
+     * colon ':' separates the key from the value. The key/value part designates the mechanism and the result of
+     * that mechanism. The previous example can be then translated to:
+     * <code>Overall Result: fail, Mechanism Results: dkim=temperror, spf=fail</code>
+     * 
+     * @param overallResult The overall {@link MailAuthenticityResult}
+     * @return The serialised object
+     */
+    private Object serialiseCodes(MailAuthenticityResult overallResult) {
+        StringBuilder serialised = new StringBuilder();
+        serialised.append("R:").append(overallResult.getStatus().ordinal()).append("|");
+        List<MailAuthenticityMechanismResult> knownResults = (List<MailAuthenticityMechanismResult>) overallResult.getAttribute(DefaultMailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS);
+        if (knownResults == null || knownResults.isEmpty()) {
+            serialised.setLength(serialised.length() - 1);
+            return serialised.toString();
+        }
+        for (MailAuthenticityMechanismResult mechResult : knownResults) {
+            MailAuthenticityMechanism mechanism = mechResult.getMechanism();
+            serialised.append(mechanism.getCode()).append(":");
+            AuthenticityMechanismResult result = mechResult.getResult();
+            serialised.append(result.getCode()).append("|");
+        }
+        serialised.setLength(serialised.length() - 1);
+        return serialised.toString();
     }
 
     /**
@@ -193,9 +233,23 @@ public class MailAuthenticityMetricFileLogger implements MailAuthenticityMetricL
      * @param overallResult The {@link MailAuthenticityResult} to serialised
      * @return the serialised object
      */
-    private Object serializeOverallResult(MailAuthenticityResult overallResult) {
-        // TODO Auto-generated method stub
-        return overallResult;
+    private Object serialiseTechnicalNames(MailAuthenticityResult overallResult) {
+        StringBuilder serialised = new StringBuilder();
+        serialised.append("Overall Result: ").append(overallResult.getStatus().getTechnicalName().toLowerCase()).append(", ");
+        List<MailAuthenticityMechanismResult> knownResults = (List<MailAuthenticityMechanismResult>) overallResult.getAttribute(DefaultMailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS);
+        if (knownResults == null || knownResults.isEmpty()) {
+            serialised.setLength(serialised.length() - 2);
+            return serialised.toString();
+        }
+        serialised.append("Mechanism Results: ");
+        for (MailAuthenticityMechanismResult mechResult : knownResults) {
+            MailAuthenticityMechanism mechanism = mechResult.getMechanism();
+            serialised.append(mechanism.getTechnicalName().toLowerCase()).append("=");
+            AuthenticityMechanismResult result = mechResult.getResult();
+            serialised.append(result.getTechnicalName().toLowerCase()).append(", ");
+        }
+        serialised.setLength(serialised.length() - 2);
+        return serialised.toString();
     }
 
     /**
@@ -204,8 +258,8 @@ public class MailAuthenticityMetricFileLogger implements MailAuthenticityMetricL
      * @param rawHeaders The {@link List} with the raw headers to serialise
      * @return the serialised object
      */
-    private Object serializeRawHeaders(List<String> rawHeaders) {
-        // TODO Auto-generated method stub
-        return rawHeaders;
+    private Object serialiseRawHeaders(List<String> rawHeaders) {
+        StringBuilder serialiser = new StringBuilder("Raw Headers: ");
+        return serialiser.append(rawHeaders).toString();
     }
 }
