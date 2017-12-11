@@ -80,7 +80,6 @@ import com.openexchange.mail.authenticity.impl.core.metrics.MailAuthenticityMetr
 import com.openexchange.mail.authenticity.impl.core.parsers.DKIMMailAuthenticityMechanismParser;
 import com.openexchange.mail.authenticity.impl.core.parsers.DMARCMailAuthenticityMechanismParser;
 import com.openexchange.mail.authenticity.impl.core.parsers.SPFMailAuthenticityMechanismParser;
-import com.openexchange.mail.authenticity.impl.osgi.Services;
 import com.openexchange.mail.authenticity.impl.trusted.TrustedMailService;
 import com.openexchange.mail.authenticity.mechanism.DefaultMailAuthenticityMechanism;
 import com.openexchange.mail.authenticity.mechanism.MailAuthenticityMechanismResult;
@@ -569,7 +568,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
      * @param overallResult the overall result
      */
     private void logMetrics(final String[] authHeaders, MailAuthenticityResult overallResult) {
-        MailAuthenticityMetricLogger metricLogger = Services.getService(MailAuthenticityMetricLogger.class);
+        MailAuthenticityMetricLogger metricLogger = services.getService(MailAuthenticityMetricLogger.class);
         metricLogger.log(Arrays.asList(authHeaders), overallResult);
     }
 
