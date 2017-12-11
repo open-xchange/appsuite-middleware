@@ -129,6 +129,7 @@ public final class State extends AbstractVerifyingAttributeConverter<VToDo, Task
     public static int toTask(final int index, final VToDo vtodo) throws ConversionWarning {
         int retval = 0;
     	final Status status = vtodo.getStatus();
+    	Property waitingStatus = vtodo.getProperty("X-OX-STATUS");
     	if (null != status && Strings.isNotEmpty(status.getValue())) {
             if (Status.VTODO_NEEDS_ACTION.equals(status)) {
                 retval = Task.NOT_STARTED;
@@ -139,13 +140,11 @@ public final class State extends AbstractVerifyingAttributeConverter<VToDo, Task
             } else if (Status.VTODO_CANCELLED.equals(status)) {
                 retval = Task.DEFERRED;
             }
-		} else {
-        	Property waitingStatus = vtodo.getProperty("X-OX-STATUS");
-        	if (null != waitingStatus && Strings.isNotEmpty(waitingStatus.getValue())) {
-    			if (waitingStatus.getValue().equals("WAITING")) {
-    				retval = Task.WAITING;
-    			}
-    		}
+		}
+    	if (null != waitingStatus && Strings.isNotEmpty(waitingStatus.getValue())) {
+			if (waitingStatus.getValue().equals("WAITING")) {
+				retval = Task.WAITING;
+			}
 		}
     	if (0 == retval) {
     		throw new ConversionWarning(index, ConversionWarning.Code.INVALID_STATUS, status.getValue());
