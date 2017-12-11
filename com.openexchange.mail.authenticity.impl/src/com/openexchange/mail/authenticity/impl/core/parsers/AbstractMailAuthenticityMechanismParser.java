@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.mail.authenticity.impl.core;
+package com.openexchange.mail.authenticity.impl.core.parsers;
 
 import java.util.Map;
 import java.util.function.BiFunction;

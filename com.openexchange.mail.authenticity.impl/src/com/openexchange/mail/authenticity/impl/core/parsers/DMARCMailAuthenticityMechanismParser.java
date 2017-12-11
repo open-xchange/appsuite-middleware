@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.mail.authenticity.impl.core;
+package com.openexchange.mail.authenticity.impl.core.parsers;
 
 import java.util.Map;
 import com.openexchange.mail.authenticity.mechanism.AuthenticityMechanismResult;

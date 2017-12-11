@@ -47,28 +47,29 @@
  *
  */
 
-package com.openexchange.mail.authenticity.impl.core;
+package com.openexchange.mail.authenticity.impl.core.parsers;
 
 import java.util.Map;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.authenticity.mechanism.AuthenticityMechanismResult;
 import com.openexchange.mail.authenticity.mechanism.DefaultMailAuthenticityMechanism;
 import com.openexchange.mail.authenticity.mechanism.MailAuthenticityMechanismResult;
-import com.openexchange.mail.authenticity.mechanism.spf.SPFAuthMechResult;
-import com.openexchange.mail.authenticity.mechanism.spf.SPFResult;
-import com.openexchange.mail.authenticity.mechanism.spf.SPFResultHeader;
+import com.openexchange.mail.authenticity.mechanism.dkim.DKIMAuthMechResult;
+import com.openexchange.mail.authenticity.mechanism.dkim.DKIMResult;
+import com.openexchange.mail.authenticity.mechanism.dkim.DKIMResultHeader;
 
 /**
- * {@link SPFMailAuthenticityMechanismParser}
+ * {@link DKIMMailAuthenticityMechanismParser}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class SPFMailAuthenticityMechanismParser extends AbstractMailAuthenticityMechanismParser {
+public class DKIMMailAuthenticityMechanismParser extends AbstractMailAuthenticityMechanismParser {
 
     /**
-     * Initialises a new {@link SPFMailAuthenticityMechanismParser}.
+     * Initialises a new {@link DKIMMailAuthenticityMechanismParser}.
      */
-    public SPFMailAuthenticityMechanismParser() {
-        super(DefaultMailAuthenticityMechanism.SPF, SPFResultHeader.SMTP_MAILFROM, SPFResultHeader.SMTP_HELO);
+    public DKIMMailAuthenticityMechanismParser() {
+        super(DefaultMailAuthenticityMechanism.DKIM, DKIMResultHeader.HEADER_I, DKIMResultHeader.HEADER_D);
     }
 
     /*
@@ -78,7 +79,7 @@ public class SPFMailAuthenticityMechanismParser extends AbstractMailAuthenticity
      */
     @Override
     AuthenticityMechanismResult parseMechanismResult(String value) {
-        return SPFResult.valueOf(value);
+        return DKIMResult.valueOf(value);
     }
 
     /*
@@ -88,8 +89,12 @@ public class SPFMailAuthenticityMechanismParser extends AbstractMailAuthenticity
      */
     @Override
     MailAuthenticityMechanismResult createResult(String domain, AuthenticityMechanismResult mechResult, String mechanismName, boolean domainMismatch, Map<String, String> attributes) {
-        SPFAuthMechResult result = new SPFAuthMechResult(domain, (SPFResult) mechResult);
-        result.setReason(extractComment(mechanismName));
+        DKIMAuthMechResult result = new DKIMAuthMechResult(domain, (DKIMResult) mechResult);
+        String reason = extractComment(mechanismName);
+        if (Strings.isEmpty(reason)) {
+            reason = Strings.unquote(attributes.remove(DKIMResultHeader.REASON));
+        }
+        result.setReason(reason);
         result.setDomainMatch(!domainMismatch);
         addProperties(attributes, result);
         return result;
