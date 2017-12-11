@@ -76,9 +76,11 @@ import com.openexchange.mail.authenticity.MailAuthenticityExceptionCodes;
 import com.openexchange.mail.authenticity.MailAuthenticityHandler;
 import com.openexchange.mail.authenticity.MailAuthenticityProperty;
 import com.openexchange.mail.authenticity.MailAuthenticityStatus;
+import com.openexchange.mail.authenticity.impl.core.metrics.MailAuthenticityMetricLogger;
 import com.openexchange.mail.authenticity.impl.core.parsers.DKIMMailAuthenticityMechanismParser;
 import com.openexchange.mail.authenticity.impl.core.parsers.DMARCMailAuthenticityMechanismParser;
 import com.openexchange.mail.authenticity.impl.core.parsers.SPFMailAuthenticityMechanismParser;
+import com.openexchange.mail.authenticity.impl.osgi.Services;
 import com.openexchange.mail.authenticity.impl.trusted.TrustedMailService;
 import com.openexchange.mail.authenticity.mechanism.DefaultMailAuthenticityMechanism;
 import com.openexchange.mail.authenticity.mechanism.MailAuthenticityMechanismResult;
@@ -181,6 +183,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
         if (authHeaders == null || authHeaders.length == 0) {
             // Pass on to custom handlers
             mailMessage.setAuthenticityResult(MailAuthenticityResult.NEUTRAL_RESULT);
+            logMetrics(authHeaders, mailMessage.getAuthenticityResult());
             return;
         }
 
@@ -188,10 +191,12 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
         if (from == null || from.length == 0) {
             // Pass on to custom handlers
             mailMessage.setAuthenticityResult(MailAuthenticityResult.NEUTRAL_RESULT);
+            logMetrics(authHeaders, mailMessage.getAuthenticityResult());
             return;
         }
 
         mailMessage.setAuthenticityResult(parseHeaders(Arrays.asList(authHeaders), from[0], session));
+        logMetrics(authHeaders, mailMessage.getAuthenticityResult());
 
         trustedMailService.handle(session, mailMessage);
     }
@@ -555,6 +560,17 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
 
         authServIdsCache.put(key, authServIds);
         return authServIds;
+    }
+
+    /**
+     * Logs the specified raw headers and overall result with the {@link MailAuthenticityMetricLogger}
+     * 
+     * @param authHeaders the raw headers
+     * @param overallResult the overall result
+     */
+    private void logMetrics(final String[] authHeaders, MailAuthenticityResult overallResult) {
+        MailAuthenticityMetricLogger metricLogger = Services.getService(MailAuthenticityMetricLogger.class);
+        metricLogger.log(Arrays.asList(authHeaders), overallResult);
     }
 
     ///////////////////////////////// HELPER CLASSES /////////////////////////////////

@@ -47,71 +47,24 @@
  *
  */
 
-package com.openexchange.mail.authenticity;
+package com.openexchange.mail.authenticity.impl.core.metrics;
 
-import com.openexchange.config.lean.Property;
+import java.util.List;
+import com.openexchange.mail.dataobjects.MailAuthenticityResult;
 
 /**
- * {@link MailAuthenticityProperty} - Properties for mail authenticity validation.
+ * {@link MailAuthenticityMetricLogger}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public enum MailAuthenticityProperty implements Property {
-    /**
-     * Defines whether the mail authenticity core feature is enabled
-     * <p>
-     * Defaults to <code>false</code>
-     */
-    ENABLED("enabled", Boolean.FALSE),
-    /**
-     * Defines the date after which the e-mails will be analyzed
-     * <p>
-     * Defaults to 0
-     */
-    THRESHOLD("threshold", Long.valueOf(0)),
-    /**
-     * Defines the MANDATORY <code>authserv-id</code>. It can contain a single arbitrary string
-     * or a comma separated list of arbitrary strings
-     * <p>
-     * Default is empty.
-     *
-     * @see <a href="https://tools.ietf.org/html/rfc7601#section-2.2">RFC-7601, Section 2.2</a>
-     */
-    AUTHSERV_ID("authServId", ""),
-    /**
-     * Defines whether metrics of the core handler will be logged for future assertion purposes.
-     * Disabled by default.
-     */
-    LOG_METRICS("logMetrics", false);
-
-    private final Object defaultValue;
-    private final String fqn;
+public interface MailAuthenticityMetricLogger {
 
     /**
-     * Initializes a new {@link MailAuthenticityProperty}.
+     * Logs the raw <code>Authentication-Results</code> headers and the overall result with the
+     * parsed mail authentication mechanisms (known and unknown)
+     * 
+     * @param rawHeaders a {@link List} with the raw headers as they appear in the mail message
+     * @param overallResult The {@link MailAuthenticityResult} and the parsed mechanisms
      */
-    private MailAuthenticityProperty(String suffix, Object defaultValue) {
-        this.defaultValue = defaultValue;
-        fqn = "com.openexchange.mail.authenticity." + suffix;
-    }
-
-    /**
-     * Gets the fully qualified name for the property
-     *
-     * @return the fully qualified name for the property
-     */
-    @Override
-    public String getFQPropertyName() {
-        return fqn;
-    }
-
-    /**
-     * Gets the default value of this property
-     *
-     * @return the default value of this property
-     */
-    @Override
-    public Object getDefaultValue() {
-        return defaultValue;
-    }
+    void log(List<String> rawHeaders, MailAuthenticityResult overallResult);
 }

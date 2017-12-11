@@ -69,6 +69,8 @@ import com.openexchange.mail.authenticity.impl.core.MailAuthenticityFetchListene
 import com.openexchange.mail.authenticity.impl.core.MailAuthenticityHandlerImpl;
 import com.openexchange.mail.authenticity.impl.core.MailAuthenticityHandlerRegistryImpl;
 import com.openexchange.mail.authenticity.impl.core.MailAuthenticityJSlobEntry;
+import com.openexchange.mail.authenticity.impl.core.metrics.MailAuthenticityMetricFileLogger;
+import com.openexchange.mail.authenticity.impl.core.metrics.MailAuthenticityMetricLogger;
 import com.openexchange.mail.authenticity.impl.trusted.internal.TrustedMailAuthenticityHandler;
 import com.openexchange.mail.authenticity.impl.trusted.internal.TrustedMailDataSource;
 import com.openexchange.mailaccount.UnifiedInboxManagement;
@@ -105,6 +107,9 @@ public class MailAuthenticityActivator extends HousekeepingActivator {
         // It is OK to pass service references since 'stopOnServiceUnavailability' returns 'true'
         final MailAuthenticityHandlerRegistryImpl registry = new MailAuthenticityHandlerRegistryImpl(getService(LeanConfigurationService.class), context);
         registerService(MailAuthenticityHandlerRegistry.class, registry);
+
+        registerService(MailAuthenticityMetricLogger.class, new MailAuthenticityMetricFileLogger());
+        trackService(MailAuthenticityMetricLogger.class);
 
         track(MailAuthenticityHandler.class, registry);
         openTrackers();
