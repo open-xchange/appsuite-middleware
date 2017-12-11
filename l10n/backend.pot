@@ -167,6 +167,7 @@ msgstr ""
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/CalendarPrintingStrings.java:75
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:275
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:275
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.printing/src/com/openexchange/printing/Messages.java:62
 msgid "The entire day"
 msgstr ""
 
