@@ -65,6 +65,7 @@ import com.openexchange.mail.authenticity.DefaultMailAuthenticityResultKey;
 import com.openexchange.mail.authenticity.MailAuthenticityProperty;
 import com.openexchange.mail.authenticity.MailAuthenticityStatus;
 import com.openexchange.mail.authenticity.impl.core.MailAuthenticityHandlerImpl;
+import com.openexchange.mail.authenticity.impl.core.metrics.MailAuthenticityMetricLogger;
 import com.openexchange.mail.authenticity.impl.trusted.Icon;
 import com.openexchange.mail.authenticity.impl.trusted.TrustedMailService;
 import com.openexchange.mail.authenticity.mechanism.AuthenticityMechanismResult;
@@ -92,6 +93,7 @@ public abstract class AbstractTestMailAuthenticity {
     private ArgumentCaptor<MailAuthenticityResult> argumentCaptor;
     private Session session;
     private LeanConfigurationService leanConfig;
+    private MailAuthenticityMetricLogger metricsLogger;
 
     /**
      * Initialises a new {@link AbstractTestMailAuthenticity}.
@@ -113,24 +115,27 @@ public abstract class AbstractTestMailAuthenticity {
         when(session.getUserId()).thenReturn(1);
         when(session.getContextId()).thenReturn(1);
 
+        metricsLogger = mock(MailAuthenticityMetricLogger.class);
         leanConfig = mock(LeanConfigurationService.class);
         ServiceLookup services = mock(ServiceLookup.class);
+        when(services.getService(MailAuthenticityMetricLogger.class)).thenReturn(metricsLogger);
         when(services.getService(LeanConfigurationService.class)).thenReturn(leanConfig);
         when(leanConfig.getProperty(1, 1, MailAuthenticityProperty.AUTHSERV_ID)).thenReturn("ox.io");
+        when(leanConfig.getBooleanProperty(MailAuthenticityProperty.LOG_METRICS)).thenReturn(false);
 
         mailMessage = mock(MailMessage.class);
         when(mailMessage.getHeaders()).thenReturn(headerCollection);
 
         fromAddresses = new InternetAddress[1];
         when(mailMessage.getFrom()).thenReturn(fromAddresses);
-        
+
         TrustedMailService doNothingService = new TrustedMailService() {
-            
+
             @Override
             public void handle(Session session, MailMessage mailMessage) {
                 // Nothing
             }
-            
+
             @Override
             public Icon getIcon(Session session, String uid) throws OXException {
                 return null;
