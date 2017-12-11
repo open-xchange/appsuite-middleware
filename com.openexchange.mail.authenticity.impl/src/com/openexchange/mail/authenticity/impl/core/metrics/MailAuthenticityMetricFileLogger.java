@@ -199,7 +199,7 @@ public class MailAuthenticityMetricFileLogger implements MailAuthenticityMetricL
     }
 
     /**
-     * Serialises the specified {@link MailAuthenticityMechanismResult} for loggin. Serialises only the codes
+     * Serialises the specified {@link MailAuthenticityMechanismResult} for logging. Serialises only the codes
      * of the mechanisms and overall result in a form like: <code>1|1:4|2:3</code>. The first number designates
      * the code for the overall status, the pipe character '|' is used as a separator for key/values, and the
      * colon ':' separates the key from the value. The key/value part designates the mechanism and the result of
