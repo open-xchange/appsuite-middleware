@@ -966,7 +966,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
             if (null == originalEvent.getCalendarUser()) {
                 eventUpdate.setCalendarUser(calendarUser);
             } else if (eventUpdate.containsCalendarUser()) {
-                if (eventUpdate.getCalendarUser() != originalEvent.getCalendarUser()) {
+                if (false == matches(eventUpdate.getCalendarUser(), originalEvent.getCalendarUser())) {
                     throw CalendarExceptionCodes.FORBIDDEN_CHANGE.create(originalEvent.getId(), EventField.CALENDAR_USER);
                 }
                 eventUpdate.removeCalendarUser(); // ignore
