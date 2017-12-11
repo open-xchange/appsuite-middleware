@@ -51,6 +51,7 @@ package com.openexchange.chronos.impl;
 
 import static com.openexchange.chronos.impl.Utils.getFolder;
 import static com.openexchange.java.Autoboxing.L;
+import static org.slf4j.LoggerFactory.getLogger;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -449,7 +450,11 @@ public class CalendarServiceImpl implements CalendarService {
 
     private void notifyHandlers(CalendarEvent event) {
         for (CalendarHandler handler : calendarHandlers) {
-            handler.handle(event);
+            try {
+                handler.handle(event);
+            } catch (Exception e) {
+                getLogger(getClass()).warn("Unexpected error while handling {}: {}", handler, event, e.getMessage(), e);
+            }
         }
     }
 
