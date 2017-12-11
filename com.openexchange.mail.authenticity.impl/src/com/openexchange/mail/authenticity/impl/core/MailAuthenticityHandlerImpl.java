@@ -146,9 +146,18 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
         this.services = services;
         this.trustedMailService = trustedMailService;
         this.ranking = ranking;
-        mailAuthComparator = new MailAuthenticityMechanismComparator();
+        this.mailAuthComparator = new MailAuthenticityMechanismComparator();
         this.authServIdsCache = CacheBuilder.newBuilder().maximumSize(65536).expireAfterWrite(30, TimeUnit.MINUTES).build();
-        requiredMailFields = ImmutableList.of(MailField.FROM);
+        this.requiredMailFields = ImmutableList.of(MailField.FROM);
+        this.mechanismParsersRegistry = initialiseMechanismRegistry();
+    }
+
+    /**
+     * Initialise the mechanism registry
+     * 
+     * @return An {@link ImmutableMap} with the mechanism implementations
+     */
+    private ImmutableMap<DefaultMailAuthenticityMechanism, BiFunction<Map<String, String>, MailAuthenticityResult, MailAuthenticityMechanismResult>> initialiseMechanismRegistry() {
         ImmutableMap.Builder<DefaultMailAuthenticityMechanism, BiFunction<Map<String, String>, MailAuthenticityResult, MailAuthenticityMechanismResult>> mechanismParsersRegistry = ImmutableMap.builder();
         mechanismParsersRegistry.put(DefaultMailAuthenticityMechanism.DMARC, (attributes, overallResult) -> {
             String value = attributes.remove(DefaultMailAuthenticityMechanism.DMARC.getTechnicalName());
@@ -193,7 +202,8 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
             addProperties(attributes, result);
             return result;
         });
-        this.mechanismParsersRegistry = mechanismParsersRegistry.build();
+
+        return mechanismParsersRegistry.build();
     }
 
     /**
