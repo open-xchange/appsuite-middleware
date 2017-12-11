@@ -385,7 +385,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
                 case TEMPERROR:
                 case NONE:
                 case NEUTRAL:
-                    // Handle as neutral
+                    // Handle as neutral or fail, depending on the domain match
                     overallResult.setStatus(result.isDomainMatch() ? MailAuthenticityStatus.NEUTRAL : MailAuthenticityStatus.FAIL);
                     break;
                 case PASS:
