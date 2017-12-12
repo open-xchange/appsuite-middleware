@@ -50,14 +50,16 @@
 package com.openexchange.chronos.provider.composition.impl.osgi;
 
 import static org.slf4j.LoggerFactory.getLogger;
-import com.openexchange.chronos.provider.CalendarProvider;
+import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.chronos.provider.CalendarProviderRegistry;
 import com.openexchange.chronos.provider.FreeBusyProvider;
 import com.openexchange.chronos.provider.account.CalendarAccountService;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccessFactory;
 import com.openexchange.chronos.provider.composition.impl.CalendarProviderRegistryImpl;
+import com.openexchange.chronos.provider.composition.impl.CalendarProviderTracker;
 import com.openexchange.chronos.provider.composition.impl.CompositingIDBasedCalendarAccessFactory;
 import com.openexchange.chronos.provider.composition.impl.quota.CalendarQuotaProvider;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.ServiceSet;
@@ -80,7 +82,7 @@ public class CompositingCalendarProviderActivator extends HousekeepingActivator 
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { CalendarAccountService.class, LeanConfigurationService.class };
+        return new Class<?>[] { CalendarAccountService.class, LeanConfigurationService.class, CapabilityService.class, ConfigViewFactory.class };
     }
 
     @Override
@@ -95,12 +97,12 @@ public class CompositingCalendarProviderActivator extends HousekeepingActivator 
             /*
              * track calendar providers & collect in registry
              */
-            ServiceSet<CalendarProvider> calendarProviders = new ServiceSet<CalendarProvider>();
             ServiceSet<FreeBusyProvider> freeBusyProviders = new ServiceSet<FreeBusyProvider>();
-            CalendarProviderRegistryImpl providerRegistry = new CalendarProviderRegistryImpl(calendarProviders, freeBusyProviders);
-            track(CalendarProvider.class, calendarProviders);
             track(FreeBusyProvider.class, freeBusyProviders);
+            CalendarProviderTracker providerTracker = new CalendarProviderTracker(context, this);
+            rememberTracker(providerTracker);
             openTrackers();
+            CalendarProviderRegistryImpl providerRegistry = new CalendarProviderRegistryImpl(providerTracker, freeBusyProviders);
             /*
              * register services
              */

@@ -57,6 +57,7 @@ import com.openexchange.chronos.provider.CalendarCapability;
 import com.openexchange.chronos.provider.CalendarProvider;
 import com.openexchange.chronos.provider.CalendarProviderRegistry;
 import com.openexchange.chronos.provider.FreeBusyProvider;
+import com.openexchange.osgi.ServiceListing;
 import com.openexchange.osgi.ServiceSet;
 
 /**
@@ -67,7 +68,7 @@ import com.openexchange.osgi.ServiceSet;
  */
 public class CalendarProviderRegistryImpl implements CalendarProviderRegistry {
 
-    private final ServiceSet<CalendarProvider> calendarProviders;
+    private final ServiceListing<CalendarProvider> calendarProviders;
     private final ServiceSet<FreeBusyProvider> freeBusyProviders;
 
     /**
@@ -76,7 +77,7 @@ public class CalendarProviderRegistryImpl implements CalendarProviderRegistry {
      * @param calendarProviders The calendar providers service set
      * @param freeBusyProviders The feee/busy providers service set
      */
-    public CalendarProviderRegistryImpl(ServiceSet<CalendarProvider> calendarProviders, ServiceSet<FreeBusyProvider> freeBusyProviders) {
+    public CalendarProviderRegistryImpl(ServiceListing<CalendarProvider> calendarProviders, ServiceSet<FreeBusyProvider> freeBusyProviders) {
         super();
         this.calendarProviders = calendarProviders;
         this.freeBusyProviders = freeBusyProviders;
@@ -94,7 +95,7 @@ public class CalendarProviderRegistryImpl implements CalendarProviderRegistry {
 
     @Override
     public List<CalendarProvider> getCalendarProviders() {
-        return Collections.unmodifiableList(new ArrayList<CalendarProvider>(calendarProviders));
+        return calendarProviders.getServiceList();
     }
 
     public List<CalendarProvider> getCalendarProviders(CalendarCapability capabilitiy) {
