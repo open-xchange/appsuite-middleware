@@ -97,7 +97,6 @@ public class DKIMMailAuthenticityMechanismParser extends AbstractMailAuthenticit
         result.setReason(reason);
         result.setDomainMatch(!domainMismatch);
         result.addProperty("signing_domain", result.getDomain());
-        //addProperties(attributes, result);
         return result;
     }
 }

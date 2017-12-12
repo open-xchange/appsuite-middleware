@@ -92,7 +92,6 @@ public class DMARCMailAuthenticityMechanismParser extends AbstractMailAuthentici
         result.setReason(extractComment(mechanismName));
         result.setDomainMatch(!domainMismatch);
         result.addProperty("from_domain", result.getDomain());
-        //addProperties(attributes, result);
         return result;
     }
 }
