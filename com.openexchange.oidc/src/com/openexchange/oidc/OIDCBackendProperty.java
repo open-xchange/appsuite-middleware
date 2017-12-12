@@ -88,7 +88,7 @@ public enum OIDCBackendProperty implements Property {
     /**
      * jwkSetEndpoint - The OPs JWK Set endpoint
      */
-    jwkSetEndpoint(OIDCProperty.PREFIX, OIDCProperty.EMPTY), 
+    jwkSetEndpoint(OIDCProperty.PREFIX, OIDCProperty.EMPTY),
     /**
      * jwsAlgorithm - The used JWS encryption algorithm
      */
@@ -104,7 +104,7 @@ public enum OIDCBackendProperty implements Property {
     /**
      * responseType - The OPs response type
      */
-    responseType(OIDCProperty.PREFIX, "code"), 
+    responseType(OIDCProperty.PREFIX, "code"),
     /**
      * userInfoEndpoint - The OPs user information endpoint
      */
@@ -121,7 +121,7 @@ public enum OIDCBackendProperty implements Property {
     /**
      * ssoLogout - Whether to redirect to the OP on logout trigger from client or not
      */
-    ssoLogout(OIDCProperty.PREFIX, false), 
+    ssoLogout(OIDCProperty.PREFIX, false),
     /**
      * redirectURILogout - Where to redirect the user after a valid logout
      */
@@ -133,7 +133,7 @@ public enum OIDCBackendProperty implements Property {
     /**
      * storeOAuthTokens - Whether OAuth cookies should be stored or not
      */
-    storeOAuthTokens(OIDCProperty.PREFIX, false), 
+    storeOAuthTokens(OIDCProperty.PREFIX, false),
     /**
      * oauthRefreshTime - Time in milliseconds determines how long before the expiration of the
      * OAuth {@link AccessToken} a new {@link AccessToken} should be requested. "refresh_token"

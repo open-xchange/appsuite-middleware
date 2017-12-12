@@ -305,7 +305,7 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
         ContextService contextService = Services.getService(ContextService.class);
         //String[] userData = subject.split("@");
         //TODO QS-VS: auf die auskommentierte Abhandlung umstellen
-        String[] userData = { "3", "wonderland.net" };
+        String[] userData = { "4", "wonderland.net" };
         if (userData.length != 2) {
             throw OIDCExceptionCode.BAD_SUBJECT.create(subject);
         }

@@ -80,5 +80,10 @@ public interface LogoutRequestInfo {
      */
     String getSessionId();
     
+    /**
+     * Load the URI from where the logout was requested
+     * 
+     * @return - The logout URI
+     */
     String getRequestURI();
 }
