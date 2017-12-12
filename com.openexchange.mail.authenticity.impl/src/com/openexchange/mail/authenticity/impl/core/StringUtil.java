@@ -245,16 +245,25 @@ final class StringUtil {
     static List<String> splitElements(String header) {
         List<String> split = new ArrayList<>();
         boolean openQuotes = false;
+        boolean openParenthesis = false;
         StringBuilder lineBuffer = new StringBuilder(128);
         for (int index = 0; index < header.length(); index++) {
             char c = header.charAt(index);
             switch (c) {
+                case '(':
+                    openParenthesis = true;
+                    lineBuffer.append(c);
+                    break;
+                case ')':
+                    openParenthesis = false;
+                    lineBuffer.append(c);
+                    break;
                 case '"':
                     openQuotes = !openQuotes;
                     lineBuffer.append(c);
                     break;
                 case ';':
-                    if (!openQuotes) {
+                    if (!openQuotes && !openParenthesis) {
                         split.add(lineBuffer.toString().trim());
                         lineBuffer.setLength(0);
                         break;
