@@ -71,6 +71,16 @@ public interface IFileItemService {
      */
     public boolean containsSubGroup(final String groupId, final String subGroupId) throws FileItemException;
 
+    /**
+     * Querying, if a file is contained in the collection.
+     *
+     * @param groupId
+     * @param subGroupId
+     * @return true, if the collections contains the group-subgroup with the given ids
+     * @throws FileItemException
+     */
+    public boolean contains(final String groupId, final String subGroupId, final String fileId) throws FileItemException;
+
     // -------------------------------------------------------------------------
 
     /**
