@@ -47,56 +47,16 @@
  *
  */
 
-package com.openexchange.find.basic.mail;
+package com.openexchange.imap.config;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 
 /**
- * {@link Constants}
+ * {@link IMapPropertiesConstants}
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since v7.6.0
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since v7.10.0
  */
-public class Constants {
+public class IMapPropertiesConstants {
 
-    final static String FIELD_FROM = "from";
-
-    final static String FIELD_TO = "to";
-
-    final static String FIELD_CC = "cc";
-
-    final static String FIELD_BCC = "bcc";
-
-    final static String FIELD_SUBJECT = "subject";
-
-    final static String FIELD_BODY = "body";
-
-    final static String FIELD_FOLDER = "folder";
-
-    final static String FIELD_FILENAME_NAME = "filename";
-
-    final static String FIELD_HAS_ATTACHMENT = "has_attachment";
-
-    final static String USER_FLAG_HAS_ATTACHMENT = "$HasAttachment";
-
-    final static String USER_FLAG_HAS_NO_ATTACHMENT = "$HasNoAttachment";
-
-    static final List<String> FROM_FIELDS = asList(FIELD_FROM);
-
-    static final List<String> TO_FIELDS = Arrays.asList(new String[] { FIELD_TO, FIELD_CC, FIELD_BCC });
-
-    static final List<String> FROM_AND_TO_FIELDS = Arrays.asList(new String[] { FIELD_FROM, FIELD_TO, FIELD_CC, FIELD_BCC });
-
-    static final List<String> FOLDERS_FIELDS = Arrays.asList(new String[] { FIELD_FOLDER });
-
-    static final List<String> QUERY_FIELDS = Arrays.asList(new String[] { FIELD_SUBJECT, FIELD_FROM, FIELD_TO, FIELD_CC, FIELD_BCC });
-
-    static final List<String> QUERY_FIELDS_BODY = Arrays.asList(new String[] { FIELD_SUBJECT, FIELD_FROM, FIELD_TO, FIELD_CC, FIELD_BCC, FIELD_BODY });
-
-    static List<String> asList(String str) {
-        return Collections.singletonList(str);
-    }
-
+    public static final String ATTACHMENT_SEARCH_ENABLED = "com.openexchange.imap.attachmentSearch.enabled";
 }

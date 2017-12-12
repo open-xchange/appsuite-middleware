@@ -52,7 +52,6 @@ package com.openexchange.folderstorage.mail;
 import static com.openexchange.folderstorage.mail.MailFolderStorage.closeMailAccess;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.mail.utils.MailFolderUtility.prepareMailFolderParam;
-import gnu.trove.map.hash.TIntIntHashMap;
 import java.io.Serializable;
 import java.util.EnumSet;
 import java.util.Locale;
@@ -99,6 +98,7 @@ import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.server.impl.OCLPermission;
+import gnu.trove.map.hash.TIntIntHashMap;
 
 /**
  * {@link MailFolderImpl} - A mail folder.
@@ -117,6 +117,7 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
     private static final String CAPABILITY_STORE_SEEN = "STORE_SEEN";
     private static final String CAPABILITY_FOLDER_VALIDITY = "FOLDER_VALIDITY";
     private static final String CAPABILITY_FILENAME_SEARCH = "FILENAME_SEARCH";
+    private static final String CAPABILITY_ATTACHMENT_SEARCH = "ATTACHMENT_SEARCH";
 
     /**
      * The mail folder content type.
@@ -318,6 +319,9 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
         this.capabilities = mailConfig.getCapabilities().getCapabilities();
         if (mailConfig.getCapabilities().hasFileNameSearch()) {
             addSupportedCapabilities(CAPABILITY_FILENAME_SEARCH);
+        }
+        if (mailConfig.getCapabilities().hasAttachmentSearch()) {
+            addSupportedCapabilities(CAPABILITY_ATTACHMENT_SEARCH);
         }
         if (mailConfig.getCapabilities().hasFolderValidity()) {
             addSupportedCapabilities(CAPABILITY_FOLDER_VALIDITY);
