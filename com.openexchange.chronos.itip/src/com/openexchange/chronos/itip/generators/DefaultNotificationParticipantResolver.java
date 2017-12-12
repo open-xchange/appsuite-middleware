@@ -191,10 +191,10 @@ public class DefaultNotificationParticipantResolver implements NotificationParti
             foundOnBehalfOf = foundOnBehalfOf || id == onBehalfOf.getId();
             foundPrincipal = foundPrincipal || roles.contains(ITipRole.PRINCIPAL);
 
-            participant.setDisplayName(userParticipant.getCn());
             participant.setLocale(u.getLocale());
             participant.setTimezone(TimeZone.getTimeZone(u.getTimeZone()));
-            if (userParticipant != null) {
+            if (null != userParticipant) {
+                participant.setDisplayName(userParticipant.getCn());
                 participant.setConfirmStatus(userParticipant.getPartStat());
                 participant.setComment(userParticipant.getComment());
             }
@@ -396,7 +396,7 @@ public class DefaultNotificationParticipantResolver implements NotificationParti
     }
 
     private String getMailAddress(User u, Attendee userParticipant) {
-        if (CalendarUtils.isInternalUser(userParticipant) && null == ResourceId.parse(userParticipant.getUri())) {
+        if (CalendarUtils.isInternalUser(userParticipant) && null != userParticipant && null == ResourceId.parse(userParticipant.getUri())) {
             String mail = CalendarUtils.extractEMailAddress(userParticipant.getUri());
             if (Strings.isNotEmpty(mail)) {
                 return mail;
