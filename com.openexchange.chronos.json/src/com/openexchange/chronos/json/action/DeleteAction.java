@@ -58,11 +58,13 @@ import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.chronos.json.converter.MultipleCalendarResultConverter;
 import com.openexchange.chronos.json.oauth.ChronosOAuthScope;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
+import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarResult;
 import com.openexchange.chronos.service.CreateResult;
 import com.openexchange.chronos.service.DeleteResult;
@@ -84,9 +86,9 @@ import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 @OAuthAction(ChronosOAuthScope.OAUTH_WRITE_SCOPE)
 public class DeleteAction extends ChronosAction {
 
-    private static final String FOLDER_ID_FIELD = "folderId";
-    private static final String ID_FIELD = "id";
-    private static final String RECURENCE_ID_FIELD = "recurrenceId";
+    private static final String FOLDER_ID_FIELD = AJAXServlet.PARAMETER_FOLDERID;
+    private static final String ID_FIELD = AJAXServlet.PARAMETER_ID;
+    private static final String RECURENCE_ID_FIELD = CalendarParameters.PARAMETER_RECURRENCE_ID;
 
     private static final Set<String> OPTIONAL_PARAMETERS = unmodifiableSet(PARAM_RANGE_START, PARAM_RANGE_END, PARAM_EXPAND );
 

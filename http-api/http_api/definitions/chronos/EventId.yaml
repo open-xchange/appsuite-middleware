@@ -3,7 +3,7 @@ required:
 - id
 - folderId
 properties:
-  folderId:
+  folder:
     type: string
     description: The identifier of the folder.
   id:

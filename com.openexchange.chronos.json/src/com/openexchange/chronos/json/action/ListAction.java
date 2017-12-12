@@ -59,12 +59,14 @@ import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.json.converter.EventResultConverter;
 import com.openexchange.chronos.json.oauth.ChronosOAuthScope;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
+import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.EventID;
 import com.openexchange.exception.OXException;
 import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
@@ -84,9 +86,9 @@ public class ListAction extends ChronosAction {
 
     private static final Set<String> OPTIONAL_PARAMETERS = unmodifiableSet(PARAMETER_FIELDS);
 
-    private static final String FOLDER_ID_FIELD = "folderId";
-    private static final String ID_FIELD = "id";
-    private static final String RECURENCE_ID_FIELD = "recurrenceId";
+    private static final String FOLDER_ID_FIELD = AJAXServlet.PARAMETER_FOLDERID;
+    private static final String ID_FIELD = AJAXServlet.PARAMETER_ID;
+    private static final String RECURENCE_ID_FIELD = CalendarParameters.PARAMETER_RECURRENCE_ID;
 
     /**
      * Initializes a new {@link ListAction}.
