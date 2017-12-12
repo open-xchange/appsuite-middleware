@@ -80,6 +80,7 @@ import static com.openexchange.folderstorage.Permission.READ_OWN_OBJECTS;
 import static com.openexchange.folderstorage.Permission.WRITE_ALL_OBJECTS;
 import static com.openexchange.folderstorage.Permission.WRITE_OWN_OBJECTS;
 import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.i;
 import static com.openexchange.tools.arrays.Collections.isNullOrEmpty;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -91,6 +92,8 @@ import java.util.Map.Entry;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import org.dmfs.rfc5545.DateTime;
+import org.dmfs.rfc5545.recur.InvalidRecurrenceRuleException;
+import org.dmfs.rfc5545.recur.RecurrenceRule;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Attendee;
@@ -296,6 +299,9 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
             if (needsSequenceNumberIncrement(eventUpdate, attendeeHelper)) {
                 eventUpdate.getUpdate().setSequence(originalEvent.getSequence() + 1);
             }
+            if (needsParticipationStatusReset(eventUpdate)) {
+                resetParticipationStatus(originalEvent.getId(), originalEvent.getAttendees());
+            }
             /*
              * adjust change & delete exceptions as needed
              */
@@ -331,8 +337,6 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
                 //
                 wasUpdated = true;
             }
-        } else if (null != eventUpdate && needsParticipationStatusReset(eventUpdate)) {
-            wasUpdated |= resetParticipationStatus(originalEvent.getId(), originalEvent.getAttendees());
         }
         /*
          * update passed alarms for calendar user, apply default alarms for newly added internal user attendees
@@ -564,9 +568,47 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
      *
      * @param eventUpdate The event update to evaluate
      * @return <code>true</code> if the attendee's participation status should be reseted, <code>false</code>, otherwise
+     * @see <a href="https://tools.ietf.org/html/rfc6638#section-3.2.8">RFC 6638, section 3.2.8</a>
      */
     private boolean needsParticipationStatusReset(ItemUpdate<Event, EventField> eventUpdate) throws OXException {
-        return eventUpdate.containsAnyChangeOf(new EventField[] { EventField.RECURRENCE_RULE, EventField.START_DATE, EventField.END_DATE });
+        if (eventUpdate.getUpdatedFields().contains(EventField.RECURRENCE_RULE)) {
+            /*
+             * reset if there are 'new' occurrences (caused by a modified or extended rule)
+             */
+            if (hasFurtherOccurrences(eventUpdate.getOriginal().getRecurrenceRule(), eventUpdate.getUpdate().getRecurrenceRule())) {
+                return true;
+            }
+        }
+        if (eventUpdate.getUpdatedFields().contains(EventField.DELETE_EXCEPTION_DATES)) {
+            /*
+             * reset if there are 'new' occurrences (caused by the reinstatement of previous delete exceptions)
+             */
+            SimpleCollectionUpdate<RecurrenceId> exceptionDateUpdates = getExceptionDateUpdates(
+                eventUpdate.getOriginal().getDeleteExceptionDates(), eventUpdate.getUpdate().getDeleteExceptionDates());
+            if (false == exceptionDateUpdates.getRemovedItems().isEmpty()) {
+                return true;
+            }
+        }
+        if (eventUpdate.getUpdatedFields().contains(EventField.START_DATE)) {
+            /*
+             * reset if updated start is before the original start
+             */
+            if (eventUpdate.getUpdate().getStartDate().before(eventUpdate.getOriginal().getStartDate())) {
+                return true;
+            }
+        }
+        if (eventUpdate.getUpdatedFields().contains(EventField.END_DATE)) {
+            /*
+             * reset if updated end is after the original end
+             */
+            if (eventUpdate.getUpdate().getEndDate().after(eventUpdate.getOriginal().getEndDate())) {
+                return true;
+            }
+        }
+        /*
+         * no reset needed, otherwise
+         */
+        return false;
     }
 
     /**
@@ -1033,6 +1075,57 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
         if (null != updatedAttendees && (1 < updatedAttendees.size() || session.getUserId() != updatedAttendees.get(0).getEntity())) {
             requireWritePermissions(originalEvent);
         }
+    }
+
+    /**
+     * Gets a value indicating whether an updated recurrence rule would produce further, additional occurrences compared to the original
+     * rule.
+     *
+     * @param originalRRule The original recurrence rule, or <code>null</code> if there was none
+     * @param updatedRRule The original recurrence rule, or <code>null</code> if there is none
+     * @return <code>true</code> if the updated rule yields further occurrences, <code>false</code>, otherwise
+     */
+    private static boolean hasFurtherOccurrences(String originalRRule, String updatedRRule) throws OXException {
+        if (null == originalRRule) {
+            return null != updatedRRule;
+        }
+        if (null == updatedRRule) {
+            return false;
+        }
+        try {
+            RecurrenceRule originalRule = new RecurrenceRule(originalRRule);
+            RecurrenceRule updatedRule = new RecurrenceRule(updatedRRule);
+            /*
+             * check if only UNTIL or COUNT was changed
+             */
+            RecurrenceRule checkedRule = new RecurrenceRule(updatedRule.toString());
+            checkedRule.setUntil(originalRule.getUntil());
+            if (checkedRule.toString().equals(originalRule.toString())) {
+                return 1 == CalendarUtils.compare(originalRule.getUntil(), updatedRule.getUntil(), null);
+            }
+            checkedRule = new RecurrenceRule(updatedRule.toString());
+            if (null == originalRule.getCount()) {
+                checkedRule.setUntil(null);
+            } else {
+                checkedRule.setCount(i(originalRule.getCount()));
+            }
+            if (checkedRule.toString().equals(originalRule.toString())) {
+                return updatedRule.getCount() > originalRule.getCount();
+            }
+            /*
+             * check if only the INTERVAL was extended
+             */
+            //TODO
+
+            /*
+             * check if each BY... part is equally or more restrictive
+             */
+            //TODO
+
+        } catch (InvalidRecurrenceRuleException e) {
+            throw CalendarExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+        return true;
     }
 
 }
