@@ -130,14 +130,14 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
         /*
          * check targeted attendee
          */
-        attendee = session.getEntityResolver().prepare(attendee);
-        Attendee originalAttendee = Check.attendeeExists(originalEvent, attendee);
+        Attendee resolvedAttendee = session.getEntityResolver().prepare(AttendeeMapper.getInstance().copy(attendee, null, (AttendeeField[]) null));
+        Attendee originalAttendee = Check.attendeeExists(originalEvent, resolvedAttendee);
         if (0 < originalAttendee.getEntity() && calendarUserId != originalAttendee.getEntity() && session.getUserId() != originalAttendee.getEntity()) {
             // TODO: even allowed for proxy user? calendarUserId != originalAttendee.getEntity()
             throw CalendarExceptionCodes.NO_WRITE_PERMISSION.create(folder.getID());
         }
         if (needsConflictCheck(originalEvent, originalAttendee, attendee)) {
-            Check.noConflicts(storage, session, originalEvent, Collections.singletonList(attendee));
+            Check.noConflicts(storage, session, originalEvent, Collections.singletonList(resolvedAttendee));
         }
         if (null == recurrenceId) {
             updateAttendee(originalEvent, originalAttendee, attendee);
