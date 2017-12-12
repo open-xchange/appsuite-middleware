@@ -62,8 +62,8 @@ import com.openexchange.mail.authenticity.MailAuthenticityStatus;
  */
 public final class MailAuthenticityResult {
 
-    /** The 'not_analyzed' result */
-    public static final MailAuthenticityResult NOT_ANALYZED_RESULT = new MailAuthenticityResult(MailAuthenticityStatus.NOT_ANALYZED);
+    /** The 'none' result */
+    public static final MailAuthenticityResult NONE_RESULT = new MailAuthenticityResult(MailAuthenticityStatus.NONE);
 
     /** The default neutral result */
     public static final MailAuthenticityResult NEUTRAL_RESULT = new MailAuthenticityResult(MailAuthenticityStatus.NEUTRAL);
