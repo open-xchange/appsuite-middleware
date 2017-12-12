@@ -147,10 +147,10 @@ public class BasicSchedJoulesCalendarProvider implements BasicCalendarProvider {
         int itemId = userConfig.optInt(SchedJoulesFields.ITEM_ID, 0);
         long refreshInterval = userConfig.optLong(SchedJoulesFields.REFRESH_INTERVAL, MINIMUM_REFRESH_INTERVAL);
         if (MINIMUM_REFRESH_INTERVAL > refreshInterval) {
-            throw OXException.general("");
+            throw SchedJoulesProviderExceptionCodes.INVALID_REFRESH_MINIMUM_INTERVAL.create(-1, session.getUserId(), session.getContextId());
         }
         if (0 == itemId) {
-            throw OXException.general("missing item id in config");
+            throw SchedJoulesProviderExceptionCodes.MISSING_ITEM_ID_FROM_CONFIG.create(-1, session.getUserId(), session.getContextId());
         }
         userConfig.putSafe(SchedJoulesFields.LOCALE, locale);
         userConfig.putSafe(SchedJoulesFields.REFRESH_INTERVAL, refreshInterval);
@@ -176,7 +176,7 @@ public class BasicSchedJoulesCalendarProvider implements BasicCalendarProvider {
             internalConfig.put(SchedJoulesFields.USER_KEY, generateUserKey(session));
 
         } catch (JSONException e) {
-            throw OXException.general("", e);
+            throw SchedJoulesProviderExceptionCodes.JSON_ERROR.create(e.getMessage(), e);
         }
 
         return internalConfig;

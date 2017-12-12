@@ -116,6 +116,16 @@ public enum SchedJoulesProviderExceptionCodes implements DisplayableOXExceptionC
      * <li>No internal configuration found [account %1$s, user %2$s, context %3$s]</li>
      */
     NO_INTERNAL_CONFIGURATION("No user configuration found [account %1$s, user %2$s, context %3$s]", CATEGORY_ERROR, 10),
+    /**
+     * <li>You have specified an invalid refresh minimum interval for the calendar subscription</li>
+     * <li>Invalid refresh minimum interval was specified [account %1$s, user %2$s, context %3$s]</li>
+     */
+    INVALID_REFRESH_MINIMUM_INTERVAL("Invalid refresh minimum interval was specified [account %1$s, user %2$s, context %3$s]", SchedJoulesProviderExceptionMessages.INVALID_MINIMUM_REFRESH_INTERVAL_MSG, CATEGORY_ERROR, 11),
+    /**
+     * <li>An error occurred inside the server which prevented it from fulfilling the request.</li>
+     * <li>The item identifier is missing from the configuration [account %1$s, user %2$s, context %3$s]</li>
+     */
+    MISSING_ITEM_ID_FROM_CONFIG("The item identifier is missing from the configuration [account %1$s, user %2$s, context %3$s]", CATEGORY_ERROR, 12),
     ;
 
     public static final String PREFIX = "SCHEDJOULES";

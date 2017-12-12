@@ -64,4 +64,6 @@ final class SchedJoulesProviderExceptionMessages {
     static final String CALENDAR_DOES_NOT_EXIST_MSG = "The requested calendar does not exist.";
     // Your SchedJoules account is malformed. Please re-create it.
     static final String MALFORMED_ACCOUNT_MSG = "Your SchedJoules account is malformed. Please re-create it.";
+    // You have specified an invalid refresh minimum interval for the calendar subscription
+    static final String INVALID_MINIMUM_REFRESH_INTERVAL_MSG = "You have specified an invalid refresh minimum interval for the calendar subscription";
 }
