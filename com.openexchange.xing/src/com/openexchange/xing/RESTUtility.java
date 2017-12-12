@@ -527,7 +527,7 @@ public class RESTUtility {
      * @throws XingException For any other unknown errors. This is also a superclass of all other XING exceptions, so you may want to only
      *             catch this exception which signals that some kind of error occurred.
      */
-    private static HttpResponse execute(final Session session, final HttpUriRequest req, final List<Integer> expectedStatusCode) throws XingException {
+    private static HttpResponse execute(final Session session, final HttpRequestBase req, final List<Integer> expectedStatusCode) throws XingException {
         return execute(session, req, -1, expectedStatusCode);
     }
 
@@ -547,7 +547,7 @@ public class RESTUtility {
      * @throws XingException For any other unknown errors. This is also a superclass of all other XING exceptions, so you may want to only
      *             catch this exception which signals that some kind of error occurred.
      */
-    private static HttpResponse execute(final Session session, final HttpUriRequest req, final int socketTimeoutOverrideMs, final List<Integer> expectedStatusCode) throws XingException {
+    private static HttpResponse execute(final Session session, final HttpRequestBase req, final int socketTimeoutOverrideMs, final List<Integer> expectedStatusCode) throws XingException {
         final HttpClient client = updatedHttpClient(session);
 
         // Set request timeouts.

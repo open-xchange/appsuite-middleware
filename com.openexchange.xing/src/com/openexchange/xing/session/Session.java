@@ -54,7 +54,6 @@ import java.util.Locale;
 import org.apache.http.HttpRequest;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpRequestBase;
-import org.apache.http.client.methods.HttpUriRequest;
 import com.openexchange.xing.XingAPI;
 import com.openexchange.xing.exception.XingException;
 
@@ -127,7 +126,7 @@ public interface Session {
      * to override the default values. This is abstracted out to cope with
      * signature changes in the Apache HttpClient libraries.
      */
-    public void setRequestTimeout(HttpUriRequest request);
+    public void setRequestTimeout(HttpRequestBase request);
 
     /**
      * Returns the XING API server. Changing this will break things.

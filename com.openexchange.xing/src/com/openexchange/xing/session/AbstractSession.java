@@ -50,67 +50,41 @@
 
 package com.openexchange.xing.session;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.zip.GZIPInputStream;
 import oauth.signpost.commonshttp.CommonsHttpOAuthConsumer;
 import oauth.signpost.exception.OAuthCommunicationException;
 import oauth.signpost.exception.OAuthExpectationFailedException;
 import oauth.signpost.exception.OAuthMessageSignerException;
-import org.apache.http.ConnectionReuseStrategy;
 import org.apache.http.Header;
 import org.apache.http.HeaderElement;
 import org.apache.http.HeaderElementIterator;
 import org.apache.http.HeaderIterator;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpException;
-import org.apache.http.HttpRequest;
-import org.apache.http.HttpRequestInterceptor;
 import org.apache.http.HttpResponse;
-import org.apache.http.HttpResponseInterceptor;
 import org.apache.http.HttpVersion;
 import org.apache.http.ParseException;
 import org.apache.http.ProtocolVersion;
 import org.apache.http.TokenIterator;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.config.RequestConfig.Builder;
 import org.apache.http.client.methods.HttpRequestBase;
-import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.client.params.HttpClientParams;
-import org.apache.http.client.utils.DateUtils;
-import org.apache.http.conn.ClientConnectionRequest;
+import org.apache.http.config.Registry;
+import org.apache.http.config.RegistryBuilder;
 import org.apache.http.conn.ConnectionKeepAliveStrategy;
-import org.apache.http.conn.params.ConnManagerParams;
-import org.apache.http.conn.params.ConnPerRoute;
+import org.apache.http.conn.ConnectionRequest;
 import org.apache.http.conn.routing.HttpRoute;
-import org.apache.http.conn.scheme.PlainSocketFactory;
-import org.apache.http.conn.scheme.Scheme;
-import org.apache.http.conn.scheme.SchemeRegistry;
-import org.apache.http.conn.ssl.SSLSocketFactory;
-import org.apache.http.conn.ssl.StrictHostnameVerifier;
-import org.apache.http.cookie.ClientCookie;
-import org.apache.http.cookie.CookieSpec;
-import org.apache.http.cookie.CookieSpecFactory;
-import org.apache.http.cookie.MalformedCookieException;
-import org.apache.http.cookie.SetCookie;
-import org.apache.http.entity.HttpEntityWrapper;
+import org.apache.http.conn.socket.ConnectionSocketFactory;
+import org.apache.http.conn.socket.PlainConnectionSocketFactory;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.impl.DefaultConnectionReuseStrategy;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
-import org.apache.http.impl.cookie.BasicExpiresHandler;
-import org.apache.http.impl.cookie.BrowserCompatSpec;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.message.BasicHeaderElementIterator;
-import org.apache.http.params.BasicHttpParams;
-import org.apache.http.params.HttpConnectionParams;
-import org.apache.http.params.HttpParams;
-import org.apache.http.params.HttpProtocolParams;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.protocol.HttpContext;
-import org.apache.http.util.TextUtils;
-import com.openexchange.net.ssl.config.SSLConfigurationService;
-import com.openexchange.net.ssl.SSLSocketFactoryProvider;
+import com.openexchange.rest.client.httpclient.HttpClients;
+import com.openexchange.rest.client.httpclient.HttpClients.ClientConfig;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
 import com.openexchange.xing.XingAPI;
@@ -290,7 +264,6 @@ public abstract class AbstractSession implements Session {
      * battery power on mobile devices. It's unlikely that you'll want to
      * change this behavior.
      */
-    @SuppressWarnings("deprecation")
     @Override
     public HttpClient getHttpClient() {
         HttpClient client = this.client.get();
@@ -298,88 +271,35 @@ public abstract class AbstractSession implements Session {
             synchronized (this) {
                 client = this.client.get();
                 if (client == null) {
+
+                    ClientConfig config = ClientConfig.newInstance();
+
+                    config.setMaxConnectionsPerRoute(10);
+                    config.setMaxTotalConnections(20);
+
                     // Set up default connection params. There are two routes to
                     // XING - api server and content server.
-                    final HttpParams connParams = new BasicHttpParams();
-                    ConnManagerParams.setMaxConnectionsPerRoute(connParams, new ConnPerRoute() {
-
-                        @Override
-                        public int getMaxForRoute(final HttpRoute route) {
-                            return 10;
-                        }
-                    });
-                    ConnManagerParams.setMaxTotalConnections(connParams, 20);
-
                     // Set up scheme registry.
-                    final SchemeRegistry schemeRegistry = new SchemeRegistry();
-                    schemeRegistry.register(new Scheme("http", PlainSocketFactory.getSocketFactory(), 80));
-                    SSLSocketFactoryProvider factoryProvider = Services.getService(SSLSocketFactoryProvider.class);
-                    javax.net.ssl.SSLSocketFactory f = factoryProvider.getDefault();
-                    SSLConfigurationService sslConfig = Services.getService(SSLConfigurationService.class);
-                    schemeRegistry.register(new Scheme("https", new SSLSocketFactory(f, sslConfig.getSupportedProtocols(), sslConfig.getSupportedCipherSuites(), new StrictHostnameVerifier()), 443));
+                    ConnectionSocketFactory plain = PlainConnectionSocketFactory.getSocketFactory();
+                    ConnectionSocketFactory ssl = SSLConnectionSocketFactory.getSocketFactory();
+                    RegistryBuilder<ConnectionSocketFactory> registryBuilder = RegistryBuilder.<ConnectionSocketFactory>create();
+                    registryBuilder.register("http", plain);
+                    registryBuilder.register("https", ssl);
 
-                    final XingClientConnManager cm = new XingClientConnManager(connParams, schemeRegistry);
+                    final XingClientConnManager cm = new XingClientConnManager(registryBuilder.build());
 
                     // Set up client params.
-                    final HttpParams httpParams = new BasicHttpParams();
-                    HttpConnectionParams.setConnectionTimeout(httpParams, DEFAULT_TIMEOUT_MILLIS);
-                    HttpConnectionParams.setSoTimeout(httpParams, DEFAULT_TIMEOUT_MILLIS);
-                    HttpConnectionParams.setSocketBufferSize(httpParams, 8192);
-                    HttpProtocolParams.setUserAgent(httpParams, "Open-Xchange-XING/1.0.0");
+                    config.setConnectionTimeout(DEFAULT_TIMEOUT_MILLIS);
+                    config.setSocketReadTimeout(DEFAULT_TIMEOUT_MILLIS);
+                    config.setSocketBufferSize(8192);
+                    config.setUserAgent("Open-Xchange-XING/1.0.0");
 
-                    final DefaultHttpClient c = new DefaultHttpClient(cm, httpParams) {
+                    config.setKeepAliveStrategy(new XingKeepAliveStrategy());
+                    config.setConnectionReuseStrategy(new XingConnectionReuseStrategy());
 
-                        @Override
-                        protected ConnectionKeepAliveStrategy createConnectionKeepAliveStrategy() {
-                            return new XingKeepAliveStrategy();
-                        }
-
-                        @Override
-                        protected ConnectionReuseStrategy createConnectionReuseStrategy() {
-                            return new XingConnectionReuseStrategy();
-                        }
-                    };
-
-                    c.getCookieSpecs().register("lenient", new CookieSpecFactory() {
-                        @Override
-                        public CookieSpec newInstance(HttpParams params) {
-                            return new LenientCookieSpec();
-                        }
-                    });
-                    HttpClientParams.setCookiePolicy(c.getParams(), "lenient");
-
-                    c.addRequestInterceptor(new HttpRequestInterceptor() {
-
-                        @Override
-                        public void process(final HttpRequest request, final HttpContext context) throws HttpException, IOException {
-                            if (!request.containsHeader("Accept-Encoding")) {
-                                request.addHeader("Accept-Encoding", "gzip");
-                            }
-                        }
-                    });
-
-                    c.addResponseInterceptor(new HttpResponseInterceptor() {
-
-                        @Override
-                        public void process(final HttpResponse response, final HttpContext context) throws HttpException, IOException {
-                            final HttpEntity entity = response.getEntity();
-                            if (entity != null) {
-                                final Header ceheader = entity.getContentEncoding();
-                                if (ceheader != null) {
-                                    final HeaderElement[] codecs = ceheader.getElements();
-                                    for (final HeaderElement codec : codecs) {
-                                        if (codec.getName().equalsIgnoreCase("gzip")) {
-                                            response.setEntity(new GzipDecompressingEntity(response.getEntity()));
-                                            return;
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    });
-
-                    client = c;
-                    this.client.set(c);
+                    config.setContentCompressionDisabled(true);
+                    client = HttpClients.getHttpClient(config, cm);
+                    this.client.set(client);
                 }
             }
         }
@@ -392,10 +312,10 @@ public abstract class AbstractSession implements Session {
      * The default implementation always sets a 30 second timeout.
      */
     @Override
-    public void setRequestTimeout(final HttpUriRequest request) {
-        final HttpParams reqParams = request.getParams();
-        HttpConnectionParams.setSoTimeout(reqParams, DEFAULT_TIMEOUT_MILLIS);
-        HttpConnectionParams.setConnectionTimeout(reqParams, DEFAULT_TIMEOUT_MILLIS);
+    public void setRequestTimeout(final HttpRequestBase request) {
+        Builder requestConfigBuilder = RequestConfig.custom();
+        requestConfigBuilder.setConnectionRequestTimeout(DEFAULT_TIMEOUT_MILLIS).setSocketTimeout(DEFAULT_TIMEOUT_MILLIS);
+        request.setConfig(requestConfigBuilder.build());
     }
 
     @Override
@@ -556,14 +476,13 @@ public abstract class AbstractSession implements Session {
         }
     } // End of DBConnectionReuseStrategy class
 
-    private static class XingClientConnManager extends ThreadSafeClientConnManager {
-
-        public XingClientConnManager(final HttpParams params, final SchemeRegistry schreg) {
-            super(params, schreg);
+    private static class XingClientConnManager extends PoolingHttpClientConnectionManager {
+        public XingClientConnManager(Registry<ConnectionSocketFactory> registry) {
+            super(registry);
         }
 
         @Override
-        public ClientConnectionRequest requestConnection(final HttpRoute route, final Object state) {
+        public ConnectionRequest requestConnection(final HttpRoute route, final Object state) {
             IdleConnectionCloser.ensureRunning(this, KEEP_ALIVE_DURATION_SECS, KEEP_ALIVE_MONITOR_INTERVAL_SECS);
             return super.requestConnection(route, state);
         }
@@ -613,103 +532,10 @@ public abstract class AbstractSession implements Session {
             try {
                 manager.closeExpiredConnections();
                 manager.closeIdleConnections(idleTimeoutSeconds, TimeUnit.SECONDS);
-                if (manager.getConnectionsInPool() == 0) {
-                    stop();
-                }
             } catch (final Exception e) {
                 stop();
             }
         }
     } // End of IdleConnectionCloserThread class
-
-    private static class GzipDecompressingEntity extends HttpEntityWrapper {
-
-        /*
-         * From Apache HttpClient Examples.
-         *
-         * ====================================================================
-         * Licensed to the Apache Software Foundation (ASF) under one
-         * or more contributor license agreements.  See the NOTICE file
-         * distributed with this work for additional information
-         * regarding copyright ownership.  The ASF licenses this file
-         * to you under the Apache License, Version 2.0 (the
-         * "License"); you may not use this file except in compliance
-         * with the License.  You may obtain a copy of the License at
-         *
-         *   http://www.apache.org/licenses/LICENSE-2.0
-         *
-         * Unless required by applicable law or agreed to in writing,
-         * software distributed under the License is distributed on an
-         * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-         * KIND, either express or implied.  See the License for the
-         * specific language governing permissions and limitations
-         * under the License.
-         * ====================================================================
-         *
-         * This software consists of voluntary contributions made by many
-         * individuals on behalf of the Apache Software Foundation.  For more
-         * information on the Apache Software Foundation, please see
-         * <http://www.apache.org/>.
-         *
-         */
-
-        public GzipDecompressingEntity(final HttpEntity entity) {
-            super(entity);
-        }
-
-        @Override
-        public InputStream getContent()
-            throws IOException, IllegalStateException {
-
-            // the wrapped entity's getContent() decides about repeatability
-            final InputStream wrappedin = wrappedEntity.getContent();
-
-            return new GZIPInputStream(wrappedin);
-        }
-
-        @Override
-        public long getContentLength() {
-            // length of ungzipped content is not known
-            return -1;
-        }
-
-    }
-
-    private static class LenientCookieSpec extends BrowserCompatSpec {
-
-        // See org.apache.http.impl.cookie.BrowserCompatSpec.DEFAULT_DATE_PATTERNS
-        private static final String[] DEFAULT_DATE_PATTERNS = new String[] {
-            DateUtils.PATTERN_RFC1123,
-            DateUtils.PATTERN_RFC1036,
-            DateUtils.PATTERN_ASCTIME,
-            "EEE, dd-MMM-yyyy HH:mm:ss z",
-            "EEE, dd-MMM-yyyy HH-mm-ss z",
-            "EEE, dd MMM yy HH:mm:ss z",
-            "EEE dd-MMM-yyyy HH:mm:ss z",
-            "EEE dd MMM yyyy HH:mm:ss z",
-            "EEE dd-MMM-yyyy HH-mm-ss z",
-            "EEE dd-MMM-yy HH:mm:ss z",
-            "EEE dd MMM yy HH:mm:ss z",
-            "EEE,dd-MMM-yy HH:mm:ss z",
-            "EEE,dd-MMM-yyyy HH:mm:ss z",
-            "EEE, dd-MM-yyyy HH:mm:ss z",
-            "EEE, dd MMM yyyy HH:mm:ss Z",
-        };
-
-        /** Initializes a new {@link LenientCookieSpec}. */
-        LenientCookieSpec() {
-            super();
-            registerAttribHandler(ClientCookie.EXPIRES_ATTR, new BasicExpiresHandler(DEFAULT_DATE_PATTERNS) {
-                @Override public void parse(SetCookie cookie, String value) throws MalformedCookieException {
-                    if (TextUtils.isEmpty(value)) {
-                        // You should set whatever you want in cookie
-                        cookie.setExpiryDate(null);
-                    } else {
-                        super.parse(cookie, value);
-                    }
-                }
-            });
-        }
-    }
 
 }
