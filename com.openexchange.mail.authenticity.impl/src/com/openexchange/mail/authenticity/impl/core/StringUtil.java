@@ -127,7 +127,6 @@ final class StringUtil {
     private static <T> T parseToCollector(String element, T collector) {
         // No pairs; return as a singleton collector with the line being both the key and the value
         if (!element.contains("=")) {
-            //pairs.put(element, element);
             add(element, element, collector);
             return collector;
         }
@@ -179,7 +178,6 @@ final class StringUtil {
                     if (!valueMode) {
                         //Remove the key from the value buffer
                         valueBuffer.setLength(valueBuffer.length() - backtrackIndex);
-                        //pairs.put(key, valueBuffer.toString().trim());
                         add(key, valueBuffer.toString().trim(), collector);
                         // Retain the new key (and reverse if that key came from backtracking)
                         key = backtracking ? keyBuffer.reverse().toString() : keyBuffer.toString();
