@@ -50,6 +50,7 @@
 package com.openexchange.mail.authenticity.impl.core.parsers;
 
 import java.util.Map;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.authenticity.mechanism.AuthenticityMechanismResult;
 import com.openexchange.mail.authenticity.mechanism.DefaultMailAuthenticityMechanism;
 import com.openexchange.mail.authenticity.mechanism.MailAuthenticityMechanismResult;
@@ -92,7 +93,9 @@ public class SPFMailAuthenticityMechanismParser extends AbstractMailAuthenticity
         result.setReason(extractComment(mechanismName));
         result.setDomainMatch(!domainMismatch);
         result.addProperty("mail_from", result.getDomain());
-        //addProperties(attributes, result);
+        if (!Strings.isEmpty(result.getClientIP())) {
+            result.addProperty("client_ip", result.getClientIP());
+        }
         return result;
     }
 }
