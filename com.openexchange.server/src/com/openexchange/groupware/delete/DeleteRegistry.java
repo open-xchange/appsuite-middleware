@@ -50,6 +50,7 @@
 package com.openexchange.groupware.delete;
 
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -69,6 +70,7 @@ import com.openexchange.groupware.infostore.InfostoreDelete;
 import com.openexchange.groupware.ldap.UserContextDeleteListener;
 import com.openexchange.groupware.tasks.TasksDelete;
 import com.openexchange.groupware.userconfiguration.UserConfigurationDeleteListener;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.usersetting.UserSettingMailDeleteListener;
 import com.openexchange.mailaccount.internal.MailAccountDeleteListener;
 import com.openexchange.preferences.UserSettingServerDeleteListener;
@@ -78,6 +80,7 @@ import com.openexchange.tools.file.QuotaUsageDelete;
 import com.openexchange.tools.file.UserQuotaUsageDelete;
 import com.openexchange.tools.oxfolder.OXFolderDeleteListener;
 import com.openexchange.tools.oxfolder.deletelistener.ObjectPermissionDeleteListener;
+import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link DeleteRegistry} - A registry for instances of {@link DeleteListener} whose
@@ -86,6 +89,8 @@ import com.openexchange.tools.oxfolder.deletelistener.ObjectPermissionDeleteList
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class DeleteRegistry {
+
+    private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(DeleteRegistry.class);
 
     /**
      * Dummy value to associate with an Object in the concurrent map.
@@ -261,8 +266,41 @@ public final class DeleteRegistry {
          * Now trigger static listeners
          */
         for (DeleteListener listener : staticListeners) {
-            listener.deletePerformed(deleteEvent, readCon, writeCon);
+            try {
+                listener.deletePerformed(deleteEvent, readCon, writeCon);
+            } catch (OXException e) {
+                OXException opt = logFKFailureElseReturnException(e, listener, deleteEvent);
+                if (null != opt) {
+                    throw opt;
+                }
+            } catch (RuntimeException e) {
+                RuntimeException opt = logFKFailureElseReturnException(e, listener, deleteEvent);
+                if (null != opt) {
+                    throw opt;
+                }
+            }
         }
+    }
+
+    private <E extends Exception> E logFKFailureElseReturnException(E e, DeleteListener listener, DeleteEvent deleteEvent) {
+        if (deleteEvent.getType() != DeleteEvent.TYPE_CONTEXT) {
+            return e;
+        }
+
+        // Check for special SQL exception for a failed foreign key constraint
+        SQLException sqlException = DBUtils.extractSqlException(e);
+        if (null == sqlException) {
+            return e;
+        }
+
+        String message = sqlException.getMessage();
+        if (Strings.asciiLowerCase(message).indexOf("a foreign key constraint fails") < 0) {
+            return e;
+        }
+
+        // Just DEBUG log it. Hard-deletion takes place anyway in OXContextMySQLStorage.deleteContextData()
+        LOGGER.debug("Failed foreign key constraint while executing '{}'", listener.getClass().getName(), sqlException);
+        return null;
     }
 
 }

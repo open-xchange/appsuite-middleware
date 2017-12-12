@@ -69,13 +69,17 @@ public class SessionDeleteListener implements DeleteListener {
 
     @Override
     public void deletePerformed(DeleteEvent event, Connection readCon, Connection writeCon) {
+        final Context context = event.getContext();
+        final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
+        if (null == sessiondService) {
+            return;
+        }
+
         if (event.getType() == DeleteEvent.TYPE_USER) {
-            final Context context = event.getContext();
-            final int userId = event.getId();
-            final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
-            if (null != sessiondService) {
-                sessiondService.removeUserSessions(userId, context);
-            }
+            int userId = event.getId();
+            sessiondService.removeUserSessions(userId, context);
+        } else if (event.getType() == DeleteEvent.TYPE_CONTEXT) {
+            sessiondService.removeContextSessions(context.getContextId());
         }
     }
 }

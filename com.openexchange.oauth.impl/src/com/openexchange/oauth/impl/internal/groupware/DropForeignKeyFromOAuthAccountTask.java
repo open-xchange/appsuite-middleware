@@ -47,63 +47,76 @@
  *
  */
 
-package com.openexchange.groupware.infostore;
+package com.openexchange.oauth.impl.internal.groupware;
 
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Arrays;
+import java.util.List;
 import com.openexchange.database.Databases;
-import com.openexchange.database.provider.SimpleDBProvider;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.delete.DeleteEvent;
-import com.openexchange.groupware.delete.DeleteFailedExceptionCodes;
-import com.openexchange.groupware.delete.DeleteListener;
-import com.openexchange.groupware.infostore.facade.impl.InfostoreFacadeImpl;
-import com.openexchange.tools.session.ServerSessionAdapter;
+import com.openexchange.groupware.update.PerformParameters;
+import com.openexchange.groupware.update.UpdateExceptionCodes;
+import com.openexchange.groupware.update.UpdateTaskAdapter;
+import com.openexchange.tools.update.Tools;
 
-public class InfostoreDelete implements DeleteListener {
+/**
+ * {@link DropForeignKeyFromOAuthAccountTask} - Drops rather needless foreign key from <code>"oauthAccounts"</code> table.
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ */
+public final class DropForeignKeyFromOAuthAccountTask extends UpdateTaskAdapter {
 
-    public InfostoreDelete() {
+    /**
+     * Initializes a new {@link DropForeignKeyFromOAuthAccountTask}.
+     */
+    public DropForeignKeyFromOAuthAccountTask() {
         super();
     }
 
     @Override
-    public void deletePerformed(DeleteEvent event, Connection readCon, Connection writeCon) throws OXException {
-        if (event.getType() == DeleteEvent.TYPE_USER) {
-            InfostoreFacade database = new InfostoreFacadeImpl(new SimpleDBProvider(readCon, writeCon));
-            database.setTransactional(true);
-            database.setCommitsTransaction(false);
-            Integer destUser = event.getDestinationUserID();
-            database.removeUser(event.getId(), event.getContext(), destUser, ServerSessionAdapter.valueOf(event.getSession(), event.getContext()));
-        } else if (event.getType() == DeleteEvent.TYPE_CONTEXT) {
-            deleteContext(event, writeCon);
+    public String[] getDependencies() {
+        return new String[] {};
+    }
+
+    @Override
+    public void perform(final PerformParameters params) throws OXException {
+        Connection con = params.getConnection();
+        boolean rollback = false;
+        try {
+            Databases.startTransaction(con);
+            rollback = true;
+
+            // Drop foreign keys from...
+            for (String table : Arrays.asList("oauthAccounts")) {
+                dropForeignKeysFrom(table, con);
+            }
+
+            con.commit();
+            rollback = false;
+        } catch (SQLException e) {
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } catch (final RuntimeException e) {
+            throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
+        } finally {
+            if (rollback) {
+                Databases.rollback(con);
+            }
+            Databases.autocommit(con);
         }
     }
 
-    /**
-     * Delete a context from tasks module.
-     */
-    private void deleteContext(DeleteEvent event, Connection writeCon) throws OXException {
-        Context ctx = event.getContext();
+    private void dropForeignKeysFrom(String table, Connection con) throws SQLException {
+        List<String> keyNames = Tools.allForeignKey(con, table);
         Statement stmt = null;
-        try {
-            stmt = writeCon.createStatement();
-
-            stmt.addBatch("DELETE FROM del_infostore_document WHERE cid=" + ctx.getContextId());
-            stmt.addBatch("DELETE FROM del_infostore WHERE cid=" + ctx.getContextId());
-            stmt.addBatch("DELETE FROM lock_null_lock WHERE cid=" + ctx.getContextId());
-            stmt.addBatch("DELETE FROM lock_null WHERE cid=" + ctx.getContextId());
-            stmt.addBatch("DELETE FROM infostore_lock WHERE cid=" + ctx.getContextId());
-            stmt.addBatch("DELETE FROM infostore_property WHERE cid=" + ctx.getContextId());
-            stmt.addBatch("DELETE FROM infostore_document WHERE cid=" + ctx.getContextId());
-            stmt.addBatch("DELETE FROM infostore WHERE cid=" + ctx.getContextId());
-
-            stmt.executeBatch();
-        } catch (final SQLException e) {
-            throw DeleteFailedExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-        } finally {
-            Databases.closeSQLStuff(stmt);
+        for (String keyName : keyNames) {
+            try {
+                stmt = con.createStatement();
+                stmt.execute("ALTER TABLE " + table + " DROP FOREIGN KEY " + keyName);
+            } finally {
+                Databases.closeSQLStuff(stmt);
+            }
         }
     }
 
