@@ -166,7 +166,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
     private static final String SECURITY = MailJSONField.SECURITY.getKey();
     private static final String SECURITY_INFO = MailJSONField.SECURITY_INFO.getKey();
     private static final String TEXT_PREVIEW = MailJSONField.TEXT_PREVIEW.getKey();
-    private static final String AUTHENTICATION_RESULTS = MailJSONField.AUTHENTICATION_RESULTS.getKey();
+    private static final String AUTHENTICATION_RESULTS = MailJSONField.AUTHENTICITY.getKey();
 
     private static final String TRUNCATED = MailJSONField.TRUNCATED.getKey();
     private static final String SANITIZED = "sanitized";
@@ -558,25 +558,22 @@ public final class JsonMessageHandler implements MailMessageHandler {
             Object object = attributes.get(key);
             if (object instanceof Collection<?>) {
                 Collection<?> col = (Collection<?>) object;
-                JSONArray array = new JSONArray(col.size());
+                JSONArray unconsideredResults = new JSONArray();
                 for (Object o : col) {
                     if (o instanceof MailAuthenticityMechanismResult) {
                         MailAuthenticityMechanismResult mechResult = (MailAuthenticityMechanismResult) o;
                         JSONObject mailAuthMechResultJson = new JSONObject();
-                        mailAuthMechResultJson.put("mechanism", mechResult.getMechanism().getTechnicalName());
                         mailAuthMechResultJson.put("result", mechResult.getResult().getTechnicalName());
                         mailAuthMechResultJson.put("reason", mechResult.getReason());
-                        for (String k : mechResult.getProperties().keySet()) {
-                            mailAuthMechResultJson.put(k, mechResult.getProperties().get(k));
-                        }
-                        array.put(mailAuthMechResultJson);
+                        mailAuthMechResultJson.put("from_domain", mechResult.getDomain());
+                        result.put(mechResult.getMechanism().getTechnicalName(), mailAuthMechResultJson);
                     } else if (o instanceof Map) {
-                        array.put(JSONCoercion.coerceToJSON(o));
+                        unconsideredResults.put(JSONCoercion.coerceToJSON(o));
                     } else {
-                        array.put(o);
+                        unconsideredResults.put(o);
                     }
                 }
-                result.put(key.getKey(), array);
+                result.put("unconsidered_results", unconsideredResults);
             } else {
                 result.put(key.getKey(), object);
             }

@@ -240,13 +240,13 @@ public enum MailListField {
      *
      * @since v7.10.0
      */
-    AUTHENTICATION_OVERALL_RESULT(664, MailJSONField.AUTHENTICATION_RESULTS.getKey()),
+    AUTHENTICATION_OVERALL_RESULT(664, MailJSONField.AUTHENTICITY.getKey()),
     /**
      * The message's authentication mechanism results (heavy version); maps to <code>"Authentication-Results"</code> header
      *
      * @since v7.10.0
      */
-    AUTHENTICATION_MECHANISM_RESULTS(665, MailJSONField.AUTHENTICATION_RESULTS.getKey());
+    AUTHENTICATION_MECHANISM_RESULTS(665, MailJSONField.AUTHENTICITY.getKey());
 
     private final int field;
     private final String key;
