@@ -207,13 +207,22 @@ public enum MailField {
     TEXT_PREVIEW(MailListField.TEXT_PREVIEW),
     /**
      * The message's authentication overall result (light version); maps to <code>"Authentication-Results"</code> header
+     * 
+     * @since v7.10.0
      */
     AUTHENTICATION_OVERALL_RESULT(MailListField.AUTHENTICATION_OVERALL_RESULT),
     /**
      * The message's authentication mechanism results (heavy version); maps to <code>"Authentication-Results"</code> header
+     * 
+     * @since v7.10.0
      */
     AUTHENTICATION_MECHANISM_RESULTS(MailListField.AUTHENTICATION_MECHANISM_RESULTS),
-
+    /**
+     * The has attachment name.
+     * 
+     * @since v7.10.0
+     */
+    HAS_ATTACHMENT(MailListField.ATTACHMENT); // FIXME already existing in mail list fields. Should create a new one?!
     ;
 
     private static final EnumMap<MailListField, MailField> LIST_FIELDS_MAP = new EnumMap<MailListField, MailField>(MailListField.class);

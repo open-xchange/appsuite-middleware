@@ -68,7 +68,9 @@ public enum MailFacetType implements FacetType {
     SUBJECT,
     MAIL_TEXT,
     CONTACTS(MailStrings.FACET_PEOPLE),
-    FILENAME;
+    FILENAME,
+    HAS_ATTACHMENT,
+    ;
 
     private static final Map<String, MailFacetType> typesById = new HashMap<String, MailFacetType>();
     static {
