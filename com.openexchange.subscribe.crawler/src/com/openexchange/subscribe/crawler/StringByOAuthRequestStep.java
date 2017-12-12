@@ -69,14 +69,14 @@ import net.oauth.client.OAuthClient;
 import net.oauth.client.httpclient4.HttpClient4;
 import net.oauth.client.httpclient4.HttpClientPool;
 import org.apache.http.client.HttpClient;
-import org.apache.http.conn.ClientConnectionManager;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
-import org.apache.http.params.HttpParams;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.gargoylesoftware.htmlunit.Page;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.openexchange.exception.OXException;
+import com.openexchange.rest.client.httpclient.HttpClients;
 import com.openexchange.subscribe.crawler.internal.AbstractStep;
 import com.openexchange.subscribe.crawler.internal.HasLoginPage;
 import com.openexchange.subscribe.crawler.internal.LoginStep;
@@ -261,11 +261,11 @@ public class StringByOAuthRequestStep extends AbstractStep<String, Object> imple
         return new OAuthAccessor(consumer);
     }
 
-    private OAuthMessage sendRequest(final Map map, final String url) throws IOException, URISyntaxException, OAuthException {
-        final List<Map.Entry> params = new ArrayList<Map.Entry>();
-        final Iterator it = map.entrySet().iterator();
+    private OAuthMessage sendRequest(final Map<?,?> map, final String url) throws IOException, URISyntaxException, OAuthException {
+        final List<Map.Entry<?,?>> params = new ArrayList<Map.Entry<?,?>>();
+        final Iterator<?> it = map.entrySet().iterator();
         while (it.hasNext()) {
-            final Map.Entry p = (Map.Entry) it.next();
+            final Map.Entry<?,?> p = (Map.Entry<?,?>) it.next();
             params.add(new OAuth.Parameter((String) p.getKey(), (String) p.getValue()));
         }
         final OAuthAccessor accessor = createOAuthAccessor();
@@ -384,26 +384,32 @@ public class StringByOAuthRequestStep extends AbstractStep<String, Object> imple
     }
 
     private static class SingleConnectionPool implements HttpClientPool {
+        private static final Logger LOG = LoggerFactory.getLogger(SingleConnectionPool.class);
 
-        private DefaultHttpClient client;
+        private CloseableHttpClient client;
+
+        /**
+         * Initializes a new {@link SingleConnectionPool}.
+         */
+        public SingleConnectionPool() {
+            super();
+        }
 
         @Override
         public HttpClient getHttpClient(final URL server) {
-            if(client != null) {
-                return client;
-            }
-            client = new DefaultHttpClient();
-            final ClientConnectionManager mgr = client.getConnectionManager();
-            if (!(mgr instanceof ThreadSafeClientConnManager)) {
-                final HttpParams params = client.getParams();
-                client = new DefaultHttpClient(new ThreadSafeClientConnManager(params, mgr.getSchemeRegistry()), params);
+            if(client == null) {
+                client = HttpClients.getHttpClient("Open-Xchange-Subscribe-Crawler/1.0.0");
             }
 
             return client;
         }
 
         public void shutdown() {
-            client.getConnectionManager().shutdown();
+            try {
+                client.close();
+            } catch (IOException e) {
+                LOG.warn("Unable to close client: "+e.getMessage());
+            }
         }
 
     }
