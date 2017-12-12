@@ -49,6 +49,7 @@
 
 package com.openexchange.contact.vcard.impl.mapping;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
@@ -85,6 +86,7 @@ import com.openexchange.imagetransformation.ImageTransformationService;
 import com.openexchange.imagetransformation.ScaleType;
 import com.openexchange.imagetransformation.TransformedImage;
 import com.openexchange.java.Charsets;
+import com.openexchange.java.InetAddresses;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.MimeType2ExtMap;
@@ -409,6 +411,7 @@ public class PhotoMapping extends AbstractMapping {
      * @return A file holder containing the loaded image, or <code>null</code> if no valid image could be loaded
      */
     private static ThresholdFileHolder loadImageFromURL(String urlString, List<OXException> warnings) throws IOException, OXException {
+        String urlStringToUse = urlString;
         int maxNumAttempts = 5;
         int numAttempts = 0;
         LoadedImage result;
@@ -417,16 +420,16 @@ public class PhotoMapping extends AbstractMapping {
                 addConversionWarning(warnings, "PHOTO", "image URL \"" + urlString + "\" appears not to be valid, skipping import.");
                 return null;
             }
-            result = doLoadImageFromURL(urlString, urlString, warnings);
-        } while (result.redirectUrl != null);
+            result = doLoadImageFromURL(urlStringToUse, urlString, warnings);
+        } while ((urlStringToUse = result.redirectUrl) != null);
         return result.fileHolder;
     }
 
-    private static final LoadedImage NULL_RESULT = new LoadedImage();
+    private static final Set<Integer> REDIRECT_RESPONSE_CODES = ImmutableSet.of(I(HttpURLConnection.HTTP_MOVED_PERM), I(HttpURLConnection.HTTP_MOVED_TEMP), I(HttpURLConnection.HTTP_SEE_OTHER), I(HttpURLConnection.HTTP_USE_PROXY));
 
     private static LoadedImage doLoadImageFromURL(String urlString, String origUrlString, List<OXException> warnings) throws IOException, OXException {
         if (Strings.isEmpty(urlString)) {
-            return NULL_RESULT;
+            return LoadedImage.getNullResult();
         }
 
         URL url;
@@ -434,7 +437,7 @@ public class PhotoMapping extends AbstractMapping {
             url = new URL(urlString);
         } catch (MalformedURLException e) {
             addConversionWarning(warnings, e, "PHOTO", "image URL \"" + origUrlString + "\" appears not to be valid, skipping import.");
-            return NULL_RESULT;
+            return LoadedImage.getNullResult();
         }
         /*
          * check URL validity
@@ -443,24 +446,24 @@ public class PhotoMapping extends AbstractMapping {
             String protocol = url.getProtocol();
             if (null == protocol || false == ALLOWED_PROTOCOLS.contains(Strings.asciiLowerCase(protocol))) {
                 addConversionWarning(warnings, "PHOTO", "image URL \"" + origUrlString + "\" appears not to be valid, skipping import.");
-                return NULL_RESULT;
+                return LoadedImage.getNullResult();
             }
 
             String host = Strings.asciiLowerCase(url.getHost());
             if (null == host || DENIED_HOSTS.contains(host)) {
                 addConversionWarning(warnings, "PHOTO", "image URL \"" + origUrlString + "\" appears not to be valid, skipping import.");
-                return NULL_RESULT;
+                return LoadedImage.getNullResult();
             }
 
             try {
                 InetAddress inetAddress = InetAddress.getByName(url.getHost());
-                if (inetAddress.isAnyLocalAddress() || inetAddress.isSiteLocalAddress() || inetAddress.isLoopbackAddress() || inetAddress.isLinkLocalAddress()) {
+                if (InetAddresses.isInternalAddress(inetAddress)) {
                     addConversionWarning(warnings, "PHOTO", "image URL \"" + origUrlString + "\" appears not to be valid, skipping import.");
-                    return NULL_RESULT;
+                    return LoadedImage.getNullResult();
                 }
             } catch (UnknownHostException e) {
                 addConversionWarning(warnings, e, "PHOTO", "image URL \"" + origUrlString + "\" appears not to be valid, skipping import.");
-                return NULL_RESULT;
+                return LoadedImage.getNullResult();
             }
         }
         /*
@@ -468,37 +471,48 @@ public class PhotoMapping extends AbstractMapping {
          */
         ThresholdFileHolder fileHolder = null;
         String mimeType = null;
-        InputStream inputStream = null;
-        try {
-            URLConnection urlConnnection = url.openConnection();
-            urlConnnection.setConnectTimeout(2500);
-            urlConnnection.setReadTimeout(2500);
-            urlConnnection.connect();
+        {
+            boolean error = true;
+            InputStream inputStream = null;
+            try {
+                URLConnection urlConnnection = url.openConnection();
+                urlConnnection.setConnectTimeout(2500);
+                urlConnnection.setReadTimeout(2500);
+                if (urlConnnection instanceof HttpURLConnection) {
+                    HttpURLConnection httpURLConnection = (HttpURLConnection) urlConnnection;
+                    // Deny to automatically follow redirects for this HttpURLConnection instance
+                    httpURLConnection.setInstanceFollowRedirects(false);
+                    httpURLConnection.connect();
 
-            // Follow & check redirects recursively
-            if (urlConnnection instanceof HttpURLConnection) {
-                HttpURLConnection httpURLConnection = (HttpURLConnection) urlConnnection;
-                int responseCode = httpURLConnection.getResponseCode();
-                if (responseCode == HttpURLConnection.HTTP_MOVED_PERM || responseCode == HttpURLConnection.HTTP_MOVED_TEMP) {
-                    String redirectUrl = urlConnnection.getHeaderField("Location");
-                    httpURLConnection.disconnect();
-                    return new LoadedImage(redirectUrl);
+                    // Check for redirect
+                    int responseCode = httpURLConnection.getResponseCode();
+                    if (REDIRECT_RESPONSE_CODES.contains(I(responseCode))) {
+                        String redirectUrl = urlConnnection.getHeaderField("Location");
+                        httpURLConnection.disconnect();
+                        return LoadedImage.getRedirectResult(redirectUrl);
+                    }
+                    if (responseCode >= 400) {
+                        addConversionWarning(warnings, "PHOTO", "image URL \"" + origUrlString + "\" appears not to be valid, skipping import.");
+                        return LoadedImage.getNullResult();
+                    }
+                } else {
+                    urlConnnection.connect();
                 }
-                if (responseCode >= 400) {
-                    addConversionWarning(warnings, "PHOTO", "image URL \"" + origUrlString + "\" appears not to be valid, skipping import.");
-                    return NULL_RESULT;
+
+                mimeType = urlConnnection.getContentType();
+                inputStream = urlConnnection.getInputStream();
+                fileHolder = new ThresholdFileHolder();
+                fileHolder.write(inputStream);
+                error = false;
+            } catch (SocketTimeoutException e) {
+                addConversionWarning(warnings, e, "PHOTO", e.getMessage());
+                return LoadedImage.getNullResult();
+            } finally {
+                Streams.close(inputStream);
+                if (error) {
+                    Streams.close(fileHolder);
                 }
             }
-
-            mimeType = urlConnnection.getContentType();
-            inputStream = urlConnnection.getInputStream();
-            fileHolder = new ThresholdFileHolder();
-            fileHolder.write(inputStream);
-        } catch (SocketTimeoutException e) {
-            addConversionWarning(warnings, e, "PHOTO", e.getMessage());
-            return NULL_RESULT;
-        } finally {
-            Streams.close(inputStream);
         }
         /*
          * check image validity
@@ -506,7 +520,7 @@ public class PhotoMapping extends AbstractMapping {
         if (false == isValidImage(fileHolder)) {
             addConversionWarning(warnings, "PHOTO", "image downloaded from \"" + origUrlString + "\" appears not to be valid, skipping import.");
             Streams.close(fileHolder);
-            return NULL_RESULT;
+            return LoadedImage.getNullResult();
         }
         /*
          * additional fallbacks to determine the mime type
@@ -518,7 +532,7 @@ public class PhotoMapping extends AbstractMapping {
             }
         }
         fileHolder.setContentType(mimeType);
-        return new LoadedImage(fileHolder);
+        return LoadedImage.getFileHolderResult(fileHolder);
     }
 
     private static boolean isValidImage(ThresholdFileHolder fileHolder) throws IOException, OXException {
@@ -556,22 +570,38 @@ public class PhotoMapping extends AbstractMapping {
 
     private static final class LoadedImage {
 
+        private static final LoadedImage NULL_RESULT = new LoadedImage();
+
+        static LoadedImage getNullResult() {
+            return NULL_RESULT;
+        }
+
+        static LoadedImage getRedirectResult(String redirectUrl) {
+            return Strings.isEmpty(redirectUrl) ? NULL_RESULT : new LoadedImage(redirectUrl);
+        }
+
+        static LoadedImage getFileHolderResult(ThresholdFileHolder fileHolder) {
+            return null == fileHolder ? NULL_RESULT : new LoadedImage(fileHolder);
+        }
+
+        // ----------------------------------------------------------------------
+
         final ThresholdFileHolder fileHolder;
         final String redirectUrl;
 
-        LoadedImage() {
+        private LoadedImage() {
             super();
             this.fileHolder = null;
             this.redirectUrl = null;
         }
 
-        LoadedImage(ThresholdFileHolder fileHolder) {
+        private LoadedImage(ThresholdFileHolder fileHolder) {
             super();
             this.fileHolder = fileHolder;
             this.redirectUrl = null;
         }
 
-        LoadedImage(String redirectUrl) {
+        private LoadedImage(String redirectUrl) {
             super();
             this.fileHolder = null;
             this.redirectUrl = redirectUrl;
