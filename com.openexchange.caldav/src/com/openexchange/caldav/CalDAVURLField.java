@@ -152,7 +152,7 @@ public class CalDAVURLField implements AdditionalFolderField {
                 if (false == session.getUserConfiguration().hasTask() || false == session.getUserConfiguration().hasPermission(Permission.CALDAV)) {
                     return null;
                 }
-                return String.valueOf(folder.getObjectID());
+                return Tools.encodeFolderId(String.valueOf(folder.getObjectID()));
             default:
                 return null;
         }

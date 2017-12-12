@@ -346,12 +346,17 @@ public class CalDAVRootCollection extends DAVRootCollection {
             }
         } catch (IllegalArgumentException e) {
             LOG.debug("Error decoding child resource name {}, assuming legacy name.", resourceName, e);
-
         }
         /*
          * try constructed composite identifier as fallback
          */
         if ((Tools.DEFAULT_ACCOUNT_PREFIX + resourceName).equals(folder.getID())) {
+            return true;
+        }
+        /*
+         * try relative folder identifier as fallback
+         */
+        if (resourceName.equals(folder.getID())) {
             return true;
         }
         /*
