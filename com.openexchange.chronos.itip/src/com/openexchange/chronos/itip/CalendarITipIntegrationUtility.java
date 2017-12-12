@@ -156,6 +156,9 @@ public class CalendarITipIntegrationUtility implements ITipIntegrationUtility {
         }
 
         Event loadEvent = getStorage(calendarSession).getEventStorage().loadEvent(eventId, null);
+        if (loadEvent == null) {
+            return null;
+        }
         loadEvent = getStorage(calendarSession).getUtilities().loadAdditionalEventData(session.getUserId(), loadEvent, null);
         return CalendarUtils.getFolderView(loadEvent, session.getUserId());
     }

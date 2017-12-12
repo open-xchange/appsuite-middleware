@@ -380,6 +380,7 @@ public class NotificationMailGenerator implements ITipMailGenerator {
         Attendee attendee = new Attendee();
         attendee.setEntity((onBehalfOf != null ? onBehalfOf : actor).getIdentifier());
         attendee.setPartStat(confirmStatus);
+        attendee.setUri(CalendarUtils.getURI(mail.getSender().getEmail()));
         reply.setAttendees(Arrays.asList(attendee));
         if (CalendarUtils.isSeriesException(reply)) {
             message.addException(reply);
