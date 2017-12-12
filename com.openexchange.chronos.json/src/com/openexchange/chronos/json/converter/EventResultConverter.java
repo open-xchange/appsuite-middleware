@@ -120,6 +120,9 @@ public class EventResultConverter implements ResultConverter {
     }
 
     private JSONObject convertEvent(Event event, String timeZoneID, ServerSession session) throws OXException {
+        if (null == event) {
+            return null;
+        }
         try {
             return EventMapper.getInstance().serialize(event, EventMapper.getInstance().getAssignedFields(event), timeZoneID, session);
         } catch (JSONException e) {
