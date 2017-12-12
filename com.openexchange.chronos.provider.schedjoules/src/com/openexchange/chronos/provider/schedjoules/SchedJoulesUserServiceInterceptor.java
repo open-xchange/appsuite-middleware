@@ -75,6 +75,9 @@ import com.openexchange.user.AbstractUserServiceInterceptor;
 public class SchedJoulesUserServiceInterceptor extends AbstractUserServiceInterceptor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SchedJoulesUserServiceInterceptor.class);
+    
+    // Disabled for now
+    private static final boolean ENABLED = false;
 
     /**
      * The URL parameter name that defines the language of the SchedJoules calendar
@@ -101,6 +104,9 @@ public class SchedJoulesUserServiceInterceptor extends AbstractUserServiceInterc
     @Override
     public void afterUpdate(Context context, User user, Contact contactData, Map<String, Object> properties) throws OXException {
         if (null == user || null == user.getLocale()) {
+            return;
+        }
+        if (!ENABLED) {
             return;
         }
         String language = user.getLocale().getLanguage();
