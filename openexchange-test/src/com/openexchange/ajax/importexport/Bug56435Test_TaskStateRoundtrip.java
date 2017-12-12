@@ -90,7 +90,7 @@ public class Bug56435Test_TaskStateRoundtrip extends ManagedTaskTest {
         ICalExportResponse response = getClient().execute(new ICalExportRequest(folderID));
         String iCal = response.getICal();
         assertTrue(iCal.contains(title));
-        assertTrue(iCal.contains("X-OX-STATUS:WAITING"));
+        assertTrue(iCal.contains("STATUS;X-OX-WAITING=WAITING:CANCELLED"));
 
         Task[] tasks = ttm.getAllTasksOnServer(folderID);
         assertEquals(1, tasks.length);
