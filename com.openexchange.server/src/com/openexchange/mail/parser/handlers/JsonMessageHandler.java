@@ -565,7 +565,9 @@ public final class JsonMessageHandler implements MailMessageHandler {
                         JSONObject mailAuthMechResultJson = new JSONObject();
                         mailAuthMechResultJson.put("result", mechResult.getResult().getTechnicalName());
                         mailAuthMechResultJson.put("reason", mechResult.getReason());
-                        mailAuthMechResultJson.put("from_domain", mechResult.getDomain());
+                        for (String k : mechResult.getProperties().keySet()) {
+                            mailAuthMechResultJson.put(k, mechResult.getProperties().get(k));
+                        }
                         result.put(mechResult.getMechanism().getTechnicalName(), mailAuthMechResultJson);
                     } else if (o instanceof Map) {
                         unconsideredResults.put(JSONCoercion.coerceToJSON(o));

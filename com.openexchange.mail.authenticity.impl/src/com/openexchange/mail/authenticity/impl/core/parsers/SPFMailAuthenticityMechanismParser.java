@@ -91,7 +91,8 @@ public class SPFMailAuthenticityMechanismParser extends AbstractMailAuthenticity
         SPFAuthMechResult result = new SPFAuthMechResult(domain, (SPFResult) mechResult);
         result.setReason(extractComment(mechanismName));
         result.setDomainMatch(!domainMismatch);
-        addProperties(attributes, result);
+        result.addProperty("mail_from", result.getDomain());
+        //addProperties(attributes, result);
         return result;
     }
 }
