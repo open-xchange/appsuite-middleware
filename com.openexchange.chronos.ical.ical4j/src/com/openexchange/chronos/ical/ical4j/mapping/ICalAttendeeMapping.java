@@ -158,7 +158,9 @@ public abstract class ICalAttendeeMapping<T extends CalendarComponent, U> extend
     }
 
     private static net.fortuna.ical4j.model.property.Attendee exportAttendee(Attendee attendee, net.fortuna.ical4j.model.property.Attendee property) throws URISyntaxException {
-        property.setValue(attendee.getUri());
+        if (Strings.isNotEmpty(attendee.getUri())) {
+            property.setValue(attendee.getUri());
+        }
         if (Strings.isNotEmpty(attendee.getCn())) {
             property.getParameters().replace(new Cn(attendee.getCn()));
         } else {
