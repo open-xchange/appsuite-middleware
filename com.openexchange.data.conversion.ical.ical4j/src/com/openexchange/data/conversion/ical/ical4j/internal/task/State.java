@@ -69,6 +69,14 @@ import net.fortuna.ical4j.model.property.Status;
  */
 public final class State extends AbstractVerifyingAttributeConverter<VToDo, Task> {
 
+	private final static String OX_STATUS = "X-OX-STATUS";
+	private final static String OX_STATUS_VALUE = "WAITING";
+
+	private final static String STATUS_NEEDS_ACTION = "NEEDS-ACTION";
+	private final static String STATUS_IN_PROCESS = "IN-PROCESS";
+	private final static String STATUS_COMPLETED = "COMPLETED";
+	private final static String STATUS_CANCELLED = "CANCELLED";
+
     public State() {
         super();
     }
@@ -116,8 +124,8 @@ public final class State extends AbstractVerifyingAttributeConverter<VToDo, Task
             break;
         case Task.WAITING:
         	ParameterList parameterList = new ParameterList(false);
-        	parameterList.add(new XParameter("X-OX-WAITING", "WAITING"));
-        	retval = new Status(parameterList, "CANCELLED");
+        	parameterList.add(new XParameter(OX_STATUS, OX_STATUS_VALUE));
+        	retval = new Status(parameterList, STATUS_CANCELLED);
             break;
         case Task.DEFERRED:
             retval = Status.VTODO_CANCELLED;
@@ -130,20 +138,27 @@ public final class State extends AbstractVerifyingAttributeConverter<VToDo, Task
 
     public static int toTask(final int index, final Status status) throws ConversionWarning {
         int retval;
-        Parameter parameter = status.getParameter("X-OX-WAITING");
-        if (Status.VTODO_NEEDS_ACTION.equals(status)) {
+        Parameter parameter = status.getParameter(OX_STATUS);
+        switch (status.getValue()) {
+		case STATUS_NEEDS_ACTION:
             retval = Task.NOT_STARTED;
-        } else if (Status.VTODO_IN_PROCESS.equals(status)) {
+			break;
+		case STATUS_IN_PROCESS:
             retval = Task.IN_PROGRESS;
-        } else if (Status.VTODO_COMPLETED.equals(status)) {
-            retval = Task.DONE;
-        } else if (Status.VTODO_CANCELLED.equals(status)) {
-            retval = Task.DEFERRED;
-        } else if (null != parameter && parameter.getValue().equals("WAITING")) {
-			retval = Task.WAITING;
-		} else {
-            throw new ConversionWarning(index, ConversionWarning.Code.INVALID_STATUS, status.getValue());
-        }
+			break;
+		case STATUS_COMPLETED:
+			retval = Task.DONE;
+			break;
+		case STATUS_CANCELLED:
+			if (null != parameter && parameter.getValue().equals(OX_STATUS_VALUE)) {
+				retval = Task.WAITING;
+				break;
+			}
+			retval = Task.DEFERRED;
+			break;
+		default:
+			throw new ConversionWarning(index, ConversionWarning.Code.INVALID_STATUS, status.getValue());
+		}
         return retval;
     }
 }
