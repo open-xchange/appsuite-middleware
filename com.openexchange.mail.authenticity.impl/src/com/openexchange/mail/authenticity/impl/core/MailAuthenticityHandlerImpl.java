@@ -441,7 +441,6 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
         }
 
         return unknownResults;
-
     }
 
     /**

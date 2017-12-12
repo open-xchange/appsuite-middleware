@@ -137,12 +137,18 @@ final class StringUtil {
         String key = null;
         boolean valueMode = false;
         boolean backtracking = false;
+        boolean comment = false;
         int backtrackIndex = 0;
         for (int index = 0; index < element.length();) {
             char c = element.charAt(index);
             switch (c) {
                 case '=':
                     if (valueMode) {
+                        if (comment) {
+                            valueBuffer.append(c);
+                            index++;
+                            break;
+                        }
                         // A key found while in value mode, so we backtrack
                         backtracking = true;
                         valueMode = false;
@@ -152,6 +158,20 @@ final class StringUtil {
                         key = keyBuffer.toString();
                         keyBuffer.setLength(0);
                         valueMode = true;
+                        index++;
+                    }
+                    break;
+                case '(':
+                    if (valueMode) {
+                        comment = true;
+                        valueBuffer.append(c);
+                        index++;
+                    }
+                    break;
+                case ')':
+                    if (valueMode) {
+                        comment = false;
+                        valueBuffer.append(c);
                         index++;
                     }
                     break;
