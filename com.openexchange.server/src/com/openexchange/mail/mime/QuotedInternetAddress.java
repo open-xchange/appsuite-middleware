@@ -215,9 +215,9 @@ public final class QuotedInternetAddress extends InternetAddress {
 
     private static InternetAddress[] parse0(String addresslist, boolean strict) throws AddressException {
         try {
-            return parse(addresslist, strict, false, true);
-        } catch (AddressException e) {
             return parse(addresslist, strict, false, false);
+        } catch (AddressException e) {
+            return parse(addresslist, strict, false, true);
         }
     }
 

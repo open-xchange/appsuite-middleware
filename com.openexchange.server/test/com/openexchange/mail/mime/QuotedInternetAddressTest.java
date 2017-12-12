@@ -70,6 +70,24 @@ public class QuotedInternetAddressTest {
     }
 
     @Test
+    public void testBug56322() throws Exception {
+        InternetAddress addr = new QuotedInternetAddress("=?utf-8?B?KExlcyBHZW50bGVtZW4gZHUgRMOpbcOpbmFnZW1lbnQp?= <enquete@les-gd.com>");
+        assertEquals("Unexpected personal", "(Les Gentlemen du D\u00e9m\u00e9nagement)", addr.getPersonal());
+        assertEquals("Unexpected address", "enquete@les-gd.com", addr.getAddress());
+
+        addr = new QuotedInternetAddress("\"=?utf-8?B?KExlcyBHZW50bGVtZW4gZHUgRMOpbcOpbmFnZW1lbnQp?=\" <enquete@les-gd.com>");
+        assertEquals("Unexpected personal", "(Les Gentlemen du D\u00e9m\u00e9nagement)", addr.getPersonal());
+        assertEquals("Unexpected address", "enquete@les-gd.com", addr.getAddress());
+
+        InternetAddress[] addresses = QuotedInternetAddress.parse("\"=?utf-8?B?KExlcyBHZW50bGVtZW4gZHUgRMOpbcOpbmFnZW1lbnQp?=\" <enquete@les-gd.com>", false);
+        assertNotNull(addresses);
+        assertTrue("Unexpected number of addresses", addresses.length == 1);
+        addr = addresses[0];
+        assertEquals("Unexpected personal", "(Les Gentlemen du D\u00e9m\u00e9nagement)", addr.getPersonal());
+        assertEquals("Unexpected address", "enquete@les-gd.com", addr.getAddress());
+    }
+
+    @Test
     public void testBug56407() throws Exception {
         ensureNoWhitespaceOrControl("=?utf-8?b?dGVzdCIgPHBvdHVzQHdoaXRlaG91c2UuZ292Pg==?==?utf-8?Q?=00=0A?=\" <demo@mailsploit.com>");
         ensureNoWhitespaceOrControl("\"=?utf-8?b?cG90dXNAd2hpdGVob3VzZS5nb3Y=?=\" <demo@mailsploit.com>");
