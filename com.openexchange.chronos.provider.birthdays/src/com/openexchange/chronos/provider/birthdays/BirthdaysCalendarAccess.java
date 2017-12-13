@@ -75,7 +75,6 @@ import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.DefaultCalendarResult;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.CalendarAccount;
-import com.openexchange.chronos.provider.account.CalendarAccountService;
 import com.openexchange.chronos.provider.basic.BasicCalendarAccess;
 import com.openexchange.chronos.provider.basic.CalendarSettings;
 import com.openexchange.chronos.provider.basic.DefaultCalendarSettings;
@@ -177,10 +176,6 @@ public class BirthdaysCalendarAccess implements BasicCalendarAccess, SubscribeAw
      */
     public void onAccountDeleted() throws OXException {
         getAlarmHelper().deleteAllAlarms();
-    }
-
-    protected CalendarAccountService getAccountService() throws OXException {
-        return services.getService(CalendarAccountService.class);
     }
 
     @Override
