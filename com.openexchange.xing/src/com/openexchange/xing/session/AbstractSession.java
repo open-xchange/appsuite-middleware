@@ -51,7 +51,6 @@
 package com.openexchange.xing.session;
 
 import java.util.Locale;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import oauth.signpost.commonshttp.CommonsHttpOAuthConsumer;
 import oauth.signpost.exception.OAuthCommunicationException;
@@ -67,29 +66,16 @@ import org.apache.http.ParseException;
 import org.apache.http.ProtocolVersion;
 import org.apache.http.TokenIterator;
 import org.apache.http.client.HttpClient;
-import org.apache.http.client.config.RequestConfig;
-import org.apache.http.client.config.RequestConfig.Builder;
 import org.apache.http.client.methods.HttpRequestBase;
-import org.apache.http.config.Registry;
-import org.apache.http.config.RegistryBuilder;
 import org.apache.http.conn.ConnectionKeepAliveStrategy;
-import org.apache.http.conn.ConnectionRequest;
-import org.apache.http.conn.routing.HttpRoute;
-import org.apache.http.conn.socket.ConnectionSocketFactory;
-import org.apache.http.conn.socket.PlainConnectionSocketFactory;
-import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.impl.DefaultConnectionReuseStrategy;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.message.BasicHeaderElementIterator;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.protocol.HttpContext;
 import com.openexchange.rest.client.httpclient.HttpClients;
 import com.openexchange.rest.client.httpclient.HttpClients.ClientConfig;
-import com.openexchange.timer.ScheduledTimerTask;
-import com.openexchange.timer.TimerService;
 import com.openexchange.xing.XingAPI;
 import com.openexchange.xing.exception.XingException;
-import com.openexchange.xing.util.Services;
 
 /**
  * Keeps track of a logged in user and contains configuration options for the
@@ -104,9 +90,6 @@ public abstract class AbstractSession implements Session {
 
     /** How long connections are kept alive. */
     private static final int KEEP_ALIVE_DURATION_SECS = 20;
-
-    /** How often the monitoring thread checks for connections to close. */
-    private static final int KEEP_ALIVE_MONITOR_INTERVAL_SECS = 5;
 
     /** The default timeout for client connections. */
     private static final int DEFAULT_TIMEOUT_MILLIS = 30000; // 30 seconds
@@ -273,20 +256,8 @@ public abstract class AbstractSession implements Session {
                 if (client == null) {
 
                     ClientConfig config = ClientConfig.newInstance();
-
                     config.setMaxConnectionsPerRoute(10);
                     config.setMaxTotalConnections(20);
-
-                    // Set up default connection params. There are two routes to
-                    // XING - api server and content server.
-                    // Set up scheme registry.
-                    ConnectionSocketFactory plain = PlainConnectionSocketFactory.getSocketFactory();
-                    ConnectionSocketFactory ssl = SSLConnectionSocketFactory.getSocketFactory();
-                    RegistryBuilder<ConnectionSocketFactory> registryBuilder = RegistryBuilder.<ConnectionSocketFactory>create();
-                    registryBuilder.register("http", plain);
-                    registryBuilder.register("https", ssl);
-
-                    final XingClientConnManager cm = new XingClientConnManager(registryBuilder.build());
 
                     // Set up client params.
                     config.setConnectionTimeout(DEFAULT_TIMEOUT_MILLIS);
@@ -298,7 +269,7 @@ public abstract class AbstractSession implements Session {
                     config.setConnectionReuseStrategy(new XingConnectionReuseStrategy());
 
                     config.setContentCompressionDisabled(true);
-                    client = HttpClients.getHttpClient(config, cm);
+                    client = HttpClients.getHttpClient(config);
                     this.client.set(client);
                 }
             }
@@ -313,9 +284,7 @@ public abstract class AbstractSession implements Session {
      */
     @Override
     public void setRequestTimeout(final HttpRequestBase request) {
-        Builder requestConfigBuilder = RequestConfig.custom();
-        requestConfigBuilder.setConnectionRequestTimeout(DEFAULT_TIMEOUT_MILLIS).setSocketTimeout(DEFAULT_TIMEOUT_MILLIS);
-        request.setConfig(requestConfigBuilder.build());
+        HttpClients.setRequestTimeout(DEFAULT_TIMEOUT_MILLIS, request);
     }
 
     @Override
@@ -475,67 +444,5 @@ public abstract class AbstractSession implements Session {
             return !ver.lessEquals(HttpVersion.HTTP_1_0);
         }
     } // End of DBConnectionReuseStrategy class
-
-    private static class XingClientConnManager extends PoolingHttpClientConnectionManager {
-        public XingClientConnManager(Registry<ConnectionSocketFactory> registry) {
-            super(registry);
-        }
-
-        @Override
-        public ConnectionRequest requestConnection(final HttpRoute route, final Object state) {
-            IdleConnectionCloser.ensureRunning(this, KEEP_ALIVE_DURATION_SECS, KEEP_ALIVE_MONITOR_INTERVAL_SECS);
-            return super.requestConnection(route, state);
-        }
-    } // End of DBClientConnManager class
-
-    private static class IdleConnectionCloser implements Runnable {
-        private final XingClientConnManager manager;
-        private final int idleTimeoutSeconds;
-        private volatile static ScheduledTimerTask timerTask;
-
-        public IdleConnectionCloser(final XingClientConnManager manager, final int idleTimeoutSeconds) {
-            super();
-            this.manager = manager;
-            this.idleTimeoutSeconds = idleTimeoutSeconds;
-        }
-
-        public static void ensureRunning(final XingClientConnManager manager, final int idleTimeoutSeconds,final int checkIntervalSeconds) {
-            ScheduledTimerTask tmp = timerTask;
-            if (null == tmp) {
-                synchronized (IdleConnectionCloser.class) {
-                    tmp = timerTask;
-                    if (null == tmp) {
-                        final IdleConnectionCloser task = new IdleConnectionCloser(manager, idleTimeoutSeconds);
-                        tmp = Services.getService(TimerService.class).scheduleWithFixedDelay(task, checkIntervalSeconds, checkIntervalSeconds, TimeUnit.SECONDS);
-                        timerTask = tmp;
-                    }
-                }
-            }
-        }
-
-        private static void stop() {
-            ScheduledTimerTask tmp = timerTask;
-            if (null != tmp) {
-                synchronized (IdleConnectionCloser.class) {
-                    tmp = timerTask;
-                    if (null != tmp) {
-                        tmp.cancel();
-                        Services.getService(TimerService.class).purge();
-                        timerTask = null;
-                    }
-                }
-            }
-        }
-
-        @Override
-        public void run() {
-            try {
-                manager.closeExpiredConnections();
-                manager.closeIdleConnections(idleTimeoutSeconds, TimeUnit.SECONDS);
-            } catch (final Exception e) {
-                stop();
-            }
-        }
-    } // End of IdleConnectionCloserThread class
 
 }

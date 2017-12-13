@@ -53,7 +53,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetAddress;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.UnknownHostException;
 import java.util.concurrent.TimeUnit;
 import java.util.zip.GZIPInputStream;
@@ -186,28 +185,6 @@ public final class HttpClients {
         }
 
         return WrappedClientsRegistry.getInstance().createWrapped(config);
-    }
-
-    /**
-     * Creates a {@link CloseableHttpClient} instance.
-     *
-     * @param config The configuration settings for the client
-     * @param ccm The {@link ClientConnectionManager} to use
-     * @return A newly created {@link CloseableHttpClient} instance
-     */
-    public static CloseableHttpClient getHttpClient(final ClientConfig config, HttpClientConnectionManager ccm) {
-        if (ccm == null) {
-            SSLSocketFactoryProvider factoryProvider = RestClientServices.getOptionalService(SSLSocketFactoryProvider.class);
-            if (null != factoryProvider) {
-                SSLConfigurationService sslConfig = RestClientServices.getOptionalService(SSLConfigurationService.class);
-                if (null != sslConfig) {
-                    return getHttpClient(config, factoryProvider, sslConfig);
-                }
-            }
-            return WrappedClientsRegistry.getInstance().createWrapped(config);
-        } else {
-            return initializeHttpClientUsing(config, ccm);
-        }
     }
 
     /**
