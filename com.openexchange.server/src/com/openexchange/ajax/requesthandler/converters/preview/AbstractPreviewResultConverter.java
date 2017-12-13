@@ -232,89 +232,96 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
             // Obtain preview document
             final PreviewDocument previewDocument;
             {
-                InputStream stream = fileHolder.getStream();
                 final Reference<InputStream> ref = new Reference<>();
-                if (streamIsEof(stream, null)) {
+                InputStream stream = fileHolder.getStream();
+                if (streamIsEof(stream, ref)) {
                     Streams.close(stream, fileHolder);
                     throw AjaxExceptionCodes.UNEXPECTED_ERROR.create("File holder has not content, hence no preview can be generated.");
                 }
+
+                // Grab non-empty stream
                 stream = ref.getValue();
+                try {
+                    final PreviewService previewService = ServerServiceRegistry.getInstance().getService(PreviewService.class);
 
-                final PreviewService previewService = ServerServiceRegistry.getInstance().getService(PreviewService.class);
+                    final DataProperties dataProperties = new DataProperties(4);
+                    dataProperties.put(DataProperties.PROPERTY_CONTENT_TYPE, getContentType(fileHolder, previewService instanceof ContentTypeChecker ? (ContentTypeChecker) previewService : null));
+                    dataProperties.put(DataProperties.PROPERTY_DISPOSITION, fileHolder.getDisposition());
+                    dataProperties.put(DataProperties.PROPERTY_NAME, fileHolder.getName());
+                    dataProperties.put(DataProperties.PROPERTY_SIZE, Long.toString(fileHolder.getLength()));
 
-                final DataProperties dataProperties = new DataProperties(4);
-                dataProperties.put(DataProperties.PROPERTY_CONTENT_TYPE, getContentType(fileHolder, previewService instanceof ContentTypeChecker ? (ContentTypeChecker) previewService : null));
-                dataProperties.put(DataProperties.PROPERTY_DISPOSITION, fileHolder.getDisposition());
-                dataProperties.put(DataProperties.PROPERTY_NAME, fileHolder.getName());
-                dataProperties.put(DataProperties.PROPERTY_SIZE, Long.toString(fileHolder.getLength()));
-
-                int pages = -1;
-                if (requestData.containsParameter("pages")) {
-                    pages = requestData.getIntParameter("pages");
-                }
-                previewDocument = previewService.getPreviewFor(new SimpleData<>(stream, dataProperties), getOutput(), session, pages);
-                // Put to cache
-                if (null != resourceCache && isValidEtag && AJAXRequestDataTools.parseBoolParameter("cache", requestData, true)) {
-                    final List<String> content = previewDocument.getContent();
-                    if (null != content) {
-                        final int size = content.size();
-                        if (size > 0) {
-                            final String cacheKey = ResourceCaches.generatePreviewCacheKey(eTag, requestData, previewLanguage);
-                            final byte[] bytes;
-                            if (1 == content.size()) {
-                                bytes = toAsciiBytes(toAsciiString(Base64.encodeBase64(content.get(0).getBytes(UTF8))));
-                            } else {
-                                final ByteArrayOutputStream baos = Streams.newByteArrayOutputStream(8192 << 1);
-                                baos.write(toAsciiBytes(toAsciiString(Base64.encodeBase64(content.get(0).getBytes(UTF8)))));
-                                final byte[] delim = DELIM;
-                                for (int i = 1; i < size; i++) {
-                                    baos.write(delim);
-                                    baos.write(toAsciiBytes(toAsciiString(Base64.encodeBase64(content.get(i).getBytes(UTF8)))));
+                    int pages = -1;
+                    if (requestData.containsParameter("pages")) {
+                        pages = requestData.getIntParameter("pages");
+                    }
+                    previewDocument = previewService.getPreviewFor(new SimpleData<>(stream, dataProperties), getOutput(), session, pages);
+                    Streams.close(stream);
+                    stream = null;
+                    // Put to cache
+                    if (null != resourceCache && isValidEtag && AJAXRequestDataTools.parseBoolParameter("cache", requestData, true)) {
+                        final List<String> content = previewDocument.getContent();
+                        if (null != content) {
+                            final int size = content.size();
+                            if (size > 0) {
+                                final String cacheKey = ResourceCaches.generatePreviewCacheKey(eTag, requestData, previewLanguage);
+                                final byte[] bytes;
+                                if (1 == content.size()) {
+                                    bytes = toAsciiBytes(toAsciiString(Base64.encodeBase64(content.get(0).getBytes(UTF8))));
+                                } else {
+                                    final ByteArrayOutputStream baos = Streams.newByteArrayOutputStream(8192 << 1);
+                                    baos.write(toAsciiBytes(toAsciiString(Base64.encodeBase64(content.get(0).getBytes(UTF8)))));
+                                    final byte[] delim = DELIM;
+                                    for (int i = 1; i < size; i++) {
+                                        baos.write(delim);
+                                        baos.write(toAsciiBytes(toAsciiString(Base64.encodeBase64(content.get(i).getBytes(UTF8)))));
+                                    }
+                                    bytes = baos.toByteArray();
                                 }
-                                bytes = baos.toByteArray();
-                            }
-                            final String fileName = fileHolder.getName();
-                            final String fileType = fileHolder.getContentType();
-                            // Specify task
-                            final Task<Void> task = new AbstractTask<Void>() {
-                                @Override
-                                public Void call() {
+                                final String fileName = fileHolder.getName();
+                                final String fileType = fileHolder.getContentType();
+                                // Specify task
+                                final Task<Void> task = new AbstractTask<Void>() {
+                                    @Override
+                                    public Void call() {
+                                        try {
+                                            final CachedResource preview = new CachedResource(bytes, fileName, fileType, bytes.length);
+                                            resourceCache.save(cacheKey, preview, 0, session.getContextId());
+                                        } catch (OXException e) {
+                                            LOGGER.warn("Could not cache preview.", e);
+                                        }
+
+                                        return null;
+                                    }
+                                };
+                                // Acquire thread pool service
+                                final ThreadPoolService threadPool = ServerServiceRegistry.getInstance().getService(ThreadPoolService.class);
+                                if (null == threadPool) {
+                                    final Thread thread = Thread.currentThread();
+                                    boolean ran = false;
+                                    task.beforeExecute(thread);
                                     try {
-                                        final CachedResource preview = new CachedResource(bytes, fileName, fileType, bytes.length);
-                                        resourceCache.save(cacheKey, preview, 0, session.getContextId());
-                                    } catch (OXException e) {
-                                        LOGGER.warn("Could not cache preview.", e);
+                                        task.call();
+                                        ran = true;
+                                        task.afterExecute(null);
+                                    } catch (final Exception ex) {
+                                        if (!ran) {
+                                            task.afterExecute(ex);
+                                        }
+                                        // Else the exception occurred within
+                                        // afterExecute itself in which case we don't
+                                        // want to call it again.
+                                        throw (ex instanceof OXException ? (OXException) ex : AjaxExceptionCodes.UNEXPECTED_ERROR.create(
+                                            ex,
+                                            ex.getMessage()));
                                     }
-
-                                    return null;
+                                } else {
+                                    threadPool.submit(task);
                                 }
-                            };
-                            // Acquire thread pool service
-                            final ThreadPoolService threadPool = ServerServiceRegistry.getInstance().getService(ThreadPoolService.class);
-                            if (null == threadPool) {
-                                final Thread thread = Thread.currentThread();
-                                boolean ran = false;
-                                task.beforeExecute(thread);
-                                try {
-                                    task.call();
-                                    ran = true;
-                                    task.afterExecute(null);
-                                } catch (final Exception ex) {
-                                    if (!ran) {
-                                        task.afterExecute(ex);
-                                    }
-                                    // Else the exception occurred within
-                                    // afterExecute itself in which case we don't
-                                    // want to call it again.
-                                    throw (ex instanceof OXException ? (OXException) ex : AjaxExceptionCodes.UNEXPECTED_ERROR.create(
-                                        ex,
-                                        ex.getMessage()));
-                                }
-                            } else {
-                                threadPool.submit(task);
                             }
                         }
                     }
+                } finally {
+                    Streams.close(stream);
                 }
             }
             if (requestData.getIntParameter("save") == 1) {
@@ -752,33 +759,40 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
             dataProperties.put("PreviewLanguage", getUserLanguage(session));
 
             // Generate preview
-            Data<InputStream> data = new SimpleData<>(fileHolder.getStream(), dataProperties);
-            PreviewDocument previewDocument = candidate.getCachedPreviewFor(data, output, session, 1);
-            if (null != previewDocument) {
-                byte[] thumbnailBuffer = null;
+            InputStream stream = fileHolder.getStream();
+            try {
+                Data<InputStream> data = new SimpleData<>(stream, dataProperties);
+                PreviewDocument previewDocument = candidate.getCachedPreviewFor(data, output, session, 1);
+                Streams.close(stream);
+                stream = null;
+                if (null != previewDocument) {
+                    byte[] thumbnailBuffer = null;
 
-                // we like to have the result as a byte buffer
-                if (previewDocument instanceof RemoteInternalPreviewDocument) {
-                    thumbnailBuffer = ((RemoteInternalPreviewDocument) previewDocument).getThumbnailBuffer();
-                } else {
-                    InputStream thumbnailStm = previewDocument.getThumbnail();
-                    if (null != thumbnailStm) {
-                        try {
-                            thumbnailBuffer = IOUtils.toByteArray(thumbnailStm);
-                        } catch (IOException e) {
-                            throw PreviewExceptionCodes.ERROR.create(e, e.getMessage());
-                        } finally {
-                            Streams.close(thumbnailStm);
+                    // we like to have the result as a byte buffer
+                    if (previewDocument instanceof RemoteInternalPreviewDocument) {
+                        thumbnailBuffer = ((RemoteInternalPreviewDocument) previewDocument).getThumbnailBuffer();
+                    } else {
+                        InputStream thumbnailStm = previewDocument.getThumbnail();
+                        if (null != thumbnailStm) {
+                            try {
+                                thumbnailBuffer = IOUtils.toByteArray(thumbnailStm);
+                            } catch (IOException e) {
+                                throw PreviewExceptionCodes.ERROR.create(e, e.getMessage());
+                            } finally {
+                                Streams.close(thumbnailStm);
+                            }
                         }
                     }
-                }
 
-                if (null != thumbnailBuffer) {
-                    Map<String, String> metadata = previewDocument.getMetaData();
-                    String fileName = metadata.get("resourcename");
-                    String contentType = metadata.get("content-type");
-                    return new CachedResource(thumbnailBuffer, fileName, contentType, thumbnailBuffer.length);
+                    if (null != thumbnailBuffer) {
+                        Map<String, String> metadata = previewDocument.getMetaData();
+                        String fileName = metadata.get("resourcename");
+                        String contentType = metadata.get("content-type");
+                        return new CachedResource(thumbnailBuffer, fileName, contentType, thumbnailBuffer.length);
+                    }
                 }
+            } finally {
+                Streams.close(stream);
             }
         } catch (OXException e) {
             LOGGER.debug("Error while trying to look up CachedResource from RemotePreviewService", e);
@@ -846,8 +860,13 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
             dataProperties.put("PreviewLanguage", getUserLanguage(session));
 
             // Generate preview
-            Data<InputStream> data = new SimpleData<>(fileHolder.getStream(), dataProperties);
-            previewService.triggerGetPreviewFor(data, output, session, 1);
+            InputStream stream = fileHolder.getStream();
+            try {
+                Data<InputStream> data = new SimpleData<>(stream, dataProperties);
+                previewService.triggerGetPreviewFor(data, output, session, 1);
+            } finally {
+                Streams.close(stream);
+            }
         } catch (OXException e) {
             LOGGER.debug("Error while triggering RemotePreviewService", e);
         }
