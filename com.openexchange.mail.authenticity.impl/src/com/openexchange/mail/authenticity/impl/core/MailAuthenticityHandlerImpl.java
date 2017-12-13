@@ -356,17 +356,22 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
             }
         }
 
+        // Pick the best results for all mechanisms
         MailAuthenticityMechanismResult bestOfDMARC = pickBestResult(dmarcResults, unconsideredResults);
+        MailAuthenticityMechanismResult bestOfDKIM = pickBestResult(dkimResults, unconsideredResults);
+        MailAuthenticityMechanismResult bestOfSPF = pickBestResult(spfResults, unconsideredResults);
+        
         if (bestOfDMARC != null) {
             // If DMARC passes we set the overall status to PASS
             if (DMARCResult.PASS.equals(bestOfDMARC.getResult()) && bestOfDMARC.isDomainMatch()) {
                 overallResult.setStatus(MailAuthenticityStatus.PASS);
+                return;
             } else if (DMARCResult.FAIL.equals(bestOfDMARC.getResult())) {
                 overallResult.setStatus(MailAuthenticityStatus.FAIL);
+                return;
             }
         }
 
-        MailAuthenticityMechanismResult bestOfDKIM = pickBestResult(dkimResults, unconsideredResults);
         boolean dkimFailed = false;
         if (bestOfDKIM != null) {
             // The DMARC status was NEUTRAL or none existing, check for DKIM
@@ -384,7 +389,6 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
             }
         }
 
-        MailAuthenticityMechanismResult bestOfSPF = pickBestResult(spfResults, unconsideredResults);
         // Continue with SPF
         if (bestOfSPF != null) {
             final SPFResult spfResult = (SPFResult) bestOfSPF.getResult();
@@ -438,6 +442,8 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
         while (iterator.hasNext()) {
             MailAuthenticityMechanismResult result = iterator.next();
             if (result.getResult().getCode() < bestResult.getResult().getCode()) {
+                bestResult = result;
+            } else if (result.getResult().getCode() == bestResult.getResult().getCode() && result.isDomainMatch()) {
                 bestResult = result;
             }
         }
