@@ -180,13 +180,19 @@ public class BasicSchedJoulesCalendarProvider extends BasicCachingCalendarProvid
 
     @Override
     protected JSONObject reconfigureAccountOpt(Session session, CalendarAccount account, CalendarSettings settings, CalendarParameters parameters) throws OXException {
+        JSONObject userConfig = settings.getConfig();
+        long refreshInterval = userConfig.optLong(SchedJoulesFields.REFRESH_INTERVAL, MINIMUM_REFRESH_INTERVAL);
+        if (MINIMUM_REFRESH_INTERVAL > refreshInterval) {
+            throw SchedJoulesProviderExceptionCodes.INVALID_REFRESH_MINIMUM_INTERVAL.create(-1, session.getUserId(), session.getContextId());
+        }
+        int itemId = userConfig.optInt(SchedJoulesFields.ITEM_ID, 0);
+        if (0 == itemId) {
+            throw SchedJoulesProviderExceptionCodes.MISSING_ITEM_ID_FROM_CONFIG.create(-1, session.getUserId(), session.getContextId());
+        }
 
-        //TODO take over further changes like locale or refresh interval
-        //TODO prevent unallowed changes (like itemid, or too low refresh interval)
+        //String locale = userConfig.optString(SchedJoulesFields.LOCALE, ServerSessionAdapter.valueOf(session).getUser().getLocale().getLanguage());
 
-        /*
-         * check & apply changes to extended properties
-         */
+        // Check & apply changes to extended properties
         boolean changed = false;
         JSONObject internalConfig = null != account.getInternalConfiguration() ? new JSONObject(account.getInternalConfiguration()) : new JSONObject();
         Object colorValue = optPropertyValue(settings.getExtendedProperties(), COLOR_LITERAL);

@@ -114,17 +114,20 @@ public class BasicSchedJoulesCalendarAccess extends BasicCachingCalendarAccess {
 
     @Override
     public CalendarSettings getSettings() {
-        DefaultCalendarSettings settings = new DefaultCalendarSettings();
-        settings.setLastModified(account.getLastModified());
-        settings.setConfig(account.getUserConfiguration());
         JSONObject internalConfig = account.getInternalConfiguration();
-        settings.setName(internalConfig.optString("name", "calendar"));
+
         ExtendedProperties extendedProperties = new ExtendedProperties();
         extendedProperties.add(SCHEDULE_TRANSP(TimeTransparency.TRANSPARENT, true));
         extendedProperties.add(DESCRIPTION(internalConfig.optString("description", null)));
         extendedProperties.add(USED_FOR_SYNC(Boolean.FALSE, true));
         extendedProperties.add(COLOR(internalConfig.optString("color", null), false));
+
+        DefaultCalendarSettings settings = new DefaultCalendarSettings();
+        settings.setLastModified(account.getLastModified());
+        settings.setConfig(account.getUserConfiguration());
+        settings.setName(internalConfig.optString("name", "calendar"));
         settings.setExtendedProperties(extendedProperties);
+
         return settings;
     }
 
