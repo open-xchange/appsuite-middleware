@@ -102,7 +102,7 @@ import com.openexchange.session.UserAndContext;
  *
  * <p>The default overall status of the {@link MailAuthenticityResult} is the {@link MailAuthenticityStatus#NEUTRAL}. If there are none of the above mentioned
  * mechnisms in the e-mail's <code>Authentication-Results</code> header, then that status applies. Unknown mechanisms and ptypes are ignored from the evaluation
- * but their raw data is included in the overall result's attributes under the {@link DefaultMailAuthenticityResultKey#UNKNOWN_AUTH_MECH_RESULTS} key.</p>
+ * but their raw data is included in the overall result's attributes under the {@link DefaultMailAuthenticityResultKey#UNCONSIDERED_AUTH_MECH_RESULTS} key.</p>
  *
  * <p>In case there are multiple <code>Authentication-Results</code> in the e-mail's headers, then all of them are evaluated (top to bottom). Their mechanisms are sorted
  * by their predefined ordinal (DMARC > DKIM > SPF) and evaluated in that order.</p>
@@ -260,7 +260,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
 
         final MailAuthenticityResult overallResult = new MailAuthenticityResult(MailAuthenticityStatus.NEUTRAL);
         final List<MailAuthenticityMechanismResult> results = new ArrayList<>();
-        final List<Map<String, String>> unknownResults = new ArrayList<>();
+        final List<Map<String, String>> unconsideredResults = new ArrayList<>();
 
         final Iterator<String> authHeaderIterator = authenticationHeaders.iterator();
         while (authHeaderIterator.hasNext()) {
@@ -288,13 +288,13 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
                 return overallResult;
             }
 
-            parseMechanisms(elements, results, unknownResults, overallResult);
+            parseMechanisms(elements, results, unconsideredResults, overallResult);
         }
 
-        determineOverallResult(overallResult, results, unknownResults);
+        determineOverallResult(overallResult, results, unconsideredResults);
 
         overallResult.addAttribute(DefaultMailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS, results);
-        overallResult.addAttribute(DefaultMailAuthenticityResultKey.UNKNOWN_AUTH_MECH_RESULTS, unknownResults);
+        overallResult.addAttribute(DefaultMailAuthenticityResultKey.UNCONSIDERED_AUTH_MECH_RESULTS, unconsideredResults);
 
         return overallResult;
     }
@@ -304,10 +304,10 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
      *
      * @param elements A {@link List} with the elements of a single <code>Authentication-Results</code> header.
      * @param results A {@link List} with the results of the known mechanisms
-     * @param unknownResults A {@link List} with the unknown results
+     * @param unconsideredResults A {@link List} with the unconsidered results
      * @param overallResult The overall {@link MailAuthenticityResult}
      */
-    private void parseMechanisms(final List<String> elements, final List<MailAuthenticityMechanismResult> results, final List<Map<String, String>> unknownResults, final MailAuthenticityResult overallResult) {
+    private void parseMechanisms(final List<String> elements, final List<MailAuthenticityMechanismResult> results, final List<Map<String, String>> unconsideredResults, final MailAuthenticityResult overallResult) {
         Collections.sort(elements, mailAuthComparator);
         for (final String element : elements) {
             final Map<String, String> attributes = StringUtil.parseMap(element);
@@ -315,13 +315,13 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
             final DefaultMailAuthenticityMechanism mechanism = DefaultMailAuthenticityMechanism.extractMechanism(attributes);
             if (mechanism == null) {
                 // Unknown or not parsable mechanism
-                unknownResults.add(parseUnknownMechs(element));
+                unconsideredResults.add(parseUnknownMechs(element));
                 continue;
             }
             final BiFunction<Map<String, String>, MailAuthenticityResult, MailAuthenticityMechanismResult> mechanismParser = mechanismParsersRegistry.get(mechanism);
             if (mechanismParser == null) {
                 // Not a valid mechanism, skip but add to the overall result
-                unknownResults.add(parseUnknownMechs(element));
+                unconsideredResults.add(parseUnknownMechs(element));
                 continue;
             }
             results.add(mechanismParser.apply(attributes, overallResult));
@@ -333,10 +333,10 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
      * 
      * @param overallResult The overall {@link MailAuthenticityResult}
      * @param results A {@link List} with the results of the known mechanisms
-     * @param unknownResults A {@link List} with the unknown results
+     * @param unconsideredResults A {@link List} with the unknown/unconsidered results
      */
     //TODO: ugly... split in smaller manageable pieces
-    private void determineOverallResult(final MailAuthenticityResult overallResult, final List<MailAuthenticityMechanismResult> results, final List<Map<String, String>> unknownResults) {
+    private void determineOverallResult(final MailAuthenticityResult overallResult, final List<MailAuthenticityMechanismResult> results, final List<Map<String, String>> unconsideredResults) {
         // Separate results
         final List<MailAuthenticityMechanismResult> spfResults = new ArrayList<>();
         final List<MailAuthenticityMechanismResult> dkimResults = new ArrayList<>();
@@ -356,7 +356,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
             }
         }
 
-        MailAuthenticityMechanismResult bestOfDMARC = pickBestResult(dmarcResults, unknownResults);
+        MailAuthenticityMechanismResult bestOfDMARC = pickBestResult(dmarcResults, unconsideredResults);
         if (bestOfDMARC != null) {
             // If DMARC passes we set the overall status to PASS
             if (DMARCResult.PASS.equals(bestOfDMARC.getResult()) && bestOfDMARC.isDomainMatch()) {
@@ -366,7 +366,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
             }
         }
 
-        MailAuthenticityMechanismResult bestOfDKIM = pickBestResult(dkimResults, unknownResults);
+        MailAuthenticityMechanismResult bestOfDKIM = pickBestResult(dkimResults, unconsideredResults);
         boolean dkimFailed = false;
         if (bestOfDKIM != null) {
             // The DMARC status was NEUTRAL or none existing, check for DKIM
@@ -384,7 +384,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
             }
         }
 
-        MailAuthenticityMechanismResult bestOfSPF = pickBestResult(spfResults, unknownResults);
+        MailAuthenticityMechanismResult bestOfSPF = pickBestResult(spfResults, unconsideredResults);
         // Continue with SPF
         if (bestOfSPF != null) {
             final SPFResult spfResult = (SPFResult) bestOfSPF.getResult();
@@ -421,11 +421,12 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
      * Picks the best {@link MailAuthenticityMechanismResult} from the specified {@link List} of results
      * 
      * @param results The {@link List} with the {@link MailAuthenticityMechanismResult}s
+     * @param unconsideredResults The {@link List} with the unconsidered results
      * @return The best {@link MailAuthenticityMechanismResult} according to their natural ordering,
      *         or <code>null</code> if the {@link List} is empty, or the first (and only) element
      *         if the {@link List} is a singleton
      */
-    private MailAuthenticityMechanismResult pickBestResult(List<MailAuthenticityMechanismResult> results, List<Map<String, String>> unknownResults) {
+    private MailAuthenticityMechanismResult pickBestResult(List<MailAuthenticityMechanismResult> results, List<Map<String, String>> unconsideredResults) {
         if (results.isEmpty()) {
             return null;
         }
@@ -442,9 +443,9 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
         }
         results.remove(bestResult);
 
-        // Add the rest to unknown list
+        // Add the rest to unconsidered list
         for (MailAuthenticityMechanismResult result : results) {
-            unknownResults.add(convert(result));
+            unconsideredResults.add(convert(result));
         }
         return bestResult;
     }

@@ -76,10 +76,10 @@ public enum DefaultMailAuthenticityResultKey implements MailAuthenticityResultKe
      */
     MAIL_AUTH_MECH_RESULTS("mailAuthenticityMechanismResults"),
     /**
-     * Defines the unknown mail authenticity mechanism results
+     * Defines the unknown/unconsidered mail authenticity mechanism results
      * that were collected during the evaluation process of the e-mail.
      */
-    UNKNOWN_AUTH_MECH_RESULTS("unknownMailAuthenticityMechanismResults"),
+    UNCONSIDERED_AUTH_MECH_RESULTS("unconsideredAuthenticityMechanismResults"),
     /**
      * Defines the complete address of the trusted sender of the e-mail
      */
