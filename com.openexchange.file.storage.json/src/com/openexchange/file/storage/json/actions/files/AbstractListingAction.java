@@ -84,6 +84,7 @@ import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorDelegator;
 import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tx.TransactionAwares;
 
 /**
  * {@link AbstractListingAction}
@@ -278,15 +279,19 @@ public abstract class AbstractListingAction extends AbstractFileAction {
                 if (loadFileMetadata) {
                     // Load meta data
                     IDBasedFileAccess fileAccess = Services.getFileAccessFactory().createAccess(session);
-                    for (Iterator<File> iter = files.iterator(); !currentThread.isInterrupted() && numberOfPregeneratedPreviews > 0 && iter.hasNext();) {
-                        File fileMetadata = iter.next();
-                        String id = fileMetadata.getId();
-                        try {
-                            fileMetadata = fileAccess.getFileMetadata(id, FileStorageFileAccess.CURRENT_VERSION);
-                            triggerFor(id, fileMetadata);
-                        } catch (Exception e) {
-                            LOGGER.warn("Failed to pre-generate preview image from file {} for user {} in context {}", fileMetadata.getId(), session.getUserId(), session.getContextId(), e);
+                    try {
+                        for (Iterator<File> iter = files.iterator(); !currentThread.isInterrupted() && numberOfPregeneratedPreviews > 0 && iter.hasNext();) {
+                            File fileMetadata = iter.next();
+                            String id = fileMetadata.getId();
+                            try {
+                                fileMetadata = fileAccess.getFileMetadata(id, FileStorageFileAccess.CURRENT_VERSION);
+                                triggerFor(id, fileMetadata);
+                            } catch (Exception e) {
+                                LOGGER.warn("Failed to pre-generate preview image from file {} for user {} in context {}", fileMetadata.getId(), session.getUserId(), session.getContextId(), e);
+                            }
                         }
+                    } finally {
+                        TransactionAwares.finishSafe(fileAccess);
                     }
                 } else {
                     // No need to load
