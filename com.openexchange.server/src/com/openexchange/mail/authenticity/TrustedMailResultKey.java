@@ -56,15 +56,9 @@ package com.openexchange.mail.authenticity;
  */
 public enum TrustedMailResultKey implements MailAuthenticityResultKey {
     /**
-     * Defines the 'trusted' key for the response object
-     */
-    TRUSTED_MAIL("trusted"),
-
-    /**
      * Defines the 'image' key for the response object
      */
-    IMAGE("image"),
-    ;
+    IMAGE("image");
 
     private final String key;
 
