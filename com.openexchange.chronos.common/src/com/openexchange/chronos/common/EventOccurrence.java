@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.chronos.recurrence.service;
+package com.openexchange.chronos.common;
 
 import java.util.SortedSet;
 import org.dmfs.rfc5545.DateTime;

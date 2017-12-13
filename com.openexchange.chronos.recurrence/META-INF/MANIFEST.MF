@@ -14,11 +14,9 @@ Import-Package: com.openexchange.chronos,
  com.openexchange.exception,
  com.openexchange.java.util,
  com.openexchange.osgi,
- com.openexchange.server,
  org.dmfs.rfc5545,
  org.dmfs.rfc5545.calendarmetrics,
  org.dmfs.rfc5545.recur,
  org.dmfs.rfc5545.recurrenceset,
  org.osgi.framework,
  org.slf4j
-Export-Package: com.openexchange.chronos.recurrence.service

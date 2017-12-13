@@ -53,6 +53,7 @@ import java.util.Calendar;
 import java.util.Date;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.common.EventOccurrence;
 import com.openexchange.chronos.compat.PositionAwareRecurrenceId;
 import com.openexchange.chronos.service.RecurrenceData;
 import com.openexchange.exception.OXException;

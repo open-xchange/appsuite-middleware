@@ -70,7 +70,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
 import org.dmfs.rfc5545.DateTime;
-import org.dmfs.rfc5545.recurrenceset.RecurrenceSetIterator;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Availability;
 import com.openexchange.chronos.Available;
@@ -93,11 +92,11 @@ import com.openexchange.chronos.impl.Check;
 import com.openexchange.chronos.impl.Comparators;
 import com.openexchange.chronos.impl.Utils;
 import com.openexchange.chronos.impl.osgi.Services;
-import com.openexchange.chronos.recurrence.service.RecurrenceUtils;
 import com.openexchange.chronos.service.AvailableField;
 import com.openexchange.chronos.service.CalendarAvailabilityService;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.FreeBusyResult;
+import com.openexchange.chronos.service.RecurrenceIterator;
 import com.openexchange.chronos.service.SearchOptions;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
@@ -312,12 +311,12 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
                 }
                 Date availableStartTime = new Date(CalendarUtils.getDateInTimeZone(available.getStartTime(), timeZone));
                 Date availableEndTime = new Date(CalendarUtils.getDateInTimeZone(available.getEndTime(), timeZone));
-                RecurrenceSetIterator recurrenceIterator = RecurrenceUtils.getRecurrenceIterator(new DefaultRecurrenceData(available.getRecurrenceRule(), available.getStartTime(), null));
+                RecurrenceIterator<RecurrenceId> recurrenceIterator = session.getRecurrenceService().iterateRecurrenceIds(new DefaultRecurrenceData(available.getRecurrenceRule(), available.getStartTime(), null));
                 // Find out the duration of the "seed" available block
                 long duration = availableEndTime.getTime() - availableStartTime.getTime();
                 while (recurrenceIterator.hasNext()) {
-                    long nextOccurrence = recurrenceIterator.next();
-                    Date startOfOccurrence = new Date(nextOccurrence);
+                    RecurrenceId nextOccurrence = recurrenceIterator.next();
+                    Date startOfOccurrence = new Date(nextOccurrence.getValue().getTimestamp());
                     // We reached the availability's end? Stop
                     if (startOfOccurrence.after(until) || startOfOccurrence.after(endTime)) {
                         break;
