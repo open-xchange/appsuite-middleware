@@ -104,4 +104,12 @@ public interface BasicCalendarProvider extends CalendarProvider {
     @Override
     BasicCalendarAccess connect(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException;
 
+    /**
+     * Override if applicable.
+     */
+    @Override
+    default int getDefaultMaxAccounts() {
+        return 25;
+    }
+
 }

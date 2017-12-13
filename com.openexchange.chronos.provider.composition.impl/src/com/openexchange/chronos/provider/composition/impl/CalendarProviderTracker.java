@@ -49,6 +49,8 @@
 
 package com.openexchange.chronos.provider.composition.impl;
 
+import static com.openexchange.chronos.provider.CalendarProviders.getCapabilityName;
+import static com.openexchange.chronos.provider.CalendarProviders.getEnabledPropertyName;
 import static com.openexchange.osgi.Tools.requireService;
 import java.util.Dictionary;
 import java.util.Hashtable;
@@ -137,14 +139,6 @@ public class CalendarProviderTracker extends RankingAwareNearRegistryServiceTrac
          * undeclare capability for calendar provider
          */
         services.getService(CapabilityService.class).undeclareCapability(getCapabilityName(provider));
-    }
-
-    private static String getEnabledPropertyName(CalendarProvider provider) {
-        return "com.openexchange.calendar." + provider.getId() + ".enabled";
-    }
-
-    private static String getCapabilityName(CalendarProvider provider) {
-        return "calendar_" + provider.getId();
     }
 
 }

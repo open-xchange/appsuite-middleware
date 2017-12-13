@@ -5,7 +5,8 @@ Bundle-SymbolicName: com.openexchange.chronos.calendar.account.service.impl
 Bundle-Version: 7.10.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Import-Package: com.openexchange.chronos.exception,
+Import-Package: com.openexchange.capabilities,
+ com.openexchange.chronos.exception,
  com.openexchange.chronos.provider,
  com.openexchange.chronos.provider.account,
  com.openexchange.chronos.provider.basic,
@@ -13,6 +14,7 @@ Import-Package: com.openexchange.chronos.exception,
  com.openexchange.chronos.storage,
  com.openexchange.chronos.storage.operation,
  com.openexchange.chronos.storage.rdb,
+ com.openexchange.config.cascade,
  com.openexchange.context,
  com.openexchange.database,
  com.openexchange.database.provider,

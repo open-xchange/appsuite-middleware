@@ -49,6 +49,8 @@
 
 package com.openexchange.chronos.calendar.account.service.impl;
 
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.osgi.Tools.requireService;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -57,13 +59,15 @@ import java.util.List;
 import java.util.stream.Collectors;
 import org.json.JSONObject;
 import org.slf4j.LoggerFactory;
+import com.openexchange.capabilities.CapabilityService;
+import com.openexchange.capabilities.CapabilitySet;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.AutoProvisioningCalendarProvider;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.CalendarProvider;
 import com.openexchange.chronos.provider.CalendarProviderRegistry;
+import com.openexchange.chronos.provider.CalendarProviders;
 import com.openexchange.chronos.provider.DefaultCalendarAccount;
-import com.openexchange.chronos.provider.SingleAccountCalendarProvider;
 import com.openexchange.chronos.provider.account.AdministrativeCalendarAccountService;
 import com.openexchange.chronos.provider.account.CalendarAccountService;
 import com.openexchange.chronos.provider.basic.BasicCalendarProvider;
@@ -72,6 +76,9 @@ import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.storage.CalendarAccountStorage;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.chronos.storage.operation.OSGiCalendarStorageOperation;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.config.cascade.ConfigViews;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
@@ -105,9 +112,9 @@ public class CalendarAccountServiceImpl implements CalendarAccountService, Admin
     @Override
     public CalendarAccount createAccount(Session session, String providerId, CalendarSettings settings, CalendarParameters parameters) throws OXException {
         /*
-         * get associated calendar provider & initialize account config
+         * get associated calendar provider, check permissions & initialize account config
          */
-        CalendarProvider calendarProvider = getProvider(providerId);
+        CalendarProvider calendarProvider = requireCapability(getProvider(providerId), session);
         if (isGuest(session) || false == BasicCalendarProvider.class.isInstance(calendarProvider)) {
             throw CalendarExceptionCodes.UNSUPPORTED_OPERATION_FOR_PROVIDER.create(providerId);
         }
@@ -135,7 +142,7 @@ public class CalendarAccountServiceImpl implements CalendarAccountService, Admin
         /*
          * get associated calendar provider & initialize account config
          */
-        CalendarProvider calendarProvider = getProvider(storedAccount.getProviderId());
+        CalendarProvider calendarProvider = requireCapability(getProvider(storedAccount.getProviderId()), session);
         if (isGuest(session) || false == BasicCalendarProvider.class.isInstance(calendarProvider)) {
             throw CalendarExceptionCodes.UNSUPPORTED_OPERATION_FOR_PROVIDER.create(storedAccount.getProviderId());
         }
@@ -383,11 +390,9 @@ public class CalendarAccountServiceImpl implements CalendarAccountService, Admin
             @Override
             protected CalendarAccount call(CalendarStorage storage) throws OXException {
                 /*
-                 * check for an existing account for this provider if required
+                 * insert account after checking if maximum number of allowed accounts is reached for this provider
                  */
-                if (false == allowsMultipleAccounts(calendarProvider) && 0 < storage.getAccountStorage().loadAccounts(new int[] { userId }, calendarProvider.getId()).size()) {
-                    throw CalendarExceptionCodes.UNSUPPORTED_OPERATION_FOR_PROVIDER.create(calendarProvider.getId());
-                }
+                checkMaxAccountsNotReached(storage, calendarProvider, contextId, userId);
                 return insertAccount(storage.getAccountStorage(), calendarProvider.getId(), userId, internalConfig, userConfig);
             }
         }.executeUpdate();
@@ -444,10 +449,6 @@ public class CalendarAccountServiceImpl implements CalendarAccountService, Admin
         return accounts.stream().filter(account -> providerId.equals(account.getProviderId())).collect(Collectors.toList());
     }
 
-    private static boolean allowsMultipleAccounts(CalendarProvider provider) {
-        return false == SingleAccountCalendarProvider.class.isInstance(provider);
-    }
-
     private static boolean isGuest(Session session) {
         return Boolean.TRUE.equals(session.getParameter(Session.PARAM_GUEST));
     }
@@ -469,6 +470,31 @@ public class CalendarAccountServiceImpl implements CalendarAccountService, Admin
                 return null;
             }
         }.executeQuery();
+    }
+
+    private int getMaxAccounts(CalendarProvider provider, int contextId, int userId) throws OXException {
+        int defaultValue = provider.getDefaultMaxAccounts();
+        ConfigView view = requireService(ConfigViewFactory.class, services).getView(userId, contextId);
+        return ConfigViews.getDefinedIntPropertyFrom(CalendarProviders.getMaxAccountsPropertyName(provider), defaultValue, view);
+    }
+
+    private void checkMaxAccountsNotReached(CalendarStorage storage, CalendarProvider provider, int contextId, int userId) throws OXException {
+        int maxAccounts = getMaxAccounts(provider, contextId, userId);
+        if (0 < maxAccounts) {
+            int numAccounts = storage.getAccountStorage().loadAccounts(new int[] { userId }, provider.getId()).size();
+            if (maxAccounts <= numAccounts) {
+                throw CalendarExceptionCodes.MAX_ACCOUNTS_EXCEEDED.create(provider.getId(), I(maxAccounts), I(numAccounts));
+            }
+        }
+    }
+
+    private CalendarProvider requireCapability(CalendarProvider provider, Session session) throws OXException {
+        String capabilityName = CalendarProviders.getCapabilityName(provider);
+        CapabilitySet capabilities = requireService(CapabilityService.class, services).getCapabilities(session);
+        if (false == capabilities.contains(capabilityName)) {
+            throw CalendarExceptionCodes.MISSING_CAPABILITY.create(capabilityName);
+        }
+        return provider;
     }
 
 }

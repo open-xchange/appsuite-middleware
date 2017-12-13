@@ -51,11 +51,13 @@ package com.openexchange.chronos.calendar.account.service.osgi;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.chronos.calendar.account.service.impl.CalendarAccountServiceImpl;
 import com.openexchange.chronos.provider.CalendarProviderRegistry;
 import com.openexchange.chronos.provider.account.AdministrativeCalendarAccountService;
 import com.openexchange.chronos.provider.account.CalendarAccountService;
 import com.openexchange.chronos.storage.CalendarStorageFactory;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -77,7 +79,7 @@ public class CalendarAccountServiceActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getOptionalServices() {
-        return new Class<?>[] { CalendarProviderRegistry.class, DatabaseService.class, ContextService.class, CalendarStorageFactory.class };
+        return new Class<?>[] { CalendarProviderRegistry.class, DatabaseService.class, ContextService.class, CalendarStorageFactory.class, CapabilityService.class, ConfigViewFactory.class };
     }
 
     @Override

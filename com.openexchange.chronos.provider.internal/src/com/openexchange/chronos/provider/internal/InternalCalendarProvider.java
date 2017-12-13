@@ -57,7 +57,6 @@ import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.AutoProvisioningCalendarProvider;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.CalendarCapability;
-import com.openexchange.chronos.provider.SingleAccountCalendarProvider;
 import com.openexchange.chronos.provider.folder.FolderCalendarAccess;
 import com.openexchange.chronos.provider.folder.FolderCalendarProvider;
 import com.openexchange.chronos.service.CalendarParameters;
@@ -79,7 +78,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class InternalCalendarProvider implements FolderCalendarProvider, AutoProvisioningCalendarProvider, SingleAccountCalendarProvider {
+public class InternalCalendarProvider implements FolderCalendarProvider, AutoProvisioningCalendarProvider {
 
     private final ServiceLookup services;
 
@@ -96,6 +95,11 @@ public class InternalCalendarProvider implements FolderCalendarProvider, AutoPro
     @Override
     public String getId() {
         return Constants.PROVIDER_ID;
+    }
+
+    @Override
+    public int getDefaultMaxAccounts() {
+        return 1;
     }
 
     @Override

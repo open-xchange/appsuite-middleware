@@ -50,13 +50,48 @@
 package com.openexchange.chronos.provider;
 
 /**
- * {@link SingleAccountCalendarProvider}
- *
- * Marker interface to indicate that only one account is allowed per user.
+ * {@link CalendarProviders}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public interface SingleAccountCalendarProvider extends CalendarProvider {
+public class CalendarProviders {
+
+    /**
+     * Gets the name of the declared capability for a specific calendar provider.
+     *
+     * @param provider The calendar provider to generate the capability name for
+     * @return The capability name
+     */
+    public static String getCapabilityName(CalendarProvider provider) {
+        return "calendar_" + provider.getId();
+    }
+
+    /**
+     * Gets the name of the property that is used to evaluate whether a calendar provider is enabled or not.
+     *
+     * @param provider The calendar provider to generate the <i>enabled</i> property name for
+     * @return The <i>enabled</i> property name
+     */
+    public static String getEnabledPropertyName(CalendarProvider provider) {
+        return "com.openexchange.calendar." + provider.getId() + ".enabled";
+    }
+
+    /**
+     * Gets the name of the property that is used to restrict the maximum number of accounts of a specific provider.
+     *
+     * @param provider The calendar provider to generate the <i>maxAccounts</i> property name for
+     * @return The <i>maxAccounts</i> property name
+     */
+    public static String getMaxAccountsPropertyName(CalendarProvider provider) {
+        return "com.openexchange.calendar." + provider.getId() + ".maxAccounts";
+    }
+
+    /**
+     * Initializes a new {@link CalendarProviders}.
+     */
+    private CalendarProviders() {
+        super();
+    }
 
 }

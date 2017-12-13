@@ -71,6 +71,7 @@ import static com.openexchange.chronos.exception.CalendarExceptionMessages.INVAL
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.INVALID_TIMEZONE_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.IO_ERROR_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.MANDATORY_FIELD_MSG;
+import static com.openexchange.chronos.exception.CalendarExceptionMessages.MAX_ACCOUNTS_EXCEEDED_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.MISSING_CAPABILITY_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.MOVE_OCCURRENCE_NOT_SUPPORTED_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.MOVE_SERIES_NOT_SUPPORTED_MSG;
@@ -339,6 +340,11 @@ public enum CalendarExceptionCodes implements DisplayableOXExceptionCode {
      * <li>The event contains too many alarms.</li>
      */
     TOO_MANY_ALARMS("The event contains too many alarms.", TOO_MANY_ALARMS_MSG, Category.CATEGORY_USER_INPUT, 5074),
+    /**
+     * <li>The maximum number of calendar subscriptions is exceeded.</li>
+     * <li>Maximum number of accounts exceeded [provider %1$s, limit %2$d, current %3$d]</li>
+     */
+    MAX_ACCOUNTS_EXCEEDED("Maximum number of accounts exceeded [provider %1$s, limit %2$d, current %3$d]", MAX_ACCOUNTS_EXCEEDED_MSG, Category.CATEGORY_USER_INPUT, 5075),
     /**
      * <li>The value for \"%2$s\" is invalid and wasn't be applied.</li>
      * <li>Ignored invalid data [id %1$s, field %2$s, severity %3$s, message %4$s]</li>

@@ -79,6 +79,16 @@ public interface CalendarProvider {
     String getDisplayName(Locale locale);
 
     /**
+     * Gets the <b>default</b> maximum number of allowed accounts within this calendar provider.
+     * <p/>
+     * <i>Note: The value may still be overridden by the corresponding configuration property.</i>
+     *
+     * @return The default maximum number of accounts, or <code>0</code> if not restricted
+     * @see CalendarProviders#getMaxAccountsPropertyName(CalendarProvider)
+     */
+    int getDefaultMaxAccounts();
+
+    /**
      * Gets the supported capabilities for a calendar access of this calendar provider, describing the usable extended feature set.
      *
      * @return The supported calendar capabilities, or an empty set if no extended functionality is available

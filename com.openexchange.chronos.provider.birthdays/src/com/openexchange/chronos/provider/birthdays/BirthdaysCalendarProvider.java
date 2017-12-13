@@ -121,6 +121,11 @@ public class BirthdaysCalendarProvider implements BasicCalendarProvider {
     }
 
     @Override
+    public int getDefaultMaxAccounts() {
+        return 1;
+    }
+
+    @Override
     public String getDisplayName(Locale locale) {
         return StringHelper.valueOf(locale).getString(BirthdaysCalendarStrings.PROVIDER_NAME);
     }
