@@ -74,10 +74,8 @@ import com.openexchange.mail.authenticity.MailAuthenticityStatus;
 import com.openexchange.mail.authenticity.TrustedMailResultKey;
 import com.openexchange.mail.authenticity.impl.trusted.Icon;
 import com.openexchange.mail.authenticity.impl.trusted.TrustedMailService;
-import com.openexchange.mail.authenticity.mechanism.AbstractAuthMechResult;
 import com.openexchange.mail.authenticity.mechanism.AuthenticityMechanismResult;
 import com.openexchange.mail.authenticity.mechanism.MailAuthenticityMechanism;
-import com.openexchange.mail.authenticity.mechanism.MailAuthenticityMechanismResult;
 import com.openexchange.mail.authenticity.mechanism.SimplePassFailResult;
 import com.openexchange.mail.dataobjects.MailAuthenticityResult;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -146,7 +144,6 @@ public class TrustedMailAuthenticityHandler implements ForcedReloadable, Trusted
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public void handle(Session session, MailMessage mailMessage) {
         String tenant = (String) session.getParameter(Session.PARAM_HOST_NAME);
         if (tenant == null) {
@@ -160,9 +157,7 @@ public class TrustedMailAuthenticityHandler implements ForcedReloadable, Trusted
             String mailAddress = getMailAddress(mailMessage);
             TrustedMail trustedDomain = checkMail(tenant, mailAddress);
             if (trustedDomain != null) {
-                List<MailAuthenticityMechanismResult> results = authenticityResult.getAttribute(DefaultMailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS, List.class);
-                results.add(new TrustedMailResult(mailAddress, null, SimplePassFailResult.PASS));
-                authenticityResult.addAttribute(TrustedMailResultKey.TRUSTED_MAIL, true);
+                authenticityResult.setStatus(MailAuthenticityStatus.TRUSTED);
                 if (trustedDomain.getImage() != null) {
                     authenticityResult.addAttribute(TrustedMailResultKey.IMAGE, trustedDomain.getImage().getUID());
                 }
@@ -351,25 +346,6 @@ public class TrustedMailAuthenticityHandler implements ForcedReloadable, Trusted
     private String getMailAddress(MailMessage msg) {
         MailAuthenticityResult authenticationResult = msg.getAuthenticityResult();
         return authenticationResult == null ? null : authenticationResult.getAttribute(DefaultMailAuthenticityResultKey.TRUSTED_SENDER).toString();
-    }
-
-    private static class TrustedMailResult extends AbstractAuthMechResult {
-
-        /**
-         * Initializes a new {@link TrustedMailResult}.
-         *
-         * @param mailAddress
-         * @param clientIP
-         * @param result
-         */
-        public TrustedMailResult(String mailAddress, String clientIP, AuthenticityMechanismResult result) {
-            super(mailAddress, clientIP, result);
-        }
-
-        @Override
-        public MailAuthenticityMechanism getMechanism() {
-            return TRUSTED_MAIL_MECHANISM;
-        }
     }
 
 }
