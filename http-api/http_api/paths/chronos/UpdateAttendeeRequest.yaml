@@ -18,7 +18,7 @@
         format: int64
         description: Timestamp of the last update of the event.
         required: true
-      - $ref: "#/parameters/QueryParamChronosIgnoreConflicts"
+      - $ref: "#/parameters/QueryParamChronosCheckConflicts"
       - in: query
         name: rangeStart
         type: string

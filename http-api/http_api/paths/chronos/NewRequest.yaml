@@ -9,7 +9,7 @@
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"
       - $ref: "#/parameters/QueryParamChronosFolder"
-      - $ref: "#/parameters/QueryParamChronosIgnoreConflicts"
+      - $ref: "#/parameters/QueryParamChronosCheckConflicts"
       - $ref: "#/parameters/QueryParamChronosNotification"
       - in: query
         name: rangeStart
@@ -58,7 +58,7 @@
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"
       - $ref: "#/parameters/QueryParamChronosFolder"
-      - $ref: "#/parameters/QueryParamChronosIgnoreConflicts"
+      - $ref: "#/parameters/QueryParamChronosCheckConflicts"
       - $ref: "#/parameters/QueryParamChronosNotification"
       - in: formData
         name: json_0

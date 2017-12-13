@@ -382,12 +382,12 @@ QueryParamChronosSort:
   type: string
   description: Specifies the field for sorting the results.
   required: false
-QueryParamChronosIgnoreConflicts:
-  name: ignoreConflicts
+QueryParamChronosCheckConflicts:
+  name: checkConflicts
   in: query
   type: boolean
   default: false
-  description: Whether to ignore conflicts or not.
+  description: Whether to check for conflicts or not.
   required: false
 QueryParamChronosExpand:
   name: expand

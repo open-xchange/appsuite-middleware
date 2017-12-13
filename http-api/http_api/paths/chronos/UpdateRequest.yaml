@@ -11,7 +11,7 @@
       - $ref: "#/parameters/QueryParamChronosFolder"
       - $ref: "#/parameters/QueryParamChronosID"
       - $ref: "#/parameters/QueryParamChronosRecurrenceID"
-      - $ref: "#/parameters/QueryParamChronosIgnoreConflicts"
+      - $ref: "#/parameters/QueryParamChronosCheckConflicts"
       - $ref: "#/parameters/QueryParamChronosNotification"
       - in: query
         name: rangeStart
@@ -68,7 +68,7 @@
       - $ref: "#/parameters/QueryParamChronosFolder"
       - $ref: "#/parameters/QueryParamChronosID"
       - $ref: "#/parameters/QueryParamChronosRecurrenceID"
-      - $ref: "#/parameters/QueryParamChronosIgnoreConflicts"
+      - $ref: "#/parameters/QueryParamChronosCheckConflicts"
       - $ref: "#/parameters/QueryParamChronosNotification"
       - in: query
         name: timestamp
