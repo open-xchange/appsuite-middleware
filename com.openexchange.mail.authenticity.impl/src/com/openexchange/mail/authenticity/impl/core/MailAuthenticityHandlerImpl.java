@@ -344,21 +344,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
         final List<MailAuthenticityMechanismResult> spfResults = new ArrayList<>();
         final List<MailAuthenticityMechanismResult> dkimResults = new ArrayList<>();
         final List<MailAuthenticityMechanismResult> dmarcResults = new ArrayList<>();
-        for (final MailAuthenticityMechanismResult result : results) {
-            final DefaultMailAuthenticityMechanism mechanism = (DefaultMailAuthenticityMechanism) result.getMechanism();
-            switch (mechanism) {
-                case DMARC:
-                    dmarcResults.add(result);
-                    break;
-                case DKIM:
-                    dkimResults.add(result);
-                    break;
-                case SPF:
-                    spfResults.add(result);
-                    break;
-            }
-        }
-        results.clear();
+        separateResults(results, spfResults, dkimResults, dmarcResults);
 
         // Pick the best results for all mechanisms
         MailAuthenticityMechanismResult bestOfDMARC = pickBestResult(dmarcResults, unconsideredResults);
@@ -387,6 +373,33 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
         boolean dkimFailed = checkDKIM(overallResult, bestOfDKIM);
         // Continue with SPF
         checkSPF(overallResult, bestOfSPF, dkimFailed);
+    }
+
+    /**
+     * Separates the results into different containers according to their type
+     * 
+     * @param results All the {@link MailAuthenticityMechanismResult}s
+     * @param spfResults The container for the SPF results
+     * @param dkimResults The container for the DKIM results
+     * @param dmarcResults The container for the DMARC results
+     */
+    private void separateResults(final List<MailAuthenticityMechanismResult> results, final List<MailAuthenticityMechanismResult> spfResults, final List<MailAuthenticityMechanismResult> dkimResults, final List<MailAuthenticityMechanismResult> dmarcResults) {
+        for (final MailAuthenticityMechanismResult result : results) {
+            final DefaultMailAuthenticityMechanism mechanism = (DefaultMailAuthenticityMechanism) result.getMechanism();
+            switch (mechanism) {
+                case DMARC:
+                    dmarcResults.add(result);
+                    break;
+                case DKIM:
+                    dkimResults.add(result);
+                    break;
+                case SPF:
+                    spfResults.add(result);
+                    break;
+            }
+        }
+        // Remove everything from the initial list
+        results.clear();
     }
 
     /**
