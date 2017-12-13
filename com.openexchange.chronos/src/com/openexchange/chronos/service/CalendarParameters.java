@@ -180,15 +180,6 @@ public interface CalendarParameters {
     /**
      * {@link String}
      * <p/>
-     * The recurrence id of a series event
-     * <p/>
-     * If set the operation only applies to this recurrence and not to the master.
-     */
-    static final String PARAMETER_RECURRENCE_ID = "recurrenceId";
-
-    /**
-     * {@link String}
-     * <p/>
      * The identifier of an existing event or event series to ignore when calculating free/busy information.
      * <p/>
      * If set, existing events with this identifier are implicitly excluded during free/busy lookups, which aids to ignore the event

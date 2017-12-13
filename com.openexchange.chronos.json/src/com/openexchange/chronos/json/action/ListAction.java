@@ -58,15 +58,12 @@ import java.util.List;
 import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.json.converter.EventResultConverter;
 import com.openexchange.chronos.json.oauth.ChronosOAuthScope;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
-import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.EventID;
 import com.openexchange.exception.OXException;
 import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
@@ -85,10 +82,6 @@ import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 public class ListAction extends ChronosAction {
 
     private static final Set<String> OPTIONAL_PARAMETERS = unmodifiableSet(PARAMETER_FIELDS);
-
-    private static final String FOLDER_ID_FIELD = AJAXServlet.PARAMETER_FOLDERID;
-    private static final String ID_FIELD = AJAXServlet.PARAMETER_ID;
-    private static final String RECURENCE_ID_FIELD = CalendarParameters.PARAMETER_RECURRENCE_ID;
 
     /**
      * Initializes a new {@link ListAction}.
@@ -114,8 +107,7 @@ public class ListAction extends ChronosAction {
         try {
             List<EventID> eventIDs = new ArrayList<>(ids.length());
             for (int x = 0; x < ids.length(); x++) {
-                JSONObject jsonObject = ids.getJSONObject(x);
-                eventIDs.add(getEventID(jsonObject.getString(FOLDER_ID_FIELD), jsonObject.getString(ID_FIELD), jsonObject.optString(RECURENCE_ID_FIELD, null)));
+                eventIDs.add(parseIdParameter(ids.getJSONObject(x)));
             }
             List<Event> events = calendarAccess.getEvents(eventIDs);
             return new AJAXRequestResult(events, new Date(getMaximumTimestamp(events)), EventResultConverter.INPUT_FORMAT);

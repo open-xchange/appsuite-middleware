@@ -65,6 +65,8 @@ import java.util.Date;
 import java.util.Map.Entry;
 import java.util.Set;
 import org.dmfs.rfc5545.DateTime;
+import org.json.JSONException;
+import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
@@ -72,7 +74,6 @@ import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.common.DefaultRecurrenceId;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.json.converter.mapper.EventMapper;
-import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.EventID;
 import com.openexchange.chronos.service.SortOrder;
 import com.openexchange.exception.Category;
@@ -98,6 +99,7 @@ public abstract class AbstractChronosAction implements AJAXActionService {
     protected static final String PARAM_EXPAND = "expand";
     protected static final String PARAM_IGNORE_CONFLICTS = "ignoreConflicts";
     protected static final String PARAM_SEND_INTERNAL_NOTIFICATIONS = "sendInternalNotifications";
+    protected static final String PARAM_RECURRENCE_ID = "recurrenceId";
 
     /**
      * Initializes a new {@link AbstractChronosAction}.
@@ -169,13 +171,13 @@ public abstract class AbstractChronosAction implements AJAXActionService {
         try {
             return new EventID(folderId, objectId, new DefaultRecurrenceId(optRecurrenceId));
         } catch (IllegalArgumentException e) {
-            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(CalendarParameters.PARAMETER_RECURRENCE_ID, optRecurrenceId);
+            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(PARAM_RECURRENCE_ID, optRecurrenceId);
         }
     }
 
     /**
      * Parses a full event identifier based on the request parameters {@link AJAXServlet#PARAMETER_ID},
-     * {@link AJAXServlet#PARAMETER_FOLDERID} and {@link CalendarParameters#PARAMETER_RECURRENCE_ID}.
+     * {@link AJAXServlet#PARAMETER_FOLDERID} and {@link AbstractChronosAction#PARAM_RECURRENCE_ID}.
      *
      * @param requestData The request data to parse the event identifier from
      * @return The parsed full event identifier
@@ -183,7 +185,31 @@ public abstract class AbstractChronosAction implements AJAXActionService {
     protected EventID parseIdParameter(AJAXRequestData requestData) throws OXException {
         String objectId = requestData.requireParameter(AJAXServlet.PARAMETER_ID);
         String folderId = requestData.requireParameter(AJAXServlet.PARAMETER_FOLDERID);
-        String optRecurrenceId = requestData.getParameter(CalendarParameters.PARAMETER_RECURRENCE_ID);
+        String optRecurrenceId = requestData.getParameter(PARAM_RECURRENCE_ID);
+        return getEventID(folderId, objectId, optRecurrenceId);
+    }
+
+    /**
+     * Parses a full event identifier based on the request parameters {@link AJAXServlet#PARAMETER_ID},
+     * {@link AJAXServlet#PARAMETER_FOLDERID} and {@link AbstractChronosAction#PARAM_RECURRENCE_ID}.
+     *
+     * @param jsonObject The JSON object to parse the event identifier from
+     * @return The parsed full event identifier
+     */
+    protected EventID parseIdParameter(JSONObject jsonObject) throws OXException {
+        String objectId;
+        try {
+            objectId = jsonObject.getString(AJAXServlet.PARAMETER_ID);
+        } catch (JSONException e) {
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create(e, AJAXServlet.PARAMETER_ID);
+        }
+        String folderId;
+        try {
+            folderId = jsonObject.getString(AJAXServlet.PARAMETER_FOLDERID);
+        } catch (JSONException e) {
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create(e, AJAXServlet.PARAMETER_FOLDERID);
+        }
+        String optRecurrenceId = jsonObject.optString(PARAM_RECURRENCE_ID, null);
         return getEventID(folderId, objectId, optRecurrenceId);
     }
 
