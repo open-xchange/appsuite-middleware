@@ -1096,13 +1096,16 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
             RecurrenceRule originalRule = new RecurrenceRule(originalRRule);
             RecurrenceRule updatedRule = new RecurrenceRule(updatedRRule);
             /*
-             * check if only UNTIL or COUNT was changed
+             * check if only UNTIL was changed
              */
             RecurrenceRule checkedRule = new RecurrenceRule(updatedRule.toString());
             checkedRule.setUntil(originalRule.getUntil());
             if (checkedRule.toString().equals(originalRule.toString())) {
                 return 1 == CalendarUtils.compare(originalRule.getUntil(), updatedRule.getUntil(), null);
             }
+            /*
+             * check if only COUNT was changed
+             */
             checkedRule = new RecurrenceRule(updatedRule.toString());
             if (null == originalRule.getCount()) {
                 checkedRule.setUntil(null);
@@ -1110,7 +1113,9 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
                 checkedRule.setCount(i(originalRule.getCount()));
             }
             if (checkedRule.toString().equals(originalRule.toString())) {
-                return updatedRule.getCount() > originalRule.getCount();
+                int originalCount = null == originalRule.getCount() ? Integer.MAX_VALUE : i(originalRule.getCount());
+                int updatedCount = null == updatedRule.getCount() ? Integer.MAX_VALUE : i(updatedRule.getCount());
+                return updatedCount > originalCount;
             }
             /*
              * check if only the INTERVAL was extended
