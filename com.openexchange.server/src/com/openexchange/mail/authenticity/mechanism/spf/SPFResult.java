@@ -53,6 +53,7 @@ import com.openexchange.mail.authenticity.mechanism.AuthenticityMechanismResult;
 
 /**
  * {@link SPFResult} - Specifies the possible SPF results.
+ * The ordinal defines the significance of each result.
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @see <a href="https://tools.ietf.org/html/rfc7208#section-8">RFC-7208, Section 8</a>
@@ -60,14 +61,14 @@ import com.openexchange.mail.authenticity.mechanism.AuthenticityMechanismResult;
 public enum SPFResult implements AuthenticityMechanismResult {
 
     /**
-     * The SPF verifier has no information at all about the authorisation
-     * or lack thereof of the client to use the checked identity or identities.
-     * The check_host() function completed without errors but was not able to
-     * reach any conclusion.
+     * The client is authorised to inject mail with the given identity. The domain
+     * can now, in the sense of reputation, be considered responsible for sending
+     * the message. Further policy checks can now proceed with confidence in the
+     * legitimate use of the identity.
      *
-     * @see <a href="https://tools.ietf.org/html/rfc7208#section-8.1">RFC-7208, Section 8.1</a>
+     * @see <a href="https://tools.ietf.org/html/rfc7208#section-8.3">RFC-7208, Section 8.3</a>
      */
-    NONE("None", "none"),
+    PASS("Pass", "pass"),
     /**
      * <p>Indicates that although a policy for the identity was discovered, there is
      * no definite assertion (positive or negative) about the client.</p>
@@ -81,30 +82,22 @@ public enum SPFResult implements AuthenticityMechanismResult {
      */
     NEUTRAL("Neutral", "neutral"),
     /**
-     * The client is authorised to inject mail with the given identity. The domain
-     * can now, in the sense of reputation, be considered responsible for sending
-     * the message. Further policy checks can now proceed with confidence in the
-     * legitimate use of the identity.
+     * Indicates that some local policy mechanism was applied
+     * that augments or even replaces (i.e., overrides) the result returned
+     * by the authentication mechanism.
      *
-     * @see <a href="https://tools.ietf.org/html/rfc7208#section-8.3">RFC-7208, Section 8.3</a>
+     * @see <a href="https://tools.ietf.org/html/rfc7601#section-2.4">RFC-7601, Section 2.4</a>
      */
-    PASS("Pass", "pass"),
+    POLICY("Policy", "policy"),
     /**
-     * An explicit statement that the client is not authorised to use the domain in the
-     * given identity. Disposition of SPF fail messages is a matter of local policy.
+     * The SPF verifier has no information at all about the authorisation
+     * or lack thereof of the client to use the checked identity or identities.
+     * The check_host() function completed without errors but was not able to
+     * reach any conclusion.
      *
-     * @see <a href="https://tools.ietf.org/html/rfc7208#section-8.4">RFC-7208, Section 8.4</a>
+     * @see <a href="https://tools.ietf.org/html/rfc7208#section-8.1">RFC-7208, Section 8.1</a>
      */
-    FAIL("Fail", "fail"),
-    /**
-     * Ought to be treated as somewhere between "fail" and "neutral"/"none". The ADMD
-     * believes the host is not authorised but is not willing to make a strong policy
-     * statement. Receiving software SHOULD NOT reject the message based solely on this
-     * result, but MAY subject the message to closer scrutiny than normal.
-     *
-     * @see <a href="https://tools.ietf.org/html/rfc7208#section-8.5">RFC-7208, Section 8.5</a>
-     */
-    SOFTFAIL("Soft Fail", "softfail"),
+    NONE("None", "none"),
     /**
      * The SPF verifier encountered a transient (generally DNS) error while performing the check.
      * Checking software can choose to accept or temporarily reject the message. If the message
@@ -131,13 +124,22 @@ public enum SPFResult implements AuthenticityMechanismResult {
      */
     PERMERROR("Permanent Error", "permerror"),
     /**
-     * Indicates that some local policy mechanism was applied
-     * that augments or even replaces (i.e., overrides) the result returned
-     * by the authentication mechanism.
+     * Ought to be treated as somewhere between "fail" and "neutral"/"none". The ADMD
+     * believes the host is not authorised but is not willing to make a strong policy
+     * statement. Receiving software SHOULD NOT reject the message based solely on this
+     * result, but MAY subject the message to closer scrutiny than normal.
      *
-     * @see <a href="https://tools.ietf.org/html/rfc7601#section-2.4">RFC-7601, Section 2.4</a>
+     * @see <a href="https://tools.ietf.org/html/rfc7208#section-8.5">RFC-7208, Section 8.5</a>
      */
-    POLICY("Policy", "policy");
+    SOFTFAIL("Soft Fail", "softfail"),
+    /**
+     * An explicit statement that the client is not authorised to use the domain in the
+     * given identity. Disposition of SPF fail messages is a matter of local policy.
+     *
+     * @see <a href="https://tools.ietf.org/html/rfc7208#section-8.4">RFC-7208, Section 8.4</a>
+     */
+    FAIL("Fail", "fail"),
+    ;
 
     private final String displayName;
     private final String technicalName;
