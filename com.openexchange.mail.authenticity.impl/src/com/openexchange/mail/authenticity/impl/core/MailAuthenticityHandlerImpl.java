@@ -361,10 +361,8 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
             // If DMARC passes we set the overall status to PASS
             if (DMARCResult.PASS.equals(bestOfDMARC.getResult()) && bestOfDMARC.isDomainMatch()) {
                 overallResult.setStatus(MailAuthenticityStatus.PASS);
-                return;
             } else if (DMARCResult.FAIL.equals(bestOfDMARC.getResult())) {
                 overallResult.setStatus(MailAuthenticityStatus.FAIL);
-                return;
             }
         }
 
@@ -490,6 +488,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
         final Map<String, String> unconsidered = new HashMap<>();
         unconsidered.put("mechanism", result.getMechanism().getTechnicalName());
         unconsidered.put("result", result.getResult().getTechnicalName());
+        unconsidered.put("domain", result.getDomain());
         if (!Strings.isEmpty(result.getReason())) {
             unconsidered.put("reason", result.getReason());
         }
