@@ -60,8 +60,8 @@ import org.json.JSONObject;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.CalendarCapability;
 import com.openexchange.chronos.provider.basic.BasicCalendarAccess;
-import com.openexchange.chronos.provider.basic.BasicCalendarProvider;
 import com.openexchange.chronos.provider.basic.CalendarSettings;
+import com.openexchange.chronos.provider.caching.basic.BasicCachingCalendarProvider;
 import com.openexchange.chronos.provider.schedjoules.exception.SchedJoulesProviderExceptionCodes;
 import com.openexchange.chronos.schedjoules.SchedJoulesService;
 import com.openexchange.chronos.schedjoules.exception.SchedJoulesAPIExceptionCodes;
@@ -79,7 +79,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class BasicSchedJoulesCalendarProvider implements BasicCalendarProvider {
+public class BasicSchedJoulesCalendarProvider extends BasicCachingCalendarProvider {
 
     public static final String PROVIDER_ID = "schedjoules";
     private static final String DISPLAY_NAME = "SchedJoules";
@@ -119,26 +119,22 @@ public class BasicSchedJoulesCalendarProvider implements BasicCalendarProvider {
     }
 
     @Override
-    public void onAccountCreated(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
-        // TODO Auto-generated method stub
-
+    protected void onAccountCreatedOpt(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
+        // nothing to do
     }
 
     @Override
-    public void onAccountUpdated(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
-        // TODO Auto-generated method stub
-
+    protected void onAccountUpdatedOpt(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
+        // nothing to do
     }
 
     @Override
-    public void onAccountDeleted(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
-        // TODO Auto-generated method stub
-
+    protected void onAccountDeletedOpt(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
+        // nothing to do
     }
 
     @Override
-    public JSONObject configureAccount(Session session, CalendarSettings settings, CalendarParameters parameters) throws OXException {
-
+    protected JSONObject configureAccountOpt(Session session, CalendarSettings settings, CalendarParameters parameters) throws OXException {
         /*
          * initialize & check user configuration for new account
          */
@@ -183,7 +179,7 @@ public class BasicSchedJoulesCalendarProvider implements BasicCalendarProvider {
     }
 
     @Override
-    public JSONObject reconfigureAccount(Session session, CalendarAccount account, CalendarSettings settings, CalendarParameters parameters) throws OXException {
+    protected JSONObject reconfigureAccountOpt(Session session, CalendarAccount account, CalendarSettings settings, CalendarParameters parameters) throws OXException {
 
         //TODO take over further changes like locale or refresh interval
         //TODO prevent unallowed changes (like itemid, or too low refresh interval)
@@ -203,6 +199,11 @@ public class BasicSchedJoulesCalendarProvider implements BasicCalendarProvider {
             changed = true;
         }
         return changed ? internalConfig : null;
+    }
+
+    @Override
+    public boolean triggerCacheInvalidation(Session session, JSONObject originUserConfiguration, JSONObject newUserConfiguration) throws OXException {
+        return false;
     }
 
     /**
