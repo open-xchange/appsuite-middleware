@@ -437,7 +437,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
         if (results.size() == 1) {
             return results.get(0);
         }
-        MailAuthenticityMechanismResult bestResult = results.remove(0);
+        MailAuthenticityMechanismResult bestResult = results.get(0);
         Iterator<MailAuthenticityMechanismResult> iterator = results.iterator();
         while (iterator.hasNext()) {
             MailAuthenticityMechanismResult result = iterator.next();
