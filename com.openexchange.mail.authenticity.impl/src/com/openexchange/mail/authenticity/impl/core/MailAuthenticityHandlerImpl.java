@@ -291,7 +291,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
             parseMechanisms(elements, results, unknownResults, overallResult);
         }
 
-        determineOverallResult(overallResult, results);
+        determineOverallResult(overallResult, results, unknownResults);
 
         overallResult.addAttribute(DefaultMailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS, results);
         overallResult.addAttribute(DefaultMailAuthenticityResultKey.UNKNOWN_AUTH_MECH_RESULTS, unknownResults);
@@ -333,8 +333,10 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
      * 
      * @param overallResult The overall {@link MailAuthenticityResult}
      * @param results A {@link List} with the results of the known mechanisms
+     * @param unknownResults A {@link List} with the unknown results
      */
-    private void determineOverallResult(final MailAuthenticityResult overallResult, final List<MailAuthenticityMechanismResult> results) {
+    //TODO: ugly... split in smaller manageable pieces
+    private void determineOverallResult(final MailAuthenticityResult overallResult, final List<MailAuthenticityMechanismResult> results, final List<Map<String, String>> unknownResults) {
         // Separate results
         final List<MailAuthenticityMechanismResult> spfResults = new ArrayList<>();
         final List<MailAuthenticityMechanismResult> dkimResults = new ArrayList<>();
@@ -354,51 +356,54 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
             }
         }
 
-        // If DMARC passes we set the overall status to PASS
-        for (final MailAuthenticityMechanismResult result : dmarcResults) {
-            if (DMARCResult.PASS.equals(result.getResult()) && result.isDomainMatch()) {
+        MailAuthenticityMechanismResult bestOfDMARC = pickBestResult(dmarcResults, unknownResults);
+        if (bestOfDMARC != null) {
+            // If DMARC passes we set the overall status to PASS
+            if (DMARCResult.PASS.equals(bestOfDMARC.getResult()) && bestOfDMARC.isDomainMatch()) {
                 overallResult.setStatus(MailAuthenticityStatus.PASS);
                 return;
-            } else if (DMARCResult.FAIL.equals(result.getResult())) {
+            } else if (DMARCResult.FAIL.equals(bestOfDMARC.getResult())) {
                 overallResult.setStatus(MailAuthenticityStatus.FAIL);
                 return;
             }
         }
 
-        // The DMARC status was NEUTRAL or none existing, check for DKIM
+        MailAuthenticityMechanismResult bestOfDKIM = pickBestResult(dkimResults, unknownResults);
         boolean dkimFailed = false;
-        for (final MailAuthenticityMechanismResult result : dkimResults) {
-            final DKIMResult dkimResult = (DKIMResult) result.getResult();
+        if (bestOfDKIM != null) {
+            // The DMARC status was NEUTRAL or none existing, check for DKIM
+            final DKIMResult dkimResult = (DKIMResult) bestOfDKIM.getResult();
             switch (dkimResult) {
                 case PERMFAIL:
                 case FAIL:
                     dkimFailed = true;
                     break;
                 case PASS:
-                    overallResult.setStatus(result.isDomainMatch() ? MailAuthenticityStatus.PASS : MailAuthenticityStatus.NEUTRAL);
+                    overallResult.setStatus(bestOfDKIM.isDomainMatch() ? MailAuthenticityStatus.PASS : MailAuthenticityStatus.NEUTRAL);
                     break;
                 default:
-                    overallResult.setStatus(result.getResult().convert());
+                    overallResult.setStatus(bestOfDKIM.getResult().convert());
             }
         }
 
+        MailAuthenticityMechanismResult bestOfSPF = pickBestResult(spfResults, unknownResults);
         // Continue with SPF
-        for (final MailAuthenticityMechanismResult result : spfResults) {
-            final SPFResult spfResult = (SPFResult) result.getResult();
+        if (bestOfSPF != null) {
+            final SPFResult spfResult = (SPFResult) bestOfSPF.getResult();
             switch (spfResult) {
                 case SOFTFAIL:
                 case TEMPERROR:
                 case NONE:
                 case NEUTRAL:
                     // Handle as neutral or fail, depending on the domain match
-                    overallResult.setStatus(result.isDomainMatch() ? MailAuthenticityStatus.NEUTRAL : MailAuthenticityStatus.FAIL);
+                    overallResult.setStatus(bestOfSPF.isDomainMatch() ? MailAuthenticityStatus.NEUTRAL : MailAuthenticityStatus.FAIL);
                     break;
                 case PASS:
                     // Pass
                     if (dkimFailed) {
-                        overallResult.setStatus(result.isDomainMatch() ? MailAuthenticityStatus.NEUTRAL : MailAuthenticityStatus.FAIL);
+                        overallResult.setStatus(bestOfSPF.isDomainMatch() ? MailAuthenticityStatus.NEUTRAL : MailAuthenticityStatus.FAIL);
                     } else {
-                        overallResult.setStatus(result.isDomainMatch() ? MailAuthenticityStatus.PASS : MailAuthenticityStatus.NEUTRAL);
+                        overallResult.setStatus(bestOfSPF.isDomainMatch() ? MailAuthenticityStatus.PASS : MailAuthenticityStatus.NEUTRAL);
                     }
                     break;
                 case PERMERROR:
@@ -409,9 +414,37 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
                 case POLICY:
                 default:
                     // Override
-                    overallResult.setStatus(result.getResult().convert());
+                    overallResult.setStatus(bestOfSPF.getResult().convert());
             }
         }
+    }
+
+    /**
+     * Picks the best {@link MailAuthenticityMechanismResult} from the specified {@link List} of results
+     * 
+     * @param results The {@link List} with the {@link MailAuthenticityMechanismResult}s
+     * @return The best {@link MailAuthenticityMechanismResult} according to their natural ordering,
+     *         or <code>null</code> if the {@link List} is empty, or the first (and only) element
+     *         if the {@link List} is a singleton
+     */
+    private MailAuthenticityMechanismResult pickBestResult(List<MailAuthenticityMechanismResult> results, List<Map<String, String>> unknownResults) {
+        if (results.isEmpty()) {
+            return null;
+        }
+        if (results.size() == 1) {
+            return results.get(0);
+        }
+        MailAuthenticityMechanismResult bestResult = results.remove(0);
+        Iterator<MailAuthenticityMechanismResult> iterator = results.iterator();
+        while (iterator.hasNext()) {
+            MailAuthenticityMechanismResult result = iterator.next();
+            if (result.getResult().getCode() < bestResult.getResult().getCode()) {
+                bestResult = result;
+            }
+        }
+        results.remove(bestResult);
+        //TODO: add the rest to unknownResults
+        return bestResult;
     }
 
     /**
