@@ -310,6 +310,9 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
     private void parseMechanisms(final List<String> elements, final List<MailAuthenticityMechanismResult> results, final List<Map<String, String>> unconsideredResults, final MailAuthenticityResult overallResult) {
         Collections.sort(elements, mailAuthComparator);
         for (final String element : elements) {
+            if (Strings.isEmpty(element)) {
+                continue;
+            }
             final Map<String, String> attributes = StringUtil.parseMap(element);
 
             final DefaultMailAuthenticityMechanism mechanism = DefaultMailAuthenticityMechanism.extractMechanism(attributes);
