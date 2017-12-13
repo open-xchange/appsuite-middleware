@@ -101,8 +101,9 @@ import com.openexchange.session.UserAndContext;
  * {@link DefaultMailAuthenticityMechanism#SPF} in that particular order.</p>
  *
  * <p>The default overall status of the {@link MailAuthenticityResult} is the {@link MailAuthenticityStatus#NEUTRAL}. If there are none of the above mentioned
- * mechnisms in the e-mail's <code>Authentication-Results</code> header, then that status applies. Unknown mechanisms and ptypes are ignored from the evaluation
- * but their raw data is included in the overall result's attributes under the {@link DefaultMailAuthenticityResultKey#UNCONSIDERED_AUTH_MECH_RESULTS} key.</p>
+ * mechanisms in the e-mail's <code>Authentication-Results</code> header, then that status applies. Unknown mechanisms, duplicate known mechanisms and <code>ptypes</code>
+ * are ignored from the evaluation but their raw data is included in the overall result's attributes under the
+ * {@link DefaultMailAuthenticityResultKey#UNCONSIDERED_AUTH_MECH_RESULTS} key.</p>
  *
  * <p>In case there are multiple <code>Authentication-Results</code> in the e-mail's headers, then all of them are evaluated (top to bottom). Their mechanisms are sorted
  * by their predefined ordinal (DMARC > DKIM > SPF) and evaluated in that order.</p>
