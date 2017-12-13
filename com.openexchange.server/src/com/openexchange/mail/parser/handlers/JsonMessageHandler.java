@@ -551,6 +551,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
 
         Map<MailAuthenticityResultKey, Object> attributes = authenticityResult.getAttributes();
         JSONObject result = new JSONObject(attributes.size());
+        JSONArray unconsideredResults = new JSONArray();
         for (MailAuthenticityResultKey key : attributes.keySet()) {
             if (!key.isVisible()) {
                 continue;
@@ -558,7 +559,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
             Object object = attributes.get(key);
             if (object instanceof Collection<?>) {
                 Collection<?> col = (Collection<?>) object;
-                JSONArray unconsideredResults = new JSONArray();
+
                 for (Object o : col) {
                     if (o instanceof MailAuthenticityMechanismResult) {
                         MailAuthenticityMechanismResult mechResult = (MailAuthenticityMechanismResult) o;
@@ -575,11 +576,11 @@ public final class JsonMessageHandler implements MailMessageHandler {
                         unconsideredResults.put(o);
                     }
                 }
-                result.put("unconsidered_results", unconsideredResults);
             } else {
                 result.put(key.getKey(), object);
             }
         }
+        result.put("unconsidered_results", unconsideredResults);
         result.put("status", authenticityResult.getStatus().getTechnicalName());
         return result;
     }
