@@ -155,6 +155,15 @@ public abstract class AbstractTestMailAuthenticity {
     }
 
     /**
+     * Asserts that the unconsidered {@link MailAuthenticityResult} contains the specified amount of results
+     *
+     * @param amount The amount of results
+     */
+    void assertUnconsideredAmount(int amount) {
+        assertEquals("The mail authenticity unconsidered results amount does not match", amount, result.getAttribute(DefaultMailAuthenticityResultKey.UNCONSIDERED_AUTH_MECH_RESULTS, List.class).size());
+    }
+
+    /**
      * Asserts that the specified {@link MailAuthenticityMechanismResult} contains the expected domain and status result
      *
      * @param actualMechanismResult The {@link MailAuthenticityMechanismResult}
