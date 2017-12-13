@@ -256,7 +256,7 @@ public class TestMailAuthenticityHandler extends AbstractTestMailAuthenticity {
         assertAmount(2);
 
         List<MailAuthenticityMechanismResult> results = result.getAttribute(DefaultMailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS, List.class);
-        assertAuthenticityMechanismResult(results.get(0), "aliceland.com", DMARCResult.PASS);
+        assertAuthenticityMechanismResult(results.get(0), "aliceland.com", "p=NONE sp=NONE dis=NONE", DMARCResult.PASS);
         assertAuthenticityMechanismResult(results.get(1), "aliceland.com", "ox.io: domain of alice@aliceland.com designates 1.2.3.4 as permitted sender", SPFResult.PASS);
     }
 

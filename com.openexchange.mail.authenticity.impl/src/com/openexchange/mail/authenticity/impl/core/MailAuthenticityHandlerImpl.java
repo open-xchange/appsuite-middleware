@@ -351,6 +351,9 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
         MailAuthenticityMechanismResult bestOfDMARC = pickBestResult(dmarcResults, unconsideredResults);
         MailAuthenticityMechanismResult bestOfDKIM = pickBestResult(dkimResults, unconsideredResults);
         MailAuthenticityMechanismResult bestOfSPF = pickBestResult(spfResults, unconsideredResults);
+        if (bestOfDMARC != null) {
+            results.add(bestOfDMARC);
+        }
         if (bestOfDKIM != null) {
             results.add(bestOfDKIM);
         }
@@ -359,7 +362,6 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
         }
 
         if (bestOfDMARC != null) {
-            results.add(bestOfDMARC);
             // If DMARC passes we set the overall status to PASS
             if (DMARCResult.PASS.equals(bestOfDMARC.getResult()) && bestOfDMARC.isDomainMatch()) {
                 overallResult.setStatus(MailAuthenticityStatus.PASS);
