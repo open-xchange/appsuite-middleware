@@ -355,12 +355,22 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
                     break;
             }
         }
+        results.clear();
 
         // Pick the best results for all mechanisms
         MailAuthenticityMechanismResult bestOfDMARC = pickBestResult(dmarcResults, unconsideredResults);
         MailAuthenticityMechanismResult bestOfDKIM = pickBestResult(dkimResults, unconsideredResults);
         MailAuthenticityMechanismResult bestOfSPF = pickBestResult(spfResults, unconsideredResults);
-        
+        if (bestOfDMARC != null) {
+            results.add(bestOfDMARC);
+        }
+        if (bestOfDKIM != null) {
+            results.add(bestOfDKIM);
+        }
+        if (bestOfSPF != null) {
+            results.add(bestOfSPF);
+        }
+
         if (bestOfDMARC != null) {
             // If DMARC passes we set the overall status to PASS
             if (DMARCResult.PASS.equals(bestOfDMARC.getResult()) && bestOfDMARC.isDomainMatch()) {
@@ -449,10 +459,11 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
         }
         results.remove(bestResult);
 
-        // Add the rest to unconsidered list
+        // Add the rest to unconsidered list and remove from the original
         for (MailAuthenticityMechanismResult result : results) {
             unconsideredResults.add(convert(result));
         }
+        results.clear();
         return bestResult;
     }
 
