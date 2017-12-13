@@ -79,6 +79,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.java.CharsetDetector;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
+import com.openexchange.java.UnsynchronizedByteArrayInputStream;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailFields;
 import com.openexchange.mail.api.IMailMessageStorage;
@@ -850,6 +851,10 @@ public final class MessageUtility {
     public static byte[] getBytesFrom(InputStream input, long maxSize) throws IOException {
         if (null == input) {
             return new byte[0];
+        }
+
+        if (input instanceof UnsynchronizedByteArrayInputStream) {
+            return Streams.stream2bytes(input);
         }
 
         // Check first byte
