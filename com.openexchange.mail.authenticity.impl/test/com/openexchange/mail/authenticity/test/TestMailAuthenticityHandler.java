@@ -381,7 +381,7 @@ public class TestMailAuthenticityHandler extends AbstractTestMailAuthenticity {
 
     /**
      * Tests the edge case where the <code>Authentication-Results</code> header field is present
-     * and one DMARC passed one faled but the <code>From</code> header has a different domain as in
+     * and one DMARC passed one failed but the <code>From</code> header has a different domain as in
      * the passing DMARC.
      */
     @Test

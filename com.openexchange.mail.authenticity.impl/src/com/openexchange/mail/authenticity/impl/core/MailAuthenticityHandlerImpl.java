@@ -443,7 +443,11 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
             }
         }
         results.remove(bestResult);
-        //TODO: add the rest to unknownResults
+
+        // Add the rest to unknown list
+        for (MailAuthenticityMechanismResult result : results) {
+            unknownResults.add(convert(result));
+        }
         return bestResult;
     }
 
@@ -474,6 +478,22 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
         }
 
         return unknownResults;
+    }
+
+    /**
+     * Converts the specified {@link MailAuthenticityMechanismResult} to a {@link Map}
+     * 
+     * @param result The {@link MailAuthenticityMechanismResult} to convert
+     * @return A {@link Map} with the converted {@link MailAuthenticityMechanismResult}
+     */
+    private Map<String, String> convert(MailAuthenticityMechanismResult result) {
+        final Map<String, String> unconsidered = new HashMap<>();
+        unconsidered.put("mechanism", result.getMechanism().getTechnicalName());
+        unconsidered.put("result", result.getResult().getTechnicalName());
+        if (!Strings.isEmpty(result.getReason())) {
+            unconsidered.put("reason", result.getReason());
+        }
+        return unconsidered;
     }
 
     /**
