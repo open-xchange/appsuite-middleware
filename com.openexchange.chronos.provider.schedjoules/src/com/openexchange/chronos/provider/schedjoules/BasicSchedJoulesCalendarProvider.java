@@ -51,6 +51,8 @@ package com.openexchange.chronos.provider.schedjoules;
 
 import static com.openexchange.chronos.provider.CalendarFolderProperty.COLOR_LITERAL;
 import static com.openexchange.chronos.provider.CalendarFolderProperty.optPropertyValue;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.Locale;
@@ -190,11 +192,30 @@ public class BasicSchedJoulesCalendarProvider extends BasicCachingCalendarProvid
             throw SchedJoulesProviderExceptionCodes.MISSING_ITEM_ID_FROM_CONFIG.create(-1, session.getUserId(), session.getContextId());
         }
 
-        //String locale = userConfig.optString(SchedJoulesFields.LOCALE, ServerSessionAdapter.valueOf(session).getUser().getLocale().getLanguage());
-
-        // Check & apply changes to extended properties
+        // Check and apply locale change
+        String locale = userConfig.optString(SchedJoulesFields.LOCALE, ServerSessionAdapter.valueOf(session).getUser().getLocale().getLanguage());
         boolean changed = false;
         JSONObject internalConfig = null != account.getInternalConfiguration() ? new JSONObject(account.getInternalConfiguration()) : new JSONObject();
+        try {
+            String url = internalConfig.optString(SchedJoulesFields.URL);
+            URL u = new URL(url);
+            String path = u.getQuery();
+            int startIndex = path.indexOf("l=");
+            int endIndex = path.indexOf("&", startIndex);
+            String l = path.substring(startIndex + 2, endIndex);
+            if (!l.equals(locale)) {
+                JSONObject item = fetchItem(session.getContextId(), itemId, locale);
+                internalConfig.putSafe(SchedJoulesFields.URL, item.getString(SchedJoulesFields.URL));
+                internalConfig.putSafe(SchedJoulesFields.NAME, item.getString(SchedJoulesFields.NAME));
+                changed = true;
+            }
+        } catch (MalformedURLException e) {
+            throw SchedJoulesProviderExceptionCodes.INVALID_URL.create(itemId, e);
+        } catch (JSONException e) {
+            throw SchedJoulesProviderExceptionCodes.JSON_ERROR.create(e.getMessage(), e);
+        }
+
+        // Check & apply changes to extended properties
         Object colorValue = optPropertyValue(settings.getExtendedProperties(), COLOR_LITERAL);
         if (null != colorValue && String.class.isInstance(colorValue) && false == colorValue.equals(internalConfig.opt(SchedJoulesFields.COLOR))) {
             internalConfig.putSafe(SchedJoulesFields.COLOR, colorValue);
@@ -213,7 +234,7 @@ public class BasicSchedJoulesCalendarProvider extends BasicCachingCalendarProvid
     }
 
     /**
-     * Fetches the calendar's metdata with the specified item and the specified locale from the SchedJoules server
+     * Fetches the calendar's metadata with the specified item and the specified locale from the SchedJoules server
      *
      * @param itemId The item identifier
      * @param locale The optional locale
