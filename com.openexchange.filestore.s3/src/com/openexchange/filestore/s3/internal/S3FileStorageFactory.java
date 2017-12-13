@@ -252,6 +252,25 @@ public class S3FileStorageFactory implements FileStorageProvider {
         if (false == Strings.isEmpty(signerOverride)) {
             clientConfiguration.setSignerOverride(signerOverride);
         }
+        String proxyHost = System.getProperty("http.proxyHost");
+
+        if(proxyHost != null) {
+            clientConfiguration.setProxyHost(proxyHost);
+            String proxyPort = System.getProperty("http.proxyPort");
+            if(proxyPort != null) {
+                clientConfiguration.setProxyPort(Integer.valueOf(proxyPort));
+            }
+
+            //TODO add nonProxyHost once aws lib has been updated
+
+            String login = System.getProperty("http.proxyUser");
+            String password = System.getProperty("http.proxyPassword");
+
+            if(login != null && password != null) {
+                clientConfiguration.setProxyUsername(login);
+                clientConfiguration.setProxyPassword(password);
+            }
+        }
         return clientConfiguration;
     }
 
