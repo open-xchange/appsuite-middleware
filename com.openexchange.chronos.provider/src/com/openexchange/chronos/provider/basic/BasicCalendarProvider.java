@@ -86,7 +86,7 @@ public interface BasicCalendarProvider extends CalendarProvider {
      * returned for persisting along with the updated calendar account.
      *
      * @param session The user's session
-     * @param calendarAccount The currently stored calendar account holding the obsolete user and current <i>internal</i> configuration
+     * @param account The currently stored calendar account holding the obsolete user and current <i>internal</i> configuration
      * @param settings The updated settings for the updated account as supplied by the client
      * @param parameters Additional calendar parameters, or <code>null</code> if not set
      * @return A JSON object holding the updated <i>internal</i> configuration to store along with update, or <code>null</code> if unchanged

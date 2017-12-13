@@ -99,12 +99,12 @@ public abstract class CachingCalendarAccess implements FolderCalendarAccess, War
     /**
      * The general key for persisting the caching information
      */
-    protected static final String CACHING = "folderCaching";
+    public static final String CACHING = "folderCaching";
 
     /**
      * The key for persisting the folders last update information
      */
-    protected static final String LAST_UPDATE = "lastUpdate";
+    public static final String LAST_UPDATE = "lastUpdate";
 
     private final ServerSession session;
     private final CalendarParameters parameters;
