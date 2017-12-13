@@ -333,8 +333,15 @@ public class Streams {
             System.arraycopy(buf, pos, newbuf, 0, len);
             return newbuf;
         }
+        // Check first byte
+        int check = is.read();
+        if (check < 0) {
+            Streams.close(is);
+            return new byte[0];
+        }
         try {
             final ByteArrayOutputStream bos = newByteArrayOutputStream(4096);
+            bos.write(check);
             final int buflen = 2048;
             final byte[] buf = new byte[buflen];
             for (int read; (read = is.read(buf, 0, buflen)) > 0;) {

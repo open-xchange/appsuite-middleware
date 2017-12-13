@@ -74,12 +74,10 @@ import com.openexchange.mail.mime.utils.MimeMessageUtility;
  */
 public final class ParameterList implements Cloneable, Serializable, Comparable<ParameterList> {
 
-    /**
-     * Serial version UID
-     */
-    private static final long serialVersionUID = 1085330725813918879L;
+    /** The logger constant */
+    static final transient org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ParameterList.class);
 
-    private static final transient org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ParameterList.class);
+    private static final long serialVersionUID = 1085330725813918879L;
 
     /**
      * The regular expression to parse parameters
@@ -246,20 +244,15 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
     }
 
     private void parseParameter(final String name, final String value) {
-        String val;
-        if (Strings.isEmpty(value)) {
-            val = "";
-        } else {
-            val =
-                (value.charAt(0) == '"') && (value.charAt(value.length() - 1) == '"') ? unescape(value.substring(1, value.length() - 1)) : value;
-        }
+        String val = Strings.isEmpty(value) ? "" : (value.charAt(0) == '"') && (value.charAt(value.length() - 1) == '"') ? unescape(value.substring(1, value.length() - 1)) : value;
         int pos = name.indexOf('*');
-        if (pos == -1) {
+        if (pos < 0) {
             parameters.put(name, new Parameter(name, MimeMessageUtility.decodeMultiEncodedHeader(val)));
         } else {
             Parameter p = null;
             final String soleName = name.substring(0, pos);
             String procName = name;
+            String rawValue;
             /*
              * Check if parameter is marked as encoded: name
              */
@@ -271,33 +264,32 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
                     /*
                      * Expect utf-8'EN'%C2%A4%20txt
                      */
-                    final String[] encInfos = RFC2231Tools.parseRFC2231Value(val);
+                    String[] encInfos = RFC2231Tools.parseRFC2231Value(val);
                     if (null == encInfos) {
                         return;
                     }
-                    val = RFC2231Tools.rfc2231Decode(encInfos[2], encInfos[0]);
-                    p = new Parameter(soleName);
-                    p.charset = encInfos[0];
-                    p.language = encInfos[1];
+                    p = new Parameter(soleName, encInfos[0], encInfos[1]);
+                    rawValue = encInfos[2];
                     parameters.put(soleName, p);
                 } else {
                     /*
                      * Expect %C2%A4%20txt
                      */
-                    val = RFC2231Tools.rfc2231Decode(val, p.charset);
+                    rawValue = val;
                 }
             } else { // non-encoded
                 p = parameters.get(soleName);
                 if (null == p) {
-                    p = new Parameter(soleName);
+                    p = new Parameter(soleName, "UTF-8", "");
                     parameters.put(soleName, p);
                 }
+                rawValue = val;
             }
             /*
              * Check for parameter continuation: name1
              */
             if (pos == -1) {
-                p.addContiguousValue(val);
+                p.addContiguousEncodedValue(rawValue);
             } else {
                 int num = -1;
                 try {
@@ -306,7 +298,7 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
                     num = -1;
                 }
                 if (num != -1) {
-                    p.setContiguousValue(num, val);
+                    p.setContiguousEncodedValue(num, rawValue);
                 }
             }
         }
@@ -361,7 +353,7 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
         if (!p.rfc2231) {
             p.rfc2231 = true;
         }
-        p.addContiguousValue(value);
+        p.addContiguousEncodedValue(value);
     }
 
     /**
@@ -448,19 +440,17 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
      * @param skipEmptyParam <code>true</code> to skip empty parameters; otherwise <code>false</code>
      */
     public void appendRFC2045String(final StringBuilder sb, final boolean skipEmptyParam) {
-        final int size = parameters.size();
-        final List<String> names = new ArrayList<String>(size);
+        int size = parameters.size();
+        List<String> names = new ArrayList<String>(size);
         names.addAll(parameters.keySet());
         Collections.sort(names);
         if (skipEmptyParam) {
-            for (final String name : names) {
-                final Parameter parameter = parameters.get(name);
-                if (!parameter.contiguousValues.isEmpty()) {
-                    parameter.appendRFC2045String(sb);
-                }
+            for (String name : names) {
+                Parameter parameter = parameters.get(name);
+                parameter.appendRFC2045String(sb);
             }
         } else {
-            for (final String name : names) {
+            for (String name : names) {
                 parameters.get(name).appendRFC2045String(sb);
             }
         }
@@ -550,32 +540,22 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
      */
     private static final class Parameter implements Cloneable, Serializable, Comparable<Parameter> {
 
-        private static final transient org.slf4j.Logger LOG1 = org.slf4j.LoggerFactory.getLogger(Parameter.class);
-
         private static final long serialVersionUID = 7978948703870567515L;
 
         boolean rfc2231;
-
         final String name;
-
-        ArrayList<String> contiguousValues;
-
-        String charset;
-
-        String language;
-
-        String value;
+        Value value;
 
         /**
          * Initializes a new rfc2231 parameter.
          *
          * @param name The parameter name without asterix characters
          */
-        public Parameter(final String name) {
+        public Parameter(String name, String charset, String language) {
             super();
             rfc2231 = true;
             this.name = name;
-            contiguousValues = new ArrayList<String>(2);
+            value = new RFC2231Value(charset, language);
         }
 
         /**
@@ -588,10 +568,7 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
             super();
             rfc2231 = false;
             this.name = name;
-            contiguousValues = new ArrayList<String>(1);
-            if ((null != value) && (value.length() > 0)) {
-                contiguousValues.add(value);
-            }
+            this.value = new DirectValue(value);
         }
 
         @Override
@@ -618,11 +595,9 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
         public int hashCode() {
             final int prime = 31;
             int result = 1;
-            result = prime * result + ((charset == null) ? 0 : charset.hashCode());
-            result = prime * result + ((contiguousValues == null) ? 0 : getValue().hashCode());
-            result = prime * result + ((language == null) ? 0 : language.hashCode());
-            result = prime * result + ((name == null) ? 0 : name.hashCode());
             result = prime * result + (rfc2231 ? 1231 : 1237);
+            result = prime * result + ((name == null) ? 0 : name.hashCode());
+            result = prime * result + ((getValue() == null) ? 0 : getValue().hashCode());
             return result;
         }
 
@@ -637,26 +612,8 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
             if (getClass() != obj.getClass()) {
                 return false;
             }
-            final Parameter other = (Parameter) obj;
-            if (charset == null) {
-                if (other.charset != null) {
-                    return false;
-                }
-            } else if (!charset.equalsIgnoreCase(other.charset)) {
-                return false;
-            }
-            if (contiguousValues == null) {
-                if (other.contiguousValues != null) {
-                    return false;
-                }
-            } else if (!getValue().equalsIgnoreCase(other.getValue())) {
-                return false;
-            }
-            if (language == null) {
-                if (other.language != null) {
-                    return false;
-                }
-            } else if (!language.equals(other.language)) {
+            Parameter other = (Parameter) obj;
+            if (rfc2231 != other.rfc2231) {
                 return false;
             }
             if (name == null) {
@@ -666,7 +623,11 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
             } else if (!name.equals(other.name)) {
                 return false;
             }
-            if (rfc2231 != other.rfc2231) {
+            if (getValue() == null) {
+                if (other.getValue() != null) {
+                    return false;
+                }
+            } else if (!getValue().equals(other.getValue())) {
                 return false;
             }
             return true;
@@ -676,154 +637,202 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
         public Object clone() {
             try {
                 final Parameter clone = (Parameter) super.clone();
-                final int size = contiguousValues.size();
-                clone.contiguousValues = new ArrayList<String>(size);
-                for (int i = 0; i < size; i++) {
-                    clone.contiguousValues.add(contiguousValues.get(i));
-                }
-                clone.value = null;
                 return clone;
             } catch (final CloneNotSupportedException e) {
-                LOG1.error("", e);
+                LOG.error("", e);
                 throw new RuntimeException("Clone failed even though 'Cloneable' interface is implemented");
             }
 
         }
 
-        /**
-         * Gets the charset
-         *
-         * @return the charset
-         */
-        public String getCharset() {
-            return charset;
+        public void addContiguousEncodedValue(String encodedValue) {
+            value.addContiguousValue(encodedValue);
         }
 
-        /**
-         * Sets the charset
-         *
-         * @param charset the charset to set
-         */
-        public void setCharset(final String charset) {
-            this.charset = charset;
-        }
-
-        /**
-         * Gets the language
-         *
-         * @return the language
-         */
-        public String getLanguage() {
-            return language;
-        }
-
-        /**
-         * Sets the language
-         *
-         * @param language the language to set
-         */
-        public void setLanguage(final String language) {
-            this.language = language;
-        }
-
-        public void addContiguousValue(final String contiguousValue) {
-            if (null != value) {
-                value = null;
-            }
-            if ((null != contiguousValue) && (contiguousValue.length() > 0)) {
-                contiguousValues.add(contiguousValue);
-            }
-        }
-
-        public void setContiguousValue(final int num, final String contiguousValue) {
-            if (null != value) {
-                value = null;
-            }
-            if ((null != contiguousValue) && (contiguousValue.length() > 0)) {
-                while (num >= contiguousValues.size()) {
-                    contiguousValues.add("");
-                }
-                contiguousValues.set(num, contiguousValue);
-            }
+        public void setContiguousEncodedValue(int num, String encodedValue) {
+            value.setContiguousValue(num, encodedValue);
         }
 
         public String getValue() {
-            if (null == value) {
-                final StringBuilder sb = new StringBuilder(64);
-                final int size = contiguousValues.size();
-                for (int i = 0; i < size; i++) {
-                    sb.append(contiguousValues.get(i));
-                }
-                value = sb.toString();
-            }
-            return value;
+            return null == value ? null : value.getValue();
         }
 
         public void appendRFC2045String(final StringBuilder sb) {
-            final int size = contiguousValues.size();
-            if (size == 0) {
+            value.appendRFC2045String(name, sb);
+        }
+
+    } // End of class Parameter
+
+    private static abstract class Value implements Cloneable {
+
+        protected Value() {
+            super();
+        }
+
+        abstract void addContiguousValue(final String contiguousValue);
+
+        abstract void setContiguousValue(final int num, final String contiguousValue);
+
+        abstract String getValue();
+
+        abstract void appendRFC2045String(String name, StringBuilder sb);
+    }
+
+    private static class DirectValue extends Value {
+
+        private final String value;
+
+        DirectValue(String value) {
+            super();
+            this.value = Strings.isEmpty(value) ? null : value;
+        }
+
+        @Override
+        void addContiguousValue(String contiguousValue) {
+            // Ignore
+        }
+
+        @Override
+        void setContiguousValue(int num, String contiguousValue) {
+            // Ignore
+        }
+
+        @Override
+        String getValue() {
+            return value;
+        }
+
+        @Override
+        void appendRFC2045String(String name, StringBuilder sb) {
+            if (null == value) {
                 sb.append("; ").append(name);
                 return;
             }
-            if (rfc2231) {
-                if (size == 1) {
-                    sb.append("; ").append(name);
-                    if (getNextValidPos(0, size) != -1) {
-                        if (RFC2231Tools.isAscii(getValue())) {
-                            sb.append('=').append(checkQuotation(getValue()));
-                        } else {
-                            sb.append("*=").append(checkQuotation(RFC2231Tools.rfc2231Encode(getValue(), CHARSET_UTF_8, null, true)));
-                        }
-                    }
-                } else {
-                    boolean needsEncoding = false;
-                    for (int i = 0; (i < size) && !needsEncoding; i++) {
-                        needsEncoding |= !RFC2231Tools.isAscii(contiguousValues.get(i));
-                    }
-                    /*
-                     * Append first
-                     */
-                    int startPos = getNextValidPos(0, size);
-                    if (startPos == -1) {
-                        sb.append("; ").append(name);
-                        return;
-                    }
-                    int count = 1;
-                    sb.append("; ").append(name).append('*').append(count++);
-                    if (needsEncoding) {
-                        sb.append("*=").append(
-                            checkQuotation(RFC2231Tools.rfc2231Encode(contiguousValues.get(startPos), CHARSET_UTF_8, null, true, true)));
-                    } else {
-                        sb.append('=').append(checkQuotation(contiguousValues.get(startPos)));
-                    }
-                    /*
-                     * Append remaining values
-                     */
-                    while ((startPos = getNextValidPos(startPos + 1, size)) != -1) {
-                        sb.append("; ").append(name).append('*').append(count++);
-                        final String chunk = contiguousValues.get(startPos);
-                        if (RFC2231Tools.isAscii(chunk)) {
-                            sb.append('=').append(checkQuotation(chunk));
-                        } else {
-                            sb.append("*=").append(checkQuotation(RFC2231Tools.rfc2231Encode(chunk, CHARSET_UTF_8, null, false)));
-                        }
-                    }
-                }
-                return;
-            }
+
             try {
                 sb.append("; ").append(name).append('=').append(checkQuotation(MimeUtility.encodeText(getValue(), CHARSET_UTF_8, "Q")));
             } catch (final UnsupportedEncodingException e) {
                 /*
                  * Cannot occur
                  */
-                LOG1.error("", e);
+                LOG.error("", e);
+            }
+        }
+
+        @Override
+        public Object clone() {
+            try {
+                DirectValue clone = (DirectValue) super.clone();
+                return clone;
+            } catch (final CloneNotSupportedException e) {
+                LOG.error("", e);
+                throw new RuntimeException("Clone failed even though 'Cloneable' interface is implemented");
+            }
+        }
+    }
+
+    private static class RFC2231Value extends Value {
+
+        private String value;
+        private List<String> encodedValues;
+        private final String charset;
+        private final String language;
+
+        RFC2231Value(String charset, String language) {
+            super();
+            this.charset = charset;
+            this.language = language;
+            encodedValues = new ArrayList<>(4);
+        }
+
+        @Override
+        public void addContiguousValue(String encodedValue) {
+            if (null != value) {
+                value = null;
+            }
+            if (Strings.isNotEmpty(encodedValue)) {
+                encodedValues.add(encodedValue);
+            }
+        }
+
+        @Override
+        public void setContiguousValue(int num, String encodedValue) {
+            if (null != value) {
+                value = null;
+            }
+            if (Strings.isNotEmpty(encodedValue)) {
+                while (num >= encodedValues.size()) {
+                    encodedValues.add("");
+                }
+                encodedValues.set(num, encodedValue);
+            }
+        }
+
+        @Override
+        public String getValue() {
+            if (null == value) {
+                StringBuilder sb = new StringBuilder(64);
+                for (String encodedValue : encodedValues) {
+                    sb.append(encodedValue);
+                }
+                value = RFC2231Tools.rfc2231Decode(sb.toString(), charset);
+            }
+            return value;
+        }
+
+        @Override
+        void appendRFC2045String(String name, StringBuilder sb) {
+            int size = encodedValues.size();
+            if (size == 0) {
+                sb.append("; ").append(name);
+                return;
+            }
+
+            if (size == 1) {
+                sb.append("; ").append(name);
+                if (getNextValidPos(0, size) != -1) {
+                    if (RFC2231Tools.isAscii(getValue())) {
+                        sb.append('=').append(checkQuotation(getValue()));
+                    } else {
+                        sb.append("*=").append(checkQuotation(RFC2231Tools.rfc2231Encode(getValue(), CHARSET_UTF_8, null, true)));
+                    }
+                }
+            } else {
+                // Append first
+                int startPos = getNextValidPos(0, size);
+                if (startPos == -1) {
+                    sb.append("; ").append(name);
+                    return;
+                }
+                int count = 1;
+                sb.append("; ").append(name).append('*').append(count++);
+                {
+                    String firstChunk = encodedValues.get(startPos);
+                    if (firstChunk.indexOf('%') < 0) {
+                        sb.append("=");
+                    } else {
+                        sb.append("*=");
+                    }
+                    sb.append(charset).append('\'').append((language == null) || (language.length() == 0) ? "" : language).append('\'');
+                    sb.append(firstChunk);
+                }
+
+                // Append remaining values
+                while ((startPos = getNextValidPos(startPos + 1, size)) != -1) {
+                    sb.append("; ").append(name).append('*').append(count++);
+                    String chunk = encodedValues.get(startPos);
+                    if (chunk.indexOf('%') < 0) {
+                        sb.append('=').append(checkQuotation(chunk));
+                    } else {
+                        sb.append("*=").append(chunk);
+                    }
+                }
             }
         }
 
         private int getNextValidPos(final int fromPos, final int size) {
             for (int i = fromPos; i < size; i++) {
-                final String val = contiguousValues.get(i);
+                String val = encodedValues.get(i);
                 if (val != null && val.length() > 0) {
                     return i;
                 }
@@ -831,70 +840,23 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
             return -1;
         }
 
-        public String toUnicodeString() {
-            final int size = contiguousValues.size();
-            if (size == 0) {
-                return new StringBuilder(name.length() + 2).append("; ").append(name).toString();
-            }
-            if (rfc2231) {
-                final StringBuilder sb = new StringBuilder(64);
-                if (size == 1) {
-                    sb.append("; ").append(name);
-                    if (getNextValidPos(0, size) != -1) {
-                        if (RFC2231Tools.isAscii(getValue())) {
-                            sb.append('=').append(checkQuotation(getValue()));
-                        } else {
-                            sb.append("*=").append(checkQuotation(RFC2231Tools.rfc2231Encode(getValue(), CHARSET_UTF_8, null, true)));
-                        }
-                    }
-                } else {
-                    boolean needsEncoding = false;
-                    for (int i = 0; (i < size) && !needsEncoding; i++) {
-                        needsEncoding |= !RFC2231Tools.isAscii(contiguousValues.get(i));
-                    }
-                    /*
-                     * Append first
-                     */
-                    int startPos = getNextValidPos(0, size);
-                    if (startPos == -1) {
-                        sb.append("; ").append(name);
-                        return sb.toString();
-                    }
-                    int count = 1;
-                    sb.append("; ").append(name).append('*').append(count++);
-                    if (needsEncoding) {
-                        sb.append("*=").append(
-                            checkQuotation(RFC2231Tools.rfc2231Encode(contiguousValues.get(0), CHARSET_UTF_8, null, true, true)));
-                    } else {
-                        sb.append('=').append(checkQuotation(contiguousValues.get(0)));
-                    }
-                    /*
-                     * Append remaining values
-                     */
-                    while ((startPos = getNextValidPos(startPos + 1, size)) != -1) {
-                        sb.append("; ").append(name).append('*').append(count++);
-                        final String chunk = contiguousValues.get(startPos);
-                        if (RFC2231Tools.isAscii(chunk)) {
-                            sb.append('=').append(checkQuotation(chunk));
-                        } else {
-                            sb.append("*=").append(checkQuotation(RFC2231Tools.rfc2231Encode(chunk, CHARSET_UTF_8, null, false)));
-                        }
-                    }
-                }
-                return sb.toString();
-            }
+        @Override
+        public Object clone() {
             try {
-                return new StringBuilder(64).append("; ").append(name).append('=').append(
-                    checkQuotation(MimeUtility.encodeText(CHARSET_UTF_8, "Q", getValue()))).toString();
-            } catch (final UnsupportedEncodingException e) {
-                /*
-                 * Cannot occur
-                 */
-                LOG1.error("", e);
-                return null;
+                RFC2231Value clone = (RFC2231Value) super.clone();
+                int size = encodedValues.size();
+                clone.encodedValues = new ArrayList<String>(size);
+                for (int i = 0; i < size; i++) {
+                    clone.encodedValues.add(encodedValues.get(i));
+                }
+                clone.value = null;
+                return clone;
+            } catch (final CloneNotSupportedException e) {
+                LOG.error("", e);
+                throw new RuntimeException("Clone failed even though 'Cloneable' interface is implemented");
             }
-        }
 
-    } // End of class Parameter
+        }
+    }
 
 }
