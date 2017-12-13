@@ -364,9 +364,6 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
         MailAuthenticityMechanismResult bestOfDMARC = pickBestResult(dmarcResults, unconsideredResults);
         MailAuthenticityMechanismResult bestOfDKIM = pickBestResult(dkimResults, unconsideredResults);
         MailAuthenticityMechanismResult bestOfSPF = pickBestResult(spfResults, unconsideredResults);
-        if (bestOfDMARC != null) {
-            results.add(bestOfDMARC);
-        }
         if (bestOfDKIM != null) {
             results.add(bestOfDKIM);
         }
@@ -375,6 +372,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
         }
 
         if (bestOfDMARC != null) {
+            results.add(bestOfDMARC);
             // If DMARC passes we set the overall status to PASS
             if (DMARCResult.PASS.equals(bestOfDMARC.getResult()) && bestOfDMARC.isDomainMatch()) {
                 overallResult.setStatus(MailAuthenticityStatus.PASS);
@@ -385,52 +383,76 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
             }
         }
 
-        boolean dkimFailed = false;
-        if (bestOfDKIM != null) {
-            // The DMARC status was NEUTRAL or none existing, check for DKIM
-            final DKIMResult dkimResult = (DKIMResult) bestOfDKIM.getResult();
-            switch (dkimResult) {
-                case PERMFAIL:
-                case FAIL:
-                    dkimFailed = true;
-                    break;
-                case PASS:
-                    overallResult.setStatus(bestOfDKIM.isDomainMatch() ? MailAuthenticityStatus.PASS : MailAuthenticityStatus.NEUTRAL);
-                    break;
-                default:
-                    overallResult.setStatus(bestOfDKIM.getResult().convert());
-            }
-        }
-
+        // The DMARC status was NEUTRAL or none existing, check for DKIM
+        boolean dkimFailed = checkDKIM(overallResult, bestOfDKIM);
         // Continue with SPF
-        if (bestOfSPF != null) {
-            final SPFResult spfResult = (SPFResult) bestOfSPF.getResult();
-            switch (spfResult) {
-                case SOFTFAIL:
-                case TEMPERROR:
-                case NONE:
-                case NEUTRAL:
-                    // Handle as neutral or fail, depending on the domain match
+        checkSPF(overallResult, bestOfSPF, dkimFailed);
+    }
+
+    /**
+     * Check the DKIM best of result and determine the overall status
+     * 
+     * @param overallResult The overall {@link MailAuthenticityResult}
+     * @param bestOfDKIM The best of DKIM {@link MailAuthenticityMechanismResult}
+     * @return <code>true</code> if DKIM failed, <code>false</code> otherwise
+     */
+    private boolean checkDKIM(final MailAuthenticityResult overallResult, MailAuthenticityMechanismResult bestOfDKIM) {
+        if (bestOfDKIM == null) {
+            return false;
+        }
+        boolean dkimFailed = false;
+        final DKIMResult dkimResult = (DKIMResult) bestOfDKIM.getResult();
+        switch (dkimResult) {
+            case PERMFAIL:
+            case FAIL:
+                dkimFailed = true;
+                break;
+            case PASS:
+                overallResult.setStatus(bestOfDKIM.isDomainMatch() ? MailAuthenticityStatus.PASS : MailAuthenticityStatus.NEUTRAL);
+                break;
+            default:
+                overallResult.setStatus(bestOfDKIM.getResult().convert());
+        }
+        return dkimFailed;
+    }
+
+    /**
+     * Check the SPF best of result and determine the overall status
+     * 
+     * @param overallResult The overall {@link MailAuthenticityResult}
+     * @param bestOfSPF The best of SPF {@link MailAuthenticityMechanismResult}
+     * @param dkimFailed the status of DKIM
+     */
+    private void checkSPF(final MailAuthenticityResult overallResult, MailAuthenticityMechanismResult bestOfSPF, boolean dkimFailed) {
+        if (bestOfSPF == null) {
+            return;
+        }
+        final SPFResult spfResult = (SPFResult) bestOfSPF.getResult();
+        switch (spfResult) {
+            case SOFTFAIL:
+            case TEMPERROR:
+            case NONE:
+            case NEUTRAL:
+                // Handle as neutral or fail, depending on the domain match
+                overallResult.setStatus(bestOfSPF.isDomainMatch() ? MailAuthenticityStatus.NEUTRAL : MailAuthenticityStatus.FAIL);
+                break;
+            case PASS:
+                // Pass
+                if (dkimFailed) {
                     overallResult.setStatus(bestOfSPF.isDomainMatch() ? MailAuthenticityStatus.NEUTRAL : MailAuthenticityStatus.FAIL);
-                    break;
-                case PASS:
-                    // Pass
-                    if (dkimFailed) {
-                        overallResult.setStatus(bestOfSPF.isDomainMatch() ? MailAuthenticityStatus.NEUTRAL : MailAuthenticityStatus.FAIL);
-                    } else {
-                        overallResult.setStatus(bestOfSPF.isDomainMatch() ? MailAuthenticityStatus.PASS : MailAuthenticityStatus.NEUTRAL);
-                    }
-                    break;
-                case PERMERROR:
-                case FAIL:
-                    // Handle as fail
-                    overallResult.setStatus(MailAuthenticityStatus.FAIL);
-                    break;
-                case POLICY:
-                default:
-                    // Override
-                    overallResult.setStatus(bestOfSPF.getResult().convert());
-            }
+                } else {
+                    overallResult.setStatus(bestOfSPF.isDomainMatch() ? MailAuthenticityStatus.PASS : MailAuthenticityStatus.NEUTRAL);
+                }
+                break;
+            case PERMERROR:
+            case FAIL:
+                // Handle as fail
+                overallResult.setStatus(MailAuthenticityStatus.FAIL);
+                break;
+            case POLICY:
+            default:
+                // Override
+                overallResult.setStatus(bestOfSPF.getResult().convert());
         }
     }
 
