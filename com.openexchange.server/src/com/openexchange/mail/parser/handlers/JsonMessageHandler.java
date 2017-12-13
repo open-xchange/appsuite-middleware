@@ -432,7 +432,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                     jsonObject.put(TEXT_PREVIEW, mail.getTextPreview());
                 }
                 MailAuthenticityResult mailAuthenticityResult = mail.getAuthenticityResult();
-                jsonObject.put(AUTHENTICATION_RESULTS, null == mailAuthenticityResult ? JSONObject.NULL : JsonMessageHandler.authenticationMechanismResultsToJson(mailAuthenticityResult));
+                jsonObject.put(AUTHENTICATION_RESULTS, null == mailAuthenticityResult ? JSONObject.EMPTY_OBJECT : JsonMessageHandler.authenticationMechanismResultsToJson(mailAuthenticityResult));
                 // Guard info
                 if (mail.containsSecurityInfo()) {
                     SecurityInfo securityInfo = mail.getSecurityInfo();
@@ -521,12 +521,12 @@ public final class JsonMessageHandler implements MailMessageHandler {
      * That is the <code>status</code> and the <code>trustedDomain</code> (if present)
      *
      * @param authenticationResult The authentication result to create the JSON representation for
-     * @return The JSON representation
+     * @return The JSON representation or an empty {@link JSONObject} if no authenticity result available
      * @throws JSONException If JSON representation cannot be returned
      */
     public static JSONObject authenticationOverallResultToJson(MailAuthenticityResult authenticationResult) throws JSONException {
         if (null == authenticationResult) {
-            return null;
+            return JSONObject.EMPTY_OBJECT;
         }
 
         JSONObject result = new JSONObject(2);
@@ -541,12 +541,12 @@ public final class JsonMessageHandler implements MailMessageHandler {
      * Creates the JSON representation for specified <code>MailAuthenticationResult</code> instance.
      *
      * @param authenticationResult The authentication result to create the JSON representation for
-     * @return The JSON representation
+     * @return The JSON representation or an empty {@link JSONObject} if no authenticity result available
      * @throws JSONException If JSON representation cannot be returned
      */
     public static JSONObject authenticationMechanismResultsToJson(MailAuthenticityResult authenticityResult) throws JSONException {
         if (null == authenticityResult) {
-            return null;
+            return JSONObject.EMPTY_OBJECT;
         }
 
         Map<MailAuthenticityResultKey, Object> attributes = authenticityResult.getAttributes();
