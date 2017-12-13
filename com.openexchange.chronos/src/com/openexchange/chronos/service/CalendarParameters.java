@@ -133,13 +133,6 @@ public interface CalendarParameters {
     /**
      * {@link Boolean}
      * <p/>
-     * Indicates whether (soft) conflicts of attendees should be ignored when saving a meeting.
-     */
-    static final String PARAMETER_IGNORE_CONFLICTS = "ignore_conflicts";
-
-    /**
-     * {@link Boolean}
-     * <p/>
      * Indicates whether an event should only be saved when there are (soft) conflicts of attendees or not.
      */
     static final String PARAMETER_CHECK_CONFLICTS = "checkConflicts";
