@@ -209,15 +209,15 @@ public class Utils {
     }
 
     /**
-     * Gets a value indicating whether (soft) conflicts of internal attendees should be ignored during event creation or update or not,
-     * based on the value of {@link CalendarParameters#PARAMETER_IGNORE_CONFLICTS} in the supplied parameters.
+     * Gets a value indicating whether (soft) conflicts of internal attendees should be checked during event creation or update or not,
+     * based on the value of {@link CalendarParameters#PARAMETER_CHECK_CONFLICTS} in the supplied parameters.
      *
      * @param parameters The calendar parameters to evaluate
-     * @return <code>true</code> if (soft) conflicts should be ignored, <code>false</code>, otherwise
-     * @see CalendarParameters#PARAMETER_IGNORE_CONFLICTS
+     * @return <code>true</code> if (soft) conflicts should be checked, <code>false</code>, otherwise
+     * @see CalendarParameters#PARAMETER_CHECK_CONFLICTS
      */
-    public static boolean isIgnoreConflicts(CalendarParameters parameters) {
-        return parameters.get(CalendarParameters.PARAMETER_IGNORE_CONFLICTS, Boolean.class, Boolean.FALSE).booleanValue();
+    public static boolean isCheckConflicts(CalendarParameters parameters) {
+        return parameters.get(CalendarParameters.PARAMETER_CHECK_CONFLICTS, Boolean.class, Boolean.FALSE).booleanValue();
     }
 
     /**

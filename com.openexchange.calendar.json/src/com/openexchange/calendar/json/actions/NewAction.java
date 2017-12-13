@@ -107,7 +107,9 @@ public final class NewAction extends AppointmentAction {
         if (appointment.containsNotification()) {
             session.set(CalendarParameters.PARAMETER_NOTIFICATION, Boolean.valueOf(appointment.getNotification()));
         }
-        session.set(CalendarParameters.PARAMETER_IGNORE_CONFLICTS, Boolean.valueOf(appointment.getIgnoreConflicts()));
+        if (false == appointment.getIgnoreConflicts()) {
+            session.set(CalendarParameters.PARAMETER_CHECK_CONFLICTS, Boolean.TRUE);
+        }
         Event event = getEventConverter(session).getEvent(appointment, null);
         String folderID = String.valueOf(appointment.getParentFolderID());
         CalendarResult result;

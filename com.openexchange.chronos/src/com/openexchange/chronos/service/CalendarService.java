@@ -301,7 +301,7 @@ public interface CalendarService {
      * <p/>
      * The following calendar parameters are evaluated:
      * <ul>
-     * <li>{@link CalendarParameters#PARAMETER_IGNORE_CONFLICTS}</li>
+     * <li>{@link CalendarParameters#PARAMETER_CHECK_CONFLICTS}</li>
      * <li>{@link CalendarParameters#PARAMETER_NOTIFICATION}</li>
      * </ul>
      *
@@ -317,7 +317,7 @@ public interface CalendarService {
      * <p/>
      * The following calendar parameters are evaluated:
      * <ul>
-     * <li>{@link CalendarParameters#PARAMETER_IGNORE_CONFLICTS}</li>
+     * <li>{@link CalendarParameters#PARAMETER_CHECK_CONFLICTS}</li>
      * <li>{@link CalendarParameters#PARAMETER_NOTIFICATION}</li>
      * </ul>
      *
@@ -343,7 +343,7 @@ public interface CalendarService {
      * <p/>
      * The following calendar parameters are evaluated:
      * <ul>
-     * <li>{@link CalendarParameters#PARAMETER_IGNORE_CONFLICTS}</li>
+     * <li>{@link CalendarParameters#PARAMETER_CHECK_CONFLICTS}</li>
      * <li>{@link CalendarParameters#PARAMETER_NOTIFICATION}</li>
      * </ul>
      *
@@ -403,7 +403,7 @@ public interface CalendarService {
      * <p/>
      * The following calendar parameters are evaluated:
      * <ul>
-     * <li>{@link CalendarParameters#PARAMETER_IGNORE_CONFLICTS}</li>
+     * <li>{@link CalendarParameters#PARAMETER_CHECK_CONFLICTS}</li>
      * <li>{@link CalendarParameters#PARAMETER_NOTIFICATION}</li>
      * <li>{@link CalendarParameters#UID_CONFLICT_STRATEGY}</li>
      * </ul>

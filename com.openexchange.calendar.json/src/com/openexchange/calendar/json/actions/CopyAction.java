@@ -88,7 +88,9 @@ public final class CopyAction extends AppointmentAction {
 
     @Override
     protected AJAXRequestResult perform(CalendarSession session, AppointmentAJAXRequest request) throws OXException, JSONException {
-        session.set(CalendarParameters.PARAMETER_IGNORE_CONFLICTS, Boolean.valueOf(request.getParameter(AppointmentFields.IGNORE_CONFLICTS)));
+        if (false == Boolean.parseBoolean(request.getParameter(AppointmentFields.IGNORE_CONFLICTS))) {
+            session.set(CalendarParameters.PARAMETER_CHECK_CONFLICTS, Boolean.TRUE);
+        }
         String folderId = request.checkParameter(AJAXServlet.PARAMETER_FOLDERID);
         String objectId = request.checkParameter(AJAXServlet.PARAMETER_ID);
         JSONObject jsonObject = request.getData();

@@ -51,7 +51,7 @@ package com.openexchange.chronos.json.action;
 
 import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_EXPAND_OCCURRENCES;
 import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_FIELDS;
-import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_IGNORE_CONFLICTS;
+import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_CHECK_CONFLICTS;
 import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_INCLUDE_PRIVATE;
 import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_MASK_ID;
 import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_NOTIFICATION;
@@ -98,6 +98,7 @@ public abstract class AbstractChronosAction implements AJAXActionService {
     protected static final String PARAM_RANGE_END = "rangeEnd";
     protected static final String PARAM_EXPAND = "expand";
     protected static final String PARAM_IGNORE_CONFLICTS = "ignoreConflicts";
+    protected static final String PARAM_CHECK_CONFLICTS = "checkConflicts";
     protected static final String PARAM_SEND_INTERNAL_NOTIFICATIONS = "sendInternalNotifications";
     protected static final String PARAM_RECURRENCE_ID = "recurrenceId";
 
@@ -232,8 +233,8 @@ public abstract class AbstractChronosAction implements AJAXActionService {
                 return new AbstractMap.SimpleEntry<String, Date>(PARAMETER_RANGE_END, new Date(endTime.getTimestamp()));
             case PARAM_EXPAND:
                 return new AbstractMap.SimpleEntry<String, Boolean>(PARAMETER_EXPAND_OCCURRENCES, Boolean.valueOf(value));
-            case PARAM_IGNORE_CONFLICTS:
-                return new AbstractMap.SimpleEntry<String, Boolean>(PARAMETER_IGNORE_CONFLICTS, Boolean.parseBoolean(value));
+            case PARAM_CHECK_CONFLICTS:
+                return new AbstractMap.SimpleEntry<String, Boolean>(PARAMETER_CHECK_CONFLICTS, Boolean.valueOf(value));
             case PARAMETER_ORDER_BY:
                 EventField mappedField = EventMapper.getInstance().getMappedField(value);
                 if (mappedField == null) {

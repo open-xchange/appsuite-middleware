@@ -111,7 +111,7 @@ public abstract class CalendarAccessOperation<T> {
         IDBasedCalendarAccess calendarAccess = requireService(IDBasedCalendarAccessFactory.class, services).createAccess(session);
         calendarAccess.set(CalendarParameters.PARAMETER_INCLUDE_PRIVATE, Boolean.TRUE);
         calendarAccess.set(CalendarParameters.PARAMETER_EXPAND_OCCURRENCES, Boolean.FALSE);
-        calendarAccess.set(CalendarParameters.PARAMETER_IGNORE_CONFLICTS, Boolean.TRUE);
+        calendarAccess.set(CalendarParameters.PARAMETER_CHECK_CONFLICTS, Boolean.FALSE);
         return calendarAccess;
     }
 

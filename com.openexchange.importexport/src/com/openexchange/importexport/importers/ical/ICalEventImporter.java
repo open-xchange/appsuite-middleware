@@ -274,7 +274,7 @@ public class ICalEventImporter extends AbstractICalImporter {
      * @return The passed parameters reference
      */
     private static CalendarParameters applyParameters(CalendarParameters parameters, Map<String, String[]> optionalParameters) {
-        parameters.set(CalendarParameters.PARAMETER_IGNORE_CONFLICTS, Boolean.TRUE);
+        parameters.set(CalendarParameters.PARAMETER_CHECK_CONFLICTS, Boolean.FALSE);
         if (null != optionalParameters) {
             if (optionalParameters.containsKey("suppressNotification")) {
                 parameters.set(CalendarParameters.PARAMETER_NOTIFICATION, Boolean.FALSE);

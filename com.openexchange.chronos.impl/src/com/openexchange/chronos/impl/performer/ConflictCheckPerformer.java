@@ -66,7 +66,7 @@ import static com.openexchange.chronos.common.CalendarUtils.matches;
 import static com.openexchange.chronos.common.CalendarUtils.truncateTime;
 import static com.openexchange.chronos.impl.Utils.getFields;
 import static com.openexchange.chronos.impl.Utils.getTimeZone;
-import static com.openexchange.chronos.impl.Utils.isIgnoreConflicts;
+import static com.openexchange.chronos.impl.Utils.isCheckConflicts;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -492,7 +492,7 @@ public class ConflictCheckPerformer extends AbstractFreeBusyPerformer {
      * <ul>
      * <li>events marked as {@link Transp#TRANSPARENT} are never checked</li>
      * <li><i>hard</i>-conflicting attendees are always checked, while other internal attendees are included based on
-     * {@link CalendarParameters#PARAMETER_IGNORE_CONFLICTS}.</li>
+     * {@link CalendarParameters#PARAMETER_CHECK_CONFLICTS}.</li>
      * </ul>
      *
      * @param event The event being inserted/updated
@@ -503,7 +503,7 @@ public class ConflictCheckPerformer extends AbstractFreeBusyPerformer {
         if (false == isOpaqueTransparency(event)) {
             return Collections.emptyList();
         }
-        boolean includeUserAttendees = false == isIgnoreConflicts(session);
+        boolean includeUserAttendees = isCheckConflicts(session);
         List<Attendee> checkedAttendees = new ArrayList<Attendee>();
         if (null == attendees || attendees.isEmpty()) {
             /*

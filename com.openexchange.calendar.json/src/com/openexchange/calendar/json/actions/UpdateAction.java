@@ -108,8 +108,9 @@ public final class UpdateAction extends AppointmentAction {
         if (appointment.containsNotification()) {
             session.set(CalendarParameters.PARAMETER_NOTIFICATION, Boolean.valueOf(appointment.getNotification()));
         }
-        session.set(CalendarParameters.PARAMETER_IGNORE_CONFLICTS, Boolean.valueOf(appointment.getIgnoreConflicts()));
-
+        if (false == appointment.getIgnoreConflicts()) {
+            session.set(CalendarParameters.PARAMETER_CHECK_CONFLICTS, Boolean.TRUE);
+        }
         Event event = getEventConverter(session).getEvent(appointment, eventID);
         if (appointment.containsParentFolderID() && 0 < appointment.getParentFolderID() && false == eventID.getFolderID().equals(asString(appointment.getParentFolderID()))) {
             /*

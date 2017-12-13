@@ -450,7 +450,7 @@ public class EventResource extends DAVObjectResource<Event> {
 
             @Override
             protected Void perform(IDBasedCalendarAccess access) throws OXException {
-                access.set(CalendarParameters.PARAMETER_IGNORE_CONFLICTS, Boolean.TRUE);
+                access.set(CalendarParameters.PARAMETER_CHECK_CONFLICTS, Boolean.FALSE);
                 long clientTimestamp = object.getTimestamp();
                 if (null != patchedImport.getEvent() && false == Tools.isPhantomMaster(object)) {
                     /*
