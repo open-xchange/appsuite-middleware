@@ -222,7 +222,7 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
         IDTokenClaimsSet result = null;
         JWSAlgorithm expectedJWSAlg = this.getJWSAlgorithm();
         try {
-            IDTokenValidator idTokenValidator = new IDTokenValidator(new Issuer(this.getBackendConfig().getIssuer()), new ClientID(this.getBackendConfig().getClientID()), expectedJWSAlg, new URL(this.getBackendConfig().getJwkSetEndpoint()));
+            IDTokenValidator idTokenValidator = new IDTokenValidator(new Issuer(this.getBackendConfig().getOpIssuer()), new ClientID(this.getBackendConfig().getClientID()), expectedJWSAlg, new URL(this.getBackendConfig().getOpJwkSetEndpoint()));
             result = idTokenValidator.validate(idToken, new Nonce(nounce));
         } catch (BadJOSEException e) {
             throw OIDCExceptionCode.IDTOKEN_VALIDATON_FAILED_CONTENT.create(e, e.getMessage());
@@ -258,7 +258,7 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
     @Override
     public LogoutRequest getLogoutFromIDPRequest(Session session) throws OXException {
         LOG.trace("getLogoutFromIDPRequest(Session session: {})", session.getSessionID());
-        URI endSessionEndpoint = OIDCTools.getURIFromPath(this.getBackendConfig().getLogoutEndpoint());
+        URI endSessionEndpoint = OIDCTools.getURIFromPath(this.getBackendConfig().getOpLogoutEndpoint());
 
         JWT idToken = null;
         try {
@@ -267,7 +267,7 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
             throw OIDCExceptionCode.UNABLE_TO_PARSE_SESSIONS_IDTOKEN.create(e);
         }
 
-        URI postLogoutTarget = OIDCTools.getURIFromPath(this.getBackendConfig().getRedirectURIPostSSOLogout());
+        URI postLogoutTarget = OIDCTools.getURIFromPath(this.getBackendConfig().getRpRedirectURIPostSSOLogout());
         LogoutRequest logoutRequest = new LogoutRequest(endSessionEndpoint, idToken, postLogoutTarget, new State());
         LOG.trace("final logout request: {}", logoutRequest.toURI().toString());
         return logoutRequest;
@@ -275,7 +275,7 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
 
     @Override
     public void finishLogout(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        String afterLogoutURI = this.getBackendConfig().getRedirectURILogout();
+        String afterLogoutURI = this.getBackendConfig().getRpRedirectURILogout();
         if (!afterLogoutURI.isEmpty() && !response.isCommitted()) {
             response.sendRedirect(afterLogoutURI);
         }
@@ -362,7 +362,7 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
         AuthorizationGrant refreshTokenGrant = new RefreshTokenGrant(refreshToken);
         ClientAuthentication clientAuth = this.getClientAuthentication();
         try {
-            URI tokenEndpoint = OIDCTools.getURIFromPath(this.getBackendConfig().getTokenEndpoint());
+            URI tokenEndpoint = OIDCTools.getURIFromPath(this.getBackendConfig().getOpTokenEndpoint());
 
             TokenRequest request = new TokenRequest(tokenEndpoint, clientAuth, refreshTokenGrant);
             HTTPRequest httpRequest = request.toHTTPRequest();
@@ -386,8 +386,16 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
     public boolean isTokenExpired(Session session) throws OXException {
         LOG.trace("isTokenExpired(Session session: {})", session.getSessionID());
         long oauthRefreshTime = this.getBackendConfig().getOauthRefreshTime();
-        long expiryDate = Long.parseLong((String) session.getParameter(Session.PARAM_OAUTH_ACCESS_TOKEN_EXPIRY_DATE));
-        return System.currentTimeMillis() >= (expiryDate - oauthRefreshTime);
+        //TODO QS-VS: Hat ein AccessToken immer ein expire, schöner machen
+        if (!session.containsParameter(Session.PARAM_OAUTH_ACCESS_TOKEN_EXPIRY_DATE)) {
+            return true;
+        }
+        try {
+            long expiryDate = Long.parseLong((String) session.getParameter(Session.PARAM_OAUTH_ACCESS_TOKEN_EXPIRY_DATE));
+            return System.currentTimeMillis() >= (expiryDate - oauthRefreshTime);
+        } catch (NumberFormatException e) {
+            return true;
+        }
     }
 
     private LoginConfiguration getLoginConfiguration() {

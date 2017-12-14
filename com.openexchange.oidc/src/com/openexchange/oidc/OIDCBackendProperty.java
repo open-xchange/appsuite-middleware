@@ -67,19 +67,19 @@ public enum OIDCBackendProperty implements Property {
     /**
      * redirectURIInit - The path to the init servlet of this backend
      */
-    redirectURIInit(OIDCProperty.PREFIX, OIDCProperty.EMPTY),
+    rpRedirectURIInit(OIDCProperty.PREFIX, OIDCProperty.EMPTY),
     /**
      * redirectURIAuth - The path to the authentication servlet of this backend
      */
-    redirectURIAuth(OIDCProperty.PREFIX, OIDCProperty.EMPTY),
+    rpRedirectURIAuth(OIDCProperty.PREFIX, OIDCProperty.EMPTY),
     /**
      * authorizationEndpoint - The OPs authorization endpoint
      */
-    authorizationEndpoint(OIDCProperty.PREFIX, OIDCProperty.EMPTY),
+    opAuthorizationEndpoint(OIDCProperty.PREFIX, OIDCProperty.EMPTY),
     /**
      * tokenEndpoint - The OPs token endpoint
      */
-    tokenEndpoint(OIDCProperty.PREFIX, OIDCProperty.EMPTY),
+    opTokenEndpoint(OIDCProperty.PREFIX, OIDCProperty.EMPTY),
     /**
      * clientSecret - The client secret, which was assigned by the OP to this client/backend
      * on registration
@@ -88,7 +88,7 @@ public enum OIDCBackendProperty implements Property {
     /**
      * jwkSetEndpoint - The OPs JWK Set endpoint
      */
-    jwkSetEndpoint(OIDCProperty.PREFIX, OIDCProperty.EMPTY),
+    opJwkSetEndpoint(OIDCProperty.PREFIX, OIDCProperty.EMPTY),
     /**
      * jwsAlgorithm - The used JWS encryption algorithm
      */
@@ -100,7 +100,7 @@ public enum OIDCBackendProperty implements Property {
     /**
      * issuer - The OPs path
      */
-    issuer(OIDCProperty.PREFIX, OIDCProperty.EMPTY),
+    opIssuer(OIDCProperty.PREFIX, OIDCProperty.EMPTY),
     /**
      * responseType - The OPs response type
      */
@@ -108,12 +108,12 @@ public enum OIDCBackendProperty implements Property {
     /**
      * logoutEndpoint - The OPs logout endpoint
      */
-    logoutEndpoint(OIDCProperty.PREFIX, OIDCProperty.EMPTY),
+    opLogoutEndpoint(OIDCProperty.PREFIX, OIDCProperty.EMPTY),
     /**
      * redirectURIPostSSOLogout - The location where the Browser should be redirected after logout
      * on OP
      */
-    redirectURIPostSSOLogout(OIDCProperty.PREFIX, OIDCProperty.EMPTY), 
+    rpRedirectURIPostSSOLogout(OIDCProperty.PREFIX, OIDCProperty.EMPTY), 
     /**
      * ssoLogout - Whether to redirect to the OP on logout trigger from client or not
      */
@@ -121,7 +121,7 @@ public enum OIDCBackendProperty implements Property {
     /**
      * redirectURILogout - Where to redirect the user after a valid logout
      */
-    redirectURILogout(OIDCProperty.PREFIX, OIDCProperty.EMPTY),
+    rpRedirectURILogout(OIDCProperty.PREFIX, OIDCProperty.EMPTY),
     /**
      * autologinCookieMode - Which login mode is enabled look at {@link OIDCBackendConfig.AutologinMode}
      */

@@ -93,23 +93,23 @@ public abstract class AbstractOIDCBackendConfig implements OIDCBackendConfig {
     }
 
     @Override
-    public String getRedirectURIInit() {
-        return this.loadStringProperty(OIDCBackendProperty.redirectURIInit);
+    public String getRpRedirectURIInit() {
+        return this.loadStringProperty(OIDCBackendProperty.rpRedirectURIInit);
     }
 
     @Override
-    public String getRedirectURIAuth() {
-        return this.loadStringProperty(OIDCBackendProperty.redirectURIAuth);
+    public String getRpRedirectURIAuth() {
+        return this.loadStringProperty(OIDCBackendProperty.rpRedirectURIAuth);
     }
 
     @Override
-    public String getAuthorizationEndpoint() {
-        return this.loadStringProperty(OIDCBackendProperty.authorizationEndpoint);
+    public String getOpAuthorizationEndpoint() {
+        return this.loadStringProperty(OIDCBackendProperty.opAuthorizationEndpoint);
     }
 
     @Override
-    public String getTokenEndpoint() {
-        return this.loadStringProperty(OIDCBackendProperty.tokenEndpoint);
+    public String getOpTokenEndpoint() {
+        return this.loadStringProperty(OIDCBackendProperty.opTokenEndpoint);
     }
 
     @Override
@@ -118,8 +118,8 @@ public abstract class AbstractOIDCBackendConfig implements OIDCBackendConfig {
     }
 
     @Override
-    public String getJwkSetEndpoint() {
-        return this.loadStringProperty(OIDCBackendProperty.jwkSetEndpoint);
+    public String getOpJwkSetEndpoint() {
+        return this.loadStringProperty(OIDCBackendProperty.opJwkSetEndpoint);
     }
 
     @Override
@@ -133,8 +133,8 @@ public abstract class AbstractOIDCBackendConfig implements OIDCBackendConfig {
     }
 
     @Override
-    public String getIssuer() {
-        return this.loadStringProperty(OIDCBackendProperty.issuer);
+    public String getOpIssuer() {
+        return this.loadStringProperty(OIDCBackendProperty.opIssuer);
     }
 
     @Override
@@ -143,13 +143,13 @@ public abstract class AbstractOIDCBackendConfig implements OIDCBackendConfig {
     }
 
     @Override
-    public String getLogoutEndpoint() {
-        return this.loadStringProperty(OIDCBackendProperty.logoutEndpoint);
+    public String getOpLogoutEndpoint() {
+        return this.loadStringProperty(OIDCBackendProperty.opLogoutEndpoint);
     }
 
     @Override
-    public String getRedirectURIPostSSOLogout() {
-        return this.loadStringProperty(OIDCBackendProperty.redirectURIPostSSOLogout);
+    public String getRpRedirectURIPostSSOLogout() {
+        return this.loadStringProperty(OIDCBackendProperty.rpRedirectURIPostSSOLogout);
     }
 
     @Override
@@ -158,8 +158,8 @@ public abstract class AbstractOIDCBackendConfig implements OIDCBackendConfig {
     }
 
     @Override
-    public String getRedirectURILogout() {
-        return this.loadStringProperty(OIDCBackendProperty.redirectURILogout);
+    public String getRpRedirectURILogout() {
+        return this.loadStringProperty(OIDCBackendProperty.rpRedirectURILogout);
     }
 
     @Override

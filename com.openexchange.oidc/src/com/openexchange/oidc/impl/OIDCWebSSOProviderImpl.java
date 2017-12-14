@@ -224,8 +224,8 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
         LOG.trace("buildLoginRequest(State state: {}, Nonce nonce: {}, HttpServletRequest request: {})", state.getValue(), nonce.getValue(), request.getRequestURI());
         String requestString = "";
         OIDCBackendConfig backendConfig = this.backend.getBackendConfig();
-        String authorizationEndpoint = backendConfig.getAuthorizationEndpoint();
-        String redirectURI = backendConfig.getRedirectURIAuth();
+        String authorizationEndpoint = backendConfig.getOpAuthorizationEndpoint();
+        String redirectURI = backendConfig.getRpRedirectURIAuth();
         try {
             Builder requestBuilder = new Builder(new ResponseType(backendConfig.getResponseType()), this.backend.getScope(), new ClientID(backendConfig.getClientID()), new URI(redirectURI));
             requestBuilder.nonce(nonce);
@@ -284,12 +284,12 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
     private TokenRequest createTokenRequest(HttpServletRequest request) throws OXException {
         LOG.trace("createTokenRequest(HttpServletRequest request: {})", request.getRequestURI());
         AuthorizationCode code = new AuthorizationCode(request.getParameter("code"));
-        URI callback = OIDCTools.getURIFromPath(this.backend.getBackendConfig().getRedirectURIAuth());
+        URI callback = OIDCTools.getURIFromPath(this.backend.getBackendConfig().getRpRedirectURIAuth());
         AuthorizationGrant codeGrant = new AuthorizationCodeGrant(code, callback);
 
         ClientAuthentication clientAuth = this.backend.getClientAuthentication();
 
-        URI tokenEndpoint = OIDCTools.getURIFromPath(this.backend.getBackendConfig().getTokenEndpoint());
+        URI tokenEndpoint = OIDCTools.getURIFromPath(this.backend.getBackendConfig().getOpTokenEndpoint());
 
         TokenRequest tokenRequest = new TokenRequest(tokenEndpoint, clientAuth, codeGrant, this.backend.getScope());
         return this.backend.getTokenRequest(tokenRequest);
@@ -446,7 +446,7 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
         boolean result = false;
         String issuer = request.getParameter("iss");
         if (!Strings.isEmpty(issuer)) {
-            result = this.backend.getBackendConfig().getIssuer().equals(issuer);
+            result = this.backend.getBackendConfig().getOpIssuer().equals(issuer);
         }
         return result;
     }

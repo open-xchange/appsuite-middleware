@@ -128,7 +128,7 @@ public interface OIDCBackendConfig {
      * 
      * @return the redirect URI
      */
-    String getRedirectURIInit();
+    String getRpRedirectURIInit();
     
     /**
      * Get the redirect URI that the OP should redirect to after token generation. Pointing to
@@ -136,21 +136,21 @@ public interface OIDCBackendConfig {
      * 
      * @return the redirect URI
      */
-    String getRedirectURIAuth();
+    String getRpRedirectURIAuth();
     
     /**
      * The path to the authorization endpoint of the OP
      * 
      * @return the path to the endpoint
      */
-    String getAuthorizationEndpoint();
+    String getOpAuthorizationEndpoint();
 
     /**
      * The path to the token endpoint of the OP
      * 
      * @return the path to the endpoint
      */
-    String getTokenEndpoint();
+    String getOpTokenEndpoint();
 
     /**
      * The secret, which the backend client received from the OP on client registration.
@@ -164,7 +164,7 @@ public interface OIDCBackendConfig {
      * 
      * @return the path to the endpoint
      */
-    String getJwkSetEndpoint();
+    String getOpJwkSetEndpoint();
 
     /**
      * The used algorithm to encrypt communication with the OP.
@@ -185,7 +185,7 @@ public interface OIDCBackendConfig {
      * 
      * @return the path to the endpoint
      */
-    String getIssuer();
+    String getOpIssuer();
     
     /**
      * The response type used by the OP
@@ -199,7 +199,7 @@ public interface OIDCBackendConfig {
      * 
      * @return the path to the endpoint
      */
-    String getLogoutEndpoint();
+    String getOpLogoutEndpoint();
     
     /**
      * The path to the post OP logout location that should be used. Pointing to the 
@@ -207,7 +207,7 @@ public interface OIDCBackendConfig {
      * 
      * @return the redirect URI
      */
-    String getRedirectURIPostSSOLogout();
+    String getRpRedirectURIPostSSOLogout();
 
     /**
      * Is SSO logout enabled, triggers the confirmation procedure via OP if enabled.
@@ -221,7 +221,7 @@ public interface OIDCBackendConfig {
      * 
      * @return the redirect URI
      */
-    String getRedirectURILogout();
+    String getRpRedirectURILogout();
     
     /**
      * Which logout mode is selected. Potential content can be found here {@link OIDCBackendConfig.AutologinMode}
