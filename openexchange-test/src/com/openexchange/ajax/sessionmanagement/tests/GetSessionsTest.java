@@ -83,13 +83,14 @@ public class GetSessionsTest extends AbstractSessionManagementTest {
     @Test
     public void testGetSessions() throws Exception {
         AllRequest req = new AllRequest();
-        AllResponse resp = testClient1.execute(req);
+        AllResponse resp = getClient().execute(req);
         Collection<ManagedSession> sessions = resp.getSessions();
         assertEquals(2, sessions.size());
         for (ManagedSession session : sessions) {
             String sessionId = session.getSessionId();
-            assertTrue(sessionId.equals(testClient1.getSession().getId()) || sessionId.equals(testClient2.getSession().getId()));
+            assertTrue(sessionId.equals(getClient().getSession().getId()) || sessionId.equals(getSecondClient().getSession().getId()));
         }
+        saveLogout(getClient2());
     }
 
 }

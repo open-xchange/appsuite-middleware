@@ -49,12 +49,8 @@
 
 package com.openexchange.ajax.sessionmanagement.tests;
 
-import java.io.IOException;
 import java.util.Collection;
-import org.json.JSONException;
-import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.sessionmanagement.AbstractSessionManagementTest;
@@ -62,10 +58,8 @@ import com.openexchange.ajax.sessionmanagement.actions.AllRequest;
 import com.openexchange.ajax.sessionmanagement.actions.AllResponse;
 import com.openexchange.ajax.sessionmanagement.actions.ClearRequest;
 import com.openexchange.ajax.sessionmanagement.actions.ClearResponse;
-import com.openexchange.exception.OXException;
 import com.openexchange.session.management.ManagedSession;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.fail;
 
 /**
  * {@link RemoveAllOtherSessionsTest}
@@ -75,38 +69,22 @@ import static org.junit.Assert.fail;
  */
 public class RemoveAllOtherSessionsTest extends AbstractSessionManagementTest {
 
+    // Blacklist is set in cook books
     private static final String BLACKLISTED_CLIENT = "randomClientForTesting";
-
-    @SuppressWarnings("unused")
-    private AJAXClient testClient3;
-
-    @Override
-    @Before
-    public void setUp() throws Exception {
-        super.setUp();
-        testClient3 = new AJAXClient(testUser2, "anotherClient");
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        // Logout only client2. Client 1 & 3 are being removed by the request and can not logout
-        saveLogout(testClient2);
-    }
 
     @Test
     public void testRemoveAllOtherSessions() throws Exception {
-        String sessionId = testClient2.getSession().getId();
+        String sessionId = getClient().getSession().getId();
         ClearRequest request = new ClearRequest();
-        ClearResponse response = testClient2.execute(request);
+        ClearResponse response = getClient().execute(request);
 
         Assert.assertFalse(response.hasError());
 
         AllRequest getRequest = new AllRequest();
-        AllResponse getResponse = testClient2.execute(getRequest);
+        AllResponse getResponse = getClient().execute(getRequest);
         Assert.assertFalse(getResponse.hasError());
         Collection<ManagedSession> sessions = getResponse.getSessions();
-        Assert.assertThat("Not all clients has been removed", 1, is(sessions.size()));
+        Assert.assertThat("Not all clients has been removed", new Integer(1), is(Integer.valueOf(sessions.size())));
 
         for (ManagedSession session : sessions) {
             Assert.assertThat("Wrong client is still loged in", sessionId, is(session.getSessionId()));
@@ -116,37 +94,25 @@ public class RemoveAllOtherSessionsTest extends AbstractSessionManagementTest {
 
     @Test
     public void testRemoveAllOtherSessionsWithoutBlacklisted() throws Exception {
-        AJAXClient blackListed = null;
-        try {
-            blackListed = new AJAXClient(testUser2, BLACKLISTED_CLIENT);
+        // Third client
+        @SuppressWarnings("unused") AJAXClient blackListed = generateClient(BLACKLISTED_CLIENT, testUser);
 
-            String sessionId = testClient2.getSession().getId();
-            ClearRequest request = new ClearRequest();
-            ClearResponse response = testClient2.execute(request);
+        String sessionId = getClient().getSession().getId();
+        ClearRequest request = new ClearRequest();
+        ClearResponse response = getClient().execute(request);
 
-            Assert.assertFalse(response.hasError());
+        Assert.assertFalse(response.hasError());
 
-            AllRequest getRequest = new AllRequest();
-            AllResponse getResponse = testClient2.execute(getRequest);
-            Assert.assertFalse(getResponse.hasError());
-            Collection<ManagedSession> sessions = getResponse.getSessions();
-            
-            // Should not see blacklisted client
-            Assert.assertThat("Not the excpected count of active clients", 1, is(sessions.size()));
+        AllRequest getRequest = new AllRequest();
+        AllResponse getResponse = getClient().execute(getRequest);
+        Assert.assertFalse(getResponse.hasError());
+        Collection<ManagedSession> sessions = getResponse.getSessions();
 
-            for (ManagedSession session : sessions) {
-                Assert.assertThat("Wrong client is still loged in", sessionId, is(session.getSessionId()));
-            }
-        } finally {
-            saveLogout(blackListed);
-        }
+        // Should not see blacklisted client
+        Assert.assertThat("Not all clients has been removed", new Integer(1), is(Integer.valueOf(sessions.size())));
 
-    }
-
-    private void saveLogout(AJAXClient client) throws OXException, IOException, JSONException {
-        // Try logout blacklisted
-        if (null != client && null != client.getSession() && null != client.getSession().getId()) {
-            client.logout();
+        for (ManagedSession session : sessions) {
+            Assert.assertThat("Wrong client is still loged in", sessionId, is(session.getSessionId()));
         }
     }
 }
