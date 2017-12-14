@@ -47,33 +47,31 @@
  *
  */
 
-package com.openexchange.global;
+package com.openexchange.tools.filename;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import com.openexchange.exception.interception.Bug50893Test;
-import com.openexchange.exception.interception.OXExceptionInterceptorRegistrationTest;
-import com.openexchange.global.tools.id.IDManglerTest;
-import com.openexchange.global.tools.iterator.MergingSearchIteratorTest;
-import com.openexchange.sessiond.SessionFilterTest;
-import com.openexchange.tools.filename.Bug53791Test;
-import com.openexchange.tools.filename.Bug55271Test;
+import static org.junit.Assert.*;
+import org.junit.Test;
+import com.openexchange.java.Strings;
 
 /**
- * {@link UnitTests}
+ * {@link Bug56499Test}
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * Lost support for 'LEFT BLACK LENTICULAR BRACKET' (U+3010) and 'RIGHT BLACK LENTICULAR BRACKET' (U+3011) in file names
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.10.0
  */
-@RunWith(Suite.class)
-@Suite.SuiteClasses({
-    IDManglerTest.class,
-    MergingSearchIteratorTest.class,
-    OXExceptionInterceptorRegistrationTest.class,
-    SessionFilterTest.class,
-    Bug50893Test.class,
-    Bug53791Test.class,
-    Bug55271Test.class,
-    com.openexchange.tools.filename.Bug56499Test.class
-})
-public class UnitTests {
+public class Bug56499Test {
+
+    @Test
+    public void testDecomposedString() {
+        checkSanitizing("\u3010\u30c9\u30e9\u30d5\u30c8\u7248\u3011\u57fa\u76e4\u6280\u8853\u306e\u9ad8\u5ea6\u5316-20171011.zip");
+    }
+
+    private static void checkSanitizing(String string) {
+        String sanitizedString = FileNameTools.sanitizeFilename(string);
+        assertFalse("Sanitized characters in " + sanitizedString, sanitizedString.contains("_"));
+        assertTrue("Unexpected string after sanitizing", Strings.equalsNormalized(string, sanitizedString));
+    }
+
 }
