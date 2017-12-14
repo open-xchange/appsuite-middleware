@@ -103,7 +103,7 @@ public class BasicSchedJoulesCalendarProvider extends BasicCachingCalendarProvid
 
     @Override
     public EnumSet<CalendarCapability> getCapabilities() {
-        return CalendarCapability.getCapabilities(SchedJoulesCalendarAccess.class);
+        return CalendarCapability.getCapabilities(BasicSchedJoulesCalendarAccess.class);
     }
 
     @Override

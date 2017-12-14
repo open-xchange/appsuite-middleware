@@ -111,7 +111,7 @@ public class SchedJoulesUserServiceInterceptor extends AbstractUserServiceInterc
         }
         String language = user.getLocale().getLanguage();
         AdministrativeCalendarAccountService service = services.getService(AdministrativeCalendarAccountService.class);
-        List<CalendarAccount> accounts = service.getAccounts(context.getContextId(), new int[] { user.getId() }, SchedJoulesCalendarProvider.PROVIDER_ID);
+        List<CalendarAccount> accounts = service.getAccounts(context.getContextId(), new int[] { user.getId() }, BasicSchedJoulesCalendarProvider.PROVIDER_ID);
         for (CalendarAccount account : accounts) {
             JSONObject internalConfig = account.getInternalConfiguration();
             JSONArray folders = internalConfig.optJSONArray(SchedJoulesFields.FOLDERS);
