@@ -120,7 +120,7 @@ public class AbstractPasswordchangehistoryTest extends AbstractRestTest {
 
             @Override
             public long getCreated() {
-                return created;
+                return created.longValue();
             }
 
             @Override
