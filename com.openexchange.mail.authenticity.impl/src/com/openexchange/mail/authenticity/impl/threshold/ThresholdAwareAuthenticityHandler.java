@@ -50,7 +50,6 @@
 package com.openexchange.mail.authenticity.impl.threshold;
 
 import java.util.Collection;
-import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.authenticity.MailAuthenticityHandler;
 import com.openexchange.mail.dataobjects.MailAuthenticityResult;
@@ -78,7 +77,7 @@ public class ThresholdAwareAuthenticityHandler implements MailAuthenticityHandle
     }
 
     @Override
-    public void handle(Session session, MailMessage mailMessage) throws OXException {
+    public void handle(Session session, MailMessage mailMessage) {
         if (null == mailMessage) {
             return;
         }

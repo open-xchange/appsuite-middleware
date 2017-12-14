@@ -51,7 +51,6 @@ package com.openexchange.mail.authenticity.test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -224,15 +223,11 @@ public abstract class AbstractTestMailAuthenticity {
      * @param headers The 'Authentication-Results' headers to add
      */
     void perform(String... headers) {
-        try {
-            for (String header : headers) {
-                headerCollection.addHeader(MessageHeaders.HDR_AUTHENTICATION_RESULTS, header);
-            }
-            handler.handle(session, mailMessage);
-            verify(mailMessage).setAuthenticityResult(argumentCaptor.capture());
-            result = argumentCaptor.getValue();
-        } catch (OXException e) {
-            fail(e.getMessage());
+        for (String header : headers) {
+            headerCollection.addHeader(MessageHeaders.HDR_AUTHENTICATION_RESULTS, header);
         }
+        handler.handle(session, mailMessage);
+        verify(mailMessage).setAuthenticityResult(argumentCaptor.capture());
+        result = argumentCaptor.getValue();
     }
 }

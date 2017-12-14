@@ -177,7 +177,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
      * @see com.openexchange.mail.authenticity.MailAuthenticityHandler#handle(com.openexchange.session.Session, com.openexchange.mail.dataobjects.MailMessage)
      */
     @Override
-    public void handle(final Session session, final MailMessage mailMessage) throws OXException {
+    public void handle(final Session session, final MailMessage mailMessage) {
         final HeaderCollection headerCollection = mailMessage.getHeaders();
         final String[] authHeaders = headerCollection.getHeader(MessageHeaders.HDR_AUTHENTICATION_RESULTS);
         if (authHeaders == null || authHeaders.length == 0) {
@@ -196,7 +196,14 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
         }
 
         List<String> headers = Arrays.asList(authHeaders);
-        mailMessage.setAuthenticityResult(parseHeaders(headers, from[0], session));
+        MailAuthenticityResult authenticityResult = MailAuthenticityResult.NOT_ANALYZED_RESULT;
+        try {
+            authenticityResult = parseHeaders(headers, from[0], session);
+        } catch (Throwable e) {
+            LOGGER.error("An error occurred during parsing the 'Authentication-Results' header: {}", e.getMessage(), e);
+        } finally {
+            mailMessage.setAuthenticityResult(authenticityResult);
+        }
         logMetrics(headers, mailMessage.getAuthenticityResult());
 
         trustedMailService.handle(session, mailMessage);
@@ -254,7 +261,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
      * @param fromHeader The <code>From</code> header
      * @param session The groupware {@link Session}
      * @return The overall {@link MailAuthenticityResult}
-     * @throws OXException if the allowed authserv-ids cannot be retrieved from the configuration
+     * @throws OXException if the allowed authserv-ids cannot be retrieved from the configuration or any other parsing error occurs
      */
     private MailAuthenticityResult parseHeaders(final List<String> authenticationHeaders, final InternetAddress from, final Session session) throws OXException {
         final List<AllowedAuthServId> allowedAuthServIds = getAllowedAuthServIds(session);

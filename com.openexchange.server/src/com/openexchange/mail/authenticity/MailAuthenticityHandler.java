@@ -50,7 +50,6 @@
 package com.openexchange.mail.authenticity;
 
 import java.util.Collection;
-import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.authenticity.mechanism.MailAuthenticityMechanism;
 import com.openexchange.mail.dataobjects.MailAuthenticityResult;
@@ -74,9 +73,8 @@ public interface MailAuthenticityHandler {
      *
      * @param session The session providing user data
      * @param mailMessage The mail message to handle
-     * @throws OXException If checking/verifying mail authenticity fails
      */
-    void handle(Session session, MailMessage mailMessage) throws OXException;
+    void handle(Session session, MailMessage mailMessage);
 
     /**
      * Returns an unmodifiable collection with all additionally required mail fields beside mandatory {@link MailField#AUTHENTICATION_OVERALL_RESULT} or {@link MailField#AUTHENTICATION_MECHANISM_RESULTS}
