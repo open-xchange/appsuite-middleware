@@ -61,6 +61,7 @@ import java.util.regex.Pattern;
 import org.apache.commons.codec.net.URLCodec;
 import com.google.common.collect.ImmutableSet;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.html.internal.GlobalEventHandler;
 import com.openexchange.html.internal.WhitelistedSchemes;
 import com.openexchange.html.osgi.Services;
 import com.openexchange.java.Strings;
@@ -263,14 +264,19 @@ public final class HtmlServices {
 
     private static boolean doContainsEventHandler(String lc) {
         int pos = lc.indexOf("on");
-        if (pos == 0) {
-            if (nextAreAsciiLetter(pos + 1, 3, lc)) {
-                return true;
+        while (pos >= 0) {
+            if (pos == 0 ? true : (false == isWordCharacter(lc.charAt(pos - 1)))) {
+                for (String globalEventHandler : GlobalEventHandler.getInstance().getGlobalEventHandlerIdentifiers()) {
+                    if (lc.regionMatches(false, pos, globalEventHandler, 0, globalEventHandler.length())) {
+                        int end = pos + globalEventHandler.length();
+                        if ((end >= lc.length()) || (false == isWordCharacter(lc.charAt(end)))) {
+                            // Ends with or contains global event handler
+                            return true;
+                        }
+                    }
+                }
             }
-        } else if (pos > 0) {
-            if (false == isWordCharacter(lc.charAt(pos - 1)) && nextAreAsciiLetter(pos + 1, 3, lc)) {
-                return true;
-            }
+            pos = lc.indexOf("on", pos + 1);
         }
         return false;
     }

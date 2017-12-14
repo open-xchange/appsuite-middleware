@@ -934,12 +934,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
          */
         IMAPStore imapStore = (IMAPStore) imapSession.getStore(PROTOCOL);
         if (MailAccount.DEFAULT_ID == accountId) {
-            Map<String, String> clientParams = new LinkedHashMap<String, String>(6);
-            clientParams.put(IMAPClientParameters.ORIGINATING_IP.getParamName(), session.getLocalIp());
-            clientParams.put(IMAPClientParameters.SESSION_ID.getParamName(), IMAPClientParameters.generateSessionInformation(session, imapStore));
-            clientParams.put(IMAPClientParameters.NAME.getParamName(), "Open-Xchange");
-            clientParams.put(IMAPClientParameters.VERSION.getParamName(), Version.getInstance().getVersionString());
-            imapStore.setClientParameters(clientParams);
+            IMAPClientParameters.setDefaultClientParameters(imapStore, session);
         }
         /*
          * ... and connect it
