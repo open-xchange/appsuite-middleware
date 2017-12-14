@@ -113,6 +113,24 @@ public interface IFileItemService {
     public IFileItem[] get(final String groupId, final Properties properties) throws FileItemException;
 
     /**
+     * Getting all {@link IFileItem} interfaces that are selected
+     * by the customQuerySQL string.
+     * The query has to be created with returning all following columns
+     * of the appropriate FileItem database table(s) in the correct order
+     *
+     *  1. FileContent.FileStoreNumber
+     *  2. FileContent.FileStoreId
+     *  3. FileContent.GroupId
+     *  4. FileContent.SubGroupId
+     *  5. FileContent.FileId
+     *
+     * @param customSqlStatement
+     * @return
+     * @throws FileItemException
+     */
+    public IFileItem[] getByCustomQuerySQL(final String customQuerySQL, Object[]... returnValues) throws FileItemException;
+
+    /**
      * Getting the number of distinct subgroup ids.
      *
      * @return The number of distinct subgroup ids.
