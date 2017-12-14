@@ -101,7 +101,6 @@ fi
 %dir %attr(755,open-xchange,root) /opt/open-xchange/etc/crawlers/
 %attr(644,open-xchange,root) /opt/open-xchange/etc/crawlers/*
 %config(noreplace) /opt/open-xchange/etc/crawler.properties
-%config(noreplace) %attr(644,open-xchange,root) /opt/open-xchange/etc/googlesubscribe.properties
 %config(noreplace) /opt/open-xchange/etc/microformatSubscription.properties
 %config(noreplace) /opt/open-xchange/etc/xingsubscribe.properties
 %config(noreplace) /opt/open-xchange/etc/yahoosubscribe.properties
