@@ -63,7 +63,6 @@ import com.openexchange.chronos.TimeTransparency;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.SingleFolderCalendarAccessUtils;
 import com.openexchange.chronos.provider.basic.CalendarSettings;
-import com.openexchange.chronos.provider.basic.DefaultCalendarSettings;
 import com.openexchange.chronos.provider.caching.ExternalCalendarResult;
 import com.openexchange.chronos.provider.caching.basic.BasicCachingCalendarAccess;
 import com.openexchange.chronos.provider.ical.conn.ICalFeedClient;
@@ -108,7 +107,7 @@ public class BasicICalCalendarAccess extends BasicCachingCalendarAccess {
 
     @Override
     public CalendarSettings getSettings() {
-        DefaultCalendarSettings settings = new DefaultCalendarSettings();
+        CalendarSettings settings = new CalendarSettings();
         ExtendedProperties extendedProperties = null;
         try {
             extendedProperties = SingleFolderCalendarAccessUtils.parseExtendedProperties(Services.getService(ConversionService.class), account.getInternalConfiguration().optJSONObject("extendedProperties"));

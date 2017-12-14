@@ -52,51 +52,216 @@ package com.openexchange.chronos.provider.basic;
 import java.util.Date;
 import org.json.JSONObject;
 import com.openexchange.chronos.ExtendedProperties;
-import com.openexchange.chronos.provider.CalendarFolderProperty;
 
 /**
- * {@link CalendarSettings}
+ * {@link CalendarSettings2}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public interface CalendarSettings {
+public class CalendarSettings {
+
+    private String name;
+    private boolean containsName;
+    private Date lastModified;
+    private boolean containsLastModified;
+    private ExtendedProperties extendedProperties;
+    private boolean containsExtendedProperties;
+    private JSONObject config;
+    private boolean containsConfig;
+    private boolean unsubscribed;
+    private boolean containsSubscribed;
 
     /**
-     * Gets the name of the calendar.
+     * Initializes a new {@link CalendarSettings2}.
+     */
+    public CalendarSettings() {
+        super();
+    }
+
+    /**
+     * Gets the calendar name.
      *
      * @return The calendar name
      */
-    String getName();
+    public String getName() {
+        return name;
+    }
+
+    /**
+     * Sets the calendar name.
+     *
+     * @param value The calendar name to set
+     */
+    public void setName(String value) {
+        name = value;
+        containsName = true;
+    }
+
+    /**
+     * Gets a value indicating whether the calendar name within this settings object has been set or not.
+     *
+     * @return <code>true</code> if the name is set, <code>false</code>, otherwise
+     */
+    public boolean containsName() {
+        return containsName;
+    }
+
+    /**
+     * Removes a previously set calendar name within this settings object.
+     */
+    public void removeName() {
+        this.name = null;
+        this.containsName = false;
+    }
+
+    /**
+     * Gets the last modification date of the calendar.
+     *
+     * @return The last modification date
+     */
+    public Date getLastModified() {
+        return lastModified;
+    }
+
+    /**
+     * Sets the last modification date of the calendar.
+     *
+     * @param value The last modification date to set
+     */
+    public void setLastModified(Date value) {
+        lastModified = value;
+        containsLastModified = true;
+    }
+
+    /**
+     * Gets a value indicating whether the last modification date of the calendar within this settings object has been set or not.
+     *
+     * @return <code>true</code> if the last modification date is set, <code>false</code>, otherwise
+     */
+    public boolean containsLastModified() {
+        return containsLastModified;
+    }
+
+    /**
+     * Removes a previously set last modification date of the calendar within this settings object.
+     */
+    public void removeLastModified() {
+        lastModified = null;
+        containsLastModified = false;
+    }
+
+    /**
+     * Gets the extended properties of the calendar.
+     *
+     * @return The extended properties
+     */
+    public ExtendedProperties getExtendedProperties() {
+        return extendedProperties;
+    }
+
+    /**
+     * Sets the extended properties of the calendar.
+     *
+     * @param value The extended properties to set
+     */
+    public void setExtendedProperties(ExtendedProperties value) {
+        extendedProperties = value;
+        containsExtendedProperties = true;
+    }
+
+    /**
+     * Gets a value indicating whether extended properties of the calendar within this settings object have been set or not.
+     *
+     * @return <code>true</code> if extended properties are set, <code>false</code>, otherwise
+     */
+    public boolean containsExtendedProperties() {
+        return containsExtendedProperties;
+    }
+
+    /**
+     * Removes previously set extended properties of the calendar within this settings object.
+     */
+    public void removeExtendedProperties() {
+        extendedProperties = null;
+        containsExtendedProperties = false;
+    }
+
+    /**
+     * Gets the <i>user</i> configuration data of the calendar.
+     *
+     * @return The <i>user</i> configuration data
+     */
+    public JSONObject getConfig() {
+        return config;
+    }
+
+    /**
+     * Sets the <i>user</i> configuration data of the calendar.
+     *
+     * @param value The <i>user</i> configuration data to set
+     */
+    public void setConfig(JSONObject value) {
+        config = value;
+        containsConfig = true;
+    }
+
+    /**
+     * Gets a value indicating whether the <i>user</i> configuration data of the calendar within this settings object has been set or not.
+     *
+     * @return <code>true</code> if the <i>user</i> configuration data is set, <code>false</code>, otherwise
+     */
+    public boolean containsConfig() {
+        return containsConfig;
+    }
+
+    /**
+     * Removes the previously set <i>user</i> configuration data of the calendar within this settings object.
+     */
+    public void removeConfig() {
+        config = null;
+        containsConfig = false;
+    }
 
     /**
      * Gets a value indicating whether the calendar is actually subscribed or not.
      *
      * @return <code>true</code> if the calendar is subscribed, <code>false</code>, otherwise
      */
-    boolean isSubscribed();
+    public boolean isSubscribed() {
+        return false == unsubscribed;
+    }
 
     /**
-     * Gets the last modification date of the calendar.
+     * Sets if the calendar is actually subscribed or not.
      *
-     * @return The last modification date, or <code>null</code> if not defined
+     * @param value <code>true</code> if the calendar is subscribed, <code>false</code>, otherwise
      */
-    Date getLastModified();
+    public void setSubscribed(boolean value) {
+        unsubscribed = false == value;
+        containsSubscribed = true;
+    }
 
     /**
-     * Gets the extended properties of the calendar.
-     * <p/>
-     * See {@link CalendarFolderProperty} for a list of common properties evaluated by clients.
+     * Gets a value indicating whether the <i>subscribed</i>-flag of the calendar has been set within this settings object or not.
      *
-     * @return The extended properties, or <code>null</code> if not defined
+     * @return <code>true</code> if the <i>subscribed</i>-flag is set, <code>false</code>, otherwise
      */
-    ExtendedProperties getExtendedProperties();
+    public boolean containsSubscribed() {
+        return containsSubscribed;
+    }
 
     /**
-     * Gets the account's arbitrary external / user configuration data.
-     *
-     * @return The user configuration, or <code>null</code> if not set
+     * Removes the previously set <i>subscribed</i>-flag of the calendar within this settings object.
      */
-    JSONObject getConfig();
+    public void removeSubscribed() {
+        unsubscribed = false;
+        containsSubscribed = false;
+    }
+
+    @Override
+    public String toString() {
+        return "CalendarSettings [name=" + name + ", lastModified=" + lastModified + ", extendedProperties=" + extendedProperties + ", config=" + config + ", unsubscribed=" + unsubscribed + "]";
+    }
 
 }

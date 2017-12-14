@@ -77,7 +77,6 @@ import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.basic.BasicCalendarAccess;
 import com.openexchange.chronos.provider.basic.CalendarSettings;
-import com.openexchange.chronos.provider.basic.DefaultCalendarSettings;
 import com.openexchange.chronos.provider.extensions.BasicSearchAware;
 import com.openexchange.chronos.provider.extensions.PersonalAlarmAware;
 import com.openexchange.chronos.provider.extensions.SubscribeAware;
@@ -189,7 +188,7 @@ public class BirthdaysCalendarAccess implements BasicCalendarAccess, SubscribeAw
          * init settings & and apply account configuration
          */
         StringHelper stringHelper = StringHelper.valueOf(session.getUser().getLocale());
-        DefaultCalendarSettings settings = new DefaultCalendarSettings();
+        CalendarSettings settings = new CalendarSettings();
         settings.setConfig(account.getUserConfiguration());
         settings.setLastModified(account.getLastModified());
         /*

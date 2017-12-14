@@ -58,7 +58,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.chronos.account.json.ChronosAccountActionFactory;
 import com.openexchange.chronos.provider.CalendarAccount;
-import com.openexchange.chronos.provider.basic.DefaultCalendarSettings;
+import com.openexchange.chronos.provider.basic.CalendarSettings;
 import com.openexchange.exception.OXException;
 import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.server.ServiceLookup;
@@ -93,7 +93,7 @@ public class UpdateAction extends AbstractAccountAction {
             throw AjaxExceptionCodes.MISSING_REQUEST_BODY.create();
         }
         Boolean enabled = data.hasAndNotNull("enabled") ? Boolean.valueOf(data.optBoolean("enabled")) : null;
-        DefaultCalendarSettings settings = new DefaultCalendarSettings();
+        CalendarSettings settings = new CalendarSettings();
         settings.setConfig(data.optJSONObject(CONFIGURATION));
         CalendarAccount account = getAccountService().updateAccount(session, accountId, settings, clientTimestamp, null);
         return new AJAXRequestResult(serializeAccount(account), account.getLastModified(), "json");

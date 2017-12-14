@@ -63,7 +63,6 @@ import com.openexchange.chronos.ExtendedProperties;
 import com.openexchange.chronos.TimeTransparency;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.basic.CalendarSettings;
-import com.openexchange.chronos.provider.basic.DefaultCalendarSettings;
 import com.openexchange.chronos.provider.caching.ExternalCalendarResult;
 import com.openexchange.chronos.provider.caching.basic.BasicCachingCalendarAccess;
 import com.openexchange.chronos.provider.schedjoules.exception.SchedJoulesProviderExceptionCodes;
@@ -122,7 +121,7 @@ public class BasicSchedJoulesCalendarAccess extends BasicCachingCalendarAccess {
         extendedProperties.add(USED_FOR_SYNC(Boolean.FALSE, true));
         extendedProperties.add(COLOR(internalConfig.optString("color", null), false));
 
-        DefaultCalendarSettings settings = new DefaultCalendarSettings();
+        CalendarSettings settings = new CalendarSettings();
         settings.setLastModified(account.getLastModified());
         settings.setConfig(account.getUserConfiguration());
         settings.setName(internalConfig.optString("name", "calendar"));

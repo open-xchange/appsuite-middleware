@@ -73,7 +73,6 @@ import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.CalendarFolderProperty;
 import com.openexchange.chronos.provider.basic.CalendarSettings;
-import com.openexchange.chronos.provider.basic.DefaultCalendarSettings;
 import com.openexchange.chronos.provider.caching.ExternalCalendarResult;
 import com.openexchange.chronos.provider.caching.basic.BasicCachingCalendarAccess;
 import com.openexchange.chronos.provider.google.GoogleCalendarConfigField;
@@ -326,7 +325,7 @@ public class GoogleCalendarAccess extends BasicCachingCalendarAccess {
 
     @Override
     public CalendarSettings getSettings() {
-        DefaultCalendarSettings settings = new DefaultCalendarSettings();
+        CalendarSettings settings = new CalendarSettings();
         settings.setLastModified(account.getLastModified());
         settings.setConfig(account.getUserConfiguration());
         JSONObject internalConfig = account.getInternalConfiguration();

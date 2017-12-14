@@ -97,7 +97,6 @@ import com.openexchange.chronos.provider.FreeBusyProvider;
 import com.openexchange.chronos.provider.account.CalendarAccountService;
 import com.openexchange.chronos.provider.basic.BasicCalendarAccess;
 import com.openexchange.chronos.provider.basic.CalendarSettings;
-import com.openexchange.chronos.provider.basic.DefaultCalendarSettings;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
 import com.openexchange.chronos.provider.composition.impl.idmangling.IDManglingCalendarResult;
 import com.openexchange.chronos.provider.composition.impl.idmangling.IDManglingImportResult;
@@ -708,7 +707,7 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
     }
 
     private CalendarSettings getBasicCalendarSettings(CalendarFolder calendarFolder, JSONObject userConfig) {
-        DefaultCalendarSettings settings = new DefaultCalendarSettings();
+        CalendarSettings settings = new CalendarSettings();
         settings.setExtendedProperties(calendarFolder.getExtendedProperties());
         settings.setName(calendarFolder.getName());
         settings.setLastModified(calendarFolder.getLastModified());

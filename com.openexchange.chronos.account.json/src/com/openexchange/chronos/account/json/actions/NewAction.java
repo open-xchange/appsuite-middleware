@@ -56,7 +56,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.chronos.account.json.ChronosAccountActionFactory;
 import com.openexchange.chronos.provider.CalendarAccount;
-import com.openexchange.chronos.provider.basic.DefaultCalendarSettings;
+import com.openexchange.chronos.provider.basic.CalendarSettings;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
@@ -93,7 +93,7 @@ public class NewAction extends AbstractAccountAction {
         if (null == data) {
             throw AjaxExceptionCodes.MISSING_REQUEST_BODY.create();
         }
-        DefaultCalendarSettings settings = new DefaultCalendarSettings();
+        CalendarSettings settings = new CalendarSettings();
         settings.setConfig(data.optJSONObject(CONFIGURATION));
         settings.setName("(new)"); //TODO
         CalendarAccount account = getAccountService().createAccount(session, provider, settings, null);
