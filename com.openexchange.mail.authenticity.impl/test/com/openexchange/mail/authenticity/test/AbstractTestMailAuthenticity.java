@@ -60,8 +60,8 @@ import org.junit.Before;
 import org.mockito.ArgumentCaptor;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.exception.OXException;
-import com.openexchange.mail.authenticity.DefaultMailAuthenticityResultKey;
 import com.openexchange.mail.authenticity.MailAuthenticityProperty;
+import com.openexchange.mail.authenticity.MailAuthenticityResultKey;
 import com.openexchange.mail.authenticity.MailAuthenticityStatus;
 import com.openexchange.mail.authenticity.impl.core.MailAuthenticityHandlerImpl;
 import com.openexchange.mail.authenticity.impl.core.metrics.MailAuthenticityMetricLogger;
@@ -150,7 +150,7 @@ public abstract class AbstractTestMailAuthenticity {
      * @param amount The amount of results
      */
     void assertAmount(int amount) {
-        assertEquals("The mail authenticity mechanism results amount does not match", amount, result.getAttribute(DefaultMailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS, List.class).size());
+        assertEquals("The mail authenticity mechanism results amount does not match", amount, result.getAttribute(MailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS, List.class).size());
     }
 
     /**
@@ -159,7 +159,7 @@ public abstract class AbstractTestMailAuthenticity {
      * @param amount The amount of results
      */
     void assertUnconsideredAmount(int amount) {
-        assertEquals("The mail authenticity unconsidered results amount does not match", amount, result.getAttribute(DefaultMailAuthenticityResultKey.UNCONSIDERED_AUTH_MECH_RESULTS, List.class).size());
+        assertEquals("The mail authenticity unconsidered results amount does not match", amount, result.getAttribute(MailAuthenticityResultKey.UNCONSIDERED_AUTH_MECH_RESULTS, List.class).size());
     }
 
     /**
@@ -191,7 +191,7 @@ public abstract class AbstractTestMailAuthenticity {
 
     /**
      * Asserts that the objets are equal
-     * 
+     *
      * @param expected The expected {@link MailAuthenticityStatus}
      * @param actual The actual {@link MailAuthenticityStatus}
      */
@@ -201,7 +201,7 @@ public abstract class AbstractTestMailAuthenticity {
 
     /**
      * Asserts that the domains are euqla
-     * 
+     *
      * @param expected The expected domain
      * @param actual The actual domain
      */

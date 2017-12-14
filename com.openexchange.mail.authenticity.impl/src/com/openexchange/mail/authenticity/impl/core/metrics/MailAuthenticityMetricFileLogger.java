@@ -52,8 +52,8 @@ package com.openexchange.mail.authenticity.impl.core.metrics;
 import java.util.List;
 import org.slf4j.LoggerFactory;
 import com.openexchange.config.lean.LeanConfigurationService;
-import com.openexchange.mail.authenticity.DefaultMailAuthenticityResultKey;
 import com.openexchange.mail.authenticity.MailAuthenticityProperty;
+import com.openexchange.mail.authenticity.MailAuthenticityResultKey;
 import com.openexchange.mail.authenticity.impl.osgi.Services;
 import com.openexchange.mail.authenticity.mechanism.AuthenticityMechanismResult;
 import com.openexchange.mail.authenticity.mechanism.MailAuthenticityMechanism;
@@ -212,7 +212,7 @@ public class MailAuthenticityMetricFileLogger implements MailAuthenticityMetricL
     private Object serialiseCodes(MailAuthenticityResult overallResult) {
         StringBuilder serialised = new StringBuilder();
         serialised.append("R:").append(overallResult.getStatus().ordinal()).append("|");
-        List<MailAuthenticityMechanismResult> knownResults = (List<MailAuthenticityMechanismResult>) overallResult.getAttribute(DefaultMailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS);
+        List<MailAuthenticityMechanismResult> knownResults = (List<MailAuthenticityMechanismResult>) overallResult.getAttribute(MailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS);
         if (knownResults == null || knownResults.isEmpty()) {
             serialised.setLength(serialised.length() - 1);
             return serialised.toString();
@@ -236,7 +236,7 @@ public class MailAuthenticityMetricFileLogger implements MailAuthenticityMetricL
     private Object serialiseTechnicalNames(MailAuthenticityResult overallResult) {
         StringBuilder serialised = new StringBuilder();
         serialised.append("Overall Result: ").append(overallResult.getStatus().getTechnicalName().toLowerCase()).append(", ");
-        List<MailAuthenticityMechanismResult> knownResults = (List<MailAuthenticityMechanismResult>) overallResult.getAttribute(DefaultMailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS);
+        List<MailAuthenticityMechanismResult> knownResults = (List<MailAuthenticityMechanismResult>) overallResult.getAttribute(MailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS);
         if (knownResults == null || knownResults.isEmpty()) {
             serialised.setLength(serialised.length() - 2);
             return serialised.toString();

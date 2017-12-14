@@ -68,10 +68,9 @@ import com.openexchange.config.PropertyFilter;
 import com.openexchange.config.Reloadables;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
-import com.openexchange.mail.authenticity.DefaultMailAuthenticityResultKey;
 import com.openexchange.mail.authenticity.MailAuthenticityExceptionCodes;
+import com.openexchange.mail.authenticity.MailAuthenticityResultKey;
 import com.openexchange.mail.authenticity.MailAuthenticityStatus;
-import com.openexchange.mail.authenticity.TrustedMailResultKey;
 import com.openexchange.mail.authenticity.impl.trusted.Icon;
 import com.openexchange.mail.authenticity.impl.trusted.TrustedMailService;
 import com.openexchange.mail.authenticity.mechanism.AuthenticityMechanismResult;
@@ -159,7 +158,7 @@ public class TrustedMailAuthenticityHandler implements ForcedReloadable, Trusted
             if (trustedDomain != null) {
                 authenticityResult.setStatus(MailAuthenticityStatus.TRUSTED);
                 if (trustedDomain.getImage() != null) {
-                    authenticityResult.addAttribute(TrustedMailResultKey.IMAGE, trustedDomain.getImage().getUID());
+                    authenticityResult.addAttribute(MailAuthenticityResultKey.IMAGE, trustedDomain.getImage().getUID());
                 }
             }
         }
@@ -345,7 +344,7 @@ public class TrustedMailAuthenticityHandler implements ForcedReloadable, Trusted
 
     private String getMailAddress(MailMessage msg) {
         MailAuthenticityResult authenticationResult = msg.getAuthenticityResult();
-        return authenticationResult == null ? null : authenticationResult.getAttribute(DefaultMailAuthenticityResultKey.TRUSTED_SENDER).toString();
+        return authenticationResult == null ? null : authenticationResult.getAttribute(MailAuthenticityResultKey.TRUSTED_SENDER).toString();
     }
 
 }

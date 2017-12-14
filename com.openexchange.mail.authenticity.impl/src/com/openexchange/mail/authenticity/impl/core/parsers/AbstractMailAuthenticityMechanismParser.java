@@ -52,7 +52,7 @@ package com.openexchange.mail.authenticity.impl.core.parsers;
 import java.util.Map;
 import java.util.function.BiFunction;
 import com.openexchange.java.Strings;
-import com.openexchange.mail.authenticity.DefaultMailAuthenticityResultKey;
+import com.openexchange.mail.authenticity.MailAuthenticityResultKey;
 import com.openexchange.mail.authenticity.MailAuthenticityStatus;
 import com.openexchange.mail.authenticity.mechanism.AbstractAuthMechResult;
 import com.openexchange.mail.authenticity.mechanism.AuthenticityMechanismResult;
@@ -81,7 +81,7 @@ abstract class AbstractMailAuthenticityMechanismParser implements BiFunction<Map
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see java.util.function.BiFunction#apply(java.lang.Object, java.lang.Object)
      */
     @Override
@@ -98,7 +98,7 @@ abstract class AbstractMailAuthenticityMechanismParser implements BiFunction<Map
     /**
      * Parses the specified value to a valid {@link AuthenticityMechanismResult} via the {@link Enum#valueOf(Class, String)}
      * method of the corresponding {@link AuthenticityMechanismResult}
-     * 
+     *
      * @param value The value
      * @return The {@link AuthenticityMechanismResult}
      * @throws IllegalArgumenException if an invalid value is passed as argument
@@ -107,7 +107,7 @@ abstract class AbstractMailAuthenticityMechanismParser implements BiFunction<Map
 
     /**
      * Creates a new {@link MailAuthenticityMechanismResult} with the specified domain, {@link AuthenticityMechanismResult}, mechanism name
-     * 
+     *
      * @param domain The domain
      * @param mechResult the {@link AuthenticityMechanismResult}
      * @param mechanismName The mechanism's name (may contain a comment in parenthesis)
@@ -128,7 +128,7 @@ abstract class AbstractMailAuthenticityMechanismParser implements BiFunction<Map
      * @return <code>true</code> if there is a mismatch between the domains, <code>false</code> otherwise
      */
     private boolean checkDomainMismatch(MailAuthenticityResult overallResult, String domain) {
-        String fromDomain = overallResult.getAttribute(DefaultMailAuthenticityResultKey.FROM_DOMAIN, String.class);
+        String fromDomain = overallResult.getAttribute(MailAuthenticityResultKey.FROM_DOMAIN, String.class);
         return !fromDomain.equals(domain);
     }
 

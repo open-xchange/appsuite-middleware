@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2017-2020 OX Software GmbH
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,33 +49,22 @@
 
 package com.openexchange.mail.authenticity;
 
+import java.util.Map;
+import org.json.JSONObject;
+
 /**
- * {@link TrustedMailResultKey}
+ * {@link CustomPropertyJsonHandler} handles custom properties of a authenticity result.
  *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.10.0
  */
-public enum TrustedMailResultKey implements MailAuthenticityResultKey {
-    /**
-     * Defines the 'image' key for the response object
-     */
-    IMAGE("image");
-
-    private final String key;
+public interface CustomPropertyJsonHandler {
 
     /**
-     * Initializes a new {@link TrustedMailResultKey}.
+     * Parses the a map of custom properties to a {@link JSONObject}
+     * @param customProperties The map of custom properties
+     * @return the {@link JSONObject}
      */
-    private TrustedMailResultKey(String key) {
-        this.key = key;
-    }
+    public JSONObject toJson(Map<String,?> customProperties);
 
-    @Override
-    public String getKey() {
-        return key;
-    }
-
-    @Override
-    public boolean isVisible() {
-        return true;
-    }
 }

@@ -70,11 +70,11 @@ import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.authenticity.AllowedAuthServId;
-import com.openexchange.mail.authenticity.DefaultMailAuthenticityResultKey;
 import com.openexchange.mail.authenticity.MailAuthenticityAttribute;
 import com.openexchange.mail.authenticity.MailAuthenticityExceptionCodes;
 import com.openexchange.mail.authenticity.MailAuthenticityHandler;
 import com.openexchange.mail.authenticity.MailAuthenticityProperty;
+import com.openexchange.mail.authenticity.MailAuthenticityResultKey;
 import com.openexchange.mail.authenticity.MailAuthenticityStatus;
 import com.openexchange.mail.authenticity.impl.core.metrics.MailAuthenticityMetricLogger;
 import com.openexchange.mail.authenticity.impl.core.parsers.DKIMMailAuthenticityMechanismParser;
@@ -152,7 +152,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
 
     /**
      * Initialise the mechanism registry
-     * 
+     *
      * @return An {@link ImmutableMap} with the mechanism implementations
      */
     private ImmutableMap<DefaultMailAuthenticityMechanism, BiFunction<Map<String, String>, MailAuthenticityResult, MailAuthenticityMechanismResult>> initialiseMechanismRegistry() {
@@ -287,8 +287,8 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
 
             // Extract the domain from the 'From' header
             try {
-                overallResult.addAttribute(DefaultMailAuthenticityResultKey.FROM_DOMAIN, extractDomain(from));
-                overallResult.addAttribute(DefaultMailAuthenticityResultKey.TRUSTED_SENDER, from.getAddress());
+                overallResult.addAttribute(MailAuthenticityResultKey.FROM_DOMAIN, extractDomain(from));
+                overallResult.addAttribute(MailAuthenticityResultKey.TRUSTED_SENDER, from.getAddress());
             } catch (final Exception e) {
                 // Malformed from header, be strict and return with failed result
                 LOGGER.debug("An error occurred while trying to extract a valid domain from the 'From' header", e);
@@ -301,8 +301,8 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
 
         determineOverallResult(overallResult, results, unconsideredResults);
 
-        overallResult.addAttribute(DefaultMailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS, results);
-        overallResult.addAttribute(DefaultMailAuthenticityResultKey.UNCONSIDERED_AUTH_MECH_RESULTS, unconsideredResults);
+        overallResult.addAttribute(MailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS, results);
+        overallResult.addAttribute(MailAuthenticityResultKey.UNCONSIDERED_AUTH_MECH_RESULTS, unconsideredResults);
 
         return overallResult;
     }
@@ -341,7 +341,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
 
     /**
      * Determine the overall result from the extracted results
-     * 
+     *
      * @param overallResult The overall {@link MailAuthenticityResult}
      * @param results A {@link List} with the results of the known mechanisms
      * @param unconsideredResults A {@link List} with the unknown/unconsidered results
@@ -387,7 +387,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
 
     /**
      * Separates the results into different containers according to their type
-     * 
+     *
      * @param results All the {@link MailAuthenticityMechanismResult}s
      * @param spfResults The container for the SPF results
      * @param dkimResults The container for the DKIM results
@@ -414,7 +414,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
 
     /**
      * Check the DKIM best of result and determine the overall status
-     * 
+     *
      * @param overallResult The overall {@link MailAuthenticityResult}
      * @param bestOfDKIM The best of DKIM {@link MailAuthenticityMechanismResult}
      * @return <code>true</code> if DKIM failed, <code>false</code> otherwise
@@ -441,7 +441,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
 
     /**
      * Check the SPF best of result and determine the overall status
-     * 
+     *
      * @param overallResult The overall {@link MailAuthenticityResult}
      * @param bestOfSPF The best of SPF {@link MailAuthenticityMechanismResult}
      * @param dkimFailed the status of DKIM
@@ -481,7 +481,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
 
     /**
      * Picks the best {@link MailAuthenticityMechanismResult} from the specified {@link List} of results
-     * 
+     *
      * @param results The {@link List} with the {@link MailAuthenticityMechanismResult}s
      * @param unconsideredResults The {@link List} with the unconsidered results
      * @return The best {@link MailAuthenticityMechanismResult} according to their natural ordering,
@@ -546,7 +546,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
 
     /**
      * Converts the specified {@link MailAuthenticityMechanismResult} to a {@link Map}
-     * 
+     *
      * @param result The {@link MailAuthenticityMechanismResult} to convert
      * @return A {@link Map} with the converted {@link MailAuthenticityMechanismResult}
      */
@@ -681,7 +681,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
 
     /**
      * Logs the specified raw headers and overall result with the {@link MailAuthenticityMetricLogger}
-     * 
+     *
      * @param authHeaders the raw headers
      * @param overallResult the overall result
      */
