@@ -48,6 +48,8 @@
 
 package com.openexchange.chronos.provider.caching;
 
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.L;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -62,10 +64,12 @@ import java.util.concurrent.TimeUnit;
 import org.json.JSONObject;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.RecurrenceId;
+import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.CalendarAccess;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.CalendarFolder;
 import com.openexchange.chronos.provider.account.AdministrativeCalendarAccountService;
+import com.openexchange.chronos.provider.account.CalendarAccountService;
 import com.openexchange.chronos.provider.caching.internal.Services;
 import com.openexchange.chronos.provider.caching.internal.handler.CachingExecutor;
 import com.openexchange.chronos.provider.caching.internal.handler.FolderProcessingType;
@@ -234,7 +238,7 @@ public abstract class CachingCalendarAccess implements FolderCalendarAccess, War
         }
     }
 
-    protected Set<FolderUpdateState> merge(List<FolderUpdateState> persistedUpdateStates, List<CalendarFolder> externalFolders) {
+    protected Set<FolderUpdateState> merge(List<FolderUpdateState> persistedUpdateStates, List<CalendarFolder> externalFolders) throws OXException {
         if (persistedUpdateStates == null) {
             persistedUpdateStates = Collections.emptyList();
         }
@@ -249,7 +253,11 @@ public abstract class CachingCalendarAccess implements FolderCalendarAccess, War
             String folderId = externalFolder.getId();
             FolderUpdateState found = findExistingFolder(persistedUpdateStates, folderId);
             if (found == null) {
-                executionList.add(new FolderUpdateState(folderId, 0, 0, FolderProcessingType.INITIAL_INSERT));
+                if (acquireUpdateLock()) {
+                    executionList.add(new FolderUpdateState(folderId, 0, 0, FolderProcessingType.INITIAL_INSERT));
+                } else {
+                    executionList.add(new FolderUpdateState(folderId, 0, 0, FolderProcessingType.READ_DB));
+                }
                 iterator.remove();
                 continue;
             }
@@ -313,12 +321,20 @@ public abstract class CachingCalendarAccess implements FolderCalendarAccess, War
             long refreshInterval = getCascadedRefreshInterval(folderId);
 
             if (lastFolderUpdate == null || lastFolderUpdate.longValue() < 0) {
-                currentStates.add(new FolderUpdateState(folderId, 0, refreshInterval, FolderProcessingType.INITIAL_INSERT));
+                if (acquireUpdateLock()) {
+                    currentStates.add(new FolderUpdateState(folderId, 0, refreshInterval, FolderProcessingType.INITIAL_INSERT));
+                } else {
+                    currentStates.add(new FolderUpdateState(folderId, lastFolderUpdate.longValue(), refreshInterval, FolderProcessingType.READ_DB));
+                }
                 continue;
             }
             long currentTimeMillis = System.currentTimeMillis();
             if (TimeUnit.MINUTES.toMillis(refreshInterval) < currentTimeMillis - lastFolderUpdate.longValue()) {
-                currentStates.add(new FolderUpdateState(folderId, lastFolderUpdate.longValue(), refreshInterval, FolderProcessingType.UPDATE));
+                if (acquireUpdateLock()) {
+                    currentStates.add(new FolderUpdateState(folderId, lastFolderUpdate.longValue(), refreshInterval, FolderProcessingType.UPDATE));
+                } else {
+                    currentStates.add(new FolderUpdateState(folderId, lastFolderUpdate.longValue(), refreshInterval, FolderProcessingType.READ_DB));
+                }
                 continue;
             }
             currentStates.add(new FolderUpdateState(folderId, lastFolderUpdate.longValue(), refreshInterval, FolderProcessingType.READ_DB));
@@ -389,4 +405,87 @@ public abstract class CachingCalendarAccess implements FolderCalendarAccess, War
         AdministrativeCalendarAccountService service = Services.getService(AdministrativeCalendarAccountService.class);
         account = service.updateAccount(getSession().getContextId(), getAccount().getUserId(), getAccount().getAccountId(), null, internalConfiguration, userConfiguration, getAccount().getLastModified().getTime());
     }
+
+    /**
+     * Locks the calendar account prior updating the cached calendar data by persisting an appropriate marker within the account's
+     * internal configuration data. If successful, the update operation should proceed, if not, another update operation for this account
+     * is already being executed.
+     *
+     * @return <code>true</code> if the account was locked for update successfully, <code>false</code>, otherwise
+     */
+    private boolean acquireUpdateLock() throws OXException {
+        long now = System.currentTimeMillis();
+        JSONObject internalConfig = account.getInternalConfiguration();
+        if (null == internalConfig) {
+            internalConfig = new JSONObject();
+        }
+        /*
+         * check if an update is already in progress
+         */
+        long lockedUntil = internalConfig.optLong("lockedForUpdateUntil", 0L);
+        if (lockedUntil > now) {
+            LOG.debug("Account {} is already locked until {}, aborting lock acquisition.", I(account.getAccountId()), L(lockedUntil));
+            return false;
+        }
+        /*
+         * no running update detected, try entering exclusive update and persist lock for 10 minutes in account config
+         */
+        lockedUntil = now + TimeUnit.MINUTES.toMillis(10);
+        internalConfig.putSafe("lockedForUpdateUntil", L(lockedUntil));
+        AdministrativeCalendarAccountService accountService = Services.getService(AdministrativeCalendarAccountService.class);
+        try {
+            account = accountService.updateAccount(session.getContextId(), session.getUserId(), account.getAccountId(), null, internalConfig, null, account.getLastModified().getTime());
+            LOG.debug("Successfully acquired and persisted lock for account {} until {}.", I(account.getAccountId()), L(lockedUntil));
+            return true;
+        } catch (OXException e) {
+            if (CalendarExceptionCodes.CONCURRENT_MODIFICATION.equals(e)) {
+                /*
+                 * account updated in the meantime; refresh & don't update now
+                 */
+                LOG.debug("Concurrent modification while attempting to persist lock for account {}, aborting.", I(account.getAccountId()));
+                account = Services.getService(CalendarAccountService.class).getAccount(session, account.getAccountId(), parameters);
+                return false;
+            }
+            throw e;
+        }
+    }
+
+    /**
+     * Releases a previously acquired lock for updating the account's cached calendar data.
+     *
+     * @return <code>true</code> if a lock was removed successfully, <code>false</code>, otherwise
+     */
+    private boolean releaseUpdateLock() throws OXException {
+        
+        // TODO 
+        // execution flow is a bit awkward, so that the lock currently cannot be released from the same location where it was previously 
+        // acquired (within a try/finally block)
+        // so at the moment, we're effectively producing stale locks (that at least time out after 10 minutes)
+        // this should be adjusted along with the pending changes for dedicated support of BasicCalendarAccess
+        
+        JSONObject internalConfig = account.getInternalConfiguration();
+        if (null != internalConfig && null != internalConfig.remove("lockedForUpdateUntil")) {
+            /*
+             * update lock removed from config, update account config in storage
+             */
+            AdministrativeCalendarAccountService accountService = Services.getService(AdministrativeCalendarAccountService.class);
+            try {
+                account = accountService.updateAccount(session.getContextId(), session.getUserId(), account.getAccountId(), null, internalConfig, null, account.getLastModified().getTime());
+                LOG.debug("Successfully released lock for account {}.", I(account.getAccountId()));
+                return true;
+            } catch (OXException e) {
+                if (CalendarExceptionCodes.CONCURRENT_MODIFICATION.equals(e)) {
+                    /*
+                     * account updated in the meantime; refresh & don't update now
+                     */
+                    LOG.debug("Concurrent modification while attempting to release lock for account {}, aborting.", I(account.getAccountId()));
+                    account = Services.getService(CalendarAccountService.class).getAccount(session, account.getAccountId(), parameters);
+                    return false;
+                }
+                throw e;
+            }
+        }
+        return false;
+    }
+
 }
