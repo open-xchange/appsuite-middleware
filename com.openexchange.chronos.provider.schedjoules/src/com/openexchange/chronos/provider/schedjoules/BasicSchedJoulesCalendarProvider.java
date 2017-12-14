@@ -59,6 +59,7 @@ import java.util.Locale;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.json.JSONValue;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.CalendarCapability;
 import com.openexchange.chronos.provider.basic.BasicCalendarAccess;
@@ -244,8 +245,12 @@ public class BasicSchedJoulesCalendarProvider extends BasicCachingCalendarProvid
     private JSONObject fetchItem(int contextId, int itemId, String locale) throws OXException {
         try {
             SchedJoulesService schedJoulesService = services.getService(SchedJoulesService.class);
-            // FIXME: type check
-            JSONObject page = (JSONObject) schedJoulesService.getPage(contextId, itemId, locale, Collections.emptySet()).getData();
+            JSONValue jsonValue = schedJoulesService.getPage(contextId, itemId, locale, Collections.emptySet()).getData();
+            if (!jsonValue.isObject()) {
+                throw SchedJoulesProviderExceptionCodes.PAGE_DOES_NOT_DENOTE_TO_JSON.create(itemId);
+            }
+
+            JSONObject page = jsonValue.toObject();
             if (!page.hasAndNotNull(SchedJoulesFields.URL)) {
                 throw SchedJoulesProviderExceptionCodes.NO_CALENDAR.create(itemId);
             }

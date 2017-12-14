@@ -126,6 +126,11 @@ public enum SchedJoulesProviderExceptionCodes implements DisplayableOXExceptionC
      * <li>The item identifier is missing from the configuration [account %1$s, user %2$s, context %3$s]</li>
      */
     MISSING_ITEM_ID_FROM_CONFIG("The item identifier is missing from the configuration [account %1$s, user %2$s, context %3$s]", CATEGORY_ERROR, 12),
+    /**
+     * <li>An error occurred inside the server which prevented it from fulfilling the request.</li>
+     * <li>The requested item with identifier '{}' does not denote to a JSON page</li>
+     */
+    PAGE_DOES_NOT_DENOTE_TO_JSON("The requested item with identifier '%1$s' does not denote to a JSON page", CATEGORY_ERROR, 13),
     ;
 
     public static final String PREFIX = "SCHEDJOULES";
