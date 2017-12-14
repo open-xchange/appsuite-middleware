@@ -161,26 +161,29 @@ public class BirthdaysCalendarProvider implements BasicCalendarProvider, AutoPro
 
     @Override
     public JSONObject reconfigureAccount(Session session, CalendarAccount account, CalendarSettings settings, CalendarParameters parameters) throws OXException {
-        ServerSession serverSession = ServerSessionAdapter.valueOf(session);
         /*
          * initialize & check passed user config
          */
-        initializeUserConfig(serverSession, settings.getConfig());
+        if (settings.containsConfig()) {
+            initializeUserConfig(ServerSessionAdapter.valueOf(session), settings.getConfig());
+        }
         /*
          * check & apply changes to extended properties
          */
         boolean changed = false;
         JSONObject internalConfig = null != account.getInternalConfiguration() ? new JSONObject(account.getInternalConfiguration()) : new JSONObject();
-        Object colorValue = optPropertyValue(settings.getExtendedProperties(), COLOR_LITERAL);
-        if (null != colorValue && String.class.isInstance(colorValue) && false == colorValue.equals(internalConfig.opt("color"))) {
-            internalConfig.putSafe("color", colorValue);
-            changed = true;
+        if (settings.containsExtendedProperties()) {
+            Object colorValue = optPropertyValue(settings.getExtendedProperties(), COLOR_LITERAL);
+            if (null != colorValue && String.class.isInstance(colorValue) && false == colorValue.equals(internalConfig.opt("color"))) {
+                internalConfig.putSafe("color", colorValue);
+                changed = true;
+            }
         }
-        if (Strings.isNotEmpty(settings.getName()) && false == settings.getName().equals(internalConfig.opt("name"))) {
+        if (settings.containsName() && Strings.isNotEmpty(settings.getName()) && false == settings.getName().equals(internalConfig.opt("name"))) {
             internalConfig.putSafe("name", settings.getName());
             changed = true;
         }
-        if (settings.isSubscribed() != internalConfig.optBoolean("subscribed", true)) {
+        if (settings.containsSubscribed() && settings.isSubscribed() != internalConfig.optBoolean("subscribed", true)) {
             internalConfig.putSafe("subscribed", settings.isSubscribed());
             changed = true;
         }

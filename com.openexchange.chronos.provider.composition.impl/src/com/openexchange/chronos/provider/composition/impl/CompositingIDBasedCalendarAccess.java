@@ -708,10 +708,18 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
 
     private CalendarSettings getBasicCalendarSettings(CalendarFolder calendarFolder, JSONObject userConfig) {
         CalendarSettings settings = new CalendarSettings();
-        settings.setExtendedProperties(calendarFolder.getExtendedProperties());
-        settings.setName(calendarFolder.getName());
-        settings.setLastModified(calendarFolder.getLastModified());
-        settings.setConfig(userConfig);
+        if (null != calendarFolder.getExtendedProperties()) {
+            settings.setExtendedProperties(calendarFolder.getExtendedProperties());
+        }
+        if (null != calendarFolder.getName()) {
+            settings.setName(calendarFolder.getName());
+        }
+        if (null != calendarFolder.getLastModified()) {
+            settings.setLastModified(calendarFolder.getLastModified());
+        }
+        if (null != userConfig) {
+            settings.setConfig(userConfig);
+        }
         settings.setSubscribed(calendarFolder.isSubscribed());
         return settings;
     }
