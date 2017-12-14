@@ -100,7 +100,7 @@ public class FileNameTools {
                 if (null != sb) {
                     sb.append(ch);
                 }
-            } else if (Strings.isPunctuation(ch)) { // Punctuations
+            } else if (Strings.isPunctuation(ch) || Character.UnicodeBlock.CJK_SYMBOLS_AND_PUNCTUATION == Character.UnicodeBlock.of(ch)) { // Punctuations
                 if (null != sb) {
                     sb.append(ch);
                 }
