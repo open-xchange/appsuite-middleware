@@ -146,6 +146,14 @@ public class UploadException extends OXException {
          * Read timed out. Waited too long for incoming data from client.
          */
         UNEXPECTED_TIMEOUT("Read timed out. Waited too long for incoming data from client.", UploadExceptionMessage.UNEXPECTED_TIMEOUT_MSG, CATEGORY_ERROR, 15),
+        /**
+         * Image upload denied. Size is too big. (current=%1$s, max=%2$s)
+         */
+        IMAGE_TOO_BIG("Image upload denied. Size is too big. (current=%1$s, max=%2$s)", UploadExceptionMessage.IMAGE_TOO_BIG_MSG, CATEGORY_USER_INPUT, 16),
+        /**
+         * Image upload denied. Resolution is too high. (current=%1$s, max=%2$s)
+         */
+        IMAGE_RESOLUTION_TOO_HIGH("Image upload denied. Resolution is too high. (current=%1$s, max=%2$s)", UploadExceptionMessage.IMAGE_RESOLUTION_TOO_HIGH_MSG, CATEGORY_USER_INPUT, 17),
 
         ;
 

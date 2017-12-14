@@ -107,7 +107,7 @@ public class TokenLoginTest extends AbstractAJAXSession {
             TokenLoginResponse response = myClient.execute(new TokenLoginRequest(login, password));
             assertNotNull("Path of redirect response is not found.", response.getPath());
             assertNotNull("Server side token not found as fragment.", response.getServerToken());
-            assertNotNull("Login string was not found as fragment.", response.getLogin());
+            // assertNotNull("Login string was not found as fragment.", response.getLogin());
             assertNotSame("", I(-1), I(response.getUserId()));
             assertNotNull("Language string was not found as fragment.", response.getLanguage());
             // Activate session with tokens.
@@ -131,7 +131,7 @@ public class TokenLoginTest extends AbstractAJAXSession {
             TokenLoginResponse response = myClient.execute(new TokenLoginRequest(login, password));
             assertNotNull("Path of redirect response is not found.", response.getPath());
             assertNotNull("Server side token not found as fragment.", response.getServerToken());
-            assertNotNull("Login string was not found as fragment.", response.getLogin());
+            // assertNotNull("Login string was not found as fragment.", response.getLogin());
             assertNotSame("", I(-1), I(response.getUserId()));
             assertNotNull("Language string was not found as fragment.", response.getLanguage());
             Thread.sleep(60000);

@@ -60,7 +60,7 @@ import com.openexchange.configuration.AJAXConfig.Property;
 
 /**
  * Tests the action formLogin of the login servlet.
- * 
+ *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public class FormLoginTest extends AbstractAJAXSession {
@@ -94,7 +94,7 @@ public class FormLoginTest extends AbstractAJAXSession {
             FormLoginResponse response = myClient.execute(new FormLoginRequest(login, password));
             assertNotNull("Path of redirect response is not found.", response.getPath());
             assertNotNull("Session identifier not found as fragment.", response.getSessionId());
-            assertNotNull("Login string was not found as fragment.", response.getLogin());
+            // assertNotNull("Login string was not found as fragment.", response.getLogin());
             assertNotSame("", I(-1), I(response.getUserId()));
             assertNotNull("Language string was not found as fragment.", response.getLanguage());
             session.setId(response.getSessionId());
@@ -115,7 +115,7 @@ public class FormLoginTest extends AbstractAJAXSession {
             FormLoginResponse response = myClient.execute(new FormLoginRequest(login, password, null));
             assertNotNull("Path of redirect response is not found.", response.getPath());
             assertNotNull("Session identifier not found as fragment.", response.getSessionId());
-            assertNotNull("Login string was not found as fragment.", response.getLogin());
+            //assertNotNull("Login string was not found as fragment.", response.getLogin());
             assertNotSame("", I(-1), I(response.getUserId()));
             assertNotNull("Language string was not found as fragment.", response.getLanguage());
             session.setId(response.getSessionId());

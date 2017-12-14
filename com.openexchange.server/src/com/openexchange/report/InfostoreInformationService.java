@@ -52,6 +52,7 @@ import java.sql.SQLException;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import com.openexchange.context.PoolAndSchema;
 import com.openexchange.exception.OXException;
 
 /**
@@ -59,7 +60,7 @@ import com.openexchange.exception.OXException;
  * by the reports drive-metric calculation functions. This classes functions are designed to use and store
  * all needed schema connections for one usersInContext-map. Therefore after the usage of one of these functions, all connections
  * should be released by calling {@link #closeAllDBConnections}.
- * 
+ *
  * Attention, if intended to call more than one function without releasing the connections after each call,
  * the developer should use the same usersInContext map. The needed connections are only gathered once, unless they are
  * released manually.
@@ -72,8 +73,9 @@ public interface InfostoreInformationService {
      * Calculate min/max/avg/total for the given context/Id map. Iterates over all schemas relevant, determined by
      * the given contextIds. Returns a map with all calculated values regarding all schemas combined. Every
      * Version of a file is considered.
-     * 
-     * @param usersInContext, map with context ids and users in a list, that belong to that context
+     *
+     * @param dbContextToUserBash, map with one context id as key, to identify the needed schema.
+     *      The value is a map with context ids and users in a list, that belong to that context
      * @return A map with the following information about file sizes:
      * <table>
      * <tr>
@@ -95,13 +97,14 @@ public interface InfostoreInformationService {
      * @throws SQLException
      * @throws OXException
      */
-    public Map<String, Integer> getFileSizeMetrics(Map<Integer, List<Integer>> usersInContext) throws SQLException, OXException;
+    public Map<String, Integer> getFileSizeMetrics(Map<PoolAndSchema, Map<Integer, List<Integer>>> dbContextToUserBash) throws SQLException, OXException;
 
     /**
      * Get all file types and their amount from all relevant schemas. Relevent schemas are determined by
      * the context ids from the given map.
-     * 
-     * @param usersInContext, map with context ids and users in a list, that belong to that context
+     *
+     * @param dbContextToUserBash, map with one context id as key, to identify the needed schema.
+     *      The value is a map with context ids and users in a list, that belong to that context
      * @return A map with the following information about mime-types:
      * <table>
      * <tr>
@@ -114,16 +117,17 @@ public interface InfostoreInformationService {
      * @throws SQLException
      * @throws OXException
      */
-    public Map<String, Integer> getFileCountMimetypeMetrics(Map<Integer, List<Integer>> usersInContext) throws SQLException, OXException;
+    public Map<String, Integer> getFileCountMimetypeMetrics(Map<PoolAndSchema, Map<Integer, List<Integer>>> dbContextToUserBash) throws SQLException, OXException;
 
     /**
      * Calculate min/max/avg/total for the amount of storage every drive user is using. Users, that do not use drive are irrelevant
      * and have no effect. The function Iterates over all schemas relevant, determined by
      * the given contextIds.
-     * 
+     *
      * Returns a map with all calculated values regarding all schemas combined.
-     * 
-     * @param usersInContext, map with context ids and users in a list, that belong to that context
+     *
+     * @param @param dbContextToUserBash, map with one context id as key, to identify the needed schema.
+     *      The value is a map with context ids and users in a list, that belong to that context
      * @return A map with the following information about used storage:
      * <table>
      * <tr>
@@ -145,16 +149,17 @@ public interface InfostoreInformationService {
      * @throws SQLException
      * @throws OXException
      */
-    public Map<String, Integer> getStorageUseMetrics(Map<Integer, List<Integer>> usersInContext) throws SQLException, OXException;
+    public Map<String, Integer> getStorageUseMetrics(Map<PoolAndSchema, Map<Integer, List<Integer>>> dbContextToUserBash) throws SQLException, OXException;
 
     /**
      * Calculate min/max/avg/total for the amount of files every drive user possesses. Users, that do not use drive are irrelevant
      * and have no effect. The function Iterates over all schemas relevant, determined by
      * the given contextIds. Versions are treated as files, also.
-     * 
+     *
      * Returns a map with all calculated values regarding all schemas combined.
-     * 
-     * @param usersInContext, map with context ids and users in a list, that belong to that context
+     *
+     * @param dbContextToUserBash, map with one context id as key, to identify the needed schema.
+     *      The value is a map with context ids and users in a list, that belong to that context
      * @return A map with the following information about file count:
      * <table>
      * <tr>
@@ -179,16 +184,17 @@ public interface InfostoreInformationService {
      * @throws SQLException
      * @throws OXException
      */
-    public Map<String, Integer> getFileCountMetrics(Map<Integer, List<Integer>> usersInContext) throws SQLException, OXException;
+    public Map<String, Integer> getFileCountMetrics(Map<PoolAndSchema, Map<Integer, List<Integer>>> dbContextToUserBash) throws SQLException, OXException;
 
     /**
      * Calculate min/max/avg/total for the amount of files every drive user possessed, in the given timeframe.
      * Users, that have not used drive in that timeframe are irrelevant and have no effect. The function Iterates over all schemas relevant, determined by
      * the given contextIds.
-     * 
+     *
      * Returns a map with all calculated values regarding all schemas combined.
-     * 
-     * @param usersInContext, map with context ids and users in a list, that belong to that context
+     *
+     * @param dbContextToUserBash, map with one context id as key, to identify the needed schema.
+     *      The value is a map with context ids and users in a list, that belong to that context
      * @param start, start of timeframe
      * @param end, end of timeframe
      * @return A map with the following information about file count:
@@ -212,16 +218,17 @@ public interface InfostoreInformationService {
      * @throws SQLException
      * @throws OXException
      */
-    public Map<String, Integer> getFileCountInTimeframeMetrics(Map<Integer, List<Integer>> usersInContext, Date start, Date end) throws SQLException, OXException;
+    public Map<String, Integer> getFileCountInTimeframeMetrics(Map<PoolAndSchema, Map<Integer, List<Integer>>> dbContextToUserBash, Date start, Date end) throws SQLException, OXException;
 
     /**
      * Calculate min/max/avg/total for the number of external storages every drive user possesses.
      * Users, that have no external storage are irrelevant and have no effect. The function Iterates over all schemas relevant, determined by
      * the given contextIds.
-     * 
+     *
      * Returns a map with all calculated values regarding all schemas combined.
-     * 
-     * @param usersInContext, map with context ids and users in a list, that belong to that context
+     *
+     * @param dbContextToUserBash, map with one context id as key, to identify the needed schema.
+     *      The value is a map with context ids and users in a list, that belong to that context
      * @return A map with the following information about external storages:
      * <table>
      * <tr>
@@ -246,13 +253,14 @@ public interface InfostoreInformationService {
      * @throws SQLException
      * @throws OXException
      */
-    public Map<String, Integer> getExternalStorageMetrics(Map<Integer, List<Integer>> usersInContext) throws SQLException, OXException;
+    public Map<String, Integer> getExternalStorageMetrics(Map<PoolAndSchema, Map<Integer, List<Integer>>> dbContextToUserBash) throws SQLException, OXException;
 
     /**
      * Get the number of files without taking their versions into account. The function Iterates over all schemas relevant, determined by
      * the given contextIds.
-     * 
-     * @param usersInContext, map with context ids and users in a list, that belong to that context
+     *
+     * @param dbContextToUserBash, map with one context id as key, to identify the needed schema.
+     *      The value is a map with context ids and users in a list, that belong to that context
      * @return A map with the following information about file count:
      * <table>
      * <tr>
@@ -265,14 +273,14 @@ public interface InfostoreInformationService {
      * @throws SQLException
      * @throws OXException
      */
-    public Map<String, Integer> getFileCountNoVersions(Map<Integer, List<Integer>> usersInContext) throws SQLException, OXException;
+    public Map<String, Integer> getFileCountNoVersions(Map<PoolAndSchema, Map<Integer, List<Integer>>> dbContextToUserBash) throws SQLException, OXException;
 
     /**
      * Calculate min/max/avg/total in percent for the quota per context-/dedicated user-filestore.
      * The function Iterates over all schemas relevant, determined by the given contextIds.
-     * 
+     *
      * Returns a map with all calculated values regarding all schemas combined.
-     * 
+     *
      * @param usersInContext, map with context ids and users in a list, that belong to that context
      * @return A map with the following information about quota usage:
      * <table>
@@ -299,10 +307,5 @@ public interface InfostoreInformationService {
      * @throws OXException
      */
     public Map<String, Integer> getQuotaUsageMetrics(Map<Integer, List<Integer>> usersInContext) throws SQLException, OXException;
-
-    /**
-     * Return all used connections to the pool. Should be called after the last metric has been calculated.
-     */
-    public void closeAllDBConnections();
 
 }

@@ -66,6 +66,7 @@ public class AutologinResponseParser extends AbstractAJAXParser<AutologinRespons
 
     /**
      * Initializes a new {@link AutologinResponseParser}.
+     *
      * @param failOnError
      */
     public AutologinResponseParser(boolean failOnError) {
@@ -80,7 +81,7 @@ public class AutologinResponseParser extends AbstractAJAXParser<AutologinRespons
             response.setData(null);
         }  else {
             autologinResponse.setSessionId(json.getString(LoginServlet.PARAMETER_SESSION));
-            autologinResponse.setUser(json.getString(LoginServlet.PARAMETER_USER));
+            autologinResponse.setUser(json.optString(LoginServlet.PARAMETER_USER, null));
             autologinResponse.setUserId(json.getInt(LoginServlet.PARAMETER_USER_ID));
             autologinResponse.setContextId(json.getInt("context_id"));
         }

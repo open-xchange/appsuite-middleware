@@ -67,6 +67,7 @@ import java.text.Normalizer;
 import java.text.Normalizer.Form;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
@@ -102,6 +103,10 @@ import org.htmlcleaner.Serializer;
 import org.htmlcleaner.SimpleHtmlSerializer;
 import org.htmlcleaner.TagNode;
 import org.jsoup.Jsoup;
+import org.jsoup.nodes.Comment;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Node;
+import org.jsoup.select.NodeVisitor;
 import org.owasp.esapi.codecs.HTMLEntityCodec;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
@@ -523,6 +528,9 @@ public final class HtmlServiceImpl implements HtmlService {
         try {
             String html = htmlContent;
 
+            // Check if input is a full HTML document or a fragment of HTML to parse
+            boolean hasBody = html.indexOf("<body") >= 0 || html.indexOf("<BODY") >= 0;
+
             // Normalize the string
             {
                 Matcher matcher = PATTERN_URL.matcher(html);
@@ -535,6 +543,8 @@ public final class HtmlServiceImpl implements HtmlService {
                     html = sb.toString();
                 }
             }
+
+            html = removeComments(html, hasBody);
 
             // Perform one-shot sanitizing
             html = replacePercentTags(html);
@@ -590,6 +600,29 @@ public final class HtmlServiceImpl implements HtmlService {
             LOG.warn("HTML content will be returned un-sanitized.", e);
             return htmlSanitizeResult;
         }
+    }
+
+    private static String removeComments(String html, boolean hasBody) {
+        Document document = Jsoup.parse(html);
+        final Set<Node> removedNodes = new HashSet<>(16, 0.9F);
+        document.traverse(new NodeVisitor() {
+
+            @Override
+            public void tail(Node node, int depth) {
+                // Ignore
+            }
+
+            @Override
+            public void head(Node node, int depth) {
+                if (node instanceof Comment) {
+                    removedNodes.add(node);
+                }
+            }
+        });
+        for (Node node : removedNodes) {
+            node.remove();
+        }
+        return hasBody ? document.outerHtml() : document.body().html();
     }
 
     private FilterJerichoHandler getHandlerFor(int initialCapacity, String optionalConfigName) {

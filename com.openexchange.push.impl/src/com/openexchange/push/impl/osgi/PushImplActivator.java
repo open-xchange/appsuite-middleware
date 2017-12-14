@@ -60,6 +60,7 @@ import org.osgi.service.event.EventHandler;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.hazelcast.core.HazelcastInstance;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.context.ContextService;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
@@ -114,7 +115,7 @@ public final class PushImplActivator extends HousekeepingActivator  {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { HazelcastConfigurationService.class, TimerService.class, SessiondService.class, DatabaseService.class };
+        return new Class<?>[] { HazelcastConfigurationService.class, TimerService.class, SessiondService.class, DatabaseService.class, ContextService.class };
     }
 
     @Override
