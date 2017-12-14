@@ -49,9 +49,9 @@
 
 package com.openexchange.chronos.json.action;
 
+import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_CHECK_CONFLICTS;
 import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_EXPAND_OCCURRENCES;
 import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_FIELDS;
-import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_CHECK_CONFLICTS;
 import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_INCLUDE_PRIVATE;
 import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_MASK_ID;
 import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_NOTIFICATION;
@@ -97,7 +97,6 @@ public abstract class AbstractChronosAction implements AJAXActionService {
     protected static final String PARAM_RANGE_START = "rangeStart";
     protected static final String PARAM_RANGE_END = "rangeEnd";
     protected static final String PARAM_EXPAND = "expand";
-    protected static final String PARAM_IGNORE_CONFLICTS = "ignoreConflicts";
     protected static final String PARAM_CHECK_CONFLICTS = "checkConflicts";
     protected static final String PARAM_SEND_INTERNAL_NOTIFICATIONS = "sendInternalNotifications";
     protected static final String PARAM_RECURRENCE_ID = "recurrenceId";

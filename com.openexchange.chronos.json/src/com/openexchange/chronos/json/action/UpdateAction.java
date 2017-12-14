@@ -73,7 +73,7 @@ import com.openexchange.server.ServiceLookup;
 @OAuthAction(ChronosOAuthScope.OAUTH_WRITE_SCOPE)
 public class UpdateAction extends ChronosAction {
 
-    private static final Set<String> OPTIONAL_PARAMETERS = unmodifiableSet(PARAM_SEND_INTERNAL_NOTIFICATIONS, PARAM_IGNORE_CONFLICTS, PARAM_RANGE_START, PARAM_RANGE_END, PARAM_EXPAND );
+    private static final Set<String> OPTIONAL_PARAMETERS = unmodifiableSet(PARAM_SEND_INTERNAL_NOTIFICATIONS, PARAM_CHECK_CONFLICTS, PARAM_RANGE_START, PARAM_RANGE_END, PARAM_EXPAND);
 
     /**
      * Initializes a new {@link UpdateAction}.
