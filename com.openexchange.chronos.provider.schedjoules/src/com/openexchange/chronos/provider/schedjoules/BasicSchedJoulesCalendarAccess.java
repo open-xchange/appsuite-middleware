@@ -87,6 +87,11 @@ public class BasicSchedJoulesCalendarAccess extends BasicCachingCalendarAccess {
     private static final String NO_ACCESS = "You have no access to this calendar";
 
     /**
+     * The default calendar name if none supplied by the user
+     */
+    private static final String DEFAULT_CALENDAR_NAME = "calendar";
+
+    /**
      * Defines the amount of time to wait before attempting another external request upon failure. Defaults in 60 minutes.
      */
     private static final int EXTERNAL_REQUEST_TIMEOUT = 60;
@@ -117,14 +122,14 @@ public class BasicSchedJoulesCalendarAccess extends BasicCachingCalendarAccess {
 
         ExtendedProperties extendedProperties = new ExtendedProperties();
         extendedProperties.add(SCHEDULE_TRANSP(TimeTransparency.TRANSPARENT, true));
-        extendedProperties.add(DESCRIPTION(internalConfig.optString("description", null)));
+        extendedProperties.add(DESCRIPTION(internalConfig.optString(SchedJoulesFields.DESCRIPTION, null)));
         extendedProperties.add(USED_FOR_SYNC(Boolean.FALSE, true));
-        extendedProperties.add(COLOR(internalConfig.optString("color", null), false));
+        extendedProperties.add(COLOR(internalConfig.optString(SchedJoulesFields.COLOR, null), false));
 
         CalendarSettings settings = new CalendarSettings();
         settings.setLastModified(account.getLastModified());
         settings.setConfig(account.getUserConfiguration());
-        settings.setName(internalConfig.optString("name", "calendar"));
+        settings.setName(internalConfig.optString(SchedJoulesFields.NAME, DEFAULT_CALENDAR_NAME));
         settings.setExtendedProperties(extendedProperties);
 
         return settings;
