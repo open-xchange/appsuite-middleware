@@ -48,6 +48,7 @@
  */
 package com.openexchange.oidc.state;
 
+import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.hazelcast.core.Hazelcast;
@@ -74,9 +75,9 @@ public class CoreStateManagement implements StateManagement {
     }
 
     @Override
-    public void addAuthenticationRequest(AuthenticationRequestInfo authenticationRequestInfo) {
+    public void addAuthenticationRequest(AuthenticationRequestInfo authenticationRequestInfo, long ttl, TimeUnit timeUnit) {
         LOG.trace("addAuthenticationRequest(AuthenticationRequestInfo: {})", authenticationRequestInfo.getState());
-        hazelcast.getMap(HAZELCAST_AUTHREQUEST_INFO_MAP).put(authenticationRequestInfo.getState(), new PortableAuthenticationRequest(authenticationRequestInfo));
+        hazelcast.getMap(HAZELCAST_AUTHREQUEST_INFO_MAP).put(authenticationRequestInfo.getState(), new PortableAuthenticationRequest(authenticationRequestInfo), ttl , timeUnit);
     }
 
     @Override
@@ -90,10 +91,9 @@ public class CoreStateManagement implements StateManagement {
     }
 
     @Override
-    public void addLogoutRequest(LogoutRequestInfo logoutRequestInfo) {
+    public void addLogoutRequest(LogoutRequestInfo logoutRequestInfo, long ttl, TimeUnit timeUnit) {
         LOG.trace("addLogoutRequest({})", logoutRequestInfo.getState());
-        hazelcast.getMap(HAZELCAST_LOGOUT_REQUEST_INFO_MAP).put(logoutRequestInfo.getState(), new PortableLogoutRequest(logoutRequestInfo));
-
+        hazelcast.getMap(HAZELCAST_LOGOUT_REQUEST_INFO_MAP).put(logoutRequestInfo.getState(), new PortableLogoutRequest(logoutRequestInfo), ttl , timeUnit);
     }
 
     @Override

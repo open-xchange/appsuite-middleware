@@ -49,6 +49,7 @@
 
 package com.openexchange.oidc.state;
 
+import java.util.concurrent.TimeUnit;
 import com.hazelcast.core.IMap;
 
 /**
@@ -62,10 +63,11 @@ public interface StateManagement {
     /**
      * Adds an AuthenticationRequestInfo object to be managed.
      * 
-     * @param args
-     * @return
+     * @param authenticationRequestInfo - The {@link AuthenticationRequestInfo} to be managed by hazelcast
+     * @param ttl The time to live
+     * @param timeUnit The time unit of <code>ttl</code>
      */
-    void addAuthenticationRequest(AuthenticationRequestInfo authenticationRequestInfo);
+    void addAuthenticationRequest(AuthenticationRequestInfo authenticationRequestInfo, long ttl, TimeUnit timeUnit);
     
     /**
      * Load the {@link AuthenticationRequestInfo} which is identified by the state.
@@ -79,9 +81,11 @@ public interface StateManagement {
      * Add the given {@link LogoutRequestInfo} to a {@link IMap}, which is managed
      * by hazelcast and enables every node in the cluster to handle Logout requests.
      * 
-     * @param logoutRequestInfo
+     * @param logoutRequestInfo - The {@link LogoutRequestInfo} to managed by hazelcast
+     * @param ttl The time to live
+     * @param timeUnit The time unit of <code>ttl</code>
      */
-    void addLogoutRequest(LogoutRequestInfo logoutRequestInfo);
+    void addLogoutRequest(LogoutRequestInfo logoutRequestInfo, long ttl, TimeUnit timeUnit);
     
     /**
      * Load the stored {@link LogoutRequestInfo} from hazelcasts {@link IMap} by

@@ -195,13 +195,6 @@ public interface OIDCBackendConfig {
     String getResponseType();
     
     /**
-     * The path to the user info endpoint of the OP
-     * 
-     * @return the path to the endpoint
-     */
-    String getUserInfoEndpoint();
-    
-    /**
      * The path to the logout endpoint of the OP
      * 
      * @return the path to the endpoint

@@ -126,6 +126,16 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
     private final SessionReservationService sessionReservationService;
     private final ServiceLookup services;
     private final LoginConfiguration loginConfiguration;
+    
+    /**
+     * The number of milliseconds for which a LogoutRequest sent by us is considered valid (5 minutes).
+     */
+    private static final long LOGOUT_REQUEST_TIMEOUT = 5 * 60 * 1000l;
+
+    /**
+     * The number of milliseconds for which an AuthnRequestInfo is remembered (5 minutes).
+     */
+    private static final long AUTHN_REQUEST_TIMEOUT = 5 * 60 * 1000l;
 
 
     public OIDCWebSSOProviderImpl(OIDCBackend backend, StateManagement stateManagement, ServiceLookup services, LoginConfiguration loginConfiguration) {
@@ -242,7 +252,7 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
             .additionalClientInformation(additionalClientInformation)
             .uiClientID(uiClientID)
             .build();
-        this.stateManagement.addAuthenticationRequest(authenticationRequestInfo);
+        this.stateManagement.addAuthenticationRequest(authenticationRequestInfo, AUTHN_REQUEST_TIMEOUT, TimeUnit.MILLISECONDS);
     }
 
     @Override
@@ -358,7 +368,8 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
         String logoutRequestString = "";
         if (this.backend.getBackendConfig().isSSOLogout()) {
             LogoutRequest logoutRequest = this.backend.getLogoutFromIDPRequest(session);
-            this.stateManagement.addLogoutRequest(new DefaultLogoutRequestInfo(logoutRequest.getState().getValue(), OIDCTools.getDomainName(request, services.getOptionalService(HostnameService.class)), session.getSessionID(), request.getParameter("deep_link") == null ? "http://google.de" : request.getParameter("deep_link")));
+            DefaultLogoutRequestInfo defaultLogoutRequestInfo = new DefaultLogoutRequestInfo(logoutRequest.getState().getValue(), OIDCTools.getDomainName(request, services.getOptionalService(HostnameService.class)), session.getSessionID(), request.getParameter("deep_link") == null ? "http://google.de" : request.getParameter("deep_link"));
+            this.stateManagement.addLogoutRequest(defaultLogoutRequestInfo, LOGOUT_REQUEST_TIMEOUT, TimeUnit.MILLISECONDS);
             logoutRequestString = logoutRequest.toURI().toString();
         } else {
             logoutRequestString = this.getRedirectForLogoutFromOXServer(session, request, response, null);

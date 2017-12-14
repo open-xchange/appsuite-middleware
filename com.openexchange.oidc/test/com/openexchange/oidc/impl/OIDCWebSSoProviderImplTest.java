@@ -53,6 +53,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import java.net.URI;
+import java.util.concurrent.TimeUnit;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.junit.Before;
@@ -340,7 +341,7 @@ public class OIDCWebSSoProviderImplTest {
         LogoutRequest backendLogout = Mockito.mock(LogoutRequest.class);
         Mockito.when(backendLogout.getState()).thenReturn(new State());
         Mockito.when(mockedBackend.getLogoutFromIDPRequest(mockedSession)).thenReturn(backendLogout);
-        PowerMockito.doNothing().when(mockedStateManagement).addLogoutRequest(Matchers.any(DefaultLogoutRequestInfo.class));
+        PowerMockito.doNothing().when(mockedStateManagement).addLogoutRequest(Matchers.any(DefaultLogoutRequestInfo.class), Matchers.anyLong(), Matchers.any(TimeUnit.class));
         URI resultUri = new URI("logoutRequest");
         PowerMockito.when(backendLogout.toURI()).thenReturn(resultUri);
         String result = provider.getLogoutRedirectRequest(mockedRequest, mockedResponse);

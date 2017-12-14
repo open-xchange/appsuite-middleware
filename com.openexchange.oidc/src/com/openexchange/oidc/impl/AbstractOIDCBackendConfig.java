@@ -143,11 +143,6 @@ public abstract class AbstractOIDCBackendConfig implements OIDCBackendConfig {
     }
 
     @Override
-    public String getUserInfoEndpoint() {
-        return this.loadStringProperty(OIDCBackendProperty.userInfoEndpoint);
-    }
-
-    @Override
     public String getLogoutEndpoint() {
         return this.loadStringProperty(OIDCBackendProperty.logoutEndpoint);
     }

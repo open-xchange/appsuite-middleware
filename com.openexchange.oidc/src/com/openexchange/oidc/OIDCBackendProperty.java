@@ -106,10 +106,6 @@ public enum OIDCBackendProperty implements Property {
      */
     responseType(OIDCProperty.PREFIX, "code"),
     /**
-     * userInfoEndpoint - The OPs user information endpoint
-     */
-    userInfoEndpoint(OIDCProperty.PREFIX, OIDCProperty.EMPTY),
-    /**
      * logoutEndpoint - The OPs logout endpoint
      */
     logoutEndpoint(OIDCProperty.PREFIX, OIDCProperty.EMPTY),
@@ -129,7 +125,7 @@ public enum OIDCBackendProperty implements Property {
     /**
      * autologinCookieMode - Which login mode is enabled look at {@link OIDCBackendConfig.AutologinMode}
      */
-    autologinCookieMode(OIDCProperty.PREFIX, OIDCBackendConfig.AutologinMode.OFF),
+    autologinCookieMode(OIDCProperty.PREFIX, OIDCBackendConfig.AutologinMode.OFF.getValue()),
     /**
      * storeOAuthTokens - Whether OAuth cookies should be stored or not
      */
