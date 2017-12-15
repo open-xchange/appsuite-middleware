@@ -76,7 +76,6 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
                 "id INT4 UNSIGNED NOT NULL," +
                 "user INT4 UNSIGNED NOT NULL," +
                 "provider VARCHAR(64) NOT NULL," +
-                "enabled BOOLEAN DEFAULT NULL," +
                 "modified BIGINT(20) NOT NULL," +
                 "internalConfig BLOB," +
                 "userConfig BLOB," +

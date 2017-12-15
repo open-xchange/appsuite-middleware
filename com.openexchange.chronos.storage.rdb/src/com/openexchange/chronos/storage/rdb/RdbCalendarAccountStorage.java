@@ -241,7 +241,7 @@ public class RdbCalendarAccountStorage extends RdbStorage implements CalendarAcc
     }
 
     private static int insertAccount(Connection connection, int cid, CalendarAccount account) throws SQLException, OXException {
-        String sql = "INSERT INTO calendar_account (cid,id,provider,user,modified,internalConfig,userConfig) VALUES (?,?,?,?,?,?,?,?);";
+        String sql = "INSERT INTO calendar_account (cid,id,provider,user,modified,internalConfig,userConfig) VALUES (?,?,?,?,?,?,?);";
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             InputStream internalConfigStream = null;
             InputStream userConfigStream = null;
