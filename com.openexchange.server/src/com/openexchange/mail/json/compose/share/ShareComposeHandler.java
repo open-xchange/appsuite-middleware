@@ -134,6 +134,7 @@ import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.tools.TimeZoneUtils;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tx.TransactionAwares;
 import com.openexchange.user.UserService;
 
 /**
@@ -493,14 +494,18 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
         Map<String, Future<ThresholdFileHolder>> previewFutures = new HashMap<>(6);
         Map<String, String> mimeTypes = new HashMap<>(6);
         IDBasedFileAccess access = fileAccessFactory.createAccess(session);
-        for (int k = Math.min(items.size(), 6), i = 0; k-- > 0; i++) {
-            String id = items.get(i).getId();
-            InputStream document = access.getDocument(id, FileStorageFileAccess.CURRENT_VERSION);
-            String mimeType = access.getFileMetadata(id, FileStorageFileAccess.CURRENT_VERSION).getFileMIMEType();
-            PreviewTask previewTask = new PreviewTask(id, document, mimeType, transformationService, previewService, documentPreviewEnabled, session);
-            Future<ThresholdFileHolder> future = threadPoolService.submit(previewTask);
-            previewFutures.put(id, future);
-            mimeTypes.put(id, mimeType);
+        try {
+            for (int k = Math.min(items.size(), 6), i = 0; k-- > 0; i++) {
+                String id = items.get(i).getId();
+                InputStream document = access.getDocument(id, FileStorageFileAccess.CURRENT_VERSION);
+                String mimeType = access.getFileMetadata(id, FileStorageFileAccess.CURRENT_VERSION).getFileMIMEType();
+                PreviewTask previewTask = new PreviewTask(id, document, mimeType, transformationService, previewService, documentPreviewEnabled, session);
+                Future<ThresholdFileHolder> future = threadPoolService.submit(previewTask);
+                previewFutures.put(id, future);
+                mimeTypes.put(id, mimeType);
+            }
+        } finally {
+            TransactionAwares.finishSafe(access);
         }
         for (Entry<String, Future<ThresholdFileHolder>> entry : previewFutures.entrySet()) {
             String id = entry.getKey();
