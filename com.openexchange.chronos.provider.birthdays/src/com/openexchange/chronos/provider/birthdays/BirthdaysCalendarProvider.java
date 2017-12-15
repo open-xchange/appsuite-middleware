@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.provider.birthdays;
 
+import static com.openexchange.chronos.provider.CalendarFolderProperty.COLOR;
 import static com.openexchange.chronos.provider.CalendarFolderProperty.COLOR_LITERAL;
 import static com.openexchange.chronos.provider.CalendarFolderProperty.optPropertyValue;
 import static com.openexchange.osgi.Tools.requireService;
@@ -60,6 +61,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.chronos.Alarm;
+import com.openexchange.chronos.ExtendedProperties;
 import com.openexchange.chronos.common.Check;
 import com.openexchange.chronos.common.UserConfigWrapper;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
@@ -133,8 +135,37 @@ public class BirthdaysCalendarProvider implements BasicCalendarProvider, AutoPro
     }
 
     @Override
+    public CalendarSettings probe(Session session, CalendarSettings settings, CalendarParameters parameters) throws OXException {
+        if (AutoProvisioningCalendarProvider.class.isAssignableFrom(getClass())) {
+            /*
+             * no probing allowed as accounts are provisioned automatically
+             */
+            throw CalendarExceptionCodes.UNSUPPORTED_OPERATION_FOR_PROVIDER.create(PROVIDER_ID);
+        }
+        /*
+         * prepare & return default settings, taking over client-supplied values if applicable
+         */
+        CalendarSettings proposedSettings = new CalendarSettings();
+        JSONObject userConfig = settings.containsConfig() ? settings.getConfig() : new JSONObject();
+        initializeUserConfig(ServerSessionAdapter.valueOf(session), userConfig);
+        proposedSettings.setConfig(userConfig);
+        if (settings.containsName() && Strings.isNotEmpty(settings.getName())) {
+            proposedSettings.setName(settings.getName());
+        }
+        if (settings.containsSubscribed()) {
+            proposedSettings.setSubscribed(settings.isSubscribed());
+        }
+        ExtendedProperties proposedExtendedProperties = new ExtendedProperties();
+        Object colorValue = optPropertyValue(settings.getExtendedProperties(), COLOR_LITERAL);
+        if (null != colorValue && String.class.isInstance(colorValue)) {
+            proposedExtendedProperties.add(COLOR((String) colorValue, false));
+        }
+        return proposedSettings;
+    }
+
+    @Override
     public JSONObject configureAccount(Session session, CalendarSettings settings, CalendarParameters parameters) throws OXException {
-        if (AutoProvisioningCalendarProvider.class.isInstance(getClass())) {
+        if (AutoProvisioningCalendarProvider.class.isAssignableFrom(getClass())) {
             /*
              * no manual account creation allowed as accounts are provisioned automatically
              */

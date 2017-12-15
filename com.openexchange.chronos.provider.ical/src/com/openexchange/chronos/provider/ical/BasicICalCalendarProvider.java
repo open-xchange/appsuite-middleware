@@ -49,11 +49,22 @@
 
 package com.openexchange.chronos.provider.ical;
 
+import static com.openexchange.chronos.provider.CalendarFolderProperty.COLOR;
+import static com.openexchange.chronos.provider.CalendarFolderProperty.COLOR_LITERAL;
+import static com.openexchange.chronos.provider.CalendarFolderProperty.DESCRIPTION;
+import static com.openexchange.chronos.provider.CalendarFolderProperty.DESCRIPTION_LITERAL;
+import static com.openexchange.chronos.provider.CalendarFolderProperty.optPropertyValue;
+import static com.openexchange.chronos.provider.ical.ICalCalendarConstants.REFRESH_INTERVAL;
+import static com.openexchange.chronos.provider.ical.ICalCalendarConstants.URI;
+import static com.openexchange.java.Autoboxing.L;
 import java.util.EnumSet;
 import java.util.Locale;
+import java.util.concurrent.TimeUnit;
+import org.dmfs.rfc5545.Duration;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.auth.info.AuthType;
+import com.openexchange.chronos.ExtendedProperties;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.CalendarCapability;
 import com.openexchange.chronos.provider.basic.BasicCalendarAccess;
@@ -61,11 +72,14 @@ import com.openexchange.chronos.provider.basic.CalendarSettings;
 import com.openexchange.chronos.provider.caching.basic.BasicCachingCalendarProvider;
 import com.openexchange.chronos.provider.ical.auth.ICalAuthParser;
 import com.openexchange.chronos.provider.ical.conn.ICalFeedClient;
+import com.openexchange.chronos.provider.ical.exception.ICalProviderExceptionCodes;
 import com.openexchange.chronos.provider.ical.result.GetResponse;
+import com.openexchange.chronos.provider.ical.utils.ICalProviderUtils;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.session.Session;
+
 
 /**
  *
@@ -111,6 +125,69 @@ public class BasicICalCalendarProvider extends BasicCachingCalendarProvider {
     @Override
     public void onAccountDeletedOpt(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
         // nothing to do
+    }
+
+    @Override
+    public CalendarSettings probe(Session session, CalendarSettings settings, CalendarParameters parameters) throws OXException {
+        /*
+         * check feed uri
+         */
+        JSONObject config = settings.getConfig();
+        if (null == config || false == config.hasAndNotNull(URI)) {
+            throw ICalProviderExceptionCodes.MISSING_FEED_URI.create();
+        }
+        String uri = config.optString(URI, null);
+        ICalProviderUtils.verifyURI(uri);
+        /*
+         * attempt to read and parse feed & take over extracted metadata as needed
+         */
+        ICalCalendarFeedConfig feedConfig = new ICalCalendarFeedConfig.EncryptedBuilder(session, new JSONObject(settings.getConfig()), new JSONObject()).build();
+        ICalFeedClient feedClient = new ICalFeedClient(session, feedConfig);
+        GetResponse feedResponse = feedClient.executeRequest();
+        Long refreshInterval = null;
+        if (Strings.isNotEmpty(feedResponse.getRefreshInterval())) {
+            try {
+                Duration duration = org.dmfs.rfc5545.Duration.parse(feedResponse.getRefreshInterval());
+                refreshInterval = L(TimeUnit.MILLISECONDS.toMinutes(duration.toMillis()));
+            } catch (IllegalArgumentException e) {
+                LOG.warn("Ignoring unparsable refresh interval \"{}\" from calendar feed \"{}\".", feedResponse.getRefreshInterval(), uri, e);
+            }
+        }
+        //TODO: check against some minimum refresh interval?
+        String color = optPropertyValue(settings.getExtendedProperties(), COLOR_LITERAL, String.class);
+        if (Strings.isEmpty(color)) {
+            color = feedResponse.getFeedColor();
+        }
+        String description = optPropertyValue(settings.getExtendedProperties(), DESCRIPTION_LITERAL, String.class);
+        if (Strings.isEmpty(description)) {
+            description = feedResponse.getFeedDescription();
+        }
+        String name = settings.getName();
+        if (Strings.isEmpty(name)) {
+            name = Strings.isNotEmpty(feedResponse.getFeedName()) ? feedResponse.getFeedName() : "Calendar";
+        }
+        /*
+         * prepare & return proposed settings, taking over client-supplied values if applicable
+         */
+        CalendarSettings proposedSettings = new CalendarSettings();
+        JSONObject proposedConfig = new JSONObject();
+        ExtendedProperties proposedExtendedProperties = new ExtendedProperties();
+        proposedConfig.putSafe(URI, uri);
+        if (null != refreshInterval) {
+            proposedConfig.putSafe(REFRESH_INTERVAL, refreshInterval);
+        }
+        //TODO: add supplied auth info
+        if (null != color) {
+            proposedExtendedProperties.add(COLOR(color, false));
+        }
+        if (null != description) {
+            proposedExtendedProperties.add(DESCRIPTION(description, false));
+        }
+        proposedSettings.setConfig(proposedConfig);
+        proposedSettings.setExtendedProperties(proposedExtendedProperties);
+        proposedSettings.setName(name);
+        proposedSettings.setSubscribed(true);
+        return proposedSettings;
     }
 
     @Override

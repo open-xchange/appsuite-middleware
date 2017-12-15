@@ -49,6 +49,13 @@
 
 package com.openexchange.chronos.provider.google;
 
+import static com.openexchange.chronos.provider.CalendarFolderProperty.COLOR;
+import static com.openexchange.chronos.provider.CalendarFolderProperty.COLOR_LITERAL;
+import static com.openexchange.chronos.provider.CalendarFolderProperty.DESCRIPTION;
+import static com.openexchange.chronos.provider.CalendarFolderProperty.DESCRIPTION_LITERAL;
+import static com.openexchange.chronos.provider.CalendarFolderProperty.optPropertyValue;
+import static com.openexchange.chronos.provider.google.GoogleCalendarConfigField.OAUTH_ID;
+import static com.openexchange.osgi.Tools.requireService;
 import java.util.EnumSet;
 import java.util.Locale;
 import org.json.JSONException;
@@ -119,6 +126,45 @@ public class GoogleCalendarProvider implements BasicCalendarProvider {
     @Override
     public EnumSet<CalendarCapability> getCapabilities() {
         return CalendarCapability.getCapabilities(GoogleCalendarAccess.class);
+    }
+
+    @Override
+    public CalendarSettings probe(Session session, CalendarSettings settings, CalendarParameters parameters) throws OXException {
+        /*
+         * check existence of referenced google oauth account
+         */
+        JSONObject userConfig = settings.getConfig();
+        if (null == userConfig || false == userConfig.hasAndNotNull(OAUTH_ID)) {
+            throw CalendarExceptionCodes.INVALID_CONFIGURATION.create(userConfig);
+        }
+        int oauthId;
+        try {
+            oauthId = userConfig.getInt(OAUTH_ID);
+        } catch (JSONException e) {
+            throw CalendarExceptionCodes.INVALID_CONFIGURATION.create(e, userConfig);
+        }
+        OAuthService oAuthService = requireService(OAuthService.class, Services.getServiceLookup());
+        oAuthService.getAccount(oauthId, session, session.getUserId(), session.getContextId());
+        /*
+         * prepare & return checked proposed settings based on client-supplied settings
+         */
+        CalendarSettings proposedSettings = new CalendarSettings();
+        //TODO: connect and apply defaults from google
+        proposedSettings.setConfig(userConfig);
+        if (settings.containsName()) {
+            proposedSettings.setName(settings.getName());
+        }
+        ExtendedProperties proposedExtendedProperties = new ExtendedProperties();
+        Object colorValue = optPropertyValue(settings.getExtendedProperties(), COLOR_LITERAL);
+        if (null != colorValue && String.class.isInstance(colorValue)) {
+            proposedExtendedProperties.add(COLOR((String) colorValue, false));
+        }
+        Object descriptionValue = optPropertyValue(settings.getExtendedProperties(), DESCRIPTION_LITERAL);
+        if (null != descriptionValue && String.class.isInstance(descriptionValue)) {
+            proposedExtendedProperties.add(DESCRIPTION((String) descriptionValue, false));
+        }
+        proposedSettings.setExtendedProperties(settings.getExtendedProperties());
+        return proposedSettings;
     }
 
     @Override

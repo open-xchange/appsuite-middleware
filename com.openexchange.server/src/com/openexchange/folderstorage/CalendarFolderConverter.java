@@ -82,9 +82,9 @@ import com.openexchange.tools.id.IDMangler;
  */
 public class CalendarFolderConverter {
 
-    private static final FolderField EXTENDED_PROPERTIES_FIELD = ExtendedPropertiesField.getInstance();
-    private static final FolderField CALENDAR_CONFIG_FIELD = CalendarConfigField.getInstance();
-    private static final FolderField CALENDAR_PROVIDER_FIELD = CalendarProviderField.getInstance();
+    public static final FolderField EXTENDED_PROPERTIES_FIELD = ExtendedPropertiesField.getInstance();
+    public static final FolderField CALENDAR_CONFIG_FIELD = CalendarConfigField.getInstance();
+    public static final FolderField CALENDAR_PROVIDER_FIELD = CalendarProviderField.getInstance();
 
     /**
      * Converts a calendar folder into a folder storage compatible folder.

@@ -49,8 +49,13 @@
 
 package com.openexchange.chronos.provider.schedjoules;
 
+import static com.openexchange.chronos.provider.CalendarFolderProperty.COLOR;
 import static com.openexchange.chronos.provider.CalendarFolderProperty.COLOR_LITERAL;
 import static com.openexchange.chronos.provider.CalendarFolderProperty.optPropertyValue;
+import static com.openexchange.chronos.provider.schedjoules.SchedJoulesFields.ITEM_ID;
+import static com.openexchange.chronos.provider.schedjoules.SchedJoulesFields.LOCALE;
+import static com.openexchange.chronos.provider.schedjoules.SchedJoulesFields.NAME;
+import static com.openexchange.chronos.provider.schedjoules.SchedJoulesFields.REFRESH_INTERVAL;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collections;
@@ -60,6 +65,7 @@ import org.apache.commons.codec.digest.DigestUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONValue;
+import com.openexchange.chronos.ExtendedProperties;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.CalendarCapability;
 import com.openexchange.chronos.provider.basic.BasicCalendarAccess;
@@ -134,6 +140,46 @@ public class BasicSchedJoulesCalendarProvider extends BasicCachingCalendarProvid
     @Override
     protected void onAccountDeletedOpt(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
         // nothing to do
+    }
+
+    @Override
+    public CalendarSettings probe(Session session, CalendarSettings settings, CalendarParameters parameters) throws OXException {
+        /*
+         * check config & fetch calendar metadata for referenced item
+         */
+        JSONObject userConfig = settings.getConfig();
+        if (null == userConfig) {
+            throw SchedJoulesProviderExceptionCodes.MISSING_ITEM_ID_FROM_CONFIG.create(-1, session.getUserId(), session.getContextId());
+        }
+        String locale = userConfig.optString(LOCALE, ServerSessionAdapter.valueOf(session).getUser().getLocale().getLanguage());
+        int itemId = userConfig.optInt(ITEM_ID, 0);
+        long refreshInterval = userConfig.optLong(REFRESH_INTERVAL, MINIMUM_REFRESH_INTERVAL);
+        if (MINIMUM_REFRESH_INTERVAL > refreshInterval) {
+            throw SchedJoulesProviderExceptionCodes.INVALID_REFRESH_MINIMUM_INTERVAL.create(-1, session.getUserId(), session.getContextId());
+        }
+        if (0 == itemId) {
+            throw SchedJoulesProviderExceptionCodes.MISSING_ITEM_ID_FROM_CONFIG.create(-1, session.getUserId(), session.getContextId());
+        }
+        JSONObject calendarMetadata = fetchItem(session.getContextId(), itemId, locale);
+        String color = optPropertyValue(settings.getExtendedProperties(), COLOR_LITERAL, String.class);
+        String name = settings.containsName() && null != settings.getName() ? settings.getName() : calendarMetadata.optString(NAME, "Calendar");
+        /*
+         * prepare & return proposed settings, taking over client-supplied values if applicable
+         */
+        CalendarSettings proposedSettings = new CalendarSettings();
+        JSONObject proposedConfig = new JSONObject();
+        ExtendedProperties proposedExtendedProperties = new ExtendedProperties();
+        proposedConfig.putSafe(ITEM_ID, itemId);
+        proposedConfig.putSafe(LOCALE, locale);
+        proposedConfig.putSafe(REFRESH_INTERVAL, refreshInterval);
+        if (null != color) {
+            proposedExtendedProperties.add(COLOR(color, false));
+        }
+        proposedSettings.setConfig(proposedConfig);
+        proposedSettings.setExtendedProperties(proposedExtendedProperties);
+        proposedSettings.setName(name);
+        proposedSettings.setSubscribed(true);
+        return proposedSettings;
     }
 
     @Override

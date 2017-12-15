@@ -65,11 +65,32 @@ import com.openexchange.session.Session;
 public interface BasicCalendarProvider extends CalendarProvider {
 
     /**
+     * Probes specific client-supplied, possibly erroneous and/or incomplete calendar settings by checking if they are valid or further
+     * configuration settings are required. This step is typically performed prior creating a new account.
+     * <p/>
+     * In case the settings are valid and can be used to create a new calendar account, the result will contain the proposed calendar
+     * settings, which may be enhanced by additional default values for certain properties of the calendar. The client is encouraged to
+     * create the account with these settings, then.
+     * <p/>
+     * In case the settings are invalid or incomplete, an appropriate exception is thrown providing further details about the root cause.
+     *
+     * @param session The user's session
+     * @param settings Calendar settings to be probed for the new account as supplied by the client
+     * @param parameters Additional calendar parameters, or <code>null</code> if not set
+     * @return The proposed calendar settings, enhanced by additional default values
+     */
+    CalendarSettings probe(Session session, CalendarSettings settings, CalendarParameters parameters) throws OXException;
+
+    /**
      * Initializes the configuration prior creating a new calendar account.
      * <p/>
      * Any permission- or data validation checks are performed during this initialization phase. In case of erroneous or incomplete
      * configuration data, an appropriate exception will be thrown. Upon success, any <i>internal</i> configuration data is returned for
      * persisting along with the newly created calendar account.
+     * <p/>
+     * <b>Note: </b>Since this method is usually invoked within a running database transaction, refrain from performing possibly
+     * long-running checks, especially not over the network. Those checks have usually been executed before (during the {@link #probe}
+     * -phase of the settings).
      *
      * @param session The user's session
      * @param settings Calendar settings for the new account as supplied by the client
