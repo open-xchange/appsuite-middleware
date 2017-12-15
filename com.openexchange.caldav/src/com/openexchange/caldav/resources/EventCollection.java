@@ -258,9 +258,11 @@ public class EventCollection extends FolderCollection<Event> implements Filterin
             throw protocolException(getUrl(), HttpServletResponse.SC_NOT_IMPLEMENTED);
         }
         Date from = 0 < arguments.size() ? toDate(arguments.get(0)) : null;
+        Date minDateTime = this.minDateTime.getMinDateTime();
+        Date rangeStart = null == from ? minDateTime : null == minDateTime ? from : from.before(minDateTime) ? minDateTime : from;
         Date until = 1 < arguments.size() ? toDate(arguments.get(1)) : null;
-        Date rangeStart = null == from || from.before(minDateTime.getMinDateTime()) ? minDateTime.getMinDateTime() : from;
-        Date rangeEnd = null == until || until.after(maxDateTime.getMaxDateTime()) ? maxDateTime.getMaxDateTime() : until;
+        Date maxDateTime = this.maxDateTime.getMaxDateTime();
+        Date rangeEnd = null == until ? maxDateTime : null == maxDateTime ? until : until.after(maxDateTime) ? maxDateTime : until;
         try {
             List<Event> events = new CalendarAccessOperation<List<Event>>(factory) {
 

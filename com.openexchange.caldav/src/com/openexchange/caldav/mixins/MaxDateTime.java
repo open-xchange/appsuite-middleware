@@ -55,7 +55,9 @@ import org.jdom2.Namespace;
 import com.openexchange.caldav.CaldavProtocol;
 import com.openexchange.caldav.GroupwareCaldavFactory;
 import com.openexchange.caldav.Tools;
+import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.util.TimeZones;
 import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
 
 
@@ -108,14 +110,26 @@ public class MaxDateTime extends SingleXMLPropertyMixin {
                 org.slf4j.LoggerFactory.getLogger(MaxDateTime.class).warn("falling back to 'one_year' as interval end", e);
                 value = "one_year";
             }
-            Calendar calendar = Calendar.getInstance();
-            calendar.add(Calendar.YEAR, "two_years".equals(value) ? 3 : 2);
-            calendar.set(Calendar.DAY_OF_YEAR, 1);
-            calendar.set(Calendar.HOUR_OF_DAY, 0);
-            calendar.set(Calendar.MINUTE, 0);
-            calendar.set(Calendar.SECOND, 0);
-            calendar.set(Calendar.MILLISECOND, 0);
-            maxDateTime = calendar.getTime();
+            /*
+             * try numerical value
+             */
+            try {
+                int days = Integer.parseInt(value);
+                if (0 >= days) {
+                    return null;
+                }
+                Calendar calendar = CalendarUtils.initCalendar(TimeZones.UTC, null);
+                calendar.add(Calendar.DATE, days);
+                maxDateTime = CalendarUtils.truncateTime(calendar).getTime();
+            } catch (NumberFormatException e) {
+                /*
+                 * no numerical value, fall back to static constants, otherwise
+                 */
+                Calendar calendar = CalendarUtils.initCalendar(TimeZones.UTC, null);
+                calendar.add(Calendar.YEAR, "two_years".equals(value) ? 3 : 2);
+                calendar.set(Calendar.DAY_OF_YEAR, 1);
+                maxDateTime = CalendarUtils.truncateTime(calendar).getTime();
+            }
         }
         return maxDateTime;
     }

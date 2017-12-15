@@ -257,7 +257,16 @@ public abstract class CalDAVFolderCollection<T extends CalendarObject> extends C
     }
 
     protected static <T extends CalendarObject> boolean isInInterval(T object, Date intervalStart, Date intervalEnd) {
-        return null != object && (null == object.getEndDate() || object.getEndDate().after(intervalStart)) && (null == object.getStartDate() || object.getStartDate().before(intervalEnd));
+        if (null == object) {
+            return false;
+        }
+        if (null != intervalStart && null != object.getEndDate() && object.getEndDate().before(intervalStart)) {
+            return false;
+        }
+        if (null != intervalEnd && null != object.getStartDate() && object.getStartDate().after(intervalEnd)) {
+            return false;
+        }
+        return true;
     }
 
     protected List<T> filter(SearchIterator<T> searchIterator) throws OXException {
@@ -332,13 +341,15 @@ public abstract class CalDAVFolderCollection<T extends CalendarObject> extends C
     public List<WebdavResource> filter(Filter filter) throws WebdavProtocolException {
         List<Object> arguments = new ArrayList<Object>(2);
         if (FilterAnalyzer.VEVENT_RANGE_QUERY_ANALYZER.match(filter, arguments) || FilterAnalyzer.VTODO_RANGE_QUERY_ANALYZER.match(filter, arguments)) {
+            Date intervalStart = getIntervalStart();
             Date from = arguments.isEmpty() ? null : toDate(arguments.get(0));
-            if (null == from || from.before(getIntervalStart())) {
-                from = getIntervalStart();
+            if (null == from || null != intervalStart && from.before(intervalStart)) {
+                from = intervalStart;
             }
+            Date intervalEnd = getIntervalEnd();
             Date until = arguments.isEmpty() ? null : toDate(arguments.get(1));
-            if (null == until || until.after(getIntervalEnd())) {
-                until = getIntervalEnd();
+            if (null == until || null != intervalEnd && until.after(intervalEnd)) {
+                until = intervalEnd;
             }
             try {
                 List<T> objects = this.getObjectsInRange(from, until);

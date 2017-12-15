@@ -55,7 +55,9 @@ import org.jdom2.Namespace;
 import com.openexchange.caldav.CaldavProtocol;
 import com.openexchange.caldav.GroupwareCaldavFactory;
 import com.openexchange.caldav.Tools;
+import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.util.TimeZones;
 import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
 
 
@@ -105,25 +107,37 @@ public class MinDateTime extends SingleXMLPropertyMixin {
             try {
                 value = factory.getConfigValue("com.openexchange.caldav.interval.start", "one_month");
             } catch (OXException e) {
-                org.slf4j.LoggerFactory.getLogger(MinDateTime.class).warn("falling back to 'one_month' as interval start", e);
-                value = "one_month";
+                org.slf4j.LoggerFactory.getLogger(MinDateTime.class).warn("falling back to 'month' as interval end", e);
+                value = "month";
             }
-            Calendar calendar = Calendar.getInstance();
-            calendar.set(Calendar.HOUR_OF_DAY, 0);
-            calendar.set(Calendar.MINUTE, 0);
-            calendar.set(Calendar.SECOND, 0);
-            calendar.set(Calendar.MILLISECOND, 0);
-            if ("one_year".equals(value)) {
-                calendar.add(Calendar.YEAR, -1);
-                calendar.set(Calendar.DAY_OF_YEAR, 1);
-            } else if ("six_months".equals(value)) {
-                calendar.add(Calendar.MONTH, -6);
-                calendar.set(Calendar.DAY_OF_MONTH, 1);
-            } else {
-                calendar.add(Calendar.MONTH, -1);
-                calendar.set(Calendar.DAY_OF_MONTH, 1);
+            /*
+             * try numerical value
+             */
+            try {
+                int days = Integer.parseInt(value);
+                if (0 >= days) {
+                    return null;
+                }
+                Calendar calendar = CalendarUtils.initCalendar(TimeZones.UTC, null);
+                calendar.add(Calendar.DATE, -1 * days);
+                minDateTime = CalendarUtils.truncateTime(calendar).getTime();
+            } catch (NumberFormatException e) {
+                /*
+                 * no numerical value, fall back to static constants, otherwise
+                 */
+                Calendar calendar = CalendarUtils.initCalendar(TimeZones.UTC, null);
+                if ("one_year".equals(value)) {
+                    calendar.add(Calendar.YEAR, -1);
+                    calendar.set(Calendar.DAY_OF_YEAR, 1);
+                } else if ("six_months".equals(value)) {
+                    calendar.add(Calendar.MONTH, -6);
+                    calendar.set(Calendar.DAY_OF_MONTH, 1);
+                } else {
+                    calendar.add(Calendar.MONTH, -1);
+                    calendar.set(Calendar.DAY_OF_MONTH, 1);
+                }
+                minDateTime = CalendarUtils.truncateTime(calendar).getTime();
             }
-            minDateTime = calendar.getTime();
         }
         return minDateTime;
     }
