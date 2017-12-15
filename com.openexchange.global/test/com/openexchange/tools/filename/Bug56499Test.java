@@ -56,7 +56,7 @@ import com.openexchange.java.Strings;
 /**
  * {@link Bug56499Test}
  *
- * Lost support for 'LEFT BLACK LENTICULAR BRACKET' (U+3010) and 'RIGHT BLACK LENTICULAR BRACKET' (U+3011) in file names
+ * Lost support for '&#x3010;' (LEFT BLACK LENTICULAR BRACKET, U+3010) and '&#x3011;' (RIGHT BLACK LENTICULAR BRACKET, U+3011) in file names
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.10.0
