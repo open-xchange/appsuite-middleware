@@ -1987,7 +1987,6 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                     }
 
                     checkMailsForColor(mails);
-                    handleAuthenticity(mails);
                     return mails;
                 }
             }
@@ -2263,7 +2262,6 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         }
 
         checkMailsForColor(mails);
-        handleAuthenticity(mails);
 
         /*
          * Set account information
@@ -2395,7 +2393,6 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         }
 
         checkMailsForColor(mails);
-        handleAuthenticity(mails);
         return new ArrayIterator<>(mails);
     }
 
@@ -2822,7 +2819,6 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             LOG.error("", e);
         }
         checkMailsForColor(mails);
-        handleAuthenticity(mails);
         return SearchIteratorAdapter.createArrayIterator(mails);
     }
 
@@ -4114,7 +4110,6 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             mails = result.getMails();
         }
         checkMailsForColor(mails);
-        handleAuthenticity(mails);
         return mails;
     }
 
@@ -4149,7 +4144,6 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             mails = result.getMails();
         }
         checkMailsForColor(mails);
-        handleAuthenticity(mails);
         return mails;
     }
 
@@ -4822,8 +4816,8 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         if (!mailAccess.getWarnings().isEmpty()) {
             warnings.addAll(mailAccess.getWarnings());
         }
-        checkMailsForColor(result);
         handleAuthenticity(result);
+        checkMailsForColor(result);
 
         return result;
     }
