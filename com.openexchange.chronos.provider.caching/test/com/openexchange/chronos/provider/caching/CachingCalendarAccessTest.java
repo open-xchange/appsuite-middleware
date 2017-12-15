@@ -141,28 +141,28 @@ public class CachingCalendarAccessTest {
     }
 
     @Test
-    public void testMerge_persistedStateNull_throwException() {
+    public void testMerge_persistedStateNull_throwException() throws OXException {
         Set<FolderUpdateState> type = cachingCalendarAccess.merge(null, Collections.<CalendarFolder> emptyList());
 
         assertTrue(type.isEmpty());
     }
 
     @Test
-    public void testMerge_visibleFoldersNull_throwException() {
+    public void testMerge_visibleFoldersNull_throwException() throws OXException {
         Set<FolderUpdateState> processingInstructions = cachingCalendarAccess.merge(Collections.<FolderUpdateState> emptyList(), null);
 
         assertTrue(processingInstructions.isEmpty());
     }
 
     @Test
-    public void testMerge_emtpyListsNothingToCompare_returnEmptySet() {
+    public void testMerge_emtpyListsNothingToCompare_returnEmptySet() throws OXException {
         Set<FolderUpdateState> processingInstructions = cachingCalendarAccess.merge(Collections.<FolderUpdateState> emptyList(), Collections.<CalendarFolder> emptyList());
 
         assertTrue(processingInstructions.isEmpty());
     }
 
     @Test
-    public void testMerge_multipleNewVisibleFolders_returnInstructionsToInsert() {
+    public void testMerge_multipleNewVisibleFolders_returnInstructionsToInsert() throws OXException {
         List<CalendarFolder> visibleFolders = new ArrayList<>();
         visibleFolders.add(new DefaultCalendarFolder("myFolderId", "The name of my folder ids folder"));
         visibleFolders.add(new DefaultCalendarFolder("mySecondFolderId", "The SECOND ONE"));
@@ -176,7 +176,7 @@ public class CachingCalendarAccessTest {
     }
 
     @Test
-    public void testMerge_persistedButNoMoreAvailableFolders_returnInstructionsToRemove() {
+    public void testMerge_persistedButNoMoreAvailableFolders_returnInstructionsToRemove() throws OXException {
         List<FolderUpdateState> lastFolders = new ArrayList<>();
         lastFolders.add(new FolderUpdateState("myFolderId", new Long(System.currentTimeMillis()), 1, FolderProcessingType.UPDATE));
         lastFolders.add(new FolderUpdateState("mySecondFolderId", new Long(System.currentTimeMillis() - 111111111), 1, FolderProcessingType.UPDATE));
@@ -190,7 +190,7 @@ public class CachingCalendarAccessTest {
     }
 
     @Test
-    public void testMerge_mixedMode() {
+    public void testMerge_mixedMode() throws OXException {
         List<FolderUpdateState> lastFolders = new ArrayList<>();
         lastFolders.add(new FolderUpdateState("myFolderId", new Long(System.currentTimeMillis()), 1, FolderProcessingType.UPDATE));
         lastFolders.add(new FolderUpdateState("mySecondFolderId", new Long(System.currentTimeMillis() - 111111111), 1, FolderProcessingType.UPDATE));
