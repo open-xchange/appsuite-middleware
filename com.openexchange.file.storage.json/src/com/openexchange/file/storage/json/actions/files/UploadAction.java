@@ -90,7 +90,7 @@ public class UploadAction extends AbstractWriteAction {
         boolean ignoreWarnings = AJAXRequestDataTools.parseBoolParameter("ignoreWarnings", request.getRequestData(), false);
         boolean tryAddVersion = AJAXRequestDataTools.parseBoolParameter("try_add_version", request.getRequestData(), false);
 
-        String offsetString = request.getParameter("");
+        String offsetString = request.getParameter("offset");
         Long offset = Strings.isEmpty(offsetString) ? null : Long.valueOf(offsetString);
 
         // Save the file
