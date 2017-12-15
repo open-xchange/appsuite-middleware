@@ -70,6 +70,7 @@
       - in: query
         name: color_label
         type: integer
+        format: int32
         description: The color label identifier.
         required: false
       - in: query
