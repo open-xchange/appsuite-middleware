@@ -261,6 +261,28 @@ public enum CalendarFolderProperty {
         return null;
     }
 
+    /**
+     * Optionally gets the value of a specific extended property from the supplied extended properties container.
+     *
+     * @param extendedProperties The extended properties to get the value from
+     * @param name The name of the extended property to get the value from
+     * @param clazz The value's target type
+     * @return The property value, or <code>null</code> if not defined or incompatible for the target type
+     */
+    public static <T> T optPropertyValue(ExtendedProperties extendedProperties, String name, Class<T> clazz) {
+        if (null != extendedProperties) {
+            ExtendedProperty property = extendedProperties.get(name);
+            if (null != property) {
+                try {
+                    return clazz.cast(property.getValue());
+                } catch (ClassCastException e) {
+                    // ignore
+                }
+            }
+        }
+        return null;
+    }
+
     private static final ExtendedPropertyParameter PROTECTED_PARAMETER = new ExtendedPropertyParameter("protected", "true");
 
     private static ExtendedProperty createProperty(String name, String value, boolean protekted) {
