@@ -231,6 +231,10 @@ public final class LogProperties {
          */
         MAIL_HOST("com.openexchange.mail.host"),
         /**
+         * com.openexchange.mail.host.remoteAddress
+         */
+        MAIL_HOST_REMOTE_ADDRESS("com.openexchange.mail.host.remoteAddress"),
+        /**
          * com.openexchange.mail.fullName
          */
         MAIL_FULL_NAME("com.openexchange.mail.fullName"),

@@ -92,12 +92,12 @@ public class Bug36412Test {
 
      @Test
      public void testKeepUnicode() throws Exception {
-        String content = "              <tr>\n" +
+        String content = "              <table><tr>\n" +
             "                            <td border=\"1\" class=\"webseminare\"\n" +
             "                              font-size:14px;=\"\" line-height:=\"\"\n" +
             "                              18px;\"=\"\" height=\"39\" valign=\"middle\"\n" +
             "                              align=\"center\" bgcolor=\"#346897\">Web Seminare</td>\n" +
-            "                          </tr>";
+            "                          </tr></table>";
         String test = service.sanitize(content, null, true, null, null);
 
         Assert.assertTrue("Unexpected return value.", test.indexOf("<td class=\"webseminare\" height=\"39\" valign=\"middle\" align=\"center\" bgcolor=\"#346897\">") > 0);

@@ -148,8 +148,8 @@ public abstract class JDBC4StatementWrapper implements Statement {
 
     // ---------------------------------------------------------------------------------------------------------------------------------
 
-    private final Statement delegate;
-    private final JDBC4ConnectionReturner con;
+    protected final Statement delegate;
+    protected final JDBC4ConnectionReturner con;
 
     /**
      * Initializes a new {@link JDBC4StatementWrapper}.
@@ -292,7 +292,9 @@ public abstract class JDBC4StatementWrapper implements Statement {
     @Override
     public ResultSet executeQuery(final String sql) throws SQLException {
         try {
-            return new JDBC41ResultSetWrapper(delegate.executeQuery(sql), this);
+            JDBC41ResultSetWrapper retval = new JDBC41ResultSetWrapper(delegate.executeQuery(sql), this);
+            con.touch();
+            return retval;
         } catch (java.sql.SQLSyntaxErrorException syntaxError) {
             logSyntaxError(syntaxError, delegate, sql, con);
             throw syntaxError;

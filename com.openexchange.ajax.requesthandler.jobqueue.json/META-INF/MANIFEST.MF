@@ -1,0 +1,28 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: The JSON interface for AJAX Job Queue
+Bundle-SymbolicName: com.openexchange.ajax.requesthandler.jobqueue.json
+Bundle-Version: 7.8.4
+Bundle-Vendor: OX Software GmbH
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Import-Package: com.google.common.annotations,
+ com.google.common.base,
+ com.google.common.collect,
+ com.openexchange.ajax.requesthandler,
+ com.openexchange.ajax.requesthandler.jobqueue,
+ com.openexchange.ajax.requesthandler.osgiservice,
+ com.openexchange.documentation,
+ com.openexchange.documentation.annotations,
+ com.openexchange.exception,
+ com.openexchange.java,
+ com.openexchange.java.util,
+ com.openexchange.osgi,
+ com.openexchange.server,
+ com.openexchange.session,
+ com.openexchange.tools.servlet,
+ com.openexchange.tools.session,
+ org.json,
+ org.osgi.framework,
+ org.osgi.util.tracker,
+ org.slf4j
+Bundle-Activator: com.openexchange.ajax.requesthandler.jobqueue.json.osgi.JobQueueJsonActivator

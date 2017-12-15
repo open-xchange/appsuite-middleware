@@ -96,10 +96,13 @@ import com.openexchange.ajax.requesthandler.converters.preview.PreviewImageResul
 import com.openexchange.ajax.requesthandler.converters.preview.PreviewThumbResultConverter;
 import com.openexchange.ajax.requesthandler.converters.preview.TextPreviewResultConverter;
 import com.openexchange.ajax.requesthandler.customizer.ConversionCustomizer;
+import com.openexchange.ajax.requesthandler.jobqueue.JobQueueService;
+import com.openexchange.ajax.requesthandler.jobqueue.impl.ThreadPoolJobQueueService;
 import com.openexchange.ajax.requesthandler.oauth.OAuthAnnotationProcessor;
 import com.openexchange.ajax.requesthandler.oauth.OAuthDispatcherServlet;
 import com.openexchange.ajax.requesthandler.responseRenderers.APIResponseRenderer;
 import com.openexchange.ajax.requesthandler.responseRenderers.FileResponseRenderer;
+import com.openexchange.ajax.requesthandler.responseRenderers.JobInfoResponseRenderer;
 import com.openexchange.ajax.requesthandler.responseRenderers.PreviewResponseRenderer;
 import com.openexchange.ajax.requesthandler.responseRenderers.SecureContentAPIResponseRenderer;
 import com.openexchange.ajax.requesthandler.responseRenderers.StringResponseRenderer;
@@ -135,6 +138,7 @@ public class DispatcherActivator extends AbstractSessionServletActivator {
 
     final ConcurrentMap<String, Object> servlets = new ConcurrentHashMap<>(32, 0.9F, 1);
     String prefix;
+    ThreadPoolJobQueueService jobQueue; // Guarded by synchronized
 
     /**
      * Initializes a new {@link DispatcherActivator}.
@@ -145,16 +149,16 @@ public class DispatcherActivator extends AbstractSessionServletActivator {
 
     @Override
     protected synchronized void startBundle() throws Exception {
-    	DispatcherPrefixService dispatcherPrefixService = getService(DispatcherPrefixService.class);
+        DispatcherPrefixService dispatcherPrefixService = getService(DispatcherPrefixService.class);
         final String prefix = dispatcherPrefixService.getPrefix();
         this.prefix = prefix;
-    	Dispatchers.setDispatcherPrefixService(dispatcherPrefixService);
-    	Dispatcher.PREFIX.set(prefix);
+        Dispatchers.setDispatcherPrefixService(dispatcherPrefixService);
+        Dispatcher.PREFIX.set(prefix);
 
         OSGiDispatcherListenerRegistry dispatcherListenerRegistry = new OSGiDispatcherListenerRegistry(context);
-    	final DefaultDispatcher dispatcher = new DefaultDispatcher(dispatcherListenerRegistry);
+        final DefaultDispatcher dispatcher = new DefaultDispatcher(dispatcherListenerRegistry);
 
-    	/*
+        /*
          * Specify default converters
          */
         final DefaultConverter defaultConverter = new DefaultConverter();
@@ -257,6 +261,7 @@ public class DispatcherActivator extends AbstractSessionServletActivator {
         DispatcherServlet.registerRenderer(fileRenderer);
         DispatcherServlet.registerRenderer(new StringResponseRenderer());
         DispatcherServlet.registerRenderer(new PreviewResponseRenderer());
+        DispatcherServlet.registerRenderer(new JobInfoResponseRenderer());
 
         registerService(AJAXActionAnnotationProcessor.class, new DispatcherNotesProcessor());
         registerService(AJAXActionAnnotationProcessor.class, new OAuthAnnotationProcessor());
@@ -367,18 +372,17 @@ public class DispatcherActivator extends AbstractSessionServletActivator {
 
         track(AJAXActionCustomizerFactory.class, new SimpleRegistryListener<AJAXActionCustomizerFactory>() {
 
-			@Override
-			public void added(ServiceReference<AJAXActionCustomizerFactory> ref, AJAXActionCustomizerFactory service) {
-				dispatcher.addCustomizer(service);
-			}
+            @Override
+            public void added(ServiceReference<AJAXActionCustomizerFactory> ref, AJAXActionCustomizerFactory service) {
+                dispatcher.addCustomizer(service);
+            }
 
-			@Override
-			public void removed(ServiceReference<AJAXActionCustomizerFactory> ref,
-					AJAXActionCustomizerFactory service) {
-				dispatcher.removeCustomizer(service);
+            @Override
+            public void removed(ServiceReference<AJAXActionCustomizerFactory> ref, AJAXActionCustomizerFactory service) {
+                dispatcher.removeCustomizer(service);
 
-			}
-		});
+            }
+        });
 
         track(DispatcherListener.class, dispatcherListenerRegistry);
 
@@ -396,6 +400,22 @@ public class DispatcherActivator extends AbstractSessionServletActivator {
 
         });
 
+        track(ConfigurationService.class, new SimpleRegistryListener<ConfigurationService>() {
+
+            @Override
+            public synchronized void added(ServiceReference<ConfigurationService> ref, ConfigurationService service) {
+                ThreadPoolJobQueueService jobQueue = new ThreadPoolJobQueueService(service);
+                DispatcherActivator.this.jobQueue = jobQueue;
+                registerService(JobQueueService.class, jobQueue);
+                ServerServiceRegistry.getInstance().addService(JobQueueService.class, jobQueue);
+            }
+
+            @Override
+            public synchronized void removed(ServiceReference<ConfigurationService> ref, ConfigurationService service) {
+                // Ignore
+            }
+        });
+
         openTrackers();
 
         registerService(Dispatcher.class, dispatcher);
@@ -410,6 +430,12 @@ public class DispatcherActivator extends AbstractSessionServletActivator {
     @Override
     protected synchronized void stopBundle() throws Exception {
         super.stopBundle();
+        ThreadPoolJobQueueService jobQueue = this.jobQueue;
+        if (null != jobQueue) {
+            this.jobQueue = null;
+            ServerServiceRegistry.getInstance().removeService(JobQueueService.class);
+            jobQueue.clear();
+        }
         DispatcherServlet.clearRenderer();
         DispatcherServlet.setDispatcher(null);
         ServerServiceRegistry.getInstance().removeService(AJAXResultDecoratorRegistry.class);
@@ -448,6 +474,12 @@ public class DispatcherActivator extends AbstractSessionServletActivator {
     @Override
     public void unregisterServlet(String alias) {
         super.unregisterServlet(alias);
+    }
+
+    @Override
+    public <S> void registerService(Class<S> clazz, S service) {
+        // TODO Auto-generated method stub
+        super.registerService(clazz, service);
     }
 
 }

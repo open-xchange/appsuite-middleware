@@ -154,6 +154,7 @@ public class RssAction implements AJAXActionService {
         List<RssResult> results = new ArrayList<RssResult>(feeds.size());
         boolean dropExternalImages = AJAXRequestDataTools.parseBoolParameter("drop_images", request, true);
         RssPreprocessor preprocessor = new SanitizingPreprocessor(dropExternalImages);
+        Date now = new Date();
 
         // Iterate feeds
         for (SyndFeed feed : feeds) {
@@ -162,19 +163,30 @@ public class RssAction implements AJAXActionService {
             }
 
             // Iterate feed's entries
+            String feedTitle = feed.getTitle();
+            String imageUrl = null;
+            String feedUrl;
+            try {
+                feedUrl = checkUrl(feed.getLink());
+                SyndImage image = feed.getImage();
+                if (image != null) {
+                    imageUrl = checkUrl(image.getUrl());
+                }
+            } catch (MalformedURLException e) {
+                throw RssExceptionCodes.INVALID_RSS.create(e, feed.getLink());
+            }
             for (Object obj : feed.getEntries()) {
                 SyndEntry entry = (SyndEntry) obj;
 
                 // Create appropriate RssResult instance
                 RssResult result;
                 try {
-                    result = new RssResult().setAuthor(entry.getAuthor()).setSubject(sanitiseString(entry.getTitle())).setUrl(checkUrl(entry.getLink()));
-                    result.setFeedUrl(checkUrl(feed.getLink())).setFeedTitle(sanitiseString(feed.getTitle())).setDate(entry.getUpdatedDate(), entry.getPublishedDate(), new Date());
+                    result = new RssResult().setAuthor(entry.getAuthor()).setSubject(entry.getTitle()).setUrl(checkUrl(entry.getLink()));
+                    result.setFeedUrl(feedUrl).setFeedTitle(feedTitle).setDate(entry.getUpdatedDate(), entry.getPublishedDate(), now);
 
                     // Check possible image
-                    SyndImage image = feed.getImage();
-                    if (image != null) {
-                        result.setImageUrl(checkUrl(image.getUrl()));
+                    if (imageUrl != null) {
+                        result.setImageUrl(imageUrl);
                     }
                 } catch (MalformedURLException e) {
                     throw RssExceptionCodes.INVALID_RSS.create(e, entry.getLink());
@@ -188,7 +200,7 @@ public class RssAction implements AJAXActionService {
                     /* Change for bug 52689: If no content is available at least display description */
                     SyndContent description = entry.getDescription();
                     if (null != description) {
-                        result.setBody(sanitiseString(description.getValue())).setFormat("text/plain");
+                        result.setBody(sanitiseString(description.getValue())).setFormat("text/html");
                     }
                 } else {
                     boolean foundHtml = false;
@@ -350,10 +362,10 @@ public class RssAction implements AJAXActionService {
     }
 
     /**
-     * Sanitises the specified string via the {@link HtmlService}
+     * Sanitizes the specified string via the {@link HtmlService}
      *
-     * @param string The string to sanitise
-     * @return The sanitised string if the {@link HtmlService} is available
+     * @param string The string to sanitize
+     * @return The sanitized string as HTML content if the {@link HtmlService} is available
      */
     private static String sanitiseString(String string) throws OXException {
         final HtmlService htmlService = Services.getService(HtmlService.class);

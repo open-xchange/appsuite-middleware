@@ -69,6 +69,7 @@ import java.sql.SQLXML;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.Calendar;
+import com.openexchange.database.Databases;
 import com.openexchange.database.IncorrectStringSQLException;
 
 /**
@@ -80,8 +81,7 @@ public abstract class JDBC4PreparedStatementWrapper extends JDBC4StatementWrappe
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(JDBC4PreparedStatementWrapper.class);
 
-    private final PreparedStatement delegate;
-    private final JDBC4ConnectionReturner con;
+    protected final PreparedStatement preparedStatementDelegate;
 
     /**
      * Initializes a new {@link JDBC4PreparedStatementWrapper}.
@@ -91,36 +91,37 @@ public abstract class JDBC4PreparedStatementWrapper extends JDBC4StatementWrappe
      */
     public JDBC4PreparedStatementWrapper(final PreparedStatement delegate, final JDBC4ConnectionReturner con) {
         super(delegate, con);
-        this.delegate = delegate;
-        this.con = con;
+        this.preparedStatementDelegate = delegate;
     }
 
     @Override
     public void addBatch() throws SQLException {
-        delegate.addBatch();
+        preparedStatementDelegate.addBatch();
     }
 
     @Override
     public void clearParameters() throws SQLException {
-        delegate.clearParameters();
+        preparedStatementDelegate.clearParameters();
     }
 
     @Override
     public boolean execute() throws SQLException {
         try {
-            LOG.debug("{} executes: {}", Thread.currentThread(), delegate);
-            boolean retval = delegate.execute();
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("{} executes: {}", Thread.currentThread(), Databases.getSqlStatement(preparedStatementDelegate, "<unknown>"));
+            }
+            boolean retval = preparedStatementDelegate.execute();
             con.updatePerformed();
             return retval;
         } catch (java.sql.SQLSyntaxErrorException syntaxError) {
-            logSyntaxError(syntaxError, delegate, con);
+            logSyntaxError(syntaxError, preparedStatementDelegate, con);
             throw syntaxError;
         } catch (java.sql.SQLException sqlException) {
             IncorrectStringSQLException incorrectStringError = IncorrectStringSQLException.instanceFor(sqlException);
             if (null != incorrectStringError) {
                 throw incorrectStringError;
             }
-            logReadTimeoutError(sqlException, delegate, con);
+            logReadTimeoutError(sqlException, preparedStatementDelegate, con);
             throw sqlException;
         }
     }
@@ -128,17 +129,21 @@ public abstract class JDBC4PreparedStatementWrapper extends JDBC4StatementWrappe
     @Override
     public ResultSet executeQuery() throws SQLException {
         try {
-            LOG.debug("{} executes: {}", Thread.currentThread(), delegate);
-            return new JDBC41ResultSetWrapper(delegate.executeQuery(), this);
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("{} executes: {}", Thread.currentThread(), Databases.getSqlStatement(preparedStatementDelegate, "<unknown>"));
+            }
+            JDBC41ResultSetWrapper retval = new JDBC41ResultSetWrapper(preparedStatementDelegate.executeQuery(), this);
+            con.touch();
+            return retval;
         } catch (java.sql.SQLSyntaxErrorException syntaxError) {
-            logSyntaxError(syntaxError, delegate, con);
+            logSyntaxError(syntaxError, preparedStatementDelegate, con);
             throw syntaxError;
         } catch (java.sql.SQLException sqlException) {
             IncorrectStringSQLException incorrectStringError = IncorrectStringSQLException.instanceFor(sqlException);
             if (null != incorrectStringError) {
                 throw incorrectStringError;
             }
-            logReadTimeoutError(sqlException, delegate, con);
+            logReadTimeoutError(sqlException, preparedStatementDelegate, con);
             throw sqlException;
         }
     }
@@ -146,303 +151,305 @@ public abstract class JDBC4PreparedStatementWrapper extends JDBC4StatementWrappe
     @Override
     public int executeUpdate() throws SQLException {
         try {
-            LOG.debug("{} executes: {}", Thread.currentThread(), delegate);
-            int retval = delegate.executeUpdate();
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("{} executes: {}", Thread.currentThread(), Databases.getSqlStatement(preparedStatementDelegate, "<unknown>"));
+            }
+            int retval = preparedStatementDelegate.executeUpdate();
             con.updatePerformed();
             return retval;
         } catch (java.sql.SQLSyntaxErrorException syntaxError) {
-            logSyntaxError(syntaxError, delegate, con);
+            logSyntaxError(syntaxError, preparedStatementDelegate, con);
             throw syntaxError;
         } catch (java.sql.SQLException sqlException) {
             IncorrectStringSQLException incorrectStringError = IncorrectStringSQLException.instanceFor(sqlException);
             if (null != incorrectStringError) {
                 throw incorrectStringError;
             }
-            logReadTimeoutError(sqlException, delegate, con);
+            logReadTimeoutError(sqlException, preparedStatementDelegate, con);
             throw sqlException;
         }
     }
 
     @Override
     public ResultSetMetaData getMetaData() throws SQLException {
-        return delegate.getMetaData();
+        return preparedStatementDelegate.getMetaData();
     }
 
     @Override
     public ParameterMetaData getParameterMetaData() throws SQLException {
-        return delegate.getParameterMetaData();
+        return preparedStatementDelegate.getParameterMetaData();
     }
 
     @Override
     public void setArray(final int i, final Array x) throws SQLException {
-        delegate.setArray(i, x);
+        preparedStatementDelegate.setArray(i, x);
     }
 
     @Override
     public void setAsciiStream(final int parameterIndex, final InputStream x, final int length) throws SQLException {
-        delegate.setAsciiStream(parameterIndex, x, length);
+        preparedStatementDelegate.setAsciiStream(parameterIndex, x, length);
     }
 
     @Override
     public void setBigDecimal(final int parameterIndex, final BigDecimal x) throws SQLException {
-        delegate.setBigDecimal(parameterIndex, x);
+        preparedStatementDelegate.setBigDecimal(parameterIndex, x);
     }
 
     @Override
     public void setBinaryStream(final int parameterIndex, final InputStream x, final int length) throws SQLException {
-        delegate.setBinaryStream(parameterIndex, x, length);
+        preparedStatementDelegate.setBinaryStream(parameterIndex, x, length);
     }
 
     @Override
     public void setBlob(final int i, final Blob x) throws SQLException {
-        delegate.setBlob(i, x);
+        preparedStatementDelegate.setBlob(i, x);
     }
 
     @Override
     public void setBoolean(final int parameterIndex, final boolean x) throws SQLException {
-        delegate.setBoolean(parameterIndex, x);
+        preparedStatementDelegate.setBoolean(parameterIndex, x);
     }
 
     @Override
     public void setByte(final int parameterIndex, final byte x) throws SQLException {
-        delegate.setByte(parameterIndex, x);
+        preparedStatementDelegate.setByte(parameterIndex, x);
     }
 
     @Override
     public void setBytes(final int parameterIndex, final byte[] x) throws SQLException {
-        delegate.setBytes(parameterIndex, x);
+        preparedStatementDelegate.setBytes(parameterIndex, x);
     }
 
     @Override
     public void setCharacterStream(final int parameterIndex, final Reader reader, final int length) throws SQLException {
-        delegate.setCharacterStream(parameterIndex, reader, length);
+        preparedStatementDelegate.setCharacterStream(parameterIndex, reader, length);
     }
 
     @Override
     public void setClob(final int i, final Clob x) throws SQLException {
-        delegate.setClob(i, x);
+        preparedStatementDelegate.setClob(i, x);
     }
 
     @Override
     public void setDate(final int parameterIndex, final Date x) throws SQLException {
-        delegate.setDate(parameterIndex, x);
+        preparedStatementDelegate.setDate(parameterIndex, x);
     }
 
     @Override
     public void setDate(final int parameterIndex, final Date x, final Calendar cal) throws SQLException {
-        delegate.setDate(parameterIndex, x, cal);
+        preparedStatementDelegate.setDate(parameterIndex, x, cal);
     }
 
     @Override
     public void setDouble(final int parameterIndex, final double x) throws SQLException {
-        delegate.setDouble(parameterIndex, x);
+        preparedStatementDelegate.setDouble(parameterIndex, x);
     }
 
     @Override
     public void setFloat(final int parameterIndex, final float x) throws SQLException {
-        delegate.setFloat(parameterIndex, x);
+        preparedStatementDelegate.setFloat(parameterIndex, x);
     }
 
     @Override
     public void setInt(final int parameterIndex, final int x) throws SQLException {
-        delegate.setInt(parameterIndex, x);
+        preparedStatementDelegate.setInt(parameterIndex, x);
     }
 
     @Override
     public void setLong(final int parameterIndex, final long x) throws SQLException {
-        delegate.setLong(parameterIndex, x);
+        preparedStatementDelegate.setLong(parameterIndex, x);
     }
 
     @Override
     public void setNull(final int parameterIndex, final int sqlType) throws SQLException {
-        delegate.setNull(parameterIndex, sqlType);
+        preparedStatementDelegate.setNull(parameterIndex, sqlType);
     }
 
     @Override
     public void setNull(final int paramIndex, final int sqlType, final String typeName) throws SQLException {
-        delegate.setNull(paramIndex, sqlType, typeName);
+        preparedStatementDelegate.setNull(paramIndex, sqlType, typeName);
     }
 
     @Override
     public void setObject(final int parameterIndex, final Object x) throws SQLException {
-        delegate.setObject(parameterIndex, x);
+        preparedStatementDelegate.setObject(parameterIndex, x);
     }
 
     @Override
     public void setObject(final int parameterIndex, final Object x, final int targetSqlType) throws SQLException {
-        delegate.setObject(parameterIndex, x, targetSqlType);
+        preparedStatementDelegate.setObject(parameterIndex, x, targetSqlType);
     }
 
     @Override
     public void setObject(final int parameterIndex, final Object x, final int targetSqlType, final int scale) throws SQLException {
-        delegate.setObject(parameterIndex, x, targetSqlType, scale);
+        preparedStatementDelegate.setObject(parameterIndex, x, targetSqlType, scale);
     }
 
     @Override
     public void setRef(final int i, final Ref x) throws SQLException {
-        delegate.setRef(i, x);
+        preparedStatementDelegate.setRef(i, x);
     }
 
     @Override
     public void setShort(final int parameterIndex, final short x) throws SQLException {
-        delegate.setShort(parameterIndex, x);
+        preparedStatementDelegate.setShort(parameterIndex, x);
     }
 
     @Override
     public void setString(final int parameterIndex, final String x) throws SQLException {
-        delegate.setString(parameterIndex, x);
+        preparedStatementDelegate.setString(parameterIndex, x);
     }
 
     @Override
     public void setTime(final int parameterIndex, final Time x) throws SQLException {
-        delegate.setTime(parameterIndex, x);
+        preparedStatementDelegate.setTime(parameterIndex, x);
     }
 
     @Override
     public void setTime(final int parameterIndex, final Time x, final Calendar cal) throws SQLException {
-        delegate.setTime(parameterIndex, x, cal);
+        preparedStatementDelegate.setTime(parameterIndex, x, cal);
     }
 
     @Override
     public void setTimestamp(final int parameterIndex, final Timestamp x) throws SQLException {
-        delegate.setTimestamp(parameterIndex, x);
+        preparedStatementDelegate.setTimestamp(parameterIndex, x);
     }
 
     @Override
     public void setTimestamp(final int parameterIndex, final Timestamp x, final Calendar cal) throws SQLException {
-        delegate.setTimestamp(parameterIndex, x, cal);
+        preparedStatementDelegate.setTimestamp(parameterIndex, x, cal);
     }
 
     @Override
     public void setURL(final int parameterIndex, final URL x) throws SQLException {
-        delegate.setURL(parameterIndex, x);
+        preparedStatementDelegate.setURL(parameterIndex, x);
     }
 
     @Override
     @Deprecated
     public void setUnicodeStream(final int parameterIndex, final InputStream x, final int length) throws SQLException {
-        delegate.setUnicodeStream(parameterIndex, x, length);
+        preparedStatementDelegate.setUnicodeStream(parameterIndex, x, length);
     }
 
     @Override
     public String toString() {
-        return delegate.toString();
+        return preparedStatementDelegate.toString();
     }
 
     @Override
     public void setAsciiStream(int parameterIndex, InputStream x) throws SQLException {
-        delegate.setAsciiStream(parameterIndex, x);
+        preparedStatementDelegate.setAsciiStream(parameterIndex, x);
     }
 
     @Override
     public void setAsciiStream(int parameterIndex, InputStream x, long length) throws SQLException {
-        delegate.setAsciiStream(parameterIndex, x, length);
+        preparedStatementDelegate.setAsciiStream(parameterIndex, x, length);
     }
 
     @Override
     public void setBinaryStream(int parameterIndex, InputStream x) throws SQLException {
-        delegate.setBinaryStream(parameterIndex, x);
+        preparedStatementDelegate.setBinaryStream(parameterIndex, x);
     }
 
     @Override
     public void setBinaryStream(int parameterIndex, InputStream x, long length) throws SQLException {
-        delegate.setBinaryStream(parameterIndex, x, length);
+        preparedStatementDelegate.setBinaryStream(parameterIndex, x, length);
     }
 
     @Override
     public void setBlob(int parameterIndex, InputStream inputStream) throws SQLException {
-        delegate.setBlob(parameterIndex, inputStream);
+        preparedStatementDelegate.setBlob(parameterIndex, inputStream);
     }
 
     @Override
     public void setBlob(int parameterIndex, InputStream inputStream, long length) throws SQLException {
-        delegate.setBlob(parameterIndex, inputStream, length);
+        preparedStatementDelegate.setBlob(parameterIndex, inputStream, length);
     }
 
     @Override
     public void setCharacterStream(int parameterIndex, Reader reader) throws SQLException {
-        delegate.setCharacterStream(parameterIndex, reader);
+        preparedStatementDelegate.setCharacterStream(parameterIndex, reader);
     }
 
     @Override
     public void setCharacterStream(int parameterIndex, Reader reader, long length) throws SQLException {
-        delegate.setCharacterStream(parameterIndex, reader, length);
+        preparedStatementDelegate.setCharacterStream(parameterIndex, reader, length);
     }
 
     @Override
     public void setClob(int parameterIndex, Reader reader) throws SQLException {
-        delegate.setClob(parameterIndex, reader);
+        preparedStatementDelegate.setClob(parameterIndex, reader);
     }
 
     @Override
     public void setClob(int parameterIndex, Reader reader, long length) throws SQLException {
-        delegate.setClob(parameterIndex, reader, length);
+        preparedStatementDelegate.setClob(parameterIndex, reader, length);
     }
 
     @Override
     public void setNCharacterStream(int parameterIndex, Reader value) throws SQLException {
-        delegate.setNCharacterStream(parameterIndex, value);
+        preparedStatementDelegate.setNCharacterStream(parameterIndex, value);
     }
 
     @Override
     public void setNCharacterStream(int parameterIndex, Reader value, long length) throws SQLException {
-        delegate.setNCharacterStream(parameterIndex, value, length);
+        preparedStatementDelegate.setNCharacterStream(parameterIndex, value, length);
     }
 
     @Override
     public void setNClob(int parameterIndex, NClob value) throws SQLException {
-        delegate.setNClob(parameterIndex, value);
+        preparedStatementDelegate.setNClob(parameterIndex, value);
     }
 
     @Override
     public void setNClob(int parameterIndex, Reader reader) throws SQLException {
-        delegate.setNClob(parameterIndex, reader);
+        preparedStatementDelegate.setNClob(parameterIndex, reader);
     }
 
     @Override
     public void setNClob(int parameterIndex, Reader reader, long length) throws SQLException {
-        delegate.setNClob(parameterIndex, reader, length);
+        preparedStatementDelegate.setNClob(parameterIndex, reader, length);
     }
 
     @Override
     public void setNString(int parameterIndex, String value) throws SQLException {
-        delegate.setNString(parameterIndex, value);
+        preparedStatementDelegate.setNString(parameterIndex, value);
     }
 
     @Override
     public void setRowId(int parameterIndex, RowId x) throws SQLException {
-        delegate.setRowId(parameterIndex, x);
+        preparedStatementDelegate.setRowId(parameterIndex, x);
     }
 
     @Override
     public void setSQLXML(int parameterIndex, SQLXML xmlObject) throws SQLException {
-        delegate.setSQLXML(parameterIndex, xmlObject);
+        preparedStatementDelegate.setSQLXML(parameterIndex, xmlObject);
     }
 
     @Override
     public boolean isClosed() throws SQLException {
-        return delegate.isClosed();
+        return preparedStatementDelegate.isClosed();
     }
 
     @Override
     public boolean isPoolable() throws SQLException {
-        return delegate.isPoolable();
+        return preparedStatementDelegate.isPoolable();
     }
 
     @Override
     public void setPoolable(boolean poolable) throws SQLException {
-        delegate.setPoolable(poolable);
+        preparedStatementDelegate.setPoolable(poolable);
     }
 
     @Override
     public boolean isWrapperFor(Class<?> iface) {
-        return iface.isAssignableFrom(delegate.getClass());
+        return iface.isAssignableFrom(preparedStatementDelegate.getClass());
     }
 
     @Override
     public <T> T unwrap(Class<T> iface) throws SQLException {
-        if (iface.isAssignableFrom(delegate.getClass())) {
-            return iface.cast(delegate);
+        if (iface.isAssignableFrom(preparedStatementDelegate.getClass())) {
+            return iface.cast(preparedStatementDelegate);
         }
         throw new SQLException("Not a wrapper for: " + iface.getName());
     }

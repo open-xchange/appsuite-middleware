@@ -67,16 +67,22 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class WhoAmIAction implements AJAXActionService {
 
+    /**
+     * Initializes a new {@link WhoAmIAction}.
+     */
+    public WhoAmIAction() {
+        super();
+    }
+
     @Override
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
-        JSONObject json = new JSONObject();
         try {
+            JSONObject json = new JSONObject();
             LoginWriter.write(session, json);
+            return new AJAXRequestResult(json, "json");
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage(), e);
         }
-
-        return new AJAXRequestResult(json, "json");
     }
 
 }

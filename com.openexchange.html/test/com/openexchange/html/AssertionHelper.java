@@ -49,6 +49,7 @@
 
 package com.openexchange.html;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import java.util.Queue;
@@ -62,6 +63,21 @@ import com.openexchange.java.Strings;
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
 public class AssertionHelper {
+
+    public static void assertSanitizedEquals(HtmlService service, String html, String expected, boolean ignoreCase) {
+        try {
+            String sanitized = service.sanitize(html, null, false, null, null);
+            if (ignoreCase) {
+                if (!Strings.isEmpty(sanitized)) {
+                    sanitized = sanitized.toLowerCase();
+                }
+                assertEquals("Unexpected HTML sanitize result", expected.toLowerCase(), sanitized);
+            }
+            assertEquals("Unexpected HTML sanitize result", expected, sanitized);
+        } catch (OXException e) {
+            org.junit.Assert.fail(e.getMessage());
+        }
+    }
 
     public static void assertSanitizedDoesNotContain(HtmlService service, String html, String... mailiciousParams) {
         assertSanitized(service, html, mailiciousParams, AssertExpression.NOT_CONTAINED);
