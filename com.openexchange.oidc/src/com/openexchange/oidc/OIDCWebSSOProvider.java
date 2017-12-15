@@ -65,8 +65,8 @@ public interface OIDCWebSSOProvider {
     /**
      * Builds the login request for the init service.
      * 
-     * @param request The servlet request
-     * @param response The servlet response
+     * @param request - The servlet request
+     * @param response - The servlet response
      * @return the login redirect request
      * @throws OXException when something fails during the process
      */
@@ -76,8 +76,8 @@ public interface OIDCWebSSOProvider {
      * Authenticate a user by sending a request to the OP and validating its response. Finally sends
      * a login request to the server to finish the login process and create a valid OX Session.
      * 
-     * @param request The servlet request
-     * @param response The servlet response
+     * @param request - The servlet request
+     * @param response - The servlet response
      * @throws OXException when something fails during the process
      */
     void authenticateUser(HttpServletRequest request, HttpServletResponse response) throws OXException;
@@ -85,8 +85,8 @@ public interface OIDCWebSSOProvider {
     /**
      * Builds the logout request for the init service.
      * 
-     * @param request The servlet request
-     * @param response The servlet response
+     * @param request - The servlet request
+     * @param response - The servlet response
      * @return the logout redirect request
      * @throws OXException when something fails during the process
      */
@@ -96,8 +96,8 @@ public interface OIDCWebSSOProvider {
      * Build the request to trigger user logout from OXServer. Validate request information by
      * inspecting the given state, before.
      * 
-     * @param request The servlet request
-     * @param response The servlet response
+     * @param request - The servlet request
+     * @param response - The servlet response
      * @return the logout redirect request to logout from server
      * @throws OXException when something fails during the process
      */
@@ -107,9 +107,9 @@ public interface OIDCWebSSOProvider {
      * Terminate the session with the given sessionId directly, without any OP relevant
      * validation before.
      * 
-     * @param sessionId The session id, that should be terminated
-     * @param request The servlet request
-     * @param response The servlet response
+     * @param sessionId - The session id, that should be terminated
+     * @param request - The servlet request
+     * @param response - The servlet response
      * @throws OXException when something fails during the process
      */
     void logoutInCaseOfError(String sessionId, HttpServletRequest request, HttpServletResponse response) throws OXException;
@@ -127,10 +127,9 @@ public interface OIDCWebSSOProvider {
     /**
      * Resume the user to his previously opened page before the logout attempt.
      * 
-     * @param request The servlet request
-     * @param response The servlet response
-     * @throws OXException - If the {@link LogoutRequestInfo} can not be loaded
-     * @throws IOException - If the redirect URL can not be constructed
+     * @param request - The servlet request
+     * @param response - The servlet response
+     * @throws OXException If the {@link LogoutRequestInfo} can not be loaded
      */
-    void resumeUser(HttpServletRequest request, HttpServletResponse response) throws OXException, IOException;
+    void resumeUser(HttpServletRequest request, HttpServletResponse response) throws OXException;
 }

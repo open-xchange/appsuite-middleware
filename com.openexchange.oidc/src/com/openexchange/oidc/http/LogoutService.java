@@ -58,6 +58,7 @@ import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.oidc.OIDCWebSSOProvider;
 import com.openexchange.oidc.spi.OIDCExceptionHandler;
+import com.openexchange.oidc.state.LogoutRequestInfo;
 import com.openexchange.oidc.tools.OIDCTools;
 
 /**
@@ -66,7 +67,7 @@ import com.openexchange.oidc.tools.OIDCTools;
  * @author <a href="mailto:vitali.sjablow@open-xchange.com">Vitali Sjablow</a>
  * @since v7.10.0
  */
-public class LogoutService extends OIDCServlet{
+public class LogoutService extends OIDCServlet {
 
     private static final Logger LOG = LoggerFactory.getLogger(LogoutService.class);
     /**
@@ -80,21 +81,20 @@ public class LogoutService extends OIDCServlet{
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        if (request.getParameter(OIDCTools.TYPE) == null) {
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST);
-        } else if (request.getParameter(OIDCTools.TYPE).equalsIgnoreCase(OIDCTools.END)) {
+        LOG.trace("doGet(HttpServletRequest request: {}, HttpServletResponse response)", request.getRequestURI());
+        String type = request.getParameter(OIDCTools.TYPE);
+        if (type != null && request.getParameter(OIDCTools.TYPE).equalsIgnoreCase(OIDCTools.RESUME)) {
+            try {
+                this.provider.resumeUser(request, response);
+            } catch (OXException e) {
+                exceptionHandler.handleLogoutFailed(request, response, e);
+            }
+        } else {
             try {
                 String redirectURI = this.provider.logoutSSOUser(request, response);
                 OIDCTools.buildRedirectResponse(response, redirectURI, "true");
             } catch (OXException e) {
                 exceptionHandler.handleLogoutFailed(request, response, e);
-                LOG.error(e.getLocalizedMessage(), e);
-            }
-        } else if (request.getParameter(OIDCTools.TYPE).equalsIgnoreCase(OIDCTools.RESUME)) {
-            try {
-                this.provider.resumeUser(request, response);
-            } catch (OXException e) {
-                exceptionHandler.handleResponseException(request, response, e);
             }
         }
     }

@@ -79,6 +79,7 @@ public class AuthenticationService extends OIDCServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         
         if (Strings.toLowerCase(request.getQueryString()).contains("error")) {
+            //TODO QS-VS: niemals null übergeben
             exceptionHandler.handleResponseException(request, response, null);
             return;
         }

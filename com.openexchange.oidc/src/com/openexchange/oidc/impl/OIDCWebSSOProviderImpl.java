@@ -368,7 +368,11 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
         String logoutRequestString = "";
         if (this.backend.getBackendConfig().isSSOLogout()) {
             LogoutRequest logoutRequest = this.backend.getLogoutFromIDPRequest(session);
-            DefaultLogoutRequestInfo defaultLogoutRequestInfo = new DefaultLogoutRequestInfo(logoutRequest.getState().getValue(), OIDCTools.getDomainName(request, services.getOptionalService(HostnameService.class)), session.getSessionID(), request.getParameter("deep_link") == null ? "http://google.de" : request.getParameter("deep_link"));
+            String domainName = OIDCTools.getDomainName(request, services.getOptionalService(HostnameService.class));
+            
+            String redirectURI = getResumeURL(request, response, domainName);
+            
+            DefaultLogoutRequestInfo defaultLogoutRequestInfo = new DefaultLogoutRequestInfo(logoutRequest.getState().getValue(), domainName, session.getSessionID(), redirectURI);
             this.stateManagement.addLogoutRequest(defaultLogoutRequestInfo, LOGOUT_REQUEST_TIMEOUT, TimeUnit.MILLISECONDS);
             logoutRequestString = logoutRequest.toURI().toString();
         } else {
@@ -376,6 +380,22 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
         }
         LOG.trace("Logout request: {}", logoutRequestString);
         return logoutRequestString;
+    }
+
+    private String getResumeURL(HttpServletRequest request, HttpServletResponse response, String domainName) {
+        String redirectURI = "";
+        URIBuilder redirectLocation = new URIBuilder()
+            .setScheme(OIDCTools.getRedirectScheme(request))
+            .setHost(domainName)
+            .setPath(request.getParameter("deep_link") == null ? OIDCTools.getUIWebPath(this.loginConfiguration, this.backend.getBackendConfig()) : request.getParameter("deep_link"));
+        Tools.disableCaching(response);
+        try {
+            redirectURI = redirectLocation.build().toString();
+        } catch (URISyntaxException e) {
+            //should not happen
+            LOG.error("", e);
+        }
+        return redirectURI;
     }
 
     private Session extractSessionFromRequest(HttpServletRequest request) throws OXException {
@@ -401,7 +421,7 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
     @Override
     public String logoutSSOUser(HttpServletRequest request, HttpServletResponse response) throws OXException {
         LOG.trace("logoutSSOUser(HttpServletRequest request: {}, HttpServletResponse response)", request.getRequestURI());
-        LogoutRequestInfo logoutRequestInfo = loadLogoutRequestInfo(request);
+        LogoutRequestInfo logoutRequestInfo = this.loadLogoutRequestInfo(request);
         String sessionId = logoutRequestInfo.getSessionId();
         LOG.trace("Try to logout user, via OP with sessionId: {}", sessionId);
         //logout user
@@ -430,6 +450,7 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
             LOG.trace("Logout URI for logout from OXServer: {}", redirectionURI);
             return redirectionURI;
         } catch (URISyntaxException e) {
+            this.logoutInCaseOfError(sessionId, request, response);
             throw OIDCExceptionCode.UNABLE_TO_PARSE_URI.create(e, "automated construction of logout request URI");
         }
     }
@@ -452,10 +473,15 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
     }
 
     @Override
-    public void resumeUser(HttpServletRequest request, HttpServletResponse response) throws OXException, IOException {
+    public void resumeUser(HttpServletRequest request, HttpServletResponse response) throws OXException {
         LOG.trace("resumeUser(HttpServletRequest request: {}, HttpServletResponse response)", request.getRequestURI());
-        LogoutRequestInfo logoutRequestInfo = loadLogoutRequestInfo(request);
-        OIDCTools.buildRedirectResponse(response, logoutRequestInfo.getRequestURI(), "true");
+        LogoutRequestInfo logoutRequestInfo = this.loadLogoutRequestInfo(request);
+        try {
+            OIDCTools.buildRedirectResponse(response, logoutRequestInfo.getRequestURI(), "true");
+        } catch (IOException e) {
+            LOG.error(e.getMessage(), e);
+            this.logoutInCaseOfError(logoutRequestInfo.getSessionId(), request, response);
+        }
     }
 
     private LogoutRequestInfo loadLogoutRequestInfo(HttpServletRequest request) throws OXException {
