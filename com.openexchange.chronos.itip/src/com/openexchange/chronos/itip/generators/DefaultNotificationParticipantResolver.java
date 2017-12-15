@@ -68,7 +68,6 @@ import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.Organizer;
 import com.openexchange.chronos.ParticipationStatus;
-import com.openexchange.chronos.ResourceId;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.itip.ITipIntegrationUtility;
 import com.openexchange.chronos.itip.ITipRole;
@@ -77,6 +76,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.tools.alias.UserAliasUtility;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
@@ -94,9 +94,9 @@ public class DefaultNotificationParticipantResolver implements NotificationParti
 
     Logger LOG = LoggerFactory.getLogger(DefaultNotificationParticipantResolver.class);
 
-    private final UserService userService;
-    private final ConfigurationService config;
-    private final ResourceService resources;
+    private final UserService            userService;
+    private final ConfigurationService   config;
+    private final ResourceService        resources;
     private final ITipIntegrationUtility util;
 
     public DefaultNotificationParticipantResolver(ITipIntegrationUtility util) {
@@ -396,10 +396,12 @@ public class DefaultNotificationParticipantResolver implements NotificationParti
     }
 
     private String getMailAddress(User u, Attendee userParticipant) {
-        if (CalendarUtils.isInternalUser(userParticipant) && null != userParticipant && null == ResourceId.parse(userParticipant.getUri())) {
+        if (CalendarUtils.isInternalUser(userParticipant) && null != userParticipant) {
             String mail = CalendarUtils.extractEMailAddress(userParticipant.getUri());
             if (Strings.isNotEmpty(mail)) {
-                return mail;
+                if (UserAliasUtility.isAlias(mail, u.getAliases())) {
+                    return mail;
+                }
             }
         }
         return u.getMail();

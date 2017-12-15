@@ -76,7 +76,6 @@ import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.ResourceId;
 import com.openexchange.chronos.common.CalendarUtils;
-import com.openexchange.chronos.common.mapping.AttendeeMapper;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.osgi.Services;
 import com.openexchange.chronos.service.CalendarResult;
@@ -92,7 +91,6 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.tools.alias.UserAliasUtility;
-import com.openexchange.groupware.tools.mappings.Mapping;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.TimeZones;
 import com.openexchange.objectusecount.BatchIncrementArguments;
@@ -551,10 +549,10 @@ public class DefaultEntityResolver implements EntityResolver {
                 try {
                     resourceId = resolve(attendee.getUri());
                 } catch (OXException e) {
-                    throw CalendarExceptionCodes.INVALID_CALENDAR_USER.create(e, attendee.getUri(), user.getId(), CalendarUserType.INDIVIDUAL);
+                    throw CalendarExceptionCodes.INVALID_CALENDAR_USER.create(e, attendee.getUri(), I(user.getId()), CalendarUserType.INDIVIDUAL);
                 }
                 if (null == resourceId || resourceId.getEntity() != user.getId()) {
-                    throw CalendarExceptionCodes.INVALID_CALENDAR_USER.create(attendee.getUri(), user.getId(), CalendarUserType.INDIVIDUAL);
+                    throw CalendarExceptionCodes.INVALID_CALENDAR_USER.create(attendee.getUri(), I(user.getId()), CalendarUserType.INDIVIDUAL);
                 }
                 attendee.setUri(attendee.getUri());
             }

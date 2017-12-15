@@ -80,7 +80,7 @@ public final class UserAliasUtility {
             return false;
         }
         for (String alias : aliases) {
-            if (alias.equalsIgnoreCase(possibleAlias)) {
+            if (null != alias && alias.equalsIgnoreCase(possibleAlias)) {
                 return true;
             }
         }
@@ -98,6 +98,9 @@ public final class UserAliasUtility {
      * @see <a href="https://tools.ietf.org/html/rfc5321#section-2.4">RFC 5321</a>
      */
     public static boolean isAlias(String possibleAlias, String[] aliases) {
+        if (null == aliases) {
+            return false;
+        }
         return isAlias(possibleAlias, Arrays.asList(aliases));
     }
 
@@ -112,9 +115,11 @@ public final class UserAliasUtility {
      * @see <a href="https://tools.ietf.org/html/rfc5321#section-2.4">RFC 5321</a>
      */
     public static Integer getUser(String possibleAlias, Map<Integer, Collection<String>> users) {
-        for (Entry<Integer, Collection<String>> user : users.entrySet()) {
-            if (isAlias(possibleAlias, user.getValue())) {
-                return user.getKey();
+        if (null != users) {
+            for (Entry<Integer, Collection<String>> user : users.entrySet()) {
+                if (isAlias(possibleAlias, user.getValue())) {
+                    return user.getKey();
+                }
             }
         }
         return null;
