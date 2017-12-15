@@ -51,6 +51,7 @@ package com.openexchange.chronos.provider.ical.conn;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.UnknownHostException;
 import java.nio.charset.Charset;
 import java.util.Date;
 import org.apache.commons.codec.binary.Base64;
@@ -177,7 +178,7 @@ public class ICalFeedClient {
 
     /**
      * Returns the calendar behind the given feed URL if available. If there is no update (based on etag and last modification header) the contained calendar will be <code>null</code>.
-     * 
+     *
      * @return GetResponse containing the feed content
      */
     public GetResponse executeRequest() throws OXException {
@@ -200,6 +201,9 @@ public class ICalFeedClient {
         } catch (ClientProtocolException e) {
             LOG.error("Error while processing the retrieved information:{}.", e.getMessage(), e);
             throw ICalProviderExceptionCodes.CLIENT_PROTOCOL_ERROR.create(e.getMessage(), e);
+        } catch (UnknownHostException e) {
+            LOG.debug("Error while processing the retrieved information:{}.", e.getMessage(), e);
+            throw ICalProviderExceptionCodes.NO_FEED.create(e, iCalFeedConfig.getFeedUrl());
         } catch (IOException e) {
             LOG.error("Error while processing the retrieved information:{}.", e.getMessage(), e);
             throw ICalProviderExceptionCodes.IO_ERROR.create(e.getMessage(), e);
@@ -229,7 +233,7 @@ public class ICalFeedClient {
 
     /**
      * Asserts the status code for any errors
-     * 
+     *
      * @param httpResponse The {@link HttpResponse}'s status code to assert
      * @return The status code
      * @throws OXException if an HTTP error is occurred (4xx or 5xx)
