@@ -75,7 +75,7 @@ import com.openexchange.user.AbstractUserServiceInterceptor;
 public class SchedJoulesUserServiceInterceptor extends AbstractUserServiceInterceptor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SchedJoulesUserServiceInterceptor.class);
-    
+
     // Disabled for now
     private static final boolean ENABLED = false;
 
@@ -134,7 +134,7 @@ public class SchedJoulesUserServiceInterceptor extends AbstractUserServiceInterc
                     LOGGER.warn("Invalid/Malformed configuration detected in SchedJoules account '{}' for user '{}' in context '{}'", account.getAccountId(), user.getId(), context.getContextId(), e);
                 }
             }
-            service.updateAccount(context.getContextId(), user.getId(), account.getAccountId(), account.isEnabled(), account.getInternalConfiguration(), account.getUserConfiguration(), account.getLastModified().getTime());
+            service.updateAccount(context.getContextId(), user.getId(), account.getAccountId(), account.getInternalConfiguration(), account.getUserConfiguration(), account.getLastModified().getTime());
         }
         super.afterUpdate(context, user, contactData, properties);
     }

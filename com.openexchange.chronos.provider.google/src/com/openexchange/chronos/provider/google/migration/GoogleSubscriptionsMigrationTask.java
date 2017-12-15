@@ -149,7 +149,7 @@ public class GoogleSubscriptionsMigrationTask extends UpdateTaskAdapter {
                     internalConfig.put(GoogleCalendarConfigField.OLD_FOLDER, sub.getFolderId());
 
                     int id = calendarStorage.getAccountStorage().nextId();
-                    calendarStorage.getAccountStorage().insertAccount(new DefaultCalendarAccount(GoogleCalendarProvider.PROVIDER_ID, id, sub.getUserId(), sub.isEnabled(), internalConfig, userConfig, new Date()));
+                    calendarStorage.getAccountStorage().insertAccount(new DefaultCalendarAccount(GoogleCalendarProvider.PROVIDER_ID, id, sub.getUserId(), internalConfig, userConfig, new Date()));
                     inserted = true;
                     calendarStorage.getAccountStorage().invalidateAccount(sub.getUserId(), -1);
                 } catch (JSONException e) {

@@ -51,7 +51,6 @@ package com.openexchange.user.copy.internal.chronos.calendar;
 
 import static com.openexchange.user.copy.internal.CopyTools.setLongOrNull;
 import static com.openexchange.user.copy.internal.CopyTools.setStringOrNull;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -65,7 +64,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.UUID;
-
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmTrigger;
 import com.openexchange.chronos.Attendee;
@@ -433,7 +431,6 @@ public class ChronosCalendarCopyTask implements CopyUserTaskService {
                 srcCalendarAccount.getProviderId(),
                 destAccountId,
                 dstUserId,
-                srcCalendarAccount.isEnabled(),
                 srcCalendarAccount.getInternalConfiguration(),
                 srcCalendarAccount.getUserConfiguration(),
                 srcCalendarAccount.getLastModified()));

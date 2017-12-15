@@ -68,7 +68,6 @@ public class DefaultCalendarAccount implements CalendarAccount {
     private final Date lastModified;
     private final JSONObject internalConfig;
     private final JSONObject userConfig;
-    private final boolean enabled;
 
     /**
      * Initializes a new {@link DefaultCalendarAccount}.
@@ -76,17 +75,15 @@ public class DefaultCalendarAccount implements CalendarAccount {
      * @param providerId The provider identifier
      * @param accountId The account identifier
      * @param userId The user identifier
-     * @param enabled <code>true</code> if the account is enabled, <code>false</code>, otherwise
      * @param internalConfig The account's internal / protected configuration data
      * @param userConfig The account's external / user configuration data
      * @param lastModified The last modification date
      */
-    public DefaultCalendarAccount(String providerId, int accountId, int userId, boolean enabled, JSONObject internalConfig, JSONObject userConfig, Date lastModified) {
+    public DefaultCalendarAccount(String providerId, int accountId, int userId, JSONObject internalConfig, JSONObject userConfig, Date lastModified) {
         super();
         this.providerId = providerId;
         this.accountId = accountId;
         this.userId = userId;
-        this.enabled = enabled;
         this.internalConfig = internalConfig;
         this.userConfig = userConfig;
         this.lastModified = lastModified;
@@ -105,11 +102,6 @@ public class DefaultCalendarAccount implements CalendarAccount {
     @Override
     public int getUserId() {
         return userId;
-    }
-
-    @Override
-    public boolean isEnabled() {
-        return enabled;
     }
 
     @Override

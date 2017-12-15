@@ -212,7 +212,7 @@ public class CachingCalendarAccountStorage implements CalendarAccountStorage {
         try {
             JSONObject internalConfig = null == account.getInternalConfiguration() ? null : new JSONObject(account.getInternalConfiguration().toString());
             JSONObject userConfig = null == account.getUserConfiguration() ? null : new JSONObject(account.getUserConfiguration().toString());
-            return new DefaultCalendarAccount(account.getProviderId(), account.getAccountId(), account.getUserId(), account.isEnabled(), internalConfig, userConfig, account.getLastModified());
+            return new DefaultCalendarAccount(account.getProviderId(), account.getAccountId(), account.getUserId(), internalConfig, userConfig, account.getLastModified());
         } catch (JSONException e) {
             throw CalendarExceptionCodes.DB_ERROR.create(e, e.getMessage());
         }

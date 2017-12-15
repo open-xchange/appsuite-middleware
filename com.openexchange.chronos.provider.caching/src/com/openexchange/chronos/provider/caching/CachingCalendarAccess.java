@@ -364,7 +364,7 @@ public abstract class CachingCalendarAccess implements FolderCalendarAccess, War
         }
         try {
             AdministrativeCalendarAccountService accountService = Services.getService(AdministrativeCalendarAccountService.class);
-            accountService.updateAccount(getSession().getContextId(), getSession().getUserId(), getAccount().getAccountId(), null, getAccount().getInternalConfiguration(), getAccount().getUserConfiguration(), getAccount().getLastModified().getTime());
+            accountService.updateAccount(getSession().getContextId(), getSession().getUserId(), getAccount().getAccountId(), getAccount().getInternalConfiguration(), getAccount().getUserConfiguration(), getAccount().getLastModified().getTime());
         } catch (OXException e) {
             LOG.error("Unable to save configuration: {}", e.getMessage(), e);
         }
@@ -403,7 +403,7 @@ public abstract class CachingCalendarAccess implements FolderCalendarAccess, War
      */
     protected void updateConfigurationData(JSONObject internalConfiguration, JSONObject userConfiguration) throws OXException {
         AdministrativeCalendarAccountService service = Services.getService(AdministrativeCalendarAccountService.class);
-        account = service.updateAccount(getSession().getContextId(), getAccount().getUserId(), getAccount().getAccountId(), null, internalConfiguration, userConfiguration, getAccount().getLastModified().getTime());
+        account = service.updateAccount(getSession().getContextId(), getAccount().getUserId(), getAccount().getAccountId(), internalConfiguration, userConfiguration, getAccount().getLastModified().getTime());
     }
 
     /**
@@ -434,7 +434,7 @@ public abstract class CachingCalendarAccess implements FolderCalendarAccess, War
         internalConfig.putSafe("lockedForUpdateUntil", L(lockedUntil));
         AdministrativeCalendarAccountService accountService = Services.getService(AdministrativeCalendarAccountService.class);
         try {
-            account = accountService.updateAccount(session.getContextId(), session.getUserId(), account.getAccountId(), null, internalConfig, null, account.getLastModified().getTime());
+            account = accountService.updateAccount(session.getContextId(), session.getUserId(), account.getAccountId(), internalConfig, null, account.getLastModified().getTime());
             LOG.debug("Successfully acquired and persisted lock for account {} until {}.", I(account.getAccountId()), L(lockedUntil));
             return true;
         } catch (OXException e) {
@@ -456,13 +456,13 @@ public abstract class CachingCalendarAccess implements FolderCalendarAccess, War
      * @return <code>true</code> if a lock was removed successfully, <code>false</code>, otherwise
      */
     private boolean releaseUpdateLock() throws OXException {
-        
-        // TODO 
-        // execution flow is a bit awkward, so that the lock currently cannot be released from the same location where it was previously 
+
+        // TODO
+        // execution flow is a bit awkward, so that the lock currently cannot be released from the same location where it was previously
         // acquired (within a try/finally block)
         // so at the moment, we're effectively producing stale locks (that at least time out after 10 minutes)
         // this should be adjusted along with the pending changes for dedicated support of BasicCalendarAccess
-        
+
         JSONObject internalConfig = account.getInternalConfiguration();
         if (null != internalConfig && null != internalConfig.remove("lockedForUpdateUntil")) {
             /*
@@ -470,7 +470,7 @@ public abstract class CachingCalendarAccess implements FolderCalendarAccess, War
              */
             AdministrativeCalendarAccountService accountService = Services.getService(AdministrativeCalendarAccountService.class);
             try {
-                account = accountService.updateAccount(session.getContextId(), session.getUserId(), account.getAccountId(), null, internalConfig, null, account.getLastModified().getTime());
+                account = accountService.updateAccount(session.getContextId(), session.getUserId(), account.getAccountId(), internalConfig, null, account.getLastModified().getTime());
                 LOG.debug("Successfully released lock for account {}.", I(account.getAccountId()));
                 return true;
             } catch (OXException e) {

@@ -62,7 +62,7 @@ import org.json.JSONObject;
 public interface CalendarAccount extends Serializable {
 
     /** The default <i>internal</i> calendar provider account */
-    static final CalendarAccount DEFAULT_ACCOUNT = new DefaultCalendarAccount("chronos", 0, 0, true, null, null, null);
+    static final CalendarAccount DEFAULT_ACCOUNT = new DefaultCalendarAccount("chronos", 0, 0, null, null, null);
 
     /**
      * Gets the account's identifier.
@@ -84,13 +84,6 @@ public interface CalendarAccount extends Serializable {
      * @return The identifier of the user
      */
     int getUserId();
-
-    /**
-     * Gets a value indicating whether the account is enabled or not.
-     *
-     * @return <code>true</code> if the account is enabled, <code>false</code>, otherwise
-     */
-    boolean isEnabled();
 
     /**
      * Gets the last modification timestamp of the calendar account.

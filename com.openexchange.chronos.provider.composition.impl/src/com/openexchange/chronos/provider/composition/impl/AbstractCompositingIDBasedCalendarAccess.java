@@ -61,7 +61,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.stream.Collectors;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.CalendarAccess;
 import com.openexchange.chronos.provider.CalendarAccount;
@@ -322,8 +321,7 @@ public abstract class AbstractCompositingIDBasedCalendarAccess implements Transa
      * @return The calendar accounts, or an empty list if there are none
      */
     protected List<CalendarAccount> getAccounts() throws OXException {
-        List<CalendarAccount> accounts = requireService(CalendarAccountService.class, services).getAccounts(session, this);
-        return accounts.stream().filter(account -> account.isEnabled()).collect(Collectors.toList());
+        return requireService(CalendarAccountService.class, services).getAccounts(session, this);
     }
 
     /**
@@ -368,9 +366,6 @@ public abstract class AbstractCompositingIDBasedCalendarAccess implements Transa
         CalendarAccount account = optAccount(accountId);
         if (null == account) {
             throw CalendarExceptionCodes.ACCOUNT_NOT_FOUND.create(I(accountId));
-        }
-        if (false == account.isEnabled()) {
-            throw CalendarExceptionCodes.ACCOUNT_DISABLED.create(account.getProviderId(), I(accountId));
         }
         return account;
     }

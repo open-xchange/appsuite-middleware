@@ -106,12 +106,11 @@ public interface AdministrativeCalendarAccountService {
      * @param contextId The context identifier
      * @param userId The identifier of the user owning the account
      * @param id The identifier of the account to update
-     * @param enabled {@link Boolean#TRUE} to enable the account, {@link Boolean#FALSE} to disable the account, or <code>null</code> to skip
      * @param internalConfig The provider-specific <i>internal</i> configuration data for the calendar account, or <code>null</code> to skip
      * @param userConfig The provider-specific <i>user</i> configuration data for the calendar account, or <code>null</code> to skip
      * @param timestamp The last-known timestamp of the account to catch concurrent modifications, or {@link CalendarUtils#DISTANT_FUTURE} to circumvent the check
      * @return The updated calendar account
      */
-    CalendarAccount updateAccount(int contextId, int userId, int id, Boolean enabled, JSONObject internalConfig, JSONObject userConfig, long timestamp) throws OXException;
+    CalendarAccount updateAccount(int contextId, int userId, int id, JSONObject internalConfig, JSONObject userConfig, long timestamp) throws OXException;
 
 }

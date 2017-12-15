@@ -121,7 +121,6 @@ public class CalendarAccountField extends FolderField {
             jsonObject.optString("provider", null),
             jsonObject.optInt("id"),
             0,
-            jsonObject.optBoolean("enabled", true),
             null,
             jsonObject.optJSONObject("config"),
             jsonObject.has("timestamp") ? new Date(jsonObject.getLong("timestamp")) : null
@@ -132,7 +131,6 @@ public class CalendarAccountField extends FolderField {
         return new JSONObject()
             .put("id", account.getAccountId())
             .put("provider", account.getProviderId())
-            .put("enabled", account.isEnabled())
             .putOpt("timestamp", null != account.getLastModified() ? L(account.getLastModified().getTime()) : null)
             .putOpt("config", account.getUserConfiguration())
         ;

@@ -117,7 +117,6 @@ abstract class AbstractAccountAction implements AJAXActionService {
             return new JSONObject()
                 .put(ID, account.getAccountId())
                 .put(PROVIDER, account.getProviderId())
-                .put("enabled", account.isEnabled())
                 .putOpt(TIMESTAMP, null != account.getLastModified() ? L(account.getLastModified().getTime()) : null)
                 .putOpt(CONFIGURATION, account.getUserConfiguration())
             ;
@@ -139,7 +138,7 @@ abstract class AbstractAccountAction implements AJAXActionService {
 
     /**
      * Get the a parameter
-     * 
+     *
      * @param requestData The {@link AJAXRequestData}
      * @param parameter The parameter name
      * @param coerceTo The type the parameter should be interpreted as

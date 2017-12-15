@@ -97,7 +97,7 @@ public interface CalendarAccountService {
      *
      * @param session The current session
      * @param providerId The identifier of the corresponding calendar provider
-     * @param userConfig The account's external / user configuration data
+     * @param settings Calendar settings for the new account as supplied by the client
      * @param parameters Additional calendar parameters, or <code>null</code> if not set
      * @return The created calendar account
      */
@@ -108,8 +108,7 @@ public interface CalendarAccountService {
      *
      * @param session The current session
      * @param id The identifier of the account to update
-     * @param userConfig The account's external / user configuration data
-     * @param enabled {@link Boolean#TRUE} to enable the account, {@link Boolean#FALSE} to disable the account, or <code>null</code> to skip
+     * @param settings Updated calendar settings for the account as supplied by the client
      * @param clientTimestamp The last timestamp known by the client to catch concurrent updates
      * @param parameters Additional calendar parameters, or <code>null</code> if not set
      * @return The updated calendar account

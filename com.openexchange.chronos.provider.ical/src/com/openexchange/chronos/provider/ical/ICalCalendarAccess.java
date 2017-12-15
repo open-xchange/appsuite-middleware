@@ -178,7 +178,7 @@ public class ICalCalendarAccess extends SingleFolderCachingCalendarAccess {
         iCalConfigurationFromJSON.putSafe(ICalCalendarConstants.NAME, folder.getName());
 
         AdministrativeCalendarAccountService service = Services.getService(AdministrativeCalendarAccountService.class);
-        service.updateAccount(getSession().getContextId(), getAccount().getUserId(), getAccount().getAccountId(), null, iCalConfigurationFromJSON, null, clientTimestamp);
+        service.updateAccount(getSession().getContextId(), getAccount().getUserId(), getAccount().getAccountId(), iCalConfigurationFromJSON, null, clientTimestamp);
 
         return folder.getId();
     }
