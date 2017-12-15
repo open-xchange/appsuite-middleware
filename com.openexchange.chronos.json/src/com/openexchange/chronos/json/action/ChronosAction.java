@@ -95,7 +95,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
 public abstract class ChronosAction extends AbstractChronosAction {
 
     /**
-     * Initializes a new {@link AbstractDriveShareAction}.
+     * Initializes a new {@link ChronosAction}.
      *
      * @param services A service lookup reference
      */
@@ -288,7 +288,7 @@ public abstract class ChronosAction extends AbstractChronosAction {
      * @return The extracted {@link JSONObject} payload
      * @throws OXException if the payload is missing, or a parsing error occurs
      */
-    private JSONObject extractJsonBody(AJAXRequestData requestData) throws OXException {
+    protected JSONObject extractJsonBody(AJAXRequestData requestData) throws OXException {
         Object data = requestData.getData();
         if (data == null || !(data instanceof JSONObject)) {
             throw AjaxExceptionCodes.ILLEGAL_REQUEST_BODY.create();

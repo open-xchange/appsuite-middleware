@@ -63,6 +63,7 @@ import com.openexchange.chronos.availability.json.AvailabilityActionFactory;
 import com.openexchange.chronos.availability.json.mapper.AvailableMapper;
 import com.openexchange.chronos.common.DataHandlers;
 import com.openexchange.chronos.json.action.ChronosActionFactory;
+import com.openexchange.chronos.json.action.account.ChronosAccountActionFactory;
 import com.openexchange.chronos.json.converter.AlarmTriggerConverter;
 import com.openexchange.chronos.json.converter.CalendarResultConverter;
 import com.openexchange.chronos.json.converter.EventConflictResultConverter;
@@ -77,6 +78,7 @@ import com.openexchange.chronos.json.converter.mapper.AlarmMapper;
 import com.openexchange.chronos.json.converter.mapper.EventMapper;
 import com.openexchange.chronos.json.oauth.ChronosOAuthScope;
 import com.openexchange.chronos.json.oauth.OAuthScopeDescription;
+import com.openexchange.chronos.provider.account.CalendarAccountService;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccessFactory;
 import com.openexchange.chronos.service.AvailableField;
 import com.openexchange.chronos.service.CalendarAvailabilityService;
@@ -98,7 +100,10 @@ public class ChronosJsonActivator extends AJAXModuleActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { IDBasedCalendarAccessFactory.class, CalendarUtilities.class, CalendarAvailabilityService.class, CalendarService.class, LeanConfigurationService.class };
+        return new Class<?>[] {
+            IDBasedCalendarAccessFactory.class, CalendarUtilities.class, CalendarAvailabilityService.class, CalendarService.class,
+            LeanConfigurationService.class, CalendarAccountService.class
+        };
     }
 
     @Override
@@ -109,6 +114,7 @@ public class ChronosJsonActivator extends AJAXModuleActivator {
              * register json module
              */
             registerModule(new ChronosActionFactory(this), "chronos");
+            registerModule(new ChronosAccountActionFactory(this), "chronos/account");
             registerModule(new AlarmActionFactory(this), "chronos/alarm");
             registerModule(new AvailabilityActionFactory(this), "chronos/availability");
             /*
