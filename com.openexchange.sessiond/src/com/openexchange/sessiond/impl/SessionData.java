@@ -255,10 +255,9 @@ final class SessionData {
             return retval.toArray(new SessionControl[retval.size()]);
         }
         for (SessionMap longTerm : longTermList) {
-            for (Iterator<SessionControl> iter = longTerm.values().iterator(); iter.hasNext();) {
-                SessionControl control = iter.next();
-                Session session = control.getSession();
-                if ((session.getContextId() == contextId) && (session.getUserId() == userId)) {
+            for (SessionControl control : longTerm.values()) {
+                if (control.equalsUserAndContext(userId, contextId)) {
+                    Session session = control.getSession();
                     longTerm.removeBySessionId(session.getSessionID());
                     longTermUserGuardian.remove(userId, contextId);
                     retval.add(control);
@@ -283,10 +282,9 @@ final class SessionData {
             return list;
         }
         for (SessionMap longTerm : longTermList) {
-            for (Iterator<SessionControl> iter = longTerm.values().iterator(); iter.hasNext();) {
-                SessionControl control = iter.next();
-                Session session = control.getSession();
-                if (session.getContextId() == contextId) {
+            for (SessionControl control : longTerm.values()) {
+                if (control.equalsContext(contextId)) {
+                    Session session = control.getSession();
                     longTerm.removeBySessionId(session.getSessionID());
                     longTermUserGuardian.remove(session.getUserId(), contextId);
                     list.add(control);
@@ -320,8 +318,7 @@ final class SessionData {
         }
 
         for (final SessionMap longTerm : longTermList) {
-            for (Iterator<SessionControl> iter = longTerm.values().iterator(); iter.hasNext();) {
-                SessionControl control = iter.next();
+            for (SessionControl control : longTerm.values()) {
                 Session session = control.getSession();
                 int contextId = session.getContextId();
                 if (contextIdsToCheck.contains(contextId)) {
@@ -365,8 +362,7 @@ final class SessionData {
             }
             for (SessionMap longTermMap : longTermList) {
                 for (SessionControl control : longTermMap.values()) {
-                    Session session = control.getSession();
-                    if ((session.getContextId() == contextId) && (session.getUserId() == userId)) {
+                    if (control.equalsUserAndContext(userId, contextId)) {
                         return control;
                     }
                 }
@@ -398,8 +394,7 @@ final class SessionData {
             }
             for (SessionMap longTermMap : longTermList) {
                 for (SessionControl control : longTermMap.values()) {
-                    Session session = control.getSession();
-                    if (session.getContextId() == contextId && session.getUserId() == userId && matcher.accepts(control.getSession())) {
+                    if (control.equalsUserAndContext(userId, contextId) && matcher.accepts(control.getSession())) {
                         return control.getSession();
                     }
                 }
@@ -452,8 +447,7 @@ final class SessionData {
 
         for (SessionMap longTermMap : longTermList) {
             for (SessionControl control : longTermMap.values()) {
-                Session session = control.getSession();
-                if (session.getContextId() == contextId && session.getUserId() == userId) {
+                if (control.equalsUserAndContext(userId, contextId)) {
                     retval.add(control);
                 }
             }
@@ -482,8 +476,7 @@ final class SessionData {
             }
             for (SessionMap longTermMap : longTermList) {
                 for (SessionControl control : longTermMap.values()) {
-                    Session session = control.getSession();
-                    if (session.getContextId() == contextId && session.getUserId() == userId) {
+                    if (control.equalsUserAndContext(userId, contextId)) {
                         count++;
                     }
                 }
