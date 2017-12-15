@@ -75,6 +75,24 @@ public interface CalendarAccountService {
     List<CalendarProvider> getProviders() throws OXException;
 
     /**
+     * Probes specific client-supplied, possibly erroneous and/or incomplete calendar settings by checking if they are valid or further
+     * configuration settings are required. This step is typically performed prior creating a new account.
+     * <p/>
+     * In case the settings are valid and can be used to create a new calendar account, the result will contain the proposed calendar
+     * settings, which may be enhanced by additional default values for certain properties of the calendar. The client is encouraged to
+     * create the account with these settings, then.
+     * <p/>
+     * In case the settings are invalid or incomplete, an appropriate exception is thrown providing further details about the root cause.
+     *
+     * @param session The user's session
+     * @param providerId The identifier of the corresponding calendar provider
+     * @param settings Calendar settings to be probed for the new account as supplied by the client
+     * @param parameters Additional calendar parameters, or <code>null</code> if not set
+     * @return The proposed calendar settings, enhanced by additional default values
+     */
+    CalendarSettings probeAccountSettings(Session session, String providerId, CalendarSettings settings, CalendarParameters parameters) throws OXException;
+
+    /**
      * Creates a new calendar account for the current session' user.
      *
      * @param session The current session

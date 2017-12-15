@@ -110,6 +110,18 @@ public class CalendarAccountServiceImpl implements CalendarAccountService, Admin
     }
 
     @Override
+    public CalendarSettings probeAccountSettings(Session session, String providerId, CalendarSettings settings, CalendarParameters parameters) throws OXException {
+        /*
+         * get associated calendar provider, check permissions & perform the probe based on the supplied settings
+         */
+        CalendarProvider calendarProvider = requireCapability(getProvider(providerId), session);
+        if (isGuest(session) || false == BasicCalendarProvider.class.isInstance(calendarProvider)) {
+            throw CalendarExceptionCodes.UNSUPPORTED_OPERATION_FOR_PROVIDER.create(providerId);
+        }
+        return ((BasicCalendarProvider) calendarProvider).probe(session, settings, parameters);
+    }
+
+    @Override
     public CalendarAccount createAccount(Session session, String providerId, CalendarSettings settings, CalendarParameters parameters) throws OXException {
         /*
          * get associated calendar provider, check permissions & initialize account config
