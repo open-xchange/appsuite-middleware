@@ -51,6 +51,7 @@ package com.openexchange.chronos.provider.ical.conn;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 import java.net.UnknownHostException;
 import java.nio.charset.Charset;
 import java.util.Date;
@@ -192,12 +193,12 @@ public class ICalFeedClient {
             int statusCode = assertStatusCode(response);
             if (statusCode == HttpStatus.SC_NOT_MODIFIED) {
                 // OK, nothing was modified, no response body, return as is
-                return new GetResponse(GetResponseState.NOT_MODIFIED, response.getAllHeaders());
+                return new GetResponse(request.getURI(), GetResponseState.NOT_MODIFIED, response.getAllHeaders());
             } else if (statusCode == HttpStatus.SC_SERVICE_UNAVAILABLE) {
-                return new GetResponse(GetResponseState.REMOVED, response.getAllHeaders());
+                return new GetResponse(request.getURI(), GetResponseState.REMOVED, response.getAllHeaders());
             }
             // Prepare the response
-            return prepareResponse(response);
+            return prepareResponse(request.getURI(), response);
         } catch (ClientProtocolException e) {
             LOG.error("Error while processing the retrieved information:{}.", e.getMessage(), e);
             throw ICalProviderExceptionCodes.CLIENT_PROTOCOL_ERROR.create(e.getMessage(), e);
@@ -213,8 +214,8 @@ public class ICalFeedClient {
         }
     }
 
-    private GetResponse prepareResponse(HttpResponse httpResponse) throws OXException {
-        GetResponse response = new GetResponse(GetResponseState.MODIFIED, httpResponse.getAllHeaders());
+    private GetResponse prepareResponse(URI uri, HttpResponse httpResponse) throws OXException {
+        GetResponse response = new GetResponse(uri, GetResponseState.MODIFIED, httpResponse.getAllHeaders());
 
         HttpEntity entity = httpResponse.getEntity();
         if (entity == null) {

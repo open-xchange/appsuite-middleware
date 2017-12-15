@@ -49,16 +49,21 @@
 
 package com.openexchange.chronos.provider.ical.result;
 
+import java.net.URI;
 import java.util.Collections;
 import java.util.List;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.http.Header;
 import org.apache.http.HttpHeaders;
+import org.apache.http.entity.ContentType;
+import com.openexchange.chronos.Calendar;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.ExtendedProperty;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.ical.ImportedCalendar;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
+import com.openexchange.mail.mime.ContentDisposition;
 
 /**
  *
@@ -69,15 +74,17 @@ import com.openexchange.java.Strings;
  */
 public class GetResponse {
 
+    private final Header[] headers;
+    private final GetResponseState state;
+    private final URI uri;
+
     private ImportedCalendar importedCalendar;
 
-    private final Header[] headers;
-
-    private final GetResponseState state;
-
-    public GetResponse(GetResponseState state, Header[] headers) {
+    public GetResponse(URI uri, GetResponseState state, Header[] headers) {
+        super();
         this.headers = headers;
         this.state = state;
+        this.uri = uri;
     }
 
     public void setCalendar(ImportedCalendar calendar) {
@@ -102,19 +109,43 @@ public class GetResponse {
     }
 
     public String getFeedName() {
-        String property = getProperty("X-WR-CALNAME");
-        if (Strings.isNotEmpty(property)) {
-            return property;
+        String name = importedCalendar.getName();
+        if (Strings.isEmpty(name)) {
+            name = getFirstNonEmptyValue(importedCalendar, "NAME", "X-WR-CALNAME");
         }
-        return importedCalendar.getName();
+        if (Strings.isEmpty(name)) {
+            try {
+                ContentDisposition contentDisposition = new ContentDisposition(getHeader("Content-Disposition"));
+                String filenameParameter = contentDisposition.getFilenameParameter();
+                if (null != filenameParameter) {
+                    name = FilenameUtils.getBaseName(filenameParameter);
+                }
+            } catch (Exception e) {
+                // best effort, so ignore
+            }
+        }
+        if (Strings.isEmpty(name)) {
+            try {
+                List<String> segments = Strings.splitAndTrim(uri.getPath(), "/");
+                if (null != segments && 0 < segments.size()) {
+                    name = FilenameUtils.getBaseName(segments.get(segments.size() - 1));
+                }
+            } catch (Exception e) {
+                // best effort, so ignore
+            }
+        }
+        if (Strings.isEmpty(name) || "basic".equals(name)) {
+            name = "Unnamed Feed";
+        }
+        return name;
     }
 
     public String getFeedDescription() {
-        String property = getProperty("X-WR-CALDESC");
-        if (Strings.isNotEmpty(property)) {
-            return property;
-        }
-        return getProperty("DESCRIPTION");
+        return getFirstNonEmptyValue(importedCalendar, "DESCRIPTION", "X-WR-CALDESC");
+    }
+
+    public String getFeedColor() {
+        return getFirstNonEmptyValue(importedCalendar, "COLOR", "X-APPLE-CALENDAR-COLOR", "X-OUTLOOK-COLOR", "X-FUNAMBOL-COLOR");
     }
 
     public String getETag() {
@@ -155,4 +186,27 @@ public class GetResponse {
     public GetResponseState getState() {
         return state;
     }
+
+    /**
+     * Gets the first non-empty extended property value from a specific imported calendar.
+     *
+     * @param calendar The calendar to get the property from
+     * @param propertyNames The property names to check
+     * @return The first non-empty property value, or <code>null</code> if there is none
+     */
+    private static String getFirstNonEmptyValue(Calendar calendar, String... propertyNames) {
+        if (null != calendar && null != propertyNames) {
+            for (String propertyName : propertyNames) {
+                ExtendedProperty property = CalendarUtils.optExtendedProperty(calendar, propertyName);
+                if (null != property) {
+                    String value = String.valueOf(property.getValue());
+                    if (Strings.isNotEmpty(value)) {
+                        return value;
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
 }
