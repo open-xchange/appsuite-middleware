@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,56 +47,34 @@
  *
  */
 
-package com.openexchange.file.storage.composition.osgi;
+package com.openexchange.file.storage.composition.internal;
 
-import org.osgi.framework.BundleContext;
-import com.openexchange.file.storage.composition.DelegatingIDBasedFileAccessFactory;
-import com.openexchange.file.storage.composition.IDBasedAdministrativeFileAccess;
-import com.openexchange.file.storage.composition.IDBasedFileAccess;
-import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
-import com.openexchange.file.storage.composition.internal.CompositingIDBasedAdministrativeFileAccess;
-import com.openexchange.file.storage.composition.internal.CompositingIDBasedFileAccess;
-import com.openexchange.file.storage.composition.internal.IDBasedAccessCloseable;
-import com.openexchange.marker.OXThreadMarkers;
-import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.session.Session;
+import java.io.Closeable;
+import java.io.IOException;
+import com.openexchange.tx.TransactionAwares;
 
 
 /**
- * {@link TrackingIDBasedFileAccessFactory} - A file access factory, which tracks possible delegating file access factories that possibly
- * influence file retrieval/storing.
+ * {@link IDBasedAccessCloseable}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.1
+ * @since v7.10.0
  */
-public class TrackingIDBasedFileAccessFactory extends RankingAwareNearRegistryServiceTracker<DelegatingIDBasedFileAccessFactory> implements IDBasedFileAccessFactory {
+public class IDBasedAccessCloseable implements Closeable {
 
-    private final ServiceLookup services;
+    private final AbstractCompositingIDBasedAccess access;
 
     /**
-     * Initializes a new {@link TrackingIDBasedFileAccessFactory}.
+     * Initializes a new {@link IDBasedAccessCloseable}.
      */
-    public TrackingIDBasedFileAccessFactory(ServiceLookup services, BundleContext context) {
-        super(context, DelegatingIDBasedFileAccessFactory.class);
-        this.services = services;
+    public IDBasedAccessCloseable(AbstractCompositingIDBasedAccess access) {
+        super();
+        this.access = access;
     }
 
     @Override
-    public IDBasedFileAccess createAccess(Session session) {
-        DelegatingIDBasedFileAccessFactory df = getHighestRanked();
-        return null == df ? newFileAccess(session) : df.createAccess(newFileAccess(session), session);
-    }
-
-    private CompositingIDBasedFileAccess newFileAccess(Session session) {
-        CompositingIDBasedFileAccess fileAccess = new CompositingIDBasedFileAccess(session, services);
-        OXThreadMarkers.rememberCloseable(new IDBasedAccessCloseable(fileAccess));
-        return fileAccess;
-    }
-
-    @Override
-    public IDBasedAdministrativeFileAccess createAccess(int contextId) {
-        return new CompositingIDBasedAdministrativeFileAccess(contextId, services);
+    public void close() throws IOException {
+        TransactionAwares.finishSafe(access);
     }
 
 }

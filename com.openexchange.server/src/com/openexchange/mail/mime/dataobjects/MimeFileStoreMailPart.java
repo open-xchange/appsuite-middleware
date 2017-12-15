@@ -80,6 +80,7 @@ import com.openexchange.sessiond.SessiondService;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
+import com.openexchange.tx.TransactionAwares;
 
 /**
  * {@link MimeFileStoreMailPart} - A {@link MailPart} implementation that keeps a reference to a temporary uploaded file that shall be added
@@ -243,12 +244,11 @@ public abstract class MimeFileStoreMailPart extends MailPart {
          * Lazy creation
          */
         if (null == dataSource) {
+            IDBasedFileAccess fileAccess = null;
             try {
-                final ContentType contentType = getContentType();
-                final MessageDataSource mds =
-                    new MessageDataSource(fileAccessFactory.createAccess(getSession()).getDocument(
-                        id,
-                        FileStorageFileAccess.CURRENT_VERSION), contentType);
+                ContentType contentType = getContentType();
+                fileAccess = fileAccessFactory.createAccess(getSession());
+                MessageDataSource mds = new MessageDataSource(fileAccess.getDocument(id, FileStorageFileAccess.CURRENT_VERSION), contentType);
                 if (contentType.getCharsetParameter() == null && contentType.startsWith(TEXT)) {
                     /*
                      * Guess charset for textual attachment
@@ -261,6 +261,8 @@ public abstract class MimeFileStoreMailPart extends MailPart {
             } catch (final IOException e) {
                 LOG.error("", e);
                 dataSource = new MessageDataSource(new byte[0], MimeTypes.MIME_APPL_OCTET);
+            } finally {
+                TransactionAwares.finishSafe(fileAccess);
             }
         }
         return dataSource;
