@@ -86,6 +86,9 @@ public class ITipUtils {
     }
 
     public static CalendarUser getPrincipal(CalendarParameters session) {
+        if (session == null) {
+            return null;
+        }
         // ID is the only value used, so we are fine only checking for this
         if (session.contains(CalendarParameters.PARAMETER_PRINCIPAL_ID)) {
             CalendarUser principal = new CalendarUser();
