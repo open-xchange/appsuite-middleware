@@ -204,7 +204,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
         MailAuthenticityResult authenticityResult = MailAuthenticityResult.NOT_ANALYZED_RESULT;
         try {
             authenticityResult = parseHeaders(headers, from[0], session);
-        } catch (Throwable e) {
+        } catch (Exception e) {
             LOGGER.error("An error occurred during parsing the 'Authentication-Results' header: {}", e.getMessage(), e);
         } finally {
             mailMessage.setAuthenticityResult(authenticityResult);
