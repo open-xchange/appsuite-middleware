@@ -346,7 +346,6 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
      * @param results A {@link List} with the results of the known mechanisms
      * @param unconsideredResults A {@link List} with the unknown/unconsidered results
      */
-    //TODO: ugly... split in smaller manageable pieces
     private void determineOverallResult(final MailAuthenticityResult overallResult, final List<MailAuthenticityMechanismResult> results, final List<Map<String, String>> unconsideredResults) {
         // Separate results
         final List<MailAuthenticityMechanismResult> spfResults = new ArrayList<>();
