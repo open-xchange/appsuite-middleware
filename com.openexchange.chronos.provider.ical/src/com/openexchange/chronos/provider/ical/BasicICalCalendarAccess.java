@@ -50,7 +50,6 @@
 package com.openexchange.chronos.provider.ical;
 
 import static com.openexchange.chronos.provider.CalendarFolderProperty.COLOR;
-import static com.openexchange.chronos.provider.CalendarFolderProperty.COLOR_LITERAL;
 import static com.openexchange.chronos.provider.CalendarFolderProperty.DESCRIPTION;
 import static com.openexchange.chronos.provider.CalendarFolderProperty.SCHEDULE_TRANSP;
 import static com.openexchange.chronos.provider.CalendarFolderProperty.USED_FOR_SYNC;
@@ -61,7 +60,6 @@ import org.json.JSONObject;
 import com.openexchange.chronos.ExtendedProperties;
 import com.openexchange.chronos.TimeTransparency;
 import com.openexchange.chronos.provider.CalendarAccount;
-import com.openexchange.chronos.provider.SingleFolderCalendarAccessUtils;
 import com.openexchange.chronos.provider.basic.CalendarSettings;
 import com.openexchange.chronos.provider.caching.ExternalCalendarResult;
 import com.openexchange.chronos.provider.caching.basic.BasicCachingCalendarAccess;
@@ -72,7 +70,6 @@ import com.openexchange.chronos.provider.ical.result.GetResponse;
 import com.openexchange.chronos.provider.ical.result.GetResponseState;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.config.lean.LeanConfigurationService;
-import com.openexchange.conversion.ConversionService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.session.Session;
@@ -107,34 +104,20 @@ public class BasicICalCalendarAccess extends BasicCachingCalendarAccess {
 
     @Override
     public CalendarSettings getSettings() {
-        CalendarSettings settings = new CalendarSettings();
-        ExtendedProperties extendedProperties = null;
-        try {
-            extendedProperties = SingleFolderCalendarAccessUtils.parseExtendedProperties(Services.getService(ConversionService.class), account.getInternalConfiguration().optJSONObject("extendedProperties"));
-        } catch (OXException e) {
-            LOG.warn("Unable to parse extended properties, falling back to defaults.", e);
-        }
-        if (null == extendedProperties) {
-            extendedProperties = new ExtendedProperties();
-        }
+        JSONObject internalConfig = account.getInternalConfiguration();
 
-        JSONObject iCalConfigurationFromJSON = getICalConfigurationFromJSON(account.getInternalConfiguration());
-        settings.setName(iCalConfigurationFromJSON.optString(ICalCalendarConstants.NAME, account.getUserConfiguration().optString(ICalCalendarConstants.URI)));
+        ExtendedProperties extendedProperties = new ExtendedProperties();
+        extendedProperties.add(SCHEDULE_TRANSP(TimeTransparency.TRANSPARENT, true));
+        extendedProperties.add(DESCRIPTION(internalConfig.optString("description", null)));
+        extendedProperties.add(USED_FOR_SYNC(Boolean.FALSE, true));
+        extendedProperties.add(COLOR(internalConfig.optString("color", null), false));
+
+        CalendarSettings settings = new CalendarSettings();
         settings.setLastModified(account.getLastModified());
-        /*
-         * always apply or overwrite protected defaults
-         */
-        extendedProperties.replace(SCHEDULE_TRANSP(TimeTransparency.TRANSPARENT, false));
-        extendedProperties.replace(USED_FOR_SYNC(Boolean.FALSE, false));
-        extendedProperties.replace(DESCRIPTION(iCalConfigurationFromJSON.optString(ICalCalendarConstants.DESCRIPTION, null), false));
-        /*
-         * insert further defaults if missing
-         */
-        if (!extendedProperties.contains(COLOR_LITERAL)) {
-            extendedProperties.add(COLOR(null, false));
-        }
-        settings.setExtendedProperties(extendedProperties);
         settings.setConfig(account.getUserConfiguration());
+        settings.setName(internalConfig.optString("name", "Calendar"));
+        settings.setExtendedProperties(extendedProperties);
+        settings.setSubscribed(internalConfig.optBoolean("subscribed", true));
 
         return settings;
     }

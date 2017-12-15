@@ -120,7 +120,7 @@ public abstract class BasicCachingCalendarProvider implements BasicCalendarProvi
     @Override
     public final JSONObject reconfigureAccount(Session session, CalendarAccount account, CalendarSettings settings, CalendarParameters parameters) throws OXException {
         JSONObject internalConfiguration = account.getInternalConfiguration();
-        if (triggerCacheInvalidation(session, account.getUserConfiguration(), settings.getConfig())) {
+        if (settings.containsConfig() && triggerCacheInvalidation(session, account.getUserConfiguration(), settings.getConfig())) {
             if (internalConfiguration.hasAndNotNull(CachingCalendarAccess.CACHING)) {
                 JSONObject folders = internalConfiguration.optJSONObject(CachingCalendarAccess.CACHING);
                 for (String folderId : folders.keySet()) {

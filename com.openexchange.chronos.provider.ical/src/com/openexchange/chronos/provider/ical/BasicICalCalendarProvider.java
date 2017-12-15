@@ -54,14 +54,15 @@ import static com.openexchange.chronos.provider.CalendarFolderProperty.COLOR_LIT
 import static com.openexchange.chronos.provider.CalendarFolderProperty.DESCRIPTION;
 import static com.openexchange.chronos.provider.CalendarFolderProperty.DESCRIPTION_LITERAL;
 import static com.openexchange.chronos.provider.CalendarFolderProperty.optPropertyValue;
+import static com.openexchange.chronos.provider.ical.ICalCalendarConstants.NAME;
 import static com.openexchange.chronos.provider.ical.ICalCalendarConstants.REFRESH_INTERVAL;
 import static com.openexchange.chronos.provider.ical.ICalCalendarConstants.URI;
 import static com.openexchange.java.Autoboxing.L;
 import java.util.EnumSet;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import org.dmfs.rfc5545.Duration;
-import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.auth.info.AuthType;
 import com.openexchange.chronos.ExtendedProperties;
@@ -79,7 +80,6 @@ import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.session.Session;
-
 
 /**
  *
@@ -192,26 +192,82 @@ public class BasicICalCalendarProvider extends BasicCachingCalendarProvider {
 
     @Override
     public JSONObject configureAccountOpt(Session session, CalendarSettings settings, CalendarParameters parameters) throws OXException {
-        ICalCalendarFeedConfig iCalFeedConfig = new ICalCalendarFeedConfig.EncryptedBuilder(session, new JSONObject(settings.getConfig()), new JSONObject()).build();
-        ICalFeedClient iCalFeedConnector = new ICalFeedClient(session, iCalFeedConfig);
-        GetResponse response = iCalFeedConnector.executeRequest(); // check connections and authorization
-
-        if (iCalFeedConfig.getAuthInfo().getAuthType().equals(AuthType.BASIC)) {
-            ICalAuthParser.encrypt(settings.getConfig(), session.getPassword()); // encrypt password for persisting in user config column
+        /*
+         * check & adjust passed user config as needed
+         */
+        JSONObject config = settings.getConfig();
+        if (null == config || false == config.hasAndNotNull(URI)) {
+            throw ICalProviderExceptionCodes.MISSING_FEED_URI.create();
         }
-        return adaptInternalConfig(response);
+        String uri = config.optString(URI, null);
+        ICalProviderUtils.verifyURI(uri);
+        ICalCalendarFeedConfig iCalFeedConfig = new ICalCalendarFeedConfig.EncryptedBuilder(session, new JSONObject(config), new JSONObject()).build();
+        if (AuthType.BASIC.equals(iCalFeedConfig.getAuthInfo().getAuthType())) {
+            ICalAuthParser.encrypt(config, session.getPassword());
+        }
+        /*
+         * prepare & return internal config, taking over client-supplied values if applicable
+         */
+        JSONObject internalConfig = new JSONObject();
+        internalConfig.putSafe(NAME, Strings.isNotEmpty(settings.getName()) ? settings.getName() : "Calendar");
+        internalConfig.putSafe("subscribed", settings.isSubscribed());
+        String color = optPropertyValue(settings.getExtendedProperties(), COLOR_LITERAL, String.class);
+        if (Strings.isNotEmpty(color)) {
+            internalConfig.putSafe("color", color);
+        }
+        String description = optPropertyValue(settings.getExtendedProperties(), DESCRIPTION_LITERAL, String.class);
+        if (Strings.isNotEmpty(description)) {
+            internalConfig.putSafe("description", description);
+        }
+        return internalConfig;
     }
 
     @Override
     public JSONObject reconfigureAccountOpt(Session session, CalendarAccount account, CalendarSettings settings, CalendarParameters parameters) throws OXException {
-        ICalCalendarFeedConfig iCalFeedConfig = new ICalCalendarFeedConfig.EncryptedBuilder(session, new JSONObject(settings.getConfig()), new JSONObject()).build();
-        ICalFeedClient iCalFeedConnector = new ICalFeedClient(session, iCalFeedConfig);
-        GetResponse getResponse = iCalFeedConnector.executeRequest(); // check connections and authorization
-
-        if (iCalFeedConfig.getAuthInfo().getAuthType().equals(AuthType.BASIC)) {
-            ICalAuthParser.encrypt(settings.getConfig(), session.getPassword()); // encrypt password for persisting in user config column
+        /*
+         * check & adjust passed user config as needed
+         */
+        if (settings.containsConfig()) {
+        JSONObject config = settings.getConfig();
+            if (null == config || false == config.hasAndNotNull(URI)) {
+                throw ICalProviderExceptionCodes.MISSING_FEED_URI.create();
+            }
+            String uri = config.optString(URI, null);
+            ICalProviderUtils.verifyURI(uri);
+            if (false == uri.equals(account.getUserConfiguration().optString(URI))) {
+                throw ICalProviderExceptionCodes.BAD_FEED_URI.create(uri);
+            }
+            ICalCalendarFeedConfig iCalFeedConfig = new ICalCalendarFeedConfig.EncryptedBuilder(session, new JSONObject(config), new JSONObject()).build();
+            if (AuthType.BASIC.equals(iCalFeedConfig.getAuthInfo().getAuthType())) {
+                ICalAuthParser.encrypt(config, session.getPassword());
+            }
         }
-        return updateInternalConfig(account, getResponse);
+        /*
+         * check & apply changes to internal config
+         */
+        boolean changed = false;
+        JSONObject internalConfig = null != account.getInternalConfiguration() ? new JSONObject(account.getInternalConfiguration()) : new JSONObject();
+        if (settings.containsExtendedProperties()) {
+            String color = optPropertyValue(settings.getExtendedProperties(), COLOR_LITERAL, String.class);
+            if (false == Objects.equals(color, internalConfig.optString("color", null))) {
+                internalConfig.putSafe("color", color);
+                changed = true;
+            }
+            String description = optPropertyValue(settings.getExtendedProperties(), DESCRIPTION_LITERAL, String.class);
+            if (false == Objects.equals(description, internalConfig.optString("description", null))) {
+                internalConfig.putSafe("description", description);
+                changed = true;
+            }
+        }
+        if (settings.containsName() && false == Objects.equals(settings.getName(), internalConfig.optString("name", null))) {
+            internalConfig.putSafe("name", settings.getName());
+            changed = true;
+        }
+        if (settings.containsSubscribed() && settings.isSubscribed() != internalConfig.optBoolean("subscribed", true)) {
+            internalConfig.putSafe("subscribed", settings.isSubscribed());
+            changed = true;
+        }
+        return changed ? internalConfig : null;
     }
 
     @Override
@@ -220,51 +276,6 @@ public class BasicICalCalendarProvider extends BasicCachingCalendarProvider {
         JSONObject newUserConfigurationCopy = new JSONObject(newUserConfiguration);
         ICalCalendarFeedConfig newFeedConfig = new ICalCalendarFeedConfig.EncryptedBuilder(session, newUserConfigurationCopy, new JSONObject()).build();
         return oldFeedConfig.mandatoryChanges(newFeedConfig);
-    }
-
-    private JSONObject updateInternalConfig(CalendarAccount calendarAccount, GetResponse getResponse) {
-        JSONObject internalConfig = calendarAccount.getInternalConfiguration();
-        if (getResponse.getCalendar() == null) {
-            return internalConfig;
-        }
-        try {
-            internalConfig.remove(ICalCalendarConstants.PROVIDER_ID);
-            JSONObject icalConfig = new JSONObject();
-            String feedName = getResponse.getFeedName();
-            if (Strings.isNotEmpty(feedName)) {
-                icalConfig.put(ICalCalendarConstants.NAME, feedName);
-            }
-            String feedDesc = getResponse.getFeedDescription();
-            if (Strings.isNotEmpty(feedDesc)) {
-                icalConfig.put(ICalCalendarConstants.DESCRIPTION, feedDesc);
-            }
-            internalConfig.put(ICalCalendarConstants.PROVIDER_ID, icalConfig);
-        } catch (JSONException e) {
-            LOG.warn("Unable to create internal config as desired.", e);
-        }
-        return internalConfig;
-    }
-
-    private JSONObject adaptInternalConfig(GetResponse getResponse) {
-        JSONObject internalConfig = new JSONObject();
-        if (getResponse.getCalendar() == null) {
-            return internalConfig;
-        }
-        JSONObject icalConfig = new JSONObject();
-        try {
-            internalConfig.put(ICalCalendarConstants.PROVIDER_ID, icalConfig);
-            String feedName = getResponse.getFeedName();
-            if (Strings.isNotEmpty(feedName)) {
-                icalConfig.put("name", feedName);
-            }
-            String feedDesc = getResponse.getFeedDescription();
-            if (Strings.isNotEmpty(feedDesc)) {
-                icalConfig.put("description", feedDesc);
-            }
-        } catch (JSONException e) {
-            LOG.warn("Unable to create internal config as desired.", e);
-        }
-        return internalConfig;
     }
 
 }
