@@ -1484,7 +1484,15 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 LOG.error("", e);
             }
 
-            handleAuthenticity(new MailMessage[] { mail });
+            if (MailAccount.DEFAULT_ID == mail.getAccountId()) {
+                MailAuthenticityHandlerRegistry authenticityHandlerRegistry = ServerServiceRegistry.getInstance().getService(MailAuthenticityHandlerRegistry.class);
+                if (null != authenticityHandlerRegistry) {
+                    MailAuthenticityHandler handler = authenticityHandlerRegistry.getHighestRankedHandlerFor(session);
+                    if (null != handler) {
+                        handler.handle(session, mail);
+                    }
+                }
+            }
 
             /*
              * Check color label vs. \Flagged flag
@@ -4799,52 +4807,57 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 
     @Override
     public MailMessage[] searchMails(String folder, IndexRange indexRange, MailSortField sortField, OrderDirection order, SearchTerm<?> searchTerm, MailField[] mailFields, String[] headerNames) throws OXException {
+        FullnameArgument argument = prepareMailFolderParam(folder);
+        int accountId = argument.getAccountId();
+        String fullName = argument.getFullname();
+        initConnection(accountId);
+
+        MailFetchArguments fetchArguments = MailFetchArguments.builder(argument, mailFields, headerNames).build();
+        Map<String, Object> fetchListenerState = new HashMap<>(4);
+        MailFetchListenerChain listenerChain = MailFetchListenerRegistry.determineFetchListenerChainFor(fetchArguments, session, fetchListenerState);
+
+        if (null != listenerChain) {
+            MailAttributation attributation = listenerChain.onBeforeFetch(fetchArguments, session, fetchListenerState);
+            if (attributation.isApplicable()) {
+                mailFields = attributation.getFields();
+                headerNames = attributation.getHeaderNames();
+            }
+        }
+
         IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
-        MailMessage[] result;
+        MailMessage[] mails;
         if (null != headerNames && 0 < headerNames.length) {
             IMailMessageStorageExt ext = messageStorage.supports(IMailMessageStorageExt.class);
             if (null != ext) {
-                result = ext.searchMessages(folder, indexRange, sortField, order, searchTerm, mailFields, headerNames);
+                mails = ext.searchMessages(fullName, indexRange, sortField, order, searchTerm, mailFields, headerNames);
             } else {
-                result = messageStorage.searchMessages(folder, indexRange, sortField, order, searchTerm, mailFields);
-                enrichWithHeaders(folder, result, headerNames, messageStorage);
+                mails = messageStorage.searchMessages(fullName, indexRange, sortField, order, searchTerm, mailFields);
+                enrichWithHeaders(fullName, mails, headerNames, messageStorage);
             }
         } else {
-            result = messageStorage.searchMessages(folder, indexRange, sortField, order, searchTerm, mailFields);
+            mails = messageStorage.searchMessages(fullName, indexRange, sortField, order, searchTerm, mailFields);
         }
 
         if (!mailAccess.getWarnings().isEmpty()) {
             warnings.addAll(mailAccess.getWarnings());
         }
-        handleAuthenticity(result);
-        checkMailsForColor(result);
 
-        return result;
-    }
-
-    /**
-     * Performs mail authenticity (if available) on the specified {@link MailMessage} array
-     * 
-     * @param result The array with the {@link MailMessage}s
-     * @throws OXException if an error is occurred
-     */
-    private void handleAuthenticity(MailMessage[] result) throws OXException {
-        if (MailAccount.DEFAULT_ID != accountId) {
-            return;
+        if (null != listenerChain) {
+            MailFetchListenerResult result = listenerChain.onAfterFetch(mails, false, session, fetchListenerState);
+            if (ListenerReply.DENY == result.getReply()) {
+                OXException e = result.getError();
+                if (null == e) {
+                    // Should not occur
+                    e = MailExceptionCode.UNEXPECTED_ERROR.create("Fetch listener processing failed");
+                }
+                throw e;
+            }
+            mails = result.getMails();
         }
 
-        MailAuthenticityHandlerRegistry authenticityHandlerRegistry = ServerServiceRegistry.getInstance().getService(MailAuthenticityHandlerRegistry.class);
-        if (null == authenticityHandlerRegistry) {
-            return;
-        }
-        MailAuthenticityHandler handler = authenticityHandlerRegistry.getHighestRankedHandlerFor(session);
-        if (null == handler) {
-            return;
-        }
+        checkMailsForColor(mails);
 
-        for (MailMessage mail : result) {
-            handler.handle(session, mail);
-        }
+        return mails;
     }
 
     private void enrichWithHeaders(String fullName, MailMessage[] mails, String[] headerNames, IMailMessageStorage messageStorage) throws OXException {
