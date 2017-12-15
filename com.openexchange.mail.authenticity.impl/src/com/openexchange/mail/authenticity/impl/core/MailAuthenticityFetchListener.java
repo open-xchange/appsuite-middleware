@@ -65,7 +65,6 @@ import com.openexchange.mail.MailFields;
 import com.openexchange.mail.authenticity.MailAuthenticityHandler;
 import com.openexchange.mail.authenticity.MailAuthenticityHandlerRegistry;
 import com.openexchange.mail.authenticity.impl.osgi.Services;
-import com.openexchange.mail.dataobjects.Delegatized;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.UnifiedInboxManagement;
@@ -187,17 +186,19 @@ public class MailAuthenticityFetchListener implements MailFetchListener {
             return MailFetchListenerResult.neutral(mails, cacheable);
         }
 
-        int unifiedINBOXAccountId = getUnifiedINBOXAccountId(session);
+        // int unifiedINBOXAccountId = getUnifiedINBOXAccountId(session);
         for (MailMessage mail : mails) {
             if (mail != null) {
                 int accId = mail.getAccountId();
+                /*-
                 if (mail instanceof Delegatized) {
                     int undelegatedAccountId = ((Delegatized) mail).getUndelegatedAccountId();
                     if (undelegatedAccountId >= 0) {
                         accId = undelegatedAccountId;
                     }
                 }
-                if (accId == MailAccount.DEFAULT_ID || accId == unifiedINBOXAccountId) {
+                */
+                if (accId == MailAccount.DEFAULT_ID /*|| accId == unifiedINBOXAccountId*/) {
                     handler.handle(session, mail);
                 }
             }

@@ -178,6 +178,11 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
      */
     @Override
     public void handle(final Session session, final MailMessage mailMessage) {
+        if (mailMessage.containsAuthenticityResult()) {
+            // Appears that authenticity results has already been set for specified MailMessage instance
+            return;
+        }
+
         final HeaderCollection headerCollection = mailMessage.getHeaders();
         final String[] authHeaders = headerCollection.getHeader(MessageHeaders.HDR_AUTHENTICATION_RESULTS);
         if (authHeaders == null || authHeaders.length == 0) {
