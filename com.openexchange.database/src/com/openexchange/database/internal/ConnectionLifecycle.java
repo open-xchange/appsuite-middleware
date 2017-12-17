@@ -58,8 +58,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Iterator;
-import java.util.Map;
-import java.util.Map.Entry;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.Properties;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.DefaultInterests;
@@ -81,6 +80,33 @@ class ConnectionLifecycle implements PoolableLifecycle<Connection> {
      * SQL command for checking the connection.
      */
     private static final String TEST_SELECT = "SELECT 1 AS test";
+
+    private static volatile Field openStatementsField;
+
+    private static Field getOpenStatementsField() {
+        Field openStatementsField = ConnectionLifecycle.openStatementsField;
+        if (null == openStatementsField) {
+            synchronized (ConnectionLifecycle.class) {
+                openStatementsField = ConnectionLifecycle.openStatementsField;
+                if (null == openStatementsField) {
+                    try {
+                        openStatementsField = com.mysql.jdbc.ConnectionImpl.class.getDeclaredField("openStatements");
+                        openStatementsField.setAccessible(true);
+                        ConnectionLifecycle.openStatementsField = openStatementsField;
+                    } catch (NoSuchFieldException e) {
+                        // Unable to retrieve openStatements content.
+                        return null;
+                    } catch (SecurityException e) {
+                        // Unable to retrieve openStatements content.
+                        return null;
+                    }
+                }
+            }
+        }
+        return openStatementsField;
+    }
+
+    // ----------------------------------------------------------------------------------------------
 
     private final String url;
     private final Properties info;
@@ -223,17 +249,14 @@ class ConnectionLifecycle implements PoolableLifecycle<Connection> {
                     addTrace(dbe, data);
                     String openStatement = "";
                     if (con instanceof com.mysql.jdbc.ConnectionImpl) {
-                        try {
-                            com.mysql.jdbc.ConnectionImpl impl = ((com.mysql.jdbc.ConnectionImpl) con);
-                            Field openStatementsField = impl.getClass().getSuperclass().getDeclaredField("openStatements");
-                            openStatementsField.setAccessible(true);
-
-                            Map<Statement, Statement> open = (Map<Statement, Statement>) openStatementsField.get(impl);
-                            for (Entry<Statement, Statement> entry : open.entrySet()) {
-                                openStatement = entry.getKey().toString();
-                            }
-                        } catch (NoSuchFieldException nsfe) {
+                        Field openStatementsField = getOpenStatementsField();
+                        if (null == openStatementsField) {
                             // Unable to retrieve openStatements content. Just log that there is an open statement...
+                        } else {
+                            CopyOnWriteArrayList<Statement> open = (CopyOnWriteArrayList<Statement>) openStatementsField.get(con);
+                            for (Statement statement : open) {
+                                openStatement = statement.toString();
+                            }
                         }
                     }
                     ConnectionPool.LOG.error(openStatement, dbe);
