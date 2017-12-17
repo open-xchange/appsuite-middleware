@@ -52,6 +52,8 @@ package com.openexchange.sessiond.impl;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -166,20 +168,37 @@ final class SessionContainer {
      * @param contextId The context ID
      * @return The sessions bound to specified user ID and context ID
      */
-    protected SessionControl[] getSessionsByUser(final int userId, final int contextId) {
-        final ConcurrentMap<Integer, Map<String, Object>> map = userSessions.get(Integer.valueOf(contextId));
+    protected List<SessionControl> getSessionsByUser(final int userId, final int contextId) {
+        ConcurrentMap<Integer, Map<String, Object>> map = userSessions.get(Integer.valueOf(contextId));
         if (null == map) {
-            return new SessionControl[0];
+            return Collections.emptyList();
         }
-        final Map<String, Object> sessionIds = map.get(Integer.valueOf(userId));
+
+        Map<String, Object> sessionIds = map.get(Integer.valueOf(userId));
         if (null == sessionIds) {
-            return new SessionControl[0];
+            return Collections.emptyList();
         }
-        final List<SessionControl> l = new ArrayList<SessionControl>(sessionIds.size());
+
+        List<SessionControl> sessions = new ArrayList<SessionControl>(sessionIds.size());
+        Set<String> idsToRemove = null;
         for (final String sessionId : sessionIds.keySet()) {
-            l.add(sessionMap.getBySessionId(sessionId));
+            SessionControl control = sessionMap.getBySessionId(sessionId);
+            if (null == control) {
+                // Apparently such a session does no more exist
+                if (null == idsToRemove) {
+                    idsToRemove = new HashSet<>(2);
+                }
+                idsToRemove.add(sessionId);
+            } else {
+                sessions.add(control);
+            }
         }
-        return l.toArray(new SessionControl[sessionIds.size()]);
+        if (null != idsToRemove) {
+            for (String sessionIdToRemove : idsToRemove) {
+                sessionIds.remove(sessionIdToRemove);
+            }
+        }
+        return sessions;
     }
 
     /**
@@ -337,7 +356,11 @@ final class SessionContainer {
         sessionIds.remove(sessionId);
         if (sessionIds.isEmpty()) {
             // Remove if still empty
-            map.remove(iUserId, new ConcurrentHashMap<String, Object>(0, 0.9F, 1));
+            boolean removed = map.remove(iUserId, new ConcurrentHashMap<String, Object>(0, 0.9F, 1));
+            if (removed && map.isEmpty()) {
+                // Remove if still empty
+                userSessions.remove(iContextId, new ConcurrentHashMap<String, Object>(0, 0.9F, 1));
+            }
         }
 
         return sessionControl;

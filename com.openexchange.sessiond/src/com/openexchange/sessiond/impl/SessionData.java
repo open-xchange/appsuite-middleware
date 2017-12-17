@@ -437,7 +437,7 @@ final class SessionData {
 
         // Short term ones
         for (SessionContainer container : sessionList) {
-            retval.addAll(Arrays.asList(container.getSessionsByUser(userId, contextId)));
+            retval.addAll(container.getSessionsByUser(userId, contextId));
         }
 
         // Long term ones
