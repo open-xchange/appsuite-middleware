@@ -61,9 +61,9 @@ import org.jsoup.nodes.FormElement;
 import org.jsoup.nodes.Node;
 import org.jsoup.nodes.TextNode;
 import org.jsoup.nodes.XmlDeclaration;
-import org.jsoup.parser.InstantiableHtmlTreeBuilder;
 import org.jsoup.parser.InterruptedParsingException;
 import org.jsoup.parser.ParseErrorList;
+import org.jsoup.parser.Parser;
 import org.jsoup.select.Elements;
 import org.jsoup.select.NodeVisitor;
 import com.google.common.collect.ImmutableMap;
@@ -174,8 +174,7 @@ public class JsoupParser {
     public void doParse(String html, JsoupHandler handler) throws OXException {
         try {
             // Parse HTML input to a Jsoup document
-            InstantiableHtmlTreeBuilder treeBuilder = new InstantiableHtmlTreeBuilder();
-            Document document = treeBuilder.parse(new InterruptibleStringReader(html), "", ParseErrorList.noTracking(), treeBuilder.defaultSettings());
+            Document document = Parser.htmlParser().parseInput(new InterruptibleStringReader(html), "");
 
             // Check <style> tag sizes against threshold
             {
