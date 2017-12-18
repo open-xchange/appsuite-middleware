@@ -219,7 +219,7 @@ public class ConfigMailFilterAction extends AbstractMailFilterAction {
                 if (false == capabilities.containsAll(simplifiedAction.requiredCapabilities())) {
                     continue;
                 }
-            } catch (Exception e) {
+            } catch (IllegalArgumentException e) {
                 //ignore, obviously the specified entry is not a simplified command
             }
 
