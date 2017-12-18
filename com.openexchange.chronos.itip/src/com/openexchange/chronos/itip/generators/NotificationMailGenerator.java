@@ -124,7 +124,8 @@ public class NotificationMailGenerator implements ITipMailGenerator {
 
     private final List<NotificationParticipant> participants;
 
-    public static final EventField[] DEFAULT_SKIP = new EventField[] { EventField.ID, EventField.FOLDER_ID, EventField.CREATED_BY, EventField.MODIFIED_BY, EventField.CREATED, EventField.LAST_MODIFIED, EventField.ALARMS, EventField.SEQUENCE, EventField.TRANSP };
+    public static final EventField[] DEFAULT_SKIP = new EventField[] { EventField.ID, EventField.FOLDER_ID, EventField.CREATED_BY, EventField.MODIFIED_BY, EventField.CREATED, EventField.LAST_MODIFIED, EventField.ALARMS, EventField.SEQUENCE,
+        EventField.TRANSP };
 
     private final List<NotificationParticipant> resources;
 
@@ -134,7 +135,8 @@ public class NotificationMailGenerator implements ITipMailGenerator {
 
     private CalendarUtilities calendarUtilities;
 
-    public NotificationMailGenerator(final ServiceLookup services, final AttachmentMemory attachmentMemory, final NotificationParticipantResolver resolver, final ITipIntegrationUtility util, final Event original, final Event appointment, User user, final User onBehalfOf, final Context ctx, final Session session, CalendarUser principal) throws OXException {
+    public NotificationMailGenerator(final ServiceLookup services, final AttachmentMemory attachmentMemory, final NotificationParticipantResolver resolver, final ITipIntegrationUtility util, final Event original, final Event appointment, User user,
+        final User onBehalfOf, final Context ctx, final Session session, CalendarUser principal) throws OXException {
         this.util = util;
         this.ctx = ctx;
         this.services = services;
@@ -199,7 +201,7 @@ public class NotificationMailGenerator implements ITipMailGenerator {
     @Override
     public boolean userIsTheOrganizer() {
         return actor.hasRole(ITipRole.ORGANIZER);
-    };
+    }
 
     @Override
     public NotificationMail generateCreateMailFor(final NotificationParticipant participant) throws OXException {
