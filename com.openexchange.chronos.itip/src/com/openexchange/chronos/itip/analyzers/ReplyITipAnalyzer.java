@@ -82,6 +82,7 @@ import com.openexchange.chronos.itip.generators.changes.ChangeDescriber;
 import com.openexchange.chronos.itip.generators.changes.generators.Details;
 import com.openexchange.chronos.itip.generators.changes.generators.Rescheduling;
 import com.openexchange.chronos.itip.generators.changes.generators.Transparency;
+import com.openexchange.chronos.itip.osgi.Services;
 import com.openexchange.chronos.itip.tools.ITipEventUpdate;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.ItemUpdate;
@@ -218,12 +219,8 @@ public class ReplyITipAnalyzer extends AbstractITipAnalyzer {
     }
 
     private void describeReplyDiff(final ITipMessage message, final ITipChange change, final TypeWrapper wrapper, final CalendarSession session) throws OXException {
-        if (services == null) {
-            return;
-        }
-
-        final ContextService contexts = services.getService(ContextService.class);
-        final UserService users = services.getService(UserService.class);
+        final ContextService contexts = Services.getService(ContextService.class);
+        final UserService users = Services.getService(UserService.class);
 
         final Context ctx = contexts.getContext(session.getContextId());
         final User user = users.getUser(session.getUserId(), ctx);

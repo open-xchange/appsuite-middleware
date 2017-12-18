@@ -82,6 +82,7 @@ import com.openexchange.chronos.itip.generators.changes.generators.Details;
 import com.openexchange.chronos.itip.generators.changes.generators.Participants;
 import com.openexchange.chronos.itip.generators.changes.generators.Rescheduling;
 import com.openexchange.chronos.itip.generators.changes.generators.Transparency;
+import com.openexchange.chronos.itip.osgi.Services;
 import com.openexchange.chronos.itip.tools.ITipEventUpdate;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.CollectionUpdate;
@@ -93,7 +94,6 @@ import com.openexchange.group.GroupService;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.resource.ResourceService;
-import com.openexchange.server.ServiceLookup;
 import com.openexchange.user.UserService;
 
 /**
@@ -106,7 +106,6 @@ public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
 
     public static final EventField[] SKIP = new EventField[] { EventField.FOLDER_ID, EventField.ID, EventField.CREATED_BY, EventField.CREATED, EventField.TIMESTAMP, EventField.LAST_MODIFIED, EventField.MODIFIED_BY, EventField.SEQUENCE, EventField.ALARMS };
     protected ITipIntegrationUtility util;
-    protected ServiceLookup services;
 
     @Override
     public ITipAnalysis analyze(final ITipMessage message, Map<String, String> header, final String style, final CalendarSession session) throws OXException {
@@ -114,19 +113,14 @@ public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
             header = new HashMap<String, String>();
         }
         header = lowercase(header);
-        if (services != null) {
 
-            final ContextService contexts = services.getService(ContextService.class);
-            final UserService users = services.getService(UserService.class);
+        final ContextService contexts = Services.getService(ContextService.class);
+        final UserService users = Services.getService(UserService.class);
 
-            final Context ctx = contexts.getContext(session.getContextId());
-            final User user = users.getUser(session.getUserId(), ctx);
+        final Context ctx = contexts.getContext(session.getContextId());
+        final User user = users.getUser(session.getUserId(), ctx);
 
-            return analyze(message, header, wrapperFor(style), user.getLocale(), user, ctx, session);
-
-        }
-
-        return analyze(message, header, wrapperFor(style), null, null, null, session);
+        return analyze(message, header, wrapperFor(style), user.getLocale(), user, ctx, session);
     }
 
     private Map<String, String> lowercase(final Map<String, String> header) {
@@ -152,15 +146,11 @@ public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
     }
 
     public void describeDiff(final ITipChange change, final TypeWrapper wrapper, final CalendarSession session, ITipMessage message) throws OXException {
-        if (services == null) {
-            change.setDiffDescription(new ArrayList<String>());
-            return;
-        }
 
-        final ContextService contexts = services.getService(ContextService.class);
-        final UserService users = services.getService(UserService.class);
-        final GroupService groups = services.getService(GroupService.class);
-        final ResourceService resources = services.getService(ResourceService.class);
+        final ContextService contexts = Services.getService(ContextService.class);
+        final UserService users = Services.getService(UserService.class);
+        final GroupService groups = Services.getService(GroupService.class);
+        final ResourceService resources = Services.getService(ResourceService.class);
 
         final Context ctx = contexts.getContext(session.getContextId());
         final User user = users.getUser(session.getUserId(), ctx);
