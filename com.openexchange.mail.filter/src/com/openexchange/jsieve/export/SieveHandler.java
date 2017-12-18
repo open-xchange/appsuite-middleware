@@ -1420,7 +1420,7 @@ public class SieveHandler {
 
     /**
      * Parses the server capabilities
-     * 
+     *
      * @param line The server line
      */
     private void parseCapabilities(String line) {
@@ -1438,7 +1438,7 @@ public class SieveHandler {
         try {
             keyword = WelcomeKeyword.valueOf(token);
         } catch (Exception e) {
-            log.debug("Unknown keyword '" + token + "'");
+            log.debug("Unknown keyword ''{}''", token);
             return;
         }
         String unquoted = Strings.unquote(value);
