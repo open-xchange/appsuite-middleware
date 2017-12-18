@@ -7,11 +7,14 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.util.Arrays;
 import org.junit.Test;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.junit.Assert;
 import com.openexchange.testing.httpclient.models.InfoItemData;
+import com.openexchange.tools.io.IOTools;
 
 public class UploadActionTest extends InfostoreApiClientTest {
 
@@ -107,6 +110,33 @@ public class UploadActionTest extends InfostoreApiClientTest {
         String id2 = uploadInfoItem(file, "image/jpeg");
         InfoItemData item2 = getItem(id2);
         assertNotEquals(file.getName(), item2.getFilename());
+    }
+
+    @Test
+    public void testChunkWiseUpload() throws Exception {
+        final File file = new File(AJAXConfig.getProperty(AJAXConfig.Property.TEST_INFOSTORE_DIR), "ox.jpg");
+        byte[] all = IOTools.getBytes(new FileInputStream(file));
+        int numOfChunks = 3;
+        byte[][] chunks = new byte[numOfChunks][];
+        int chunkSize = (int) Math.floor(chunks.length / numOfChunks);
+        int from = 0, to = chunkSize;
+        for (int x = 0; x < numOfChunks; x++) {
+            chunks[x] = Arrays.copyOfRange(all, from, to);
+            from = to;
+            to = to + chunkSize;
+        }
+
+        // upload chunks
+        String id = null;
+        for (int x = 0; x < numOfChunks; x++) {
+            id = uploadInfoItem(id, file, "image/jpeg", null, chunks[x], Long.valueOf(x * chunkSize));
+        }
+
+        InfoItemData item = getItem(id);
+        assertEquals(item.getTitle(), file.getName());
+        assertEquals(item.getDescription(), file.getName());
+        assertEquals("1", item.getVersion());
+        assertEquals("image/jpeg", item.getFileMimetype());
     }
 
     /*

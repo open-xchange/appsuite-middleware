@@ -89,6 +89,8 @@ public class InfostoreApiClientTest extends AbstractAPIClientSession {
 
     protected InfostoreApi infostoreApi;
 
+    private Long timestamp = null;
+
     @Override
     @Before
     public void setUp() throws Exception {
@@ -114,11 +116,18 @@ public class InfostoreApiClientTest extends AbstractAPIClientSession {
 
     protected String uploadInfoItem(String id, File file, String mimeType, String versionComment) throws ApiException, FileNotFoundException, IOException {
         byte[] bytes = IOTools.getBytes(new FileInputStream(file));
-        InfoItemUpdateResponse uploadInfoItem = infostoreApi.uploadInfoItem(getClient().getSession(), folderId, bytes, id, file.getName(), file.getName(), mimeType, null, file.getName(), null, null, versionComment, null, null, String.valueOf(bytes.length), false, false, null);
+        return uploadInfoItem(id, file, mimeType, versionComment, bytes, null);
+    }
+
+    protected String uploadInfoItem(String id, File file, String mimeType, String versionComment, byte[] bytes, Long offset) throws ApiException, FileNotFoundException, IOException {
+
+        InfoItemUpdateResponse uploadInfoItem = infostoreApi.uploadInfoItem(getClient().getSession(), folderId, bytes, timestamp, id, file.getName(), file.getName(), mimeType, null, file.getName(), null, null, versionComment, null, null, String.valueOf(bytes.length), false, false, offset);
         Assert.assertNull(uploadInfoItem.getError());
         Assert.assertNotNull(uploadInfoItem.getData());
+        timestamp = uploadInfoItem.getTimestamp();
         return uploadInfoItem.getData();
     }
+
 
     protected InfoItemData getItem(String id) throws ApiException {
         InfoItemResponse infoItem = infostoreApi.getInfoItem(getClient().getSession(), id, folderId);

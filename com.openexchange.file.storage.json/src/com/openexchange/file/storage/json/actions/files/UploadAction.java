@@ -89,6 +89,7 @@ public class UploadAction extends AbstractWriteAction {
         }
         boolean ignoreWarnings = AJAXRequestDataTools.parseBoolParameter("ignoreWarnings", request.getRequestData(), false);
         boolean tryAddVersion = AJAXRequestDataTools.parseBoolParameter("try_add_version", request.getRequestData(), false);
+        long timestamp = request.getTimestamp();
 
         String offsetString = request.getParameter("offset");
         Long offset = Strings.isEmpty(offsetString) ? null : Long.valueOf(offsetString);
@@ -96,9 +97,9 @@ public class UploadAction extends AbstractWriteAction {
         // Save the file
         String newId;
         if (offset == null) {
-            newId = fileAccess.saveDocument(file, request.getUploadedFileData(), FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER, request.getSentColumns(), false, ignoreWarnings, tryAddVersion);
+            newId = fileAccess.saveDocument(file, request.getUploadedFileData(), timestamp, request.getSentColumns(), false, ignoreWarnings, tryAddVersion);
         } else {
-            newId = fileAccess.saveDocument(file, request.getUploadedFileData(), FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER, request.getSentColumns(), offset);
+            newId = fileAccess.saveDocument(file, request.getUploadedFileData(), timestamp, request.getSentColumns(), offset);
         }
 
         List<OXException> warnings = new ArrayList<>(fileAccess.getAndFlushWarnings());
