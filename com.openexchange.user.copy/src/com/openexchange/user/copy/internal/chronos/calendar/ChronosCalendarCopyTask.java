@@ -168,7 +168,7 @@ public class ChronosCalendarCopyTask implements CopyUserTaskService {
 
     @Override
     public void done(Map<String, ObjectMapping<?>> copied, boolean failed) {
-        // TODO Auto-generated method stub
+        // nothing to do
     }
 
     @Override
@@ -269,15 +269,15 @@ public class ChronosCalendarCopyTask implements CopyUserTaskService {
                 trigger.setTime(rs.getLong(7));//triggerDate?
                 trigger.setAction(rs.getString(8));
                 if (Strings.isEmpty(rs.getString(9))) {
-                	trigger.setRecurrenceId(null);
-				} else {
-	                trigger.setRecurrenceId(new DefaultRecurrenceId(rs.getString(9)));
-				}
+                    trigger.setRecurrenceId(null);
+                } else {
+                    trigger.setRecurrenceId(new DefaultRecurrenceId(rs.getString(9)));
+                }
                 if (Strings.isEmpty(rs.getString(10))) {
-                	trigger.setTimezone(null);
-				} else {
-					trigger.setTimezone(TimeZone.getTimeZone(rs.getString(10)));
-				}
+                    trigger.setTimezone(null);
+                } else {
+                    trigger.setTimezone(TimeZone.getTimeZone(rs.getString(10)));
+                }
                 trigger.setRelatedTime(rs.getLong(11));
                 trigger.setPushed(rs.getBoolean(12));
                 triggerList.add(trigger);
