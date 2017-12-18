@@ -285,21 +285,11 @@ public final class JSONPathElement {
     }
 
     static void removeOne(JSONArray jsonArray, int theIndex) {
-        List<Object> purged = new ArrayList<Object>(jsonArray.length());
-        for (int i = 0, size = jsonArray.length(); i < size; i++) {
-            if (i != theIndex) {
-                try {
-                    purged.add(jsonArray.get(i));
-                } catch (JSONException e) {
-                }
-            }
+        try {
+            jsonArray.remove(theIndex);
+        } catch (JSONException e) {
+            // Ignore
         }
-
-        jsonArray.reset();
-        for (Object p : purged) {
-            jsonArray.put(p);
-        }
-
     }
 
     static boolean isInstance(final String name, final Class<? extends JSONValue> clazz, final JSONObject jsonObject) {
