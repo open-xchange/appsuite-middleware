@@ -98,23 +98,21 @@ public class ICal4JITipParser {
                 }
                 message.setMethod(methodValue);
                 messagesPerUID.put(event.getUid(), message);
+                if (owner > 0) {
+                    message.setOwner(owner);
+                }
+
+                resolveAttendees(event, session);
+                resolveOrganizer(event, session);
+
+                if (event.containsRecurrenceId()) {
+                    message.addException(event);
+                } else {
+                    message.setEvent(event);
+                }
                 messages.add(message);
+                // TODO: Comment
             }
-
-            if (owner > 0) {
-                message.setOwner(owner);
-            }
-
-            resolveAttendees(event, session);
-            resolveOrganizer(event, session);
-
-            if (event.containsRecurrenceId()) {
-                message.addException(event);
-            } else {
-                message.setEvent(event);
-            }
-
-            // TODO: Comment
         }
 
         return messages;

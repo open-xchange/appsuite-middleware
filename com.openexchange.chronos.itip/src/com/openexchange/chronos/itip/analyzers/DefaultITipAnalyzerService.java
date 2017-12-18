@@ -55,6 +55,8 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.chronos.itip.ITipAnalysis;
 import com.openexchange.chronos.itip.ITipAnalyzer;
 import com.openexchange.chronos.itip.ITipAnalyzerService;
@@ -73,7 +75,9 @@ import com.openexchange.exception.OXException;
  */
 public class DefaultITipAnalyzerService implements ITipAnalyzerService {
 
-    public static final Integer RANKING = 0;
+    public static final Integer RANKING = new Integer(0);
+    
+    private final static Logger LOGGER = LoggerFactory.getLogger(DeclineCounterITipAnalyzer.class);
 
     private final Map<ITipMethod, ITipAnalyzer> analyzers = new EnumMap<ITipMethod, ITipAnalyzer>(ITipMethod.class);
 
@@ -126,7 +130,7 @@ public class DefaultITipAnalyzerService implements ITipAnalyzerService {
             }
 
             if (analyzer == null) {
-                // TODO: Error
+                LOGGER.error("Could not find itip analyzer for method {}", method.toString());
             } else {
                 result.add(analyzer.analyze(message, mailHeader, format, session));
             }

@@ -51,6 +51,7 @@ package com.openexchange.chronos.itip.analyzers;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -376,10 +377,10 @@ public class ReplyITipAnalyzer extends AbstractITipAnalyzer {
     }
 
     private void discardAllButFirst(final Event update) {
-        if (update.getAttendees() != null && update.getAttendees().size() > 0) {
-            Attendee first = update.getAttendees().get(0);
-            update.getAttendees().clear();
-            update.getAttendees().add(first);
+        List<Attendee> attendees = update.getAttendees();
+        if (attendees != null && attendees.size() > 1) {
+            Attendee first = attendees.get(0);
+            update.setAttendees(Collections.singletonList(first));
         }
     }
 

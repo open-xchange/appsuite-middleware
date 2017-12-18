@@ -93,8 +93,7 @@ public class ActionPerformerAction extends AbstractITipAction {
 
     @Override
     protected Object process(List<ITipAnalysis> analysis, AJAXRequestData request, CalendarSession session, TimeZone tz) throws JSONException, OXException {
-        int index = getIndex(request);
-        ITipAnalysis analysisToProcess = analysis.get(index);
+        ITipAnalysis analysisToProcess = analysis.get(0);
         ITipActionPerformerFactoryService factory = getFactory();
         ITipAction action = ITipAction.valueOf(request.getParameter("action").toUpperCase());
         ITipAttributes attributes = new ITipAttributes();
@@ -124,10 +123,6 @@ public class ActionPerformerAction extends AbstractITipAction {
         JSONObject object = new JSONObject();
         object.put("msg", "Done");
         return object;
-    }
-
-    private int getIndex(AJAXRequestData request) {
-        return 0;
     }
 
     public Collection<String> getActionNames() throws OXException {
