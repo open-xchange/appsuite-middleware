@@ -114,7 +114,7 @@ public class ITipEventUpdate implements EventUpdate {
     public boolean containsAnyChangesBeside(EventField[] fields) {
         Set<EventField> temp = new HashSet<>(getUpdatedFields());
         temp.removeAll(Arrays.asList(fields));
-        return temp.isEmpty();
+        return !temp.isEmpty();
     }
 
     public boolean containsExactTheseChanges(EventField[] fields) {
