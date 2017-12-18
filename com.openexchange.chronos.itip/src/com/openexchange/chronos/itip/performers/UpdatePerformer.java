@@ -55,10 +55,14 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.chronos.Attendee;
+import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.ParticipationStatus;
+import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.mapping.EventMapper;
 import com.openexchange.chronos.itip.ITipAction;
 import com.openexchange.chronos.itip.ITipAnalysis;
@@ -66,12 +70,15 @@ import com.openexchange.chronos.itip.ITipAttributes;
 import com.openexchange.chronos.itip.ITipChange;
 import com.openexchange.chronos.itip.ITipIntegrationUtility;
 import com.openexchange.chronos.itip.generators.ITipMailGeneratorFactory;
+import com.openexchange.chronos.itip.osgi.Services;
 import com.openexchange.chronos.itip.sender.MailSenderService;
 import com.openexchange.chronos.service.CalendarResult;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.EventID;
 import com.openexchange.chronos.service.EventUpdate;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.user.UserService;
 
 /**
  * 
@@ -81,6 +88,8 @@ import com.openexchange.exception.OXException;
  * @since v7.10.0
  */
 public class UpdatePerformer extends AbstractActionPerformer {
+    
+    private final static Logger LOGGER = LoggerFactory.getLogger(UpdatePerformer.class);
 
     public UpdatePerformer(ITipIntegrationUtility util, MailSenderService sender, ITipMailGeneratorFactory generators) {
         super(util, sender, generators);
@@ -109,7 +118,7 @@ public class UpdatePerformer extends AbstractActionPerformer {
             if (analysis.getMessage().getOwner() > 0) {
                 owner = analysis.getMessage().getOwner();
             }
-            ensureAttendee(event, change.getCurrentEvent(), action, owner, attributes);
+            ensureAttendee(event, change.getCurrentEvent(), action, owner, session.getContextId(), attributes);
             Event original = determineOriginalEvent(change, processed, session);
             Event forMail = event;
             if (original != null) {
@@ -167,7 +176,7 @@ public class UpdatePerformer extends AbstractActionPerformer {
         event.setId(createResult.getCreations().get(0).getCreatedEvent().getId());
     }
 
-    private void ensureAttendee(Event event, Event currentEvent, ITipAction action, int owner, ITipAttributes attributes) {
+    private void ensureAttendee(Event event, Event currentEvent, ITipAction action, int owner, int contextId, ITipAttributes attributes) {
         ParticipationStatus confirm = null;
         switch (action) {
             case ACCEPT:
@@ -198,12 +207,11 @@ public class UpdatePerformer extends AbstractActionPerformer {
         boolean found = false;
         for (Attendee attendee : event.getAttendees()) {
             if (attendee.getEntity() == owner) {
-                if (confirm != null) {
-                    attendee.setPartStat(confirm);
-                }
+                attendee.setPartStat(confirm);
                 if (message != null) {
                     attendee.setComment(message);
                 }
+                found = true;
             }
         }
 
@@ -215,6 +223,15 @@ public class UpdatePerformer extends AbstractActionPerformer {
             }
             if (message != null) {
                 attendee.setComment(message);
+            }
+            try {
+                User user = Services.getService(UserService.class, true).getUser(owner, contextId);
+                attendee.setCn(user.getDisplayName());
+                attendee.setEMail(user.getMail());
+                attendee.setUri(CalendarUtils.getURI(user.getMail()));
+                attendee.setCuType(CalendarUserType.INDIVIDUAL);
+            } catch (OXException e) {
+                LOGGER.error("Could not resolve user with identifier {}", Integer.valueOf(owner), e);
             }
             event.getAttendees().add(attendee);
         }
