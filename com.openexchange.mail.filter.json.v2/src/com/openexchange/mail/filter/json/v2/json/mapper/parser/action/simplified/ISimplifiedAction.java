@@ -49,22 +49,26 @@
 
 package com.openexchange.mail.filter.json.v2.json.mapper.parser.action.simplified;
 
+import java.util.Set;
+
 /**
- * {@link SimplifiedActions}
+ * {@link ISimplifiedAction}
  *
- * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
- * @since v7.8.4
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public enum SimplifiedActions {
-    Copy("copy");
+public interface ISimplifiedAction {
 
-    private String commandName;
+    /**
+     * Returns the name of the {@link ISimplifiedAction}
+     * 
+     * @return the name of the {@link ISimplifiedAction}
+     */
+    String getCommandName();
 
-    SimplifiedActions(String commandName) {
-        this.commandName = commandName;
-    }
-
-    public String getCommandName() {
-        return commandName;
-    }
+    /**
+     * Returns a {@link Set} with all the required capabilities for this {@link ISimplifiedAction}
+     * 
+     * @return a {@link Set} with all the required capabilities for this {@link ISimplifiedAction}
+     */
+    Set<String> requiredCapabilities();
 }
