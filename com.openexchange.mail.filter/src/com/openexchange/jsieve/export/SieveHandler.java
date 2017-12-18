@@ -1426,10 +1426,10 @@ public class SieveHandler {
     private void parseCapabilities(String line) {
         int index = line.indexOf(' ');
         if (index < 0) {
-            return;
+            index = line.length();
         }
-        String key = line.substring(0, index);
-        String value = line.substring(index + 1);
+        String key = line.substring(0, index).trim();
+        String value = line.substring(index).trim();
         String token = Strings.unquote(key);
         if (null == token) {
             return;
@@ -1437,10 +1437,21 @@ public class SieveHandler {
         WelcomeKeyword keyword;
         try {
             keyword = WelcomeKeyword.valueOf(token);
-        } catch (Exception e) {
-            log.debug("Unknown keyword ''{}''", token);
+        } catch (IllegalArgumentException e) {
+            log.debug("Unknown keyword '{}'", token);
             return;
         }
+
+        parseWelcomeKeyword(keyword, value);
+    }
+
+    /**
+     * Parses the {@link WelcomeKeyword} and the specified value
+     * 
+     * @param keyword The {@link WelcomeKeyword} to parse
+     * @param value The optional value of the keyword
+     */
+    private void parseWelcomeKeyword(WelcomeKeyword keyword, String value) {
         String unquoted = Strings.unquote(value);
         switch (keyword) {
             case IMPLEMENTATION:
