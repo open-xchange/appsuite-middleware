@@ -362,7 +362,7 @@ public class DefaultNotificationParticipantResolver implements NotificationParti
 
             final NotificationParticipant participant = new NotificationParticipant(role, true, mail);
             participant.setDisplayName(e.getCn());
-            participant.setTimezone(appointment.getStartDate().getTimeZone());
+            participant.setTimezone(null == appointment.getStartDate() ? TimeZone.getDefault() : appointment.getStartDate().getTimeZone());
             participant.setLocale(user.getLocale());
             Attendee cp = statusMap.get(mail);
             if (cp != null) {
