@@ -49,15 +49,18 @@
 
 package com.openexchange.database.internal;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.pooling.ExhaustedActions;
 
 /**
  * Contains the settings to connect to the configuration database.
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class Configuration {
@@ -229,7 +232,41 @@ public final class Configuration {
         poolConfig.testOnDeactivate = getBoolean(Property.TEST_ON_DEACTIVATE, poolConfig.testOnDeactivate);
         poolConfig.testOnIdle = getBoolean(Property.TEST_ON_IDLE, poolConfig.testOnIdle);
         poolConfig.testThreads = getBoolean(Property.TEST_THREADS, poolConfig.testThreads);
-        LOG.info(poolConfig.toString());
+
+        List<Object> logArgs = new ArrayList<>(24);
+        logArgs.add(Strings.getLineSeparator());
+        logArgs.add(poolConfig.maxIdle);
+        logArgs.add(Strings.getLineSeparator());
+        logArgs.add(poolConfig.maxIdleTime);
+        logArgs.add(Strings.getLineSeparator());
+        logArgs.add(poolConfig.maxActive);
+        logArgs.add(Strings.getLineSeparator());
+        logArgs.add(poolConfig.maxWait);
+        logArgs.add(Strings.getLineSeparator());
+        logArgs.add(poolConfig.maxLifeTime);
+        logArgs.add(Strings.getLineSeparator());
+        logArgs.add(poolConfig.exhaustedAction);
+        logArgs.add(Strings.getLineSeparator());
+        logArgs.add(poolConfig.testOnActivate);
+        logArgs.add(Strings.getLineSeparator());
+        logArgs.add(poolConfig.testOnDeactivate);
+        logArgs.add(Strings.getLineSeparator());
+        logArgs.add(poolConfig.testOnIdle);
+        logArgs.add(Strings.getLineSeparator());
+        logArgs.add(poolConfig.testThreads);
+        LOG.info("Database pooling options:" +
+                 "{}    Maximum idle connections: {}" +
+                 "{}    Maximum idle time: {}ms" +
+                 "{}    Maximum active connections: {}" +
+                 "{}    Maximum wait time for a connection: {}ms" +
+                 "{}    Maximum life time of a connection: {}ms" +
+                 "{}    Action if connections exhausted: {}" +
+                 "{}    Test connections on activate: {}" +
+                 "{}    Test connections on deactivate: {}" +
+                 "{}    Test idle connections: {}" +
+                 "{}    Test threads for bad connection usage (SLOW): {}",
+                 logArgs.toArray(new Object[logArgs.size()])
+            );
     }
 
     ConnectionPool.Config getPoolConfig() {
