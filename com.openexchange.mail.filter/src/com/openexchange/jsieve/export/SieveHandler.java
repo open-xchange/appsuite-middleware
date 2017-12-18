@@ -1445,31 +1445,31 @@ public class SieveHandler {
         switch (keyword) {
             case IMPLEMENTATION:
                 capa.setImplementation(unquoted);
-                break;
+                return;
             case MAXREDIRECTS:
                 try {
                     capa.addExtendedProperty(keyword.name(), Integer.valueOf(unquoted));
                 } catch (NumberFormatException ex) {
                     log.error("Unable to parse '{}' capability value: {}", keyword, unquoted);
                 }
-                break;
+                return;
             case SASL: {
                 StringTokenizer st = new StringTokenizer(unquoted);
                 while (st.hasMoreTokens()) {
                     capa.addSasl(st.nextToken().toUpperCase());
                 }
-                break;
+                return;
             }
             case SIEVE: {
                 StringTokenizer st = new StringTokenizer(unquoted);
                 while (st.hasMoreTokens()) {
                     capa.addSieve(st.nextToken());
                 }
-                break;
+                return;
             }
             case STARTTLS:
                 capa.setStarttls(Boolean.TRUE);
-                break;
+                return;
             default:
                 return;
         }
