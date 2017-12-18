@@ -118,6 +118,8 @@ public class OIDCTools {
     public static final String ACCESS_TOKEN_EXPIRY = "access_token_expiry";
 
     public static final String BACKEND_PATH = "__session.oidc.backend.path";
+    
+    public static final String DEFAULT_BACKEND_PATH = "oidc";
 
     public static String getPathString(String path) {
         if (Strings.isEmpty(path)) {
@@ -290,7 +292,8 @@ public class OIDCTools {
     public static String getPrefix(final OIDCBackend oidcBackend) {
         StringBuilder prefixBuilder = new StringBuilder();
         prefixBuilder.append(getRedirectPathPrefix());
-        prefixBuilder.append("oidc/");
+        prefixBuilder.append(DEFAULT_BACKEND_PATH);
+        prefixBuilder.append("/");
         String path = oidcBackend.getPath();
         if (!Strings.isEmpty(path)) {
             prefixBuilder.append(path).append("/");

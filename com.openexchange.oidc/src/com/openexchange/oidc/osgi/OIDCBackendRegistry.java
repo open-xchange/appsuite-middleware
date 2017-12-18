@@ -50,6 +50,7 @@ package com.openexchange.oidc.osgi;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
+import java.util.Map;
 import java.util.Stack;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.servlet.Servlet;
@@ -84,6 +85,8 @@ import com.openexchange.oidc.spi.OIDCExceptionHandler;
 import com.openexchange.oidc.state.CoreStateManagement;
 import com.openexchange.oidc.tools.OIDCTools;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.serverconfig.ComputedServerConfigValueService;
+import com.openexchange.session.Session;
 
 /**
  * Registers and stores all OpenID backends and their servlets to handle future requests.
@@ -125,9 +128,12 @@ public class OIDCBackendRegistry extends ServiceTracker<OIDCBackend, OIDCBackend
                 if (config == null) {
                     throw OIDCExceptionCode.MISSING_BACKEND_CONFIGURATION.create(path.isEmpty() ? "No path available" : path);
                 }
+                
                 if (!Strings.isEmpty(path)) {
                     OIDCTools.validatePath(path);
                 }
+                serviceRegistrations.push(context.registerService(ComputedServerConfigValueService.class, getOidcPathComputedValue(oidcBackend),null));
+
                 oidcBackend.setLoginConfiguration(this.loginConfiguration);
                 OIDCWebSSOProvider ssoProvider = new OIDCWebSSOProviderImpl(oidcBackend, new CoreStateManagement(this.services.getService(HazelcastInstance.class)), this.services, this.loginConfiguration);
                 OIDCExceptionHandler exceptionHandler = oidcBackend.getExceptionHandler();
@@ -163,6 +169,27 @@ public class OIDCBackendRegistry extends ServiceTracker<OIDCBackend, OIDCBackend
             }
         }
         return null;
+    }
+    
+    private ComputedServerConfigValueService getOidcPathComputedValue(final OIDCBackend oidcBackend) {
+        return new ComputedServerConfigValueService() {
+
+            @Override
+            public void addValue(Map<String, Object> serverConfig, String hostName, int userID, int contextID, Session optSession) throws OXException {
+                
+                if (serverConfig.containsKey("oidcPath")) {
+                    return;
+                }
+                
+                String backendPath = oidcBackend.getPath();
+                String oidcPath = "/" + OIDCTools.DEFAULT_BACKEND_PATH;
+                if (!Strings.isEmpty(backendPath)) {
+                    oidcPath += "/" + backendPath;
+                } 
+                
+                serverConfig.put("oidcPath", oidcPath);
+            }
+        };
     }
 
     /**
