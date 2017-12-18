@@ -335,6 +335,7 @@ public class DefaultNotificationParticipantResolver implements NotificationParti
                 participant.setTimezone(TimeZone.getDefault());
                 participant.setResource(true);
                 participant.setConfiguration(defaultConfiguration);
+                participant.setDisplayName(resource.getDisplayName());
                 retval.add(participant);
             }
 

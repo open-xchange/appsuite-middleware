@@ -313,7 +313,7 @@ public class LabelHelper {
         return delegationState.getDeleteIntroduction();
     }
 
-    public String getCreator() throws OXException {
+    public String getCreator() {
         return mail.getOrganizer().getDisplayName();
     }
 
