@@ -111,7 +111,7 @@ public class MailAuthenticityTest extends AbstractConfigAwareAPIClientSession {
         String testMailDir = AJAXConfig.getProperty(AJAXConfig.Property.TEST_MAIL_DIR) + SUBFOLDER;
         String imgName = "ox.jpg";
         File f = new File(testMailDir, imgName);
-        if(f.exists()) {
+        if (f.exists()) {
             CONFIG.put("com.openexchange.mail.authenticity.trusted.image.1", f.getAbsolutePath());
         }
         super.setUpConfiguration();
@@ -156,93 +156,95 @@ public class MailAuthenticityTest extends AbstractConfigAwareAPIClientSession {
         /*
          * Test pass all
          */
-       MailResponse resp = api.getMail(getClient().getSession(), FOLDER, IMPORTED_EMAILS.get(PASS_ALL).getId(), null, 0, null, false, null, null, null, null, null);
-       MailData mail = checkResponse(resp);
-       AuthenticationResult authenticationResult = mail.getAuthenticationResults();
-       Assert.assertNotNull(authenticationResult);
-       List<MechanismResult> mailAuthenticityMechanismResults = authenticationResult.getMailAuthenticityMechanismResults();
-       Assert.assertEquals(3, mailAuthenticityMechanismResults.size());
 
-       boolean spf=false, dmarc=false, dkim=false;
-       for(MechanismResult result: mailAuthenticityMechanismResults) {
-           switch(result.getMechanism()) {
-               case DKIM:
-                   dkim=true;
-                   break;
-               case DMARC:
-                   dmarc = true;
-                   break;
-               case SPF:
-                   spf = true;
-                   break;
-           }
+        MailResponse resp = api.getMail(getClient().getSession(), FOLDER, IMPORTED_EMAILS.get(PASS_ALL).getId(), null, null, null, null, false, null, null, null, null, null);
+        MailData mail = checkResponse(resp);
+        AuthenticationResult authenticationResult = mail.getAuthenticationResults();
+        Assert.assertNotNull(authenticationResult);
+        List<MechanismResult> mailAuthenticityMechanismResults = authenticationResult.getMailAuthenticityMechanismResults();
+        Assert.assertEquals(3, mailAuthenticityMechanismResults.size());
+
+        boolean spf = false, dmarc = false, dkim = false;
+        for (MechanismResult result : mailAuthenticityMechanismResults) {
+            switch (result.getMechanism()) {
+                case DKIM:
+                    dkim = true;
+                    break;
+                case DMARC:
+                    dmarc = true;
+                    break;
+                case SPF:
+                    spf = true;
+                    break;
+            }
             Assert.assertEquals("pass", result.getResult());
-       }
+        }
 
-       Assert.assertTrue(spf && dmarc && dkim);
-       Assert.assertEquals(StatusEnum.PASS, authenticationResult.getStatus());
+        Assert.assertTrue(spf && dmarc && dkim);
+        Assert.assertEquals(StatusEnum.PASS, authenticationResult.getStatus());
 
-       /*
-        * Test pishing
-        */
-        resp = api.getMail(getClient().getSession(), FOLDER, IMPORTED_EMAILS.get(PISHING).getId(), null, 0, null, false, null, null, null, null, null);
-       mail = checkResponse(resp);
-       authenticationResult = mail.getAuthenticationResults();
-       Assert.assertNotNull(authenticationResult);
-       mailAuthenticityMechanismResults = authenticationResult.getMailAuthenticityMechanismResults();
-       Assert.assertFalse(mailAuthenticityMechanismResults.isEmpty());
+        /*
+         * Test pishing
+         */
 
-       spf=false;
-       dmarc=false;
-       dkim=false;
-       for(MechanismResult result: mailAuthenticityMechanismResults) {
-           switch(result.getMechanism()) {
-               case DKIM:
-                   dkim=true;
-                   break;
-               case DMARC:
-                   dmarc = true;
-                   break;
-               case SPF:
-                   spf = true;
-                   break;
-           }
+        resp = api.getMail(getClient().getSession(), FOLDER, IMPORTED_EMAILS.get(PISHING).getId(), null, null, null, null, false, null, null, null, null, null);
+        mail = checkResponse(resp);
+        authenticationResult = mail.getAuthenticationResults();
+        Assert.assertNotNull(authenticationResult);
+        mailAuthenticityMechanismResults = authenticationResult.getMailAuthenticityMechanismResults();
+        Assert.assertFalse(mailAuthenticityMechanismResults.isEmpty());
+
+        spf = false;
+        dmarc = false;
+        dkim = false;
+        for (MechanismResult result : mailAuthenticityMechanismResults) {
+            switch (result.getMechanism()) {
+                case DKIM:
+                    dkim = true;
+                    break;
+                case DMARC:
+                    dmarc = true;
+                    break;
+                case SPF:
+                    spf = true;
+                    break;
+            }
             Assert.assertEquals("fail", result.getResult());
-       }
+        }
 
-       Assert.assertTrue(spf || dmarc || dkim);
-       Assert.assertEquals(StatusEnum.FAIL, authenticationResult.getStatus());
+        Assert.assertTrue(spf || dmarc || dkim);
+        Assert.assertEquals(StatusEnum.FAIL, authenticationResult.getStatus());
 
-       /*
-        * Test none
-        */
-        resp = api.getMail(getClient().getSession(), FOLDER, IMPORTED_EMAILS.get(NONE).getId(), null, 0, null, false, null, null, null, null, null);
-       mail = checkResponse(resp);
-       authenticationResult = mail.getAuthenticationResults();
-       Assert.assertNotNull(authenticationResult);
-       mailAuthenticityMechanismResults = authenticationResult.getMailAuthenticityMechanismResults();
-       Assert.assertFalse(mailAuthenticityMechanismResults.isEmpty());
+        /*
+         * Test none
+         */
+        resp = api.getMail(getClient().getSession(), FOLDER, IMPORTED_EMAILS.get(NONE).getId(), null, null, null, null, false, null, null, null, null, null);
+        mail = checkResponse(resp);
+        authenticationResult = mail.getAuthenticationResults();
+        Assert.assertNotNull(authenticationResult);
+        mailAuthenticityMechanismResults = authenticationResult.getMailAuthenticityMechanismResults();
+        Assert.assertFalse(mailAuthenticityMechanismResults.isEmpty());
 
-       spf=false;
-       dmarc=false;
-       dkim=false;
-       for(MechanismResult result: mailAuthenticityMechanismResults) {
-           switch(result.getMechanism()) {
-               case DKIM:
-                   dkim=true;
-                   break;
-               case DMARC:
-                   dmarc = true;
-                   break;
-               case SPF:
-                   spf = true;
-                   break;
-           }
+        spf = false;
+        dmarc = false;
+        dkim = false;
+        for (MechanismResult result : mailAuthenticityMechanismResults) {
+            switch (result.getMechanism()) {
+                case DKIM:
+                    dkim = true;
+                    break;
+                case DMARC:
+                    dmarc = true;
+                    break;
+                case SPF:
+                    spf = true;
+                    break;
+            }
             Assert.assertEquals("none", result.getResult());
-       }
+        }
 
-       Assert.assertTrue(spf && dmarc && dkim);
-       Assert.assertEquals(StatusEnum.NEUTRAL, authenticationResult.getStatus());
+        Assert.assertTrue(spf && dmarc && dkim);
+        Assert.assertEquals(StatusEnum.NEUTRAL, authenticationResult.getStatus());
     }
 
     @Test
@@ -250,20 +252,20 @@ public class MailAuthenticityTest extends AbstractConfigAwareAPIClientSession {
         /*
          * Test trusted domain
          */
-       MailResponse resp = api.getMail(getClient().getSession(), FOLDER, IMPORTED_EMAILS.get(TRUSTED).getId(), null, 0, null, false, null, null, null, null, null);
-       MailData mail = checkResponse(resp);
-       AuthenticationResult authenticationResult = mail.getAuthenticationResults();
-       Assert.assertNotNull(authenticationResult);
-       Assert.assertEquals(StatusEnum.PASS, authenticationResult.getStatus());
-       Assert.assertNotNull(authenticationResult.getTrusted());
-       Assert.assertTrue(authenticationResult.getTrusted());
-       Assert.assertNotNull(authenticationResult.getImage());
 
-       byte[] trustedMailPicture = imageApi.getTrustedMailPicture(authenticationResult.getImage());
-       Assert.assertNotNull(trustedMailPicture);
-       Assert.assertNotEquals(0, trustedMailPicture.length);
+        MailResponse resp = api.getMail(getClient().getSession(), FOLDER, IMPORTED_EMAILS.get(TRUSTED).getId(), null, null, null, null, false, null, null, null, null, null);
+        MailData mail = checkResponse(resp);
+        AuthenticationResult authenticationResult = mail.getAuthenticationResults();
+        Assert.assertNotNull(authenticationResult);
+        Assert.assertEquals(StatusEnum.PASS, authenticationResult.getStatus());
+        Assert.assertNotNull(authenticationResult.getTrusted());
+        Assert.assertTrue(authenticationResult.getTrusted());
+        Assert.assertNotNull(authenticationResult.getImage());
+
+        byte[] trustedMailPicture = imageApi.getTrustedMailPicture(authenticationResult.getImage());
+        Assert.assertNotNull(trustedMailPicture);
+        Assert.assertNotEquals(0, trustedMailPicture.length);
     }
-
 
     private MailData checkResponse(MailResponse resp) {
         Assert.assertNull(resp.getError());
@@ -271,7 +273,7 @@ public class MailAuthenticityTest extends AbstractConfigAwareAPIClientSession {
         return resp.getData();
     }
 
-    private List<MailDestinationData> checkResponse(MailImportResponse response){
+    private List<MailDestinationData> checkResponse(MailImportResponse response) {
         Assert.assertNull(response.getError());
         Assert.assertNotNull(response.getData());
         return response.getData();
@@ -295,6 +297,5 @@ public class MailAuthenticityTest extends AbstractConfigAwareAPIClientSession {
     protected String getReloadables() {
         return "ConfigReloader,TrustedMailAuthenticityHandler";
     }
-
 
 }
