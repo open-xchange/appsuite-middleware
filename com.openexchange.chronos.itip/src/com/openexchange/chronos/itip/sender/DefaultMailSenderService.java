@@ -412,10 +412,20 @@ public class DefaultMailSenderService implements MailSenderService {
         ct.setPrimaryType("application");
         ct.setSubType("ics");
         ct.setNameParameter(fileName);
+        String method = null;
+
+        if (mail.getMessage().getMethod() != ITipMethod.NO_METHOD) {
+            method = mail.getMessage().getMethod().getKeyword().toUpperCase(Locale.US);
+            ct.setParameter("method", method);
+        }
+
         /*
          * Generate ICal text
          */
         CalendarExport export = icalService.exportICal(icalService.initParameters());
+        if (method != null) {
+            export.setMethod(method);
+        }
         export.add(mail.getMessage().getEvent());
         for (Event excpetion : mail.getMessage().exceptions()) {
             export.add(excpetion);
