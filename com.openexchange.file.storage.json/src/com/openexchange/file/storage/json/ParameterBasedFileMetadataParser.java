@@ -49,6 +49,8 @@
 
 package com.openexchange.file.storage.json;
 
+import java.util.ArrayList;
+import java.util.List;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFile;
@@ -122,6 +124,48 @@ public class ParameterBasedFileMetadataParser {
         if (Strings.isNotEmpty(sizeString)) {
             result.setFileSize(Long.valueOf(sizeString));
         }
+        return result;
+    }
+
+    public List<File.Field> getFields(AJAXRequestData request) {
+        ArrayList<File.Field> result = new ArrayList<>();
+        if (request.containsParameter(File.Field.FOLDER_ID.getName())) {
+            result.add(File.Field.FOLDER_ID);
+        }
+        if (request.containsParameter(File.Field.TITLE.getName())) {
+            result.add(File.Field.TITLE);
+        }
+        if (request.containsParameter(File.Field.FILENAME.getName())) {
+            result.add(File.Field.FILENAME);
+        }
+        if (request.containsParameter(File.Field.FILE_MIMETYPE.getName())) {
+            result.add(File.Field.FILE_MIMETYPE);
+        }
+        if (request.containsParameter(File.Field.FILE_MD5SUM.getName())) {
+            result.add(File.Field.FILE_MD5SUM);
+        }
+        if (request.containsParameter(File.Field.DESCRIPTION.getName())) {
+            result.add(File.Field.DESCRIPTION);
+        }
+        if (request.containsParameter(File.Field.ID.getName())) {
+            result.add(File.Field.ID);
+        }
+        if (request.containsParameter(File.Field.VERSION.getName())) {
+            result.add(File.Field.VERSION);
+        }
+        if (request.containsParameter(File.Field.VERSION_COMMENT.getName())) {
+            result.add(File.Field.VERSION_COMMENT);
+        }
+        if (request.containsParameter(File.Field.CATEGORIES.getName())) {
+            result.add(File.Field.CATEGORIES);
+        }
+        if (request.containsParameter(File.Field.COLOR_LABEL.getName())) {
+            result.add(File.Field.COLOR_LABEL);
+        }
+        if (request.containsParameter(File.Field.FILE_SIZE.getName())) {
+            result.add(File.Field.FILE_SIZE);
+        }
+
         return result;
     }
 

@@ -901,6 +901,10 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
             return;
         }
         try {
+            String method = data.optHttpServletRequest().getMethod();
+            if (!"PUT".equals(method)) {
+                throw AjaxExceptionCodes.MISSING_REQUEST_BODY.create();
+            }
             InputStream uploadStream = data.getUploadStream();
             contentData = IOTools.getBytes(uploadStream);
         } catch (IOException e1) {
@@ -908,23 +912,20 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
         }
 
         file = ParameterBasedFileMetadataParser.getInstance().parse(data);
-        fields = new ArrayList<File.Field>();
+        fields = ParameterBasedFileMetadataParser.getInstance().getFields(data);
         if (file != null) {
             if (!fields.contains(File.Field.FILENAME) && file.getFileName() != null && file.getFileName().trim().length() != 0) {
                 fields.add(File.Field.FILENAME);
             }
-
             if (!fields.contains(File.Field.FILE_MIMETYPE) && file.getFileMIMEType() != null && file.getFileMIMEType().trim().length() != 0) {
                 fields.add(File.Field.FILE_MIMETYPE);
             }
             if (file.getFileSize() <= 0 && contentData.length != 0) {
                 file.setFileSize(contentData.length);
             }
-            fields.add(File.Field.FILE_SIZE);
-        }
-
-        if (has("id") && !fields.contains(File.Field.ID)) {
-            fields.add(File.Field.ID);
+            if (!fields.contains(File.Field.FILE_SIZE)) {
+                fields.add(File.Field.FILE_SIZE);
+            }
         }
     }
 

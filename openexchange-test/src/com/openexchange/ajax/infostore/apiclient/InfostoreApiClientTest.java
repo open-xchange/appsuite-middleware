@@ -54,6 +54,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.UUID;
+import org.junit.After;
 import org.junit.Before;
 import com.openexchange.ajax.config.actions.Tree;
 import com.openexchange.ajax.framework.AbstractAPIClientSession;
@@ -61,8 +62,7 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.modules.Module;
 import com.openexchange.junit.Assert;
 import com.openexchange.testing.httpclient.invoker.ApiException;
-import com.openexchange.testing.httpclient.models.ConfigProperty;
-import com.openexchange.testing.httpclient.models.ConfigPropertyResponse;
+import com.openexchange.testing.httpclient.models.ConfigResponse;
 import com.openexchange.testing.httpclient.models.FolderUpdateResponse;
 import com.openexchange.testing.httpclient.models.InfoItemData;
 import com.openexchange.testing.httpclient.models.InfoItemResponse;
@@ -73,6 +73,7 @@ import com.openexchange.testing.httpclient.modules.ConfigApi;
 import com.openexchange.testing.httpclient.modules.FoldersApi;
 import com.openexchange.testing.httpclient.modules.InfostoreApi;
 import com.openexchange.tools.io.IOTools;
+import net.fortuna.ical4j.model.Date;
 
 public class InfostoreApiClientTest extends AbstractAPIClientSession {
 
@@ -95,21 +96,25 @@ public class InfostoreApiClientTest extends AbstractAPIClientSession {
         getClient().login(testUser.getLogin(), testUser.getPassword());
         this.folderId = createFolderForTest();
         infostoreApi = new InfostoreApi(getClient());
+    }
 
-        //        java.io.File upload = new java.io.File(TestInit.getTestProperty("ajaxPropertiesFile"));
-        //        File file1 = InfostoreTestManager.createFile(folderId, "test knowledge", "text/plain");
-        //        file1.setDescription("test knowledge description");
-        //        itm.newAction(file1, upload);
-        //
-        //        File file2 = InfostoreTestManager.createFile(folderId, "test url", "text/plain");
-        //        file2.setURL("http://www.open-xchange.com");
-        //        file2.setDescription("test url description");
-        //        itm.newAction(file2, upload);
+    @Override
+    @After
+    public void tearDown() throws Exception {
+        if (folderId != null) {
+            FoldersApi folderApi = new FoldersApi(getClient());
+            folderApi.deleteFolders(getClient().getSession(), java.util.Collections.singletonList(folderId), "1", new Date().getTime(), null, true, true, false);
+        }
+        super.tearDown();
     }
 
     protected String uploadInfoItem(File file, String mimeType) throws ApiException, FileNotFoundException, IOException {
+        return uploadInfoItem(null, file, mimeType, null);
+    }
+
+    protected String uploadInfoItem(String id, File file, String mimeType, String versionComment) throws ApiException, FileNotFoundException, IOException {
         byte[] bytes = IOTools.getBytes(new FileInputStream(file));
-        InfoItemUpdateResponse uploadInfoItem = infostoreApi.uploadInfoItem(getClient().getSession(), folderId, bytes, null, file.getName(), file.getName(), mimeType, null, file.getName(), null, null, null, null, null, String.valueOf(bytes.length), false, false, null);
+        InfoItemUpdateResponse uploadInfoItem = infostoreApi.uploadInfoItem(getClient().getSession(), folderId, bytes, id, file.getName(), file.getName(), mimeType, null, file.getName(), null, null, versionComment, null, null, String.valueOf(bytes.length), false, false, null);
         Assert.assertNull(uploadInfoItem.getError());
         Assert.assertNotNull(uploadInfoItem.getData());
         return uploadInfoItem.getData();
@@ -127,35 +132,36 @@ public class InfostoreApiClientTest extends AbstractAPIClientSession {
         FoldersApi folderApi = new FoldersApi(getClient());
         NewFolderBody body = new NewFolderBody();
         NewFolderBodyFolder folder = new NewFolderBodyFolder();
-        folder.setModule(String.valueOf(Module.INFOSTORE.getFolderConstant()));
+        folder.setModule(Module.INFOSTORE.getName());
         folder.setSummary("NewInfostoreFolder" + UUID.randomUUID().toString());
         folder.setTitle(folder.getSummary());
-        folder.setType(FolderObject.PUBLIC);
+        folder.setSubscribed(true);
+        folder.setPermissions(null);
         body.setFolder(folder);
-        FolderUpdateResponse folderUpdateResponse = folderApi.createFolder(parent, getClient().getSession(), body, "0", null);
+        FolderUpdateResponse folderUpdateResponse = folderApi.createFolder(parent, getClient().getSession(), body, "1", null);
         return checkResponse(folderUpdateResponse);
     }
 
     public String getPrivateInfostoreFolder() throws ApiException {
         if (null == privateInfostoreFolder) {
             ConfigApi configApi = new ConfigApi(getClient());
-            ConfigPropertyResponse configPropertyResponse = configApi.getConfigProperty(getClient().getSession(), Tree.PrivateInfostoreFolder.getPath());
-            ConfigProperty property = checkResponse(configPropertyResponse);
-            privateInfostoreFolder = (String) property.getValue();
+            ConfigResponse configNode = configApi.getConfigNode(Tree.PrivateInfostoreFolder.getPath(), getClient().getSession());
+            Object data = checkResponse(configNode);
+            privateInfostoreFolder = String.valueOf(data);
 
         }
         return privateInfostoreFolder;
     }
 
-    private ConfigProperty checkResponse(ConfigPropertyResponse resp) {
-        Assert.assertNull(resp.getError());
+    private Object checkResponse(ConfigResponse resp) {
+        Assert.assertNull(resp.getErrorDesc(), resp.getError());
         Assert.assertNotNull(resp.getData());
         return resp.getData();
     }
 
 
     private String checkResponse(FolderUpdateResponse resp) {
-        Assert.assertNull(resp.getError());
+        Assert.assertNull(resp.getErrorDesc(), resp.getError());
         Assert.assertNotNull(resp.getData());
         return resp.getData();
     }
