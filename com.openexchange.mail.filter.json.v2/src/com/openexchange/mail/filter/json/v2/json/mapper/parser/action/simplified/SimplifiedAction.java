@@ -47,82 +47,58 @@
  *
  */
 
-package com.openexchange.mail.filter.json.v2.json.mapper.parser;
+package com.openexchange.mail.filter.json.v2.json.mapper.parser.action.simplified;
 
-import java.util.List;
+import java.util.Collections;
 import java.util.Set;
-import com.openexchange.exception.OXException;
-import com.openexchange.jsieve.commands.test.ICommand;
-import com.openexchange.jsieve.registry.CommandRegistry;
-import com.openexchange.mailfilter.MailFilterService;
-import com.openexchange.server.ServiceLookup;
+import com.openexchange.jsieve.commands.ActionCommand;
 
 /**
- * {@link AbstractCommandParser}
+ * {@link SimplifiedAction}
  *
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @since v7.8.4
  */
-public abstract class AbstractCommandParser<I extends ICommand> {
-
-    protected final ServiceLookup services;
-    private final I command;
+public enum SimplifiedAction implements ISimplifiedAction {
 
     /**
-     * Initialises a new {@link AbstractCommandParser}.
+     * The copy command
      */
-    public AbstractCommandParser(ServiceLookup services, I command) {
-        super();
-        this.services = services;
-        this.command = command;
+    COPY("copy", Collections.singleton("copy"));
+
+    private String commandName;
+    private Set<String> requiredCapabilities;
+
+    /**
+     * Initialises a new {@link SimplifiedAction}.
+     * 
+     * @param commandName The command's name
+     * @param requiredCapabilities A {@link Set} with all required sieve capabilities which
+     *            also may stem from the tag arguments of the actual underlaying {@link ActionCommand}.
+     */
+    SimplifiedAction(String commandName, Set<String> requiredCapabilities) {
+        this.commandName = commandName;
+        this.requiredCapabilities = requiredCapabilities;
     }
 
-    /**
-     * Checks whether this command is supported
-     *
-     * @param capabilities The capabilities previously obtained from the {@link MailFilterService} service
-     * @return true if it is supported, false otherwise
-     * @throws OXException
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.mail.filter.json.v2.json.mapper.parser.action.simplified.SimplifiedAction#getCommandName()
      */
-    public boolean isCommandSupported(Set<String> capabilities) throws OXException {
-        CommandRegistry<I> commandRegistry = getCommandRegistry();
-        I c = commandRegistry.get(command.getCommandName());
-        List<String> required = c.getRequired();
-
-        if (null == required || required.isEmpty()) {
-            return true;
-        }
-        boolean result = capabilities.containsAll(required);
-        // Check if at least one imapflags or imap4flags cap isAvailable
-        if (!result && required.size() == 2 && required.contains("imap4flags") && (capabilities.contains("imapflags") || capabilities.contains("imap4flags"))) {
-            return true;
-        }
-        return result;
+    @Override
+    public String getCommandName() {
+        return commandName;
     }
 
-    /**
-     * Retrieves the corresponding {@link ICommand}
-     *
-     * @return The {@link ICommand}
-     * @throws OXException if an error is occurred
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.mail.filter.json.v2.json.mapper.parser.action.simplified.SimplifiedAction#requiredCapabilities()
      */
-    public I getCommand() throws OXException {
-        CommandRegistry<I> commandRegistry = getCommandRegistry();
-        return commandRegistry.get(getCommandName());
+    @Override
+    public Set<String> requiredCapabilities() {
+        return requiredCapabilities;
     }
-
-    /**
-     * The corresponding {@link ICommand} name
-     *
-     * @return The command name
-     */
-    protected String getCommandName() {
-        return command.getCommandName();
-    }
-
-    /**
-     * Returns the corresponding {@link CommandRegistry}
-     *
-     * @return the corresponding {@link CommandRegistry}
-     */
-    protected abstract <T> CommandRegistry<T> getCommandRegistry();
 }
