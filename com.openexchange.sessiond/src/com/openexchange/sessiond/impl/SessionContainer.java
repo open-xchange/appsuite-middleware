@@ -50,7 +50,6 @@
 package com.openexchange.sessiond.impl;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -334,34 +333,16 @@ final class SessionContainer {
             return null;
         }
 
-        Session session = sessionControl.getSession();
-        Integer iContextId = Integer.valueOf(session.getContextId());
+        Integer iContextId = Integer.valueOf(sessionControl.getContextId());
         ConcurrentMap<Integer, Map<String, Object>> map = userSessions.get(iContextId);
-        if (null == map) {
-            return sessionControl;
-        }
-
-        if (map.isEmpty()) {
-            // Remove if still empty
-            userSessions.remove(iContextId, new ConcurrentHashMap<String, Object>(0, 0.9F, 1));
-            return sessionControl;
-        }
-
-        Integer iUserId = Integer.valueOf(session.getUserId());
-        Map<String, Object> sessionIds = map.get(iUserId);
-        if (sessionIds == null) {
-            return sessionControl;
-        }
-
-        sessionIds.remove(sessionId);
-        if (sessionIds.isEmpty()) {
-            // Remove if still empty
-            boolean removed = map.remove(iUserId, new ConcurrentHashMap<String, Object>(0, 0.9F, 1));
-            if (removed && map.isEmpty()) {
-                // Remove if still empty
-                userSessions.remove(iContextId, new ConcurrentHashMap<String, Object>(0, 0.9F, 1));
+        if (null != map) {
+            Integer iUserId = Integer.valueOf(sessionControl.getUserId());
+            Map<String, Object> sessionIds = map.get(iUserId);
+            if (sessionIds != null) {
+                sessionIds.remove(sessionId);
             }
         }
+
 
         return sessionControl;
     }
@@ -373,31 +354,27 @@ final class SessionContainer {
      * @param contextId The context ID
      * @return The {@link SessionControl session controls} previously associated with specified user ID and context ID.
      */
-    protected SessionControl[] removeSessionsByUser(final int userId, final int contextId) {
+    protected List<SessionControl> removeSessionsByUser(final int userId, final int contextId) {
         Integer iContextId = Integer.valueOf(contextId);
         ConcurrentMap<Integer, Map<String, Object>> map = userSessions.get(iContextId);
         if (null == map) {
-            return new SessionControl[0];
-        }
-        if (map.isEmpty()) {
-            // Remove if still empty
-            userSessions.remove(iContextId, new ConcurrentHashMap<String, Object>(0, 0.9F, 1));
+            return Collections.emptyList();
         }
 
         Integer iUserId = Integer.valueOf(userId);
         Map<String, Object> sessionIds = map.remove(iUserId);
         if (sessionIds == null || sessionIds.isEmpty()) {
-            return new SessionControl[0];
+            return Collections.emptyList();
         }
 
         List<SessionControl> l = new ArrayList<SessionControl>(sessionIds.size());
-        for (final String sessionId : sessionIds.keySet()) {
-            final SessionControl sc = sessionMap.removeBySessionId(sessionId);
+        for (String sessionId : sessionIds.keySet()) {
+            SessionControl sc = sessionMap.removeBySessionId(sessionId);
             if (sc != null) {
                 l.add(sc);
             }
         }
-        return l.toArray(new SessionControl[l.size()]);
+        return l;
     }
 
     /**
@@ -406,11 +383,11 @@ final class SessionContainer {
      * @param contextId The context ID
      * @return The {@link SessionControl session controls} previously associated with specified user ID and context ID.
      */
-    protected SessionControl[] removeSessionsByContext(final int contextId) {
+    protected List<SessionControl> removeSessionsByContext(final int contextId) {
         Integer iContextId = Integer.valueOf(contextId);
         ConcurrentMap<Integer, Map<String, Object>> map = userSessions.remove(iContextId);
         if (null == map || map.isEmpty()) {
-            return new SessionControl[0];
+            return Collections.emptyList();
         }
 
         List<SessionControl> l = new ArrayList<SessionControl>(128);
@@ -423,20 +400,19 @@ final class SessionContainer {
                 }
             }
         }
-        return l.toArray(new SessionControl[l.size()]);
+        return l;
     }
 
     /**
      * Removes the sessions bound to the given contextIds.
      *
-     * @param contextId Set of context ids
+     * @param contextIds The context identifiers to remove
      * @return The {@link SessionControl session controls} previously associated with specified user ID and context ID.
      */
     protected List<SessionControl> removeSessionsByContexts(final Set<Integer> contextIds) {
         List<SessionControl> removedSessionsByContexts = new ArrayList<SessionControl>();
         for (int contextId : contextIds) {
-            SessionControl[] removeSessionsByContext = this.removeSessionsByContext(contextId);
-            removedSessionsByContexts.addAll(Arrays.asList(removeSessionsByContext));
+            removedSessionsByContexts.addAll(this.removeSessionsByContext(contextId));
         }
         return removedSessionsByContexts;
     }
@@ -448,8 +424,17 @@ final class SessionContainer {
      * @return <code>true</code> if there is such a session; otherwise <code>false</code>
      */
     protected boolean hasForContext(final int contextId) {
-        final ConcurrentMap<Integer, Map<String, Object>> map = userSessions.get(Integer.valueOf(contextId));
-        return null != map && !map.isEmpty();
+        ConcurrentMap<Integer, Map<String, Object>> map = userSessions.get(Integer.valueOf(contextId));
+        if (null == map || map.isEmpty()) {
+            return false;
+        }
+
+        for (Map<String, Object> sessionIds : map.values()) {
+            if (false == sessionIds.isEmpty()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

@@ -50,7 +50,6 @@
 package com.openexchange.sessiond.impl;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -245,7 +244,7 @@ final class SessionData {
         // Removing sessions is a write operation.
         final List<SessionControl> retval = new LinkedList<SessionControl>();
         for (final SessionContainer container : sessionList) {
-            retval.addAll(Arrays.asList(container.removeSessionsByUser(userId, contextId)));
+            retval.addAll(container.removeSessionsByUser(userId, contextId));
         }
         for (final SessionControl control : retval) {
             unscheduleTask2MoveSession2FirstContainer(control.getSession().getSessionID(), true);
@@ -272,7 +271,7 @@ final class SessionData {
         // Removing sessions is a write operation.
         final List<SessionControl> list = new LinkedList<SessionControl>();
         for (final SessionContainer container : sessionList) {
-            list.addAll(Arrays.asList(container.removeSessionsByContext(contextId)));
+            list.addAll(container.removeSessionsByContext(contextId));
         }
         for (final SessionControl control : list) {
             unscheduleTask2MoveSession2FirstContainer(control.getSession().getSessionID(), true);

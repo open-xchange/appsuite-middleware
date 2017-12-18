@@ -129,4 +129,23 @@ public class SessionControl {
     public boolean equalsUserAndContext(int userId, int contextId) {
         return session.getContextId() == contextId && session.getUserId() == userId;
     }
+
+    /**
+     * Gets the context identifier
+     *
+     * @return The context identifier
+     */
+    public int getContextId() {
+        return session.getContextId();
+    }
+
+    /**
+     * Gets the user identifier
+     *
+     * @return The user identifier
+     */
+    public int getUserId() {
+        return session.getUserId();
+    }
+
 }
