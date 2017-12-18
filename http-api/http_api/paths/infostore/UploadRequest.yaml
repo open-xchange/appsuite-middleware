@@ -18,6 +18,15 @@
         description: The folder id.
         required: true
       - in: query
+        name: timestamp
+        type: integer
+        format: int64
+        description: |
+          Timestamp of the last update of the infoitem. If the infoitem was modified after the specified timestamp, then the update must fail.
+          Note:
+          This must only be set for updates of existing infoitems.
+        required: false
+      - in: query
         name: id
         type: string
         description: The id of the file in case of an update.
