@@ -84,8 +84,9 @@
         required: false
       - in: query
         name: file_size
-        type: string
-        description: The size of the file.
+        type: integer
+        format: int64
+        description: The size of the document in bytes.
         required: false
       - in: query
         name: try_add_version
