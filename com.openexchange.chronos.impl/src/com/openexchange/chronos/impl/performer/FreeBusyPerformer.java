@@ -126,6 +126,8 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
     };
     //@formatter:on
 
+    private static final boolean AVAILABILITY_ENABLED = false;
+
     /**
      * Initializes a new {@link FreeBusyPerformer}.
      *
@@ -240,6 +242,17 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
         // Get the free busy data for the attendees
         Map<Attendee, List<FreeBusyTime>> freeBusyPerAttendee = performMerged(attendees, from, until);
 
+        // Disabled until further notice
+        if (!AVAILABILITY_ENABLED) {
+            Map<Attendee, FreeBusyResult> results = new HashMap<>();
+            for (Attendee attendee : freeBusyPerAttendee.keySet()) {
+                FreeBusyResult result = new FreeBusyResult();
+                result.setFreeBusyTimes(freeBusyPerAttendee.get(attendee));
+                results.put(attendee, result);
+            }
+            return results;
+        }
+
         // Get the available time for the attendees
         CalendarAvailabilityService availabilityService = Services.getService(CalendarAvailabilityService.class);
         Map<Attendee, Availability> availabilityPerAttendee = availabilityService.getAttendeeAvailability(session, attendees, from, until);
@@ -269,7 +282,7 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
             // Adjust the ranges of the FreeBusyTime slots that are marked as FREE
             // in regard to the mergedFreeBusyTimes
             List<FreeBusyTime> eventsFreeBusyTimes = freeBusyPerAttendee.get(attendee);
-            if(eventsFreeBusyTimes == null){
+            if (eventsFreeBusyTimes == null) {
                 continue;
             }
             if (eventsFreeBusyTimes.isEmpty()) {

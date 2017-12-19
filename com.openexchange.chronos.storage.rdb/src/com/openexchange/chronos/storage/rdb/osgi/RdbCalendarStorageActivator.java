@@ -54,7 +54,6 @@ import org.slf4j.LoggerFactory;
 import com.openexchange.caching.CacheService;
 import com.openexchange.chronos.service.CalendarUtilities;
 import com.openexchange.chronos.service.RecurrenceService;
-import com.openexchange.chronos.storage.CalendarAvailabilityStorageFactory;
 import com.openexchange.chronos.storage.CalendarStorageFactory;
 import com.openexchange.chronos.storage.rdb.groupware.ChronosCreateTableService;
 import com.openexchange.chronos.storage.rdb.groupware.ChronosCreateTableTask;
@@ -118,7 +117,8 @@ public class RdbCalendarStorageActivator extends HousekeepingActivator {
              * register storage factory services
              */
             registerService(CalendarStorageFactory.class, storageFactory);
-            registerService(CalendarAvailabilityStorageFactory.class, new com.openexchange.chronos.storage.rdb.RdbCalendarAvailabilityStorageFactory());
+            // Availability disabled until further notice
+            //registerService(CalendarAvailabilityStorageFactory.class, new com.openexchange.chronos.storage.rdb.RdbCalendarAvailabilityStorageFactory()); 
         } catch (Exception e) {
             LOG.error("error starting {}", context.getBundle(), e);
             throw e;
