@@ -136,7 +136,7 @@ public interface AlarmTriggerStorage {
      * Retrieves all not acknowledged alarm triggers for the given user with a trigger time earlier than the given limit.
      *
      * @param userId The user id
-     * @param until The upper limit
+     * @param until An optional upper limit
      * @return A list of {@link AlarmTrigger}s
      * @throws OXException
      */
