@@ -69,7 +69,7 @@ public interface MailAuthenticityHandler {
      * Handles the specified mail message. Extracts the mail headers from the mail message
      * and checks if the 'Authentication-Results' header is present. If it is, then parses that header
      * and collects the results of the different {@link MailAuthenticityMechanism}s that might be present
-     * in a {@link MailAuthenticityResult} object and returns that
+     * in a {@link MailAuthenticityResult} object.
      *
      * @param session The session providing user data
      * @param mailMessage The mail message to handle
