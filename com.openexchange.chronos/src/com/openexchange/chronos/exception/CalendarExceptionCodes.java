@@ -64,6 +64,7 @@ import static com.openexchange.chronos.exception.CalendarExceptionMessages.FOLDE
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.IGNORED_INVALID_DATA_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.INCOMPATIBLE_DATE_TYPES_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.INCORRECT_STRING_MSG;
+import static com.openexchange.chronos.exception.CalendarExceptionMessages.INVALID_ALARM_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.INVALID_CALENDAR_USER_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.INVALID_CONFIGURATION_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.INVALID_GEO_LOCATION_MSG;
@@ -289,6 +290,11 @@ public enum CalendarExceptionCodes implements DisplayableOXExceptionCode {
      * <li>Invalid configuration [configuration %1$s]</li>
      */
     INVALID_CONFIGURATION("Invalid configuration [configuration %1$s]", INVALID_CONFIGURATION_MSG, Category.CATEGORY_USER_INPUT, 4004),
+    /**
+     * <li>The supplied alarm is invalid. Please correct the alarm and try again.</li>
+     * <li>Invalid alarm [alarm %1$s]</li>
+     */
+    INVALID_ALARM("Invalid alarm [alarm %1$s]", INVALID_ALARM_MSG, Category.CATEGORY_USER_INPUT, 4005),
     /**
      * <li>An error occurred inside the server which prevented it from fulfilling the request.</li>
      * <li>Unexpected error [%1$s]</li>

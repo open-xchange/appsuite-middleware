@@ -243,7 +243,7 @@ public class Check {
      *
      * @param alarm The alarm to check
      * @return The passed alarm, after it was checked for validity
-     * @throws OXException {@link CalendarExceptionCodes#INVALID_RRULE}
+     * @throws OXException {@link CalendarExceptionCodes#INVALID_ALARM}
      */
     public static Alarm alarmIsValid(Alarm alarm) throws OXException {
         /*
@@ -277,6 +277,20 @@ public class Check {
             for (Attendee attendee : alarm.getAttendees()) {
                 requireValidEMail(attendee);
             }
+        }
+        return alarm;
+    }
+
+    /**
+     * Checks that the supplied alarm has a <i>relative</i> trigger defined.
+     *
+     * @param alarm The alarm to check
+     * @return The passed alarm, after it was checked for validity
+     * @throws OXException {@link CalendarExceptionCodes#INVALID_ALARM}
+     */
+    public static Alarm hasReleativeTrigger(Alarm alarm) throws OXException {
+        if (false == AlarmUtils.hasRelativeTrigger(alarm)) {
+            throw CalendarExceptionCodes.INVALID_ALARM.create(String.valueOf(alarm));
         }
         return alarm;
     }

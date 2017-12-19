@@ -78,6 +78,7 @@ import com.openexchange.chronos.service.CollectionUpdate;
 import com.openexchange.chronos.service.ItemUpdate;
 import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 
 /**
  * {@link AlarmUtils}
@@ -225,6 +226,17 @@ public class AlarmUtils extends CalendarUtils {
             }
         }
         return calendar;
+    }
+
+    /**
+     * Gets a value indicating whether a specific alarm's trigger is <i>relative</i>, i.e. it has a defined duration and no <i>absolute</i>
+     * trigger time.
+     *
+     * @param alarm The alarm to check the trigger in
+     * @return <code>true</code> if the alarm's trigger is <i>relative</i>, <code>false</code>, otherwise
+     */
+    public static boolean hasRelativeTrigger(Alarm alarm) {
+        return null != alarm && null != alarm.getTrigger() && Strings.isNotEmpty(alarm.getTrigger().getDuration());
     }
 
     /**
