@@ -50,6 +50,7 @@
 package com.openexchange.share.impl.groupware;
 
 import java.sql.Connection;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -57,6 +58,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.FolderPermissionType;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.cache.service.FolderCacheInvalidationService;
 import com.openexchange.groupware.container.FolderObject;
@@ -64,6 +66,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.modules.Module;
 import com.openexchange.osgi.Tools;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareTarget;
@@ -89,7 +92,7 @@ public class AdministrativeTargetUpdateImpl extends AbstractTargetUpdate {
     private final Connection connection;
     private final HandlerParameters parameters;
     private final OXFolderAccess folderAccess;
-	private ModuleExtensionRegistry<FolderHandlerModuleExtension> folderExtensions;
+	private final ModuleExtensionRegistry<FolderHandlerModuleExtension> folderExtensions;
 
     public AdministrativeTargetUpdateImpl(ServiceLookup services, int contextID, Connection writeCon, ModuleExtensionRegistry<ModuleHandler> handlers, ModuleExtensionRegistry<FolderHandlerModuleExtension> folderExtensions) throws OXException {
         super(services, handlers);
@@ -127,7 +130,19 @@ public class AdministrativeTargetUpdateImpl extends AbstractTargetUpdate {
             syntheticOwnerSession.setParameter("com.openexchange.share.administrativeUpdate", Boolean.TRUE);
             syntheticOwnerSession.setParameter(Connection.class.getName() + '@' + Thread.currentThread().getId(), connection);
             OXFolderManager folderManager = OXFolderManager.getInstance(syntheticOwnerSession, folderAccess, connection, connection);
-            folderManager.updateFolder(folderTargetProxy.getFolder(), false, System.currentTimeMillis());
+            FolderObject folder = folderTargetProxy.getFolder();
+            folderManager.updateFolder(folder, false, System.currentTimeMillis());
+
+            if (folder.getModule() == FolderObject.INFOSTORE) {
+                List<Integer> subfolderIds = folder.getSubfolderIds();
+                List<FolderObject> folderObjects = folderAccess.getFolderObjects(subfolderIds);
+                List<OCLPermission> appliedPermissions = folderTargetProxy.getAppliedPermissions();
+                for (FolderObject fol : folderObjects) {
+                    prepareInheritedPermissions(fol, appliedPermissions);
+                    folderManager.updateFolder(fol, true, true, System.currentTimeMillis());
+                }
+            }
+
             /*
              * clear some additional caches for all potentially affected users that are not covered when updating through folder manager
              */
@@ -138,6 +153,23 @@ public class AdministrativeTargetUpdateImpl extends AbstractTargetUpdate {
             }
         }
 
+    }
+
+    private static FolderObject prepareInheritedPermissions(FolderObject folder, List<OCLPermission> added){
+        List<OCLPermission> originalPermissions = folder.getPermissions();
+        if (null == originalPermissions) {
+            originalPermissions = new ArrayList<OCLPermission>();
+        }
+
+        for(OCLPermission add : added){
+            add.setType(FolderPermissionType.LEGATOR);
+        }
+
+        List<OCLPermission> newPermissions = new ArrayList<>(originalPermissions.size() + added.size());
+        newPermissions.addAll(originalPermissions);
+        newPermissions.addAll(added);
+        folder.setPermissions(newPermissions);
+        return folder;
     }
 
     @Override

@@ -60,6 +60,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.composition.FilenameValidationUtils;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
+import com.openexchange.folderstorage.FolderPermissionType;
 import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderStorageDiscoverer;
@@ -76,6 +77,7 @@ import com.openexchange.folderstorage.internal.CalculatePermission;
 import com.openexchange.folderstorage.mail.contentType.MailContentType;
 import com.openexchange.folderstorage.osgi.FolderStorageServices;
 import com.openexchange.folderstorage.tx.TransactionManager;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.Strings;
@@ -313,7 +315,7 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                     MovePerformer movePerformer = newMovePerformer();
                     movePerformer.setStorageParameters(storageParameters);
                     if (FolderStorage.REAL_TREE_ID.equals(folder.getTreeID())) {
-                        movePerformer.doMoveReal(folder, storage, realParentStorage, newRealParentStorage);
+                        movePerformer.doMoveReal(folder, storage, realParentStorage, newRealParentStorage, storageFolder);
                     } else {
                         movePerformer.doMoveVirtual(folder, storage, realStorage, realParentStorage, newRealParentStorage, storageFolder, openedStorages);
                     }
@@ -355,6 +357,15 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                          */
                         decorator.put("cascadePermissions", Boolean.FALSE);
                     }
+
+                    /*
+                     * Properly inherit permissions
+                     */
+                    if ((storageFolder.getContentType().getModule() == FolderObject.INFOSTORE && folder.getContentType() == null) || (folder.getContentType() != null && folder.getContentType().getModule() == FolderObject.INFOSTORE)) {
+                        addMissingType(folder.getPermissions(), storageFolder.getPermissions());
+                        addParentLinkPermission(folder, oldParentId, storage);
+                    }
+
                     /*
                      * Change permissions either in real or in virtual storage
                      */
@@ -507,6 +518,52 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
             }
         }
     } // End of doUpdate()
+
+    private void addMissingType(Permission[] newPerms, Permission[] origPerms) {
+        for (Permission perm : origPerms) {
+            if (perm.getType() == FolderPermissionType.LEGATOR || perm.getType() == FolderPermissionType.INHERITED) {
+                for (Permission newPerm : newPerms) {
+                    if (newPerm.getType() == FolderPermissionType.NORMAL && newPerm.getSystem() == 0 && perm.getEntity() == newPerm.getEntity() && perm.isGroup() == newPerm.isGroup()) {
+                        newPerm.setType(perm.getType());
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Return a list of permissions which must be inherited from the parent folder
+     *
+     * @param folder The folder to check
+     * @param newRealParentStorage The storage of the folder
+     * @return A list of {@link Permission}s
+     * @throws OXException
+     */
+    private void addParentLinkPermission(Folder folder, String parentId, FolderStorage newRealParentStorage) throws OXException {
+        List<Permission> result = new ArrayList<>(folder.getPermissions().length);
+        for (Permission perm : folder.getPermissions()) {
+            result.add(perm);
+        }
+        Folder parent = newRealParentStorage.getFolder(folder.getTreeID(), parentId, storageParameters);
+        for (Permission perm : parent.getPermissions()) {
+            if (perm.getType() == FolderPermissionType.INHERITED || perm.getType() == FolderPermissionType.LEGATOR) {
+                boolean exists = false;
+                for (Permission tmp : folder.getPermissions()) {
+                    if (tmp.getEntity() == perm.getEntity() && tmp.isGroup() == perm.isGroup() && tmp.getType() == FolderPermissionType.INHERITED) {
+                        exists = true;
+                        break;
+                    }
+                }
+                if (!exists) {
+                    Permission cloned = (Permission) perm.clone();
+                    cloned.setType(FolderPermissionType.INHERITED);
+                    result.add(cloned);
+                }
+            }
+        }
+        folder.setPermissions(result.toArray(new Permission[result.size()]));
+    }
 
     /**
      * Gather all sub-folders that the current user has administrative rights.

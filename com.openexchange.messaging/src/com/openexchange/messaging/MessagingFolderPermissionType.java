@@ -47,58 +47,59 @@
  *
  */
 
-package com.openexchange.groupware.update;
-
-import java.sql.Connection;
-import java.sql.SQLException;
-import com.openexchange.database.Databases;
-import com.openexchange.exception.OXException;
-import com.openexchange.tools.update.Column;
-import com.openexchange.tools.update.Tools;
+package com.openexchange.messaging;
 
 /**
- * {@link SimpleColumnCreationTask}
+ * {@link MessagingFolderPermissionType} defines available permission types for messaging folders.
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.10.0
  */
-public abstract class SimpleColumnCreationTask extends UpdateTaskAdapter {
+public enum MessagingFolderPermissionType {
+    /**
+     * The normal permission type
+     */
+    NORMAL(0),
+    /**
+     * Permissions of this type are going to be handed down to sub-folders
+     */
+    LEGATOR(1),
+    /**
+     * Permissions of this type are inherited permissions of a {@link MessagingFolderPermissionType#LEGATOR} permission
+     */
+    INHERITED(2);
 
-    @Override
-    public void perform(PerformParameters params) throws OXException {
-        Connection con = params.getConnection();
-        boolean rollback = false;
-        try {
+    private final int type;
 
-            con.setAutoCommit(false);
-            rollback = true;
-            for(String table: getTableNames()){
-                if (columnExists(con, table)) {
-                    continue;
-                }
-                Tools.addColumns(con, table, new Column(getColumnName(), getColumnDefinition()));
+    /**
+     * Initializes a new {@link MessagingFolderPermissionType}.
+     */
+    private MessagingFolderPermissionType(int type) {
+        this.type = type;
+    }
+
+    /**
+     * Return the corresponding {@link FolderPermissionType} with the given type number or the {@link MessagingFolderPermissionType#NORMAL} type in case the given type number is unknown.
+     *
+     * @param type The type number
+     * @return The {@link MessagingFolderPermissionType}
+     */
+    public static MessagingFolderPermissionType getType(int type) {
+        for (MessagingFolderPermissionType tmp : MessagingFolderPermissionType.values()) {
+            if (tmp.type == type) {
+                return tmp;
             }
-
-            con.commit();
-            rollback = false;
-        } catch (SQLException e) {
-            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
-        } finally {
-            if (rollback) {
-                Databases.rollback(con);
-            }
-            Databases.autocommit(con);
         }
+        return NORMAL;
     }
 
-    private boolean columnExists(Connection con, String tableName) throws SQLException {
-        return Tools.columnExists(con, tableName, getColumnName());
+    /**
+     * Returns the identifying number of this type
+     *
+     * @return the type number
+     */
+    public int getTypeNumber() {
+        return type;
     }
-
-    protected abstract String[] getTableNames();
-
-    protected abstract String getColumnName();
-
-    protected abstract String getColumnDefinition();
-
-
 }
+

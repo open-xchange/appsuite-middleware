@@ -60,6 +60,11 @@ package com.openexchange.folderstorage;
 public class ImmutablePermission implements Permission {
 
     /**
+     * serialVersionUID
+     */
+    private static final long serialVersionUID = 6640988722846121827L;
+
+    /**
      * Creates a new builder.
      *
      * @return The new builder
@@ -74,6 +79,7 @@ public class ImmutablePermission implements Permission {
         private int entity = -1;
         private boolean group;
         private int system;
+        private FolderPermissionType type;
         private boolean admin;
         private int folderPermission;
         private int readPermission;
@@ -96,6 +102,7 @@ public class ImmutablePermission implements Permission {
             entity = -1;
             group = false;
             system = 0;
+            type = FolderPermissionType.NORMAL;
             admin = true;
             folderPermission = 0;
             readPermission = 0;
@@ -134,6 +141,17 @@ public class ImmutablePermission implements Permission {
          */
         public Builder setSystem(int system) {
             this.system = system;
+            return this;
+        }
+
+        /**
+         * Sets the type.
+         *
+         * @param type The permission type
+         * @return This builder
+         */
+        public Builder setSystem(FolderPermissionType type) {
+            this.type = type;
             return this;
         }
 
@@ -198,7 +216,7 @@ public class ImmutablePermission implements Permission {
          * @return The immutable permission
          */
         public ImmutablePermission build() {
-            return new ImmutablePermission(entity, group, system, admin, folderPermission, readPermission, writePermission, deletePermission);
+            return new ImmutablePermission(entity, group, system, admin, folderPermission, readPermission, writePermission, deletePermission, type);
         }
     }
 
@@ -207,6 +225,7 @@ public class ImmutablePermission implements Permission {
     private final int entity;
     private final boolean group;
     private final int system;
+    private final FolderPermissionType type;
     private final boolean admin;
     private final int folderPermission;
     private final int readPermission;
@@ -217,11 +236,12 @@ public class ImmutablePermission implements Permission {
     /**
      * Initializes a new {@link ImmutablePermission}.
      */
-    ImmutablePermission(int entity, boolean group, int system, boolean admin, int folderPermission, int readPermission, int writePermission, int deletePermission) {
+    ImmutablePermission(int entity, boolean group, int system, boolean admin, int folderPermission, int readPermission, int writePermission, int deletePermission, FolderPermissionType type) {
         super();
         this.entity = entity;
         this.group = group;
         this.system = system;
+        this.type = type;
         this.admin = admin;
         this.folderPermission = folderPermission;
         this.readPermission = readPermission;
@@ -238,6 +258,7 @@ public class ImmutablePermission implements Permission {
         result = prime * result + writePermission;
         result = prime * result + deletePermission;
         result = prime * result + system;
+        result = prime * result + type.getTypeNumber();
         hash = result;
     }
 
@@ -389,13 +410,26 @@ public class ImmutablePermission implements Permission {
         if (system != other.getSystem()) {
             return false;
         }
+        if (type != other.getType()) {
+            return false;
+        }
 
         return true;
     }
 
     @Override
     public String toString() {
-        return "ImmutablePermission [entity=" + entity + ", group=" + group + ", admin=" + admin + ", system=" + system + ", folderPermission=" + folderPermission + ", readPermission=" + readPermission + ", writePermission=" + writePermission + ", deletePermission=" + deletePermission + "]";
+        return "ImmutablePermission [entity=" + entity + ", group=" + group + ", admin=" + admin + ", system=" + system + ", type=" + type + ", folderPermission=" + folderPermission + ", readPermission=" + readPermission + ", writePermission=" + writePermission + ", deletePermission=" + deletePermission + "]";
+    }
+
+    @Override
+    public FolderPermissionType getType() {
+        return type;
+    }
+
+    @Override
+    public void setType(FolderPermissionType type) {
+        throw new UnsupportedOperationException("ImmutablePermission.setType()");
     }
 
 }

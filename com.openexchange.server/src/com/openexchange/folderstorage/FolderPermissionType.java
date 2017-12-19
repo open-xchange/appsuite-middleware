@@ -47,58 +47,58 @@
  *
  */
 
-package com.openexchange.groupware.update;
+package com.openexchange.folderstorage;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-import com.openexchange.database.Databases;
-import com.openexchange.exception.OXException;
-import com.openexchange.tools.update.Column;
-import com.openexchange.tools.update.Tools;
 
 /**
- * {@link SimpleColumnCreationTask}
+ * {@link FolderPermissionType} defines available permission types for folders.
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.10.0
  */
-public abstract class SimpleColumnCreationTask extends UpdateTaskAdapter {
+public enum FolderPermissionType {
+    /**
+     * The normal permission type
+     */
+    NORMAL(0),
+    /**
+     * Permissions of this type are going to be handed down to sub-folders
+     */
+    LEGATOR(1),
+    /**
+     * Permissions of this type are inherited permissions of a {@link FolderPermissionType#LEGATOR} permission
+     */
+    INHERITED(2);
 
-    @Override
-    public void perform(PerformParameters params) throws OXException {
-        Connection con = params.getConnection();
-        boolean rollback = false;
-        try {
+    private final int type;
 
-            con.setAutoCommit(false);
-            rollback = true;
-            for(String table: getTableNames()){
-                if (columnExists(con, table)) {
-                    continue;
-                }
-                Tools.addColumns(con, table, new Column(getColumnName(), getColumnDefinition()));
+    /**
+     * Initializes a new {@link FolderPermissionType}.
+     */
+    private FolderPermissionType(int type) {
+        this.type = type;
+    }
+
+    /**
+     * Return the corresponding {@link FolderPermissionType} with the given type number or the {@link FolderPermissionType#NORMAL} type in case the given type number is unknown.
+     * @param type The type number
+     * @return The {@link FolderPermissionType}
+     */
+    public static FolderPermissionType getType(int type) {
+        for (FolderPermissionType tmp : FolderPermissionType.values()) {
+            if (tmp.type == type) {
+                return tmp;
             }
-
-            con.commit();
-            rollback = false;
-        } catch (SQLException e) {
-            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
-        } finally {
-            if (rollback) {
-                Databases.rollback(con);
-            }
-            Databases.autocommit(con);
         }
+        return NORMAL;
     }
 
-    private boolean columnExists(Connection con, String tableName) throws SQLException {
-        return Tools.columnExists(con, tableName, getColumnName());
+    /**
+     * Returns the identifying number of this type
+     *
+     * @return the type number
+     */
+    public int getTypeNumber() {
+        return type;
     }
-
-    protected abstract String[] getTableNames();
-
-    protected abstract String getColumnName();
-
-    protected abstract String getColumnDefinition();
-
-
 }

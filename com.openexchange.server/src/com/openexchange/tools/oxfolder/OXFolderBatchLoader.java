@@ -66,7 +66,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.regex.Pattern;
 import org.json.JSONException;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.FolderPermissionType;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.java.Streams;
@@ -309,7 +311,7 @@ public final class OXFolderBatchLoader {
                 try {
                     final int[] currentIds = com.openexchange.tools.arrays.Arrays.extract(folderIds, i, IN_LIMIT);
                     final String sql = getIN(
-                        "SELECT permission_id,fp,orp,owp,odp,admin_flag,group_flag,system,fuid FROM #TABLE# WHERE cid=? AND fuid IN (",
+                        "SELECT permission_id,fp,orp,owp,odp,admin_flag,group_flag,system,fuid,type FROM #TABLE# WHERE cid=? AND fuid IN (",
                         currentIds.length);
                     stmt = readCon.prepareStatement(PAT_RPL_TABLE.matcher(sql).replaceFirst(table));
                     int pos = 1;
@@ -328,13 +330,15 @@ public final class OXFolderBatchLoader {
                         p.setFolderAdmin(rs.getInt(6) > 0 ? true : false); // admin_flag
                         p.setGroupPermission(rs.getInt(7) > 0 ? true : false); // group_flag
                         p.setSystem(rs.getInt(8)); // system
+                        p.setType(FolderPermissionType.getType(rs.getInt(10)));
                         list.add(p);
                     }
                     stmt.close();
+                    rs.close();
                     rs = null;
                     stmt = null;
                 } finally {
-                    closeSQLStuff(rs, stmt);
+                    Databases.closeSQLStuff(rs, stmt);
                 }
             }
             return ret;

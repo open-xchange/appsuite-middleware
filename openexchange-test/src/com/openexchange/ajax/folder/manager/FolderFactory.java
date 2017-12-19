@@ -47,58 +47,25 @@
  *
  */
 
-package com.openexchange.groupware.update;
+package com.openexchange.ajax.folder.manager;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-import com.openexchange.database.Databases;
-import com.openexchange.exception.OXException;
-import com.openexchange.tools.update.Column;
-import com.openexchange.tools.update.Tools;
+import com.openexchange.testing.httpclient.models.NewFolderBodyFolder;
 
 /**
- * {@link SimpleColumnCreationTask}
+ * {@link FolderFactory}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.10.0
  */
-public abstract class SimpleColumnCreationTask extends UpdateTaskAdapter {
+public class FolderFactory {
 
-    @Override
-    public void perform(PerformParameters params) throws OXException {
-        Connection con = params.getConnection();
-        boolean rollback = false;
-        try {
-
-            con.setAutoCommit(false);
-            rollback = true;
-            for(String table: getTableNames()){
-                if (columnExists(con, table)) {
-                    continue;
-                }
-                Tools.addColumns(con, table, new Column(getColumnName(), getColumnDefinition()));
-            }
-
-            con.commit();
-            rollback = false;
-        } catch (SQLException e) {
-            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
-        } finally {
-            if (rollback) {
-                Databases.rollback(con);
-            }
-            Databases.autocommit(con);
-        }
+    public static NewFolderBodyFolder getSimpleFolder(String name, String module) {
+        NewFolderBodyFolder result = new NewFolderBodyFolder();
+        result.setTitle(name);
+        result.setModule(module);
+        result.setSubscribed(true);
+        result.setPermissions(null);
+        return result;
     }
-
-    private boolean columnExists(Connection con, String tableName) throws SQLException {
-        return Tools.columnExists(con, tableName, getColumnName());
-    }
-
-    protected abstract String[] getTableNames();
-
-    protected abstract String getColumnName();
-
-    protected abstract String getColumnDefinition();
-
 
 }

@@ -64,6 +64,7 @@ import java.util.List;
 import java.util.regex.Pattern;
 import org.json.JSONException;
 import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.FolderPermissionType;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.java.Streams;
@@ -208,7 +209,7 @@ public final class OXFolderLoader {
     }
 
     private static final String SQL_LOAD_P =
-        "SELECT permission_id, fp, orp, owp, odp, admin_flag, group_flag, system FROM #TABLE# WHERE cid = ? AND fuid = ?";
+        "SELECT permission_id, fp, orp, owp, odp, admin_flag, group_flag, system, type FROM #TABLE# WHERE cid = ? AND fuid = ?";
 
     /**
      * Loads folder permissions from database. Creates a new connection if <code>null</code> is given.
@@ -243,6 +244,7 @@ public final class OXFolderLoader {
                 p.setFolderAdmin(rs.getInt(6) > 0 ? true : false); // admin_flag
                 p.setGroupPermission(rs.getInt(7) > 0 ? true : false); // group_flag
                 p.setSystem(rs.getInt(8)); // system
+                p.setType(FolderPermissionType.getType(rs.getInt(9))); // type
                 permList.add(p);
             }
             stmt.close();

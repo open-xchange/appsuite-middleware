@@ -75,6 +75,7 @@ import com.openexchange.folder.json.FolderFieldRegistry;
 import com.openexchange.folder.json.services.ServiceRegistry;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
+import com.openexchange.folderstorage.FolderPermissionType;
 import com.openexchange.folderstorage.FolderProperty;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.Permissions;
@@ -468,6 +469,9 @@ public final class FolderWriter {
                     } else {
                         ja = new JSONArray();
                         for (final Permission permission : obj) {
+                            if (permission.getType() == FolderPermissionType.INHERITED) {
+                                continue;
+                            }
                             final JSONObject jo = new JSONObject(4);
                             jo.put(FolderField.BITS.getName(), Permissions.createPermissionBits(permission));
                             jo.put(FolderField.ENTITY.getName(), permission.getEntity());
@@ -639,6 +643,7 @@ public final class FolderWriter {
                 permission.getWritePermission(), permission.getDeletePermission());
             oclPermission.setFolderAdmin(permission.isAdmin());
             oclPermission.setGroupPermission(permission.isGroup());
+            oclPermission.setType(permission.getType() == null ? FolderPermissionType.NORMAL : permission.getType());
             oclPermissions.add(oclPermission);
         }
         return oclPermissions;

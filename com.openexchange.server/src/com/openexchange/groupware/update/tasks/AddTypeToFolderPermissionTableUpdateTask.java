@@ -47,58 +47,41 @@
  *
  */
 
-package com.openexchange.groupware.update;
+package com.openexchange.groupware.update.tasks;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-import com.openexchange.database.Databases;
-import com.openexchange.exception.OXException;
-import com.openexchange.tools.update.Column;
-import com.openexchange.tools.update.Tools;
+import com.openexchange.groupware.update.SimpleColumnCreationTask;
 
 /**
- * {@link SimpleColumnCreationTask}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * {@link AddTypeToFolderPermissionTableUpdateTask} - adds the column "type" to the oxfolder_permissions table
+ *
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.10.0
  */
-public abstract class SimpleColumnCreationTask extends UpdateTaskAdapter {
+public final class AddTypeToFolderPermissionTableUpdateTask extends SimpleColumnCreationTask {
+
+    public AddTypeToFolderPermissionTableUpdateTask() {
+        super();
+    }
 
     @Override
-    public void perform(PerformParameters params) throws OXException {
-        Connection con = params.getConnection();
-        boolean rollback = false;
-        try {
-
-            con.setAutoCommit(false);
-            rollback = true;
-            for(String table: getTableNames()){
-                if (columnExists(con, table)) {
-                    continue;
-                }
-                Tools.addColumns(con, table, new Column(getColumnName(), getColumnDefinition()));
-            }
-
-            con.commit();
-            rollback = false;
-        } catch (SQLException e) {
-            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
-        } finally {
-            if (rollback) {
-                Databases.rollback(con);
-            }
-            Databases.autocommit(con);
-        }
+    public String[] getDependencies() {
+        return new String[0];
     }
 
-    private boolean columnExists(Connection con, String tableName) throws SQLException {
-        return Tools.columnExists(con, tableName, getColumnName());
+    @Override
+    protected String[] getTableNames() {
+        return new String[] {"oxfolder_permissions","del_oxfolder_permissions"};
     }
 
-    protected abstract String[] getTableNames();
+    @Override
+    protected String getColumnName() {
+        return "type";
+    }
 
-    protected abstract String getColumnName();
-
-    protected abstract String getColumnDefinition();
-
+    @Override
+    protected String getColumnDefinition() {
+        return "INT4 UNSIGNED NOT NULL DEFAULT 0";
+    }
 
 }

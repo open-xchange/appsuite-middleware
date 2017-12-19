@@ -59,6 +59,7 @@ import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.DefaultPermission;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
+import com.openexchange.folderstorage.FolderPermissionType;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.Type;
 import com.openexchange.folderstorage.internal.performers.AbstractPerformer;
@@ -237,31 +238,6 @@ public final class CalculatePermission {
         return set.isEmpty() ? true : set.contains(module);
     }
 
-    private static final int[] mapping = { 0, 2, 4, -1, 8 };
-
-    /**
-     * The actual max permission that can be transfered in field 'bits' or JSON's permission object
-     */
-    private static final int MAX_PERMISSION = 64;
-
-    private static final int[] parsePermissionBits(final int bitsArg) {
-        int bits = bitsArg;
-        final int[] retval = new int[5];
-        for (int i = retval.length - 1; i >= 0; i--) {
-            final int shiftVal = (i * 7); // Number of bits to be shifted
-            retval[i] = bits >> shiftVal;
-            bits -= (retval[i] << shiftVal);
-            if (retval[i] == MAX_PERMISSION) {
-                retval[i] = Permission.MAX_PERMISSION;
-            } else if (i < (retval.length - 1)) {
-                retval[i] = mapping[retval[i]];
-            } else {
-                retval[i] = retval[i];
-            }
-        }
-        return retval;
-    }
-
     /**
      * Calculates the effective permission for given session's user in given folder.
      *
@@ -367,6 +343,7 @@ public final class CalculatePermission {
         private static final long serialVersionUID = 5488824197214654462L;
 
         private int system;
+        private FolderPermissionType type;
         private int deletePermission;
         private int folderPermission;
         private int readPermission;
@@ -398,6 +375,7 @@ public final class CalculatePermission {
             result = prime * result + (group ? 1231 : 1237);
             result = prime * result + readPermission;
             result = prime * result + system;
+            result = prime * result + type.getTypeNumber();
             result = prime * result + writePermission;
             return result;
         }
@@ -430,6 +408,9 @@ public final class CalculatePermission {
                 return false;
             }
             if (system != other.getSystem()) {
+                return false;
+            }
+            if (type != other.getType()) {
                 return false;
             }
             if (writePermission != other.getWritePermission()) {
@@ -551,6 +532,16 @@ public final class CalculatePermission {
             } catch (final CloneNotSupportedException e) {
                 throw new InternalError(e.getMessage());
             }
+        }
+
+        @Override
+        public FolderPermissionType getType() {
+            return type;
+        }
+
+        @Override
+        public void setType(FolderPermissionType type) {
+            this.type = type;
         }
 
     } // End of DummyPermission
