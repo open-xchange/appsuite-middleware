@@ -67,7 +67,7 @@ final class StringUtil {
 
         /**
          * Adds the specified key/value to the specified {@link T} collector
-         * 
+         *
          * @param key The key
          * @param value The value
          * @param collector The {@link T} collector
@@ -98,7 +98,7 @@ final class StringUtil {
 
     /**
      * Parses the specified element as a key/value {@link Map}
-     * 
+     *
      * @param element The element to parse
      * @return A {@link Map} with the key/value attributes of the element
      */
@@ -109,7 +109,7 @@ final class StringUtil {
 
     /**
      * Parses the specified element as a {@link List} of {@link MailAuthenticityAttribute}s
-     * 
+     *
      * @param element The element to parse
      * @return a {@link List} with the {@link MailAuthenticityAttribute}s
      */
@@ -220,7 +220,7 @@ final class StringUtil {
 
     /**
      * Adds the specified key/value to the specified {@link T} collector
-     * 
+     *
      * @param key The key
      * @param value The value
      * @param collector The {@link T} collector
@@ -240,7 +240,7 @@ final class StringUtil {
      * @param header The header to split
      * @return A {@link List} with the split elements
      */
-    static List<String> splitElements(String header) {
+    static List<String> splitElements(CharSequence header) {
         List<String> split = new ArrayList<>();
         boolean openQuotes = false;
         boolean openParenthesis = false;

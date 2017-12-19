@@ -60,6 +60,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiFunction;
+import java.util.regex.Pattern;
 import javax.mail.internet.InternetAddress;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
@@ -67,7 +68,10 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.InterruptibleCharSequence;
 import com.openexchange.java.Strings;
+import com.openexchange.java.InterruptibleCharSequence.InterruptedRuntimeException;
+import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.authenticity.AllowedAuthServId;
 import com.openexchange.mail.authenticity.MailAuthenticityAttribute;
@@ -274,33 +278,39 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
         final List<MailAuthenticityMechanismResult> results = new ArrayList<>();
         final List<Map<String, String>> unconsideredResults = new ArrayList<>();
 
-        final Iterator<String> authHeaderIterator = authenticationHeaders.iterator();
-        while (authHeaderIterator.hasNext()) {
-            final String authenticationHeader = authHeaderIterator.next();
-            List<String> elements = StringUtil.splitElements(authenticationHeader);
+        try {
+            final Thread currentThread = Thread.currentThread();
+            for (Iterator<String> authHeaderIterator = authenticationHeaders.iterator(); !currentThread.isInterrupted() && authHeaderIterator.hasNext();) {
+                final String authenticationHeader = authHeaderIterator.next();
+                List<String> elements = StringUtil.splitElements(InterruptibleCharSequence.valueOf(authenticationHeader));
 
-            // The first property of the header MUST always be the domain (i.e. the authserv-id)
-            // See https://tools.ietf.org/html/rfc7601 for the formal definition
-            final String authServId = elements.get(0);
-            if (!isAuthServIdValid(authServId, allowedAuthServIds)) {
-                // Not a configured authserver-id, ignore
-                continue;
+                // The first property of the header MUST always be the domain (i.e. the authserv-id)
+                // See https://tools.ietf.org/html/rfc7601 for the formal definition
+                final String authServId = elements.get(0);
+                if (!isAuthServIdValid(authServId, allowedAuthServIds)) {
+                    // Not a configured authserver-id, ignore
+                    continue;
+                }
+                // Remove the authserv-id
+                elements = elements.subList(1, elements.size());
+
+                // Extract the domain from the 'From' header
+                try {
+                    overallResult.addAttribute(MailAuthenticityResultKey.FROM_DOMAIN, extractDomain(from));
+                    overallResult.addAttribute(MailAuthenticityResultKey.TRUSTED_SENDER, from.getAddress());
+                } catch (final Exception e) {
+                    // Malformed from header, be strict and return with failed result
+                    LOGGER.debug("An error occurred while trying to extract a valid domain from the 'From' header", e);
+                    overallResult.setStatus(MailAuthenticityStatus.FAIL);
+                    return overallResult;
+                }
+
+                parseMechanisms(elements, results, unconsideredResults, overallResult, currentThread);
             }
-            // Remove the authserv-id
-            elements = elements.subList(1, elements.size());
-
-            // Extract the domain from the 'From' header
-            try {
-                overallResult.addAttribute(MailAuthenticityResultKey.FROM_DOMAIN, extractDomain(from));
-                overallResult.addAttribute(MailAuthenticityResultKey.TRUSTED_SENDER, from.getAddress());
-            } catch (final Exception e) {
-                // Malformed from header, be strict and return with failed result
-                LOGGER.debug("An error occurred while trying to extract a valid domain from the 'From' header", e);
-                overallResult.setStatus(MailAuthenticityStatus.FAIL);
-                return overallResult;
-            }
-
-            parseMechanisms(elements, results, unconsideredResults, overallResult);
+        } catch (InterruptedRuntimeException e) {
+            // Keep interrupted state
+            Thread.currentThread().interrupt();
+            throw MailExceptionCode.INTERRUPT_ERROR.create();
         }
 
         determineOverallResult(overallResult, results, unconsideredResults);
@@ -318,10 +328,12 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
      * @param results A {@link List} with the results of the known mechanisms
      * @param unconsideredResults A {@link List} with the unconsidered results
      * @param overallResult The overall {@link MailAuthenticityResult}
+     * @param currentThread The current thread
      */
-    private void parseMechanisms(final List<String> elements, final List<MailAuthenticityMechanismResult> results, final List<Map<String, String>> unconsideredResults, final MailAuthenticityResult overallResult) {
+    private void parseMechanisms(List<String> elements, List<MailAuthenticityMechanismResult> results, List<Map<String, String>> unconsideredResults, MailAuthenticityResult overallResult, Thread currentThread) {
         Collections.sort(elements, mailAuthComparator);
-        for (final String element : elements) {
+        for (Iterator<String> iterator = elements.iterator(); !currentThread.isInterrupted() && iterator.hasNext();) {
+            String element = iterator.next();
             if (Strings.isEmpty(element)) {
                 continue;
             }
@@ -579,6 +591,8 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
         return adr.substring(index + 1);
     }
 
+    private static final Pattern SPLIT = Pattern.compile(" ");
+
     /**
      * Determines whether the specified authServId is valid
      *
@@ -590,7 +604,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
             LOGGER.warn("The authserv-id is missing from the 'Authentication-Results'");
             return false;
         }
-        final String[] split = authServId.split(" ");
+        final String[] split = SPLIT.split(authServId, 0);
 
         // Cleanse the optional version
         authServId = split.length == 0 ? authServId : split[0];
