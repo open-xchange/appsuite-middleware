@@ -280,39 +280,41 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
                 "PRIMARY KEY (cid,account,alarm)" +
             ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;"
         );
-        tablesByName.put("calendar_available",
-            "CREATE TABLE calendar_available (" +
-                "cid INT4 UNSIGNED NOT NULL," +
-                "id INT4 UNSIGNED NOT NULL," +
-                "user INT4 UNSIGNED NOT NULL," +
-                "uid VARCHAR(767) DEFAULT NULL," +
-                "start datetime NOT NULL," +
-                "end datetime DEFAULT NULL," +
-                "startTimezone VARCHAR(255) DEFAULT NULL," +
-                "endTimezone VARCHAR(255) DEFAULT NULL," +
-                "allDay BOOLEAN DEFAULT NULL," +
-                "created BIGINT(20) NOT NULL," +
-                "description TEXT DEFAULT NULL," +
-                "modified BIGINT(20) NOT NULL," +
-                "location VARCHAR(255) DEFAULT NULL," +
-                "exDate TEXT DEFAULT NULL," +
-                "recurrence BIGINT(20) DEFAULT NULL," +
-                "rrule VARCHAR(255) DEFAULT NULL," +
-                "summary VARCHAR(255) DEFAULT NULL," +
-                "categories VARCHAR(1024) DEFAULT NULL, " +
-                "comment VARCHAR(512) DEFAULT NULL," +
-                "extendedProperties BLOB DEFAULT NULL," +
-                "PRIMARY KEY (cid,user,id)," +
-                "KEY uid (cid,user,uid(191))" +
-            ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;"
-        );
-        tablesByName.put("calendar_available_sequence",
-            "CREATE TABLE calendar_available_sequence (" +
-                "cid INT4 UNSIGNED NOT NULL," +
-                "id INT4 UNSIGNED NOT NULL," +
-                "PRIMARY KEY (cid)" +
-            ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;"
-        );
+
+        // Disabled until further notice
+//        tablesByName.put("calendar_available",
+//            "CREATE TABLE calendar_available (" +
+//                "cid INT4 UNSIGNED NOT NULL," +
+//                "id INT4 UNSIGNED NOT NULL," +
+//                "user INT4 UNSIGNED NOT NULL," +
+//                "uid VARCHAR(767) DEFAULT NULL," +
+//                "start datetime NOT NULL," +
+//                "end datetime DEFAULT NULL," +
+//                "startTimezone VARCHAR(255) DEFAULT NULL," +
+//                "endTimezone VARCHAR(255) DEFAULT NULL," +
+//                "allDay BOOLEAN DEFAULT NULL," +
+//                "created BIGINT(20) NOT NULL," +
+//                "description TEXT DEFAULT NULL," +
+//                "modified BIGINT(20) NOT NULL," +
+//                "location VARCHAR(255) DEFAULT NULL," +
+//                "exDate TEXT DEFAULT NULL," +
+//                "recurrence BIGINT(20) DEFAULT NULL," +
+//                "rrule VARCHAR(255) DEFAULT NULL," +
+//                "summary VARCHAR(255) DEFAULT NULL," +
+//                "categories VARCHAR(1024) DEFAULT NULL, " +
+//                "comment VARCHAR(512) DEFAULT NULL," +
+//                "extendedProperties BLOB DEFAULT NULL," +
+//                "PRIMARY KEY (cid,user,id)," +
+//                "KEY uid (cid,user,uid(191))" +
+//            ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;"
+//        );
+//        tablesByName.put("calendar_available_sequence",
+//            "CREATE TABLE calendar_available_sequence (" +
+//                "cid INT4 UNSIGNED NOT NULL," +
+//                "id INT4 UNSIGNED NOT NULL," +
+//                "PRIMARY KEY (cid)" +
+//            ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;"
+//        );
         return tablesByName; //@formatter:on
     }
 

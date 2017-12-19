@@ -211,7 +211,7 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
     private List<AlarmTrigger> getAlarmTriggers(int user, Date until) throws OXException {
         Connection con = dbProvider.getReadConnection(context);
         try {
-            return getAlarmTriggers(user, until.getTime(), con);
+            return getAlarmTriggers(user, until==null ? null : until.getTime(), con);
         } finally {
             dbProvider.releaseReadConnection(context, con);
         }
@@ -225,7 +225,12 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
                 .append(MAPPER.getColumns(mappedFields))
                 .append(" FROM ")
                 .append("calendar_alarm_trigger")
-                .append(" WHERE cid=? AND user=? AND account=? AND triggerDate<? ORDER BY triggerDate");
+                .append(" WHERE cid=? AND user=? AND account=?");
+
+            if(until!=null) {
+                stringBuilder.append(" AND triggerDate<?");
+            }
+            stringBuilder.append(" ORDER BY triggerDate");
 
             List<AlarmTrigger> alrmTriggers = new ArrayList<AlarmTrigger>();
             try (PreparedStatement stmt = con.prepareStatement(stringBuilder.toString())) {
@@ -233,7 +238,9 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
                 stmt.setInt(parameterIndex++, context.getContextId());
                 stmt.setInt(parameterIndex++, user);
                 stmt.setInt(parameterIndex++, accountId);
-                stmt.setLong(parameterIndex++, until);
+                if(until != null) {
+                    stmt.setLong(parameterIndex++, until);
+                }
 
                 try (ResultSet resultSet = logExecuteQuery(stmt)) {
                     while (resultSet.next()) {

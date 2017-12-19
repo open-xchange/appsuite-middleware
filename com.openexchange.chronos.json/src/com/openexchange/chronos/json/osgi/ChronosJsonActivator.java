@@ -116,7 +116,8 @@ public class ChronosJsonActivator extends AJAXModuleActivator {
             registerModule(new ChronosActionFactory(this), "chronos");
             registerModule(new ChronosAccountActionFactory(this), "chronos/account");
             registerModule(new AlarmActionFactory(this), "chronos/alarm");
-            registerModule(new AvailabilityActionFactory(this), "chronos/availability");
+            // Availability disabled until further notice
+            //registerModule(new AvailabilityActionFactory(this), "chronos/availability");
             /*
              * register oauth provider
              */

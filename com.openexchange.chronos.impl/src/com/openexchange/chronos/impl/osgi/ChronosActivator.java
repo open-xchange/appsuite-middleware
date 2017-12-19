@@ -54,7 +54,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.chronos.impl.CalendarServiceImpl;
 import com.openexchange.chronos.impl.FreeBusyServiceImpl;
-import com.openexchange.chronos.impl.availability.CalendarAvailabilityServiceImpl;
 import com.openexchange.chronos.impl.groupware.CalendarDeleteListener;
 import com.openexchange.chronos.impl.groupware.CalendarDowngradeListener;
 import com.openexchange.chronos.impl.osgi.event.EventAdminServiceTracker;
@@ -66,7 +65,6 @@ import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.chronos.service.CalendarUtilities;
 import com.openexchange.chronos.service.FreeBusyService;
 import com.openexchange.chronos.service.RecurrenceService;
-import com.openexchange.chronos.storage.CalendarAvailabilityStorageFactory;
 import com.openexchange.chronos.storage.CalendarStorageFactory;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigViewFactory;
@@ -107,7 +105,7 @@ public class ChronosActivator extends HousekeepingActivator {
     //@formatter:off
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, ConfigViewFactory.class, CalendarStorageFactory.class, CalendarAvailabilityStorageFactory.class,
+        return new Class<?>[] { ConfigurationService.class, ConfigViewFactory.class, CalendarStorageFactory.class, /*CalendarAvailabilityStorageFactory.class,*/
             FolderService.class, ContextService.class, UserService.class, GroupService.class, ResourceService.class, DatabaseService.class, RecurrenceService.class,
             ThreadPoolService.class, QuotaService.class, LeanConfigurationService.class, AdministrativeCalendarAccountService.class, ConversionService.class };
     }
@@ -139,7 +137,8 @@ public class ChronosActivator extends HousekeepingActivator {
             registerService(CalendarService.class, calendarService);
             registerService(FreeBusyService.class, new FreeBusyServiceImpl());
             registerService(CalendarUtilities.class, calendarUtilities);
-            registerService(CalendarAvailabilityService.class, new CalendarAvailabilityServiceImpl());
+            // Availability disabled until further notice
+            //registerService(CalendarAvailabilityService.class, new CalendarAvailabilityServiceImpl());
             registerService(DeleteListener.class, new CalendarDeleteListener(factory, calendarUtilities, calendarHandlers));
             DowngradeRegistry.getInstance().registerDowngradeListener(new CalendarDowngradeListener(factory, calendarUtilities, calendarHandlers));
             /*
