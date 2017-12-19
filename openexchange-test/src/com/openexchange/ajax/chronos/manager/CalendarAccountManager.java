@@ -106,7 +106,7 @@ public class CalendarAccountManager extends AbstractManager {
 
     public CalendarAccountResponse createCalendarAccount(String providerId, String configuration) throws ApiException {
         CalendarAccountResponse response = userApi.getChronosApi().createAccount(userApi.getSession(), providerId, configuration);
-        assertNull(response.getError(), response.getError());
+        assertNull("Calendar account could not be created due an error.", response.getError());
         assertNotNull(response.getData());
         rememberCalendarAccountId(AccountFactory.createCalendarAccountId(response.getData().getId(), response.getData().getTimestamp()));
         return response;
