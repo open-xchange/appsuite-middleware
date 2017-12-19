@@ -52,10 +52,13 @@ package com.openexchange.chronos.provider.birthdays.osgi;
 import static org.slf4j.LoggerFactory.getLogger;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
+import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.chronos.provider.CalendarProvider;
 import com.openexchange.chronos.provider.account.AdministrativeCalendarAccountService;
+import com.openexchange.chronos.provider.account.CalendarAccountService;
 import com.openexchange.chronos.provider.birthdays.BirthdaysCalendarProvider;
 import com.openexchange.chronos.provider.birthdays.ContactEventHandler;
+import com.openexchange.chronos.provider.birthdays.DefaultAlarmDate;
 import com.openexchange.chronos.service.CalendarUtilities;
 import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.chronos.storage.CalendarStorageFactory;
@@ -64,6 +67,7 @@ import com.openexchange.context.ContextService;
 import com.openexchange.conversion.ConversionService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.folderstorage.FolderService;
+import com.openexchange.jslob.JSlobEntry;
 import com.openexchange.osgi.HousekeepingActivator;
 
 /**
@@ -83,9 +87,10 @@ public class BirthdaysCalendarProviderActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { 
-            ContactService.class, RecurrenceService.class, CalendarUtilities.class, FolderService.class, CalendarStorageFactory.class, 
-            DatabaseService.class, ContextService.class, AdministrativeCalendarAccountService.class, ConversionService.class
+        return new Class<?>[] {
+            ContactService.class, RecurrenceService.class, CalendarUtilities.class, FolderService.class, CalendarStorageFactory.class,
+            DatabaseService.class, ContextService.class, AdministrativeCalendarAccountService.class, ConversionService.class, 
+            CapabilityService.class, CalendarAccountService.class
         };
     }
 
@@ -98,6 +103,7 @@ public class BirthdaysCalendarProviderActivator extends HousekeepingActivator {
              */
             BirthdaysCalendarProvider calendarProvider = new BirthdaysCalendarProvider(this);
             registerService(CalendarProvider.class, calendarProvider);
+            registerService(JSlobEntry.class, new DefaultAlarmDate(this));
             /*
              * register event handler for contact changes
              */
