@@ -58,7 +58,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
-import com.openexchange.folderstorage.FolderPermissionType;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.cache.service.FolderCacheInvalidationService;
 import com.openexchange.groupware.container.FolderObject;
@@ -162,7 +161,7 @@ public class AdministrativeTargetUpdateImpl extends AbstractTargetUpdate {
         }
 
         for(OCLPermission add : added){
-            add.setType(FolderPermissionType.LEGATOR);
+//            add.setType(FolderPermissionType.LEGATOR);
         }
 
         List<OCLPermission> newPermissions = new ArrayList<>(originalPermissions.size() + added.size());
