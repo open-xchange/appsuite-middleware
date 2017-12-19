@@ -52,8 +52,12 @@ package com.openexchange.chronos.provider.internal.osgi;
 import static org.slf4j.LoggerFactory.getLogger;
 import com.openexchange.chronos.provider.CalendarProvider;
 import com.openexchange.chronos.provider.FreeBusyProvider;
+import com.openexchange.chronos.provider.account.CalendarAccountService;
 import com.openexchange.chronos.provider.internal.InternalCalendarProvider;
 import com.openexchange.chronos.provider.internal.InternalFreeBusyProvider;
+import com.openexchange.chronos.provider.internal.config.DefaultAlarmDate;
+import com.openexchange.chronos.provider.internal.config.DefaultAlarmDateTime;
+import com.openexchange.chronos.provider.internal.config.DefaultFolderId;
 import com.openexchange.chronos.provider.internal.share.CalendarFolderHandlerModuleExtension;
 import com.openexchange.chronos.provider.internal.share.CalendarModuleAdjuster;
 import com.openexchange.chronos.service.CalendarService;
@@ -61,6 +65,7 @@ import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.conversion.ConversionService;
 import com.openexchange.folderstorage.FolderService;
+import com.openexchange.jslob.JSlobEntry;
 import com.openexchange.jslob.JSlobService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.share.core.ModuleAdjuster;
@@ -85,7 +90,10 @@ public class InternalCalendarProviderActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { FolderService.class, CalendarService.class, RecurrenceService.class, UserService.class, ConversionService.class, ConfigurationService.class };
+        return new Class<?>[] {
+            FolderService.class, CalendarService.class, RecurrenceService.class, UserService.class, ConversionService.class, ConfigurationService.class,
+            CalendarAccountService.class
+        };
     }
 
     @Override
@@ -95,14 +103,20 @@ public class InternalCalendarProviderActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        trackService(FolderUserPropertyStorage.class);
-        openTrackers();
         try {
             getLogger(InternalCalendarProviderActivator.class).info("starting bundle {}", context.getBundle());
+            trackService(FolderUserPropertyStorage.class);
+            openTrackers();
             registerService(CalendarProvider.class, new InternalCalendarProvider(this));
             registerService(FreeBusyProvider.class, new InternalFreeBusyProvider(this));
             registerService(ModuleAdjuster.class, new CalendarModuleAdjuster());
             registerService(FolderHandlerModuleExtension.class, new CalendarFolderHandlerModuleExtension(this));
+            /*
+             * register JSlob entries
+             */
+            registerService(JSlobEntry.class, new DefaultFolderId(this));
+            registerService(JSlobEntry.class, new DefaultAlarmDate(this));
+            registerService(JSlobEntry.class, new DefaultAlarmDateTime(this));
         } catch (Exception e) {
             getLogger(InternalCalendarProviderActivator.class).error("error starting {}", context.getBundle(), e);
             throw e;

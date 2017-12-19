@@ -68,6 +68,16 @@ public class CalendarProviders {
     }
 
     /**
+     * Gets the name of the declared capability for a specific calendar provider.
+     *
+     * @param providerId The identifier of the calendar provider to generate the capability name for
+     * @return The capability name
+     */
+    public static String getCapabilityName(String providerId) {
+        return "calendar_" + providerId;
+    }
+
+    /**
      * Gets the name of the property that is used to evaluate whether a calendar provider is enabled or not.
      *
      * @param provider The calendar provider to generate the <i>enabled</i> property name for

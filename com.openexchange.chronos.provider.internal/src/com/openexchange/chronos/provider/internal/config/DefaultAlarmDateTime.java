@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,45 +47,50 @@
  *
  */
 
-package com.openexchange.chronos.provider.internal;
+package com.openexchange.chronos.provider.internal.config;
 
-import com.openexchange.folderstorage.ContentType;
-import com.openexchange.groupware.container.FolderObject;
+import org.json.JSONObject;
+import com.openexchange.exception.OXException;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.session.Session;
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link Constants}
+ * {@link DefaultAlarmDateTime}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public enum Constants {
-    ;
+public class DefaultAlarmDateTime extends ChronosJSlobEntry {
 
-    /** The static identifier of the internal calendar provider */
-    public static final String PROVIDER_ID = "chronos";
+    /**
+     * Initializes a new {@link DefaultAlarmDateTime}.
+     *
+     * @param services A service lookup reference
+     */
+    public DefaultAlarmDateTime(ServiceLookup services) {
+        super(services);
+    }
 
-    /** The static identifier of the single default account in the internal calendar provider */
-    public static final int ACCOUNT_ID = 0;
+    @Override
+    public String getPath() {
+        return "chronos/defaultAlarmDateTime";
+    }
 
-    /** The static qualified identifier of the single default account in the internal calendar provider */
-    public static final String QUALIFIED_ACCOUNT_ID = "cal://0";
+    @Override
+    public boolean isWritable(Session session) throws OXException {
+        return true;
+    }
 
-    /** The identifier of the folder tree the calendar provider is using */
-    public static final String TREE_ID = com.openexchange.folderstorage.FolderStorage.REAL_TREE_ID;
+    @Override
+    protected Object getValue(ServerSession session, JSONObject userConfig) throws OXException {
+        return userConfig.optJSONObject("defaultAlarmDateTime");
+    }
 
-    /** The used folder storage content type */
-    public static final ContentType CONTENT_TYPE = com.openexchange.folderstorage.database.contentType.CalendarContentType.getInstance();
-
-    /** The identifier of the "private" root folder */
-    static final String PRIVATE_FOLDER_ID = String.valueOf(FolderObject.SYSTEM_PRIVATE_FOLDER_ID);
-
-    /** The identifier of the "public" root folder */
-    static final String PUBLIC_FOLDER_ID = String.valueOf(FolderObject.SYSTEM_PUBLIC_FOLDER_ID);
-
-    /** The identifier of the "shared" root folder */
-    static final String SHARED_FOLDER_ID = String.valueOf(FolderObject.SYSTEM_SHARED_FOLDER_ID);
-
-    /** The prefix used for stored user properties of folders */
-    static final String USER_PROPERTY_PREFIX = "cal/";
+    @Override
+    protected void setValue(ServerSession session, JSONObject userConfig, Object value) throws OXException {
+        userConfig.putSafe("defaultAlarmDateTime", value);
+        new UserConfigHelper(services).checkUserConfig(session, userConfig);
+    }
 
 }

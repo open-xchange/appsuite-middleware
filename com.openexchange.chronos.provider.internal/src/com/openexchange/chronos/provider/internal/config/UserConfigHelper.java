@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.chronos.provider.internal;
+package com.openexchange.chronos.provider.internal.config;
 
 import static com.openexchange.chronos.provider.internal.Constants.CONTENT_TYPE;
 import static com.openexchange.chronos.provider.internal.Constants.TREE_ID;
@@ -118,10 +118,12 @@ public class UserConfigHelper {
             Alarm defaultAlarmDate = configWrapper.getDefaultAlarmDate();
             if (null != defaultAlarmDate) {
                 Check.alarmIsValid(defaultAlarmDate);
+                Check.hasReleativeTrigger(defaultAlarmDate);
             }
             Alarm defaultAlarmDateTime = configWrapper.getDefaultAlarmDateTime();
             if (null != defaultAlarmDateTime) {
                 Check.alarmIsValid(defaultAlarmDateTime);
+                Check.hasReleativeTrigger(defaultAlarmDateTime);
             }
             /*
              * check availability

@@ -59,6 +59,7 @@ import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.CalendarCapability;
 import com.openexchange.chronos.provider.folder.FolderCalendarAccess;
 import com.openexchange.chronos.provider.folder.FolderCalendarProvider;
+import com.openexchange.chronos.provider.internal.config.UserConfigHelper;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.chronos.service.CalendarSession;
