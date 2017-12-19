@@ -200,7 +200,7 @@ public final class IPAddressUtil {
         val = 0;
         while (i < srcb_length) {
             ch = src.charAt(i++);
-            final int chval = digit(ch);
+            final int chval = digit(ch, 16);
             if (chval != -1) {
                 val <<= 4;
                 val |= chval;
@@ -410,7 +410,7 @@ public final class IPAddressUtil {
         int digit;
 
         if (i < max) {
-            digit = digit(s.charAt(i++));
+            digit = digit(s.charAt(i++), radix);
             if (digit < 0) {
                 return -1L;
             }
@@ -420,7 +420,7 @@ public final class IPAddressUtil {
             /*
              * Accumulating negatively avoids surprises near MAX_VALUE
              */
-            digit = digit(s.charAt(i++));
+            digit = digit(s.charAt(i++), radix);
             if (digit < 0) {
                 return -1L;
             }
@@ -475,7 +475,7 @@ public final class IPAddressUtil {
         int digit;
 
         if (i < max) {
-            digit = digit(s.charAt(i++));
+            digit = digit(s.charAt(i++), radix);
             if (digit < 0) {
                 return -1;
             }
@@ -485,7 +485,7 @@ public final class IPAddressUtil {
             /*
              * Accumulating negatively avoids surprises near MAX_VALUE
              */
-            digit = digit(s.charAt(i++));
+            digit = digit(s.charAt(i++), radix);
             if (digit < 0) {
                 return -1;
             }
@@ -501,7 +501,7 @@ public final class IPAddressUtil {
         return -result;
     }
 
-    private static int digit(final char c) {
+    private static int digit(char c, int radix) {
         switch (c) {
         case '0':
             return 0;
@@ -520,21 +520,21 @@ public final class IPAddressUtil {
         case '7':
             return 7;
         case '8':
-            return 8;
+            return radix < 10 ? -1 : 8;
         case '9':
-            return 9;
+            return radix < 10 ? -1 : 9;
         case 'a':
-            return 10;
+            return radix < 16 ? -1 : 10;
         case 'b':
-            return 11;
+            return radix < 16 ? -1 : 11;
         case 'c':
-            return 12;
+            return radix < 16 ? -1 : 12;
         case 'd':
-            return 13;
+            return radix < 16 ? -1 : 13;
         case 'e':
-            return 14;
+            return radix < 16 ? -1 : 14;
         case 'f':
-            return 15;
+            return radix < 16 ? -1 : 15;
         default:
             return -1;
         }
