@@ -56,10 +56,14 @@ import static com.openexchange.chronos.provider.CalendarFolderProperty.DESCRIPTI
 import static com.openexchange.chronos.provider.CalendarFolderProperty.optPropertyValue;
 import static com.openexchange.chronos.provider.google.GoogleCalendarConfigField.OAUTH_ID;
 import static com.openexchange.osgi.Tools.requireService;
+import java.io.IOException;
 import java.util.EnumSet;
 import java.util.Locale;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.google.api.services.calendar.Calendar;
+import com.google.api.services.calendar.model.CalendarList;
+import com.google.api.services.calendar.model.CalendarListEntry;
 import com.openexchange.chronos.ExtendedProperties;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.CalendarAccount;
@@ -69,6 +73,7 @@ import com.openexchange.chronos.provider.basic.BasicCalendarAccess;
 import com.openexchange.chronos.provider.basic.BasicCalendarProvider;
 import com.openexchange.chronos.provider.basic.CalendarSettings;
 import com.openexchange.chronos.provider.google.access.GoogleCalendarAccess;
+import com.openexchange.chronos.provider.google.access.GoogleOAuthAccess;
 import com.openexchange.chronos.provider.google.osgi.Services;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.exception.OXException;
@@ -149,21 +154,48 @@ public class GoogleCalendarProvider implements BasicCalendarProvider {
          * prepare & return checked proposed settings based on client-supplied settings
          */
         CalendarSettings proposedSettings = new CalendarSettings();
-        //TODO: connect and apply defaults from google
+        ExtendedProperties proposedExtendedProperties = new ExtendedProperties();
+
+        GoogleOAuthAccess googleOAuthAccess = new GoogleOAuthAccess(oauthId, session);
+        googleOAuthAccess.initialize();
+
+        Calendar googleCal = (Calendar) googleOAuthAccess.getClient().getClient();
+
+        try {
+            CalendarList list = googleCal.calendarList().list().execute();
+            CalendarListEntry primary = null;
+            for(CalendarListEntry entry: list.getItems()) {
+                if(entry.isPrimary()) {
+                    primary = entry;
+                    break;
+                }
+            }
+            if(primary != null) {
+                userConfig.put(GoogleCalendarConfigField.FOLDER, primary.getId());
+                settings.setName(primary.getSummary());
+                proposedExtendedProperties.add(COLOR(primary.getColorId(), false));
+                proposedExtendedProperties.add(DESCRIPTION(primary.getDescription(), false));
+            }
+        } catch (IOException e) {
+            throw CalendarExceptionCodes.IO_ERROR.create(e, e.getMessage());
+        } catch (JSONException e) {
+            throw CalendarExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+
         proposedSettings.setConfig(userConfig);
         if (settings.containsName()) {
             proposedSettings.setName(settings.getName());
         }
-        ExtendedProperties proposedExtendedProperties = new ExtendedProperties();
+
         Object colorValue = optPropertyValue(settings.getExtendedProperties(), COLOR_LITERAL);
         if (null != colorValue && String.class.isInstance(colorValue)) {
-            proposedExtendedProperties.add(COLOR((String) colorValue, false));
+            proposedExtendedProperties.replace(COLOR((String) colorValue, false));
         }
         Object descriptionValue = optPropertyValue(settings.getExtendedProperties(), DESCRIPTION_LITERAL);
         if (null != descriptionValue && String.class.isInstance(descriptionValue)) {
-            proposedExtendedProperties.add(DESCRIPTION((String) descriptionValue, false));
+            proposedExtendedProperties.replace(DESCRIPTION((String) descriptionValue, false));
         }
-        proposedSettings.setExtendedProperties(settings.getExtendedProperties());
+        proposedSettings.setExtendedProperties(proposedExtendedProperties);
         return proposedSettings;
     }
 

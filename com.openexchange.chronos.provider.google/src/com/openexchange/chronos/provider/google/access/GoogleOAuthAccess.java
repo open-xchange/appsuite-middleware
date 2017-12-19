@@ -50,13 +50,10 @@
 package com.openexchange.chronos.provider.google.access;
 
 import java.io.IOException;
-import org.json.JSONException;
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.http.HttpResponseException;
 import com.google.api.services.calendar.Calendar;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
-import com.openexchange.chronos.provider.CalendarAccount;
-import com.openexchange.chronos.provider.google.GoogleCalendarConfigField;
 import com.openexchange.exception.OXException;
 import com.openexchange.google.api.client.GoogleApiClients;
 import com.openexchange.oauth.OAuthAccount;
@@ -75,14 +72,14 @@ import com.openexchange.session.Session;
  */
 public class GoogleOAuthAccess extends AbstractOAuthAccess {
 
-    private final CalendarAccount acc;
+    private final int accountId;
 
     /**
      * Initializes a new {@link GoogleOAuthAccess}.
      */
-    public GoogleOAuthAccess(CalendarAccount account, Session session) {
+    public GoogleOAuthAccess(int accountId, Session session) {
         super(session);
-        this.acc = account;
+        this.accountId = accountId;
     }
 
     @Override
@@ -130,13 +127,7 @@ public class GoogleOAuthAccess extends AbstractOAuthAccess {
 
     @Override
     public int getAccountId() throws OXException {
-        try {
-            return acc.getUserConfiguration().getInt(GoogleCalendarConfigField.OAUTH_ID);
-        } catch (IllegalArgumentException e) {
-            throw CalendarExceptionCodes.UNEXPECTED_ERROR.create(e.getMessage());
-        } catch (JSONException e) {
-            throw CalendarExceptionCodes.UNEXPECTED_ERROR.create(e.getMessage());
-        }
+      return accountId;
     }
 
     @Override

@@ -119,8 +119,13 @@ public class GoogleCalendarAccess extends BasicCachingCalendarAccess {
         this.account = account;
         refreshInterval = GoogleCalendarConfig.getResfrehInterval(session);
         requestTimeout = GoogleCalendarConfig.getRequestTimeout(session);
-        oauthAccess = new GoogleOAuthAccess(account, session);
-        oauthAccess.initialize();
+        try {
+            oauthAccess = new GoogleOAuthAccess(account.getUserConfiguration().getInt(GoogleCalendarConfigField.OAUTH_ID), session);
+            oauthAccess.initialize();
+        } catch (JSONException e) {
+            throw CalendarExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+
         if (checkConfig) {
             initCalendarFolder(session);
         }
