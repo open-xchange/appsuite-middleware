@@ -60,11 +60,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import com.openexchange.database.Databases;
@@ -709,6 +707,13 @@ public class DatabaseImpl extends DBService {
         }
     }
 
+    /**
+     * Get the document file store locations for the specified context
+     *
+     * @param ctx The context
+     * @return A sorted set of all document file store locations for the specified context
+     * @throws OXException
+     */
     public SortedSet<String> getDocumentFileStoreLocationsperContext(Context ctx) throws OXException {
         Connection con = getReadConnection(ctx);
         try {
@@ -727,21 +732,13 @@ public class DatabaseImpl extends DBService {
             stmt = con.prepareStatement("SELECT DISTINCT user.id FROM user WHERE user.cid=? AND user.filestore_id>0");
             stmt.setInt(1, contextId);
             result = stmt.executeQuery();
-            Set<Integer> userIds;
-            if (result.next()) {
-                userIds = new LinkedHashSet<Integer>(16, 0.9F);
-                do {
-                    userIds.add(Integer.valueOf(result.getInt(1)));
-                } while (result.next());
-            } else {
-                userIds = null;
-            }
+            boolean hasUserFileStores = result.next();
             close(stmt, result);
             result = null;
             stmt = null;
 
             SortedSet<String> fileStorageLocations;
-            if (null == userIds) {
+            if (false == hasUserFileStores) {
                 // There are no users in this context with a specific file storage. Just grab all from "infostore_document" table for given context.
                 stmt = con.prepareStatement("SELECT file_store_location FROM infostore_document WHERE infostore_document.cid=? AND file_store_location IS NOT NULL");
                 stmt.setInt(1, contextId);
@@ -765,22 +762,6 @@ public class DatabaseImpl extends DBService {
                 close(stmt, result);
                 result = null;
                 stmt = null;
-
-                // Iterate users with a specific file storage
-                for (Integer userId : userIds) {
-                    stmt = con.prepareStatement("SELECT d.file_store_location FROM infostore_document AS d JOIN infostore AS i ON d.cid=i.cid AND d.infostore_id=i.id WHERE d.cid=? AND d.file_store_location IS NOT NULL AND i.folder_id IN (SELECT t.fuid FROM oxfolder_tree AS t WHERE t.cid=? AND t.module=? AND t.created_from=?)");
-                    stmt.setInt(1, contextId);
-                    stmt.setInt(2, contextId);
-                    stmt.setInt(3, FolderObject.INFOSTORE);
-                    stmt.setInt(4, userId.intValue());
-                    result = stmt.executeQuery();
-                    while (result.next()) {
-                        fileStorageLocations.add(result.getString(1));
-                    }
-                    close(stmt, result);
-                    result = null;
-                    stmt = null;
-                }
             }
 
             return fileStorageLocations;

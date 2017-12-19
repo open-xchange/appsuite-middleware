@@ -51,10 +51,9 @@ package com.openexchange.groupware.update;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.sql.Statement;
-import java.text.MessageFormat;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
-import com.openexchange.tools.sql.DBUtils;
+import com.openexchange.tools.update.Column;
 import com.openexchange.tools.update.Tools;
 
 /**
@@ -64,25 +63,19 @@ import com.openexchange.tools.update.Tools;
  */
 public abstract class SimpleColumnCreationTask extends UpdateTaskAdapter {
 
-    private static final String ADD_COLUMN = "ALTER TABLE {0} ADD COLUMN {1}";
-
     @Override
     public void perform(PerformParameters params) throws OXException {
         Connection con = params.getConnection();
         boolean rollback = false;
         try {
-            if (columnExists(con)) {
-                return;
-            }
+
             con.setAutoCommit(false);
             rollback = true;
-
-            Statement stmt = null;
-            try {
-                stmt = con.createStatement();
-                stmt.execute(getStatement());
-            } finally {
-                DBUtils.closeSQLStuff(stmt);
+            for(String table: getTableNames()){
+                if (columnExists(con, table)) {
+                    continue;
+                }
+                Tools.addColumns(con, table, new Column(getColumnName(), getColumnDefinition()));
             }
 
             con.commit();
@@ -91,21 +84,17 @@ public abstract class SimpleColumnCreationTask extends UpdateTaskAdapter {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
             if (rollback) {
-                DBUtils.rollback(con);
+                Databases.rollback(con);
             }
-            DBUtils.autocommit(con);
+            Databases.autocommit(con);
         }
     }
 
-    private String getStatement() {
-        return MessageFormat.format(ADD_COLUMN, getTableName(), getColumnDefinition());
+    private boolean columnExists(Connection con, String tableName) throws SQLException {
+        return Tools.columnExists(con, tableName, getColumnName());
     }
 
-    private boolean columnExists(Connection con) throws SQLException {
-        return Tools.columnExists(con, getTableName(), getColumnName());
-    }
-
-    protected abstract String getTableName();
+    protected abstract String[] getTableNames();
 
     protected abstract String getColumnName();
 

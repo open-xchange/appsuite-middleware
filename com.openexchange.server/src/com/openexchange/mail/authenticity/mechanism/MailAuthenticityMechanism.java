@@ -50,7 +50,7 @@
 package com.openexchange.mail.authenticity.mechanism;
 
 /**
- * {@link MailAuthenticityMechanism}
+ * {@link MailAuthenticityMechanism} - Defines the different supported mechanism types
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
@@ -64,10 +64,24 @@ public interface MailAuthenticityMechanism {
     String getDisplayName();
 
     /**
+     * Gets the technicalName
+     *
+     * @return The technicalName
+     */
+    String getTechnicalName();
+
+    /**
      * Gets the resultType
      *
      * @return The resultType
      */
     Class<? extends AuthenticityMechanismResult> getResultType();
+
+    /**
+     * Returns the ordinal value
+     * 
+     * @return the ordinal value of the enum
+     */
+    int getCode();
 
 }

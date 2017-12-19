@@ -50,6 +50,7 @@
 package com.openexchange.folderstorage.filestorage;
 
 import com.openexchange.file.storage.FileStoragePermission;
+import com.openexchange.folderstorage.FolderPermissionType;
 import com.openexchange.folderstorage.Permission;
 
 /**
@@ -60,6 +61,8 @@ import com.openexchange.folderstorage.Permission;
 public final class FileStoragePermissionImpl implements Permission {
 
     private int system;
+
+    private FolderPermissionType type;
 
     private int deletePermission;
 
@@ -96,6 +99,7 @@ public final class FileStoragePermissionImpl implements Permission {
         group = fsPermission.isGroup();
         readPermission = fsPermission.getReadPermission();
         system = fsPermission.getSystem();
+        type = fsPermission.getType() != null ? FolderPermissionType.getType(fsPermission.getType().getTypeNumber()) : FolderPermissionType.NORMAL;
         writePermission = fsPermission.getWritePermission();
     }
 
@@ -271,6 +275,18 @@ public final class FileStoragePermissionImpl implements Permission {
         } catch (final CloneNotSupportedException e) {
             throw new InternalError(e.getMessage());
         }
+    }
+
+    @Override
+    public FolderPermissionType getType() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public void setType(FolderPermissionType type) {
+        // TODO Auto-generated method stub
+
     }
 
 }

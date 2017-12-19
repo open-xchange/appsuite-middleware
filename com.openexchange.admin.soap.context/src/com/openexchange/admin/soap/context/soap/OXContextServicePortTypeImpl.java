@@ -51,6 +51,7 @@ import com.openexchange.admin.soap.context.dataobjects.SOAPStringMapMap;
 import com.openexchange.admin.soap.context.dataobjects.SchemaSelectStrategy;
 import com.openexchange.admin.soap.context.dataobjects.User;
 import com.openexchange.admin.soap.context.dataobjects.UserModuleAccess;
+import com.openexchange.java.Strings;
 import com.openexchange.tools.net.URIDefaults;
 import com.openexchange.tools.net.URIParser;
 
@@ -470,10 +471,10 @@ public class OXContextServicePortTypeImpl implements OXContextServicePortType {
     }
 
     @Override
-    public java.util.List<Context> listPageAll(final int offset, final int length, final Credentials auth) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, RemoteException_Exception {
+    public java.util.List<Context> listPageAll(final String offset, final String length, final Credentials auth) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, RemoteException_Exception {
         final OXContextInterface contextInterface = getContextInterface();
         try {
-            final com.openexchange.admin.rmi.dataobjects.Context[] contexts = contextInterface.listAll(offset, length, soap2Credentials(auth));
+            final com.openexchange.admin.rmi.dataobjects.Context[] contexts = contextInterface.listAll(string2int(offset), string2int(length), soap2Credentials(auth));
             if (null == contexts) {
                 return Collections.emptyList();
             }
@@ -722,10 +723,10 @@ public class OXContextServicePortTypeImpl implements OXContextServicePortType {
     }
 
     @Override
-    public java.util.List<Context> listPageByFilestore(final Filestore fs, final int offset, final int length, final Credentials auth) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, RemoteException_Exception, NoSuchFilestoreException_Exception {
+    public java.util.List<Context> listPageByFilestore(final Filestore fs, final String offset, final String length, final Credentials auth) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, RemoteException_Exception, NoSuchFilestoreException_Exception {
         final OXContextInterface contextInterface = getContextInterface();
         try {
-            final com.openexchange.admin.rmi.dataobjects.Context[] contexts = contextInterface.listByFilestore(soap2Filestore(fs), offset, length, soap2Credentials(auth));
+            final com.openexchange.admin.rmi.dataobjects.Context[] contexts = contextInterface.listByFilestore(soap2Filestore(fs), string2int(offset), string2int(length), soap2Credentials(auth));
             if (null == contexts) {
                 return Collections.emptyList();
             }
@@ -1044,10 +1045,10 @@ public class OXContextServicePortTypeImpl implements OXContextServicePortType {
     }
 
     @Override
-    public java.util.List<Context> listPage(final java.lang.String searchPattern, final int offset, final int length, final Credentials auth) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, RemoteException_Exception {
+    public java.util.List<Context> listPage(final java.lang.String searchPattern, final String offset, final String length, final Credentials auth) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, RemoteException_Exception {
         final OXContextInterface contextInterface = getContextInterface();
         try {
-            final com.openexchange.admin.rmi.dataobjects.Context[] contexts = contextInterface.list(com.openexchange.java.Strings.isEmpty(searchPattern) ? "*" : searchPattern, offset, length, soap2Credentials(auth));
+            final com.openexchange.admin.rmi.dataobjects.Context[] contexts = contextInterface.list(com.openexchange.java.Strings.isEmpty(searchPattern) ? "*" : searchPattern, string2int(offset), string2int(length), soap2Credentials(auth));
             if (null == contexts) {
                 return Collections.emptyList();
             }
@@ -1149,10 +1150,10 @@ public class OXContextServicePortTypeImpl implements OXContextServicePortType {
     }
 
     @Override
-    public java.util.List<Context> listPageByDatabase(final Database db, final int offset, final int length, final Credentials auth) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, RemoteException_Exception, NoSuchDatabaseException_Exception {
+    public java.util.List<Context> listPageByDatabase(final Database db, final String offset, final String length, final Credentials auth) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, RemoteException_Exception, NoSuchDatabaseException_Exception {
         final OXContextInterface contextInterface = getContextInterface();
         try {
-            final com.openexchange.admin.rmi.dataobjects.Context[] contexts = contextInterface.listByDatabase(soap2Database(db), offset, length, soap2Credentials(auth));
+            final com.openexchange.admin.rmi.dataobjects.Context[] contexts = contextInterface.listByDatabase(soap2Database(db), string2int(offset), string2int(length), soap2Credentials(auth));
             if (null == contexts) {
                 return Collections.emptyList();
             }
@@ -2112,12 +2113,7 @@ public class OXContextServicePortTypeImpl implements OXContextServicePortType {
         }
         final com.openexchange.admin.rmi.dataobjects.Database ret = new com.openexchange.admin.rmi.dataobjects.Database();
 
-        Integer itg = soapDatabase.getClusterWeight();
-        if (itg != null) {
-            ret.setClusterWeight(itg);
-        }
-
-        itg = soapDatabase.getCurrentUnits();
+        Integer itg = soapDatabase.getCurrentUnits();
         if (itg != null) {
             ret.setCurrentUnits(itg);
         }
@@ -2435,7 +2431,6 @@ public class OXContextServicePortTypeImpl implements OXContextServicePortType {
             return null;
         }
         final Database soapDatabase = new Database();
-        soapDatabase.setClusterWeight(database.getClusterWeight());
         soapDatabase.setCurrentUnits(database.getCurrentUnits());
         soapDatabase.setDriver(database.getDriver());
         soapDatabase.setId(database.getId());
@@ -2484,5 +2479,20 @@ public class OXContextServicePortTypeImpl implements OXContextServicePortType {
         }
         soapMap.setEntries(entries);
         return soapMap;
+    }
+
+    private static int string2int(String str) throws StorageException_Exception {
+        if (Strings.isEmpty(str)) {
+            return -1;
+        }
+
+        try {
+            int i = Integer.parseInt(str.trim());
+            return i < 0 ? -1 : i;
+        } catch (NumberFormatException e) {
+            com.openexchange.admin.soap.context.soap.StorageException faultDetail = new com.openexchange.admin.soap.context.soap.StorageException();
+            faultDetail.setStorageException(new com.openexchange.admin.soap.context.exceptions.StorageException());
+            throw new StorageException_Exception("Invalid integer parameter", faultDetail, e);
+        }
     }
 }

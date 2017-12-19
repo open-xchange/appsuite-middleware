@@ -49,12 +49,13 @@
 
 package com.openexchange.mail.authenticity;
 
+import java.util.Collection;
 import com.openexchange.exception.OXException;
 import com.openexchange.osgi.annotation.SingletonService;
 import com.openexchange.session.Session;
 
 /**
- * {@link MailAuthenticityHandlerRegistry}
+ * {@link MailAuthenticityHandlerRegistry} - A registry service for {@link MailAuthenticityHandler authenticity handlers}.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.10.0
@@ -99,5 +100,13 @@ public interface MailAuthenticityHandlerRegistry {
      * @throws OXException If sorted listing cannot be returned
      */
     MailAuthenticityHandler getHighestRankedHandlerFor(Session session) throws OXException;
+
+    /**
+     * Gets all currently available handlers.
+     *
+     * @return All currently available handlers
+     * @throws OXException If handlers cannot be returned
+     */
+    Collection<MailAuthenticityHandler> getHandlers() throws OXException;
 
 }

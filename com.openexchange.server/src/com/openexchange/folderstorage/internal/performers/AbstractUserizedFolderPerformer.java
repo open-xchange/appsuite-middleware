@@ -70,6 +70,7 @@ import com.openexchange.file.storage.FileStorageCapability;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
+import com.openexchange.folderstorage.FolderPermissionType;
 import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderStorageDiscoverer;
@@ -774,7 +775,7 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
         Collection<Permission> originalPermissions = comparedPermissions.getOriginalPermissions();
         if (null != originalPermissions && 0 < originalPermissions.size()) {
             for (Permission originalPermission : originalPermissions) {
-                if (false == originalPermission.isGroup() && !comparedPermissions.isSystemPermission(originalPermission)) {
+                if (false == originalPermission.isGroup() && !comparedPermissions.isSystemPermission(originalPermission) && originalPermission.getType() == FolderPermissionType.NORMAL) {
                     GuestInfo guestInfo = comparedPermissions.getGuestInfo(originalPermission.getEntity());
                     if (null != guestInfo && isAnonymous(guestInfo)) {
                         return true;
@@ -800,9 +801,9 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
              * allow only one anonymous permission with "read-only" permission bits, matching the guest's fixed target
              */
             checkIsLinkPermission(folder, permission);
-            if (isNotEqualsTarget(session, folder, guestInfo.getLinkTarget())) {
-                throw invalidPermissions(folder, permission);
-            }
+//            if (isNotEqualsTarget(session, folder, guestInfo.getLinkTarget())) {
+//                throw invalidPermissions(folder, permission);
+//            }
         } else if (isReadOnlySharing(folder)) {
             /*
              * allow only "read-only" permissions for invited guests in non-infostore folders

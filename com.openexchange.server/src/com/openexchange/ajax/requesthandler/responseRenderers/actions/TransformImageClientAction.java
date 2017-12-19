@@ -54,6 +54,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.zip.Adler32;
 import java.util.zip.CheckedInputStream;
 import java.util.zip.Checksum;
@@ -95,7 +96,7 @@ public class TransformImageClientAction extends TransformImageAction {
      * @param imageClient The image client service interface
      */
     public void setImageClient(final IImageClient imageClient) {
-        m_imageClient = imageClient;
+        m_imageClient.set(imageClient);
     }
 
     /**
@@ -104,10 +105,11 @@ public class TransformImageClientAction extends TransformImageAction {
     public boolean isValid() {
         boolean ret = false;
 
-        if (null != m_imageClient) {
+        IImageClient imageClient = this.m_imageClient.get();
+        if (null != imageClient) {
             if (!(ret = m_clientStatusValid.get())) {
                 try {
-                    m_clientStatusValid.set(ret = m_imageClient.isConnected());
+                    m_clientStatusValid.set(ret = imageClient.isConnected());
                 } catch (OXException e) {
                     // only tracing here
                     LOG.trace(e.getMessage());
@@ -159,7 +161,8 @@ public class TransformImageClientAction extends TransformImageAction {
         if (isNotEmpty(cacheKey)) {
             if (isValid()) {
                 try {
-                    final InputStream imageInputStm = m_imageClient.getImage(cacheKey, xformParams.getFormatString(), Integer.toString(session.getContext().getContextId()));
+                    IImageClient imageClient = this.m_imageClient.get();
+                    final InputStream imageInputStm = imageClient.getImage(cacheKey, xformParams.getFormatString(), Integer.toString(session.getContext().getContextId()));
 
                     if (null != imageInputStm) {
                         ret = new FileHolder(imageInputStm, -1, xformParams.getImageMimeType(), cacheKey);
@@ -204,7 +207,8 @@ public class TransformImageClientAction extends TransformImageAction {
         if (isValid() && isNotEmpty(cacheKey)) {
             try (final InputStream srcImageStm = file.getStream()) {
                 if (null != srcImageStm) {
-                    try (final InputStream resultImageStm = m_imageClient.cacheAndGetImage(cacheKey, xformParams.getFormatString(), srcImageStm, getContextIdString(session))) {
+                    IImageClient imageClient = this.m_imageClient.get();
+                    try (final InputStream resultImageStm = imageClient.cacheAndGetImage(cacheKey, xformParams.getFormatString(), srcImageStm, getContextIdString(session))) {
                         if (null != resultImageStm) {
                             final ThresholdFileHolder imageData = new ThresholdFileHolder();
                             imageData.write(resultImageStm);
@@ -290,7 +294,7 @@ public class TransformImageClientAction extends TransformImageAction {
 
     // - Members ---------------------------------------------------------------
 
-    private IImageClient m_imageClient = null;
+    private final AtomicReference<IImageClient> m_imageClient = new AtomicReference<>(null);
 
     private final AtomicBoolean m_clientStatusValid = new AtomicBoolean(false);
 }

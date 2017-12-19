@@ -4,3 +4,4 @@ requests:
   - UserPictureRequest.yaml
   - FileMp3coverRequest.yaml
   - MfilePictureRequest.yaml
+  - TrustedMailPictureRequest.yaml

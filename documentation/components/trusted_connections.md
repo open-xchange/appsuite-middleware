@@ -98,6 +98,7 @@ To identify this problem you can simply set the JDK to log all SSL handshakes wi
 Upon starting the middleware server, you should see In the `open-xchange-console.log` some SSL information, i.e. initialisation of the trust store. For every connection the middleware is initiating and an SSL handshake is taking place, the relevant SSL certificates along with the entire SSL handshake process will be logged there. 
 
 In case of the affected JDK version, the initial header the JDK is sending on behalf of the middleware server looks like this:
+
 ```
 *** ClientHello, TLSv1.2
 RandomCookie:  GMT: 1492186440 bytes = { 86, 206, 84, 37, 246, 139, 77, 249, 203, 236, 178, 93, 75, 65, 27, 134, 91, 24, 79, 38, 49, 98, 255, 93, 136, 11, 240, 128 }
@@ -109,6 +110,7 @@ Extension ec_point_formats, formats: [uncompressed]
 Extension signature_algorithms, signature_algorithms: SHA512withECDSA, SHA512withRSA, SHA384withECDSA, SHA384withRSA, SHA256withECDSA, SHA256withRSA, SHA256withDSA, SHA224withECDSA, SHA224withRSA, SHA224withDSA, SHA1withECDSA, SHA1withRSA, SHA1withDSA
 ***
 ```
+
 and the response it gets from the third party server along with the certificate chain looks like this:
 
 ```
@@ -167,6 +169,7 @@ chain [0] = [
   Subject: CN=*.badssl.com, OU=PositiveSSL Wildcard, OU=Domain Control Validated
   Signature Algorithm: SHA256withRSA, OID = 1.2.840.113549.1.1.11
 ```
+
 The client is sending the required `server_name` extension to the server, and the server acknowledges this in the response. Consequently, the correct certificate is returned with the correct common name.
 
 The bug is fixed with patch version 141 for [OpenJDK](https://bugs.openjdk.java.net/projects/JDK/versions/18709) and [Oracle JDK](http://www.oracle.com/technetwork/java/javase/2col/8u141-bugfixes-3720387.html). So, be sure to upgrade to the appropriate version.

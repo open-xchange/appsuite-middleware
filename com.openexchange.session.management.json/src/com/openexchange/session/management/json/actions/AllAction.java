@@ -63,10 +63,10 @@ import com.openexchange.exception.OXException;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.management.ManagedSession;
 import com.openexchange.session.management.SessionManagementService;
 import com.openexchange.session.management.SessionManagementStrings;
-import com.openexchange.session.management.json.osgi.Services;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.UserService;
 
@@ -78,17 +78,20 @@ import com.openexchange.user.UserService;
  */
 public class AllAction implements AJAXActionService {
 
-    public AllAction() {
+    private final ServiceLookup services;
+
+    public AllAction(ServiceLookup services) {
         super();
+        this.services = services;
     }
 
     @Override
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
-        SessionManagementService service = Services.getService(SessionManagementService.class);
+        SessionManagementService service = services.getService(SessionManagementService.class);
         if (null == service) {
             throw ServiceExceptionCode.absentService(SessionManagementService.class);
         }
-        UserService userService = Services.getService(UserService.class);
+        UserService userService = services.getService(UserService.class);
         Locale locale = Locale.getDefault();
         if (null != userService) {
             locale = userService.getUser(session.getUserId(), session.getContextId()).getLocale();
@@ -168,9 +171,9 @@ public class AllAction implements AJAXActionService {
     private JSONObject getDeviceInfo(ManagedSession session, Locale locale) {
         JSONObject deviceInfo = new JSONObject(2);
         try {
-            ClientInfoService service = Services.getService(ClientInfoService.class);
+            ClientInfoService service = services.getService(ClientInfoService.class);
             if (null != service) {
-                ClientInfo info = service.getClientInfo(session);
+                ClientInfo info = service.getClientInfo(session.getSession());
                 if (null != info) {
                     deviceInfo.put("info", info.toString(locale));
                     deviceInfo.put("type", info.getType().getName());

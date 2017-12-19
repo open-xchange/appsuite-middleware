@@ -122,9 +122,9 @@ public interface OXContextServicePortType {
     @ResponseWrapper(localName = "listPageAllResponse", targetNamespace = "http://soap.admin.openexchange.com", className = "com.openexchange.admin.soap.context.soap.ListPageAllResponse")
     public java.util.List<com.openexchange.admin.soap.context.dataobjects.Context> listPageAll(
         @WebParam(name = "offset", targetNamespace = "http://soap.admin.openexchange.com")
-        int offset,
+        String offset,
         @WebParam(name = "length", targetNamespace = "http://soap.admin.openexchange.com")
-        int length,
+        String length,
         @WebParam(name = "auth", targetNamespace = "http://soap.admin.openexchange.com")
         com.openexchange.admin.soap.context.dataobjects.Credentials auth
     ) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, RemoteException_Exception;
@@ -224,9 +224,9 @@ public interface OXContextServicePortType {
         @WebParam(name = "fs", targetNamespace = "http://soap.admin.openexchange.com")
         com.openexchange.admin.soap.context.dataobjects.Filestore fs,
         @WebParam(name = "offset", targetNamespace = "http://soap.admin.openexchange.com")
-        int offset,
+        String offset,
         @WebParam(name = "length", targetNamespace = "http://soap.admin.openexchange.com")
-        int length,
+        String length,
         @WebParam(name = "auth", targetNamespace = "http://soap.admin.openexchange.com")
         com.openexchange.admin.soap.context.dataobjects.Credentials auth
     ) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, RemoteException_Exception, NoSuchFilestoreException_Exception;
@@ -330,9 +330,9 @@ public interface OXContextServicePortType {
         @WebParam(name = "search_pattern", targetNamespace = "http://soap.admin.openexchange.com")
         java.lang.String searchPattern,
         @WebParam(name = "offset", targetNamespace = "http://soap.admin.openexchange.com")
-        int offset,
+        String offset,
         @WebParam(name = "length", targetNamespace = "http://soap.admin.openexchange.com")
-        int length,
+        String length,
         @WebParam(name = "auth", targetNamespace = "http://soap.admin.openexchange.com")
         com.openexchange.admin.soap.context.dataobjects.Credentials auth
     ) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, RemoteException_Exception;
@@ -370,9 +370,9 @@ public interface OXContextServicePortType {
         @WebParam(name = "db", targetNamespace = "http://soap.admin.openexchange.com")
         com.openexchange.admin.soap.context.dataobjects.Database db,
         @WebParam(name = "db", targetNamespace = "http://soap.admin.openexchange.com")
-        int offset,
+        String offset,
         @WebParam(name = "db", targetNamespace = "http://soap.admin.openexchange.com")
-        int length,
+        String length,
         @WebParam(name = "auth", targetNamespace = "http://soap.admin.openexchange.com")
         com.openexchange.admin.soap.context.dataobjects.Credentials auth
     ) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, RemoteException_Exception, NoSuchDatabaseException_Exception;

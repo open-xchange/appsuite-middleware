@@ -114,7 +114,7 @@ public class PeriodicCleaner implements Runnable {
                         lastLogTime = now;
                     }
                     try {
-                        cleanupContext(representativeContextId);
+                        cleanupSchema(representativeContextId);
                         break;
                     } catch (OXException e) {
                         if (Category.CATEGORY_TRY_AGAIN.equals(e.getCategory()) && retry < 3) {
@@ -152,7 +152,7 @@ public class PeriodicCleaner implements Runnable {
      * @param representativeContextId The context ID located in target schema
      * @param guestExpiry the time span (in milliseconds) after which an unused guest user can be deleted permanently
      */
-    private void cleanupContext(int representativeContextId) throws OXException {
+    private void cleanupSchema(int representativeContextId) throws OXException {
         // Execute schema- and resulting guest cleanup tasks in current thread
         try {
             Map<Integer, List<GuestCleanupTask>> guestCleanupTasks = new SchemaCleanupTask(services, representativeContextId, guestExpiry).call();

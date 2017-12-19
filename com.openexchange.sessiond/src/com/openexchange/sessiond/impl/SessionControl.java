@@ -109,4 +109,43 @@ public class SessionControl {
         return creationTime;
     }
 
+    /**
+     * Checks if the session associated with this control holds specified context identifier
+     *
+     * @param contextId The context identifier to check against
+     * @return <code>true</code> if session holds specified context identifier; otherwise <code>false</code>
+     */
+    public boolean equalsContext(int contextId) {
+        return session.getContextId() == contextId;
+    }
+
+    /**
+     * Checks if the session associated with this control holds specified user and context identifier
+     *
+     * @param userId The user identifier to check against
+     * @param contextId The context identifier to check against
+     * @return <code>true</code> if session holds specified user and context identifier; otherwise <code>false</code>
+     */
+    public boolean equalsUserAndContext(int userId, int contextId) {
+        return session.getContextId() == contextId && session.getUserId() == userId;
+    }
+
+    /**
+     * Gets the context identifier
+     *
+     * @return The context identifier
+     */
+    public int getContextId() {
+        return session.getContextId();
+    }
+
+    /**
+     * Gets the user identifier
+     *
+     * @return The user identifier
+     */
+    public int getUserId() {
+        return session.getUserId();
+    }
+
 }

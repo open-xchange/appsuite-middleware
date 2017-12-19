@@ -456,6 +456,21 @@ if [ -e $TMPFILE ]; then
 fi
 set +e
 
+# SoftwareChange_Request-66
+ox_remove_property com.openexchange.hazelcast.jmxDetailed /opt/open-xchange/etc/hazelcast.properties
+
+# SoftwareChange_Request-77
+PFILE=/opt/open-xchange/etc/cache.ccf
+NAMES=( jcs.region.User.cacheattributes.MaxObjects jcs.region.UserConfiguration.cacheattributes.MaxObjects jcs.region.UserPermissionBits.cacheattributes.MaxObjects jcs.region.UserSettingMail.cacheattributes.MaxObjects jcs.region.Context.cacheattributes.MaxObjects )
+OLDDEFAULTS=( 40000 20000 20000 20000 10000 )
+NEWDEFAULTS=( 4000000 4000000 4000000 4000000 1000000 )
+for I in $(seq 1 ${#NAMES[@]}); do
+  VALUE=$(ox_read_property ${NAMES[$I-1]} $PFILE)
+  if [ "${VALUE}" = "${OLDDEFAULTS[$I-1]}" ]; then
+    ox_set_property ${NAMES[$I-1]} "${NEWDEFAULTS[$I-1]}" $PFILE
+  fi
+done
+
 setConfigFilePermissions() {
     PROTECT=( autoconfig.properties configdb.properties hazelcast.properties jolokia.properties mail.properties mail-push.properties management.properties secret.properties secrets server.properties sessiond.properties share.properties tokenlogin-secrets )
     for FILE in "${PROTECT[@]}"

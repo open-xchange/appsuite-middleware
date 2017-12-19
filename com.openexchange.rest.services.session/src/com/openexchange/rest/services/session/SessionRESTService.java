@@ -106,7 +106,8 @@ public class SessionRESTService {
         try {
             Session ses = sessiondService.getSession(session);
             if(ses != null){
-                return new JSONObject(4).put("context", ses.getContextId()).put("user", ses.getUserId());
+                final boolean isGuest = Boolean.TRUE.equals(ses.getParameter(Session.PARAM_GUEST));
+                return new JSONObject(6).put("context", ses.getContextId()).put("user", ses.getUserId()).put("guest", isGuest);
             }
             return new JSONObject();
         } catch (JSONException e) {

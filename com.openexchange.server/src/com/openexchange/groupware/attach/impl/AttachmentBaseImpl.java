@@ -279,6 +279,32 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
     }
 
     @Override
+    public SortedSet<String> getAttachmentFileStoreLocationsPerUser(Context ctx, User user) throws OXException {
+        final SortedSet<String> retval = new TreeSet<String>();
+        Connection readCon = null;
+        final String selectfileid = "SELECT file_id FROM prg_attachment WHERE file_id is not null AND cid=? AND created_by=?";
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            readCon = getReadConnection(ctx);
+            stmt = readCon.prepareStatement(selectfileid);
+            stmt.setInt(1, ctx.getContextId());
+            stmt.setInt(2, user.getId());
+            rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                retval.add(rs.getString(1));
+            }
+        } catch (final SQLException e) {
+            throw AttachmentExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
+        } finally {
+            close(stmt, rs);
+            releaseReadConnection(ctx, readCon);
+        }
+        return retval;
+    }
+
+    @Override
     public TimedResult<AttachmentMetadata> getAttachments(final Session session, final int folderId, final int attachedId, final int moduleId, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
         return getAttachments(session, folderId, attachedId, moduleId, QUERIES.getFields(), null, ASC, ctx, user, userConfig);
     }

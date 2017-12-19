@@ -169,6 +169,8 @@ import com.openexchange.net.ssl.config.impl.internal.SSLProperties;
 import com.openexchange.net.ssl.config.impl.internal.TrustAllSSLConfigurationService;
 import com.openexchange.net.ssl.internal.DefaultSSLSocketFactoryProvider;
 import com.openexchange.osgi.util.ServiceCallWrapperModifier;
+import com.openexchange.passwordchange.BasicPasswordChangeService;
+import com.openexchange.passwordchange.DefaultBasicPasswordChangeService;
 import com.openexchange.passwordmechs.PasswordMechFactoryImpl;
 import com.openexchange.push.udp.registry.PushServiceRegistry;
 import com.openexchange.resource.ResourceService;
@@ -514,6 +516,10 @@ public final class Init {
 
         startTestServices = System.currentTimeMillis();
         startAndInjectAliasService();
+        System.out.println("startAndInjectAliasService took " + (System.currentTimeMillis() - startTestServices) + "ms.");
+        
+        startTestServices = System.currentTimeMillis();
+        startAndInjectPasswordChangeService();
         System.out.println("startAndInjectAliasService took " + (System.currentTimeMillis() - startTestServices) + "ms.");
     }
 
@@ -1078,6 +1084,14 @@ public final class Init {
             services.put(PhoneNumberParserService.class, service);
             TestServiceRegistry.getInstance().addService(PhoneNumberParserService.class, service);
         }
+    }
+    
+    public static void startAndInjectPasswordChangeService() {
+        if (null == TestServiceRegistry.getInstance().getService(BasicPasswordChangeService.class)) {
+            BasicPasswordChangeService service =  new DefaultBasicPasswordChangeService();
+            services.put(BasicPasswordChangeService.class, service);
+            TestServiceRegistry.getInstance().addService(BasicPasswordChangeService.class, service);
+        }   
     }
 
     public static void stopServer() throws Exception {

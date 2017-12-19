@@ -104,20 +104,19 @@ public class ListDatabase extends DatabaseAbstraction {
             data.add(makeStandardData(database, false));
         }
 
-        doOutput(new String[] { "r", "l", "l", "l", "r", "r", "r", "r", "l", "r", "r" },
+        doOutput(new String[] { "r", "l", "l", "l", "r", "r", "r", "l", "r", "r" },
 //        doOutput(new String[] { "3r", "10l", "20l", "7l", "7r", "7r", "7r", "7r", "6l", "4r", "7r" },
-                 new String[] { "id", "name", "hostname", "master", "mid", "weight", "maxctx", "curctx", "hlimit", "max", "inital" }, data);
+                 new String[] { "id", "name", "hostname", "master", "mid", "maxctx", "curctx", "hlimit", "max", "inital" }, data);
     }
 
     private void precsvinfos(final Database[] databases) throws URISyntaxException, InvalidDataException {
         // needed for csv output, KEEP AN EYE ON ORDER!!!
-        final ArrayList<String> columns = new ArrayList<String>();
+        final ArrayList<String> columns = new ArrayList<String>(16);
         columns.add("id");
         columns.add("display_name");
         columns.add("url");
         columns.add("master");
         columns.add("masterid");
-        columns.add("clusterweight");
         columns.add("maxUnits");
         columns.add("currentunits");
         columns.add("poolHardLimit");
@@ -219,12 +218,6 @@ public class ListDatabase extends DatabaseAbstraction {
 
         if (null != db.getMasterId()) {
             rea_data.add(db.getMasterId().toString());
-        } else {
-            rea_data.add(null);
-        }
-
-        if (null != db.getClusterWeight()) {
-            rea_data.add(db.getClusterWeight().toString());
         } else {
             rea_data.add(null);
         }

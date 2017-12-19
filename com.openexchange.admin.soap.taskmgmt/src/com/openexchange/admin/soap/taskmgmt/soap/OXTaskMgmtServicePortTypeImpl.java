@@ -275,12 +275,7 @@ public class OXTaskMgmtServicePortTypeImpl implements OXTaskMgmtServicePortType 
         }
         final com.openexchange.admin.rmi.dataobjects.Database ret = new com.openexchange.admin.rmi.dataobjects.Database();
 
-        Integer itg = soapDatabase.getClusterWeight();
-        if (itg != null) {
-            ret.setClusterWeight(itg);
-        }
-
-        itg = soapDatabase.getCurrentUnits();
+        Integer itg = soapDatabase.getCurrentUnits();
         if (itg != null) {
             ret.setCurrentUnits(itg);
         }

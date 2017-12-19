@@ -508,11 +508,11 @@ public final class MimeStorageUtility {
     // ---------------------------------------------------------------------------------------------------------------------------------
 
     private static final EnumMap<MailField, FetchProfile.Item> FIELD2ITEM;
-    private static final EnumMap<MailField, List<String>> FIELD2STRING;
+    private static final EnumMap<MailField, List<String>> FIELD2HEADERNAMES;
 
     static {
         /*
-         * Item map
+         * (Fetch) Item map
          */
         final EnumMap<MailField, FetchProfile.Item> field2item = new EnumMap<MailField, FetchProfile.Item>(MailField.class);
         field2item.put(MailField.HEADERS, IMAPFolder.FetchProfileItem.HEADERS);
@@ -528,7 +528,7 @@ public final class MimeStorageUtility {
         field2item.put(MailField.TEXT_PREVIEW, IMAPFolder.SnippetFetchProfileItem.SNIPPETS);
         FIELD2ITEM = field2item;
         /*
-         * String map
+         * Header name map
          */
         final EnumMap<MailField, List<String>> field2string = new EnumMap<MailField, List<String>>(MailField.class);
         field2string.put(MailField.FROM, Collections.singletonList(MessageHeaders.HDR_FROM));
@@ -539,8 +539,9 @@ public final class MimeStorageUtility {
         field2string.put(MailField.SENT_DATE, Collections.singletonList(MessageHeaders.HDR_DATE));
         field2string.put(MailField.DISPOSITION_NOTIFICATION_TO, Collections.singletonList(MessageHeaders.HDR_DISP_NOT_TO));
         field2string.put(MailField.PRIORITY, Arrays.asList(MessageHeaders.HDR_IMPORTANCE, MessageHeaders.HDR_X_PRIORITY));
-        field2string.put(MailField.AUTHENTICATION_RESULTS, Collections.singletonList(MessageHeaders.HDR_AUTHENTICATION_RESULTS));
-        FIELD2STRING = field2string;
+        field2string.put(MailField.AUTHENTICATION_OVERALL_RESULT, Collections.singletonList(MessageHeaders.HDR_AUTHENTICATION_RESULTS));
+        field2string.put(MailField.AUTHENTICATION_MECHANISM_RESULTS, Collections.singletonList(MessageHeaders.HDR_AUTHENTICATION_RESULTS));
+        FIELD2HEADERNAMES = field2string;
     }
 
     /**
@@ -556,10 +557,10 @@ public final class MimeStorageUtility {
             return;
         }
 
-        List<String> strings = FIELD2STRING.get(field);
-        if (null != strings) {
-            for (final String string : strings) {
-                fp.add(string);
+        List<String> headerNames = FIELD2HEADERNAMES.get(field);
+        if (null != headerNames) {
+            for (final String headerName : headerNames) {
+                fp.add(headerName);
             }
         }
     }

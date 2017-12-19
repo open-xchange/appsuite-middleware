@@ -49,22 +49,31 @@
 
 package com.openexchange.mail.authenticity.impl.osgi;
 
-import java.util.Arrays;
-import java.util.List;
+import java.util.Dictionary;
+import java.util.Hashtable;
+import org.osgi.framework.BundleContext;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.ForcedReloadable;
 import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
+import com.openexchange.config.Reloadables;
 import com.openexchange.config.lean.LeanConfigurationService;
-import com.openexchange.java.Strings;
+import com.openexchange.conversion.DataSource;
+import com.openexchange.image.ImageActionFactory;
+import com.openexchange.jslob.JSlobEntry;
 import com.openexchange.mail.MailFetchListener;
 import com.openexchange.mail.authenticity.MailAuthenticityHandler;
 import com.openexchange.mail.authenticity.MailAuthenticityHandlerRegistry;
-import com.openexchange.mail.authenticity.impl.MailAuthenticityFetchListener;
-import com.openexchange.mail.authenticity.impl.MailAuthenticityHandlerImpl;
-import com.openexchange.mail.authenticity.impl.MailAuthenticityHandlerRegistryImpl;
-import com.openexchange.mail.authenticity.impl.MailAuthenticityProperty;
-import com.openexchange.mail.authenticity.impl.TrustedDomainAuthenticityHandler;
+import com.openexchange.mail.authenticity.MailAuthenticityProperty;
+import com.openexchange.mail.authenticity.impl.core.MailAuthenticityFetchListener;
+import com.openexchange.mail.authenticity.impl.core.MailAuthenticityHandlerImpl;
+import com.openexchange.mail.authenticity.impl.core.MailAuthenticityHandlerRegistryImpl;
+import com.openexchange.mail.authenticity.impl.core.MailAuthenticityJSlobEntry;
+import com.openexchange.mail.authenticity.impl.core.metrics.MailAuthenticityMetricFileLogger;
+import com.openexchange.mail.authenticity.impl.core.metrics.MailAuthenticityMetricLogger;
+import com.openexchange.mail.authenticity.impl.trusted.internal.TrustedMailAuthenticityHandler;
+import com.openexchange.mail.authenticity.impl.trusted.internal.TrustedMailDataSource;
+import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.osgi.HousekeepingActivator;
 
 /**
@@ -89,41 +98,71 @@ public class MailAuthenticityActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { LeanConfigurationService.class, ConfigurationService.class };
+        return new Class<?>[] { LeanConfigurationService.class, ConfigurationService.class, UnifiedInboxManagement.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
-
-        track(TrustedDomainAuthenticityHandler.class);
+        final BundleContext context = this.context;
         // It is OK to pass service references since 'stopOnServiceUnavailability' returns 'true'
         final MailAuthenticityHandlerRegistryImpl registry = new MailAuthenticityHandlerRegistryImpl(getService(LeanConfigurationService.class), context);
         registerService(MailAuthenticityHandlerRegistry.class, registry);
 
-        registerService(ForcedReloadable.class, new ForcedReloadable() {
+        registerService(MailAuthenticityMetricLogger.class, new MailAuthenticityMetricFileLogger());
+        trackService(MailAuthenticityMetricLogger.class);
 
-            @Override
-            public void reloadConfiguration(ConfigurationService configService) {
-                registry.invalidateCache();
-            }
+        track(MailAuthenticityHandler.class, registry);
+        openTrackers();
 
-            @Override
-            public Interests getInterests() {
-                return null;
-            }
-        });
         ConfigurationService configurationService = getService(ConfigurationService.class);
-        TrustedDomainAuthenticityHandler authenticationHandler = new TrustedDomainAuthenticityHandler(configurationService);
+        TrustedMailAuthenticityHandler authenticationHandler = new TrustedMailAuthenticityHandler(configurationService);
+        registerService(ForcedReloadable.class, authenticationHandler);
 
-        LeanConfigurationService leanConfigService = getService(LeanConfigurationService.class);
-        List<String> authServIds = Arrays.asList(Strings.splitByComma(leanConfigService.getProperty(MailAuthenticityProperty.authServId)));
-        registerService(MailAuthenticityHandler.class, new MailAuthenticityHandlerImpl(authServIds, this));
-
-        registerService(Reloadable.class, authenticationHandler);
-        registerService(TrustedDomainAuthenticityHandler.class, authenticationHandler);
+        final MailAuthenticityHandlerImpl handlerImpl = new MailAuthenticityHandlerImpl(authenticationHandler, this);
+        registerService(MailAuthenticityHandler.class, handlerImpl);
+        registerService(Reloadable.class, new ConfigReloader(registry, handlerImpl));
 
         MailAuthenticityFetchListener fetchListener = new MailAuthenticityFetchListener(registry);
         registerService(MailFetchListener.class, fetchListener);
+
+        registerService(JSlobEntry.class, new MailAuthenticityJSlobEntry(this));
+
+        {
+            // Register image data source
+            TrustedMailDataSource trustedMailDataSource = TrustedMailDataSource.getInstance();
+            Dictionary<String, Object> props = new Hashtable<String, Object>(1);
+            props.put("identifier", trustedMailDataSource.getRegistrationName());
+            registerService(DataSource.class, trustedMailDataSource, props);
+            ImageActionFactory.addMapping(trustedMailDataSource.getRegistrationName(), trustedMailDataSource.getAlias());
+        }
+        Services.setServiceLookup(this);
+    }
+
+    private static class ConfigReloader implements Reloadable {
+
+        private final MailAuthenticityHandlerRegistryImpl registry;
+        private final MailAuthenticityHandlerImpl handlerImpl;
+
+        /**
+         * Initializes a new {@link MailAuthenticityActivator.ConfigReloader}.
+         */
+        ConfigReloader(MailAuthenticityHandlerRegistryImpl registry, MailAuthenticityHandlerImpl handlerImpl) {
+            super();
+            this.registry = registry;
+            this.handlerImpl = handlerImpl;
+
+        }
+
+        @Override
+        public void reloadConfiguration(ConfigurationService configService) {
+            registry.invalidateCache();
+            handlerImpl.invalidateAuthServIdsCache();
+        }
+
+        @Override
+        public Interests getInterests() {
+            return Reloadables.interestsForProperties(MailAuthenticityProperty.ENABLED.getFQPropertyName(), MailAuthenticityProperty.THRESHOLD.getFQPropertyName(), MailAuthenticityProperty.AUTHSERV_ID.getFQPropertyName());
+        }
     }
 
 }

@@ -49,20 +49,83 @@
 
 package com.openexchange.mail.authenticity;
 
+import com.openexchange.mail.authenticity.mechanism.MailAuthenticityMechanismResult;
 import com.openexchange.mail.dataobjects.MailAuthenticityResult;
 
 /**
- * {@link MailAuthenticityResultKey} - Interface for the available keys of the
- * {@link MailAuthenticityResult} fields
+ * {@link MailAuthenticityResultKey} - Defines the {@link MailAuthenticityResultKey}s
+ * used in the core/default implementation of the {@link MailAuthenticityHandler} to record
+ * the results of the evaluation of an e-mail and compile the {@link MailAuthenticityResult}.
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public interface MailAuthenticityResultKey {
+public enum MailAuthenticityResultKey {
 
     /**
-     * Returns the name of the key
-     * 
-     * @return the name of the key
+     * Defines the overall status of the result object
      */
-    String getKey();
+    STATUS("status"),
+    /**
+     * Defines the domain of the 'From' header from the e-mail
+     * which the authenticity was evaluated.
+     */
+    FROM_DOMAIN("from_domain"),
+    /**
+     * Defines the {@link MailAuthenticityMechanismResult}s that were
+     * collected during the evaluation process of the e-mail.
+     */
+    MAIL_AUTH_MECH_RESULTS("mailAuthenticityMechanismResults"),
+    /**
+     * Defines the unknown/unconsidered mail authenticity mechanism results
+     * that were collected during the evaluation process of the e-mail.
+     */
+    UNCONSIDERED_AUTH_MECH_RESULTS("unconsideredAuthenticityMechanismResults"),
+    /**
+     * Defines the complete address of the trusted sender of the e-mail
+     */
+    TRUSTED_SENDER("trustedSender", false),
+    /**
+     * Contains a map of custom properties
+     */
+    CUSTOM_PROPERTIES("custom", false),
+    /**
+     * Defines the 'image' key for the response object
+     */
+    IMAGE("image");
+
+    private final String key;
+    private final boolean isVisible;
+
+    /**
+     * Initialises a new {@link DefaultMailAuthenticityResultKey}.
+     */
+    private MailAuthenticityResultKey(String key) {
+        this(key, true);
+    }
+
+    /**
+     * Initialises a new {@link DefaultMailAuthenticityResultKey}.
+     */
+    private MailAuthenticityResultKey(String key, boolean isVisible) {
+        this.key = key;
+        this.isVisible = isVisible;
+    }
+
+    /**
+     * Returns the key
+     *
+     * @return the key
+     */
+    public String getKey() {
+        return key;
+    }
+
+    /**
+     * A flag indicating whether this attribute is visible or not
+     *
+     * @return
+     */
+    public boolean isVisible() {
+        return isVisible;
+    }
 }

@@ -49,6 +49,7 @@
 
 package com.openexchange.folderstorage.database;
 
+import com.openexchange.folderstorage.FolderPermissionType;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.server.impl.OCLPermission;
 
@@ -62,6 +63,8 @@ public final class DatabasePermission implements Permission {
     private static final long serialVersionUID = -7152653657127451770L;
 
     private int system;
+
+    private FolderPermissionType type;
 
     private int deletePermission;
 
@@ -96,6 +99,7 @@ public final class DatabasePermission implements Permission {
         group = oclPermission.isGroupPermission();
         readPermission = oclPermission.getReadPermission();
         system = oclPermission.getSystem();
+        type = oclPermission.getType();
         writePermission = oclPermission.getWritePermission();
     }
 
@@ -110,6 +114,7 @@ public final class DatabasePermission implements Permission {
         result = prime * result + (group ? 1231 : 1237);
         result = prime * result + readPermission;
         result = prime * result + system;
+        result = prime * result + type.getTypeNumber();
         result = prime * result + writePermission;
         return result;
     }
@@ -145,6 +150,9 @@ public final class DatabasePermission implements Permission {
             return false;
         }
         if (system != other.getSystem()) {
+            return false;
+        }
+        if (type != other.getType()) {
             return false;
         }
         if (writePermission != other.getWritePermission()) {
@@ -278,7 +286,18 @@ public final class DatabasePermission implements Permission {
         return new StringBuilder(64)
             .append((admin ? "_FolderAdmin" : "")).append((group ? "Group" : "User")).append(entity).append('@')
             .append(folderPermission).append('.').append(readPermission).append('.').append(writePermission).append('.').append(deletePermission)
-            .append(' ').append("system").append('=').append(system).toString();
+            .append(' ').append("system").append('=').append(system)
+            .append(' ').append("type").append('=').append(type).toString();
+    }
+
+    @Override
+    public FolderPermissionType getType() {
+        return type;
+    }
+
+    @Override
+    public void setType(FolderPermissionType type) {
+        this.type = type;
     }
 
 }

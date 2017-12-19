@@ -49,6 +49,8 @@
 
 package com.openexchange.mail.authenticity.mechanism;
 
+import java.util.Map;
+
 /**
  * {@link MailAuthenticityMechanismResult} - Defines the methods of the mail authentication
  * mechanism result dataobject
@@ -59,14 +61,14 @@ public interface MailAuthenticityMechanismResult {
 
     /**
      * Returns the domain for which this mechanism was applied
-     * 
+     *
      * @return the domain for which this mechanism was applied
      */
     String getDomain();
 
     /**
      * Returns the (optional) client IP which was used to send the e-mail
-     * 
+     *
      * @return the (optional) client IP which was used to send the e-mail;
      *         <code>null</code> if none available
      */
@@ -74,22 +76,36 @@ public interface MailAuthenticityMechanismResult {
 
     /**
      * Returns the {@link DefaultMailAuthenticityMechanism} used for this result
-     * 
+     *
      * @return the {@link DefaultMailAuthenticityMechanism} used for this result
      */
     MailAuthenticityMechanism getMechanism();
 
     /**
      * Returns the result of the authentication mechanism
-     * 
+     *
      * @return the result of the authentication mechanism
      */
     AuthenticityMechanismResult getResult();
 
     /**
      * Returns the reason of the result
-     * 
+     *
      * @return the reason of the result
      */
     String getReason();
+
+    /**
+     * Returns a {@link Map} with the properties for the mechanism result
+     * 
+     * @return a {@link Map} with the properties for the mechanism result
+     */
+    Map<String, String> getProperties();
+
+    /**
+     * Gets the domainMatch
+     *
+     * @return The domainMatch
+     */
+    boolean isDomainMatch();
 }

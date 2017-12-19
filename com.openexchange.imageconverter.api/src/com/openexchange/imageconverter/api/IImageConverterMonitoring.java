@@ -64,17 +64,18 @@ public interface IImageConverterMonitoring {
 
     public long getMedianKeyProcessTimeMillis();
 
-    public long getKeyRequestCount_Total();
-    public long getKeyRequestCount_Background();
-    public long getKeyRequestCount_Medium();
-    public long getKeyRequestCount_Instant();
+    public long getRequestCount_Total();
+    public long getRequestCount_Get();
+    public long getRequestCount_Cache();
+    public long getRequestCount_CacheAndGet();
+    public long getRequestCount_Admin();
 
-    public long getMedianKeyRequestTimeMillis_Total();
-    public long getMedianKeyRequestTimeMillis_Background();
-    public long getMedianKeyRequestTimeMillis_Medium();
-    public long getMedianKeyRequestTimeMillis_Instant();
+    public long getMedianRequestTimeMillis_Total();
+    public long getMedianRequestTimeMillis_Get();
+    public long getMedianRequestTimeMillis_Cache();
+    public long getMedianRequestTimeMillis_CacheAndGet();
+    public long getMedianRequestTimeMillis_Admin();
 
-    public long getPeakKeyCountInQueue_Total();
     public long getPeakKeyCountInQueue_Background();
     public long getPeakKeyCountInQueue_Medium();
     public long getPeakKeyCountInQueue_Instant();
@@ -83,4 +84,7 @@ public interface IImageConverterMonitoring {
     public long getMedianKeyQueueTimeMillis_Background();
     public long getMedianKeyQueueTimeMillis_Medium();
     public long getMedianKeyQueueTimeMillis_Instant();
+
+    public long getCacheKeyCount();
+    public long getCacheSize();
 }

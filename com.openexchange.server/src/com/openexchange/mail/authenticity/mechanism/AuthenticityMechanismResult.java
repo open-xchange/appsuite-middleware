@@ -49,12 +49,18 @@
 
 package com.openexchange.mail.authenticity.mechanism;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import com.openexchange.mail.authenticity.MailAuthenticityStatus;
+
 /**
  * {@link AuthenticityMechanismResult}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public interface AuthenticityMechanismResult {
+
+    static final Logger LOGGER = LoggerFactory.getLogger(AuthenticityMechanismResult.class);
 
     /**
      * Returns the display name of the mechanism's result
@@ -69,4 +75,27 @@ public interface AuthenticityMechanismResult {
      * @return the technical name of the mechanism's result
      */
     String getTechnicalName();
+
+    /**
+     * Returns the ordinal
+     * 
+     * @return The ordinal of the enum
+     */
+    int getCode();
+
+    /**
+     * Converts the specified {@link AuthenticityMechanismResult} to {@link MailAuthenticityStatus}
+     *
+     * @param mechanismResult The {@link AuthenticityMechanismResult} to convert
+     * @return The converted {@link MailAuthenticityStatus}. The status {@link MailAuthenticityStatus#NEUTRAL} might
+     *         also get returned if the specified {@link AuthenticityMechanismResult} does not map to a valid {@link MailAuthenticityStatus}.
+     */
+    default MailAuthenticityStatus convert() {
+        try {
+            return MailAuthenticityStatus.valueOf(getTechnicalName().toUpperCase());
+        } catch (IllegalArgumentException e) {
+            LOGGER.debug("Unknown mail authenticity status '{}'", getTechnicalName(), e);
+            return MailAuthenticityStatus.NEUTRAL;
+        }
+    }
 }

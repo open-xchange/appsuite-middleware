@@ -116,7 +116,7 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
     public void runContextReport(ContextReport contextReport) {
         // Grab the file store quota from the context and save them in the report
         Context ctx = contextReport.getContext();
-        LOG.trace("Process context: " + ctx.getContextId() + " of report with uuid: " + contextReport.getUUID());
+        LOG.trace("Process context: {} of report with uuid: {}", ctx.getContextId(), contextReport.getUUID());
         try {
             QuotaFileStorageService storageService = FileStorages.getQuotaFileStorageService();
             if (null == storageService) {

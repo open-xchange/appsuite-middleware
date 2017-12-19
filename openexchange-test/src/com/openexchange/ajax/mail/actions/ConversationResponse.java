@@ -165,7 +165,10 @@ public class ConversationResponse extends AbstractAJAXResponse {
                     case TEXT_PREVIEW_IF_AVAILABLE: case TEXT_PREVIEW:
                         message.setTextPreview(strValue);
                         break;
-                    case AUTHENTICATION_RESULTS:
+                    case AUTHENTICATION_OVERALL_RESULT:
+                        message.setAuthenticityResult((MailAuthenticityResult) messageMap.get(key));
+                        break;
+                    case AUTHENTICATION_MECHANISM_RESULTS:
                         message.setAuthenticityResult((MailAuthenticityResult) messageMap.get(key));
                         break;
                     case PRIORITY:

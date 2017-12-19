@@ -50,7 +50,7 @@
 package com.openexchange.mail.authenticity;
 
 /**
- * {@link MailAuthenticityStatus}
+ * {@link MailAuthenticityStatus} - Defines the different status types of the overall status
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
@@ -71,7 +71,15 @@ public enum MailAuthenticityStatus {
     /**
      * Nothing has been analyzed
      */
-    NOT_ANALYZED("Not Analyzed", "not_analyzed");
+    NOT_ANALYZED("Not Analyzed", "not-analyzed"),
+    /**
+     * None (explicitly used for mail before the defined cut-off-date)
+     */
+    NONE("None", "none"),
+    /**
+     * Passed authentication status is also from a trusted mail address
+     */
+    TRUSTED("Trusted", "trusted");
 
     private final String displayName;
     private final String technicalName;

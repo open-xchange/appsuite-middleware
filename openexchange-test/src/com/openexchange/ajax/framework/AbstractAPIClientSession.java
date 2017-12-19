@@ -49,6 +49,8 @@
 
 package com.openexchange.ajax.framework;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import java.util.HashSet;
 import java.util.Set;
 import org.junit.After;
@@ -252,5 +254,19 @@ public abstract class AbstractAPIClientSession {
             protocol = "http";
         }
         newClient.setBasePath(protocol + "://" + hostname + "/ajax");
+    }
+
+    /**
+     * Checks if a response doesn't contain any errors
+     *
+     * @param error The error element of the response
+     * @param errorDesc The error description element of the response
+     * @param data The data element of the response
+     * @return The data
+     */
+    protected <T> T checkResponse(String error, String errorDesc, T data) {
+        assertNull(errorDesc, error);
+        assertNotNull(data);
+        return data;
     }
 }

@@ -844,7 +844,7 @@ public class JSONArray extends AbstractJSONValue implements Iterable<Object> {
         if (index < 0) {
             throw new JSONException("JSONArray[" + index + "] not found.");
         }
-        if (index < length()) {
+        if (index < myArrayList.size()) {
             try {
                 this.myArrayList.remove(index);
             } catch (final RuntimeException e) {

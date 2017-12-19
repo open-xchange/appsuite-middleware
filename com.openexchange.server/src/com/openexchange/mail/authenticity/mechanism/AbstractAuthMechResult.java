@@ -49,6 +49,8 @@
 
 package com.openexchange.mail.authenticity.mechanism;
 
+import java.util.HashMap;
+import java.util.Map;
 import com.openexchange.mail.authenticity.mechanism.dmarc.DMARCAuthMechResult;
 
 /**
@@ -61,7 +63,9 @@ public abstract class AbstractAuthMechResult implements MailAuthenticityMechanis
     private final String domain;
     private final String clientIP;
     private final AuthenticityMechanismResult result;
+    private boolean domainMatch;
     private String reason;
+    private final Map<String, String> properties;
 
     /**
      * Initialises a new {@link DMARCAuthMechResult}.
@@ -70,11 +74,12 @@ public abstract class AbstractAuthMechResult implements MailAuthenticityMechanis
      * @param clientIP The optional client IP used to send the e-mail
      * @param result The {@link AuthenticityMechanismResult}
      */
-    public AbstractAuthMechResult(String domain, String clientIP, AuthenticityMechanismResult result) {
+    public AbstractAuthMechResult(final String domain, final String clientIP, final AuthenticityMechanismResult result) {
         super();
         this.domain = domain;
         this.clientIP = clientIP;
         this.result = result;
+        properties = new HashMap<>();
     }
 
     @Override
@@ -95,6 +100,26 @@ public abstract class AbstractAuthMechResult implements MailAuthenticityMechanis
     /*
      * (non-Javadoc)
      * 
+     * @see com.openexchange.mail.authenticity.mechanism.MailAuthenticityMechanismResult#getProperties()
+     */
+    @Override
+    public Map<String, String> getProperties() {
+        return properties;
+    }
+
+    /**
+     * Adds the specified property to the properties {@link Map}
+     * 
+     * @param key The name of the property
+     * @param value The value of the property
+     */
+    public void addProperty(final String key, final String value) {
+        properties.put(key, value);
+    }
+
+    /*
+     * (non-Javadoc)
+     *
      * @see com.openexchange.mail.authenticity.common.mechanism.MailAuthenticityMechanismResult#getReason()
      */
     @Override
@@ -104,10 +129,105 @@ public abstract class AbstractAuthMechResult implements MailAuthenticityMechanis
 
     /**
      * Sets the reason of the result
-     * 
+     *
      * @param reason the reason to set
      */
-    public void setReason(String reason) {
+    public void setReason(final String reason) {
         this.reason = reason;
+    }
+
+    /**
+     * Gets the domainMatch
+     *
+     * @return The domainMatch
+     */
+    @Override
+    public boolean isDomainMatch() {
+        return domainMatch;
+    }
+
+    /**
+     * Sets the domainMatch
+     *
+     * @param domainMatch The domainMatch to set
+     */
+    public void setDomainMatch(final boolean domainMatch) {
+        this.domainMatch = domainMatch;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.lang.Object#hashCode()
+     */
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((clientIP == null) ? 0 : clientIP.hashCode());
+        result = prime * result + ((domain == null) ? 0 : domain.hashCode());
+        result = prime * result + (domainMatch ? 1231 : 1237);
+        result = prime * result + ((properties == null) ? 0 : properties.hashCode());
+        result = prime * result + ((reason == null) ? 0 : reason.hashCode());
+        result = prime * result + ((this.result == null) ? 0 : this.result.hashCode());
+        return result;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
+    @Override
+    public boolean equals(final Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final AbstractAuthMechResult other = (AbstractAuthMechResult) obj;
+        if (clientIP == null) {
+            if (other.clientIP != null) {
+                return false;
+            }
+        } else if (!clientIP.equals(other.clientIP)) {
+            return false;
+        }
+        if (domain == null) {
+            if (other.domain != null) {
+                return false;
+            }
+        } else if (!domain.equals(other.domain)) {
+            return false;
+        }
+        if (domainMatch != other.domainMatch) {
+            return false;
+        }
+        if (properties == null) {
+            if (other.properties != null) {
+                return false;
+            }
+        } else if (!properties.equals(other.properties)) {
+            return false;
+        }
+        if (reason == null) {
+            if (other.reason != null) {
+                return false;
+            }
+        } else if (!reason.equals(other.reason)) {
+            return false;
+        }
+        if (result == null) {
+            if (other.result != null) {
+                return false;
+            }
+        } else if (!result.equals(other.result)) {
+            return false;
+        }
+        return true;
     }
 }

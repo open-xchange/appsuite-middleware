@@ -18,6 +18,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.capabilities.json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.charset"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.clientinfo"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.clientinfo.impl"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.cluster.lock"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.cluster.timer"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.cluster.timer.impl"/>
@@ -134,6 +135,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.mail.autoconfig.impl"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.mail.autoconfig.json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.mail.attachment.impl"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.mail.authenticity.impl"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.mail.categories"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.mail.oauth"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.mailmapping"/>
@@ -195,6 +197,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.serverconfig"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.serverconfig.impl"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.session.management"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.session.management.impl"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.session.management.json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.sessiond"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.session.reservation.impl"/>

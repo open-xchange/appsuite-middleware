@@ -78,6 +78,7 @@ public class AdministrativeFolderTargetProxy extends AbstractTargetProxy {
     private final Set<Integer> affectedUsers;
     private final ShareTarget target;
     private final ShareTargetPath targetPath;
+    private List<OCLPermission> appliedPermissions;
 
     /**
      * Initializes a new {@link AdministrativeFolderTargetProxy}.
@@ -97,6 +98,7 @@ public class AdministrativeFolderTargetProxy extends AbstractTargetProxy {
     public AdministrativeFolderTargetProxy(FolderObject folder, ShareTarget target) {
         super();
         this.folder = folder;
+        appliedPermissions = new ArrayList<>();
         this.affectedUsers = new HashSet<Integer>();
         this.target = target;
         this.targetPath = new ShareTargetPath(target.getModule(), target.getFolder(), target.getItem());
@@ -147,6 +149,7 @@ public class AdministrativeFolderTargetProxy extends AbstractTargetProxy {
                 affectedUsers.add(Integer.valueOf(permission.getEntity()));
             }
         }
+        appliedPermissions = mergePermissions(appliedPermissions, permissions, new OCLPermissionConverter(folder));
         folder.setPermissions(newPermissions);
         setModified();
     }
@@ -206,7 +209,7 @@ public class AdministrativeFolderTargetProxy extends AbstractTargetProxy {
         return DriveTargetProxyType.FOLDER;
     }
 
-    private static class OCLPermissionConverter implements PermissionConverter<OCLPermission> {
+    public static class OCLPermissionConverter implements PermissionConverter<OCLPermission> {
 
         private final FolderObject folder;
 
@@ -265,6 +268,10 @@ public class AdministrativeFolderTargetProxy extends AbstractTargetProxy {
     @Override
     public Date getTimestamp() {
         return folder.getLastModified();
+    }
+
+    public List<OCLPermission> getAppliedPermissions(){
+        return appliedPermissions;
     }
 
 }

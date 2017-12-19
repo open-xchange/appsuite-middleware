@@ -49,6 +49,7 @@
 
 package com.openexchange.folderstorage.messaging;
 
+import com.openexchange.folderstorage.FolderPermissionType;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.messaging.MessagingPermission;
 
@@ -59,7 +60,14 @@ import com.openexchange.messaging.MessagingPermission;
  */
 public final class MessagingPermissionImpl implements Permission {
 
+    /**
+     * serialVersionUID
+     */
+    private static final long serialVersionUID = 1L;
+
     private int system;
+
+    private FolderPermissionType type;
 
     private int deletePermission;
 
@@ -96,6 +104,7 @@ public final class MessagingPermissionImpl implements Permission {
         group = messagingPermission.isGroup();
         readPermission = messagingPermission.getReadPermission();
         system = messagingPermission.getSystem();
+        type = FolderPermissionType.getType(messagingPermission.getType().getTypeNumber());
         writePermission = messagingPermission.getWritePermission();
     }
 
@@ -115,6 +124,7 @@ public final class MessagingPermissionImpl implements Permission {
         result = prime * result + (group ? 1231 : 1237);
         result = prime * result + readPermission;
         result = prime * result + system;
+        result = prime * result + type.getTypeNumber();
         result = prime * result + writePermission;
         return result;
     }
@@ -150,6 +160,9 @@ public final class MessagingPermissionImpl implements Permission {
             return false;
         }
         if (system != other.getSystem()) {
+            return false;
+        }
+        if (type != other.getType()) {
             return false;
         }
         if (writePermission != other.getWritePermission()) {
@@ -271,6 +284,16 @@ public final class MessagingPermissionImpl implements Permission {
         } catch (final CloneNotSupportedException e) {
             throw new InternalError(e.getMessage());
         }
+    }
+
+    @Override
+    public FolderPermissionType getType() {
+        return type;
+    }
+
+    @Override
+    public void setType(FolderPermissionType type) {
+        this.type = type;
     }
 
 }

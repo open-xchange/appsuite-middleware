@@ -52,7 +52,8 @@ package com.openexchange.mail.authenticity.mechanism.dkim;
 import com.openexchange.mail.authenticity.mechanism.AuthenticityMechanismResult;
 
 /**
- * {@link DKIMResult} - The evaluation states of the DKIM signature
+ * {@link DKIMResult} - The evaluation states of the DKIM signature.
+ * The ordinal defines the significance of each result.
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @see <a href="https://tools.ietf.org/html/rfc7601#section-2.7.1">RFC 7601, Section 2.7.1</a>
@@ -60,25 +61,11 @@ import com.openexchange.mail.authenticity.mechanism.AuthenticityMechanismResult;
 public enum DKIMResult implements AuthenticityMechanismResult {
 
     /**
-     * The message was not signed.
-     */
-    NONE("None", "none"),
-    /**
      * The message was signed, the signature or signatures were
      * acceptable to the ADMD, and the signature(s) passed verification
      * tests.
      */
     PASS("Pass", "pass"),
-    /**
-     * The message was signed and the signature or signatures were
-     * acceptable to the ADMD, but they failed the verification test(s).
-     */
-    FAIL("Fail", "fail"),
-    /**
-     * The message was signed, but some aspect of the signature or
-     * signatures was not acceptable to the ADMD.
-     */
-    POLICY("Policy", "policy"),
     /**
      * The message was signed, but the signature or signatures
      * contained syntax errors or were not otherwise able to be
@@ -87,6 +74,15 @@ public enum DKIMResult implements AuthenticityMechanismResult {
      *
      */
     NEUTRAL("Neutral", "neutral"),
+    /**
+     * The message was signed, but some aspect of the signature or
+     * signatures was not acceptable to the ADMD.
+     */
+    POLICY("Policy", "policy"),
+    /**
+     * The message was not signed.
+     */
+    NONE("None", "none"),
     /**
      * The message could not be verified due to some error that
      * is likely transient in nature, such as a temporary inability to
@@ -99,7 +95,13 @@ public enum DKIMResult implements AuthenticityMechanismResult {
      * is unrecoverable, such as a required header field being absent. A
      * later attempt is unlikely to produce a final result.
      */
-    PERMFAIL("Permanent Failure", "permfail");
+    PERMFAIL("Permanent Failure", "permfail"),
+    /**
+     * The message was signed and the signature or signatures were
+     * acceptable to the ADMD, but they failed the verification test(s).
+     */
+    FAIL("Fail", "fail"),
+    ;
 
     private final String displayName;
     private final String technicalName;
@@ -120,5 +122,10 @@ public enum DKIMResult implements AuthenticityMechanismResult {
     @Override
     public String getTechnicalName() {
         return technicalName;
+    }
+
+    @Override
+    public int getCode() {
+        return ordinal();
     }
 }

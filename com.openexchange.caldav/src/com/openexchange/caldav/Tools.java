@@ -65,6 +65,7 @@ import com.openexchange.chronos.Event;
 import com.openexchange.chronos.ExtendedProperties;
 import com.openexchange.chronos.ExtendedProperty;
 import com.openexchange.dav.AttachmentUtils;
+import com.openexchange.dav.DAVOAuthScope;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.groupware.attach.AttachmentMetadata;
@@ -85,7 +86,10 @@ public class Tools {
 
     public static final String DEFAULT_ACCOUNT_PREFIX = "cal://0/";
 
-    public static final String OAUTH_SCOPE = "caldav";
+    /**
+     * The OAuth scope token for CalDAV
+     */
+    public static final String OAUTH_SCOPE = DAVOAuthScope.CALDAV.getScope();
 
     public static String encodeFolderId(String folderId) {
         return null == folderId ? null : BaseEncoding.base64Url().omitPadding().encode(folderId.getBytes(Charsets.US_ASCII));
