@@ -131,7 +131,8 @@ final class StringUtil {
     private static <T> T parseToCollector(CharSequence element, T collector) {
         // No pairs; return as a singleton collector with the line being both the key and the value
         if (!element.toString().contains("=")) {
-            add(element.toString(), element.toString(), collector);
+            String kv = element.toString();
+            add(kv, kv, collector);
             return collector;
         }
 
