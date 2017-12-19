@@ -53,6 +53,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.mail.authenticity.MailAuthenticityAttribute;
 
 /**
@@ -62,6 +64,8 @@ import com.openexchange.mail.authenticity.MailAuthenticityAttribute;
  */
 @SuppressWarnings("unchecked")
 final class StringUtil {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(StringUtil.class);
 
     private static interface CollectorAdder {
 
@@ -241,6 +245,9 @@ final class StringUtil {
      * @return A {@link List} with the split elements
      */
     static List<String> splitElements(CharSequence header) {
+        LOGGER.debug("Splitting header: {}", header);
+        long start = System.currentTimeMillis();
+        
         List<String> split = new ArrayList<>();
         boolean openQuotes = false;
         boolean openParenthesis = false;
@@ -274,6 +281,7 @@ final class StringUtil {
         if (lineBuffer.length() > 0) {
             split.add(lineBuffer.toString().trim());
         }
+        LOGGER.trace("Header '{}' split in {} msec.", header, System.currentTimeMillis() - start);
         return split;
     }
 }
