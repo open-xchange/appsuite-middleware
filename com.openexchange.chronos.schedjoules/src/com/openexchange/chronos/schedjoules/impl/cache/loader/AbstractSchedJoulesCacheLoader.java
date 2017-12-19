@@ -73,7 +73,8 @@ abstract class AbstractSchedJoulesCacheLoader extends CacheLoader<SchedJoulesCac
 
     /**
      * Initialises a new {@link AbstractSchedJoulesCacheLoader}.
-     * @param apiCache TODO
+     * 
+     * @param apiCache The {@link SchedJoulesAPICache}
      */
     public AbstractSchedJoulesCacheLoader(SchedJoulesAPICache apiCache) {
         super();
