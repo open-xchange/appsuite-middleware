@@ -72,6 +72,7 @@ import com.openexchange.chronos.provider.account.AdministrativeCalendarAccountSe
 import com.openexchange.chronos.provider.account.CalendarAccountService;
 import com.openexchange.chronos.provider.basic.BasicCalendarProvider;
 import com.openexchange.chronos.provider.basic.CalendarSettings;
+import com.openexchange.chronos.provider.folder.FolderCalendarProvider;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.storage.CalendarAccountStorage;
 import com.openexchange.chronos.storage.CalendarStorage;
@@ -163,6 +164,34 @@ public class CalendarAccountServiceImpl implements CalendarAccountService, Admin
          * update calendar account in storage within transaction
          */
         CalendarAccount account = updateAccount(session.getContextId(), session.getUserId(), id, internalConfig, settings.getConfig(), clientTimestamp, parameters);
+        /*
+         * let provider perform any additional initialization
+         */
+        calendarProvider.onAccountUpdated(session, account, parameters);
+        return account;
+    }
+
+    @Override
+    public CalendarAccount updateAccount(Session session, int id, JSONObject userConfig, long clientTimestamp, CalendarParameters parameters) throws OXException {
+        /*
+         * get & check stored calendar account
+         */
+        CalendarAccount storedAccount = getAccount(session, id, parameters);
+        if (null != storedAccount.getLastModified() && storedAccount.getLastModified().getTime() > clientTimestamp) {
+            throw CalendarExceptionCodes.CONCURRENT_MODIFICATION.create(String.valueOf(id), clientTimestamp, storedAccount.getLastModified().getTime());
+        }
+        /*
+         * get associated calendar provider & initialize account config
+         */
+        CalendarProvider calendarProvider = requireCapability(getProvider(storedAccount.getProviderId()), session);
+        if (isGuest(session) || false == FolderCalendarProvider.class.isInstance(calendarProvider)) {
+            throw CalendarExceptionCodes.UNSUPPORTED_OPERATION_FOR_PROVIDER.create(storedAccount.getProviderId());
+        }
+        JSONObject internalConfig = ((FolderCalendarProvider) calendarProvider).reconfigureAccount(session, storedAccount, userConfig, parameters);
+        /*
+         * update calendar account in storage within transaction
+         */
+        CalendarAccount account = updateAccount(session.getContextId(), session.getUserId(), id, internalConfig, userConfig, clientTimestamp, parameters);
         /*
          * let provider perform any additional initialization
          */
