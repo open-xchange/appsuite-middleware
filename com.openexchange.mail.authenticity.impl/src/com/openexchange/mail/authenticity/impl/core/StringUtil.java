@@ -106,7 +106,7 @@ final class StringUtil {
      * @param element The element to parse
      * @return A {@link Map} with the key/value attributes of the element
      */
-    static Map<String, String> parseMap(String element) {
+    static Map<String, String> parseMap(CharSequence element) {
         Map<String, String> mapCollector = new HashMap<>();
         return parseToCollector(element, mapCollector);
     }
@@ -117,7 +117,7 @@ final class StringUtil {
      * @param element The element to parse
      * @return a {@link List} with the {@link MailAuthenticityAttribute}s
      */
-    static List<MailAuthenticityAttribute> parseList(String element) {
+    static List<MailAuthenticityAttribute> parseList(CharSequence element) {
         List<MailAuthenticityAttribute> listCollector = new ArrayList<>();
         return parseToCollector(element, listCollector);
     }
@@ -128,10 +128,10 @@ final class StringUtil {
      * @param element The element to parse
      * @return A {@link T} with the key/value attributes of the element
      */
-    private static <T> T parseToCollector(String element, T collector) {
+    private static <T> T parseToCollector(CharSequence element, T collector) {
         // No pairs; return as a singleton collector with the line being both the key and the value
-        if (!element.contains("=")) {
-            add(element, element, collector);
+        if (!element.toString().contains("=")) {
+            add(element.toString(), element.toString(), collector);
             return collector;
         }
 

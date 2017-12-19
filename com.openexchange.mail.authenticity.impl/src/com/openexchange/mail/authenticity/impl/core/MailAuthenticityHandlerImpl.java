@@ -337,7 +337,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
             if (Strings.isEmpty(element)) {
                 continue;
             }
-            final Map<String, String> attributes = StringUtil.parseMap(element);
+            final Map<String, String> attributes = StringUtil.parseMap(InterruptibleCharSequence.valueOf(element));
 
             final DefaultMailAuthenticityMechanism mechanism = DefaultMailAuthenticityMechanism.extractMechanism(attributes);
             if (mechanism == null) {
@@ -537,7 +537,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
      * @return A {@link Map} with the parsed attributes of the unknown mechanism
      */
     private Map<String, String> parseUnknownMechs(final String element) {
-        final List<MailAuthenticityAttribute> attributes = StringUtil.parseList(element);
+        final List<MailAuthenticityAttribute> attributes = StringUtil.parseList(InterruptibleCharSequence.valueOf(element));
         final Map<String, String> unknownResults = new HashMap<>();
         // First element is always the mechanism
         final MailAuthenticityAttribute mechanism = attributes.get(0);
