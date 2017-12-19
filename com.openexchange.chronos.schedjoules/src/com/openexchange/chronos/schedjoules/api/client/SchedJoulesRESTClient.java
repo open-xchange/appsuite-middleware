@@ -405,8 +405,10 @@ public class SchedJoulesRESTClient implements Closeable {
         CloseableHttpResponse httpResponse = null;
         try {
             // Execute the request
+            LOGGER.debug("Executing request: '{}'", httpRequest.getURI());
             httpResponse = httpClient.execute(httpRequest);
-
+            LOGGER.debug("Request '{}' completed with status code '{}'", httpRequest.getURI(), httpResponse.getStatusLine().getStatusCode());
+            
             // Get the response code and assert
             int statusCode = assertStatusCode(httpResponse);
             if (statusCode == 304) {
