@@ -49,9 +49,11 @@
 
 package com.openexchange.ajax.sessionmanagement;
 
+import java.io.IOException;
+import org.json.JSONException;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
-
+import com.openexchange.exception.OXException;
 
 /**
  * {@link AbstractSessionManagementTest}
@@ -61,29 +63,29 @@ import com.openexchange.ajax.framework.AbstractAJAXSession;
  */
 public class AbstractSessionManagementTest extends AbstractAJAXSession {
 
-    protected AJAXClient testClient1;
-    protected AJAXClient testClient2;
-
     public static final String SERVLET_PATH = "/ajax/sessionmanagement";
+    private AJAXClient         secondClient;
 
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        getClient().logout();
-        getClient2().logout();
-        testClient1 = new AJAXClient(testUser2);
-        testClient2 = new AJAXClient(testUser2, "otherClient");
+        secondClient = generateClient("secondClient", testUser);
     }
 
-    @Override
-    public void tearDown() throws Exception {
-        if (null != testClient1 && null != testClient1.getValues() && testClient1.getValues().getContextId() > 0 && testClient1.getValues().getUserId() > 0) {
-            testClient1.logout();
+    /**
+     * Gets the secondClient for the testUser
+     *
+     * @return The secondClient
+     */
+    public AJAXClient getSecondClient() {
+        return secondClient;
+    }
+
+    protected void saveLogout(AJAXClient client) throws OXException, IOException, JSONException {
+        // Try logout blacklisted
+        if (null != client && null != client.getSession() && null != client.getSession().getId()) {
+            client.logout();
         }
-        if (null != testClient2 && null != testClient2.getValues() && testClient2.getValues().getContextId() > 0 && testClient2.getValues().getUserId() > 0) {
-            testClient2.logout();
-        }
-        super.tearDown();
     }
 
 }

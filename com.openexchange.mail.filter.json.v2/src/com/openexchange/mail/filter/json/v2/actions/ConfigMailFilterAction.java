@@ -75,6 +75,7 @@ import com.openexchange.mail.filter.json.v2.json.mapper.parser.ActionCommandPars
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.ExtendedFieldTestCommandParser;
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.TestCommandParser;
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.TestCommandParserRegistry;
+import com.openexchange.mail.filter.json.v2.json.mapper.parser.action.simplified.SimplifiedAction;
 import com.openexchange.mailfilter.Credentials;
 import com.openexchange.mailfilter.MailFilterService;
 import com.openexchange.mailfilter.exceptions.MailFilterExceptionCode;
@@ -204,12 +205,23 @@ public class ConfigMailFilterAction extends AbstractMailFilterAction {
     }
 
     private JSONArray getActionArray(final Set<String> capabilities, Blacklist blacklists) throws OXException, JSONException {
-
         ActionCommandParserRegistry service = services.getService(ActionCommandParserRegistry.class);
         final JSONArray testarray = new JSONArray();
         Map<String, ActionCommandParser<ActionCommand>> map = service.getCommandParsers();
         for (Map.Entry<String, ActionCommandParser<ActionCommand>> entry : map.entrySet()) {
             ActionCommandParser<ActionCommand> parser = entry.getValue();
+
+            // Check if the tag arguments of the simplified action command contains any 
+            // of the sieve announced capabilities
+            try {
+                SimplifiedAction simplifiedAction = SimplifiedAction.valueOf(entry.getKey().toUpperCase());
+                // skip if the capability is not announced by the sieve server
+                if (false == capabilities.containsAll(simplifiedAction.requiredCapabilities())) {
+                    continue;
+                }
+            } catch (IllegalArgumentException e) {
+                //ignore, obviously the specified entry is not a simplified command
+            }
 
             if (!blacklists.isBlacklisted(BasicGroup.actions, entry.getKey()) && parser.isCommandSupported(capabilities)) {
                 final JSONObject object = new JSONObject();

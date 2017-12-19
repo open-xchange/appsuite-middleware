@@ -213,6 +213,19 @@ public class CachingAliasStorage implements UserAliasStorage {
     }
 
     @Override
+    public void setAliases(Connection con, int contextId, int userId, Set<String> aliases) throws OXException {
+        delegate.setAliases(con, contextId, userId, aliases);
+
+        CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
+        if (null != cacheService) {
+            Cache cache = cacheService.getCache(REGION_NAME);
+            CacheKey key = newCacheKey(cacheService, userId, contextId);
+            ImmutableSet<String> newAliases = ImmutableSet.copyOf(aliases);
+            cache.put(key, newAliases, true);
+        }
+    }
+
+    @Override
     public boolean createAlias(Connection con, int contextId, int userId, String alias) throws OXException {
         boolean success = delegate.createAlias(con, contextId, userId, alias);
         if (success) {

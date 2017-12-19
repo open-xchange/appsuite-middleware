@@ -1607,16 +1607,18 @@ public final class SessionHandler {
             return;
         }
         List<SessionControl> controls = sessionData.rotateShort();
-        if (config.isAutoLogin()) {
-            for (final SessionControl sessionControl : controls) {
-                LOG.info("Session is moved to long life time container. All temporary session data will be cleaned up. ID: {}", sessionControl.getSession().getSessionID());
+        if (!controls.isEmpty()) {
+            if (config.isAutoLogin()) {
+                for (final SessionControl sessionControl : controls) {
+                    LOG.info("Session is moved to long life time container. All temporary session data will be cleaned up. ID: {}", sessionControl.getSession().getSessionID());
+                }
+                postSessionDataRemoval(controls);
+            } else {
+                for (final SessionControl sessionControl : controls) {
+                    LOG.info("Session timed out. ID: {}", sessionControl.getSession().getSessionID());
+                }
+                postContainerRemoval(controls, true);
             }
-            postSessionDataRemoval(controls);
-        } else {
-            for (final SessionControl sessionControl : controls) {
-                LOG.info("Session timed out. ID: {}", sessionControl.getSession().getSessionID());
-            }
-            postContainerRemoval(controls, true);
         }
     }
 
@@ -1627,10 +1629,12 @@ public final class SessionHandler {
             return;
         }
         List<SessionControl> controls = sessionData.rotateLongTerm();
-        for (SessionControl control : controls) {
-            LOG.info("Session timed out. ID: {}", control.getSession().getSessionID());
+        if (!controls.isEmpty()) {
+            for (SessionControl control : controls) {
+                LOG.info("Session timed out. ID: {}", control.getSession().getSessionID());
+            }
+            postContainerRemoval(controls, true);
         }
-        postContainerRemoval(controls, true);
     }
 
     public static int getNumberOfActiveSessions() {

@@ -192,64 +192,66 @@ public final class DownloadUtility {
             // Some variables
             String fn = fileName;
             // Check by Content-Type and file name
-            if (Strings.startsWithAny(toLowerCase(contentType.getSubType()), "htm", "xhtm")) {
+            if (Strings.containsAny(toLowerCase(contentType.getSubType()), "htm", "xhtm")) {
                 /*
                  * HTML content requested for download...
                  */
                 if (null == sContentDisposition) {
                     sContentDisposition = "attachment";
                 } else if (toLowerCase(sContentDisposition).startsWith("inline")) {
-                    /*
-                     * Sanitizing of HTML content needed
-                     */
-                    sink = new ThresholdFileHolder();
-                    sink.write(in);
-                    in = null;
-                    String cs = contentType.getCharsetParameter();
-                    if (!CharsetDetector.isValid(cs)) {
-                        cs = CharsetDetector.detectCharset(sink.getStream());
-                        if ("US-ASCII".equalsIgnoreCase(cs)) {
-                            cs = "ISO-8859-1";
-                        }
-                    }
-                    // Check size
-                    String htmlContent;
-                    if (sink.getLength() > HtmlServices.htmlThreshold()) {
-                        // HTML cannot be sanitized as it exceeds the threshold for HTML parsing
-                        OXException oxe = AjaxExceptionCodes.HTML_TOO_BIG.create();
-                        htmlContent = SessionServlet.getErrorPage(200, oxe.getDisplayMessage(locale), "");
+                    if (contentType.contains("application/")) {
+                        sContentDisposition = "attachment";
                     } else {
-                        htmlContent = new String(sink.toByteArray(), Charsets.forName(cs));
-                        HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
-                        htmlContent = htmlService.sanitize(htmlContent, null, true, null, null);
+                        /*
+                         * Sanitizing of HTML content needed
+                         */
+                        sink = new ThresholdFileHolder();
+                        sink.write(in);
+                        in = null;
+                        String cs = contentType.getCharsetParameter();
+                        if (!CharsetDetector.isValid(cs)) {
+                            cs = CharsetDetector.detectCharset(sink.getStream());
+                            if ("US-ASCII".equalsIgnoreCase(cs)) {
+                                cs = "ISO-8859-1";
+                            }
+                        }
+                        // Check size
+                        String htmlContent;
+                        if (sink.getLength() > HtmlServices.htmlThreshold()) {
+                            // HTML cannot be sanitized as it exceeds the threshold for HTML parsing
+                            OXException oxe = AjaxExceptionCodes.HTML_TOO_BIG.create();
+                            htmlContent = SessionServlet.getErrorPage(200, oxe.getDisplayMessage(locale), "");
+                        } else {
+                            htmlContent = new String(sink.toByteArray(), Charsets.forName(cs));
+                            HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
+                            htmlContent = htmlService.sanitize(htmlContent, null, true, null, null);
+                        }
+                        sink.close();
+                        sink = null; // Null'ify as not needed anymore
+                        contentType.setCharsetParameter("UTF-8");
+                        byte[] tmp = htmlContent.getBytes(Charsets.UTF_8);
+                        sz = tmp.length;
+                        in = new ByteArrayRandomAccess(tmp);
                     }
-                    sink.close();
-                    sink = null; // Null'ify as not needed anymore
-                    contentType.setCharsetParameter("UTF-8");
-                    byte[] tmp = htmlContent.getBytes(Charsets.UTF_8);
-                    sz = tmp.length;
-                    in = new ByteArrayRandomAccess(tmp);
                 }
             } else if (Strings.startsWithAny(toLowerCase(contentType.getSubType()), "javascript") || fileNameImpliesJavascript(fileName)) {
                 // Treat all JavaScript content as harmful
                 harmful = true;
                 sContentDisposition = "attachment";
-            } else if (Strings.startsWithAny(toLowerCase(contentType.getSubType()), "svg") || fileNameImpliesSvg(fileName)) {
+            } else if (Strings.containsAny(toLowerCase(contentType.getSubType()), "svg") || fileNameImpliesSvg(fileName)) {
                 // Treat all SVG content as harmful
                 harmful = true;
                 sContentDisposition = "attachment";
             } else if (Strings.startsWithAny(toLowerCase(contentType.getSubType()), "xsl") || fileNameImpliesExcel(fileName)) {
-                // Treat all SVG content as harmful
-                harmful = true;
                 sContentDisposition = "attachment";
-            } else if (Strings.startsWithAny(toLowerCase(contentType.getSubType()), "xml") || fileNameImpliesXml(fileName)) {
+            } else if (Strings.containsAny(toLowerCase(contentType.getSubType()), "xml") || fileNameImpliesXml(fileName)) {
                 /*
                  * XML content requested for download...
                  */
                 if (null == sContentDisposition) {
                     sContentDisposition = "attachment";
                 } else if (toLowerCase(sContentDisposition).startsWith("inline")) {
-                    if (contentType.startsWith("application/")) {
+                    if (contentType.contains("application/")) {
                         sContentDisposition = "attachment";
                     } else {
                         /*

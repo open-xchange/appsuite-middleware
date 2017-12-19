@@ -36,7 +36,7 @@ public class OXTestToolkit {
     public static void assertImageBytesEqualsAndNotNull(final String message, final byte[] expect, final byte[] value) throws Exception {
         if (expect != null) {
             Assert.assertNotNull(message + " is null", value);
-            Assert.assertTrue(message + " byte array size is not equals", expect.length <= value.length);
+            Assert.assertTrue(message + " byte array size is not equals", expect.length >= value.length);
             //            for (int a = 0; a < expect.length; a++) {
             //                Assert.assertEquals(message + " byte in pos (" + a + ") is not equals", expect[a], value[a]);
             //            }

@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.mime;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.CharacterCodingException;
@@ -59,6 +60,8 @@ import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import com.openexchange.java.Charsets;
+import com.openexchange.java.Streams;
+import com.openexchange.mail.utils.MessageUtility;
 
 /**
  * {@link RFC2231Tools} - A collection of <small><b><a href="http://www.ietf.org/rfc/rfc2231.txt">RFC2231</a></b></small> related utility
@@ -139,36 +142,33 @@ public final class RFC2231Tools {
         } else if (null == charset || !Charset.isSupported(charset)) {
             return encoded;
         }
-        final int length = encoded.length();
-        final ByteBuffer bb = ByteBuffer.allocate(length);
+
+        int length = encoded.length();
+        byte[] bytes = new byte[length];
+        int pos = 0;
         int i = 0;
         while (i < length) {
-            final char c = encoded.charAt(i);
+            char c = encoded.charAt(i);
             if ('%' == c) {
                 if ((i < (length - 2)) && isHexDigit(encoded.charAt(i + 1)) && isHexDigit(encoded.charAt(i + 2))) {
-                    bb.put((byte) ((Character.digit(encoded.charAt(i + 1), RADIX) << 4) + Character.digit(encoded.charAt(i + 2), RADIX)));
+                    bytes[pos++] = ((byte) ((Character.digit(encoded.charAt(i + 1), RADIX) << 4) + Character.digit(encoded.charAt(i + 2), RADIX)));
                     i += 2;
                 } else if ((i < (length - 1)) && isHexDigit(encoded.charAt(i + 1))) {
-                    bb.put((byte) (Character.digit(encoded.charAt(i + 1), RADIX)));
+                    bytes[pos++] = ((byte) (Character.digit(encoded.charAt(i + 1), RADIX)));
                     i += 1;
                 } else {
-                    bb.put((byte) c);
+                    bytes[pos++] = ((byte) c);
                 }
             } else {
-                bb.put((byte) c);
+                bytes[pos++] = ((byte) c);
             }
             i++;
         }
-        bb.flip();
-        final Charset cs = Charsets.forName(charset);
         try {
-            return cs.decode(bb).toString();
-        } catch (final java.nio.BufferOverflowException e) {
-            LOG.warn("Decoding with charset \"{}\" failed for input string: \"{}\"", charset, encoded, e);
-            /*
-             * Retry with own allocated char buffer
-             */
-            return rfc2231DecodeRetry(cs, bb);
+            return MessageUtility.readStream(Streams.newByteArrayInputStream(bytes, 0, pos), charset, false, -1);
+        } catch (IOException e) {
+            // Cannot occur
+            throw new IllegalStateException(e);
         }
     }
 

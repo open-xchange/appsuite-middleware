@@ -1135,12 +1135,9 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             List<ContextSearcher> searchers = new ArrayList<ContextSearcher>();
             searchers.add(new ContextSearcher(cache, "SELECT cid FROM context WHERE name LIKE ?", sqlPattern));
             searchers.add(new ContextSearcher(cache, "SELECT cid FROM login2context WHERE login_info LIKE ?", sqlPattern));
-            try {
-                Integer.parseInt(sqlPattern);
-                searchers.add(new ContextSearcher(cache, "SELECT cid FROM context WHERE cid = ?", sqlPattern));
-            } catch (NumberFormatException e) {
-                // Ignore and do nothing, because we are not including that query to the searcher
-                // since the specified sqlPattern does not solely consists out of numbers.
+            int optContextId = Strings.parsePositiveInt(sqlPattern);
+            if (optContextId > 0) {
+                searchers.add(new NumericContextSearcher(cache, optContextId));
             }
 
             // Invoke & add into sorted set
@@ -3074,7 +3071,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 prep = null;
 
                 if (oldFilestoreId != 0) {
-                    prep = configdb_write_con.prepareStatement("UPDATE contexts_per_filestore SET count=count-1 WHERE filestore_id=?");
+                    prep = configdb_write_con.prepareStatement("UPDATE contexts_per_filestore SET count=count-1 WHERE filestore_id=? AND count>0");
                     prep.setInt(1, oldFilestoreId);
                     prep.executeUpdate();
                     closeSQLStuff(prep);

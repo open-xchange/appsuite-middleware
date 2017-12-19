@@ -87,6 +87,20 @@ public class Strings {
     }
 
     /**
+     * Checks if given string starts with specified prefix
+     *
+     * @param s The string to check
+     * @param prefix The prefix
+     * @return <code>true</code> if given string starts with specified prefix; otherwise <code>false</code>
+     */
+    public static boolean startsWithAny(String s, String prefix) {
+        if (null == s) {
+            return false;
+        }
+        return null != prefix && s.startsWith(prefix, 0) ? true : false;
+    }
+
+    /**
      * Checks if given string starts with any of specified prefixes
      *
      * @param s The string to check
@@ -100,6 +114,40 @@ public class Strings {
         for (int i = prefixes.length; i-- > 0;) {
             String prefix = prefixes[i];
             if (null != prefix && s.startsWith(prefix, 0)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Checks if given string contains sequence
+     *
+     * @param s The string to check
+     * @param sequence The sequence that might be contained
+     * @return <code>true</code> if given string contains specified sequence; otherwise <code>false</code>
+     */
+    public static boolean containsAny(String s, String sequence) {
+        if (null == s) {
+            return false;
+        }
+        return null != sequence && s.indexOf(sequence, 0) >= 0 ? true : false;
+    }
+
+    /**
+     * Checks if given string contains any of specified sequences
+     *
+     * @param s The string to check
+     * @param sequences The sequences that might be contained
+     * @return <code>true</code> if given string contains any of specified sequences; otherwise <code>false</code>
+     */
+    public static boolean containsAny(String s, String... sequences) {
+        if (null == s) {
+            return false;
+        }
+        for (int i = sequences.length; i-- > 0;) {
+            String sequence = sequences[i];
+            if (null != sequence && s.indexOf(sequence, 0) >= 0) {
                 return true;
             }
         }
@@ -721,12 +769,15 @@ public class Strings {
         }
     }
 
-    private static final CharsetDecoder UTF8_CHARSET_DECODER;
-    static {
-        final CharsetDecoder utf8Decoder = Charsets.UTF_8.newDecoder();
-        utf8Decoder.onMalformedInput(CodingErrorAction.REPORT);
-        utf8Decoder.onUnmappableCharacter(CodingErrorAction.REPORT);
-        UTF8_CHARSET_DECODER = utf8Decoder;
+    /* In a holder class to defer initialization until needed. */
+    private static class Holder {
+        static final CharsetDecoder UTF8_CHARSET_DECODER;
+        static {
+            final CharsetDecoder utf8Decoder = Charsets.UTF_8.newDecoder();
+            utf8Decoder.onMalformedInput(CodingErrorAction.REPORT);
+            utf8Decoder.onUnmappableCharacter(CodingErrorAction.REPORT);
+            UTF8_CHARSET_DECODER = utf8Decoder;
+        }
     }
 
     /**
@@ -737,7 +788,7 @@ public class Strings {
      */
     public static boolean isUTF8Bytes(final byte[] bytes) {
         try {
-            UTF8_CHARSET_DECODER.decode(ByteBuffer.wrap(bytes));
+            Holder.UTF8_CHARSET_DECODER.decode(ByteBuffer.wrap(bytes));
             return true;
         } catch (final CharacterCodingException e) {
             return false;

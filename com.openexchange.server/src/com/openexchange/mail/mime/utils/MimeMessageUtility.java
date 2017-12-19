@@ -1056,7 +1056,10 @@ public final class MimeMessageUtility {
 
                     boolean doEncode = true;
                     int start = m.start();
-                    if (lastMatch == start) {
+                    if (lastMatch == 0 || lastMatch == start) {
+                        if (lastMatch != start) {
+                            sb.append(hdrVal.substring(lastMatch, start));
+                        }
                         if ("b".equalsIgnoreCase(encoding)) {
                             Base64EncodedValue ev = new Base64EncodedValue(charset, encodedValue);
                             if (null == prev) {
@@ -1076,16 +1079,16 @@ public final class MimeMessageUtility {
                                 }
                                 doEncode = false;
                             }
-                        } else if (prev!=null){
+                        } else if (null != prev) {
                             sb.append(decodeEncodedWord(prev.charset, "B", prev.value.toString()));
-                            prev=null;
+                            prev = null;
                         }
                     } else {
                         if (null != prev) {
                             sb.append(decodeEncodedWord(prev.charset, "B", prev.value.toString()));
                             prev = null;
                         }
-                        sb.append(hdrVal.substring(lastMatch, m.start()));
+                        sb.append(hdrVal.substring(lastMatch, start));
                     }
 
                     // Decode encoded-word
@@ -2925,7 +2928,7 @@ public final class MimeMessageUtility {
             if (content instanceof String) {
                 String stringContent = (String) content;
                 if (Strings.isEmpty(stringContent)) {
-                    return new EmptyStringMimeMultipart(new MessageDataSource(Streams.newByteArrayInputStream(stringContent.getBytes(Charsets.ISO_8859_1)), null == contentType ? getHeader("Content-Type", null, part) : contentType));
+                    return new EmptyStringMimeMultipart(new MessageDataSource(new byte[0], null == contentType ? getHeader("Content-Type", null, part) : contentType));
                 }
                 return new MimeMultipart(new MessageDataSource(Streams.newByteArrayInputStream(stringContent.getBytes(Charsets.ISO_8859_1)), null == contentType ? getHeader("Content-Type", null, part) : contentType));
             }

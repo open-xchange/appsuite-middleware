@@ -53,9 +53,12 @@ import javax.servlet.http.HttpServletRequest;
 import org.opensaml.saml2.core.AuthnRequest;
 import org.opensaml.saml2.core.LogoutRequest;
 import org.opensaml.saml2.core.LogoutResponse;
+import org.opensaml.saml2.core.Response;
 import org.opensaml.saml2.metadata.SPSSODescriptor;
 import com.openexchange.exception.OXException;
 import com.openexchange.saml.SAMLConfig.Binding;
+import com.openexchange.saml.state.AuthnRequestInfo;
+import com.openexchange.saml.state.StateManagement;
 import com.openexchange.session.Session;
 
 
@@ -105,4 +108,8 @@ public abstract class AbstractWebSSOCustomizer implements WebSSOCustomizer {
         return descriptor;
     }
 
+    @Override
+    public AuthnRequestInfo getRequestInfo(HttpServletRequest httpRequest, Response response, StateManagement stateManagement) throws OXException {
+        return null;
+    }
 }

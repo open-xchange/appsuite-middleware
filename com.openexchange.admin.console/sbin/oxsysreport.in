@@ -380,9 +380,9 @@ create_heap_dump() {
 # will fail on some systems.
     echo "Creating Java heap dump of Open-Xchange groupware..."
     if [ -f "/opt/open-xchange/sbin/heapdump" -a 'ibm' != "${JAVA_VM_TYPE}" ]; then
-        local _heap_dump="${TMP}/${LOGDIR}/commands/heapdump.bin"
+        local _heap_dump="${TMP}/${LOGDIR}/commands/heapdump.hprof"
         local _heap_dump_cmd="heapdump -f ${_heap_dump}"
-        local _heap_dump_log="${TMP}/${LOGDIR}/commands/heapdump -f heapdump.bin"
+        local _heap_dump_log="${TMP}/${LOGDIR}/commands/heapdump -f $(basename ${_heap_dump})"
 
         # Grant write permissions for ox user
         chmod a+w ${TMP}/${LOGDIR}/commands

@@ -369,12 +369,6 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
             db.setPoolHardLimit(DEFAULT_POOL_HARD_LIMIT ? 1 : 0);
         }
 
-        if (null == db.getClusterWeight()) {
-            db.setClusterWeight(DEFAULT_DB_WEIGHT);
-        } else if (db.getClusterWeight() < 0 || db.getClusterWeight() > 100) {
-            throw new InvalidDataException("Clusterweight not within range (0-100)");
-        }
-
         if (null == db.getUrl()) {
             db.setUrl("jdbc:mysql://" + DEFAULT_HOSTNAME + "/?useUnicode=true&characterEncoding=UTF-8&autoReconnect=false&useUnicode=true&useServerPrepStmts=false&useTimezone=true&serverTimezone=UTC&connectTimeout=15000&socketTimeout=15000");
         }
@@ -535,7 +529,7 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.admin.rmi.OXUtilInterface#changeServer(com.openexchange.admin.rmi.dataobjects.Server, java.lang.String, com.openexchange.admin.rmi.dataobjects.Credentials)
      */
     @Override
@@ -758,12 +752,6 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
 
         if (db.getName() != null && tool.existsDatabaseName(db)) {
             throw new InvalidDataException("Database " + db.getName() + " already exists!");
-        }
-
-        if (db.getClusterWeight() != null) {
-            if (db.getClusterWeight() < 0 || db.getClusterWeight() > 100) {
-                throw new InvalidDataException("Clusterweight not within range (0-100)");
-            }
         }
 
         oxutil.changeDatabase(db);

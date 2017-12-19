@@ -36,7 +36,7 @@ Received: from mx2.open-xchange.com (alcatraz.open-xchange.com. [87.191.39.187])
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
         Wed, 18 Oct 2017 05:31:00 -0700 (PDT)
 Received-SPF: pass (google.com: domain of test.user@open-xchange.com designates 87.191.39.187 as permitted sender) client-ip=87.191.39.187;
-Authentication-Results: mx.google.com;
+Authentication-Results: open-xchange.authenticity.test;
        dkim=pass header.i=@open-xchange.com header.s=201705 header.b=VvWVD9kg;
        spf=pass (google.com: domain of test.user@open-xchange.com designates 87.191.39.187 as permitted sender) smtp.mailfrom=test.user@open-xchange.com;
        dmarc=pass (p=NONE sp=NONE dis=NONE) header.from=open-xchange.com

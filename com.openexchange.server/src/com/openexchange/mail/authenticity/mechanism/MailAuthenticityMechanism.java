@@ -77,4 +77,11 @@ public interface MailAuthenticityMechanism {
      */
     Class<? extends AuthenticityMechanismResult> getResultType();
 
+    /**
+     * Returns the ordinal value
+     * 
+     * @return the ordinal value of the enum
+     */
+    int getCode();
+
 }

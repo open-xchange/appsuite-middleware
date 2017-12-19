@@ -122,5 +122,12 @@ public interface ISMTPProperties extends ITransportProperties {
      * @return <code>true</code> if partial send is allowed; otherwise <code>false</code>
      */
     public boolean isSendPartial();
+    
+    /**
+     * Get the primary address header to append.
+     * 
+     * @return The primary address header name or <code>null</code> if not set
+     */
+    public String getPrimaryAddressHeader();
 
 }

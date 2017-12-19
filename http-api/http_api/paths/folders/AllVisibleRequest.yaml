@@ -18,6 +18,8 @@
         description: |
           A JSON object containing three fields: "private", "public, and "shared". Each field is a JSON array with data for all folders. 
           Each folder is itself described by an array. The elements of each array contain the information specified by the corresponding identifiers in the columns parameter. 
+          For the content_type "mail" a JSON object only containing the JSON array "private" is returned. Mail folders are managed by the mail storage and all are considered 
+          to be in private folder namespace for an Open-Xchange user.
           In case of errors the responsible fields in the response are filled (see [Error handling](#error-handling)).
         schema:
           $ref: "#/definitions/FoldersVisibilityResponse"

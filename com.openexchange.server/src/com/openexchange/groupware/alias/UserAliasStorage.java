@@ -163,6 +163,17 @@ public interface UserAliasStorage {
     boolean deleteAliases(Connection con, int contextId, int userId) throws OXException;
 
     /**
+     * Sets a user's aliases.
+     *
+     * A write connection object to use or <code>null</code> to obtain a new database write connection.
+     * @param contextId The context identifier
+     * @param userId The user identifier
+     * @param aliases The aliases to set
+     * @throws OXException If aliases cannot be set
+     */
+    void setAliases(Connection con, int contextId, int userId, Set<String> aliases) throws OXException;
+
+    /**
      * Invalidates possibly cached aliases.
      *
      * @param contextId The context identifier

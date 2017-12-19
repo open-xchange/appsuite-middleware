@@ -117,6 +117,7 @@ import com.openexchange.mail.dataobjects.SecuritySettings;
 import com.openexchange.mail.dataobjects.compose.ComposeType;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.dataobjects.compose.ContentAware;
+import com.openexchange.mail.mime.HeaderCollection;
 import com.openexchange.mail.mime.MimeHeaderNameChecker;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.MimeMailExceptionCode;
@@ -151,6 +152,7 @@ import com.openexchange.smtp.filler.SMTPMessageFiller;
 import com.openexchange.smtp.services.Services;
 import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.ThreadPools;
+import com.openexchange.user.UserService;
 import com.sun.mail.smtp.JavaSMTPTransport;
 import com.sun.mail.smtp.SMTPMessage;
 import com.sun.mail.smtp.SMTPSendFailedException;
@@ -904,6 +906,11 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
             MimeMessage messageToSend = smtpMessage;
             Exception exception = null;
             try {
+                // Append optional header
+                if (Account.DEFAULT_ID == accountId) {
+                    addPrimaryAddressHeader(smtpMessage, smtpConfig.getSMTPProperties());
+                }
+                
                 // Check if security settings are given and if properly handled
                 if (securitySettings != null && securitySettings.anythingSet()) {
                     if (false == listenerChain.checkSettings(securitySettings, session)) {
@@ -1555,6 +1562,39 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
             throw (OXException) cause;
         }
         throw MailExceptionCode.UNEXPECTED_ERROR.create(cause, cause.getMessage());
+    }
+
+    /**
+     * Add the primary address header to outgoing mails if 'com.openexchange.smtp.setPrimaryAddressHeader' is set and valid.
+     * 
+     * @param message The message to send
+     * @param properties The {@link ISMTPProperties} to get the option from
+     * @throws OXException If user can't be loaded
+     */
+    private void addPrimaryAddressHeader(MimeMessage message, ISMTPProperties properties) throws OXException {
+        String header = properties.getPrimaryAddressHeader();
+        if (HeaderCollection.isInvalid(header, true)) {
+            // Only log if property is set
+            if (Strings.isNotEmpty(header)) {
+                LOG.error("The value \"{}\" of property 'com.openexchange.smtp.setPrimaryAddressHeader' isn't valid. Therefore the header can't be appended to the message.", header);
+            }
+        } else {
+            UserService userService = Services.getService(UserService.class);
+            if (null == userService) {
+                throw ServiceExceptionCode.absentService(UserService.class);
+            }
+
+            try {
+                String mail = userService.getUser(session.getUserId(), session.getContextId()).getMail();
+                if (Strings.isNotEmpty(mail)) {
+                    message.addHeader(header, mail);
+                }
+            } catch (MessagingException e) {
+                LOG.error("Couldn't add header to the outgoing mail.", e);
+            } catch (OXException e) {
+                LOG.error("The user {} in context {} wasn't found. Therefore the header {} wasn't appended to the message.", I(session.getUserId()), I(session.getContextId()), header);
+            }
+        }
     }
 
     private static final class AddressAddingTransportListener implements TransportListener {
