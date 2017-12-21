@@ -49,8 +49,6 @@
 
 package com.openexchange.chronos.provider.internal.config;
 
-import static com.openexchange.chronos.provider.internal.Constants.CONTENT_TYPE;
-import static com.openexchange.chronos.provider.internal.Constants.TREE_ID;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.osgi.Tools.requireService;
 import org.json.JSONException;
@@ -66,15 +64,10 @@ import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.conversion.ConversionService;
 import com.openexchange.exception.OXException;
-import com.openexchange.folderstorage.FolderService;
-import com.openexchange.folderstorage.UserizedFolder;
-import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.jslob.JSlob;
 import com.openexchange.jslob.JSlobId;
 import com.openexchange.jslob.JSlobService;
 import com.openexchange.jslob.storage.JSlobStorage;
-import com.openexchange.mail.usersetting.UserSettingMail;
-import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
@@ -145,111 +138,29 @@ public class UserConfigHelper {
      * @param userConfig The user configuration to apply the legacy settings in
      */
     public void applyLegacyConfig(ServerSession session, JSONObject userConfig) throws OXException {
-        UserConfigWrapper configWrapper = new UserConfigWrapper(requireService(ConversionService.class, services), userConfig);
-        try {
-            /*
-             * default alarms, availability
-             */
-            configWrapper.setDefaultAlarmDateTime(optLegacyDefaultAlarm(session));
-            configWrapper.setDefaultAlarmDate(null);
-            configWrapper.setAvailability(optLegacyAvailability(session));
-            /*
-             * default folder id
-             */
-            userConfig.putOpt("defaultFolderId", optLegacyDefaultFolderId(session));
-            /*
-             * notification settings
-             */
-            UserSettingMail userSettingMail = UserSettingMailStorage.getInstance().getUserSettingMail(session);
-            if (userSettingMail != null) {
-                userConfig.put("notifyNewModifiedDeleted", userSettingMail.isNotifyAppointments());
-                userConfig.put("notifyAcceptedDeclinedAsCreator", userSettingMail.isNotifyAppointmentsConfirmOwner());
-                userConfig.put("notifyAcceptedDeclinedAsParticipant", userSettingMail.isNotifyAppointmentsConfirmParticipant());
-            }
-        } catch (OXException | JSONException e) {
-            LOG.warn("Error applying legacy calendar settings for user {} in context {}", I(session.getUserId()), I(session.getContextId()), e);
+        /*
+         * migrate default alarm from legacy reminder minutes setting
+         */
+        Alarm defaultAlarmDateTime = optLegacyDefaultAlarm(session);
+        if (null != defaultAlarmDateTime) {
+            new UserConfigWrapper(requireService(ConversionService.class, services), userConfig).setDefaultAlarmDateTime(defaultAlarmDateTime);
         }
-    }
-
-    private String optLegacyDefaultFolderId(ServerSession session) {
-        try {
-            UserizedFolder defaultFolder = requireService(FolderService.class, services).getDefaultFolder(session.getUser(), TREE_ID, CONTENT_TYPE, PrivateType.getInstance(), session, null);
-            return defaultFolder.getID();
-        } catch (OXException e) {
-            LOG.warn("Error getting default folder for user {} in context {}", I(session.getUserId()), I(session.getContextId()), e);
-        }
-        return null;
-    }
-
-    private Available[] optLegacyAvailability(ServerSession session) {
-        boolean INSERT_DEFAULT_AVAILABILITY = false;
-        if (false == INSERT_DEFAULT_AVAILABILITY) {
-            return null;
-        }
-        //        JSlob jsLob = optJSlob(session, "io.ox/calendar");
-        //        if (null != jsLob) {
-        //            try {
-        //                int startTime = jsLob.getJsonObject().getInt("startTime");
-        //                startTime = Math.min(23, Math.max(0, startTime));
-        //                int endTime = jsLob.getJsonObject().getInt("endTime");
-        //                endTime = Math.min(23, Math.max(0, endTime));
-        //                int workweekStart = jsLob.getJsonObject().getInt("workweekStart") + 1;
-        //                workweekStart = Math.min(7, Math.max(1, workweekStart));
-        //                int numDaysWorkweek = jsLob.getJsonObject().getInt("numDaysWorkweek");
-        //                numDaysWorkweek = Math.min(7, Math.max(1, workweekStart));
-        //
-        //                Available available = new Available();
-        //                available.setCreationTimestamp(new Date());
-        //                Calendar calendar = CalendarUtils.initCalendar(TimeZones.UTC, null);
-        //                for (int dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK); workweekStart != dayOfWeek; calendar.add(Calendar.DATE, -1))
-        //                    ;
-        //                List<WeekdayNum> weekDays = new ArrayList<WeekdayNum>(numDaysWorkweek);
-        //                for (int i = 0; i < numDaysWorkweek; i++) {
-        //
-        ////                    new WeekdayNum(0, Weekday.v)
-        ////                    weekDays.add(new wee)
-        //                }
-        //                RecurrenceRule rule = new RecurrenceRule(Freq.WEEKLY);
-        ////                rule.set
-        ////
-        ////
-        ////                DateTime startTime = new DateTime(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH), startHour, 0, 0);
-        ////                DateTime endTime = new DateTime(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH), endHour, 0, 0);
-        ////                available.setStartTime(startTime);
-        ////                available.setEndTime(endTime);
-        ////                available.setUid(UUID.randomUUID().toString());
-        ////                available.setRecurrenceRule("FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR");
-        ////                try {
-        ////                    return serializeAvailability(session, Collections.singletonList(available));
-        ////                } catch (OXException e) {
-        ////                    LOG.warn("Error inserting default availability for user {} in context {}", I(session.getUserId()), I(session.getContextId()), e);
-        ////                }
-        ////
-        //
-        //            } catch (JSONException e) {
-        //                LOG.warn("Error converting default alarm from JSlob for user {} in context {}", I(session.getUserId()), I(session.getContextId()), e);
-        //            }
-        //        }
-
-        return null;
     }
 
     private Alarm optLegacyDefaultAlarm(ServerSession session) {
         JSlob jsLob = optJSlob(session, "io.ox/calendar");
-        if (null != jsLob) {
-            if (jsLob.getJsonObject().hasAndNotNull("defaultReminder")) {
-                try {
-                    int reminderMinutes = jsLob.getJsonObject().getInt("defaultReminder");
-                    if (-1 == reminderMinutes) {
-                        return null;
-                    }
-                    String duration = AlarmUtils.getDuration(true, 0, 0, 0, reminderMinutes, 0);
-                    Alarm alarm = new Alarm(new Trigger(duration), AlarmAction.DISPLAY);
-                    alarm.setDescription("Reminder");
-                    return alarm;
-                } catch (JSONException e) {
-                    LOG.warn("Error converting default alarm from JSlob for user {} in context {}", I(session.getUserId()), I(session.getContextId()), e);
+        if (null != jsLob && jsLob.getJsonObject().hasAndNotNull("defaultReminder")) {
+            try {
+                int reminderMinutes = jsLob.getJsonObject().getInt("defaultReminder");
+                if (-1 == reminderMinutes) {
+                    return null;
                 }
+                String duration = AlarmUtils.getDuration(true, 0, 0, 0, reminderMinutes, 0);
+                Alarm alarm = new Alarm(new Trigger(duration), AlarmAction.DISPLAY);
+                alarm.setDescription("Reminder");
+                return alarm;
+            } catch (JSONException e) {
+                LOG.warn("Error converting default alarm from JSlob for user {} in context {}", I(session.getUserId()), I(session.getContextId()), e);
             }
         }
         return null;
