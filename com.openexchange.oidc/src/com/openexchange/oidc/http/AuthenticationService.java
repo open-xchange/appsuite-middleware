@@ -57,6 +57,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
+import com.openexchange.oidc.OIDCExceptionCode;
 import com.openexchange.oidc.OIDCWebSSOProvider;
 import com.openexchange.oidc.spi.OIDCExceptionHandler;
 
@@ -79,8 +80,8 @@ public class AuthenticationService extends OIDCServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         
         if (Strings.toLowerCase(request.getQueryString()).contains("error")) {
-            //TODO QS-VS: niemals null übergeben
-            exceptionHandler.handleResponseException(request, response, null);
+            String errorMessage = request.getParameter("error") + ":" + request.getParameter("error_description");
+            exceptionHandler.handleResponseException(request, response, OIDCExceptionCode.OP_SERVER_ERROR.create(errorMessage));
             return;
         }
         

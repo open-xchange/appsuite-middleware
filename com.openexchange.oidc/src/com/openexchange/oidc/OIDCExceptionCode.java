@@ -140,8 +140,12 @@ public enum OIDCExceptionCode implements OXExceptionCode {
     /**
      * "Unable to handle third party login request, because of: '%1$s'"
      */
-    INVALID_THIRDPARTY_LOGIN_REQUEST("Unable to handle third party login request, because of: '%1$s'", Category.CATEGORY_ERROR, 20);
-
+    INVALID_THIRDPARTY_LOGIN_REQUEST("Unable to handle third party login request, because of: '%1$s'", Category.CATEGORY_ERROR, 20),
+    /**
+     * "The OpenID-Provider responded with an error: '%1$s'"
+     */
+    OP_SERVER_ERROR("The OpenID-Provider responded with an error: '%1$s'", Category.CATEGORY_ERROR, 21);
+    
     private final String message;
     private final String displayMessage;
     private final int detailNumber;
