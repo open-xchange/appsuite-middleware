@@ -49,10 +49,7 @@
 
 package com.openexchange.chronos.provider.caching.basic;
 
-import java.sql.Connection;
-import java.sql.SQLException;
 import org.json.JSONObject;
-import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.basic.BasicCalendarProvider;
 import com.openexchange.chronos.provider.basic.CalendarSettings;
@@ -60,17 +57,10 @@ import com.openexchange.chronos.provider.caching.CachingCalendarAccess;
 import com.openexchange.chronos.provider.caching.internal.Services;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.storage.CalendarStorage;
-import com.openexchange.chronos.storage.CalendarStorageFactory;
-import com.openexchange.database.DatabaseService;
-import com.openexchange.database.Databases;
-import com.openexchange.database.provider.DBTransactionPolicy;
-import com.openexchange.database.provider.SimpleDBProvider;
+import com.openexchange.chronos.storage.operation.OSGiCalendarStorageOperation;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.session.Session;
-import com.openexchange.tools.session.ServerSession;
-import com.openexchange.tools.session.ServerSessionAdapter;
-import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link BasicCachingCalendarProvider}
@@ -181,7 +171,7 @@ public abstract class BasicCachingCalendarProvider implements BasicCalendarProvi
 
     @Override
     public final void onAccountDeleted(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
-        delete(session, account);
+        delete(session.getContextId(), account, parameters);
 
         onAccountDeletedOpt(session, account, parameters);
     }
@@ -195,38 +185,31 @@ public abstract class BasicCachingCalendarProvider implements BasicCalendarProvi
      */
     protected abstract void onAccountDeletedOpt(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException;
 
-    private void delete(Session session, CalendarAccount account) throws OXException {
-        ServerSession serverSession = ServerSessionAdapter.valueOf(session);
+    @Override
+    public final void onAccountDeleted(Context context, CalendarAccount account, CalendarParameters parameters) throws OXException {
+        delete(context.getContextId(), account, parameters);
 
-        boolean committed = false;
-        DatabaseService dbService = Services.getService(DatabaseService.class);
-        Connection writeConnection = null;
-        Context context = serverSession.getContext();
-        try {
-            writeConnection = dbService.getWritable(context);
-            writeConnection.setAutoCommit(false);
+        onAccountDeletedOpt(context, account, parameters);
+    }
 
-            CalendarStorage calendarStorage = Services.getService(CalendarStorageFactory.class).create(serverSession.getContext(), account.getAccountId(), null, new SimpleDBProvider(writeConnection, writeConnection), DBTransactionPolicy.NO_TRANSACTIONS);
-            calendarStorage.getUtilities().deleteAllData();
+    /**
+     * Callback routine that is invoked after an existing account for the calendar provider has been deleted and after the {@link BasicCachingCalendarProvider} has executed desired preparations/cleanups.
+     *
+     * @param context The context
+     * @param account The calendar account that was deleted
+     * @param parameters Additional calendar parameters, or <code>null</code> if not set
+     */
+    protected abstract void onAccountDeletedOpt(Context context, CalendarAccount account, CalendarParameters parameters) throws OXException;
 
-            writeConnection.commit();
-            committed = true;
-        } catch (SQLException e) {
-            if (DBUtils.isTransactionRollbackException(e)) {
-                throw CalendarExceptionCodes.DB_ERROR_TRY_AGAIN.create(e.getMessage(), e);
+    private void delete(int contextId, CalendarAccount account, CalendarParameters parameters) throws OXException {
+
+        new OSGiCalendarStorageOperation<Void>(Services.getServiceLookup(), contextId, account.getAccountId()) {
+
+            @Override
+            protected Void call(CalendarStorage storage) throws OXException {
+                storage.getUtilities().deleteAllData();
+                return null;
             }
-            throw CalendarExceptionCodes.DB_ERROR.create(e.getMessage(), e);
-        } finally {
-            if (null != writeConnection) {
-                if (false == committed) {
-                    Databases.rollback(writeConnection);
-                    Databases.autocommit(writeConnection);
-                    dbService.backWritableAfterReading(context, writeConnection);
-                } else {
-                    Databases.autocommit(writeConnection);
-                    dbService.backWritable(context, writeConnection);
-                }
-            }
-        }
+        };
     }
 }

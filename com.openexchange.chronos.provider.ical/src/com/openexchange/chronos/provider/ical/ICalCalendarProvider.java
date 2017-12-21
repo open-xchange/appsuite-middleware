@@ -63,6 +63,7 @@ import com.openexchange.chronos.provider.ical.conn.ICalFeedClient;
 import com.openexchange.chronos.provider.ical.result.GetResponse;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.java.Strings;
 import com.openexchange.session.Session;
 
@@ -181,6 +182,10 @@ public class ICalCalendarProvider extends CachingCalendarProvider {
         // nothing to do
     }
 
+    public void onAccountDeletedOpt(Context context, CalendarAccount account, CalendarParameters parameters) throws OXException {
+        // nothing to do
+    }
+
     @Override
     public boolean triggerCacheInvalidation(Session session, JSONObject originUserConfiguration, JSONObject newUserConfiguration) throws OXException {
         ICalCalendarFeedConfig oldFeedConfig = new ICalCalendarFeedConfig.DecryptedBuilder(session, new JSONObject(originUserConfiguration), new JSONObject()).build();
@@ -188,4 +193,10 @@ public class ICalCalendarProvider extends CachingCalendarProvider {
         ICalCalendarFeedConfig newFeedConfig = new ICalCalendarFeedConfig.EncryptedBuilder(session, newUserConfigurationCopy, new JSONObject()).build();
         return oldFeedConfig.mandatoryChanges(newFeedConfig);
     }
+
+    @Override
+    public void onAccountDeleted(Context context, CalendarAccount account, CalendarParameters parameters) throws OXException {
+        // TODO Auto-generated method stub
+    }
+
 }

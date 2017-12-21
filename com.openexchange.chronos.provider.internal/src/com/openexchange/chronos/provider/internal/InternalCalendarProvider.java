@@ -65,6 +65,7 @@ import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.update.UpdateStatus;
 import com.openexchange.groupware.update.Updater;
 import com.openexchange.i18n.tools.StringHelper;
@@ -153,6 +154,11 @@ public class InternalCalendarProvider implements FolderCalendarProvider, AutoPro
 
     @Override
     public void onAccountDeleted(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
+        // no
+    }
+
+    @Override
+    public void onAccountDeleted(Context context, CalendarAccount account, CalendarParameters parameters) throws OXException {
         // no
     }
 

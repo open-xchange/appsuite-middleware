@@ -76,6 +76,7 @@ import com.openexchange.chronos.schedjoules.SchedJoulesService;
 import com.openexchange.chronos.schedjoules.exception.SchedJoulesAPIExceptionCodes;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
@@ -139,6 +140,11 @@ public class BasicSchedJoulesCalendarProvider extends BasicCachingCalendarProvid
 
     @Override
     protected void onAccountDeletedOpt(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
+        // nothing to do
+    }
+
+    @Override
+    protected void onAccountDeletedOpt(Context context, CalendarAccount account, CalendarParameters parameters) throws OXException {
         // nothing to do
     }
 

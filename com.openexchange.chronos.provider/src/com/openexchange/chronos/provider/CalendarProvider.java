@@ -53,6 +53,7 @@ import java.util.EnumSet;
 import java.util.Locale;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.session.Session;
 
 /**
@@ -121,6 +122,16 @@ public interface CalendarProvider {
      * @param parameters Additional calendar parameters, or <code>null</code> if not set
      */
     void onAccountDeleted(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException;
+
+    /**
+     * Callback routine that is invoked after an existing account for the calendar provider has been deleted (and the user's session is
+     * not available).
+     *
+     * @param context The context
+     * @param account The calendar account that was deleted
+     * @param parameters Additional calendar parameters, or <code>null</code> if not set
+     */
+    void onAccountDeleted(Context context, CalendarAccount account, CalendarParameters parameters) throws OXException;
 
     /**
      * Initializes the connection to a specific calendar account.

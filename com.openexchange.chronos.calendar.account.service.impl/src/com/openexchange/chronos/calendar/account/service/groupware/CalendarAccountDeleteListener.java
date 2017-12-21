@@ -54,11 +54,11 @@ import java.sql.Connection;
 import java.util.List;
 import org.slf4j.LoggerFactory;
 import com.openexchange.chronos.calendar.account.service.impl.CalendarAccountServiceImpl;
+import com.openexchange.chronos.common.DefaultCalendarParameters;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.CalendarProvider;
 import com.openexchange.chronos.provider.CalendarProviderRegistry;
-import com.openexchange.chronos.storage.CalendarAccountStorage;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.chronos.storage.CalendarStorageFactory;
 import com.openexchange.database.provider.DBTransactionPolicy;
@@ -100,29 +100,25 @@ public class CalendarAccountDeleteListener implements DeleteListener {
          * initialize calendar storage & delete accounts
          */
         SimpleDBProvider dbProvider = new SimpleDBProvider(readCon, writeCon);
+        DefaultCalendarParameters parameters = new DefaultCalendarParameters();
+        parameters.set(Connection.class.getName(), writeCon);
         CalendarStorage calendarStorage = requireService(CalendarStorageFactory.class, services).create(event.getContext(), -1, null, dbProvider, DBTransactionPolicy.NO_TRANSACTIONS);
-        deleteAccounts(calendarStorage.getAccountStorage(), event.getId());
-    }
-
-    private void deleteAccounts(CalendarAccountStorage accountStorage, int userId) throws OXException {
-        List<CalendarAccount> storedAccounts = accountStorage.loadAccounts(userId);
-        if (null != storedAccounts && 0 < storedAccounts.size()) {
-            CalendarProviderRegistry providerRegistry = requireService(CalendarProviderRegistry.class, services);
-            for (CalendarAccount storedAccount : storedAccounts) {
-                /*
-                 * delete account data from storage
-                 */
-                accountStorage.deleteAccount(storedAccount.getUserId(), storedAccount.getAccountId());
-                /*
-                 * also let provider perform any additional cleanup tasks
-                 */
-                CalendarProvider calendarProvider = providerRegistry.getCalendarProvider(storedAccount.getProviderId());
-                if (null == calendarProvider) {
-                    LoggerFactory.getLogger(CalendarAccountServiceImpl.class).warn("Provider '{}' not available, skipping additional cleanup tasks for deleted account {}.",
-                        storedAccount.getProviderId(), storedAccount, CalendarExceptionCodes.PROVIDER_NOT_AVAILABLE.create(storedAccount.getProviderId()));
-                } else {
-//                    calendarProvider.onAccountDeleted(session, storedAccount, parameters);
-                }
+        List<CalendarAccount> storedAccounts = calendarStorage.getAccountStorage().loadAccounts(event.getId());
+        if (null == storedAccounts || storedAccounts.isEmpty()) {
+            return;
+        }
+        CalendarProviderRegistry providerRegistry = requireService(CalendarProviderRegistry.class, services);
+        for (CalendarAccount storedAccount : storedAccounts) {
+            /*
+             * delete account data from storage, then let provider perform any additional cleanup tasks
+             */
+            calendarStorage.getAccountStorage().deleteAccount(storedAccount.getUserId(), storedAccount.getAccountId());
+            CalendarProvider calendarProvider = providerRegistry.getCalendarProvider(storedAccount.getProviderId());
+            if (null == calendarProvider) {
+                LoggerFactory.getLogger(CalendarAccountServiceImpl.class).warn("Provider '{}' not available, skipping additional cleanup tasks for deleted account {}.",
+                    storedAccount.getProviderId(), storedAccount, CalendarExceptionCodes.PROVIDER_NOT_AVAILABLE.create(storedAccount.getProviderId()));
+            } else {
+                calendarProvider.onAccountDeleted(event.getContext(), storedAccount, parameters);
             }
         }
     }

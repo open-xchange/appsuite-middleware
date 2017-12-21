@@ -78,6 +78,7 @@ import com.openexchange.chronos.provider.ical.result.GetResponse;
 import com.openexchange.chronos.provider.ical.utils.ICalProviderUtils;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.java.Strings;
 import com.openexchange.session.Session;
 
@@ -124,6 +125,11 @@ public class BasicICalCalendarProvider extends BasicCachingCalendarProvider {
 
     @Override
     public void onAccountDeletedOpt(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
+        // nothing to do
+    }
+
+    @Override
+    public void onAccountDeletedOpt(Context context, CalendarAccount account, CalendarParameters parameters) throws OXException {
         // nothing to do
     }
 

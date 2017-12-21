@@ -77,6 +77,7 @@ import com.openexchange.chronos.provider.google.access.GoogleOAuthAccess;
 import com.openexchange.chronos.provider.google.osgi.Services;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
@@ -125,6 +126,11 @@ public class GoogleCalendarProvider implements BasicCalendarProvider {
 
     @Override
     public void onAccountDeleted(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
+        // nothing to do
+    }
+
+    @Override
+    public void onAccountDeleted(Context context, CalendarAccount account, CalendarParameters parameters) throws OXException {
         // nothing to do
     }
 
@@ -276,4 +282,5 @@ public class GoogleCalendarProvider implements BasicCalendarProvider {
     public BasicCalendarAccess connect(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
         return new GoogleCalendarAccess(session, account, parameters, true);
     }
+
 }

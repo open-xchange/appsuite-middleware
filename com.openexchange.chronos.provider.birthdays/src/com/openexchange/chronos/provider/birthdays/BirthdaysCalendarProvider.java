@@ -74,6 +74,7 @@ import com.openexchange.chronos.provider.basic.CalendarSettings;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.conversion.ConversionService;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.Strings;
@@ -131,7 +132,12 @@ public class BirthdaysCalendarProvider implements BasicCalendarProvider, AutoPro
          * initialize & check user configuration for new account & return default (empty) internal config
          */
         initializeUserConfig(ServerSessionAdapter.valueOf(session), userConfig);
-        return new JSONObject();
+        /*
+         * prepare default internal config
+         */
+        JSONObject internalConfig = new JSONObject();
+        internalConfig.putSafe("color", "#0000cc");
+        return internalConfig;
     }
 
     @Override
@@ -233,7 +239,12 @@ public class BirthdaysCalendarProvider implements BasicCalendarProvider, AutoPro
 
     @Override
     public void onAccountDeleted(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
-        getAccess(session, account, parameters).onAccountDeleted();
+        onAccountDeleted(ServerSessionAdapter.valueOf(session).getContext(), account, parameters);
+    }
+
+    @Override
+    public void onAccountDeleted(Context context, CalendarAccount account, CalendarParameters parameters) throws OXException {
+        new AlarmHelper(services, context, account).deleteAllAlarms();
     }
 
     @Override
