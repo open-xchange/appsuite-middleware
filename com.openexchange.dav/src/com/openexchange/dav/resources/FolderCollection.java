@@ -85,6 +85,7 @@ import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.ParameterizedFolder;
 import com.openexchange.folderstorage.Permission;
+import com.openexchange.folderstorage.SetterAwareFolder;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.folderstorage.type.SharedType;
@@ -413,17 +414,20 @@ public abstract class FolderCollection<T> extends DAVCollection {
         return null != owner ? owner.getDisplayName() : null;
     }
 
-    private static final class FolderUpdate extends AbstractFolder implements ParameterizedFolder {
+    private static final class FolderUpdate extends AbstractFolder implements ParameterizedFolder, SetterAwareFolder {
 
         private static final long serialVersionUID = -367640273380922433L;
 
         private final Map<FolderField, FolderProperty> properties;
+
+        private boolean containsSubscribed;
 
         /**
          * Initializes a new {@link FolderUpdate}.
          */
         public FolderUpdate() {
             super();
+            subscribed = true;
             this.properties = new HashMap<FolderField, FolderProperty>();
         }
 
@@ -444,6 +448,17 @@ public abstract class FolderCollection<T> extends DAVCollection {
         @Override
         public Map<FolderField, FolderProperty> getProperties() {
             return properties;
+        }
+
+        @Override
+        public void setSubscribed(boolean subscribed) {
+            super.setSubscribed(subscribed);
+            containsSubscribed = true;
+        }
+
+        @Override
+        public boolean containsSubscribed() {
+            return containsSubscribed;
         }
 
     }
