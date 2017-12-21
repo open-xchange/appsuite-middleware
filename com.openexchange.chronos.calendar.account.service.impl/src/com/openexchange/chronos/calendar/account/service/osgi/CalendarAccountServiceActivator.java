@@ -52,6 +52,7 @@ package com.openexchange.chronos.calendar.account.service.osgi;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.capabilities.CapabilityService;
+import com.openexchange.chronos.calendar.account.service.groupware.CalendarAccountDeleteListener;
 import com.openexchange.chronos.calendar.account.service.impl.CalendarAccountServiceImpl;
 import com.openexchange.chronos.provider.CalendarProviderRegistry;
 import com.openexchange.chronos.provider.account.AdministrativeCalendarAccountService;
@@ -60,6 +61,7 @@ import com.openexchange.chronos.storage.CalendarStorageFactory;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.osgi.HousekeepingActivator;
 
 /**
@@ -94,6 +96,7 @@ public class CalendarAccountServiceActivator extends HousekeepingActivator {
             CalendarAccountServiceImpl accountService = new CalendarAccountServiceImpl(this);
             registerService(CalendarAccountService.class, accountService);
             registerService(AdministrativeCalendarAccountService.class, accountService);
+            registerService(DeleteListener.class, new CalendarAccountDeleteListener(this));
             openTrackers();
         } catch (Exception e) {
             LOG.error("error starting {}", context.getBundle(), e);
