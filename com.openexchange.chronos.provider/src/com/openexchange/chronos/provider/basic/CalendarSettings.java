@@ -54,7 +54,7 @@ import org.json.JSONObject;
 import com.openexchange.chronos.ExtendedProperties;
 
 /**
- * {@link CalendarSettings2}
+ * {@link CalendarSettings}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
@@ -73,7 +73,7 @@ public class CalendarSettings {
     private boolean containsSubscribed;
 
     /**
-     * Initializes a new {@link CalendarSettings2}.
+     * Initializes a new {@link CalendarSettings}.
      */
     public CalendarSettings() {
         super();
