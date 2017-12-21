@@ -288,7 +288,7 @@ public class CalendarAccountServiceImpl implements CalendarAccountService, Admin
         /*
          * check for pending provisioning tasks
          */
-        if (false == getProvidersRequiringProvisioning(accounts).isEmpty() && false == isGuest(session)) {
+        if (false == getProvidersRequiringProvisioning(session, accounts).isEmpty() && false == isGuest(session)) {
             accounts = new OSGiCalendarStorageOperation<List<CalendarAccount>>(services, session.getContextId(), -1, parameters) {
 
                 @Override
@@ -297,7 +297,7 @@ public class CalendarAccountServiceImpl implements CalendarAccountService, Admin
                      * re-check account list for pending auto-provisioning within transaction & auto-provision as needed
                      */
                     List<CalendarAccount> accounts = storage.getAccountStorage().loadAccounts(session.getUserId());
-                    for (AutoProvisioningCalendarProvider calendarProvider : getProvidersRequiringProvisioning(accounts)) {
+                    for (AutoProvisioningCalendarProvider calendarProvider : getProvidersRequiringProvisioning(session, accounts)) {
                         JSONObject userConfig = new JSONObject();
                         JSONObject internalConfig = calendarProvider.autoConfigureAccount(session, userConfig, parameters);
                         CalendarAccount account = insertAccount(storage.getAccountStorage(), calendarProvider.getId(), session.getUserId(), internalConfig, userConfig);
@@ -396,14 +396,15 @@ public class CalendarAccountServiceImpl implements CalendarAccountService, Admin
      * Gets a list of auto-provisioning calendar providers where no calendar account is found in the supplied list of accounts, i.e. those
      * providers who where a provisioning task is required.
      *
+     * @param session The current session
      * @param existingAccounts The accounts to check against the registered auto-provisioning calendar providers
      * @return The auto-provisioning calendar providers where no calendar account was found
      */
-    private List<AutoProvisioningCalendarProvider> getProvidersRequiringProvisioning(List<CalendarAccount> existingAccounts) throws OXException {
+    private List<AutoProvisioningCalendarProvider> getProvidersRequiringProvisioning(Session session, List<CalendarAccount> existingAccounts) throws OXException {
         CalendarProviderRegistry providerRegistry = getProviderRegistry();
         List<AutoProvisioningCalendarProvider> unprovisionedProviders = new ArrayList<AutoProvisioningCalendarProvider>();
         for (AutoProvisioningCalendarProvider calendarProvider : providerRegistry.getAutoProvisioningCalendarProviders()) {
-            if (null == find(existingAccounts, calendarProvider.getId())) {
+            if (null == find(existingAccounts, calendarProvider.getId()) && hasCapability(calendarProvider, session)) {
                 unprovisionedProviders.add(calendarProvider);
             }
         }
@@ -525,12 +526,16 @@ public class CalendarAccountServiceImpl implements CalendarAccountService, Admin
     }
 
     private CalendarProvider requireCapability(CalendarProvider provider, Session session) throws OXException {
-        String capabilityName = CalendarProviders.getCapabilityName(provider);
-        CapabilitySet capabilities = requireService(CapabilityService.class, services).getCapabilities(session);
-        if (false == capabilities.contains(capabilityName)) {
-            throw CalendarExceptionCodes.MISSING_CAPABILITY.create(capabilityName);
+        if (false == hasCapability(provider, session)) {
+            throw CalendarExceptionCodes.MISSING_CAPABILITY.create(CalendarProviders.getCapabilityName(provider));
         }
         return provider;
+    }
+
+    private boolean hasCapability(CalendarProvider provider, Session session) throws OXException {
+        String capabilityName = CalendarProviders.getCapabilityName(provider);
+        CapabilitySet capabilities = requireService(CapabilityService.class, services).getCapabilities(session);
+        return capabilities.contains(capabilityName);
     }
 
 }

@@ -67,6 +67,8 @@ public interface AutoProvisioningCalendarProvider extends CalendarProvider {
      * of the provider is found for the current session's user, allowing to auto-provision a corresponding account that is persisted
      * afterwards for later usage.
      * <p/>
+     * <b>Note:</b> Auto-provisioning is only triggered for users that have the provider-specific capability assigned.
+     * <p/>
      * Upon success, any <i>internal</i> configuration data is returned for persisting along with the newly created calendar account.
      *
      * @param session The user's session
