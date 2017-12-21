@@ -161,8 +161,8 @@ public class InternalCalendarProvider implements FolderCalendarProvider, AutoPro
         /*
          * init user config based on migrated legacy settings
          */
-        //        ServerSession serverSession = ServerSessionAdapter.valueOf(session);
-        //        new UserConfigHelper(services).applyLegacyConfig(serverSession, userConfig);
+        ServerSession serverSession = ServerSessionAdapter.valueOf(session);
+        new UserConfigHelper(services).applyLegacyConfig(serverSession, userConfig);
         return new JSONObject();
     }
 

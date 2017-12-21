@@ -70,12 +70,13 @@ import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.jslob.JSlob;
+import com.openexchange.jslob.JSlobId;
 import com.openexchange.jslob.JSlobService;
+import com.openexchange.jslob.storage.JSlobStorage;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -254,13 +255,17 @@ public class UserConfigHelper {
         return null;
     }
 
-    private JSlob optJSlob(Session session, String id) {
+    private JSlob optJSlob(ServerSession session, String id) {
         try {
             JSlobService jslobService = services.getOptionalService(JSlobService.class);
             if (null == jslobService) {
                 throw ServiceExceptionCode.absentService(JSlobService.class);
             }
-            return jslobService.get(id, session);
+            JSlobStorage jsLobStorage = services.getOptionalService(JSlobStorage.class);
+            if (null == jsLobStorage) {
+                throw ServiceExceptionCode.absentService(JSlobStorage.class);
+            }
+            return jsLobStorage.opt(new JSlobId(jslobService.getIdentifier(), id, session.getUserId(), session.getContextId()));
         } catch (OXException e) {
             LOG.warn("Error getting JSlob {} for user {} in context {}", id, I(session.getUserId()), I(session.getContextId()), e);
         }

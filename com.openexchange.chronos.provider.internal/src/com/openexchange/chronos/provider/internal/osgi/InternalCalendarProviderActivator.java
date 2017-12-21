@@ -67,6 +67,7 @@ import com.openexchange.conversion.ConversionService;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.jslob.JSlobEntry;
 import com.openexchange.jslob.JSlobService;
+import com.openexchange.jslob.storage.JSlobStorage;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.share.core.ModuleAdjuster;
 import com.openexchange.share.groupware.spi.FolderHandlerModuleExtension;
@@ -98,7 +99,7 @@ public class InternalCalendarProviderActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getOptionalServices() {
-        return new Class<?>[] { JSlobService.class };
+        return new Class<?>[] { JSlobService.class, JSlobStorage.class };
     }
 
     @Override
