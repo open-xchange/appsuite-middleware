@@ -123,9 +123,17 @@ public abstract class FolderCollection<T> extends DAVCollection {
         this.factory = factory;
         this.folder = folder;
         if (null != folder) {
-            includeProperties(new CurrentUserPrivilegeSet(folder.getOwnPermission()), new CTag(this), new SyncToken(this));
-            includeProperties(new ACL(folder.getPermissions()), new ACLRestrictions(), new SupportedPrivilegeSet());
-            includeProperties(new ShareAccess(this), new Invite(this), new ShareResourceURI(this), new Principal(getOwner()));
+            includeProperties(
+                new CTag(this), 
+                new SyncToken(this),
+                new ACL(folder.getPermissions()), 
+                new ACLRestrictions(), 
+                new SupportedPrivilegeSet(),
+                new ShareAccess(this), 
+                new Invite(this), 
+                new ShareResourceURI(this), 
+                new Principal(getOwner())
+            );
         }
     }
 

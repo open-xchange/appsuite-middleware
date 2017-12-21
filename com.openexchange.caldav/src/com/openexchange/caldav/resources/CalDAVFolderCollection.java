@@ -81,6 +81,7 @@ import com.openexchange.caldav.reports.FilteringResource;
 import com.openexchange.dav.DAVProtocol;
 import com.openexchange.dav.PreconditionException;
 import com.openexchange.dav.mixins.CalendarColor;
+import com.openexchange.dav.mixins.CurrentUserPrivilegeSet;
 import com.openexchange.dav.resources.CommonFolderCollection;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.ParameterizedFolder;
@@ -141,10 +142,21 @@ public abstract class CalDAVFolderCollection<T extends CalendarObject> extends C
         this.folderID = null != folder ? Tools.parse(folder.getID()) : 0;
         this.minDateTime = new MinDateTime(factory);
         this.maxDateTime = new MaxDateTime(factory);
-        includeProperties(new SupportedReportSet(), minDateTime, maxDateTime, new Invite(factory, this),
-            new AllowedSharingModes(factory.getSession()), new CalendarOwner(this), new Organizer(this),
-            new ScheduleDefaultCalendarURL(factory), new ScheduleDefaultTasksURL(factory), new CalendarColor(this),
-            new ManagedAttachmentsServerURL(), new CalendarTimezone(factory, this));
+        includeProperties(
+            new CurrentUserPrivilegeSet(folder.getOwnPermission()),
+            new SupportedReportSet(), 
+            minDateTime, 
+            maxDateTime,
+            new Invite(factory, this),
+            new AllowedSharingModes(factory.getSession()), 
+            new CalendarOwner(this), 
+            new Organizer(this),
+            new ScheduleDefaultCalendarURL(factory), 
+            new ScheduleDefaultTasksURL(factory), 
+            new CalendarColor(this),
+            new ManagedAttachmentsServerURL(), 
+            new CalendarTimezone(factory, this)
+        );
         if (NO_ORDER != order) {
             includeProperties(new CalendarOrder(order));
         }

@@ -95,6 +95,7 @@ import com.openexchange.dav.DAVProtocol;
 import com.openexchange.dav.PreconditionException;
 import com.openexchange.dav.mixins.CalendarColor;
 import com.openexchange.dav.mixins.CalendarDescription;
+import com.openexchange.dav.mixins.CurrentUserPrivilegeSet;
 import com.openexchange.dav.mixins.ScheduleCalendarTransp;
 import com.openexchange.dav.reports.SyncStatus;
 import com.openexchange.dav.resources.FolderCollection;
@@ -163,14 +164,26 @@ public class EventCollection extends FolderCollection<Event> implements Filterin
         this.folderID = null != folder ? folder.getID() : null;
         this.minDateTime = new MinDateTime(factory);
         this.maxDateTime = new MaxDateTime(factory);
-        includeProperties(new SupportedReportSet(), minDateTime, maxDateTime, new Invite(factory, this),
-            new AllowedSharingModes(factory.getSession()), new CalendarOwner(this), new Organizer(this),
-            new ScheduleDefaultCalendarURL(factory), new ScheduleDefaultTasksURL(factory),
-            new CalendarColor(this), new CalendarDescription(this), new ScheduleCalendarTransp(this),
-            new ManagedAttachmentsServerURL(), new CalendarTimezone(factory, this),
+        includeProperties(
+            new CurrentUserPrivilegeSet(folder.getOwnPermission(), true),
+            new SupportedReportSet(),
+            minDateTime,
+            maxDateTime,
+            new Invite(factory, this),
+            new AllowedSharingModes(factory.getSession()),
+            new CalendarOwner(this),
+            new Organizer(this),
+            new ScheduleDefaultCalendarURL(factory),
+            new ScheduleDefaultTasksURL(factory),
+            new CalendarColor(this),
+            new CalendarDescription(this),
+            new ScheduleCalendarTransp(this),
+            new ManagedAttachmentsServerURL(),
+            new CalendarTimezone(factory, this),
             new SupportedCalendarComponentSet(SupportedCalendarComponentSet.VEVENT),
             new SupportedCalendarComponentSets(SupportedCalendarComponentSets.VEVENT),
-            new DefaultAlarmVeventDate(), new DefaultAlarmVeventDatetime()
+            new DefaultAlarmVeventDate(),
+            new DefaultAlarmVeventDatetime()
         );
         if (CalendarOrder.NO_ORDER != order) {
             includeProperties(new CalendarOrder(order));
