@@ -56,6 +56,8 @@ import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
@@ -79,13 +81,19 @@ import com.openexchange.chronos.service.CollectionUpdate;
 import com.openexchange.chronos.service.ItemUpdate;
 import com.openexchange.chronos.service.RecurrenceIterator;
 import com.openexchange.chronos.service.RecurrenceService;
+import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.groupware.notify.NotificationConfig;
 import com.openexchange.groupware.notify.State;
+import com.openexchange.groupware.notify.NotificationConfig.NotificationProperty;
 import com.openexchange.groupware.notify.State.Type;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.AllocatingStringWriter;
+import com.openexchange.java.Strings;
+import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.templating.OXTemplate;
@@ -97,6 +105,8 @@ import com.openexchange.templating.TemplateService;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class NotificationMailGenerator implements ITipMailGenerator {
+
+    private final static Logger LOGGER = LoggerFactory.getLogger(NotificationMailGenerator.class);
 
     private NotificationParticipant organizer;
 
@@ -257,7 +267,7 @@ public class NotificationMailGenerator implements ITipMailGenerator {
     protected NotificationMail cancel(final NotificationParticipant recipient) {
         final NotificationMail mail = new NotificationMail();
         mail.setRecipient(recipient);
-        mail.setSender(recipient.isExternal() ? organizer : actor);
+        mail.setSender(determinateSender(recipient.isExternal()));
         initMail(mail);
 
         final ITipMessage message = new ITipMessage();
@@ -275,17 +285,17 @@ public class NotificationMailGenerator implements ITipMailGenerator {
 
     // IMIP Messages
 
-    protected NotificationMail noITIP(final NotificationParticipant recipient, final State.Type type) throws OXException {
+    protected NotificationMail noITIP(final NotificationParticipant recipient, final State.Type type) {
         final NotificationMail mail = new NotificationMail();
         mail.setRecipient(recipient);
-        mail.setSender(recipient.isExternal() ? organizer : actor);
+        mail.setSender(determinateSender(recipient.isExternal()));
         mail.setStateType(type);
         initMail(mail);
 
         return mail;
     }
 
-    protected NotificationMail counterNoITIP(final NotificationParticipant recipient, final State.Type type) throws OXException {
+    protected NotificationMail counterNoITIP(final NotificationParticipant recipient, final State.Type type) {
         final NotificationMail mail = new NotificationMail();
         mail.setRecipient(recipient);
         mail.setSender(actor);
@@ -299,7 +309,7 @@ public class NotificationMailGenerator implements ITipMailGenerator {
         final Event appointmentToReport = (override != null) ? override : this.appointment;
         final NotificationMail mail = new NotificationMail();
         mail.setRecipient(recipient);
-        mail.setSender(recipient.isExternal() ? organizer : actor);
+        mail.setSender(determinateSender(recipient.isExternal()));
         mail.setStateType(type);
         initMail(mail);
         initAttachments(mail);
@@ -323,10 +333,48 @@ public class NotificationMailGenerator implements ITipMailGenerator {
         return mail;
     }
 
+    /**
+     * Determinate the {@link NotificationParticipant} to use as the sender of the mail.
+     * Considers {@link NotificationProperty#FROM_SOURCE} for the correct mail address to use.
+     * 
+     * @param external If the receiver of the mail is internal or external
+     * @return The sender with correct mail set
+     */
+    private NotificationParticipant determinateSender(boolean external) {
+        NotificationParticipant n;
+        if (external) {
+            n = organizer.clone();
+            try {
+                String fromAddr;
+                final String senderSource = NotificationConfig.getProperty(NotificationProperty.FROM_SOURCE, "primaryMail");
+                Context context = Services.getService(ContextService.class, true).getContext(session.getContextId());
+                if (senderSource.equals("defaultSenderAddress")) {
+                    try {
+                        fromAddr = UserSettingMailStorage.getInstance().loadUserSettingMail(n.getIdentifier(), context).getSendAddr();
+                    } catch (final OXException e) {
+                        LOGGER.debug("", e);
+                        fromAddr = UserStorage.getInstance().getUser(n.getIdentifier(), context).getMail();
+                    }
+                } else {
+                    fromAddr = UserStorage.getInstance().getUser(n.getIdentifier(), context).getMail();
+                }
+                if (Strings.isNotEmpty(fromAddr)) {
+                    n.setEmail(fromAddr);
+                }
+            } catch (OXException e) {
+                LOGGER.debug("Couldn't change sender mail address to configuared defaults.", e);
+            }
+
+        } else {
+            n = actor;
+        }
+        return n;
+    }
+
     protected NotificationMail add(final NotificationParticipant recipient) throws OXException {
         final NotificationMail mail = new NotificationMail();
         mail.setRecipient(recipient);
-        mail.setSender(recipient.isExternal() ? organizer : actor);
+        mail.setSender(determinateSender(recipient.isExternal()));
         mail.setStateType(State.Type.NEW);
         initMail(mail);
         initAttachments(mail);
@@ -1048,30 +1096,17 @@ public class NotificationMailGenerator implements ITipMailGenerator {
                         return null;
                     }
                     // This needs to be a reply
-                    if (participant.hasRole(ITipRole.ORGANIZER)) {
-                        return stateChanged(reply(participant, confirmStatus), confirmStatus);
-                    }
-                    if (!participant.isExternal()) {
-                        return stateChanged(noITIP(participant, getStateTypeForStatus(confirmStatus)), confirmStatus);
-                    }
-                    return null;
+                    return stateChanged(reply(participant, confirmStatus), confirmStatus);
                 }
 
                 // This is a update on behalf of the organizer
-
-                if (participant.hasRole(ITipRole.ORGANIZER)) {
-                    if (isCounterableOnly()) {
-                        return update(counter(participant));
-                    } else if (ignorableChangedOnly()) {
-                        return null;
-                    } else {
-                        return update(noITIP(participant, Type.MODIFIED));
-                    }
+                if (isCounterableOnly()) {
+                    return update(counter(participant));
+                } else if (ignorableChangedOnly()) {
+                    return null;
+                } else {
+                    return update(noITIP(participant, Type.MODIFIED));
                 }
-                if (!participant.isExternal()) {
-                    return update(noITIP(participant, State.Type.MODIFIED));
-                }
-                return null;
             } else if (participant.hasRole(ITipRole.ATTENDEE)) {
                 if (onlyMyStateChanged() && confirmStatus != null) {
                     if (participant.isExternal()) {
