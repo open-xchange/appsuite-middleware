@@ -241,6 +241,12 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
     }
 
     @Override
+    public void insertAlarms(Event event, Map<Integer, List<Alarm>> alarmsByUserId) throws OXException {
+        Map<String, Map<Integer, List<Alarm>>> alarmsByUserByEventId = Collections.singletonMap(event.getId(), alarmsByUserId);
+        insertAlarms(alarmsByUserByEventId);
+    }
+
+    @Override
     public void updateAlarms(Event event, int userID, List<Alarm> alarms) throws OXException {
         int updated = 0;
         Connection connection = null;

@@ -238,6 +238,13 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
     }
 
     @Override
+    public void insertAlarms(Event event, Map<Integer, List<Alarm>> alarmsByUserId) throws OXException {
+        for (Entry<Integer, List<Alarm>> entry : alarmsByUserId.entrySet()) {
+            insertAlarms(event, i(entry.getKey()), entry.getValue());
+        }
+    }
+
+    @Override
     public void insertAlarms(Map<String, Map<Integer, List<Alarm>>> alarmsByUserByEventId) throws OXException {
         throw new UnsupportedOperationException();
     }

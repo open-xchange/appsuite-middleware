@@ -112,6 +112,12 @@ public class RdbAlarmStorage implements AlarmStorage {
     }
 
     @Override
+    public void insertAlarms(Event event, Map<Integer, List<Alarm>> alarmsByUserId) throws OXException {
+        delegate.insertAlarms(event, alarmsByUserId);
+        legacyDelegate.insertAlarms(event, alarmsByUserId);
+    }
+
+    @Override
     public void insertAlarms(Map<String, Map<Integer, List<Alarm>>> alarmsByUserByEventId) throws OXException {
         delegate.insertAlarms(alarmsByUserByEventId);
         legacyDelegate.insertAlarms(alarmsByUserByEventId);
