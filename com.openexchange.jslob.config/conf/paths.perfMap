@@ -20,6 +20,7 @@ modules/com.openexchange.user.passwordchange/maxLength > io.ox/core//password/ma
 modules/com.openexchange.user.passwordchange/minLength > io.ox/core//password/minLength
 modules/com.openexchange.user.passwordchange/regexp > io.ox/core//password/regexp
 modules/com.openexchange.user.passwordchange/special > io.ox/core//password/special
+modules/com.openexchange.user.passwordchange/emptyCurrent > io.ox/core//password/emptyCurrent
 
 # Contact Collector
 modules/mail/contactCollectOnMailAccess > io.ox/mail//contactCollectOnMailAccess
