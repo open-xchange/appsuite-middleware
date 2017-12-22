@@ -20,6 +20,30 @@ import com.openexchange.osgi.annotation.SingletonService;
 public interface IFileItemService {
 
     /**
+     * {@link DatabaseType}
+     *
+     * @author <a href="mailto:kai.ahrens@open-xchange.com">Kai Ahrens</a>
+     * @since v7.10.0
+     */
+    public enum DatabaseType {
+        /**
+         * A database, that supports only standard SQL queries.
+         */
+        STANDARD_SQL,
+        /**
+         * A database, that supports standard SQL queries as well as MySQL specific queries.
+         */
+        MYSQL
+    }
+
+    /**
+     * Retrieving the type of database, internally used to store and retrieve file metadata.
+     *
+     * @return The {@link DatabaseType}.
+     */
+    public DatabaseType getDatabaseType();
+
+    /**
      * Registering a key or a list of keys for a specific group,
      * that can be used as user defined properties of a FileItem for the group.
      * The registering of keys needs to be done prior to the usage of that key
@@ -128,7 +152,7 @@ public interface IFileItemService {
      * @return
      * @throws FileItemException
      */
-    public IFileItem[] getByCustomQuerySQL(final String customQuerySQL, Object[]... returnValues) throws FileItemException;
+    public IFileItem[] getByCustomQuerySQL(final String customQuerySQL, Object... returnValues) throws FileItemException;
 
     /**
      * Getting the number of distinct subgroup ids.
