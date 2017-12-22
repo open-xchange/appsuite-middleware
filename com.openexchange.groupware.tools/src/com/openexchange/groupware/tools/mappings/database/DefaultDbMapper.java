@@ -169,8 +169,7 @@ public abstract class DefaultDbMapper<O, E extends Enum<E>> extends DefaultMappe
                         return entry.getKey();
                     }
                 }
-            }
-			if (columnLabel.equals(entry.getValue().getColumnLabel())) {
+            } else if (columnLabel.equals(entry.getValue().getColumnLabel())) {
 				return entry.getKey();
 			}
 		}
