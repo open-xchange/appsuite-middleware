@@ -65,11 +65,15 @@ import static com.openexchange.folderstorage.Permission.DELETE_ALL_OBJECTS;
 import static com.openexchange.folderstorage.Permission.DELETE_OWN_OBJECTS;
 import static com.openexchange.folderstorage.Permission.NO_PERMISSIONS;
 import static com.openexchange.folderstorage.Permission.READ_FOLDER;
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.i;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -100,7 +104,6 @@ import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.type.PublicType;
-import com.openexchange.java.Autoboxing;
 import com.openexchange.java.Strings;
 import com.openexchange.search.CompositeSearchTerm;
 import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
@@ -391,32 +394,54 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
         if (null == alarms || 0 == alarms.size()) {
             return Collections.emptyList();
         }
-        List<Alarm> newAlarms = new ArrayList<Alarm>(alarms.size());
-        for (Alarm alarm : alarms) {
-            Alarm newAlarm = AlarmMapper.getInstance().copy(alarm, null, (AlarmField[]) null);
-            newAlarm.setId(storage.getAlarmStorage().nextId());
-            if (forceNewUids || false == newAlarm.containsUid() || Strings.isEmpty(newAlarm.getUid())) {
-                newAlarm.setUid(UUID.randomUUID().toString());
+        return insertAlarms(event, Collections.singletonMap(I(userId), alarms), forceNewUids).get(I(userId));
+    }
+
+    /**
+     * Inserts alarm data for an event of a specific user, optionally assigning new alarm UIDs in case the alarms are copied over from
+     * another event. A new unique alarm identifier is always assigned, and the event is passed from the calendar user's folder view to the
+     * storage implicitly (based on {@link Utils#getFolderView}.
+     *
+     * @param event The event the alarms are associated with
+     * @param alarmsByUserId The alarms to insert, mapped to the corresponding user identifier
+     * @param alarms The alarms to insert
+     * @param forceNewUids <code>true</code> if new UIDs should be assigned even if already set in the supplied alarms, <code>false</code>, otherwise
+     * @return The inserted alarms, mapped to the corresponding user identifier
+     */
+    protected Map<Integer, List<Alarm>> insertAlarms(Event event, Map<Integer, List<Alarm>> alarmsByUserId, boolean forceNewUids) throws OXException {
+        if (null == alarmsByUserId || 0 == alarmsByUserId.size()) {
+            return Collections.emptyMap();
+        }
+        Map<Integer, List<Alarm>> newAlarmsByUserId = new HashMap<Integer, List<Alarm>>(alarmsByUserId.size());
+        for (Entry<Integer, List<Alarm>> entry : alarmsByUserId.entrySet()) {
+            List<Alarm> newAlarms = new ArrayList<Alarm>(entry.getValue().size());
+            for (Alarm alarm : entry.getValue()) {
+                Alarm newAlarm = AlarmMapper.getInstance().copy(alarm, null, (AlarmField[]) null);
+                newAlarm.setId(storage.getAlarmStorage().nextId());
+                if (forceNewUids || false == newAlarm.containsUid() || Strings.isEmpty(newAlarm.getUid())) {
+                    newAlarm.setUid(UUID.randomUUID().toString());
+                }
+                newAlarms.add(newAlarm);
             }
-            newAlarms.add(newAlarm);
-        }
-        final String folderView = getFolderView(event, userId);
-        if (false == folderView.equals(event.getFolderId())) {
-            event = new DelegatingEvent(event) {
+            String folderView = getFolderView(event, i(entry.getKey()));
+            if (false == folderView.equals(event.getFolderId())) {
+                event = new DelegatingEvent(event) {
 
-                @Override
-                public String getFolderId() {
-                    return folderView;
-                }
+                    @Override
+                    public String getFolderId() {
+                        return folderView;
+                    }
 
-                @Override
-                public boolean containsFolderId() {
-                    return true;
-                }
-            };
+                    @Override
+                    public boolean containsFolderId() {
+                        return true;
+                    }
+                };
+            }
+            storage.getAlarmStorage().insertAlarms(event, i(entry.getKey()), newAlarms);
+            newAlarmsByUserId.put(entry.getKey(), newAlarms);
         }
-        storage.getAlarmStorage().insertAlarms(event, userId, newAlarms);
-        return newAlarms;
+        return newAlarmsByUserId;
     }
 
     /**
@@ -616,7 +641,7 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
                  * internal organizer must match the actual calendar user if specified
                  */
                 if (organizer.getEntity() != calendarUserId) {
-                    throw CalendarExceptionCodes.INVALID_CALENDAR_USER.create(organizer.getUri(), Autoboxing.I(organizer.getEntity()), CalendarUserType.INDIVIDUAL);
+                    throw CalendarExceptionCodes.INVALID_CALENDAR_USER.create(organizer.getUri(), I(organizer.getEntity()), CalendarUserType.INDIVIDUAL);
                 }
             } else {
                 /*
