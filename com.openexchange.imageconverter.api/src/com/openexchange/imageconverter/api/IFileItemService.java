@@ -139,7 +139,7 @@ public interface IFileItemService {
 
     /**
      * Getting all {@link IFileItem} interfaces that are selected
-     * by the customQuerySQL string.
+     * by the customQuery SQL string.
      * The query has to be created with returning all following columns
      * of the appropriate FileItem database table(s) in the correct order
      *
@@ -153,7 +153,7 @@ public interface IFileItemService {
      * @return
      * @throws FileItemException
      */
-    public IFileItem[] getByCustomQuerySQL(final String customQuerySQL, Object... returnValues) throws FileItemException;
+    public IFileItem[] getByCustomQuery(final String customQuery, Object... returnValues) throws FileItemException;
 
     /**
      * Getting the number of distinct subgroup ids.
