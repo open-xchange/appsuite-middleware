@@ -80,8 +80,8 @@ import com.openexchange.exception.OXException;
  */
 public abstract class AbstractActionPerformer implements ITipActionPerformer {
 
-    protected ITipIntegrationUtility util;
-    private final MailSenderService sender;
+    protected ITipIntegrationUtility       util;
+    private final MailSenderService        sender;
     private final ITipMailGeneratorFactory mailGenerators;
 
     public AbstractActionPerformer(final ITipIntegrationUtility util, final MailSenderService mailSender, final ITipMailGeneratorFactory mailGenerators) {
@@ -206,12 +206,13 @@ public abstract class AbstractActionPerformer implements ITipActionPerformer {
 
     private Event constructFakeOriginal(final Event appointment, final CalendarSession session, int owner) throws OXException {
         Event copy = session.getUtilities().copyEvent(appointment, (EventField[]) null);
-        for (Attendee attendee : copy.getAttendees()) {
-            if (attendee.getEntity() == owner) {
-                attendee.setPartStat(ParticipationStatus.NEEDS_ACTION);
+        if (copy.containsAttendees()) {
+            for (Attendee attendee : copy.getAttendees()) {
+                if (attendee.getEntity() == owner) {
+                    attendee.setPartStat(ParticipationStatus.NEEDS_ACTION);
+                }
             }
         }
-
         return copy;
     }
 

@@ -176,7 +176,7 @@ public class DefaultNotificationParticipantResolver implements NotificationParti
 
             final Set<ITipRole> roles = EnumSet.noneOf(ITipRole.class);
 
-            roles.add((mail.equalsIgnoreCase(organizer) || id == appointment.getOrganizer().getEntity()) ? ITipRole.ORGANIZER : ITipRole.ATTENDEE);
+            roles.add((mail.equalsIgnoreCase(organizer) || (appointment.containsOrganizer() && id == appointment.getOrganizer().getEntity())) ? ITipRole.ORGANIZER : ITipRole.ATTENDEE);
             if (id == onBehalfOf.getId()) {
                 roles.add(ITipRole.ON_BEHALF_OF);
             }
@@ -220,7 +220,7 @@ public class DefaultNotificationParticipantResolver implements NotificationParti
 
             final Set<ITipRole> roles = EnumSet.noneOf(ITipRole.class);
 
-            roles.add((mail.equalsIgnoreCase(organizer) || id == appointment.getOrganizer().getEntity()) ? ITipRole.ORGANIZER : ITipRole.ATTENDEE);
+            roles.add((mail.equalsIgnoreCase(organizer) || (appointment.containsOrganizer() && id == appointment.getOrganizer().getEntity())) ? ITipRole.ORGANIZER : ITipRole.ATTENDEE);
             if (id == onBehalfOf.getId()) {
                 roles.add(ITipRole.ON_BEHALF_OF);
             }
@@ -414,7 +414,7 @@ public class DefaultNotificationParticipantResolver implements NotificationParti
         } else {
             Organizer organizer = appointment.getOrganizer();
             if (organizer == null) {
-                return userService.getUser(appointment.getCreatedBy().getEntity(), ctx);
+                return appointment.containsCreatedBy() ? userService.getUser(appointment.getCreatedBy().getEntity(), ctx) : null;
             }
             String organizerMail = CalendarUtils.extractEMailAddress(organizer.getUri());
             if (null != organizerMail) {
@@ -437,7 +437,10 @@ public class DefaultNotificationParticipantResolver implements NotificationParti
             organizer = original.getOrganizer();
         }
         if (organizer == null) {
-            final User owner = userService.getUser(appointment.getCreatedBy().getEntity(), ctx);
+            User owner = null;
+            if (appointment.containsCreatedBy()) {
+                owner = userService.getUser(appointment.getCreatedBy().getEntity(), ctx);
+            }
             return owner == null ? "unknown" : owner.getMail();
         }
         return CalendarUtils.extractEMailAddress(organizer.getUri());
