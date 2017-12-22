@@ -223,18 +223,18 @@ public class UpgradeSchemata extends UtilAbstraction {
      * Lists all known schemata
      * 
      * @return The known schemata
-     * @throws RemoteException
-     * @throws StorageException
-     * @throws InvalidCredentialsException
-     * @throws InvalidDataException
+     * @throws RemoteException See {@link OXUtilInterface#listDatabaseSchema(String, Boolean, Credentials)}
+     * @throws StorageException See {@link OXUtilInterface#listDatabaseSchema(String, Boolean, Credentials)}
+     * @throws InvalidCredentialsException See {@link OXUtilInterface#listDatabaseSchema(String, Boolean, Credentials)}
+     * @throws InvalidDataException See {@link OXUtilInterface#listDatabaseSchema(String, Boolean, Credentials)}
      */
     private Database[] listSchemata() throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
-        Database[] databases = oxUtil.listDatabaseSchema("*", false, credentials);
+        Database[] databases = oxUtil.listDatabaseSchema("*", Boolean.FALSE, credentials);
         if (Strings.isEmpty(startFromSchema) || databases.length == 1) {
             return databases[0].getScheme().equals(startFromSchema) ? new Database[0] : databases;
         }
 
-        Comparator<Database> comparator = (o1, o2) -> o1.getName().compareTo(o2.getName());
+        Comparator<Database> comparator = (o1, o2) -> o1.getScheme().compareTo(o2.getScheme());
         Arrays.sort(databases, comparator);
         int position = Arrays.binarySearch(databases, new Database(-1, startFromSchema), comparator);
         if (position < 0) {
@@ -516,7 +516,7 @@ public class UpgradeSchemata extends UtilAbstraction {
         jmxPasswordNameOption = setShortLongOpt(parser, 's', "password", "The optional JMX password (if JMX has authentication enabled)", true, NeededQuadState.possibly);
         schemaNameOption = setShortLongOpt(parser, 'm', "schema-name", "The optional schema name to continue from", true, NeededQuadState.possibly);
         forceOption = setShortLongOpt(parser, 'f', "force", "Forces the upgrade even if the updates fail in some schemata", false, NeededQuadState.notneeded);
-        skipOption = setShortLongOpt(parser, 'k', "skip-schemata", "Defines the names of the schemata as a comma separated list that should be skipped during the upgrde phase", true, NeededQuadState.possibly);
+        skipOption = setShortLongOpt(parser, 'k', "skip-schemata", "Defines the names of the schemata as a comma separated list that should be skipped during the upgrade phase", true, NeededQuadState.possibly);
 
         setDefaultCommandLineOptionsWithoutContextID(parser);
     }
