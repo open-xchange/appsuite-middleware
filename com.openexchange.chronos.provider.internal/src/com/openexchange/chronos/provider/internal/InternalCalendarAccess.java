@@ -71,6 +71,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.dmfs.rfc5545.DateTime;
 import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmTrigger;
@@ -318,6 +319,11 @@ public class InternalCalendarAccess implements FolderCalendarAccess, SubscribeAw
     @Override
     public CalendarResult deleteEvent(EventID eventID, long clientTimestamp) throws OXException {
         return getCalendarService().deleteEvent(session, eventID, clientTimestamp);
+    }
+
+    @Override
+    public CalendarResult splitSeries(EventID eventID, DateTime splitPoint, String uid, long clientTimestamp) throws OXException {
+        return getCalendarService().splitSeries(session, eventID, splitPoint, uid, clientTimestamp);
     }
 
     @Override

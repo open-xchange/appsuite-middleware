@@ -51,6 +51,7 @@ package com.openexchange.chronos.service;
 
 import java.util.List;
 import java.util.Set;
+import org.dmfs.rfc5545.DateTime;
 import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmTrigger;
@@ -379,7 +380,7 @@ public interface CalendarService {
     CalendarResult updateAlarms(CalendarSession session, EventID eventID, List<Alarm> alarms, long clientTimestamp) throws OXException;
 
     /**
-     * Delete an existing event.
+     * Deletes an existing event.
      *
      * @param session The calendar session
      * @param eventID The identifier of the event to delete
@@ -387,6 +388,18 @@ public interface CalendarService {
      * @return The delete result
      */
     CalendarResult deleteEvent(CalendarSession session, EventID eventID, long clientTimestamp) throws OXException;
+
+    /**
+     * Splits an existing event series into two separate event series.
+     *
+     * @param session The calendar session
+     * @param eventID The identifier of the event series to split
+     * @param splitPoint The date or date-time where the split is to occur
+     * @param uid A new unique identifier to assign to the new part of the series, or <code>null</code> if not set
+     * @param clientTimestamp The last timestamp / sequence number known by the client to catch concurrent updates
+     * @return The split result
+     */
+    CalendarResult splitSeries(CalendarSession session, EventID eventID, DateTime splitPoint, String uid, long clientTimestamp) throws OXException;
 
     /**
      * Clears a folder's contents by deleting all contained events.

@@ -50,6 +50,7 @@
 package com.openexchange.chronos.provider.groupware;
 
 import java.util.List;
+import org.dmfs.rfc5545.DateTime;
 import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Attendee;
@@ -209,6 +210,17 @@ public interface GroupwareCalendarAccess extends FolderCalendarAccess, Permissio
      * @return The delete result
      */
     CalendarResult deleteEvent(EventID eventID, long clientTimestamp) throws OXException;
+
+    /**
+     * Splits an existing event series into two separate event series.
+     *
+     * @param eventID The identifier of the event series to split
+     * @param splitPoint The date or date-time where the split is to occur
+     * @param uid A new unique identifier to assign to the new part of the series, or <code>null</code> if not set
+     * @param clientTimestamp The last timestamp / sequence number known by the client to catch concurrent updates
+     * @return The split result
+     */
+    CalendarResult splitSeries(EventID eventID, DateTime splitPoint, String uid, long clientTimestamp) throws OXException;
 
     /**
      * Imports a list of events into a specific folder.

@@ -71,6 +71,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TimeZone;
+import org.dmfs.rfc5545.DateTime;
 import org.json.JSONObject;
 import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.chronos.Alarm;
@@ -503,6 +504,18 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
         try {
             GroupwareCalendarAccess calendarAccess = getGroupwareAccess(accountId);
             CalendarResult result = calendarAccess.deleteEvent(getRelativeId(eventID), clientTimestamp);
+            return new IDManglingCalendarResult(result, accountId);
+        } catch (OXException e) {
+            throw withUniqueIDs(e, accountId);
+        }
+    }
+
+    @Override
+    public CalendarResult splitSeries(EventID eventID, DateTime splitPoint, String uid, long clientTimestamp) throws OXException {
+        int accountId = getAccountId(eventID.getFolderID());
+        try {
+            GroupwareCalendarAccess calendarAccess = getGroupwareAccess(accountId);
+            CalendarResult result = calendarAccess.splitSeries(getRelativeId(eventID), splitPoint, uid, clientTimestamp);
             return new IDManglingCalendarResult(result, accountId);
         } catch (OXException e) {
             throw withUniqueIDs(e, accountId);

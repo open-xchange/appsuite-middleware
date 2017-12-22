@@ -57,6 +57,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
+import org.dmfs.rfc5545.DateTime;
 import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmTrigger;
@@ -77,6 +78,7 @@ import com.openexchange.chronos.impl.performer.ListPerformer;
 import com.openexchange.chronos.impl.performer.MovePerformer;
 import com.openexchange.chronos.impl.performer.SearchPerformer;
 import com.openexchange.chronos.impl.performer.SequenceNumberPerformer;
+import com.openexchange.chronos.impl.performer.SplitPerformer;
 import com.openexchange.chronos.impl.performer.TouchPerformer;
 import com.openexchange.chronos.impl.performer.UpdateAlarmsPerformer;
 import com.openexchange.chronos.impl.performer.UpdateAttendeePerformer;
@@ -397,6 +399,21 @@ public class CalendarServiceImpl implements CalendarService {
          */
         notifyHandlers(result, session);
         return result.getUserizedResult();
+    }
+
+    @Override
+    public CalendarResult splitSeries(CalendarSession session, EventID eventID, DateTime splitPoint, String uid, long clientTimestamp) throws OXException {
+        /*
+         * split event series, notify handlers & return userized result
+         */
+        return notifyHandlers(new InternalCalendarStorageOperation<InternalCalendarResult>(session) {
+
+            @Override
+            protected InternalCalendarResult execute(CalendarSession session, CalendarStorage storage) throws OXException {
+                return new SplitPerformer(storage, session, getFolder(session, eventID.getFolderID())).perform(eventID.getObjectID(), splitPoint, uid, clientTimestamp);
+
+            }
+        }.executeUpdate(), session).getUserizedResult();
     }
 
     @Override

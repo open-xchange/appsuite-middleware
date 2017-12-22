@@ -68,7 +68,9 @@ import static com.openexchange.chronos.exception.CalendarExceptionMessages.INVAL
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.INVALID_CALENDAR_USER_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.INVALID_CONFIGURATION_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.INVALID_GEO_LOCATION_MSG;
+import static com.openexchange.chronos.exception.CalendarExceptionMessages.INVALID_RECURRENCE_ID_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.INVALID_RRULE_MSG;
+import static com.openexchange.chronos.exception.CalendarExceptionMessages.INVALID_SPLIT_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.INVALID_TIMEZONE_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.IO_ERROR_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.MANDATORY_FIELD_MSG;
@@ -194,12 +196,17 @@ public enum CalendarExceptionCodes implements DisplayableOXExceptionCode {
      * <li>The targeted occurrence is not part of the event series. Please select a valid recurrence identifier and try again.</li>
      * <li>Invalid recurrence id [id %1$s, rule %2$s]</li>
      */
-    INVALID_RECURRENCE_ID("Invalid recurrence id [id %1$s, rule %2$s]", INVALID_RRULE_MSG, Category.CATEGORY_USER_INPUT, 4061),
+    INVALID_RECURRENCE_ID("Invalid recurrence id [id %1$s, rule %2$s]", INVALID_RECURRENCE_ID_MSG, Category.CATEGORY_USER_INPUT, 4061),
     /**
      * <li>In order to accomplish the search, %1$d or more characters are required.</li>
      * <li>Query too short [minimum %1$d, query %2$s]</li>
      */
     QUERY_TOO_SHORT("Query too short [minimum %1$d, query %2$s]", QUERY_TOO_SHORT_MSG, Category.CATEGORY_USER_INPUT, 4062),
+    /**
+     * <li>The split of the event series cannot be performed. Please select a valid split point and try again.</li>
+     * <li>Invalid split [id %1$s, split point %2$s]</li>
+     */
+    INVALID_SPLIT("Invalid split [id %1$s, split point %2$s]", INVALID_SPLIT_MSG, Category.CATEGORY_USER_INPUT, 4063),
     /**
      * <li>The operation could not be completed due to a concurrent modification. Please reload the data and try again.</li>
      * <li>Concurrent modification [id %1$s, client timestamp %2$d, actual timestamp %3$d]</li>

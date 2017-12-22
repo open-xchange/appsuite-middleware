@@ -273,6 +273,22 @@ public class Check extends com.openexchange.chronos.common.Check {
     }
 
     /**
+     * Checks that a specific unique identifier (UID) is not already used for another event within the same context.
+     *
+     * @param storage A reference to the calendar storage
+     * @param uid The unique identifier to check
+     * @return The passed unique identifier, after it was checked for uniqueness
+     * @throws OXException {@link CalendarExceptionCodes#UID_CONFLICT}
+     */
+    public static String uidIsUnique(CalendarStorage storage, String uid) throws OXException {
+        String existingId = new ResolveUidPerformer(storage).perform(uid);
+        if (null != existingId) {
+            throw CalendarExceptionCodes.UID_CONFLICT.create(uid, existingId);
+        }
+        return uid;
+    }
+
+    /**
      * Checks that a particular attendee exists in an event.
      *
      * @param event The event to check

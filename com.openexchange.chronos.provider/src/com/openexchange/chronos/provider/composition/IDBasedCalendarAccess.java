@@ -53,6 +53,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.dmfs.rfc5545.DateTime;
 import org.json.JSONObject;
 import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.chronos.Alarm;
@@ -429,6 +430,24 @@ public interface IDBasedCalendarAccess extends TransactionAware, CalendarParamet
      * @return The delete result
      */
     CalendarResult deleteEvent(EventID eventID, long clientTimestamp) throws OXException;
+
+    /**
+     * Splits an existing event series into two separate event series.
+     * <p/>
+     * <b>Note:</b> Only available for the internal <i>groupware</i> calendar provider.
+     * <p/>
+     * The following calendar parameters are evaluated:
+     * <ul>
+     * <li>{@link CalendarParameters#PARAMETER_NOTIFICATION}</li>
+     * </ul>
+     *
+     * @param eventID The identifier of the event series to split
+     * @param splitPoint The date or date-time where the split is to occur
+     * @param uid A new unique identifier to assign to the new part of the series, or <code>null</code> if not set
+     * @param clientTimestamp The last timestamp / sequence number known by the client to catch concurrent updates
+     * @return The split result
+     */
+    CalendarResult splitSeries(EventID eventID, DateTime splitPoint, String uid, long clientTimestamp) throws OXException;
 
     /**
      * Imports a list of events into a specific folder.
