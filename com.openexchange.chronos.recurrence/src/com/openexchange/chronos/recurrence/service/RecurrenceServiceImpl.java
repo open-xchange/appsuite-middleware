@@ -50,6 +50,7 @@
 package com.openexchange.chronos.recurrence.service;
 
 import static com.openexchange.chronos.common.CalendarUtils.initCalendar;
+import static com.openexchange.chronos.common.CalendarUtils.initRecurrenceRule;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -166,13 +167,13 @@ public class RecurrenceServiceImpl implements RecurrenceService {
 
     @Override
     public boolean isUnlimited(String recurrenceRule) throws OXException {
-        RecurrenceRule rule = RecurrenceUtils.getRecurrenceRule(recurrenceRule);
+        RecurrenceRule rule = initRecurrenceRule(recurrenceRule);
         return null == rule.getCount() && null == rule.getUntil();
     }
 
     @Override
     public RecurrenceId getLastOccurrence(RecurrenceData recurrenceData) throws OXException {
-        RecurrenceRule rule = RecurrenceUtils.getRecurrenceRule(recurrenceData.getRecurrenceRule());
+        RecurrenceRule rule = initRecurrenceRule(recurrenceData.getRecurrenceRule());
         if (null == rule.getCount() && null == rule.getUntil()) {
             return null;
         }

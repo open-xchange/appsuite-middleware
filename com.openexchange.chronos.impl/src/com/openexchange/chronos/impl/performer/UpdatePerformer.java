@@ -62,6 +62,7 @@ import static com.openexchange.chronos.common.CalendarUtils.getFolderView;
 import static com.openexchange.chronos.common.CalendarUtils.getUserIDs;
 import static com.openexchange.chronos.common.CalendarUtils.hasExternalOrganizer;
 import static com.openexchange.chronos.common.CalendarUtils.initCalendar;
+import static com.openexchange.chronos.common.CalendarUtils.initRecurrenceRule;
 import static com.openexchange.chronos.common.CalendarUtils.isAllDay;
 import static com.openexchange.chronos.common.CalendarUtils.isAttendeeSchedulingResource;
 import static com.openexchange.chronos.common.CalendarUtils.isGroupScheduled;
@@ -92,7 +93,6 @@ import java.util.Map.Entry;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import org.dmfs.rfc5545.DateTime;
-import org.dmfs.rfc5545.recur.InvalidRecurrenceRuleException;
 import org.dmfs.rfc5545.recur.RecurrenceRule;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Attachment;
@@ -1092,44 +1092,40 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
         if (null == updatedRRule) {
             return false;
         }
-        try {
-            RecurrenceRule originalRule = new RecurrenceRule(originalRRule);
-            RecurrenceRule updatedRule = new RecurrenceRule(updatedRRule);
-            /*
-             * check if only UNTIL was changed
-             */
-            RecurrenceRule checkedRule = new RecurrenceRule(updatedRule.toString());
-            checkedRule.setUntil(originalRule.getUntil());
-            if (checkedRule.toString().equals(originalRule.toString())) {
-                return 1 == CalendarUtils.compare(originalRule.getUntil(), updatedRule.getUntil(), null);
-            }
-            /*
-             * check if only COUNT was changed
-             */
-            checkedRule = new RecurrenceRule(updatedRule.toString());
-            if (null == originalRule.getCount()) {
-                checkedRule.setUntil(null);
-            } else {
-                checkedRule.setCount(i(originalRule.getCount()));
-            }
-            if (checkedRule.toString().equals(originalRule.toString())) {
-                int originalCount = null == originalRule.getCount() ? Integer.MAX_VALUE : i(originalRule.getCount());
-                int updatedCount = null == updatedRule.getCount() ? Integer.MAX_VALUE : i(updatedRule.getCount());
-                return updatedCount > originalCount;
-            }
-            /*
-             * check if only the INTERVAL was extended
-             */
-            //TODO
-
-            /*
-             * check if each BY... part is equally or more restrictive
-             */
-            //TODO
-
-        } catch (InvalidRecurrenceRuleException e) {
-            throw CalendarExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        RecurrenceRule originalRule = initRecurrenceRule(originalRRule);
+        RecurrenceRule updatedRule = initRecurrenceRule(updatedRRule);
+        /*
+         * check if only UNTIL was changed
+         */
+        RecurrenceRule checkedRule = initRecurrenceRule(updatedRule.toString());
+        checkedRule.setUntil(originalRule.getUntil());
+        if (checkedRule.toString().equals(originalRule.toString())) {
+            return 1 == CalendarUtils.compare(originalRule.getUntil(), updatedRule.getUntil(), null);
         }
+        /*
+         * check if only COUNT was changed
+         */
+        checkedRule = initRecurrenceRule(updatedRule.toString());
+        if (null == originalRule.getCount()) {
+            checkedRule.setUntil(null);
+        } else {
+            checkedRule.setCount(i(originalRule.getCount()));
+        }
+        if (checkedRule.toString().equals(originalRule.toString())) {
+            int originalCount = null == originalRule.getCount() ? Integer.MAX_VALUE : i(originalRule.getCount());
+            int updatedCount = null == updatedRule.getCount() ? Integer.MAX_VALUE : i(updatedRule.getCount());
+            return updatedCount > originalCount;
+        }
+        /*
+         * check if only the INTERVAL was extended
+         */
+        //TODO
+
+        /*
+         * check if each BY... part is equally or more restrictive
+         */
+        //TODO
+
         return true;
     }
 

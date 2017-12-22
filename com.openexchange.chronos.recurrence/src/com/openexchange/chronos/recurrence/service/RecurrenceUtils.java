@@ -50,10 +50,10 @@
 package com.openexchange.chronos.recurrence.service;
 
 import static com.openexchange.chronos.common.CalendarUtils.initCalendar;
+import static com.openexchange.chronos.common.CalendarUtils.initRecurrenceRule;
 import java.util.Calendar;
 import java.util.List;
 import org.dmfs.rfc5545.DateTime;
-import org.dmfs.rfc5545.recur.InvalidRecurrenceRuleException;
 import org.dmfs.rfc5545.recur.RecurrenceRule;
 import org.dmfs.rfc5545.recur.RecurrenceRule.Part;
 import org.dmfs.rfc5545.recur.RecurrenceRule.WeekdayNum;
@@ -97,23 +97,8 @@ public class RecurrenceUtils {
      * @throws OXException {@link CalendarExceptionCodes#INVALID_RRULE}
      */
     public static RecurrenceSetIterator getRecurrenceIterator(RecurrenceData recurrenceData, boolean forwardToOccurrence) throws OXException {
-        RecurrenceRule rule = getRecurrenceRule(recurrenceData.getRecurrenceRule());
+        RecurrenceRule rule = initRecurrenceRule(recurrenceData.getRecurrenceRule());
         return getRecurrenceIterator(rule, recurrenceData.getSeriesStart(), forwardToOccurrence);
-    }
-
-    /**
-     * Initializes a new recurrence rule.
-     *
-     * @param recurrenceRule The recurrence rule string
-     * @return The recurrence rule
-     * @throws OXException {@link CalendarExceptionCodes#INVALID_RRULE}
-     */
-    public static RecurrenceRule getRecurrenceRule(String recurrenceRule) throws OXException {
-        try {
-            return new RecurrenceRule(recurrenceRule);
-        } catch (InvalidRecurrenceRuleException | IllegalArgumentException e) {
-            throw CalendarExceptionCodes.INVALID_RRULE.create(e, recurrenceRule);
-        }
     }
 
     /**

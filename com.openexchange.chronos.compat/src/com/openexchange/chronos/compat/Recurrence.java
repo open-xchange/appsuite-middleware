@@ -50,6 +50,7 @@
 package com.openexchange.chronos.compat;
 
 import static com.openexchange.chronos.common.CalendarUtils.initCalendar;
+import static com.openexchange.chronos.common.CalendarUtils.initRecurrenceRule;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.L;
 import java.util.ArrayList;
@@ -137,7 +138,7 @@ public class Recurrence {
          */
         TimeZone timeZone = recurrenceData.getSeriesStart().isFloating() ? TimeZones.UTC : recurrenceData.getSeriesStart().getTimeZone();
         Calendar seriesStartCalendar = initCalendar(timeZone, recurrenceData.getSeriesStart().getTimestamp());
-        RecurrenceRule rrule = getRecurrenceRule(recurrenceData.getRecurrenceRule());
+        RecurrenceRule rrule = initRecurrenceRule(recurrenceData.getRecurrenceRule());
         SeriesPattern pattern = new SeriesPattern();
         pattern.setInterval(I(rrule.getInterval()));
         pattern.setSeriesStart(L(seriesStartCalendar.getTimeInMillis()));
@@ -441,22 +442,6 @@ public class Recurrence {
         for (int i = 0; i <= SeriesPattern.MAX_OCCURRENCESE && iterator.hasNext(); dateTime = iterator.next().getValue(), i++)
             ;
         return initCalendar(TimeZones.UTC, dateTime.getYear(), dateTime.getMonth(), dateTime.getDayOfMonth()).getTime();
-    }
-
-    /**
-     * Initializes a new recurrence rule for the supplied recurrence rule string.
-     *
-     *
-     * @param rrule The recurrence rule string
-     * @return The recurrence rule
-     * @throws OXException {@link CalendarExceptionCodes#INVALID_RRULE}
-     */
-    private static RecurrenceRule getRecurrenceRule(String rrule) throws OXException {
-        try {
-            return new RecurrenceRule(rrule);
-        } catch (InvalidRecurrenceRuleException | IllegalArgumentException e) {
-            throw CalendarExceptionCodes.INVALID_RRULE.create(e, rrule);
-        }
     }
 
     /**

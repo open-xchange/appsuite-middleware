@@ -75,6 +75,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import javax.mail.internet.idn.IDNA;
 import org.dmfs.rfc5545.DateTime;
+import org.dmfs.rfc5545.recur.InvalidRecurrenceRuleException;
+import org.dmfs.rfc5545.recur.RecurrenceRule;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Attendee;
@@ -623,6 +625,21 @@ public class CalendarUtils {
      */
     public static boolean isSeriesException(Event event) {
         return null != event && null != event.getSeriesId() && false == event.getSeriesId().equals(event.getId());
+    }
+
+    /**
+     * Initializes a new recurrence rule for the supplied recurrence rule string.
+     *
+     * @param rrule The recurrence rule string
+     * @return The recurrence rule
+     * @throws OXException {@link CalendarExceptionCodes#INVALID_RRULE}
+     */
+    public static RecurrenceRule initRecurrenceRule(String rrule) throws OXException {
+        try {
+            return new RecurrenceRule(rrule);
+        } catch (InvalidRecurrenceRuleException | IllegalArgumentException e) {
+            throw CalendarExceptionCodes.INVALID_RRULE.create(e, rrule);
+        }
     }
 
     /**
