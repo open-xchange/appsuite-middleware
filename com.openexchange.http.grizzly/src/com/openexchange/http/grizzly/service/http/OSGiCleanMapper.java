@@ -155,32 +155,27 @@ public class OSGiCleanMapper {
      * @return First matching alias, or <code>null</code> if no match has been found.
      */
     public static String map(String resource, boolean cutAfterSlash) {
-        String result;
         String match = resource;
         while (true) {
             int i = 0;
             if (cutAfterSlash) {
                 i = match.lastIndexOf('/');
                 if (i == -1) {
-                    result = null;
-                    break;
+                    return null;
+                }
+
+                if (i == 0) {
+                    match = "/";
                 } else {
-                    if (i == 0) {
-                        match = "/";
-                    } else {
-                        match = resource.substring(0, i);
-                    }
+                    match = resource.substring(0, i);
                 }
             }
             if (containsAlias(match)) {
-                result = match;
-                break;
+                return match;
             } else if (i == 0) {
-                result = null;
-                break;
+                return null;
             }
         }
-        return result;
     }
 
     /**
@@ -248,14 +243,15 @@ public class OSGiCleanMapper {
      * @param alias Alias to unregister.
      */
     public void recycleRegistrationData(String alias) {
-        if (containsAlias(alias)) {
+        if (null != alias) {
             // global cleanup
-            aliasTree.remove(alias);
-            HttpHandler handler = registrations.remove(alias);
-            handler.destroy();
+            if (aliasTree.remove(alias)) {
+                HttpHandler handler = registrations.remove(alias);
+                handler.destroy();
 
-            // local cleanup
-            localAliases.remove(alias);
+                // local cleanup
+                localAliases.remove(alias);
+            }
         }
     }
 
