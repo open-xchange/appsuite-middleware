@@ -1252,6 +1252,10 @@ public final class ConfigJSlobService implements JSlobService {
     }
 
     private static void addValueByPath(final List<JSONPathElement> path, final Object value, final JSONObject object) throws JSONException {
+        if (null == object) {
+            LOG.debug("JSONObject is null. Can't add value {}", value);
+            return;
+        }
         final int msize = path.size() - 1;
         JSONObject current = object;
         for (int i = 0; i < msize; i++) {
