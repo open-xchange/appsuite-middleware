@@ -49,13 +49,20 @@
 
 package com.openexchange.caldav.action;
 
+import static com.openexchange.webdav.protocol.Protocol.DAV_NS;
 import java.io.IOException;
+import javax.servlet.http.HttpServletResponse;
+import org.jdom2.Element;
 import com.openexchange.caldav.GroupwareCaldavFactory;
+import com.openexchange.caldav.resources.EventResource;
+import com.openexchange.dav.DAVProtocol;
 import com.openexchange.dav.actions.POSTAction;
 import com.openexchange.webdav.action.WebdavRequest;
 import com.openexchange.webdav.action.WebdavResponse;
+import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
+import com.openexchange.webdav.xml.resources.PropfindResponseMarshaller;
 
 /**
  * {@link CalDAVPOSTAction}
@@ -83,7 +90,43 @@ public class CalDAVPOSTAction extends POSTAction {
 	    if (super.handle(request, response)) {
 	        return;
 	    }
-		WebdavResource resource = request.getResource();
+        if ("split".equals(request.getParameter("action"))) {
+            /*
+             * handle special "split" action
+             */
+            WebdavPath splitComponentUrl = requireResource(request, EventResource.class).split(request.getParameter("rid"), request.getParameter("uid"));
+            if ("return=representation".equals(request.getHeader("Prefer"))) {
+                WebdavResource updatedResource = factory.resolveResource(request.getUrl());
+                WebdavResource newResource = factory.resolveResource(splitComponentUrl);
+                response.setHeader("ETag", updatedResource.getETag());
+                /*
+                 * render multistatus response upon success, yielding the representation of both resulting components
+                 */
+                Element multistatusElement = prepareMultistatusElement();
+                PropfindResponseMarshaller marshaller = new PropfindResponseMarshaller(request.getURLPrefix(), request.getCharset(), request.isBrief());
+                for (WebdavResource resource : new WebdavResource[] { updatedResource, newResource }) {
+                    Element responseElement = new Element("response", DAV_NS);
+                    responseElement.addContent(marshaller.marshalHREF(resource.getUrl(), false));
+                    Element propElement = new Element("prop", DAV_NS);
+                    propElement.addContent(marshaller.marshalProperty(resource.getProperty(DAV_NS.getURI(), "getetag"), protocol));
+                    propElement.addContent(marshaller.marshalProperty(resource.getProperty(DAVProtocol.CAL_NS.getURI(), "calendar-data"), protocol));
+                    Element propstatElement = new Element("propstat", DAV_NS);
+                    propstatElement.addContent(propElement);
+                    propstatElement.addContent(marshaller.marshalStatus(HttpServletResponse.SC_OK));
+                    responseElement.addContent(propstatElement);
+                    multistatusElement.addContent(responseElement);
+                }
+                sendMultistatusResponse(response, multistatusElement);
+            } else {
+                /*
+                 * return simple response with "Split-Component-URL" header, otherwise
+                 */
+                response.setStatus(HttpServletResponse.SC_CREATED);
+                response.setHeader("Split-Component-URL", splitComponentUrl.toString());
+            }
+            return;
+        }
+        WebdavResource resource = request.getResource();
 		if (null != request.getHeader("content-length")) {
 			resource.setLength(new Long(request.getHeader("content-length")));
 		}

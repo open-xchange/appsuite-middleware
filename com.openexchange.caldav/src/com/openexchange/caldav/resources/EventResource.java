@@ -57,6 +57,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import javax.servlet.http.HttpServletResponse;
+import org.dmfs.rfc5545.DateTime;
 import com.openexchange.caldav.CalDAVImport;
 import com.openexchange.caldav.CaldavProtocol;
 import com.openexchange.caldav.EventPatches;
@@ -184,6 +185,39 @@ public class EventResource extends DAVObjectResource<Event> {
     public void putBody(InputStream body, boolean guessSize) throws WebdavProtocolException {
         try {
             caldavImport = new CalDAVImport(this, body);
+        } catch (OXException e) {
+            throw getProtocolException(e);
+        }
+    }
+
+    /**
+     * Splits a recurring event series on a certain split point.
+     *
+     * @param rid The date or date-time where the split is to occur
+     * @param uid A new unique identifier to assign to the new part of the series, or <code>null</code> if not set
+     * @return The url of the newly created, detached recurring event
+     */
+    public WebdavPath split(String rid, String uid) throws WebdavProtocolException {
+        DateTime splitPoint;
+        try {
+            splitPoint = DateTime.parse(rid);
+        } catch (IllegalArgumentException | NullPointerException e) {
+            throw new PreconditionException(DAVProtocol.CAL_NS.getURI(), "valid-rid-parameter", getUrl(), HttpServletResponse.SC_FORBIDDEN);
+        }
+        try {
+            return parent.constructPathForChildResource(new CalendarAccessOperation<Event>(factory) {
+
+                @Override
+                protected Event perform(IDBasedCalendarAccess access) throws OXException {
+                    EventID eventID = new EventID(parent.folderID, object.getId());
+                    CalendarResult result = access.splitSeries(eventID, splitPoint, uid, object.getTimestamp());
+                    if (result.getCreations().isEmpty()) {
+                        LOG.warn("{}: No event created.", getUrl());
+                        throw new PreconditionException(DAVProtocol.CAL_NS.getURI(), "valid-calendar-object-resource", url, HttpServletResponse.SC_FORBIDDEN);
+                    }
+                    return result.getCreations().get(0).getCreatedEvent();
+                }
+            }.execute(factory.getSession()));
         } catch (OXException e) {
             throw getProtocolException(e);
         }
