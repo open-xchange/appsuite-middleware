@@ -56,10 +56,12 @@ import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.chronos.impl.Check.requireUpToDateTimestamp;
 import static com.openexchange.java.Autoboxing.i;
 import static com.openexchange.tools.arrays.Collections.isNullOrEmpty;
+import java.util.AbstractMap;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.SortedSet;
 import java.util.TimeZone;
 import java.util.TreeSet;
@@ -130,7 +132,7 @@ public class SplitPerformer extends AbstractUpdatePerformer {
         /*
          * check the supplied split point for validity & derive next recurrence
          */
-        TimeZone timeZone = isFloating(originalEvent) ? TimeZones.UTC :originalEvent.getStartDate().getTimeZone();
+        TimeZone timeZone = isFloating(originalEvent) ? TimeZones.UTC : originalEvent.getStartDate().getTimeZone();
         DefaultRecurrenceData originalRecurrenceData = new DefaultRecurrenceData(originalEvent.getRecurrenceRule(), originalEvent.getStartDate(), null);
         RecurrenceIterator<RecurrenceId> iterator = session.getRecurrenceService().iterateRecurrenceIds(originalRecurrenceData, new Date(splitPoint.getTimestamp()), null);
         if (false == iterator.hasNext()) {
@@ -162,33 +164,17 @@ public class SplitPerformer extends AbstractUpdatePerformer {
          * distribute delete exception dates prior / on or after the split time
          */
         if (false == isNullOrEmpty(originalEvent.getDeleteExceptionDates())) {
-            SortedSet<RecurrenceId> detachedDeleteExceptionDates = new TreeSet<RecurrenceId>();
-            SortedSet<RecurrenceId> updatedDeleteExceptionDates = new TreeSet<RecurrenceId>();
-            for (RecurrenceId deleteExceptionDate : originalEvent.getDeleteExceptionDates()) {
-                if (0 > compare(deleteExceptionDate.getValue(), splitPoint, timeZone)) {
-                    detachedDeleteExceptionDates.add(deleteExceptionDate);
-                } else {
-                    updatedDeleteExceptionDates.add(deleteExceptionDate);
-                }
-            }
-            detachedSeriesMaster.setDeleteExceptionDates(detachedDeleteExceptionDates);
-            updatedSeriesMaster.setDeleteExceptionDates(updatedDeleteExceptionDates);
+            Entry<SortedSet<RecurrenceId>, SortedSet<RecurrenceId>> splittedExceptionDates = splitExceptionDates(originalEvent.getDeleteExceptionDates(), splitPoint);
+            detachedSeriesMaster.setDeleteExceptionDates(splittedExceptionDates.getKey());
+            updatedSeriesMaster.setDeleteExceptionDates(splittedExceptionDates.getValue());
         }
         /*
          * distribute change exception dates prior / on or after the split time
          */
         if (false == isNullOrEmpty(originalEvent.getChangeExceptionDates())) {
-            SortedSet<RecurrenceId> detachedChangeExceptionDates = new TreeSet<RecurrenceId>();
-            SortedSet<RecurrenceId> updatedChangeExceptionDates = new TreeSet<RecurrenceId>();
-            for (RecurrenceId changeExceptionDate : originalEvent.getChangeExceptionDates()) {
-                if (0 > compare(changeExceptionDate.getValue(), splitPoint, timeZone)) {
-                    detachedChangeExceptionDates.add(changeExceptionDate);
-                } else {
-                    updatedChangeExceptionDates.add(changeExceptionDate);
-                }
-            }
-            detachedSeriesMaster.setChangeExceptionDates(detachedChangeExceptionDates);
-            updatedSeriesMaster.setChangeExceptionDates(updatedChangeExceptionDates);
+            Entry<SortedSet<RecurrenceId>, SortedSet<RecurrenceId>> splittedExceptionDates = splitExceptionDates(originalEvent.getChangeExceptionDates(), splitPoint);
+            detachedSeriesMaster.setChangeExceptionDates(splittedExceptionDates.getKey());
+            updatedSeriesMaster.setChangeExceptionDates(splittedExceptionDates.getValue());
         }
         /*
          * adjust recurrence rules for the detached series to have a fixed UNTIL one second or day prior the split point
@@ -246,6 +232,29 @@ public class SplitPerformer extends AbstractUpdatePerformer {
             }
         }
         return resultTracker.getResult();
+    }
+
+    /**
+     * Splits a set of exception dates at a certain split point, resulting in one set with exception dates <i>prior</i> the split point,
+     * and another one with exception dates <i>on or after</i> this split point.
+     *
+     * @param exceptionDates The set of exception dates to split
+     * @param splitPoint The split point
+     * @return A map entry, where the key holds the exception dates prior the split point, and the value the dates on or after it
+     */
+    private static Entry<SortedSet<RecurrenceId>, SortedSet<RecurrenceId>> splitExceptionDates(SortedSet<RecurrenceId> exceptionDates, DateTime splitPoint) {
+        SortedSet<RecurrenceId> leftExceptionDates = new TreeSet<RecurrenceId>();
+        SortedSet<RecurrenceId> rightExceptionDates = new TreeSet<RecurrenceId>();
+        if (null != exceptionDates && 0 < exceptionDates.size()) {
+            for (RecurrenceId exceptionDate : exceptionDates) {
+                if (0 > compare(exceptionDate.getValue(), splitPoint, null)) {
+                    leftExceptionDates.add(exceptionDate);
+                } else {
+                    rightExceptionDates.add(exceptionDate);
+                }
+            }
+        }
+        return new AbstractMap.SimpleEntry<SortedSet<RecurrenceId>, SortedSet<RecurrenceId>>(leftExceptionDates, rightExceptionDates);
     }
 
 }
