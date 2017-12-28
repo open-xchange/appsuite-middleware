@@ -86,9 +86,29 @@ public class CalDAVPOSTAction extends POSTAction {
 
 	@Override
 	public void perform(WebdavRequest request, WebdavResponse response) throws WebdavProtocolException {
-	    if (super.handle(request, response)) {
+	    if (handle(request, response)) {
 	        return;
 	    }
+        WebdavResource resource = request.getResource();
+		if (null != request.getHeader("content-length")) {
+			resource.setLength(new Long(request.getHeader("content-length")));
+		}
+		/*
+		 * put request body
+		 */
+		try {
+			resource.putBodyAndGuessLength(request.getBody());
+		} catch (IOException e) {
+			LOG.debug("Client Gone?", e);
+		}
+		/*
+		 * write back response
+		 */
+		writeResource(resource, response);
+	}
+
+    @Override
+    protected boolean handle(WebdavRequest request, WebdavResponse response) throws WebdavProtocolException {
         if ("split".equals(request.getParameter("action"))) {
             /*
              * handle special "split" action
@@ -121,24 +141,9 @@ public class CalDAVPOSTAction extends POSTAction {
                 response.setStatus(HttpServletResponse.SC_CREATED);
                 response.setHeader("Split-Component-URL", splitComponentUrl.toString());
             }
-            return;
+            return true;
         }
-        WebdavResource resource = request.getResource();
-		if (null != request.getHeader("content-length")) {
-			resource.setLength(new Long(request.getHeader("content-length")));
-		}
-		/*
-		 * put request body
-		 */
-		try {
-			resource.putBodyAndGuessLength(request.getBody());
-		} catch (IOException e) {
-			LOG.debug("Client Gone?", e);
-		}
-		/*
-		 * write back response
-		 */
-		writeResource(resource, response);
-	}
+        return super.handle(request, response);
+    }
 
 }
