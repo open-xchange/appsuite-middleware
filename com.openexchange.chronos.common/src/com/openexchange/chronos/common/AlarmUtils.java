@@ -356,17 +356,21 @@ public class AlarmUtils extends CalendarUtils {
      * @return The duration string
      */
     public static String getDuration(long duration, TimeUnit unit) {
+        if (0 == duration) {
+            return "P0D";
+        }
         StringBuilder stringBuilder = new StringBuilder();
         if (0 > duration) {
             stringBuilder.append('-');
             duration = duration * -1;
         }
-        stringBuilder.append("PT");
+        stringBuilder.append('P');
         long days = unit.toDays(duration);
         if (0 < days) {
             stringBuilder.append(days).append('D');
             duration -= unit.convert(days, TimeUnit.DAYS);
         }
+        stringBuilder.append('T');
         long hours = unit.toHours(duration);
         if (0 < hours) {
             stringBuilder.append(hours).append('H');
