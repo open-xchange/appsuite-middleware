@@ -65,27 +65,66 @@ public class UtilsTest  {
 
     @Test
     public void testGetDurationDate() throws Exception {
-        assertEquals("P0D", getDuration(DateTime.parse("20171205"), DateTime.parse("20171205"), null).toString());
-        assertEquals("P1D", getDuration(DateTime.parse("20171205"), DateTime.parse("20171206"), null).toString());
-        assertEquals("-P1D", getDuration(DateTime.parse("20171206"), DateTime.parse("20171205"), null).toString());
-        assertEquals("P365D", getDuration(DateTime.parse("20161206"), DateTime.parse("20171206"), null).toString());
-        assertEquals("-P365D", getDuration(DateTime.parse("20171206"), DateTime.parse("20161206"), null).toString());
-        assertEquals("P731D", getDuration(DateTime.parse("20151206"), DateTime.parse("20171206"), null).toString());
-        assertEquals("-P731D", getDuration(DateTime.parse("20171206"), DateTime.parse("20151206"), null).toString());
+        assertEquals("P0D", getDuration(DateTime.parse("20171205"), DateTime.parse("20171205")).toString());
+        assertEquals("P1D", getDuration(DateTime.parse("20171205"), DateTime.parse("20171206")).toString());
+        assertEquals("-P1D", getDuration(DateTime.parse("20171206"), DateTime.parse("20171205")).toString());
+        assertEquals("P365D", getDuration(DateTime.parse("20161206"), DateTime.parse("20171206")).toString());
+        assertEquals("-P365D", getDuration(DateTime.parse("20171206"), DateTime.parse("20161206")).toString());
+        assertEquals("P731D", getDuration(DateTime.parse("20151206"), DateTime.parse("20171206")).toString());
+        assertEquals("-P731D", getDuration(DateTime.parse("20171206"), DateTime.parse("20151206")).toString());
     }
 
     @Test
-    public void testGetDurationDateTime() throws Exception {
+    public void testGetDurationDateTimeWithSameTimeZone() throws Exception {
         TimeZone timeZone = TimeZone.getTimeZone("Europe/Berlin");
-        assertEquals("P0D", getDuration(DateTime.parse("20171205T160000"), DateTime.parse("20171205T160000"), timeZone).toString());
-        assertEquals("PT1M", getDuration(DateTime.parse("20171205T160000"), DateTime.parse("20171205T160100"), timeZone).toString());
-        assertEquals("-PT1M", getDuration(DateTime.parse("20171205T160100"), DateTime.parse("20171205T160000"), timeZone).toString());
-        assertEquals("PT3H30M", getDuration(DateTime.parse("20171205T160000"), DateTime.parse("20171205T193000"), timeZone).toString());
-        assertEquals("-PT3H30M", getDuration(DateTime.parse("20171205T193000"), DateTime.parse("20171205T160000"), timeZone).toString());
-        assertEquals("PT8H", getDuration(DateTime.parse("20171205T160000"), DateTime.parse("20171206T000000"), timeZone).toString());
-        assertEquals("-PT8H", getDuration(DateTime.parse("20171206T000000"), DateTime.parse("20171205T160000"), timeZone).toString());
-        assertEquals("PT11H", getDuration(DateTime.parse("20171205T160000"), DateTime.parse("20171206T030000"), timeZone).toString());
-        assertEquals("-PT11H", getDuration(DateTime.parse("20171206T030000"), DateTime.parse("20171205T160000"), timeZone).toString());
+        assertEquals("P0D", getDuration(DateTime.parse(timeZone, "20171205T160000"), DateTime.parse(timeZone, "20171205T160000")).toString());
+        assertEquals("PT1M", getDuration(DateTime.parse(timeZone, "20171205T160000"), DateTime.parse(timeZone, "20171205T160100")).toString());
+        assertEquals("-PT1M", getDuration(DateTime.parse(timeZone, "20171205T160100"), DateTime.parse(timeZone, "20171205T160000")).toString());
+        assertEquals("PT3H30M", getDuration(DateTime.parse(timeZone, "20171205T160000"), DateTime.parse(timeZone, "20171205T193000")).toString());
+        assertEquals("-PT3H30M", getDuration(DateTime.parse(timeZone, "20171205T193000"), DateTime.parse(timeZone, "20171205T160000")).toString());
+        assertEquals("PT8H", getDuration(DateTime.parse(timeZone, "20171205T160000"), DateTime.parse(timeZone, "20171206T000000")).toString());
+        assertEquals("-PT8H", getDuration(DateTime.parse(timeZone, "20171206T000000"), DateTime.parse(timeZone, "20171205T160000")).toString());
+        assertEquals("PT11H", getDuration(DateTime.parse(timeZone, "20171205T160000"), DateTime.parse(timeZone, "20171206T030000")).toString());
+        assertEquals("-PT11H", getDuration(DateTime.parse(timeZone, "20171206T030000"), DateTime.parse(timeZone, "20171205T160000")).toString());
+    }
+
+    @Test
+    public void testGetDurationDateTimeWithMixedTimeZone() throws Exception {
+        TimeZone timeZone1 = TimeZone.getTimeZone("Europe/Berlin");
+        TimeZone timeZone2 = TimeZone.getTimeZone("America/New_York");
+        assertEquals("P0D", getDuration(DateTime.parse(timeZone1, "20171205T160000"), DateTime.parse(timeZone2, "20171205T100000")).toString());
+        assertEquals("PT1M", getDuration(DateTime.parse(timeZone1, "20171205T160000"), DateTime.parse(timeZone2, "20171205T100100")).toString());
+        assertEquals("-PT1M", getDuration(DateTime.parse(timeZone1, "20171205T160100"), DateTime.parse(timeZone2, "20171205T100000")).toString());
+        assertEquals("PT3H30M", getDuration(DateTime.parse(timeZone1, "20171205T160000"), DateTime.parse(timeZone2, "20171205T133000")).toString());
+        assertEquals("-PT3H30M", getDuration(DateTime.parse(timeZone1, "20171205T193000"), DateTime.parse(timeZone2, "20171205T100000")).toString());
+        assertEquals("PT8H", getDuration(DateTime.parse(timeZone1, "20171205T160000"), DateTime.parse(timeZone2, "20171205T180000")).toString());
+        assertEquals("-PT8H", getDuration(DateTime.parse(timeZone1, "20171206T000000"), DateTime.parse(timeZone2, "20171205T100000")).toString());
+        assertEquals("PT11H", getDuration(DateTime.parse(timeZone1, "20171205T160000"), DateTime.parse(timeZone2, "20171205T210000")).toString());
+        assertEquals("-PT11H", getDuration(DateTime.parse(timeZone1, "20171206T030000"), DateTime.parse(timeZone2, "20171205T100000")).toString());
+    }
+
+    @Test
+    public void testGetDurationDateAndDateTime() throws Exception {
+        TimeZone timeZone = TimeZone.getTimeZone("Europe/Berlin");
+        assertEquals("P0D", getDuration(DateTime.parse("20171205"), DateTime.parse(timeZone, "20171205T000000")).toString());
+        assertEquals("P1D", getDuration(DateTime.parse("20171205"), DateTime.parse(timeZone, "20171206T000000")).toString());
+        assertEquals("-P1D", getDuration(DateTime.parse("20171206"), DateTime.parse(timeZone, "20171205T000000")).toString());
+        assertEquals("PT1M", getDuration(DateTime.parse("20171206"), DateTime.parse(timeZone, "20171206T000100")).toString());
+        assertEquals("-PT1M", getDuration(DateTime.parse("20171206"), DateTime.parse(timeZone, "20171205T235900")).toString());
+        assertEquals("PT3H30M", getDuration(DateTime.parse("20171205"), DateTime.parse(timeZone, "20171205T033000")).toString());
+        assertEquals("-PT3H30M", getDuration(DateTime.parse("20171206"), DateTime.parse(timeZone, "20171205T203000")).toString());
+    }
+
+    @Test
+    public void testGetDurationDateTimeAndDate() throws Exception {
+        TimeZone timeZone = TimeZone.getTimeZone("Europe/Berlin");
+        assertEquals("P0D", getDuration(DateTime.parse(timeZone, "20171205T000000"), DateTime.parse("20171205")).toString());
+        assertEquals("P1D", getDuration(DateTime.parse(timeZone, "20171205T000000"), DateTime.parse("20171206")).toString());
+        assertEquals("-P1D", getDuration(DateTime.parse(timeZone, "20171206T000000"), DateTime.parse("20171205")).toString());
+        assertEquals("PT1M", getDuration(DateTime.parse(timeZone, "20171205T235900"), DateTime.parse("20171206")).toString());
+        assertEquals("-PT1M", getDuration(DateTime.parse(timeZone, "20171206T000100"), DateTime.parse("20171206")).toString());
+        assertEquals("PT3H30M", getDuration(DateTime.parse(timeZone, "20171205T203000"), DateTime.parse("20171206")).toString());
+        assertEquals("-PT3H30M", getDuration(DateTime.parse(timeZone, "20171205T033000"), DateTime.parse("20171205")).toString());
     }
 
 }

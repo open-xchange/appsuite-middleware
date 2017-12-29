@@ -370,6 +370,9 @@ public class AlarmUtils extends CalendarUtils {
             stringBuilder.append(days).append('D');
             duration -= unit.convert(days, TimeUnit.DAYS);
         }
+        if (0 == duration) {
+            return stringBuilder.toString();
+        }
         stringBuilder.append('T');
         long hours = unit.toHours(duration);
         if (0 < hours) {

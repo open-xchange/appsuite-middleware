@@ -879,14 +879,15 @@ public class CalendarUtils {
     /**
      * Calculates the duration between the supplied dates or date-times, from the perspective of the given timezone for <i>floating</i>
      * dates.
+     * <p/>
+     * If one of the supplied dates is <i>floating</i>, and the other one is not (i.e. it represents a <i>date with local time
+     * timezone</i>), the difference is determined by transferring the floating date into this local timezone first.
      *
      * @param dateTime1 The first date-time
      * @param dateTime2 The second date-time
-     * @param timeZone The timezone to consider for <i>floating</i> dates, i.e. the actual 'perspective' of the comparison, or
-     *            <code>null</code> to fall back to UTC
      * @return The duration between the dates
      */
-    public static Duration getDuration(DateTime dateTime1, DateTime dateTime2, TimeZone timeZone) {
+    public static Duration getDuration(DateTime dateTime1, DateTime dateTime2) {
         if (dateTime1.isAllDay() && dateTime2.isAllDay()) {
             int days = 0;
             if (dateTime1.before(dateTime2)) {
@@ -901,10 +902,9 @@ public class CalendarUtils {
             }
             return new Duration(days >= 0 ? 1 : -1, Math.abs(days), 0);
         }
-        long timestamp1 = dateTime1.isFloating() ? getDateInTimeZone(dateTime1, timeZone) : dateTime1.getTimestamp();
-        long timestamp2 = dateTime2.isFloating() ? getDateInTimeZone(dateTime2, timeZone) : dateTime2.getTimestamp();
-        String dur = AlarmUtils.getDuration(timestamp2 - timestamp1, TimeUnit.MILLISECONDS);
-        return Duration.parse(dur);
+        long timestamp1 = dateTime1.isFloating() && null != dateTime2.getTimeZone() ? getDateInTimeZone(dateTime1, dateTime2.getTimeZone()) : dateTime1.getTimestamp();
+        long timestamp2 = dateTime2.isFloating() && null != dateTime1.getTimeZone() ? getDateInTimeZone(dateTime2, dateTime1.getTimeZone()) : dateTime2.getTimestamp();
+        return Duration.parse(AlarmUtils.getDuration(timestamp2 - timestamp1, TimeUnit.MILLISECONDS));
     }
 
     /**
