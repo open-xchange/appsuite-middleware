@@ -73,8 +73,10 @@ import java.util.TreeSet;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.TimeUnit;
 import javax.mail.internet.idn.IDNA;
 import org.dmfs.rfc5545.DateTime;
+import org.dmfs.rfc5545.Duration;
 import org.dmfs.rfc5545.recur.InvalidRecurrenceRuleException;
 import org.dmfs.rfc5545.recur.RecurrenceRule;
 import com.openexchange.chronos.Alarm;
@@ -872,6 +874,37 @@ public class CalendarUtils {
         long timestamp1 = dateTime1.isFloating() ? getDateInTimeZone(dateTime1, timeZone) : dateTime1.getTimestamp();
         long timestamp2 = dateTime2.isFloating() ? getDateInTimeZone(dateTime2, timeZone) : dateTime2.getTimestamp();
         return Long.compare(timestamp1, timestamp2);
+    }
+
+    /**
+     * Calculates the duration between the supplied dates or date-times, from the perspective of the given timezone for <i>floating</i>
+     * dates.
+     *
+     * @param dateTime1 The first date-time
+     * @param dateTime2 The second date-time
+     * @param timeZone The timezone to consider for <i>floating</i> dates, i.e. the actual 'perspective' of the comparison, or
+     *            <code>null</code> to fall back to UTC
+     * @return The duration between the dates
+     */
+    public static Duration getDuration(DateTime dateTime1, DateTime dateTime2, TimeZone timeZone) {
+        if (dateTime1.isAllDay() && dateTime2.isAllDay()) {
+            int days = 0;
+            if (dateTime1.before(dateTime2)) {
+                Duration ONE_DAY_MORE = new Duration(1, 1, 0);
+                for (DateTime current = dateTime1; false == current.equals(dateTime2); current = current.addDuration(ONE_DAY_MORE), days++)
+                    ;
+            }
+            if (dateTime1.after(dateTime2)) {
+                Duration ONE_DAY_LESS = new Duration(-1, 1, 0);
+                for (DateTime current = dateTime1; false == current.equals(dateTime2); current = current.addDuration(ONE_DAY_LESS), days--)
+                    ;
+            }
+            return new Duration(days >= 0 ? 1 : -1, Math.abs(days), 0);
+        }
+        long timestamp1 = dateTime1.isFloating() ? getDateInTimeZone(dateTime1, timeZone) : dateTime1.getTimestamp();
+        long timestamp2 = dateTime2.isFloating() ? getDateInTimeZone(dateTime2, timeZone) : dateTime2.getTimestamp();
+        String dur = AlarmUtils.getDuration(timestamp2 - timestamp1, TimeUnit.MILLISECONDS);
+        return Duration.parse(dur);
     }
 
     /**
