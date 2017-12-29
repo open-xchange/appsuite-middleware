@@ -89,7 +89,7 @@ public class RelatedToMapping extends AbstractICalMapping<VEvent, Event> {
         if (null != property) {
             object.setRelatedTo(new RelatedTo(optParameterValue(property, Parameter.RELTYPE), property.getValue()));
         } else if (false == isIgnoreUnsetProperties(parameters)) {
-            object.setDeleteExceptionDates(null);
+            object.setRelatedTo(null);
         }
     }
 
