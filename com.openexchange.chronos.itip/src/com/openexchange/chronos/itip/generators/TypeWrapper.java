@@ -50,7 +50,7 @@
 package com.openexchange.chronos.itip.generators;
 
 import com.openexchange.chronos.ParticipationStatus;
-
+import com.openexchange.chronos.compat.ShownAsTransparency;
 
 /**
  * {@link TypeWrapper}
@@ -58,12 +58,20 @@ import com.openexchange.chronos.ParticipationStatus;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public interface TypeWrapper {
-    public String participant(Object argument);
-    public String original(Object argument);
-    public String updated(Object argument);
-    public String state(Object argument, ParticipationStatus confirmStatus);
-    public String none(Object argument);
-	public String emphasiszed(Object argument);
-	public String reference(Object argument);
-	public String shownAs(Object argument, int shownAs);
+
+    String participant(Object argument);
+
+    String original(Object argument);
+
+    String updated(Object argument);
+
+    String state(Object argument, ParticipationStatus confirmStatus);
+
+    String none(Object argument);
+
+    String emphasiszed(Object argument);
+
+    String reference(Object argument);
+
+    String shownAs(Object argument, ShownAsTransparency shownAs);
 }

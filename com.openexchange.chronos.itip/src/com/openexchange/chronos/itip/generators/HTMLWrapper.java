@@ -51,6 +51,7 @@ package com.openexchange.chronos.itip.generators;
 
 import org.apache.commons.lang.StringEscapeUtils;
 import com.openexchange.chronos.ParticipationStatus;
+import com.openexchange.chronos.compat.ShownAsTransparency;
 import com.openexchange.chronos.itip.generators.changes.PassthroughWrapper;
 import com.openexchange.groupware.container.Appointment;
 
@@ -102,22 +103,23 @@ public class HTMLWrapper extends PassthroughWrapper {
     }
 
     @Override
-    public String shownAs(Object argument, int shownAs) {
+    public String shownAs(Object argument, ShownAsTransparency shownAs) {
         return wrap("shown_as_label " + shownAsCssClass(shownAs), argument);
     }
 
-    private String shownAsCssClass(int shownAs) {
+    private String shownAsCssClass(ShownAsTransparency shownAs) {
         switch (shownAs) {
-            case Appointment.RESERVED:
+            case RESERVED:
                 return "reserved";
-            case Appointment.TEMPORARY:
+            case TEMPORARY:
                 return "temporary";
-            case Appointment.ABSENT:
+            case ABSENT:
                 return "absent";
-            case Appointment.FREE:
+            case FREE:
                 return "free";
+            default:
+                return "unknown";
         }
-        return "unknown";
     }
 
     private String wrap(String string, Object argument) {

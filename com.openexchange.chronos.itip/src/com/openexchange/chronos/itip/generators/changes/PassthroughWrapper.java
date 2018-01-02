@@ -50,6 +50,7 @@
 package com.openexchange.chronos.itip.generators.changes;
 
 import com.openexchange.chronos.ParticipationStatus;
+import com.openexchange.chronos.compat.ShownAsTransparency;
 import com.openexchange.chronos.itip.generators.TypeWrapper;
 
 
@@ -99,7 +100,7 @@ public class PassthroughWrapper implements TypeWrapper {
 	}
 
 	@Override
-	public String shownAs(final Object argument, final int shownAs) {
+	public String shownAs(final Object argument, final ShownAsTransparency shownAs) {
 		return none(argument);
 	}
 

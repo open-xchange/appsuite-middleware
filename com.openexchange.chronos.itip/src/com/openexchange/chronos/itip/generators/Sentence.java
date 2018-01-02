@@ -53,7 +53,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.regex.Pattern;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.chronos.ParticipationStatus;
+import com.openexchange.chronos.compat.ShownAsTransparency;
 import com.openexchange.chronos.itip.ContextSensitiveMessages;
 import com.openexchange.chronos.itip.generators.changes.PassthroughWrapper;
 import com.openexchange.i18n.tools.StringHelper;
@@ -65,10 +68,12 @@ import com.openexchange.i18n.tools.StringHelper;
  */
 public class Sentence {
 
-    private final String message;
-    private final List<Object> arguments = new ArrayList<Object>();
-    private final List<ArgumentType> types = new ArrayList<ArgumentType>();
-    private final List<Object[]> extra = new ArrayList<Object[]>();
+    private final static Logger LOGGER = LoggerFactory.getLogger(Sentence.class);
+
+    private final String             message;
+    private final List<Object>       arguments = new ArrayList<Object>();
+    private final List<ArgumentType> types     = new ArrayList<ArgumentType>();
+    private final List<Object[]>     extra     = new ArrayList<Object[]>();
 
     public Sentence(String message) {
         this.message = message;
@@ -97,24 +102,7 @@ public class Sentence {
             Object argument = arguments.get(i);
             ArgumentType type = types.get(i);
             Object[] extraInfo = extra.get(i);
-            if (argument instanceof String) {
-                String str = (String) argument;
-                if (type == ArgumentType.SHOWN_AS && str != null && str.trim().length() != 0) {
-                    argument = sh.getString(str);
-                }
-            }
-            if (type == ArgumentType.STATUS) {
-                ParticipationStatus status = (ParticipationStatus) extraInfo[0];
-                if (status.equals(ParticipationStatus.ACCEPTED)) {
-                    argument = ContextSensitiveMessages.accepted(locale, ContextSensitiveMessages.Context.VERB);                    
-                } else if (status.equals(ParticipationStatus.DECLINED)) {
-                    argument = ContextSensitiveMessages.declined(locale, ContextSensitiveMessages.Context.VERB);                    
-                } else if (status.equals(ParticipationStatus.TENTATIVE)) {
-                    argument = ContextSensitiveMessages.tentative(locale, ContextSensitiveMessages.Context.VERB);                    
-                } else {
-                    argument = sh.getString((String) argument);                    
-                }
-            }
+
             switch (type) {
                 case NONE:
                     wrapped.add(wrapper.none(argument));
@@ -129,6 +117,16 @@ public class Sentence {
                     wrapped.add(wrapper.participant(argument));
                     break;
                 case STATUS:
+                    ParticipationStatus status = (ParticipationStatus) extraInfo[0];
+                    if (status.equals(ParticipationStatus.ACCEPTED)) {
+                        argument = ContextSensitiveMessages.accepted(locale, ContextSensitiveMessages.Context.VERB);
+                    } else if (status.equals(ParticipationStatus.DECLINED)) {
+                        argument = ContextSensitiveMessages.declined(locale, ContextSensitiveMessages.Context.VERB);
+                    } else if (status.equals(ParticipationStatus.TENTATIVE)) {
+                        argument = ContextSensitiveMessages.tentative(locale, ContextSensitiveMessages.Context.VERB);
+                    } else {
+                        argument = sh.getString((String) argument);
+                    }
                     wrapped.add(wrapper.state(argument, (ParticipationStatus) extraInfo[0]));
                     break;
                 case EMPHASIZED:
@@ -138,7 +136,17 @@ public class Sentence {
                     wrapped.add(wrapper.reference(argument));
                     break;
                 case SHOWN_AS:
-                    wrapped.add(wrapper.shownAs(argument, (Integer) extraInfo[0]));
+                    if (argument instanceof String) {
+                        String str = (String) argument;
+                        if (str.trim().length() != 0) {
+                            argument = sh.getString(str);
+                        }
+                    }
+                    wrapped.add(wrapper.shownAs(argument, (ShownAsTransparency) extraInfo[0]));
+                    break;
+
+                default:
+                    LOGGER.debug("Unknown ArgumentType {}", argument);
                     break;
             }
         }
