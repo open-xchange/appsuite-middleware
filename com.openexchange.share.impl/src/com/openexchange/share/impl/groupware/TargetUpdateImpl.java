@@ -138,7 +138,7 @@ public class TargetUpdateImpl extends AbstractTargetUpdate {
             toUpdate.setID(folder.getID());
             folderService.updateFolder(toUpdate, folder.getLastModifiedUTC(), parameters.getSession(), parameters.getFolderServiceDecorator());
 
-            if (folder.getContentType().getModule() == FolderObject.INFOSTORE) {
+            if (false && folder.getContentType().getModule() == FolderObject.INFOSTORE) {
                 // Add permission to sub folders
                 FolderResponse<UserizedFolder[]> folderObjects = folderService.getSubfolders(folder.getTreeID(), folder.getID(), true, parameters.getSession(), parameters.getFolderServiceDecorator());
 
