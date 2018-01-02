@@ -54,6 +54,7 @@ import static com.openexchange.java.Autoboxing.I2i;
 import static org.slf4j.LoggerFactory.getLogger;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
@@ -66,6 +67,7 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TimeZone;
@@ -1555,6 +1557,29 @@ public class CalendarUtils {
             exceptionDates[position++] = recurrenceId.getValue().getTimestamp();
         }
         return exceptionDates;
+    }
+
+    /**
+     * Splits a set of exception dates at a certain split point, resulting in one set with exception dates <i>prior</i> the split point,
+     * and another one with exception dates <i>on or after</i> this split point.
+     *
+     * @param exceptionDates The set of exception dates to split
+     * @param splitPoint The split point
+     * @return A map entry, where the key holds the exception dates prior the split point, and the value the dates on or after it
+     */
+    public static Entry<SortedSet<RecurrenceId>, SortedSet<RecurrenceId>> splitExceptionDates(SortedSet<RecurrenceId> exceptionDates, DateTime splitPoint) {
+        SortedSet<RecurrenceId> leftExceptionDates = new TreeSet<RecurrenceId>();
+        SortedSet<RecurrenceId> rightExceptionDates = new TreeSet<RecurrenceId>();
+        if (null != exceptionDates && 0 < exceptionDates.size()) {
+            for (RecurrenceId exceptionDate : exceptionDates) {
+                if (0 > compare(exceptionDate.getValue(), splitPoint, null)) {
+                    leftExceptionDates.add(exceptionDate);
+                } else {
+                    rightExceptionDates.add(exceptionDate);
+                }
+            }
+        }
+        return new AbstractMap.SimpleEntry<SortedSet<RecurrenceId>, SortedSet<RecurrenceId>>(leftExceptionDates, rightExceptionDates);
     }
 
     /**
