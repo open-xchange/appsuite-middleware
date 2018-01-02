@@ -364,6 +364,12 @@ QueryParamChronosRecurrenceID:
   type: string
   description: The recurrence identifier.
   required: false
+QueryParamChronosRecurrenceRange:
+  name: recurrenceRange
+  in: query
+  type: string
+  description: The targeted range specified with the recurrence id.
+  required: false
 QueryParamChronosFields:
   name: fields
   in: query

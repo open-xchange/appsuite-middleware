@@ -12,3 +12,6 @@ properties:
   recurrenceId:
     type: string
     description: The recurrence id of this recurrence.
+  recurrenceRange:
+    type: string
+    description: The targeted range specified with the recurrence id.
