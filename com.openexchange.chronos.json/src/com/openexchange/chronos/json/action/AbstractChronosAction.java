@@ -100,6 +100,7 @@ public abstract class AbstractChronosAction implements AJAXActionService {
     protected static final String PARAM_CHECK_CONFLICTS = "checkConflicts";
     protected static final String PARAM_SEND_INTERNAL_NOTIFICATIONS = "sendInternalNotifications";
     protected static final String PARAM_RECURRENCE_ID = "recurrenceId";
+    protected static final String PARAM_RECURRENCE_RANGE = "recurrenceRange";
 
     /**
      * Initializes a new {@link AbstractChronosAction}.
@@ -162,14 +163,15 @@ public abstract class AbstractChronosAction implements AJAXActionService {
      * @param folderId The folder identifier
      * @param objectId The object identifier
      * @param optRecurrenceId The recurrence identifier value, or <code>null</code> if not set
+     * @param optRecurrenceRange The recurrence range value, or <code>null</code> if not set
      * @return The full event identifier
      */
-    protected EventID getEventID(String folderId, String objectId, String optRecurrenceId) throws OXException {
+    protected EventID getEventID(String folderId, String objectId, String optRecurrenceId, String optRecurrenceRange) throws OXException {
         if (null == optRecurrenceId) {
             return new EventID(folderId, objectId);
         }
         try {
-            return new EventID(folderId, objectId, new DefaultRecurrenceId(optRecurrenceId));
+            return new EventID(folderId, objectId, new DefaultRecurrenceId(optRecurrenceId, optRecurrenceRange));
         } catch (IllegalArgumentException e) {
             throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(PARAM_RECURRENCE_ID, optRecurrenceId);
         }
@@ -186,7 +188,8 @@ public abstract class AbstractChronosAction implements AJAXActionService {
         String objectId = requestData.requireParameter(AJAXServlet.PARAMETER_ID);
         String folderId = requestData.requireParameter(AJAXServlet.PARAMETER_FOLDERID);
         String optRecurrenceId = requestData.getParameter(PARAM_RECURRENCE_ID);
-        return getEventID(folderId, objectId, optRecurrenceId);
+        String optRecurrenceRange = requestData.getParameter(PARAM_RECURRENCE_RANGE);
+        return getEventID(folderId, objectId, optRecurrenceId, optRecurrenceRange);
     }
 
     /**
@@ -210,7 +213,8 @@ public abstract class AbstractChronosAction implements AJAXActionService {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create(e, AJAXServlet.PARAMETER_FOLDERID);
         }
         String optRecurrenceId = jsonObject.optString(PARAM_RECURRENCE_ID, null);
-        return getEventID(folderId, objectId, optRecurrenceId);
+        String optRecurrenceRange = jsonObject.optString(PARAM_RECURRENCE_RANGE, null);
+        return getEventID(folderId, objectId, optRecurrenceId, optRecurrenceRange);
     }
 
     protected long parseClientTimestamp(AJAXRequestData requestData) throws OXException {

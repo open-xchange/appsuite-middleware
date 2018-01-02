@@ -49,9 +49,12 @@
 
 package com.openexchange.chronos.common;
 
+import java.util.Objects;
 import java.util.TimeZone;
 import org.dmfs.rfc5545.DateTime;
 import com.openexchange.chronos.RecurrenceId;
+import com.openexchange.chronos.RecurrenceRange;
+import com.openexchange.java.Enums;
 import com.openexchange.java.util.TimeZones;
 
 /**
@@ -63,15 +66,17 @@ import com.openexchange.java.util.TimeZones;
 public class DefaultRecurrenceId implements RecurrenceId {
 
     protected final DateTime value;
+    protected final RecurrenceRange range;
 
     /**
      * Initializes a new {@link DefaultRecurrenceId} for a specific date-time. If the date-time is neither <i>floating</i> nor in
      * <code>UTC</code> format, the value's timezone is shifted to <code>UTC</code> implicitly.
      *
      * @param value The recurrence-id value
-     * @throws NullPointerException if the passed argument is <code>null</code>
+     * @param range The targeted range, or <code>null</code> if only this recurrence is targeted
+     * @throws NullPointerException if the passed value argument is <code>null</code>
      */
-    public DefaultRecurrenceId(DateTime value) {
+    public DefaultRecurrenceId(DateTime value, RecurrenceRange range) {
         super();
         if (null == value) {
             throw new NullPointerException("value");
@@ -81,6 +86,31 @@ public class DefaultRecurrenceId implements RecurrenceId {
         } else {
             this.value = value;
         }
+        this.range = range;
+    }
+
+    /**
+     * Initializes a new {@link DefaultRecurrenceId} for a specific date-time. If the date-time is neither <i>floating</i> nor in
+     * <code>UTC</code> format, the value's timezone is shifted to <code>UTC</code> implicitly.
+     *
+     * @param value The recurrence-id value
+     * @throws NullPointerException if the passed argument is <code>null</code>
+     */
+    public DefaultRecurrenceId(DateTime value) {
+        this(value, null);
+    }
+
+    /**
+     * Initializes a new {@link DefaultRecurrenceId} from a RFC 5545 date-time string, either in <code>UTC</code> format (with trailing
+     * <code>Z</code>), or as <i>floating</i> date or date-time.
+     *
+     * @param value The recurrence-id value as RFC 5545 date-time string
+     * @param range The targeted range, or <code>null</code> if only this recurrence is targeted
+     * @throws NullPointerException if the passed value argument is <code>null</code>
+     * @throws IllegalArgumentException if the passed value argument is not a valid date-time string, or the passed range argument is invalid
+     */
+    public DefaultRecurrenceId(String value, String range) {
+        this(DateTime.parse(value), Enums.parse(RecurrenceRange.class, range, null));
     }
 
     /**
@@ -101,6 +131,11 @@ public class DefaultRecurrenceId implements RecurrenceId {
     }
 
     @Override
+    public RecurrenceRange getRange() {
+        return range;
+    }
+
+    @Override
     public int compareTo(RecurrenceId other, TimeZone timeZone) {
         return null == other ? 1 : CalendarUtils.compare(value, other.getValue(), timeZone);
     }
@@ -112,12 +147,20 @@ public class DefaultRecurrenceId implements RecurrenceId {
 
     @Override
     public int hashCode() {
-        return value.hashCode();
+        int result = value.hashCode();
+        if (null != range) {
+            result = 31 * result + range.hashCode();
+        }
+        return result;
     }
 
     @Override
     public boolean equals(Object other) {
-        return null != other && RecurrenceId.class.isInstance(other) && value.equals(((RecurrenceId) other).getValue());
+        if (null != other && RecurrenceId.class.isInstance(other)) {
+            RecurrenceId otherReurrenceId = (RecurrenceId) other;
+            return Objects.equals(value, otherReurrenceId.getValue()) && Objects.equals(range, otherReurrenceId.getRange());
+        }
+        return false;
     }
 
     @Override

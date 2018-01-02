@@ -52,6 +52,7 @@ package com.openexchange.chronos.storage.rdb.legacy;
 import java.util.TimeZone;
 import org.dmfs.rfc5545.DateTime;
 import com.openexchange.chronos.RecurrenceId;
+import com.openexchange.chronos.RecurrenceRange;
 import com.openexchange.chronos.storage.CalendarStorage;
 
 /**
@@ -77,6 +78,11 @@ public class StoredRecurrenceId implements RecurrenceId {
     @Override
     public DateTime getValue() {
         throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public RecurrenceRange getRange() {
+        return null;
     }
 
     /**

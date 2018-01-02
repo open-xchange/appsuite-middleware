@@ -49,43 +49,27 @@
 
 package com.openexchange.chronos;
 
-import java.util.TimeZone;
-import org.dmfs.rfc5545.DateTime;
-
 /**
- * {@link RecurrenceId}
+ * {@link RecurrenceRange}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
- * @see <a href="https://tools.ietf.org/html/rfc5545#section-3.8.4.4">RFC 5545, section 3.8.4.4</a>
+ * @see <a href="https://tools.ietf.org/html/rfc5545#section-3.2.13">RFC 5545, section 3.2.13</a>
  */
-public interface RecurrenceId extends Comparable<RecurrenceId> {
+public enum RecurrenceRange {
 
     /**
-     * Gets the value, i.e. the (original) start-date of the targeted recurrence in the event series.
-     * <p/>
-     * The returned date-time is either in <code>UTC</code> format or a <i>floating</i> date or date-time.
-     *
-     * @return The recurrence-id value
+     * To specify the instance specified by the recurrence identifier and all subsequent recurrence instances.
      */
-    DateTime getValue();
-
+    THISANDFUTURE,
     /**
-     * Gets a value indicating the effective range of targeted recurrence instances.
+     * To specify all instances prior to the recurrence identifier.
      *
-     * @return The range, or <code>null</code> if only this instance is targeted.
+     * @deprecated with <a href="https://tools.ietf.org/html/rfc5545#appendix-A.3">RFC 5545, appendix A.3</a>
      */
-    RecurrenceRange getRange();
+    @Deprecated
+    THISANDPRIOR,
 
-    /**
-     * Compares this recurrence id to another one, taking a concrete timezone into consideration for <i>floating</i> values.
-     *
-     * @param other The recurrence id to compare with
-     * @param timeZone The timezone to consider for <i>floating</i> dates, i.e. the actual 'perspective' of the comparison, or
-     *            <code>null</code> to fall back to UTC
-     * @return A negative integer, zero, or a positive integer as this recurrence id is less than, equal to, or greater than the other
-     *         recurrence id
-     */
-    int compareTo(RecurrenceId other, TimeZone timeZone);
+    ;
 
 }
