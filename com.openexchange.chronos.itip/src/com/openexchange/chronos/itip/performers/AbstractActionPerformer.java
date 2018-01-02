@@ -56,6 +56,7 @@ import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.ParticipationStatus;
+import com.openexchange.chronos.common.mapping.EventMapper;
 import com.openexchange.chronos.itip.ITipAction;
 import com.openexchange.chronos.itip.ITipActionPerformer;
 import com.openexchange.chronos.itip.ITipAnalysis;
@@ -223,7 +224,7 @@ public abstract class AbstractActionPerformer implements ITipActionPerformer {
 
         EventUpdate diff = session.getUtilities().compare(original, appointment, false, (EventField[]) null);
         Event copy = session.getUtilities().copyEvent(original, (EventField[]) null);
-        copy = session.getUtilities().copyEvent(original, diff.getUpdatedFields().toArray(new EventField[diff.getUpdatedFields().size()]));
+        EventMapper.getInstance().copy(original, copy, diff.getUpdatedFields().toArray(new EventField[diff.getUpdatedFields().size()]));
 
         return copy;
     }
