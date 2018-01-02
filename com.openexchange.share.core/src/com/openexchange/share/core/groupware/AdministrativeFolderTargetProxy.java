@@ -79,6 +79,7 @@ public class AdministrativeFolderTargetProxy extends AbstractTargetProxy {
     private final ShareTarget target;
     private final ShareTargetPath targetPath;
     private List<OCLPermission> appliedPermissions;
+    private List<OCLPermission> removedPermissions;
 
     /**
      * Initializes a new {@link AdministrativeFolderTargetProxy}.
@@ -99,6 +100,7 @@ public class AdministrativeFolderTargetProxy extends AbstractTargetProxy {
         super();
         this.folder = folder;
         appliedPermissions = new ArrayList<>();
+        removedPermissions = new ArrayList<>();
         this.affectedUsers = new HashSet<Integer>();
         this.target = target;
         this.targetPath = new ShareTargetPath(target.getModule(), target.getFolder(), target.getItem());
@@ -166,6 +168,7 @@ public class AdministrativeFolderTargetProxy extends AbstractTargetProxy {
             }
         }
         List<OCLPermission> newPermissions = removePermissions(originalPermissions, permissions, new OCLPermissionConverter(folder));
+        removedPermissions = mergePermissions(removedPermissions, permissions, new OCLPermissionConverter(folder));
         folder.setPermissions(newPermissions);
         setModified();
     }
@@ -272,6 +275,10 @@ public class AdministrativeFolderTargetProxy extends AbstractTargetProxy {
 
     public List<OCLPermission> getAppliedPermissions(){
         return appliedPermissions;
+    }
+
+    public List<OCLPermission> getRemovedPermissions() {
+        return removedPermissions;
     }
 
 }
