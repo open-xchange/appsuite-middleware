@@ -211,7 +211,11 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
                 } else {
                     if (SHUTDOWN_REQUESTED.get()) {
                         // 503 - Service Unavailable
-                        response.setStatus(shutDownStatus);
+                        try {
+                            setStatusAndWriteErrorPage(shutDownStatus, null, request, response);
+                        } catch (Exception e) {
+                            LOG.warn("Failed to commit 503 status.", e);
+                        }
                         return;
                     }
 
@@ -255,7 +259,11 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
         } else {
             if (SHUTDOWN_REQUESTED.get()) {
                 // 503 - Service Unavailable
-                response.setStatus(shutDownStatus);
+                try {
+                    setStatusAndWriteErrorPage(shutDownStatus, null, request, response);
+                } catch (Exception e) {
+                    LOG.warn("Failed to commit 503 status.", e);
+                }
                 return;
             }
 
@@ -290,7 +298,11 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
                     appendRequestInfo(logBuilder, request);
                     LOG.error(logBuilder.toString(), t);
                     // 500 - Internal Server Error
-                    response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR_500);
+                    try {
+                        setStatusAndWriteErrorPage(HttpStatus.INTERNAL_SERVER_ERROR_500, null, request, response);
+                    } catch (Exception e) {
+                        LOG.warn("Failed to commit 500 status.", e);
+                    }
                 } finally {
                     processingLock.unlock();
                 }
@@ -299,9 +311,8 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
         }
 
         if (!invoked) {
-            response.setStatus(HttpStatus.NOT_FOUND_404);
             try {
-                writeErrorPage(request, response);
+                setStatusAndWriteErrorPage(HttpStatus.NOT_FOUND_404, "Resource does not exist.", request, response);
             } catch (Exception e) {
                 LOG.warn("Failed to commit 404 status.", e);
             }
@@ -756,9 +767,9 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
         return errorPageGenerator;
     }
 
-    private void writeErrorPage(Request req, Response res) throws Exception {
-        res.setStatus(HttpStatus.NOT_FOUND_404);
-        final ByteBuffer bb = getErrorPage(404, "Not found", "Resource does not exist.");
+    private void setStatusAndWriteErrorPage(HttpStatus status, String optDescription, Request req, Response res) throws Exception {
+        res.setStatus(status);
+        final ByteBuffer bb = getErrorPage(status.getStatusCode(), status.getReasonPhrase(), null == optDescription ? status.getReasonPhrase() : optDescription);
         res.setContentLength(bb.limit());
         res.setContentType("text/html");
         org.glassfish.grizzly.http.io.OutputBuffer out = res.getOutputBuffer();
