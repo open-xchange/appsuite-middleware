@@ -179,6 +179,59 @@ public class OSGiCleanMapper {
     }
 
     /**
+     * Performs full match of requested URI to registered HTTP handler if any.
+     *
+     * @param resource      Resource to look-up
+     * @return First matching HTTP handler, or <code>null</code> if no match has been found.
+     */
+    public static HttpHandler map2HttpHandler(String resource) {
+        return null == resource ? null : registrations.get(resource);
+    }
+
+    /**
+     * Performs mapping of requested URI to registered HTTP handler if any.
+     * <p/>
+     * Works in two modes:
+     * <ul>
+     * <li>Full match - Checks for full match of resource (cutAfterSlash == false),</li>
+     * <li>Reducing match - Checks {@link String#substring(int, int)} (0, {@link String#lastIndexOf(String)} ('/'))
+     * for match (cutAfterSlash == true).</li>
+     * </ul>
+     *
+     * @param resource      Resource to be mapped.
+     * @param cutAfterSlash Should cut off after last '/' before looking up.
+     * @return First matching HTTP handler, or <code>null</code> if no match has been found.
+     */
+    public static HttpHandlerMatch map2HttpHandler(String resource, boolean cutAfterSlash) {
+        if (null == resource) {
+            return null;
+        }
+
+        String match = resource;
+        while (true) {
+            int i = 0;
+            if (cutAfterSlash) {
+                i = match.lastIndexOf('/');
+                if (i == -1) {
+                    return null;
+                }
+
+                if (i == 0) {
+                    match = "/";
+                } else {
+                    match = resource.substring(0, i);
+                }
+            }
+            HttpHandler httpHandler = registrations.get(match);
+            if (null != httpHandler) {
+                return new HttpHandlerMatch(httpHandler, match);
+            } else if (i == 0) {
+                return null;
+            }
+        }
+    }
+
+    /**
      * Checks if alias has been registered.
      *
      * @param alias Alias to check.
