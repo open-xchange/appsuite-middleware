@@ -51,16 +51,25 @@ package com.openexchange.chronos.impl.performer;
 
 import static com.openexchange.chronos.common.CalendarUtils.contains;
 import static com.openexchange.chronos.common.CalendarUtils.find;
+import static com.openexchange.chronos.common.CalendarUtils.initRecurrenceRule;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesException;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
+import static com.openexchange.chronos.common.CalendarUtils.splitExceptionDates;
 import static com.openexchange.chronos.impl.Check.requireUpToDateTimestamp;
+import java.util.Map.Entry;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import org.dmfs.rfc5545.DateTime;
+import org.dmfs.rfc5545.Duration;
+import org.dmfs.rfc5545.recur.RecurrenceRule;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.RecurrenceId;
+import com.openexchange.chronos.RecurrenceRange;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.DefaultRecurrenceData;
+import com.openexchange.chronos.common.mapping.EventMapper;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.Check;
 import com.openexchange.chronos.impl.Consistency;
@@ -175,6 +184,41 @@ public class DeletePerformer extends AbstractUpdatePerformer {
                     // com.openexchange.ajax.appointment.recurrence.TestsForCreatingChangeExceptions.testShouldFailIfTryingToCreateADeleteExceptionOnTopOfAChangeException())
                     throw CalendarExceptionCodes.INVALID_RECURRENCE_ID.create(
                         new Exception("Deletion of existing change exception not supported"), recurrenceId, originalEvent.getRecurrenceRule());
+                } else if (null != recurrenceId.getRange()) {
+                    if (false == RecurrenceRange.THISANDFUTURE.equals(recurrenceId.getRange())) {
+                        throw CalendarExceptionCodes.INVALID_RECURRENCE_ID.create(
+                            new Exception("Only \"THISANDFUTURE\" is supported"), recurrenceId, originalEvent.getRecurrenceRule());
+                    }
+                    /*
+                     * adjust recurrence rule to have a fixed UNTIL one second or day prior the targeted occurrence
+                     */
+                    Event eventUpdate = EventMapper.getInstance().copy(originalEvent, null, EventField.ID, EventField.SERIES_ID, EventField.START_DATE, EventField.END_DATE);
+                    RecurrenceRule rule = initRecurrenceRule(originalEvent.getRecurrenceRule());
+                    DateTime until = recurrenceId.getValue().addDuration(recurrenceId.getValue().isAllDay() ? new Duration(-1, 1, 0) : new Duration(-1, 0, 1));
+                    rule.setUntil(until);
+                    eventUpdate.setRecurrenceRule(rule.toString());
+                    /*
+                     * remove any change- and delete exceptions after the occurrence
+                     */
+                    Entry<SortedSet<RecurrenceId>, SortedSet<RecurrenceId>> splittedDeleteExceptionDates = splitExceptionDates(originalEvent.getDeleteExceptionDates(), until);
+                    if (false == splittedDeleteExceptionDates.getValue().isEmpty()) {
+                        eventUpdate.setDeleteExceptionDates(splittedDeleteExceptionDates.getKey());
+                    }
+                    Entry<SortedSet<RecurrenceId>, SortedSet<RecurrenceId>> splittedChangeExceptionDates = splitExceptionDates(originalEvent.getChangeExceptionDates(), until);
+                    if (false == splittedChangeExceptionDates.getValue().isEmpty()) {
+                        for (Event changeException : loadExceptionData(originalEvent.getSeriesId(), splittedChangeExceptionDates.getValue())) {
+                            delete(changeException);
+                        }
+                        eventUpdate.setChangeExceptionDates(splittedChangeExceptionDates.getKey());
+                    }
+                    /*
+                     * update series master in storage & track results
+                     */
+                    Consistency.setModified(session, timestamp, eventUpdate, session.getUserId());
+                    storage.getEventStorage().updateEvent(eventUpdate);
+                    Event updatedEvent = loadEventData(originalEvent.getId());
+                    updateAlarmTrigger(originalEvent, updatedEvent);
+                    resultTracker.trackUpdate(originalEvent, updatedEvent);
                 } else {
                     /*
                      * creation of new delete exception
@@ -210,6 +254,8 @@ public class DeletePerformer extends AbstractUpdatePerformer {
                     // com.openexchange.ajax.appointment.recurrence.TestsForCreatingChangeExceptions.testShouldFailIfTryingToCreateADeleteExceptionOnTopOfAChangeException())
                     throw CalendarExceptionCodes.INVALID_RECURRENCE_ID.create(
                         new Exception("Deletion of existing change exception not supported"), recurrenceId, originalEvent.getRecurrenceRule());
+                } else if (null != recurrenceId.getRange()) {
+                    throw CalendarExceptionCodes.FORBIDDEN_CHANGE.create(originalEvent.getId(), originalEvent.getRecurrenceRule());
                 } else {
                     /*
                      * creation of new delete exception

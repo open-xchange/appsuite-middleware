@@ -208,12 +208,13 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
      * <p/>
      * The deletion includes:
      * <ul>
-     * <ul>insertion of a <i>tombstone</i> record for the original event</ul>
-     * <ul>insertion of <i>tombstone</i> records for the original event's attendees</ul>
-     * <ul>deletion of any alarms associated with the event</ul>
-     * <ul>deletion of any attachments associated with the event</ul>
-     * <ul>deletion of the event</ul>
-     * <ul>deletion of the event's attendees</ul>
+     * <li>insertion of a <i>tombstone</i> record for the original event</li>
+     * <li>insertion of <i>tombstone</i> records for the original event's attendees</li>
+     * <li>deletion of any alarms associated with the event</li>
+     * <li>deletion of any attachments associated with the event</li>
+     * <li>deletion of the event</li>
+     * <li>deletion of the event's attendees</li>
+     * <li>tracking the deletion within the result tracker instance</li>
      * </ul>
      *
      * @param originalEvent The original event to delete
