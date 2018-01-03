@@ -68,7 +68,6 @@ import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Event;
-import com.openexchange.chronos.ExtendedPropertyParameter;
 import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.common.mapping.AbstractCollectionUpdate;
 import com.openexchange.chronos.common.mapping.AttendeeMapper;
@@ -166,9 +165,9 @@ public class AttendeeHelper implements CollectionUpdate<Attendee, AttendeeField>
         this.session = session;
         this.folder = folder;
         this.originalAttendees = emptyForNull(originalAttendees);
-        this.attendeesToInsert = new ArrayList<Attendee>();
-        this.attendeesToDelete = new ArrayList<Attendee>();
-        this.attendeesToUpdate = new ArrayList<ItemUpdate<Attendee, AttendeeField>>();
+        this.attendeesToInsert = new ArrayList<>();
+        this.attendeesToDelete = new ArrayList<>();
+        this.attendeesToUpdate = new ArrayList<>();
     }
 
     @Override
@@ -198,7 +197,7 @@ public class AttendeeHelper implements CollectionUpdate<Attendee, AttendeeField>
      * @return The changed list of attendees
      */
     public List<Attendee> previewChanges() throws OXException {
-        List<Attendee> newAttendees = new ArrayList<Attendee>(originalAttendees);
+        List<Attendee> newAttendees = new ArrayList<>(originalAttendees);
         newAttendees.removeAll(attendeesToDelete);
         for (ItemUpdate<Attendee, AttendeeField> attendeeToUpdate : attendeesToUpdate) {
             Attendee originalAttendee = attendeeToUpdate.getOriginal();
@@ -223,7 +222,7 @@ public class AttendeeHelper implements CollectionUpdate<Attendee, AttendeeField>
             /*
              * prepare & add all further attendees
              */
-            List<Attendee> attendeeList = new ArrayList<Attendee>();
+            List<Attendee> attendeeList = new ArrayList<>();
             attendeeList.add(defaultAttendee);
             attendeesToInsert.addAll(prepareNewAttendees(attendeeList, requestedAttendees));
         }
@@ -237,7 +236,7 @@ public class AttendeeHelper implements CollectionUpdate<Attendee, AttendeeField>
         session.getEntityResolver().prefetch(updatedAttendees);
         updatedAttendees = session.getEntityResolver().prepare(updatedAttendees);
         AbstractCollectionUpdate<Attendee, AttendeeField> attendeeDiff = getAttendeeUpdates(originalAttendees, updatedAttendees);
-        List<Attendee> attendeeList = new ArrayList<Attendee>(originalAttendees);
+        List<Attendee> attendeeList = new ArrayList<>(originalAttendees);
         /*
          * delete removed attendees
          */
@@ -291,7 +290,7 @@ public class AttendeeHelper implements CollectionUpdate<Attendee, AttendeeField>
             if (false == isInternal(attendee) && false == session.getConfig().isSkipExternalAttendeeURIChecks()) {
                 attendee = Check.requireValidEMail(attendee);
             }
-            attendeesToUpdate.add(new DefaultItemUpdate<Attendee, AttendeeField>(AttendeeMapper.getInstance(), attendeeUpdate.getOriginal(), attendee));
+            attendeesToUpdate.add(new DefaultItemUpdate<>(AttendeeMapper.getInstance(), attendeeUpdate.getOriginal(), attendee));
         }
         /*
          * prepare & add all new attendees
@@ -308,7 +307,7 @@ public class AttendeeHelper implements CollectionUpdate<Attendee, AttendeeField>
     }
 
     private List<Attendee> prepareNewAttendees(List<Attendee> existingAttendees, List<Attendee> newAttendees) throws OXException {
-        List<Attendee> attendees = new ArrayList<Attendee>(newAttendees.size());
+        List<Attendee> attendees = new ArrayList<>(newAttendees.size());
         /*
          * add internal user attendees
          */
@@ -324,11 +323,6 @@ public class AttendeeHelper implements CollectionUpdate<Attendee, AttendeeField>
                 userAttendee.setPartStat(session.getConfig().getInitialPartStat(userAttendee.getEntity(), inPublicFolder));
             }
             attendees.add(userAttendee);
-
-            List<ExtendedPropertyParameter> ps = new ArrayList<>();
-            ps.add(new ExtendedPropertyParameter("X-WURST", "kuchen"));
-            ps.add(new ExtendedPropertyParameter("X-AUTO", "hund"));
-            userAttendee.setExtendedParameters(ps);
         }
         /*
          * resolve & add any internal group attendees
