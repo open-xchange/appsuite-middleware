@@ -679,12 +679,17 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
             LOG.error("", e);
             throw e;
         }
-        
+
         final OXToolStorageInterface storage = OXToolStorageInterface.getInstance();
-        if (storage.isLastContextInSchema(ctx)) {
+        boolean contextExists = storage.existsContext(ctx);
+        if (contextExists && storage.isLastContextInSchema(ctx)) {
+            // The context which is supposed to be restored is the last one kept in associated database schema
+            // Deleting it in further processing of context restoration might drop the schema
+            // TODO: To be revised for v7.10.0
             throw new OXContextRestoreException(Code.LAST_CONTEXT_IN_SCHEMA, ctx.getIdAsString());
         }
-        
+
+        // Either such a context does not exist or it is not the last one in associated database schema
         LOG.info("Context: {}", ctx);
         LOG.info("Filenames: {}", java.util.Arrays.toString(fileNames));
 
@@ -714,8 +719,8 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
 
             final OXContextInterface contextInterface = Activator.getContextInterface();
 
-            // We have to do the exists check beforehand otherwise you'll find a stack trace in the logs
-            if (storage.existsContext(ctx)) {
+            // Drop if such a context already exists
+            if (contextExists) {
                 try {
                     contextInterface.delete(ctx, auth);
                 } catch (final NoSuchContextException e) {

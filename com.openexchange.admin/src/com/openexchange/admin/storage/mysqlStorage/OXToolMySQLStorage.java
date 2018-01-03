@@ -215,7 +215,31 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
      */
     @Override
     public boolean existsContext(final Context ctx) throws StorageException {
-        return selectwithint(-1, "SELECT cid FROM context WHERE cid = ?;", ctx.getId().intValue());
+        Connection con = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            con = cache.getReadConnectionForConfigDB();
+            stmt = con.prepareStatement("SELECT 1 FROM context WHERE cid = ?");
+            stmt.setInt(1, ctx.getId().intValue());
+            rs = stmt.executeQuery();
+            return rs.next();
+        } catch (final PoolException e) {
+            log.error("Pool Error", e);
+            throw new StorageException(e);
+        } catch (final SQLException e) {
+            log.error("SQL Error", e);
+            throw new StorageException(e.toString());
+        } finally {
+            Databases.closeSQLStuff(rs, stmt);
+            if (null != con) {
+                try {
+                    cache.pushReadConnectionForConfigDB(con);
+                } catch (final PoolException e) {
+                    log.error("Error pushing connection to pool!", e);
+                }
+            }
+        }
     }
 
     /*
@@ -3097,7 +3121,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#isLastContextInSchema(com.openexchange.admin.rmi.dataobjects.Context)
      */
     @Override

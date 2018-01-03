@@ -47,62 +47,64 @@
  *
  */
 
-package com.openexchange.share.json.actions;
+package com.openexchange.groupware.settings.tree.modules.passwordchange;
 
-import java.util.Date;
-import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import static com.openexchange.java.Autoboxing.B;
 import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.share.ShareLink;
-import com.openexchange.share.ShareTarget;
-import com.openexchange.tools.servlet.AjaxExceptionCodes;
-import com.openexchange.tools.session.ServerSession;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.settings.IValueHandler;
+import com.openexchange.groupware.settings.PreferencesItemService;
+import com.openexchange.groupware.settings.ReadOnlyValue;
+import com.openexchange.groupware.settings.Setting;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.session.Session;
+import com.openexchange.share.AuthenticationMode;
+import com.openexchange.share.GuestInfo;
+import com.openexchange.share.ShareService;
 
 /**
- * {@link GetLinkAction}
+ * {@link EmptyCurrent}
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since v7.8.0
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @since v7.10.0
  */
-public class GetLinkAction extends AbstractShareAction {
+public class EmptyCurrent implements PreferencesItemService {
 
-    /**
-     * Initializes a new {@link GetLinkAction}.
-     *
-     * @param services A service lookup reference
-     */
-    public GetLinkAction(ServiceLookup services) {
-        super(services);
+    @Override
+    public String[] getPath() {
+        return new String[] { "modules", "com.openexchange.user.passwordchange", "emptyCurrent" };
     }
 
     @Override
-    public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
-        /*
-         * parse target & get or create the share link
-         */
-        ShareTarget target = getParser().parseTarget((JSONObject) requestData.requireData());
-        ShareLink shareLink = getShareService().getLink(session, target);
-        /*
-         * return appropriate result
-         */
-        JSONObject jsonResult = new JSONObject();
-        try {
-            jsonResult.put("url", shareLink.getShareURL(requestData.getHostData()));
-            jsonResult.put("entity", shareLink.getGuest().getGuestID());
-            jsonResult.put("is_new", shareLink.isNew());
-            Date expiryDate = shareLink.getGuest().getExpiryDate();
-            if (null != expiryDate) {
-                jsonResult.put("expiry_date", getParser().addTimeZoneOffset(expiryDate.getTime(), getTimeZone(requestData, session)));
+    public IValueHandler getSharedValue() {
+        return new ReadOnlyValue() {
+
+            @Override
+            public void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) throws OXException {
+                setting.setSingleValue(B(hasEmptyPassword(session, user)));
             }
-            jsonResult.putOpt("password", shareLink.getGuest().getPassword());
-            jsonResult.putOpt("includeSubfolders", shareLink.getTarget().isIncludeSubfolders());
-        } catch (JSONException e) {
-            throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());
+
+            @Override
+            public boolean isAvailable(UserConfiguration userConfig) {
+                return true;
+            }
+        };
+    }
+
+    private static boolean hasEmptyPassword(Session session, User user) throws OXException {
+        if (user.isGuest()) {
+            ShareService shareService = ServerServiceRegistry.getServize(ShareService.class);
+            if (null != shareService) {
+                GuestInfo guestInfo = shareService.getGuestInfo(session, user.getId());
+                if (null != guestInfo) {
+                    AuthenticationMode authenticationMode = guestInfo.getAuthentication();
+                    return AuthenticationMode.ANONYMOUS.equals(authenticationMode) || AuthenticationMode.GUEST.equals(authenticationMode);
+                }
+            }
         }
-        return new AJAXRequestResult(jsonResult, shareLink.getTimestamp(), "json");
+        return false;
     }
 
 }

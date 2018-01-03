@@ -58,6 +58,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
@@ -223,18 +224,18 @@ public class UpgradeSchemata extends UtilAbstraction {
      * Lists all known schemata
      * 
      * @return The known schemata
-     * @throws RemoteException
-     * @throws StorageException
-     * @throws InvalidCredentialsException
-     * @throws InvalidDataException
+     * @throws RemoteException See {@link OXUtilInterface#listDatabaseSchema(String, Boolean, Credentials)}
+     * @throws StorageException See {@link OXUtilInterface#listDatabaseSchema(String, Boolean, Credentials)}
+     * @throws InvalidCredentialsException See {@link OXUtilInterface#listDatabaseSchema(String, Boolean, Credentials)}
+     * @throws InvalidDataException See {@link OXUtilInterface#listDatabaseSchema(String, Boolean, Credentials)}
      */
     private Database[] listSchemata() throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
-        Database[] databases = oxUtil.listDatabaseSchema("*", false, credentials);
+        Database[] databases = oxUtil.listDatabaseSchema("*", Boolean.FALSE, credentials);
         if (Strings.isEmpty(startFromSchema) || databases.length == 1) {
             return databases[0].getScheme().equals(startFromSchema) ? new Database[0] : databases;
         }
 
-        Comparator<Database> comparator = (o1, o2) -> o1.getName().compareTo(o2.getName());
+        Comparator<Database> comparator = (o1, o2) -> o1.getScheme().compareTo(o2.getScheme());
         Arrays.sort(databases, comparator);
         int position = Arrays.binarySearch(databases, new Database(-1, startFromSchema), comparator);
         if (position < 0) {
@@ -253,22 +254,32 @@ public class UpgradeSchemata extends UtilAbstraction {
      * @return The filtered schemata
      */
     private Database[] filterSchemata(Database[] databases, Comparator<Database> comparator) {
-        System.out.print("Filtering out skipped schemata: ");
-        
-        List<Database> databasesList = Arrays.asList(databases);
         StringBuilder sb = new StringBuilder();
+        sb.append("Filtering out skipped schemata: ");
+
+        List<Integer> toSkip = new LinkedList<>();
         for (String schema : skippedSchemata) {
             sb.append("'").append(schema).append("', ");
             int position = Arrays.binarySearch(databases, new Database(-1, schema), comparator);
-            if (position > 0) {
-                databasesList.remove(position);
+            if (position >= 0) {
+                // Remember databases to be skipped
+                toSkip.add(new Integer(position));
             }
         }
-        
+
+        // Copy array and skip relevant databases
+        Database[] filtered = new Database[databases.length - toSkip.size()];
+        int j = 0;
+        for (int i = 0; i < databases.length && j < filtered.length; i++) {
+            if (false == toSkip.contains(Integer.valueOf(i))) {
+                filtered[j++] = databases[i];
+            }
+        }
+
         sb.setLength(sb.length() - 2);
         System.out.println(sb.toString());
-        
-        return databasesList.toArray(new Database[databasesList.size()]);
+
+        return filtered;
     }
 
     /**
@@ -278,7 +289,7 @@ public class UpgradeSchemata extends UtilAbstraction {
      * @throws InstanceNotFoundException if the required MBean does not exist in the registry
      * @throws MBeanException if an error during the runUpdate method is occurred
      * @throws ReflectionException if an invocation error is occurred
-     * @throws IOExceptionif an I/O error is occurred
+     * @throws IOException if an I/O error is occurred
      */
     private void runUpdates(String schemaName) throws InstanceNotFoundException, MBeanException, ReflectionException, IOException {
         System.out.print("Running updates...");
@@ -516,7 +527,7 @@ public class UpgradeSchemata extends UtilAbstraction {
         jmxPasswordNameOption = setShortLongOpt(parser, 's', "password", "The optional JMX password (if JMX has authentication enabled)", true, NeededQuadState.possibly);
         schemaNameOption = setShortLongOpt(parser, 'm', "schema-name", "The optional schema name to continue from", true, NeededQuadState.possibly);
         forceOption = setShortLongOpt(parser, 'f', "force", "Forces the upgrade even if the updates fail in some schemata", false, NeededQuadState.notneeded);
-        skipOption = setShortLongOpt(parser, 'k', "skip-schemata", "Defines the names of the schemata as a comma separated list that should be skipped during the upgrde phase", true, NeededQuadState.possibly);
+        skipOption = setShortLongOpt(parser, 'k', "skip-schemata", "Defines the names of the schemata as a comma separated list that should be skipped during the upgrade phase", true, NeededQuadState.possibly);
 
         setDefaultCommandLineOptionsWithoutContextID(parser);
     }

@@ -68,11 +68,14 @@ import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.contact.storage.ContactUserStorage;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.FolderPermissionType;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.Permissions;
+import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.group.Group;
 import com.openexchange.group.GroupService;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.LdapExceptionCode;
 import com.openexchange.groupware.ldap.User;
@@ -102,6 +105,7 @@ import com.openexchange.share.ShareTarget;
 import com.openexchange.share.ShareTargetPath;
 import com.openexchange.share.core.CreatedSharesImpl;
 import com.openexchange.share.core.ShareConstants;
+import com.openexchange.share.core.groupware.FolderTargetProxy;
 import com.openexchange.share.core.tools.ShareToken;
 import com.openexchange.share.core.tools.ShareTool;
 import com.openexchange.share.groupware.ModuleSupport;
@@ -342,12 +346,24 @@ public class DefaultShareService implements ShareService {
                 }
             }
 
-            if (guestUserUpdated) {
+            boolean folderPermissionUpdate = false;
+            if (shareInfo.getTarget().getModule() == FolderObject.INFOSTORE && shareInfo.getTarget().isIncludeSubfolders() != target.isIncludeSubfolders()) {
+                TargetPermission targetPermission = new TargetPermission(shareInfo.getGuest().getGuestID(), false, LINK_PERMISSION_BITS);
+                if (shareInfo.getTarget().isIncludeSubfolders()) {
+                    // Remove permission in case includeSubfolders is changed from 'true' to 'false' so handed down permissions get removed as well
+                    targetProxy.removePermissions(Collections.singletonList(targetPermission));
+                }
+                // Re-apply the link permission so that the permission converter of the proxy can apply the correct type
+                targetProxy.applyPermissions(Collections.singletonList(targetPermission));
+                targetProxy.touch();
+                targetUpdate.run();
+                folderPermissionUpdate = true;
+            } else if (guestUserUpdated) {
                 targetProxy.touch();
                 targetUpdate.run();
             }
             connectionHelper.commit();
-            if (guestUserUpdated) {
+            if (guestUserUpdated || folderPermissionUpdate) {
                 userService.invalidateUser(context, guest.getId());
                 return new DefaultShareLink(shareInfo, moduleSupport.load(target, session).getTimestamp(), false);
             }
@@ -428,13 +444,30 @@ public class DefaultShareService implements ShareService {
                         user = userService.getUser(entity.intValue(), context);
                     }
                     if (ShareTool.isAnonymousGuest(user)) {
-                        ShareTarget dstTarget = services.getService(ModuleSupport.class).adjustTarget(proxy.getTarget(), session, user.getId());
-                        return new DefaultShareInfo(services, context.getContextId(), user, proxy.getTarget(), dstTarget, proxy.getTargetPath());
+                        ShareTarget target = adjustSubfolderFlag(proxy, user.getId());
+                        ShareTarget dstTarget = services.getService(ModuleSupport.class).adjustTarget(target, session, user.getId());
+                        return new DefaultShareInfo(services, context.getContextId(), user, target, dstTarget, proxy.getTargetPath());
                     }
                 }
             }
         }
         return null;
+    }
+
+    private ShareTarget adjustSubfolderFlag(TargetProxy targetProxy, int guestId) {
+
+        if (targetProxy instanceof FolderTargetProxy) {
+            FolderTargetProxy proxy = (FolderTargetProxy) targetProxy;
+            ShareTarget proxyTarget = proxy.getTarget();
+            UserizedFolder folder = proxy.getFolder();
+            for (Permission perm : folder.getPermissions()) {
+                if (perm.getEntity() == guestId) {
+                    return new ShareTarget(proxyTarget.getModule(), proxyTarget.getFolder(), proxyTarget.getRealFolder(), proxyTarget.getItem(), perm.getType().equals(FolderPermissionType.LEGATOR));
+                }
+            }
+        }
+        ShareTarget proxyTarget = targetProxy.getTarget();
+        return new ShareTarget(proxyTarget.getModule(), proxyTarget.getFolder(), proxyTarget.getRealFolder(), proxyTarget.getItem(), null);
     }
 
     /**

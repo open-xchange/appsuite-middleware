@@ -153,30 +153,35 @@ public class TargetUpdateImpl extends AbstractTargetUpdate {
                 }
                 folderServiceDecorator.put("permissions", "inherit");
                 for (UserizedFolder fol : folderObjects.getResponse()) {
-                    prepareInheritedPermissions(fol, appliedPermissions, removedPermissions);
+                    ShareTarget target = proxy.getTarget();
+                    prepareInheritedPermissions(fol, appliedPermissions, removedPermissions, target.isIncludeSubfolders() != null ? target.isIncludeSubfolders() : false);
                     folderService.updateFolder(fol, fol.getLastModifiedUTC(), parameters.getSession(), folderServiceDecorator);
                 }
             }
         }
     }
 
-    private static UserizedFolder prepareInheritedPermissions(UserizedFolder folder, List<Permission> added, List<Permission> removed){
+    private static UserizedFolder prepareInheritedPermissions(UserizedFolder folder, List<Permission> added, List<Permission> removed, boolean includeSubfolders) {
         Permission[] originalPermissions = folder.getPermissions();
         if (null == originalPermissions) {
             originalPermissions = new Permission[0];
         }
 
-        for(Permission add : added){
-            add.setType(FolderPermissionType.INHERITED);
+        if (includeSubfolders) {
+            for (Permission add : added) {
+                add.setType(FolderPermissionType.INHERITED);
+            }
         }
 
-        for(Permission rem : removed){
+        for (Permission rem : removed) {
             rem.setType(FolderPermissionType.INHERITED);
         }
 
         List<Permission> permissions = new ArrayList<>(originalPermissions.length + added.size());
         Collections.addAll(permissions, originalPermissions);
-        permissions.addAll(added);
+        if (includeSubfolders) {
+            permissions.addAll(added);
+        }
         permissions = removePermissions(permissions, removed);
         folder.setPermissions(permissions.toArray(new Permission[permissions.size()]));
         return folder;
@@ -265,7 +270,7 @@ public class TargetUpdateImpl extends AbstractTargetUpdate {
                     folderTarget.getFolder(),
                     parameters.getSession(),
                     parameters.getFolderServiceDecorator());
-                FolderTargetProxy proxy = new FolderTargetProxy(folderTarget.getModule(), folder);
+                FolderTargetProxy proxy = new FolderTargetProxy(folderTarget, folder);
                 if (checkPermissions && !canShareFolder(folder)) {
                     throw ShareExceptionCodes.NO_SHARE_PERMISSIONS.create(
                         parameters.getUser().getId(),

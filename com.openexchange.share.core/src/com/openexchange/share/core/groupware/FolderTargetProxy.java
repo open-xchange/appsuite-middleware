@@ -82,16 +82,16 @@ public class FolderTargetProxy extends AbstractTargetProxy {
     private final PermissionConverter<Permission> converter;
 
 
-    public FolderTargetProxy(int module, UserizedFolder folder) {
+    public FolderTargetProxy(ShareTarget target, UserizedFolder folder) {
         super();
         this.folder = folder;
-        if (folder.getContentType().getModule() == FolderObject.INFOSTORE) {
-            converter = CONVERTER_INFOSTORE;
+        if (folder.getContentType().getModule() == FolderObject.INFOSTORE && target.isIncludeSubfolders() != null && target.isIncludeSubfolders()) {
+            converter = HANDING_DOWN_CONVERTER;
         } else {
             converter = CONVERTER;
         }
-        target = new ShareTarget(module, folder.getID(), null);
-        targetPath = new ShareTargetPath(module, folder.getID(), null);
+        this.target = new ShareTarget(target.getModule(), folder.getID(), null, null, target.isIncludeSubfolders());
+        targetPath = new ShareTargetPath(target.getModule(), folder.getID(), null);
         appliedPermissions = new ArrayList<>();
         removedPermissions = new ArrayList<>();
     }
@@ -226,7 +226,7 @@ public class FolderTargetProxy extends AbstractTargetProxy {
         }
     };
 
-    private static PermissionConverter<Permission> CONVERTER_INFOSTORE = new PermissionConverter<Permission>() {
+    private static PermissionConverter<Permission> HANDING_DOWN_CONVERTER = new PermissionConverter<Permission>() {
 
         @Override
         public int getEntity(Permission permission) {

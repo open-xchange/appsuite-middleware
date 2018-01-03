@@ -47,62 +47,71 @@
  *
  */
 
-package com.openexchange.share.json.actions;
+package com.openexchange.html.vulntests;
 
-import java.util.Date;
-import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.share.ShareLink;
-import com.openexchange.share.ShareTarget;
-import com.openexchange.tools.servlet.AjaxExceptionCodes;
-import com.openexchange.tools.session.ServerSession;
+import static org.junit.Assert.assertTrue;
+import org.junit.Test;
+import com.openexchange.html.AbstractSanitizing;
+import com.openexchange.html.HtmlSanitizeOptions;
+import com.openexchange.html.HtmlSanitizeOptions.ParserPreference;
 
 /**
- * {@link GetLinkAction}
+ * {@link Bug56582VulTest}
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since v7.8.0
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class GetLinkAction extends AbstractShareAction {
+public class Bug56582VulTest extends AbstractSanitizing {
 
-    /**
-     * Initializes a new {@link GetLinkAction}.
-     *
-     * @param services A service lookup reference
-     */
-    public GetLinkAction(ServiceLookup services) {
-        super(services);
+    public Bug56582VulTest() {
+        super();
     }
 
-    @Override
-    public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
-        /*
-         * parse target & get or create the share link
-         */
-        ShareTarget target = getParser().parseTarget((JSONObject) requestData.requireData());
-        ShareLink shareLink = getShareService().getLink(session, target);
-        /*
-         * return appropriate result
-         */
-        JSONObject jsonResult = new JSONObject();
-        try {
-            jsonResult.put("url", shareLink.getShareURL(requestData.getHostData()));
-            jsonResult.put("entity", shareLink.getGuest().getGuestID());
-            jsonResult.put("is_new", shareLink.isNew());
-            Date expiryDate = shareLink.getGuest().getExpiryDate();
-            if (null != expiryDate) {
-                jsonResult.put("expiry_date", getParser().addTimeZoneOffset(expiryDate.getTime(), getTimeZone(requestData, session)));
-            }
-            jsonResult.putOpt("password", shareLink.getGuest().getPassword());
-            jsonResult.putOpt("includeSubfolders", shareLink.getTarget().isIncludeSubfolders());
-        } catch (JSONException e) {
-            throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());
+    @Test
+    public void testCorruptCss() throws Exception {
+        String content = "<!DOCTYPE html>\n" +
+            "<html><head>\n" +
+            "    <meta charset=\"UTF-8\">\n" +
+            "\n" +
+            "</head>\n" +
+            "<body>\n" +
+            "<style>\n" +
+            ".a {\n" +
+            "        font-family: </styl/**/e>;\n" +
+            "        font-family: </sty/**/le>;\n" +
+            "        font-family: </s/*data*/tyle>;\n" +
+            "} \n" +
+            ".<iframe/onload=alert(document[\"cookie\"])> { } \n" +
+            "</style>\n" +
+            "\n" +
+            "    <p>hello</p>\n" +
+            "</body>\n" +
+            "</html>";
+
+        {
+            HtmlSanitizeOptions.Builder options = HtmlSanitizeOptions.builder();
+            options.setOptConfigName(null);
+            options.setDropExternalImages(false);
+            options.setModified(null);
+            options.setCssPrefix(null);
+            options.setParserPreference(ParserPreference.JERICHO);
+
+            String sanitized = getHtmlService().sanitize(content, options.build()).getContent();
+
+            assertTrue("Unexpected content: " + sanitized, sanitized.indexOf("onload") < 0);
         }
-        return new AJAXRequestResult(jsonResult, shareLink.getTimestamp(), "json");
+
+        {
+            HtmlSanitizeOptions.Builder options = HtmlSanitizeOptions.builder();
+            options.setOptConfigName(null);
+            options.setDropExternalImages(false);
+            options.setModified(null);
+            options.setCssPrefix(null);
+            options.setParserPreference(ParserPreference.JSOUP);
+
+            String sanitized = getHtmlService().sanitize(content, options.build()).getContent();
+
+            assertTrue("Unexpected content: " + sanitized, sanitized.indexOf("onload") < 0);
+        }
     }
 
 }

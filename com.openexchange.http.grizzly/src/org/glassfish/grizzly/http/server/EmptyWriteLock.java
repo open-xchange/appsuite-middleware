@@ -47,62 +47,70 @@
  *
  */
 
-package com.openexchange.share.json.actions;
+package org.glassfish.grizzly.http.server;
 
-import java.util.Date;
-import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.share.ShareLink;
-import com.openexchange.share.ShareTarget;
-import com.openexchange.tools.servlet.AjaxExceptionCodes;
-import com.openexchange.tools.session.ServerSession;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
- * {@link GetLinkAction}
+ * {@link EmptyWriteLock}
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since v7.8.0
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.10.0
  */
-public class GetLinkAction extends AbstractShareAction {
+public class EmptyWriteLock extends java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock {
+
+    private static final long serialVersionUID = -7671295270015164735L;
+
+    private static final EmptyWriteLock INSTANCE = new EmptyWriteLock();
 
     /**
-     * Initializes a new {@link GetLinkAction}.
+     * Gets the instance
      *
-     * @param services A service lookup reference
+     * @return The instance
      */
-    public GetLinkAction(ServiceLookup services) {
-        super(services);
+    public static EmptyWriteLock getInstance() {
+        return INSTANCE;
+    }
+
+    // -----------------------------------------------------------------------------------------------------------------
+
+    /**
+     * Initializes a new {@link EmptyWriteLock}.
+     */
+    private EmptyWriteLock() {
+        super(new ReentrantReadWriteLock());
     }
 
     @Override
-    public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
-        /*
-         * parse target & get or create the share link
-         */
-        ShareTarget target = getParser().parseTarget((JSONObject) requestData.requireData());
-        ShareLink shareLink = getShareService().getLink(session, target);
-        /*
-         * return appropriate result
-         */
-        JSONObject jsonResult = new JSONObject();
-        try {
-            jsonResult.put("url", shareLink.getShareURL(requestData.getHostData()));
-            jsonResult.put("entity", shareLink.getGuest().getGuestID());
-            jsonResult.put("is_new", shareLink.isNew());
-            Date expiryDate = shareLink.getGuest().getExpiryDate();
-            if (null != expiryDate) {
-                jsonResult.put("expiry_date", getParser().addTimeZoneOffset(expiryDate.getTime(), getTimeZone(requestData, session)));
-            }
-            jsonResult.putOpt("password", shareLink.getGuest().getPassword());
-            jsonResult.putOpt("includeSubfolders", shareLink.getTarget().isIncludeSubfolders());
-        } catch (JSONException e) {
-            throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());
-        }
-        return new AJAXRequestResult(jsonResult, shareLink.getTimestamp(), "json");
+    public void unlock() {
+        // ignore
+    }
+
+    @Override
+    public boolean tryLock(long time, TimeUnit unit) throws InterruptedException {
+        return true;
+    }
+
+    @Override
+    public boolean tryLock() {
+        return true;
+    }
+
+    @Override
+    public Condition newCondition() {
+        return EmptyReadLock.EMPTY_CONDITION;
+    }
+
+    @Override
+    public void lockInterruptibly() throws InterruptedException {
+        // ignore
+    }
+
+    @Override
+    public void lock() {
+        // ignore
     }
 
 }

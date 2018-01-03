@@ -51,6 +51,7 @@ package com.openexchange.share.impl.groupware;
 
 import java.sql.Connection;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -132,13 +133,14 @@ public class AdministrativeTargetUpdateImpl extends AbstractTargetUpdate {
             OXFolderManager folderManager = OXFolderManager.getInstance(syntheticOwnerSession, folderAccess, connection, connection);
             FolderObject folder = folderTargetProxy.getFolder();
             folderManager.updateFolder(folder, false, System.currentTimeMillis());
-
-            if (folder.getModule() == FolderObject.INFOSTORE) {
+            ShareTarget target = folderTargetProxy.getTarget();
+            if (folder.getModule() == FolderObject.INFOSTORE && target.isIncludeSubfolders() != null && target.isIncludeSubfolders()) {
                 List<Integer> subfolderIds = folder.getSubfolderIds();
                 List<FolderObject> folderObjects = folderAccess.getFolderObjects(subfolderIds);
                 List<OCLPermission> appliedPermissions = folderTargetProxy.getAppliedPermissions();
+                List<OCLPermission> removedPermissions = folderTargetProxy.getRemovedPermissions();
                 for (FolderObject fol : folderObjects) {
-                    prepareInheritedPermissions(fol, appliedPermissions);
+                    prepareInheritedPermissions(fol, appliedPermissions, removedPermissions);
                     folderManager.updateFolder(fol, true, true, System.currentTimeMillis());
                 }
             }
@@ -155,21 +157,46 @@ public class AdministrativeTargetUpdateImpl extends AbstractTargetUpdate {
 
     }
 
-    private static FolderObject prepareInheritedPermissions(FolderObject folder, List<OCLPermission> added){
+    private static FolderObject prepareInheritedPermissions(FolderObject folder, List<OCLPermission> added, List<OCLPermission> removed) {
         List<OCLPermission> originalPermissions = folder.getPermissions();
         if (null == originalPermissions) {
             originalPermissions = new ArrayList<OCLPermission>();
         }
 
         for(OCLPermission add : added){
-            add.setType(FolderPermissionType.LEGATOR);
+            add.setType(FolderPermissionType.INHERITED);
+        }
+
+        for (OCLPermission rem : removed) {
+            rem.setType(FolderPermissionType.INHERITED);
         }
 
         List<OCLPermission> newPermissions = new ArrayList<>(originalPermissions.size() + added.size());
         newPermissions.addAll(originalPermissions);
         newPermissions.addAll(added);
+        newPermissions = removePermissions(newPermissions, removed);
         folder.setPermissions(newPermissions);
         return folder;
+    }
+
+    protected static List<OCLPermission> removePermissions(List<OCLPermission> origPermissions, List<OCLPermission> toRemove) {
+        if (origPermissions == null || origPermissions.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        List<OCLPermission> newPermissions = new ArrayList<OCLPermission>(origPermissions);
+        Iterator<OCLPermission> it = newPermissions.iterator();
+        while (it.hasNext()) {
+            OCLPermission permission = it.next();
+            for (OCLPermission removable : toRemove) {
+                if (permission.isGroupPermission() == removable.isGroupPermission() && permission.getEntity() == removable.getEntity()) {
+                    it.remove();
+                    break;
+                }
+            }
+        }
+
+        return newPermissions;
     }
 
     @Override

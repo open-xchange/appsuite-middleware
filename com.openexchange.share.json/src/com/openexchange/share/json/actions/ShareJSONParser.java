@@ -138,7 +138,11 @@ public class ShareJSONParser {
             if (jsonTarget.hasAndNotNull("item")) {
                 target = new ShareTarget(module, folder, jsonTarget.getString("item"));
             } else {
-                target = new ShareTarget(module, folder);
+                if (jsonTarget.hasAndNotNull("includeSubfolders")) {
+                    target = new ShareTarget(module, folder, jsonTarget.getBoolean("includeSubfolders"));
+                } else {
+                    target = new ShareTarget(module, folder);
+                }
             }
             return target;
         } catch (JSONException e) {

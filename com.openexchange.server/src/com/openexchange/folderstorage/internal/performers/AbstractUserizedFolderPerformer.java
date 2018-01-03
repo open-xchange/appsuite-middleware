@@ -801,9 +801,10 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
              * allow only one anonymous permission with "read-only" permission bits, matching the guest's fixed target
              */
             checkIsLinkPermission(folder, permission);
-//            if (isNotEqualsTarget(session, folder, guestInfo.getLinkTarget())) {
-//                throw invalidPermissions(folder, permission);
-//            }
+            // Only check not inherited permissions because inherited permissions are only applied internally and doesn't needed to be checked
+            if(permission.getType() != FolderPermissionType.INHERITED && isNotEqualsTarget(session, folder, guestInfo.getLinkTarget())) {
+                throw invalidPermissions(folder, permission);
+            }
         } else if (isReadOnlySharing(folder)) {
             /*
              * allow only "read-only" permissions for invited guests in non-infostore folders
