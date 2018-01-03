@@ -110,19 +110,9 @@ public class NotificationMailGenerator implements ITipMailGenerator {
 
     private NotificationParticipant organizer;
 
-    private NotificationParticipant actor;
-
     private final List<NotificationParticipant> recipients;
 
-    private final Event appointment;
-
-    private final Event original;
-
     private final ITipIntegrationUtility util;
-
-    private final Session session;
-
-    private ITipEventUpdate diff;
 
     private MailGeneratorState state;
 
@@ -132,18 +122,28 @@ public class NotificationMailGenerator implements ITipMailGenerator {
 
     private final ServiceLookup services;
 
-    private final List<NotificationParticipant> participants;
-
-    public static final EventField[] DEFAULT_SKIP = new EventField[] { EventField.ID, EventField.FOLDER_ID, EventField.CREATED_BY, EventField.MODIFIED_BY, EventField.CREATED, EventField.LAST_MODIFIED, EventField.ALARMS, EventField.SEQUENCE,
-        EventField.TRANSP };
-
     private final List<NotificationParticipant> resources;
 
     private NotificationParticipant principal;
 
-    private NotificationParticipant onBehalfOf;
+    protected NotificationParticipant actor;
 
-    private CalendarUtilities calendarUtilities;
+    protected final Event appointment;
+
+    protected final Event original;
+
+    protected final Session session;
+
+    protected ITipEventUpdate diff;
+
+    protected final List<NotificationParticipant> participants;
+
+    protected NotificationParticipant onBehalfOf;
+
+    protected CalendarUtilities calendarUtilities;
+
+    public static final EventField[] DEFAULT_SKIP = new EventField[] { EventField.ID, EventField.FOLDER_ID, EventField.CREATED_BY, EventField.MODIFIED_BY, EventField.CREATED, EventField.LAST_MODIFIED, EventField.ALARMS, EventField.SEQUENCE,
+        EventField.TRANSP };
 
     public NotificationMailGenerator(final ServiceLookup services, final AttachmentMemory attachmentMemory, final NotificationParticipantResolver resolver, final ITipIntegrationUtility util, final Event original, final Event appointment, User user,
         final User onBehalfOf, final Context ctx, final Session session, CalendarUser principal) throws OXException {
@@ -371,7 +371,7 @@ public class NotificationMailGenerator implements ITipMailGenerator {
         return n;
     }
 
-    protected NotificationMail add(final NotificationParticipant recipient) throws OXException {
+    protected NotificationMail add(final NotificationParticipant recipient) {
         final NotificationMail mail = new NotificationMail();
         mail.setRecipient(recipient);
         mail.setSender(determinateSender(recipient.isExternal()));
@@ -387,7 +387,7 @@ public class NotificationMailGenerator implements ITipMailGenerator {
         return mail;
     }
 
-    protected NotificationMail counter(final NotificationParticipant recipient) throws OXException {
+    protected NotificationMail counter(final NotificationParticipant recipient) {
         final NotificationMail mail = new NotificationMail();
         mail.setRecipient(recipient);
         mail.setSender(actor);
@@ -443,7 +443,7 @@ public class NotificationMailGenerator implements ITipMailGenerator {
         return mail;
     }
 
-    private State.Type getStateTypeForStatus(final ParticipationStatus confirmStatus) {
+    protected State.Type getStateTypeForStatus(final ParticipationStatus confirmStatus) {
         if (confirmStatus == null) {
             return State.Type.MODIFIED;
         }
@@ -486,7 +486,7 @@ public class NotificationMailGenerator implements ITipMailGenerator {
         return mail;
     }
 
-    protected NotificationMail declinecounter(final NotificationParticipant recipient) throws OXException {
+    protected NotificationMail declinecounter(final NotificationParticipant recipient) {
         final NotificationMail mail = new NotificationMail();
         mail.setRecipient(recipient);
         mail.setSender(actor);
@@ -520,7 +520,7 @@ public class NotificationMailGenerator implements ITipMailGenerator {
 
     }
 
-    private void initAttachments(final NotificationMail mail) throws OXException {
+    private void initAttachments(final NotificationMail mail) {
         if (services == null) {
             return;
         }
@@ -621,6 +621,10 @@ public class NotificationMailGenerator implements ITipMailGenerator {
             case ORGANIZER:
                 mail.setSubject(prefix(mail) + new Sentence(Messages.SUBJECT_COUNTER_APPOINTMENT).add(mail.getEvent().getSummary()).getMessage(mail.getRecipient().getLocale()));
                 mail.setTemplateName("notify.appointment.counter.organizer");
+                break;
+            default:
+                //Fall through
+                LOGGER.debug("Can not counter for role {}.", role.toString());
                 break;
         }
         render(mail);
@@ -990,7 +994,7 @@ public class NotificationMailGenerator implements ITipMailGenerator {
 
         protected boolean onlyMyStateChanged() {
             if (stateChanged != null) {
-                return stateChanged;
+                return stateChanged.booleanValue();
             }
 
             if (diff == null) {
@@ -1009,7 +1013,7 @@ public class NotificationMailGenerator implements ITipMailGenerator {
                 }
 
                 if (updatedItems.size() > 1) {
-                    return stateChanged = false;
+                    return (stateChanged = Boolean.FALSE).booleanValue();
                 }
 
                 int identifier = actor.getIdentifier();
@@ -1019,8 +1023,7 @@ public class NotificationMailGenerator implements ITipMailGenerator {
                 for (ItemUpdate<Attendee, AttendeeField> updatedItem : updatedItems) {
                     if (updatedItem.getUpdate().getEntity() == identifier && updatedItem.getUpdatedFields().contains(AttendeeField.PARTSTAT)) {
                         confirmStatus = updatedItem.getUpdate().getPartStat();
-                        stateChanged = true;
-                        return true;
+                        return (stateChanged = Boolean.TRUE).booleanValue();
                     }
                 }
             }
