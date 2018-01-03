@@ -75,19 +75,20 @@ import com.openexchange.user.UserService;
  */
 public class LabelHelper {
 
-    private final NotificationMail mail;
     private final Context ctx;
-    private final TypeWrapper wrapper;
     private final DateHelper dateHelper;
     private final UserService users;
     private final HTMLUtils html;
-    private final Locale locale;
     private TimeZone timezone;
     private DelegationState delegationState;
     private final ServiceLookup services;
     private final Pattern patternSlashFixer;
-
     private static final String fallbackHostname;
+
+    protected final NotificationMail mail;
+    protected final TypeWrapper wrapper;
+    protected final Locale locale;
+    
     static {
         String fbHostname;
         try {
@@ -127,7 +128,7 @@ public class LabelHelper {
     public String getShowAs() {
         final Event event = mail.getEvent();
 
-        if (event.getTransp().equals(Transp.TRANSPARENT)) {
+        if (event.getTransp().getValue().equals(Transp.TRANSPARENT)) {
             return new Sentence(Messages.FREE).getMessage(locale);
         } else {
             return new Sentence(Messages.RESERVERD).getMessage(locale);
@@ -136,7 +137,7 @@ public class LabelHelper {
 
     public String getShowAsClass() {
         final Event event = mail.getEvent();
-        if (event.getTransp().equals(Transp.TRANSPARENT)) {
+        if (event.getTransp().getValue().equals(Transp.TRANSPARENT)) {
             return "free";
         } else {
             return "reserved";
