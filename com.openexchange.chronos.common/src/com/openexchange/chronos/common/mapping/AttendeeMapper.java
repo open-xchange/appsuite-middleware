@@ -61,6 +61,7 @@ import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.ExtendedPropertyParameter;
 import com.openexchange.chronos.ParticipantRole;
 import com.openexchange.chronos.ParticipationStatus;
+import com.openexchange.chronos.TimeTransparency;
 import com.openexchange.chronos.Transp;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tools.mappings.DefaultMapper;
@@ -175,6 +176,12 @@ public class AttendeeMapper extends DefaultMapper<Attendee, AttendeeField> {
         mappings.put(AttendeeField.SENT_BY, new DefaultMapping<CalendarUser, Attendee>() {
 
             @Override
+            public void copy(Attendee from, Attendee to) throws OXException {
+                CalendarUser value = get(from);
+                set(to, null == value ? null : new CalendarUser(value));
+            }
+
+            @Override
             public boolean isSet(Attendee object) {
                 return object.containsSentBy();
             }
@@ -195,6 +202,12 @@ public class AttendeeMapper extends DefaultMapper<Attendee, AttendeeField> {
             }
         });
         mappings.put(AttendeeField.CU_TYPE, new DefaultMapping<CalendarUserType, Attendee>() {
+
+            @Override
+            public void copy(Attendee from, Attendee to) throws OXException {
+                CalendarUserType value = get(from);
+                set(to, null == value ? null : new CalendarUserType(value.getValue()));
+            }
 
             @Override
             public boolean isSet(Attendee object) {
@@ -219,6 +232,12 @@ public class AttendeeMapper extends DefaultMapper<Attendee, AttendeeField> {
         mappings.put(AttendeeField.ROLE, new DefaultMapping<ParticipantRole, Attendee>() {
 
             @Override
+            public void copy(Attendee from, Attendee to) throws OXException {
+                ParticipantRole value = get(from);
+                set(to, null == value ? null : new ParticipantRole(value.getValue()));
+            }
+
+            @Override
             public boolean isSet(Attendee object) {
                 return object.containsRole();
             }
@@ -239,6 +258,12 @@ public class AttendeeMapper extends DefaultMapper<Attendee, AttendeeField> {
             }
         });
         mappings.put(AttendeeField.PARTSTAT, new DefaultMapping<ParticipationStatus, Attendee>() {
+
+            @Override
+            public void copy(Attendee from, Attendee to) throws OXException {
+                ParticipationStatus value = get(from);
+                set(to, null == value ? null : new ParticipationStatus(value.getValue()));
+            }
 
             @Override
             public boolean isSet(Attendee object) {
@@ -377,6 +402,12 @@ public class AttendeeMapper extends DefaultMapper<Attendee, AttendeeField> {
             }
         });
         mappings.put(AttendeeField.TRANSP, new DefaultMapping<Transp, Attendee>() {
+
+            @Override
+            public void copy(Attendee from, Attendee to) throws OXException {
+                Transp value = get(from);
+                set(to, null == value ? null : TimeTransparency.TRANSPARENT.equals(value.getValue()) ? TimeTransparency.TRANSPARENT : TimeTransparency.OPAQUE);
+            }
 
             @Override
             public boolean equals(Attendee attendee1, Attendee attendee2) {

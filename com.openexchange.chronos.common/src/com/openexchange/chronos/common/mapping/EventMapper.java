@@ -75,9 +75,12 @@ import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.EventStatus;
 import com.openexchange.chronos.ExtendedProperties;
+import com.openexchange.chronos.ExtendedProperty;
+import com.openexchange.chronos.ExtendedPropertyParameter;
 import com.openexchange.chronos.Organizer;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.RelatedTo;
+import com.openexchange.chronos.TimeTransparency;
 import com.openexchange.chronos.Transp;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.exception.OXException;
@@ -620,6 +623,12 @@ public class EventMapper extends DefaultMapper<Event, EventField> {
         mappings.put(EventField.CLASSIFICATION, new DefaultMapping<Classification, Event>() {
 
             @Override
+            public void copy(Event from, Event to) throws OXException {
+                Classification value = get(from);
+                set(to, null == value ? null : new Classification(value.getValue()));
+            }
+
+            @Override
             public boolean isSet(Event object) {
                 return object.containsClassification();
             }
@@ -684,6 +693,12 @@ public class EventMapper extends DefaultMapper<Event, EventField> {
             }
         });
         mappings.put(EventField.GEO, new DefaultMapping<double[], Event>() {
+
+            @Override
+            public void copy(Event from, Event to) throws OXException {
+                double[] value = get(from);
+                set(to, null == value ? null : value.clone());
+            }
 
             @Override
             public boolean isSet(Event object) {
@@ -760,6 +775,13 @@ public class EventMapper extends DefaultMapper<Event, EventField> {
             }
         });
         mappings.put(EventField.TRANSP, new DefaultMapping<Transp, Event>() {
+
+            @Override
+            public void copy(Event from, Event to) throws OXException {
+                Transp value = get(from);
+                set(to, null == value ? null : Transp.TRANSPARENT.equals(value.getValue()) ? TimeTransparency.TRANSPARENT : TimeTransparency.OPAQUE);
+                set(to, value);
+            }
 
             @Override
             public boolean equals(Event event1, Event event2) {
@@ -913,6 +935,12 @@ public class EventMapper extends DefaultMapper<Event, EventField> {
         mappings.put(EventField.STATUS, new DefaultMapping<EventStatus, Event>() {
 
             @Override
+            public void copy(Event from, Event to) throws OXException {
+                EventStatus value = get(from);
+                set(to, null == value ? null : new EventStatus(value.getValue()));
+            }
+
+            @Override
             public boolean isSet(Event object) {
                 return object.containsStatus();
             }
@@ -1060,6 +1088,28 @@ public class EventMapper extends DefaultMapper<Event, EventField> {
             }
         });
         mappings.put(EventField.EXTENDED_PROPERTIES, new DefaultMapping<ExtendedProperties, Event>() {
+
+            @Override
+            public void copy(Event from, Event to) throws OXException {
+                ExtendedProperties value = get(from);
+                if (null == value) {
+                    set(to, null);
+                } else {
+                    ExtendedProperties properties = new ExtendedProperties();
+                    for (ExtendedProperty property : value) {
+                        if (null == property.getParameters()) {
+                            properties.add(new ExtendedProperty(property.getName(), property.getValue()));
+                        } else {
+                            List<ExtendedPropertyParameter> parameters = new ArrayList<ExtendedPropertyParameter>();
+                            for (ExtendedPropertyParameter parameter : property.getParameters()) {
+                                parameters.add(new ExtendedPropertyParameter(parameter));
+                            }
+                            properties.add(new ExtendedProperty(property.getName(), property.getValue(), parameters));
+                        }
+                    }
+                    set(to, properties);
+                }
+            }
 
             @Override
             public boolean isSet(Event object) {
