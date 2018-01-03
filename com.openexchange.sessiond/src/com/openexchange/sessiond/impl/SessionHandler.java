@@ -87,6 +87,8 @@ import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.sessiond.SessionFilter;
 import com.openexchange.sessiond.SessionMatcher;
 import com.openexchange.sessiond.SessiondEventConstants;
+import com.openexchange.sessiond.impl.usertype.UserSpecificSessiondConfigRegistry;
+import com.openexchange.sessiond.impl.usertype.UserTypeSessiondConfigInterface;
 import com.openexchange.sessiond.osgi.Services;
 import com.openexchange.sessiond.serialization.PortableContextSessionsCleaner;
 import com.openexchange.sessiond.serialization.PortableSessionFilterApplier;
@@ -122,7 +124,10 @@ public final class SessionHandler {
     private static volatile SessionIdGenerator sessionIdGenerator;
 
     /** The applied configuration */
-    static volatile SessiondConfigRegistry REGISTRY;
+    static volatile SessiondConfigInterface config;
+
+    /** The applied user type specific configuration */
+    static volatile UserSpecificSessiondConfigRegistry REGISTRY;
 
     /** The {@link SessionData} reference */
     protected static final AtomicReference<SessionData> SESSION_DATA_REF = new AtomicReference<SessionData>();
@@ -158,9 +163,9 @@ public final class SessionHandler {
      * @param config The appropriate configuration
      * @throws OXException
      */
-    public static synchronized void init(SessiondConfigRegistry registry) throws OXException {
+    public static synchronized void init(SessiondConfigInterface config, UserSpecificSessiondConfigRegistry registry) throws OXException {
+        SessionHandler.config = config;
         SessionHandler.REGISTRY = registry;
-        GenericSessiondConfigInterface config = SessionHandler.REGISTRY.getGenericConfig();
         SessionData sessionData = new SessionData(config.getNumberOfSessionContainers(), config.getMaxSessions(), config.getRandomTokenTimeout(), config.getNumberOfLongTermSessionContainers(), config.isAutoLogin());
         SESSION_DATA_REF.set(sessionData);
         try {
@@ -170,7 +175,6 @@ public final class SessionHandler {
         }
         noLimit = (config.getMaxSessions() == 0);
         asyncPutToSessionStorage = config.isAsyncPutToSessionStorage();
-
         obfuscator = new Obfuscator(config.getObfuscationKey().toCharArray());
     }
 
@@ -193,6 +197,7 @@ public final class SessionHandler {
         }
         sessionIdGenerator = null;
         REGISTRY.clear();
+        config = null;
         noLimit = false;
     }
 
@@ -994,8 +999,8 @@ public final class SessionHandler {
             LOG.warn("\tSessionData instance is null.");
             return;
         }
-        SessiondConfigInterface config = REGISTRY.getService(userId, contextId);
-        int maxSessPerUser = config.getMaxSessionsPerUserType();
+        UserTypeSessiondConfigInterface userTypeConfig = REGISTRY.getService(userId, contextId);
+        int maxSessPerUser = userTypeConfig.getMaxSessionsPerUserType();
         if (maxSessPerUser > 0) {
             int count = sessionData.getNumOfUserSessions(userId, contextId, true);
             if (count >= maxSessPerUser) {
@@ -1029,7 +1034,6 @@ public final class SessionHandler {
             // Nothing to check against
             return;
         }
-        SessiondConfigInterface config = REGISTRY.getService(userId, contextId);
         int maxSessPerClient = config.getMaxSessionsPerClient();
         if (maxSessPerClient > 0) {
             SessionData sessionData = SESSION_DATA_REF.get();
@@ -1587,19 +1591,16 @@ public final class SessionHandler {
         }
         List<SessionControl> controls = sessionData.rotateShort();
         if (!controls.isEmpty()) {
-            List<SessiondConfigInterface> configs = REGISTRY.getServices();
-            for (SessiondConfigInterface config : configs) {
-                if (config.isAutoLogin()) {
-                    for (final SessionControl sessionControl : controls) {
-                        LOG.info("Session is moved to long life time container. All temporary session data will be cleaned up. ID: {}", sessionControl.getSession().getSessionID());
-                    }
-                    postSessionDataRemoval(controls);
-                } else {
-                    for (final SessionControl sessionControl : controls) {
-                        LOG.info("Session timed out. ID: {}", sessionControl.getSession().getSessionID());
-                    }
-                    postContainerRemoval(controls, true);
+            if (config.isAutoLogin()) {
+                for (final SessionControl sessionControl : controls) {
+                    LOG.info("Session is moved to long life time container. All temporary session data will be cleaned up. ID: {}", sessionControl.getSession().getSessionID());
                 }
+                postSessionDataRemoval(controls);
+            } else {
+                for (final SessionControl sessionControl : controls) {
+                    LOG.info("Session timed out. ID: {}", sessionControl.getSession().getSessionID());
+                }
+                postContainerRemoval(controls, true);
             }
         }
     }
@@ -1901,7 +1902,6 @@ public final class SessionHandler {
             sessionData.addTimerService(service);
         }
 
-        GenericSessiondConfigInterface config = SessionHandler.REGISTRY.getGenericConfig();
         long containerTimeout = config.getSessionContainerTimeout();
         shortSessionContainerRotator = service.scheduleWithFixedDelay(new ShortSessionContainerRotator(), containerTimeout, containerTimeout);
         if (config.isAutoLogin()) {

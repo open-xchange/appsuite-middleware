@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.sessiond.impl;
+package com.openexchange.sessiond.impl.usertype;
 
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
@@ -65,41 +65,41 @@ import com.openexchange.sessiond.osgi.Services;
 import com.openexchange.user.UserService;
 
 /**
- * {@link SessiondConfigRegistry}
+ * {@link UserSpecificSessiondConfigRegistry}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.10.0
  */
-public class SessiondConfigRegistry {
+public class UserSpecificSessiondConfigRegistry {
 
     public enum USER_TYPE {
         USER, GUEST, ANONYMOUS;
     }
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SessiondConfigRegistry.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(UserSpecificSessiondConfigRegistry.class);
 
     private static final Cache<UserAndContext, USER_TYPE> CACHE = CacheBuilder.newBuilder().maximumSize(65536).expireAfterWrite(60, TimeUnit.MINUTES).build();
 
-    private final ConcurrentMap<USER_TYPE, SessiondConfigInterface> map;
+    private final ConcurrentMap<USER_TYPE, UserTypeSessiondConfigInterface> map;
 
     private final ConfigurationService conf;
 
-    public SessiondConfigRegistry(ConfigurationService conf) {
+    public UserSpecificSessiondConfigRegistry(ConfigurationService conf) {
         this.conf = conf;
-        this.map = new ConcurrentHashMap<USER_TYPE, SessiondConfigInterface>();
+        this.map = new ConcurrentHashMap<USER_TYPE, UserTypeSessiondConfigInterface>();
     }
 
     public void init() {
-        SessiondConfigImpl userConfig = new SessiondConfigImpl(conf);
+        UserTypeSessiondConfigInterface userConfig = new SessiondUserConfigImpl(conf);
         map.put(userConfig.handles(), userConfig);
-        SessiondLinkConfigImpl linkConfig = new SessiondLinkConfigImpl(conf);
+        UserTypeSessiondConfigInterface linkConfig = new SessiondLinkConfigImpl(conf);
         map.put(linkConfig.handles(), linkConfig);
-        SessiondGuestConfigImpl guestConfig = new SessiondGuestConfigImpl(conf);
+        UserTypeSessiondConfigInterface guestConfig = new SessiondGuestConfigImpl(conf);
         map.put(guestConfig.handles(), guestConfig);
     }
 
-    public List<SessiondConfigInterface> getServices() {
-        return (List<SessiondConfigInterface>) map.values();
+    public List<UserTypeSessiondConfigInterface> getServices() {
+        return (List<UserTypeSessiondConfigInterface>) map.values();
     }
 
     public void clear() {
@@ -107,11 +107,7 @@ public class SessiondConfigRegistry {
         CACHE.invalidateAll();
     }
 
-    public GenericSessiondConfigInterface getGenericConfig() {
-        return this.map.get(USER_TYPE.USER);
-    }
-
-    public SessiondConfigInterface getService(int userId, int contextId) throws OXException {
+    public UserTypeSessiondConfigInterface getService(int userId, int contextId) throws OXException {
         if (this.map.isEmpty()) {
             throw SessionExceptionCodes.NOT_INITIALIZED.create();
         }

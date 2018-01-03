@@ -47,73 +47,40 @@
  *
  */
 
-package com.openexchange.sessiond.impl;
+package com.openexchange.sessiond.impl.usertype;
 
-import java.util.concurrent.atomic.AtomicBoolean;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.exception.OXException;
-import com.openexchange.server.Initialization;
-import com.openexchange.sessiond.impl.usertype.UserSpecificSessiondConfigRegistry;
-import com.openexchange.sessiond.osgi.Services;
 
 /**
- * {@link SessiondInit} - Initializes sessiond service
+ * 
+ * {@link SessiondLinkConfigImpl}
  *
- * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since v7.10.0
  */
-public class SessiondInit implements Initialization {
+public class SessiondLinkConfigImpl implements UserTypeSessiondConfigInterface {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SessiondInit.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SessiondLinkConfigImpl.class);
 
-    private UserSpecificSessiondConfigRegistry registry;
-
-    private SessiondConfigInterface config;
-
-    private final AtomicBoolean started = new AtomicBoolean();
-
-    private static final SessiondInit singleton = new SessiondInit();
-
-    public static SessiondInit getInstance() {
-        return singleton;
-    }
-
-    @Override
-    public void start() throws OXException {
-        if (started.get()) {
-            LOG.error("{} started", SessiondInit.class.getName());
-            return;
-        }
-        LOG.info("Parse Sessiond properties");
-
-        final ConfigurationService conf = Services.getService(ConfigurationService.class);
-        if (conf != null) {
-            config = new SessiondConfigImpl(conf);
-            registry = new UserSpecificSessiondConfigRegistry(conf);
-            registry.init();
-            LOG.info("Starting Sessiond");
-
-            SessionHandler.init(config, registry);
-            started.set(true);
-        }
-    }
-
-    @Override
-    public void stop() {
-        if (!started.get()) {
-            LOG.error("{} has not been started", SessiondInit.class.getName());
-            return;
-        }
-        SessionHandler.close();
-        started.set(false);
-    }
+    private int maxSessionsPerLink = 250;
 
     /**
-     * Checks if {@link SessiondInit} is started
+     * Initializes a new {@link SessiondLinkConfigImpl}.
      *
-     * @return <code>true</code> if {@link SessiondInit} is started; otherwise <code>false</code>
+     * @param conf The configuration service
      */
-    public boolean isStarted() {
-        return started.get();
+    public SessiondLinkConfigImpl(ConfigurationService conf) {
+        maxSessionsPerLink = conf.getIntProperty("com.openexchange.sessiond.maxSessionPerLink", maxSessionsPerLink);
+        LOG.debug("Sessiond property: com.openexchange.sessiond.maxSessionsPerLink={}", maxSessionsPerLink);
+    }
+
+    @Override
+    public int getMaxSessionsPerUserType() {
+        return maxSessionsPerLink;
+    }
+
+    @Override
+    public UserSpecificSessiondConfigRegistry.USER_TYPE handles() {
+        return UserSpecificSessiondConfigRegistry.USER_TYPE.ANONYMOUS;
     }
 }

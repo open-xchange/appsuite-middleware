@@ -47,51 +47,40 @@
  *
  */
 
-package com.openexchange.sessiond.impl;
+package com.openexchange.sessiond.impl.usertype;
+
+import com.openexchange.config.ConfigurationService;
 
 /**
  * 
- * {@link GenericSessiondConfigInterface}
+ * {@link SessiondGuestConfigImpl}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.10.0
  */
-public interface GenericSessiondConfigInterface {
+public class SessiondGuestConfigImpl implements UserTypeSessiondConfigInterface {
 
-    long getSessionContainerTimeout();
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SessiondGuestConfigImpl.class);
 
-    long getLongTermSessionContainerTimeout();
-
-    int getNumberOfSessionContainers();
-
-    int getMaxSessions();
-
-    int getMaxSessionsPerClient();
-
-    long getLifeTime();
-
-    long getLongLifeTime();
-
-    long getRandomTokenTimeout();
-
-    int getNumberOfLongTermSessionContainers();
+    private int maxSessionsPerGuest = 20;
 
     /**
-     * @return <code>true</code> if autologin is enabled.
-     */
-    boolean isAutoLogin();
-
-    /**
-     * Whether to enforce putting sessions into session storage asynchronously.
+     * Initializes a new {@link SessiondGuestConfigImpl}.
      *
-     * @return <code>true</code> for async put; otherwise <code>false</code>
+     * @param conf The configuration service
      */
-    boolean isAsyncPutToSessionStorage();
+    public SessiondGuestConfigImpl(ConfigurationService conf) {
+        maxSessionsPerGuest = conf.getIntProperty("com.openexchange.sessiond.maxSessionPerGuest", maxSessionsPerGuest);
+        LOG.debug("Sessiond property: com.openexchange.sessiond.maxSessionsPerGuest={}", maxSessionsPerGuest);
+    }
 
-    /**
-     * Gets a key to encrypt passwords when putting session into storage.
-     *
-     * @return The obfuscation key
-     */
-    String getObfuscationKey();
+    @Override
+    public int getMaxSessionsPerUserType() {
+        return maxSessionsPerGuest;
+    }
+
+    @Override
+    public UserSpecificSessiondConfigRegistry.USER_TYPE handles() {
+        return UserSpecificSessiondConfigRegistry.USER_TYPE.GUEST;
+    }
 }

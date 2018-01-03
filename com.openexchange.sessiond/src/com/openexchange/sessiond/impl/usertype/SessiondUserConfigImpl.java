@@ -47,41 +47,39 @@
  *
  */
 
-package com.openexchange.sessiond.impl;
+package com.openexchange.sessiond.impl.usertype;
 
 import com.openexchange.config.ConfigurationService;
 
 /**
- * 
- * {@link SessiondGuestConfigImpl}
+ * {@link SessiondUserConfigImpl} - The default {@link UserTypeSessiondConfigInterface} implementation.
  *
- * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
- * @since v7.10.0
+ * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class SessiondGuestConfigImpl extends SessiondConfigImpl {
+public class SessiondUserConfigImpl implements UserTypeSessiondConfigInterface {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SessiondGuestConfigImpl.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SessiondUserConfigImpl.class);
 
-    private int maxSessionsPerGuest = 20;
+    private int maxSessionsPerUser = 100;
 
     /**
      * Initializes a new {@link SessiondGuestConfigImpl}.
      *
      * @param conf The configuration service
      */
-    public SessiondGuestConfigImpl(ConfigurationService conf) {
-        super(conf);
-        maxSessionsPerGuest = conf.getIntProperty("com.openexchange.sessiond.maxSessionPerGuest", maxSessionsPerGuest);
-        LOG.debug("Sessiond property: com.openexchange.sessiond.maxSessionsPerGuest={}", maxSessionsPerGuest);
+    public SessiondUserConfigImpl(ConfigurationService conf) {
+        maxSessionsPerUser = conf.getIntProperty("com.openexchange.sessiond.maxSessionPerUser", maxSessionsPerUser);
+        LOG.debug("Sessiond property: com.openexchange.sessiond.maxSessionPerUser={}", maxSessionsPerUser);
     }
 
     @Override
     public int getMaxSessionsPerUserType() {
-        return maxSessionsPerGuest;
+        return maxSessionsPerUser;
     }
 
     @Override
-    public SessiondConfigRegistry.USER_TYPE handles() {
-        return SessiondConfigRegistry.USER_TYPE.GUEST;
+    public UserSpecificSessiondConfigRegistry.USER_TYPE handles() {
+        return UserSpecificSessiondConfigRegistry.USER_TYPE.USER;
     }
 }

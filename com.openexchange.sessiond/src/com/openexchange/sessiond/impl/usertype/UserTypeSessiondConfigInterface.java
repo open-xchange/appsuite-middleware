@@ -47,41 +47,29 @@
  *
  */
 
-package com.openexchange.sessiond.impl;
+package com.openexchange.sessiond.impl.usertype;
 
-import com.openexchange.config.ConfigurationService;
+import com.openexchange.sessiond.impl.usertype.UserSpecificSessiondConfigRegistry.USER_TYPE;
 
 /**
- * 
- * {@link SessiondLinkConfigImpl}
+ * SessionConfig
  *
- * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
- * @since v7.10.0
+ * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  */
-public class SessiondLinkConfigImpl extends SessiondConfigImpl {
-
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SessiondLinkConfigImpl.class);
-
-    private int maxSessionsPerLink = 250;
+public interface UserTypeSessiondConfigInterface {
 
     /**
-     * Initializes a new {@link SessiondLinkConfigImpl}.
-     *
-     * @param conf The configuration service
+     * Returns the type of users the {@link UserTypeSessiondConfigInterface} handles
+     * 
+     * @return {@link USER_TYPE}
      */
-    public SessiondLinkConfigImpl(ConfigurationService conf) {
-        super(conf);
-        maxSessionsPerLink = conf.getIntProperty("com.openexchange.sessiond.maxSessionPerLink", maxSessionsPerLink);
-        LOG.debug("Sessiond property: com.openexchange.sessiond.maxSessionsPerLink={}", maxSessionsPerLink);
-    }
+    USER_TYPE handles();
 
-    @Override
-    public int getMaxSessionsPerUserType() {
-        return maxSessionsPerLink;
-    }
-
-    @Override
-    public SessiondConfigRegistry.USER_TYPE handles() {
-        return SessiondConfigRegistry.USER_TYPE.ANONYMOUS;
-    }
+    /**
+     * Returns the maximum allowed sessions for the given type of user.
+     * 
+     * @return The number of allowed sessions for the given type of user
+     * @see #handles()
+     */
+    int getMaxSessionsPerUserType();
 }

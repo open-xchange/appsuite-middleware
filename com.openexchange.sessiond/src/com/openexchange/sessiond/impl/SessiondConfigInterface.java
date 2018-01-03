@@ -49,27 +49,49 @@
 
 package com.openexchange.sessiond.impl;
 
-import com.openexchange.sessiond.impl.SessiondConfigRegistry.USER_TYPE;
-
 /**
- * SessionConfig
+ * 
+ * {@link SessiondConfigInterface}
  *
- * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since v7.10.0
  */
-public interface SessiondConfigInterface extends GenericSessiondConfigInterface {
+public interface SessiondConfigInterface {
+
+    long getSessionContainerTimeout();
+
+    long getLongTermSessionContainerTimeout();
+
+    int getNumberOfSessionContainers();
+
+    int getMaxSessions();
+
+    int getMaxSessionsPerClient();
+
+    long getLifeTime();
+
+    long getLongLifeTime();
+
+    long getRandomTokenTimeout();
+
+    int getNumberOfLongTermSessionContainers();
 
     /**
-     * Returns the type of users the {@link SessiondConfigInterface} handles
-     * 
-     * @return {@link USER_TYPE}
+     * @return <code>true</code> if autologin is enabled.
      */
-    USER_TYPE handles();
+    boolean isAutoLogin();
 
     /**
-     * Returns the maximum allowed sessions for the given type of user.
-     * 
-     * @return The number of allowed sessions for the given type of user
-     * @see #handles()
+     * Whether to enforce putting sessions into session storage asynchronously.
+     *
+     * @return <code>true</code> for async put; otherwise <code>false</code>
      */
-    int getMaxSessionsPerUserType();
+    boolean isAsyncPutToSessionStorage();
+
+    /**
+     * Gets a key to encrypt passwords when putting session into storage.
+     *
+     * @return The obfuscation key
+     */
+    String getObfuscationKey();
 }
