@@ -61,7 +61,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 import java.util.SortedSet;
 import java.util.TimeZone;
@@ -74,11 +73,7 @@ import com.openexchange.chronos.Organizer;
 import com.openexchange.chronos.Period;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.CalendarUtils;
-import com.openexchange.chronos.common.DefaultRecurrenceData;
-import com.openexchange.chronos.common.DefaultRecurrenceId;
 import com.openexchange.chronos.compat.Appointment2Event;
-import com.openexchange.chronos.compat.Event2Appointment;
-import com.openexchange.chronos.compat.PositionAwareRecurrenceId;
 import com.openexchange.chronos.compat.SeriesPattern;
 import com.openexchange.chronos.exception.ProblemSeverity;
 import com.openexchange.chronos.service.RecurrenceData;
@@ -228,80 +223,7 @@ public class Compat {
     }
 
     private static Event adjustPriorSave(RdbEventStorage eventStorage, Connection connection, Event event) throws OXException, SQLException {
-        /*
-         * prepare event data for insert
-         */
-        Event eventData = new Event();
-        EventMapper.getInstance().copy(event, eventData, EventMapper.getInstance().getMappedFields());
-        if (isSeriesMaster(eventData)) {
-            RecurrenceData recurrenceData = new DefaultRecurrenceData(eventData.getRecurrenceRule(), eventData.getStartDate(), null);
-            if (eventData.containsRecurrenceRule() && null != eventData.getRecurrenceRule()) {
-                /*
-                 * convert recurrence rule to legacy pattern & derive "absolute duration" / "recurrence calculator" field
-                 */
-                SeriesPattern seriesPattern = Event2Appointment.getSeriesPattern(Services.getService(RecurrenceService.class), recurrenceData);
-                long absoluteDuration = new Period(eventData).getTotalDays();
-                eventData.setRecurrenceRule(absoluteDuration + "~" + seriesPattern.getDatabasePattern());
-            }
-            if (eventData.containsStartDate() || eventData.containsEndDate()) {
-                /*
-                 * expand recurrence master start- and enddate to cover the whole series period
-                 */
-                TimeZone timeZone = recurrenceData.getSeriesStart().getTimeZone();
-                Period seriesPeriod = getImplicitSeriesPeriod(Services.getService(RecurrenceService.class), event);
-                if (seriesPeriod.isAllDay()) {
-                    eventData.setStartDate(new DateTime(seriesPeriod.getStartDate().getTime()).toAllDay());
-                    eventData.setEndDate(new DateTime(seriesPeriod.getEndDate().getTime()).toAllDay());
-                } else {
-                    eventData.setStartDate(new DateTime(timeZone, seriesPeriod.getStartDate().getTime()));
-                    eventData.setEndDate(new DateTime(timeZone, seriesPeriod.getEndDate().getTime()));
-                }
-            }
-        }
-        if (isSeriesException(eventData)) {
-            RecurrenceData recurrenceData;
-            if (null != eventData.getRecurrenceId() && RecurrenceData.class.isInstance(eventData.getRecurrenceId())) {
-                recurrenceData = (RecurrenceData) eventData.getRecurrenceId();
-            } else {
-                recurrenceData = eventStorage.selectRecurrenceData(connection, asInt(eventData.getSeriesId()), false);
-            }
-            if (eventData.containsRecurrenceRule() && null != eventData.getRecurrenceRule()) {
-                // TODO really required to also store series pattern for exceptions?
-                /*
-                 * convert recurrence rule to legacy pattern & derive "absolute duration" / "recurrence calculator" field
-                 */
-                SeriesPattern seriesPattern = Event2Appointment.getSeriesPattern(Services.getService(RecurrenceService.class), recurrenceData);
-                long absoluteDuration = new Period(eventData).getTotalDays();
-                eventData.setRecurrenceRule(absoluteDuration + "~" + seriesPattern.getDatabasePattern());
-            }
-            /*
-             * transform recurrence ids to legacy "recurrence date positions" (UTC dates with truncated time fraction)
-             */
-            if (eventData.containsRecurrenceId() && null != eventData.getRecurrenceId()) {
-                int recurrencePosition;
-                if (PositionAwareRecurrenceId.class.isInstance(eventData.getRecurrenceId())) {
-                    recurrencePosition = ((PositionAwareRecurrenceId) eventData.getRecurrenceId()).getRecurrencePosition();
-                } else {
-                    recurrencePosition = Event2Appointment.getRecurrencePosition(Services.getService(RecurrenceService.class), recurrenceData, eventData.getRecurrenceId());
-                }
-                eventData.setRecurrenceId(new StoredRecurrenceId(recurrencePosition));
-            }
-        }
-        /*
-         * truncate milliseconds from creation date to avoid bad rounding in MySQL versions >= 5.6.4.
-         * See: http://dev.mysql.com/doc/refman/5.6/en/fractional-seconds.html
-         * See: com.openexchange.sql.tools.SQLTools.toTimestamp(Date)
-         */
-        if (eventData.containsCreated() && null != eventData.getCreated()) {
-            eventData.setCreated(new Date((eventData.getCreated().getTime() / 1000) * 1000));
-        }
-        if (eventData.containsDeleteExceptionDates()) {
-            eventData.setDeleteExceptionDates(getRecurrenceIds(Event2Appointment.getRecurrenceDatePositions(eventData.getDeleteExceptionDates())));
-        }
-        if (eventData.containsChangeExceptionDates()) {
-            eventData.setChangeExceptionDates(getRecurrenceIds(Event2Appointment.getRecurrenceDatePositions(eventData.getChangeExceptionDates())));
-        }
-        return eventData;
+        return new StoredEvent(eventStorage, connection, event);
     }
 
     private static Event adjustRecurrenceForMasterAfterLoad(RdbEventStorage eventStorage, Event event) throws OXException {
@@ -420,17 +342,6 @@ public class Compat {
         return dates;
     }
 
-    private static SortedSet<RecurrenceId> getRecurrenceIds(List<Date> dates) {
-        if (null == dates) {
-            return null;
-        }
-        SortedSet<RecurrenceId> recurrenceIds = new TreeSet<RecurrenceId>();
-        for (Date date : dates) {
-            recurrenceIds.add(new DefaultRecurrenceId(new DateTime(date.getTime())));
-        }
-        return recurrenceIds;
-    }
-
     /**
      * Calculates the actual start- and end-date of the "master" recurrence for a specific series pattern, i.e. the start- and end-date of
      * a serie's first occurrence.
@@ -462,66 +373,6 @@ public class Compat {
         calendar.add(Calendar.DAY_OF_YEAR, absoluteDuration);
         Date endDate = calendar.getTime();
         return new Period(startDate, endDate, seriesPeriod.isAllDay());
-    }
-
-    /**
-     * Calculates the implicit start- and end-date of a recurring event series, i.e. the period spanning from the first until the "last"
-     * occurrence.
-     *
-     * @param recurrenceData The recurrence data
-     * @param masterPeriod The actual start- and end-date of the recurrence master, wrapped into a {@link Period} structure
-     * @return The implicit period of a recurring event series
-     */
-    private static Period getImplicitSeriesPeriod(RecurrenceService recurrenceService, Event seriesMaster) throws OXException {
-        /*
-         * remember time fraction of actual start- and end-date
-         */
-        DateTime seriesStart = seriesMaster.getStartDate();
-        TimeZone timeZone = seriesStart.isFloating() ? TimeZones.UTC : seriesStart.getTimeZone();
-        Calendar calendar = initCalendar(timeZone, seriesStart.getTimestamp());
-        int startHour = calendar.get(Calendar.HOUR_OF_DAY);
-        int startMinute = calendar.get(Calendar.MINUTE);
-        int startSecond = calendar.get(Calendar.SECOND);
-        calendar.setTimeInMillis(seriesMaster.getEndDate().getTimestamp());
-        int endHour = calendar.get(Calendar.HOUR_OF_DAY);
-        int endMinute = calendar.get(Calendar.MINUTE);
-        int endSecond = calendar.get(Calendar.SECOND);
-        /*
-         * iterate recurrence and take over start date of first occurrence
-         */
-        Date startDate;
-        Iterator<RecurrenceId> iterator = recurrenceService.iterateRecurrenceIds(new DefaultRecurrenceData(seriesMaster.getRecurrenceRule(), seriesStart, null));
-        if (iterator.hasNext()) {
-            calendar.setTimeInMillis(iterator.next().getValue().getTimestamp());
-            calendar.set(Calendar.HOUR_OF_DAY, startHour);
-            calendar.set(Calendar.MINUTE, startMinute);
-            calendar.set(Calendar.SECOND, startSecond);
-            startDate = calendar.getTime();
-        } else {
-            startDate = new Date(seriesMaster.getStartDate().getTimestamp());
-        }
-        /*
-         * iterate recurrence and take over end date of "last" occurrence
-         */
-        long millis = seriesMaster.getEndDate().getTimestamp();
-        for (int i = 1; i <= SeriesPattern.MAX_OCCURRENCESE && iterator.hasNext(); millis = iterator.next().getValue().getTimestamp(), i++)
-            ;
-        calendar.setTimeInMillis(millis);
-        calendar.set(Calendar.HOUR_OF_DAY, endHour);
-        calendar.set(Calendar.MINUTE, endMinute);
-        calendar.set(Calendar.SECOND, endSecond);
-        calendar.add(Calendar.DAY_OF_YEAR, (int) new Period(seriesMaster).getTotalDays());
-        Date endDate = calendar.getTime();
-        /*
-         * adjust end date if it falls into other timezone observance with different offset, just like it's done at
-         * com.openexchange.calendar.CalendarOperation.calculateImplictEndOfSeries(CalendarDataObject, String, boolean)
-         */
-        int startOffset = timeZone.getOffset(startDate.getTime());
-        int endOffset = timeZone.getOffset(endDate.getTime());
-        if (startOffset != endOffset) {
-            endDate.setTime(endDate.getTime() + endOffset - startOffset);
-        }
-        return new Period(startDate, endDate, seriesMaster.getStartDate().isAllDay());
     }
 
     /**

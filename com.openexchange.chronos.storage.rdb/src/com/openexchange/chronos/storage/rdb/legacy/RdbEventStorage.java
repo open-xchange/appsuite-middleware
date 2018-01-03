@@ -370,7 +370,7 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
     public void deleteAllEvents() throws OXException {
         throw new UnsupportedOperationException();
     }
-    
+
     private static int deleteEvents(Connection connection, int contextID, List<String> objectIDs) throws SQLException {
         if (null == objectIDs || 0 == objectIDs.size()) {
             return 0;
@@ -413,12 +413,12 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
     }
 
     private int updateEvent(Connection connection, int contextID, int objectID, Event event) throws SQLException, OXException {
-        EventField[] assignedfields = MAPPER.getAssignedFields(event);
+        Event eventData = Compat.adjustPriorUpdate(this, connection, event);
+        EventField[] assignedfields = MAPPER.getAssignedFields(eventData);
         String sql = new StringBuilder()
             .append("UPDATE prg_dates SET ").append(MAPPER.getAssignments(assignedfields)).append(' ')
             .append("WHERE cid=? AND intfield01=?;")
         .toString();
-        Event eventData = Compat.adjustPriorUpdate(this, connection, event);
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             int parameterIndex = 1;
             parameterIndex = MAPPER.setParameters(stmt, parameterIndex, eventData, assignedfields);
