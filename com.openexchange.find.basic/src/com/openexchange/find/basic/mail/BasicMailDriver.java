@@ -60,8 +60,6 @@ import static com.openexchange.find.basic.mail.Constants.FIELD_TO;
 import static com.openexchange.find.basic.mail.Constants.FROM_AND_TO_FIELDS;
 import static com.openexchange.find.basic.mail.Constants.FROM_FIELDS;
 import static com.openexchange.find.basic.mail.Constants.TO_FIELDS;
-import static com.openexchange.find.basic.mail.Constants.USER_FLAG_HAS_ATTACHMENT;
-import static com.openexchange.find.basic.mail.Constants.USER_FLAG_HAS_NO_ATTACHMENT;
 import static com.openexchange.find.common.CommonConstants.FIELD_DATE;
 import static com.openexchange.find.common.CommonConstants.QUERY_LAST_MONTH;
 import static com.openexchange.find.common.CommonConstants.QUERY_LAST_WEEK;
@@ -279,7 +277,7 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
 
         Facet hasAttachmentFacet = newExclusiveBuilder(MailFacetType.HAS_ATTACHMENT)
             .addValue(buildStaticFacetValue(CommonStrings.FACET_VALUE_TRUE, MailStrings.HAS_ATTACHMENT_TRUE, fields, CommonStrings.FACET_VALUE_TRUE))
-            .addValue(buildStaticFacetValue(CommonStrings.FACET_VALUE_FALSE, MailStrings.HAS_ATTACHMENT_FALSE, fields, CommonStrings.FACET_VALUE_FALSE)).build();
+            .build();
         facets.add(hasAttachmentFacet);
     }
 
@@ -699,10 +697,7 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
             return new FileNameTerm(query);
         } else if (FIELD_HAS_ATTACHMENT.equals(field)) {
             boolean hasAttachment = Boolean.parseBoolean(query);
-            if (hasAttachment) {
-                return new UserFlagTerm(USER_FLAG_HAS_ATTACHMENT, true);
-            }
-            return new UserFlagTerm(USER_FLAG_HAS_NO_ATTACHMENT, true);
+            return new UserFlagTerm(hasAttachment ? MailMessage.HAS_ATTACHMENT_LABEL : MailMessage.HAS_NO_ATTACHMENT_LABEL, true);
         }
 
         throw FindExceptionCode.UNSUPPORTED_FILTER_FIELD.create(field);
