@@ -251,6 +251,20 @@ public abstract class MailMessage extends MailPart {
      */
     private static final Set<String> ALL_COLOR_LABELS = ImmutableSet.of("$cl_0", "$cl_1", "$cl_2", "$cl_3", "$cl_4", "$cl_5", "$cl_6", "$cl_7", "$cl_8", "$cl_9", "$cl_10", "cl_0", "cl_1", "cl_2", "cl_3", "cl_4", "cl_5", "cl_6", "cl_7", "cl_8", "cl_9", "cl_10");
 
+    /*-
+     * ------------------- Attachment Label ------------------------------
+     */
+
+    /**
+     * Marks if the mail has an attachment
+     */
+    public static final String HAS_ATTACHMENT_LABEL = "$HasAttachment";
+
+    /**
+     * Marks if the mail has no attachment
+     */
+    public static final String HAS_NO_ATTACHMENT_LABEL = "$HasNoAttachment";
+
     /**
      * Determines the corresponding <code>int</code> value of a given color label's string representation.
      * <p>
@@ -325,6 +339,26 @@ public abstract class MailMessage extends MailPart {
      */
     public static String getColorLabelStringValue(final int cl) {
         return new StringBuilder(COLOR_LABEL_PREFIX).append(cl).toString();
+    }
+
+    /**
+     * Returns if the provided custom user flag is '$HasAttachment'
+     * 
+     * @param userFlag the flag to check
+     * @return <code>true</code> if the flag is '$HasAttachment'; otherwise <code>false</code>
+     */
+    public static boolean isHasAttachment(String userFlag) {
+        return (userFlag != null && (userFlag.equalsIgnoreCase(MailMessage.HAS_ATTACHMENT_LABEL)));
+    }
+
+    /**
+     * Returns if the provided custom user flag is '$HasNoAttachment'
+     * 
+     * @param userFlag the flag to check
+     * @return <code>true</code> if the flag is '$HasNoAttachment'; otherwise <code>false</code>
+     */
+    public static boolean isHasNoAttachment(String userFlag) {
+        return (userFlag != null && (userFlag.equalsIgnoreCase(MailMessage.HAS_NO_ATTACHMENT_LABEL)));
     }
 
     private static final InternetAddress[] EMPTY_ADDRS = new InternetAddress[0];
@@ -2219,5 +2253,4 @@ public abstract class MailMessage extends MailPart {
      * @param unreadMessages The number of unread messages
      */
     public abstract void setUnreadMessages(int unreadMessages);
-
 }
