@@ -70,59 +70,38 @@ public class ContextSensitiveMessages {
     }
 
     public static String accepted(Locale locale, Context ctxt) {
-        I18nService i18nService = I18nServices.getInstance().getService(locale);
-        if (i18nService == null) {
-            LOG.debug("No service for {}  found. Using default for bundle ", locale);
-            return "accepted";
-        }
-
-        switch (ctxt) {
-            case VERB:
-                // The verb "accepted", like "User A has accepted an appointment."
-                return i18nService.getL10NContextLocalized("verb", "accepted");
-            case ADJECTIVE:
-                // The adjective "accepted", like "The users status is 'accepted'."
-                return i18nService.getL10NContextLocalized("adjective", "accepted");
-            default:
-                return "accepted";
-        }
+        return getString("accepted", locale, ctxt);
     }
 
     public static String declined(Locale locale, Context ctxt) {
-        I18nService i18nService = I18nServices.getInstance().getService(locale);
-        if (i18nService == null) {
-            LOG.debug("No service for {}  found. Using default for bundle ", locale);
-            return "declined";
-        }
-
-        switch (ctxt) {
-            case VERB:
-                // The verb "declined", like "User A has declined an appointment."
-                return i18nService.getL10NContextLocalized("verb", "declined");
-            case ADJECTIVE:
-                // The adjective "declined", like "The users status is 'declined'."
-                return i18nService.getL10NContextLocalized("adjective", "declined");
-            default:
-                return "declined";
-        }
+        return getString("declined", locale, ctxt);
     }
 
     public static String tentative(Locale locale, Context ctxt) {
+        return getString("tentatively accepted", locale, ctxt);
+    }
+
+    private static String getString(String value, Locale locale, Context ctxt) {
         I18nService i18nService = I18nServices.getInstance().getService(locale);
         if (i18nService == null) {
-            LOG.debug("No service for {}  found. Using default for bundle ", locale);
-            return "tentatively accepted";
+            LOG.debug("No translation service for {}  found. Using default for bundle.", locale);
+        } else {
+            switch (ctxt) {
+                case VERB:
+                    // The verb "accepted", like "User A has accepted an appointment."
+                    // The verb "declined", like "User A has declined an appointment."
+                    // The verb "tentatively accepted", like "User A has tentatively accepted an appointment."
+                    return i18nService.getL10NContextLocalized("verb", value);
+                case ADJECTIVE:
+                    // The adjective "accepted", like "The users status is 'accepted'."
+                    // The adjective "declined", like "The users status is 'declined'."
+                    // The adjective "tentatively accepted", like "The users status is 'tentatively accepted'."
+                    return i18nService.getL10NContextLocalized("adjective", value);
+                default:
+                    //Fall through
+                    break;
+            }
         }
-
-        switch (ctxt) {
-            case VERB:
-                // The verb "tentatively accepted", like "User A has tentatively accepted an appointment."
-                return i18nService.getL10NContextLocalized("verb", "tentatively accepted");
-            case ADJECTIVE:
-                // The adjective "tentatively accepted", like "The users status is 'tentatively accepted'."
-                return i18nService.getL10NContextLocalized("adjective", "tentatively accepted");
-            default:
-                return "tentatively accepted";
-        }
+        return value;
     }
 }
