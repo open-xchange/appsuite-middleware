@@ -50,9 +50,6 @@ package com.openexchange.oidc;
 
 import java.util.HashMap;
 import java.util.Map;
-import com.openexchange.oidc.http.AuthenticationService;
-import com.openexchange.oidc.http.InitService;
-import com.openexchange.oidc.http.LogoutService;
 
 /**
  * {@link OIDCBackendConfig}

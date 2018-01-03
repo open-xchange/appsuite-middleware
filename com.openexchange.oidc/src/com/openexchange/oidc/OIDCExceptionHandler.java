@@ -46,29 +46,49 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+package com.openexchange.oidc;
 
-package com.openexchange.oidc.impl;
-
-import com.openexchange.config.lean.LeanConfigurationService;
-import com.openexchange.oidc.OIDCBackendConfig;
+import java.io.IOException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import com.openexchange.exception.OXException;
 
 /**
- * {@link OIDCBackendConfigImpl} Default implementation of {@link OIDCBackendConfig}
+ * Determines how login and logout exception should be handled by the backend.
  *
  * @author <a href="mailto:vitali.sjablow@open-xchange.com">Vitali Sjablow</a>
  * @since v7.10.0
  */
-public class OIDCBackendConfigImpl extends AbstractOIDCBackendConfig{
+public interface OIDCExceptionHandler {
+    
+    /**
+     * What is supposed to happen after a failed user authentication? This method will be executed.
+     * 
+     * @param request The {@link HttpServletRequest} that triggered the authentication
+     * @param response The {@link HttpServletResponse}
+     * @param exception The {@link IOException} that led to the authentication failure
+     * @throws IOException The {@link IOException}
+     */
+    void handleAuthenticationFailed(HttpServletRequest request, HttpServletResponse response, OXException exception) throws IOException;
 
     /**
-     * Initializes a new {@link OIDCBackendConfigImpl}.
+     * What is supposed to happen after a failed user logout? This method will be executed.
      * 
-     * @param leanConfigurationService - The {@link LeanConfigurationService} to use
-     * @param backendName - If this {@link OIDCBackendConfig} has a custom configuration, the backendName property
-     *      is used to construct the property name. See {@link AbstractOIDCBackendConfig} for more information.
+     * @param request The {@link HttpServletRequest} that triggered the logout
+     * @param response The {@link HttpServletResponse}
+     * @param exception The {@link IOException} that led to the logout failure
+     * @throws IOException The {@link IOException}
      */
-    public OIDCBackendConfigImpl(LeanConfigurationService leanConfigurationService, String backendName) {
-        super(leanConfigurationService, backendName);
-    }
-
+    void handleLogoutFailed(HttpServletRequest request, HttpServletResponse response, OXException exception) throws IOException;
+    
+    /**
+     * A default handler for the given exception.
+     * 
+     * @param request The {@link HttpServletRequest} that triggered the logout
+     * @param response The {@link HttpServletResponse}
+     * @param exception The {@link IOException} that led to the logout failure
+     * @throws IOException The {@link IOException}
+     */
+    void handleResponseException(HttpServletRequest request, HttpServletResponse response, OXException exception) throws IOException;
+    
 }

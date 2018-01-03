@@ -50,7 +50,6 @@
 package com.openexchange.oidc.state;
 
 import java.util.concurrent.TimeUnit;
-import com.hazelcast.core.IMap;
 
 /**
  * Manager of all client states, that try to login or logout with OpenID features.
@@ -78,7 +77,7 @@ public interface StateManagement {
     AuthenticationRequestInfo getAndRemoveAuthenticationInfo(String state);
     
     /**
-     * Add the given {@link LogoutRequestInfo} to a {@link IMap}, which is managed
+     * Add the given {@link LogoutRequestInfo} to a hazelcast IMap, which is managed
      * by hazelcast and enables every node in the cluster to handle Logout requests.
      * 
      * @param logoutRequestInfo - The {@link LogoutRequestInfo} to managed by hazelcast
