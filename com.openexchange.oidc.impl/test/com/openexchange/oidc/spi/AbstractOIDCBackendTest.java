@@ -245,6 +245,7 @@ public class AbstractOIDCBackendTest {
     public void isTokenExpired_TrueTest() {
         Mockito.when(mockedBackendConfig.getOauthRefreshTime()).thenReturn(10000);
         Mockito.when(mockedSession.getParameter(Session.PARAM_OAUTH_ACCESS_TOKEN_EXPIRY_DATE)).thenReturn(String.valueOf(new Date().getTime()));
+        Mockito.when(mockedSession.containsParameter(Session.PARAM_OAUTH_ACCESS_TOKEN_EXPIRY_DATE)).thenReturn(true);
         try {
             boolean result = this.testBackend.isTokenExpired(mockedSession);
             assertTrue("True expected, got false", result);
@@ -253,11 +254,24 @@ public class AbstractOIDCBackendTest {
             fail("No error should happen");
         }
     }
+    
+    @Test
+    public void isTokenExpired_FalseTest() {
+        Mockito.when(mockedBackendConfig.getOauthRefreshTime()).thenReturn(10000);
+        Mockito.when(mockedSession.getParameter(Session.PARAM_OAUTH_ACCESS_TOKEN_EXPIRY_DATE)).thenReturn(String.valueOf(new Date().getTime() + 100000));
+        Mockito.when(mockedSession.containsParameter(Session.PARAM_OAUTH_ACCESS_TOKEN_EXPIRY_DATE)).thenReturn(true);
+        try {
+            boolean result = this.testBackend.isTokenExpired(mockedSession);
+            assertFalse("False expected, got true", result);
+        } catch (OXException e) {
+            e.printStackTrace();
+            fail("No error should happen");
+        }
+    }
 
     @Test
-    public void isTokenExpired_FailTest() {
+    public void isTokenExpired_NoParamTest() {
         Mockito.when(mockedBackendConfig.getOauthRefreshTime()).thenReturn(0);
-        Mockito.when(mockedSession.getParameter(Session.PARAM_OAUTH_ACCESS_TOKEN_EXPIRY_DATE)).thenReturn(String.valueOf(new Date().getTime()+10000));
         try {
             boolean result = this.testBackend.isTokenExpired(mockedSession);
             assertFalse("False expected, got true", result);
