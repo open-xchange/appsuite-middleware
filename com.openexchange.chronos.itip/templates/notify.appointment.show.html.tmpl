@@ -26,9 +26,9 @@
             <div class="participant">
                 <span class="person">${participant.displayName?html}</span>
                 <#if (participant.confirmStatus??)>
-                    <#if (participant.confirmStatus == "ACCEPT" )>
+                    <#if (participant.confirmStatus == "ACCEPTED" )>
                     <span class="status accepted">&#10003</span>
-                    <#elseif (participant.confirmStatus == "DECLINE" )>
+                    <#elseif (participant.confirmStatus == "DECLINED" )>
                     <span class="status declined"> x</span>
                     <#elseif (participant.confirmStatus == "TENTATIVE" )>
                     <span class="status tentative"> ?</span>
