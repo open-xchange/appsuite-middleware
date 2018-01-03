@@ -49,37 +49,39 @@
 
 package com.openexchange.sessiond.impl;
 
+import com.openexchange.config.ConfigurationService;
+
 /**
- * {@link Sessiond} - The Sessiond
+ * 
+ * {@link SessiondLinkConfigImpl}
  *
- * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since v7.10.0
  */
+public class SessiondLinkConfigImpl extends SessiondConfigImpl {
 
-public class Sessiond {
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SessiondLinkConfigImpl.class);
 
-    private static volatile Sessiond singleton;
+    private int maxSessionsPerLink = 250;
 
-    // private SessionHandler sessionHandler;
-
-    private final SessiondConfigInterface config;
-
-    public Sessiond(final SessiondConfigInterface config) {
-        this.config = config;
+    /**
+     * Initializes a new {@link SessiondLinkConfigImpl}.
+     *
+     * @param conf The configuration service
+     */
+    public SessiondLinkConfigImpl(ConfigurationService conf) {
+        super(conf);
+        maxSessionsPerLink = conf.getIntProperty("com.openexchange.sessiond.maxSessionPerLink", maxSessionsPerLink);
+        LOG.debug("Sessiond property: com.openexchange.sessiond.maxSessionsPerLink={}", maxSessionsPerLink);
     }
 
-    public void start() {
-        // sessionHandler = new SessionHandler();
-        SessionHandler.init(config);
+    @Override
+    public int getMaxSessionsPerUserType() {
+        return maxSessionsPerLink;
     }
 
-    public static Sessiond getInstance(final SessiondConfigInterface config) {
-        if (singleton != null) {
-            return singleton;
-        }
-        return singleton = new Sessiond(config);
-    }
-
-    public void close() {
-        SessionHandler.close();
+    @Override
+    public SessiondConfigRegistry.USER_TYPE handles() {
+        return SessiondConfigRegistry.USER_TYPE.ANONYMOUS;
     }
 }

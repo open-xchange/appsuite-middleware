@@ -18,7 +18,7 @@ properties:
     version: 
     reloadable: false
     configcascadeAware: false
-    related: 
+    related: com.openexchange.sessiond.maxSessionPerLink, com.openexchange.sessiond.maxSessionPerGuest
     file: sessiond.properties
     packageName: open-xchange-core
     tags: ["Session", "Limit"]
@@ -122,3 +122,26 @@ properties:
     file: sessiond.properties
     packageName: open-xchange-core
     tags: ["Session"]
+  - key: com.openexchange.sessiond.maxSessionPerLink
+    description: |
+      Maximum number of concurrent sessions per anonymous link, a value less than or equal to zero means unlimited.
+    defaultValue: 250
+    version: 
+    reloadable: false
+    configcascadeAware: false
+    related: com.openexchange.sessiond.maxSessionPerUser, com.openexchange.sessiond.maxSessionPerGuest
+    file: sessiond.properties
+    packageName: open-xchange-core
+    tags: ["Session", "Limit"]
+  - key: com.openexchange.sessiond.maxSessionPerGuest
+    description: |
+      Maximum number of concurrent sessions per guest, a value less than or equal to zero means unlimited.
+    defaultValue: 20
+    version: 
+    reloadable: false
+    configcascadeAware: false
+    related: com.openexchange.sessiond.maxSessionPerLink, com.openexchange.sessiond.maxSessionPerUser
+    file: sessiond.properties
+    packageName: open-xchange-core
+    tags: ["Session", "Limit"]
+    

@@ -141,7 +141,7 @@ public class SessiondConfigImpl implements SessiondConfigInterface {
     }
 
     @Override
-    public int getMaxSessionsPerUser() {
+    public int getMaxSessionsPerUserType() {
         return maxSessionsPerUser;
     }
 
@@ -186,4 +186,8 @@ public class SessiondConfigImpl implements SessiondConfigInterface {
         return obfuscationKey;
     }
 
+    @Override
+    public SessiondConfigRegistry.USER_TYPE handles() {
+        return SessiondConfigRegistry.USER_TYPE.USER;
+    }
 }

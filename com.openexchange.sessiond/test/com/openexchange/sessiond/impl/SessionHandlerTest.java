@@ -57,7 +57,10 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.mockito.Matchers;
+import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 import org.osgi.service.event.EventAdmin;
 import com.hazelcast.config.Config;
 import com.hazelcast.core.Hazelcast;
@@ -70,6 +73,7 @@ import com.openexchange.hazelcast.serialization.CustomPortable;
 import com.openexchange.osgi.ServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessionFilter;
+import com.openexchange.sessiond.impl.SessiondConfigRegistry.USER_TYPE;
 import com.openexchange.sessiond.serialization.PortableSessionFilterApplier;
 import com.openexchange.threadpool.SimFactory;
 
@@ -87,6 +91,9 @@ public class SessionHandlerTest {
     private static HazelcastInstance hz1;
 
     private static HazelcastInstance hz2;
+
+    @Mock
+    private SessiondConfigRegistry registry;
 
     @BeforeClass
     public static void initHazelcast() throws Exception {
@@ -118,7 +125,9 @@ public class SessionHandlerTest {
 
     @Before
     public void initSessionHandler() throws Exception {
-        SessionHandler.init(new SessiondConfigInterface() {
+        MockitoAnnotations.initMocks(this);
+
+        SessiondConfigInterface sessiondConfigInterface = new SessiondConfigInterface() {
             @Override
             public boolean isAutoLogin() {
                 return false;
@@ -160,7 +169,7 @@ public class SessionHandlerTest {
             }
 
             @Override
-            public int getMaxSessionsPerUser() {
+            public int getMaxSessionsPerUserType() {
                 return 0;
             }
 
@@ -183,7 +192,15 @@ public class SessionHandlerTest {
             public long getLifeTime() {
                 return 0;
             }
-        });
+
+            @Override
+            public USER_TYPE handles() {
+                return USER_TYPE.USER;
+            }
+        };
+        Mockito.when(registry.getService(Matchers.anyInt(), Matchers.anyInt())).thenReturn(sessiondConfigInterface);
+        Mockito.when(registry.getGenericConfig()).thenReturn(sessiondConfigInterface);
+        SessionHandler.init(registry);
     }
 
     @Before
@@ -201,7 +218,7 @@ public class SessionHandlerTest {
      public void testSessionRotation() throws Exception {
         SessionImpl session = addSession();
         Assert.assertNotNull(SessionHandler.getSession(session.getSessionID(), false));
-        Thread.sleep(SessionHandler.config.getNumberOfSessionContainers() * SessionHandler.config.getLifeTime() + SessionHandler.config.getNumberOfLongTermSessionContainers() * SessionHandler.config.getLongLifeTime() + 2000);
+        Thread.sleep(registry.getGenericConfig().getNumberOfSessionContainers() * registry.getGenericConfig().getLifeTime() + registry.getGenericConfig().getNumberOfLongTermSessionContainers() * registry.getGenericConfig().getLongLifeTime() + 2000);
         Assert.assertNull(SessionHandler.getSession(session.getSessionID(), false));
     }
 

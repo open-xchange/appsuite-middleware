@@ -47,16 +47,51 @@
  *
  */
 
-package com.openexchange.share.core.tools;
+package com.openexchange.sessiond.impl;
 
 /**
- * {@link ShareCoreTool}
+ * 
+ * {@link GenericSessiondConfigInterface}
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since v7.8.0
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since v7.10.0
  */
-public class ShareCoreTool {
+public interface GenericSessiondConfigInterface {
 
+    long getSessionContainerTimeout();
 
+    long getLongTermSessionContainerTimeout();
 
+    int getNumberOfSessionContainers();
+
+    int getMaxSessions();
+
+    int getMaxSessionsPerClient();
+
+    long getLifeTime();
+
+    long getLongLifeTime();
+
+    long getRandomTokenTimeout();
+
+    int getNumberOfLongTermSessionContainers();
+
+    /**
+     * @return <code>true</code> if autologin is enabled.
+     */
+    boolean isAutoLogin();
+
+    /**
+     * Whether to enforce putting sessions into session storage asynchronously.
+     *
+     * @return <code>true</code> for async put; otherwise <code>false</code>
+     */
+    boolean isAsyncPutToSessionStorage();
+
+    /**
+     * Gets a key to encrypt passwords when putting session into storage.
+     *
+     * @return The obfuscation key
+     */
+    String getObfuscationKey();
 }

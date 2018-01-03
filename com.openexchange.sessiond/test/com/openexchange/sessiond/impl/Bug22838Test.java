@@ -53,11 +53,14 @@ import static org.junit.Assert.assertEquals;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Matchers;
+import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 import org.osgi.service.event.EventAdmin;
-import com.openexchange.config.SimConfigurationService;
 import com.openexchange.server.SimpleServiceLookup;
 import com.openexchange.session.Session;
+import com.openexchange.sessiond.impl.SessiondConfigRegistry.USER_TYPE;
 import com.openexchange.sessionstorage.SessionStorageService;
 
 /**
@@ -66,12 +69,12 @@ import com.openexchange.sessionstorage.SessionStorageService;
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 public class Bug22838Test {
-    private SessiondConfigInterface config;
+
+    @Mock
+    private SessiondConfigRegistry registry;
 
     @Before
     public void setUp() throws Exception {
-        config = new SessiondConfigImpl(new SimConfigurationService());
-
         SimpleServiceLookup serviceLookup = new SimpleServiceLookup();
         SessionStorageService sessionStorageService = Mockito.mock(SessionStorageService.class);
         serviceLookup.add(SessionStorageService.class, sessionStorageService);
@@ -79,7 +82,83 @@ public class Bug22838Test {
         serviceLookup.add(EventAdmin.class, eventAdmin);
         com.openexchange.sessiond.osgi.Services.setServiceLookup(serviceLookup);
 
-        SessionHandler.init(config);
+        MockitoAnnotations.initMocks(this);
+
+        SessiondConfigInterface sessiondConfigInterface = new SessiondConfigInterface() {
+
+            @Override
+            public boolean isAutoLogin() {
+                return false;
+            }
+
+            @Override
+            public boolean isAsyncPutToSessionStorage() {
+                return false;
+            }
+
+            @Override
+            public long getSessionContainerTimeout() {
+                return 1000l;
+            }
+
+            @Override
+            public long getLongTermSessionContainerTimeout() {
+                return 10000l;
+            }
+
+            @Override
+            public long getRandomTokenTimeout() {
+                return 100l;
+            }
+
+            @Override
+            public String getObfuscationKey() {
+                return "12345";
+            }
+
+            @Override
+            public int getNumberOfSessionContainers() {
+                return 2;
+            }
+
+            @Override
+            public int getNumberOfLongTermSessionContainers() {
+                return 2;
+            }
+
+            @Override
+            public int getMaxSessionsPerUserType() {
+                return 0;
+            }
+
+            @Override
+            public int getMaxSessionsPerClient() {
+                return 0;
+            }
+
+            @Override
+            public int getMaxSessions() {
+                return 0;
+            }
+
+            @Override
+            public long getLongLifeTime() {
+                return 0;
+            }
+
+            @Override
+            public long getLifeTime() {
+                return 0;
+            }
+
+            @Override
+            public USER_TYPE handles() {
+                return USER_TYPE.USER;
+            }
+        };
+        Mockito.when(registry.getService(Matchers.anyInt(), Matchers.anyInt())).thenReturn(sessiondConfigInterface);
+        Mockito.when(registry.getGenericConfig()).thenReturn(sessiondConfigInterface);
+        SessionHandler.init(registry);
     }
 
     @After
