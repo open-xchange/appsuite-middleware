@@ -316,6 +316,7 @@ public class NotificationMailGenerator implements ITipMailGenerator {
 
         final ITipMessage message = new ITipMessage();
         message.setMethod(ITipMethod.REQUEST);
+        message.setEvent(appointmentToReport);
 
         if (CalendarUtils.isSeriesMaster(appointmentToReport)) {
             final List<Event> exceptions = util.getExceptions(appointmentToReport, session);
