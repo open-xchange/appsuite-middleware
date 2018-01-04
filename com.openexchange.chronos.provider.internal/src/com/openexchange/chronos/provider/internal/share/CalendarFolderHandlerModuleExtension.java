@@ -145,7 +145,7 @@ public class CalendarFolderHandlerModuleExtension implements FolderHandlerModule
             return null;
         }
         String folderId = targetPath.getFolder();
-        ShareTarget target = new ShareTarget(targetPath.getModule(), getUniqueFolderId(folderId), getRelativeFolderId(folderId), targetPath.getItem());
+        ShareTarget target = new ShareTarget(targetPath.getModule(), getUniqueFolderId(folderId), getRelativeFolderId(folderId), targetPath.getItem(), null);
         FolderObject folder = getFolderObject(folderId, contextId);
         return new AdministrativeFolderTargetProxy(folder, target);
     }
@@ -156,7 +156,7 @@ public class CalendarFolderHandlerModuleExtension implements FolderHandlerModule
             return null;
         }
         String folderId = folderTarget.getFolder();
-        ShareTarget target = new ShareTarget(folderTarget.getModule(), getUniqueFolderId(folderId), getRelativeFolderId(folderId), folderTarget.getItem());
+        ShareTarget target = new ShareTarget(folderTarget.getModule(), getUniqueFolderId(folderId), getRelativeFolderId(folderId), folderTarget.getItem(), folderTarget.isIncludeSubfolders());
         FolderObject folder = getFolderObject(folderId, contextId);
         return new AdministrativeFolderTargetProxy(folder, target);
     }
