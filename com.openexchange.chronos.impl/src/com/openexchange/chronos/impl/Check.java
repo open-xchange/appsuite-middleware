@@ -60,6 +60,8 @@ import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Classification;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.RecurrenceId;
+import com.openexchange.chronos.RecurrenceRange;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.SelfProtectionFactory.SelfProtection;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
@@ -381,6 +383,21 @@ public class Check extends com.openexchange.chronos.common.Check {
             }
             throw conflictException;
         }
+    }
+
+    /**
+     * Checks that the range specific within a recurrence identifier matches an expected recurrence range value.
+     *
+     * @param recurrenceId The recurrence identifier to check
+     * @param expectedRange The expected recurrence range, or <code>null</code> to ensure no range is set
+     * @return The recurrence identifier, after its range paramter was checked
+     * @throws OXException {@link CalendarExceptionCodes#INVALID_RECURRENCE_ID}
+     */
+    public static RecurrenceId recurrenceRangeMatches(RecurrenceId recurrenceId, RecurrenceRange expectedRange) throws OXException {
+        if (null == expectedRange && null != recurrenceId.getRange() || null != expectedRange && false == expectedRange.equals(recurrenceId.getRange())) {
+            throw CalendarExceptionCodes.INVALID_RECURRENCE_ID.create(new Exception("Expected range " + expectedRange), recurrenceId.getValue(), "");
+        }
+        return recurrenceId;
     }
 
 }

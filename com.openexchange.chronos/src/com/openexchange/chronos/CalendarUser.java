@@ -175,4 +175,9 @@ public class CalendarUser {
         this.email = email;
     }
 
+    @Override
+    public String toString() {
+        return "CalendarUser [uri=" + uri + ", entity=" + entity + "]";
+    }
+
 }
