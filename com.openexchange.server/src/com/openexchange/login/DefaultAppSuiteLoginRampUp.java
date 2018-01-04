@@ -51,6 +51,7 @@ package com.openexchange.login;
 
 import static com.openexchange.ajax.AJAXServlet.localeFrom;
 import static com.openexchange.ajax.requesthandler.AJAXRequestDataBuilder.request;
+import static com.openexchange.login.LoginRampUpConfig.getConfig;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -71,9 +72,6 @@ import com.openexchange.ajax.requesthandler.Dispatcher;
 import com.openexchange.ajax.requesthandler.Dispatchers;
 import com.openexchange.ajax.tools.JSONCoercion;
 import com.openexchange.ajax.writer.ResponseWriter;
-import com.openexchange.config.cascade.ConfigView;
-import com.openexchange.config.cascade.ConfigViewFactory;
-import com.openexchange.config.cascade.ConfigViews;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptions;
@@ -81,7 +79,6 @@ import com.openexchange.json.OXJSONWriter;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.osgi.ExceptionUtils;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.threadpool.AbstractTrackableTask;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.tools.session.ServerSession;
@@ -105,7 +102,8 @@ public abstract class DefaultAppSuiteLoginRampUp implements LoginRampUpService {
     /** The logger constant */
     static final Logger LOG = org.slf4j.LoggerFactory.getLogger(DefaultAppSuiteLoginRampUp.class);
 
-    private static enum RampUpKey {
+    /** The known ramp-up keys */
+    public static enum RampUpKey {
 
         SERVER_CONFIG("serverConfig"),
         JSLOBS("jslobs"),
@@ -137,6 +135,17 @@ public abstract class DefaultAppSuiteLoginRampUp implements LoginRampUpService {
     protected DefaultAppSuiteLoginRampUp(ServiceLookup services) {
         super();
         this.services = services;
+    }
+
+    /**
+     * Gets the infix to use when looking up config settings.
+     * <p>
+     * Typically the client identifier to which this ramp-up applies.
+     *
+     * @return The infix or <code>null</code>
+     */
+    protected String getConfigInfix() {
+        return null;
     }
 
     static void handleException(OXException e, String key, ConcurrentMap<String, OXException> errors) {
@@ -198,27 +207,6 @@ public abstract class DefaultAppSuiteLoginRampUp implements LoginRampUpService {
         return requestResult;
     }
 
-    /**
-     * Gets the execution time threshold in milliseconds since when to log ramp-up calls
-     *
-     * @param session The session providing user data
-     * @return The execution time threshold in milliseconds
-     */
-    protected long getExecutionTimeThreshold(ServerSession session) {
-        ConfigViewFactory factory = ServerServiceRegistry.getInstance().getService(ConfigViewFactory.class);
-        if (null == factory) {
-            return 0L;
-        }
-
-        try {
-            ConfigView view = factory.getView(session.getUserId(), session.getContextId());
-            return ConfigViews.getDefinedIntPropertyFrom("com.openexchange.ajax.login.rampup.debugThresholdMillis", 0, view);
-        } catch (Exception e) {
-            LOG.error("Failed to obtain execution time threshold from property \"com.openexchange.ajax.login.rampup.debugThresholdMillis\"", e);
-        }
-        return 0L;
-    }
-
     @Override
     public JSONObject getContribution(final ServerSession session, final AJAXRequestData loginRequest) throws OXException {
         int numberOfKeys = KEYS.size();
@@ -228,12 +216,17 @@ public abstract class DefaultAppSuiteLoginRampUp implements LoginRampUpService {
         ThreadPoolService threads = services.getService(ThreadPoolService.class);
 
         final Dispatcher ox = services.getService(Dispatcher.class);
+        final LoginRampUpConfig config = getConfig(getConfigInfix());
+        final long thresholdMillis = LOG.isDebugEnabled() ? config.debugThresholdMillis : -1;
 
-        final long thresholdMillis = LOG.isDebugEnabled() ? getExecutionTimeThreshold(session) : -1;
         rampUps.put(RampUpKey.FOLDER_LIST.key, threads.submit(new AbstractTrackableTask<Object>() {
 
             @Override
             public Object call() throws Exception {
+                if (config.folderlistDisabled) {
+                    return null;
+                }
+
                 AJAXRequestResult requestResult = null;
                 Exception exc = null;
                 try {
@@ -261,6 +254,9 @@ public abstract class DefaultAppSuiteLoginRampUp implements LoginRampUpService {
 
             @Override
             public Object call() throws Exception {
+                if (config.folderDisabled) {
+                    return null;
+                }
                 if (null == session.getUserPermissionBits() || false == session.getUserPermissionBits().hasWebMail()) {
                     return null;
                 }
@@ -311,6 +307,10 @@ public abstract class DefaultAppSuiteLoginRampUp implements LoginRampUpService {
 
             @Override
             public Object call() throws Exception {
+                if (config.jslobsDisabled) {
+                    return null;
+                }
+
                 AJAXRequestResult requestResult = null;
                 Exception exc = null;
                 try {
@@ -342,6 +342,10 @@ public abstract class DefaultAppSuiteLoginRampUp implements LoginRampUpService {
 
             @Override
             public Object call() throws Exception {
+                if (config.serverConfigDisabled) {
+                    return null;
+                }
+
                 AJAXRequestResult requestResult = null;
                 Exception exc = null;
                 try {
@@ -367,11 +371,14 @@ public abstract class DefaultAppSuiteLoginRampUp implements LoginRampUpService {
 
             @Override
             public Object call() throws Exception {
+                if (config.oauthDisabled) {
+                    return null;
+                }
                 if (session.isAnonymous() || session.getUser().isGuest()) {
                     return null;
                 }
-                JSONObject oauth = new JSONObject(3);
 
+                JSONObject oauth = new JSONObject(3);
                 AJAXRequestResult requestResult = null;
                 Exception exc = null;
                 try {
@@ -434,6 +441,10 @@ public abstract class DefaultAppSuiteLoginRampUp implements LoginRampUpService {
 
             @Override
             public Object call() throws Exception {
+                if (config.userDisabled) {
+                    return null;
+                }
+
                 AJAXRequestResult requestResult = null;
                 Exception exc = null;
                 try {
@@ -459,6 +470,10 @@ public abstract class DefaultAppSuiteLoginRampUp implements LoginRampUpService {
 
             @Override
             public Object call() throws Exception {
+                if (config.accountsDisabled) {
+                    return null;
+                }
+
                 AJAXRequestResult requestResult = null;
                 Exception exc = null;
                 try {
@@ -493,11 +508,11 @@ public abstract class DefaultAppSuiteLoginRampUp implements LoginRampUpService {
 
             // Let tasks contribute to JSON object
             JSONObject jo = new JSONObject(numberOfKeys);
-            Iterator<RampUpFuture> tasksoWaitFor = taskCompletions.iterator();
+            Iterator<RampUpFuture> tasksToWaitFor = taskCompletions.iterator();
             RampUpFuture last = null;
             try {
-                while (tasksoWaitFor.hasNext()) {
-                    RampUpFuture rampUpTask = tasksoWaitFor.next();
+                while (tasksToWaitFor.hasNext()) {
+                    RampUpFuture rampUpTask = tasksToWaitFor.next();
                     last = rampUpTask;
                     Object value = rampUpTask.get();
                     jo.put(rampUpTask.getKey(), JSONCoercion.coerceToJSON(value));
@@ -507,8 +522,8 @@ public abstract class DefaultAppSuiteLoginRampUp implements LoginRampUpService {
                 if (null != last) {
                     last.cancel(true);
                 }
-                while (tasksoWaitFor.hasNext()) {
-                    RampUpFuture rampUpTask = tasksoWaitFor.next();
+                while (tasksToWaitFor.hasNext()) {
+                    RampUpFuture rampUpTask = tasksToWaitFor.next();
                     rampUpTask.cancel(true);
                 }
 
