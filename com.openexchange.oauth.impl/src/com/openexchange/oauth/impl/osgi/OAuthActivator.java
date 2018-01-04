@@ -53,12 +53,14 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.event.EventAdmin;
 import org.osgi.util.tracker.ServiceTracker;
+import com.hazelcast.core.HazelcastInstance;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.context.ContextService;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.dispatcher.DispatcherPrefixService;
+import com.openexchange.hazelcast.serialization.CustomPortableFactory;
 import com.openexchange.html.HtmlService;
 import com.openexchange.http.client.builder.HTTPResponseProcessor;
 import com.openexchange.http.deferrer.CustomRedirectURLDetermination;
@@ -84,6 +86,8 @@ import com.openexchange.oauth.impl.internal.DeleteListenerRegistry;
 import com.openexchange.oauth.impl.internal.InvalidationListenerRegistry;
 import com.openexchange.oauth.impl.internal.OAuthServiceImpl;
 import com.openexchange.oauth.impl.internal.ReauthorizeListenerRegistry;
+import com.openexchange.oauth.impl.internal.hazelcast.PortableCallbackRegistryFetch;
+import com.openexchange.oauth.impl.internal.hazelcast.PortableCallbackRegistryFetchFactory;
 import com.openexchange.oauth.impl.scope.impl.OAuthScopeRegistryImpl;
 import com.openexchange.oauth.impl.services.Services;
 import com.openexchange.oauth.scope.OAuthScopeRegistry;
@@ -161,6 +165,7 @@ public final class OAuthActivator extends HousekeepingActivator {
             track(OAuthAccountInvalidationListener.class, new InvalidationListenerServiceTracker(context));
             trackService(HtmlService.class);
             trackService(DeferringURLService.class);
+            trackService(HazelcastInstance.class);
             openTrackers();
             /*
              * Register
@@ -188,6 +193,8 @@ public final class OAuthActivator extends HousekeepingActivator {
                     }
                 };
             }
+            PortableCallbackRegistryFetch.setCallbackRegistry(cbRegistry);
+            registerService(CustomPortableFactory.class, new PortableCallbackRegistryFetchFactory(), null);
             final OSGiDelegateServiceMap delegateServices = new OSGiDelegateServiceMap();
             this.delegateServices = delegateServices;
             delegateServices.put(DBProvider.class, new OSGiDatabaseServiceDBProvider().start(context));
