@@ -51,6 +51,7 @@ package com.openexchange.oidc.impl;
 
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.oidc.OIDCBackendConfig;
+import com.openexchange.oidc.spi.AbstractOIDCBackendConfig;
 
 /**
  * {@link OIDCBackendConfigImpl} Default implementation of {@link OIDCBackendConfig}

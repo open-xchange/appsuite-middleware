@@ -73,5 +73,6 @@ Import-Package: com.fasterxml.jackson.core,
  org.osgi.service.http,
  org.osgi.util.tracker,
  org.slf4j
-Export-Package: com.openexchange.oidc.tools
+Export-Package: com.openexchange.oidc.tools,
+ com.openexchange.oidc.spi
 Bundle-Activator: com.openexchange.oidc.osgi.OIDCActivator

@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.oidc.impl;
+package com.openexchange.oidc.spi;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -69,16 +69,16 @@ public abstract class AbstractOIDCBackendConfig implements OIDCBackendConfig {
 
     private final static Logger LOG = LoggerFactory.getLogger(AbstractOIDCBackendConfig.class);
 
-    private LeanConfigurationService leanConfigurationService;
-    
-    private String customPropertyPrefix;
+    protected LeanConfigurationService leanConfigurationService;
+
+    protected String customPropertyPrefix;
 
     /**
      * Initializes a new {@link AbstractOIDCBackendConfig}. The {@link LeanConfigurationService} is
      * used to load all properties. The {@link backendName} is used to add a custom name to the prefix of
      * every property, before loading. Can be null, this way the prefix stored in {@link OIDCProperty}
      * will be used.
-     * 
+     *
      * @param leanConfigurationService - The {@link LeanConfigurationService} to use
      * @param customPropertyPrefix - The additional prefix like "custom.", the dot at the end is mandatory. Can be null.
      */
@@ -194,16 +194,16 @@ public abstract class AbstractOIDCBackendConfig implements OIDCBackendConfig {
     public String getUIWebpath() {
         return this.loadStringProperty(OIDCBackendProperty.uiWebPath);
     }
-    
+
     @Override
     public String getBackendPath() {
         return this.loadStringProperty(OIDCBackendProperty.backendPath);
     }
-    
+
     /**
      * Load the given {@link String} property. If a custom backendName is stored, this name
      * is added to the prefix, to load the correct property.
-     * 
+     *
      * @param backendProperty - The {@link OIDCBackendProperty} to load
      * @return The {@link String} value
      */
@@ -216,11 +216,11 @@ public abstract class AbstractOIDCBackendConfig implements OIDCBackendConfig {
         }
         return result;
     }
-    
+
     /**
      * Load the given {@link int} property. If a custom backendName is stored, this name
      * is added to the prefix, to load the correct property.
-     * 
+     *
      * @param backendProperty - The {@link OIDCBackendProperty} to load
      * @return The {@link int} value
      */
@@ -233,11 +233,11 @@ public abstract class AbstractOIDCBackendConfig implements OIDCBackendConfig {
         }
         return result;
     }
-    
+
     /**
      * Load the given {@link boolean} property. If a custom backendName is stored, this name
      * is added to the prefix, to load the correct property.
-     * 
+     *
      * @param backendProperty - The {@link OIDCBackendProperty} to load
      * @return The {@link boolean} value
      */
@@ -250,15 +250,15 @@ public abstract class AbstractOIDCBackendConfig implements OIDCBackendConfig {
         }
         return result;
     }
-    
-    private Property getCustomProperty(final OIDCBackendProperty backendProperty) {
+
+    protected Property getCustomProperty(final OIDCBackendProperty backendProperty) {
         return new Property() {
-            
+
             @Override
             public String getFQPropertyName() {
                 return OIDCProperty.PREFIX + customPropertyPrefix + backendProperty.name();
             }
-            
+
             @Override
             public <T> T getDefaultValue(Class<T> clazz) {
                 Object defaultValue = backendProperty.getDefaultValue();
