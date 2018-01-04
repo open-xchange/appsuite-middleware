@@ -198,6 +198,7 @@ public class SplitPerformer extends AbstractUpdatePerformer {
         /*
          * insert the new detached series event, taking over any auxiliary data from the original series
          */
+        Check.quotaNotExceeded(storage, session);
         storage.getEventStorage().insertEvent(detachedSeriesMaster);
         storage.getAttendeeStorage().insertAttendees(detachedSeriesMaster.getId(), originalEvent.getAttendees());
         storage.getAttachmentStorage().insertAttachments(session.getSession(), folder.getID(), detachedSeriesMaster.getId(), originalEvent.getAttachments());
