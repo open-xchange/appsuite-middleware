@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,34 +47,50 @@
  *
  */
 
-package com.openexchange.appsuite;
+package com.openexchange.login.osgi;
 
-import com.openexchange.login.DefaultAppSuiteLoginRampUp;
-import com.openexchange.server.ServiceLookup;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Interests;
+import com.openexchange.config.Reloadable;
+import com.openexchange.config.Reloadables;
+import com.openexchange.login.LoginRampUpConfig;
+import com.openexchange.osgi.HousekeepingActivator;
+
 
 /**
- * {@link AppSuiteLoginRampUp}
+ * {@link LoginRampUpActivator}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.10.0
  */
-public class AppSuiteLoginRampUp extends DefaultAppSuiteLoginRampUp {
+public class LoginRampUpActivator extends HousekeepingActivator {
 
     /**
-     * Initializes a new {@link AppSuiteLoginRampUp}.
-     *
-     * @param services The service look-up
+     * Initializes a new {@link LoginRampUpActivator}.
      */
-    public AppSuiteLoginRampUp(ServiceLookup services) {
-        super(services);
+    public LoginRampUpActivator() {
+        super();
     }
 
     @Override
-    protected String getConfigInfix() {
-        return "open-xchange-appsuite";
+    protected Class<?>[] getNeededServices() {
+        return EMPTY_CLASSES;
     }
 
     @Override
-    public boolean contributesTo(String client) {
-        return "open-xchange-appsuite".equals(client);
+    protected void startBundle() throws Exception {
+        registerService(Reloadable.class, new Reloadable() {
+
+            @Override
+            public void reloadConfiguration(ConfigurationService configService) {
+                LoginRampUpConfig.invalidateCache();
+            }
+
+            @Override
+            public Interests getInterests() {
+                return Reloadables.interestsForProperties("com.openexchange.ajax.login.rampup.*");
+            }
+        });
     }
+
 }

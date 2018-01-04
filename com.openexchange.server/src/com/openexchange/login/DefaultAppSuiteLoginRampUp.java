@@ -51,36 +51,40 @@ package com.openexchange.login;
 
 import static com.openexchange.ajax.AJAXServlet.localeFrom;
 import static com.openexchange.ajax.requesthandler.AJAXRequestDataBuilder.request;
+import static com.openexchange.login.LoginRampUpConfig.getConfig;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.Dispatcher;
 import com.openexchange.ajax.requesthandler.Dispatchers;
 import com.openexchange.ajax.tools.JSONCoercion;
 import com.openexchange.ajax.writer.ResponseWriter;
-import com.openexchange.config.cascade.ConfigView;
-import com.openexchange.config.cascade.ConfigViewFactory;
-import com.openexchange.config.cascade.ConfigViews;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptions;
+import com.openexchange.java.Strings;
 import com.openexchange.json.OXJSONWriter;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.osgi.ExceptionUtils;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.threadpool.AbstractTask;
-import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.threadpool.AbstractTrackableTask;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.tools.session.ServerSession;
@@ -104,7 +108,8 @@ public abstract class DefaultAppSuiteLoginRampUp implements LoginRampUpService {
     /** The logger constant */
     static final Logger LOG = org.slf4j.LoggerFactory.getLogger(DefaultAppSuiteLoginRampUp.class);
 
-    private static enum RampUpKey {
+    /** The known ramp-up keys */
+    public static enum RampUpKey {
 
         SERVER_CONFIG("serverConfig"),
         JSLOBS("jslobs"),
@@ -123,6 +128,84 @@ public abstract class DefaultAppSuiteLoginRampUp implements LoginRampUpService {
         }
     }
 
+    public static interface Contribution {
+
+        /**
+         * Gets the key of this contribution.
+         * <p>
+         * Must not be one of {@link RampUpKey reserved keys}.
+         *
+         * @return The key
+         */
+        String getKey();
+
+        /**
+         * Gets the result object.
+         *
+         * @param session The session providing user information
+         * @param loginRequest The login request
+         * @return The result object
+         * @throws OXException If result object cannot be returned
+         */
+        Object getResult(ServerSession session, AJAXRequestData loginRequest) throws OXException;
+    }
+
+    public static abstract class AbstractDispatcherContribution implements Contribution {
+
+        private final Dispatcher ox;
+
+        /**
+         * Initializes a new {@link DefaultAppSuiteLoginRampUp.AbstractDispatcherContribution}.
+         */
+        protected AbstractDispatcherContribution(Dispatcher ox) {
+            super();
+            this.ox = ox;
+        }
+
+        @Override
+        public Object getResult(ServerSession session, AJAXRequestData loginRequest) throws OXException {
+            AJAXRequestResult requestResult = null;
+            Exception exc = null;
+            try {
+                AJAXRequestData requestData = request().session(session).module(getModule()).action(getAction()).params(getParams()).format("json").build(loginRequest);
+                requestResult = ox.perform(requestData, null, session);
+                return requestResult.getResultObject();
+            } catch (OXException x) {
+                // Omit result on error. Let the UI deal with this
+                exc = x;
+                throw x;
+            } catch (RuntimeException x) {
+                // Omit result on error. Let the UI deal with this
+                exc = x;
+                throw x;
+            } finally {
+                Dispatchers.signalDone(requestResult, exc);
+            }
+        }
+
+        /**
+         * Gets the parameters to pass to dispatcher action
+         *
+         * @return The parameters
+         */
+        protected abstract String[] getParams();
+
+        /**
+         * Gets the action to call
+         *
+         * @return The action
+         */
+        protected abstract String getAction();
+
+        /**
+         * Gets the dispatcher module
+         *
+         * @return The module
+         */
+        protected abstract String getModule();
+
+    }
+
     // ------------------------------------------------------------------------------------------------------------------------------------------------------ //
 
     /** The service look-up */
@@ -138,9 +221,22 @@ public abstract class DefaultAppSuiteLoginRampUp implements LoginRampUpService {
         this.services = services;
     }
 
+    /**
+     * Gets the infix to use when looking up config settings.
+     * <p>
+     * Typically the client identifier to which this ramp-up applies.
+     *
+     * @return The infix or <code>null</code>
+     */
+    protected String getConfigInfix() {
+        return null;
+    }
+
     static void handleException(OXException e, String key, ConcurrentMap<String, OXException> errors) {
         if (OXExceptions.isCategory(Category.CATEGORY_PERMISSION_DENIED, e)) {
             LOG.debug("Permission error during {} ramp-up", key, e);
+        } else if (OXExceptions.isCategory(Category.CATEGORY_USER_INPUT, e)) {
+            LOG.debug("Error during {} ramp-up", key, e);
         } else {
             LOG.error("Error during {} ramp-up", key, e);
         }
@@ -157,16 +253,28 @@ public abstract class DefaultAppSuiteLoginRampUp implements LoginRampUpService {
 
     /** The ramp-up keys. Keep order! */
     private static final List<RampUpKey> KEYS;
+    private static final Set<String> RESERVED;
     static {
         RampUpKey[] values = RampUpKey.values();
-        int len = values.length;
-        List<RampUpKey> keys = new ArrayList<>(len);
+        ImmutableList.Builder<RampUpKey> keys = ImmutableList.builder();
+        ImmutableSet.Builder<String> reserved = ImmutableSet.builder();
         for (RampUpKey rampUpKey : values) {
             if (RampUpKey.ERRORS != rampUpKey) {
                 keys.add(rampUpKey);
             }
+            reserved.add(Strings.asciiLowerCase(rampUpKey.key));
         }
-        KEYS = ImmutableList.copyOf(keys);
+        KEYS = keys.build();
+        RESERVED = reserved.build();
+    }
+
+    /**
+     * Gets extended contributions
+     *
+     * @return The extended contributions
+     */
+    protected Collection<Contribution> getExtendedContributions() {
+        return Collections.emptyList();
     }
 
     /**
@@ -197,27 +305,6 @@ public abstract class DefaultAppSuiteLoginRampUp implements LoginRampUpService {
         return requestResult;
     }
 
-    /**
-     * Gets the execution time threshold in milliseconds since when to log ramp-up calls
-     *
-     * @param session The session providing user data
-     * @return The execution time threshold in milliseconds
-     */
-    protected long getExecutionTimeThreshold(ServerSession session) {
-        ConfigViewFactory factory = ServerServiceRegistry.getInstance().getService(ConfigViewFactory.class);
-        if (null == factory) {
-            return 0L;
-        }
-
-        try {
-            ConfigView view = factory.getView(session.getUserId(), session.getContextId());
-            return ConfigViews.getDefinedIntPropertyFrom("com.openexchange.ajax.login.rampup.debugThresholdMillis", 0, view);
-        } catch (Exception e) {
-            LOG.error("Failed to obtain execution time threshold from property \"com.openexchange.ajax.login.rampup.debugThresholdMillis\"", e);
-        }
-        return 0L;
-    }
-
     @Override
     public JSONObject getContribution(final ServerSession session, final AJAXRequestData loginRequest) throws OXException {
         int numberOfKeys = KEYS.size();
@@ -227,12 +314,17 @@ public abstract class DefaultAppSuiteLoginRampUp implements LoginRampUpService {
         ThreadPoolService threads = services.getService(ThreadPoolService.class);
 
         final Dispatcher ox = services.getService(Dispatcher.class);
+        final LoginRampUpConfig config = getConfig(getConfigInfix());
+        final long thresholdMillis = LOG.isDebugEnabled() ? config.debugThresholdMillis : -1;
 
-        final long thresholdMillis = LOG.isDebugEnabled() ? getExecutionTimeThreshold(session) : -1;
         rampUps.put(RampUpKey.FOLDER_LIST.key, threads.submit(new AbstractTrackableTask<Object>() {
 
             @Override
             public Object call() throws Exception {
+                if (config.folderlistDisabled) {
+                    return null;
+                }
+
                 AJAXRequestResult requestResult = null;
                 Exception exc = null;
                 try {
@@ -256,10 +348,13 @@ public abstract class DefaultAppSuiteLoginRampUp implements LoginRampUpService {
             }
         }));
 
-        rampUps.put(RampUpKey.FOLDER.key, threads.submit(new AbstractTask<Object>() {
+        rampUps.put(RampUpKey.FOLDER.key, threads.submit(new AbstractTrackableTask<Object>() {
 
             @Override
             public Object call() throws Exception {
+                if (config.folderDisabled) {
+                    return null;
+                }
                 if (null == session.getUserPermissionBits() || false == session.getUserPermissionBits().hasWebMail()) {
                     return null;
                 }
@@ -306,10 +401,14 @@ public abstract class DefaultAppSuiteLoginRampUp implements LoginRampUpService {
             }
         }));
 
-        rampUps.put(RampUpKey.JSLOBS.key, threads.submit(new AbstractTask<Object>() {
+        rampUps.put(RampUpKey.JSLOBS.key, threads.submit(new AbstractTrackableTask<Object>() {
 
             @Override
             public Object call() throws Exception {
+                if (config.jslobsDisabled) {
+                    return null;
+                }
+
                 AJAXRequestResult requestResult = null;
                 Exception exc = null;
                 try {
@@ -337,10 +436,14 @@ public abstract class DefaultAppSuiteLoginRampUp implements LoginRampUpService {
             }
         }));
 
-        rampUps.put(RampUpKey.SERVER_CONFIG.key, threads.submit(new AbstractTask<Object>() {
+        rampUps.put(RampUpKey.SERVER_CONFIG.key, threads.submit(new AbstractTrackableTask<Object>() {
 
             @Override
             public Object call() throws Exception {
+                if (config.serverConfigDisabled) {
+                    return null;
+                }
+
                 AJAXRequestResult requestResult = null;
                 Exception exc = null;
                 try {
@@ -362,15 +465,18 @@ public abstract class DefaultAppSuiteLoginRampUp implements LoginRampUpService {
             }
         }));
 
-        rampUps.put(RampUpKey.OAUTH.key, threads.submit(new AbstractTask<Object>() {
+        rampUps.put(RampUpKey.OAUTH.key, threads.submit(new AbstractTrackableTask<Object>() {
 
             @Override
             public Object call() throws Exception {
+                if (config.oauthDisabled) {
+                    return null;
+                }
                 if (session.isAnonymous() || session.getUser().isGuest()) {
                     return null;
                 }
-                JSONObject oauth = new JSONObject(3);
 
+                JSONObject oauth = new JSONObject(3);
                 AJAXRequestResult requestResult = null;
                 Exception exc = null;
                 try {
@@ -429,10 +535,14 @@ public abstract class DefaultAppSuiteLoginRampUp implements LoginRampUpService {
             }
         }));
 
-        rampUps.put(RampUpKey.USER.key, threads.submit(new AbstractTask<Object>() {
+        rampUps.put(RampUpKey.USER.key, threads.submit(new AbstractTrackableTask<Object>() {
 
             @Override
             public Object call() throws Exception {
+                if (config.userDisabled) {
+                    return null;
+                }
+
                 AJAXRequestResult requestResult = null;
                 Exception exc = null;
                 try {
@@ -454,10 +564,14 @@ public abstract class DefaultAppSuiteLoginRampUp implements LoginRampUpService {
             }
         }));
 
-        rampUps.put(RampUpKey.ACCOUNTS.key, threads.submit(new AbstractTask<Object>() {
+        rampUps.put(RampUpKey.ACCOUNTS.key, threads.submit(new AbstractTrackableTask<Object>() {
 
             @Override
             public Object call() throws Exception {
+                if (config.accountsDisabled) {
+                    return null;
+                }
+
                 AJAXRequestResult requestResult = null;
                 Exception exc = null;
                 try {
@@ -480,13 +594,84 @@ public abstract class DefaultAppSuiteLoginRampUp implements LoginRampUpService {
 
         }));
 
+        // Check for extended contributions
+        List<String> extendedKeys = null;
+        {
+            Collection<Contribution> contributions = getExtendedContributions();
+            if (null != contributions && false == contributions.isEmpty()) {
+                extendedKeys = new ArrayList<>(contributions.size());
+                for (final Contribution contribution : contributions) {
+                    if (RESERVED.contains(Strings.asciiLowerCase(contribution.getKey()))) {
+                        // Illegal key... Ignore
+                    } else {
+                        rampUps.put(contribution.getKey(), threads.submit(new AbstractTrackableTask<Object>() {
+
+                            @Override
+                            public Object call() throws Exception {
+                                try {
+                                    return contribution.getResult(session, loginRequest);
+                                } catch (OXException x) {
+                                    // Omit result on error. Let the UI deal with this
+                                    handleException(x, contribution.getKey(), errors);
+                                } catch (RuntimeException x) {
+                                    // Omit result on error. Let the UI deal with this
+                                    handleException(x, contribution.getKey());
+                                }
+                                return null;
+                            }
+                        }));
+                        extendedKeys.add(contribution.getKey());
+                    }
+                }
+            }
+        }
+
         try {
-            JSONObject jo = new JSONObject(numberOfKeys);
+            // Grab tasks to complete in preserved order
+            List<RampUpFuture> taskCompletions = new LinkedList<>();
             for (RampUpKey rampUpKey : KEYS) {
-                Object value = rampUps.get(rampUpKey.key).get();
-                jo.put(rampUpKey.key, JSONCoercion.coerceToJSON(value));
+                Future<Object> taskCompletion = rampUps.get(rampUpKey.key);
+                if (null != taskCompletion) {
+                    taskCompletions.add(new RampUpFuture(rampUpKey, taskCompletion));
+                }
             }
 
+            if (null != extendedKeys) {
+                for (String extendedKey : extendedKeys) {
+                    Future<Object> taskCompletion = rampUps.get(extendedKey);
+                    if (null != taskCompletion) {
+                        taskCompletions.add(new RampUpFuture(extendedKey, taskCompletion));
+                    }
+                }
+            }
+
+            // Let tasks contribute to JSON object
+            JSONObject jo = new JSONObject(numberOfKeys);
+            Iterator<RampUpFuture> tasksToWaitFor = taskCompletions.iterator();
+            RampUpFuture last = null;
+            try {
+                while (tasksToWaitFor.hasNext()) {
+                    RampUpFuture rampUpTask = tasksToWaitFor.next();
+                    last = rampUpTask;
+                    Object value = rampUpTask.get();
+                    jo.put(rampUpTask.getKey(), JSONCoercion.coerceToJSON(value));
+                }
+            } catch (InterruptedException e) {
+                // Ramp-up interrupted... Cancel remaining tasks
+                if (null != last) {
+                    last.cancel(true);
+                }
+                while (tasksToWaitFor.hasNext()) {
+                    RampUpFuture rampUpTask = tasksToWaitFor.next();
+                    rampUpTask.cancel(true);
+                }
+
+                // Keep interrupted status
+                Thread.currentThread().interrupt();
+                LOG.debug("Ramp-up has been intentionally interrupted", e);
+            }
+
+            // Add errors (if any)
             int numErrors = errors.size();
             if (numErrors > 0) {
                 Locale locale = localeFrom(session);
@@ -501,11 +686,39 @@ public abstract class DefaultAppSuiteLoginRampUp implements LoginRampUpService {
             return jo;
         } catch (Throwable t) {
             ExceptionUtils.handleThrowable(t);
-            Logger logger = org.slf4j.LoggerFactory.getLogger(DefaultAppSuiteLoginRampUp.class);
-            logger.warn("Failed ramp-up", t);
+            LOG.warn("Failed ramp-up", t);
             return new JSONObject();
         }
     }
 
+    private static final class RampUpFuture {
+
+        private final String key;
+        private final Future<Object> rampUpTask;
+
+        RampUpFuture(RampUpKey rampUpKey, Future<Object> rampUpTask) {
+            super();
+            this.key = rampUpKey.key;
+            this.rampUpTask = rampUpTask;
+        }
+
+        RampUpFuture(String key, Future<Object> rampUpTask) {
+            super();
+            this.key = key;
+            this.rampUpTask = rampUpTask;
+        }
+
+        String getKey() {
+            return key;
+        }
+
+        boolean cancel(boolean mayInterruptIfRunning) {
+            return rampUpTask.cancel(mayInterruptIfRunning);
+        }
+
+        Object get() throws InterruptedException, ExecutionException {
+            return rampUpTask.get();
+        }
+    }
 
 }
