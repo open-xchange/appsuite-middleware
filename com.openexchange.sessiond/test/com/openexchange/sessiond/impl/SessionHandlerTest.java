@@ -143,7 +143,7 @@ public class SessionHandlerTest {
                 return UserType.USER;
             }
         };
-        Mockito.when(registry.getService(Matchers.anyInt(), Matchers.anyInt())).thenReturn(sessiondConfigInterface);
+        Mockito.when(registry.getConfigFor(Matchers.anyInt(), Matchers.anyInt())).thenReturn(sessiondConfigInterface);
         config = new SessiondConfigInterface() {
 
             @Override

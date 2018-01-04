@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -50,32 +50,54 @@
 package com.openexchange.sessiond.impl.usertype;
 
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.sessiond.impl.usertype.UserTypeSessiondConfigRegistry.UserType;
+
 
 /**
+ * {@link AbstractConfigBasedUserTypeSessiondConfigInterface} - The abstract Sessiond user settings initialized by configuration.
  *
- * {@link SessiondUserConfigImpl}
- *
- * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.10.0
  */
-public class SessiondUserConfigImpl extends AbstractConfigBasedUserTypeSessiondConfigInterface {
+public abstract class AbstractConfigBasedUserTypeSessiondConfigInterface implements UserTypeSessiondConfigInterface {
+
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractConfigBasedUserTypeSessiondConfigInterface.class);
+
+    protected final UserTypeSessiondConfigRegistry.UserType userType;
+    protected final int maxSessions;
 
     /**
-     * Initializes a new {@link SessiondLinkConfigImpl}.
-     *
-     * @param conf The configuration service
+     * Initializes a new {@link AbstractConfigBasedUserTypeSessiondConfigInterface}.
      */
-    public SessiondUserConfigImpl(ConfigurationService conf) {
-        super(UserTypeSessiondConfigRegistry.UserType.USER, conf);
+    protected AbstractConfigBasedUserTypeSessiondConfigInterface(UserTypeSessiondConfigRegistry.UserType userType, ConfigurationService conf) {
+        super();
+        this.userType = userType;
+        String propertyName = getPropertyName();
+        maxSessions = conf.getIntProperty(propertyName, getDefaultValue());
+        LOG.debug("Sessiond property: {}={}", propertyName, maxSessions);
     }
 
     @Override
-    protected String getPropertyName() {
-        return "com.openexchange.sessiond.maxSessionPerUser";
+    public UserType getUserType() {
+        return userType;
     }
 
     @Override
-    protected int getDefaultValue() {
-        return 100;
+    public int getMaxSessionsPerUserType() {
+        return maxSessions;
     }
+
+    /**
+     * Gets the name of the property providing the number of max. sessions.
+     *
+     * @return The property name
+     */
+    protected abstract String getPropertyName();
+
+    /**
+     * Gets the default value to assume for the number of max. sessions.
+     *
+     * @return The default value
+     */
+    protected abstract int getDefaultValue();
 }

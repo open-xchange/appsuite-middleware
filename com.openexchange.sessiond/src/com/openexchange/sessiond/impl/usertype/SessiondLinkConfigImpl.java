@@ -52,17 +52,13 @@ package com.openexchange.sessiond.impl.usertype;
 import com.openexchange.config.ConfigurationService;
 
 /**
- * 
+ *
  * {@link SessiondLinkConfigImpl}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.10.0
  */
-public class SessiondLinkConfigImpl implements UserTypeSessiondConfigInterface {
-
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SessiondLinkConfigImpl.class);
-
-    private int maxSessionsPerLink = 250;
+public class SessiondLinkConfigImpl extends AbstractConfigBasedUserTypeSessiondConfigInterface {
 
     /**
      * Initializes a new {@link SessiondLinkConfigImpl}.
@@ -70,17 +66,17 @@ public class SessiondLinkConfigImpl implements UserTypeSessiondConfigInterface {
      * @param conf The configuration service
      */
     public SessiondLinkConfigImpl(ConfigurationService conf) {
-        maxSessionsPerLink = conf.getIntProperty("com.openexchange.sessiond.maxSessionPerLink", maxSessionsPerLink);
-        LOG.debug("Sessiond property: com.openexchange.sessiond.maxSessionsPerLink={}", maxSessionsPerLink);
+        super(UserTypeSessiondConfigRegistry.UserType.ANONYMOUS, conf);
     }
 
     @Override
-    public int getMaxSessionsPerUserType() {
-        return maxSessionsPerLink;
+    protected String getPropertyName() {
+        return "com.openexchange.sessiond.maxSessionPerLink";
     }
 
     @Override
-    public UserTypeSessiondConfigRegistry.UserType getUserType() {
-        return UserTypeSessiondConfigRegistry.UserType.ANONYMOUS;
+    protected int getDefaultValue() {
+        return 250;
     }
+
 }

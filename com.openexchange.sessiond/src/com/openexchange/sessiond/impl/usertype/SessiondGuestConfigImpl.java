@@ -52,35 +52,31 @@ package com.openexchange.sessiond.impl.usertype;
 import com.openexchange.config.ConfigurationService;
 
 /**
- * 
+ *
  * {@link SessiondGuestConfigImpl}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.10.0
  */
-public class SessiondGuestConfigImpl implements UserTypeSessiondConfigInterface {
-
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SessiondGuestConfigImpl.class);
-
-    private int maxSessionsPerGuest = 20;
+public class SessiondGuestConfigImpl extends AbstractConfigBasedUserTypeSessiondConfigInterface {
 
     /**
-     * Initializes a new {@link SessiondGuestConfigImpl}.
+     * Initializes a new {@link SessiondLinkConfigImpl}.
      *
      * @param conf The configuration service
      */
     public SessiondGuestConfigImpl(ConfigurationService conf) {
-        maxSessionsPerGuest = conf.getIntProperty("com.openexchange.sessiond.maxSessionPerGuest", maxSessionsPerGuest);
-        LOG.debug("Sessiond property: com.openexchange.sessiond.maxSessionsPerGuest={}", maxSessionsPerGuest);
+        super(UserTypeSessiondConfigRegistry.UserType.GUEST, conf);
     }
 
     @Override
-    public int getMaxSessionsPerUserType() {
-        return maxSessionsPerGuest;
+    protected String getPropertyName() {
+        return "com.openexchange.sessiond.maxSessionPerGuest";
     }
 
     @Override
-    public UserTypeSessiondConfigRegistry.UserType getUserType() {
-        return UserTypeSessiondConfigRegistry.UserType.GUEST;
+    protected int getDefaultValue() {
+        return 20;
     }
+
 }

@@ -127,7 +127,7 @@ public final class SessionHandler {
     static volatile SessiondConfigInterface config;
 
     /** The applied user type specific configuration */
-    static volatile UserTypeSessiondConfigRegistry REGISTRY;
+    static volatile UserTypeSessiondConfigRegistry userConfigRegistry;
 
     /** The {@link SessionData} reference */
     protected static final AtomicReference<SessionData> SESSION_DATA_REF = new AtomicReference<SessionData>();
@@ -161,11 +161,10 @@ public final class SessionHandler {
      * Initializes the {@link SessionHandler session handler}
      *
      * @param config The appropriate configuration
-     * @throws OXException
      */
-    public static synchronized void init(SessiondConfigInterface config, UserTypeSessiondConfigRegistry registry) throws OXException {
+    public static synchronized void init(SessiondConfigInterface config, UserTypeSessiondConfigRegistry userConfigRegistry) {
         SessionHandler.config = config;
-        SessionHandler.REGISTRY = registry;
+        SessionHandler.userConfigRegistry = userConfigRegistry;
         SessionData sessionData = new SessionData(config.getNumberOfSessionContainers(), config.getMaxSessions(), config.getRandomTokenTimeout(), config.getNumberOfLongTermSessionContainers(), config.isAutoLogin());
         SESSION_DATA_REF.set(sessionData);
         try {
@@ -196,7 +195,7 @@ public final class SessionHandler {
             o.destroy();
         }
         sessionIdGenerator = null;
-        REGISTRY.clear();
+        userConfigRegistry.clear();
         config = null;
         noLimit = false;
     }
@@ -999,7 +998,8 @@ public final class SessionHandler {
             LOG.warn("\tSessionData instance is null.");
             return;
         }
-        UserTypeSessiondConfigInterface userTypeConfig = REGISTRY.getService(userId, contextId);
+
+        UserTypeSessiondConfigInterface userTypeConfig = userConfigRegistry.getConfigFor(userId, contextId);
         int maxSessPerUser = userTypeConfig.getMaxSessionsPerUserType();
         if (maxSessPerUser > 0) {
             int count = sessionData.getNumOfUserSessions(userId, contextId, true);

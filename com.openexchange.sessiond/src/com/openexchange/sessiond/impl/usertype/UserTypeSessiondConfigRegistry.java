@@ -50,10 +50,11 @@
 package com.openexchange.sessiond.impl.usertype;
 
 import java.util.EnumMap;
-import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import com.google.common.collect.ImmutableMap;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
@@ -70,59 +71,87 @@ import com.openexchange.user.UserService;
  */
 public class UserTypeSessiondConfigRegistry {
 
-    public enum UserType {
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(UserTypeSessiondConfigRegistry.class);
+
+    public static enum UserType {
         USER, GUEST, ANONYMOUS;
     }
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(UserTypeSessiondConfigRegistry.class);
+    // --------------------------------------------------------------------------------------------
 
-    private final Cache<UserAndContext, UserType> CACHE = CacheBuilder.newBuilder().maximumSize(65536).expireAfterWrite(120, TimeUnit.MINUTES).build();
+    private final Cache<UserAndContext, UserType> cache = CacheBuilder.newBuilder().maximumSize(65536).expireAfterAccess(30, TimeUnit.MINUTES).build();
+    private final Map<UserType, UserTypeSessiondConfigInterface> map;
+    private final UserTypeSessiondConfigInterface fallbackConfig;
 
-    private final EnumMap<UserType, UserTypeSessiondConfigInterface> map;
-
-    public UserTypeSessiondConfigRegistry() {
-        this.map = new EnumMap<UserType, UserTypeSessiondConfigInterface>(UserType.class);
-    }
-
-    public void init(ConfigurationService conf) {
+    /**
+     * Initializes a new {@link UserTypeSessiondConfigRegistry}.
+     *
+     * @param conf The config service to use
+     */
+    public UserTypeSessiondConfigRegistry(ConfigurationService conf) {
+        super();
+        EnumMap<UserType, UserTypeSessiondConfigInterface> map = new EnumMap<UserType, UserTypeSessiondConfigInterface>(UserType.class);
         UserTypeSessiondConfigInterface userConfig = new SessiondUserConfigImpl(conf);
+        this.fallbackConfig = userConfig;
         map.put(userConfig.getUserType(), userConfig);
         UserTypeSessiondConfigInterface linkConfig = new SessiondLinkConfigImpl(conf);
         map.put(linkConfig.getUserType(), linkConfig);
         UserTypeSessiondConfigInterface guestConfig = new SessiondGuestConfigImpl(conf);
         map.put(guestConfig.getUserType(), guestConfig);
+        this.map = ImmutableMap.copyOf(map); // Creates an ImmutableEnumMap
     }
 
-    public List<UserTypeSessiondConfigInterface> getServices() {
-        return (List<UserTypeSessiondConfigInterface>) map.values();
-    }
-
+    /**
+     * Clears this registry
+     */
     public void clear() {
         this.map.clear();
-        CACHE.invalidateAll();
+        cache.invalidateAll();
     }
 
-    public UserTypeSessiondConfigInterface getService(int userId, int contextId) throws OXException {
-        UserAndContext key = UserAndContext.newInstance(userId, contextId);
-        UserType result = CACHE.getIfPresent(key);
+    /**
+     * Gets the fall-back configuration
+     *
+     * @return The fall-back configuration
+     */
+    public UserTypeSessiondConfigInterface getFallbackConfig() {
+        return fallbackConfig;
+    }
 
-        if (null == result) {
+    /**
+     * Gets the Sessiond configuration for specified user
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return The configuration for specified user
+     * @throws OXException If configuration for specified user cannot be returned
+     */
+    public UserTypeSessiondConfigInterface getConfigFor(int userId, int contextId) throws OXException {
+        UserAndContext key = UserAndContext.newInstance(userId, contextId);
+        UserType userType = cache.getIfPresent(key);
+        if (null == userType) {
             UserService userService = Services.optService(UserService.class);
             if (userService == null) {
                 LOG.warn("Unable to retrieve UserService. Can handle sessions only via user settings as evaluation of user type is not possible.");
-                return this.map.get(UserType.USER);
+                return fallbackConfig;
             }
             User user = userService.getUser(userId, contextId);
             if (isAnonymousGuest(user)) {
-                result = UserType.ANONYMOUS;
+                userType = UserType.ANONYMOUS;
             } else if (user.isGuest()) {
-                result = UserType.GUEST;
+                userType = UserType.GUEST;
             } else {
-                result = UserType.USER;
+                userType = UserType.USER;
             }
-            CACHE.put(key, result);
+            cache.put(key, userType);
         }
-        return this.map.get(result);
+
+        UserTypeSessiondConfigInterface userConfig = this.map.get(userType);
+        if (null == userConfig) {
+            LOG.warn("No such Sessiond user config for {}. Can handle sessions only via user settings.", userType.name());
+            return fallbackConfig;
+        }
+        return userConfig;
     }
 
     private static boolean isAnonymousGuest(User user) {

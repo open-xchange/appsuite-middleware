@@ -100,7 +100,7 @@ public class Bug22838Test {
             }
         };
 
-        Mockito.when(registry.getService(Matchers.anyInt(), Matchers.anyInt())).thenReturn(sessiondConfigInterface);
+        Mockito.when(registry.getConfigFor(Matchers.anyInt(), Matchers.anyInt())).thenReturn(sessiondConfigInterface);
 
         SessionHandler.init(new SessiondConfigImpl(new SimConfigurationService()), registry);
     }

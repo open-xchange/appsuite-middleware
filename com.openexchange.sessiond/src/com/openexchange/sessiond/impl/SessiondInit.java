@@ -66,16 +66,15 @@ public class SessiondInit implements Initialization {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SessiondInit.class);
 
-
-    private SessiondConfigInterface config;
-
-    private final AtomicBoolean started = new AtomicBoolean();
-
     private static final SessiondInit singleton = new SessiondInit();
 
     public static SessiondInit getInstance() {
         return singleton;
     }
+
+    // ---------------------------------------------------------------------------------------------
+
+    private final AtomicBoolean started = new AtomicBoolean();
 
     @Override
     public void start() throws OXException {
@@ -87,11 +86,9 @@ public class SessiondInit implements Initialization {
 
         final ConfigurationService conf = Services.getService(ConfigurationService.class);
         if (conf != null) {
-            config = new SessiondConfigImpl(conf);
-            UserTypeSessiondConfigRegistry registry = new UserTypeSessiondConfigRegistry();
-            registry.init(conf);
             LOG.info("Starting Sessiond");
-
+            SessiondConfigInterface config = new SessiondConfigImpl(conf);
+            UserTypeSessiondConfigRegistry registry = new UserTypeSessiondConfigRegistry(conf);
             SessionHandler.init(config, registry);
             started.set(true);
         }
