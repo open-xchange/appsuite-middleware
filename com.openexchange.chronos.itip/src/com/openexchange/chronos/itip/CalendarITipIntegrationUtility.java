@@ -68,6 +68,7 @@ import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.java.Strings;
 import com.openexchange.session.Session;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 
@@ -98,9 +99,13 @@ public class CalendarITipIntegrationUtility implements ITipIntegrationUtility {
 
     @Override
     public List<Event> getExceptions(final Event original, final Session session) throws OXException {
+        String folderId = original.getFolderId();
+        if (Strings.isEmpty(folderId)) {
+            return Collections.emptyList();
+        }
         CalendarService calendarService = Services.getService(CalendarService.class);
         CalendarSession calendarSession = calendarService.init(session);
-        List<Event> changeExceptions = calendarService.getChangeExceptions(calendarSession, original.getFolderId(), original.getId());
+        List<Event> changeExceptions = calendarService.getChangeExceptions(calendarSession, folderId, original.getId());
         return changeExceptions;
     }
 
