@@ -389,7 +389,6 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
     public boolean isTokenExpired(Session session) throws OXException {
         LOG.trace("isTokenExpired(Session session: {})", session.getSessionID());
         long oauthRefreshTime = this.getBackendConfig().getOauthRefreshTime();
-        //TODO QS-VS: Hat ein AccessToken immer ein expire, schöner machen
         if (!session.containsParameter(Session.PARAM_OAUTH_ACCESS_TOKEN_EXPIRY_DATE)) {
             return false;
         }

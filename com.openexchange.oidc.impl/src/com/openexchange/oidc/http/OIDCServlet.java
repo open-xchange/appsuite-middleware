@@ -69,5 +69,4 @@ public abstract class OIDCServlet extends HttpServlet{
         this.provider = provider;
         this.exceptionHandler = exceptionHandler;
     }
-
 }

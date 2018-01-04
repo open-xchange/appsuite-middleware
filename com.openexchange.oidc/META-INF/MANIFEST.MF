@@ -5,7 +5,6 @@ Bundle-SymbolicName: com.openexchange.oidc
 Bundle-Version: 7.8.10
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Bundle-Activator: com.openexchange.oidc.osgi.OIDCActivator
 Bundle-ClassPath: .
 Export-Package: com.openexchange.oidc,
  com.openexchange.oidc.state

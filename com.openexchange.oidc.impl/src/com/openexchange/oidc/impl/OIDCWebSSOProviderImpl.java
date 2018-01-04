@@ -154,7 +154,6 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
 
         if (autologinMode != null && autologinMode == AutologinMode.OX_DIRECT) {
             String autologinRedirect = this.getAutologinURLFromOIDCCookie(request, response);
-//            autologinRedirect = "https://google.oxoe.int/appsuite/#!!&app=io.ox/calendar&folder=virtual/all-my-appointments&perspective=week:workweek";
             if (!Strings.isEmpty(autologinRedirect)) {
                 return autologinRedirect;
             }
@@ -181,10 +180,10 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
             return null;
         }
         
-        String redirectURL = getAutologinByCookieURL(request, response, autologinCookie);
+        String redirectURL = this.getAutologinByCookieURL(request, response, autologinCookie);
         String deeplink = request.getParameter("hash");
         
-        //TODO QS-VS um test erweitern
+        //TODO QS-VS um test erweitern, ist das überhaupt richtig so?
         if (!Strings.isEmpty(redirectURL) && !Strings.isEmpty(deeplink)) {
             redirectURL += "&" + deeplink.substring(1);
         }
