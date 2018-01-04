@@ -77,7 +77,7 @@ public enum MailListField {
     /**
      * Whether message contains attachments (602)
      */
-    ATTACHMENT(602, MailJSONField.HAS_ATTACHMENTS.getKey()),
+    ATTACHMENT(602, MailJSONField.HAS_ATTACHMENTS.getKey()), //FIXME use new approach
     /**
      * From (603)
      */

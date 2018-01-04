@@ -47,39 +47,40 @@
  *
  */
 
-package com.openexchange.sessiond.impl;
+package com.openexchange.sessiond.impl.usertype;
+
+import com.openexchange.config.ConfigurationService;
 
 /**
- * {@link Sessiond} - The Sessiond
+ * 
+ * {@link SessiondUserConfigImpl}
  *
- * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since v7.10.0
  */
+public class SessiondUserConfigImpl implements UserTypeSessiondConfigInterface {
 
-public class Sessiond {
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SessiondUserConfigImpl.class);
 
-    private static volatile Sessiond singleton;
+    private int maxSessionsPerUser = 100;
 
-    // private SessionHandler sessionHandler;
-
-    private final SessiondConfigInterface config;
-
-    public Sessiond(final SessiondConfigInterface config) {
-        this.config = config;
+    /**
+     * Initializes a new {@link SessiondGuestConfigImpl}.
+     *
+     * @param conf The configuration service
+     */
+    public SessiondUserConfigImpl(ConfigurationService conf) {
+        maxSessionsPerUser = conf.getIntProperty("com.openexchange.sessiond.maxSessionPerUser", maxSessionsPerUser);
+        LOG.debug("Sessiond property: com.openexchange.sessiond.maxSessionPerUser={}", maxSessionsPerUser);
     }
 
-    public void start() {
-        // sessionHandler = new SessionHandler();
-        SessionHandler.init(config);
+    @Override
+    public int getMaxSessionsPerUserType() {
+        return maxSessionsPerUser;
     }
 
-    public static Sessiond getInstance(final SessiondConfigInterface config) {
-        if (singleton != null) {
-            return singleton;
-        }
-        return singleton = new Sessiond(config);
-    }
-
-    public void close() {
-        SessionHandler.close();
+    @Override
+    public UserTypeSessiondConfigRegistry.UserType getUserType() {
+        return UserTypeSessiondConfigRegistry.UserType.USER;
     }
 }

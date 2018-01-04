@@ -87,6 +87,8 @@ import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.sessiond.SessionFilter;
 import com.openexchange.sessiond.SessionMatcher;
 import com.openexchange.sessiond.SessiondEventConstants;
+import com.openexchange.sessiond.impl.usertype.UserTypeSessiondConfigRegistry;
+import com.openexchange.sessiond.impl.usertype.UserTypeSessiondConfigInterface;
 import com.openexchange.sessiond.osgi.Services;
 import com.openexchange.sessiond.serialization.PortableContextSessionsCleaner;
 import com.openexchange.sessiond.serialization.PortableSessionFilterApplier;
@@ -124,6 +126,9 @@ public final class SessionHandler {
     /** The applied configuration */
     static volatile SessiondConfigInterface config;
 
+    /** The applied user type specific configuration */
+    static volatile UserTypeSessiondConfigRegistry REGISTRY;
+
     /** The {@link SessionData} reference */
     protected static final AtomicReference<SessionData> SESSION_DATA_REF = new AtomicReference<SessionData>();
 
@@ -134,7 +139,7 @@ public final class SessionHandler {
     private static volatile boolean asyncPutToSessionStorage;
 
     /** The obfuscator */
-    protected static volatile Obfuscator obfuscatr;
+    protected static volatile Obfuscator obfuscator;
 
     /** Logger */
     protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SessionHandler.class);
@@ -156,15 +161,12 @@ public final class SessionHandler {
      * Initializes the {@link SessionHandler session handler}
      *
      * @param config The appropriate configuration
+     * @throws OXException
      */
-    public static synchronized void init(SessiondConfigInterface config) {
+    public static synchronized void init(SessiondConfigInterface config, UserTypeSessiondConfigRegistry registry) throws OXException {
         SessionHandler.config = config;
-        SessionData sessionData = new SessionData(
-            config.getNumberOfSessionContainers(),
-            config.getMaxSessions(),
-            config.getRandomTokenTimeout(),
-            config.getNumberOfLongTermSessionContainers(),
-            config.isAutoLogin());
+        SessionHandler.REGISTRY = registry;
+        SessionData sessionData = new SessionData(config.getNumberOfSessionContainers(), config.getMaxSessions(), config.getRandomTokenTimeout(), config.getNumberOfLongTermSessionContainers(), config.isAutoLogin());
         SESSION_DATA_REF.set(sessionData);
         try {
             sessionIdGenerator = SessionIdGenerator.getInstance();
@@ -173,8 +175,7 @@ public final class SessionHandler {
         }
         noLimit = (config.getMaxSessions() == 0);
         asyncPutToSessionStorage = config.isAsyncPutToSessionStorage();
-
-        obfuscatr = new Obfuscator(config.getObfuscationKey().toCharArray());
+        obfuscator = new Obfuscator(config.getObfuscationKey().toCharArray());
     }
 
     /**
@@ -189,23 +190,15 @@ public final class SessionHandler {
         } else {
             LOG.warn("\tSessionData instance is null.");
         }
-        Obfuscator o = obfuscatr;
+        Obfuscator o = obfuscator;
         if (null != o) {
-            obfuscatr = null;
+            obfuscator = null;
             o.destroy();
         }
         sessionIdGenerator = null;
+        REGISTRY.clear();
         config = null;
         noLimit = false;
-    }
-
-    /**
-     * Gets the configuration
-     *
-     * @return The configuration
-     */
-    public static SessiondConfigInterface getConfig() {
-        return config;
     }
 
     /**
@@ -214,7 +207,7 @@ public final class SessionHandler {
      * @return The session obfuscator instance
      */
     public static Obfuscator getObfuscator() {
-        return obfuscatr;
+        return obfuscator;
     }
 
     /**
@@ -226,7 +219,7 @@ public final class SessionHandler {
      */
     public static Collection<String> getRemoteParameterNames(int userId, int contextId) {
         SessionStorageConfiguration configuration = SessionStorageConfiguration.getInstance();
-        return null == configuration ? Collections.<String>emptyList() : configuration.getRemoteParameterNames(userId, contextId);
+        return null == configuration ? Collections.<String> emptyList() : configuration.getRemoteParameterNames(userId, contextId);
     }
 
     /**
@@ -783,7 +776,6 @@ public final class SessionHandler {
         return putIntoSessionStorage(sessionControl.getSession(), true, asyncPutToSessionStorage);
     }
 
-
     /**
      * Adds a new session containing given attributes to session container(s)
      *
@@ -1007,7 +999,8 @@ public final class SessionHandler {
             LOG.warn("\tSessionData instance is null.");
             return;
         }
-        int maxSessPerUser = config.getMaxSessionsPerUser();
+        UserTypeSessiondConfigInterface userTypeConfig = REGISTRY.getService(userId, contextId);
+        int maxSessPerUser = userTypeConfig.getMaxSessionsPerUserType();
         if (maxSessPerUser > 0) {
             int count = sessionData.getNumOfUserSessions(userId, contextId, true);
             if (count >= maxSessPerUser) {
@@ -1086,16 +1079,6 @@ public final class SessionHandler {
             return;
         }
         sessionData.checkAuthId(login, authId);
-        /*
-        SessionStorageService storageService = Services.optService(SessionStorageService.class);
-        if (storageService != null) {
-            try {
-                storageService.checkAuthId(login, authId);
-            } catch (OXException e) {
-                LOG.error("", e);
-            }
-        }
-         */
     }
 
     /**
@@ -1644,7 +1627,7 @@ public final class SessionHandler {
 
     public static int[] getNumberOfLongTermSessions() {
         SessionData sessionData = SESSION_DATA_REF.get();
-        return null == sessionData ? new int[0]: sessionData.getLongTermSessionsPerContainer();
+        return null == sessionData ? new int[0] : sessionData.getLongTermSessionsPerContainer();
     }
 
     public static int[] getNumberOfShortTermSessions() {
@@ -1918,6 +1901,7 @@ public final class SessionHandler {
         if (null != sessionData) {
             sessionData.addTimerService(service);
         }
+
         long containerTimeout = config.getSessionContainerTimeout();
         shortSessionContainerRotator = service.scheduleWithFixedDelay(new ShortSessionContainerRotator(), containerTimeout, containerTimeout);
         if (config.isAutoLogin()) {

@@ -47,16 +47,29 @@
  *
  */
 
-package com.openexchange.share.core.tools;
+package com.openexchange.sessiond.impl.usertype;
+
+import com.openexchange.sessiond.impl.usertype.UserTypeSessiondConfigRegistry.UserType;
 
 /**
- * {@link ShareCoreTool}
+ * SessionConfig
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since v7.8.0
+ * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  */
-public class ShareCoreTool {
+public interface UserTypeSessiondConfigInterface {
 
+    /**
+     * Returns the type of users the {@link UserTypeSessiondConfigInterface} handles
+     * 
+     * @return {@link UserType}
+     */
+    UserType getUserType();
 
-
+    /**
+     * Returns the maximum allowed sessions for the given type of user.
+     * 
+     * @return The number of allowed sessions for the given type of user
+     * @see #getUserType()
+     */
+    int getMaxSessionsPerUserType();
 }
