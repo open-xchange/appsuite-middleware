@@ -73,6 +73,7 @@ import com.openexchange.chronos.itip.generators.ITipMailGeneratorFactory;
 import com.openexchange.chronos.itip.osgi.Services;
 import com.openexchange.chronos.itip.sender.MailSenderService;
 import com.openexchange.chronos.itip.tools.ITipEventUpdate;
+import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarResult;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.EventID;
@@ -103,6 +104,7 @@ public class UpdatePerformer extends AbstractActionPerformer {
 
     @Override
     public List<Event> perform(ITipAction action, ITipAnalysis analysis, CalendarSession session, ITipAttributes attributes) throws OXException {
+        session.<Boolean>set(CalendarParameters.PARAMETER_SUPPRESS_ITIP, Boolean.TRUE);
         List<ITipChange> changes = analysis.getChanges();
         List<Event> result = new ArrayList<Event>(changes.size());
 

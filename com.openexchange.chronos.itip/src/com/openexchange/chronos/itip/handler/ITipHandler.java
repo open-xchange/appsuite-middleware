@@ -62,6 +62,7 @@ import com.openexchange.chronos.itip.tools.ITipUtils;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.service.CalendarEvent;
 import com.openexchange.chronos.service.CalendarHandler;
+import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CreateResult;
 import com.openexchange.chronos.service.DeleteResult;
 import com.openexchange.chronos.service.UpdateResult;
@@ -89,6 +90,10 @@ public class ITipHandler implements CalendarHandler {
 
     @Override
     public void handle(CalendarEvent event) {
+        Boolean suppress = event.getCalendarParameters().contains(CalendarParameters.PARAMETER_SUPPRESS_ITIP) && event.getCalendarParameters().get(CalendarParameters.PARAMETER_SUPPRESS_ITIP, Boolean.class);
+        if (suppress) {
+            return;
+        }
         if (event.getAccountId() != CalendarAccount.DEFAULT_ACCOUNT.getAccountId()) {
             return;
         }

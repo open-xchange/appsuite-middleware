@@ -215,6 +215,14 @@ public interface CalendarParameters {
     static final String PARAMETER_PRINCIPAL_EMAIL = "itip.principalEmail";
 
     /**
+     * {@link Boolean}
+     * <p/>
+     * Boolean to suppress ITip roundtrip. Necessary when already inside an itip handling and additional actions are performed.
+     * <p/>
+     */
+    static final String PARAMETER_SUPPRESS_ITIP = "itip.suppress";
+
+    /**
      * Sets a parameter.
      *
      * @param parameter The parameter name to set
