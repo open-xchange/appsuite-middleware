@@ -207,7 +207,6 @@ public class ITipAnalysisWriter {
         Set<EventField> updatedFields = diff.getUpdatedFields();
         for (EventField updatedField : updatedFields) {
             final JSONObject difference = new JSONObject();
-            EventMapper eventMapper = EventMapper.getInstance();
             writeField("old", updatedField, diff.getOriginal(), difference);
             writeField("new", updatedField, diff.getUpdate(), difference);
         }

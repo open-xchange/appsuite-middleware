@@ -613,9 +613,7 @@ public abstract class EventConverter {
         if (isSeriesMaster(event)) {
             if (event.containsStartDate() || event.containsEndDate()) {
                 // prefer start/end date of first occurrence for the series master event
-                if (null == recurrenceData) {
-                    recurrenceData = new DefaultRecurrenceData(event.getRecurrenceRule(), event.getStartDate(), null);
-                }
+                recurrenceData = new DefaultRecurrenceData(event.getRecurrenceRule(), event.getStartDate(), null);
                 RecurrenceId firstRecurrenceId = null;
                 RecurrenceIterator<RecurrenceId> iterator = getRecurrenceService().iterateRecurrenceIds(recurrenceData);
                 if (iterator.hasNext()) {

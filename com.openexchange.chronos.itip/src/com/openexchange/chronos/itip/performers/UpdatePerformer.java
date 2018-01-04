@@ -135,7 +135,7 @@ public class UpdatePerformer extends AbstractActionPerformer {
                 forMail = util.reloadEvent(event, session);
             }
 
-            if (event != null && !change.isException()) {
+            if (!change.isException()) {
                 processed.put(event.getUid(), event);
             }
 
