@@ -72,6 +72,7 @@ import com.openexchange.chronos.itip.ITipIntegrationUtility;
 import com.openexchange.chronos.itip.generators.ITipMailGeneratorFactory;
 import com.openexchange.chronos.itip.osgi.Services;
 import com.openexchange.chronos.itip.sender.MailSenderService;
+import com.openexchange.chronos.itip.tools.ITipEventUpdate;
 import com.openexchange.chronos.service.CalendarResult;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.EventID;
@@ -122,7 +123,10 @@ public class UpdatePerformer extends AbstractActionPerformer {
             Event original = determineOriginalEvent(change, processed, session);
             Event forMail = event;
             if (original != null) {
-                updateEvent(original, event, session);
+                ITipEventUpdate diff = change.getDiff();
+                if (null != diff && false == diff.isEmpty()) {
+                    updateEvent(original, event, session);
+                }
             } else {
                 ensureFolderId(event, session);
                 createEvent(event, session);
