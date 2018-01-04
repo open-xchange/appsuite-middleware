@@ -701,7 +701,7 @@ public abstract class EventConverter {
             // series pattern seems to be added in response for recurrence master and "regular" occurrences, but not for change exceptions
 
             if (null == recurrenceData) {
-                if (isSeriesMaster(event)) {
+                if (isSeriesMaster(event) || null == event.getSeriesId() && null == event.getId()) {
                     recurrenceData = new DefaultRecurrenceData(event.getRecurrenceRule(), event.getStartDate(), null);
                 } else if (null != event.getRecurrenceId() && DataAwareRecurrenceId.class.isInstance(event.getRecurrenceId())) {
                     recurrenceData = (RecurrenceData) event.getRecurrenceId();

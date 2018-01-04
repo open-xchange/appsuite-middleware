@@ -156,6 +156,7 @@ public class UpdatePerformer extends AbstractActionPerformer {
 
         update.setFolderId(original.getFolderId());
         update.setId(original.getId());
+        update.setSeriesId(original.getSeriesId());
 
         if (!original.containsRecurrenceId() && event.containsRecurrenceId()) {
             update.setRecurrenceId(event.getRecurrenceId());
@@ -168,6 +169,7 @@ public class UpdatePerformer extends AbstractActionPerformer {
         }
 
         event.setId(update.getId());
+        event.setSeriesId(update.getSeriesId());
         event.setFolderId(update.getFolderId());
 
         if (update.containsRecurrenceId()) {
