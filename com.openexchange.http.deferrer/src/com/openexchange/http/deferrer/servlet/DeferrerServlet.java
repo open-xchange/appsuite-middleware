@@ -94,6 +94,7 @@ public class DeferrerServlet extends HttpServlet {
         // Determine the URL
         RedirectUri redirectUri = determineRedirectURL(req);
         if (redirectUri == null) {
+            Tools.sendErrorPage(resp, HttpServletResponse.SC_NOT_FOUND, "No such redirect URI.");
             return;
         }
 
