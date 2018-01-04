@@ -185,13 +185,10 @@ public class DeletePerformer extends AbstractUpdatePerformer {
                     throw CalendarExceptionCodes.INVALID_RECURRENCE_ID.create(
                         new Exception("Deletion of existing change exception not supported"), recurrenceId, originalEvent.getRecurrenceRule());
                 } else if (null != recurrenceId.getRange()) {
-                    if (false == RecurrenceRange.THISANDFUTURE.equals(recurrenceId.getRange())) {
-                        throw CalendarExceptionCodes.INVALID_RECURRENCE_ID.create(
-                            new Exception("Only \"THISANDFUTURE\" is supported"), recurrenceId, originalEvent.getRecurrenceRule());
-                    }
                     /*
-                     * adjust recurrence rule to have a fixed UNTIL one second or day prior the targeted occurrence
+                     * delete "this and future" recurrences; adjust recurrence rule to have a fixed UNTIL one second or day prior the targeted occurrence
                      */
+                    Check.recurrenceRangeMatches(recurrenceId, RecurrenceRange.THISANDFUTURE);
                     Event eventUpdate = EventMapper.getInstance().copy(originalEvent, null, EventField.ID, EventField.SERIES_ID, EventField.START_DATE, EventField.END_DATE);
                     RecurrenceRule rule = initRecurrenceRule(originalEvent.getRecurrenceRule());
                     DateTime until = recurrenceId.getValue().addDuration(recurrenceId.getValue().isAllDay() ? new Duration(-1, 1, 0) : new Duration(-1, 0, 1));
