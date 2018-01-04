@@ -126,7 +126,7 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
     private final SessionReservationService sessionReservationService;
     private final ServiceLookup services;
     private final LoginConfiguration loginConfiguration;
-    
+
     /**
      * The number of milliseconds for which a LogoutRequest sent by us is considered valid (5 minutes).
      */
@@ -171,7 +171,7 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
         LOG.trace("Login redirect request: {}", loginRequest);
         return loginRequest;
     }
-    
+
     private String getAutologinURLFromOIDCCookie(HttpServletRequest request, HttpServletResponse response) throws OXException {
         LOG.trace("getAutologinURLFromOIDCCookie(HttpServletRequest request: {}, HttpServletResponse response)", request.getRequestURI());
         Cookie autologinCookie = OIDCTools.loadAutologinCookie(request, this.loginConfiguration);
@@ -179,18 +179,18 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
         if (autologinCookie == null) {
             return null;
         }
-        
+
         String redirectURL = this.getAutologinByCookieURL(request, response, autologinCookie);
         String deeplink = request.getParameter("hash");
-        
-        //TODO QS-VS um test erweitern, ist das überhaupt richtig so?
+
+        //TODO QS-VS um test erweitern, ist das ueberhaupt richtig so?
         if (!Strings.isEmpty(redirectURL) && !Strings.isEmpty(deeplink)) {
             redirectURL += "&" + deeplink.substring(1);
         }
 
         return redirectURL;
     }
-    
+
     private String getAutologinByCookieURL(HttpServletRequest request, HttpServletResponse response, Cookie oidcAtologinCookie) throws OXException {
         LOG.trace("getAutologinByCookieURL(HttpServletRequest request: {}, HttpServletResponse response, Cookie oidcAtologinCookie: {})", request.getRequestURI(), oidcAtologinCookie != null ? oidcAtologinCookie.getValue() : "null");
         if (oidcAtologinCookie != null) {
@@ -210,7 +210,7 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
 
         return null;
     }
-    
+
     private Session getSessionFromAutologinCookie(Cookie oidcAtologinCookie) throws OXException {
         LOG.trace("getSessionFromAutologinCookie(Cookie oidcAtologinCookie: {})", oidcAtologinCookie.getValue());
         Session session = null;
@@ -288,7 +288,7 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
             throw e;
         }
     }
-    
+
     private TokenRequest createTokenRequest(HttpServletRequest request) throws OXException {
         LOG.trace("createTokenRequest(HttpServletRequest request: {})", request.getRequestURI());
         AuthorizationCode code = new AuthorizationCode(request.getParameter("code"));
@@ -302,7 +302,7 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
         TokenRequest tokenRequest = new TokenRequest(tokenEndpoint, clientAuth, codeGrant, this.backend.getScope());
         return this.backend.getTokenRequest(tokenRequest);
     }
-    
+
     private OIDCTokenResponse getTokenResponse(TokenRequest tokenReq) throws OXException {
         LOG.trace("OIDCTokenResponse getTokenResponse(TokenRequest tokenReq {})", tokenReq);
         HTTPRequest httpRequest = this.backend.getHttpRequest(tokenReq.toHTTPRequest());
@@ -326,7 +326,7 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
 
         return (OIDCTokenResponse) tokenResponse;
     }
-    
+
     private void sendLoginRequestToServer(HttpServletRequest request, HttpServletResponse response, OIDCTokenResponse tokenResponse, String domainName) throws OXException {
         LOG.trace("sendLoginRequestToServer(HttpServletRequest request: {}, HttpServletResponse response, OIDCTokenResponse tokenResponse: {}, String domainName: {})",
             request.getRequestURI(), tokenResponse.getOIDCTokens().toJSONObject().toJSONString(), domainName);
@@ -377,9 +377,9 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
         if (this.backend.getBackendConfig().isSSOLogout()) {
             LogoutRequest logoutRequest = this.backend.getLogoutFromIDPRequest(session);
             String domainName = OIDCTools.getDomainName(request, services.getOptionalService(HostnameService.class));
-            
+
             String redirectURI = getResumeURL(request, response, domainName);
-            
+
             DefaultLogoutRequestInfo defaultLogoutRequestInfo = new DefaultLogoutRequestInfo(logoutRequest.getState().getValue(), domainName, session.getSessionID(), redirectURI);
             this.stateManagement.addLogoutRequest(defaultLogoutRequestInfo, LOGOUT_REQUEST_TIMEOUT, TimeUnit.MILLISECONDS);
             logoutRequestString = logoutRequest.toURI().toString();
