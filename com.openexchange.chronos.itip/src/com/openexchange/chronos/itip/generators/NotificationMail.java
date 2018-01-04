@@ -91,8 +91,8 @@ public class NotificationMail {
     private String html;
     private String subject;
 
-    private Event original;
-    private Event event;
+    private Event           original;
+    private Event           event;
     private ITipEventUpdate diff;
 
     private NotificationParticipant sender;
@@ -344,8 +344,16 @@ public class NotificationMail {
     }
 
     public boolean shouldBeSent() throws OXException {
-        if (event != null && endsInPast(event)) {
-            return false;
+        if (null != event) {
+            if (endsInPast(event)) {
+                // No mail for events in the past
+                if (null != original && endsInPast(original) || stateType.equals(Type.NEW) || stateType.equals(Type.MODIFIED)) {
+                    return false;
+                }
+            }
+            if (stateType.equals(Type.DELETED)) {
+                return false;
+            }
         }
         if (!recipientIsOrganizerAndHasNoAccess()) {
             return false;
@@ -357,15 +365,6 @@ public class NotificationMail {
         //        if (event != null && event.containsNotification() && !event.getNotification()) {
         //            return false;
         //        }
-        if (event != null && stateType.equals(Type.NEW) && endsInPast(event)) {
-            return false;
-        }
-        if (event != null && original != null && stateType.equals(Type.MODIFIED) && isNotWorthUpdateNotification(original, event)) {
-            return false;
-        }
-        if (event != null && stateType.equals(Type.DELETED)) {
-            return false;
-        }
 
         // Does the appointment have any change to notify about?
         if (!anInterestingFieldChanged()) {
@@ -510,93 +509,41 @@ public class NotificationMail {
         return false;
     }
 
-    private boolean isNotWorthUpdateNotification(final Event original, final Event modified) throws OXException {
-        if (CalendarUtils.isSeriesMaster(original) || CalendarUtils.isSeriesException(original)) {
-            if (endsInPast(original)) {
-                return endsInPast(modified);
-            } else {
-                if (CalendarUtils.isSeriesException(modified)) {
-                    return endsInPast(modified);
-                } else {
-                    return false;
-                }
-            }
-        } else {
-            if (endsInPast(original)) {
-                return endsInPast(modified);
-            } else {
-                return false;
-            }
-        }
-    }
-
     private boolean endsInPast(final Event event) throws OXException {
         final Date now = new Date();
-        Date endDate;
+        Date endDate = new Date(event.getEndDate().getTimestamp());
 
-        // Get latest end date
-        if (original == null || event.getEndDate().after(original.getEndDate())) {
-            endDate = new Date(event.getEndDate().getTimestamp());
-        } else {
-            endDate = new Date(original.getEndDate().getTimestamp());
-        }
-
-        // No recurrence at all
-        if (!CalendarUtils.isSeriesMaster(event) && !CalendarUtils.isSeriesException(event) && !CalendarUtils.isSeriesMaster(original) && !CalendarUtils.isSeriesException(original)) {
-            return endDate.before(now);
-        }
-
-        // Exception update/create
-        if (CalendarUtils.isSeriesException(event)) {
-            return endDate.before(now);
-        }
-
-        // Series update
-        if (CalendarUtils.isSeriesMaster(event) && CalendarUtils.isSeriesMaster(original)) {
-            RecurrenceRule origRrule;
-            RecurrenceRule eventRule;
+        // In case of series master the date of the last occurrence has to be validated
+        if (CalendarUtils.isSeriesMaster(event)) {
             try {
-                origRrule = new RecurrenceRule(original.getRecurrenceRule());
-                eventRule = new RecurrenceRule(event.getRecurrenceRule());
+                RecurrenceRule eventRule = new RecurrenceRule(event.getRecurrenceRule());
+                Date eventEnd = null;
+
+                RecurrenceService rService = Services.getService(RecurrenceService.class);
+                if (eventRule.getUntil() != null) {
+                    eventEnd = new Date(eventRule.getUntil().getTimestamp());
+                } else if (eventRule.getCount() != null) {
+                    Iterator<Event> instances = rService.calculateInstances(event, null, null, null);
+                    Event last = null;
+                    while (instances.hasNext()) {
+                        last = instances.next();
+                    }
+                    if (null != last) {
+                        eventEnd = new Date(last.getEndDate().getTimestamp());
+                    }
+                } else {
+                    // Recurrence rule has no 'limit' defined. 
+                    return false;
+                }
+                if (eventEnd != null) {
+                    return eventEnd.before(now);
+                }
             } catch (InvalidRecurrenceRuleException e) {
-                LOG.error("Invalid recurrence rule. Fallback to notify");
-                return false;
+                LOG.debug("Invalid recurrence rule. Fallback to notify");
             }
-            Date origEnd = null;
-            Date eventEnd = null;
-
-            RecurrenceService rService = Services.getService(RecurrenceService.class);
-            if (origRrule.getUntil() != null) {
-                origEnd = new Date(origRrule.getUntil().getTimestamp());
-            } else if (origRrule.getCount() != null) {
-                Iterator<Event> instances = rService.calculateInstances(original, null, null, null);
-                while (instances.hasNext()) {
-                    if (!instances.hasNext()) {
-                        origEnd = new Date(instances.next().getEndDate().getTimestamp());
-                    }
-                }
-            }
-            if (eventRule.getUntil() != null) {
-                eventEnd = new Date(eventRule.getUntil().getTimestamp());
-            } else if (eventRule.getCount() != null) {
-                Iterator<Event> instances = rService.calculateInstances(event, null, null, null);
-                while (instances.hasNext()) {
-                    if (!instances.hasNext()) {
-                        eventEnd = new Date(instances.next().getEndDate().getTimestamp());
-                    }
-                }
-            }
-
-            if (origEnd == null || eventEnd == null) {
-                return false;
-            } else {
-                return eventEnd.before(now) || origEnd.before(now);
-            }
-
         }
 
-        LOG.error("Unexpected case found. Fallback to notify");
-        return false;
+        return endDate.before(now);
     }
 
     private boolean isCancelMail() {
