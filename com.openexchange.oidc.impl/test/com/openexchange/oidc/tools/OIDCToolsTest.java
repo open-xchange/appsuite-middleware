@@ -111,16 +111,16 @@ public class OIDCToolsTest {
 
     @Mock
     private Cookie mockedCookie;
-    
+
     @Mock
     private OIDCBackendConfig mockedBackendConfig;
-    
+
     @Mock
     private OIDCBackend mockedBackend;
-    
+
     @Mock
     LoginConfiguration mockedLoginConfig;
-    
+
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
@@ -128,11 +128,14 @@ public class OIDCToolsTest {
         Mockito.when(mockedHostnameService.getHostname(-1, -1)).thenReturn(HOSTNAME);
         Mockito.when(mockedRequest.getRequestURI()).thenReturn(REQUEST_URI);
     }
-    
+
     @After
     public void cleanUp() {
-        for (File file : new File(TESTFILES_PATH).listFiles()) {
-            file.delete();
+        File files = new File(TESTFILES_PATH);
+        if (null != files && files.isDirectory() && files.exists()) {
+            for (File file : files.listFiles()) {
+                file.delete();
+            }
         }
     }
 
@@ -156,7 +159,7 @@ public class OIDCToolsTest {
         String result = OIDCTools.getDomainName(mockedRequest, mockedHostnameService);
         assertEquals(HOSTNAME, result);
     }
-    
+
     @Test
     public void validateSession_ValidTest() throws Exception {
         Mockito.when(mockedSession.getSessionID()).thenReturn("SessionID");
@@ -176,7 +179,7 @@ public class OIDCToolsTest {
         }
         assertTrue(true);
     }
-    
+
     @Test
     public void validateSession_SecretCookieNullTest() throws Exception {
         Mockito.when(mockedSession.getSessionID()).thenReturn("SessionID");
@@ -233,7 +236,7 @@ public class OIDCToolsTest {
             assertEquals("Stored JSON String is not like expected", REDIRECT_JSON, reader.readLine());
         }
     }
-    
+
     @Test
     public void addParameterToSession_ParameterInGivenMapTest() {
         Session session = new MockedSession();
@@ -256,7 +259,7 @@ public class OIDCToolsTest {
         assertTrue("There was a parameter found, where none should be.", ((String) session.getParameter(newKey) == null));
 
     }
-    
+
     @Test
     public void getUIWebPath_FromBackendTest() {
         Mockito.when(mockedBackendConfig.getUIWebpath()).thenReturn(UI_WEBPATH);
@@ -290,7 +293,7 @@ public class OIDCToolsTest {
             assertEquals(OIDCExceptionCode.INVALID_BACKEND_PATH, e.getExceptionCode());
         }
     }
-    
+
     @Test
     public void getPrefix_BackendConfigTest() {
         PowerMockito.stub(PowerMockito.method(OIDCTools.class, "getRedirectPathPrefix")).toReturn("dispatcher/");
@@ -306,7 +309,7 @@ public class OIDCToolsTest {
         String result = OIDCTools.getPrefix(mockedBackend);
         assertTrue("Wrong prefix build, dispatcher/oidc/ expected", result.equals("dispatcher/oidc/"));
     }
-    
+
     @Test
     public void getUiClient_FromRequestTest() {
         PowerMockito.mockStatic(LoginServlet.class);
