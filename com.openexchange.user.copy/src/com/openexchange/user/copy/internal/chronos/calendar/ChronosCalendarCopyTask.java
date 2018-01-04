@@ -184,7 +184,7 @@ public class ChronosCalendarCopyTask implements CopyUserTaskService {
         Map<String, List<Attendee>> attendees = exchangeAttendeesIds(folderMapping, eventAttendeeMapping, dstEventMapping, dstUsrId, srcUsrId);
         insertDestinationAttendees(attendees);
         //Alarms
-        Map<String, Map<Integer, List<Alarm>>> alarmByEventByUser = exchangeAlarmIds(alarmByEvent, dstEventMapping, dstUsrId);
+        Map<String, Map<Integer, List<Alarm>>> alarmByEventByUser = exchangeAlarmIds(alarmByEvent, dstEventMapping, srcUsrId, dstUsrId);
         insertDestinationAlarms(alarmByEventByUser);
         //AlarmTrigger
         List<Event> dstEvents = new ArrayList<>(dstEventMapping.values());
@@ -263,11 +263,11 @@ public class ChronosCalendarCopyTask implements CopyUserTaskService {
 
     private Map<String, Event> exchangeEventIds(List<Event> srcEventList, Context dstCtx, int dstUsrId, int srcUsrId) throws OXException {
         Map<String, Event> dstEventList = new HashMap<>(srcEventList.size());
-        for (Entry<String, List<Event>> entry : getEventsByUID(srcEventList, true).entrySet()) {
+        for (Entry<String, List<Event>> entry : getEventsByUID(srcEventList, false).entrySet()) {
             List<Event> eventGroup = sortSeriesMasterFirst(entry.getValue());
             String srcSeriesMasterId = "";
             String dstSeriesMasterId = "";
-            if (1 < eventGroup.size()) {
+            if (1 <= eventGroup.size() && null != eventGroup.get(0).getSeriesId()) {
                 srcSeriesMasterId = eventGroup.get(0).getId();
             }
             for (Event srcEvent : eventGroup) {
@@ -318,12 +318,15 @@ public class ChronosCalendarCopyTask implements CopyUserTaskService {
         return dstAttendees;
     }
 
-    private Map<String, Map<Integer, List<Alarm>>> exchangeAlarmIds(Map<String, Map<Integer, List<Alarm>>> alarms, Map<String, Event> dstEventMapping, int dstUsrId) throws OXException {
+    private Map<String, Map<Integer, List<Alarm>>> exchangeAlarmIds(Map<String, Map<Integer, List<Alarm>>> alarms, Map<String, Event> dstEventMapping, int srcUsrId, int dstUsrId) throws OXException {
         Map<String, Map<Integer, List<Alarm>>> alarmsByUserByEventId = new HashMap<>(alarms.size());
         Map<Integer, List<Alarm>> alarmsByUser = null;
         List<Alarm> alarmList;
         for (Entry<String, Map<Integer, List<Alarm>>> entry : alarms.entrySet()) {
             for (Entry<Integer, List<Alarm>> alarmsPerUser : entry.getValue().entrySet()) {
+                if (srcUsrId != alarmsPerUser.getKey()) {
+                    continue;
+                }
                 alarmsByUser = new HashMap<>(1);
                 alarmList = new ArrayList<>(entry.getValue().size());
                 for (Alarm alarm : alarmsPerUser.getValue()) {
