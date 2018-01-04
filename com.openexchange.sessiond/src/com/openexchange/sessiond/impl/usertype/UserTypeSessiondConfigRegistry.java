@@ -49,9 +49,8 @@
 
 package com.openexchange.sessiond.impl.usertype;
 
+import java.util.EnumMap;
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
@@ -60,42 +59,38 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.Strings;
 import com.openexchange.session.UserAndContext;
-import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.sessiond.osgi.Services;
 import com.openexchange.user.UserService;
 
 /**
- * {@link UserSpecificSessiondConfigRegistry}
+ * {@link UserTypeSessiondConfigRegistry}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.10.0
  */
-public class UserSpecificSessiondConfigRegistry {
+public class UserTypeSessiondConfigRegistry {
 
-    public enum USER_TYPE {
+    public enum UserType {
         USER, GUEST, ANONYMOUS;
     }
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(UserSpecificSessiondConfigRegistry.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(UserTypeSessiondConfigRegistry.class);
 
-    private static final Cache<UserAndContext, USER_TYPE> CACHE = CacheBuilder.newBuilder().maximumSize(65536).expireAfterWrite(60, TimeUnit.MINUTES).build();
+    private final Cache<UserAndContext, UserType> CACHE = CacheBuilder.newBuilder().maximumSize(65536).expireAfterWrite(120, TimeUnit.MINUTES).build();
 
-    private final ConcurrentMap<USER_TYPE, UserTypeSessiondConfigInterface> map;
+    private final EnumMap<UserType, UserTypeSessiondConfigInterface> map;
 
-    private final ConfigurationService conf;
-
-    public UserSpecificSessiondConfigRegistry(ConfigurationService conf) {
-        this.conf = conf;
-        this.map = new ConcurrentHashMap<USER_TYPE, UserTypeSessiondConfigInterface>();
+    public UserTypeSessiondConfigRegistry() {
+        this.map = new EnumMap<UserType, UserTypeSessiondConfigInterface>(UserType.class);
     }
 
-    public void init() {
+    public void init(ConfigurationService conf) {
         UserTypeSessiondConfigInterface userConfig = new SessiondUserConfigImpl(conf);
-        map.put(userConfig.handles(), userConfig);
+        map.put(userConfig.getUserType(), userConfig);
         UserTypeSessiondConfigInterface linkConfig = new SessiondLinkConfigImpl(conf);
-        map.put(linkConfig.handles(), linkConfig);
+        map.put(linkConfig.getUserType(), linkConfig);
         UserTypeSessiondConfigInterface guestConfig = new SessiondGuestConfigImpl(conf);
-        map.put(guestConfig.handles(), guestConfig);
+        map.put(guestConfig.getUserType(), guestConfig);
     }
 
     public List<UserTypeSessiondConfigInterface> getServices() {
@@ -108,26 +103,22 @@ public class UserSpecificSessiondConfigRegistry {
     }
 
     public UserTypeSessiondConfigInterface getService(int userId, int contextId) throws OXException {
-        if (this.map.isEmpty()) {
-            throw SessionExceptionCodes.NOT_INITIALIZED.create();
-        }
-
         UserAndContext key = UserAndContext.newInstance(userId, contextId);
-        USER_TYPE result = CACHE.getIfPresent(key);
+        UserType result = CACHE.getIfPresent(key);
 
         if (null == result) {
             UserService userService = Services.optService(UserService.class);
             if (userService == null) {
                 LOG.warn("Unable to retrieve UserService. Can handle sessions only via user settings as evaluation of user type is not possible.");
-                return this.map.get(USER_TYPE.USER);
+                return this.map.get(UserType.USER);
             }
             User user = userService.getUser(userId, contextId);
             if (isAnonymousGuest(user)) {
-                result = USER_TYPE.ANONYMOUS;
+                result = UserType.ANONYMOUS;
             } else if (user.isGuest()) {
-                result = USER_TYPE.GUEST;
+                result = UserType.GUEST;
             } else {
-                result = USER_TYPE.USER;
+                result = UserType.USER;
             }
             CACHE.put(key, result);
         }
@@ -135,9 +126,6 @@ public class UserSpecificSessiondConfigRegistry {
     }
 
     private static boolean isAnonymousGuest(User user) {
-        if (user.isGuest() && Strings.isEmpty(user.getMail())) {
-            return true;
-        }
-        return false;
+        return user.isGuest() && Strings.isEmpty(user.getMail());
     }
 }

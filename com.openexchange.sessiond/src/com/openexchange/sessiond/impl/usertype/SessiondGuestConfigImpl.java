@@ -80,7 +80,7 @@ public class SessiondGuestConfigImpl implements UserTypeSessiondConfigInterface 
     }
 
     @Override
-    public UserSpecificSessiondConfigRegistry.USER_TYPE handles() {
-        return UserSpecificSessiondConfigRegistry.USER_TYPE.GUEST;
+    public UserTypeSessiondConfigRegistry.UserType getUserType() {
+        return UserTypeSessiondConfigRegistry.UserType.GUEST;
     }
 }

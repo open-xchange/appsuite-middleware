@@ -49,7 +49,7 @@
 
 package com.openexchange.sessiond.impl.usertype;
 
-import com.openexchange.sessiond.impl.usertype.UserSpecificSessiondConfigRegistry.USER_TYPE;
+import com.openexchange.sessiond.impl.usertype.UserTypeSessiondConfigRegistry.UserType;
 
 /**
  * SessionConfig
@@ -61,15 +61,15 @@ public interface UserTypeSessiondConfigInterface {
     /**
      * Returns the type of users the {@link UserTypeSessiondConfigInterface} handles
      * 
-     * @return {@link USER_TYPE}
+     * @return {@link UserType}
      */
-    USER_TYPE handles();
+    UserType getUserType();
 
     /**
      * Returns the maximum allowed sessions for the given type of user.
      * 
      * @return The number of allowed sessions for the given type of user
-     * @see #handles()
+     * @see #getUserType()
      */
     int getMaxSessionsPerUserType();
 }

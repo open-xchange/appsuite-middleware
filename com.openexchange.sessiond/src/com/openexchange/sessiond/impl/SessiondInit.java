@@ -53,7 +53,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.Initialization;
-import com.openexchange.sessiond.impl.usertype.UserSpecificSessiondConfigRegistry;
+import com.openexchange.sessiond.impl.usertype.UserTypeSessiondConfigRegistry;
 import com.openexchange.sessiond.osgi.Services;
 
 /**
@@ -66,7 +66,6 @@ public class SessiondInit implements Initialization {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SessiondInit.class);
 
-    private UserSpecificSessiondConfigRegistry registry;
 
     private SessiondConfigInterface config;
 
@@ -89,8 +88,8 @@ public class SessiondInit implements Initialization {
         final ConfigurationService conf = Services.getService(ConfigurationService.class);
         if (conf != null) {
             config = new SessiondConfigImpl(conf);
-            registry = new UserSpecificSessiondConfigRegistry(conf);
-            registry.init();
+            UserTypeSessiondConfigRegistry registry = new UserTypeSessiondConfigRegistry();
+            registry.init(conf);
             LOG.info("Starting Sessiond");
 
             SessionHandler.init(config, registry);

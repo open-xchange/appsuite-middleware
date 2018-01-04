@@ -62,8 +62,8 @@ import com.openexchange.config.SimConfigurationService;
 import com.openexchange.server.SimpleServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.impl.usertype.UserTypeSessiondConfigInterface;
-import com.openexchange.sessiond.impl.usertype.UserSpecificSessiondConfigRegistry;
-import com.openexchange.sessiond.impl.usertype.UserSpecificSessiondConfigRegistry.USER_TYPE;
+import com.openexchange.sessiond.impl.usertype.UserTypeSessiondConfigRegistry;
+import com.openexchange.sessiond.impl.usertype.UserTypeSessiondConfigRegistry.UserType;
 import com.openexchange.sessionstorage.SessionStorageService;
 
 /**
@@ -74,7 +74,7 @@ import com.openexchange.sessionstorage.SessionStorageService;
 public class Bug22838Test {
 
     @Mock
-    private UserSpecificSessiondConfigRegistry registry;
+    private UserTypeSessiondConfigRegistry registry;
 
     @Before
     public void setUp() throws Exception {
@@ -90,8 +90,8 @@ public class Bug22838Test {
         UserTypeSessiondConfigInterface sessiondConfigInterface = new UserTypeSessiondConfigInterface() {
 
             @Override
-            public USER_TYPE handles() {
-                return USER_TYPE.USER;
+            public UserType getUserType() {
+                return UserType.USER;
             }
 
             @Override

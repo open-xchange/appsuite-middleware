@@ -52,10 +52,11 @@ package com.openexchange.sessiond.impl.usertype;
 import com.openexchange.config.ConfigurationService;
 
 /**
- * {@link SessiondUserConfigImpl} - The default {@link UserTypeSessiondConfigInterface} implementation.
+ * 
+ * {@link SessiondUserConfigImpl}
  *
- * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since v7.10.0
  */
 public class SessiondUserConfigImpl implements UserTypeSessiondConfigInterface {
 
@@ -79,7 +80,7 @@ public class SessiondUserConfigImpl implements UserTypeSessiondConfigInterface {
     }
 
     @Override
-    public UserSpecificSessiondConfigRegistry.USER_TYPE handles() {
-        return UserSpecificSessiondConfigRegistry.USER_TYPE.USER;
+    public UserTypeSessiondConfigRegistry.UserType getUserType() {
+        return UserTypeSessiondConfigRegistry.UserType.USER;
     }
 }

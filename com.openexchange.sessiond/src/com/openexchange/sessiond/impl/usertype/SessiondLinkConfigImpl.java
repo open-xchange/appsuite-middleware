@@ -80,7 +80,7 @@ public class SessiondLinkConfigImpl implements UserTypeSessiondConfigInterface {
     }
 
     @Override
-    public UserSpecificSessiondConfigRegistry.USER_TYPE handles() {
-        return UserSpecificSessiondConfigRegistry.USER_TYPE.ANONYMOUS;
+    public UserTypeSessiondConfigRegistry.UserType getUserType() {
+        return UserTypeSessiondConfigRegistry.UserType.ANONYMOUS;
     }
 }

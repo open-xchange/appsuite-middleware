@@ -87,7 +87,7 @@ import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.sessiond.SessionFilter;
 import com.openexchange.sessiond.SessionMatcher;
 import com.openexchange.sessiond.SessiondEventConstants;
-import com.openexchange.sessiond.impl.usertype.UserSpecificSessiondConfigRegistry;
+import com.openexchange.sessiond.impl.usertype.UserTypeSessiondConfigRegistry;
 import com.openexchange.sessiond.impl.usertype.UserTypeSessiondConfigInterface;
 import com.openexchange.sessiond.osgi.Services;
 import com.openexchange.sessiond.serialization.PortableContextSessionsCleaner;
@@ -127,7 +127,7 @@ public final class SessionHandler {
     static volatile SessiondConfigInterface config;
 
     /** The applied user type specific configuration */
-    static volatile UserSpecificSessiondConfigRegistry REGISTRY;
+    static volatile UserTypeSessiondConfigRegistry REGISTRY;
 
     /** The {@link SessionData} reference */
     protected static final AtomicReference<SessionData> SESSION_DATA_REF = new AtomicReference<SessionData>();
@@ -163,7 +163,7 @@ public final class SessionHandler {
      * @param config The appropriate configuration
      * @throws OXException
      */
-    public static synchronized void init(SessiondConfigInterface config, UserSpecificSessiondConfigRegistry registry) throws OXException {
+    public static synchronized void init(SessiondConfigInterface config, UserTypeSessiondConfigRegistry registry) throws OXException {
         SessionHandler.config = config;
         SessionHandler.REGISTRY = registry;
         SessionData sessionData = new SessionData(config.getNumberOfSessionContainers(), config.getMaxSessions(), config.getRandomTokenTimeout(), config.getNumberOfLongTermSessionContainers(), config.isAutoLogin());

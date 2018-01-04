@@ -74,8 +74,8 @@ import com.openexchange.osgi.ServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessionFilter;
 import com.openexchange.sessiond.impl.usertype.UserTypeSessiondConfigInterface;
-import com.openexchange.sessiond.impl.usertype.UserSpecificSessiondConfigRegistry;
-import com.openexchange.sessiond.impl.usertype.UserSpecificSessiondConfigRegistry.USER_TYPE;
+import com.openexchange.sessiond.impl.usertype.UserTypeSessiondConfigRegistry;
+import com.openexchange.sessiond.impl.usertype.UserTypeSessiondConfigRegistry.UserType;
 import com.openexchange.sessiond.serialization.PortableSessionFilterApplier;
 import com.openexchange.threadpool.SimFactory;
 
@@ -94,7 +94,7 @@ public class SessionHandlerTest {
     private static HazelcastInstance hz2;
 
     @Mock
-    private UserSpecificSessiondConfigRegistry registry;
+    private UserTypeSessiondConfigRegistry registry;
 
     private SessiondConfigInterface config;
 
@@ -139,8 +139,8 @@ public class SessionHandlerTest {
             }
 
             @Override
-            public USER_TYPE handles() {
-                return USER_TYPE.USER;
+            public UserType getUserType() {
+                return UserType.USER;
             }
         };
         Mockito.when(registry.getService(Matchers.anyInt(), Matchers.anyInt())).thenReturn(sessiondConfigInterface);
