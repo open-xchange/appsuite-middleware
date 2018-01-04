@@ -236,7 +236,8 @@ public final class CheckPermissionOnUpdate extends CheckPermission {
             OCLPermission.NO_PERMISSIONS,
             false,
             OCLPermission.SYSTEM_SYSTEM,
-            FolderPermissionType.NORMAL, 
+            FolderPermissionType.NORMAL,
+            null,
             writeCon,
             ctx);
     }

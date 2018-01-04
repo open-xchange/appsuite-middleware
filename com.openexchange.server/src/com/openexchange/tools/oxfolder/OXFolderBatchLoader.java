@@ -50,7 +50,6 @@
 package com.openexchange.tools.oxfolder;
 
 import static com.openexchange.java.Autoboxing.I;
-import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import static com.openexchange.tools.sql.DBUtils.getIN;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
@@ -249,7 +248,7 @@ public final class OXFolderBatchLoader {
                         folders.put(fuid, folderObj);
                     }
                 } finally {
-                    closeSQLStuff(rs, stmt);
+                    Databases.closeSQLStuff(rs, stmt);
                 }
             }
             if (loadSubfolderList) {
@@ -311,7 +310,7 @@ public final class OXFolderBatchLoader {
                 try {
                     final int[] currentIds = com.openexchange.tools.arrays.Arrays.extract(folderIds, i, IN_LIMIT);
                     final String sql = getIN(
-                        "SELECT permission_id,fp,orp,owp,odp,admin_flag,group_flag,system,fuid,type FROM #TABLE# WHERE cid=? AND fuid IN (",
+                        "SELECT permission_id,fp,orp,owp,odp,admin_flag,group_flag,system,fuid,type,sharedParentFolder FROM #TABLE# WHERE cid=? AND fuid IN (",
                         currentIds.length);
                     stmt = readCon.prepareStatement(PAT_RPL_TABLE.matcher(sql).replaceFirst(table));
                     int pos = 1;
@@ -330,7 +329,9 @@ public final class OXFolderBatchLoader {
                         p.setFolderAdmin(rs.getInt(6) > 0 ? true : false); // admin_flag
                         p.setGroupPermission(rs.getInt(7) > 0 ? true : false); // group_flag
                         p.setSystem(rs.getInt(8)); // system
-                        p.setType(FolderPermissionType.getType(rs.getInt(10)));
+                        p.setType(FolderPermissionType.getType(rs.getInt(10))); // type
+                        int legator = rs.getInt(11);
+                        p.setPermissionLegator(legator==0 ? null : String.valueOf(legator)); // permission legator
                         list.add(p);
                     }
                     stmt.close();
@@ -404,7 +405,7 @@ public final class OXFolderBatchLoader {
 		                ret.get(rs.getInt(2)).add(I(rs.getInt(1)));
 		            }
 		        } finally {
-		        	closeSQLStuff(rs, stmt);
+		            Databases.closeSQLStuff(rs, stmt);
 		        }
             }
             return ret;

@@ -47,43 +47,48 @@
  *
  */
 
-package com.openexchange.folderstorage.outlook.memory;
-
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import com.openexchange.folderstorage.BasicPermission;
-import com.openexchange.folderstorage.FolderPermissionType;
+package com.openexchange.share.groupware;
 
 /**
- * {@link MemoryPermission} - A mail folder permission.
+ * {@link SubfolderAwareTargetPermission}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.10.0
  */
-public final class MemoryPermission extends BasicPermission {
+public class SubfolderAwareTargetPermission extends TargetPermission {
+
+    private final int type;
+    private final String legator;
 
     /**
-     * serialVersionUID
+     * Initializes a new {@link SubfolderAwareTargetPermission}.
+     * @param entityId
+     * @param isGroup
+     * @param permissionBits
+     * @param includeSubfolders
      */
-    private static final long serialVersionUID = -4886238734505728866L;
+    public SubfolderAwareTargetPermission(int entityId, boolean isGroup, int permissionBits, int type, String legator) {
+        super(entityId, isGroup, permissionBits);
+        this.type = type;
+        this.legator = legator;
+    }
 
     /**
-     * Initializes a {@link MemoryPermission} from specified {@link ResultSet}'s currently select row:<br>
-     * <code>SELECT entity, fp, orp, owp, odp, adminFlag, groupFlag, system, type, sharedParentFolder FROM virtualPermission ...</code>
+     * Gets this folder permission's type.
      *
-     * @throws SQLException If reading from result set fails
+     * @return This folder permission's type.
      */
-    public MemoryPermission(final ResultSet rs) throws SQLException {
-        super();
-        entity = rs.getInt(1);
-        folderPermission = rs.getInt(2);
-        readPermission = rs.getInt(3);
-        writePermission = rs.getInt(4);
-        deletePermission = rs.getInt(5);
-        admin = rs.getInt(6) > 0;
-        group = rs.getInt(7) > 0;
-        system = rs.getInt(8);
-        type = FolderPermissionType.getType(rs.getInt(9));
-        legator = rs.getString(10);
+    public int getType() {
+        return type;
+    }
+
+    /**
+     * If this permission is handed down from a parent folder this method retrieves the sharing parent folder id.
+     *
+     * @return This sharing folder id
+     */
+    public String getPermissionLegator() {
+       return legator;
     }
 
 }

@@ -7,6 +7,3 @@ folder:
 item:
   type: string
   description: The object identifier, in case the share target is a single item. This must not be present to share a complete folder.
-includeSubfolders:
-  type: boolean
-  description: An optional flag indicating whether subfolders should be included or not. Only applicable for infostore folders.

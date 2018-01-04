@@ -80,6 +80,7 @@ public class ImmutablePermission implements Permission {
         private boolean group;
         private int system;
         private FolderPermissionType type;
+        private String legator;
         private boolean admin;
         private int folderPermission;
         private int readPermission;
@@ -103,6 +104,7 @@ public class ImmutablePermission implements Permission {
             group = false;
             system = 0;
             type = FolderPermissionType.NORMAL;
+            legator = null;
             admin = true;
             folderPermission = 0;
             readPermission = 0;
@@ -150,10 +152,22 @@ public class ImmutablePermission implements Permission {
          * @param type The permission type
          * @return This builder
          */
-        public Builder setSystem(FolderPermissionType type) {
+        public Builder setFolderPermissionType(FolderPermissionType type) {
             this.type = type;
             return this;
         }
+
+        /**
+         * Sets the legator.
+         *
+         * @param legator The legator
+         * @return This builder
+         */
+        public Builder setFolderPermissionType(String legator) {
+            this.legator = legator;
+            return this;
+        }
+
 
         /**
          * Sets the admin flag
@@ -216,7 +230,7 @@ public class ImmutablePermission implements Permission {
          * @return The immutable permission
          */
         public ImmutablePermission build() {
-            return new ImmutablePermission(entity, group, system, admin, folderPermission, readPermission, writePermission, deletePermission, type);
+            return new ImmutablePermission(entity, group, system, admin, folderPermission, readPermission, writePermission, deletePermission, type, legator);
         }
     }
 
@@ -226,6 +240,7 @@ public class ImmutablePermission implements Permission {
     private final boolean group;
     private final int system;
     private final FolderPermissionType type;
+    private final String legator;
     private final boolean admin;
     private final int folderPermission;
     private final int readPermission;
@@ -236,12 +251,13 @@ public class ImmutablePermission implements Permission {
     /**
      * Initializes a new {@link ImmutablePermission}.
      */
-    ImmutablePermission(int entity, boolean group, int system, boolean admin, int folderPermission, int readPermission, int writePermission, int deletePermission, FolderPermissionType type) {
+    ImmutablePermission(int entity, boolean group, int system, boolean admin, int folderPermission, int readPermission, int writePermission, int deletePermission, FolderPermissionType type, String legator) {
         super();
         this.entity = entity;
         this.group = group;
         this.system = system;
         this.type = type;
+        this.legator = legator;
         this.admin = admin;
         this.folderPermission = folderPermission;
         this.readPermission = readPermission;
@@ -259,6 +275,7 @@ public class ImmutablePermission implements Permission {
         result = prime * result + deletePermission;
         result = prime * result + system;
         result = prime * result + type.getTypeNumber();
+        result = prime * result + legator==null ? 0 : legator.hashCode();
         hash = result;
     }
 
@@ -430,6 +447,16 @@ public class ImmutablePermission implements Permission {
     @Override
     public void setType(FolderPermissionType type) {
         throw new UnsupportedOperationException("ImmutablePermission.setType()");
+    }
+
+    @Override
+    public String getPermissionLegator() {
+        return legator;
+    }
+
+    @Override
+    public void setPermissionLegator(String legator) {
+        throw new UnsupportedOperationException("ImmutablePermission.setPermissionLegator()");
     }
 
 }

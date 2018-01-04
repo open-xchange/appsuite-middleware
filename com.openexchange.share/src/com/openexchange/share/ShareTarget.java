@@ -65,7 +65,6 @@ public class ShareTarget implements Cloneable, Serializable {
     private String folder;
     private String realFolder;
     private String item;
-    private Boolean includeSubfolders;
 
     /**
      * Initializes a new, empty {@link ShareTarget}.
@@ -81,7 +80,7 @@ public class ShareTarget implements Cloneable, Serializable {
      * @param folder The identifier of the share's folder
      */
     public ShareTarget(int module, String folder) {
-        this(module, folder, (Boolean) null);
+        this(module, folder, (String) null);
     }
 
     /**
@@ -92,7 +91,7 @@ public class ShareTarget implements Cloneable, Serializable {
      * @param item The identifier of the share's item
      */
     public ShareTarget(int module, String folder, String item) {
-        this(module, folder, null, item, null);
+        this(module, folder, null, item);
     }
 
     /**
@@ -102,15 +101,13 @@ public class ShareTarget implements Cloneable, Serializable {
      * @param folder The identifier of the share's folder
      * @param realFolder The identifier of the real folder (to load) in case it differs from <code>folder</code> parameter
      * @param item The identifier of the share's item
-     * @param includeSubfolders Whether the share target should include sub-folders or not
      */
-    public ShareTarget(int module, String folder, String realFolder, String item, Boolean includeSubfolders) {
+    public ShareTarget(int module, String folder, String realFolder, String item) {
         super();
         this.module = module;
         this.folder = folder;
         this.realFolder = null == realFolder || (null != folder && folder.equals(realFolder)) ? null : realFolder;
         this.item = item;
-        this.includeSubfolders = includeSubfolders;
     }
 
     /**
@@ -119,18 +116,7 @@ public class ShareTarget implements Cloneable, Serializable {
      * @param target The target to copy the properties from
      */
     public ShareTarget(ShareTarget target) {
-        this(target.getModule(), target.getFolder(), target.getRealFolder(), target.getItem(), target.isIncludeSubfolders());
-    }
-
-    /**
-     * Initializes a new {@link ShareTarget}, pointing to a folder of a specific groupware module.
-     *
-     * @param module The groupware module of the share's target folder
-     * @param folder The identifier of the share's folder
-     * @param includeSubfolders Whether the share target should include sub-folders or not
-     */
-    public ShareTarget(int module, String folder, Boolean includeSubfolders) {
-        this(module, folder, null, null, includeSubfolders);
+        this(target.getModule(), target.getFolder(), target.getRealFolder(), target.getItem());
     }
 
     /**
@@ -273,24 +259,6 @@ public class ShareTarget implements Cloneable, Serializable {
     @Override
     public String toString() {
         return "ShareTarget [module=" + module + ", folder=" + getFolder() + (null != getItem() ? (", item=" + getItem()) : "") + "]";
-    }
-
-    /**
-     * In case the share is a folder this flag indicates whether it also include sub-folders or not
-     *
-     * @return The includeSubfolders
-     */
-    public Boolean isIncludeSubfolders() {
-        return includeSubfolders;
-    }
-
-    /**
-     * Sets the includeSubfolders flag
-     * 
-     * @param includeSubfolders
-     */
-    public void setIncludeSubfolders(Boolean includeSubfolders) {
-        this.includeSubfolders = includeSubfolders;
     }
 
 }

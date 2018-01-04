@@ -53,15 +53,15 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import com.openexchange.folderstorage.DefaultPermission;
+import com.openexchange.folderstorage.BasicPermission;
 import com.openexchange.folderstorage.FolderPermissionType;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.Permissions;
 import com.openexchange.folderstorage.UserizedFolder;
-import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.ShareTargetPath;
 import com.openexchange.share.groupware.DriveTargetProxyType;
+import com.openexchange.share.groupware.SubfolderAwareTargetPermission;
 import com.openexchange.share.groupware.TargetPermission;
 import com.openexchange.share.groupware.TargetProxyType;
 
@@ -85,12 +85,8 @@ public class FolderTargetProxy extends AbstractTargetProxy {
     public FolderTargetProxy(ShareTarget target, UserizedFolder folder) {
         super();
         this.folder = folder;
-        if (folder.getContentType().getModule() == FolderObject.INFOSTORE && target.isIncludeSubfolders() != null && target.isIncludeSubfolders()) {
-            converter = HANDING_DOWN_CONVERTER;
-        } else {
-            converter = CONVERTER;
-        }
-        this.target = new ShareTarget(target.getModule(), folder.getID(), null, null, target.isIncludeSubfolders());
+        converter = CONVERTER;
+        this.target = new ShareTarget(target.getModule(), folder.getID(), null, null);
         targetPath = new ShareTargetPath(target.getModule(), folder.getID(), null);
         appliedPermissions = new ArrayList<>();
         removedPermissions = new ArrayList<>();
@@ -217,47 +213,17 @@ public class FolderTargetProxy extends AbstractTargetProxy {
 
         @Override
         public Permission convert(TargetPermission permission) {
-            return new DefaultPermission(permission.getEntity(), permission.isGroup(), permission.getBits());
+            if(permission instanceof SubfolderAwareTargetPermission) {
+                BasicPermission result = new BasicPermission(permission.getEntity(), permission.isGroup(), permission.getBits());
+                result.setType(FolderPermissionType.getType(((SubfolderAwareTargetPermission) permission).getType()));
+                return result;
+            }
+            return new BasicPermission(permission.getEntity(), permission.isGroup(), permission.getBits());
         }
 
         @Override
         public TargetPermission convert(Permission permission) {
-            return new TargetPermission(permission.getEntity(), permission.isGroup(), getBits(permission));
-        }
-    };
-
-    private static PermissionConverter<Permission> HANDING_DOWN_CONVERTER = new PermissionConverter<Permission>() {
-
-        @Override
-        public int getEntity(Permission permission) {
-            return permission.getEntity();
-        }
-
-        @Override
-        public boolean isGroup(Permission permission) {
-            return permission.isGroup();
-        }
-
-        @Override
-        public boolean isSystem(Permission permission) {
-            return permission.getSystem() > 0;
-        }
-
-        @Override
-        public int getBits(Permission permission) {
-            return Permissions.createPermissionBits(permission);
-        }
-
-        @Override
-        public Permission convert(TargetPermission permission) {
-            DefaultPermission result = new DefaultPermission(permission.getEntity(), permission.isGroup(), permission.getBits());
-            result.setType(FolderPermissionType.LEGATOR);
-            return result;
-        }
-
-        @Override
-        public TargetPermission convert(Permission permission) {
-            return new TargetPermission(permission.getEntity(), permission.isGroup(), getBits(permission));
+            return new SubfolderAwareTargetPermission(permission.getEntity(), permission.isGroup(), getBits(permission), permission.getType().getTypeNumber(), permission.getPermissionLegator());
         }
     };
 

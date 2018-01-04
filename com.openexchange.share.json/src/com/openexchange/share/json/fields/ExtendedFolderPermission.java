@@ -126,6 +126,7 @@ public class ExtendedFolderPermission extends ExtendedPermission {
         }
         if (permission.getType() == FolderPermissionType.INHERITED) {
             jsonObject.put("isInherited", true);
+            jsonObject.put("isInheritedFrom", permission.getPermissionLegator());
         }
         return jsonObject;
     }

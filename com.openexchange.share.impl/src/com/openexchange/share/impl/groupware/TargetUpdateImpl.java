@@ -144,6 +144,7 @@ public class TargetUpdateImpl extends AbstractTargetUpdate {
 
                 List<Permission> appliedPermissions = folderTargetProxy.getAppliedPermissions();
                 List<Permission> removedPermissions = folderTargetProxy.getRemovedPermissions();
+
                 FolderServiceDecorator folderServiceDecorator;
                 try {
                     folderServiceDecorator = parameters.getFolderServiceDecorator().clone();
@@ -153,35 +154,38 @@ public class TargetUpdateImpl extends AbstractTargetUpdate {
                 }
                 folderServiceDecorator.put("permissions", "inherit");
                 for (UserizedFolder fol : folderObjects.getResponse()) {
-                    ShareTarget target = proxy.getTarget();
-                    prepareInheritedPermissions(fol, appliedPermissions, removedPermissions, target.isIncludeSubfolders() != null ? target.isIncludeSubfolders() : false);
+                    prepareInheritedPermissions(fol, appliedPermissions, removedPermissions);
                     folderService.updateFolder(fol, fol.getLastModifiedUTC(), parameters.getSession(), folderServiceDecorator);
                 }
             }
         }
     }
 
-    private static UserizedFolder prepareInheritedPermissions(UserizedFolder folder, List<Permission> added, List<Permission> removed, boolean includeSubfolders) {
+    private static UserizedFolder prepareInheritedPermissions(UserizedFolder folder, List<Permission> added, List<Permission> removed) {
         Permission[] originalPermissions = folder.getPermissions();
         if (null == originalPermissions) {
             originalPermissions = new Permission[0];
         }
 
-        if (includeSubfolders) {
-            for (Permission add : added) {
+        List<Permission> filtered = new ArrayList<>(added.size());
+        for (Permission add : added) {
+            if(add.getType() == FolderPermissionType.LEGATOR) {
+                add.setPermissionLegator(folder.getParentID());
                 add.setType(FolderPermissionType.INHERITED);
+                filtered.add(add);
             }
         }
 
         for (Permission rem : removed) {
+            if(rem.getType() == FolderPermissionType.LEGATOR) {
+                rem.setPermissionLegator(String.valueOf(folder.getParentID()));
+            }
             rem.setType(FolderPermissionType.INHERITED);
         }
 
-        List<Permission> permissions = new ArrayList<>(originalPermissions.length + added.size());
+        List<Permission> permissions = new ArrayList<>(originalPermissions.length + filtered.size());
         Collections.addAll(permissions, originalPermissions);
-        if (includeSubfolders) {
-            permissions.addAll(added);
-        }
+        permissions.addAll(filtered);
         permissions = removePermissions(permissions, removed);
         folder.setPermissions(permissions.toArray(new Permission[permissions.size()]));
         return folder;

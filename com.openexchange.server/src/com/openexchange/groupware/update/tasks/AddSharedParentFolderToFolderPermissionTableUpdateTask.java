@@ -47,41 +47,41 @@
  *
  */
 
-package com.openexchange.file.storage.infostore.folder;
+package com.openexchange.groupware.update.tasks;
 
-import com.openexchange.folderstorage.GuestPermission;
-import com.openexchange.share.recipient.ShareRecipient;
+import com.openexchange.groupware.update.SimpleColumnCreationTask;
 
 /**
- * {@link ParsedGuestPermission}
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * {@link AddSharedParentFolderToFolderPermissionTableUpdateTask} - adds the column "type" to the oxfolder_permissions table
+ *
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.10.0
  */
-public class ParsedGuestPermission extends ParsedPermission implements GuestPermission {
+public final class AddSharedParentFolderToFolderPermissionTableUpdateTask extends SimpleColumnCreationTask {
 
-    private static final long serialVersionUID = -7466310117990522541L;
-
-    private ShareRecipient recipient;
-
-    /**
-     * Initializes a new {@link ParsedGuestPermission}.
-     */
-    public ParsedGuestPermission() {
+    public AddSharedParentFolderToFolderPermissionTableUpdateTask() {
         super();
     }
 
     @Override
-    public ShareRecipient getRecipient() {
-        return recipient;
+    public String[] getDependencies() {
+        return new String[0];
     }
 
-    /**
-     * Sets the share recipient.
-     *
-     * @param recipient The share recipient to set
-     */
-    public void setRecipient(ShareRecipient recipient) {
-        this.recipient = recipient;
+    @Override
+    protected String[] getTableNames() {
+        return new String[] {"oxfolder_permissions","del_oxfolder_permissions", "virtualPermission", "virtualBackupPermission"};
+    }
+
+    @Override
+    protected String getColumnName() {
+        return "sharedParentFolder";
+    }
+
+    @Override
+    protected String getColumnDefinition() {
+        return "INT4 UNSIGNED";
     }
 
 }

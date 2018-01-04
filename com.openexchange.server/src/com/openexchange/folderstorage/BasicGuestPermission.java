@@ -47,27 +47,29 @@
  *
  */
 
-package com.openexchange.folder.json.parser;
+package com.openexchange.folderstorage;
 
-import com.openexchange.folderstorage.GuestPermission;
 import com.openexchange.share.recipient.ShareRecipient;
 
 /**
- * {@link ParsedGuestPermission}
+ * {@link BasicGuestPermission}
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since v7.6.1
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.10.0
  */
-public class ParsedGuestPermission extends ParsedPermission implements GuestPermission {
+public class BasicGuestPermission extends BasicPermission implements GuestPermission {
 
-    private static final long serialVersionUID = 7203618073266628866L;
+    /**
+     * serialVersionUID
+     */
+    private static final long serialVersionUID = -1806831555286164309L;
 
     private ShareRecipient recipient;
 
     /**
-     * Initializes an empty {@link ParsedGuestPermission}.
+     * Initializes a new {@link ParsedGuestPermission}.
      */
-    public ParsedGuestPermission() {
+    public BasicGuestPermission() {
         super();
     }
 
@@ -76,6 +78,11 @@ public class ParsedGuestPermission extends ParsedPermission implements GuestPerm
         return recipient;
     }
 
+    /**
+     * Sets the share recipient.
+     *
+     * @param recipient The share recipient to set
+     */
     public void setRecipient(ShareRecipient recipient) {
         this.recipient = recipient;
     }

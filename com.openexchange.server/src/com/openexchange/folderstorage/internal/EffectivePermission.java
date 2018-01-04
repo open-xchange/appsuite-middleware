@@ -459,4 +459,14 @@ public final class EffectivePermission implements Permission {
         throw new UnsupportedOperationException("EffectivePermission.setType()");
     }
 
+    @Override
+    public String getPermissionLegator() {
+        return underlyingPerm.getPermissionLegator();
+    }
+
+    @Override
+    public void setPermissionLegator(String legator) {
+        throw new UnsupportedOperationException("EffectivePermission.setPermissionLegator()");
+    }
+
 }

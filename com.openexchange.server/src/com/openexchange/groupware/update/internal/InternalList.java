@@ -57,6 +57,7 @@ import com.openexchange.groupware.update.UpdateTaskV2;
 import com.openexchange.groupware.update.tasks.AddOAuthColumnToMailAccountTableTask;
 import com.openexchange.groupware.update.tasks.AddPrimaryKeyVcardIdsTask;
 import com.openexchange.groupware.update.tasks.AddPrimaryKeyVcardPrincipalTask;
+import com.openexchange.groupware.update.tasks.AddSharedParentFolderToFolderPermissionTableUpdateTask;
 import com.openexchange.groupware.update.tasks.AddSnippetAttachmentPrimaryKeyUpdateTask;
 import com.openexchange.groupware.update.tasks.AddStartTLSColumnForMailAccountTablesTask;
 import com.openexchange.groupware.update.tasks.AddTypeToFolderPermissionTableUpdateTask;
@@ -649,6 +650,9 @@ public final class InternalList {
 
         // Adds the column "type" to the oxfolder_permissions table
         list.add(new AddTypeToFolderPermissionTableUpdateTask());
+
+        // Adds the column "sharedParentFolder" to the oxfolder_permissions table
+        list.add(new AddSharedParentFolderToFolderPermissionTableUpdateTask());
 
         // Drops rather needless foreign key from "object_use_count" table
         list.add(new com.openexchange.groupware.update.tasks.DropForeignKeyFromObjectUseCountTable());

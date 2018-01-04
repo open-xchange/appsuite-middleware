@@ -594,6 +594,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
                             if(permission.getType() == FolderPermissionType.LEGATOR){
                                 OCLPermission tmp = permission.deepClone();
                                 tmp.setType(FolderPermissionType.INHERITED);
+                                tmp.setPermissionLegator(String.valueOf(parent.getObjectID()));
                                 permissions.add(tmp);
                             } else {
                                 permissions.add(permission);
@@ -634,6 +635,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
         oclPerm.setAllPermission(p.getFolderPermission(), p.getReadPermission(), p.getWritePermission(), p.getDeletePermission());
         oclPerm.setSystem(p.getSystem());
         oclPerm.setType(p.getType() == null ? FolderPermissionType.NORMAL: p.getType());
+        oclPerm.setPermissionLegator(p.getPermissionLegator());
         return oclPerm;
     }
 

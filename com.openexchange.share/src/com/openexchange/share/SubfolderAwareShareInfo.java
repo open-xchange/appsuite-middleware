@@ -1,3 +1,4 @@
+package com.openexchange.share;
 /*
  *
  *    OPEN-XCHANGE legal information
@@ -47,43 +48,19 @@
  *
  */
 
-package com.openexchange.folderstorage.outlook.memory;
-
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import com.openexchange.folderstorage.BasicPermission;
-import com.openexchange.folderstorage.FolderPermissionType;
-
 /**
- * {@link MemoryPermission} - A mail folder permission.
+ * {@link SubfolderAwareShareInfo}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.10.0
  */
-public final class MemoryPermission extends BasicPermission {
+public interface SubfolderAwareShareInfo extends ShareInfo {
 
     /**
-     * serialVersionUID
-     */
-    private static final long serialVersionUID = -4886238734505728866L;
-
-    /**
-     * Initializes a {@link MemoryPermission} from specified {@link ResultSet}'s currently select row:<br>
-     * <code>SELECT entity, fp, orp, owp, odp, adminFlag, groupFlag, system, type, sharedParentFolder FROM virtualPermission ...</code>
+     * Defines whether this share includes sub-folders or not.
      *
-     * @throws SQLException If reading from result set fails
+     * @return true if it contains sub-folders, false otherwise
      */
-    public MemoryPermission(final ResultSet rs) throws SQLException {
-        super();
-        entity = rs.getInt(1);
-        folderPermission = rs.getInt(2);
-        readPermission = rs.getInt(3);
-        writePermission = rs.getInt(4);
-        deletePermission = rs.getInt(5);
-        admin = rs.getInt(6) > 0;
-        group = rs.getInt(7) > 0;
-        system = rs.getInt(8);
-        type = FolderPermissionType.getType(rs.getInt(9));
-        legator = rs.getString(10);
-    }
+    Boolean isIncludeSubfolders();
 
 }

@@ -211,6 +211,9 @@ final class MovePerformer extends AbstractPerformer {
             if (perm.getType() == FolderPermissionType.INHERITED || perm.getType() == FolderPermissionType.LEGATOR) {
                 Permission cloned = (Permission) perm.clone();
                 cloned.setType(FolderPermissionType.INHERITED);
+                if(perm.getType() == FolderPermissionType.LEGATOR) {
+                    cloned.setPermissionLegator(folder.getParentID());
+                }
                 result.add(cloned);
             }
         }
