@@ -222,7 +222,7 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
                 /*
                  * update for existing change exception
                  */
-                Event originalExceptionEvent = optExceptionData(originalEvent.getId(), recurrenceId);
+                Event originalExceptionEvent = loadExceptionData(originalEvent.getId(), recurrenceId);
                 Attendee originalExceptionAttendee = Check.attendeeExists(originalExceptionEvent, attendee);
                 updateAttendee(originalExceptionEvent, originalExceptionAttendee, attendee);
             } else {

@@ -50,11 +50,12 @@
 package com.openexchange.chronos.common;
 
 import static com.openexchange.chronos.common.CalendarUtils.getDuration;
+import static com.openexchange.chronos.common.CalendarUtils.shiftRecurrenceId;
+import static org.dmfs.rfc5545.DateTime.parse;
 import static org.junit.Assert.assertEquals;
 import java.util.TimeZone;
 import org.dmfs.rfc5545.DateTime;
 import org.junit.Test;
-
 /**
  * {@link UtilsTest}
  *
@@ -62,6 +63,25 @@ import org.junit.Test;
  * @since v7.10.0
  */
 public class UtilsTest  {
+
+    @Test
+    public void testShiftRecurrenceIdDate() throws Exception {
+        assertEquals(new DefaultRecurrenceId("20180103"), shiftRecurrenceId(new DefaultRecurrenceId("20180103"), parse("20180101"), parse("20180101")));
+        assertEquals(new DefaultRecurrenceId("20180203"), shiftRecurrenceId(new DefaultRecurrenceId("20180103"), parse("20180101"), parse("20180201")));
+        assertEquals(new DefaultRecurrenceId("20180103"), shiftRecurrenceId(new DefaultRecurrenceId("20180203"), parse("20180201"), parse("20180101")));
+        assertEquals(new DefaultRecurrenceId("20180603"), shiftRecurrenceId(new DefaultRecurrenceId("20180103"), parse("20180101"), parse("20180601")));
+        assertEquals(new DefaultRecurrenceId("20180103"), shiftRecurrenceId(new DefaultRecurrenceId("20180603"), parse("20180601"), parse("20180101")));
+    }
+
+    @Test
+    public void testShiftRecurrenceIdDateTimeWithSameTimeZone() throws Exception {
+        TimeZone timeZone = TimeZone.getTimeZone("Europe/Berlin");
+        assertEquals(new DefaultRecurrenceId("20180103T130000Z"), shiftRecurrenceId(new DefaultRecurrenceId("20180103T130000Z"), parse(timeZone, "20180101T140000"), parse(timeZone, "20180101T140000")));
+        assertEquals(new DefaultRecurrenceId("20180203T130000Z"), shiftRecurrenceId(new DefaultRecurrenceId("20180103T130000Z"), parse(timeZone, "20180101T140000"), parse(timeZone, "20180201T140000")));
+        assertEquals(new DefaultRecurrenceId("20180103T130000Z"), shiftRecurrenceId(new DefaultRecurrenceId("20180203T130000Z"), parse(timeZone, "20180201T140000"), parse(timeZone, "20180101T140000")));
+        assertEquals(new DefaultRecurrenceId("20180603T120000Z"), shiftRecurrenceId(new DefaultRecurrenceId("20180103T130000Z"), parse(timeZone, "20180101T140000"), parse(timeZone, "20180601T140000")));
+        assertEquals(new DefaultRecurrenceId("20180103T130000Z"), shiftRecurrenceId(new DefaultRecurrenceId("20180603T120000Z"), parse(timeZone, "20180601T140000"), parse(timeZone, "20180101T140000")));
+    }
 
     @Test
     public void testGetDurationDate() throws Exception {

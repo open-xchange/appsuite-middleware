@@ -108,6 +108,15 @@ public class SplitPerformer extends AbstractUpdatePerformer {
     }
 
     /**
+     * Initializes a new {@link SplitPerformer}, taking over the settings from another update performer.
+     *
+     * @param updatePerformer The update performer to take over the settings from
+     */
+    protected SplitPerformer(AbstractUpdatePerformer updatePerformer) throws OXException {
+        super(updatePerformer);
+    }
+
+    /**
      * Performs the split operation.
      *
      * @param objectId The identifier of the event to split

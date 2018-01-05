@@ -100,10 +100,7 @@ public class UpdateAlarmsPerformer extends AbstractUpdatePerformer {
         if (null != recurrenceId) {
             if (isSeriesMaster(originalEvent)) {
                 recurrenceId = Check.recurrenceIdExists(session.getRecurrenceService(), originalEvent, recurrenceId);
-                Event originalExceptionEvent = optExceptionData(originalEvent.getSeriesId(), recurrenceId);
-                if (null == originalExceptionEvent) {
-                    throw CalendarExceptionCodes.EVENT_RECURRENCE_NOT_FOUND.create(objectId, recurrenceId);
-                }
+                Event originalExceptionEvent = loadExceptionData(originalEvent.getSeriesId(), recurrenceId);
                 originalEvent = originalExceptionEvent;
             } else if (false == isSeriesException(originalEvent)) {
                 throw CalendarExceptionCodes.EVENT_RECURRENCE_NOT_FOUND.create(objectId, recurrenceId);

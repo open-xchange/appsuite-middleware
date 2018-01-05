@@ -146,6 +146,20 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
     }
 
     /**
+     * Initializes a new {@link AbstractUpdatePerformer}, taking over the settings from another update performer.
+     *
+     * @param updatePerformer The update performer to take over the settings from
+     */
+    protected AbstractUpdatePerformer(AbstractUpdatePerformer updatePerformer) throws OXException {
+        super(updatePerformer.session, updatePerformer.storage);
+        this.folder = updatePerformer.folder;
+        this.calendarUser = updatePerformer.calendarUser;
+        this.calendarUserId = updatePerformer.calendarUserId;
+        this.timestamp = updatePerformer.timestamp;
+        this.resultTracker = updatePerformer.resultTracker;
+    }
+
+    /**
      * Prepares a new change exception for a recurring event series.
      *
      * @param originalMasterEvent The original master event
@@ -464,7 +478,7 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
         if (alarmUpdates.isEmpty()) {
             return false;
         }
-        //        requireWritePermissions(event);
+        requireWritePermissions(event, Collections.singletonList(session.getEntityResolver().prepareUserAttendee(userId)));
         /*
          * delete removed alarms
          */
@@ -615,6 +629,25 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
     }
 
     /**
+     * Loads all non user-specific data for a specific exception of an event series, including attendees and attachments.
+     * <p/>
+     * No <i>userization</i> of the exception event is performed and no alarm data is fetched for a specific attendee, i.e. only the
+     * plain/vanilla event data is loaded from the storage.
+     *
+     * @param seriesId The identifier of the event series to load the exception from
+     * @param recurrenceId The recurrence identifier of the exception to load
+     * @return The event exception data
+     * @throws OXException {@link CalendarExceptionCodes#EVENT_RECURRENCE_NOT_FOUND}
+     */
+    protected Event loadExceptionData(String seriesId, RecurrenceId recurrenceId) throws OXException {
+        Event changeException = optExceptionData(seriesId, recurrenceId);
+        if (null == changeException) {
+            throw CalendarExceptionCodes.EVENT_RECURRENCE_NOT_FOUND.create(seriesId, recurrenceId);
+        }
+        return changeException;
+    }
+
+    /**
      * Optionally loads all non user-specific data for a specific exception of an event series, including attendees and attachments.
      * <p/>
      * No <i>userization</i> of the exception event is performed and no alarm data is fetched for a specific attendee, i.e. only the
@@ -710,6 +743,22 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
         Check.classificationAllowsUpdate(folder, originalEvent);
         if (isAttendeeSchedulingResource(originalEvent, calendarUserId) && session.getConfig().isRestrictAllowedAttendeeChanges()) {
             throw CalendarExceptionCodes.NOT_ORGANIZER.create(folder.getID(), originalEvent.getId());
+        }
+    }
+
+    /**
+     * Checks that data of one or more attendees of an event can be updated by the current session's user under the perspective of the
+     * current folder.
+     *
+     * @param originalEvent The original event being updated
+     * @param updatedAttendees The attendees whose data is updated
+     * @throws OXException {@link CalendarExceptionCodes#UNSUPPORTED_FOLDER}, {@link CalendarExceptionCodes#NO_READ_PERMISSION},
+     *             {@link CalendarExceptionCodes#NO_WRITE_PERMISSION}, {@link CalendarExceptionCodes#NOT_ORGANIZER},
+     *             {@link CalendarExceptionCodes#RESTRICTED_BY_CLASSIFICATION}
+     */
+    protected void requireWritePermissions(Event originalEvent, List<Attendee> updatedAttendees) throws OXException {
+        if (null != updatedAttendees && (1 < updatedAttendees.size() || session.getUserId() != updatedAttendees.get(0).getEntity())) {
+            requireWritePermissions(originalEvent);
         }
     }
 

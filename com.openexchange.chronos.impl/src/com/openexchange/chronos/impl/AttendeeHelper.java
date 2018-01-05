@@ -165,9 +165,9 @@ public class AttendeeHelper implements CollectionUpdate<Attendee, AttendeeField>
         this.session = session;
         this.folder = folder;
         this.originalAttendees = emptyForNull(originalAttendees);
-        this.attendeesToInsert = new ArrayList<>();
-        this.attendeesToDelete = new ArrayList<>();
-        this.attendeesToUpdate = new ArrayList<>();
+        this.attendeesToInsert = new ArrayList<Attendee>();
+        this.attendeesToDelete = new ArrayList<Attendee>();
+        this.attendeesToUpdate = new ArrayList<ItemUpdate<Attendee, AttendeeField>>();
     }
 
     @Override
@@ -197,7 +197,7 @@ public class AttendeeHelper implements CollectionUpdate<Attendee, AttendeeField>
      * @return The changed list of attendees
      */
     public List<Attendee> previewChanges() throws OXException {
-        List<Attendee> newAttendees = new ArrayList<>(originalAttendees);
+        List<Attendee> newAttendees = new ArrayList<Attendee>(originalAttendees);
         newAttendees.removeAll(attendeesToDelete);
         for (ItemUpdate<Attendee, AttendeeField> attendeeToUpdate : attendeesToUpdate) {
             Attendee originalAttendee = attendeeToUpdate.getOriginal();
@@ -222,7 +222,7 @@ public class AttendeeHelper implements CollectionUpdate<Attendee, AttendeeField>
             /*
              * prepare & add all further attendees
              */
-            List<Attendee> attendeeList = new ArrayList<>();
+            List<Attendee> attendeeList = new ArrayList<Attendee>();
             attendeeList.add(defaultAttendee);
             attendeesToInsert.addAll(prepareNewAttendees(attendeeList, requestedAttendees));
         }
@@ -236,7 +236,7 @@ public class AttendeeHelper implements CollectionUpdate<Attendee, AttendeeField>
         session.getEntityResolver().prefetch(updatedAttendees);
         updatedAttendees = session.getEntityResolver().prepare(updatedAttendees);
         AbstractCollectionUpdate<Attendee, AttendeeField> attendeeDiff = getAttendeeUpdates(originalAttendees, updatedAttendees);
-        List<Attendee> attendeeList = new ArrayList<>(originalAttendees);
+        List<Attendee> attendeeList = new ArrayList<Attendee>(originalAttendees);
         /*
          * delete removed attendees
          */
@@ -290,7 +290,7 @@ public class AttendeeHelper implements CollectionUpdate<Attendee, AttendeeField>
             if (false == isInternal(attendee) && false == session.getConfig().isSkipExternalAttendeeURIChecks()) {
                 attendee = Check.requireValidEMail(attendee);
             }
-            attendeesToUpdate.add(new DefaultItemUpdate<>(AttendeeMapper.getInstance(), attendeeUpdate.getOriginal(), attendee));
+            attendeesToUpdate.add(new DefaultItemUpdate<Attendee, AttendeeField>(AttendeeMapper.getInstance(), attendeeUpdate.getOriginal(), attendee));
         }
         /*
          * prepare & add all new attendees
@@ -307,7 +307,7 @@ public class AttendeeHelper implements CollectionUpdate<Attendee, AttendeeField>
     }
 
     private List<Attendee> prepareNewAttendees(List<Attendee> existingAttendees, List<Attendee> newAttendees) throws OXException {
-        List<Attendee> attendees = new ArrayList<>(newAttendees.size());
+        List<Attendee> attendees = new ArrayList<Attendee>(newAttendees.size());
         /*
          * add internal user attendees
          */
