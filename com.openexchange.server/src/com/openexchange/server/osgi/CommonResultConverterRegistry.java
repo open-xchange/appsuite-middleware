@@ -67,13 +67,13 @@ public class CommonResultConverterRegistry implements ServiceTrackerCustomizer<R
 
     private final BundleContext context;
 
-    private ConcurrentHashMap<String, Map<String, ResultConverter>> converters;
+    private final ConcurrentHashMap<String, Map<String, ResultConverter>> converters;
 
     /**
      * Initializes a new {@link CommonResultConverterRegistry}.
-     * 
+     *
      * @param context The {@link BundleContext}
-     * 
+     *
      */
     public CommonResultConverterRegistry(BundleContext context) {
         super();
@@ -120,7 +120,7 @@ public class CommonResultConverterRegistry implements ServiceTrackerCustomizer<R
 
     /**
      * Add a {@link ResultConverter}
-     * 
+     *
      * @param resultConverter The converter to add
      * @return The {@link ResultConverter} if successfully added, else <code>null</code>
      */
@@ -131,9 +131,9 @@ public class CommonResultConverterRegistry implements ServiceTrackerCustomizer<R
                 map = converters.get(resultConverter.getInputFormat());
             } else {
                 map = new ConcurrentHashMap<String, ResultConverter>(16, 0.9f, 1);
+                converters.put(resultConverter.getInputFormat(), map);
             }
             map.put(resultConverter.getOutputFormat(), resultConverter);
-            converters.put(resultConverter.getInputFormat(), map);
             return resultConverter;
         }
         return null;
