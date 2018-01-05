@@ -49,19 +49,15 @@
 
 package com.openexchange.groupware.datahandler;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
+import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.TimeZone;
 import org.json.JSONArray;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.DefaultConverter;
@@ -70,7 +66,6 @@ import com.openexchange.ajax.requesthandler.ResultConverterRegistry;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.ical.ICalService;
 import com.openexchange.chronos.ical.ImportedCalendar;
-import com.openexchange.configuration.ServerConfig;
 import com.openexchange.conversion.ConversionResult;
 import com.openexchange.conversion.Data;
 import com.openexchange.conversion.DataArguments;
@@ -85,15 +80,12 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tasks.Task;
-import com.openexchange.java.Streams;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.TimeZoneUtils;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
-import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
-import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
  * {@link ICalJSONDataHandler} - The data handler return JSON appointments and JSON tasks parsed from an ICal input stream.
@@ -109,6 +101,8 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ICalJSONDataHandler implements DataHandler {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ICalJSONDataHandler.class);
 
     private static final Class<?>[] TYPES = { InputStream.class };
 
@@ -170,9 +164,7 @@ public final class ICalJSONDataHandler implements DataHandler {
                 ImportedCalendar calendar = iCalService.importICal(stream, null);
                 events = calendar.getEvents();
             } finally {
-                if (null != stream) {
-                    stream.close();
-                }
+                safeClose(stream);
             }
             /*
              * Errors and warnings
@@ -187,7 +179,7 @@ public final class ICalJSONDataHandler implements DataHandler {
         } catch (final IOException e) {
             throw DataExceptionCodes.ERROR.create(e, e.getMessage());
         } finally {
-            inputStreamCopy.close();
+            safeClose(inputStreamCopy);
         }
         /*
          * The JSON array to return
@@ -240,7 +232,23 @@ public final class ICalJSONDataHandler implements DataHandler {
         try {
             return iCalParser.parseTasks(inputStream, defaultZone, ctx, conversionErrors, conversionWarnings).getImportedObjects();
         } finally {
-            Streams.close(inputStream);
+            safeClose(inputStream);
+        }
+    }
+
+    /**
+     * Closes a {@link Closeable} save. In case of an error while closing, the error will be logged instead of being thrown
+     * so that possible earlier errors won't be 'overriden'
+     * 
+     * @param closeable The {@link Closeable}
+     */
+    protected static void safeClose(Closeable closeable) {
+        if (null != closeable) {
+            try {
+                closeable.close();
+            } catch (Exception e) {
+                LOGGER.debug("Error while closing.", e);
+            }
         }
     }
 
@@ -248,88 +256,10 @@ public final class ICalJSONDataHandler implements DataHandler {
 
     private static InputStreamCopy copyStream(final InputStream orig, final long size) throws OXException {
         try {
-            return new InputStreamCopy(orig, (size <= 0 || size > LIMIT));
+            return new InputStreamCopy(orig, "openexchange-icaljson-", (size <= 0 || size > LIMIT));
         } catch (final IOException e) {
             throw DataExceptionCodes.ERROR.create(e, e.getMessage());
         }
     }
 
-    private static final class InputStreamCopy {
-
-        private static final int DEFAULT_BUF_SIZE = 0x2000;
-
-        private static final String FILE_PREFIX = "openexchange-icaljson-";
-
-        private byte[] bytes;
-
-        private File file;
-
-        private final long size;
-
-        public InputStreamCopy(final InputStream orig, final boolean createFile) throws IOException {
-            super();
-            if (createFile) {
-                size = copy2File(orig);
-            } else {
-                size = copy2ByteArr(orig);
-            }
-        }
-
-        public InputStream getInputStream() throws IOException {
-            return bytes == null ? (file == null ? null : (new BufferedInputStream(new FileInputStream(file), DEFAULT_BUF_SIZE))) : (new UnsynchronizedByteArrayInputStream(bytes));
-        }
-
-        public void close() {
-            if (file != null) {
-                if (file.exists()) {
-                    file.delete();
-                }
-                file = null;
-            }
-            if (bytes != null) {
-                bytes = null;
-            }
-        }
-
-        private int copy2ByteArr(final InputStream in) throws IOException {
-            final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(DEFAULT_BUF_SIZE << 1);
-            final byte[] bbuf = new byte[DEFAULT_BUF_SIZE];
-            int len;
-            while ((len = in.read(bbuf)) > 0) {
-                out.write(bbuf, 0, len);
-            }
-            out.flush();
-            this.bytes = out.toByteArray();
-            out.close();
-            return bytes.length;
-        }
-
-        @SuppressWarnings("unused")
-        public long getSize() {
-            return size;
-        }
-
-        private long copy2File(final InputStream in) throws IOException {
-            long totalBytes = 0;
-            {
-                final File tmpFile = File.createTempFile(FILE_PREFIX, null, new File(ServerConfig.getProperty(ServerConfig.Property.UploadDirectory)));
-                tmpFile.deleteOnExit();
-                OutputStream out = null;
-                try {
-                    out = new BufferedOutputStream(new FileOutputStream(tmpFile), DEFAULT_BUF_SIZE);
-                    final byte[] bbuf = new byte[DEFAULT_BUF_SIZE];
-                    int len;
-                    while ((len = in.read(bbuf)) > 0) {
-                        out.write(bbuf, 0, len);
-                        totalBytes += len;
-                    }
-                    out.flush();
-                } finally {
-                    Streams.close(out);
-                }
-                file = tmpFile;
-            }
-            return totalBytes;
-        }
-    }
 }

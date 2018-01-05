@@ -170,8 +170,7 @@ public class ImportPerformer extends AbstractUpdatePerformer {
         Event masterEvent = eventGroup.get(0);
         switch (strategy) {
             case REASSIGN: {
-                String newUid = UUID.randomUUID().toString();
-                eventGroup.forEach(e -> e.setUid(newUid));
+                eventGroup.forEach(e -> e.setUid(UUID.randomUUID().toString()));
                 InternalImportResult result = createEvent(masterEvent);
                 results.add(result);
                 if (isSuccess(result) && 1 < eventGroup.size()) {

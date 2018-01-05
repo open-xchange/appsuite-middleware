@@ -176,9 +176,7 @@ public final class ICalInsertDataHandler extends ICalDataHandler {
                     ImportedCalendar calendar = iCalService.importICal(stream, null);
                     events = calendar.getEvents();
                 } finally {
-                    if (null != stream) {
-                        stream.close();
-                    }
+                    safeClose(stream);
                 }
                 /*
                  * Start parsing tasks
@@ -188,7 +186,7 @@ public final class ICalInsertDataHandler extends ICalDataHandler {
         } catch (final IOException e) {
             throw DataExceptionCodes.ERROR.create(e, e.getMessage());
         } finally {
-            inputStreamCopy.close();
+            safeClose(inputStreamCopy);
         }
         /*
          * The JSON array to return
