@@ -979,13 +979,15 @@ public final class OXFolderSQL {
      * @param objectDeletePermission The object delete permission to set
      * @param isAdmin <code>true</code> if permission ID is a folder administrator; otherwise <code>false</code>
      * @param system The system bit mask
+     * @param type The permission type
+     * @param legator The permission legator or null
      * @param writeCon A connection with write capability; may be <code>null</code> to fetch from pool
      * @param ctx The context
      * @return <code>true</code> if corresponding entry was successfully inserted; otherwise <code>false</code>
      * @throws OXException If a pooling error occurred
      * @throws SQLException If a SQL error occurred
      */
-    public static boolean addSinglePermission(final int folderId, final int permissionId, final boolean isGroup, final int folderPermission, final int objectReadPermission, final int objectWritePermission, final int objectDeletePermission, final boolean isAdmin, final int system, final FolderPermissionType type, final Connection writeCon, final Context ctx) throws OXException, SQLException {
+    public static boolean addSinglePermission(final int folderId, final int permissionId, final boolean isGroup, final int folderPermission, final int objectReadPermission, final int objectWritePermission, final int objectDeletePermission, final boolean isAdmin, final int system, final FolderPermissionType type, final String legator, final Connection writeCon, final Context ctx) throws OXException, SQLException {
         Connection wc = writeCon;
         boolean closeWriteCon = false;
         PreparedStatement stmt = null;
@@ -1023,7 +1025,7 @@ public final class OXFolderSQL {
             if (alreadyExists) {
                 success = true;
             } else {
-                stmt = wc.prepareStatement("INSERT INTO oxfolder_permissions (cid, fuid, permission_id, group_flag, fp, orp, owp, odp, admin_flag, system, type) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                stmt = wc.prepareStatement("INSERT INTO oxfolder_permissions (cid, fuid, permission_id, group_flag, fp, orp, owp, odp, admin_flag, system, type, sharedParentFolder) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
                 pos = 1;
                 stmt.setInt(pos++, ctx.getContextId());
                 stmt.setInt(pos++, folderId);
@@ -1036,6 +1038,11 @@ public final class OXFolderSQL {
                 stmt.setInt(pos++, isAdmin ? 1 : 0);
                 stmt.setInt(pos++, system);
                 stmt.setInt(pos++, type.getTypeNumber());
+                if(legator != null) {
+                    stmt.setInt(pos++, Integer.valueOf(legator));
+                } else {
+                    stmt.setNull(pos++, java.sql.Types.INTEGER);
+                }
                 try {
                     success = executeUpdate(stmt) == 1;
                 } catch (SQLException e) {
@@ -1472,10 +1479,7 @@ public final class OXFolderSQL {
         return 0;
     }
 
-    private static final String SQL_INSERT_NEW_FOLDER = "INSERT INTO oxfolder_tree (fuid, cid, parent, fname, module, type, creating_date,"
-        + " created_from, changing_date, changed_from, permission_flag, subfolder_flag, default_flag) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)";
-
-    private static final String SQL_INSERT_NEW_PERMISSIONS = "INSERT INTO oxfolder_permissions " + "(cid, fuid, permission_id, fp, orp, owp, odp, admin_flag, group_flag, type) " + "VALUES (?,?,?,?,?,?,?,?,?,?)";
+    private static final String SQL_INSERT_NEW_PERMISSIONS = "INSERT INTO oxfolder_permissions " + "(cid, fuid, permission_id, fp, orp, owp, odp, admin_flag, group_flag, type, sharedParentFolder) " + "VALUES (?,?,?,?,?,?,?,?,?,?,?)";
 
     private static final String SQL_UPDATE_PARENT_SUBFOLDER_FLAG = "UPDATE oxfolder_tree " + "SET subfolder_flag = 1, changing_date = ? WHERE cid = ? AND fuid = ?";
 
@@ -1574,6 +1578,12 @@ public final class OXFolderSQL {
                         stmt.setInt(8, ocl.isFolderAdmin() ? 1 : 0);
                         stmt.setInt(9, ocl.isGroupPermission() ? 1 : 0);
                         stmt.setInt(10, ocl.getType().getTypeNumber());
+                        String legator = ocl.getPermissionLegator();
+                        if(legator != null) {
+                            stmt.setInt(11, Integer.valueOf(legator));
+                        } else {
+                            stmt.setNull(11, java.sql.Types.INTEGER);
+                        }
                         stmt.addBatch();
                     }
                     executeBatch(stmt);
@@ -1784,6 +1794,12 @@ public final class OXFolderSQL {
                     stmt.setInt(pos++, oclPerm.isFolderAdmin() ? 1 : 0);
                     stmt.setInt(pos++, oclPerm.isGroupPermission() ? 1 : 0);
                     stmt.setInt(pos++, oclPerm.getType().getTypeNumber());
+                    String legator = oclPerm.getPermissionLegator();
+                    if(legator != null) {
+                        stmt.setInt(11, Integer.valueOf(legator));
+                    } else {
+                        stmt.setNull(11, java.sql.Types.INTEGER);
+                    }
                     stmt.addBatch();
                 }
                 executeBatch(stmt);

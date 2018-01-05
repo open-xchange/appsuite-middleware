@@ -162,6 +162,7 @@ public class IMAPCapabilities extends MailCapabilities {
     private boolean hasChildren;
     private boolean hasSortDisplay;
     private boolean hasFileNameSearch;
+    private boolean hasAttachmentSearch;
 
     /**
      * Initializes a new {@link IMAPCapabilities}
@@ -305,7 +306,8 @@ public class IMAPCapabilities extends MailCapabilities {
             ", hasThreadReferences=").append(hasThreadReferences()).append(", hasChildren=").append(hasChildren()).append(", hasIMAP4=").append(
             hasIMAP4()).append(", hasIMAP4rev1=").append(hasIMAP4rev1()).append(", hasNamespace=").append(hasNamespace()).append(
             ", hasThreadOrderedSubject=").append(hasThreadOrderedSubject()).append(", hasUIDPlus=").append(hasUIDPlus()).append(
-            ", hasSortDisplay=").append(hasSortDisplay()).append(", hasFileNameSearch=").append(hasFileNameSearch()).toString();
+            ", hasSortDisplay=").append(hasSortDisplay()).append(", hasFileNameSearch=").append(hasFileNameSearch())
+            .append(", hasAttachmentSearch=").append(hasAttachmentSearch()).toString();
     }
 
     /**
@@ -320,6 +322,15 @@ public class IMAPCapabilities extends MailCapabilities {
     @Override
     public boolean hasFileNameSearch() {
         return hasFileNameSearch;
+    }
+
+    @Override
+    public boolean hasAttachmentSearch() {
+        return hasAttachmentSearch;
+    }
+
+    public void setAttachmentSearchEnabled(boolean enabled) {
+        this.hasAttachmentSearch = enabled;
     }
 
     @Override

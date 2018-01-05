@@ -160,6 +160,20 @@ public interface Permission extends Cloneable, Serializable {
     public void setType(FolderPermissionType type);
 
     /**
+     * If this permission is handed down from a parent folder this method retrieves the id of the sharing folder.
+     *
+     * @return The id of the sharing folder.
+     */
+    public String getPermissionLegator();
+
+    /**
+     * Sets the id of the folder who has handed down this permission
+     *
+     * @param legator The id of the sharing folder
+     */
+    public void setPermissionLegator(String legator);
+
+    /**
      * Checks if this folder permission's entity is a group.
      *
      * @return <code>true</code> if this folder permission's entity is a group; otherwise <code>false</code>

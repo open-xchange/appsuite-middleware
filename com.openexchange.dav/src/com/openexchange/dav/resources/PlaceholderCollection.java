@@ -69,8 +69,8 @@ import com.openexchange.dav.reports.SyncStatus;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXException.IncorrectString;
 import com.openexchange.exception.OXException.ProblematicAttribute;
+import com.openexchange.folderstorage.BasicPermission;
 import com.openexchange.folderstorage.ContentType;
-import com.openexchange.folderstorage.DefaultPermission;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.ParameterizedFolder;
 import com.openexchange.folderstorage.Permission;
@@ -95,8 +95,8 @@ public class PlaceholderCollection<T> extends FolderCollection<T> {
 
     private String displayName;
     private ContentType contentType;
-    private Map<String, Object> meta;
-    private String treeID;
+    private final Map<String, Object> meta;
+    private final String treeID;
 
     /**
      * Initializes a new {@link PlaceholderCollection}.
@@ -253,7 +253,7 @@ public class PlaceholderCollection<T> extends FolderCollection<T> {
     }
 
     protected Permission getDefaultAdminPermissions(int entity) {
-        DefaultPermission permission = new DefaultPermission();
+        BasicPermission permission = new BasicPermission();
         permission.setMaxPermissions();
         permission.setEntity(entity);
         return permission;

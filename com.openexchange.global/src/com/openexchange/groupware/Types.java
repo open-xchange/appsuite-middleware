@@ -157,5 +157,4 @@ public interface Types {
 
     public static final int EAV_NODE = 666;
     
-    public static final int PASSWORD_CHANGE = 140;
 }

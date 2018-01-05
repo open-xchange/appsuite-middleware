@@ -47,41 +47,35 @@
  *
  */
 
-package com.openexchange.file.storage.infostore.folder;
+package com.openexchange.sessiond.impl.usertype;
 
-import com.openexchange.folderstorage.GuestPermission;
-import com.openexchange.share.recipient.ShareRecipient;
+import com.openexchange.config.ConfigurationService;
 
 /**
- * {@link ParsedGuestPermission}
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * {@link SessiondUserConfigImpl}
+ *
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since v7.10.0
  */
-public class ParsedGuestPermission extends ParsedPermission implements GuestPermission {
-
-    private static final long serialVersionUID = -7466310117990522541L;
-
-    private ShareRecipient recipient;
+public class SessiondUserConfigImpl extends AbstractConfigBasedUserTypeSessiondConfigInterface {
 
     /**
-     * Initializes a new {@link ParsedGuestPermission}.
+     * Initializes a new {@link SessiondLinkConfigImpl}.
+     *
+     * @param conf The configuration service
      */
-    public ParsedGuestPermission() {
-        super();
+    public SessiondUserConfigImpl(ConfigurationService conf) {
+        super(UserTypeSessiondConfigRegistry.UserType.USER, conf);
     }
 
     @Override
-    public ShareRecipient getRecipient() {
-        return recipient;
+    protected String getPropertyName() {
+        return "com.openexchange.sessiond.maxSessionPerUser";
     }
 
-    /**
-     * Sets the share recipient.
-     *
-     * @param recipient The share recipient to set
-     */
-    public void setRecipient(ShareRecipient recipient) {
-        this.recipient = recipient;
+    @Override
+    protected int getDefaultValue() {
+        return 100;
     }
-
 }

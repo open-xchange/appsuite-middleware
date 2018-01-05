@@ -61,6 +61,7 @@ import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import com.openexchange.crypto.CryptoService;
+import com.openexchange.database.Databases;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
@@ -109,18 +110,24 @@ public final class MailPasswordUtil {
         public void update(final String recrypted, final GenericProperty customizationNote) throws OXException {
             final int contextId = customizationNote.session.getContextId();
             final Connection con = Database.get(contextId, true);
+            boolean rollback = false;
             try {
                 con.setAutoCommit(false);
+                rollback = true;
+
                 update0(recrypted, customizationNote, con);
+
                 con.commit();
+                rollback = false;
             } catch (final SQLException e) {
-                DBUtils.rollback(con);
                 throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
             } catch (final RuntimeException e) {
-                DBUtils.rollback(con);
                 throw MailAccountExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
             } finally {
-                DBUtils.autocommit(con);
+                if (rollback) {
+                    Databases.rollback(con);
+                }
+                Databases.autocommit(con);
                 Database.back(contextId, true, con);
             }
         }

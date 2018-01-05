@@ -56,12 +56,14 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import com.openexchange.folderstorage.FolderPermissionType;
 import com.openexchange.folderstorage.Permissions;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.ShareTargetPath;
 import com.openexchange.share.groupware.DriveTargetProxyType;
+import com.openexchange.share.groupware.SubfolderAwareTargetPermission;
 import com.openexchange.share.groupware.TargetPermission;
 import com.openexchange.share.groupware.TargetProxyType;
 
@@ -253,12 +255,16 @@ public class AdministrativeFolderTargetProxy extends AbstractTargetProxy {
             oclPermission.setGroupPermission(permission.isGroup());
             int[] bits = Permissions.parsePermissionBits(permission.getBits());
             oclPermission.setAllPermission(bits[0], bits[1], bits[2], bits[3]);
+            if(permission instanceof SubfolderAwareTargetPermission) {
+                oclPermission.setType(FolderPermissionType.getType(((SubfolderAwareTargetPermission) permission).getType()));
+                oclPermission.setPermissionLegator(((SubfolderAwareTargetPermission) permission).getPermissionLegator());
+            }
             return oclPermission;
         }
 
         @Override
         public TargetPermission convert(OCLPermission permission) {
-            return new TargetPermission(permission.getEntity(), permission.isGroupPermission(), getBits(permission));
+            return new SubfolderAwareTargetPermission(permission.getEntity(), permission.isGroupPermission(), getBits(permission), permission.getType().getTypeNumber(), permission.getPermissionLegator());
         }
 
     }

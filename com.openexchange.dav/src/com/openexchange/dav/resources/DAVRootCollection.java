@@ -55,7 +55,7 @@ import com.openexchange.dav.mixins.ACL;
 import com.openexchange.dav.mixins.ACLRestrictions;
 import com.openexchange.dav.mixins.CurrentUserPrincipal;
 import com.openexchange.dav.mixins.SupportedPrivilegeSet;
-import com.openexchange.folderstorage.DefaultPermission;
+import com.openexchange.folderstorage.BasicPermission;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.Permissions;
 import com.openexchange.group.GroupStorage;
@@ -71,7 +71,7 @@ import com.openexchange.webdav.protocol.WebdavProtocolException;
 public abstract class DAVRootCollection extends DAVCollection {
 
     private static final Permission[] ROOT_PERMISSIONS = {
-        new DefaultPermission(GroupStorage.GROUP_ZERO_IDENTIFIER, true, Permissions.createPermissionBits(
+        new BasicPermission(GroupStorage.GROUP_ZERO_IDENTIFIER, true, Permissions.createPermissionBits(
             Permission.READ_FOLDER, Permission.NO_PERMISSIONS, Permission.NO_PERMISSIONS, Permission.NO_PERMISSIONS, false))
     };
     private static final WebdavPath ROOT_URL = new WebdavPath();

@@ -133,15 +133,19 @@ public class AdministrativeTargetUpdateImpl extends AbstractTargetUpdate {
             OXFolderManager folderManager = OXFolderManager.getInstance(syntheticOwnerSession, folderAccess, connection, connection);
             FolderObject folder = folderTargetProxy.getFolder();
             folderManager.updateFolder(folder, false, System.currentTimeMillis());
-            ShareTarget target = folderTargetProxy.getTarget();
-            if (folder.getModule() == FolderObject.INFOSTORE && target.isIncludeSubfolders() != null && target.isIncludeSubfolders()) {
+
+            if (folder.getModule() == FolderObject.INFOSTORE) {
+                // Add permission to sub folders
                 List<Integer> subfolderIds = folder.getSubfolderIds();
-                List<FolderObject> folderObjects = folderAccess.getFolderObjects(subfolderIds);
+
                 List<OCLPermission> appliedPermissions = folderTargetProxy.getAppliedPermissions();
                 List<OCLPermission> removedPermissions = folderTargetProxy.getRemovedPermissions();
-                for (FolderObject fol : folderObjects) {
-                    prepareInheritedPermissions(fol, appliedPermissions, removedPermissions);
-                    folderManager.updateFolder(fol, true, true, System.currentTimeMillis());
+
+                Context context = getContextService().loadContext(contextID);
+                for (Integer id : subfolderIds) {
+                    FolderObject sub = FolderObject.loadFolderObjectFromDB(id, context);
+                    prepareInheritedPermissions(sub, appliedPermissions, removedPermissions);
+                    folderManager.updateFolder(sub, false, true, sub.getLastModified().getTime());
                 }
             }
 
@@ -160,22 +164,30 @@ public class AdministrativeTargetUpdateImpl extends AbstractTargetUpdate {
     private static FolderObject prepareInheritedPermissions(FolderObject folder, List<OCLPermission> added, List<OCLPermission> removed) {
         List<OCLPermission> originalPermissions = folder.getPermissions();
         if (null == originalPermissions) {
-            originalPermissions = new ArrayList<OCLPermission>();
+            originalPermissions = new ArrayList<>();
         }
 
-        for(OCLPermission add : added){
-            add.setType(FolderPermissionType.INHERITED);
+        List<OCLPermission> filtered = new ArrayList<>(added.size());
+        for (OCLPermission add : added) {
+            if(add.getType() == FolderPermissionType.LEGATOR) {
+                add.setPermissionLegator(String.valueOf(folder.getParentFolderID()));
+                add.setType(FolderPermissionType.INHERITED);
+                filtered.add(add);
+            }
         }
 
         for (OCLPermission rem : removed) {
+            if(rem.getType() == FolderPermissionType.LEGATOR) {
+                rem.setPermissionLegator(String.valueOf(folder.getParentFolderID()));
+            }
             rem.setType(FolderPermissionType.INHERITED);
         }
 
-        List<OCLPermission> newPermissions = new ArrayList<>(originalPermissions.size() + added.size());
-        newPermissions.addAll(originalPermissions);
-        newPermissions.addAll(added);
-        newPermissions = removePermissions(newPermissions, removed);
-        folder.setPermissions(newPermissions);
+        List<OCLPermission> permissions = new ArrayList<>(originalPermissions.size() + filtered.size());
+        permissions.addAll(originalPermissions);
+        permissions.addAll(filtered);
+        permissions = removePermissions(permissions, removed);
+        folder.setPermissions(permissions);
         return folder;
     }
 

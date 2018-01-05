@@ -158,6 +158,7 @@ public class OCLPermission implements Permission, Cloneable, Serializable, OXClo
     private int odp;
     private int system;
     private FolderPermissionType type;
+    private String legator;
 
     /**
      * This property defines if this permission declares the owner to be the
@@ -182,6 +183,7 @@ public class OCLPermission implements Permission, Cloneable, Serializable, OXClo
         owp = NO_PERMISSIONS;
         odp = NO_PERMISSIONS;
         type = FolderPermissionType.NORMAL;
+        legator = null;
     }
 
     /**
@@ -197,6 +199,7 @@ public class OCLPermission implements Permission, Cloneable, Serializable, OXClo
         owp = NO_PERMISSIONS;
         odp = NO_PERMISSIONS;
         type = FolderPermissionType.NORMAL;
+        legator = null;
         this.entity = entity;
         this.fuid = fuid;
     }
@@ -216,6 +219,7 @@ public class OCLPermission implements Permission, Cloneable, Serializable, OXClo
         groupPermission = false;
         system = 0;
         type = FolderPermissionType.NORMAL;
+        legator = null;
     }
 
     /**
@@ -234,6 +238,22 @@ public class OCLPermission implements Permission, Cloneable, Serializable, OXClo
      */
     public void setType(final FolderPermissionType type) {
         this.type = type;
+    }
+    
+    /**
+     * Retrieves the id of the permission legator
+     */
+    public String getPermissionLegator() {
+        return legator;
+    }
+
+    /**
+     * Sets the permission legator
+     * 
+     * @param legator The permission legator
+     */
+    public void setPermissionLegator(String legator) {
+        this.legator = legator;
     }
 
     /**
@@ -634,7 +654,7 @@ public class OCLPermission implements Permission, Cloneable, Serializable, OXClo
         final OCLPermission op = (OCLPermission) other;
         return (entity == op.entity) && (fuid == op.fuid) && (fp == op.fp) && (orp == op.orp) && (owp == op.owp)
                 && (odp == op.odp) && (folderAdmin == op.folderAdmin) && (groupPermission == op.groupPermission)
-                && (system == op.system) && (type == op.type);
+                && (system == op.system) && (type == op.type) && (legator == op.legator);
     }
 
     @Override
@@ -650,6 +670,7 @@ public class OCLPermission implements Permission, Cloneable, Serializable, OXClo
         hash = 31 * hash + (groupPermission ? 1 : 0);
         hash = 31 * hash + system;
         hash = 31 * hash + type.getTypeNumber();
+        hash = 31 * hash + legator == null ? 0 : legator.hashCode();
         return hash;
     }
 

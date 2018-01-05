@@ -659,6 +659,7 @@ public final class FolderWriter {
             oclPermission.setFolderAdmin(permission.isAdmin());
             oclPermission.setGroupPermission(permission.isGroup());
             oclPermission.setType(permission.getType() == null ? FolderPermissionType.NORMAL : permission.getType());
+            oclPermission.setPermissionLegator(permission.getPermissionLegator());
             oclPermissions.add(oclPermission);
         }
         return oclPermissions;

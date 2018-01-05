@@ -384,7 +384,6 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                      * Properly inherit permissions
                      */
                     if ((storageFolder.getContentType().getModule() == FolderObject.INFOSTORE && folder.getContentType() == null) || (folder.getContentType() != null && folder.getContentType().getModule() == FolderObject.INFOSTORE)) {
-                        addMissingType(folder.getPermissions(), storageFolder.getPermissions());
                         addParentLinkPermission(folder, oldParentId, storage);
                     }
 
@@ -522,21 +521,8 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
         }
     } // End of doUpdate()
 
-    private void addMissingType(Permission[] newPerms, Permission[] origPerms) {
-        for (Permission perm : origPerms) {
-            if (perm.getType() == FolderPermissionType.LEGATOR || perm.getType() == FolderPermissionType.INHERITED) {
-                for (Permission newPerm : newPerms) {
-                    if (newPerm.getType() == FolderPermissionType.NORMAL && newPerm.getSystem() == 0 && perm.getEntity() == newPerm.getEntity() && perm.isGroup() == newPerm.isGroup()) {
-                        newPerm.setType(perm.getType());
-                        break;
-                    }
-                }
-            }
-        }
-    }
-
     /**
-     * Return a list of permissions which must be inherited from the parent folder
+     * Add missing permissions to the folder which must be inherited from the parent folder
      *
      * @param folder The folder to check
      * @param newRealParentStorage The storage of the folder
@@ -561,6 +547,9 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                 if (!exists) {
                     Permission cloned = (Permission) perm.clone();
                     cloned.setType(FolderPermissionType.INHERITED);
+                    if(perm.getType() == FolderPermissionType.LEGATOR) {
+                        cloned.setPermissionLegator(parentId);
+                    }
                     result.add(cloned);
                 }
             }

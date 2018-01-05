@@ -47,16 +47,26 @@
  *
  */
 
-package com.openexchange.share.core.tools;
+package com.openexchange.oauth.impl.internal.hazelcast;
+
+import com.openexchange.hazelcast.serialization.AbstractCustomPortableFactory;
+import com.openexchange.hazelcast.serialization.CustomPortable;
 
 /**
- * {@link ShareCoreTool}
+ * {@link PortableCallbackRegistryFetchFactory} - The portable factory for {@link PortableCallbackRegistryFetch} type.
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since v7.8.0
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class ShareCoreTool {
+public class PortableCallbackRegistryFetchFactory extends AbstractCustomPortableFactory {
 
+    @Override
+    public CustomPortable create() {
+        return new PortableCallbackRegistryFetch();
+    }
 
+    @Override
+    public int getClassId() {
+        return PortableCallbackRegistryFetch.CLASS_ID;
+    }
 
 }

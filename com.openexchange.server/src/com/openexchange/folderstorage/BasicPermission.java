@@ -47,96 +47,85 @@
  *
  */
 
-package com.openexchange.file.storage.infostore.folder;
+package com.openexchange.folderstorage;
 
-import com.openexchange.folderstorage.FolderPermissionType;
-import com.openexchange.folderstorage.Permission;
 
 /**
- * {@link ParsedPermission} - A parsed permission.
+ * {@link BasicPermission}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.10.0
  */
-public class ParsedPermission implements Permission {
+public class BasicPermission implements Permission {
 
     /**
      * serialVersionUID
      */
-    private static final long serialVersionUID = -4051354535282515068L;
+    private static final long serialVersionUID = 7760512838927816558L;
 
-    private int system;
-    private FolderPermissionType type;
-    private int deletePermission;
-    private int folderPermission;
-    private int readPermission;
-    private int writePermission;
-    private boolean admin;
-    private int entity;
-    private boolean group;
+    protected int entity = -1;
+
+    protected boolean group;
+
+    protected int system;
+
+    protected FolderPermissionType type;
+
+    protected String legator;
+
+    protected boolean admin;
+
+    protected int folderPermission;
+
+    protected int readPermission;
+
+    protected int writePermission;
+
+    protected int deletePermission;
 
     /**
-     * Initializes an empty {@link ParsedPermission}.
+     * Initializes an empty {@link DefaultPermission}.
      */
-    public ParsedPermission() {
+    public BasicPermission() {
         super();
+        setNoPermissions();
     }
 
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + (admin ? 1231 : 1237);
-        result = prime * result + deletePermission;
-        result = prime * result + entity;
-        result = prime * result + folderPermission;
-        result = prime * result + (group ? 1231 : 1237);
-        result = prime * result + readPermission;
-        result = prime * result + system;
-        result = prime * result + type.getTypeNumber();
-        result = prime * result + writePermission;
-        return result;
+    /**
+     * Initializes a new {@link DefaultPermission} set to the given
+     * entity and permission bits.
+     *
+     * @param entity
+     * @param isGroup
+     * @param permissionBits
+     */
+    public BasicPermission(int entity, boolean isGroup, int permissionBits) {
+        super();
+        this.entity = entity;
+        this.group = isGroup;
+        int[] permissions = Permissions.parsePermissionBits(permissionBits);
+        folderPermission = permissions[0];
+        readPermission = permissions[1];
+        writePermission = permissions[2];
+        deletePermission = permissions[3];
+        admin = permissions[4] > 0;
     }
 
-    @Override
-    public boolean equals(final Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null) {
-            return false;
-        }
-        if (!(obj instanceof Permission)) {
-            return false;
-        }
-        final Permission other = (Permission) obj;
-        if (admin != other.isAdmin()) {
-            return false;
-        }
-        if (deletePermission != other.getDeletePermission()) {
-            return false;
-        }
-        if (entity != other.getEntity()) {
-            return false;
-        }
-        if (folderPermission != other.getFolderPermission()) {
-            return false;
-        }
-        if (group != other.isGroup()) {
-            return false;
-        }
-        if (readPermission != other.getReadPermission()) {
-            return false;
-        }
-        if (system != other.getSystem()) {
-            return false;
-        }
-        if (type != other.getType()) {
-            return false;
-        }
-        if (writePermission != other.getWritePermission()) {
-            return false;
-        }
-        return true;
+    /**
+     * Copy constructor
+     */
+    public BasicPermission(Permission permission) {
+        super();
+        entity = permission.getEntity();
+        group = permission.isGroup();
+        system = permission.getSystem();
+        type = permission.getType();
+        legator = permission.getPermissionLegator();
+        admin = permission.isAdmin();
+        folderPermission = permission.getFolderPermission();
+        readPermission = permission.getReadPermission();
+        writePermission = permission.getWritePermission();
+        deletePermission = permission.getDeletePermission();
     }
 
     @Override
@@ -252,11 +241,77 @@ public class ParsedPermission implements Permission {
 
     @Override
     public Object clone() {
-        try {
-            return super.clone();
-        } catch (final CloneNotSupportedException e) {
-            throw new InternalError(e.getMessage());
+        return new BasicPermission(this);
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + (admin ? 1231 : 1237);
+        result = prime * result + deletePermission;
+        result = prime * result + entity;
+        result = prime * result + folderPermission;
+        result = prime * result + (group ? 1231 : 1237);
+        result = prime * result + readPermission;
+        result = prime * result + system;
+        result = prime * result + type.getTypeNumber();
+        result = prime * result + legator==null ? 0 : legator.hashCode();
+        result = prime * result + writePermission;
+        return result;
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+        if (this == obj) {
+            return true;
         }
+        if (obj == null) {
+            return false;
+        }
+
+        if (!(obj instanceof Permission)) {
+            return false;
+        }
+
+        final Permission other = (Permission) obj;
+        if (admin != other.isAdmin()) {
+            return false;
+        }
+        if (deletePermission != other.getDeletePermission()) {
+            return false;
+        }
+        if (entity != other.getEntity()) {
+            return false;
+        }
+        if (folderPermission != other.getFolderPermission()) {
+            return false;
+        }
+        if (group != other.isGroup()) {
+            return false;
+        }
+        if (readPermission != other.getReadPermission()) {
+            return false;
+        }
+        if (system != other.getSystem()) {
+            return false;
+        }
+        if (type != other.getType()) {
+            return false;
+        }
+        if ((legator==null && other.getPermissionLegator()!=null) || (legator!=null && !legator.equals(other.getPermissionLegator()))) {
+            return false;
+        }
+        if (writePermission != other.getWritePermission()) {
+            return false;
+        }
+
+        return true;
+    }
+
+    @Override
+    public String toString() {
+        return "Permission [entity=" + entity + ", group=" + group + ", admin=" + admin + ", system=" + system + ", folderPermission=" + folderPermission + ", readPermission=" + readPermission + ", writePermission=" + writePermission + ", deletePermission=" + deletePermission + "]";
     }
 
     @Override
@@ -269,4 +324,13 @@ public class ParsedPermission implements Permission {
         this.type = type;
     }
 
+    @Override
+    public String getPermissionLegator() {
+        return legator;
+    }
+
+    @Override
+    public void setPermissionLegator(String legator) {
+        this.legator = legator;
+    }
 }

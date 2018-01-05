@@ -75,6 +75,7 @@ public class ServerCompositeActivator extends CompositeBundleActivator {
         new com.openexchange.filemanagement.osgi.ManagedFileManagementActivator(),
         new com.openexchange.server.osgi.ServerActivator(),
         new com.openexchange.ajax.requesthandler.osgi.DispatcherActivator(),
+        new com.openexchange.login.osgi.LoginRampUpActivator(),
         new com.openexchange.ajax.ipcheck.osgi.IPCheckActivator(),
         new com.openexchange.groupware.settings.impl.osgi.SettingsActivator(),
         new com.openexchange.ajax.printing.osgi.AJAXPrintingActivator(),

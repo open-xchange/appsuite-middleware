@@ -1035,7 +1035,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
                     try {
                         final FolderObject tmp = new FolderObject(subfolderId);
                         FolderObject folderFromMaster = getFolderFromMaster(subfolderId);
-                        List<OCLPermission> mergePermissions = mergePermissionsForHandDown(permission, folderFromMaster.getPermissions());
+                        List<OCLPermission> mergePermissions = mergePermissionsForHandDown(permission, folderFromMaster.getPermissions(), folderId);
                         tmp.setPermissions(mergePermissions);
                         doUpdate(tmp, options, folderFromMaster, lastModified, true, alreadyCheckedParents);  // Calls handDown() for subfolder, as well
                         if (null != cacheManager) {
@@ -1057,15 +1057,16 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
     /**
      * Merges old and new permissions for hand down
      *
-     * @param permissions The new permissions
+     * @param permission The new permissions
      * @param originalPermissions The original permissions
+     * @param parentId The id of the parent folder
      */
-    List<OCLPermission> mergePermissionsForHandDown(ComparedOCLFolderPermissions permission, List<OCLPermission> originalPermissions) {
+    List<OCLPermission> mergePermissionsForHandDown(ComparedOCLFolderPermissions permission, List<OCLPermission> originalPermissions, int parentId) {
         List<OCLPermission> result = new ArrayList<>(permission.getNewPermissions().size());
         for (OCLPermission perm : permission.getNewPermissions()) {
             result.add(perm);
         }
-        adjustTypeOfInheritedPermissions(result);
+        adjustTypeOfInheritedPermissions(result, parentId);
         for(OCLPermission orig: originalPermissions){
             if (!containsEntity(orig, permission)) {
                 result.add(orig);
@@ -1099,11 +1100,13 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
      * Ensures that {@link FolderPermissionType#LEGATOR} is handed down as {@link FolderPermissionType#INHERITED}
      *
      * @param permissions The new permissions
+     * @param parentId The id of the parent folder
      */
-    void adjustTypeOfInheritedPermissions(List<OCLPermission> permissions) {
+    void adjustTypeOfInheritedPermissions(List<OCLPermission> permissions, int parentId) {
         for (OCLPermission perm : permissions) {
             if (perm.getSystem() != 1 && perm.getType() == FolderPermissionType.LEGATOR) {
                 perm.setType(FolderPermissionType.INHERITED);
+                perm.setPermissionLegator(String.valueOf(parentId));
             }
         }
     }
@@ -1114,10 +1117,6 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
 
     private int getFolderOwnerFromMaster(int folderId) throws OXException {
         return getFolderFromMaster(folderId, false, false).getCreatedBy();
-    }
-
-    private boolean hasSubfoldersFromMaster(int folderId) throws OXException {
-        return getFolderFromMaster(folderId, false, false).hasSubfolders();
     }
 
     protected FolderObject getFolderFromMaster(int folderId) throws OXException {

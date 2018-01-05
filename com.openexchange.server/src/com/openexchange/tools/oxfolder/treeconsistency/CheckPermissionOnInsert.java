@@ -228,6 +228,7 @@ public final class CheckPermissionOnInsert extends CheckPermission {
             false,
             OCLPermission.SYSTEM_SYSTEM,
             FolderPermissionType.NORMAL,
+            null,
             writeCon,
             ctx);
     }

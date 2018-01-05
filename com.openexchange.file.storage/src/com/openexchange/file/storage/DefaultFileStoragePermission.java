@@ -76,6 +76,8 @@ public class DefaultFileStoragePermission implements FileStoragePermission {
 
     private FileStorageFolderPermissionType type;
 
+    protected String legator;
+
     private int deletePermission;
 
     private int folderPermission;
@@ -109,6 +111,7 @@ public class DefaultFileStoragePermission implements FileStoragePermission {
         result = prime * result + readPermission;
         result = prime * result + system;
         result = prime * result + type.getTypeNumber();
+        result = prime * result + legator==null ? 0 : legator.hashCode();
         result = prime * result + writePermission;
         return result;
     }
@@ -147,6 +150,9 @@ public class DefaultFileStoragePermission implements FileStoragePermission {
             return false;
         }
         if (type != other.getType()) {
+            return false;
+        }
+        if ((legator==null && other.getPermissionLegator()!=null) || (legator!=null && !legator.equals(other.getPermissionLegator()))) {
             return false;
         }
         if (writePermission != other.getWritePermission()) {
@@ -278,6 +284,16 @@ public class DefaultFileStoragePermission implements FileStoragePermission {
     @Override
     public void setType(FileStorageFolderPermissionType type) {
         this.type = type;
+    }
+
+    @Override
+    public String getPermissionLegator() {
+        return legator;
+    }
+
+    @Override
+    public void setPermissionLegator(String legator) {
+        this.legator = legator;
     }
 
 }

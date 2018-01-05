@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,37 +47,57 @@
  *
  */
 
-package com.openexchange.folder.json.parser;
+package com.openexchange.sessiond.impl.usertype;
 
-import com.openexchange.folderstorage.GuestPermission;
-import com.openexchange.share.recipient.ShareRecipient;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.sessiond.impl.usertype.UserTypeSessiondConfigRegistry.UserType;
+
 
 /**
- * {@link ParsedGuestPermission}
+ * {@link AbstractConfigBasedUserTypeSessiondConfigInterface} - The abstract Sessiond user settings initialized by configuration.
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since v7.6.1
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.10.0
  */
-public class ParsedGuestPermission extends ParsedPermission implements GuestPermission {
+public abstract class AbstractConfigBasedUserTypeSessiondConfigInterface implements UserTypeSessiondConfigInterface {
 
-    private static final long serialVersionUID = 7203618073266628866L;
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractConfigBasedUserTypeSessiondConfigInterface.class);
 
-    private ShareRecipient recipient;
+    protected final UserTypeSessiondConfigRegistry.UserType userType;
+    protected final int maxSessions;
 
     /**
-     * Initializes an empty {@link ParsedGuestPermission}.
+     * Initializes a new {@link AbstractConfigBasedUserTypeSessiondConfigInterface}.
      */
-    public ParsedGuestPermission() {
+    protected AbstractConfigBasedUserTypeSessiondConfigInterface(UserTypeSessiondConfigRegistry.UserType userType, ConfigurationService conf) {
         super();
+        this.userType = userType;
+        String propertyName = getPropertyName();
+        maxSessions = conf.getIntProperty(propertyName, getDefaultValue());
+        LOG.debug("Sessiond property: {}={}", propertyName, maxSessions);
     }
 
     @Override
-    public ShareRecipient getRecipient() {
-        return recipient;
+    public UserType getUserType() {
+        return userType;
     }
 
-    public void setRecipient(ShareRecipient recipient) {
-        this.recipient = recipient;
+    @Override
+    public int getMaxSessionsPerUserType() {
+        return maxSessions;
     }
 
+    /**
+     * Gets the name of the property providing the number of max. sessions.
+     *
+     * @return The property name
+     */
+    protected abstract String getPropertyName();
+
+    /**
+     * Gets the default value to assume for the number of max. sessions.
+     *
+     * @return The default value
+     */
+    protected abstract int getDefaultValue();
 }

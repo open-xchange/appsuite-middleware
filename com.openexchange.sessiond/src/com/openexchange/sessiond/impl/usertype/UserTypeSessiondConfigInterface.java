@@ -47,39 +47,29 @@
  *
  */
 
-package com.openexchange.sessiond.impl;
+package com.openexchange.sessiond.impl.usertype;
+
+import com.openexchange.sessiond.impl.usertype.UserTypeSessiondConfigRegistry.UserType;
 
 /**
- * {@link Sessiond} - The Sessiond
+ * SessionConfig
  *
- * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
+ * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  */
+public interface UserTypeSessiondConfigInterface {
 
-public class Sessiond {
+    /**
+     * Returns the type of users the {@link UserTypeSessiondConfigInterface} handles
+     * 
+     * @return {@link UserType}
+     */
+    UserType getUserType();
 
-    private static volatile Sessiond singleton;
-
-    // private SessionHandler sessionHandler;
-
-    private final SessiondConfigInterface config;
-
-    public Sessiond(final SessiondConfigInterface config) {
-        this.config = config;
-    }
-
-    public void start() {
-        // sessionHandler = new SessionHandler();
-        SessionHandler.init(config);
-    }
-
-    public static Sessiond getInstance(final SessiondConfigInterface config) {
-        if (singleton != null) {
-            return singleton;
-        }
-        return singleton = new Sessiond(config);
-    }
-
-    public void close() {
-        SessionHandler.close();
-    }
+    /**
+     * Returns the maximum allowed sessions for the given type of user.
+     * 
+     * @return The number of allowed sessions for the given type of user
+     * @see #getUserType()
+     */
+    int getMaxSessionsPerUserType();
 }
