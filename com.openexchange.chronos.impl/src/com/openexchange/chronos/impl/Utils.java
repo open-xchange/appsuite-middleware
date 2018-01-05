@@ -88,6 +88,7 @@ import com.openexchange.chronos.Classification;
 import com.openexchange.chronos.DelegatingEvent;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.EventFlag;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.DefaultRecurrenceData;
@@ -164,6 +165,12 @@ public class Utils {
         EventField.ID, EventField.TIMESTAMP, EventField.MODIFIED_BY, EventField.FOLDER_ID, EventField.SERIES_ID,
         EventField.RECURRENCE_RULE, EventField.SEQUENCE, EventField.START_DATE, EventField.TRANSP
     };
+
+    /** A collection of fields that need to be queried to construct the special event flags field properly afterwards */
+    public static final List<EventField> FLAG_FIELDS = Arrays.asList(
+        EventField.ID, EventField.SERIES_ID, EventField.FOLDER_ID, EventField.RECURRENCE_ID,  EventField.STATUS, EventField.TRANSP,
+        EventField.CLASSIFICATION, EventField.ORGANIZER, EventField.ATTACHMENTS, EventField.ALARMS, EventField.ATTENDEES
+    );
 
     /**
      * Gets the event fields to include when querying events from the storage based on the client-requested fields defined in the
@@ -255,13 +262,17 @@ public class Utils {
     }
 
     /**
-     * Gets the event fields to include when querying events from the storage based on the supplied client-requested fields. <p/>
-     * Specific {@link Utils#DEFAULT_FIELDS} are included implicitly, further required ones may be defined explicitly, too.
+     * Gets the event fields to include when querying events from the storage based on the supplied client-requested fields.
+     * <p/>
+     * Specific {@link Utils#DEFAULT_FIELDS} are included implicitly, further required ones may be defined explicitly, too. If the special
+     * field {@link EventField#FLAGS} is requested, further fields (as listed in {@link Utils#FLAG_FIELDS}) are also added to be able to
+     * derive the actual flags afterwards.
      *
      * @param requestedFields The fields requested by the client, or <code>null</code> to retrieve all fields
      * @param requiredFields Additionally required fields to add, or <code>null</code> if not defined
      * @return The fields to use when querying events from the storage
      * @see Utils#DEFAULT_FIELDS
+     * @see Utils#FLAG_FIELDS
      */
     public static EventField[] getFields(EventField[] requestedFields, EventField... requiredFields) {
         if (null == requestedFields) {
@@ -269,10 +280,13 @@ public class Utils {
         }
         Set<EventField> fields = new HashSet<EventField>();
         fields.addAll(DEFAULT_FIELDS);
-        if (null != requiredFields && 0 < requestedFields.length) {
+        fields.addAll(Arrays.asList(requestedFields));
+        if (null != requiredFields && 0 < requiredFields.length) {
             fields.addAll(Arrays.asList(requiredFields));
         }
-        fields.addAll(Arrays.asList(requestedFields));
+        if (fields.contains(EventFlag.class)) {
+            fields.addAll(FLAG_FIELDS);
+        }
         return fields.toArray(new EventField[fields.size()]);
     }
 
