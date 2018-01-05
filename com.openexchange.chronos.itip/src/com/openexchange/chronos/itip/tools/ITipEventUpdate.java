@@ -79,30 +79,37 @@ public class ITipEventUpdate implements EventUpdate {
         this.delegate = update;
     }
 
+    @Override
     public Event getOriginal() {
         return delegate.getOriginal();
     }
 
+    @Override
     public Event getUpdate() {
         return delegate.getUpdate();
     }
 
+    @Override
     public Set<EventField> getUpdatedFields() {
         return delegate.getUpdatedFields();
     }
 
+    @Override
     public CollectionUpdate<Attendee, AttendeeField> getAttendeeUpdates() {
         return delegate.getAttendeeUpdates();
     }
 
+    @Override
     public boolean containsAnyChangeOf(EventField[] fields) {
         return delegate.containsAnyChangeOf(fields);
     }
 
+    @Override
     public CollectionUpdate<Alarm, AlarmField> getAlarmUpdates() {
         return delegate.getAlarmUpdates();
     }
 
+    @Override
     public SimpleCollectionUpdate<Attachment> getAttachmentUpdates() {
         return delegate.getAttachmentUpdates();
     }

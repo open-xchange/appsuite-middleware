@@ -51,7 +51,6 @@ package com.openexchange.chronos.itip.json;
 
 import java.util.List;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -60,13 +59,11 @@ import com.openexchange.calendar.json.actions.chronos.DefaultEventConverter;
 import com.openexchange.calendar.json.compat.Appointment;
 import com.openexchange.calendar.json.compat.AppointmentWriter;
 import com.openexchange.chronos.Event;
-import com.openexchange.chronos.EventField;
-import com.openexchange.chronos.common.mapping.EventMapper;
 import com.openexchange.chronos.itip.ITipAction;
 import com.openexchange.chronos.itip.ITipAnalysis;
 import com.openexchange.chronos.itip.ITipAnnotation;
 import com.openexchange.chronos.itip.ITipChange;
-import com.openexchange.chronos.itip.ParticipantChange;
+import com.openexchange.chronos.itip.tools.CalendarField;
 import com.openexchange.chronos.itip.tools.ITipEventUpdate;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.EventConflict;
@@ -82,7 +79,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
 public class ITipAnalysisWriter {
 
     private final AppointmentWriter appointmentWriter;
-    private DefaultEventConverter eventConverter;
+    private DefaultEventConverter   eventConverter;
 
     public ITipAnalysisWriter(final TimeZone timezone, final CalendarSession session, ServiceLookup services) throws OXException {
         super();
@@ -178,13 +175,10 @@ public class ITipAnalysisWriter {
             for (EventConflict conflict : conflicts) {
                 final JSONObject conflictObject = new JSONObject();
                 appointmentWriter.writeAppointment(eventConverter.getAppointment(conflict.getConflictingEvent()), conflictObject);
-                array.put(conflictObject);   
+                array.put(conflictObject);
             }
             changeObject.put("conflicts", array);
         }
-
-        final ParticipantChange participantChange = change.getParticipantChange();
-        // TODO
 
         final ITipEventUpdate diff = change.getDiff();
         if (diff != null) {
@@ -204,26 +198,35 @@ public class ITipAnalysisWriter {
     }
 
     private void writeDiff(final JSONObject diffObject, final ITipEventUpdate diff) throws JSONException, OXException {
-        Set<EventField> updatedFields = diff.getUpdatedFields();
-        for (EventField updatedField : updatedFields) {
-            final JSONObject difference = new JSONObject();
-            writeField("old", updatedField, diff.getOriginal(), difference);
-            writeField("new", updatedField, diff.getUpdate(), difference);
+        // Convert event
+        Appointment original = eventConverter.getAppointment(diff.getOriginal());
+        Appointment updated = eventConverter.getAppointment(diff.getUpdate());
+
+        // Iterate over all columns and put diff into response
+        for (int column : Appointment.ALL_COLUMNS) {
+            if (original.contains(column) || updated.contains(column)) {
+                JSONObject difference = new JSONObject();
+                String fieldName = CalendarField.getByColumn(column).getJsonName();
+                Object originalValue = original.get(column);
+                Object updatedValue = updated.get(column);
+                if (null == originalValue ? null != updatedValue : false == originalValue.equals(updatedValue)) {
+                    writeField("old", originalValue, column, fieldName, difference);
+                    writeField("new", updatedValue, column, fieldName, difference);
+
+                    diffObject.put(fieldName, difference);
+                }
+            }
         }
-        
-        // TODO: Write extra info aka confimration status
     }
-    
-    private void writeField(String key, EventField field, Event value, JSONObject difference) throws JSONException, OXException {
-        Event container = EventMapper.getInstance().copy(value, null, false, new EventField[]{field});
-        Appointment converted = eventConverter.getAppointment(container);
-        JSONObject object = new JSONObject();
-        appointmentWriter.writeAppointment(converted, object);
-        if (object.entrySet().size() != 1) {
-            //TODO:
-        }
-        for (Entry<String, Object> entry : object.entrySet()) {
-            difference.put(entry.getKey(), entry.getValue());            
+
+    private void writeField(final String key, final Object value, final int fieldNumber, final String fieldName, final JSONObject difference) throws JSONException {
+        final Appointment appointment = new Appointment();
+        appointment.set(fieldNumber, value);
+        final JSONObject json = new JSONObject();
+        appointmentWriter.writeAppointment(appointment, json);
+        final Object opt = json.opt(fieldName);
+        if (opt != null) {
+            difference.put(key, opt);
         }
     }
 
@@ -244,7 +247,7 @@ public class ITipAnalysisWriter {
 
     private void writeAnnotation(final ITipAnnotation annotation, final JSONObject annotationObject) throws JSONException, OXException {
         annotationObject.put("message", annotation.getMessage());
-        // TOOD: i18n and message args
+        // TODO: i18n and message args
         final Event event = annotation.getEvent();
         if (event != null) {
             final JSONObject appointmentObject = new JSONObject();
@@ -252,5 +255,4 @@ public class ITipAnalysisWriter {
             annotationObject.put("appointment", appointmentObject);
         }
     }
-
 }
