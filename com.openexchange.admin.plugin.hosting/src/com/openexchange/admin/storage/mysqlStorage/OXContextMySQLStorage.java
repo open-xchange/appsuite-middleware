@@ -1578,7 +1578,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                         // Must not be used for a context association
                         throw new StorageException("Database " + givenDatabase.getId() + " must not be used.");
                     }
-                    contextCommon.updateContextsPerDBPoolCount(decrementDatabaseCount, db, configCon);
+                    contextCommon.updateContextsPerDBPoolCount(!decrementDatabaseCount, db, configCon);
                 }
                 decrementDatabaseCount = true;
             }
