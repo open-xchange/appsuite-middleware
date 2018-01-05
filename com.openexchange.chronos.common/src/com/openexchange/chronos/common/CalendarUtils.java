@@ -51,6 +51,7 @@ package com.openexchange.chronos.common;
 
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.I2i;
+import static com.openexchange.tools.arrays.Collections.isNullOrEmpty;
 import static org.slf4j.LoggerFactory.getLogger;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -907,6 +908,84 @@ public class CalendarUtils {
         long timestamp1 = dateTime1.isFloating() && null != dateTime2.getTimeZone() ? getDateInTimeZone(dateTime1, dateTime2.getTimeZone()) : dateTime1.getTimestamp();
         long timestamp2 = dateTime2.isFloating() && null != dateTime1.getTimeZone() ? getDateInTimeZone(dateTime2, dateTime1.getTimeZone()) : dateTime2.getTimestamp();
         return Duration.parse(AlarmUtils.getDuration(timestamp2 - timestamp1, TimeUnit.MILLISECONDS));
+    }
+
+    /**
+     * Adjusts a collection of recurrence identifiers by applying an offset based on the difference of an original and updated series
+     * start date.
+     *
+     * @param originalRecurrenceIds The original recurrence identifiers to adjust
+     * @param originalSeriesStart The original start date of the underlying series event
+     * @param updatedSeriesStart The original start date of the underlying series event
+     * @return A set of new recurrence identifier instance whose values are shifted accordingly
+     */
+    public static SortedSet<RecurrenceId> shiftRecurrenceIds(SortedSet<RecurrenceId> originalRecurrenceIds, SortedSet<RecurrenceId> updatedRecurrenceIds, DateTime originalSeriesStart, DateTime updatedSeriesStart) {
+        if (isNullOrEmpty(updatedRecurrenceIds) || isNullOrEmpty(originalRecurrenceIds)) {
+            return updatedRecurrenceIds;
+        }
+        TreeSet<RecurrenceId> changedRecurrenceIds = new TreeSet<RecurrenceId>(updatedRecurrenceIds);
+        for (RecurrenceId originalRecurrenceId : originalRecurrenceIds) {
+            if (changedRecurrenceIds.remove(originalRecurrenceId)) {
+                changedRecurrenceIds.add(shiftRecurrenceId(originalRecurrenceId, originalSeriesStart, updatedSeriesStart));
+            }
+        }
+        return changedRecurrenceIds;
+    }
+
+    /**
+     * Adjusts an recurrence identifier by applying an offset based on the difference of an original and updated series start date.
+     *
+     * @param originalRecurrenceId The original recurrence identifier to adjust
+     * @param originalSeriesStart The original start date of the underlying series event
+     * @param updatedSeriesStart The original start date of the underlying series event
+     * @return A new recurrence identifier instance whose value is shifted accordingly
+     */
+    public static RecurrenceId shiftRecurrenceId(RecurrenceId originalRecurrenceId, DateTime originalSeriesStart, DateTime updatedSeriesStart) {
+        if (originalSeriesStart.isAllDay() && updatedSeriesStart.isAllDay()) {
+            /*
+             * both 'all-day', apply offset day-wise & return an 'all-day' recurrence id
+             */
+            DateTime value = originalRecurrenceId.getValue();
+            if (originalSeriesStart.before(updatedSeriesStart)) {
+                Duration ONE_DAY_MORE = new Duration(1, 1, 0);
+                for (DateTime current = originalSeriesStart; false == current.equals(updatedSeriesStart); current = current.addDuration(ONE_DAY_MORE), value = value.addDuration(ONE_DAY_MORE))
+                    ;
+            }
+            if (originalSeriesStart.after(updatedSeriesStart)) {
+                Duration ONE_DAY_LESS = new Duration(-1, 1, 0);
+                for (DateTime current = originalSeriesStart; false == current.equals(updatedSeriesStart); current = current.addDuration(ONE_DAY_LESS), value = value.addDuration(ONE_DAY_LESS))
+                    ;
+            }
+            return new DefaultRecurrenceId(value);
+        }
+        if (originalSeriesStart.isFloating() && updatedSeriesStart.isFloating()) {
+            /*
+             * both 'floating', apply relative offset & return a 'floating' or 'all-day' recurrence id
+             */
+            long offset = updatedSeriesStart.getTimestamp() - originalSeriesStart.getTimestamp();
+            DateTime value = new DateTime(null, originalRecurrenceId.getValue().getTimestamp() + offset);
+            return new DefaultRecurrenceId(updatedSeriesStart.isAllDay() ? value.toAllDay() : value);
+        }
+        if (originalSeriesStart.isFloating()) {
+            /*
+             * from 'floating' to 'non-floating', apply offset in timezone of updated series start & return a fixed recurrence id
+             */
+            long offset = updatedSeriesStart.getTimestamp() - getDateInTimeZone(originalSeriesStart, updatedSeriesStart.getTimeZone());
+            return new DefaultRecurrenceId(new DateTime(originalRecurrenceId.getValue().getTimestamp() + offset));
+        }
+        if (updatedSeriesStart.isFloating()) {
+            /*
+             * from 'non-floating' to 'floating', apply offset in timezone of original series start & return a 'floating' or 'all-day' recurrence id
+             */
+            long offset = getDateInTimeZone(updatedSeriesStart, originalSeriesStart.getTimeZone()) - originalSeriesStart.getTimestamp();
+            DateTime value = new DateTime(originalRecurrenceId.getValue().getTimestamp() + offset);
+            return new DefaultRecurrenceId(updatedSeriesStart.isAllDay() ? value.toAllDay() : value);
+        }
+        /*
+         * both 'non-floating', apply relative offset & return a fixed recurrence id
+         */
+        long offset = updatedSeriesStart.getTimestamp() - originalSeriesStart.getTimestamp();
+        return new DefaultRecurrenceId(new DateTime(originalRecurrenceId.getValue().getTimestamp() + offset));
     }
 
     /**
