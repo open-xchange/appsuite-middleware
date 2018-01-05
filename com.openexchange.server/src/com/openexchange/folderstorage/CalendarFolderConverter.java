@@ -183,7 +183,7 @@ public class CalendarFolderConverter {
      * @return The folder-storage compatible permission
      */
     public static Permission getStoragePermission(CalendarPermission calendarPermission) {
-        DefaultPermission permission = new DefaultPermission();
+        BasicPermission permission = new BasicPermission();
         permission.setEntity(calendarPermission.getEntity());
         permission.setGroup(calendarPermission.isGroup());
         permission.setAdmin(calendarPermission.isAdmin());
