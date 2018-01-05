@@ -100,7 +100,7 @@ public class CalendarModuleAdjuster implements ModuleAdjuster {
             return target;
         }
         String folderId = getUniqueFolderId(realFolderId);
-        return new ShareTarget(target.getModule(), folderId, realFolderId, target.getItem(), target.isIncludeSubfolders());
+        return new ShareTarget(target.getModule(), folderId, realFolderId, target.getItem());
     }
 
     private static String optRelativeFolderId(String folderId) {
