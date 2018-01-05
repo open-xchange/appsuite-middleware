@@ -156,6 +156,11 @@ public class DeltaEvent extends DelegatingEvent {
     }
 
     @Override
+    public boolean containsFlags() {
+        return setFields.contains(EventField.FLAGS);
+    }
+
+    @Override
     public boolean containsFolderId() {
         return setFields.contains(EventField.FOLDER_ID);
     }

@@ -191,8 +191,12 @@ public class ColumnIDs {
      */
     static final int ALARMS = Appointment.ALARM;
     /**
-     * The column identifier the extended properties of the event.
+     * The column identifier for the extended properties of the event.
      */
     static final int EXTENDED_PROPERTIES = Appointment.EXTENDED_PROPERTIES;
+    /**
+     * The column identifier for the flags of the event.
+     */
+    static final int FLAGS = 265;
 
 }

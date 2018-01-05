@@ -50,6 +50,7 @@
 package com.openexchange.chronos;
 
 import java.util.Date;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.SortedSet;
 import org.dmfs.rfc5545.DateTime;
@@ -762,6 +763,26 @@ public abstract class DelegatingEvent extends Event {
     @Override
     public boolean containsExtendedProperties() {
         return delegate.containsExtendedProperties();
+    }
+
+    @Override
+    public EnumSet<EventFlag> getFlags() {
+        return delegate.getFlags();
+    }
+
+    @Override
+    public void setFlags(EnumSet<EventFlag> value) {
+        delegate.setFlags(value);
+    }
+
+    @Override
+    public void removeFlags() {
+        delegate.removeFlags();
+    }
+
+    @Override
+    public boolean containsFlags() {
+        return delegate.containsFlags();
     }
 
 }

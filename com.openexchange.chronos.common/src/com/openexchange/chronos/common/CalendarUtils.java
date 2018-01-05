@@ -62,6 +62,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.EnumSet;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -91,8 +92,11 @@ import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Classification;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.EventFlag;
+import com.openexchange.chronos.EventStatus;
 import com.openexchange.chronos.ExtendedProperties;
 import com.openexchange.chronos.ExtendedProperty;
+import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.Period;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.Transp;
@@ -1735,7 +1739,7 @@ public class CalendarUtils {
      * Otherwise, the corresponding attendee's parent folder identifier is returned.
      *
      * @param event The event to get the folder view for
-     * @param calendarUser The identifier of the user to get the folder view for
+     * @param calendarUser The identifier of the calendar user to get the folder view for
      * @return The folder identifier
      * @throws OXException - {@link CalendarExceptionCodes#ATTENDEE_NOT_FOUND} in case there's no static parent folder and the supplied user is no attendee
      */
@@ -1749,4 +1753,66 @@ public class CalendarUtils {
         }
         return userAttendee.getFolderId();
     }
+
+    /**
+     * Generates the flags for a specific event.
+     *
+     * @param event The event to get the flags for
+     * @param calendarUser The identifier of the calendar user to get flags for
+     * @return The event flags
+     */
+    public static EnumSet<EventFlag> getFlags(Event event, int calendarUser) {
+        EnumSet<EventFlag> flags = EnumSet.noneOf(EventFlag.class);
+        if (null != event.getAttachments() && 0 < event.getAttachments().size()) {
+            flags.add(EventFlag.ATTACHMENTS);
+        }
+        if (null != event.getAlarms() && 0 < event.getAlarms().size()) {
+            flags.add(EventFlag.ALARMS);
+        }
+        if (isGroupScheduled(event)) {
+            flags.add(EventFlag.SCHEDULED);
+        }
+        if (isOrganizerSchedulingResource(event, calendarUser)) {
+            flags.add(EventFlag.ORGANIZER);
+            flags.add(EventFlag.ATTENDEE);
+        } else if (isAttendeeSchedulingResource(event, calendarUser)) {
+            flags.add(EventFlag.ATTENDEE);
+        }
+        if (Classification.CONFIDENTIAL.equals(event.getClassification())) {
+            flags.add(EventFlag.CONFIDENTIAL);
+        } else if (Classification.PRIVATE.equals(event.getClassification())) {
+            flags.add(EventFlag.PRIVATE);
+        }
+        if (false == isOpaqueTransparency(event)) {
+            flags.add(EventFlag.TRANSPARENT);
+        }
+        if (EventStatus.CONFIRMED.equals(event.getStatus())) {
+            flags.add(EventFlag.EVENT_CONFIRMED);
+        } else if (EventStatus.CANCELLED.equals(event.getStatus())) {
+            flags.add(EventFlag.EVENT_CANCELLED);
+        } else if (EventStatus.TENTATIVE.equals(event.getStatus())) {
+            flags.add(EventFlag.EVENT_TENTATIVE);
+        }
+        Attendee attendee = find(event.getAttendees(), calendarUser);
+        if (null != attendee) {
+            if (ParticipationStatus.ACCEPTED.equals(attendee.getPartStat())) {
+                flags.add(EventFlag.ACCEPTED);
+            } else if (ParticipationStatus.DECLINED.equals(attendee.getPartStat())) {
+                flags.add(EventFlag.DECLINED);
+            } else if (ParticipationStatus.DELEGATED.equals(attendee.getPartStat())) {
+                flags.add(EventFlag.DELEGATED);
+            } else if (ParticipationStatus.NEEDS_ACTION.equals(attendee.getPartStat())) {
+                flags.add(EventFlag.NEEDS_ACTION);
+            } else if (ParticipationStatus.TENTATIVE.equals(attendee.getPartStat())) {
+                flags.add(EventFlag.TENTATIVE);
+            }
+        }
+        if (isSeriesMaster(event)) {
+            flags.add(EventFlag.SERIES);
+        } else if (isSeriesException(event)) {
+            flags.add(EventFlag.EXCEPTION);
+        }
+        return flags;
+    }
+
 }

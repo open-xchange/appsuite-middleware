@@ -535,7 +535,7 @@ public class Utils {
      * @param folder The folder to get the calendar user for
      * @return The identifier of the calendar user
      */
-    public static int getCalendarUserId(UserizedFolder folder) throws OXException {
+    public static int getCalendarUserId(UserizedFolder folder) {
         if (SharedType.getInstance().equals(folder.getType())) {
             return folder.getCreatedBy();
         }

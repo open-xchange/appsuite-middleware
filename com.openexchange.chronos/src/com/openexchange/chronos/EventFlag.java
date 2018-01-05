@@ -50,152 +50,106 @@
 package com.openexchange.chronos;
 
 /**
- * {@link EventField}
+ * {@link EventFlag}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public enum EventField {
+public enum EventFlag {
 
     /**
-     * The object identifier of the event.
+     * The event contains at least one attachment.
      */
-    ID,
+    ATTACHMENTS(1 << 1),
     /**
-     * The parent folder identifier representing the view on the event.
+     * The calendar user has at least one alarm associated with the event.
      */
-    FOLDER_ID,
+    ALARMS(1 << 2),
     /**
-     * The universal identifier of the event.
+     * Event is a <i>group-scheduled</i> meeting with an organizer.
      */
-    UID,
+    SCHEDULED(1 << 3),
     /**
-     * The relationship between this and other events.
+     * The calendar user is the <i>organizer<i> of the meeting.
      */
-    RELATED_TO,
+    ORGANIZER(1 << 4),
     /**
-     * The filename of the event.
+     * The calendar user is <i>attendee<i> of the meeting.
      */
-    FILENAME,
+    ATTENDEE(1 << 5),
     /**
-     * The sequence number of the event.
+     * Event is classified <i>private</i>, so is invisible for others.
      */
-    SEQUENCE,
+    PRIVATE(1 << 8),
     /**
-     * The timestamp of the event.
+     * Event is classified as <i>confidential</i>, so only start and end time are visible for others.
      */
-    TIMESTAMP,
+    CONFIDENTIAL(1 << 9),
     /**
-     * The creation date of the event.
+     * Event is <i>transparent</i> for the calendar user, i.e. invisible to free/busy time searches.
      */
-    CREATED,
+    TRANSPARENT(1 << 10),
     /**
-     * The calendar user that initially created the event.
+     * Indicates that the event's overall status is <i>tentative</i>.
      */
-    CREATED_BY,
+    EVENT_TENTATIVE(1 << 11),
     /**
-     * The last modification date of the event.
+     * Indicates that the event's overall status is <i>definite</i>.
      */
-    LAST_MODIFIED,
+    EVENT_CONFIRMED(1 << 12),
     /**
-     * The calendar user that performed the last modification of the event.
+     * Indicates that the event's overall status is <i>cancelled</i>.
      */
-    MODIFIED_BY,
+    EVENT_CANCELLED(1 << 13),
     /**
-     * The calendar user of the event.
+     * The calendar user's participation status is <i>needs action</i>.
      */
-    CALENDAR_USER,
+    NEEDS_ACTION(1 << 15),
     /**
-     * The summary of the event.
+     * The calendar user's participation status is <i>accepted</i>.
      */
-    SUMMARY,
+    ACCEPTED(1 << 16),
     /**
-     * The location of the event.
+     * The calendar user's participation status is <i>declined</i>.
      */
-    LOCATION,
+    DECLINED(1 << 17),
     /**
-     * The description of the event.
+     * The calendar user's participation status is <i>tentative</i>.
      */
-    DESCRIPTION,
+    TENTATIVE(1 << 18),
     /**
-     * The categories of the event.
+     * The calendar user's participation status is <i>delegated</i>.
      */
-    CATEGORIES,
+    DELEGATED(1 << 19),
     /**
-     * The classification of the event.
+     * The event represents the <i>master</i> of a recurring event series, or an expanded (regular) occurrence of a series.
      */
-    CLASSIFICATION,
+    SERIES(1 << 20),
     /**
-     * The color of the event.
+     * The event represents an exception / overridden instance of a recurring event series.
      */
-    COLOR,
-    /**
-     * The uniform resource locator (URL) of the event.
-     */
-    URL,
-    /**
-     * The global position of the event.
-     */
-    GEO,
-    /**
-     * The start date of the event.
-     */
-    START_DATE,
-    /**
-     * The end date of the event.
-     */
-    END_DATE,
-    /**
-     * The time transparency of the event.
-     */
-    TRANSP,
-    /**
-     * The series identifier of the event.
-     */
-    SERIES_ID,
-    /**
-     * The recurrence rule of the event.
-     */
-    RECURRENCE_RULE,
-    /**
-     * The recurrence identifier of the event.
-     */
-    RECURRENCE_ID,
-    /**
-     * The change exception dates of the event.
-     */
-    CHANGE_EXCEPTION_DATES,
-    /**
-     * The delete exception dates of the event.
-     */
-    DELETE_EXCEPTION_DATES,
-    /**
-     * The status of the event.
-     */
-    STATUS,
-    /**
-     * The organizer of the event.
-     */
-    ORGANIZER,
-    /**
-     * The attendees of the event.
-     */
-    ATTENDEES,
-    /**
-     * The attachments of the event.
-     */
-    ATTACHMENTS,
-    /**
-     * The alarms of the event.
-     */
-    ALARMS,
-    /**
-     * Extended properties of the event.
-     */
-    EXTENDED_PROPERTIES,
-    /**
-     * Flags of the event.
-     */
-    FLAGS,
+    EXCEPTION(1 << 21),
+
     ;
+
+    private final int flag;
+
+    /**
+     * Initializes a new {@link EventFlag}.
+     *
+     * @param flag The flag value
+     */
+    private EventFlag(int flag) {
+        this.flag = flag;
+    }
+
+    /**
+     * Gets the flag value.
+     *
+     * @return The flag value
+     */
+    public int getFlag() {
+        return flag;
+    }
+
 }

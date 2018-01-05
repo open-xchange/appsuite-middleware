@@ -56,6 +56,7 @@ import static com.openexchange.java.Autoboxing.l;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.EnumMap;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map.Entry;
@@ -73,6 +74,7 @@ import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.Classification;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.EventFlag;
 import com.openexchange.chronos.EventStatus;
 import com.openexchange.chronos.ExtendedProperties;
 import com.openexchange.chronos.ExtendedProperty;
@@ -1129,6 +1131,34 @@ public class EventMapper extends DefaultMapper<Event, EventField> {
             @Override
             public void remove(Event object) {
                 object.removeExtendedProperties();
+            }
+        });
+        mappings.put(EventField.FLAGS, new DefaultMapping<EnumSet<EventFlag>, Event>() {
+
+            @Override
+            public void copy(Event from, Event to) throws OXException {
+                EnumSet<EventFlag> value = get(from);
+                set(to, null == value ? null : EnumSet.copyOf(value));
+            }
+
+            @Override
+            public boolean isSet(Event object) {
+                return object.containsFlags();
+            }
+
+            @Override
+            public void set(Event object, EnumSet<EventFlag> value) throws OXException {
+                object.setFlags(value);
+            }
+
+            @Override
+            public EnumSet<EventFlag> get(Event object) {
+                return object.getFlags();
+            }
+
+            @Override
+            public void remove(Event object) {
+                object.removeFlags();
             }
         });
         return mappings;

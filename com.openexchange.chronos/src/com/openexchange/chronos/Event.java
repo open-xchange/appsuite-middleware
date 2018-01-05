@@ -105,6 +105,7 @@ public class Event {
     private List<Alarm> alarms;
 
     private ExtendedProperties extendedProperties;
+    private EnumSet<EventFlag> flags;
 
     private final EnumSet<EventField> setFields;
 
@@ -1366,6 +1367,42 @@ public class Event {
      */
     public boolean containsExtendedProperties() {
         return setFields.contains(EventField.EXTENDED_PROPERTIES);
+    }
+
+    /**
+     * Gets the flags of the event.
+     *
+     * @return The flags
+     */
+    public EnumSet<EventFlag> getFlags() {
+        return flags;
+    }
+
+    /**
+     * Sets the flags of the event.
+     *
+     * @param value The flags to set
+     */
+    public void setFlags(EnumSet<EventFlag> value) {
+        flags = value;
+        setFields.add(EventField.FLAGS);
+    }
+
+    /**
+     * Removes the flags of the event.
+     */
+    public void removeFlags() {
+        flags = null;
+        setFields.remove(EventField.FLAGS);
+    }
+
+    /**
+     * Gets a value indicating whether the flags of the event have been set or not.
+     *
+     * @return <code>true</code> if the flags are set, <code>false</code>, otherwise
+     */
+    public boolean containsFlags() {
+        return setFields.contains(EventField.FLAGS);
     }
 
     @Override

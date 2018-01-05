@@ -403,6 +403,11 @@ public class ChronosJsonFields {
     public static final String EXTENDED_PROPERTIES = "extendedProperties";
 
     /**
+     * The flags of the event. See {@link Event#getFlags()}
+     */
+    public static final String FLAGS = "flags";
+
+    /**
      *
      * {@link ExtendedProperty} contains fields of the ExtendedProperty json object. See {@link ChronosJsonFields#EXTENDED_PROPERTIES}
      *

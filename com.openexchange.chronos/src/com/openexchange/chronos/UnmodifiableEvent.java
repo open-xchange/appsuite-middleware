@@ -50,6 +50,7 @@
 package com.openexchange.chronos;
 
 import java.util.Date;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.SortedSet;
 import org.dmfs.rfc5545.DateTime;
@@ -398,6 +399,16 @@ public class UnmodifiableEvent extends DelegatingEvent {
 
     @Override
     public void removeExtendedProperties() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void setFlags(EnumSet<EventFlag> value) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void removeFlags() {
         throw new UnsupportedOperationException();
     }
 

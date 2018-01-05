@@ -55,6 +55,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.EnumMap;
+import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map.Entry;
@@ -73,6 +74,7 @@ import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.Classification;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.EventFlag;
 import com.openexchange.chronos.EventStatus;
 import com.openexchange.chronos.ExtendedProperties;
 import com.openexchange.chronos.Organizer;
@@ -91,6 +93,7 @@ import com.openexchange.groupware.tools.mappings.json.StringMapping;
 import com.openexchange.groupware.tools.mappings.json.TimeMapping;
 import com.openexchange.java.Enums;
 import com.openexchange.session.Session;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
  * {@link EventMapper}
@@ -849,7 +852,7 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
 
             @Override
             public boolean isSet(Event object) {
-                return object.containsOrganizer();
+                return object.containsGeo();
             }
 
             @Override
@@ -864,7 +867,7 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
 
             @Override
             public void remove(Event object) {
-                object.removeOrganizer();
+                object.removeGeo();
             }
 
             @Override
@@ -1002,7 +1005,59 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
                 object.removeExtendedProperties();
             }
         });
+        mappings.put(EventField.FLAGS, new DefaultJsonMapping<EnumSet<EventFlag>, Event>(ChronosJsonFields.FLAGS, ColumnIDs.FLAGS) {
 
+            @Override
+            public boolean isSet(Event object) {
+                return object.containsFlags();
+            }
+
+            @Override
+            public void set(Event object, EnumSet<EventFlag> value) throws OXException {
+                object.setFlags(value);
+            }
+
+            @Override
+            public EnumSet<EventFlag> get(Event object) {
+                return object.getFlags();
+            }
+
+            @Override
+            public void remove(Event object) {
+                object.removeFlags();
+            }
+
+            @Override
+            public void deserialize(JSONObject from, Event to) throws JSONException, OXException {
+                JSONArray jsonArray = from.optJSONArray(getAjaxName());
+                if (null == jsonArray) {
+                    set(to, null);
+                } else {
+                    EnumSet<EventFlag> flags = EnumSet.noneOf(EventFlag.class);
+                    for (int i = 0; i < jsonArray.length(); i++) {
+                        try {
+                            flags.add(Enums.parse(EventFlag.class, jsonArray.getString(i)));
+                        } catch (IllegalArgumentException e) {
+                            throw AjaxExceptionCodes.INVALID_JSON_REQUEST_BODY.create(e);
+                        }
+                    }
+                    set(to, flags);
+                }
+            }
+
+            @Override
+            public Object serialize(Event from, TimeZone timeZone, Session session) throws JSONException {
+                EnumSet<EventFlag> flags = from.getFlags();
+                if (null == flags) {
+                    return JSONObject.NULL;
+                }
+                JSONArray jsonArray = new JSONArray(flags.size());
+                for (EventFlag flag : flags) {
+                    jsonArray.put(flag.name().toLowerCase());
+                }
+                return jsonArray;
+            }
+        });
         return mappings;
     }
 
