@@ -60,7 +60,6 @@ import com.openexchange.importexport.exceptions.ImportExportExceptionCodes;
 import com.openexchange.importexport.formats.Format;
 import com.openexchange.importexport.helpers.SizedInputStream;
 import com.openexchange.java.Streams;
-import com.openexchange.java.Strings;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -138,11 +137,11 @@ public abstract class AbstractICalExporter implements ICalExport {
 
     @Override
     public ThresholdFileHolder getExportDataSource(ServerSession session, OutputStream out) throws OXException {
-        return isBatchExport() ? exportFolderData(session, out) : exportBatchData(session, out);
+        return isBatchExport() ? exportBatchData(session, out) : exportFolderData(session, out);
     }
 
     private boolean isBatchExport() {
-        return Strings.isEmpty(getFolderId());
+        return !getBatchIds().isEmpty();
     }
 
     public String getFolderId() {

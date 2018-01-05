@@ -67,7 +67,7 @@ import com.openexchange.test.concurrent.ParallelSuite;
     BasicAvailabilityTest.class,
     BasicFreeBusyTest.class,
     // FIXME: The SchedJoules tests were deactivated due to the nature of their implementation
-    //        i.e. external/third party service provider. Will be re-activated for CI tests. 
+    //        i.e. external/third party service provider. Will be re-activated for CI tests.
     //BasicSchedJoulesAPITest.class,
     //BasicSchedJoulesProviderTest.class,
     BasicSelfProtectionTest.class,
@@ -75,8 +75,10 @@ import com.openexchange.test.concurrent.ParallelSuite;
     BasicSingleEventTest.class,
     CalendarAccountTest.class,
     ChronosQuotaTest.class,
-    TimezoneAlarmTriggerTest.class
+    TimezoneAlarmTriggerTest.class,
+    ICalEventImportExportTest.class
     // @formatter:on
+
 })
 public class ChronosTestSuite {
 

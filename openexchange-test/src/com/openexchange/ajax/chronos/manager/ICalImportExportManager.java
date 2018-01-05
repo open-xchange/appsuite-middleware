@@ -57,7 +57,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.testing.httpclient.invoker.ApiException;
-import com.openexchange.testing.httpclient.models.Errors;
 import com.openexchange.testing.httpclient.models.EventId;
 import com.openexchange.testing.httpclient.models.InfoItemExport;
 import com.openexchange.testing.httpclient.modules.ExportApi;
@@ -120,7 +119,7 @@ public class ICalImportExportManager {
         for (int i = 0; i < length; i++) {
             JSONObject tuple = data.getJSONObject(i);
             try {
-                String folderId = tuple.getString("folder");
+                String folderId = tuple.getString("folder_id");
                 String objectId = tuple.getString("id");
                 EventId eventId = new EventId();
                 eventId.setFolder(folderId);
@@ -131,30 +130,6 @@ public class ICalImportExportManager {
             }
         }
         return eventIds;
-    }
-
-    public List<Errors> parseImportJSONResponseErrors(String response) throws JSONException {
-        JSONObject object = new JSONObject(response);
-        JSONArray data = object.getJSONArray("data");
-        int length = data.length();
-        if (length <= 0) {
-            return Collections.emptyList();
-        }
-        List<Errors> errors = new ArrayList<>(length);
-        for (int i = 0; i < length; i++) {
-            JSONObject tuple = data.getJSONObject(i);
-            try {
-                String err = tuple.getString("error");
-                String err_desc = tuple.getString("error_desc");
-                Errors error = new Errors();
-                error.setError(err);
-                error.setErrorDesc(err_desc);
-                errors.add(error);
-            } catch (JSONException e) {
-                return Collections.emptyList();
-            }
-        }
-        return errors;
     }
 
 }

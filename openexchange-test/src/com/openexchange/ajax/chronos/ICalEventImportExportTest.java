@@ -68,8 +68,6 @@ import com.openexchange.ajax.chronos.util.DateTimeUtil;
 import com.openexchange.configuration.asset.Asset;
 import com.openexchange.configuration.asset.AssetType;
 import com.openexchange.java.Strings;
-import com.openexchange.testing.httpclient.invoker.ApiException;
-import com.openexchange.testing.httpclient.models.Errors;
 import com.openexchange.testing.httpclient.models.EventData;
 import com.openexchange.testing.httpclient.models.EventId;
 import com.openexchange.testing.httpclient.models.InfoItemExport;
@@ -114,7 +112,7 @@ public class ICalEventImportExportTest extends AbstractChronosTest {
     }
 
     @Test
-    public void testBatchEventExport() throws ApiException {
+    public void testBatchEventExport() throws Exception {
         List<EventData> eventData = new ArrayList<>();
         EventData expectedEventData = eventManager.createEvent(EventFactory.createSingleTwoHourEvent(defaultUserApi.getCalUser(), testUser.getLogin(), "testBatchEvent1"));
         List<InfoItemExport> itemList = new ArrayList<>();
@@ -160,7 +158,7 @@ public class ICalEventImportExportTest extends AbstractChronosTest {
         assertEquals(ICalImportExportManager.SERIES_IMPORT_ICS_UID, eventData.get(0).getUid());
     }
 
-    @Test
+    @Test//TODO fix
     public void testICalEventRecurrenceImport() throws Exception {
         List<EventData> eventData = getEventData(ICalImportExportManager.RECURRENCE_IMPORT_ICS);
         assertFalse(eventData.isEmpty());
@@ -175,12 +173,9 @@ public class ICalEventImportExportTest extends AbstractChronosTest {
 
     @Test
     public void testICalEventImportUIDHandling() throws Exception {
-        List<EventData> eventData = getEventData(ICalImportExportManager.RECURRENCE_IMPORT_ICS);
+        getEventData(ICalImportExportManager.RECURRENCE_IMPORT_ICS);
         String response = importICalFile(ICalImportExportManager.RECURRENCE_IMPORT_ICS);
-        List<Errors> errors = importExportManager.parseImportJSONResponseErrors(response);
-        assertEquals(1, errors.size());
-        assertEquals("The event could not be created due to another conflicting event with the same unique identifier.", errors.get(0).getError());
-        assertEquals("UID conflict [uid "+eventData.get(0).getUid()+", conflicting id "+eventData.get(0).getId()+"]", errors.get(0).getErrorDesc());
+        assertTrue(response.contains("The event could not be created due to another conflicting event with the same unique identifier"));
     }
 
     @Test
@@ -191,10 +186,6 @@ public class ICalEventImportExportTest extends AbstractChronosTest {
         assertEquals(ICalImportExportManager.SERIES_IMPORT_ICS_UID, eventData.get(0).getUid());
 
         List<InfoItemExport> itemList = new ArrayList<>();
-        addInfoItemExport(itemList, eventData.get(0).getFolder(), eventData.get(0).getId());
-
-        eventData.addAll(getEventData(ICalImportExportManager.SERIES_IMPORT_ICS));
-
         addInfoItemExport(itemList, eventData.get(0).getFolder(), eventData.get(0).getId());
 
         String iCalExport = importExportManager.exportICalBatchFile(defaultUserApi.getSession(), itemList);
