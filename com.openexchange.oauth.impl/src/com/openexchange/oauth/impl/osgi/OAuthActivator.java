@@ -98,6 +98,7 @@ import com.openexchange.secret.recovery.EncryptedItemCleanUpService;
 import com.openexchange.secret.recovery.EncryptedItemDetectorService;
 import com.openexchange.secret.recovery.SecretMigrator;
 import com.openexchange.sessiond.SessiondService;
+import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
 import com.openexchange.tools.session.SessionHolder;
@@ -124,7 +125,7 @@ public final class OAuthActivator extends HousekeepingActivator {
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] { DatabaseService.class, SessiondService.class, EventAdmin.class, SecretEncryptionFactoryService.class, SessionHolder.class, CryptoService.class, ConfigViewFactory.class,
-            TimerService.class, DispatcherPrefixService.class, UserService.class, SSLSocketFactoryProvider.class };
+            TimerService.class, DispatcherPrefixService.class, UserService.class, SSLSocketFactoryProvider.class, ThreadPoolService.class };
     }
 
     @Override

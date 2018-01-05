@@ -50,8 +50,9 @@
 package com.openexchange.oauth.impl.internal;
 
 import static com.openexchange.oauth.OAuthConstants.OAUTH_PROBLEM_PERMISSION_DENIED;
+import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
@@ -61,15 +62,19 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import javax.servlet.http.HttpServletRequest;
-import com.hazelcast.core.Cluster;
 import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.core.Hazelcasts;
 import com.hazelcast.core.IExecutorService;
 import com.hazelcast.core.Member;
 import com.openexchange.http.deferrer.CustomRedirectURLDetermination;
+import com.openexchange.java.SetableFuture;
 import com.openexchange.oauth.CallbackRegistry;
 import com.openexchange.oauth.OAuthConstants;
 import com.openexchange.oauth.impl.internal.hazelcast.PortableCallbackRegistryFetch;
 import com.openexchange.oauth.impl.services.Services;
+import com.openexchange.threadpool.AbstractTask;
+import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.threadpool.behavior.CallerRunsBehavior;
 
 /**
  * {@link CallbackRegistryImpl}
@@ -215,65 +220,132 @@ public class CallbackRegistryImpl implements CustomRedirectURLDetermination, Run
      * @return The remotely looked-up call-back URL or <code>null</code>
      */
     private String tryGetByTokenFromRemote(String token, HazelcastInstance hazelcastInstance) {
-        Cluster cluster = hazelcastInstance.getCluster();
-
-        // Get local member
-        Member localMember = cluster.getLocalMember();
-
         // Determine other cluster members
-        Set<Member> otherMembers = getOtherMembers(cluster.getMembers(), localMember);
+        Set<Member> otherMembers = Hazelcasts.getRemoteMembers(hazelcastInstance);
         if (otherMembers.isEmpty()) {
             return null;
         }
 
         IExecutorService executor = hazelcastInstance.getExecutorService("default");
         Map<Member, Future<String>> futureMap = executor.submitToMembers(new PortableCallbackRegistryFetch(token), otherMembers);
-        for (Iterator<Entry<Member, Future<String>>> it = futureMap.entrySet().iterator(); it.hasNext();) {
-            Future<String> future = it.next().getValue();
-            // Check Future's return value
-            int retryCount = 3;
-            while (retryCount-- > 0) {
-                try {
-                    String callbackUrl = future.get();
-                    retryCount = 0;
-                    return callbackUrl;
-                } catch (InterruptedException e) {
-                    // Interrupted - Keep interrupted state
-                    Thread.currentThread().interrupt();
-                } catch (CancellationException e) {
-                    // Canceled
-                    retryCount = 0;
-                } catch (ExecutionException e) {
-                    Throwable cause = e.getCause();
+        int size = futureMap.size();
 
-                    // Check for Hazelcast timeout
-                    if (!(cause instanceof com.hazelcast.core.OperationTimeoutException)) {
-                        if (cause instanceof RuntimeException) {
-                            throw ((RuntimeException) cause);
-                        }
-                        if (cause instanceof Error) {
-                            throw (Error) cause;
-                        }
-                        throw new IllegalStateException("Not unchecked", cause);
-                    }
+        ThreadPoolService threadPool = Services.optService(ThreadPoolService.class);
+        if (null == threadPool || 1 == size) {
+            for (Iterator<Entry<Member, Future<String>>> it = futureMap.entrySet().iterator(); it.hasNext();) {
+                Future<String> future = it.next().getValue();
+                // Check Future's return value
+                int retryCount = 3;
+                while (retryCount-- > 0) {
+                    try {
+                        String callbackUrl = future.get();
+                        retryCount = 0;
+                        return callbackUrl;
+                    } catch (InterruptedException e) {
+                        // Interrupted - Keep interrupted state
+                        Thread.currentThread().interrupt();
+                    } catch (CancellationException e) {
+                        // Canceled
+                        retryCount = 0;
+                    } catch (ExecutionException e) {
+                        Throwable cause = e.getCause();
 
-                    // Timeout while awaiting remote result
-                    if (retryCount <= 0) {
-                        // No further retry
-                        cancelFutureSafe(future);
+                        // Check for Hazelcast timeout
+                        if (!(cause instanceof com.hazelcast.core.OperationTimeoutException)) {
+                            if (cause instanceof RuntimeException) {
+                                throw ((RuntimeException) cause);
+                            }
+                            if (cause instanceof Error) {
+                                throw (Error) cause;
+                            }
+                            throw new IllegalStateException("Not unchecked", cause);
+                        }
+
+                        // Timeout while awaiting remote result
+                        if (retryCount <= 0) {
+                            // No further retry
+                            cancelFutureSafe(future);
+                        }
                     }
                 }
             }
+            return null;
         }
-        return null;
-    }
 
-    private Set<Member> getOtherMembers(Set<Member> allMembers, Member localMember) {
-        Set<Member> otherMembers = new LinkedHashSet<Member>(allMembers);
-        if (!otherMembers.remove(localMember)) {
-            LOG.warn("Couldn't remove local member from cluster members.");
+        // Use thread pool to obtain results from submitted tasks to remote members
+        final SetableFuture<String> result = new SetableFuture<>();
+        List<Future<Void>> submitted = new ArrayList<>(size);
+        for (Iterator<Entry<Member, Future<String>>> it = futureMap.entrySet().iterator(); it.hasNext();) {
+            final Future<String> future = it.next().getValue();
+            // Check Future's return value in a separate thread
+            submitted.add(threadPool.submit(new AbstractTask<Void>() {
+
+                @Override
+                public Void call() throws Exception {
+                    int retryCount = 3;
+                    while (retryCount-- > 0) {
+                        try {
+                            String callbackUrl = future.get();
+                            retryCount = 0;
+                            result.set(callbackUrl);
+                            return null;
+                        } catch (InterruptedException e) {
+                            // Interrupted - Keep interrupted state
+                            Thread.currentThread().interrupt();
+                        } catch (CancellationException e) {
+                            // Canceled
+                            retryCount = 0;
+                        } catch (ExecutionException e) {
+                            Throwable cause = e.getCause();
+
+                            // Check for Hazelcast timeout
+                            if (!(cause instanceof com.hazelcast.core.OperationTimeoutException)) {
+                                if (cause instanceof RuntimeException) {
+                                    result.setException(cause);
+                                }
+                                if (cause instanceof Error) {
+                                    result.setException(cause);
+                                }
+                                result.setException(new IllegalStateException("Not unchecked", cause));
+                            }
+
+                            // Timeout while awaiting remote result
+                            if (retryCount <= 0) {
+                                // No further retry
+                                cancelFutureSafe(future);
+                            }
+                        }
+                    }
+                    return null;
+                }
+            }, CallerRunsBehavior.<Void> getInstance()));
         }
-        return otherMembers;
+
+        // Await result
+        try {
+            String callbackUrl = result.get();
+            for (Future<Void> future : submitted) {
+                future.cancel(true);
+            }
+            return callbackUrl;
+        } catch (InterruptedException e) {
+            // Interrupted - Keep interrupted state
+            Thread.currentThread().interrupt();
+            e.printStackTrace();
+        } catch (CancellationException e) {
+            // Canceled
+        } catch (ExecutionException e) {
+            Throwable cause = e.getCause();
+            if (cause instanceof RuntimeException) {
+                throw ((RuntimeException) cause);
+            }
+            if (cause instanceof Error) {
+                throw (Error) cause;
+            }
+            throw new IllegalStateException("Not unchecked", cause);
+        }
+
+        return null;
     }
 
     /**
