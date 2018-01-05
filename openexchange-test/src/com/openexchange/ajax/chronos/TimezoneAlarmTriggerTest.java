@@ -107,7 +107,7 @@ public class TimezoneAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTe
             AlarmTrigger alarmTrigger = triggers.get(0);
             checkAlarmTime(alarmTrigger, event.getId(), start.getTimeInMillis() - TimeUnit.MINUTES.toMillis(10));
             EventId eventId = new EventId();
-            eventId.setFolderId(event.getFolder());
+            eventId.setFolder(event.getFolder());
             eventId.setId(event.getId());
             eventId.setRecurrenceId(event.getRecurrenceId());
             eventManager.deleteEvent(eventId);
@@ -153,7 +153,7 @@ public class TimezoneAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTe
             AlarmTrigger alarmTrigger = triggers.get(0);
             checkAlarmTime(alarmTrigger, event.getId(), start.getTimeInMillis() - TimeUnit.MINUTES.toMillis(10));
             EventId eventId = new EventId();
-            eventId.setFolderId(event.getFolder());
+            eventId.setFolder(event.getFolder());
             eventId.setId(event.getId());
             eventId.setRecurrenceId(event.getRecurrenceId());
             eventManager.deleteEvent(eventId);

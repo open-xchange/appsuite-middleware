@@ -270,7 +270,7 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
          * 3. Delete the exception
          */
         EventId toDelete = new EventId();
-        toDelete.setFolderId(exceptionEvent.getFolder());
+        toDelete.setFolder(exceptionEvent.getFolder());
         toDelete.setId(exceptionEvent.getId());
         eventManager.deleteEvent(toDelete);
 
@@ -282,7 +282,7 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
          * 4. Delete series too
          */
         toDelete = new EventId();
-        toDelete.setFolderId(exceptionEvent.getFolder());
+        toDelete.setFolder(exceptionEvent.getFolder());
         toDelete.setId(event.getId());
         eventManager.deleteEvent(toDelete);
 
@@ -455,7 +455,7 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
          * 7. Delete the exception
          */
         EventId toDelete = new EventId();
-        toDelete.setFolderId(exceptionEvent.getFolder());
+        toDelete.setFolder(exceptionEvent.getFolder());
         toDelete.setId(exceptionEvent.getId());
         eventManager.deleteEvent(toDelete);
 
@@ -472,7 +472,7 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
          * 8. Delete series too
          */
         toDelete = new EventId();
-        toDelete.setFolderId(event.getFolder());
+        toDelete.setFolder(event.getFolder());
         toDelete.setId(event.getId());
         eventManager.deleteEvent(toDelete);
 

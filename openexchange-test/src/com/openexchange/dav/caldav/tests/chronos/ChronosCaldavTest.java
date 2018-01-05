@@ -97,7 +97,7 @@ public class ChronosCaldavTest extends AbstractChronosCaldavTest {
             if (uid.equals(event.getUid())) {
                 if (remember) {
                     EventId eventId = new EventId();
-                    eventId.setFolderId(event.getFolder());
+                    eventId.setFolder(event.getFolder());
                     eventId.setId(event.getId());
                     eventId.setRecurrenceId(event.getRecurrenceId());
                     rememberEventId(defaultUserApi, eventId);
@@ -161,7 +161,7 @@ public class ChronosCaldavTest extends AbstractChronosCaldavTest {
     }
 
     protected Pair<String, String> getPair(String uid, String value) {
-        return new Pair<String, String>(uid, value);
+        return new Pair<>(uid, value);
     }
 
     /**

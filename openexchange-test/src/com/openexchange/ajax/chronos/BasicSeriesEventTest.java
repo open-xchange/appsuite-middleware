@@ -108,7 +108,7 @@ public class BasicSeriesEventTest extends AbstractChronosTest {
 
         EventId eventId = new EventId();
         eventId.setId(expectedEventData.getId());
-        eventId.setFolderId(expectedEventData.getFolder());
+        eventId.setFolder(expectedEventData.getFolder());
         eventManager.deleteEvent(eventId);
 
         try {
@@ -134,7 +134,7 @@ public class BasicSeriesEventTest extends AbstractChronosTest {
 
         EventId eventId = new EventId();
         eventId.setId(expectedEventData.getId());
-        eventId.setFolderId(expectedEventData.getFolder());
+        eventId.setFolder(expectedEventData.getFolder());
 
         List<EventData> allEvents = eventManager.getAllEvents(today, nextWeek, true);
         assertEquals("Expected 3 occurrences", 3, allEvents.size());
@@ -144,7 +144,7 @@ public class BasicSeriesEventTest extends AbstractChronosTest {
 
         EventId occurence = new EventId();
         occurence.setId(eventId.getId());
-        occurence.setFolderId(expectedEventData.getFolder());
+        occurence.setFolder(expectedEventData.getFolder());
         occurence.setRecurrenceId(allEvents.get(2).getRecurrenceId());
 
         eventManager.deleteEvent(occurence);
@@ -174,7 +174,7 @@ public class BasicSeriesEventTest extends AbstractChronosTest {
 
         EventId eventId = new EventId();
         eventId.setId(expectedEventData.getId());
-        eventId.setFolderId(expectedEventData.getFolder());
+        eventId.setFolder(expectedEventData.getFolder());
 
         expectedEventData.setEndDate(DateTimeUtil.incrementDateTimeData(expectedEventData.getEndDate(), 5000));
 
@@ -205,7 +205,7 @@ public class BasicSeriesEventTest extends AbstractChronosTest {
 
         EventId masterId = new EventId();
         masterId.setId(expectedEventData.getId());
-        masterId.setFolderId(expectedEventData.getFolder());
+        masterId.setFolder(expectedEventData.getFolder());
 
         List<EventData> allEvents = eventManager.getAllEvents(today, nextWeek, true);
         assertEquals("Expected 3 occurrences", 3, allEvents.size());
@@ -215,7 +215,7 @@ public class BasicSeriesEventTest extends AbstractChronosTest {
 
         EventId occurence = new EventId();
         occurence.setId(masterId.getId());
-        occurence.setFolderId(folderId);
+        occurence.setFolder(folderId);
         occurence.setRecurrenceId(allEvents.get(2).getRecurrenceId());
 
         EventData updatedData = new EventData();
