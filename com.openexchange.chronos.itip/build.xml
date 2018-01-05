@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="com.openexchange.calendar overrides" basedir=".">
+<project name="com.openexchange.chronos.itip overrides" basedir=".">
 
     <description>
         This build file overrides the postInstall target to install templates.
