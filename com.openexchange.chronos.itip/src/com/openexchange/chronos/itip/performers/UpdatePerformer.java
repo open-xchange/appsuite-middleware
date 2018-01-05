@@ -90,7 +90,7 @@ import com.openexchange.user.UserService;
  * @since v7.10.0
  */
 public class UpdatePerformer extends AbstractActionPerformer {
-    
+
     private final static Logger LOGGER = LoggerFactory.getLogger(UpdatePerformer.class);
 
     public UpdatePerformer(ITipIntegrationUtility util, MailSenderService sender, ITipMailGeneratorFactory generators) {
@@ -104,7 +104,7 @@ public class UpdatePerformer extends AbstractActionPerformer {
 
     @Override
     public List<Event> perform(ITipAction action, ITipAnalysis analysis, CalendarSession session, ITipAttributes attributes) throws OXException {
-        session.<Boolean>set(CalendarParameters.PARAMETER_SUPPRESS_ITIP, Boolean.TRUE);
+        session.<Boolean> set(CalendarParameters.PARAMETER_SUPPRESS_ITIP, Boolean.TRUE);
         List<ITipChange> changes = analysis.getChanges();
         List<Event> result = new ArrayList<Event>(changes.size());
 
@@ -158,8 +158,10 @@ public class UpdatePerformer extends AbstractActionPerformer {
 
         update.setFolderId(original.getFolderId());
         update.setId(original.getId());
-        update.setSeriesId(original.getSeriesId());
-
+        
+        if (original.containsSeriesId()) {
+            update.setSeriesId(original.getSeriesId());
+        }
         if (!original.containsRecurrenceId() && event.containsRecurrenceId()) {
             update.setRecurrenceId(event.getRecurrenceId());
         } else if (original.containsRecurrenceId()) {
@@ -171,9 +173,11 @@ public class UpdatePerformer extends AbstractActionPerformer {
         }
 
         event.setId(update.getId());
-        event.setSeriesId(update.getSeriesId());
         event.setFolderId(update.getFolderId());
 
+        if (update.containsSeriesId()) {
+            event.setSeriesId(update.getSeriesId());
+        }
         if (update.containsRecurrenceId()) {
             event.setRecurrenceId(update.getRecurrenceId());
         }
