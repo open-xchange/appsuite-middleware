@@ -68,6 +68,12 @@ public class Hazelcasts {
         super();
     }
 
+    /**
+     * Gets the remote members from specified Hazelcast instance.
+     *
+     * @param hazelcastInstance The Hazelcast instance for the cluster
+     * @return The remote members
+     */
     public static Set<Member> getRemoteMembers(HazelcastInstance hazelcastInstance) {
         if (null == hazelcastInstance) {
             return Collections.emptySet();
