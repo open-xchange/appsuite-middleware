@@ -73,16 +73,16 @@ public class ICalImportExportManager {
 
     public static final String RECURRENCE_IMPORT_ICS = "ical_recurrence_import.ics";
     public static final String RECURRENCE_IMPORT_ICS_SUMMARY = "Test";
-    public static final String RECURRENCE_IMPORT_ICS_UID = "13179a8a-6305-41a5-8de9-029319782b98";
+    public static final String RECURRENCE_IMPORT_ICS_UID = "15279a8a-6305-41a5-8de9-029319782b98";
     public static final String RECURRENCE_IMPORT_ICS_RECURRENCE_ID = "20171010T060000Z";
 
     public static final String SINGLE_IMPORT_ICS = "single_test_event.ics";
     public static final String SINGLE_IMPORT_ICS_SUMMARY = "TestSingle";
-    public static final String SINGLE_IMPORT_ICS_UID = "e206a2a4-83bf-441f-ad2d-9622e3210772";
+    public static final String SINGLE_IMPORT_ICS_UID = "e316a2a4-83bf-441f-ad2d-9622e3210772";
 
     public static final String SERIES_IMPORT_ICS = "test_series.ics";
     public static final String SERIES_IMPORT_ICS_SUMMARY = "TestSeries";
-    public static final String SERIES_IMPORT_ICS_UID = "fbbd81e8-4a90-4092-bc9b-7e3a5cbb5861";
+    public static final String SERIES_IMPORT_ICS_UID = "fbbd81e8-4a81-4092-bc9b-7e3a5cbb5861";
 
     private final ExportApi exportApi;
 
@@ -120,10 +120,10 @@ public class ICalImportExportManager {
         for (int i = 0; i < length; i++) {
             JSONObject tuple = data.getJSONObject(i);
             try {
-                String folderId = tuple.getString("folder_id");
+                String folderId = tuple.getString("folder");
                 String objectId = tuple.getString("id");
                 EventId eventId = new EventId();
-                eventId.setFolderId(folderId);
+                eventId.setFolder(folderId);
                 eventId.setId(objectId);
                 eventIds.add(eventId);
             } catch (JSONException e) {
