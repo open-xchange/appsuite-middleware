@@ -364,15 +364,15 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
      */
     private void determineOverallResult(final MailAuthenticityResult overallResult, final List<MailAuthenticityMechanismResult> results, final List<Map<String, String>> unconsideredResults) {
         // Separate results
-        final List<MailAuthenticityMechanismResult> spfResults = new ArrayList<>();
-        final List<MailAuthenticityMechanismResult> dkimResults = new ArrayList<>();
-        final List<MailAuthenticityMechanismResult> dmarcResults = new ArrayList<>();
-        separateResults(results, spfResults, dkimResults, dmarcResults);
+        SeparatedResults separatedResults = separateAndClearResults(results);
 
         // Pick the best results for all mechanisms
-        MailAuthenticityMechanismResult bestOfDMARC = pickBestResult(dmarcResults, unconsideredResults);
-        MailAuthenticityMechanismResult bestOfDKIM = pickBestResult(dkimResults, unconsideredResults);
-        MailAuthenticityMechanismResult bestOfSPF = pickBestResult(spfResults, unconsideredResults);
+        MailAuthenticityMechanismResult bestOfDMARC = pickBestResult(separatedResults.getDmarcResults(), unconsideredResults);
+        MailAuthenticityMechanismResult bestOfDKIM = pickBestResult(separatedResults.getDkimResults(), unconsideredResults);
+        MailAuthenticityMechanismResult bestOfSPF = pickBestResult(separatedResults.getSpfResults(), unconsideredResults);
+        separatedResults = null; // Might help GC
+
+        // Re-add best ones to results
         if (bestOfDMARC != null) {
             results.add(bestOfDMARC);
         }
@@ -404,27 +404,42 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
      * Separates the results into different containers according to their type
      *
      * @param results All the {@link MailAuthenticityMechanismResult}s
-     * @param spfResults The container for the SPF results
-     * @param dkimResults The container for the DKIM results
-     * @param dmarcResults The container for the DMARC results
+     * @return The results separated by SPF, DKIM and DMARC
      */
-    private void separateResults(final List<MailAuthenticityMechanismResult> results, final List<MailAuthenticityMechanismResult> spfResults, final List<MailAuthenticityMechanismResult> dkimResults, final List<MailAuthenticityMechanismResult> dmarcResults) {
+    private SeparatedResults separateAndClearResults(final List<MailAuthenticityMechanismResult> results) {
+        // Declare containers for SPF, DKIM and DMARC
+        List<MailAuthenticityMechanismResult> spfResults = null;
+        List<MailAuthenticityMechanismResult> dkimResults = null;
+        List<MailAuthenticityMechanismResult> dmarcResults = null;
+
         for (final MailAuthenticityMechanismResult result : results) {
             final DefaultMailAuthenticityMechanism mechanism = (DefaultMailAuthenticityMechanism) result.getMechanism();
             switch (mechanism) {
                 case DMARC:
+                    if (null == dmarcResults) {
+                        dmarcResults = new ArrayList<>();
+                    }
                     dmarcResults.add(result);
                     break;
                 case DKIM:
+                    if (null == dkimResults) {
+                        dkimResults = new ArrayList<>();
+                    }
                     dkimResults.add(result);
                     break;
                 case SPF:
+                    if (null == spfResults) {
+                        spfResults = new ArrayList<>();
+                    }
                     spfResults.add(result);
                     break;
             }
         }
+
         // Remove everything from the initial list
         results.clear();
+
+        return new SeparatedResults(spfResults, dkimResults, dmarcResults);
     }
 
     /**
@@ -504,29 +519,33 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
      *         if the {@link List} is a singleton
      */
     private MailAuthenticityMechanismResult pickBestResult(List<MailAuthenticityMechanismResult> results, List<Map<String, String>> unconsideredResults) {
-        if (results.isEmpty()) {
+        int size = results.size();
+        if (size == 0) {
             return null;
         }
-        if (results.size() == 1) {
+        if (size == 1) {
             return results.get(0);
         }
-        MailAuthenticityMechanismResult bestResult = results.get(0);
-        Iterator<MailAuthenticityMechanismResult> iterator = results.iterator();
-        while (iterator.hasNext()) {
-            MailAuthenticityMechanismResult result = iterator.next();
-            if (result.getResult().getCode() < bestResult.getResult().getCode()) {
+
+        MailAuthenticityMechanismResult bestResult = null;
+        for (MailAuthenticityMechanismResult result : results) {
+            if (null == bestResult) {
                 bestResult = result;
-            } else if (result.getResult().getCode() == bestResult.getResult().getCode() && result.isDomainMatch()) {
-                bestResult = result;
+            } else {
+                if (result.getResult().getCode() < bestResult.getResult().getCode()) {
+                    bestResult = result;
+                } else if (result.getResult().getCode() == bestResult.getResult().getCode() && result.isDomainMatch()) {
+                    bestResult = result;
+                }
             }
         }
-        results.remove(bestResult);
 
         // Add the rest to unconsidered list and remove from the original
         for (MailAuthenticityMechanismResult result : results) {
-            unconsideredResults.add(convert(result));
+            if (result != bestResult) {
+                unconsideredResults.add(convert(result));
+            }
         }
-        results.clear();
         return bestResult;
     }
 
@@ -566,12 +585,13 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
      * @return A {@link Map} with the converted {@link MailAuthenticityMechanismResult}
      */
     private Map<String, String> convert(MailAuthenticityMechanismResult result) {
-        final Map<String, String> unconsidered = new HashMap<>();
+        final Map<String, String> unconsidered = new HashMap<>(6);
         unconsidered.put("mechanism", result.getMechanism().getTechnicalName());
         unconsidered.put("result", result.getResult().getTechnicalName());
         unconsidered.put("domain", result.getDomain());
-        if (!Strings.isEmpty(result.getReason())) {
-            unconsidered.put("reason", result.getReason());
+        String reason = result.getReason();
+        if (!Strings.isEmpty(reason)) {
+            unconsidered.put("reason", reason);
         }
         return unconsidered;
     }
@@ -749,4 +769,54 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
             return 0;
         }
     }
+
+    /** Simple helper class to wrap containers for SPF, DKIM and DMARC results */
+    private static class SeparatedResults {
+
+        private final List<MailAuthenticityMechanismResult> spfResults;
+        private final List<MailAuthenticityMechanismResult> dkimResults;
+        private final List<MailAuthenticityMechanismResult> dmarcResults;
+
+        /**
+         * Initializes a new {@link SeparatedResults}.
+         *
+         * @param spfResults The container for SPF results
+         * @param dkimResults The container for DKIM results
+         * @param dmarcResults The container for DMARC results
+         */
+        SeparatedResults(List<MailAuthenticityMechanismResult> spfResults, List<MailAuthenticityMechanismResult> dkimResults, List<MailAuthenticityMechanismResult> dmarcResults) {
+            super();
+            this.spfResults = null == spfResults ? Collections.emptyList() : spfResults;
+            this.dkimResults = null == dkimResults ? Collections.emptyList() : dkimResults;
+            this.dmarcResults = null == dmarcResults ? Collections.emptyList() : dmarcResults;
+        }
+
+        /**
+         * Gets the SPF results
+         *
+         * @return The SPF results
+         */
+        List<MailAuthenticityMechanismResult> getSpfResults() {
+            return spfResults;
+        }
+
+        /**
+         * Gets the DKIM results
+         *
+         * @return The DKIM results
+         */
+        List<MailAuthenticityMechanismResult> getDkimResults() {
+            return dkimResults;
+        }
+
+        /**
+         * Gets the DMAR results
+         *
+         * @return The DMAR results
+         */
+        List<MailAuthenticityMechanismResult> getDmarcResults() {
+            return dmarcResults;
+        }
+    }
+
 }
