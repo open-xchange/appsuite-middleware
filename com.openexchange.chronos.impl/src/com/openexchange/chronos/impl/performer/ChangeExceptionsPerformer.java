@@ -103,7 +103,8 @@ public class ChangeExceptionsPerformer extends AbstractQueryPerformer {
         /*
          * load series master first
          */
-        Event event = storage.getEventStorage().loadEvent(seriesID, getFields(session));
+        EventField[] fields = getFields(session, EventField.ORGANIZER, EventField.ATTENDEES);
+        Event event = storage.getEventStorage().loadEvent(seriesID, fields);
         if (null == event) {
             throw CalendarExceptionCodes.EVENT_NOT_FOUND.create(seriesID);
         }
@@ -123,7 +124,6 @@ public class ChangeExceptionsPerformer extends AbstractQueryPerformer {
         /*
          * perform search & filter the results based on user's access permissions
          */
-        EventField[] fields = getFields(session, EventField.ORGANIZER, EventField.ATTENDEES);
         List<Event> changeExceptions = storage.getEventStorage().searchEvents(searchTerm, null, fields);
         if (null == changeExceptions || 0 == changeExceptions.size()) {
             return Collections.emptyList();
@@ -134,7 +134,7 @@ public class ChangeExceptionsPerformer extends AbstractQueryPerformer {
                 iterator.remove();
             }
         }
-        return postProcess(changeExceptions, folder, true);
+        return postProcess(changeExceptions, folder, true, fields);
     }
 
 }

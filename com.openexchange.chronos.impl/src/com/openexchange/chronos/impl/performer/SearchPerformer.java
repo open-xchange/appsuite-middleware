@@ -135,11 +135,11 @@ public class SearchPerformer extends AbstractQueryPerformer {
         for (Event event : storage.getUtilities().loadAdditionalEventData(-1, foundEvents, fields)) {
             List<UserizedFolder> foldersForEvent = getFoldersForEvent(folders, event);
             if (1 == foldersForEvent.size()) {
-                events.addAll(postProcess(Collections.singletonList(event), foldersForEvent.get(0), false));
+                events.addAll(postProcess(Collections.singletonList(event), foldersForEvent.get(0), false, fields));
             } else {
                 for (UserizedFolder folder : foldersForEvent) {
                     Event copiedEvent = EventMapper.getInstance().copy(event, new Event(), (EventField[]) null);
-                    events.addAll(postProcess(Collections.singletonList(copiedEvent), folder, false));
+                    events.addAll(postProcess(Collections.singletonList(copiedEvent), folder, false, fields));
                 }
             }
             getSelfProtection().checkEventCollection(events);

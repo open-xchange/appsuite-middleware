@@ -130,13 +130,13 @@ public class UpdatesPerformer extends AbstractQueryPerformer {
         if (false == com.openexchange.tools.arrays.Arrays.contains(ignore, "changed")) {
             List<Event> events = storage.getEventStorage().searchEvents(searchTerm, new SearchOptions(session), fields);
             storage.getUtilities().loadAdditionalEventData(session.getUserId(), events, fields);
-            newAndModifiedEvents = postProcess(events, session.getUserId(), true);
+            newAndModifiedEvents = postProcess(events, session.getUserId(), true, fields);
         }
         List<Event> deletedEvents = null;
         if (false == com.openexchange.tools.arrays.Arrays.contains(ignore, "deleted")) {
             List<Event> events = storage.getEventStorage().searchEventTombstones(searchTerm, new SearchOptions(session), fields);
             storage.getUtilities().loadAdditionalEventTombstoneData(events, fields);
-            deletedEvents = postProcess(events, session.getUserId(), true);
+            deletedEvents = postProcess(events, session.getUserId(), true, fields);
         }
         return new DefaultUpdatesResult(newAndModifiedEvents, deletedEvents);
     }
@@ -166,7 +166,7 @@ public class UpdatesPerformer extends AbstractQueryPerformer {
         if (false == com.openexchange.tools.arrays.Arrays.contains(ignore, "changed")) {
             List<Event> events = storage.getEventStorage().searchEvents(searchTerm, new SearchOptions(session), fields);
             storage.getUtilities().loadAdditionalEventData(getCalendarUserId(folder), events, fields);
-            newAndModifiedEvents = postProcess(events, folder, isIncludeClassifiedEvents(session));
+            newAndModifiedEvents = postProcess(events, folder, isIncludeClassifiedEvents(session), fields);
         }
         List<Event> deletedEvents = null;
         if (false == com.openexchange.tools.arrays.Arrays.contains(ignore, "deleted")) {
@@ -175,7 +175,7 @@ public class UpdatesPerformer extends AbstractQueryPerformer {
             Boolean oldExpandOccurrences = session.get(CalendarParameters.PARAMETER_EXPAND_OCCURRENCES, Boolean.class);
             try {
                 session.set(CalendarParameters.PARAMETER_EXPAND_OCCURRENCES, Boolean.FALSE);
-                deletedEvents = postProcess(events, folder, isIncludeClassifiedEvents(session));
+                deletedEvents = postProcess(events, folder, isIncludeClassifiedEvents(session), fields);
             } finally {
                 session.set(CalendarParameters.PARAMETER_EXPAND_OCCURRENCES, oldExpandOccurrences);
             }

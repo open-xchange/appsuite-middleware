@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.impl.performer;
 
+import static com.openexchange.chronos.common.CalendarUtils.getFlags;
 import static com.openexchange.chronos.common.CalendarUtils.getFolderView;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.chronos.impl.Check.requireCalendarPermission;
@@ -84,6 +85,7 @@ import com.openexchange.quota.Quota;
 import com.openexchange.search.CompositeSearchTerm;
 import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
 import com.openexchange.search.SingleSearchTerm.SingleOperation;
+import com.openexchange.tools.arrays.Arrays;
 
 /**
  * {@link AbstractQueryPerformer}
@@ -167,6 +169,7 @@ public abstract class AbstractQueryPerformer {
      * <ul>
      * <li>excluding events that are excluded as per {@link Utils#isExcluded(Event, CalendarSession, boolean)}</li>
      * <li>applying the folder identifier from the passed folder</li>
+     * <li>generate and apply event flags applying the folder identifier from the passed folder</li>
      * <li>resolving occurrences of the series master event as per {@link Utils#isResolveOccurrences(com.openexchange.chronos.service.CalendarParameters)}</li>
      * <li>apply <i>userized</i> versions of change- and delete-exception dates in the series master event based on the calendar user's actual attendance</li>
      * <li>sorting the resulting event list based on the requested sort options</li>
@@ -175,21 +178,26 @@ public abstract class AbstractQueryPerformer {
      * @param events The events to post-process
      * @param inFolder The parent folder representing the view on the event
      * @param includeClassified <code>true</code> to include <i>confidential</i> events in shared folders, <code>false</code>, otherwise
+     * @param fields The event fields to consider, or <code>null</code> if not specified
      * @return The processed events
      */
-    protected List<Event> postProcess(List<Event> events, UserizedFolder inFolder, boolean includeClassified) throws OXException {
+    protected List<Event> postProcess(List<Event> events, UserizedFolder inFolder, boolean includeClassified, EventField[] fields) throws OXException {
         List<Event> processedEvents = new ArrayList<Event>(events.size());
+        int calendarUserId = getCalendarUserId(inFolder);
         for (Event event : events) {
             if (isExcluded(event, session, includeClassified)) {
                 continue;
             }
             event.setFolderId(inFolder.getID());
+            if (null == fields || Arrays.contains(fields, EventField.FLAGS)) {
+                event.setFlags(getFlags(event, calendarUserId));
+            }
             event = anonymizeIfNeeded(session, event);
             if (isSeriesMaster(event)) {
                 if (isResolveOccurrences(session)) {
                     processedEvents.addAll(resolveOccurrences(event));
                 } else {
-                    processedEvents.add(applyExceptionDates(storage, event, getCalendarUserId(inFolder)));
+                    processedEvents.add(applyExceptionDates(storage, event, calendarUserId));
                 }
             } else {
                 processedEvents.add(event);
@@ -212,15 +220,19 @@ public abstract class AbstractQueryPerformer {
      * @param events The events to post-process
      * @param forUser The identifier of the user to apply the parent folder identifier for
      * @param includePrivate <code>true</code> to include private or confidential events in non-private folders, <code>false</code>, otherwise
+     * @param fields The event fields to consider, or <code>null</code> if not specified
      * @return The processed events
      */
-    protected List<Event> postProcess(List<Event> events, int forUser, boolean includePrivate) throws OXException {
+    protected List<Event> postProcess(List<Event> events, int forUser, boolean includePrivate, EventField[] fields) throws OXException {
         List<Event> processedEvents = new ArrayList<Event>(events.size());
         for (Event event : events) {
             if (isExcluded(event, session, includePrivate)) {
                 continue;
             }
             event.setFolderId(getFolderView(event, forUser));
+            if (null == fields || Arrays.contains(fields, EventField.FLAGS)) {
+                event.setFlags(getFlags(event, forUser));
+            }
             event = anonymizeIfNeeded(session, event);
             if (isSeriesMaster(event)) {
                 if (isResolveOccurrences(session)) {
