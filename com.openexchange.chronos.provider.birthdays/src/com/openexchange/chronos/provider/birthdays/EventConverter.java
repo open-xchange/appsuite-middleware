@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.provider.birthdays;
 
+import static com.openexchange.chronos.common.CalendarUtils.getFlags;
 import static com.openexchange.chronos.common.CalendarUtils.getURI;
 import static com.openexchange.chronos.common.CalendarUtils.initCalendar;
 import static com.openexchange.chronos.common.CalendarUtils.isInRange;
@@ -136,6 +137,7 @@ public class EventConverter {
         extendedProperties.add(new ExtendedProperty("X-OX-CONTACT-ID", String.valueOf(contact.getObjectID())));
         extendedProperties.add(new ExtendedProperty("X-OX-CONTACT-FOLDER-ID", String.valueOf(contact.getParentFolderID())));
         event.setExtendedProperties(extendedProperties);
+        event.setFlags(getFlags(event, calendarUserId));
         return event;
     }
 
