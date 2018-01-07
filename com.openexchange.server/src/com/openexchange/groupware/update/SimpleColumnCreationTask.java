@@ -79,9 +79,11 @@ public abstract class SimpleColumnCreationTask extends UpdateTaskAdapter {
             con.setAutoCommit(false);
             rollback = true;
 
+            String columnName = getColumnName();
+            Column columnToAdd = new Column(columnName, getColumnDefinition());
             for (String table : getTableNames()) {
-                if (false == columnExists(con, table)) {
-                    Tools.addColumns(con, table, new Column(getColumnName(), getColumnDefinition()));
+                if (false == Tools.columnExists(con, table, columnName)) {
+                    Tools.addColumns(con, table, columnToAdd);
                 }
             }
 
@@ -95,10 +97,6 @@ public abstract class SimpleColumnCreationTask extends UpdateTaskAdapter {
             }
             Databases.autocommit(con);
         }
-    }
-
-    private boolean columnExists(Connection con, String tableName) throws SQLException {
-        return Tools.columnExists(con, tableName, getColumnName());
     }
 
     /**
