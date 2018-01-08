@@ -91,7 +91,7 @@ public class ClusterLockServiceHazelcastImpl extends AbstractClusterLockServiceI
         HazelcastInstance hzInstance = getHazelcastInstance();
 
         IMap<String, Long> clusterLocks = hzInstance.getMap(ClusterLockType.ClusterTaskLocks.name());
-        long timeNow = System.nanoTime();
+        long timeNow = System.currentTimeMillis();
         Long timeThen = clusterLocks.putIfAbsent(clusterTask.getTaskName(), timeNow);
         if (timeThen == null) {
             return true;
