@@ -56,19 +56,22 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.Available;
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.Organizer;
+import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.ResourceId;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.provider.CalendarAccount;
@@ -391,7 +394,7 @@ public class ChronosCalendarCopyTask implements CopyUserTaskService {
     }
 
     private void insertDestinationAlarmTriggers(Map<String, Map<Integer, List<Alarm>>> alarmByEventByUser, List<Event> eventList) throws OXException {
-        dstCalendarStorage.getAlarmTriggerStorage().insertTriggers(alarmByEventByUser, eventList, Collections.emptyMap());
+        dstCalendarStorage.getAlarmTriggerStorage().insertTriggers(alarmByEventByUser, eventList, prepareTriggerExceptions(eventList));
     }
 
     private void insertDestinationFolderProperties(final Connection writeCon, List<FolderProperties> properties) throws OXException {
@@ -437,14 +440,14 @@ public class ChronosCalendarCopyTask implements CopyUserTaskService {
         if (null != srcCalendarStorage) {
             this.srcCalendarStorage = null;
         }
-        this.srcCalendarStorage = createCalendarStorage(srcCtx, DefaultCalendarAccount.DEFAULT_ACCOUNT.getAccountId(), readCon, null);
+        this.srcCalendarStorage = createCalendarStorage(srcCtx, DefaultCalendarAccount.DEFAULT_ACCOUNT.getAccountId(), readCon, readCon);
     }
 
     private void initDestinationCalendarStorage(Context dstCtx, final Connection writeCon) throws OXException {
         if (null != dstCalendarStorage) {
             this.dstCalendarStorage = null;
         }
-        this.dstCalendarStorage = createCalendarStorage(dstCtx, DefaultCalendarAccount.DEFAULT_ACCOUNT.getAccountId(), null, writeCon);
+        this.dstCalendarStorage = createCalendarStorage(dstCtx, DefaultCalendarAccount.DEFAULT_ACCOUNT.getAccountId(), writeCon, writeCon);
     }
 
     private CalendarUser createCalendarUser(Context dstCtx, int dstUsrId, CalendarUser srcCalendarUser, int srcUsrId) {
@@ -462,14 +465,35 @@ public class ChronosCalendarCopyTask implements CopyUserTaskService {
         return calendarUser;
     }
 
+    private Map<String, Set<RecurrenceId>> prepareTriggerExceptions(List<Event> eventList) throws OXException {
+        Map<String, Set<RecurrenceId>> exceptionMap = new HashMap<>(eventList.size());
+        for (Event event : eventList) {
+            Set<RecurrenceId> exceptions = new TreeSet<>();
+            if (CalendarUtils.isSeriesMaster(event)) {
+                exceptions.addAll(getChangeExceptionDates(event.getSeriesId()));
+                if (event.getDeleteExceptionDates() != null) {
+                    exceptions.addAll(event.getDeleteExceptionDates());
+                }
+            }
+            exceptionMap.put(event.getId(), exceptions);
+        }
+        return exceptionMap;
+    }
+
+    private SortedSet<RecurrenceId> getChangeExceptionDates(String seriesId) throws OXException {
+        EventField[] fields = new EventField[] { EventField.RECURRENCE_ID, EventField.ID, EventField.SERIES_ID };
+        List<Event> changeExceptions = dstCalendarStorage.getEventStorage().loadExceptions(seriesId, fields);
+        return CalendarUtils.getRecurrenceIds(changeExceptions);
+    }
+
     private CalendarStorage createCalendarStorage(Context ctx, int accountId, final Connection readCon, final Connection writeCon) throws OXException {
         SimpleDBProvider simpleDBProvider = new SimpleDBProvider(readCon, writeCon);
-        return services.getService(CalendarStorageFactory.class).create(ctx, accountId, null, simpleDBProvider, DBTransactionPolicy.NORMAL_TRANSACTIONS);
+        return services.getService(CalendarStorageFactory.class).create(ctx, accountId, null, simpleDBProvider, DBTransactionPolicy.NO_TRANSACTIONS);
     }
 
     private CalendarAvailabilityStorage createCalendarAvailabilityStorage(Context ctx, final Connection readCon, final Connection writeCon) throws OXException {
         SimpleDBProvider simpleDBProvider = new SimpleDBProvider(readCon, writeCon);
-        return services.getService(CalendarAvailabilityStorageFactory.class).create(ctx, simpleDBProvider, DBTransactionPolicy.NORMAL_TRANSACTIONS);
+        return services.getService(CalendarAvailabilityStorageFactory.class).create(ctx, simpleDBProvider, DBTransactionPolicy.NO_TRANSACTIONS);
     }
 
     private String getDestinationFolder(ObjectMapping<FolderObject> folderMapping, int srcFolder) {
