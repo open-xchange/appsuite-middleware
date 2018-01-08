@@ -61,7 +61,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * @since v7.10.0
  */
 @SuppressWarnings("serial")
-class ElementLock extends ReentrantLock {
+public class ElementLock extends ReentrantLock {
 
     /**
      * {@link LockMode}
@@ -69,7 +69,7 @@ class ElementLock extends ReentrantLock {
      * @author <a href="mailto:kai.ahrens@open-xchange.com">Kai Ahrens</a>
      * @since v7.10.0
      */
-    enum LockMode {
+    public enum LockMode {
         STANDARD,
         WAIT_IF_PROCESSED,
         WAIT_IF_PROCESSED_AND_BEGIN_PROCESSING,
@@ -101,14 +101,14 @@ class ElementLock extends ReentrantLock {
     /**
      * Initializes a new {@link ElementLock}.
      */
-    ElementLock() {
+    public ElementLock() {
         super();
     }
 
     /**
      * @return
      */
-    boolean lock(final LockMode lockMode) {
+    public boolean lock(final LockMode lockMode) {
         m_useCount.incrementAndGet();
 
         if (lockMode.isTryLock()) {
@@ -140,7 +140,7 @@ class ElementLock extends ReentrantLock {
     /**
      * @return
      */
-    long unlockAndGetUseCount(final boolean finishProcessing) {
+    public long unlockAndGetUseCount(final boolean finishProcessing) {
         if (finishProcessing && m_isProcessing.compareAndSet(true, false)) {
             m_processingFinishedCondition.signalAll();
         }
@@ -153,14 +153,14 @@ class ElementLock extends ReentrantLock {
     /**
      * @return
      */
-    long getUseCount() {
+    public long getUseCount() {
         return m_useCount.get();
     }
 
     /**
      * @return
      */
-    boolean isProcessing() {
+    public boolean isProcessing() {
         return m_isProcessing.get();
     }
 
