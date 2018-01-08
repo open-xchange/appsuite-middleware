@@ -298,10 +298,10 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
                 try {
                     overallResult.addAttribute(MailAuthenticityResultKey.FROM_DOMAIN, extractDomain(from));
                     overallResult.addAttribute(MailAuthenticityResultKey.TRUSTED_SENDER, from.getAddress());
-                } catch (final Exception e) {
-                    // Malformed from header, be strict and return with failed result
+                } catch (final IllegalArgumentException e) {
+                    // Malformed 'From' header, return with 'Not Analyzed' result
                     LOGGER.debug("An error occurred while trying to extract a valid domain from the 'From' header", e);
-                    overallResult.setStatus(MailAuthenticityStatus.FAIL);
+                    overallResult.setStatus(MailAuthenticityStatus.NOT_ANALYZED);
                     return overallResult;
                 }
 
