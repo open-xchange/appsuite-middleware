@@ -49,11 +49,11 @@
 
 package com.openexchange.chronos.impl.performer;
 
+import static com.openexchange.chronos.common.CalendarUtils.getFields;
 import static com.openexchange.chronos.common.CalendarUtils.getSearchTerm;
 import static com.openexchange.chronos.impl.Utils.getFolderIdTerm;
 import static com.openexchange.java.Autoboxing.I;
 import com.openexchange.chronos.EventField;
-import com.openexchange.chronos.impl.Utils;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.SearchOptions;
 import com.openexchange.chronos.storage.CalendarStorage;
@@ -93,7 +93,7 @@ public class ForeignEventsPerformer extends AbstractQueryPerformer {
             .addSearchTerm(getSearchTerm(EventField.CREATED_BY, SingleOperation.NOT_EQUALS, I(session.getUserId())))
         ;
         SearchOptions searchOptions = new SearchOptions().setLimits(0, 1);
-        EventField[] fields = Utils.getFields((EventField[]) null, EventField.CREATED_BY);
+        EventField[] fields = getFields(new EventField[0], EventField.CREATED_BY);
         return 0 < storage.getEventStorage().searchEvents(searchTerm, searchOptions, fields).size();
     }
 

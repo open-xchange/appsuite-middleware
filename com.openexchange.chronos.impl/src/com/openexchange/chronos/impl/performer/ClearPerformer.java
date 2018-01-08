@@ -50,6 +50,7 @@
 package com.openexchange.chronos.impl.performer;
 
 import static com.openexchange.chronos.common.CalendarUtils.find;
+import static com.openexchange.chronos.common.CalendarUtils.getFields;
 import static com.openexchange.chronos.impl.Check.requireCalendarPermission;
 import static com.openexchange.chronos.impl.Check.requireUpToDateTimestamp;
 import static com.openexchange.chronos.impl.Utils.getFolderIdTerm;
@@ -72,7 +73,6 @@ import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.InternalCalendarResult;
-import com.openexchange.chronos.impl.Utils;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.SearchOptions;
 import com.openexchange.chronos.service.SortOrder;
@@ -135,7 +135,7 @@ public class ClearPerformer extends AbstractUpdatePerformer {
         /*
          * load original events
          */
-        EventField[] fields = Utils.DEFAULT_FIELDS.toArray(new EventField[Utils.DEFAULT_FIELDS.size()]);
+        EventField[] fields = getFields(new EventField[0]);
         List<Event> originalEvents = storage.getEventStorage().searchEvents(searchTerm, searchOptions, fields);
         if (null == originalEvents || 0 == originalEvents.size()) {
             return 0;

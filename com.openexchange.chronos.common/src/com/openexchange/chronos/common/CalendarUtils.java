@@ -57,6 +57,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.AbstractMap;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
@@ -106,6 +107,7 @@ import com.openexchange.chronos.common.mapping.AbstractSimpleCollectionUpdate;
 import com.openexchange.chronos.common.mapping.AttendeeMapper;
 import com.openexchange.chronos.common.mapping.EventMapper;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
+import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.EventConflict;
 import com.openexchange.chronos.service.EventID;
 import com.openexchange.chronos.service.EventUpdates;
@@ -155,6 +157,19 @@ public class CalendarUtils {
             }
         }
     };
+
+    /** A collection of fields that are always included when querying events from the storage */
+    private static final List<EventField> DEFAULT_FIELDS = Arrays.asList(
+        EventField.ID, EventField.SERIES_ID, EventField.FOLDER_ID, EventField.RECURRENCE_ID, EventField.TIMESTAMP, EventField.CREATED_BY,
+        EventField.CALENDAR_USER, EventField.CLASSIFICATION, EventField.START_DATE, EventField.END_DATE, EventField.RECURRENCE_RULE,
+        EventField.CHANGE_EXCEPTION_DATES, EventField.DELETE_EXCEPTION_DATES, EventField.ORGANIZER
+    );
+
+    /** A collection of fields that need to be queried to construct the special event flags field properly afterwards */
+    private static final List<EventField> FLAG_FIELDS = Arrays.asList(
+        EventField.ID, EventField.SERIES_ID, EventField.FOLDER_ID, EventField.RECURRENCE_ID,  EventField.STATUS, EventField.TRANSP,
+        EventField.CLASSIFICATION, EventField.ORGANIZER, EventField.ATTACHMENTS, EventField.ALARMS, EventField.ATTENDEES
+    );
 
     private static final ConcurrentMap<String, TimeZone> KNOWN_TIMEZONES = new ConcurrentHashMap<String, TimeZone>();
 
@@ -1752,6 +1767,51 @@ public class CalendarUtils {
             throw CalendarExceptionCodes.ATTENDEE_NOT_FOUND.create(I(calendarUser), event.getId());
         }
         return userAttendee.getFolderId();
+    }
+
+    /**
+     * Gets the event fields to include when querying events from the storage based on the client-requested fields defined in the
+     * supplied calendar parameters.
+     * <p/>
+     * Specific {@link #DEFAULT_FIELDS} are included implicitly, further required ones may be defined explicitly, too.
+     *
+     * @param parameters The calendar parameters to get the requested fields from
+     * @param requiredFields Additionally required fields to add, or <code>null</code> if not defined
+     * @return The fields to use when querying events from the storage
+     * @see CalendarParameters#PARAMETER_FIELDS
+     * @see #DEFAULT_FIELDS
+     */
+    public static EventField[] getFields(CalendarParameters parameters, EventField... requiredFields) {
+        return getFields(parameters.get(CalendarParameters.PARAMETER_FIELDS, EventField[].class), requiredFields);
+    }
+
+    /**
+     * Gets the event fields to include when querying events from the storage based on the supplied client-requested fields.
+     * <p/>
+     * Specific {@link #DEFAULT_FIELDS} are included implicitly, further required ones may be defined explicitly, too. If the special
+     * field {@link EventField#FLAGS} is requested, further fields (as listed in {@link #FLAG_FIELDS}) are also added to be able to
+     * derive the actual flags afterwards.
+     *
+     * @param requestedFields The fields requested by the client, or <code>null</code> to retrieve all fields
+     * @param requiredFields Additionally required fields to add, or <code>null</code> if not defined
+     * @return The fields to use when querying events from the storage
+     * @see #DEFAULT_FIELDS
+     * @see #FLAG_FIELDS
+     */
+    public static EventField[] getFields(EventField[] requestedFields, EventField... requiredFields) {
+        if (null == requestedFields) {
+            return EventField.values();
+        }
+        Set<EventField> fields = new HashSet<EventField>();
+        fields.addAll(DEFAULT_FIELDS);
+        fields.addAll(Arrays.asList(requestedFields));
+        if (null != requiredFields && 0 < requiredFields.length) {
+            fields.addAll(Arrays.asList(requiredFields));
+        }
+        if (fields.contains(EventFlag.class)) {
+            fields.addAll(FLAG_FIELDS);
+        }
+        return fields.toArray(new EventField[fields.size()]);
     }
 
     /**

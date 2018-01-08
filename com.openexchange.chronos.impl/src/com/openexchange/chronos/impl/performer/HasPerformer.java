@@ -50,6 +50,7 @@
 package com.openexchange.chronos.impl.performer;
 
 import static com.openexchange.chronos.common.CalendarUtils.find;
+import static com.openexchange.chronos.common.CalendarUtils.getFields;
 import static com.openexchange.chronos.common.CalendarUtils.initCalendar;
 import static com.openexchange.chronos.common.CalendarUtils.isGroupScheduled;
 import static com.openexchange.chronos.common.CalendarUtils.isInRange;
@@ -115,7 +116,7 @@ public class HasPerformer extends AbstractFreeBusyPerformer {
         /*
          * search overlapping events
          */
-        EventField[] fields = Utils.getFields(Utils.DEFAULT_FIELDS.toArray(new EventField[Utils.DEFAULT_FIELDS.size()]), EventField.ORGANIZER, EventField.ATTENDEES);
+        EventField[] fields = getFields(new EventField[0], EventField.ORGANIZER, EventField.ATTENDEES);
         List<Attendee> attendees = Collections.singletonList(session.getEntityResolver().applyEntityData(new Attendee(), userID));
         List<Event> events = storage.getEventStorage().searchOverlappingEvents(attendees, true, new SearchOptions().setRange(rangeStart, rangeEnd), fields);
         events = storage.getUtilities().loadAdditionalEventData(-1, events, fields);
