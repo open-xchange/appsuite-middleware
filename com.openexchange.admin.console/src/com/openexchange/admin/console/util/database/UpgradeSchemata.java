@@ -58,7 +58,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
@@ -251,32 +250,22 @@ public class UpgradeSchemata extends UtilAbstraction {
      * @return The filtered schemata
      */
     private Database[] filterSchemata(Database[] databases, Comparator<Database> comparator) {
+        System.out.print("Filtering out skipped schemata: ");
+        
+        List<Database> databasesList = Arrays.asList(databases);
         StringBuilder sb = new StringBuilder();
-        sb.append("Filtering out skipped schemata: ");
-
-        List<Integer> toSkip = new LinkedList<>();
         for (String schema : skippedSchemata) {
             sb.append("'").append(schema).append("', ");
             int position = Arrays.binarySearch(databases, new Database(-1, schema), comparator);
-            if (position >= 0) {
-                // Remember databases to be skipped
-                toSkip.add(new Integer(position));
+            if (position > 0) {
+                databasesList.remove(position);
             }
         }
-
-        // Copy array and skip relevant databases
-        Database[] filtered = new Database[databases.length - toSkip.size()];
-        int j = 0;
-        for (int i = 0; i < databases.length && j < filtered.length; i++) {
-            if (false == toSkip.contains(Integer.valueOf(i))) {
-                filtered[j++] = databases[i];
-            }
-        }
-
+        
         sb.setLength(sb.length() - 2);
         System.out.println(sb.toString());
-
-        return filtered;
+        
+        return databasesList.toArray(new Database[databasesList.size()]);
     }
 
     /**
@@ -286,7 +275,7 @@ public class UpgradeSchemata extends UtilAbstraction {
      * @throws InstanceNotFoundException if the required MBean does not exist in the registry
      * @throws MBeanException if an error during the runUpdate method is occurred
      * @throws ReflectionException if an invocation error is occurred
-     * @throws IOException if an I/O error is occurred
+     * @throws IOExceptionif an I/O error is occurred
      */
     private void runUpdates(String schemaName) throws InstanceNotFoundException, MBeanException, ReflectionException, IOException {
         System.out.print("Running updates...");
