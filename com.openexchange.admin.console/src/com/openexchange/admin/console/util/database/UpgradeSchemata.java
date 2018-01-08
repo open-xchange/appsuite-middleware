@@ -127,7 +127,17 @@ public class UpgradeSchemata extends UtilAbstraction {
      */
     @SuppressWarnings("unused")
     public static void main(String args[]) {
-        new UpgradeSchemata(args);
+        //new UpgradeSchemata(args);
+        Comparator<String> comparator = (s1, s2) -> {
+            Integer su1 = Integer.parseInt(s1.substring(s1.indexOf('_') + 1));
+            Integer su2 = Integer.parseInt(s2.substring(s2.indexOf('_') + 1));
+            return su1.compareTo(su2);
+        };
+        String[] databases = new String[] { "oxdatabase_53", "oxdatabase_6", "oxdatabase_5", "oxdatabase_1", "oxdatabase_100", "oxdatabase_56", "oxdatabase_105", "oxdatabase_1" };
+        Arrays.sort(databases, comparator);
+        for (int i = 0; i < databases.length; i++) {
+            System.out.println(databases[i]);
+        }
     }
 
     /**
@@ -231,7 +241,12 @@ public class UpgradeSchemata extends UtilAbstraction {
             return databases[0].getScheme().equals(startFromSchema) ? new Database[0] : databases;
         }
 
-        Comparator<Database> comparator = (o1, o2) -> o1.getScheme().compareTo(o2.getScheme());
+        // Sort arithmetically, that is by integer suffix of each database schema
+        Comparator<Database> comparator = (o1, o2) -> {
+            Integer i1 = Integer.parseInt(o1.getScheme().substring(o1.getScheme().indexOf('_') + 1));
+            Integer i2 = Integer.parseInt(o2.getScheme().substring(o2.getScheme().indexOf('_') + 1));
+            return i1.compareTo(i2);
+        };
         Arrays.sort(databases, comparator);
         int position = Arrays.binarySearch(databases, new Database(-1, startFromSchema), comparator);
         if (position < 0) {
@@ -251,8 +266,8 @@ public class UpgradeSchemata extends UtilAbstraction {
      */
     private Database[] filterSchemata(Database[] databases, Comparator<Database> comparator) {
         System.out.print("Filtering out skipped schemata: ");
-        
-        List<Database> databasesList = Arrays.asList(databases);
+
+        List<Database> databasesList = toList(databases);
         StringBuilder sb = new StringBuilder();
         for (String schema : skippedSchemata) {
             sb.append("'").append(schema).append("', ");
@@ -261,11 +276,25 @@ public class UpgradeSchemata extends UtilAbstraction {
                 databasesList.remove(position);
             }
         }
-        
+
         sb.setLength(sb.length() - 2);
         System.out.println(sb.toString());
-        
+
         return databasesList.toArray(new Database[databasesList.size()]);
+    }
+
+    /**
+     * Converts the specified {@link Database} array to a {@link List}
+     * 
+     * @param databasesArr The {@link Database} array
+     * @return The {@link List}
+     */
+    private List<Database> toList(Database[] databasesArr) {
+        List<Database> databasesList = new ArrayList<>(databasesArr.length);
+        for (int i = 0; i < databasesArr.length; i++) {
+            databasesList.add(databasesArr[i]);
+        }
+        return databasesList;
     }
 
     /**
