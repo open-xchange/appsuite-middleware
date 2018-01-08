@@ -69,8 +69,8 @@ import com.google.common.collect.ImmutableMap;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.InterruptibleCharSequence;
-import com.openexchange.java.Strings;
 import com.openexchange.java.InterruptibleCharSequence.InterruptedRuntimeException;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.authenticity.AllowedAuthServId;
@@ -597,10 +597,11 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
     }
 
     /**
-     *
+     * Extracts the domain from the specified internet address
+     * 
      * @param adr The address as string
      * @return The domain of the sender
-     * @throws IllegalAccessException if the address is either empty or <code>null</code
+     * @throws IllegalArgumentException if the address is either empty or <code>null</code
      */
     private String extractDomain(final InternetAddress address) {
         if (address == null) {
@@ -663,6 +664,9 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
         }
         final int endIndex = value.indexOf(')');
         if (endIndex < 0) {
+            return null;
+        }
+        if (beginIndex >= endIndex) {
             return null;
         }
         value = Strings.unquote(value);
