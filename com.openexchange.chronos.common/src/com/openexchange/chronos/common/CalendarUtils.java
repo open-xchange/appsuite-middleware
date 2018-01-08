@@ -933,7 +933,8 @@ public class CalendarUtils {
      * Adjusts a collection of recurrence identifiers by applying an offset based on the difference of an original and updated series
      * start date.
      *
-     * @param originalRecurrenceIds The original recurrence identifiers to adjust
+     * @param originalRecurrenceIds The original recurrence identifiers
+     * @param updatedRecurrenceIds The updated recurrence identifiers to adjust
      * @param originalSeriesStart The original start date of the underlying series event
      * @param updatedSeriesStart The original start date of the underlying series event
      * @return A set of new recurrence identifier instance whose values are shifted accordingly
