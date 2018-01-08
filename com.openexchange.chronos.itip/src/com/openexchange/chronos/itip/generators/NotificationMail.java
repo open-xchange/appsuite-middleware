@@ -550,7 +550,7 @@ public class NotificationMail {
         return itipMessage != null && itipMessage.getMethod() == ITipMethod.CANCEL;
     }
 
-    private static final EventField[] FIELDS_TO_REPORT = new EventField[] { EventField.LOCATION, EventField.SUMMARY, EventField.START_DATE, EventField.END_DATE, EventField.DESCRIPTION, EventField.RECURRENCE_RULE, EventField.ATTENDEES };
+    private static final EventField[] FIELDS_TO_REPORT = new EventField[] { EventField.LOCATION, EventField.SUMMARY, EventField.START_DATE, EventField.END_DATE, EventField.DESCRIPTION, EventField.RECURRENCE_RULE, EventField.ATTENDEES, EventField.CHANGE_EXCEPTION_DATES };
 
     private boolean anInterestingFieldChanged() throws OXException {
         if (getDiff() == null) {

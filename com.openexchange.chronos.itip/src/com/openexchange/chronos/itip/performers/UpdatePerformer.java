@@ -128,6 +128,8 @@ public class UpdatePerformer extends AbstractActionPerformer {
                 ITipEventUpdate diff = change.getDiff();
                 if (null != diff && false == diff.isEmpty()) {
                     updateEvent(original, event, session);
+                } else {
+                    continue;
                 }
             } else {
                 ensureFolderId(event, session);
