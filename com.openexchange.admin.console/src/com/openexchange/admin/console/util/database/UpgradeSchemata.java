@@ -58,9 +58,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.Set;
 import javax.management.InstanceNotFoundException;
 import javax.management.MBeanException;
 import javax.management.MBeanServerConnection;
@@ -242,7 +244,6 @@ public class UpgradeSchemata extends UtilAbstraction {
         if (position < 0) {
             return filterSchemata(databases, comparator);
         }
-
         System.out.println("Skipping to schema '" + startFromSchema + "'");
         return filterSchemata(Arrays.copyOfRange(databases, position + 1, databases.length), comparator);
     }
@@ -257,34 +258,29 @@ public class UpgradeSchemata extends UtilAbstraction {
     private Database[] filterSchemata(Database[] databases, Comparator<Database> comparator) {
         System.out.print("Filtering out skipped schemata: ");
 
-        List<Database> databasesList = toList(databases);
+        Set<Integer> indexesToSkip = new HashSet<>();
         StringBuilder sb = new StringBuilder();
         for (String schema : skippedSchemata) {
             sb.append("'").append(schema).append("', ");
             int position = Arrays.binarySearch(databases, new Database(-1, schema), comparator);
-            if (position > 0) {
-                databasesList.remove(position);
+            if (position >= 0) {
+                // Remember database position to be skipped
+                indexesToSkip.add(position);
+            }
+        }
+
+        // Copy array and skip relevant databases
+        Database[] filtered = new Database[databases.length - indexesToSkip.size()];
+        for (int i = 0, j = 0; i < databases.length && j < filtered.length; i++) {
+            if (false == indexesToSkip.contains(Integer.valueOf(i))) {
+                filtered[j++] = databases[i];
             }
         }
 
         sb.setLength(sb.length() - 2);
         System.out.println(sb.toString());
 
-        return databasesList.toArray(new Database[databasesList.size()]);
-    }
-
-    /**
-     * Converts the specified {@link Database} array to a {@link List}
-     * 
-     * @param databasesArr The {@link Database} array
-     * @return The {@link List}
-     */
-    private List<Database> toList(Database[] databasesArr) {
-        List<Database> databasesList = new ArrayList<>(databasesArr.length);
-        for (int i = 0; i < databasesArr.length; i++) {
-            databasesList.add(databasesArr[i]);
-        }
-        return databasesList;
+        return filtered;
     }
 
     /**
