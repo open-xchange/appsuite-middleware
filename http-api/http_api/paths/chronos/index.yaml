@@ -11,4 +11,5 @@ requests:
   - MoveRequest.yaml
   - FreeBusyRequest.yaml
   - NeedsActionRequest.yaml
+  - ResolveRequest.yaml
   

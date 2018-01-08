@@ -130,7 +130,6 @@ public class InternalCalendarAccess implements FolderCalendarAccess, SubscribeAw
 
     private final CalendarSession session;
     private final ServiceLookup services;
-    private final CalendarAccount account;
 
     /**
      * Initializes a new {@link InternalCalendarAccess}.
@@ -142,7 +141,6 @@ public class InternalCalendarAccess implements FolderCalendarAccess, SubscribeAw
     public InternalCalendarAccess(CalendarSession session, CalendarAccount account, ServiceLookup services) {
         super();
         this.session = session;
-        this.account = account;
         this.services = services;
     }
 
@@ -269,6 +267,11 @@ public class InternalCalendarAccess implements FolderCalendarAccess, SubscribeAw
     @Override
     public List<Event> getEventsOfUser(Boolean rsvp, ParticipationStatus[] partStats) throws OXException {
         return getCalendarService().getEventsOfUser(session, rsvp, partStats);
+    }
+
+    @Override
+    public Event resolveEvent(String eventId) throws OXException {
+        return getCalendarService().getUtilities().resolveByID(session, eventId);
     }
 
     @Override

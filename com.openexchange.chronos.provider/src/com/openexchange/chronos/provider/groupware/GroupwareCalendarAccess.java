@@ -129,6 +129,15 @@ public interface GroupwareCalendarAccess extends FolderCalendarAccess, Permissio
     List<Event> getEventsOfUser(Boolean rsvp, ParticipationStatus[] partStats) throws OXException;
 
     /**
+     * Resolves an event identifier to an event, and returns it in the perspective of the current session's user, i.e. having an
+     * appropriate parent folder identifier assigned.
+     *
+     * @param eventId The identifier of the event to resolve
+     * @return The resolved event from the user's point of view, or <code>null</code> if not found
+     */
+    Event resolveEvent(String eventId) throws OXException;
+
+    /**
      * Gets lists of new and updated as well as deleted events since a specific timestamp of a user.
      * <p/>
      * The following calendar parameters are evaluated:

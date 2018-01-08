@@ -49,54 +49,54 @@
 
 package com.openexchange.chronos.json.action;
 
-import java.util.Collection;
-import java.util.Map;
-import com.google.common.collect.ImmutableMap;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
+import static com.openexchange.tools.arrays.Collections.unmodifiableSet;
+import java.util.Date;
+import java.util.Set;
+import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.chronos.Event;
+import com.openexchange.chronos.json.converter.EventResultConverter;
+import com.openexchange.chronos.json.oauth.ChronosOAuthScope;
+import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
+import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.exception.OXException;
-import com.openexchange.oauth.provider.resourceserver.annotations.OAuthModule;
+import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link ChronosActionFactory}
+ * {@link ResolveAction}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.0
  */
-@OAuthModule
-public class ChronosActionFactory implements AJAXActionServiceFactory {
+@OAuthAction(ChronosOAuthScope.OAUTH_READ_SCOPE)
+public class ResolveAction extends ChronosAction {
 
-    private final Map<String, AJAXActionService> actions;
+    private static final Set<String> OPTIONAL_PARAMETERS = unmodifiableSet(CalendarParameters.PARAMETER_FIELDS);
 
-    public ChronosActionFactory(ServiceLookup services) {
-        super();
-        ImmutableMap.Builder<String, AJAXActionService> actions = ImmutableMap.builder();
-        actions.put("get", new GetAction(services));
-        actions.put("all", new AllAction(services));
-        actions.put("list", new ListAction(services));
-        actions.put("new", new NewAction(services));
-        actions.put("update", new UpdateAction(services));
-        actions.put("delete", new DeleteAction(services));
-        actions.put("updateAttendee", new UpdateAttendeeAction(services));
-        actions.put("updates", new UpdatesAction(services));
-        actions.put("move", new MoveAction(services));
-        actions.put("getAttachment", new GetAttachment(services));
-        actions.put("freeBusy", new FreeBusyAction(services));
-        actions.put("needsAction", new NeedsActionAction(services));
-        actions.put("resolve", new ResolveAction(services));
-        this.actions = actions.build();
+    /**
+     * Initializes a new {@link ResolveAction}.
+     *
+     * @param services A service lookup reference
+     */
+    protected ResolveAction(ServiceLookup services) {
+        super(services);
     }
 
     @Override
-    public AJAXActionService createActionService(String action) throws OXException {
-        return actions.get(action);
+    protected Set<String> getOptionalParameters() {
+        return OPTIONAL_PARAMETERS;
     }
 
     @Override
-    public Collection<? extends AJAXActionService> getSupportedServices() {
-        return java.util.Collections.unmodifiableCollection(actions.values());
+    protected AJAXRequestResult perform(IDBasedCalendarAccess calendarAccess, AJAXRequestData requestData) throws OXException {
+        String eventId = requestData.requireParameter(AJAXServlet.PARAMETER_ID);
+        Event event = calendarAccess.resolveEvent(eventId);
+        if (null == event) {
+            return AJAXRequestResult.EMPTY_REQUEST_RESULT;
+        }
+        return new AJAXRequestResult(event, new Date(event.getTimestamp()), EventResultConverter.INPUT_FORMAT);
     }
 
 }

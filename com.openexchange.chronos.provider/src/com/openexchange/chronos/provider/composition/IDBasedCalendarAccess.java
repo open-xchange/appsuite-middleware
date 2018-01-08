@@ -225,6 +225,17 @@ public interface IDBasedCalendarAccess extends TransactionAware, CalendarParamet
     List<Event> getEventsOfUser(Boolean rsvp, ParticipationStatus[] partStats) throws OXException;
 
     /**
+     * Resolves an event identifier to an event, and returns it in the perspective of the current session's user, i.e. having an
+     * appropriate parent folder identifier assigned.
+     * <p/>
+     * <b>Note:</b> Only events from the internal <i>groupware</i> calendar provider are considered.
+     *
+     * @param eventId The identifier of the event to resolve
+     * @return The resolved event from the user's point of view, or <code>null</code> if not found
+     */
+    Event resolveEvent(String eventId) throws OXException;
+
+    /**
      * Searches for events by one or more queries in the fields {@link EventField#SUMMARY}, {@link EventField#DESCRIPTION} and
      * {@link EventField#CATEGORIES}. The queries are surrounded by wildcards implicitly to follow a <i>contains</i> semantic.
      * Additional, storage-specific search filters can be applied.

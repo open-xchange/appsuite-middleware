@@ -276,6 +276,16 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
     }
 
     @Override
+    public Event resolveEvent(String eventId) throws OXException {
+        try {
+            Event event = getGroupwareAccess(DEFAULT_ACCOUNT).resolveEvent(eventId);
+            return null == event ? null : withUniqueID(event, DEFAULT_ACCOUNT.getAccountId());
+        } catch (OXException e) {
+            throw withUniqueIDs(e, DEFAULT_ACCOUNT.getAccountId());
+        }
+    }
+
+    @Override
     public List<Event> searchEvents(String[] folderIds, List<SearchFilter> filters, List<String> queries) throws OXException {
         if (null == folderIds) {
             return searchEvents(filters, queries);
