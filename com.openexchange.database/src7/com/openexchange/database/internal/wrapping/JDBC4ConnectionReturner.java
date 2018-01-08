@@ -143,6 +143,7 @@ public abstract class JDBC4ConnectionReturner implements Connection, StateAware,
                             try {
                                 statement = con.createStatement();
                                 rs = statement.executeQuery("SELECT 1 AS keep_alive_test");
+                                System.out.println("Performed \"SELECT 1 AS keep_alive_test\" to keep connection alive");
                                 while (rs.next()) {
                                     // Discard
                                 }
@@ -231,6 +232,7 @@ public abstract class JDBC4ConnectionReturner implements Connection, StateAware,
         }
 
         heartBeat.startHeartbeat(timer);
+        state.setHeartbeatEnabled(true);
         return true;
     }
 
@@ -568,7 +570,7 @@ public abstract class JDBC4ConnectionReturner implements Connection, StateAware,
     }
 
     /**
-     * Touches this connection; updates its last-accessed time stanp
+     * Touches this connection; updates its last-accessed time stamp
      */
     public void touch() {
         HeartBeatHelper heartBeat = heartBeatReference.get();
