@@ -123,3 +123,33 @@ url:
 seriesId:
   type: string
   description: The identifier of the event series.
+flags:
+  type: array
+  description: Flags indicating certain aspects of an event.
+  items:
+    type: string
+    enum: ["attachment" "alarms", "scheduled", "organizer", "attendee", "private", "confidential", "transparent", "event_tentative", "event_confirmed", "event_cancelled", "needs_action", "accepted", "declined", "tentative", "delegated", "series", "overridden" ]
+    description: >
+      Event Flags:
+       * `attachment` - The event contains at least one attachment. 
+       * `alarms` - The calendar user has at least one alarm associated with the event.
+       * `scheduled` - Event is a <i>group-scheduled</i> meeting with an organizer.
+       * `organizer` - The calendar user is the <i>organizer<i> of the meeting. 
+       * `attendee` - The calendar user is <i>attendee<i> of the meeting.
+       * `private` - Event is classified <i>private</i>, so is invisible for others. 
+       * `confidential` - Event is classified as <i>confidential</i>, so only start and end time are visible for others.
+       * `transparent` - Event is <i>transparent</i> for the calendar user, i.e. invisible to free/busy time searches.
+       * `event_tentative` - Indicates that the event's overall status is <i>tentative</i>.
+       * `event_confirmed` - Indicates that the event's overall status is <i>definite</i>.
+       * `event_cancelled` - Indicates that the event's overall status is <i>cancelled</i>.
+       * `needs_action` - The calendar user's participation status is <i>needs action</i>. 
+       * `accepted` - The calendar user's participation status is <i>accepted</i>.
+       * `declined` - The calendar user's participation status is <i>declined</i>.
+       * `tentative` - The calendar user's participation status is <i>tentative</i>.
+       * `delegated` - The calendar user's participation status is <i>delegated</i>.
+       * `series` - The event represents the <i>master</i> of a recurring event series, or an expanded (regular) occurrence of a series. 
+       * `overridden` - The event represents an exception / overridden instance of a recurring event series.
+relatedTo:
+  type: string
+  description: The relationship between this and other events.
+      

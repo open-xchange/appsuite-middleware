@@ -1810,7 +1810,7 @@ public class CalendarUtils {
         if (isSeriesMaster(event)) {
             flags.add(EventFlag.SERIES);
         } else if (isSeriesException(event)) {
-            flags.add(EventFlag.EXCEPTION);
+            flags.add(EventFlag.OVERRIDDEN);
         }
         return flags;
     }

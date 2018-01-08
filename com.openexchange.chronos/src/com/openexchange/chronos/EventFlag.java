@@ -60,96 +60,75 @@ public enum EventFlag {
     /**
      * The event contains at least one attachment.
      */
-    ATTACHMENTS(1 << 1),
+    ATTACHMENTS,
     /**
      * The calendar user has at least one alarm associated with the event.
      */
-    ALARMS(1 << 2),
+    ALARMS,
     /**
      * Event is a <i>group-scheduled</i> meeting with an organizer.
      */
-    SCHEDULED(1 << 3),
+    SCHEDULED,
     /**
      * The calendar user is the <i>organizer<i> of the meeting.
      */
-    ORGANIZER(1 << 4),
+    ORGANIZER,
     /**
      * The calendar user is <i>attendee<i> of the meeting.
      */
-    ATTENDEE(1 << 5),
+    ATTENDEE,
     /**
      * Event is classified <i>private</i>, so is invisible for others.
      */
-    PRIVATE(1 << 8),
+    PRIVATE,
     /**
      * Event is classified as <i>confidential</i>, so only start and end time are visible for others.
      */
-    CONFIDENTIAL(1 << 9),
+    CONFIDENTIAL,
     /**
      * Event is <i>transparent</i> for the calendar user, i.e. invisible to free/busy time searches.
      */
-    TRANSPARENT(1 << 10),
+    TRANSPARENT,
     /**
      * Indicates that the event's overall status is <i>tentative</i>.
      */
-    EVENT_TENTATIVE(1 << 11),
+    EVENT_TENTATIVE,
     /**
      * Indicates that the event's overall status is <i>definite</i>.
      */
-    EVENT_CONFIRMED(1 << 12),
+    EVENT_CONFIRMED,
     /**
      * Indicates that the event's overall status is <i>cancelled</i>.
      */
-    EVENT_CANCELLED(1 << 13),
+    EVENT_CANCELLED,
     /**
      * The calendar user's participation status is <i>needs action</i>.
      */
-    NEEDS_ACTION(1 << 15),
+    NEEDS_ACTION,
     /**
      * The calendar user's participation status is <i>accepted</i>.
      */
-    ACCEPTED(1 << 16),
+    ACCEPTED,
     /**
      * The calendar user's participation status is <i>declined</i>.
      */
-    DECLINED(1 << 17),
+    DECLINED,
     /**
      * The calendar user's participation status is <i>tentative</i>.
      */
-    TENTATIVE(1 << 18),
+    TENTATIVE,
     /**
      * The calendar user's participation status is <i>delegated</i>.
      */
-    DELEGATED(1 << 19),
+    DELEGATED,
     /**
      * The event represents the <i>master</i> of a recurring event series, or an expanded (regular) occurrence of a series.
      */
-    SERIES(1 << 20),
+    SERIES,
     /**
      * The event represents an exception / overridden instance of a recurring event series.
      */
-    EXCEPTION(1 << 21),
+    OVERRIDDEN,
 
     ;
-
-    private final int flag;
-
-    /**
-     * Initializes a new {@link EventFlag}.
-     *
-     * @param flag The flag value
-     */
-    private EventFlag(int flag) {
-        this.flag = flag;
-    }
-
-    /**
-     * Gets the flag value.
-     *
-     * @return The flag value
-     */
-    public int getFlag() {
-        return flag;
-    }
-
 }
