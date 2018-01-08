@@ -60,6 +60,7 @@ import javax.mail.internet.InternetAddress;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.dataobjects.Delegatized;
+import com.openexchange.mail.dataobjects.MailAuthenticityResult;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.SecurityInfo;
@@ -1071,6 +1072,31 @@ public final class UnifiedMailMessage extends MailMessage implements Delegatized
     @Override
     public void removeSecurityResult() {
         delegatee.removeSecurityResult();
+    }
+
+    @Override
+    public void setAuthenticityResult(MailAuthenticityResult authenticationResult) {
+        delegatee.setAuthenticityResult(authenticationResult);
+    }
+
+    @Override
+    public MailAuthenticityResult getAuthenticityResult() {
+        return delegatee.getAuthenticityResult();
+    }
+
+    @Override
+    public boolean hasAuthenticityResult() {
+        return delegatee.hasAuthenticityResult();
+    }
+
+    @Override
+    public boolean containsAuthenticityResult() {
+        return delegatee.containsAuthenticityResult();
+    }
+
+    @Override
+    public void removeAuthenticityResult() {
+        delegatee.removeAuthenticityResult();
     }
 
     @Override

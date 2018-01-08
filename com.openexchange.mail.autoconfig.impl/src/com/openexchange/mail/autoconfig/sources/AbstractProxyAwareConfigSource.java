@@ -49,13 +49,8 @@
 
 package com.openexchange.mail.autoconfig.sources;
 
-import java.net.MalformedURLException;
-import java.net.URL;
-import org.apache.http.HttpHost;
-import org.apache.http.auth.AuthScope;
-import org.apache.http.auth.Credentials;
-import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.impl.client.DefaultHttpClient;
+import java.net.URI;
+import java.net.URISyntaxException;
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.exception.OXException;
@@ -77,6 +72,24 @@ public abstract class AbstractProxyAwareConfigSource extends AbstractConfigSourc
     private static final String PROPERTY_ISPDB_PROXY_LOGIN = "com.openexchange.mail.autoconfig.http.proxy.login";
     private static final String PROPERTY_ISPDB_PROXY_PASSWORD = "com.openexchange.mail.autoconfig.http.proxy.password";
 
+    public static final class ProxyInfo {
+        final URI proxyUrl;
+        final String proxyLogin;
+        final String proxyPassword;
+
+        ProxyInfo(URI proxyUrl, String proxyLogin, String proxyPassword) {
+            super();
+            this.proxyUrl = proxyUrl;
+            this.proxyLogin = proxyLogin;
+            this.proxyPassword = proxyPassword;
+        }
+
+        @Override
+        public String toString() {
+            return proxyUrl.toString();
+        }
+    }
+
     // -------------------------------------------------------------------------------------------------- //
 
     /** The OSGi service look-up */
@@ -95,12 +108,11 @@ public abstract class AbstractProxyAwareConfigSource extends AbstractConfigSourc
     /**
      * Gets the HTTP proxy if configured
      *
-     * @param client The {@link DefaultHttpClient} instance to use
      * @param view The config view
      * @return The HTTP proxy or <code>null</code>
      * @throws OXException If proxy cannot be returned
      */
-    protected HttpHost getHttpProxyIfEnabled(DefaultHttpClient client, ConfigView view) throws OXException {
+    protected ProxyInfo getHttpProxyIfEnabled(ConfigView view) throws OXException {
         ComposedConfigProperty<String> property = view.property(PROPERTY_ISPDB_PROXY, String.class);
         if (!property.isDefined()) {
             return null;
@@ -114,7 +126,7 @@ public abstract class AbstractProxyAwareConfigSource extends AbstractConfigSourc
 
         // Parse & apply proxy settings
         try {
-            URL proxyUrl;
+            URI proxyUrl;
             {
                 String sProxyUrl = Strings.asciiLowerCase(proxy.trim());
                 if (sProxyUrl.startsWith("://")) {
@@ -122,35 +134,27 @@ public abstract class AbstractProxyAwareConfigSource extends AbstractConfigSourc
                 } else if (false == sProxyUrl.startsWith("http://") && false == sProxyUrl.startsWith("https://")) {
                     sProxyUrl = new StringBuilder(sProxyUrl.length() + 7).append("http://").append(sProxyUrl).toString();
                 }
-                proxyUrl = new URL(sProxyUrl);
+                proxyUrl = new URI(sProxyUrl);
             }
 
-            boolean isHttps = proxyUrl.getProtocol().equalsIgnoreCase("https");
-            int prxyPort = proxyUrl.getPort();
-            if (prxyPort == -1) {
-                prxyPort = isHttps ? 443 : 80;
-            }
-
-            HttpHost httpHost = new HttpHost(proxyUrl.getHost(), prxyPort, proxyUrl.getProtocol());
+            String proxyLogin = null;
+            String proxyPassword = null;
 
             ComposedConfigProperty<String> propLogin = view.property(PROPERTY_ISPDB_PROXY_LOGIN, String.class);
             if (propLogin.isDefined()) {
                 ComposedConfigProperty<String> propPassword = view.property(PROPERTY_ISPDB_PROXY_PASSWORD, String.class);
                 if (propPassword.isDefined()) {
-                    String proxyLogin = propLogin.get();
-                    String proxyPassword = propPassword.get();
+                    proxyLogin = propLogin.get();
+                    proxyPassword = propPassword.get();
                     if (false == Strings.isEmpty(proxyLogin) && false == Strings.isEmpty(proxyPassword)) {
                         proxyLogin = proxyLogin.trim();
                         proxyPassword = proxyPassword.trim();
-
-                        Credentials credentials = new UsernamePasswordCredentials(proxyLogin, proxyPassword);
-                        client.getCredentialsProvider().setCredentials(new AuthScope(httpHost.getHostName(), httpHost.getPort()), credentials);
                     }
                 }
             }
 
-            return httpHost;
-        } catch (MalformedURLException e) {
+            return new ProxyInfo(proxyUrl, proxyLogin, proxyPassword);
+        } catch (URISyntaxException e) {
             LOG.warn("Unable to parse proxy URL: {}", proxy, e);
             return null;
         } catch (NumberFormatException e) {

@@ -518,7 +518,7 @@ public class Report implements Serializable {
                 osw.write(getIndentation(--indentationLevel) + (contentContainerType == JsonObjectType.MAP ? "}" : "]") + "\n");
             }
             if (rootAttribute != null && rootAttribute.length() > 0) {
-                osw.write(getIndentation(--indentationLevel) + "},\n");
+                osw.write(getIndentation(--indentationLevel) + "}\n");
             }
         } catch (FileNotFoundException e) {
             LOG.error("Unable to create the .report file", e);

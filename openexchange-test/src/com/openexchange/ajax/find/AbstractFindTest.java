@@ -80,10 +80,7 @@ import com.openexchange.find.facet.Filter;
 import com.openexchange.find.facet.FilterBuilder;
 import com.openexchange.find.facet.Option;
 import com.openexchange.find.facet.SimpleFacet;
-import com.openexchange.session.Session;
 import com.openexchange.test.FolderTestManager;
-import com.openexchange.tools.session.ServerSession;
-import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  * {@link AbstractFindTest}
@@ -98,8 +95,6 @@ public abstract class AbstractFindTest extends AbstractAJAXSession {
 
     protected FolderTestManager folderManager2;
 
-    protected ServerSession session;
-
     /**
      * Default constructor.
      *
@@ -112,7 +107,6 @@ public abstract class AbstractFindTest extends AbstractAJAXSession {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        session = ServerSessionAdapter.valueOf(getClient().getValues().getUserId(), getClient().getValues().getContextId());
         random = new Random();
         client2 = getClient2();
         folderManager2 = new FolderTestManager(client2);

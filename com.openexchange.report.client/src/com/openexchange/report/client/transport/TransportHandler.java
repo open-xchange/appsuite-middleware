@@ -343,7 +343,6 @@ public class TransportHandler {
         clientlogincountyear.put("caldav", clcYear.getCarddav());
 
         retval.put("total", total);
-        retval.put("macdetail", macdetail);
         if (wantsdetails) {
             retval.put("detail", detail);
         }
@@ -357,7 +356,7 @@ public class TransportHandler {
         retval.put("version", version);
         retval.put("clientlogincount", clientlogincount);
         retval.put("clientlogincountyear", clientlogincountyear);
-
+        retval.put("macdetail", macdetail);
         return retval;
     }
 

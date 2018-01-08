@@ -60,24 +60,25 @@ import com.openexchange.i18n.LocalizableStrings;
  */
 public class DriveClientInfoStrings implements LocalizableStrings {
 
-    // Drive Client %1$s on %2$s %3$s
+    // %1$s %2$s on %3$s %4$s
     // E.g. Drive Client 2.4.0 on Windows 10
-    public static final String DRIVE_CLIENT_INFO_WITH_PLATFORM_VERSION = "Drive Client %1$s on %2$s %3$s";
+    public static final String DRIVE_CLIENT_INFO_WITH_PLATFORM_VERSION = "%1$s %2$s on %3$s %4$s";
 
-    // Drive Client %1$s on %2$s
+    // %1$s %2$s on %3$s
     // E.g. Drive Client 2.4.0 on Windows
-    public static final String DRIVE_CLIENT_INFO_WITH_PLATFORM = "Drive Client %1$s on %2$s";
+    public static final String DRIVE_CLIENT_INFO_WITH_PLATFORM = "%1$s %2$s on %3$s";
 
-    // Drive Client on %1$s
+    // %1$s on %2$s
     // E.g. Drive Client on Windows
-    public static final String DRIVE_CLIENT_INFO_WITHOUT_VERSION = "Drive Client on %1$s";
+    public static final String DRIVE_CLIENT_INFO_WITHOUT_VERSION = "%1$s on %2$s";
 
-    // Drive Client %1$s
+    // %1$s %2$s
     // E.g. Drive Client 2.4.0
-    public static final String DRIVE_CLIENT_INFO_WITH_VERSION = "Drive Client %1$s";
+    public static final String DRIVE_CLIENT_INFO_WITH_VERSION = "%1$s %2$s";
 
-    // Drive Client
-    public static final String DRIVE_CLIENT = "Drive Client";
+    // %1$s
+    // E.g. Drive Client
+    public static final String DRIVE_CLIENT = "%1$s";
 
     private DriveClientInfoStrings() {
         super();

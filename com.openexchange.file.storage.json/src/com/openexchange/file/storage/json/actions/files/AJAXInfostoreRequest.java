@@ -821,7 +821,7 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
                 } else {
                     try {
                         ContentType contentType = new ContentType(cts);
-                        if (contentType.startsWith("multipart/") || contentType.containsBoundaryParameter()) {
+                        if (contentType.contains("multipart/") || contentType.containsBoundaryParameter()) {
                             // deny weird MIME types
                             throw FileStorageExceptionCodes.DENIED_MIME_TYPE.create();
                         }

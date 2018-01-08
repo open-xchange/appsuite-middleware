@@ -49,13 +49,13 @@
 
 package com.openexchange.server.ajax.ping;
 
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Map;
+import com.google.common.collect.ImmutableMap;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.exception.OXException;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 
 /**
@@ -65,21 +65,28 @@ import com.openexchange.exception.OXException;
  */
 public class PingAJAXActionFactory implements AJAXActionServiceFactory {
 
-    private static final Collection<String> SUPPORTED_SERVICES = Arrays.asList("ping", "time", "whoami");
-    private final Map<String, AJAXActionService> ACTIONS = new HashMap<String, AJAXActionService>() {{
-        put("ping", new PingAction());
-        put("time", new TimeAction());
-        put("whoami", new WhoAmIAction());
-    }};
+    private final Map<String, AJAXActionService> actions;
+
+    /**
+     * Initializes a new {@link PingAJAXActionFactory}.
+     */
+    public PingAJAXActionFactory() {
+        super();
+        actions = ImmutableMap.of("ping", new PingAction(), "time", new TimeAction(), "whoami", new WhoAmIAction());
+    }
 
     @Override
     public Collection<?> getSupportedServices() {
-        return SUPPORTED_SERVICES;
+        return actions.keySet();
     }
 
     @Override
     public AJAXActionService createActionService(String action) throws OXException {
-        return ACTIONS.get(action);
+        AJAXActionService actionService = null == action ? null : actions.get(action);
+        if (null == actionService) {
+            throw AjaxExceptionCodes.UNKNOWN_ACTION_IN_MODULE.create(action, "system");
+        }
+        return actionService;
     }
 
 }

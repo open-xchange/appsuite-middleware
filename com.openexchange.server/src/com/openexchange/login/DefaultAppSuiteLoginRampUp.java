@@ -228,6 +228,8 @@ public abstract class DefaultAppSuiteLoginRampUp implements LoginRampUpService {
     static void handleException(OXException e, String key, ConcurrentMap<String, OXException> errors) {
         if (OXExceptions.isCategory(Category.CATEGORY_PERMISSION_DENIED, e)) {
             LOG.debug("Permission error during {} ramp-up", key, e);
+        } else if (OXExceptions.isCategory(Category.CATEGORY_USER_INPUT, e)) {
+            LOG.debug("Error during {} ramp-up", key, e);
         } else {
             LOG.error("Error during {} ramp-up", key, e);
         }

@@ -146,7 +146,7 @@ public class LineInputStream extends FilterInputStream {
 	    // .. Insert the byte into our byte buffer
 	    if (--room < 0) { // No room, need to grow.
 		if (buf.length < MAX_INCR)
-		    buf = new byte[buf.length * 2];
+		    buf = new byte[buf.length << 1];
 		else
 		    buf = new byte[buf.length + MAX_INCR];
 		room = buf.length - offset - 1;

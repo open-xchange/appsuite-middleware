@@ -962,7 +962,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
         ResultSet rs = null;
         try {
             con = cache.getReadConnectionForConfigDB();
-            stmt = con.prepareStatement("SELECT c2db.write_db_pool_id,c2db.db_schema,db.url,db.driver,db.login,db.password,db.name,dbc.read_db_pool_id,dbc.weight,dbc.max_units FROM context_server2db_pool c2db JOIN db_pool db ON db.db_pool_id=c2db.write_db_pool_id JOIN db_cluster dbc ON dbc.write_db_pool_id=c2db.write_db_pool_id WHERE c2db.cid=?");
+            stmt = con.prepareStatement("SELECT c2db.write_db_pool_id,c2db.db_schema,db.url,db.driver,db.login,db.password,db.name,dbc.read_db_pool_id,dbc.max_units FROM context_server2db_pool c2db JOIN db_pool db ON db.db_pool_id=c2db.write_db_pool_id JOIN db_cluster dbc ON dbc.write_db_pool_id=c2db.write_db_pool_id WHERE c2db.cid=?");
             stmt.setInt(1, contextId);
             rs = stmt.executeQuery();
             if (!rs.next()) {
@@ -982,7 +982,6 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             if (slaveId > 0) {
                 retval.setRead_id(I(slaveId));
             }
-            retval.setClusterWeight(I(rs.getInt(pos++)));
             retval.setMaxUnits(I(rs.getInt(pos++)));
             return retval;
         } catch (PoolException e) {
@@ -2982,7 +2981,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            stmt = con.prepareStatement("SELECT url,driver,login,password,name,read_db_pool_id,weight,max_units FROM db_pool JOIN db_cluster ON write_db_pool_id=db_pool_id WHERE db_pool_id=?");
+            stmt = con.prepareStatement("SELECT url,driver,login,password,name,read_db_pool_id,max_units FROM db_pool JOIN db_cluster ON write_db_pool_id=db_pool_id WHERE db_pool_id=?");
             stmt.setInt(1, id);
             rs = stmt.executeQuery();
             if (!rs.next()) {
@@ -3002,7 +3001,6 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             if (slaveId > 0) {
                 retval.setRead_id(I(slaveId));
             }
-            retval.setClusterWeight(I(rs.getInt(pos++)));
             retval.setMaxUnits(I(rs.getInt(pos++)));
             return retval;
         } catch (SQLException e) {

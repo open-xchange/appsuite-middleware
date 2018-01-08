@@ -87,6 +87,20 @@ public class Strings {
     }
 
     /**
+     * Checks if given string starts with specified prefix
+     *
+     * @param s The string to check
+     * @param prefix The prefix
+     * @return <code>true</code> if given string starts with specified prefix; otherwise <code>false</code>
+     */
+    public static boolean startsWithAny(String s, String prefix) {
+        if (null == s) {
+            return false;
+        }
+        return null != prefix && s.startsWith(prefix, 0) ? true : false;
+    }
+
+    /**
      * Checks if given string starts with any of specified prefixes
      *
      * @param s The string to check
@@ -100,6 +114,40 @@ public class Strings {
         for (int i = prefixes.length; i-- > 0;) {
             String prefix = prefixes[i];
             if (null != prefix && s.startsWith(prefix, 0)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Checks if given string contains sequence
+     *
+     * @param s The string to check
+     * @param sequence The sequence that might be contained
+     * @return <code>true</code> if given string contains specified sequence; otherwise <code>false</code>
+     */
+    public static boolean containsAny(String s, String sequence) {
+        if (null == s) {
+            return false;
+        }
+        return null != sequence && s.indexOf(sequence, 0) >= 0 ? true : false;
+    }
+
+    /**
+     * Checks if given string contains any of specified sequences
+     *
+     * @param s The string to check
+     * @param sequences The sequences that might be contained
+     * @return <code>true</code> if given string contains any of specified sequences; otherwise <code>false</code>
+     */
+    public static boolean containsAny(String s, String... sequences) {
+        if (null == s) {
+            return false;
+        }
+        for (int i = sequences.length; i-- > 0;) {
+            String sequence = sequences[i];
+            if (null != sequence && s.indexOf(sequence, 0) >= 0) {
                 return true;
             }
         }
@@ -470,6 +518,16 @@ public class Strings {
      */
     public static String[] splitByColon(final String s) {
         return splitBy(s, ':', true);
+    }
+
+    /**
+     * Splits given string by semi-colon separator.
+     *
+     * @param s The string to split
+     * @return The split string
+     */
+    public static String[] splitBySemiColon(final String s) {
+        return splitBy(s, ';', true);
     }
 
     // private static final Pattern P_SPLIT_DOT = Pattern.compile("\\s*\\.\\s*");

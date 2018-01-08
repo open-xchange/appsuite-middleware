@@ -55,6 +55,7 @@ import static com.openexchange.mail.parser.MailMessageParser.generateFilename;
 import static com.openexchange.mail.utils.MailFolderUtility.prepareFullname;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
@@ -73,6 +74,7 @@ import org.json.JSONObject;
 import com.google.common.collect.ImmutableSet;
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.fields.FolderChildFields;
+import com.openexchange.ajax.tools.JSONCoercion;
 import com.openexchange.data.conversion.ical.ICalParser;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
@@ -94,8 +96,12 @@ import com.openexchange.mail.MailPath;
 import com.openexchange.mail.attachment.AttachmentToken;
 import com.openexchange.mail.attachment.AttachmentTokenConstants;
 import com.openexchange.mail.attachment.AttachmentTokenService;
+import com.openexchange.mail.authenticity.MailAuthenticityResultKey;
+import com.openexchange.mail.authenticity.TrustedDomainResultKey;
+import com.openexchange.mail.authenticity.mechanism.MailAuthenticityMechanismResult;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.conversion.InlineImageDataSource;
+import com.openexchange.mail.dataobjects.MailAuthenticityResult;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.SecurityInfo;
@@ -160,6 +166,8 @@ public final class JsonMessageHandler implements MailMessageHandler {
     private static final String SECURITY = MailJSONField.SECURITY.getKey();
     private static final String SECURITY_INFO = MailJSONField.SECURITY_INFO.getKey();
     private static final String TEXT_PREVIEW = MailJSONField.TEXT_PREVIEW.getKey();
+    private static final String AUTHENTICATION_OVERALL_RESULT = MailJSONField.AUTHENTICATION_OVERALL_RESULT.getKey();
+    private static final String AUTHENTICATION_MECHANISM_RESULTS = MailJSONField.AUTHENTICATION_MECHANISM_RESULTS.getKey();
 
     private static final String TRUNCATED = MailJSONField.TRUNCATED.getKey();
     private static final String SANITIZED = "sanitized";
@@ -424,12 +432,21 @@ public final class JsonMessageHandler implements MailMessageHandler {
                 if (mail.containsTextPreview()) {
                     jsonObject.put(TEXT_PREVIEW, mail.getTextPreview());
                 }
+                MailAuthenticityResult mailAuthenticityResult = mail.getAuthenticityResult();
+                jsonObject.put(AUTHENTICATION_OVERALL_RESULT, null == mailAuthenticityResult ? JSONObject.NULL : JsonMessageHandler.authenticationOverallResultToJson(mailAuthenticityResult));
+                jsonObject.put(AUTHENTICATION_MECHANISM_RESULTS, null == mailAuthenticityResult ? JSONObject.NULL : JsonMessageHandler.authenticationMechanismResultsToJson(mailAuthenticityResult));
                 // Guard info
                 if (mail.containsSecurityInfo()) {
-                    jsonObject.put(SECURITY_INFO, securityInfoToJSON(mail.getSecurityInfo()));
+                    SecurityInfo securityInfo = mail.getSecurityInfo();
+                    if (null != securityInfo) {
+                        jsonObject.put(SECURITY_INFO, securityInfoToJSON(securityInfo));
+                    }
                 }
                 if (mail.hasSecurityResult()) {
-                    jsonObject.put(SECURITY, securityResultToJSON(mail.getSecurityResult()));
+                    SecurityResult securityResult = mail.getSecurityResult();
+                    if (null != securityResult) {
+                        jsonObject.put(SECURITY, securityResultToJSON(securityResult));
+                    }
                 }
 
                 this.initialiserSequenceId = mail.getSequenceId();
@@ -489,7 +506,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
     }
 
     /**
-     * Create the JSON representation for this <code>SecurityInfo</code> object.
+     * Creates the JSON representation for specified <code>SecurityInfo</code> instance.
      *
      * @return The JSON representation
      * @throws JSONException If JSON representation cannot be returned
@@ -502,10 +519,79 @@ public final class JsonMessageHandler implements MailMessageHandler {
     }
 
     /**
+     * Creates the JSON representation of the essential information for the specified {@link MailAuthenticityResult} instance.
+     * That is the <code>status</code> and the <code>trustedDomain</code> (if present)
+     * 
+     * @param authenticationResult The authentication result to create the JSON representation for
+     * @return The JSON representation
+     * @throws JSONException If JSON representation cannot be returned
+     */
+    public static JSONObject authenticationOverallResultToJson(MailAuthenticityResult authenticationResult) throws JSONException {
+        if (null == authenticationResult) {
+            return null;
+        }
+
+        JSONObject result = new JSONObject(2);
+        result.put("status", authenticationResult.getStatus().getTechnicalName());
+        if (authenticationResult.getAttribute(TrustedDomainResultKey.TRUSTED_DOMAIN) != null) {
+            result.put(TrustedDomainResultKey.TRUSTED_DOMAIN.getKey(), authenticationResult.getAttribute(TrustedDomainResultKey.TRUSTED_DOMAIN));
+        }
+        return result;
+    }
+
+    /**
+     * Creates the JSON representation for specified <code>MailAuthenticationResult</code> instance.
+     *
+     * @param authenticationResult The authentication result to create the JSON representation for
+     * @return The JSON representation
+     * @throws JSONException If JSON representation cannot be returned
+     */
+    public static JSONObject authenticationMechanismResultsToJson(MailAuthenticityResult authenticityResult) throws JSONException {
+        if (null == authenticityResult) {
+            return null;
+        }
+
+        Map<MailAuthenticityResultKey, Object> attributes = authenticityResult.getAttributes();
+        JSONObject result = new JSONObject(attributes.size());
+        for (MailAuthenticityResultKey key : attributes.keySet()) {
+            if (!key.isVisible()) {
+                continue;
+            }
+            Object object = attributes.get(key);
+            if (object instanceof Collection<?>) {
+                Collection<?> col = (Collection<?>) object;
+                JSONArray array = new JSONArray(col.size());
+                for (Object o : col) {
+                    if (o instanceof MailAuthenticityMechanismResult) {
+                        MailAuthenticityMechanismResult mechResult = (MailAuthenticityMechanismResult) o;
+                        JSONObject mailAuthMechResultJson = new JSONObject();
+                        mailAuthMechResultJson.put("mechanism", mechResult.getMechanism().getTechnicalName());
+                        mailAuthMechResultJson.put("result", mechResult.getResult().getTechnicalName());
+                        mailAuthMechResultJson.put("reason", mechResult.getReason());
+                        for (String k : mechResult.getProperties().keySet()) {
+                            mailAuthMechResultJson.put(k, mechResult.getProperties().get(k));
+                        }
+                        array.put(mailAuthMechResultJson);
+                    } else if (o instanceof Map) {
+                        array.put(JSONCoercion.coerceToJSON(o));
+                    } else {
+                        array.put(o);
+                    }
+                }
+                result.put(key.getKey(), array);
+            } else {
+                result.put(key.getKey(), object);
+            }
+        }
+        result.put("status", authenticityResult.getStatus().getTechnicalName());
+        return result;
+    }
+
+    /**
      * Sets whether to set the exact length of mail parts.
      *
      * @param exactLength <code>true</code> to set the exact length of mail parts; otherwise use mail system's size estimation
-     * @return This {@link JsonMessageHandler} with new behavior applied
+     * @return This {@link JsonMessageHandler} with new behaviour applied
      */
     public JsonMessageHandler setSizePolicy(final SizePolicy sizePolicy) {
         this.sizePolicy = sizePolicy;
@@ -516,7 +602,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
      * Sets whether the HTML part of a <i>multipart/alternative</i> content shall be attached.
      *
      * @param attachHTMLAlternativePart Whether the HTML part of a <i>multipart/alternative</i> content shall be attached
-     * @return This {@link JsonMessageHandler} with new behavior applied
+     * @return This {@link JsonMessageHandler} with new behaviour applied
      */
     public JsonMessageHandler setAttachHTMLAlternativePart(final boolean attachHTMLAlternativePart) {
         this.attachHTMLAlternativePart = attachHTMLAlternativePart;
@@ -527,7 +613,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
      * Sets whether to include raw plain-text in generated JSON object.
      *
      * @param includePlainText <code>true</code> to include raw plain-text; otherwise <code>false</code>
-     * @return This {@link JsonMessageHandler} with new behavior applied
+     * @return This {@link JsonMessageHandler} with new behaviour applied
      */
     public JsonMessageHandler setIncludePlainText(final boolean includePlainText) {
         this.includePlainText = includePlainText;

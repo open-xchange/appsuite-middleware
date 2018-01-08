@@ -558,7 +558,6 @@ public class ImageFormat implements Comparable<ImageFormat> {
 
     static {
         SCALETYPE_DISTANCE_VALUE.put(ScaleType.CONTAIN, Long.valueOf(1));
-        SCALETYPE_DISTANCE_VALUE.put(ScaleType.CONTAIN, Long.valueOf(1));
         SCALETYPE_DISTANCE_VALUE.put(ScaleType.CONTAIN_FORCE_DIMENSION, Long.valueOf(2));
         SCALETYPE_DISTANCE_VALUE.put(ScaleType.COVER, Long.valueOf(4));
         SCALETYPE_DISTANCE_VALUE.put(ScaleType.COVER_AND_CROP, Long.valueOf(5));

@@ -116,6 +116,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,com.openexchange.mail.autoconfig.impl"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,com.openexchange.mail.autoconfig.json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,com.openexchange.mail.attachment.impl"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,com.openexchange.mail.authenticity.impl"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,com.openexchange.mail.categories"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,com.openexchange.mail.oauth"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,com.openexchange.mailmapping"/>

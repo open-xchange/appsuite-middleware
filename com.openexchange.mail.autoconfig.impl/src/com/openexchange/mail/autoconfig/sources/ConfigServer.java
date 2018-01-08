@@ -50,8 +50,10 @@
 package com.openexchange.mail.autoconfig.sources;
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.UnknownHostException;
 import java.util.Arrays;
 import org.apache.http.Header;
 import org.apache.http.HttpHost;
@@ -60,12 +62,12 @@ import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.utils.URLEncodedUtils;
-import org.apache.http.conn.params.ConnRoutePNames;
-import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.InetAddresses;
 import com.openexchange.mail.autoconfig.DefaultAutoconfig;
 import com.openexchange.mail.autoconfig.Autoconfig;
 import com.openexchange.mail.autoconfig.xmlparser.AutoconfigParser;
@@ -102,29 +104,37 @@ public class ConfigServer extends AbstractProxyAwareConfigSource {
             try {
                 url = new URL(sUrl);
             } catch (MalformedURLException e) {
-                LOG.warn("Unable to parse URL: {}", sUrl, e);
+                LOG.warn("Unable to parse URL: {}. Skipping config server source for mail auto-config", sUrl, e);
                 return null;
             }
         }
 
+        boolean isLocalAddress;
+        try {
+            InetAddress inetAddress = InetAddress.getByName(url.getHost());
+            isLocalAddress = InetAddresses.isInternalAddress(inetAddress);
+        } catch (UnknownHostException e) {
+            // IP address of that host could not be determined
+            LOG.warn("Unknown host: {}. Skipping config server source for mail auto-config", url.getHost(), e);
+            return null;
+        }
+
         // New HTTP client
-        DefaultHttpClient httpclient = null;
+        CloseableHttpClient httpclient = null;
         try {
 
             {
                 int readTimeout = 10000;
                 int connecTimeout = 3000;
-                HttpClients.ClientConfig clientConfig = HttpClients.ClientConfig.newInstance().setConnectionTimeout(connecTimeout).setSocketReadTimeout(readTimeout).setUserAgent("Open-Xchange Auto-Config Client");
-                httpclient = HttpClients.getHttpClient(clientConfig);
-            }
+                HttpClients.ClientConfig clientConfig = HttpClients.ClientConfig.newInstance().setConnectionTimeout(connecTimeout).setSocketReadTimeout(readTimeout).setUserAgent("Open-Xchange Auto-Config Client").setDenyLocalRedirect(false == isLocalAddress);
 
-            {
                 ConfigViewFactory configViewFactory = services.getService(ConfigViewFactory.class);
                 ConfigView view = configViewFactory.getView(userId, contextId);
-                HttpHost proxy = getHttpProxyIfEnabled(httpclient, view);
+                ProxyInfo proxy = getHttpProxyIfEnabled(view);
                 if (null != proxy) {
-                    httpclient.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY, proxy);
+                    clientConfig.setProxy(proxy.proxyUrl, proxy.proxyLogin, proxy.proxyPassword);
                 }
+                httpclient = HttpClients.getHttpClient(clientConfig);
             }
 
             HttpHost target = new HttpHost(url.getHost(), -1, url.getProtocol());
@@ -191,7 +201,11 @@ public class ConfigServer extends AbstractProxyAwareConfigSource {
             // shut down the connection manager to ensure
             // immediate deallocation of all system resources
             if (null != httpclient) {
-                httpclient.close(); // Performs 'getConnectionManager().shutdown();'
+                try {
+                    httpclient.close(); // Performs 'getConnectionManager().shutdown();'
+                } catch (Exception e) {
+                    // Ignore
+                }
             }
         }
     }

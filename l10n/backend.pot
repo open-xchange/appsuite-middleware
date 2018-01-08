@@ -990,24 +990,32 @@ msgid "Your device configuration"
 msgstr ""
 
 #. %1$s, %2$s %3$s on %4$s %5$s
-#. E.g. Appsuite UI, Chrome 61 on Windows 10
+#. E.g. App Suite UI, Chrome 61 on Windows 10
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.clientinfo/src/com/openexchange/clientinfo/ClientInfoStrings.java:65
 msgid "%1$s, %2$s %3$s on %4$s %5$s"
 msgstr ""
 
 #. %1$s on %2$s %3$s
-#. E.g. Appsuite UI on Windows 10
+#. E.g. App Suite UI on Windows 10
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.clientinfo/src/com/openexchange/clientinfo/ClientInfoStrings.java:69
 msgid "%1$s on %2$s %3$s"
 msgstr ""
 
 #. %1$s
-#. E.g. Appsuite UI
+#. E.g. App Suite UI
+#. %1$s
+#. E.g. Drive Client
 #. This simple message does not need to be translated. It is used to transport data to the frontend. Just put the same value in it for
 #. all translations or remove it from the PO file.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.clientinfo/src/com/openexchange/clientinfo/ClientInfoStrings.java:73
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.drive.impl/src/com/openexchange/drive/impl/DriveClientInfoStrings.java:81
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/authentication/LoginExceptionMessages.java:94
 msgid "%1$s"
+msgstr ""
+
+#. Microsoft Exchange ActiveSync Client
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.clientinfo/src/com/openexchange/clientinfo/ClientInfoStrings.java:76
+msgid "Microsoft Exchange ActiveSync Client"
 msgstr ""
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.cluster.lock/src/com/openexchange/cluster/lock/internal/ClusterLockExceptionMessages.java:61
@@ -1700,33 +1708,35 @@ msgid ""
 "later."
 msgstr ""
 
-#. Drive Client %1$s on %2$s %3$s
+#. %1$s %2$s on %3$s %4$s
 #. E.g. Drive Client 2.4.0 on Windows 10
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.drive.impl/src/com/openexchange/drive/impl/DriveClientInfoStrings.java:65
-msgid "Drive Client %1$s on %2$s %3$s"
+msgid "%1$s %2$s on %3$s %4$s"
 msgstr ""
 
-#. Drive Client %1$s on %2$s
+#. %1$s %2$s on %3$s
 #. E.g. Drive Client 2.4.0 on Windows
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.drive.impl/src/com/openexchange/drive/impl/DriveClientInfoStrings.java:69
-msgid "Drive Client %1$s on %2$s"
+msgid "%1$s %2$s on %3$s"
 msgstr ""
 
-#. Drive Client on %1$s
+#. %1$s on %2$s
 #. E.g. Drive Client on Windows
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.drive.impl/src/com/openexchange/drive/impl/DriveClientInfoStrings.java:73
-msgid "Drive Client on %1$s"
+msgid "%1$s on %2$s"
 msgstr ""
 
-#. Drive Client %1$s
+#. %1$s %2$s
 #. E.g. Drive Client 2.4.0
+#. The default display name format for contacts without department: <firstname> <lastname>
+#.
+#. * The display of a users given and sur name name in e.g. notification mails (Hello John Doe, ...).
+#. * The placeholders mean $givenname $surname.
+#.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.drive.impl/src/com/openexchange/drive/impl/DriveClientInfoStrings.java:77
-msgid "Drive Client %1$s"
-msgstr ""
-
-#. Drive Client
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.drive.impl/src/com/openexchange/drive/impl/DriveClientInfoStrings.java:80
-msgid "Drive Client"
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/contacts/ContactDisplayNameFormat.java:65
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.notification/src/com/openexchange/notification/NotificationStrings.java:67
+msgid "%1$s %2$s"
 msgstr ""
 
 #. * e.g. "Uploaded with OX Drive (Ottos Laptop)"
@@ -2639,16 +2649,6 @@ msgstr ""
 #. The default display name format for contacts with department: <firstname> <lastname> (department)
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/contacts/ContactDisplayNameFormat.java:62
 msgid "%1$s %2$s (%3$s)"
-msgstr ""
-
-#. The default display name format for contacts without department: <firstname> <lastname>
-#.
-#. * The display of a users given and sur name name in e.g. notification mails (Hello John Doe, ...).
-#. * The placeholders mean $givenname $surname.
-#.
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/contacts/ContactDisplayNameFormat.java:65
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.notification/src/com/openexchange/notification/NotificationStrings.java:67
-msgid "%1$s %2$s"
 msgstr ""
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/contacts/ContactsStrings.java:64
@@ -7935,6 +7935,11 @@ msgstr ""
 msgid ""
 "Your mail transport for %2$s was disabled because of authorization issues. "
 "Please reauthorize the account %5$s to enable it again."
+msgstr ""
+
+#. Missing or invalid authserv-ids.
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/authenticity/MailAuthenticityExceptionMessages.java:63
+msgid "Missing or invalid authserv-ids."
 msgstr ""
 
 #. The default name for a file

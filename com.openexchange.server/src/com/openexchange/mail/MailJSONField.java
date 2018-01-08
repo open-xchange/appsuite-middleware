@@ -217,11 +217,13 @@ public enum MailJSONField {
     ACCOUNT_ID("account_id"),
     /**
      * The original mail ID.
+     * 
      * @since v7.8.0
      */
     ORIGINAL_ID("original_id"),
     /**
      * The original folder ID
+     * 
      * @since v7.8.0
      */
     ORIGINAL_FOLDER_ID("original_folder_id"),
@@ -255,12 +257,20 @@ public enum MailJSONField {
     SECURITY_INFO("security_info"),
     /**
      * A message's text preview
+     * 
      * @since v7.10.0
      */
-    TEXT_PREVIEW("text_preview")
+    TEXT_PREVIEW("text_preview"),
+    /**
+     * The message's authentication overall result (light version).
+     */
+    AUTHENTICATION_OVERALL_RESULT("authentication_overall_result"),
+    /**
+     * The message's authentication mechanism results (heavy version).
+     */
+    AUTHENTICATION_MECHANISM_RESULTS("authentication_mechanism_results"),
 
     ;
-
 
     private final String key;
 

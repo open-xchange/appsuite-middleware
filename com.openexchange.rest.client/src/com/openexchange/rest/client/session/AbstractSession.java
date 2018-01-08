@@ -203,7 +203,7 @@ public abstract class AbstractSession implements Session {
 
     @Override
     public void setRequestTimeout(HttpUriRequest request) {
-        HttpClients.setDefaultRequestTimeout(request);
+        HttpClients.setDefaultRequestTimeout((HttpRequestBase) request);
     }
 
     /**

@@ -414,7 +414,7 @@ public class OXContextMySQLStorageCommon {
             // Decrement filestore counter
             int filestoreId = getFilestoreIdFor(con, contextId);
             if (0 != filestoreId) {
-                stmt = con.prepareStatement("UPDATE contexts_per_filestore SET count=count-1 WHERE filestore_id=?");
+                stmt = con.prepareStatement("UPDATE contexts_per_filestore SET count=count-1 WHERE filestore_id=? AND count>0");
                 stmt.setInt(1, filestoreId);
                 stmt.executeUpdate();
                 closeSQLStuff(stmt);

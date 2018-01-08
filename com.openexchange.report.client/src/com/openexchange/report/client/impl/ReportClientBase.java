@@ -848,16 +848,21 @@ public class ReportClientBase extends AbstractJMXTools {
             JSONObject data = new JSONObject((String) report.get("data"));
             if (data.getBoolean("needsComposition")) {
                 System.out.println("{");
+                int counter = 0;
+                int attributeCount = data.keySet().size();
                 for (String string : data.keySet()) {
+                    counter++;
+                    boolean endReached = counter == attributeCount;
                     if (data.get(string) instanceof String) {
-                        System.out.println("  \"" + string + "\" : \"" + data.get(string) + "\",");
+                        System.out.println("  \"" + string + "\" : \"" + data.get(string) + "\"" + (endReached ? "" : ","));
                     } else if (data.get(string) instanceof Boolean) {
-                        System.out.println("  \"" + string + "\" : " + data.get(string) + ",");
+                        System.out.println("  \"" + string + "\" : " + data.get(string) + (endReached ? "" : ","));
                     } else if (string.equals("macdetail") || string.equals("oxaas")) {
                         ReportPrinting.printStoredReportContentToConsole((String) report.get("storageFolderPath"), (String) report.get("uuid"));
+                        System.out.println((endReached ? "" : ","));
                     } else {
                         JSONObject obj = (JSONObject) data.get(string);
-                        System.out.println("  \"" + string + "\" : " + obj.toString(2, 1) + ",");
+                        System.out.println("  \"" + string + "\" : " + obj.toString(2, 1) + (endReached ? "" : ","));
                     }
                 }
                 System.out.println("}");

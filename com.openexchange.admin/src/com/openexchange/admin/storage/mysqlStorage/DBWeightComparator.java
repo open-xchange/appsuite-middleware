@@ -81,7 +81,7 @@ public class DBWeightComparator implements Comparator<DatabaseHandle> {
     }
 
     private int getAverageUnits(final DatabaseHandle db) {
-        return totalUnits * i(db.getClusterWeight()) / totalWeight;
+        return totalUnits * 100 / totalWeight;
     }
 
     private boolean isFull(final DatabaseHandle db) {

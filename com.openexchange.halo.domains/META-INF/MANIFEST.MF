@@ -1,0 +1,16 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Halo Trusted Domains
+Bundle-SymbolicName: com.openexchange.halo.domains
+Bundle-Version: 7.10.0
+Bundle-Activator: com.openexchange.halo.domains.osgi.Activator
+Bundle-Vendor: OX Software GmbH
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Import-Package: com.openexchange.ajax.container,
+ com.openexchange.ajax.fileholder,
+ com.openexchange.exception,
+ com.openexchange.halo,
+ com.openexchange.mail.authenticity.impl.handler.domain,
+ com.openexchange.osgi,
+ com.openexchange.session,
+ org.osgi.framework

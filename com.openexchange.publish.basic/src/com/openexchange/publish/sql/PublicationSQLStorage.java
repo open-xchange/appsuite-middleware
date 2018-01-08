@@ -402,9 +402,8 @@ public class PublicationSQLStorage implements PublicationStorage {
 
     @Override
     public void deletePublicationsInContext(final int contextId, final Context ctx) throws OXException {
-        Connection writeConnection = null;
+        Connection writeConnection = dbProvider.getWriteConnection(ctx);
         try {
-            writeConnection = dbProvider.getWriteConnection(ctx);
             deleteWhereContextID(contextId, ctx, writeConnection);
         } catch (final SQLException e) {
             throw PublicationErrorMessage.SQL_ERROR.create(e);

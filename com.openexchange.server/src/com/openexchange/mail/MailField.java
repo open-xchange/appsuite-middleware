@@ -177,29 +177,42 @@ public enum MailField {
     SUPPORTS_CONTINUATION(null),
     /**
      * The original mail ID.
+     * 
      * @since v7.8.0
      */
     ORIGINAL_ID(MailListField.ORIGINAL_ID),
     /**
      * The original folder ID
+     * 
      * @since v7.8.0
      */
     ORIGINAL_FOLDER_ID(MailListField.ORIGINAL_FOLDER_ID),
     /**
      * The attachment name.
+     * 
      * @since v7.8.2
      */
     ATTACHMENT_NAME(null),
     /**
      * The message's text preview only if immediately available
+     * 
      * @since v7.10.0
      */
     TEXT_PREVIEW_IF_AVAILABLE(MailListField.TEXT_PREVIEW_IF_AVAILABLE),
     /**
      * The message's text preview; generate it if absent (may be slow)
+     * 
      * @since v7.10.0
      */
-    TEXT_PREVIEW(MailListField.TEXT_PREVIEW)
+    TEXT_PREVIEW(MailListField.TEXT_PREVIEW),
+    /**
+     * The message's authentication overall result (light version).
+     */
+    AUTHENTICATION_OVERALL_RESULT(MailListField.AUTHENTICATION_OVERALL_RESULT),
+    /**
+     * The message's authentication mechanism results (heavy version).
+     */
+    AUTHENTICATION_MECHANISM_RESULTS(MailListField.AUTHENTICATION_MECHANISM_RESULTS),
 
     ;
 
@@ -228,9 +241,7 @@ public enum MailField {
      * ID, FOLDER_ID, CONTENT_TYPE, FROM, TO, CC, BCC, SUBJECT, SIZE, SENT_DATE, RECEIVED_DATE, FLAGS, THREAD_LEVEL,
      * DISPOSITION_NOTIFICATION_TO, PRIORITY, COLOR_LABEL
      */
-    public static final MailField[] FIELDS_LOW_COST = {
-        ID, FOLDER_ID, CONTENT_TYPE, MIME_TYPE, FROM, TO, CC, BCC, SUBJECT, SIZE, SENT_DATE, RECEIVED_DATE, FLAGS, THREAD_LEVEL,
-        DISPOSITION_NOTIFICATION_TO, PRIORITY, COLOR_LABEL };
+    public static final MailField[] FIELDS_LOW_COST = { ID, FOLDER_ID, CONTENT_TYPE, MIME_TYPE, FROM, TO, CC, BCC, SUBJECT, SIZE, SENT_DATE, RECEIVED_DATE, FLAGS, THREAD_LEVEL, DISPOSITION_NOTIFICATION_TO, PRIORITY, COLOR_LABEL };
 
     /**
      * All fields except {@link #BODY} and {@link #FULL}.
@@ -238,9 +249,7 @@ public enum MailField {
      * ID, FOLDER_ID, CONTENT_TYPE, FROM, TO, CC, BCC, SUBJECT, SIZE, SENT_DATE, RECEIVED_DATE, FLAGS, THREAD_LEVEL,
      * DISPOSITION_NOTIFICATION_TO, PRIORITY, COLOR_LABEL, HEADERS
      */
-    public static final MailField[] FIELDS_WO_BODY = {
-        ID, FOLDER_ID, CONTENT_TYPE, MIME_TYPE, FROM, TO, CC, BCC, SUBJECT, SIZE, SENT_DATE, RECEIVED_DATE, FLAGS, THREAD_LEVEL,
-        DISPOSITION_NOTIFICATION_TO, PRIORITY, COLOR_LABEL, HEADERS };
+    public static final MailField[] FIELDS_WO_BODY = { ID, FOLDER_ID, CONTENT_TYPE, MIME_TYPE, FROM, TO, CC, BCC, SUBJECT, SIZE, SENT_DATE, RECEIVED_DATE, FLAGS, THREAD_LEVEL, DISPOSITION_NOTIFICATION_TO, PRIORITY, COLOR_LABEL, HEADERS };
 
     private final MailListField listField;
 

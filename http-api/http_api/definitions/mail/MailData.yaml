@@ -11,5 +11,55 @@ properties:
     description: Information regarding signature verification or decryption type after processed by Guard
     items:
       $ref: "#/definitions/GuardSecurityResult"
+  authentication_results:
+    type: object
+    description: Informations about the authenticity of the sender domain.
+    title: AuthenticationResult
+    properties:
+      mailAuthenticityMechanismResults:
+        type: array
+        description: A list of individual mechanism results
+        items:
+          type: object
+          title: MechanismResult
+          description: The result of a single mechanism
+          properties:
+            result:
+              type: string
+              description: The result of the mechanism
+            mechanism:
+              type: string
+              description: The identifier of the mechanism
+            reason:
+              type: string
+              description: The (optional) reason of the status
+      unknownMailAuthenticityMechanismResults:
+        type: array
+        description: A list of unknown mechanisms
+        items:
+          type: object
+          title: MechanismResult
+          description: The result of a single mechanism
+          properties:
+            result:
+              type: string
+              description: The result of the mechanism
+            mechanism:
+              type: string
+              description: The identifier of the mechanism
+            reason:
+              type: string
+              description: The (optional) reason of the status
+      image:
+        type: string
+        description: In case the result is positive and the domain of the sender is a trusted domain and also contains a image this field contains a link to this image.
+      fromDomain:
+        type: string
+        description: The from domain
+      status:
+        type: string
+        description: The overall authenticity status
+        enum: ["pass", "neutral","fail","not-analyzed"]
+
 
 

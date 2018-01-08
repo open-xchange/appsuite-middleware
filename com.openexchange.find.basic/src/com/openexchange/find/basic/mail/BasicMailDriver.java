@@ -390,7 +390,7 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
         for (Contact contact : contacts) {
             String valueId = prepareFacetValueId("contact", session.getContextId(), Integer.toString(contact.getObjectID()));
             List<String> queries = extractMailAddessesFrom(contact);
-            builder.addValue(buildContactValue(valueId, queries, DisplayItems.convert(contact, session), toAsDefaultOption, session));
+            builder.addValue(buildContactValue(valueId, queries, DisplayItems.convert(contact, session.getUser().getLocale()), toAsDefaultOption, session));
             valuesAdded = true;
         }
 

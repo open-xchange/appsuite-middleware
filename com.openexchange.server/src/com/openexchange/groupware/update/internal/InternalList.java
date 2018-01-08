@@ -646,6 +646,9 @@ public final class InternalList {
         // Extends uidl column of the pop3_storage_ids and pop3_storage_deleted tables
         list.add(new com.openexchange.groupware.update.tasks.POP3ExtendUidlTask());
 
+        // Drops rather needless foreign key from "object_use_count" table
+        list.add(new com.openexchange.groupware.update.tasks.DropForeignKeyFromObjectUseCountTable());
+
         return list.toArray(new UpdateTaskV2[list.size()]);
     }
 

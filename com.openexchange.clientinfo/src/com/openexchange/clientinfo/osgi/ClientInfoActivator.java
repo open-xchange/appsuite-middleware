@@ -52,9 +52,11 @@ package com.openexchange.clientinfo.osgi;
 import com.openexchange.clientinfo.ClientInfoProvider;
 import com.openexchange.clientinfo.ClientInfoService;
 import com.openexchange.clientinfo.impl.ClientInfoServiceImpl;
+import com.openexchange.clientinfo.impl.USMEASClientInfoProvider;
 import com.openexchange.clientinfo.impl.WebClientInfoProvider;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.ServiceSet;
+import com.openexchange.serverconfig.ServerConfigService;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.uadetector.UserAgentParser;
 
@@ -69,7 +71,7 @@ public class ClientInfoActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { UserAgentParser.class, SessiondService.class };
+        return new Class<?>[] { UserAgentParser.class, SessiondService.class, ServerConfigService.class };
     }
 
     @Override
@@ -79,6 +81,7 @@ public class ClientInfoActivator extends HousekeepingActivator {
         ClientInfoService service = new ClientInfoServiceImpl(set);
         track(ClientInfoProvider.class, set);
         registerService(ClientInfoService.class, service);
+        registerService(ClientInfoProvider.class, new USMEASClientInfoProvider(), 15);
         registerService(ClientInfoProvider.class, new WebClientInfoProvider(), 20);
         openTrackers();
     }

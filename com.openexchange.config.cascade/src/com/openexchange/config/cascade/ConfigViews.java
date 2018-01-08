@@ -140,6 +140,20 @@ public class ConfigViews {
      * @return The defined property value or <code>def</code> (if not defined)
      * @throws OXException If defined property cannot be returned
      */
+    public static long getDefinedLongPropertyFrom(String propertyName, long def, ConfigView view) throws OXException {
+        ComposedConfigProperty<Long> property = view.property(propertyName, long.class);
+        return property.isDefined() ? property.get().longValue() : def;
+    }
+
+    /**
+     * Gets the defined property from given view associated with specified name.
+     *
+     * @param propertyName The property name
+     * @param def The default value to return
+     * @param view The config view to grab from
+     * @return The defined property value or <code>def</code> (if not defined)
+     * @throws OXException If defined property cannot be returned
+     */
     public static String getDefinedStringPropertyFrom(String propertyName, String def, ConfigView view) throws OXException {
         ComposedConfigProperty<String> property = view.property(propertyName, String.class);
         return property.isDefined() ? property.get() : def;
