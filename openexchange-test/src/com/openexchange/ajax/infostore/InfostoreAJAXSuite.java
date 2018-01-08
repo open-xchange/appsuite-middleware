@@ -13,7 +13,6 @@ import com.openexchange.ajax.infostore.test.CreateAndDeleteInfostoreTest;
 import com.openexchange.ajax.infostore.test.CreateFileWithIllegalCharactersTest;
 import com.openexchange.ajax.infostore.test.InfostoreObjectCountTest;
 import com.openexchange.ajax.infostore.test.TrashTest;
-import com.openexchange.ajax.infostore.test.TryAddVersionTest;
 import com.openexchange.ajax.infostore.test.ZipDocumentsTest;
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -52,7 +51,6 @@ public class InfostoreAJAXSuite extends TestSuite {
         tests.addTestSuite(AppendDocumentTest.class);
         tests.addTestSuite(Bug44622Test.class);
         tests.addTestSuite(Bug44891Test.class);
-        tests.addTestSuite(TryAddVersionTest.class);
         return tests;
     }
 }

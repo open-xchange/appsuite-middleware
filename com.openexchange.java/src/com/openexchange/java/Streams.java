@@ -303,18 +303,25 @@ public class Streams {
             return new byte[0];
         }
         if (is instanceof UnsynchronizedByteArrayInputStream) {
-            final UnsynchronizedByteArrayInputStream ubais = (UnsynchronizedByteArrayInputStream) is;
-            final byte[] buf = ubais.getBuf();
-            final int pos = ubais.getPosition();
-            final int len = ubais.getCount() - pos;
-            final byte[] newbuf = new byte[len];
+            UnsynchronizedByteArrayInputStream ubais = (UnsynchronizedByteArrayInputStream) is;
+            byte[] buf = ubais.getBuf();
+            int pos = ubais.getPosition();
+            int len = ubais.getCount() - pos;
+            byte[] newbuf = new byte[len];
             System.arraycopy(buf, pos, newbuf, 0, len);
             return newbuf;
         }
         try {
-            final ByteArrayOutputStream bos = newByteArrayOutputStream(4096);
-            final int buflen = 2048;
-            final byte[] buf = new byte[buflen];
+            // Check first byte
+            int check = is.read();
+            if (check < 0) {
+                return new byte[0];
+            }
+
+            ByteArrayOutputStream bos = newByteArrayOutputStream(4096);
+            bos.write(check);
+            int buflen = 2048;
+            byte[] buf = new byte[buflen];
             for (int read; (read = is.read(buf, 0, buflen)) > 0;) {
                 bos.write(buf, 0, read);
             }
