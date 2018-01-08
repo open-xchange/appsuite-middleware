@@ -127,17 +127,7 @@ public class UpgradeSchemata extends UtilAbstraction {
      */
     @SuppressWarnings("unused")
     public static void main(String args[]) {
-        //new UpgradeSchemata(args);
-        Comparator<String> comparator = (s1, s2) -> {
-            Integer su1 = Integer.parseInt(s1.substring(s1.indexOf('_') + 1));
-            Integer su2 = Integer.parseInt(s2.substring(s2.indexOf('_') + 1));
-            return su1.compareTo(su2);
-        };
-        String[] databases = new String[] { "oxdatabase_53", "oxdatabase_6", "oxdatabase_5", "oxdatabase_1", "oxdatabase_100", "oxdatabase_56", "oxdatabase_105", "oxdatabase_1" };
-        Arrays.sort(databases, comparator);
-        for (int i = 0; i < databases.length; i++) {
-            System.out.println(databases[i]);
-        }
+        new UpgradeSchemata(args);
     }
 
     /**
