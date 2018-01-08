@@ -356,7 +356,18 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
     }
 
     /**
-     * Determine the overall result from the extracted results
+     * <p>Determine the overall result from the extracted results. The overall result
+     * will be determined by checking the results of DMARC, DKIM and SPF (in that order).</p>
+     * 
+     * <p>If multiple results of a specific mechanism are present, then the best result
+     * will be picked for that particular mechanism (according to their natural
+     * {@link Enum} ordering).</p>
+     * 
+     * <p>If the DMARC mechanism result is 'PASS' then the overall status is marked as 'PASS' or
+     * if is 'FAIL' then the overall status is marked as 'FAIL, and no further action is performed.</p>
+     * 
+     * <p>If the DMARC mechanism is other than 'PASS' or 'FAIL' then DKIM and SPF are checked and
+     * the overall status is determined in respect to their results.</p>
      *
      * @param overallResult The overall {@link MailAuthenticityResult}
      * @param results A {@link List} with the results of the known mechanisms
@@ -443,7 +454,14 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
     }
 
     /**
-     * Check the DKIM best of result and determine the overall status
+     * <p>Check the DKIM best of result and set the overall status.</p>
+     * 
+     * <p>If the DKIM status is either 'PERMFAIL' or 'FAIL' then the DKIM mechanism is
+     * considered to have failed, thus the overall status is set accordingly to 'FAIL'.</p>
+     * 
+     * <p>If the DKIM status is set to 'PASS', then the overall status will be set to
+     * either 'PASS' or 'NEUTRAL' depending on whether there is a domain match ('PASS'
+     * in case of a domain match).</p>
      *
      * @param overallResult The overall {@link MailAuthenticityResult}
      * @param bestOfDKIM The best of DKIM {@link MailAuthenticityMechanismResult}
@@ -470,7 +488,19 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
     }
 
     /**
-     * Check the SPF best of result and determine the overall status
+     * <p>Check the SPF best of result and set the overall status.</p>
+     * 
+     * <p>If the SPF status is either 'PERMERROR' or 'FAIL' then the SPF mechanism is
+     * considered to have failed, thus the overall status is set accordingly to 'FAIL'.</p>
+     * 
+     * <p>If the SPF status is either 'SOFTFAIL', or 'TEMPERROR', or 'NONE', or 'NEUTRAL'
+     * then the overall status is set to either 'NEUTRAL' or 'FAIL' depending on whether
+     * there is a domain match ('NEUTRAL' in case of a domain match).</p>
+     * 
+     * <p>On the other hand, if the SPF status is set to 'PASS' then the overall status
+     * is set to either 'NEUTRAL' or 'FAIL' depending on whether DKIM failed and there is
+     * a domain match ('NEUTRAL' in case of a domain match), or to either 'PASS' or 'NEUTRAL'
+     * if DKIM passed and there is a domain match ('PASS' in case of a domain match).</p>
      *
      * @param overallResult The overall {@link MailAuthenticityResult}
      * @param bestOfSPF The best of SPF {@link MailAuthenticityMechanismResult}
