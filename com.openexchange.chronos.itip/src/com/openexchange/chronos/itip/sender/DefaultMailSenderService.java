@@ -306,7 +306,10 @@ public class DefaultMailSenderService implements MailSenderService {
         if (method != null) {
             export.setMethod(method);
         }
-        export.add(mail.getMessage().getEvent());
+        Event event = mail.getMessage().getEvent();
+        if (null != event) {
+            export.add(event);
+        }
         for (Event excpetion : mail.getMessage().exceptions()) {
             export.add(excpetion);
         }
@@ -374,7 +377,10 @@ public class DefaultMailSenderService implements MailSenderService {
         if (method != null) {
             export.setMethod(method);
         }
-        export.add(mail.getMessage().getEvent());
+        Event event = mail.getMessage().getEvent();
+        if (null != event) {
+            export.add(event);
+        }
         for (Event excpetion : mail.getMessage().exceptions()) {
             export.add(excpetion);
         }
