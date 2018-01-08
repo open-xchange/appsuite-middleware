@@ -87,10 +87,10 @@ public class DMARCMailAuthenticityMechanismParser extends AbstractMailAuthentici
      * @see com.openexchange.mail.authenticity.impl.core.AbstractMailAuthenticityMechanismParser#createResult(java.lang.String, com.openexchange.mail.authenticity.mechanism.AuthenticityMechanismResult, java.lang.String, boolean, java.util.Map)
      */
     @Override
-    MailAuthenticityMechanismResult createResult(String domain, AuthenticityMechanismResult mechResult, String mechanismName, boolean domainMismatch, Map<String, String> attributes) {
+    MailAuthenticityMechanismResult createResult(String domain, AuthenticityMechanismResult mechResult, String mechanismName, boolean domainMatch, Map<String, String> attributes) {
         DMARCAuthMechResult result = new DMARCAuthMechResult(domain, (DMARCResult) mechResult);
         result.setReason(extractComment(mechanismName));
-        result.setDomainMatch(!domainMismatch);
+        result.setDomainMatch(domainMatch);
         result.addProperty("from_domain", result.getDomain());
         return result;
     }
