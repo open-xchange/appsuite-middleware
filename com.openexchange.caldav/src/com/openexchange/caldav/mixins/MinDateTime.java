@@ -105,10 +105,10 @@ public class MinDateTime extends SingleXMLPropertyMixin {
         if (null == minDateTime) {
             String value = null;
             try {
-                value = factory.getConfigValue("com.openexchange.caldav.interval.start", "one_month");
+                value = factory.getConfigValue("com.openexchange.caldav.interval.start", "0");
             } catch (OXException e) {
-                org.slf4j.LoggerFactory.getLogger(MinDateTime.class).warn("falling back to 'month' as interval end", e);
-                value = "month";
+                org.slf4j.LoggerFactory.getLogger(MinDateTime.class).warn("falling back to '0' as interval end", e);
+                value = "0";
             }
             /*
              * try numerical value

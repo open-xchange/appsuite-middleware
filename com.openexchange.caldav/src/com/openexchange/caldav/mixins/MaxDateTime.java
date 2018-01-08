@@ -105,10 +105,10 @@ public class MaxDateTime extends SingleXMLPropertyMixin {
         if (null == maxDateTime) {
             String value = null;
             try {
-                value = factory.getConfigValue("com.openexchange.caldav.interval.end", "one_year");
+                value = factory.getConfigValue("com.openexchange.caldav.interval.end", "0");
             } catch (OXException e) {
-                org.slf4j.LoggerFactory.getLogger(MaxDateTime.class).warn("falling back to 'one_year' as interval end", e);
-                value = "one_year";
+                org.slf4j.LoggerFactory.getLogger(MaxDateTime.class).warn("falling back to '0' as interval end", e);
+                value = "0";
             }
             /*
              * try numerical value
