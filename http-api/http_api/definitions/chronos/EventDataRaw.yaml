@@ -13,12 +13,21 @@ timestamp:
   format: int64
   description: The timestamp of the event.
   readOnly: true
+categories:
+  type: array
+  description: An array of categories.
+  items:
+    type: string
+    description: A category.
+filename:
+  type: string
+  description:  The filename of the event.
 uid:
   type: string
-  description: the universal identifier.
+  description: The universal identifier of the event.
 description:
   type: string
-  description: The description.
+  description: The event's description.
 attendees:
   type: array
   description: The attendees of the event.
@@ -47,7 +56,7 @@ id:
   description: The identifier of the event.
 class:
   type: string
-  description: The class of the event.
+  description: The classification of the event.
 organizer:
     $ref: "#/definitions/CalendarUser"
     description: The organizer of the event.
@@ -57,9 +66,6 @@ transp:
   enum: 
     - OPAQUE
     - TRANSPARENT
-allDay:
-  type: boolean
-  description: A flag indicating an all day event.
 color: 
   type: string
   description: The color of the even as a css3 color definition.
@@ -123,6 +129,12 @@ url:
 seriesId:
   type: string
   description: The identifier of the event series.
+status: 
+  type: string
+  description: The status of the event.
+location:
+  type: string
+  description: The location of the event.
 flags:
   type: array
   description: Flags indicating certain aspects of an event.

@@ -87,7 +87,7 @@ public class ColumnIDs {
      */
     static final int CREATED = FolderChildObject.CREATION_DATE;
     /**
-     * The column identifier denoting the user identifier of the event's creator.
+     * The column identifier denoting the calendar user of the event's creator.
      */
     static final int CREATED_BY = FolderChildObject.CREATED_BY;
     /**
@@ -95,13 +95,13 @@ public class ColumnIDs {
      */
     static final int LAST_MODIFIED = FolderChildObject.LAST_MODIFIED;
     /**
-     * The column identifier denoting the identifier of the user who last modified the event.
+     * The column identifier denoting the calendar user who last modified the event.
      */
     static final int MODIFIED_BY = FolderChildObject.MODIFIED_BY;
     /**
-     * The column identifier denoting the identifier of the calendar user of the event.
+     * The column identifier denoting the calendar user of the event.
      */
-    static final int CALENDAR_USER = Appointment.PRINCIPAL_ID;
+    static final int CALENDAR_USER = Appointment.PRINCIPAL;
     /**
      * The column identifier denoting the summary of the event.
      */
@@ -131,21 +131,9 @@ public class ColumnIDs {
      */
     static final int START_DATE = Appointment.START_DATE;
     /**
-     * The column identifier denoting the start timezone of the event.
-     */
-    static final int START_TIMEZONE = Appointment.TIMEZONE;
-    /**
      * The column identifier denoting the end date of the event.
      */
     static final int END_DATE = Appointment.END_DATE;
-    /**
-     * The column identifier denoting the end timezone of the event.
-     */
-    static final int END_TIMEZONE = 262;
-    /**
-     * The column identifier denoting the all-day character of the event.
-     */
-    static final int ALL_DAY = Appointment.FULL_TIME;
     /**
      * The column identifier denoting the time transparency of the event.
      */

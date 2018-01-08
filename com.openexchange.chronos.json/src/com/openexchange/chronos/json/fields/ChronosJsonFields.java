@@ -424,28 +424,6 @@ public class ChronosJsonFields {
          * The value of the extended property. See {@link com.openexchange.chronos.ExtendedProperty#getValue()}
          */
         public static final String VALUE = "value";
-        /**
-         * The parameters of the extended property. See {@link com.openexchange.chronos.ExtendedProperty#getParameters()}
-         */
-        public static final String PARAMETERS = "parameters";
 
-        /**
-         *
-         * {@link Parameter} contains fields of the Parameter json object. See {@link ExtendedProperty#PARAMETERS}
-         *
-         * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
-         * @since v7.10.0
-         */
-        public static final class Parameter {
-
-            /**
-             * The name of the parameter. See {@link com.openexchange.chronos.ExtendedPropertyParameter#getName()}
-             */
-            public static final String NAME = "name";
-            /**
-             * The value of the parameter. See {@link com.openexchange.chronos.ExtendedPropertyParameter#getValue()}
-             */
-            public static final String VALUE = "value";
-        }
     }
 }

@@ -113,10 +113,10 @@ specific field data of single or multiple objects.
 |ID   | Name  |	Type  |	Value  |
 |:----|:------|:------|:-------|
 |200 | title| String | Short description.|
-|201 | start_date| Date | or Time	Inclusive start of the event as Date for tasks and whole day appointments and Time for normal appointments. For sequencies, this date must be part of the sequence, i. e. sequencies always start at this date. (deprecated for tasks since v7.6.1, replaced by start_time and full_time)|
-|202 | end_date| Date | or Time	Exclusive end of the event as Date for tasks and whole day appointments and as Time for normal appointments. (deprecated for tasks since v7.6.1, replaced by end_time and full_time)|
+|201 | start_date| Date or Time | Inclusive start of the event as Date for tasks and whole day appointments and Time for normal appointments. For sequencies, this date must be part of the sequence, i. e. sequencies always start at this date. (deprecated for tasks since v7.6.1, replaced by start_time and full_time)|
+|202 | end_date| Date or Time |	Exclusive end of the event as Date for tasks and whole day appointments and as Time for normal appointments. (deprecated for tasks since v7.6.1, replaced by end_time and full_time)|
 |203 | note| String | Long description.|
-|204 | alarm| Number | or Time	Specifies when to notify the participants as the number of minutes before the start of the appointment (-1 for "no alarm"). For tasks, the Time value specifies the absolute time when the user should be notified.|
+|204 | alarm| Number or Time | Specifies when to notify the participants as the number of minutes before the start of the appointment (-1 for "no alarm"). For tasks, the Time value specifies the absolute time when the user should be notified.|
 |209 | recurrence_type| Number | Specifies the type of the recurrence for a task sequence. See [Task sequence type](#task-sequence-type)|
 |212 | days| Number | Specifies which days of the week are part of a sequence. The value is a bitfield with bit 0 indicating sunday, bit 1 indicating monday and so on. May be present if recurrence_type > 1. If allowed but not present, the value defaults to 127 (all 7 days).|
 |213 | day_in_month| Number | Specifies which day of a month is part of the sequence. Counting starts with 1. If the field "days" is also present, only days selected by that field are counted. If the number is bigger than the number of available days, the last available day is selected. Present if and only if recurrence_type > 2.|
@@ -131,9 +131,9 @@ specific field data of single or multiple objects.
 |224 | organizer| String | Contains the email address of the appointment organizer which is not necessarily an internal user. Not implemented for tasks.|
 |225 | sequence| Number | iCal sequence number. Not implemented for tasks. Must be incremented on update. Will be incremented by the server, if not set.|
 |226 | confirmations| Array | Each element represents a confirming participant as described in [Confirming participant](#confirming-participant). This can be internal and external user. Not implemented for tasks.|
-|227 | organizerId| Number | Contains the userIId of the appointment organizer if it is an internal user. Not implemented for tasks. (Introduced with 6.20.1)|
+|227 | organizerId| Number | Contains the userId of the appointment organizer if it is an internal user. Not implemented for tasks. (Introduced with 6.20.1)|
 |228 | principal| String | Contains the email address of the appointment principal which is not necessarily an internal user. Not implemented for tasks. (Introduced with 6.20.1)|
-|229 | principalId| Number | Contains the userIId of the appointment principal if it is an internal user. Not implemented for tasks. (Introduced with 6.20.1)|
+|229 | principalId| Number | Contains the userId of the appointment principal if it is an internal user. Not implemented for tasks. (Introduced with 6.20.1)|
 |401 | full_time| Boolean | True if the event is a whole day appointment or task, false otherwise.|
 
 ### Task sequence type

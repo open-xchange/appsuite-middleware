@@ -16,3 +16,30 @@ properties:
   partStat:
     type: string
     description: The participation status.
+  role:
+    type: string
+    description: |
+      The type of the attendee.
+      <ul>
+        <li><code>CHAIR</code> - The chair of the calendar entity.</li>
+        <li><code>REQ-PARTICIPANT</code> - A participant whose participation is required.</li>
+        <li><code>OPT-PARTICIPANT</code> - A participant whose participation is optional.</li>
+        <li><code>NON-PARTICIPANT</code> - A participant who is copied for information purposes only.</li>
+      </ul>
+    enum:
+      - CHAIR
+      - REQ-PARTICIPANT
+      - OPT-PARTICIPANT
+      - NON-PARTICIPANT
+  comment: 
+    type: string
+    description: The comment of the attendee.
+  rsvp:
+    type: boolean
+    description: The rsvp expectation of the attendee.
+  member:
+    type: array
+    description: Each element represents the ID of a group or list in which the attendee is a member.
+    items:
+      type: string
+      description: The ID of the group or list.
