@@ -124,6 +124,11 @@ public class IMAPCapabilities extends MailCapabilities {
      */
     public static final String CAP_SEARCH_FILENAME = "SEARCH=X-MIMEPART";
 
+    /**
+     * TEXT PREVIEW: <code>"SNIPPET=FUZZY"</code>
+     */
+    public static final String CAP_TEXT_PREVIEW = "SNIPPET=FUZZY";
+
     /*-
      * IMAP bit constants
      */
@@ -163,6 +168,7 @@ public class IMAPCapabilities extends MailCapabilities {
     private boolean hasSortDisplay;
     private boolean hasFileNameSearch;
     private boolean hasAttachmentSearch;
+    private boolean hasTextPreview;
 
     /**
      * Initializes a new {@link IMAPCapabilities}
@@ -322,6 +328,20 @@ public class IMAPCapabilities extends MailCapabilities {
     @Override
     public boolean hasFileNameSearch() {
         return hasFileNameSearch;
+    }
+
+    /**
+     * Sets whether text previews are supported
+     *
+     * @param hasTextPreview <code>true</code> to signal support for text previews; otherwise <code>false</code>
+     */
+    public void setTextPreview(boolean hasTextPreview) {
+        this.hasTextPreview = hasTextPreview;
+    }
+
+    @Override
+    public boolean hasTextPreview() {
+        return hasTextPreview;
     }
 
     @Override

@@ -90,6 +90,7 @@ import com.openexchange.mail.api.IMailFolderStorageEnhanced;
 import com.openexchange.mail.api.IMailFolderStorageEnhanced2;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
+import com.openexchange.mail.api.MailCapabilities;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.permission.DefaultMailPermission;
@@ -118,6 +119,7 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
     private static final String CAPABILITY_FOLDER_VALIDITY = "FOLDER_VALIDITY";
     private static final String CAPABILITY_FILENAME_SEARCH = "FILENAME_SEARCH";
     private static final String CAPABILITY_ATTACHMENT_SEARCH = "ATTACHMENT_SEARCH";
+    private static final String CAPABILITY_TEXT_PREVIEW = "TEXT_PREVIEW";
 
     /**
      * The mail folder content type.
@@ -316,15 +318,19 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
             }
         }
 
-        this.capabilities = mailConfig.getCapabilities().getCapabilities();
-        if (mailConfig.getCapabilities().hasFileNameSearch()) {
+        MailCapabilities mailCapabilities = mailConfig.getCapabilities();
+        this.capabilities = mailCapabilities.getCapabilities();
+        if (mailCapabilities.hasFileNameSearch()) {
             addSupportedCapabilities(CAPABILITY_FILENAME_SEARCH);
         }
-        if (mailConfig.getCapabilities().hasAttachmentSearch()) {
+        if (mailCapabilities.hasAttachmentSearch()) {
             addSupportedCapabilities(CAPABILITY_ATTACHMENT_SEARCH);
         }
-        if (mailConfig.getCapabilities().hasFolderValidity()) {
+        if (mailCapabilities.hasFolderValidity()) {
             addSupportedCapabilities(CAPABILITY_FOLDER_VALIDITY);
+        }
+        if (mailCapabilities.hasTextPreview()) {
+            addSupportedCapabilities(CAPABILITY_TEXT_PREVIEW);
         }
         if (!mailFolder.isHoldsFolders() && mp.canCreateSubfolders()) {
             // Cannot contain subfolders; therefore deny subfolder creation
