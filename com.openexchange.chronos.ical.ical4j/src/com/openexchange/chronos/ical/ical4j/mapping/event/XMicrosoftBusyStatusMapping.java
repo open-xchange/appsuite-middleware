@@ -93,7 +93,7 @@ public class XMicrosoftBusyStatusMapping extends ICalTextMapping<VEvent, Event> 
                     break;
             }
         }
-        return Transp.TRANSPARENT.equals(value) ? FREE : BUSY;
+        return Transp.TRANSPARENT.getValue().equals(value.getValue()) ? FREE : BUSY;
     }
 
     @Override
