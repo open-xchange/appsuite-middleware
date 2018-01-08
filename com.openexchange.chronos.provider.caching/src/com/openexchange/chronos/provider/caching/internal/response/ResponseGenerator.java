@@ -49,12 +49,9 @@
 
 package com.openexchange.chronos.provider.caching.internal.response;
 
-import java.util.Arrays;
 import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.provider.caching.CachingCalendarAccess;
 import com.openexchange.chronos.service.CalendarParameters;
 
@@ -66,9 +63,7 @@ import com.openexchange.chronos.service.CalendarParameters;
  */
 public class ResponseGenerator {
 
-    private static final List<EventField> DEFAULT_FIELDS = Arrays.asList(EventField.ID, EventField.SERIES_ID, EventField.FOLDER_ID, EventField.RECURRENCE_ID, EventField.TIMESTAMP, EventField.CREATED_BY, EventField.CALENDAR_USER, EventField.CLASSIFICATION, EventField.START_DATE, EventField.END_DATE, EventField.RECURRENCE_RULE, EventField.DELETE_EXCEPTION_DATES, EventField.ORGANIZER, EventField.ALARMS, EventField.ATTENDEES);
-
-    private static final List<EventField> IGNORED_FIELDS = Arrays.asList(EventField.ATTACHMENTS);
+    private static EventField[] IGNORED_FIELDS = { EventField.ATTACHMENTS };
 
     protected final CachingCalendarAccess cachedCalendarAccess;
 
@@ -77,13 +72,9 @@ public class ResponseGenerator {
     }
 
     protected EventField[] getFields(EventField[] requestedFields) {
-        EventField[] requested = null == requestedFields ? EventField.values() : requestedFields;
-
-        Set<EventField> fields = new HashSet<EventField>();
-        fields.addAll(Arrays.asList(requested));
-        fields.addAll(DEFAULT_FIELDS);
-        fields.removeAll(IGNORED_FIELDS);
-        return fields.toArray(new EventField[fields.size()]);
+        EventField[] fields = CalendarUtils.getFields(requestedFields);
+        fields = com.openexchange.tools.arrays.Arrays.remove(fields, IGNORED_FIELDS);
+        return fields;
     }
 
     protected static boolean isResolveOccurrences(CalendarParameters parameters) {

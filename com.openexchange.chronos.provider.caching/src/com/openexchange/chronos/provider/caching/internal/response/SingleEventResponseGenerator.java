@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.provider.caching.internal.response;
 
+import static com.openexchange.chronos.common.CalendarUtils.getFlags;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import java.util.Date;
 import java.util.Iterator;
@@ -95,12 +96,13 @@ public class SingleEventResponseGenerator extends ResponseGenerator {
                 }
 
                 event = storage.getUtilities().loadAdditionalEventData(cachedCalendarAccess.getAccount().getUserId(), event, fields);
+                event.setFlags(getFlags(event, cachedCalendarAccess.getAccount().getUserId()));
+                event.setFolderId(folderId);
                 if (null != recurrenceId) {
                     if (isSeriesMaster(event)) {
                         Event exceptionEvent = storage.getEventStorage().loadException(eventId, recurrenceId, fields);
                         if (null != exceptionEvent) {
                             exceptionEvent = storage.getUtilities().loadAdditionalEventData(cachedCalendarAccess.getAccount().getUserId(), exceptionEvent, fields);
-                            exceptionEvent.setFolderId(folderId);
                             event = exceptionEvent;
                         } else {
                             Iterator<Event> iterator = Services.getService(RecurrenceService.class).iterateEventOccurrences(event, new Date(recurrenceId.getValue().getTimestamp()), null);

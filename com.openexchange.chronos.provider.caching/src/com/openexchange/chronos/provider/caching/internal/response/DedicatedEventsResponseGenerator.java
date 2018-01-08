@@ -50,6 +50,7 @@
 package com.openexchange.chronos.provider.caching.internal.response;
 
 import static com.openexchange.chronos.common.CalendarUtils.find;
+import static com.openexchange.chronos.common.CalendarUtils.getFlags;
 import static com.openexchange.chronos.common.CalendarUtils.getSearchTerm;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import java.util.ArrayList;
@@ -139,6 +140,7 @@ public class DedicatedEventsResponseGenerator extends ResponseGenerator {
             }
             RecurrenceId recurrenceId = eventID.getRecurrenceID();
             event.setFolderId(folderId);
+            event.setFlags(getFlags(event, cachedCalendarAccess.getAccount().getUserId()));
             if (null != recurrenceId) {
                 if (isSeriesMaster(event)) {
                     if (null != calendarStorage.getEventStorage().loadException(event.getId(), recurrenceId, new EventField[] { EventField.ID })) {
@@ -182,7 +184,9 @@ public class DedicatedEventsResponseGenerator extends ResponseGenerator {
         }
         EventField[] fields = getFields(this.cachedCalendarAccess.getParameters().get(CalendarParameters.PARAMETER_FIELDS, EventField[].class));
         SearchOptions searchOptions = new SearchOptions(this.cachedCalendarAccess.getParameters());
-        return calendarStorage.getEventStorage().searchEvents(searchTerm, searchOptions, fields);
+        List<Event> events = calendarStorage.getEventStorage().searchEvents(searchTerm, searchOptions, fields);
+        events = calendarStorage.getUtilities().loadAdditionalEventData(cachedCalendarAccess.getAccount().getUserId(), events, fields);
+        return events;
     }
 
     protected List<EventID> getEventIDs() {

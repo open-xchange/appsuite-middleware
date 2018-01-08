@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.provider.caching.internal.response;
 
+import static com.openexchange.chronos.common.CalendarUtils.getFlags;
 import static com.openexchange.chronos.common.CalendarUtils.getSearchTerm;
 import java.util.Collections;
 import java.util.List;
@@ -106,6 +107,10 @@ public class ChangeExceptionsResponseGenerator extends ResponseGenerator {
                     return Collections.emptyList();
                 }
                 changeExceptions = storage.getUtilities().loadAdditionalEventData(cachedCalendarAccess.getAccount().getUserId(), changeExceptions, fields);
+                for (Event changeException : changeExceptions) {
+                    changeException.setFlags(getFlags(event, cachedCalendarAccess.getAccount().getUserId()));
+                    changeException.setFolderId(folderId);
+                }
                 return changeExceptions;
             }
         }.executeQuery();

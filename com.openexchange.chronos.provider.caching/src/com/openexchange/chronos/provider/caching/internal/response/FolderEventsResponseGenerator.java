@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.provider.caching.internal.response;
 
+import static com.openexchange.chronos.common.CalendarUtils.getFlags;
 import static com.openexchange.chronos.common.CalendarUtils.getSearchTerm;
 import java.util.ArrayList;
 import java.util.List;
@@ -95,6 +96,8 @@ public class FolderEventsResponseGenerator extends ResponseGenerator {
                 List<Event> enhancedEvents = storage.getUtilities().loadAdditionalEventData(cachedCalendarAccess.getAccount().getUserId(), events, fields);
                 List<Event> allEvents = new ArrayList<>();
                 for (Event event : enhancedEvents) {
+                    event.setFlags(getFlags(event, cachedCalendarAccess.getAccount().getUserId()));
+                    event.setFolderId(folderId);
                     if (CalendarUtils.isSeriesMaster(event) && isResolveOccurrences(parameters)) {
                         allEvents.addAll(Lists.newArrayList(Services.getService(RecurrenceService.class).iterateEventOccurrences(event, getFrom(parameters), getUntil(parameters))));
                     } else {
