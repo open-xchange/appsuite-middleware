@@ -58,7 +58,11 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableList;
 import com.openexchange.java.Strings;
 
@@ -132,7 +136,7 @@ public class AllowedAuthServId {
                         }
                         String prefixToAdd = allowdAuthServId.substring(0, allowdAuthServId.length() - 1);
                         boolean add = true;
-                        for (Iterator<String> iter = prefixes.iterator(); add && iter.hasNext(); ) {
+                        for (Iterator<String> iter = prefixes.iterator(); add && iter.hasNext();) {
                             String existentPrefix = iter.next();
                             if (prefixToAdd.startsWith(existentPrefix)) {
                                 // A more generic one already exists
@@ -280,23 +284,28 @@ public class AllowedAuthServId {
         // ----------------------------------------------------------------------
 
         private final Pattern pattern;
-        private final ConcurrentMap<String, Boolean> cache;
+        /**
+         * The regex result time-and-size-based eviction cache (24h, 10.000 elements)
+         */
+        private final LoadingCache<String, Boolean> cache;
 
         private RegExChecker(String wildcardExpression) {
             super();
             this.pattern = Pattern.compile(Strings.wildcardToRegex(wildcardExpression));
-            cache = new ConcurrentHashMap<>();
+            cache = CacheBuilder.newBuilder().expireAfterAccess(24, TimeUnit.HOURS).maximumSize(10000).build(new CacheLoader<String, Boolean>() {
+
+                @Override
+                public Boolean load(String authServId) {
+                    Boolean result = Boolean.valueOf(pattern.matcher(authServId).matches());
+                    cache.put(authServId, result);
+                    return result;
+                }
+            });
         }
 
         @Override
         public boolean allows(String authServId) {
-            Boolean result = cache.get(authServId);
-            if (null == result) {
-                result = Boolean.valueOf(pattern.matcher(authServId).matches());
-                cache.put(authServId, result);
-            }
-            return result.booleanValue();
+            return cache.getUnchecked(authServId).booleanValue();
         }
     }
-
 }
