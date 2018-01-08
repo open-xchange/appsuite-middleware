@@ -215,9 +215,9 @@ public final class QuotedInternetAddress extends InternetAddress {
 
     private static InternetAddress[] parse0(String addresslist, boolean strict) throws AddressException {
         try {
-            return parse(addresslist, strict, false, true);
-        } catch (AddressException e) {
             return parse(addresslist, strict, false, false);
+        } catch (AddressException e) {
+            return parse(addresslist, strict, false, true);
         }
     }
 
@@ -1196,7 +1196,7 @@ public final class QuotedInternetAddress extends InternetAddress {
 
         if (encodedPersonal != null) {
             try {
-                personal = MimeMessageUtility.decodeMultiEncodedHeader(encodedPersonal);
+                personal = init(MimeMessageUtility.decodeMultiEncodedHeader(encodedPersonal));
                 return personal;
             } catch (final Exception ex) {
                 // 1. ParseException: either its an unencoded string or
@@ -1229,7 +1229,7 @@ public final class QuotedInternetAddress extends InternetAddress {
             if (encodedPersonal.length() > 0) {
                 if (null == personal) {
                     try {
-                        personal = MimeUtility.decodeText(encodedPersonal);
+                        personal = init(MimeMessageUtility.decodeMultiEncodedHeader(encodedPersonal));
                     } catch (final Exception ex) {
                         // 1. ParseException: either its an unencoded string or
                         // it can't be parsed

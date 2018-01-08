@@ -53,7 +53,8 @@ import com.openexchange.mail.authenticity.mechanism.AuthenticityMechanismResult;
 
 /**
  * {@link DMARCResult} - Defines the possible results as defined in
- * <a href="https://tools.ietf.org/html/rfc7489#section-11.2">RFC-7489, Section 11.2</a>
+ * <a href="https://tools.ietf.org/html/rfc7489#section-11.2">RFC-7489, Section 11.2</a>.
+ * The ordinal defines the significance of each result.
  * 
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @see <a href="https://tools.ietf.org/html/rfc7489#section-11.2">RFC-7489, Section 11.2</a>
@@ -66,10 +67,10 @@ public enum DMARCResult implements AuthenticityMechanismResult {
      */
     PASS("Pass", "pass"),
     /**
-     * A DMARC policy record was published for the aligned
-     * identifier, and none of the authentication mechanisms passed.
+     * No DMARC policy record was published for the aligned
+     * identifier, or no aligned identifier could be extracted.
      */
-    FAIL("Fail", "fail"),
+    NONE("None", "none"),
     /**
      * A temporary error occurred during DMARC evaluation. A
      * later attempt might produce a final result.
@@ -82,11 +83,10 @@ public enum DMARCResult implements AuthenticityMechanismResult {
      */
     PERMERROR("Permanent Error", "permerror"),
     /**
-     * No DMARC policy record was published for the aligned
-     * identifier, or no aligned identifier could be extracted.
+     * A DMARC policy record was published for the aligned
+     * identifier, and none of the authentication mechanisms passed.
      */
-    NONE("None", "none"),
-    ;
+    FAIL("Fail", "fail");
 
     private final String displayName;
     private final String technicalName;
@@ -107,5 +107,10 @@ public enum DMARCResult implements AuthenticityMechanismResult {
     @Override
     public String getTechnicalName() {
         return technicalName;
+    }
+
+    @Override
+    public int getCode() {
+        return ordinal();
     }
 }

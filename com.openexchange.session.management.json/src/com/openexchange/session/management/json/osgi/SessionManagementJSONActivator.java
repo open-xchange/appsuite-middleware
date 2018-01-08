@@ -71,8 +71,7 @@ public class SessionManagementJSONActivator extends AJAXModuleActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        Services.setServiceLookup(this);
-        registerModule(new SessionManagementActionFactory(), "sessionmanagement");
+        registerModule(new SessionManagementActionFactory(this), "sessionmanagement");
     }
 
 }

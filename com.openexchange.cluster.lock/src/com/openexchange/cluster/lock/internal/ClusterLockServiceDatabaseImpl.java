@@ -104,7 +104,7 @@ public class ClusterLockServiceDatabaseImpl extends AbstractClusterLockServiceIm
         ResultSet resultSet = null;
 
         try {
-            long timeNow = System.nanoTime();
+            long timeNow = System.currentTimeMillis();
             if (acquireClusterLock(clusterTask, timeNow, connection)) {
                 return true;
             }

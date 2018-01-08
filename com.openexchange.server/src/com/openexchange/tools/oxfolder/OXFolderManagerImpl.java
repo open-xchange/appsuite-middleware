@@ -95,6 +95,7 @@ import com.openexchange.exception.OXExceptionConstants;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.folder.FolderDeleteListenerService;
 import com.openexchange.folder.internal.FolderDeleteListenerRegistry;
+import com.openexchange.folderstorage.FolderPermissionType;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.cache.CacheFolderStorage;
 import com.openexchange.groupware.Types;
@@ -121,6 +122,7 @@ import com.openexchange.java.Charsets;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.MailSessionParameterNames;
 import com.openexchange.preferences.ServerUserSetting;
+import com.openexchange.server.impl.ComparedOCLFolderPermissions;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.server.impl.OCLPermission;
@@ -1020,7 +1022,10 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
                 if (containsPermissions) {
                     final List<OCLPermission> permissions = fo.getPermissions();
                     if (permissions != null && !permissions.isEmpty()) {
-                        handDown(fo.getObjectID(), options, permissions, lastModified, alreadyCheckedParents, FolderCacheManager.isEnabled() ? FolderCacheManager.getInstance() : null);
+                        List<OCLPermission> origPermissions = storageObj.getPermissions();
+
+                        ComparedOCLFolderPermissions compPerm = new ComparedOCLFolderPermissions(session, permissions.toArray(new OCLPermission[permissions.size()]), origPermissions.toArray(new OCLPermission[origPermissions.size()]));
+                        handDown(fo.getObjectID(), options, compPerm, lastModified, alreadyCheckedParents, FolderCacheManager.isEnabled() ? FolderCacheManager.getInstance() : null);
                     }
                 }
             } catch (final DataTruncation e) {
@@ -1042,7 +1047,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
         }
     }
 
-    protected void handDown(final int folderId, final int options, final List<OCLPermission> permissions, final long lastModified, final TIntObjectMap<TIntSet> alreadyCheckedParents, final FolderCacheManager cacheManager) throws OXException, SQLException {
+    protected void handDown(final int folderId, final int options, final ComparedOCLFolderPermissions permission, final long lastModified, final TIntObjectMap<TIntSet> alreadyCheckedParents, final FolderCacheManager cacheManager) throws OXException, SQLException {
         final Context ctx = this.ctx;
         final TIntList subfolders = OXFolderSQL.getSubfolderIDs(folderId, writeCon, ctx);
         if (!subfolders.isEmpty()) {
@@ -1053,8 +1058,10 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
                 public boolean execute(final int subfolderId) {
                     try {
                         final FolderObject tmp = new FolderObject(subfolderId);
-                        tmp.setPermissions(permissions);
-                        doUpdate(tmp, options, getFolderFromMaster(subfolderId), lastModified, true, alreadyCheckedParents);  // Calls handDown() for subfolder, as well
+                        FolderObject folderFromMaster = getFolderFromMaster(subfolderId);
+                        List<OCLPermission> mergePermissions = mergePermissionsForHandDown(permission, folderFromMaster.getPermissions(), folderId);
+                        tmp.setPermissions(mergePermissions);
+                        doUpdate(tmp, options, folderFromMaster, lastModified, true, alreadyCheckedParents);  // Calls handDown() for subfolder, as well
                         if (null != cacheManager) {
                             cacheManager.removeFolderObject(subfolderId, ctx);
                         }
@@ -1070,16 +1077,70 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
         }
     }
 
+
+    /**
+     * Merges old and new permissions for hand down
+     *
+     * @param permission The new permissions
+     * @param originalPermissions The original permissions
+     * @param parentId The id of the parent folder
+     */
+    List<OCLPermission> mergePermissionsForHandDown(ComparedOCLFolderPermissions permission, List<OCLPermission> originalPermissions, int parentId) {
+        List<OCLPermission> result = new ArrayList<>(permission.getNewPermissions().size());
+        for (OCLPermission perm : permission.getNewPermissions()) {
+            result.add(perm);
+        }
+        adjustTypeOfInheritedPermissions(result, parentId);
+        for(OCLPermission orig: originalPermissions){
+            if (!containsEntity(orig, permission)) {
+                result.add(orig);
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Checks if the list of permissions contains a permission with the same entity
+     *
+     * @param perm
+     * @param permissions
+     * @return
+     */
+    private boolean containsEntity(OCLPermission perm, ComparedOCLFolderPermissions permission) {
+        for (OCLPermission tmp : permission.getNewPermissions()) {
+            if (tmp.getEntity() == perm.getEntity() && perm.isGroupPermission() == tmp.isGroupPermission()) {
+                return true;
+            }
+        }
+        for (OCLPermission deleted : permission.getRemovedUserPermissions()) {
+            if (deleted.getEntity() == perm.getEntity() && perm.isGroupPermission() == deleted.isGroupPermission()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Ensures that {@link FolderPermissionType#LEGATOR} is handed down as {@link FolderPermissionType#INHERITED}
+     *
+     * @param permissions The new permissions
+     * @param parentId The id of the parent folder
+     */
+    void adjustTypeOfInheritedPermissions(List<OCLPermission> permissions, int parentId) {
+        for (OCLPermission perm : permissions) {
+            if (perm.getSystem() != 1 && perm.getType() == FolderPermissionType.LEGATOR) {
+                perm.setType(FolderPermissionType.INHERITED);
+                perm.setPermissionLegator(String.valueOf(parentId));
+            }
+        }
+    }
+
     private int getFolderTypeFromMaster(int folderId) throws OXException {
         return getFolderFromMaster(folderId, false, false).getType();
     }
 
     private int getFolderOwnerFromMaster(int folderId) throws OXException {
         return getFolderFromMaster(folderId, false, false).getCreatedBy();
-    }
-
-    private boolean hasSubfoldersFromMaster(int folderId) throws OXException {
-        return getFolderFromMaster(folderId, false, false).hasSubfolders();
     }
 
     protected FolderObject getFolderFromMaster(int folderId) throws OXException {

@@ -104,7 +104,10 @@ public abstract class AbstractOAuthTest extends AbstractSmtpAJAXSession {
     @After
     public void tearDown() throws Exception {
         try {
-            oAuthClient.logout();
+            OAuthClient oAuthClient = this.oAuthClient;
+            if (null != oAuthClient) {
+                oAuthClient.logout();
+            }
             unregisterTestClient(clientApp);
         } finally {
             super.tearDown();

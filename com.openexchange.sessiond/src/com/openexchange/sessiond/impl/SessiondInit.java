@@ -53,7 +53,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.Initialization;
-import com.openexchange.sessiond.SessionExceptionCodes;
+import com.openexchange.sessiond.impl.usertype.UserTypeSessiondConfigRegistry;
 import com.openexchange.sessiond.osgi.Services;
 
 /**
@@ -66,15 +66,15 @@ public class SessiondInit implements Initialization {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SessiondInit.class);
 
-    private SessiondConfigInterface config;
-
-    private final AtomicBoolean started = new AtomicBoolean();
-
     private static final SessiondInit singleton = new SessiondInit();
 
     public static SessiondInit getInstance() {
         return singleton;
     }
+
+    // ---------------------------------------------------------------------------------------------
+
+    private final AtomicBoolean started = new AtomicBoolean();
 
     @Override
     public void start() throws OXException {
@@ -86,16 +86,11 @@ public class SessiondInit implements Initialization {
 
         final ConfigurationService conf = Services.getService(ConfigurationService.class);
         if (conf != null) {
-            config = new SessiondConfigImpl(conf);
             LOG.info("Starting Sessiond");
-
-            if (config != null) {
-                final Sessiond sessiond = Sessiond.getInstance(config);
-                sessiond.start();
-                started.set(true);
-            } else {
-                throw SessionExceptionCodes.SESSIOND_CONFIG_EXCEPTION.create();
-            }
+            SessiondConfigInterface config = new SessiondConfigImpl(conf);
+            UserTypeSessiondConfigRegistry registry = new UserTypeSessiondConfigRegistry(conf);
+            SessionHandler.init(config, registry);
+            started.set(true);
         }
     }
 
@@ -105,8 +100,7 @@ public class SessiondInit implements Initialization {
             LOG.error("{} has not been started", SessiondInit.class.getName());
             return;
         }
-        final Sessiond s = Sessiond.getInstance(config);
-        s.close();
+        SessionHandler.close();
         started.set(false);
     }
 

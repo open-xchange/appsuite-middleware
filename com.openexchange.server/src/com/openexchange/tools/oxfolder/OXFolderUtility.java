@@ -73,6 +73,7 @@ import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.capabilities.CapabilitySet;
 import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.FolderPermissionType;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.group.Group;
 import com.openexchange.group.GroupStorage;
@@ -492,7 +493,7 @@ public final class OXFolderUtility {
                     /*
                      * added link, check link target, assigned permissions & "share_links" capability
                      */
-                    if (false == matches(guestInfo.getLinkTarget(), folder)) {
+                    if (permission.getType() == FolderPermissionType.NORMAL && false == matches(guestInfo.getLinkTarget(), folder)) {
                         throw ShareExceptionCodes.NO_MULTIPLE_TARGETS_LINK.create();
                     }
                     if (null == capabilities || false == capabilities.contains("share_links")) {

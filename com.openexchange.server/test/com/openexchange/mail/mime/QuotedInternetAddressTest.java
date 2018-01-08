@@ -70,6 +70,53 @@ public class QuotedInternetAddressTest {
     }
 
     @Test
+    public void testBug56322() throws Exception {
+        InternetAddress addr = new QuotedInternetAddress("=?utf-8?B?KExlcyBHZW50bGVtZW4gZHUgRMOpbcOpbmFnZW1lbnQp?= <enquete@les-gd.com>");
+        assertEquals("Unexpected personal", "(Les Gentlemen du D\u00e9m\u00e9nagement)", addr.getPersonal());
+        assertEquals("Unexpected address", "enquete@les-gd.com", addr.getAddress());
+
+        addr = new QuotedInternetAddress("\"=?utf-8?B?KExlcyBHZW50bGVtZW4gZHUgRMOpbcOpbmFnZW1lbnQp?=\" <enquete@les-gd.com>");
+        assertEquals("Unexpected personal", "(Les Gentlemen du D\u00e9m\u00e9nagement)", addr.getPersonal());
+        assertEquals("Unexpected address", "enquete@les-gd.com", addr.getAddress());
+
+        InternetAddress[] addresses = QuotedInternetAddress.parse("\"=?utf-8?B?KExlcyBHZW50bGVtZW4gZHUgRMOpbcOpbmFnZW1lbnQp?=\" <enquete@les-gd.com>", false);
+        assertNotNull(addresses);
+        assertTrue("Unexpected number of addresses", addresses.length == 1);
+        addr = addresses[0];
+        assertEquals("Unexpected personal", "(Les Gentlemen du D\u00e9m\u00e9nagement)", addr.getPersonal());
+        assertEquals("Unexpected address", "enquete@les-gd.com", addr.getAddress());
+    }
+
+    @Test
+    public void testBug56407() throws Exception {
+        ensureNoWhitespaceOrControl("=?utf-8?b?dGVzdCIgPHBvdHVzQHdoaXRlaG91c2UuZ292Pg==?==?utf-8?Q?=00=0A?=\" <demo@mailsploit.com>");
+        ensureNoWhitespaceOrControl("\"=?utf-8?b?cG90dXNAd2hpdGVob3VzZS5nb3Y=?=\" <demo@mailsploit.com>");
+        ensureNoWhitespaceOrControl("\"=?utf-8?b?cG90dXNAd2hpdGVob3VzZS5nb3YiIDxwb3R1c0B3aGl0ZWhvdXNlLmdvdj4=?==?utf-8?Q?=00=0A?=\" <demo@mailsploit.com>");
+        ensureNoWhitespaceOrControl("\"=?utf-8?b?cG90dXNAd2hpdGVob3VzZS5nb3YiIDx0ZXN0Pg==?==?utf-8?Q?=00=0A?=\" <demo@mailsploit.com>");
+        ensureNoWhitespaceOrControl("\"=?utf-8?b?InRlc3QiIDxwb3R1c0B3aGl0ZWhvdXNlLmdvdj4=?==?utf-8?Q?=0A=00=00=00?=\" <demo@mailsploit.com>");
+        ensureNoWhitespaceOrControl("\"=?utf-8?b?InBvdHVzQHdoaXRlaG91c2UuZ292IiA8dGVzdD4=?==?utf-8?Q?=0A=00=00=00?=\" <demo@mailsploit.com>");
+    }
+
+    private void ensureNoWhitespaceOrControl(String sAddress) {
+        try {
+            QuotedInternetAddress addr = new QuotedInternetAddress(sAddress);
+
+            ensureNoWhitespaceOrControlInString(addr.toString());
+            ensureNoWhitespaceOrControlInString(addr.toUnicodeString());
+            ensureNoWhitespaceOrControlInString(addr.getAddress());
+            ensureNoWhitespaceOrControlInString(addr.getPersonal());
+        } catch (AddressException e) {
+            fail(e.getMessage());
+        }
+    }
+
+    private void ensureNoWhitespaceOrControlInString(String toTest) {
+        assertTrue("Contains null byte, but shouldn't: " + toTest, toTest.indexOf('\0') < 0);
+        assertTrue("Contains CR, but shouldn't: " + toTest, toTest.indexOf('\r') < 0);
+        assertTrue("Contains LF, but shouldn't: " + toTest, toTest.indexOf('\n') < 0);
+    }
+
+    @Test
     public void testBug52107() throws Exception {
         QuotedInternetAddress addr = new QuotedInternetAddress("(just a comment) \"Doe, Jane (JD)\" <doe.jane@domain.de>", true);
         assertEquals("Unexpected personal", "Doe, Jane (JD)", addr.getPersonal());

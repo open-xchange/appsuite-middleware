@@ -77,7 +77,7 @@ public enum MailListField {
     /**
      * Whether message contains attachments (602)
      */
-    ATTACHMENT(602, MailJSONField.HAS_ATTACHMENTS.getKey()),
+    ATTACHMENT(602, MailJSONField.HAS_ATTACHMENTS.getKey()), //FIXME use new approach
     /**
      * From (603)
      */
@@ -170,19 +170,19 @@ public enum MailListField {
     ACCOUNT_ID(653, MailJSONField.ACCOUNT_ID.getKey()),
     /**
      * The original mail ID. (654)
-     * 
+     *
      * @since v7.8.0
      */
     ORIGINAL_ID(654, MailJSONField.ORIGINAL_ID.getKey()),
     /**
      * The original folder ID (655)
-     * 
+     *
      * @since v7.8.0
      */
     ORIGINAL_FOLDER_ID(655, MailJSONField.ORIGINAL_FOLDER_ID.getKey()),
     /**
      * The MIME type information (656)
-     * 
+     *
      * @since v7.8.0
      */
     MIME_TYPE(656, MailJSONField.CONTENT_TYPE.getKey()),
@@ -225,24 +225,32 @@ public enum MailListField {
     DATE(661, MailJSONField.DATE.getKey()),
     /**
      * A message's text preview only if immediately available
-     * 
+     *
      * @since v7.10.0
      */
     TEXT_PREVIEW_IF_AVAILABLE(662, MailJSONField.TEXT_PREVIEW.getKey()),
     /**
      * A message's text preview; generate it if absent (which may be slow)
-     * 
+     *
      * @since v7.10.0
      */
     TEXT_PREVIEW(663, MailJSONField.TEXT_PREVIEW.getKey()),
     /**
-     * The message's authentication overall result (light version).
+     * The message's authentication overall result (light version); maps to <code>"Authentication-Results"</code> header
+     *
+     * @since v7.10.0
      */
-    AUTHENTICATION_OVERALL_RESULT(664, MailJSONField.AUTHENTICATION_OVERALL_RESULT.getKey()),
+    AUTHENTICATION_OVERALL_RESULT(664, MailJSONField.AUTHENTICITY.getKey()),
     /**
-     * The message's authentication mechanism results (heavy version).
+     * The message's authentication mechanism results (heavy version); maps to <code>"Authentication-Results"</code> header
+     *
+     * @since v7.10.0
      */
-    AUTHENTICATION_MECHANISM_RESULTS(665, MailJSONField.AUTHENTICATION_MECHANISM_RESULTS.getKey());
+    AUTHENTICATION_MECHANISM_RESULTS(665, MailJSONField.AUTHENTICITY.getKey()),
+
+    CONTENT_TYPE(666, MailJSONField.CONTENT_TYPE.getKey()),
+
+    ;
 
     private final int field;
     private final String key;

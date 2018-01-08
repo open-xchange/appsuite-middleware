@@ -769,12 +769,15 @@ public class Strings {
         }
     }
 
-    private static final CharsetDecoder UTF8_CHARSET_DECODER;
-    static {
-        final CharsetDecoder utf8Decoder = Charsets.UTF_8.newDecoder();
-        utf8Decoder.onMalformedInput(CodingErrorAction.REPORT);
-        utf8Decoder.onUnmappableCharacter(CodingErrorAction.REPORT);
-        UTF8_CHARSET_DECODER = utf8Decoder;
+    /* In a holder class to defer initialization until needed. */
+    private static class Holder {
+        static final CharsetDecoder UTF8_CHARSET_DECODER;
+        static {
+            final CharsetDecoder utf8Decoder = Charsets.UTF_8.newDecoder();
+            utf8Decoder.onMalformedInput(CodingErrorAction.REPORT);
+            utf8Decoder.onUnmappableCharacter(CodingErrorAction.REPORT);
+            UTF8_CHARSET_DECODER = utf8Decoder;
+        }
     }
 
     /**
@@ -785,7 +788,7 @@ public class Strings {
      */
     public static boolean isUTF8Bytes(final byte[] bytes) {
         try {
-            UTF8_CHARSET_DECODER.decode(ByteBuffer.wrap(bytes));
+            Holder.UTF8_CHARSET_DECODER.decode(ByteBuffer.wrap(bytes));
             return true;
         } catch (final CharacterCodingException e) {
             return false;

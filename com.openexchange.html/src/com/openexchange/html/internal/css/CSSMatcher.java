@@ -277,7 +277,7 @@ public final class CSSMatcher {
                     return false;
                 }
                 if (allowedValue.indexOf('*') >= 0) {
-                    return true;
+                    return value.indexOf('<') < 0 && value.indexOf('>') < 0;
                 }
                 int length = allowedValue.length();
                 for (int k = length, j = 0; k-- > 0; j++) {
@@ -575,8 +575,8 @@ public final class CSSMatcher {
     private static final Pattern SPLIT_COMMA = Pattern.compile(",");
 
     static String prefixBlock(final String match, final String cssPrefix) {
-        if (isEmpty(match)) {
-            return match;
+        if (isEmpty(match) || HtmlServices.containsEventHandler(match)) {
+            return "{";
         }
         if (isEmpty(cssPrefix)) {
             return new StringBuilder(match).append('{').toString();

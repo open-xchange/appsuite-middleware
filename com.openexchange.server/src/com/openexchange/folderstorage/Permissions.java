@@ -164,7 +164,7 @@ public class Permissions {
      * @return The permission instance
      */
     public static Permission createPermission(int entity, boolean isGroup, int permissionBits) {
-        return new DefaultPermission(entity, isGroup, permissionBits);
+        return new BasicPermission(entity, isGroup, permissionBits);
     }
 
 

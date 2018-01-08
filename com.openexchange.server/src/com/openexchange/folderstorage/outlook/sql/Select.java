@@ -63,17 +63,18 @@ import java.util.List;
 import java.util.Locale;
 import java.util.TreeMap;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.BasicPermission;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
+import com.openexchange.folderstorage.FolderPermissionType;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.SortableId;
 import com.openexchange.folderstorage.StorageType;
 import com.openexchange.folderstorage.outlook.OutlookFolder;
-import com.openexchange.folderstorage.outlook.OutlookPermission;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.Collators;
-import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link Select} - SQL to load a virtual folder or its subfolder identifiers.
@@ -120,22 +121,16 @@ public final class Select {
         "SELECT folderId, name FROM virtualBackupTree WHERE cid = ? AND tree = ? AND user = ? AND parentId = ?";
 
     private static final String SQL_SELECT_PERMS =
-        "SELECT entity, groupFlag, fp, orp, owp, odp, adminFlag, system FROM virtualPermission WHERE cid = ? AND tree = ? AND user = ? AND folderId = ?";
+        "SELECT entity, groupFlag, fp, orp, owp, odp, adminFlag, system, type, sharedParentFolder FROM virtualPermission WHERE cid = ? AND tree = ? AND user = ? AND folderId = ?";
 
     private static final String SQL_SELECT_PERMS_BCK =
-        "SELECT entity, groupFlag, fp, orp, owp, odp, adminFlag, system FROM virtualBackupPermission WHERE cid = ? AND tree = ? AND user = ? AND folderId = ?";
+        "SELECT entity, groupFlag, fp, orp, owp, odp, adminFlag, system, type, sharedParentFolder FROM virtualBackupPermission WHERE cid = ? AND tree = ? AND user = ? AND folderId = ?";
 
     private static final String SQL_SELECT_SUBSCRIPTION =
         "SELECT subscribed FROM virtualSubscription WHERE cid = ? AND tree = ? AND user = ? AND folderId = ?";
 
     private static final String SQL_SELECT_SUBSCRIPTION_BCK =
         "SELECT subscribed FROM virtualBackupSubscription WHERE cid = ? AND tree = ? AND user = ? AND folderId = ?";
-
-    private static final String SQL_SELECT2_SUBF =
-        "SELECT folderId, name FROM virtualTree WHERE cid = ? AND tree = ? AND user = ? AND parentId = ?";
-
-    private static final String SQL_SELECT2_SUBF_BCK =
-        "SELECT folderId, name FROM virtualBackupTree WHERE cid = ? AND tree = ? AND user = ? AND parentId = ?";
 
     public static String getByName(final int cid, final int tree, final int user, final String parentId, final String name, final StorageType storageType) throws OXException {
         final DatabaseService databaseService = getDatabaseService();
@@ -156,7 +151,7 @@ public final class Select {
         } catch (final SQLException e) {
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
             databaseService.backReadOnly(cid, con);
         }
     }
@@ -216,7 +211,7 @@ public final class Select {
         } catch (final Exception e) {
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
         }
     }
 
@@ -275,7 +270,7 @@ public final class Select {
         } catch (final Exception e) {
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
         }
     }
 
@@ -332,7 +327,7 @@ public final class Select {
         } catch (final Exception e) {
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
         }
     }
 
@@ -387,7 +382,7 @@ public final class Select {
                 stmt.setString(pos, folderIds[i]);
                 rs = stmt.executeQuery();
                 ret[i] = rs.next();
-                DBUtils.closeSQLStuff(rs, stmt);
+                Databases.closeSQLStuff(rs, stmt);
             }
             stmt = null;
             rs = null;
@@ -397,7 +392,7 @@ public final class Select {
         } catch (final Exception e) {
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
         }
     }
 
@@ -452,7 +447,7 @@ public final class Select {
                 stmt.setString(pos, folderIds[i].getId());
                 rs = stmt.executeQuery();
                 ret[i] = rs.next();
-                DBUtils.closeSQLStuff(rs, stmt);
+                Databases.closeSQLStuff(rs, stmt);
             }
             stmt = null;
             rs = null;
@@ -462,7 +457,7 @@ public final class Select {
         } catch (final Exception e) {
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
         }
     }
 
@@ -563,7 +558,7 @@ public final class Select {
             }
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
         }
         stmt = null;
         // Subfolder IDs
@@ -579,7 +574,7 @@ public final class Select {
             rs = stmt.executeQuery();
             final List<Permission> permissions = new ArrayList<Permission>();
             while (rs.next()) {
-                final Permission p = new OutlookPermission();
+                final Permission p = new BasicPermission();
                 pos = 1;
                 p.setEntity(rs.getInt(pos++));
                 p.setGroup(rs.getInt(pos++) > 0);
@@ -589,6 +584,9 @@ public final class Select {
                 p.setDeletePermission(rs.getInt(pos++));
                 p.setAdmin(rs.getInt(pos++) > 0);
                 p.setSystem(rs.getInt(pos++));
+                p.setType(FolderPermissionType.getType(rs.getInt(pos++)));
+                int legator = rs.getInt(pos++);
+                p.setPermissionLegator(legator > 0 ? String.valueOf(legator) : null);
                 permissions.add(p);
             }
             if (permissions.isEmpty()) {
@@ -606,7 +604,7 @@ public final class Select {
             }
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
         }
         stmt = null;
         // Select subscription
@@ -634,7 +632,7 @@ public final class Select {
             }
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
         }
         stmt = null;
         // Set subscribed subfolder if and only if table contains virtually added subscribed subfolders
@@ -670,7 +668,7 @@ public final class Select {
             }
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
         }
         return true;
     }
@@ -789,7 +787,7 @@ public final class Select {
             }
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
         }
     }
 
@@ -840,7 +838,7 @@ public final class Select {
         } catch (final Exception e) {
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
         }
     }
 
@@ -892,7 +890,7 @@ public final class Select {
         } catch (final Exception e) {
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
         }
     }
 

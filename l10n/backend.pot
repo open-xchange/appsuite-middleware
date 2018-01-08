@@ -991,13 +991,13 @@ msgstr ""
 
 #. %1$s, %2$s %3$s on %4$s %5$s
 #. E.g. App Suite UI, Chrome 61 on Windows 10
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.clientinfo/src/com/openexchange/clientinfo/ClientInfoStrings.java:65
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.clientinfo.impl/src/com/openexchange/clientinfo/impl/ClientInfoStrings.java:65
 msgid "%1$s, %2$s %3$s on %4$s %5$s"
 msgstr ""
 
 #. %1$s on %2$s %3$s
 #. E.g. App Suite UI on Windows 10
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.clientinfo/src/com/openexchange/clientinfo/ClientInfoStrings.java:69
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.clientinfo.impl/src/com/openexchange/clientinfo/impl/ClientInfoStrings.java:69
 msgid "%1$s on %2$s %3$s"
 msgstr ""
 
@@ -1007,14 +1007,14 @@ msgstr ""
 #. E.g. Drive Client
 #. This simple message does not need to be translated. It is used to transport data to the frontend. Just put the same value in it for
 #. all translations or remove it from the PO file.
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.clientinfo/src/com/openexchange/clientinfo/ClientInfoStrings.java:73
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.clientinfo.impl/src/com/openexchange/clientinfo/impl/ClientInfoStrings.java:73
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.drive.impl/src/com/openexchange/drive/impl/DriveClientInfoStrings.java:81
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/authentication/LoginExceptionMessages.java:94
 msgid "%1$s"
 msgstr ""
 
 #. Microsoft Exchange ActiveSync Client
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.clientinfo/src/com/openexchange/clientinfo/ClientInfoStrings.java:76
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.clientinfo.impl/src/com/openexchange/clientinfo/impl/ClientInfoStrings.java:76
 msgid "Microsoft Exchange ActiveSync Client"
 msgstr ""
 
@@ -2646,6 +2646,14 @@ msgstr ""
 msgid "last year"
 msgstr ""
 
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/common/CommonStrings.java:101
+msgid "true"
+msgstr ""
+
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/common/CommonStrings.java:103
+msgid "false"
+msgstr ""
+
 #. The default display name format for contacts with department: <firstname> <lastname> (department)
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/contacts/ContactDisplayNameFormat.java:62
 msgid "%1$s %2$s (%3$s)"
@@ -2802,6 +2810,21 @@ msgstr ""
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/mail/MailStrings.java:86
 msgid "in attachment file names"
+msgstr ""
+
+#. Has attachment
+#. The module attachments
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/mail/MailStrings.java:89
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/attach/impl/AttachmentStrings.java:62
+msgid "Attachments"
+msgstr ""
+
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/mail/MailStrings.java:91
+msgid "Has attachment"
+msgstr ""
+
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/mail/MailStrings.java:93
+msgid "Has no attachment"
 msgstr ""
 
 #. ------------------------- i18n strings for facet types -------------------------------------- //
@@ -5118,11 +5141,6 @@ msgstr ""
 msgid ""
 "Invalid parameter sent in request. Parameter '%1$s' was '%2$s' which does "
 "not look like a number."
-msgstr ""
-
-#. The module attachments
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/attach/impl/AttachmentStrings.java:62
-msgid "Attachments"
 msgstr ""
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/CalendarFieldStrings.java:64
@@ -7937,11 +7955,6 @@ msgid ""
 "Please reauthorize the account %5$s to enable it again."
 msgstr ""
 
-#. Missing or invalid authserv-ids.
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/authenticity/MailAuthenticityExceptionMessages.java:63
-msgid "Missing or invalid authserv-ids."
-msgstr ""
-
 #. The default name for a file
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/json/compose/share/ShareComposeStrings.java:73
 msgid "File"
@@ -8782,14 +8795,14 @@ msgstr ""
 msgid "Authentication failed for user name: %1$s"
 msgstr ""
 
+#. Session not found.
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.session.management/src/com/openexchange/session/management/SessionManagementExceptionMessages.java:64
+msgid "Session not found."
+msgstr ""
+
 #. * The string constant for unknown location; <code>"unknown location"</code>
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.session.management/src/com/openexchange/session/management/SessionManagementStrings.java:64
 msgid "unknown location"
-msgstr ""
-
-#. Session not found.
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.session.management/src/com/openexchange/session/management/exception/SessionManagementExceptionMessages.java:64
-msgid "Session not found."
 msgstr ""
 
 #. No session found for identifier: %1$s
@@ -9056,6 +9069,12 @@ msgstr ""
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/ShareExceptionMessages.java:96
 msgid "The set permissions for the link are invalid."
+msgstr ""
+
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/ShareExceptionMessages.java:98
+msgid ""
+"The share you are looking for is currently not available. Please try again "
+"later."
 msgstr ""
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/groupware/TargetProxyTypeStrings.java:63

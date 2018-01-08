@@ -52,50 +52,51 @@ package com.openexchange.mail.authenticity;
 import com.openexchange.config.lean.Property;
 
 /**
- * {@link MailAuthenticityProperty}
+ * {@link MailAuthenticityProperty} - Properties for mail authenticity validation.
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public enum MailAuthenticityProperty implements Property {
     /**
      * Defines whether the mail authenticity core feature is enabled
+     * <p>
      * Defaults to <code>false</code>
      */
-    enabled(false),
+    ENABLED("enabled", Boolean.FALSE),
     /**
-     * Defines the date after which the e-mails will be analysed
+     * Defines the date after which the e-mails will be analyzed
+     * <p>
      * Defaults to 0
      */
-    threshold(0L),
+    THRESHOLD("threshold", Long.valueOf(0)),
     /**
      * Defines the MANDATORY <code>authserv-id</code>. It can contain a single arbitrary string
      * or a comma separated list of arbitrary strings
+     * <p>
      * Default is empty.
      *
      * @see <a href="https://tools.ietf.org/html/rfc7601#section-2.2">RFC-7601, Section 2.2</a>
      */
-    authServId;
+    AUTHSERV_ID("authServId", ""),
+    /**
+     * Defines whether metrics of the core handler will be logged for future assertion purposes.
+     * Disabled by default.
+     */
+    LOG_METRICS("logMetrics", false);
 
     private final Object defaultValue;
     private final String fqn;
 
     /**
-     * Initialises a new {@link MailAuthenticityProperty}.
-     */
-    private MailAuthenticityProperty() {
-        this("");
-    }
-
-    /**
      * Initializes a new {@link MailAuthenticityProperty}.
      */
-    private MailAuthenticityProperty(Object defaultValue) {
+    private MailAuthenticityProperty(String suffix, Object defaultValue) {
         this.defaultValue = defaultValue;
-        fqn = "com.openexchange.mail.authenticity." + name();
+        fqn = "com.openexchange.mail.authenticity." + suffix;
     }
 
     /**
-     * Returns the fully qualified name for the property
+     * Gets the fully qualified name for the property
      *
      * @return the fully qualified name for the property
      */
@@ -105,7 +106,7 @@ public enum MailAuthenticityProperty implements Property {
     }
 
     /**
-     * Returns the default value of this property
+     * Gets the default value of this property
      *
      * @return the default value of this property
      */

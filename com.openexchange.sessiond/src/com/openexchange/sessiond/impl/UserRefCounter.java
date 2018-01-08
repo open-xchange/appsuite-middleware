@@ -49,111 +49,103 @@
 
 package com.openexchange.sessiond.impl;
 
-import gnu.trove.map.TIntObjectMap;
-import gnu.trove.map.hash.TIntObjectHashMap;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 
 /**
  * {@link UserRefCounter}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class UserRefCounter {
 
-    private final ReadWriteLock rwLock = new ReentrantReadWriteLock();
+    private final ConcurrentMap<Integer, ConcurrentMap<Integer, AtomicInteger>> longTermUserGuardian;
 
-    private final TIntObjectMap<TIntObjectMap<int[]>> longTermUserGuardian = new TIntObjectHashMap<TIntObjectMap<int[]>>();
-
-    public void add(final int uid, final int cid) {
-        final Lock wl = rwLock.writeLock();
-        wl.lock();
-        try {
-            TIntObjectMap<int[]> counters = longTermUserGuardian.get(cid);
-            if (null == counters) {
-                counters = new TIntObjectHashMap<int[]>();
-                longTermUserGuardian.put(cid, counters);
-            }
-            int[] counter = counters.get(uid);
-            if (null == counter) {
-                counter = new int[1];
-                counter[0] = 0;
-                counters.put(uid, counter);
-            }
-            counter[0] = counter[0] + 1;
-        } finally {
-            wl.unlock();
-        }
+    /**
+     * Initializes a new {@link UserRefCounter}.
+     */
+    public UserRefCounter() {
+        super();
+        longTermUserGuardian = new ConcurrentHashMap<>(256, 0.9F, 1);
     }
 
-    public void remove(final int uid, final int cid) {
-        final Lock rl = rwLock.readLock();
-        rl.lock();
-        try {
-            final TIntObjectMap<int[]> counters = longTermUserGuardian.get(cid);
+    public void add(int userId, int contextId) {
+        Integer iContextId = Integer.valueOf(contextId);
+        ConcurrentMap<Integer, AtomicInteger> counters = longTermUserGuardian.get(iContextId);
+        if (null == counters) {
+            ConcurrentMap<Integer, AtomicInteger> newCounters = new ConcurrentHashMap<>(16, 0.9F, 1);
+            counters = longTermUserGuardian.putIfAbsent(iContextId, newCounters);
             if (null == counters) {
-                return;
+                counters = newCounters;
             }
-            final int[] counter = counters.get(uid);
+        }
+
+        Integer iUserId = Integer.valueOf(userId);
+        while (true) {
+            AtomicInteger counter = counters.get(iUserId);
             if (null == counter) {
-                return;
-            }
-            // Upgrade lock
-            final Lock wl = rwLock.writeLock();
-            rl.unlock();
-            wl.lock();
-            try {
-                counter[0] = counter[0] - 1;
-                if (counter[0] <= 0) {
-                    counters.remove(uid);
-                    if (counters.isEmpty()) {
-                        longTermUserGuardian.remove(cid);
-                    }
+                AtomicInteger nuCounter = new AtomicInteger(1);
+                counter = counters.putIfAbsent(iUserId, nuCounter);
+                if (null == counter) {
+                    // This thread was able to put the new counter with initial count of 1
+                    return;
                 }
-            } finally {
-                // Downgrade by acquiring read lock before releasing write lock
-                rl.lock();
-                wl.unlock(); // Unlock write, still hold read
             }
-        } finally {
-            rl.unlock();
+            if (counter.getAndIncrement() > 0) {
+                return;
+            }
+            // Became invalid in the meantime: Revert the increment & retry
+            counter.decrementAndGet();
         }
     }
 
-    public boolean contains(final int cid) {
-        final Lock rl = rwLock.readLock();
-        rl.lock();
-        try {
-            return longTermUserGuardian.containsKey(cid);
-        } finally {
-            rl.unlock();
+    public void remove(int userId, int contextId) {
+        ConcurrentMap<Integer, AtomicInteger> counters = longTermUserGuardian.get(Integer.valueOf(contextId));
+        if (null == counters) {
+            return;
+        }
+
+        Integer iUserId = Integer.valueOf(userId);
+        AtomicInteger counter = counters.get(iUserId);
+        if (null == counter) {
+            return;
+        }
+
+        if (counter.decrementAndGet() <= 0) {
+            // Remove counter
+            counters.remove(iUserId);
         }
     }
 
-    public boolean contains(final int uid, final int cid) {
-        final Lock rl = rwLock.readLock();
-        rl.lock();
-        try {
-            final TIntObjectMap<int[]> counters = longTermUserGuardian.get(cid);
-            if (null == counters) {
-                return false;
-            }
-            final int[] counter = counters.get(uid);
-            return null != counter && counter[0] > 0;
-        } finally {
-            rl.unlock();
+    public boolean contains(int contextId) {
+        ConcurrentMap<Integer, AtomicInteger> counters = longTermUserGuardian.get(Integer.valueOf(contextId));
+        if (null == counters) {
+            return false;
         }
+
+        for (AtomicInteger counter : counters.values()) {
+            if (counter.get() > 0) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean contains(int userId, int contextId) {
+        ConcurrentMap<Integer, AtomicInteger> counters = longTermUserGuardian.get(Integer.valueOf(contextId));
+        if (null == counters) {
+            return false;
+        }
+
+        AtomicInteger counter = counters.get(Integer.valueOf(userId));
+        return null != counter && counter.get() > 0;
     }
 
     public void clear() {
-        final Lock wl = rwLock.writeLock();
-        wl.lock();
-        try {
-            longTermUserGuardian.clear();
-        } finally {
-            wl.unlock();
-        }
+        longTermUserGuardian.clear();
     }
+
 }

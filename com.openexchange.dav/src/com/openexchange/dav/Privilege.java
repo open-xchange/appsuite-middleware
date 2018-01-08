@@ -54,7 +54,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import javax.servlet.http.HttpServletResponse;
-import com.openexchange.folderstorage.DefaultPermission;
+import com.openexchange.folderstorage.BasicPermission;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
@@ -317,7 +317,7 @@ public enum Privilege {
     }
 
     public static Permission getApplying(List<Privilege> privileges) throws WebdavProtocolException {
-        DefaultPermission permission = new DefaultPermission();
+        BasicPermission permission = new BasicPermission();
         HashSet<Privilege> setPrivileges = new HashSet<Privilege>(privileges);
         if (setPrivileges.contains(ALL)) {
             if (1 < setPrivileges.size()) {

@@ -250,6 +250,65 @@ public class RdbAliasStorage implements UserAliasStorage {
         }
     }
 
+    private void setAliases(int contextId, int userId, Set<String> aliases) throws OXException {
+        Connection con = Database.get(contextId, true);
+        boolean rollback = false;
+        try {
+            Databases.startTransaction(con);
+            rollback = true;
+
+            setAliases(con, contextId, userId, aliases);
+
+            con.commit();
+            rollback = false;
+        } catch (SQLException e) {
+            throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            if (rollback) {
+                Databases.rollback(con);
+            }
+            Databases.autocommit(con);
+            Database.back(contextId, true, con);
+        }
+    }
+
+    @Override
+    public void setAliases(Connection con, int contextId, int userId, Set<String> aliases) throws OXException {
+        if (con == null) {
+            setAliases(contextId, userId, aliases);
+            return;
+        }
+
+        PreparedStatement stmt = null;
+        try {
+            int index = 0;
+            stmt = con.prepareStatement("DELETE FROM user_alias WHERE cid=? AND user=?");
+            stmt.setInt(++index, contextId);
+            stmt.setInt(++index, userId);
+            stmt.executeUpdate();
+            Databases.closeSQLStuff(stmt);
+            stmt = null;
+
+            if (null != aliases && !aliases.isEmpty()) {
+                stmt = con.prepareStatement("INSERT INTO user_alias (cid, user, alias, uuid) VALUES (?,?,?,?) ON DUPLICATE KEY UPDATE alias=?");
+                for (String alias : aliases) {
+                    index = 0;
+                    stmt.setInt(++index, contextId);
+                    stmt.setInt(++index, userId);
+                    stmt.setString(++index, alias);
+                    stmt.setBytes(++index, UUIDs.toByteArray(UUID.randomUUID()));
+                    stmt.setString(++index, alias);
+                    stmt.addBatch();
+                }
+                stmt.executeBatch();
+            }
+        } catch (SQLException e) {
+            throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            Databases.closeSQLStuff(stmt);
+        }
+    }
+
     private boolean createAlias(int contextId, int userId, String alias) throws OXException {
         Connection con = Database.get(contextId, true);
         try {

@@ -7,7 +7,6 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,com.openexchange.halo.mail"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,com.openexchange.halo.pictures"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,com.openexchange.halo.xing"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,com.openexchange.halo.domains"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,com.openexchange.scripting.rhino"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,com.openexchange.scripting.rhino.apiBridge"/>
 </provider>

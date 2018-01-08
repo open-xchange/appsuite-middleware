@@ -58,8 +58,10 @@ import com.openexchange.file.storage.composition.crypto.CryptoAwareSharingServic
 import com.openexchange.file.storage.composition.internal.AbstractCompositingIDBasedFileAccess;
 import com.openexchange.file.storage.composition.internal.CompositingIDBasedFolderAccess;
 import com.openexchange.file.storage.composition.internal.FileStreamHandlerRegistryImpl;
+import com.openexchange.file.storage.composition.internal.IDBasedAccessCloseable;
 import com.openexchange.file.storage.composition.internal.Services;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
+import com.openexchange.marker.OXThreadMarkers;
 import com.openexchange.objectusecount.ObjectUseCountService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.server.ServiceLookup;
@@ -123,7 +125,9 @@ public class FileStorageCompositionActivator extends HousekeepingActivator {
 
             @Override
             public CompositingIDBasedFolderAccess createAccess(Session session) {
-                return new CompositingIDBasedFolderAccess(session, services);
+                CompositingIDBasedFolderAccess folderAccess = new CompositingIDBasedFolderAccess(session, services);
+                OXThreadMarkers.rememberCloseable(new IDBasedAccessCloseable(folderAccess));
+                return folderAccess;
             }
 
         });

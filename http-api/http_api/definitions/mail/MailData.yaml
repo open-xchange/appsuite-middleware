@@ -50,9 +50,15 @@ properties:
             reason:
               type: string
               description: The (optional) reason of the status
+      trusted:
+        type: boolean
+        description: |
+          Defines whether the sender is a trusted sender. 
       image:
         type: string
-        description: In case the result is positive and the domain of the sender is a trusted domain and also contains a image this field contains a link to this image.
+        description: |
+          In case the result is positive and the mail address of the sender is a trusted mail address this field contains the uid of the image if one exists. 
+          The image can be obtained from the image module.
       fromDomain:
         type: string
         description: The from domain

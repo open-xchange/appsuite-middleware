@@ -69,6 +69,7 @@ import com.openexchange.testing.httpclient.models.MailListElement;
 import com.openexchange.testing.httpclient.models.MailResponse;
 import com.openexchange.testing.httpclient.models.MailsCleanUpResponse;
 import com.openexchange.testing.httpclient.models.MechanismResult;
+import com.openexchange.testing.httpclient.modules.ImageApi;
 import com.openexchange.testing.httpclient.modules.MailApi;
 
 /**
@@ -84,10 +85,12 @@ public class MailAuthenticityTest extends AbstractConfigAwareAPIClientSession {
     private static final String PASS_ALL = "passAll.eml";
     private static final String PISHING = "pishing.eml";
     private static final String NONE = "none.eml";
-    private static final String[] MAIL_NAMES = new String[] { PASS_ALL, PISHING, NONE };
+    private static final String TRUSTED = "trusted.eml";
+    private static final String[] MAIL_NAMES = new String[] { PASS_ALL, PISHING, NONE, TRUSTED };
     private MailApi api;
     private final Map<String, MailDestinationData> IMPORTED_EMAILS = new HashMap<>();
     private Long timestamp = 0l;
+    private ImageApi imageApi;
 
     private static final String DKIM = "dkim";
     private static final String SPF = "spf";
@@ -99,21 +102,27 @@ public class MailAuthenticityTest extends AbstractConfigAwareAPIClientSession {
 
         // Setup configurations ----------------------------------
         // general config
-        CONFIG.put(MailAuthenticityProperty.enabled.getFQPropertyName(), Boolean.TRUE.toString());
-        CONFIG.put(MailAuthenticityProperty.authServId.getFQPropertyName(), "open-xchange.authenticity.test");
+        CONFIG.put(MailAuthenticityProperty.ENABLED.getFQPropertyName(), Boolean.TRUE.toString());
+        CONFIG.put(MailAuthenticityProperty.AUTHSERV_ID.getFQPropertyName(), "open-xchange.authenticity.test");
 
         // trusted domain config
-        String imgPath = AJAXConfig.getProperty(AJAXConfig.Property.TEST_MAIL_DIR) + SUBFOLDER + "/ox.jpg";
-        CONFIG.put("com.openexchange.mail.authenticity.trustedDomains.domains", "*trusted.domain.com:1");
-        CONFIG.put("com.openexchange.mail.authenticity.trustedDomains.image.1", imgPath);
+        CONFIG.put("com.openexchange.mail.authenticity.trusted.config", "support@open-xchange.com:1");
+
+        String testMailDir = AJAXConfig.getProperty(AJAXConfig.Property.TEST_MAIL_DIR) + SUBFOLDER;
+        String imgName = "ox.jpg";
+        File f = new File(testMailDir, imgName);
+        if(f.exists()) {
+            CONFIG.put("com.openexchange.mail.authenticity.trusted.image.1", f.getAbsolutePath());
+        }
         super.setUpConfiguration();
 
         // Setup client and import mails ------------------------
         getClient().login(testUser.getLogin(), testUser.getPassword());
         api = new MailApi(getClient());
-        String testMailDir = AJAXConfig.getProperty(AJAXConfig.Property.TEST_MAIL_DIR) + SUBFOLDER;
+        imageApi = new ImageApi(getClient());
+
         for (String name : MAIL_NAMES) {
-            File f = new File(testMailDir, name);
+            f = new File(testMailDir, name);
             Assert.assertTrue(f.exists());
             MailImportResponse response = api.importMail(getClient().getSession(), FOLDER, f, null, true);
             List<MailDestinationData> data = checkResponse(response);
@@ -147,7 +156,7 @@ public class MailAuthenticityTest extends AbstractConfigAwareAPIClientSession {
         /*
          * Test pass all
          */
-        MailResponse resp = api.getMail(getClient().getSession(), FOLDER, IMPORTED_EMAILS.get(PASS_ALL).getId(), null, 0, null, false, null, null, null, null, null);
+       MailResponse resp = api.getMail(getClient().getSession(), FOLDER, IMPORTED_EMAILS.get(PASS_ALL).getId(), null, 0, null, false, null, null, null, null, null, null);
        MailData mail = checkResponse(resp);
        AuthenticationResult authenticationResult = mail.getAuthenticationResults();
        Assert.assertNotNull(authenticationResult);
@@ -176,7 +185,7 @@ public class MailAuthenticityTest extends AbstractConfigAwareAPIClientSession {
        /*
         * Test pishing
         */
-        resp = api.getMail(getClient().getSession(), FOLDER, IMPORTED_EMAILS.get(PISHING).getId(), null, 0, null, false, null, null, null, null, null);
+        resp = api.getMail(getClient().getSession(), FOLDER, IMPORTED_EMAILS.get(PISHING).getId(), null, 0, null, false, null, null, null, null, null, null);
        mail = checkResponse(resp);
        authenticationResult = mail.getAuthenticationResults();
        Assert.assertNotNull(authenticationResult);
@@ -207,7 +216,7 @@ public class MailAuthenticityTest extends AbstractConfigAwareAPIClientSession {
        /*
         * Test none
         */
-        resp = api.getMail(getClient().getSession(), FOLDER, IMPORTED_EMAILS.get(NONE).getId(), null, 0, null, false, null, null, null, null, null);
+        resp = api.getMail(getClient().getSession(), FOLDER, IMPORTED_EMAILS.get(NONE).getId(), null, 0, null, false, null, null, null, null, null, null);
        mail = checkResponse(resp);
        authenticationResult = mail.getAuthenticationResults();
        Assert.assertNotNull(authenticationResult);
@@ -235,6 +244,26 @@ public class MailAuthenticityTest extends AbstractConfigAwareAPIClientSession {
        Assert.assertTrue(spf && dmarc && dkim);
        Assert.assertEquals(StatusEnum.NEUTRAL, authenticationResult.getStatus());
     }
+
+    @Test
+    public void testTrustedDomain() throws ApiException {
+        /*
+         * Test trusted domain
+         */
+       MailResponse resp = api.getMail(getClient().getSession(), FOLDER, IMPORTED_EMAILS.get(TRUSTED).getId(), null, 0, null, false, null, null, null, null, null, null);
+       MailData mail = checkResponse(resp);
+       AuthenticationResult authenticationResult = mail.getAuthenticationResults();
+       Assert.assertNotNull(authenticationResult);
+       Assert.assertEquals(StatusEnum.PASS, authenticationResult.getStatus());
+       Assert.assertNotNull(authenticationResult.getTrusted());
+       Assert.assertTrue(authenticationResult.getTrusted());
+       Assert.assertNotNull(authenticationResult.getImage());
+
+       byte[] trustedMailPicture = imageApi.getTrustedMailPicture(authenticationResult.getImage());
+       Assert.assertNotNull(trustedMailPicture);
+       Assert.assertNotEquals(0, trustedMailPicture.length);
+    }
+
 
     private MailData checkResponse(MailResponse resp) {
         Assert.assertNull(resp.getError());
@@ -264,7 +293,7 @@ public class MailAuthenticityTest extends AbstractConfigAwareAPIClientSession {
 
     @Override
     protected String getReloadables() {
-        return "ConfigReloader,TrustedDomainAuthenticityHandler";
+        return "ConfigReloader,TrustedMailAuthenticityHandler";
     }
 
 

@@ -18,6 +18,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,com.openexchange.capabilities.json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,com.openexchange.charset"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,com.openexchange.clientinfo"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,com.openexchange.clientinfo.impl"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,com.openexchange.cluster.lock"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,com.openexchange.cluster.timer"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,com.openexchange.cluster.timer.impl"/>
@@ -178,6 +179,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,com.openexchange.serverconfig"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,com.openexchange.serverconfig.impl"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,com.openexchange.session.management"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,com.openexchange.session.management.impl"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,com.openexchange.session.management.json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,com.openexchange.sessiond"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,com.openexchange.session.reservation.impl"/>
