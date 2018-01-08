@@ -176,7 +176,7 @@ public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
             return;
         }
 
-        final ChangeDescriber cd = new ChangeDescriber(new Rescheduling(), new Details(), new Participants(users, groups, resources, true), new Transparency());
+        final ChangeDescriber cd = new ChangeDescriber(new Rescheduling(), new Details(), new Participants(users, groups, resources), new Transparency());
 
         final List<String> descriptions = cd.getChanges(ctx, currentEvent, newEvent, change.getDiff(), wrapper, user.getLocale(), TimeZone.getTimeZone(user.getTimeZone()));
         change.setDiffDescription(descriptions);
@@ -266,7 +266,7 @@ public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
         List<? extends ItemUpdate<Attendee, AttendeeField>> updatedItems = attendeeUpdates.getUpdatedItems();
         for (ItemUpdate<Attendee, AttendeeField> attendeeUpdate : updatedItems) {
             if (attendeeUpdate.containsAnyChangeOf(ALL_BUT_CONFIRMATION))
-                ;
+                return false;
         }
 
         return true;

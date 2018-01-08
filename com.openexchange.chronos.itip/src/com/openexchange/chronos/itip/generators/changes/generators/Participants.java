@@ -49,6 +49,8 @@
 
 package com.openexchange.chronos.itip.generators.changes.generators;
 
+import static com.openexchange.java.Autoboxing.i;
+import static com.openexchange.java.Autoboxing.I;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -125,18 +127,15 @@ public class Participants implements ChangeDescriptionGenerator {
         }
     };
 
-    private final UserService users;
-    private final GroupService groups;
+    private final UserService     users;
+    private final GroupService    groups;
     private final ResourceService resources;
 
-    private final boolean stateChanges;
-
-    public Participants(UserService users, GroupService groups, ResourceService resources, boolean stateChanges) {
+    public Participants(UserService users, GroupService groups, ResourceService resources) {
         super();
         this.users = users;
         this.groups = groups;
         this.resources = resources;
-        this.stateChanges = stateChanges;
     }
 
     @Override
@@ -177,7 +176,7 @@ public class Participants implements ChangeDescriptionGenerator {
         List<Sentence> changes = new ArrayList<Sentence>();
 
         for (Integer attendeeId : attendeeIds) {
-            User u = users.getUser(attendeeId, ctx);
+            User u = users.getUser(i(attendeeId), ctx);
             ChangeType changeType = attendeeChange.get(attendeeId);
             switch (changeType) {
                 case ADD:
@@ -217,11 +216,12 @@ public class Participants implements ChangeDescriptionGenerator {
                 case TENTATIVE:
                     changes.add(new Sentence(PARTICIPANT_MESSAGE_MAP.get(changeType)).add(mail, ArgumentType.PARTICIPANT).addStatus(ParticipationStatus.TENTATIVE));
                     break;
+                default: // Skip
             }
         }
 
         for (Integer id : groupChange.keySet()) {
-            Group group = groups.getGroup(ctx, id);
+            Group group = groups.getGroup(ctx, i(id));
             ChangeType changeType = groupChange.get(id);
             if (changeType == null) {
                 continue;
@@ -236,7 +236,7 @@ public class Participants implements ChangeDescriptionGenerator {
         }
 
         for (Entry<Integer, ChangeType> entry : resourceChange.entrySet()) {
-            Resource resource = resources.getResource(entry.getKey(), ctx);
+            Resource resource = resources.getResource(i(entry.getKey()), ctx);
             ChangeType changeType = entry.getValue();
             if (changeType == null) {
                 continue;
@@ -259,30 +259,24 @@ public class Participants implements ChangeDescriptionGenerator {
         for (ItemUpdate<Attendee, AttendeeField> itemUpdate : updatedItems) {
             ChangeType changeType = null;
             if (itemUpdate.getUpdatedFields().contains(AttendeeField.PARTSTAT)) {
-                ParticipationStatus newPartStat = itemUpdate.getUpdate().getPartStat();
-                if (newPartStat.equals(ParticipationStatus.DECLINED)) {
-                    changeType = ChangeType.DECLINE;
-                } else if (newPartStat.equals(ParticipationStatus.TENTATIVE)) {
-                    changeType = ChangeType.TENTATIVE;
-                } else {
-                    changeType = ChangeType.ACCEPT;
-                }
+                changeType = getChangeType(itemUpdate.getUpdate().getPartStat());
             }
-
-            Attendee original = itemUpdate.getOriginal();
-            if (CalendarUtils.isInternal(original)) {
-                userIds.add(original.getEntity());
-                userChange.put(original.getEntity(), changeType);
-            } else {
-                externalChange.put(original.getEMail(), changeType);
+            if (false == getChangeType(itemUpdate.getOriginal().getPartStat()).equals(changeType)) {
+                Attendee original = itemUpdate.getOriginal();
+                if (CalendarUtils.isInternal(original)) {
+                    userIds.add(I(original.getEntity()));
+                    userChange.put(I(original.getEntity()), changeType);
+                } else {
+                    externalChange.put(original.getEMail(), changeType);
+                }
             }
         }
 
         if (difference.getAddedItems() != null && !difference.getAddedItems().isEmpty()) {
             for (Attendee added : difference.getAddedItems()) {
                 if (CalendarUtils.isInternal(added)) {
-                    userIds.add(added.getEntity());
-                    userChange.put(added.getEntity(), ChangeType.ADD);
+                    userIds.add(I(added.getEntity()));
+                    userChange.put(I(added.getEntity()), ChangeType.ADD);
                 } else {
                     externalChange.put(added.getEMail(), ChangeType.ADD);
                 }
@@ -292,8 +286,8 @@ public class Participants implements ChangeDescriptionGenerator {
         if (difference.getRemovedItems() != null && !difference.getRemovedItems().isEmpty()) {
             for (Attendee removed : difference.getRemovedItems()) {
                 if (CalendarUtils.isInternal(removed)) {
-                    userIds.add(removed.getEntity());
-                    userChange.put(removed.getEntity(), ChangeType.REMOVE);
+                    userIds.add(I(removed.getEntity()));
+                    userChange.put(I(removed.getEntity()), ChangeType.REMOVE);
                 } else {
                     externalChange.put(removed.getEMail(), ChangeType.REMOVE);
                 }
@@ -301,21 +295,36 @@ public class Participants implements ChangeDescriptionGenerator {
         }
     }
 
+    /**
+     * Get the {@link ChangeType} to the corresponding {@link ParticipationStatus}
+     * 
+     * @param newPartStat The status
+     * @return The {@link ChangeType}
+     */
+    private ChangeType getChangeType(ParticipationStatus newPartStat) {
+        if (newPartStat.equals(ParticipationStatus.DECLINED)) {
+            return ChangeType.DECLINE;
+        } else if (newPartStat.equals(ParticipationStatus.TENTATIVE)) {
+            return ChangeType.TENTATIVE;
+        }
+        return ChangeType.ACCEPT;
+    }
+
     private void investigateSetOperation(CollectionUpdate<Attendee, AttendeeField> difference, Set<Integer> userIds, Set<Integer> groupIds, Set<Integer> resourceIds, Map<Integer, ChangeType> userChange, Map<Integer, ChangeType> resourceChange, Map<Integer, ChangeType> groupChange, Map<String, ChangeType> externalChange, ChangeType changeType, List<Attendee> list) {
         for (Attendee added : list) {
             if (added.getCuType().equals(CalendarUserType.INDIVIDUAL)) {
                 if (CalendarUtils.isInternal(added)) {
-                    userIds.add(added.getEntity());
-                    userChange.put(added.getEntity(), changeType);
+                    userIds.add(I(added.getEntity()));
+                    userChange.put(I(added.getEntity()), changeType);
                 } else {
                     externalChange.put(added.getEMail(), changeType);
                 }
             } else if (added.getCuType().equals(CalendarUserType.RESOURCE)) {
-                resourceIds.add(added.getEntity());
-                resourceChange.put(added.getEntity(), changeType);
+                resourceIds.add(I(added.getEntity()));
+                resourceChange.put(I(added.getEntity()), changeType);
             } else if (added.getCuType().equals(CalendarUserType.GROUP)) {
-                groupIds.add(added.getEntity());
-                groupChange.put(added.getEntity(), changeType);
+                groupIds.add(I(added.getEntity()));
+                groupChange.put(I(added.getEntity()), changeType);
             }
         }
     }

@@ -97,11 +97,7 @@ public class ChangeHelper {
         this.wrapper = wrapper;
         this.ctx = ctx;
         final Rescheduling rescheduling = new Rescheduling();
-        boolean interested = true;
-        if (participant.getConfiguration() != null) {
-            interested = participant.getConfiguration().interestedInStateChanges();
-        }
-        final Participants participants = new Participants(services.getService(UserService.class), services.getService(GroupService.class), services.getService(ResourceService.class), interested);
+        final Participants participants = new Participants(services.getService(UserService.class), services.getService(GroupService.class), services.getService(ResourceService.class));
         final Details details = new Details();
         final Attachments attachments = new Attachments(attachmentMemory);
         Transparency shownAs = new Transparency();
