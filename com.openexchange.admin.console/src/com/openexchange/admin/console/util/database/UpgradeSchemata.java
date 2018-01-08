@@ -95,9 +95,6 @@ import com.openexchange.java.Strings;
  */
 public class UpgradeSchemata extends UtilAbstraction {
 
-    /**
-     * TYPE_ABORT_TO_ABORT_THE_UPGRADE_PROCESS_OR_CONTINUE_TO_PROCEED_ABORT_CONTINUE
-     */
     private static final String PROMPT = "Type 'abort' to abort the upgrade process, or 'continue' to proceed ['abort'/'continue']:";
     private static final String ABORT = "abort";
     private static final String CONTINUE = "continue";
