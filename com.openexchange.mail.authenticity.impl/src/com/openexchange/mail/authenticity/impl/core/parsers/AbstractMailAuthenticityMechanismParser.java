@@ -142,7 +142,7 @@ abstract class AbstractMailAuthenticityMechanismParser implements BiFunction<Map
     private String extractDomain(Map<String, String> attributes, String... keys) {
         for (String key : keys) {
             String value = attributes.get(key);
-            if (!Strings.isEmpty(value)) {
+            if (Strings.isNotEmpty(value)) {
                 return cleanseDomain(value);
             }
         }
