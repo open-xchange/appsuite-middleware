@@ -296,9 +296,7 @@ public class AllowedAuthServId {
 
                 @Override
                 public Boolean load(String authServId) {
-                    Boolean result = Boolean.valueOf(pattern.matcher(authServId).matches());
-                    cache.put(authServId, result);
-                    return result;
+                    return Boolean.valueOf(pattern.matcher(authServId).matches());
                 }
             });
         }
