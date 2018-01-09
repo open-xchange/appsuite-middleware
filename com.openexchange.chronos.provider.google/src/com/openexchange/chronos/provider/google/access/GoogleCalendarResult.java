@@ -57,6 +57,8 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.EventStatus;
@@ -80,6 +82,8 @@ import com.openexchange.exception.OXException;
  * @since v7.10.0
  */
 public class GoogleCalendarResult extends ExternalCalendarResult implements DiffAwareExternalCalendarResult {
+
+    private static final Logger LOG = LoggerFactory.getLogger(GoogleCalendarResult.class);
 
     private final GoogleCalendarAccess access;
     private final GoogleEventsPage currentResult;
@@ -107,7 +111,7 @@ public class GoogleCalendarResult extends ExternalCalendarResult implements Diff
         String folderId;
         try {
             folderId = internalConfiguration.getString(GoogleCalendarConfigField.FOLDER);
-            if(folderId==null) {
+            if (folderId == null) {
                 throw CalendarExceptionCodes.UNEXPECTED_ERROR.create("Google calendar account is invalid. Please delete and recreate it.");
             }
         } catch (JSONException e) {
@@ -341,6 +345,7 @@ public class GoogleCalendarResult extends ExternalCalendarResult implements Diff
         try {
             return service.calculateRecurrencePosition(master, cal) > 0;
         } catch (OXException e) {
+            LOG.debug("{}", e.getMessage(), e);
             return false;
         }
     }

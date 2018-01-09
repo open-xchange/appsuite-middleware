@@ -114,7 +114,7 @@ public class GoogleSubscriptionsMigrationTask extends UpdateTaskAdapter {
         }
 
         ContextService contextService = Services.getService(ContextService.class);
-        if (contextService == null ) {
+        if (contextService == null) {
             throw ServiceExceptionCode.absentService(ContextService.class);
         }
 
@@ -199,6 +199,7 @@ public class GoogleSubscriptionsMigrationTask extends UpdateTaskAdapter {
                     }
                 } catch (OXException e) {
                     // Continue
+                    LOG.debug("{}", e.getMessage(), e);
                 }
             } else {
                 result.add(perm.getEntity());

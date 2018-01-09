@@ -59,6 +59,8 @@ import java.util.Date;
 import java.util.List;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.model.CalendarList;
 import com.google.api.services.calendar.model.CalendarListEntry;
@@ -99,6 +101,8 @@ import com.openexchange.session.Session;
  * @since v7.10.0
  */
 public class GoogleCalendarAccess extends BasicCachingCalendarAccess {
+
+    private static final Logger LOG = LoggerFactory.getLogger(GoogleCalendarAccess.class);
 
     private final GoogleOAuthAccess oauthAccess;
     private final CalendarParameters parameters;
@@ -152,6 +156,7 @@ public class GoogleCalendarAccess extends BasicCachingCalendarAccess {
                     internalConfiguration.remove(GoogleCalendarConfigField.OLD_FOLDER);
                 } catch (OXException e) {
                     // ignore
+                    LOG.debug("{}", e.getMessage(), e);
                 }
             }
 
