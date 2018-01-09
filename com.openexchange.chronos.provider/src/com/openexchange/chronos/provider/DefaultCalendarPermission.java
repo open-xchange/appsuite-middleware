@@ -75,6 +75,25 @@ public class DefaultCalendarPermission implements CalendarPermission {
             CalendarPermission.NO_PERMISSIONS)
         ;
     }
+    
+    /**
+     * Prepares a default <i>admin</i> permission for the supplied user identifier.
+     *
+     * @param userID The identifier of the user to prepare the permission for
+     * @return The default <i>admin</i> permission for the supplied user
+     */
+    public static CalendarPermission adminPermissionsFor(int userID) {
+        return new DefaultCalendarPermission(
+            userID,
+            CalendarPermission.MAX_PERMISSION,
+            CalendarPermission.READ_ALL_OBJECTS,
+            CalendarPermission.NO_PERMISSIONS,
+            CalendarPermission.NO_PERMISSIONS,
+            false,
+            false,
+            CalendarPermission.NO_PERMISSIONS)
+        ;
+    }
 
     private int system;
     private int deletePermission;

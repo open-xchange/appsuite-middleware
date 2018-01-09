@@ -723,7 +723,7 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
         folder.setName(settings.getName());
         folder.setId(BasicCalendarAccess.FOLDER_ID);
         folder.setLastModified(settings.getLastModified());
-        folder.setPermissions(Collections.singletonList(DefaultCalendarPermission.readOnlyPermissionsFor(session.getUserId())));
+        folder.setPermissions(Collections.singletonList(DefaultCalendarPermission.adminPermissionsFor(session.getUserId())));
         folder.setSupportedCapabilites(CalendarCapability.getCapabilities(calendarAccess.getClass()));
         folder.setSubscribed(settings.isSubscribed());
         return folder;

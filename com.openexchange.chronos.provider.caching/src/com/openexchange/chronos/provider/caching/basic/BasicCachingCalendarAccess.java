@@ -164,7 +164,7 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess 
             folder.setExtendedProperties(settings.getExtendedProperties());
             folder.setPermissions(Collections.singletonList(new DefaultCalendarPermission(
                 userId,
-                CalendarPermission.READ_FOLDER,
+                CalendarPermission.MAX_PERMISSION,
                 CalendarPermission.READ_ALL_OBJECTS,
                 CalendarPermission.WRITE_ALL_OBJECTS,
                 CalendarPermission.NO_PERMISSIONS,
