@@ -152,3 +152,9 @@ com.openexchange.calendar.extendedProperties:
       properties:
         value:
           type: string
+com.openexchange.calendar.config:
+  type: object
+  description: Holds arbitrary, provider-specific configuration data for calendar accounts.
+com.openexchange.calendar.provider:
+  type: string
+  description: Denotes the identifier of the underlying calendar provider.
