@@ -491,7 +491,7 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
         MailMessage mail;
         try {
             mail = handleFetchRespone(fetchResponse, fullname, accountId, lastHandlers, determineAttachmentByHeader, checkICal, checkVCard, treatEmbeddedAsAttachment);
-            if (null != mail && null != textPreviewMode) {
+            if (null != mail && null != textPreviewProvider && null != textPreviewMode) {
                 mail.setTextPreview(textPreviewProvider.getTextPreview(Long.parseLong(mail.getMailId()), textPreviewMode));
             }
         } catch (final MessagingException e) {
