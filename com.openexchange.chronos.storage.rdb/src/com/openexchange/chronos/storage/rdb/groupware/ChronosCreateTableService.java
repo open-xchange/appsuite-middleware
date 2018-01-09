@@ -275,7 +275,9 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
                 "floatingTimezone VARCHAR(255) DEFAULT NULL," +
                 "relatedTime BIGINT(20) DEFAULT NULL," +
                 "pushed BOOL DEFAULT FALSE," +
-                "PRIMARY KEY (cid,account,alarm)" +
+                "PRIMARY KEY (cid,account,alarm)," +
+                "KEY triggerDate (cid,account,user,triggerDate)," +
+                "KEY event (cid,account,user,eventId)" +
             ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;"
         );
 

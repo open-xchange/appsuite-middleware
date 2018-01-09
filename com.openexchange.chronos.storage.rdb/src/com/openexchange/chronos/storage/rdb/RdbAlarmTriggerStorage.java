@@ -225,7 +225,7 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
                 .append(MAPPER.getColumns(mappedFields))
                 .append(" FROM ")
                 .append("calendar_alarm_trigger")
-                .append(" WHERE cid=? AND user=? AND account=?");
+                .append(" WHERE cid=? AND account=? AND user=?");
 
             if(until!=null) {
                 stringBuilder.append(" AND triggerDate<?");
@@ -236,8 +236,9 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
             try (PreparedStatement stmt = con.prepareStatement(stringBuilder.toString())) {
                 int parameterIndex = 1;
                 stmt.setInt(parameterIndex++, context.getContextId());
-                stmt.setInt(parameterIndex++, user);
                 stmt.setInt(parameterIndex++, accountId);
+                stmt.setInt(parameterIndex++, user);
+
                 if(until != null) {
                     stmt.setLong(parameterIndex++, until);
                 }
