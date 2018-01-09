@@ -139,7 +139,6 @@ public class OIDCSessionInspectorServiceTest {
     @Test
     public void onSessionHit_TokenNotExpiredTest() throws Exception {
       PowerMockito.doReturn(mockedBackend).when(this.inspector, PowerMockito.method(OIDCSessionInspectorService.class, "loadBackendForSession", Session.class)).withArguments(Matchers.any(Session.class));
-      Mockito.when(mockedBackendConfig.isStoreOAuthTokensEnabled()).thenReturn(true);
       Mockito.when(mockedBackend.isTokenExpired(mockedSession)).thenReturn(false);
       
       Reply result = this.inspector.onSessionHit(this.mockedSession, this.mockedRequest, this.mockedResponse);
@@ -149,21 +148,8 @@ public class OIDCSessionInspectorServiceTest {
     }
 
     @Test
-    public void onSessionHit_StoreTokensDisableTest() throws Exception {
-        PowerMockito.doReturn(mockedBackend).when(this.inspector, PowerMockito.method(OIDCSessionInspectorService.class, "loadBackendForSession", Session.class)).withArguments(Matchers.any(Session.class));
-        Mockito.when(mockedBackendConfig.isStoreOAuthTokensEnabled()).thenReturn(false);
-        Mockito.when(mockedBackend.isTokenExpired(mockedSession)).thenReturn(true);
-        
-        Reply result = this.inspector.onSessionHit(this.mockedSession, this.mockedRequest, this.mockedResponse);
-        
-        Mockito.verify(mockedBackend, Mockito.times(0)).updateOauthTokens(mockedSession);
-        assertTrue("Wrong reply", result == Reply.NEUTRAL);
-    }
-
-    @Test
     public void onSessionHit_UpdateTokensFailTest() throws Exception {
         PowerMockito.doReturn(mockedBackend).when(this.inspector, PowerMockito.method(OIDCSessionInspectorService.class, "loadBackendForSession", Session.class)).withArguments(Matchers.any(Session.class));
-        Mockito.when(mockedBackendConfig.isStoreOAuthTokensEnabled()).thenReturn(true);
         Mockito.when(mockedBackend.isTokenExpired(mockedSession)).thenReturn(true);
         Mockito.when(mockedBackend.updateOauthTokens(mockedSession)).thenReturn(false);
         
@@ -176,7 +162,6 @@ public class OIDCSessionInspectorServiceTest {
     @Test
     public void onSessionHit_UpdateTokensSuccessTest() throws Exception {
         PowerMockito.doReturn(mockedBackend).when(this.inspector, PowerMockito.method(OIDCSessionInspectorService.class, "loadBackendForSession", Session.class)).withArguments(Matchers.any(Session.class));
-        Mockito.when(mockedBackendConfig.isStoreOAuthTokensEnabled()).thenReturn(true);
         Mockito.when(mockedBackend.isTokenExpired(mockedSession)).thenReturn(true);
         Mockito.when(mockedBackend.updateOauthTokens(mockedSession)).thenReturn(true);
         

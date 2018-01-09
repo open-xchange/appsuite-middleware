@@ -175,11 +175,6 @@ public abstract class AbstractOIDCBackendConfig implements OIDCBackendConfig {
     }
 
     @Override
-    public boolean isStoreOAuthTokensEnabled() {
-        return this.loadBooleanProperty(OIDCBackendProperty.storeOAuthTokens);
-    }
-
-    @Override
     public boolean isAutologinEnabled() {
         boolean result = false;
         AutologinMode autologinMode = OIDCBackendConfig.AutologinMode.get(this.autologinCookieMode());

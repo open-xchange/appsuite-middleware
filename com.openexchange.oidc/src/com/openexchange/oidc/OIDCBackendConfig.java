@@ -228,13 +228,6 @@ public interface OIDCBackendConfig {
     String autologinCookieMode();
 
     /**
-     * Determines weather OAuth tokens should be stored in a user-session or not.
-     * 
-     * @return true or false
-     */
-    boolean isStoreOAuthTokensEnabled();
-    
-    /**
      * Is auto-login at all enabled or not
      * 
      * @return true or false

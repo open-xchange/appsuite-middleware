@@ -127,10 +127,6 @@ public enum OIDCBackendProperty implements Property {
      */
     autologinCookieMode(OIDCProperty.PREFIX, OIDCBackendConfig.AutologinMode.OFF.getValue()),
     /**
-     * storeOAuthTokens - Whether OAuth cookies should be stored or not
-     */
-    storeOAuthTokens(OIDCProperty.PREFIX, false),
-    /**
      * oauthRefreshTime - Time in milliseconds determines how long before the expiration of the
      * OAuth {@link AccessToken} a new {@link AccessToken} should be requested. "refresh_token"
      * grant type must be registered in OP.

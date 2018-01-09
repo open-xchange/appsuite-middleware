@@ -332,16 +332,14 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
             request.getRequestURI(), tokenResponse.getOIDCTokens().toJSONObject().toJSONString(), domainName);
         AuthenticationInfo authInfo = this.backend.resolveAuthenticationResponse(request, tokenResponse);
         authInfo.setProperty(OIDCTools.IDTOKEN, tokenResponse.getOIDCTokens().getIDTokenString());
-        if (this.backend.getBackendConfig().isStoreOAuthTokensEnabled()) {
-            BearerAccessToken bearerAccessToken = tokenResponse.getTokens().getBearerAccessToken();
-            RefreshToken refreshToken = tokenResponse.getTokens().getRefreshToken();
-            if (bearerAccessToken != null && refreshToken != null) {
-                authInfo.setProperty(OIDCTools.ACCESS_TOKEN, bearerAccessToken.getValue());
-                authInfo.setProperty(OIDCTools.REFRESH_TOKEN, refreshToken.getValue());
-                long expiryDate = new Date().getTime();
-                expiryDate += bearerAccessToken.getLifetime() * 1000;
-                authInfo.setProperty(OIDCTools.ACCESS_TOKEN_EXPIRY, String.valueOf(expiryDate));
-            }
+        BearerAccessToken bearerAccessToken = tokenResponse.getTokens().getBearerAccessToken();
+        RefreshToken refreshToken = tokenResponse.getTokens().getRefreshToken();
+        if (bearerAccessToken != null && refreshToken != null) {
+            authInfo.setProperty(OIDCTools.ACCESS_TOKEN, bearerAccessToken.getValue());
+            authInfo.setProperty(OIDCTools.REFRESH_TOKEN, refreshToken.getValue());
+            long expiryDate = new Date().getTime();
+            expiryDate += bearerAccessToken.getLifetime() * 1000;
+            authInfo.setProperty(OIDCTools.ACCESS_TOKEN_EXPIRY, String.valueOf(expiryDate));
         }
 
         String sessionToken = sessionReservationService.reserveSessionFor(
