@@ -63,11 +63,13 @@ import org.slf4j.Logger;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.IMAPCommandsCollection;
 import com.openexchange.imap.IMAPServerInfo;
+import com.openexchange.imap.services.Services;
 import com.openexchange.mail.dataobjects.IDMailMessage;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.utils.StorageUtility;
 import com.sun.mail.iap.Response;
 import com.sun.mail.imap.IMAPFolder;
+import com.sun.mail.imap.IMAPTextPreviewProvider;
 import com.sun.mail.imap.protocol.FetchResponse;
 import com.sun.mail.imap.protocol.UID;
 
@@ -92,6 +94,8 @@ public final class MailMessageFillerIMAPCommand extends AbstractIMAPCommand<Void
     private final boolean uid;
     private final String fullname;
     private final int index;
+    private final IMAPTextPreviewProvider.Mode textPreviewMode;
+    private final IMAPTextPreviewProvider textPreviewProvider;
 
     /**
      * Initializes a new {@link MailMessageFillerIMAPCommand}.
@@ -117,6 +121,17 @@ public final class MailMessageFillerIMAPCommand extends AbstractIMAPCommand<Void
         }
         this.messages = tm;
         this.uids = tuids.toArray();
+        textPreviewProvider = Services.optService(IMAPTextPreviewProvider.class);
+        if (fp.contains(IMAPFolder.SnippetFetchProfileItem.SNIPPETS_LAZY)) {
+            this.textPreviewMode = IMAPTextPreviewProvider.Mode.ONLY_IF_AVAILABLE;
+        } else if (fp.contains(IMAPFolder.SnippetFetchProfileItem.SNIPPETS)) {
+            this.textPreviewMode = IMAPTextPreviewProvider.Mode.REQUIRE;
+        } else {
+            this.textPreviewMode = null;
+        }
+        if (null != textPreviewMode) {
+            fp.add(UIDFolder.FetchProfileItem.UID);
+        }
         if (length == messageCount) {
             command = getFetchCommand(isRev1, checkFetchProfile(fp), false, serverInfo);
             args = (1 == length ? new String[] { "1" } : ARGS_ALL);
@@ -181,6 +196,9 @@ public final class MailMessageFillerIMAPCommand extends AbstractIMAPCommand<Void
                     IDMailMessage idm = (IDMailMessage) message;
                     idm.setAccountId(accountId);
                     MailMessageFetchIMAPCommand.handleFetchRespone(idm, fetchResponse, fullname);
+                    if (null != textPreviewMode) {
+                        idm.setTextPreview(textPreviewProvider.getTextPreview(idm.getUid(), textPreviewMode));
+                    }
                 } catch (OXException e) {
                     /*
                      * Discard corrupt message
