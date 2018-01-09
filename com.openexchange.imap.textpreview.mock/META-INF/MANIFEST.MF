@@ -4,7 +4,8 @@ Bundle-Name: Open-Xchange IMAP
 Bundle-SymbolicName: com.openexchange.imap.textpreview.mock
 Bundle-Version: 7.10.0
 Bundle-Vendor: OX Software GmbH
-Import-Package: com.openexchange.exception,
+Import-Package: com.openexchange.config,
+ com.openexchange.exception,
  com.openexchange.i18n,
  com.openexchange.java,
  com.openexchange.java.util,

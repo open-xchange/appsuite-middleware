@@ -49,6 +49,7 @@
 
 package com.openexchange.imap.textpreview.mock.osgi;
 
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.imap.textpreview.mock.MockIMAPTextPreviewProvider;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.sun.mail.imap.IMAPTextPreviewProvider;
@@ -70,12 +71,15 @@ public class MockIMAPTextPreviewActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return EMPTY_CLASSES;
+        return new Class<?>[] { ConfigurationService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
-        registerService(IMAPTextPreviewProvider.class, new MockIMAPTextPreviewProvider());
+        boolean enabled = getService(ConfigurationService.class).getBoolProperty("com.openexchange.imap.textpreview.mock.enabled", false);
+        if (enabled) {
+            registerService(IMAPTextPreviewProvider.class, new MockIMAPTextPreviewProvider());
+        }
     }
 
 }
