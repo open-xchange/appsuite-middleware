@@ -53,6 +53,7 @@ import static com.openexchange.chronos.impl.Utils.PROVIDER_ID;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.osgi.Tools.requireService;
 import java.sql.Connection;
+import java.util.List;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Available;
 import com.openexchange.chronos.ParticipationStatus;
@@ -121,7 +122,7 @@ public class CalendarUserSettings {
      *
      * @return The default alarm, or <code>null</code> if not defined
      */
-    public Alarm getDefaultAlarmDate() throws OXException {
+    public List<Alarm> getDefaultAlarmDate() throws OXException {
         UserConfigWrapper userConfig = getUserConfig(userId);
         if (null == userConfig) {
             LOG.debug("No user configuration available for user {} in context {}, unable to get default alarms.", I(userId), I(contextId));
@@ -135,7 +136,7 @@ public class CalendarUserSettings {
      *
      * @return The default alarm, or <code>null</code> if not defined
      */
-    public Alarm getDefaultAlarmDateTime() throws OXException {
+    public List<Alarm> getDefaultAlarmDateTime() throws OXException {
         UserConfigWrapper userConfig = getUserConfig(userId);
         if (null == userConfig) {
             LOG.debug("No user configuration available for user {} in context {}, unable to get default alarms.", I(userId), I(contextId));

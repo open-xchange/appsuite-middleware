@@ -53,6 +53,8 @@ import static com.openexchange.chronos.common.DataHandlers.ALARM2JSON;
 import static com.openexchange.chronos.common.DataHandlers.AVAILABLE2JSON;
 import static com.openexchange.chronos.common.DataHandlers.JSON2ALARM;
 import static com.openexchange.chronos.common.DataHandlers.JSON2AVAILABLE;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -93,37 +95,37 @@ public class UserConfigWrapper {
     }
 
     /**
-     * Gets the default alarm to be applied to events whose start-date is of type <i>date</i> from the underlying user configuration.
+     * Gets the default alarms to be applied to events whose start-date is of type <i>date</i> from the underlying user configuration.
      *
-     * @return The default alarm, or <code>null</code> if not defined
+     * @return The default alarms, or <code>null</code> if not defined
      */
-    public Alarm getDefaultAlarmDate() throws OXException {
-        return deserializeAlarm(userConfig.optJSONObject(KEY_DEFAULT_ALARM_DATE));
+    public List<Alarm> getDefaultAlarmDate() throws OXException {
+        return deserializeAlarms(userConfig.optJSONArray(KEY_DEFAULT_ALARM_DATE));
     }
 
     /**
-     * Sets the default alarm to be applied to events whose start-date is of type <i>date</i> in the underlying user configuration.
+     * Sets the default alarms to be applied to events whose start-date is of type <i>date</i> in the underlying user configuration.
      *
-     * @param alarm The alarm to set, or <code>null</code> to remove the value
+     * @param alarms The alarms to set, or <code>null</code> to remove the value
      * @return <code>true</code> if the underlying configuration was modified, <code>false</code>, otherwise
      */
-    public boolean setDefaultAlarmDate(Alarm alarm) throws OXException {
-        if (null == alarm) {
+    public boolean setDefaultAlarmDate(List<Alarm> alarms) throws OXException {
+        if (null == alarms) {
             return null != userConfig.remove(KEY_DEFAULT_ALARM_DATE);
         }
-        JSONObject value = serializeAlarm(alarm);
-        JSONObject oldValue = userConfig.optJSONObject(KEY_DEFAULT_ALARM_DATE);
+        JSONArray value = serializeAlarms(alarms);
+        JSONArray oldValue = userConfig.optJSONArray(KEY_DEFAULT_ALARM_DATE);
         userConfig.putSafe(KEY_DEFAULT_ALARM_DATE, value);
         return false == Objects.equals(value, oldValue);
     }
 
     /**
-     * Gets the default alarm to be applied to events whose start-date is of type <i>date-time</i> from the underlying user configuration.
+     * Gets the default alarms to be applied to events whose start-date is of type <i>date-time</i> from the underlying user configuration.
      *
-     * @return The default alarm, or <code>null</code> if not defined
+     * @return The default alarms, or <code>null</code> if not defined
      */
-    public Alarm getDefaultAlarmDateTime() throws OXException {
-        return deserializeAlarm(userConfig.optJSONObject("defaultAlarmDateTime"));
+    public List<Alarm> getDefaultAlarmDateTime() throws OXException {
+        return deserializeAlarms(userConfig.optJSONArray("defaultAlarmDateTime"));
     }
 
     /**
@@ -132,12 +134,12 @@ public class UserConfigWrapper {
      * @param alarm The alarm to set, or <code>null</code> to remove the value
      * @return <code>true</code> if the underlying configuration was modified, <code>false</code>, otherwise
      */
-    public boolean setDefaultAlarmDateTime(Alarm alarm) throws OXException {
-        if (null == alarm) {
+    public boolean setDefaultAlarmDateTime(List<Alarm> alarms) throws OXException {
+        if (null == alarms) {
             return null != userConfig.remove(KEY_DEFAULT_ALARM_DATE_TIME);
         }
-        JSONObject value = serializeAlarm(alarm);
-        JSONObject oldValue = userConfig.optJSONObject(KEY_DEFAULT_ALARM_DATE_TIME);
+        JSONArray value = serializeAlarms(alarms);
+        JSONArray oldValue = userConfig.optJSONArray(KEY_DEFAULT_ALARM_DATE_TIME);
         userConfig.putSafe(KEY_DEFAULT_ALARM_DATE_TIME, value);
         return false == Objects.equals(value, oldValue);
     }
@@ -165,6 +167,28 @@ public class UserConfigWrapper {
         JSONArray oldValue = userConfig.optJSONArray(KEY_AVAILABILITY);
         userConfig.putSafe(KEY_AVAILABILITY, value);
         return false == Objects.equals(value, oldValue);
+    }
+
+    private List<Alarm> deserializeAlarms(JSONArray jsonArray) throws OXException {
+        if (null == jsonArray) {
+            return null;
+        }
+        List<Alarm> alarms = new ArrayList<Alarm>(jsonArray.length());
+        for (int i = 0; i < jsonArray.length(); i++) {
+            alarms.add(deserializeAlarm(jsonArray.optJSONObject(i)));
+        }
+        return alarms;
+    }
+
+    private JSONArray serializeAlarms(List<Alarm> alarms) throws OXException {
+        if (null == alarms) {
+            return null;
+        }
+        JSONArray jsonArray = new JSONArray(alarms.size());
+        for (Alarm alarm : alarms) {
+            jsonArray.put(serializeAlarm(alarm));
+        }
+        return jsonArray;
     }
 
     private JSONObject serializeAlarm(Alarm alarm) throws OXException {

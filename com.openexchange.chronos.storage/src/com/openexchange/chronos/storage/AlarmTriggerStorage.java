@@ -150,4 +150,14 @@ public interface AlarmTriggerStorage {
      * @throws OXException
      */
     Integer recalculateFloatingAlarmTriggers(int userId) throws OXException;
+
+    /**
+     * Loads information about which events have at least one alarm trigger for the user in the storage.
+     *
+     * @param userId The identifier of the user to get the trigger information for
+     * @param eventIds The identifiers of the event to get the trigger information for
+     * @return A map that associates the identifiers of those events where at least one alarm trigger is stored for the user to {@link Boolean#TRUE}
+     */
+    Map<String, Boolean> hasTriggers(int userId, String[] eventIds) throws OXException;
+
 }

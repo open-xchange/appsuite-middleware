@@ -57,7 +57,6 @@ import static com.openexchange.folderstorage.Permission.NO_PERMISSIONS;
 import static com.openexchange.folderstorage.Permission.WRITE_OWN_OBJECTS;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.tools.arrays.Collections.isNullOrEmpty;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -156,9 +155,9 @@ public class CreatePerformer extends AbstractUpdatePerformer {
                 List<Alarm> alarms = Check.maxAlarms(getSelfProtection(), Check.alarmsAreValid(event.getAlarms()));
                 alarmsPerUserId.put(I(userId), insertAlarms(createdEvent, userId, alarms, false));
             } else {
-                Alarm defaultAlarm = isAllDay(createdEvent) ? session.getConfig().getDefaultAlarmDate(userId) : session.getConfig().getDefaultAlarmDateTime(userId);
+                List<Alarm> defaultAlarm = isAllDay(createdEvent) ? session.getConfig().getDefaultAlarmDate(userId) : session.getConfig().getDefaultAlarmDateTime(userId);
                 if (null != defaultAlarm) {
-                    alarmsPerUserId.put(I(userId), insertAlarms(createdEvent, userId, Collections.singletonList(defaultAlarm), true));
+                    alarmsPerUserId.put(I(userId), insertAlarms(createdEvent, userId, defaultAlarm, true));
                 }
             }
         }

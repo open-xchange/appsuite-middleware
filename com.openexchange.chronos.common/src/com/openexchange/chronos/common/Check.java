@@ -296,6 +296,24 @@ public class Check {
     }
 
     /**
+     * Checks that each alarm in the supplied list has a <i>relative</i> trigger defined.
+     *
+     * @param alarms The alarms to check
+     * @return The passed alarms, after they were checked for validity
+     * @throws OXException {@link CalendarExceptionCodes#INVALID_ALARM}
+     */
+    public static List<Alarm> haveReleativeTriggers(List<Alarm> alarms) throws OXException {
+        if (null != alarms && 0 < alarms.size()) {
+            for (Alarm alarm : alarms) {
+                if (false == AlarmUtils.hasRelativeTrigger(alarm)) {
+                    throw CalendarExceptionCodes.INVALID_ALARM.create(String.valueOf(alarm));
+                }
+            }
+        }
+        return alarms;
+    }
+
+    /**
      * Checks that the supplied availability is valid, i.e. its available definitions contain all mandatory properties.
      *
      * @param recurrenceService A reference to the recurrence service

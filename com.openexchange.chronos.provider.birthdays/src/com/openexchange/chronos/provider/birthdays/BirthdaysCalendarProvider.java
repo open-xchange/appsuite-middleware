@@ -55,6 +55,7 @@ import static com.openexchange.chronos.provider.CalendarFolderProperty.optProper
 import static com.openexchange.osgi.Tools.requireService;
 import java.util.EnumSet;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import org.json.JSONArray;
@@ -279,9 +280,10 @@ public class BirthdaysCalendarProvider implements BasicCalendarProvider, AutoPro
          */
         try {
             UserConfigWrapper configWrapper = new UserConfigWrapper(requireService(ConversionService.class, services), userConfig);
-            Alarm defaultAlarm = configWrapper.getDefaultAlarmDate();
+            List<Alarm> defaultAlarm = configWrapper.getDefaultAlarmDate();
             if (null != defaultAlarm) {
-                Check.alarmIsValid(defaultAlarm);
+                Check.alarmsAreValid(defaultAlarm);
+                Check.haveReleativeTriggers(defaultAlarm);
             }
         } catch (OXException e) {
             throw CalendarExceptionCodes.INVALID_CONFIGURATION.create(e, String.valueOf(userConfig));

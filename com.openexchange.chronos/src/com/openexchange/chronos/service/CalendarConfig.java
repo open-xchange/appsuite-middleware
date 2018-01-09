@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.service;
 
+import java.util.List;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Available;
 import com.openexchange.chronos.ParticipationStatus;
@@ -80,20 +81,20 @@ public interface CalendarConfig {
     ParticipationStatus getInitialPartStat(int userId, boolean inPublicFolder);
 
     /**
-     * Gets the default alarm to be applied to events whose start-date is of type <i>date</i> from the underlying user configuration.
+     * Gets the default alarms to be applied to events whose start-date is of type <i>date</i> from the underlying user configuration.
      *
      * @param userId The identifier of the user to get the default alarm for
-     * @return The default alarm, or <code>null</code> if not defined
+     * @return The default alarms, or <code>null</code> if not defined
      */
-    Alarm getDefaultAlarmDate(int userId) throws OXException;
+    List<Alarm> getDefaultAlarmDate(int userId) throws OXException;
 
     /**
-     * Gets the default alarm to be applied to events whose start-date is of type <i>date-time</i> from the underlying user configuration.
+     * Gets the default alarms to be applied to events whose start-date is of type <i>date-time</i> from the underlying user configuration.
      *
      * @param userId The identifier of the user to get the default alarm for
-     * @return The default alarm, or <code>null</code> if not defined
+     * @return The default alarms, or <code>null</code> if not defined
      */
-    Alarm getDefaultAlarmDateTime(int userId) throws OXException;
+    List<Alarm> getDefaultAlarmDateTime(int userId) throws OXException;
 
     /**
      * Gets the defined availability (in form of one or more available definitions) from the underlying user configuration.

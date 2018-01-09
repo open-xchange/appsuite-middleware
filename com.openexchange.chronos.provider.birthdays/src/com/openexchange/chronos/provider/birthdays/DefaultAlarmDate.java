@@ -115,7 +115,7 @@ public class DefaultAlarmDate implements JSlobEntry {
             return JSONObject.NULL;
         }
         JSONObject userConfig = accounts.get(0).getUserConfiguration();
-        return null == userConfig ? JSONObject.NULL : userConfig.optJSONObject("defaultAlarmDate");
+        return null == userConfig ? JSONObject.NULL : userConfig.optJSONArray("defaultAlarmDate");
     }
 
     @Override
@@ -139,10 +139,10 @@ public class DefaultAlarmDate implements JSlobEntry {
         userConfig.putSafe("defaultAlarmDate", value);
         try {
             UserConfigWrapper configWrapper = new UserConfigWrapper(requireService(ConversionService.class, services), userConfig);
-            Alarm defaultAlarm = configWrapper.getDefaultAlarmDate();
+            List<Alarm> defaultAlarm = configWrapper.getDefaultAlarmDate();
             if (null != defaultAlarm) {
-                Check.alarmIsValid(defaultAlarm);
-                Check.hasReleativeTrigger(defaultAlarm);
+                Check.alarmsAreValid(defaultAlarm);
+                Check.haveReleativeTriggers(defaultAlarm);
             }
         } catch (OXException e) {
             throw CalendarExceptionCodes.INVALID_CONFIGURATION.create(e, String.valueOf(userConfig));

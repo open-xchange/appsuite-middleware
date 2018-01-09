@@ -51,6 +51,8 @@ package com.openexchange.chronos.provider.internal.config;
 
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.osgi.Tools.requireService;
+import java.util.Collections;
+import java.util.List;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.chronos.Alarm;
@@ -109,15 +111,15 @@ public class UserConfigHelper {
             /*
              * check default alarms
              */
-            Alarm defaultAlarmDate = configWrapper.getDefaultAlarmDate();
+            List<Alarm> defaultAlarmDate = configWrapper.getDefaultAlarmDate();
             if (null != defaultAlarmDate) {
-                Check.alarmIsValid(defaultAlarmDate);
-                Check.hasReleativeTrigger(defaultAlarmDate);
+                Check.alarmsAreValid(defaultAlarmDate);
+                Check.haveReleativeTriggers(defaultAlarmDate);
             }
-            Alarm defaultAlarmDateTime = configWrapper.getDefaultAlarmDateTime();
+            List<Alarm> defaultAlarmDateTime = configWrapper.getDefaultAlarmDateTime();
             if (null != defaultAlarmDateTime) {
-                Check.alarmIsValid(defaultAlarmDateTime);
-                Check.hasReleativeTrigger(defaultAlarmDateTime);
+                Check.alarmsAreValid(defaultAlarmDateTime);
+                Check.haveReleativeTriggers(defaultAlarmDateTime);
             }
             /*
              * check availability
@@ -143,7 +145,7 @@ public class UserConfigHelper {
          */
         Alarm defaultAlarmDateTime = optLegacyDefaultAlarm(session);
         if (null != defaultAlarmDateTime) {
-            new UserConfigWrapper(requireService(ConversionService.class, services), userConfig).setDefaultAlarmDateTime(defaultAlarmDateTime);
+            new UserConfigWrapper(requireService(ConversionService.class, services), userConfig).setDefaultAlarmDateTime(Collections.singletonList(defaultAlarmDateTime));
         }
     }
 

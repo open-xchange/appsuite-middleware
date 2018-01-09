@@ -84,7 +84,7 @@ public class DefaultAlarmDateTime extends ChronosJSlobEntry {
 
     @Override
     protected Object getValue(ServerSession session, JSONObject userConfig) throws OXException {
-        return userConfig.optJSONObject("defaultAlarmDateTime");
+        return userConfig.optJSONArray("defaultAlarmDateTime");
     }
 
     @Override

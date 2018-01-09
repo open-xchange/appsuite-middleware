@@ -210,8 +210,7 @@ public class AlarmHelper {
     public List<Alarm> getDefaultAlarms() {
         try {
             UserConfigWrapper configWrapper = new UserConfigWrapper(requireService(ConversionService.class, services), account.getUserConfiguration());
-            Alarm defaultAlarm = configWrapper.getDefaultAlarmDate();
-            return null != defaultAlarm ? Collections.singletonList(defaultAlarm) : null;
+            return configWrapper.getDefaultAlarmDate();
         } catch (Exception e) {
             LOG.warn("Error getting default alarm from user configuration \"{}\": {}", account.getUserConfiguration(), e.getMessage(), e);
             return null;

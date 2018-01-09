@@ -56,6 +56,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -400,6 +401,45 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
             throw asOXException(e);
         } finally {
             release(connection, updated);
+        }
+    }
+
+    @Override
+    public Map<String, Boolean> hasTriggers(int userId, String[] eventIds) throws OXException {
+        Connection connection = null;
+        try {
+            connection = dbProvider.getReadConnection(context);
+            return selectHasTriggers(connection, userId, eventIds);
+        } catch (SQLException e) {
+            throw asOXException(e);
+        } finally {
+            dbProvider.releaseReadConnection(context, connection);
+        }
+    }
+
+    private Map<String, Boolean> selectHasTriggers(Connection connection, int userId, String[] eventIds) throws SQLException {
+        if (null == eventIds || 0 == eventIds.length) {
+            return Collections.emptyMap();
+        }
+        StringBuilder stringBuilder = new StringBuilder()
+            .append("SELECT DISTINCT(eventId) FROM calendar_alarm_trigger WHERE cid=? AND account=? AND user=? AND eventId")
+            .append(getPlaceholders(eventIds.length)).append(';')
+        ;
+        Map<String, Boolean> triggersById = new HashMap<String, Boolean>();
+        try (PreparedStatement stmt = connection.prepareStatement(stringBuilder.toString())) {
+            int parameterIndex = 1;
+            stmt.setInt(parameterIndex++, context.getContextId());
+            stmt.setInt(parameterIndex++, accountId);
+            stmt.setInt(parameterIndex++, userId);
+            for (String id : eventIds) {
+                stmt.setString(parameterIndex++, id);
+            }
+            try (ResultSet resultSet = logExecuteQuery(stmt)) {
+                while (resultSet.next()) {
+                    triggersById.put(String.valueOf(resultSet.getString("eventId")), Boolean.TRUE);
+                }
+            }
+            return triggersById;
         }
     }
 

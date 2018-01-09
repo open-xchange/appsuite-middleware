@@ -50,6 +50,7 @@
 package com.openexchange.chronos.impl.session;
 
 import static com.openexchange.java.Autoboxing.I;
+import java.util.List;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Available;
 import com.openexchange.chronos.ParticipationStatus;
@@ -114,12 +115,12 @@ public class CalendarConfigImpl implements CalendarConfig {
     }
 
     @Override
-    public Alarm getDefaultAlarmDate(int userId) throws OXException {
+    public List<Alarm> getDefaultAlarmDate(int userId) throws OXException {
         return getUserSettings(userId).getDefaultAlarmDate();
     }
 
     @Override
-    public Alarm getDefaultAlarmDateTime(int userId) throws OXException {
+    public List<Alarm> getDefaultAlarmDateTime(int userId) throws OXException {
         return getUserSettings(userId).getDefaultAlarmDateTime();
     }
 

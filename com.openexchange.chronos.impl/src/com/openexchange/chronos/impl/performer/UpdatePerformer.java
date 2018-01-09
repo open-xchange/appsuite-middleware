@@ -259,9 +259,9 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
             updateAlarms(eventUpdate.getUpdate(), calendarUserId, storage.getAlarmStorage().loadAlarms(originalEvent, calendarUserId), eventData.getAlarms());
         }
         for (int userId : getUserIDs(eventUpdate.getAttendeeUpdates().getAddedItems())) {
-            Alarm defaultAlarm = isAllDay(eventUpdate.getUpdate()) ? session.getConfig().getDefaultAlarmDate(userId) : session.getConfig().getDefaultAlarmDateTime(userId);
+            List<Alarm> defaultAlarm = isAllDay(eventUpdate.getUpdate()) ? session.getConfig().getDefaultAlarmDate(userId) : session.getConfig().getDefaultAlarmDateTime(userId);
             if (null != defaultAlarm) {
-                insertAlarms(eventUpdate.getUpdate(), userId, Collections.singletonList(defaultAlarm), true);
+                insertAlarms(eventUpdate.getUpdate(), userId, defaultAlarm, true);
             }
         }
         /*
