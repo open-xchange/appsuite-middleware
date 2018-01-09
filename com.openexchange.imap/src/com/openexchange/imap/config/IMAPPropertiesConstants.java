@@ -51,12 +51,12 @@ package com.openexchange.imap.config;
 
 
 /**
- * {@link IMapPropertiesConstants}
+ * {@link IMAPPropertiesConstants}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.10.0
  */
-public class IMapPropertiesConstants {
+public class IMAPPropertiesConstants {
 
     public static final String ATTACHMENT_SEARCH_ENABLED = "com.openexchange.imap.attachmentSearch.enabled";
 }
