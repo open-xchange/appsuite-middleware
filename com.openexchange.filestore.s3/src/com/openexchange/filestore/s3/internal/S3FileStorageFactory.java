@@ -261,7 +261,10 @@ public class S3FileStorageFactory implements FileStorageProvider {
                 clientConfiguration.setProxyPort(Integer.valueOf(proxyPort));
             }
 
-            //TODO add nonProxyHost once aws lib has been updated
+            String nonProxyHosts = System.getProperty("http.nonProxyHosts");
+            if(Strings.isNotEmpty(nonProxyHosts)) {
+                clientConfiguration.setNonProxyHosts(nonProxyHosts);
+            }
 
             String login = System.getProperty("http.proxyUser");
             String password = System.getProperty("http.proxyPassword");
