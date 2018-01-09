@@ -981,7 +981,7 @@ public class NotificationMailGenerator implements ITipMailGenerator {
                 return false;
             }
 
-            return diff.containsAnyChangeOf(new EventField[] { EventField.START_DATE, EventField.END_DATE, EventField.LOCATION, EventField.SUMMARY, EventField.ATTENDEES });
+            return diff.containsAnyChangeOf(new EventField[] { EventField.START_DATE, EventField.END_DATE, EventField.LOCATION, EventField.SUMMARY, EventField.ATTENDEES, EventField.DESCRIPTION, EventField.RECURRENCE_RULE, EventField.ATTACHMENTS });
         }
 
         protected boolean ignorableChangedOnly() {
