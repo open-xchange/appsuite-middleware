@@ -283,7 +283,7 @@ public class AllowedAuthServId {
 
         // ----------------------------------------------------------------------
 
-        private final Pattern pattern;
+        final Pattern pattern;
         /**
          * The regex result time-and-size-based eviction cache (24h, 10.000 elements)
          */

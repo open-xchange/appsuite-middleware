@@ -406,7 +406,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
         }
 
         // The DMARC status was NEUTRAL or none existing, check for DKIM
-        boolean dkimFailed = dkmiFailed(overallResult, bestOfDKIM);
+        boolean dkimFailed = dkimFailed(overallResult, bestOfDKIM);
         // Continue with SPF
         checkSPF(overallResult, bestOfSPF, dkimFailed);
     }
@@ -467,7 +467,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
      * @param bestOfDKIM The best of DKIM {@link MailAuthenticityMechanismResult}
      * @return <code>true</code> if DKIM failed, <code>false</code> otherwise
      */
-    private boolean dkmiFailed(final MailAuthenticityResult overallResult, MailAuthenticityMechanismResult bestOfDKIM) {
+    private boolean dkimFailed(final MailAuthenticityResult overallResult, MailAuthenticityMechanismResult bestOfDKIM) {
         if (bestOfDKIM == null) {
             return false;
         }
