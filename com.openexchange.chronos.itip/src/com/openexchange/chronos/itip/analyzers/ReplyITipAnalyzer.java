@@ -277,7 +277,7 @@ public class ReplyITipAnalyzer extends AbstractITipAnalyzer {
 
         if (method == ITipMethod.COUNTER) {
             // Alright, the counter may overwrite any field
-            ITipEventUpdate diff = new ITipEventUpdate(new EventUpdateImpl(original, update, false, new EventField[] { EventField.ATTENDEES }));
+            ITipEventUpdate diff = new ITipEventUpdate(new EventUpdateImpl(original, update, true, new EventField[] { EventField.ATTENDEES }));
             Set<EventField> skipFields = skipFieldsInCounter(message);
 
             for (EventField field : EventField.values()) {
@@ -297,12 +297,12 @@ public class ReplyITipAnalyzer extends AbstractITipAnalyzer {
             }
         } else if (!update.containsRecurrenceId()) {
             // The Reply may only override participant states
-            final ITipEventUpdate diff = new ITipEventUpdate(new EventUpdateImpl(original, update, false, new EventField[] { EventField.ATTENDEES }));
+            final ITipEventUpdate diff = new ITipEventUpdate(new EventUpdateImpl(original, update, true, new EventField[] { EventField.ATTENDEES }));
             for (EventField updatedField : diff.getUpdatedFields()) {
                 EventMapper.getInstance().copy(diff.getUpdate(), update, new EventField[] { updatedField });
             }
         } else {
-            // hier wir
+            // TODO hier wir
         }
 
         List<Attendee> newUsers = new ArrayList<>();

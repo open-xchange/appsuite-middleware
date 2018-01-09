@@ -198,7 +198,7 @@ public class NotificationMail {
 
     public ITipEventUpdate getDiff() throws OXException {
         if (diff == null && original != null && event != null) {
-            diff = new ITipEventUpdate(new EventUpdateImpl(original, event, false, NotificationMailGenerator.DEFAULT_SKIP));
+            diff = new ITipEventUpdate(new EventUpdateImpl(original, event, true, NotificationMailGenerator.DEFAULT_SKIP));
         }
         return diff;
     }
@@ -386,17 +386,17 @@ public class NotificationMail {
         // Interested in state changes, but not in other changes
         if (getRecipient().getConfiguration().interestedInStateChanges() && !getRecipient().getConfiguration().interestedInChanges()) {
             boolean aboutStateChanges = isAboutStateChanges();
-            LOG.debug("NotificationMail.shouldBeSend (1), User: {}, {}, {}, {}\nDiffering Fields: {}", id(), stateChanges(), changes(), aboutStateChanges, diffs());
+            LOG.debug("NotificationMail.shouldBeSend (1), User: {}, {}, {}, {}\nDiffering Fields: {}", id(), stateChanges(), changes(), Boolean.valueOf(aboutStateChanges), diffs());
             return aboutStateChanges;
         }
 
         // Interested in other changes, but not in state changes
         boolean aboutStateChangesOnly = isAboutStateChangesOnly();
         if (!getRecipient().getConfiguration().interestedInStateChanges() && getRecipient().getConfiguration().interestedInChanges()) {
-            LOG.debug("NotificationMail.shouldBeSend (2), User: {}, {}, {}, {}\nDiffering Fields: {}{}", id(), stateChanges(), changes(), aboutStateChangesOnly, diffs(), getUserDiff());
+            LOG.debug("NotificationMail.shouldBeSend (2), User: {}, {}, {}, {}\nDiffering Fields: {}{}", id(), stateChanges(), changes(), Boolean.valueOf(aboutStateChangesOnly), diffs(), getUserDiff());
             return !aboutStateChangesOnly;
         }
-        LOG.debug("NotificationMail.shouldBeSend (3), User: {}, {}, {}, {}\nDiffering Fields: {}{}", id(), stateChanges(), changes(), aboutStateChangesOnly, diffs(), getUserDiff());
+        LOG.debug("NotificationMail.shouldBeSend (3), User: {}, {}, {}, {}\nDiffering Fields: {}{}", id(), stateChanges(), changes(), Boolean.valueOf(aboutStateChangesOnly), diffs(), getUserDiff());
         return true;
     }
 
@@ -550,7 +550,8 @@ public class NotificationMail {
         return itipMessage != null && itipMessage.getMethod() == ITipMethod.CANCEL;
     }
 
-    private static final EventField[] FIELDS_TO_REPORT = new EventField[] { EventField.LOCATION, EventField.SUMMARY, EventField.START_DATE, EventField.END_DATE, EventField.DESCRIPTION, EventField.RECURRENCE_RULE, EventField.ATTENDEES, EventField.CHANGE_EXCEPTION_DATES };
+    private static final EventField[] FIELDS_TO_REPORT = new EventField[] { EventField.LOCATION, EventField.SUMMARY, EventField.START_DATE, EventField.END_DATE, EventField.DESCRIPTION, EventField.RECURRENCE_RULE, EventField.ATTENDEES,
+        EventField.CHANGE_EXCEPTION_DATES };
 
     private boolean anInterestingFieldChanged() throws OXException {
         if (getDiff() == null) {
