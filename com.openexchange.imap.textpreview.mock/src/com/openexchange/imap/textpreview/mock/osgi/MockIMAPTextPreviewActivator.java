@@ -76,7 +76,7 @@ public class MockIMAPTextPreviewActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        boolean enabled = getService(ConfigurationService.class).getBoolProperty("com.openexchange.imap.textpreview.mock.enabled", false);
+        boolean enabled = getService(ConfigurationService.class).getBoolProperty("com.openexchange.imap.textpreview.mock.enabled", true);
         if (enabled) {
             registerService(IMAPTextPreviewProvider.class, new MockIMAPTextPreviewProvider());
         }
