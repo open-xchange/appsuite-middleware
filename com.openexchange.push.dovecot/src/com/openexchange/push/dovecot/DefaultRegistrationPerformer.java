@@ -57,6 +57,7 @@ import org.slf4j.Logger;
 import com.openexchange.dovecot.doveadm.client.DefaultDoveAdmCommand;
 import com.openexchange.dovecot.doveadm.client.DoveAdmClient;
 import com.openexchange.dovecot.doveadm.client.DoveAdmCommand;
+import com.openexchange.dovecot.doveadm.client.DoveAdmDataResponse;
 import com.openexchange.dovecot.doveadm.client.DoveAdmResponse;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
@@ -72,6 +73,7 @@ import com.openexchange.mail.service.MailService;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.push.PushExceptionCodes;
+import com.openexchange.push.dovecot.commands.CheckExistenceCommand;
 import com.openexchange.push.dovecot.commands.RegistrationCommand;
 import com.openexchange.push.dovecot.commands.UnregistrationCommand;
 import com.openexchange.push.dovecot.registration.RegistrationContext;
@@ -149,8 +151,25 @@ public class DefaultRegistrationPerformer implements RegistrationPerformer {
 
         String user = getLoginFor(registrationContext, doveAdmClient);
         String userInfo = generateIdFor(registrationContext);
-        DoveAdmCommand command = craftMailboxMetadataSetCommandUsing("user=" + userInfo, "reg-" + userInfo, user);
+        String valueToSet = "user=" + userInfo;
+
+        // Check if there is already such a registration
+        DoveAdmCommand command = craftMailboxMetadataGetCommandUsing("get-" + userInfo, user);
         DoveAdmResponse response = doveAdmClient.executeCommand(command);
+        if (response.isError()) {
+            OXException oexc = PushExceptionCodes.UNEXPECTED_ERROR.create("Failed to check for existent Dovecot Push for user " + registrationContext.getUserId() + " in context " + registrationContext.getContextId() + ": " + response.toString());
+            return RegistrationResult.failedRegistrationResult(oexc, true, null);
+        }
+        DoveAdmDataResponse dataResponse = response.asDataResponse();
+        String value = dataResponse.getResults().get(0).getValue("value");
+        if (valueToSet.equals(value)) {
+            LOGGER.debug("Successfully detected an existent Dovecot Push for user {} in context {}", registrationContext.getUserId(), registrationContext.getContextId());
+            return RegistrationResult.successRegistrationResult();
+        }
+
+        // No such registration available. Set it...
+        command = craftMailboxMetadataSetCommandUsing(valueToSet, "reg-" + userInfo, user);
+        response = doveAdmClient.executeCommand(command);
         if (response.isError()) {
             OXException oexc = PushExceptionCodes.UNEXPECTED_ERROR.create("Failed to register Dovecot Push for user " + registrationContext.getUserId() + " in context " + registrationContext.getContextId() + ": " + response.toString());
             return RegistrationResult.failedRegistrationResult(oexc, true, null);
@@ -188,10 +207,13 @@ public class DefaultRegistrationPerformer implements RegistrationPerformer {
             // Proceed & grab INBOX folder
             final IMAPFolder imapFolder = (IMAPFolder) imapStore.getFolder("INBOX");
 
-            // Advertise registration at Dovecot IMAP server through SETMETADATA command
-            Boolean result = (Boolean) imapFolder.doCommand(new RegistrationCommand(imapFolder, session));
-            if (false == result.booleanValue()) {
-                return RegistrationResult.deniedRegistrationResult("SETMETADATA command failed");
+            Boolean alreadyExists = (Boolean) imapFolder.doCommand(new CheckExistenceCommand(imapFolder, session));
+            if (false == alreadyExists.booleanValue()) {
+                // Advertise registration at Dovecot IMAP server through SETMETADATA command
+                Boolean result = (Boolean) imapFolder.doCommand(new RegistrationCommand(imapFolder, session));
+                if (false == result.booleanValue()) {
+                    return RegistrationResult.deniedRegistrationResult("SETMETADATA command failed");
+                }
             }
 
             // Success
@@ -285,7 +307,7 @@ public class DefaultRegistrationPerformer implements RegistrationPerformer {
         return (IMAPFolderStorage) fstore;
     }
 
-    private DoveAdmCommand craftMailboxMetadataSetCommandUsing(String userInfo, String commandId, String user) {
+    private DoveAdmCommand craftMailboxMetadataSetCommandUsing(String value, String commandId, String user) {
         return DefaultDoveAdmCommand.builder()
             .command("mailboxMetadataSet")
             .optionalIdentifier(commandId)
@@ -293,12 +315,24 @@ public class DefaultRegistrationPerformer implements RegistrationPerformer {
             .setParameter("mailbox", "")
             .setParameter("allowEmptyMailboxName", true)
             .setParameter("key", "/private/vendor/vendor.dovecot/http-notify")
-            .setParameter("value", userInfo)
+            .setParameter("value", value)
             .build();
     }
+
     private DoveAdmCommand craftMailboxMetadataUnsetCommandUsing(String commandId, String user) {
         return DefaultDoveAdmCommand.builder()
             .command("mailboxMetadataUnset")
+            .optionalIdentifier(commandId)
+            .setParameter("user", user)
+            .setParameter("mailbox", "")
+            .setParameter("allowEmptyMailboxName", true)
+            .setParameter("key", "/private/vendor/vendor.dovecot/http-notify")
+            .build();
+    }
+
+    private DoveAdmCommand craftMailboxMetadataGetCommandUsing(String commandId, String user) {
+        return DefaultDoveAdmCommand.builder()
+            .command("mailboxMetadataGet")
             .optionalIdentifier(commandId)
             .setParameter("user", user)
             .setParameter("mailbox", "")

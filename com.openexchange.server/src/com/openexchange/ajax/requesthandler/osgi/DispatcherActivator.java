@@ -99,6 +99,7 @@ import com.openexchange.ajax.requesthandler.customizer.ConversionCustomizer;
 import com.openexchange.ajax.requesthandler.jobqueue.JobQueueService;
 import com.openexchange.ajax.requesthandler.jobqueue.impl.ThreadPoolJobQueueService;
 import com.openexchange.ajax.requesthandler.oauth.OAuthAnnotationProcessor;
+import com.openexchange.ajax.requesthandler.oauth.OAuthConstants;
 import com.openexchange.ajax.requesthandler.oauth.OAuthDispatcherServlet;
 import com.openexchange.ajax.requesthandler.responseRenderers.APIResponseRenderer;
 import com.openexchange.ajax.requesthandler.responseRenderers.FileResponseRenderer;
@@ -309,7 +310,7 @@ public class DispatcherActivator extends AbstractSessionServletActivator {
                 if (null == servlets.putIfAbsent(module, PRESENT)) {
                     registerSessionServlet(prefix + module, dispatcherServlet);
                     if (service.getClass().isAnnotationPresent(OAuthModule.class)) {
-                        registerSessionServlet(prefix + "oauth/modules/" + module, oAuthDispatcherServlet);
+                        registerSessionServlet(prefix + OAuthConstants.OAUTH_SERVLET_SUBPREFIX + module, oAuthDispatcherServlet);
                     }
                 }
             }
@@ -320,7 +321,7 @@ public class DispatcherActivator extends AbstractSessionServletActivator {
                 if (null != servlets.remove(module)) {
                     unregisterServlet(prefix + module);
                     if (service.getClass().isAnnotationPresent(OAuthModule.class)) {
-                        unregisterServlet(prefix + "oauth/modules/" + module);
+                        unregisterServlet(prefix + OAuthConstants.OAUTH_SERVLET_SUBPREFIX + module);
                     }
                 }
                 dispatcher.remove(module, service);

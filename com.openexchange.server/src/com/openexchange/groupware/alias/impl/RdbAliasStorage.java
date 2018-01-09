@@ -49,26 +49,28 @@
 
 package com.openexchange.groupware.alias.impl;
 
-import static com.openexchange.tools.sql.DBUtils.IN_LIMIT;
-import static com.openexchange.tools.sql.DBUtils.getIN;
+import static com.openexchange.database.Databases.IN_LIMIT;
+import static com.openexchange.database.Databases.getIN;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ImmutableSet.Builder;
+import com.openexchange.database.DBPoolingExceptionCodes;
+import com.openexchange.database.Databases;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.alias.UserAliasStorage;
 import com.openexchange.groupware.alias.UserAliasStorageExceptionCodes;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.tools.arrays.Arrays;
-import com.openexchange.tools.sql.DBUtils;
+import gnu.trove.iterator.TIntObjectIterator;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 
@@ -94,7 +96,7 @@ public class RdbAliasStorage implements UserAliasStorage {
     }
 
     @Override
-    public Set<String> getAliases(int contextId) throws OXException {
+    public ImmutableSet<String> getAliases(int contextId) throws OXException {
         Connection con = Database.get(contextId, false);
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -103,24 +105,24 @@ public class RdbAliasStorage implements UserAliasStorage {
             stmt.setInt(1, contextId);
             rs = stmt.executeQuery();
             if (false == rs.next()) {
-                return Collections.emptySet();
+                return ImmutableSet.<String> builder().build();
             }
 
-            List<String> l = new LinkedList<String>();
+            ImmutableSet.Builder<String> aliases = ImmutableSet.builder();
             do {
-                l.add(rs.getString(1));
+                aliases.add(rs.getString(1));
             } while (rs.next());
-            return new HashSet<String>(l);
+            return aliases.build();
         } catch (SQLException e) {
-            throw UserAliasStorageExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+            throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
             Database.back(contextId, false, con);
         }
     }
 
     @Override
-    public HashSet<String> getAliases(int contextId, int userId) throws OXException {
+    public ImmutableSet<String> getAliases(int contextId, int userId) throws OXException {
         Connection con = Database.get(contextId, false);
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -130,15 +132,19 @@ public class RdbAliasStorage implements UserAliasStorage {
             stmt.setInt(++index, contextId);
             stmt.setInt(++index, userId);
             rs = stmt.executeQuery();
-            HashSet<String> aliases = new HashSet<String>(6, 0.9F);
-            while (rs.next()) {
-                aliases.add(rs.getString(1));
+            if (false == rs.next()) {
+                return ImmutableSet.<String> builder().build();
             }
-            return aliases;
+
+            ImmutableSet.Builder<String> aliases = ImmutableSet.builder();
+            do {
+                aliases.add(rs.getString(1));
+            } while (rs.next());
+            return aliases.build();
         } catch (SQLException e) {
-            throw UserAliasStorageExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+            throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
             Database.back(contextId, false, con);
         }
     }
@@ -158,7 +164,7 @@ public class RdbAliasStorage implements UserAliasStorage {
             return Collections.<Set<String>> singletonList(getAliases(contextId, userIds[0]));
         }
 
-        TIntObjectMap<Set<String>> map = getAliasesMapping(contextId, userIds);
+        TIntObjectMap<ImmutableSet<String>> map = getAliasesMapping(contextId, userIds);
         List<Set<String>> list = new ArrayList<>(length);
         for (int userId : userIds) {
             list.add(map.get(userId));
@@ -174,11 +180,11 @@ public class RdbAliasStorage implements UserAliasStorage {
      * @return The alias mapping
      * @throws OXException If alias mapping cannot be returned
      */
-    TIntObjectMap<Set<String>> getAliasesMapping(int contextId, int[] userIds) throws OXException {
+    TIntObjectMap<ImmutableSet<String>> getAliasesMapping(int contextId, int[] userIds) throws OXException {
         Connection con = Database.get(contextId, false);
         try {
             int length = userIds.length;
-            TIntObjectMap<Set<String>> map = new TIntObjectHashMap<>(length);
+            TIntObjectMap<ImmutableSet.Builder<String>> map = new TIntObjectHashMap<>(length);
 
             for (int i = 0; i < length; i += IN_LIMIT) {
                 PreparedStatement stmt = null;
@@ -189,24 +195,30 @@ public class RdbAliasStorage implements UserAliasStorage {
                     int pos = 1;
                     stmt.setInt(pos++, contextId);
                     for (int j = 0; j < clen; j++) {
-                        int userId = userIds[i+j];
+                        int userId = userIds[i + j];
                         stmt.setInt(pos++, userId);
-                        map.put(userId, new HashSet<String>(6, 0.9F));
+                        map.put(userId, ImmutableSet.<String> builder());
                     }
                     rs = stmt.executeQuery();
                     while (rs.next()) {
                         int userId = rs.getInt(1);
-                        Set<String> aliases = map.get(userId);
+                        Builder<String> aliases = map.get(userId);
                         aliases.add(rs.getString(2));
                     }
                 } catch (SQLException e) {
-                    throw UserAliasStorageExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+                    throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
                 } finally {
-                    DBUtils.closeSQLStuff(rs, stmt);
+                    Databases.closeSQLStuff(rs, stmt);
                 }
             }
 
-            return map;
+            TIntObjectMap<ImmutableSet<String>> retval = new TIntObjectHashMap<>(length);
+            TIntObjectIterator<Builder<String>> iterator = map.iterator();
+            for (int i = map.size(); i-- > 0;) {
+                iterator.advance();
+                retval.put(iterator.key(), iterator.value().build());
+            }
+            return retval;
         } finally {
             Database.back(contextId, false, con);
         }
@@ -220,7 +232,7 @@ public class RdbAliasStorage implements UserAliasStorage {
         try {
             int index = 0;
             /*
-             *  Use utf8_bin to match umlauts. But that also makes it case sensitive, so use LOWER to be case insesitive.
+             * Use utf8_bin to match umlauts. But that also makes it case sensitive, so use LOWER to be case insesitive.
              */
             stmt = con.prepareStatement("SELECT user FROM user_alias WHERE cid=? AND LOWER(alias) LIKE LOWER(?) COLLATE utf8_bin");
             stmt.setInt(++index, contextId);
@@ -231,10 +243,69 @@ public class RdbAliasStorage implements UserAliasStorage {
             }
             return -1;
         } catch (SQLException e) {
-            throw UserAliasStorageExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+            throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
             Database.back(contextId, false, con);
+        }
+    }
+
+    private void setAliases(int contextId, int userId, Set<String> aliases) throws OXException {
+        Connection con = Database.get(contextId, true);
+        boolean rollback = false;
+        try {
+            Databases.startTransaction(con);
+            rollback = true;
+
+            setAliases(con, contextId, userId, aliases);
+
+            con.commit();
+            rollback = false;
+        } catch (SQLException e) {
+            throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            if (rollback) {
+                Databases.rollback(con);
+            }
+            Databases.autocommit(con);
+            Database.back(contextId, true, con);
+        }
+    }
+
+    @Override
+    public void setAliases(Connection con, int contextId, int userId, Set<String> aliases) throws OXException {
+        if (con == null) {
+            setAliases(contextId, userId, aliases);
+            return;
+        }
+
+        PreparedStatement stmt = null;
+        try {
+            int index = 0;
+            stmt = con.prepareStatement("DELETE FROM user_alias WHERE cid=? AND user=?");
+            stmt.setInt(++index, contextId);
+            stmt.setInt(++index, userId);
+            stmt.executeUpdate();
+            Databases.closeSQLStuff(stmt);
+            stmt = null;
+
+            if (null != aliases && !aliases.isEmpty()) {
+                stmt = con.prepareStatement("INSERT INTO user_alias (cid, user, alias, uuid) VALUES (?,?,?,?) ON DUPLICATE KEY UPDATE alias=?");
+                for (String alias : aliases) {
+                    index = 0;
+                    stmt.setInt(++index, contextId);
+                    stmt.setInt(++index, userId);
+                    stmt.setString(++index, alias);
+                    stmt.setBytes(++index, UUIDs.toByteArray(UUID.randomUUID()));
+                    stmt.setString(++index, alias);
+                    stmt.addBatch();
+                }
+                stmt.executeBatch();
+            }
+        } catch (SQLException e) {
+            throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            Databases.closeSQLStuff(stmt);
         }
     }
 
@@ -264,9 +335,13 @@ public class RdbAliasStorage implements UserAliasStorage {
 
             return stmt.executeUpdate() == 1;
         } catch (SQLException e) {
-            throw UserAliasStorageExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+            if (Databases.isPrimaryKeyConflictInMySQL(e)) {
+                // Hide original exception, don't add to stack trace. See bug 50225
+                throw UserAliasStorageExceptionCodes.DUPLICATE_ALIAS.create(alias);
+            }
+            throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
     }
 
@@ -295,9 +370,9 @@ public class RdbAliasStorage implements UserAliasStorage {
             stmt.setString(++index, oldAlias);
             return stmt.executeUpdate() == 1;
         } catch (SQLException e) {
-            throw UserAliasStorageExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+            throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
     }
 
@@ -325,9 +400,9 @@ public class RdbAliasStorage implements UserAliasStorage {
             stmt.setString(++index, alias);
             return stmt.executeUpdate() == 1;
         } catch (SQLException e) {
-            throw UserAliasStorageExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+            throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
     }
 
@@ -354,9 +429,9 @@ public class RdbAliasStorage implements UserAliasStorage {
             stmt.setInt(++index, userId);
             return stmt.executeUpdate() != 0;
         } catch (SQLException e) {
-            throw UserAliasStorageExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+            throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
     }
 
@@ -382,13 +457,10 @@ public class RdbAliasStorage implements UserAliasStorage {
             } while (rs.next());
             return retval;
         } catch (SQLException e) {
-            throw UserAliasStorageExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-        } catch (RuntimeException e) {
-            throw UserAliasStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
             Database.back(contextId, false, con);
         }
     }
-
 }

@@ -65,19 +65,18 @@ public enum UserAliasStorageExceptionCodes implements DisplayableOXExceptionCode
     /**
      * Unexpected error: %1$s.
      */
-    UNEXPECTED_ERROR(UserAliasStorageExceptionCodes.UNEXPECTED_ERROR_MSG, CATEGORY_ERROR, 1),
+    UNEXPECTED_ERROR("Unexpected error: %1$s.", CATEGORY_ERROR, 1),
     /**
      * A SQL error occurred: %1$s.
      */
-    SQL_ERROR(UserAliasStorageExceptionCodes.SQL_ERROR_MSG, CATEGORY_ERROR, 2, OXExceptionStrings.SQL_ERROR_MSG),
-
+    SQL_ERROR("An SQL error occurred: %1$s.", CATEGORY_ERROR, 2, OXExceptionStrings.SQL_ERROR_MSG),
+    /**
+     * {@value #DUPLICATE_ALIAS_MSG}
+     */
+    DUPLICATE_ALIAS("The alias %1$s already exists. Please note that the alias is case insensitive!", CATEGORY_ERROR, 3)
     ;
 
     private static final String PREFIX = "USER_ALIAS";
-
-    private static final String UNEXPECTED_ERROR_MSG = "Unexpected error: %1$s.";
-
-    private static final String SQL_ERROR_MSG = "A SQL error occurred: %1$s.";
 
     /**
      * Checks if specified {@code OXException}'s prefix is equal to this {@code OXExceptionCode} enumeration.

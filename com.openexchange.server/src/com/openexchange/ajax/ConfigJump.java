@@ -63,6 +63,8 @@ import com.openexchange.configjump.Replacements;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
+import com.openexchange.java.Strings;
+import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
 
@@ -70,6 +72,7 @@ import com.openexchange.tools.session.ServerSession;
  * This class implements the servlet for authenticating the user at the
  * user admin interface an returns the URL for jumping to the user admin
  * interface to the GUI.
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class ConfigJump extends SessionServlet {
@@ -95,56 +98,70 @@ public class ConfigJump extends SessionServlet {
      * {@inheritDoc}
      */
     @Override
-    protected void doGet(final HttpServletRequest req,
-        final HttpServletResponse resp) throws ServletException, IOException {
+    protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
         final ServerSession sessionObj = getSessionObject(req);
         final Response response = new Response(sessionObj);
         try {
-            final Context ctx = ContextStorage.getInstance().getContext(
-                sessionObj.getContextId());
-            final String protocol = Tools.getProtocol(req);
-            final URL url = com.openexchange.configjump.client.ConfigJump.getLink(new Replacements() {
-                @Override
-                public int getContextId() {
-                    return sessionObj.getContextId();
+            if (null == sessionObj) {
+                String sessionId = req.getParameter(PARAMETER_SESSION);
+                if (Strings.isEmpty(sessionId)) {
+                    response.setException(SessionExceptionCodes.SESSION_PARAMETER_MISSING.create());
+                } else {
+                    response.setException(SessionExceptionCodes.SESSION_EXPIRED.create(sessionId));
                 }
-                @Override
-                public String getPassword() {
-                    return sessionObj.getPassword();
-                }
-                @Override
-                public String getUsername() {
-                    return sessionObj.getUserlogin();
-                }
-                @Override
-                public String getProtocol() {
-                    return protocol;
-                }
-                @Override
-                public String getServerName() {
-                    return req.getServerName();
-                }
-                @Override
-                public int getServerPort() {
-                    return req.getServerPort();
-                }
-                @Override
-                public ICookie[] getCookies() {
-                    final Cookie[] cookies = req.getCookies();
-                    final ICookie[] retval = new ICookie[cookies.length];
-                    for (int i = 0; i < cookies.length; i++) {
-                        retval[i] = new CookieImpl(cookies[i].getName(),
-                            cookies[i].getValue());
+            } else {
+                final Context ctx = ContextStorage.getInstance().getContext(sessionObj.getContextId());
+                final String protocol = Tools.getProtocol(req);
+                URL url = com.openexchange.configjump.client.ConfigJump.getLink(new Replacements() {
+
+                    @Override
+                    public int getContextId() {
+                        return sessionObj.getContextId();
                     }
-                    return retval;
-                }
-                @Override
-                public String[] getContextInfos() {
-                    return ctx.getLoginInfo();
-                }
-            });
-            response.setData(url);
-        } catch (final OXException e) {
+
+                    @Override
+                    public String getPassword() {
+                        return sessionObj.getPassword();
+                    }
+
+                    @Override
+                    public String getUsername() {
+                        return sessionObj.getUserlogin();
+                    }
+
+                    @Override
+                    public String getProtocol() {
+                        return protocol;
+                    }
+
+                    @Override
+                    public String getServerName() {
+                        return req.getServerName();
+                    }
+
+                    @Override
+                    public int getServerPort() {
+                        return req.getServerPort();
+                    }
+
+                    @Override
+                    public ICookie[] getCookies() {
+                        final Cookie[] cookies = req.getCookies();
+                        final ICookie[] retval = new ICookie[cookies.length];
+                        for (int i = 0; i < cookies.length; i++) {
+                            retval[i] = new CookieImpl(cookies[i].getName(), cookies[i].getValue());
+                        }
+                        return retval;
+                    }
+
+                    @Override
+                    public String[] getContextInfos() {
+                        return ctx.getLoginInfo();
+                    }
+                });
+                response.setData(url);
+            }
+        } catch (OXException e) {
             LOG.error("", e);
             response.setException(e);
         }
@@ -158,17 +175,21 @@ public class ConfigJump extends SessionServlet {
     }
 
     private static class CookieImpl implements ICookie {
+
         private final String name;
         private final String value;
+
         public CookieImpl(final String name, final String value) {
             super();
             this.name = name;
             this.value = value;
         }
+
         @Override
         public String getName() {
             return name;
         }
+
         @Override
         public String getValue() {
             return value;

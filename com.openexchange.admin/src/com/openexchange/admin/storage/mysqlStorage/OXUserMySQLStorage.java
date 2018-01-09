@@ -811,21 +811,13 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
 
             // update user aliases
             UserAliasStorage aliasStorage = AdminServiceRegistry.getInstance().getService(UserAliasStorage.class);
-            final HashSet<String> alias = usrdata.getAliases();
-            if(null != alias) {
-                Set<String> storedAliases = new HashSet<>(aliasStorage.getAliases(contextId, userId));
-                for (final String elem : alias) {
-                    if (elem != null && elem.trim().length() > 0) {
-                        if (!containsAndRemove(elem, storedAliases)) {
-                            aliasStorage.createAlias(con, contextId, userId, elem);
-                        }
-                    }
+            {
+                Set<String> aliases = usrdata.getAliases();
+                if (null != aliases) {
+                    aliasStorage.setAliases(con, contextId, userId, aliases);
+                } else if (usrdata.isAliasesset()) {
+                    aliasStorage.deleteAliases(con, contextId, userId);
                 }
-                for (String storedAlias : storedAliases) {
-                    aliasStorage.deleteAlias(con, contextId, userId, storedAlias);
-                }
-            } else if (usrdata.isAliasesset()) {
-                aliasStorage.deleteAliases(con, contextId, userId);
             }
 
             if(usrdata.isUserAttributesset()) {
