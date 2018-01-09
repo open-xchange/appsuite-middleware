@@ -135,4 +135,6 @@ original_folder_id:
 content_type:
   type: string
   description: The MIME type of the mail.
-
+text_preview:
+  type: string
+  description: The optional preview of the mail body
