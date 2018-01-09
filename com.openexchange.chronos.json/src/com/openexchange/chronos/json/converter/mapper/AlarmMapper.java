@@ -106,6 +106,7 @@ public class AlarmMapper extends DefaultJsonMapper<Alarm, AlarmField> {
         this.mappedFields = mappings.keySet().toArray(newArray(mappings.keySet().size()));
     }
 
+    @Override
     public AlarmField[] getMappedFields() {
         return mappedFields;
     }
@@ -393,7 +394,7 @@ public class AlarmMapper extends DefaultJsonMapper<Alarm, AlarmField> {
                 object.removeSummary();
             }
         });
-        mappings.put(AlarmField.DESCRIPTION, new StringMapping<Alarm>(ChronosJsonFields.DESCRIPTION, ColumnIDs.DESCRIPTION) {
+        mappings.put(AlarmField.DESCRIPTION, new StringMapping<Alarm>(ChronosJsonFields.DESCRIPTION, null) {
 
             @Override
             public boolean isSet(Alarm object) {

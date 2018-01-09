@@ -163,7 +163,7 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
     protected EnumMap<EventField, ? extends JsonMapping<? extends Object, Event>> createMappings() {
         EnumMap<EventField, JsonMapping<? extends Object, Event>> mappings = new
             EnumMap<EventField, JsonMapping<? extends Object, Event>>(EventField.class);
-        mappings.put(EventField.ID, new StringMapping<Event>(ChronosJsonFields.ID, ColumnIDs.ID) {
+        mappings.put(EventField.ID, new StringMapping<Event>(ChronosJsonFields.ID, null) {
 
             @Override
             public boolean isSet(Event object) {
@@ -185,7 +185,7 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
                 object.removeId();
             }
         });
-        mappings.put(EventField.FOLDER_ID, new StringMapping<Event>(ChronosJsonFields.FOLDER, ColumnIDs.FOLDER_ID) {
+        mappings.put(EventField.FOLDER_ID, new StringMapping<Event>(ChronosJsonFields.FOLDER, null) {
 
             @Override
             public boolean isSet(Event object) {
@@ -207,7 +207,7 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
                 object.removeFolderId();
             }
         });
-        mappings.put(EventField.UID, new StringMapping<Event>(ChronosJsonFields.UID, ColumnIDs.UID) {
+        mappings.put(EventField.UID, new StringMapping<Event>(ChronosJsonFields.UID, null) {
 
             @Override
             public boolean isSet(Event object) {
@@ -229,7 +229,7 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
                 object.removeUid();
             }
         });
-        mappings.put(EventField.FILENAME, new StringMapping<Event>(ChronosJsonFields.FILENAME, ColumnIDs.FILENAME) {
+        mappings.put(EventField.FILENAME, new StringMapping<Event>(ChronosJsonFields.FILENAME, null) {
 
             @Override
             public boolean isSet(Event object) {
@@ -251,7 +251,7 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
                 object.removeFilename();
             }
         });
-        mappings.put(EventField.SEQUENCE, new IntegerMapping<Event>(ChronosJsonFields.SEQUENCE, ColumnIDs.SEQUENCE) {
+        mappings.put(EventField.SEQUENCE, new IntegerMapping<Event>(ChronosJsonFields.SEQUENCE, null) {
 
             @Override
             public boolean isSet(Event object) {
@@ -273,7 +273,7 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
                 object.removeSequence();
             }
         });
-        mappings.put(EventField.CREATED, new TimeMapping<Event>(ChronosJsonFields.CREATED, ColumnIDs.CREATED) {
+        mappings.put(EventField.CREATED, new TimeMapping<Event>(ChronosJsonFields.CREATED, null) {
 
             @Override
             public boolean isSet(Event object) {
@@ -317,7 +317,7 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
                 object.removeTimestamp();
             }
         });
-        mappings.put(EventField.CREATED_BY, new CalendarUserMapping<CalendarUser, Event>(ChronosJsonFields.CREATED_BY, ColumnIDs.CREATED_BY) {
+        mappings.put(EventField.CREATED_BY, new CalendarUserMapping<CalendarUser, Event>(ChronosJsonFields.CREATED_BY, null) {
 
             @Override
             public CalendarUser newInstance() {
@@ -344,7 +344,7 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
                 object.removeCreatedBy();
             }
         });
-        mappings.put(EventField.LAST_MODIFIED, new TimeMapping<Event>(ChronosJsonFields.LAST_MODIFIED, ColumnIDs.LAST_MODIFIED) {
+        mappings.put(EventField.LAST_MODIFIED, new TimeMapping<Event>(ChronosJsonFields.LAST_MODIFIED, null) {
 
             @Override
             public boolean isSet(Event object) {
@@ -366,7 +366,7 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
                 object.removeLastModified();
             }
         });
-        mappings.put(EventField.MODIFIED_BY, new CalendarUserMapping<CalendarUser, Event>(ChronosJsonFields.MODIFIED_BY, ColumnIDs.MODIFIED_BY) {
+        mappings.put(EventField.MODIFIED_BY, new CalendarUserMapping<CalendarUser, Event>(ChronosJsonFields.MODIFIED_BY, null) {
 
             @Override
             public CalendarUser newInstance() {
@@ -393,7 +393,7 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
                 object.removeModifiedBy();
             }
         });
-        mappings.put(EventField.CALENDAR_USER, new CalendarUserMapping<CalendarUser, Event>(ChronosJsonFields.CALENDAR_USER, ColumnIDs.CALENDAR_USER) {
+        mappings.put(EventField.CALENDAR_USER, new CalendarUserMapping<CalendarUser, Event>(ChronosJsonFields.CALENDAR_USER, null) {
 
             @Override
             public CalendarUser newInstance() {
@@ -420,7 +420,7 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
                 object.removeCalendarUser();
             }
         });
-        mappings.put(EventField.SUMMARY, new StringMapping<Event>(ChronosJsonFields.SUMMARY, ColumnIDs.SUMMARY) {
+        mappings.put(EventField.SUMMARY, new StringMapping<Event>(ChronosJsonFields.SUMMARY, null) {
 
             @Override
             public boolean isSet(Event object) {
@@ -442,7 +442,7 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
                 object.removeSummary();
             }
         });
-        mappings.put(EventField.LOCATION, new StringMapping<Event>(ChronosJsonFields.LOCATION, ColumnIDs.LOCATION) {
+        mappings.put(EventField.LOCATION, new StringMapping<Event>(ChronosJsonFields.LOCATION, null) {
 
             @Override
             public boolean isSet(Event object) {
@@ -464,7 +464,7 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
                 object.removeLocation();
             }
         });
-        mappings.put(EventField.DESCRIPTION, new StringMapping<Event>(ChronosJsonFields.DESCRIPTION, ColumnIDs.DESCRIPTION) {
+        mappings.put(EventField.DESCRIPTION, new StringMapping<Event>(ChronosJsonFields.DESCRIPTION, null) {
 
             @Override
             public boolean isSet(Event object) {
@@ -486,7 +486,7 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
                 object.removeDescription();
             }
         });
-        mappings.put(EventField.CATEGORIES, new ListMapping<String, Event>(ChronosJsonFields.CATEGORIES, ColumnIDs.CATEGORIES) {
+        mappings.put(EventField.CATEGORIES, new ListMapping<String, Event>(ChronosJsonFields.CATEGORIES, null) {
 
             @Override
             public boolean isSet(Event object) {
@@ -513,7 +513,7 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
                 return array.getString(index);
             }
         });
-        mappings.put(EventField.CLASSIFICATION, new StringMapping<Event>(ChronosJsonFields.CLASSIFICATION, ColumnIDs.CLASSIFICATION) {
+        mappings.put(EventField.CLASSIFICATION, new StringMapping<Event>(ChronosJsonFields.CLASSIFICATION, null) {
 
             @Override
             public boolean isSet(Event object) {
@@ -536,7 +536,7 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
                 object.removeClassification();
             }
         });
-        mappings.put(EventField.COLOR, new StringMapping<Event>(ChronosJsonFields.COLOR, ColumnIDs.COLOR) {
+        mappings.put(EventField.COLOR, new StringMapping<Event>(ChronosJsonFields.COLOR, null) {
 
             @Override
             public boolean isSet(Event object) {
@@ -558,7 +558,7 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
                 object.removeColor();
             }
         });
-        mappings.put(EventField.START_DATE, new DateTimeMapping<Event>(ChronosJsonFields.START_DATE, ColumnIDs.START_DATE) {
+        mappings.put(EventField.START_DATE, new DateTimeMapping<Event>(ChronosJsonFields.START_DATE, null) {
 
             @Override
             public boolean isSet(Event object) {
@@ -580,7 +580,7 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
                 object.removeStartDate();
             }
         });
-        mappings.put(EventField.END_DATE, new DateTimeMapping<Event>(ChronosJsonFields.END_DATE, ColumnIDs.END_DATE) {
+        mappings.put(EventField.END_DATE, new DateTimeMapping<Event>(ChronosJsonFields.END_DATE, null) {
 
             @Override
             public boolean isSet(Event object) {
@@ -602,7 +602,7 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
                 object.removeEndDate();
             }
         });
-        mappings.put(EventField.TRANSP, new StringMapping<Event>(ChronosJsonFields.TRANSP, ColumnIDs.TRANSP) {
+        mappings.put(EventField.TRANSP, new StringMapping<Event>(ChronosJsonFields.TRANSP, null) {
 
             @Override
             public boolean isSet(Event object) {
@@ -624,7 +624,7 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
                 object.removeTransp();
             }
         });
-        mappings.put(EventField.SERIES_ID, new StringMapping<Event>(ChronosJsonFields.SERIES_ID, ColumnIDs.SERIES_ID) {
+        mappings.put(EventField.SERIES_ID, new StringMapping<Event>(ChronosJsonFields.SERIES_ID, null) {
 
             @Override
             public boolean isSet(Event object) {
@@ -646,7 +646,7 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
                 object.removeSeriesId();
             }
         });
-        mappings.put(EventField.RECURRENCE_RULE, new StringMapping<Event>(ChronosJsonFields.RECURRENCE_RULE, ColumnIDs.RECURRENCE_RULE) {
+        mappings.put(EventField.RECURRENCE_RULE, new StringMapping<Event>(ChronosJsonFields.RECURRENCE_RULE, null) {
 
             @Override
             public boolean isSet(Event object) {
@@ -668,7 +668,7 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
                 object.removeRecurrenceRule();
             }
         });
-        mappings.put(EventField.RECURRENCE_ID, new StringMapping<Event>(ChronosJsonFields.RECURRENCE_ID, ColumnIDs.RECURRENCE_ID) {
+        mappings.put(EventField.RECURRENCE_ID, new StringMapping<Event>(ChronosJsonFields.RECURRENCE_ID, null) {
 
             @Override
             public boolean isSet(Event object) {
@@ -691,7 +691,7 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
                 object.removeRecurrenceId();
             }
         });
-        mappings.put(EventField.CHANGE_EXCEPTION_DATES, new ListMapping<String, Event>(ChronosJsonFields.CHANGE_EXCEPTION_DATES, ColumnIDs.CHANGE_EXCEPTION_DATES) {
+        mappings.put(EventField.CHANGE_EXCEPTION_DATES, new ListMapping<String, Event>(ChronosJsonFields.CHANGE_EXCEPTION_DATES, null) {
 
             @Override
             public boolean isSet(Event object) {
@@ -734,7 +734,7 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
                 return array.getString(index);
             }
         });
-        mappings.put(EventField.DELETE_EXCEPTION_DATES, new ListMapping<String, Event>(ChronosJsonFields.DELETE_EXCEPTION_DATES, ColumnIDs.DELETE_EXCEPTION_DATES) {
+        mappings.put(EventField.DELETE_EXCEPTION_DATES, new ListMapping<String, Event>(ChronosJsonFields.DELETE_EXCEPTION_DATES, null) {
 
             @Override
             public boolean isSet(Event object) {
@@ -777,7 +777,7 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
                 return array.getString(index);
             }
         });
-        mappings.put(EventField.STATUS, new StringMapping<Event>(ChronosJsonFields.STATUS, ColumnIDs.STATUS) {
+        mappings.put(EventField.STATUS, new StringMapping<Event>(ChronosJsonFields.STATUS, null) {
 
             @Override
             public boolean isSet(Event object) {
@@ -822,7 +822,7 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
                 object.removeUrl();
             }
         });
-        mappings.put(EventField.ORGANIZER, new CalendarUserMapping<Organizer, Event>(ChronosJsonFields.ORGANIZER, ColumnIDs.ORGANIZER) {
+        mappings.put(EventField.ORGANIZER, new CalendarUserMapping<Organizer, Event>(ChronosJsonFields.ORGANIZER, null) {
 
             @Override
             public Organizer newInstance() {
@@ -891,7 +891,7 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
                 return geoLocationJson;
             }
         });
-        mappings.put(EventField.ATTENDEES, new AttendeesMapping<Event>(ChronosJsonFields.ATTENDEES, ColumnIDs.ATTENDEES) {
+        mappings.put(EventField.ATTENDEES, new AttendeesMapping<Event>(ChronosJsonFields.ATTENDEES, null) {
 
             @Override
             public boolean isSet(Event object) {
@@ -913,7 +913,7 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
                 object.removeAttendees();
             }
         });
-        mappings.put(EventField.ATTACHMENTS, new AttachmentsMapping<Event>(ChronosJsonFields.ATTACHMENTS, ColumnIDs.ATTACHMENTS) {
+        mappings.put(EventField.ATTACHMENTS, new AttachmentsMapping<Event>(ChronosJsonFields.ATTACHMENTS, null) {
 
             @Override
             public boolean isSet(Event object) {
@@ -936,7 +936,7 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
             }
 
         });
-        mappings.put(EventField.ALARMS, new ListMapping<Alarm, Event>(ChronosJsonFields.ALARMS, ColumnIDs.ALARMS) {
+        mappings.put(EventField.ALARMS, new ListMapping<Alarm, Event>(ChronosJsonFields.ALARMS, null) {
 
             @Override
             public boolean isSet(Event object) {
@@ -984,7 +984,7 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
                 return AlarmMapper.getInstance().deserialize(jsonObject, AlarmMapper.getInstance().getMappedFields(), timeZone);
             }
         });
-        mappings.put(EventField.EXTENDED_PROPERTIES, new ExtendedPropertiesMapping<Event>(ChronosJsonFields.EXTENDED_PROPERTIES, ColumnIDs.EXTENDED_PROPERTIES) {
+        mappings.put(EventField.EXTENDED_PROPERTIES, new ExtendedPropertiesMapping<Event>(ChronosJsonFields.EXTENDED_PROPERTIES, null) {
 
             @Override
             public boolean isSet(Event object) {
@@ -1006,7 +1006,7 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
                 object.removeExtendedProperties();
             }
         });
-        mappings.put(EventField.FLAGS, new DefaultJsonMapping<EnumSet<EventFlag>, Event>(ChronosJsonFields.FLAGS, ColumnIDs.FLAGS) {
+        mappings.put(EventField.FLAGS, new DefaultJsonMapping<EnumSet<EventFlag>, Event>(ChronosJsonFields.FLAGS, null) {
 
             @Override
             public boolean isSet(Event object) {
