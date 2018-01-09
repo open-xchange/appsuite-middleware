@@ -50,13 +50,12 @@
 package com.openexchange.chronos.common;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import com.openexchange.chronos.FreeBusyTime;
 import com.openexchange.chronos.service.FreeBusyResult;
 import com.openexchange.exception.OXException;
@@ -169,10 +168,12 @@ public class FreeBusyUtils {
                      */
                     if (mergedTime.getStartTime().equals(freeBusyTime.getEndTime())) {
                         mergedTime.setStartTime(freeBusyTime.getStartTime());
+                        mergedTime.setEvent(null);
                         iterator.remove();
                         break;
                     } else if (mergedTime.getEndTime().equals(freeBusyTime.getStartTime())) {
                         mergedTime.setEndTime(freeBusyTime.getEndTime());
+                        mergedTime.setEvent(null);
                         iterator.remove();
                         break;
                     }
@@ -186,14 +187,12 @@ public class FreeBusyUtils {
     }
 
     private static Date[] getTimes(List<FreeBusyTime> freeBusyTimes) {
-        Set<Date> times = new HashSet<Date>();
+        SortedSet<Date> times = new TreeSet<Date>();
         for (FreeBusyTime freeBusyTime : freeBusyTimes) {
             times.add(freeBusyTime.getStartTime());
             times.add(freeBusyTime.getEndTime());
         }
-        Date[] array = times.toArray(new Date[times.size()]);
-        Arrays.sort(array);
-        return array;
+        return times.toArray(new Date[times.size()]);
     }
 
 }
