@@ -133,7 +133,7 @@ public class UpdatePerformer extends AbstractActionPerformer {
                 }
             } else {
                 ensureFolderId(event, session);
-                createEvent(event, session);
+                event = createEvent(event, session);
                 forMail = util.reloadEvent(event, session);
             }
 
@@ -185,9 +185,17 @@ public class UpdatePerformer extends AbstractActionPerformer {
         }
     }
 
-    private void createEvent(Event event, CalendarSession session) throws OXException {
+    /**
+     * Creates a new event based on the given event. 
+     * 
+     * @param event The event to create
+     * @param session The {@link CalendarSession}
+     * @return The newly created event
+     * @throws OXException In case event can't be created
+     */
+    private Event createEvent(Event event, CalendarSession session) throws OXException {
         CalendarResult createResult = session.getCalendarService().createEvent(session, event.getFolderId(), event);
-        event.setId(createResult.getCreations().get(0).getCreatedEvent().getId());
+        return createResult.getCreations().get(0).getCreatedEvent();
     }
 
     private void ensureAttendee(Event event, Event currentEvent, ITipAction action, int owner, int contextId, ITipAttributes attributes) {

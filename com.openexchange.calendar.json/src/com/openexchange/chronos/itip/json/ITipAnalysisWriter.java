@@ -55,6 +55,8 @@ import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.calendar.json.actions.chronos.DefaultEventConverter;
 import com.openexchange.calendar.json.compat.Appointment;
 import com.openexchange.calendar.json.compat.AppointmentWriter;
@@ -77,6 +79,8 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class ITipAnalysisWriter {
+    
+    private final static Logger LOGGER = LoggerFactory.getLogger(ITipAnalysisWriter.class);
 
     private final AppointmentWriter appointmentWriter;
     private DefaultEventConverter   eventConverter;
@@ -204,17 +208,21 @@ public class ITipAnalysisWriter {
 
         // Iterate over all columns and put diff into response
         for (int column : Appointment.ALL_COLUMNS) {
-            if (original.contains(column) || updated.contains(column)) {
-                JSONObject difference = new JSONObject();
-                String fieldName = CalendarField.getByColumn(column).getJsonName();
-                Object originalValue = original.get(column);
-                Object updatedValue = updated.get(column);
-                if (null == originalValue ? null != updatedValue : false == originalValue.equals(updatedValue)) {
-                    writeField("old", originalValue, column, fieldName, difference);
-                    writeField("new", updatedValue, column, fieldName, difference);
+            try {
+                if (original.contains(column) || updated.contains(column)) {
+                    JSONObject difference = new JSONObject();
+                    String fieldName = CalendarField.getByColumn(column).getJsonName();
+                    Object originalValue = original.get(column);
+                    Object updatedValue = updated.get(column);
+                    if (null == originalValue ? null != updatedValue : false == originalValue.equals(updatedValue)) {
+                        writeField("old", originalValue, column, fieldName, difference);
+                        writeField("new", updatedValue, column, fieldName, difference);
 
-                    diffObject.put(fieldName, difference);
+                        diffObject.put(fieldName, difference);
+                    }
                 }
+            } catch (UnsupportedOperationException e) {
+                LOGGER.warn("Could not convert field {}.", CalendarField.getByColumn(column).getJsonName(), e);
             }
         }
     }
