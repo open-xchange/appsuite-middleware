@@ -319,15 +319,15 @@ public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
     }
 
     public void purgeConflicts(final ITipAnalysis analysis) throws OXException {
-        final Map<String, ITipChange> knownAppointments = new HashMap<>();
+        final Map<String, ITipChange> knownEvents = new HashMap<>();
         for (final ITipChange change : analysis.getChanges()) {
             final Event currentAppointment = change.getCurrentEvent();
             if (currentAppointment != null) {
-                knownAppointments.put(currentAppointment.getId(), change);
+                knownEvents.put(currentAppointment.getId(), change);
             }
             final Event deletedAppointment = change.getDeletedEvent();
             if (deletedAppointment != null) {
-                knownAppointments.put(deletedAppointment.getId(), change);
+                knownEvents.put(deletedAppointment.getId(), change);
             }
         }
 
@@ -336,23 +336,23 @@ public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
             if (conflicts == null) {
                 continue;
             }
-            final Event newAppointment = change.getNewEvent();
-            if (newAppointment == null) {
+            final Event newEvent = change.getNewEvent();
+            if (newEvent == null) {
                 continue;
             }
-            final Event currentAppointment = change.getCurrentEvent();
-            final Event masterAppointment = change.getMasterEvent();
+            final Event currentEvent = change.getCurrentEvent();
+            final Event masterEvent = change.getMasterEvent();
             for (final Iterator<EventConflict> iterator = conflicts.iterator(); iterator.hasNext();) {
                 final EventConflict conflict = iterator.next();
-                if (currentAppointment != null && (currentAppointment.getId().equals(conflict.getConflictingEvent().getId()))) {
+                if (currentEvent != null && (currentEvent.getId().equals(conflict.getConflictingEvent().getId()))) {
                     iterator.remove();
                     continue;
                 }
-                if (masterAppointment != null && (masterAppointment.getId().equals(conflict.getConflictingEvent().getId()))) {
+                if (masterEvent != null && (masterEvent.getId().equals(conflict.getConflictingEvent().getId()))) {
                     iterator.remove();
                     continue;
                 }
-                final ITipChange changeToConflict = knownAppointments.get(conflict.getConflictingEvent().getId());
+                final ITipChange changeToConflict = knownEvents.get(conflict.getConflictingEvent().getId());
                 if (changeToConflict == null) {
                     continue;
                 }
@@ -363,7 +363,7 @@ public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
                     if (changedAppointment == null) {
                         continue;
                     }
-                    if (!overlaps(changedAppointment, newAppointment)) {
+                    if (!overlaps(changedAppointment, newEvent)) {
                         iterator.remove();
                     }
                 }

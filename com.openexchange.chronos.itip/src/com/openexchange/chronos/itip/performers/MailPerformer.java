@@ -87,18 +87,18 @@ public class MailPerformer extends AbstractActionPerformer {
     public List<Event> perform(ITipAction action, ITipAnalysis analysis, CalendarSession session, ITipAttributes attributes) throws OXException {
         List<ITipChange> changes = analysis.getChanges();
         for (ITipChange change : changes) {
-            Event appointment = change.getNewEvent();
+            Event event = change.getNewEvent();
             // TODO: appointment.setNotification(true);
-            int owner = getOwner(session, analysis, appointment);
-            writeMail(action, null, appointment, session, owner);
+            int owner = getOwner(session, analysis, event);
+            writeMail(action, null, event, session, owner);
         }
 
         List<ITipAnnotation> annotations = analysis.getAnnotations();
         for (ITipAnnotation annotation : annotations) {
-            Event appointment = annotation.getEvent();
+            Event event = annotation.getEvent();
             // TODO: appointment.setNotification(true);
-            int owner = getOwner(session, analysis, appointment);
-            writeMail(action, null, appointment, session, owner);
+            int owner = getOwner(session, analysis, event);
+            writeMail(action, null, event, session, owner);
         }
         return Collections.emptyList();
     }
