@@ -106,8 +106,11 @@ public class FreeBusyUtils {
      * </ul>
      */
     public static List<FreeBusyTime> mergeFreeBusy(List<FreeBusyTime> freeBusyTimes) {
-        if (null == freeBusyTimes || 2 > freeBusyTimes.size()) {
+        if (null == freeBusyTimes) {
             return Collections.emptyList(); // nothing to do
+        }
+        if (2 > freeBusyTimes.size()) {
+            return freeBusyTimes; // nothing more to do
         }
         /*
          * expand times to match all possible boundaries
