@@ -52,14 +52,10 @@ package com.openexchange.chronos.json.converter.mapper;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.i;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.EnumMap;
 import java.util.EnumSet;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map.Entry;
-import java.util.Set;
 import java.util.SortedSet;
 import java.util.TimeZone;
 import java.util.TreeSet;
@@ -92,6 +88,7 @@ import com.openexchange.groupware.tools.mappings.json.LongMapping;
 import com.openexchange.groupware.tools.mappings.json.StringMapping;
 import com.openexchange.groupware.tools.mappings.json.TimeMapping;
 import com.openexchange.java.Enums;
+import com.openexchange.java.Strings;
 import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
@@ -130,22 +127,26 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
         return mappedFields;
     }
 
-    public EventField[] getAssignedFields(Event event, EventField... mandatoryFields) {
-        if (null == event) {
-            throw new IllegalArgumentException("event");
+    /**
+     * Parses event fields from a comma separated string.
+     *
+     * @param value The comma separated string of field names to parse
+     * @return The parsed fields, or <code>null</code> if the passed value was <code>null</code>
+     */
+    public EventField[] parseFields(String value) throws OXException {
+        if (null == value) {
+            return null;
         }
-        Set<EventField> setFields = new HashSet<EventField>();
-        for (Entry<EventField, ? extends JsonMapping<? extends Object, Event>> entry : getMappings().entrySet()) {
-            JsonMapping<? extends Object, Event> mapping = entry.getValue();
-            if (mapping.isSet(event)) {
-                EventField field = entry.getKey();
-                setFields.add(field);
+        String[] splittedValue = Strings.splitByComma(value);
+        EventField[] fields = new EventField[splittedValue.length];
+        for (int i = 0; i < splittedValue.length; i++) {
+            EventField field = getMappedField(splittedValue[i]);
+            if (null == field) {
+                throw OXException.notFound(splittedValue[i]);
             }
+            fields[i] = field;
         }
-        if (null != mandatoryFields) {
-            setFields.addAll(Arrays.asList(mandatoryFields));
-        }
-        return setFields.toArray(newArray(setFields.size()));
+        return fields;
     }
 
     @Override

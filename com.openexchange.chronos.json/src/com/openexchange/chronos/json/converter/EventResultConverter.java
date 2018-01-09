@@ -58,9 +58,12 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.Converter;
 import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.json.converter.mapper.EventMapper;
 import com.openexchange.chronos.json.fields.ChronosGeneralJsonFields;
+import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.exception.OXException;
+import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -93,13 +96,6 @@ public class EventResultConverter implements ResultConverter {
     @Override
     public void convert(AJAXRequestData requestData, AJAXRequestResult result, ServerSession session, Converter converter) throws OXException {
         /*
-         * Determine timezone
-         */
-        String timeZoneID = requestData.getParameter(ChronosGeneralJsonFields.TIMEZONE);
-        if (null == timeZoneID) {
-            timeZoneID = session.getUser().getTimeZone();
-        }
-        /*
          * check and convert result object
          */
         Object resultObject = result.getResultObject();
@@ -107,37 +103,58 @@ public class EventResultConverter implements ResultConverter {
             /*
              * only one event to convert
              */
-            resultObject = convertEvent((Event) resultObject, timeZoneID, session);
+            resultObject = convertEvent((Event) resultObject, getTimeZoneID(requestData, session), session, getFields(requestData));
         } else if (List.class.isInstance(resultObject)) {
             /*
              * convert list of events
              */
-            resultObject = convertEvents((List<Event>) resultObject, timeZoneID, session);
+            resultObject = convertEvents((List<Event>) resultObject, getTimeZoneID(requestData, session), session, getFields(requestData));
         } else {
             throw new UnsupportedOperationException();
         }
         result.setResultObject(resultObject, getOutputFormat());
     }
 
-    private JSONObject convertEvent(Event event, String timeZoneID, ServerSession session) throws OXException {
+    protected JSONObject convertEve1nt(Event event, String timeZoneID, Session session) throws OXException {
+        return convertEvent(event, timeZoneID, session, null);
+    }
+
+    protected JSONObject convertEvent(Event event, String timeZoneID, Session session, EventField[] fields) throws OXException {
         if (null == event) {
             return null;
         }
+        if (null == fields) {
+            fields = EventMapper.getInstance().getAssignedFields(event);
+        }
         try {
-            return EventMapper.getInstance().serialize(event, EventMapper.getInstance().getAssignedFields(event), timeZoneID, session);
+            return EventMapper.getInstance().serialize(event, fields, timeZoneID, session);
         } catch (JSONException e) {
             throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
         }
     }
 
-    private JSONArray convertEvents(List<Event> events, String timeZoneID, ServerSession session) throws OXException {
+    protected JSONArray convertEvent1s(List<Event> events, String timeZoneID, Session session) throws OXException {
+        return convertEvents(events, timeZoneID, session, null);
+    }
+
+    protected JSONArray convertEvents(List<Event> events, String timeZoneID, Session session, EventField[] fields) throws OXException {
         if (null == events) {
             return null;
         }
         JSONArray jsonArray = new JSONArray(events.size());
         for (Event event : events) {
-            jsonArray.put(convertEvent(event, timeZoneID, session));
+            jsonArray.put(convertEvent(event, timeZoneID, session, fields));
         }
         return jsonArray;
     }
+
+    protected static String getTimeZoneID(AJAXRequestData requestData, ServerSession session) {
+        String timeZoneID = requestData.getParameter(ChronosGeneralJsonFields.TIMEZONE);
+        return null == timeZoneID ? session.getUser().getTimeZone() : timeZoneID;
+    }
+
+    protected static EventField[] getFields(AJAXRequestData requestData) throws OXException {
+        return EventMapper.getInstance().parseFields(requestData.getParameter(CalendarParameters.PARAMETER_FIELDS));
+    }
+
 }
