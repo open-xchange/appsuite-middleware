@@ -390,7 +390,7 @@ public class Check extends com.openexchange.chronos.common.Check {
      *
      * @param recurrenceId The recurrence identifier to check
      * @param expectedRange The expected recurrence range, or <code>null</code> to ensure no range is set
-     * @return The recurrence identifier, after its range paramter was checked
+     * @return The recurrence identifier, after its range parameter was checked
      * @throws OXException {@link CalendarExceptionCodes#INVALID_RECURRENCE_ID}
      */
     public static RecurrenceId recurrenceRangeMatches(RecurrenceId recurrenceId, RecurrenceRange expectedRange) throws OXException {
