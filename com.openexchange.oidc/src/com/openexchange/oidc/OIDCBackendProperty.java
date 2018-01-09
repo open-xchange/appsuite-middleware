@@ -139,7 +139,7 @@ public enum OIDCBackendProperty implements Property {
     /**
      * uiWebPath - This backends UI path
      */
-    uiWebPath(OIDCProperty.PREFIX, "/appsuite/"),
+    uiWebPath(OIDCProperty.PREFIX, OIDCProperty.EMPTY),
     /**
      * backendPath - This backends servlet path, which is appended to the default /oidc/ path.
      */
