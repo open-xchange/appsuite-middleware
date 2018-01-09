@@ -217,6 +217,12 @@ public class RdbCalendarStorage implements CalendarStorage {
             public void insertTriggers(Event event, Map<Integer, List<Alarm>> alarmsPerUserId) throws OXException {
                 // Do nothing
             }
+
+            @Override
+            public Map<String, Boolean> hasTriggers(int userId, String[] eventIds) throws OXException {
+                // TODO Auto-generated method stub
+                return null;
+            }
         };
     }
 
