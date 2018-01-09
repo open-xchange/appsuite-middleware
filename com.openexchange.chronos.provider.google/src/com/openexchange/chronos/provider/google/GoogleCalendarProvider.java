@@ -61,6 +61,8 @@ import java.util.EnumSet;
 import java.util.Locale;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.model.CalendarList;
 import com.google.api.services.calendar.model.CalendarListEntry;
@@ -90,6 +92,8 @@ import com.openexchange.session.Session;
  */
 public class GoogleCalendarProvider implements BasicCalendarProvider {
 
+    private static final Logger LOG = LoggerFactory.getLogger(GoogleCalendarProvider.class);
+
     public static final String PROVIDER_ID = "google";
     private static final String DISPLAY_NAME = "Google";
 
@@ -103,8 +107,8 @@ public class GoogleCalendarProvider implements BasicCalendarProvider {
         return DISPLAY_NAME;
     }
 
-    private int checkConfig(JSONObject userConfig) throws OXException{
-        if(!userConfig.hasAndNotNull(GoogleCalendarConfigField.OAUTH_ID)){
+    private int checkConfig(JSONObject userConfig) throws OXException {
+        if (!userConfig.hasAndNotNull(GoogleCalendarConfigField.OAUTH_ID)) {
             throw CalendarExceptionCodes.INVALID_CONFIGURATION.create(userConfig);
         }
         try {
@@ -170,13 +174,13 @@ public class GoogleCalendarProvider implements BasicCalendarProvider {
         try {
             CalendarList list = googleCal.calendarList().list().execute();
             CalendarListEntry primary = null;
-            for(CalendarListEntry entry: list.getItems()) {
-                if(entry.isPrimary()) {
+            for (CalendarListEntry entry : list.getItems()) {
+                if (entry.isPrimary()) {
                     primary = entry;
                     break;
                 }
             }
-            if(primary != null) {
+            if (primary != null) {
                 userConfig.put(GoogleCalendarConfigField.FOLDER, primary.getId());
                 settings.setName(primary.getSummary());
                 proposedExtendedProperties.add(COLOR(primary.getColorId(), false));
@@ -221,23 +225,24 @@ public class GoogleCalendarProvider implements BasicCalendarProvider {
         JSONObject internalConfig = new JSONObject();
         try {
             internalConfig.put(GoogleCalendarConfigField.OAUTH_ID, accountId);
-            if(userConfig.hasAndNotNull(GoogleCalendarConfigField.FOLDER)) {
+            if (userConfig.hasAndNotNull(GoogleCalendarConfigField.FOLDER)) {
                 internalConfig.put(GoogleCalendarConfigField.FOLDER, userConfig.getString(GoogleCalendarConfigField.FOLDER));
             }
 
             // store extended properties
             ExtendedProperties extendedProperties = settings.getExtendedProperties();
             Object colorValue = CalendarFolderProperty.optPropertyValue(extendedProperties, CalendarFolderProperty.COLOR_LITERAL);
-            if(colorValue != null) {
+            if (colorValue != null) {
                 internalConfig.put(GoogleCalendarConfigField.COLOR, colorValue);
             }
 
             Object description = CalendarFolderProperty.optPropertyValue(extendedProperties, CalendarFolderProperty.DESCRIPTION_LITERAL);
-            if(description != null) {
+            if (description != null) {
                 internalConfig.put(GoogleCalendarConfigField.DESCRIPTION, description);
             }
         } catch (JSONException e) {
             // never happens
+            LOG.debug("{}", e.getMessage(), e);
         }
         return internalConfig;
     }
@@ -258,21 +263,22 @@ public class GoogleCalendarProvider implements BasicCalendarProvider {
         JSONObject result = new JSONObject();
         try {
             result.put(GoogleCalendarConfigField.OAUTH_ID, accountId);
-            if(userConfig.hasAndNotNull(GoogleCalendarConfigField.FOLDER)) {
+            if (userConfig.hasAndNotNull(GoogleCalendarConfigField.FOLDER)) {
                 result.put(GoogleCalendarConfigField.FOLDER, userConfig.getString(GoogleCalendarConfigField.FOLDER));
             }
 
-            if(userConfig.hasAndNotNull(GoogleCalendarConfigField.COLOR)) {
+            if (userConfig.hasAndNotNull(GoogleCalendarConfigField.COLOR)) {
                 result.put(GoogleCalendarConfigField.COLOR, userConfig.getString(GoogleCalendarConfigField.COLOR));
             }
 
-            if(userConfig.hasAndNotNull(GoogleCalendarConfigField.DESCRIPTION)) {
+            if (userConfig.hasAndNotNull(GoogleCalendarConfigField.DESCRIPTION)) {
                 result.put(GoogleCalendarConfigField.DESCRIPTION, userConfig.getString(GoogleCalendarConfigField.DESCRIPTION));
             }
         } catch (JSONException e) {
             // never happens
+            LOG.debug("{}", e.getMessage(), e);
         }
-        if(result.isEqualTo(calendarAccount.getInternalConfiguration())) {
+        if (result.isEqualTo(calendarAccount.getInternalConfiguration())) {
             return null;
         }
         return result;
