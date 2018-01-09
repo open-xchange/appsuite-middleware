@@ -716,39 +716,40 @@ public class EventUpdateProcessor implements EventUpdate {
      * @return <code>true</code> if the attendee's participation status should be reseted, <code>false</code>, otherwise
      * @see <a href="https://tools.ietf.org/html/rfc6638#section-3.2.8">RFC 6638, section 3.2.8</a>
      */
-    private static boolean needsParticipationStatusReset(Event originalEvent, Event updatedEvent) throws OXException {
-        if (false == EventMapper.getInstance().get(EventField.RECURRENCE_RULE).equals(originalEvent, updatedEvent)) {
-            /*
-             * reset if there are 'new' occurrences (caused by a modified or extended rule)
-             */
-            if (hasFurtherOccurrences(originalEvent.getRecurrenceRule(), updatedEvent.getRecurrenceRule())) {
-                return true;
+    private boolean needsParticipationStatusReset(Event originalEvent, Event updatedEvent) throws OXException {
+        if (CalendarUtils.isOrganizer(updatedEvent, session.getUserId())) {
+            if (false == EventMapper.getInstance().get(EventField.RECURRENCE_RULE).equals(originalEvent, updatedEvent)) {
+                /*
+                 * reset if there are 'new' occurrences (caused by a modified or extended rule)
+                 */
+                if (hasFurtherOccurrences(originalEvent.getRecurrenceRule(), updatedEvent.getRecurrenceRule())) {
+                    return true;
+                }
             }
-        }
-        if (false == EventMapper.getInstance().get(EventField.DELETE_EXCEPTION_DATES).equals(originalEvent, updatedEvent)) {
-            /*
-             * reset if there are 'new' occurrences (caused by the reinstatement of previous delete exceptions)
-             */
-            SimpleCollectionUpdate<RecurrenceId> exceptionDateUpdates = getExceptionDateUpdates(
-                originalEvent.getDeleteExceptionDates(), updatedEvent.getDeleteExceptionDates());
-            if (false == exceptionDateUpdates.getRemovedItems().isEmpty()) {
-                return true;
+            if (false == EventMapper.getInstance().get(EventField.DELETE_EXCEPTION_DATES).equals(originalEvent, updatedEvent)) {
+                /*
+                 * reset if there are 'new' occurrences (caused by the reinstatement of previous delete exceptions)
+                 */
+                SimpleCollectionUpdate<RecurrenceId> exceptionDateUpdates = getExceptionDateUpdates(originalEvent.getDeleteExceptionDates(), updatedEvent.getDeleteExceptionDates());
+                if (false == exceptionDateUpdates.getRemovedItems().isEmpty()) {
+                    return true;
+                }
             }
-        }
-        if (false == EventMapper.getInstance().get(EventField.START_DATE).equals(originalEvent, updatedEvent)) {
-            /*
-             * reset if updated start is before the original start
-             */
-            if (updatedEvent.getStartDate().before(originalEvent.getStartDate())) {
-                return true;
+            if (false == EventMapper.getInstance().get(EventField.START_DATE).equals(originalEvent, updatedEvent)) {
+                /*
+                 * reset if updated start is before the original start
+                 */
+                if (updatedEvent.getStartDate().before(originalEvent.getStartDate())) {
+                    return true;
+                }
             }
-        }
-        if (false == EventMapper.getInstance().get(EventField.END_DATE).equals(originalEvent, updatedEvent)) {
-            /*
-             * reset if updated end is after the original end
-             */
-            if (updatedEvent.getEndDate().after(originalEvent.getEndDate())) {
-                return true;
+            if (false == EventMapper.getInstance().get(EventField.END_DATE).equals(originalEvent, updatedEvent)) {
+                /*
+                 * reset if updated end is after the original end
+                 */
+                if (updatedEvent.getEndDate().after(originalEvent.getEndDate())) {
+                    return true;
+                }
             }
         }
         /*
