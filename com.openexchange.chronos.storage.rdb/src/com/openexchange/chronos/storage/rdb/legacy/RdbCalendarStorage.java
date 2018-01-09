@@ -220,8 +220,8 @@ public class RdbCalendarStorage implements CalendarStorage {
 
             @Override
             public Map<String, Boolean> hasTriggers(int userId, String[] eventIds) throws OXException {
-                // TODO Auto-generated method stub
-                return null;
+                // Do nothing
+                return Collections.emptyMap();
             }
         };
     }

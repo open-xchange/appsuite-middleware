@@ -462,6 +462,9 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
     }
 
     private Map<String, ParticipationStatus> selectPartStats(Connection connection, String[] eventIds, Attendee attendee) throws SQLException, OXException {
+        if (null == eventIds || 0 == eventIds.length) {
+            return java.util.Collections.emptyMap();
+        }
         StringBuilder stringBuilder = new StringBuilder()
             .append("SELECT event,partStat FROM calendar_attendee WHERE cid=? AND account=? AND ")
             .append(isInternal(attendee) ? "entity" : "uri").append("=?")
