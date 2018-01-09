@@ -717,7 +717,7 @@ public class EventUpdateProcessor implements EventUpdate {
      * @see <a href="https://tools.ietf.org/html/rfc6638#section-3.2.8">RFC 6638, section 3.2.8</a>
      */
     private boolean needsParticipationStatusReset(Event originalEvent, Event updatedEvent) throws OXException {
-        if (CalendarUtils.isOrganizer(updatedEvent, session.getUserId())) {
+        if (CalendarUtils.isOrganizer(updatedEvent, calendarUser.getEntity())) {
             if (false == EventMapper.getInstance().get(EventField.RECURRENCE_RULE).equals(originalEvent, updatedEvent)) {
                 /*
                  * reset if there are 'new' occurrences (caused by a modified or extended rule)
