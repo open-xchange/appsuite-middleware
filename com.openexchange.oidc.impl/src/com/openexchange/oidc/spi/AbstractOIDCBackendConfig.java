@@ -71,6 +71,13 @@ public abstract class AbstractOIDCBackendConfig implements OIDCBackendConfig {
 
     protected LeanConfigurationService leanConfigurationService;
 
+    
+    /**
+     * customPropertyPrefix - If set, it identifies this {@link OIDCBackendConfig}. The set value 
+     * is appended to OIDCProperty.PREFIX. 
+     * See <code>com.openexchange.oidc.spi.AbstractOIDCBackendConfig.getCustomProperty(OIDCBackendProperty)</code>
+     * for more information
+     */
     protected String customPropertyPrefix;
 
     /**
@@ -209,10 +216,11 @@ public abstract class AbstractOIDCBackendConfig implements OIDCBackendConfig {
      */
     protected String loadStringProperty(final OIDCBackendProperty backendProperty) {
         String result = "";
-        if (Strings.isEmpty(this.customPropertyPrefix)) {
-            result = this.leanConfigurationService.getProperty(backendProperty);
-        } else {
+        if (!Strings.isEmpty(this.customPropertyPrefix)) {
             result = this.leanConfigurationService.getProperty(this.getCustomProperty(backendProperty));
+        } 
+        if (Strings.isEmpty(result)) {
+            result = this.leanConfigurationService.getProperty(backendProperty);
         }
         return result;
     }
@@ -225,11 +233,12 @@ public abstract class AbstractOIDCBackendConfig implements OIDCBackendConfig {
      * @return The {@link int} value
      */
     protected int loadIntProperty(final OIDCBackendProperty backendProperty) {
-        int result;
-        if (Strings.isEmpty(this.customPropertyPrefix)) {
-            result = this.leanConfigurationService.getIntProperty(backendProperty);
-        } else {
+        Integer result = null;
+        if (!Strings.isEmpty(this.customPropertyPrefix)) {
             result = this.leanConfigurationService.getIntProperty(this.getCustomProperty(backendProperty));
+        } 
+        if (result == null) {
+            result = this.leanConfigurationService.getIntProperty(backendProperty);
         }
         return result;
     }
@@ -242,11 +251,12 @@ public abstract class AbstractOIDCBackendConfig implements OIDCBackendConfig {
      * @return The {@link boolean} value
      */
     protected boolean loadBooleanProperty(final OIDCBackendProperty backendProperty) {
-        boolean result;
-        if (Strings.isEmpty(this.customPropertyPrefix)) {
-            result = this.leanConfigurationService.getBooleanProperty(backendProperty);
-        } else {
+        Boolean result = null;
+        if (!Strings.isEmpty(this.customPropertyPrefix)) {
             result = this.leanConfigurationService.getBooleanProperty(this.getCustomProperty(backendProperty));
+        } 
+        if (result == null) {
+            result = this.leanConfigurationService.getBooleanProperty(backendProperty);
         }
         return result;
     }

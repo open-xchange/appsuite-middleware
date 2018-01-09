@@ -48,7 +48,6 @@
  */
 package com.openexchange.oidc;
 
-import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.exception.OXException;
