@@ -128,7 +128,7 @@ public class NotificationMailGenerator implements ITipMailGenerator {
 
     protected NotificationParticipant actor;
 
-    protected final Event appointment;
+    protected final Event updated;
 
     protected final Event original;
 
@@ -145,7 +145,7 @@ public class NotificationMailGenerator implements ITipMailGenerator {
     public static final EventField[] DEFAULT_SKIP = new EventField[] { EventField.ID, EventField.FOLDER_ID, EventField.CREATED_BY, EventField.MODIFIED_BY, EventField.CREATED, EventField.LAST_MODIFIED, EventField.ALARMS, EventField.SEQUENCE,
         EventField.TRANSP };
 
-    public NotificationMailGenerator(final ServiceLookup services, final AttachmentMemory attachmentMemory, final NotificationParticipantResolver resolver, final ITipIntegrationUtility util, final Event original, final Event appointment, User user,
+    public NotificationMailGenerator(final ServiceLookup services, final AttachmentMemory attachmentMemory, final NotificationParticipantResolver resolver, final ITipIntegrationUtility util, final Event original, final Event updated, User user,
         final User onBehalfOf, final Context ctx, final Session session, CalendarUser principal) throws OXException {
         this.util = util;
         this.ctx = ctx;
@@ -153,9 +153,9 @@ public class NotificationMailGenerator implements ITipMailGenerator {
         this.attachmentMemory = attachmentMemory;
         this.calendarUtilities = Services.getService(CalendarUtilities.class);
 
-        this.recipients = resolver.resolveAllRecipients(original, appointment, user, onBehalfOf, ctx, session, principal);
-        this.participants = resolver.getAllParticipants(this.recipients, appointment, user, ctx);
-        this.resources = resolver.getResources(appointment, ctx);
+        this.recipients = resolver.resolveAllRecipients(original, updated, user, onBehalfOf, ctx, session, principal);
+        this.participants = resolver.getAllParticipants(this.recipients, updated, user, ctx);
+        this.resources = resolver.getResources(updated, ctx);
 
         for (final NotificationParticipant participant : recipients) {
             if (participant.hasRole(ITipRole.ORGANIZER)) {
@@ -180,11 +180,11 @@ public class NotificationMailGenerator implements ITipMailGenerator {
         }
 
         this.original = original;
-        this.appointment = appointment;
+        this.updated = updated;
         this.session = session;
 
         if (original != null) {
-            this.diff = new ITipEventUpdate(new EventUpdateImpl(original, appointment, false, DEFAULT_SKIP));
+            this.diff = new ITipEventUpdate(new EventUpdateImpl(original, updated, false, DEFAULT_SKIP));
         }
 
         if (actor.hasRole(ITipRole.ORGANIZER) || actor.hasRole(ITipRole.PRINCIPAL)) {
@@ -197,7 +197,7 @@ public class NotificationMailGenerator implements ITipMailGenerator {
             }
         }
 
-        if (diff != null && diff.getUpdatedFields().isEmpty() && !attachmentMemory.hasAttachmentChanged(appointment.getId(), session.getContextId())) {
+        if (diff != null && diff.getUpdatedFields().isEmpty() && !attachmentMemory.hasAttachmentChanged(updated.getId(), session.getContextId())) {
             state = new DoNothingState();
         }
     }
@@ -272,7 +272,7 @@ public class NotificationMailGenerator implements ITipMailGenerator {
 
         final ITipMessage message = new ITipMessage();
         message.setMethod(ITipMethod.CANCEL);
-        message.setEvent(appointment);
+        message.setEvent(updated);
 
         mail.setMessage(message);
 
@@ -306,7 +306,7 @@ public class NotificationMailGenerator implements ITipMailGenerator {
     }
 
     protected NotificationMail request(final NotificationParticipant recipient, final Event override, final State.Type type) throws OXException {
-        final Event appointmentToReport = (override != null) ? override : this.appointment;
+        final Event eventToReport = (override != null) ? override : this.updated;
         final NotificationMail mail = new NotificationMail();
         mail.setRecipient(recipient);
         mail.setSender(determinateSender(recipient.isExternal()));
@@ -316,10 +316,10 @@ public class NotificationMailGenerator implements ITipMailGenerator {
 
         final ITipMessage message = new ITipMessage();
         message.setMethod(ITipMethod.REQUEST);
-        message.setEvent(appointmentToReport);
+        message.setEvent(eventToReport);
 
-        if (CalendarUtils.isSeriesMaster(appointmentToReport)) {
-            final List<Event> exceptions = util.getExceptions(appointmentToReport, session);
+        if (CalendarUtils.isSeriesMaster(eventToReport)) {
+            final List<Event> exceptions = util.getExceptions(eventToReport, session);
             if (exceptions != null) {
                 for (final Event exception : exceptions) {
                     message.addException(exception);
@@ -328,7 +328,7 @@ public class NotificationMailGenerator implements ITipMailGenerator {
         }
         mail.setMessage(message);
         mail.setOriginal(original);
-        mail.setEvent(appointmentToReport);
+        mail.setEvent(eventToReport);
 
         return mail;
     }
@@ -381,7 +381,7 @@ public class NotificationMailGenerator implements ITipMailGenerator {
 
         final ITipMessage message = new ITipMessage();
         message.setMethod(ITipMethod.REQUEST);
-        message.addException(appointment);
+        message.addException(updated);
         mail.setMessage(message);
 
         return mail;
@@ -397,10 +397,10 @@ public class NotificationMailGenerator implements ITipMailGenerator {
 
         final ITipMessage message = new ITipMessage();
         message.setMethod(ITipMethod.COUNTER);
-        if (CalendarUtils.isSeriesException(appointment)) {
-            message.addException(appointment);
+        if (CalendarUtils.isSeriesException(updated)) {
+            message.addException(updated);
         } else {
-            message.setEvent(appointment);
+            message.setEvent(updated);
         }
 
         mail.setMessage(message);
@@ -423,8 +423,8 @@ public class NotificationMailGenerator implements ITipMailGenerator {
             if (field == EventField.ATTENDEES) {
                 continue;
             }
-            if (appointment.isSet(field)) {
-                EventMapper.getInstance().copy(appointment, reply, field);
+            if (updated.isSet(field)) {
+                EventMapper.getInstance().copy(updated, reply, field);
             }
         }
         Attendee attendee = new Attendee();
@@ -470,7 +470,7 @@ public class NotificationMailGenerator implements ITipMailGenerator {
         final ITipMessage message = new ITipMessage();
         message.setMethod(ITipMethod.REFRESH);
 
-        final Event address = calendarUtilities.copyEvent(appointment, (EventField[]) null);
+        final Event address = calendarUtilities.copyEvent(updated, (EventField[]) null);
         address.removeAttendees();
         address.removeDescription();
         address.removeLocation();
@@ -497,10 +497,10 @@ public class NotificationMailGenerator implements ITipMailGenerator {
         final ITipMessage message = new ITipMessage();
         message.setMethod(ITipMethod.DECLINECOUNTER);
 
-        if (CalendarUtils.isSeriesException(appointment)) {
-            message.addException(appointment);
+        if (CalendarUtils.isSeriesException(updated)) {
+            message.addException(updated);
         } else {
-            message.setEvent(appointment);
+            message.setEvent(updated);
         }
 
         mail.setMessage(message);
@@ -513,7 +513,7 @@ public class NotificationMailGenerator implements ITipMailGenerator {
         mail.setActor(actor);
         mail.setPrincipal(principal);
         mail.setSharedCalendarOwner(onBehalfOf);
-        mail.setEvent(appointment);
+        mail.setEvent(updated);
         mail.setOriginal(original);
         mail.setParticipants(participants);
         mail.setResources(resources);
@@ -524,7 +524,7 @@ public class NotificationMailGenerator implements ITipMailGenerator {
         if (services == null) {
             return;
         }
-        if (!attachmentMemory.hasAttachmentChanged(appointment.getId(), ctx.getContextId())) {
+        if (!attachmentMemory.hasAttachmentChanged(updated.getId(), ctx.getContextId())) {
             return;
         }
         mail.setAttachmentUpdate(true);
@@ -667,9 +667,9 @@ public class NotificationMailGenerator implements ITipMailGenerator {
             return;
         }
         final Event originalForRendering = mail.getOriginal();
-        final Event appointmentForRendering = mail.getEvent();
+        final Event updateForRendering = mail.getEvent();
 
-        fastForwardToConcreteOriginalOccurrence(originalForRendering, appointmentForRendering);
+        fastForwardToConcreteOriginalOccurrence(originalForRendering, updateForRendering);
 
         final NotificationParticipant participant = mail.getRecipient();
 
@@ -688,7 +688,7 @@ public class NotificationMailGenerator implements ITipMailGenerator {
         env.put("formatters", dateHelperFor(mail.getRecipient()));
         env.put("labels", getLabelHelper(mail, wrapper, participant));
         if (originalForRendering != null) {
-            env.put("changes", new ChangeHelper(ctx, mail.getRecipient(), originalForRendering, appointmentForRendering, mail.getDiff(), participant.getLocale(), participant.getTimeZone(), wrapper, attachmentMemory, services).getChanges());
+            env.put("changes", new ChangeHelper(ctx, mail.getRecipient(), originalForRendering, updateForRendering, mail.getDiff(), participant.getLocale(), participant.getTimeZone(), wrapper, attachmentMemory, services).getChanges());
         } else {
             env.put("changes", new ArrayList<String>());
         }
@@ -701,18 +701,18 @@ public class NotificationMailGenerator implements ITipMailGenerator {
         wrapper = new HTMLWrapper();
         env.put("labels", getLabelHelper(mail, wrapper, participant));
         if (originalForRendering != null) {
-            env.put("changes", new ChangeHelper(ctx, mail.getRecipient(), originalForRendering, appointmentForRendering, mail.getDiff(), participant.getLocale(), participant.getTimeZone(), wrapper, attachmentMemory, services).getChanges());
+            env.put("changes", new ChangeHelper(ctx, mail.getRecipient(), originalForRendering, updateForRendering, mail.getDiff(), participant.getLocale(), participant.getTimeZone(), wrapper, attachmentMemory, services).getChanges());
         }
         writer = new AllocatingStringWriter();
         htmlTemplate.process(env, writer);
         mail.setHtml(writer.toString());
     }
 
-    private void fastForwardToConcreteOriginalOccurrence(final Event originalForRendering, final Event appointmentForRendering) throws OXException {
-        if (originalForRendering != null && appointmentForRendering != null && CalendarUtils.isSeriesMaster(originalForRendering) && CalendarUtils.isSeriesException(appointmentForRendering)) {
+    private void fastForwardToConcreteOriginalOccurrence(final Event originalForRendering, final Event updateForRendering) throws OXException {
+        if (originalForRendering != null && updateForRendering != null && CalendarUtils.isSeriesMaster(originalForRendering) && CalendarUtils.isSeriesException(updateForRendering)) {
             RecurrenceService recurrenceService = Services.getService(RecurrenceService.class);
-            Calendar recurrenceId = GregorianCalendar.getInstance(appointmentForRendering.getRecurrenceId().getValue().getTimeZone());
-            recurrenceId.setTimeInMillis(appointmentForRendering.getRecurrenceId().getValue().getTimestamp());
+            Calendar recurrenceId = GregorianCalendar.getInstance(updateForRendering.getRecurrenceId().getValue().getTimeZone());
+            recurrenceId.setTimeInMillis(updateForRendering.getRecurrenceId().getValue().getTimestamp());
             int position = recurrenceService.calculateRecurrencePosition(originalForRendering, recurrenceId);
 
             RecurrenceIterator<Event> recurrenceIterator = recurrenceService.iterateEventOccurrences(originalForRendering, null, null);
@@ -729,7 +729,7 @@ public class NotificationMailGenerator implements ITipMailGenerator {
     }
 
     private DateHelper dateHelperFor(final NotificationParticipant participant) {
-        return new DateHelper(appointment, participant.getLocale(), participant.getTimeZone());
+        return new DateHelper(updated, participant.getLocale(), participant.getTimeZone());
     }
 
     @Override
@@ -844,7 +844,7 @@ public class NotificationMailGenerator implements ITipMailGenerator {
         }
 
         protected boolean existsInUpdate(NotificationParticipant participant) {
-            for (Attendee attendee : appointment.getAttendees()) {
+            for (Attendee attendee : updated.getAttendees()) {
                 if (participant.getIdentifier() == attendee.getEntity()) {
                     return true;
                 }
@@ -1064,10 +1064,10 @@ public class NotificationMailGenerator implements ITipMailGenerator {
         @Override
         public NotificationMail generateDeleteMailFor(final NotificationParticipant participant) throws OXException {
             if (actor.hasRole(ITipRole.ATTENDEE)) {
-                Event appointmentToReport = calendarUtilities.copyEvent(appointment, (EventField[]) null);
-                removeParticipant(appointmentToReport, session.getUserId());
-                NotificationMail request = request(participant, appointmentToReport, State.Type.MODIFIED);
-                request.setOriginal(appointment);
+                Event eventToReport = calendarUtilities.copyEvent(updated, (EventField[]) null);
+                removeParticipant(eventToReport, session.getUserId());
+                NotificationMail request = request(participant, eventToReport, State.Type.MODIFIED);
+                request.setOriginal(updated);
 
                 List<NotificationParticipant> newParticipants = new ArrayList<NotificationParticipant>();
                 for (NotificationParticipant np : participants) {
@@ -1081,14 +1081,14 @@ public class NotificationMailGenerator implements ITipMailGenerator {
             return ATTENDEE.generateDeleteMailFor(participant);
         }
 
-        private void removeParticipant(final Event appointment, final int userId) {
-            List<Attendee> purged = new ArrayList<>(appointment.getAttendees().size());
-            for (Attendee attendee : appointment.getAttendees()) {
+        private void removeParticipant(final Event event, final int userId) {
+            List<Attendee> purged = new ArrayList<>(event.getAttendees().size());
+            for (Attendee attendee : event.getAttendees()) {
                 if (attendee.getEntity() != userId) {
                     purged.add(attendee);
                 }
             }
-            appointment.setAttendees(purged);
+            event.setAttendees(purged);
         }
 
         @Override
